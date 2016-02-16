@@ -1,0 +1,25 @@
+logdata-anomaly-miner (0.0-~pre6) xenial; urgency=low
+
+  * Initial Release Features:
+    * Common parsing model elements available: fixed strings,
+      numbers, IP addresses, date-time fields, delimited fields,
+      fixed alphabet fields, ...
+    * Common parsing model structural elements: sequences, branches,
+      repeated elements, optional elements.
+    * Stream and file reading, splitting into lines.
+    * Operating system integration: privileged parent process forwarding
+      file descriptors to analysis child.
+    * Reopening of log files using open/fstat loop.
+    * Functionality for state persistence handling between restarts.
+    * Analysis components:
+      * NewMatchPathDetector: generate events when new match path
+        is detected.
+      * MatchValueQueueSplitter: split input from e.g. one parser
+        and forward it to different analyzers depending on match
+        values.
+      * WhitelistViolationDetector: ignore log data that is whitelisted
+        at least by single rule (logcheck equivalent behaviour)
+      * TimeCorrelationViolationDetector: check if usually correlated
+        loglines are really found both.
+
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Thu, 16 Feb 2016 14:20:00 +0000

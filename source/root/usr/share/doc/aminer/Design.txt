@@ -1,0 +1,160 @@
+Preamble:
+=========
+
+This document describes the requirement, design and implementation
+of AMiner. For using it, the general "Readme.txt" may suit your
+needs better than this document.
+
+
+Requirements:
+=============
+
+* IO-Event triggered stream processing of messages to avoid CPU
+  peaks and allow timely generation of alerts.
+* Sensible alerting model, e.g. sending of aggregated report 10sec
+  after first anomaly, then have gracetime of 5min. When more events
+  occurred, send another report and double grace time.
+* Have "environment" flags, e.g. maintenance mode to reduce messages
+  under known procedures. Example: rsyslog should only restart during
+  daily cronjobs, but at any time during maintenance.
+
+
+Design:
+=======
+
+* Configuration layout:
+  * Split model configuration and statistics/rule configuration
+
+* Log file reading:
+
+Those problems have to be addressed when processing a continous
+stream of logging data from multiple sources:
+
+  * High performance log reading conflicts with proper EOF detection:
+    The select() call is useful to react to available data from
+    sockets and pipes but will always include any descriptors
+    for plain files, as they are always readable, even when at
+    EOF. To detect availability of more data, inotify would have
+    to be used. But while waiting, no socket change can be detected.
+    Apart from that, unprivileged child may not access the directories
+    containing the opened log file descriptors.
+
+  * Log files may roll over: the service writing it or a helper
+    program will move the file aside and switch to a newly created
+    file.
+
+  * Multiple file synchronization: When processing messages from
+    two different log data sources to correlate them, care must
+    be taken not to read newest messages only from one source
+    and fall behind on the other source. Otherwise messages generated
+    with quite different time stamps might be processed nearly
+    at the same time while messages originating nearly at same
+    timepoint might be separated.
+
+Solutions:
+
+  * High performance log reading: No perfect solution possible.
+    Therefore workaround similar to "tail -f" was choosen: Use
+    select() on master/child communication socket also for sleeping
+    between file descriptor read attempts. After timeout, handle
+    the master/child communication (if any), then read each file
+    until all of them did not supply any more data. Go to sleep
+    again.
+
+  * Roll over: Privileged process monitors if the file currently
+    read has moved. When a move is detected, notify the child
+    about the new file. This detection has to occur quite timely
+    as otherwise the child process not knowing about the new file
+    will continue processing and miss relevant correlated patterns
+    due to reading only some of the currently relevant streams.
+    FIXME: readlink best method? Inotify?
+
+  * Roll over in child: The challenge is to completely read the
+    old file before switching to the new one. Therefore the child
+    relies on the notifications from the parent process to know
+    about new files. When a new file is received, the old one
+    is fstat'ed to known the maximum size of the file, then the
+    remaining data is read before closing the old file descriptor.
+
+
+* Input parsing:
+
+Fast input disecting is key for performant rule checks later on.
+Therefore the algorithm should have following properties:
+
+  * Avoid passing over same data twice (as distinct regular expressions
+    would do), instead allow a tree-like parsing structure, that
+    will follow one parsing path for a given log-atom.
+
+  * Make parsed parts quickly accessible so that rule checks can
+    just pick out the data they need without searching the tree
+    again.
+
+* Rule based distribution of parsed input to detectors:
+
+
+Implementation:
+===============
+
+* AMiner:
+
+This is the privileged master process having access to logfiles.
+It just launches the AMinerAnalysisChild and forwards logfiles
+to it.
+
+
+* AMinerAnalysisChild:
+
+This process runs without root capablities and just reads logfiles
+and stores state information in /var/lib/aminer.
+
+AMinerAnalysisChild processes data in a multistage process. Each
+transformation step is configurable, components can be registered
+to receive output from one layer and create input for the next
+one.
+
+  * aminerConfig.parsingModel: This function returns the parsing
+    model for all log data processed. After parsing, the results
+    are distributed via the parsedItemsListenersList.
+
+  * aminerConfig.parsedItemsListenersList: This list returns listeners
+    to receive fully, partially or even unparsed items.
+
+  * aminerConfig.analysisEventListenersList: This configuration
+    function returns a list of EventListeners that want to receive
+    significant analysis events, e.g. anomalies or violations.
+
+
+* TimeCorrelationDetector:
+
+This component attempts to perform following steps for each recieved
+log-atom:
+
+  * Check which test rules match it. If no rule matched the data,
+    keep it for reference when creating new rules next time.
+
+  * When a match A was found, go through correlation table to
+    check if any of the other matches has matched recently. If
+    a recent match B had occured, update 2 counters, one assuming
+    that A* (hidden internal event) caused B and then A, the other
+    one that B* cause B and then A.
+
+  * If maximum number of parallel check rules not reached yet,
+    create a new random rule now using the current log-atom or
+    the last unmatched one.
+
+  * Perform correlation result accounting until at least some
+    correlation counters reach values high enough. Otherwise
+    discard features after some time or number of log atoms received
+    when they did not reach sufficiently high counts: they may
+    be unique features likely not being observed again.
+
+This detection algorithm has some weaknesses:
+
+  * If match A is followed by multiple machtes of B, that will
+    raise the correlation hypothesis for A*->A->B above the count
+    of A.
+
+  * For A*->A->B hypothesis, two As detected before the first
+    B will increment count only once, the second pair is deemed
+    non-correlated.

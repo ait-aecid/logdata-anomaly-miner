@@ -1,0 +1,58 @@
+#!/bin/bash -e
+# Standard Debian package build script with examples for .svn file
+# cleanup, fakeroot packaging, ..
+#
+# How to use:
+#
+# * Build package only in temporary location _tmpRoot,
+#   use it also for storing of temporary files (which should be
+#   removed before creating the package). The directory is deleted
+#   at the end of the script. By using it that way, no garbage files
+#   are left over after building and symlink attacks on temporary
+#   directories are prevented.
+#
+# Source: https://svn-ehealth.d03.arc.local/MFN/trunk/Templates/StdDebianPackage/Build.sh V2015-09-25
+
+if [ "${EUID} ${UID}" = "0 0" ] && touch /fake-root-detect 2> /dev/null; then
+  rm /fake-root-detect
+  echo "Build should not be run as root!" >&2
+  exit 1
+fi
+
+# Export tmp dir to allow large package builds within vservers
+export TMPDIR="/var/tmp"
+_projectDir="$(pwd)"
+
+_svnRevision=""
+if test -d "${_projectDir}/.svn"; then
+  if [ "$(svn status "${_projectDir}" | colrm 3 | grep -vEe '^(|X |Pe)$')" != "" ]; then
+    echo "Svn checkout has local modifications, commit before build or use svn export with local modifications." >&2
+#   exit 1
+  else
+    _svnUrl="$(svn info "${_projectDir}" | grep -E -e "^URL: ")"
+    _svnRevision="$(svn info "${_projectDir}" | grep -E -e "^Revision: [0-9]+$")"
+  fi
+fi
+
+# Use a temporary directory for building, no need to keep it.
+_tmpRoot="$(mktemp -d)"
+echo "Building package at ${_tmpRoot}" >&2
+
+_debDirectory="${_tmpRoot}/deb-build"
+mkdir -- "${_debDirectory}"
+cp -a -- "${_projectDir}/source/debian" "${_projectDir}/source/root" "${_debDirectory}"
+
+# Remove svn files copied by accident
+find "${_tmpRoot}" -type d -name '*.svn' -exec rm -rf -- {} \; 2> /dev/null || true
+
+# Build packages:
+# -F: full build
+# -us: unsigned sorce
+# -uc: unsigned changes
+# -sa: force inclusion of original source
+(set -e; cd -- "${_debDirectory}"; dpkg-buildpackage -S -us -uc -sa; dpkg-buildpackage -b -uc)
+rm -rf -- "${_debDirectory}"
+cp -ai -- "${_tmpRoot}/logdata-anomaly-miner_"* .
+rm -rf -- "${_tmpRoot}"
+
+echo "Build successful" >&2
