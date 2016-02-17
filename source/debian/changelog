@@ -1,4 +1,4 @@
-logdata-anomaly-miner (0.0-~pre6) xenial; urgency=low
+logdata-anomaly-miner (0.0~pre6) unstable; urgency=low
 
   * Initial Release Features:
     * Common parsing model elements available: fixed strings,

@@ -187,7 +187,6 @@ def sendFileDescriptor(sendSocket, sendFd, sendFileName):
   ioVec.iovLength=len(sendFileName)
 
   controlMsg=WorkaroundControlMsg()
-# controlMsg.controlMsgHeader.cmsgLen=ctypes.sizeof(WorkaroundControlMsgHeader)
   controlMsg.controlMsgHeader.cmsgLen=CMSG_LEN(ctypes.sizeof(ctypes.c_int))
   controlMsg.controlMsgHeader.cmsgLevel=socket.SOL_SOCKET
 # SCM_RIGHTS=1
@@ -200,7 +199,10 @@ def sendFileDescriptor(sendSocket, sendFd, sendFileName):
   msgHeader.msgIov=(ioVec,)
   msgHeader.msgIovLen=1
   msgHeader.msgControl=ctypes.pointer(controlMsg)
-  print >>sys.stderr, 'INFO: Difference between c and pyhton impl: C: 20 bytes, python 24 bytes with CMSG_SPACE'
+# FIXME: Difference between c and pyhton implementation in message
+# size: C: 20 bytes, python 24 bytes with CMSG_SPACE. See description
+# of class WorkaroundControlMsg how additional space at the end
+# of the structure avoids buffer overrun.
   msgHeader.msgControlLen=controlMsg.controlMsgHeader.cmsgLen
 # msgHeader.msgControlLen=CMSG_SPACE(ctypes.sizeof(ctypes.c_int))
   msgHeader.msgFlags=0
@@ -236,7 +238,6 @@ def receiveFileDescriptor(receiveSocket):
   ioVec.iovLength=len(ioVec.iovBase)
 
   controlMsg=WorkaroundControlMsg()
-# controlMsg.controlMsgHeader.cmsgLen=ctypes.sizeof(WorkaroundControlMsgHeader)
   controlMsg.controlMsgHeader.cmsgLen=CMSG_LEN(ctypes.sizeof(ctypes.c_int))
   controlMsg.controlMsgHeader.cmsgLevel=0
   controlMsg.controlMsgHeader.cmsgType=0

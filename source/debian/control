@@ -2,15 +2,15 @@ Source: logdata-anomaly-miner
 Section: misc
 Priority: extra
 Maintainer: Roman Fiedler <roman.fiedler@ait.ac.at>
-Build-Depends: debhelper (>= 8.0.0)
-Standards-Version: 3.9.2
-Homepage: <insert the upstream URL, if relevant> FIXME
-Vcs-Git: git+ssh://git.launchpad.net/logdata-anomaly-miner
-Vcs-Browser: FIXME
+Build-Depends: debhelper (>= 9.0.0)
+Standards-Version: 3.9.6
+Homepage: https://launchpad.net/logdata-anomaly-miner/
+Vcs-Git: git://git.launchpad.net/logdata-anomaly-miner
+Vcs-Browser: https://bazaar.launchpad.net/~roman-fiedler/logdata-anomaly-miner/roman-fiedler/files
 
 Package: logdata-anomaly-miner
 Architecture: all
-Depends: python-tz
+Depends: python-tz, ${misc:Depends}
 Description: logdata-anomaly-miner allows to create log analysis
   pipelines to analyze log data streams and detect violations
   or anomalies in it. It can be run from console, as daemon with

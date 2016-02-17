@@ -50,12 +50,6 @@ after any standard logging preamble, e.g. from syslog."""
       DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('port'),
       FixedDataModelElement.FixedDataModelElement('s3', ' ssh2 [preauth]')]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('disconnect', [
-      FixedDataModelElement.FixedDataModelElement('s0', 'Received disconnect from '),
-      IpAddressDataModelElement.IpAddressDataModelElement('clientip'),
-      FixedDataModelElement.FixedDataModelElement('s1', ': 11: disconnected by user'),
-  ]))
-
   typeChildren.append(SequenceModelElement.SequenceModelElement('readerr', [
       FixedDataModelElement.FixedDataModelElement('s0', 'Read error from remote host '),
       IpAddressDataModelElement.IpAddressDataModelElement('clientip'),
@@ -66,6 +60,12 @@ after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement.FixedDataModelElement('s0', 'Received disconnect from '),
       IpAddressDataModelElement.IpAddressDataModelElement('clientip'),
       FixedDataModelElement.FixedDataModelElement('s1', ': 11: disconnected by user'),
+  ]))
+
+  typeChildren.append(SequenceModelElement.SequenceModelElement('signal', [
+      FixedDataModelElement.FixedDataModelElement('s0', 'Received signal '),
+      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('signal'),
+      FixedDataModelElement.FixedDataModelElement('s1', '; terminating.'),
   ]))
 
   typeChildren.append(SequenceModelElement.SequenceModelElement('server', [
@@ -80,7 +80,7 @@ after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement.FixedDataModelElement('s0', 'Set /proc/self/oom_score_adj '),
       OptionalMatchModelElement.OptionalMatchModelElement('from', FixedDataModelElement.FixedDataModelElement('default', 'from 0 ')),
       FixedDataModelElement.FixedDataModelElement('s1', 'to '),
-      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('newval')
+      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('newval', valueSignType=DecimalIntegerValueModelElement.DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL)
   ]))
 
   typeChildren.append(SequenceModelElement.SequenceModelElement('session-start', [

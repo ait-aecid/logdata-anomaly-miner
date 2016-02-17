@@ -1,6 +1,6 @@
-Format: http://dep.debian.net/deps/dep5
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: logdata-anomaly-miner
-Source: <url://example.com> FIXME
+Source: git+ssh://git.launchpad.net/logdata-anomaly-miner
 
 Files: *
 Copyright: 2016 Roman Fiedler <roman.fiedler@ait.ac.at>
