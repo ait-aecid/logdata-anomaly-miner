@@ -1,0 +1,16 @@
+[Unit]
+Description=AMiner log data mining server
+Documentation=man:AMiner(1)
+
+[Service]
+Type=forking
+ExecStart=/usr/lib/aminer/AMiner
+KillMode=control-group
+# Write everything to /dev/null: if AMiner is misconfigured, it
+# may detect anonamies in its own log data, thus creating a logging
+# loop. You may prefer logging to journal only, which needs journald
+# to be reconfigured with "ForwardToSyslog=false".
+StandardOutput=null
+
+[Install]
+WantedBy=multi-user.target

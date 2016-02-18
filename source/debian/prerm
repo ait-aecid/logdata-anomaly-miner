@@ -20,7 +20,22 @@ set -e
 case "$1" in
     remove)
 # Stop all services and delete the users before removing the service.
-    invoke-rc.d aminer stop || exit $?
+# As quite some users won't use the daemon, ignore errors due
+# to non-running service.
+    if test -d /usr/lib/upstart; then
+# Just stop, configuration file will be removed when package is
+# removed.
+        stop aminer || true
+    elif test -e /bin/systemctl; then
+        systemctl --quiet is-active aminer && systemctl stop aminer
+        systemctl --quiet is-enabled aminer && systemctl disable aminer
+    else
+        invoke-rc.d aminer stop || true
+    fi
+
+# Revert overrides, otherwise next dpkg install will fail.
+    dpkg-statoverride --remove /etc/aminer
+
 
 # Delete user, will also delete group.
     userdel "aminer"
