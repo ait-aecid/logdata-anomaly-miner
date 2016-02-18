@@ -239,3 +239,28 @@ class ModuloTimeMatchElement(MatchRule):
       if self.matchAction!=None: self.matchAction.matchAction(parserMatch)
       return(True)
     return(False)
+
+
+class IPv4InRFC1918MatchElement(MatchRule):
+  """Match elements of this class return true when the given path
+  was found, contains a valid IPv4 address from the RFC1918 private
+  IP ranges. This could also be done by distinct range match elements,
+  but as this kind of matching is common, have an own element
+  for it."""
+
+  def __init__(self, path, matchAction=None):
+    self.path=path
+    self.matchAction=matchAction
+
+  def match(self, parserMatch):
+    matchElement=parserMatch.getMatchDictionary().get(self.path, None)
+    if (matchElement==None) or not(isinstance(matchElement.matchObject, int)):
+      return(False)
+    value=matchElement.matchObject
+    if ((value&0xff000000)==0xa000000) or ((value&0xfff00000)==0xac100000) or ((value&0xffff0000)==0xc0a80000):
+      if self.matchAction!=None: self.matchAction.matchAction(parserMatch)
+      return(True)
+    return(False)
+
+  def __str__(self):
+    return('hasPath(%s)' % self.path)
