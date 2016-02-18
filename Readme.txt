@@ -17,8 +17,6 @@ Roadmap:
 
 Next features to be added, sorted by priority:
 
-* Tools for automated configuration generation assistance
-* Remote control support to communicate with central learing component.
 * Implement log reading continuation persistance
 * Improved documentation, example configuration, testdata.
 * Implement statistical value distribution analysis persistence

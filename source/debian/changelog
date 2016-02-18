@@ -22,4 +22,4 @@ logdata-anomaly-miner (0.0~pre6) unstable; urgency=low
       * TimeCorrelationViolationDetector: check if usually correlated
         loglines are really found both.
 
- -- Roman Fiedler <roman.fiedler@ait.ac.at>  Thu, 16 Feb 2016 14:20:00 +0000
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Thu, 18 Feb 2016 15:51:00 +0000
