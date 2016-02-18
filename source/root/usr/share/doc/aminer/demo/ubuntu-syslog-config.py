@@ -119,7 +119,10 @@ def buildAnalysisPipeline(aminerConfig):
   timeTriggeredHandlers=[]
 
   from aminer.parsing import SimpleParsingModelRawAtomHandler
-  rawAtomHandlers.append(SimpleParsingModelRawAtomHandler.SimpleParsingModelRawAtomHandler(parsingModel, parsedAtomHandlers, unparsedAtomHandlers))
+  rawAtomHandlers.append(
+      SimpleParsingModelRawAtomHandler.SimpleParsingModelRawAtomHandler(
+          parsingModel, parsedAtomHandlers, unparsedAtomHandlers,
+          defaultTimestampPath='/model/syslog/time'))
 
 # Always report the unparsed lines: a part of the parsing model
 # seems to be missing or wrong.
@@ -134,20 +137,24 @@ def buildAnalysisPipeline(aminerConfig):
   timeTriggeredHandlers.append(newMatchPathDetector)
 
 # Run a whitelisting over the parsed lines.
+  from aminer.analysis import Rules
   from aminer.analysis import WhitelistViolationDetector
   violationAction=WhitelistViolationDetector.ViolationAction(anomalyEventHandlers)
   whitelistRules=[]
 # Filter out things so bad, that we do not want to accept the
 # risk, that a too broad whitelisting rule will accept the data
 # later on.
-  whitelistRules.append(WhitelistViolationDetector.MatchRule([WhitelistViolationDetector.ValueMatchElement('/model/services/cron/msgtype/exec/user', 'hacker')], violationAction))
+  whitelistRules.append(Rules.ValueMatchRule('/model/services/cron/msgtype/exec/user', 'hacker', violationAction))
 # Ignore Exim queue run start/stop messages
-  whitelistRules.append(WhitelistViolationDetector.MatchRule([WhitelistViolationDetector.PathExistsMatchElement('/model/services/exim/msg/queue/pid')], None))
-# Ignore daily cronjobs, but only when started at expected time
+  whitelistRules.append(Rules.PathExistsMatchRule('/model/services/exim/msg/queue/pid'))
+# Add a debugging rule in the middle to see everything not whitelisted
+# up to this point.
+  whitelistRules.append(Rules.DebugMatchRule(False))
+# Ignore hourly cronjobs, but only when started at expected time
 # and duration is not too long.
-  whitelistRules.append(WhitelistViolationDetector.MatchRule([
-      WhitelistViolationDetector.ValueMatchElement('/model/services/cron/msgtype/exec/command', '(   cd / && run-parts --report /etc/cron.hourly)'),
-      WhitelistViolationDetector.ModuloTimeMatchElement('/model/syslog/time', 3600, 17*60, 17*60+5)], None))
+  whitelistRules.append(Rules.AndMatchRule([
+      Rules.ValueMatchRule('/model/services/cron/msgtype/exec/command', '(   cd / && run-parts --report /etc/cron.hourly)'),
+      Rules.ModuloTimeMatchRule('/model/syslog/time', 3600, 17*60, 17*60+5)]))
 
   parsedAtomHandlers.append(WhitelistViolationDetector.WhitelistViolationDetector(whitelistRules, anomalyEventHandlers))
 

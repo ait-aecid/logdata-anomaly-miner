@@ -1,4 +1,5 @@
 import datetime
+import sys
 
 """This package contains various classes to build check rulesets.
 The ruleset also supports parallel rule evaluation, e.g. the two
@@ -39,8 +40,8 @@ class AndMatchRule(MatchRule):
     the first match fails. If a matchAction is attached to this
     rule, it will be invoked at the end of all checks.
     @return True when all subrules matched."""
-    for matchElement in self.subRules:
-      if not(matchElement.match(parserMatch)): return(False)
+    for rule in self.subRules:
+      if not(rule.match(parserMatch)): return(False)
     if self.matchAction!=None: self.matchAction.matchAction(parserMatch)
     return(True)
 
@@ -67,8 +68,8 @@ class OrMatchRule(MatchRule):
     the first match succeeds. If a matchAction is attached to
     this rule, it will be invoked after the first match.
     @return True when any subrule matched."""
-    for matchElement in self.subRules:
-      if matchElement.match(parserMatch):
+    for rule in self.subRules:
+      if rule.match(parserMatch):
         if self.matchAction!=None: self.matchAction.matchAction(parserMatch)
         return(True)
     return(False)
@@ -102,8 +103,8 @@ class ParallelMatchRule(MatchRule):
     at the end of all checks.
     @return True when any subrule matched."""
     matchFlag=False
-    for matchElement in self.subRules:
-      if matchElement.match(parserMatch): matchFlag=True
+    for rule in self.subRules:
+      if rule.match(parserMatch): matchFlag=True
     if (matchFlag) and (self.matchAction!=None):
       self.matchAction.matchAction(parserMatch)
     return(matchFlag)
@@ -117,7 +118,7 @@ class ParallelMatchRule(MatchRule):
     return(result)
 
 
-class NegationMatchElement(MatchRule):
+class NegationMatchRule(MatchRule):
   """Match elements of this class return true when the subrule
   did not match."""
 
@@ -134,7 +135,7 @@ class NegationMatchElement(MatchRule):
     return('not %s' % subRule)
 
 
-class PathExistsMatchElement(MatchRule):
+class PathExistsMatchRule(MatchRule):
   """Match elements of this class return true when the given path
   was found in the parsed match data."""
 
@@ -152,7 +153,7 @@ class PathExistsMatchElement(MatchRule):
     return('hasPath(%s)' % self.path)
 
 
-class ValueMatchElement(MatchRule):
+class ValueMatchRule(MatchRule):
   """Match elements of this class return true when the given path
   exists and has exactly the given parsed value."""
 
@@ -173,7 +174,7 @@ class ValueMatchElement(MatchRule):
     return('value(%s)==%s' % (self.path, self.value))
 
 
-class ValueListMatchElement(MatchRule):
+class ValueListMatchRule(MatchRule):
   """Match elements of this class return true when the given path
   exists and has exactly one of the values included in the value
   list."""
@@ -194,7 +195,7 @@ class ValueListMatchElement(MatchRule):
     return('value(%s) in %s' % (self.path, ' '.join(self.valueList)))
 
 
-class ValueRangeMatchElement(MatchRule):
+class ValueRangeMatchRule(MatchRule):
   """Match elements of this class return true when the given path
   exists and the value is included in [lower, upper] range."""
 
@@ -217,7 +218,7 @@ class ValueRangeMatchElement(MatchRule):
     return('value(%s) inrange (%s, %s)' % (self.path, lowerLimit, upperLimit))
 
 
-class ModuloTimeMatchElement(MatchRule):
+class ModuloTimeMatchRule(MatchRule):
   """Match elements of this class return true when the given path
   exists, denotes a datetime object and the seconds on that day
   modulo the given value are included in [lower, upper] range."""
@@ -231,17 +232,16 @@ class ModuloTimeMatchElement(MatchRule):
 
   def match(self, parserMatch):
 # Use the class object as marker for nonexisting entries
-    testValue=parserMatch.getMatchDictionary().get(self.path, None)
-    if (testValue==None) or not(isinstance(testValue.matchObject, datetime.datetime)): return(False)
-    testValue=testValue.matchObject
-    testValue=((testValue.hour*60+testValue.minute)*60+testValue.second)%self.secondsModulo
+    testValue=parserMatch.getDefaultTimestamp()
+    if testValue==None: return(False)
+    testValue%=self.secondsModulo
     if (testValue>=self.lowerLimit) and (testValue<=self.upperLimit):
       if self.matchAction!=None: self.matchAction.matchAction(parserMatch)
       return(True)
     return(False)
 
 
-class IPv4InRFC1918MatchElement(MatchRule):
+class IPv4InRFC1918MatchRule(MatchRule):
   """Match elements of this class return true when the given path
   was found, contains a valid IPv4 address from the RFC1918 private
   IP ranges. This could also be done by distinct range match elements,
@@ -264,3 +264,22 @@ class IPv4InRFC1918MatchElement(MatchRule):
 
   def __str__(self):
     return('hasPath(%s)' % self.path)
+
+
+class DebugMatchRule(MatchRule):
+  """This rule can be inserted into a normal ruleset just to see
+  when a match attempt is made. It just prints out the current
+  parserMatch that is evaluated. The match action is always invoked
+  when defined, no matter which match result is returned."""
+
+  def __init__(self, debugMatchResult=False, matchAction=None):
+    self.debugMatchResult=debugMatchResult
+    self.matchAction=matchAction
+
+  def match(self, parserMatch):
+    print >>sys.stderr, 'Rules.DebugMatchRule: triggered while handling "%s"' % (parserMatch.matchElement.matchString)
+    if self.matchAction!=None: self.matchAction.matchAction(parserMatch)
+    return(self.debugMatchResult)
+
+  def __str__(self):
+    return('%s' % self.debugMatchResult)
