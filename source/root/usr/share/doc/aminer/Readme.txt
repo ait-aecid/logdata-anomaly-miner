@@ -243,3 +243,34 @@ Historic examples:
   "Jun 03 17:18:49 AAAAAA" (A-Event) ==> "Jun 03 17:18:49 BBBBBB" (B-Event)
   "Jun 04 09:56:36 AAAAAA" (A-Event) ==> "Jun 04 09:56:36 BBBBBB" (B-Event)
 -------------------------------------------------------------------------------
+
+
+Running as a Service:
+=====================
+
+The package comes with an upstart and a systemd script to run
+AMiner as a daemon. Those scripts are deactivated by default because:
+
+* there is no AMiner default configuration, you need to generate
+  it before starting anyway.
+
+* CAVEAT: When AMiner is misconfigured and his diagnostic output
+  somehow reaches the logfiles it is currently processing, a log
+  data loop can be generated, just filling up your disks!
+
+To enable AMiner daemon, do the following:
+
+* Upstart: Enable autostart by uncommenting the "start on" stanza
+  in "/etc/init/aminer.conf". As AMiner stdout/stderr messages
+  would end up in "/var/log/upstart/aminer.log", there is no risk
+  for log data loops UNLESS you include those files to be handled
+  by AMiner or you have another type of data forwarding from the
+  files to e.g. main syslog in place.
+
+* Systemd: Service is enabled using "systemctl enable aminer".
+  The default AMiner service configuration will write all messages
+  from stdout/stderr to /dev/null due to "StandardOutput=null"
+  setting to avoid log data loops. If you are sure what you are
+  doing, you may want to change this to "StandardOutput=journal"
+  and deactivate journal to syslog forwarding when you need to
+  have aminer parse the syslog data also.
