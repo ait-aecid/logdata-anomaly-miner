@@ -17,7 +17,7 @@ configKeyMailAlertingMaxAlertGap='MailAlerting.MaxAlertGap'
 configKeyMailAlertingMaxEventsPerMessage='MailAlerting.MaxEventsPerMessage'
 
 
-class DefaultMailNotificationEventListener:
+class DefaultMailNotificationEventHandler:
   """This class implements an event record listener, that will pool
 received events, reduce the amount of events below the maximum
 number allowed per timeframe, create text representation of received
@@ -45,8 +45,9 @@ events and send them via "sendmail" transport."""
 
 # Locate the sendmail binary immediately at startup to avoid delayed
 # errors due to misconfiguration.
-    print >>sys.stderr, 'FIXME: no sendmail locating yet'
     self.sendmailBinaryPath='/usr/sbin/sendmail'
+    if not os.path.exists(self.sendmailBinaryPath):
+      raise Exception('sendmail binary not found')
     self.runningSendmailProcesses=[]
 
 
@@ -106,7 +107,6 @@ events and send them via "sendmail" transport."""
 
   def sendNotification(self):
     """Really send out the message."""
-    print >>sys.stderr, 'Got send notification'
     if len(self.runningSendmailProcesses)!=0:
       runningProcesses=[]
       for process in self.runningSendmailProcesses:
@@ -114,7 +114,7 @@ events and send them via "sendmail" transport."""
           runningProcesses.append(process)
           continue
         if process.returncode!=0:
-          print >>sys.stderr, 'Sending mail terminated with error %d' % process.returncode
+          print >>sys.stderr, 'WARNING: Sending mail terminated with error %d' % process.returncode
       self.runningSendmailProcesses=runningProcesses
 
     if self.eventsCollected==0: return()
