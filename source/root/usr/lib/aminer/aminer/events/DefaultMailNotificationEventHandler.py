@@ -86,7 +86,7 @@ events and send them via "sendmail" transport."""
           self.nextAlertTime=currentTime+self.eventCollectTime
         else:
 # Increase the gap
-         self.currentAlertGap+=1.5
+         self.currentAlertGap*=1.5
          if self.currentAlertGap>self.maxAlertGap:
            self.currentAlertGap=self.maxAlertGap
       else:
