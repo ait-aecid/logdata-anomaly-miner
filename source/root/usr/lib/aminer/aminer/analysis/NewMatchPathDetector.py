@@ -27,8 +27,8 @@ class NewMatchPathDetector:
     unknownPathList=[]
     for path in match.getMatchDictionary().keys():
       if not(path in self.knownPathSet):
+        unknownPathList.append(path)
         if self.autoIncludeFlag:
-          unknownPathList.append(path)
           self.knownPathSet.add(path)
     if len(unknownPathList)>0:
       if self.nextPersistTime==None:
