@@ -40,7 +40,7 @@ class DecimalIntegerValueModelElement:
     data=matchContext.matchData
 
     allowedCharacters=self.startCharacters
-    if not(data[0] in allowedCharacters): return(None)
+    if (len(data)==0) or (not(data[0] in allowedCharacters)): return(None)
     matchLen=1
 
     allowedCharacters=self.padCharacters
