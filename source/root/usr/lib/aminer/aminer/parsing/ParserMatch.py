@@ -37,6 +37,8 @@ class ParserMatch:
 
 
   def getDefaultTimestamp(self):
+    """Get the default timestamp value for this MatchElement.
+    @return the timestamp as number of seconds since 1970."""
     return(self.defaultTimestamp)
 
   def __str__(self):
