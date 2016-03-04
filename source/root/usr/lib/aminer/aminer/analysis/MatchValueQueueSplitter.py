@@ -11,7 +11,9 @@ class MatchValueQueueSplitter:
 
   def receiveParsedAtom(self, atomData, match):
     targetValue=match.getMatchDictionary().get(self.targetPath, None)
-    targetHandler=self.parsedAtomHandlerDict.get(targetValue, self.defaultParsedAtomHandler)
+    targetValue!=None: targetValue=targetValue.matchObject
+    targetHandler=self.parsedAtomHandlerDict.get(targetValue,
+        self.defaultParsedAtomHandler)
     targetHandler.receiveParsedAtom(atomData, match)
 
 
