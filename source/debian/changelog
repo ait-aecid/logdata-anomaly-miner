@@ -1,4 +1,4 @@
-logdata-anomaly-miner (0.0-~pre8) xenial; urgency=low
+logdata-anomaly-miner (0.0.0) xenial; urgency=low
 
   * Initial Release Features:
     * Common parsing model elements available: fixed strings,
@@ -14,6 +14,8 @@ logdata-anomaly-miner (0.0-~pre8) xenial; urgency=low
     * Analysis components:
       * NewMatchPathDetector: generate events when new match path
         is detected.
+      * HistogramAnalysis: generate complete and path-dependent
+        histograms for given properties.
       * MatchValueQueueSplitter: split input from e.g. one parser
         and forward it to different analyzers depending on match
         values.
