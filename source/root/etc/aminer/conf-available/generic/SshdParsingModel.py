@@ -42,6 +42,14 @@ after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement.FixedDataModelElement('s3', ' port '),
       DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('sport')]))
 
+  typeChildren.append(SequenceModelElement.SequenceModelElement('error-bind', [
+      FixedDataModelElement.FixedDataModelElement('s0', 'error: bind: Cannot assign requested address')]))
+
+  typeChildren.append(SequenceModelElement.SequenceModelElement('error-channel-setup', [
+      FixedDataModelElement.FixedDataModelElement('s0', 'error: channel_setup_fwd_listener: cannot listen to port: '),
+      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('port')]))
+
+
   typeChildren.append(SequenceModelElement.SequenceModelElement('postppk', [FixedDataModelElement.FixedDataModelElement('s0', 'Postponed publickey for '),
       userNameModel,
       FixedDataModelElement.FixedDataModelElement('s1', ' from '),
@@ -59,7 +67,9 @@ after any standard logging preamble, e.g. from syslog."""
   typeChildren.append(SequenceModelElement.SequenceModelElement('disconnect', [
       FixedDataModelElement.FixedDataModelElement('s0', 'Received disconnect from '),
       IpAddressDataModelElement.IpAddressDataModelElement('clientip'),
-      FixedDataModelElement.FixedDataModelElement('s1', ': 11: disconnected by user'),
+      FixedDataModelElement.FixedDataModelElement('s1', ': 11: '),
+      FixedWordlistDataModelElement.FixedWordlistDataModelElement('reason',
+          ['Bye Bye [preauth]', 'disconnected by user']),
   ]))
 
   typeChildren.append(SequenceModelElement.SequenceModelElement('signal', [

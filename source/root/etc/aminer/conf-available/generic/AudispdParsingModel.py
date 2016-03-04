@@ -62,6 +62,8 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       return(MatchElement.MatchElement("%s/%s" % (path, self.id),
           matchData, matchValue, None))
 
+  pamStatusWordList=FixedWordlistDataModelElement.FixedWordlistDataModelElement('status', ['failed', 'success'])
+
 
 # Define how to read the msgId sequence in all types of audit messages.
   msgIdPart=SequenceModelElement.SequenceModelElement('msgid', [FixedDataModelElement.FixedDataModelElement('idpre', 'msg=audit('),
@@ -177,19 +179,20 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('argc'),
       RepeatedElementDataModelElement.RepeatedElementDataModelElement('arg', execArgModel)]))
 
+# This message differs on Ubuntu 32/64 bit variants.
   typeChildren.append(SequenceModelElement.SequenceModelElement('login', [FixedDataModelElement.FixedDataModelElement('login', 'LOGIN '),
       msgIdPart,
       FixedDataModelElement.FixedDataModelElement('s0', 'pid='),
       DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('pid'),
       FixedDataModelElement.FixedDataModelElement('s1', ' uid='),
       DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('uid'),
-      FixedDataModelElement.FixedDataModelElement('s2', ' old auid='),
+      FixedWordlistDataModelElement.FixedWordlistDataModelElement('s2', [' old auid=', ' old-auid=']),
       DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('auid-old'),
-      FixedDataModelElement.FixedDataModelElement('s3', ' new auid='),
+      FixedWordlistDataModelElement.FixedWordlistDataModelElement('s3', [' new auid=', ' auid=']),
       DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('auid-new'),
-      FixedDataModelElement.FixedDataModelElement('s4', ' old ses='),
+      FixedWordlistDataModelElement.FixedWordlistDataModelElement('s4', [' old ses=', ' old-ses=']),
       DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('ses-old'),
-      FixedDataModelElement.FixedDataModelElement('s5', ' new ses='),
+      FixedWordlistDataModelElement.FixedWordlistDataModelElement('s5', [' new ses=', ' ses=']),
       DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('ses-new'),
       FixedDataModelElement.FixedDataModelElement('s6', ' res=1')]))
 
@@ -222,6 +225,13 @@ via syslog after any standard logging preamble, e.g. from syslog."""
           FixedDataModelElement.FixedDataModelElement('noinfo', ' nametype=')]),
       FixedWordlistDataModelElement.FixedWordlistDataModelElement('nametype', ['CREATE', 'DELETE', 'NORMAL', 'PARENT', 'UNKNOWN']),
 ]))
+
+  typeChildren.append(SequenceModelElement.SequenceModelElement('sockaddr', [
+      FixedDataModelElement.FixedDataModelElement('type', 'SOCKADDR '),
+      msgIdPart,
+      FixedDataModelElement.FixedDataModelElement('s0', ' saddr='),
+      HexStringModelElement.HexStringModelElement('sockaddr'),
+  ]))
 
   typeChildren.append(SequenceModelElement.SequenceModelElement('syscall', [FixedDataModelElement.FixedDataModelElement('syscall', 'SYSCALL '),
       msgIdPart,
@@ -277,6 +287,16 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       AnyByteDataModelElement.AnyByteDataModelElement('key')
 ]))
 
+# The UNKNOWN type is used then audispd does not know the type
+# of the event, usually because the kernel is more recent than
+# audispd, thus emiting yet unknown event types.
+# * type=1327: procitle: see https://www.redhat.com/archives/linux-audit/2014-February/msg00047.html
+  typeChildren.append(SequenceModelElement.SequenceModelElement('unknown-proctitle', [FixedDataModelElement.FixedDataModelElement('type', 'UNKNOWN[1327] '),
+      msgIdPart,
+      FixedDataModelElement.FixedDataModelElement('s0', 'proctitle='),
+      ExecArgumentDataModelElement('proctitle')
+  ]))
+
   typeChildren.append(SequenceModelElement.SequenceModelElement('useracct', [FixedDataModelElement.FixedDataModelElement('type', 'USER_ACCT '),
       msgIdPart,
       FixedDataModelElement.FixedDataModelElement('s0', 'pid='),
@@ -323,7 +343,6 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement.FixedDataModelElement('s9', ' res=success\'')
 ]))
 
-
   typeChildren.append(SequenceModelElement.SequenceModelElement('userstart', [FixedDataModelElement.FixedDataModelElement('type', 'USER_START '),
       msgIdPart,
       FixedDataModelElement.FixedDataModelElement('s0', 'pid='),
@@ -347,7 +366,8 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement.FixedDataModelElement('s9', ' res=success\'')
 ]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('userend', [FixedDataModelElement.FixedDataModelElement('type', 'USER_END '),
+  typeChildren.append(SequenceModelElement.SequenceModelElement('userend', [
+      FixedDataModelElement.FixedDataModelElement('type', 'USER_END '),
       msgIdPart,
       FixedDataModelElement.FixedDataModelElement('s0', 'pid='),
       DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('pid'),
@@ -370,6 +390,59 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement.FixedDataModelElement('s9', ' res=success\'')
 ]))
 
-  model=SequenceModelElement.SequenceModelElement('audispd', [FixedDataModelElement.FixedDataModelElement('sname', 'audispd: type='),
+  typeChildren.append(SequenceModelElement.SequenceModelElement('usererr', [
+      FixedDataModelElement.FixedDataModelElement('type', 'USER_ERR '),
+      msgIdPart,
+      FixedDataModelElement.FixedDataModelElement('s0', 'pid='),
+      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('pid'),
+      FixedDataModelElement.FixedDataModelElement('s1', ' uid='),
+      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('uid'),
+      FixedDataModelElement.FixedDataModelElement('s2', ' auid='),
+      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('auid'),
+      FixedDataModelElement.FixedDataModelElement('s3', ' ses='),
+      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('ses'),
+      FixedDataModelElement.FixedDataModelElement('s4', ' msg=\'op=PAM:bad_ident acct="?" exe="'),
+      DelimitedDataModelElement.DelimitedDataModelElement('exec', '"'),
+      FixedDataModelElement.FixedDataModelElement('s5', '" hostname='),
+      DelimitedDataModelElement.DelimitedDataModelElement('clientname', ' '),
+      FixedDataModelElement.FixedDataModelElement('s6', ' addr='),
+      DelimitedDataModelElement.DelimitedDataModelElement('clienip', ' '),
+      FixedDataModelElement.FixedDataModelElement('s7', ' terminal='),
+      WhiteSpaceLimitedDataModelElement.WhiteSpaceLimitedDataModelElement('terminal'),
+      FixedDataModelElement.FixedDataModelElement('s8', ' res=failed\'')
+]))
+
+  typeChildren.append(SequenceModelElement.SequenceModelElement('userlogin', [FixedDataModelElement.FixedDataModelElement('type', 'USER_LOGIN '),
+      msgIdPart,
+      FixedDataModelElement.FixedDataModelElement('s0', 'pid='),
+      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('pid'),
+      FixedDataModelElement.FixedDataModelElement('s1', ' uid='),
+      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('uid'),
+      FixedDataModelElement.FixedDataModelElement('s2', ' auid='),
+      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('auid'),
+      FixedDataModelElement.FixedDataModelElement('s3', ' ses='),
+      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('ses'),
+      FixedDataModelElement.FixedDataModelElement('s4', ' msg=\'op=login '),
+      FirstMatchModelElement.FirstMatchModelElement('msgtype', [
+          FixedDataModelElement.FixedDataModelElement('loginok', 'id=0'),
+          SequenceModelElement.SequenceModelElement('loginfail', [
+              FixedDataModelElement.FixedDataModelElement('s0', 'acct='),
+              ExecArgumentDataModelElement('account')
+          ])]),
+      FixedDataModelElement.FixedDataModelElement('s5', ' exe="'),
+      DelimitedDataModelElement.DelimitedDataModelElement('exec', '"'),
+      FixedDataModelElement.FixedDataModelElement('s6', '" hostname='),
+      DelimitedDataModelElement.DelimitedDataModelElement('clientname', ' '),
+      FixedDataModelElement.FixedDataModelElement('s7', ' addr='),
+      DelimitedDataModelElement.DelimitedDataModelElement('clienip', ' '),
+      FixedDataModelElement.FixedDataModelElement('s8', ' terminal='),
+      WhiteSpaceLimitedDataModelElement.WhiteSpaceLimitedDataModelElement('terminal'),
+      FixedDataModelElement.FixedDataModelElement('s9', ' res='),
+      pamStatusWordList,
+      FixedDataModelElement.FixedDataModelElement('s10', '\'')
+  ]))
+
+  model=SequenceModelElement.SequenceModelElement('audispd', [
+      FixedDataModelElement.FixedDataModelElement('sname', 'audispd: type='),
       FirstMatchModelElement.FirstMatchModelElement('msgtype', typeChildren)])
   return(model)
