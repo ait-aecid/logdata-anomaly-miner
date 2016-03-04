@@ -84,7 +84,9 @@ AMinerUtils.secureOpenFile=insecureDemoOpen
 
 # Add your ruleset here:
 
-# Define the pipeline for parsing the log data:
+# Define the function to create pipeline for parsing the log data.
+# The function has to return a tuple containing a list of listeners
+# for RawAtoms and the list of components needing timer interrupts.
 def buildAnalysisPipeline(aminerConfig):
 # Build the parsing model first
   from aminer.parsing import FirstMatchModelElement
