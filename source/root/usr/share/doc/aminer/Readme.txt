@@ -67,12 +67,14 @@ more about each feature, read "Design.txt".
   * analyse parsed data (see analyzers below)
   * split the stream, e.g. per host or per source zone
 
-* Event generation components:
+* Analysis components for event generation (see Analysis.txt):
   * Events on unknown (unparseable) log atoms
   * Events on log atoms with new structure, e.g. log atoms of
     type not observed before on this system
   * Detection of new items in lines (new MACs, IPs, hostnames,
     user names)
+  * Histogram reports for given properties in any path or per
+    path
   * Whitelisting of parsed atoms using complex rulesets
   * Statistical check if last n extracted values deviate from
     average previously observed

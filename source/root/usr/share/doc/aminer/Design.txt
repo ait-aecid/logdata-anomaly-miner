@@ -113,17 +113,12 @@ transformation step is configurable, components can be registered
 to receive output from one layer and create input for the next
 one.
 
-  * aminerConfig.parsingModel: This function returns the parsing
-    model for all log data processed. After parsing, the results
-    are distributed via the parsedItemsListenersList.
-
-  * aminerConfig.parsedItemsListenersList: This list returns listeners
-    to receive fully, partially or even unparsed items.
-
-  * aminerConfig.analysisEventListenersList: This configuration
-    function returns a list of EventListeners that want to receive
-    significant analysis events, e.g. anomalies or violations.
-
+  * aminerConfig.buildAnalysisPipeline: This function creates
+    the pipeline for parsing the log data and hands over the list
+    of RawAtom handlers (those who will receive new log-atoms)
+    and a list of components needing timer interrupts. Thus the
+    need for multithreaded operation or asynchronous timer events
+    is eliminated.
 
 * TimeCorrelationDetector:
 

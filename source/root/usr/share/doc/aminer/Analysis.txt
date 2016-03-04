@@ -1,0 +1,148 @@
+Preamble:
+=========
+
+This document lists all analysis components, that are components
+that emit events to the reporting infrastructure on certain conditions.
+The components in the following list are annotated with short
+codes describing their properties to speed up search for suitable
+analysis component.
+
+  Property codes:
+
+  * (A)utoconfiguration: This component may learn from the input
+    data and adapt itself to new inputs.
+  * (F)iltering: This component just filters input and distributes
+    it to other analysis components.
+  * (H)ardwired: This component generates events by hard rules.
+    This is the opposite to "statistical triggering".
+  * (N)ondeterministic: This component may react differently to
+    the same input in two runs.
+  * (R)eporting: This component will generate analysis reports
+    for evaluation by an analyst. Those components can be very
+    useful in the configuration phase to understand the processed
+    data better.
+  * (S)tatistical triggering: This component uses statistical
+    methods to trigger on unexpected data. Such components may
+    miss relevant events or cause false-positives.
+
+List of components:
+
+
+* HistogramAnalysis.HistogramAnalysis (R): Create histogram reports
+  for parsed values.
+
+* HistogramAnalysis.PathDependentHistogramAnalysis (R): Create
+  path-dependent histogram reports.
+
+* MatchValueAverageChangeDetector.MatchValueAverageChangeDetector (AS):
+  Detect when average value of given parsed value changes over
+  time.
+
+* MatchValueQueueSplitter.MatchValueQueueSplitter (F): Use value
+  of parsed element to forward input data to other analyzers.
+
+* MatchValueStreamWriter.MatchValueStreamWriter (F): Forward selected
+  input data e.g. as CSV list, to other compoments via stream,
+  e.g. to perform analysis in another tool.
+
+* NewMatchPathDetector.NewMatchPathDetector (AH): Generate events
+  when new parser pathes are found.
+
+* NewMatchPathValueDetector.NewMatchPathValueDetector (AH): Generate
+  events when new parsed values are observed for a given path,
+  e.g. new MAC addresses, user names, ...
+
+* TimeCorrelationDetector.TimeCorrelationDetector (ANR): Try to
+  detect time correlations and report them.
+
+* TimeCorrelationViolationDetector.TimeCorrelationViolationDetector (H):
+  Detect changes in time correlation on a given ruleset.
+
+* WhitelistViolationDetector.WhitelistViolationDetector (FH):
+  Check all inputs using ruleset and create events, forward input
+  to other components.
+
+
+HistogramAnalysis.HistogramAnalysis:
+====================================
+
+This component performs a histogram analysis on one or more input
+properties. The properties are parsed values denoted by their
+parsing path. Those values are then handed over to the selected
+"binning function", that calculates the histogram bin.
+
+* Binning:
+
+Binning can be done using one of the predefined binning functions
+or by creating own subclasses from "HistogramAnalysis.BinDefinition".
+
+  * LinearNumericBinDefinition: Binning function working on numeric
+    values and sorting them into bins of same size.
+
+  * ModuloTimeBinDefinition: Binning function working on parsed
+    datetime values but applying a modulo function to them. This
+    is useful for analysis of periodic activities.
+
+
+* Example:
+
+The following example creates a HistogramAnalysis using only the
+property "/model/line/time", binned on per-hour basis and sending
+a report every week:
+
+  from aminer.analysis import HistogramAnalysis
+  # Use a time-modulo binning function
+  moduloTimeBinDefinition=HistogramAnalysis.ModuloTimeBinDefinition(
+      3600*24, # Modulo values in seconds (1 day)
+      3600,    # Division factor to get down to reporting unit (1h)
+      0,       # Start of lowest bin
+      1,       # Size of bin in reporting units
+      24,      # Number of bins
+      False)   # Disable outlier bins, not possible with time modulo
+  histogramAnalysis=HistogramAnalysis.HistogramAnalysis(
+      aminerConfig,
+      [('/model/line/time', moduloTimeBinDefinition)],
+      3600*24*7,  # Reporting interval (weekly)
+      reportEventHandlers,        # Send report to those handlers
+      resetAfterReportFlag=True)  # Zero counters after sending of report
+  # Send the appropriate input feed to the component
+  parsedAtomHandlers.append(histogramAnalysis)
+
+
+HistogramAnalysis.PathDependentHistogramAnalysis:
+=================================================
+
+This component creates a histogram for only a single input property,
+e.g. an IP address, but for each group of correlated match pathes.
+Assume there two pathes that include the input property but they
+separate after the property was found on the path. This might
+be for example the client IP address in ssh log atoms, where the
+parsing path may split depending if this was a log atom for a
+successful login, logout or some error. This analysis component
+will then create separate histograms, one for the path common
+to all atoms and one for each disjunct part of the subpathes found.
+
+The component uses the same binning functions as the standard
+HistogramAnalysis.HistogramAnalysis, see documentation there.
+
+* Example:
+
+  # Perform path-dependent histogram analysis:
+  from aminer.analysis import HistogramAnalysis
+  # Use a time-modulo binning function
+  moduloTimeBinDefinition=HistogramAnalysis.ModuloTimeBinDefinition(
+      3600*24, # Modulo values in seconds (1 day)
+      3600,    # Division factor to get down to reporting unit (1h)
+      0,       # Start of lowest bin
+      1,       # Size of bin in reporting units
+      24,      # Number of bins
+      False)   # Disable outlier bins, not possible with time modulo
+  pathDependentHistogramAnalysis=HistogramAnalysis.PathDependentHistogramAnalysis(
+      aminerConfig,
+      '/model/line/time',  # The value properties to check
+      moduloTimeBinDefinition,
+      3600*24*7,                  # Reporting interval (weekly)
+      reportEventHandlers,        # Send report to those handlers
+      resetAfterReportFlag=True)  # Zero counters after sending of report
+  # Send the appropriate input feed to the component
+  parsedAtomHandlers.append(pathDependentHistogramAnalysis)
