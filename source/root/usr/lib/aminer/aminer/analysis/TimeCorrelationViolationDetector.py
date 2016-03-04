@@ -20,7 +20,8 @@ class TimeCorrelationViolationDetector:
     self.historyBEvents=[]
 
     PersistencyUtil.addPersistableComponent(self)
-    self.persistenceFileName=AMinerConfig.buildPersistenceFileName(aminerConfig, 'TimeCorrelationViolationDetector', peristenceId)
+    self.persistenceFileName=AMinerConfig.buildPersistenceFileName(
+        aminerConfig, 'TimeCorrelationViolationDetector', peristenceId)
     persistenceData=PersistencyUtil.loadJson(self.persistenceFileName)
 #   if persistenceData==None:
 #     self.knownPathSet=set()

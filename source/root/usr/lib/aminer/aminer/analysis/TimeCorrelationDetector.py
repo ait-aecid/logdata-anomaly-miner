@@ -33,7 +33,8 @@ class TimeCorrelationDetector:
     self.totalRecords=0
 
     PersistencyUtil.addPersistableComponent(self)
-    self.persistenceFileName=AMinerConfig.buildPersistenceFileName(aminerConfig, 'TimeCorrelationViolationDetector:', peristenceId)
+    self.persistenceFileName=AMinerConfig.buildPersistenceFileName(
+        aminerConfig, 'TimeCorrelationDetector', peristenceId)
     persistenceData=PersistencyUtil.loadJson(self.persistenceFileName)
     if persistenceData==None:
       self.featureList=[]
@@ -74,7 +75,10 @@ class TimeCorrelationDetector:
     for feature in featuresFoundList:
       feature.lastTriggerTime=timestamp
 
-    if len(featuresFoundList): self.lastUnhandledMatch=parserMatch
+    if len(featuresFoundList)==0:
+      self.lastUnhandledMatch=parserMatch
+    elif self.nextPersistTime==None:
+      self.nextPersistTime=time.time()+600
 
     if (self.totalRecords%0x10000)==0:
       for listener in self.anomalyEventHandlers:
