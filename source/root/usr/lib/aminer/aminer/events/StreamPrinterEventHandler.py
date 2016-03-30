@@ -11,8 +11,8 @@ class StreamPrinterEventHandler:
   """This class implements an event record listener, that will
 just print out data about the event to a stream, by default this
 is stdout"""
-  def __init__(self, aminerConfig):
-    pass
+  def __init__(self, aminerConfig, stream=sys.stdout):
+    self.stream=stream
 
   def receiveEvent(self, eventType, eventMessage, sortedLogLines, eventData):
     """Receive information about a detected event."""
@@ -24,8 +24,8 @@ is stdout"""
         message+='  '+eventData.annotateMatch('')+'\n'
       else:
         message+='  '+str(eventData)+'\n'
-    print '%s' % message
-    sys.stdout.flush()
+    print >>self.stream, '%s' % message
+    self.stream.flush()
     return
 
 
