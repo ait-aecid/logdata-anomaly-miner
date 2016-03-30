@@ -186,7 +186,7 @@ class ValueListMatchRule(MatchRule):
 
   def match(self, parserMatch):
     testValue=parserMatch.getMatchDictionary().get(self.path, None)
-    if (testValue!=None) and (testValue in self.valueList):
+    if (testValue!=None) and (testValue.matchObject in self.valueList):
       if self.matchAction!=None: self.matchAction.matchAction(parserMatch)
       return(True)
     return(False)
