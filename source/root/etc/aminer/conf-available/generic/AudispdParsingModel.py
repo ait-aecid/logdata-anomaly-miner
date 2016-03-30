@@ -97,7 +97,21 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       HexStringModelElement.HexStringModelElement('pe-new')
   ]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('credacq', [FixedDataModelElement.FixedDataModelElement('type', 'CRED_ACQ '),
+  typeChildren.append(SequenceModelElement.SequenceModelElement('conf-change', [
+      FixedDataModelElement.FixedDataModelElement('type', 'CONFIG_CHANGE '),
+      msgIdPart,
+      FixedDataModelElement.FixedDataModelElement('s0', 'auid='),
+      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('auid'),
+      FixedDataModelElement.FixedDataModelElement('s1', ' ses='),
+      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('ses'),
+      FixedDataModelElement.FixedDataModelElement('s2', ' op="add rule" key=(null) list='),
+      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('list'),
+      FixedDataModelElement.FixedDataModelElement('s3', ' res='),
+      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('result')
+  ]))
+
+  typeChildren.append(SequenceModelElement.SequenceModelElement('credacq', [
+      FixedDataModelElement.FixedDataModelElement('type', 'CRED_ACQ '),
       msgIdPart,
       FixedDataModelElement.FixedDataModelElement('s0', 'pid='),
       DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('pid'),
@@ -214,7 +228,19 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       VariableByteDataModelElement.VariableByteDataModelElement('rdev', '0123456789abcdef:'),
       FixedDataModelElement.FixedDataModelElement('s6', ' nametype=')])
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('path', [FixedDataModelElement.FixedDataModelElement('path', 'PATH '),
+  typeChildren.append(SequenceModelElement.SequenceModelElement('conf-change', [
+      FixedDataModelElement.FixedDataModelElement('type', 'NETFILTER_CFG '),
+      msgIdPart,
+      FixedDataModelElement.FixedDataModelElement('s0', 'table='),
+      FixedWordlistDataModelElement.FixedWordlistDataModelElement('table', ['filter', 'nat']),
+      FixedDataModelElement.FixedDataModelElement('s1', ' family='),
+      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('family'),
+      FixedDataModelElement.FixedDataModelElement('s2', ' entries='),
+      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('entries')
+  ])) 
+
+  typeChildren.append(SequenceModelElement.SequenceModelElement('path', [
+      FixedDataModelElement.FixedDataModelElement('path', 'PATH '),
       msgIdPart,
       FixedDataModelElement.FixedDataModelElement('s0', 'item='),
       DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('item'),
@@ -443,6 +469,12 @@ via syslog after any standard logging preamble, e.g. from syslog."""
   ]))
 
   model=SequenceModelElement.SequenceModelElement('audispd', [
-      FixedDataModelElement.FixedDataModelElement('sname', 'audispd: type='),
-      FirstMatchModelElement.FirstMatchModelElement('msgtype', typeChildren)])
+      FixedDataModelElement.FixedDataModelElement('sname', 'audispd: '),
+      FirstMatchModelElement.FirstMatchModelElement('type', [
+          SequenceModelElement.SequenceModelElement('record', [
+              FixedDataModelElement.FixedDataModelElement('s0', 'type='),
+              FirstMatchModelElement.FirstMatchModelElement('msgtype', typeChildren)]),
+          FixedDataModelElement.FixedDataModelElement('queue-full', 'queue is full - dropping event')
+      ])
+  ])
   return(model)

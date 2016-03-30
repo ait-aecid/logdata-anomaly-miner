@@ -25,6 +25,10 @@ after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement.FixedDataModelElement('s3', ' ssh2: RSA '),
       VariableByteDataModelElement.VariableByteDataModelElement('user', '0123456789abcdef:')]))
 
+  typeChildren.append(SequenceModelElement.SequenceModelElement('btmp-perm', [
+      FixedDataModelElement.FixedDataModelElement('s0', 'Excess permission or bad ownership on file /var/log/btmp')
+]))
+
   typeChildren.append(SequenceModelElement.SequenceModelElement('closing', [FixedDataModelElement.FixedDataModelElement('s0', 'Closing connection to '),
       IpAddressDataModelElement.IpAddressDataModelElement('clientip'),
       FixedDataModelElement.FixedDataModelElement('s1', ' port '),
@@ -49,6 +53,23 @@ after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement.FixedDataModelElement('s0', 'error: channel_setup_fwd_listener: cannot listen to port: '),
       DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('port')]))
 
+  typeChildren.append(SequenceModelElement.SequenceModelElement('ident-missing', [
+      FixedDataModelElement.FixedDataModelElement('s0', 'Did not receive identification string from '),
+      IpAddressDataModelElement.IpAddressDataModelElement('clientip')
+]))
+
+  typeChildren.append(SequenceModelElement.SequenceModelElement('invalid-user', [
+      FixedDataModelElement.FixedDataModelElement('s0', 'Invalid user '),
+      DelimitedDataModelElement.DelimitedDataModelElement('user', ' from '),
+      FixedDataModelElement.FixedDataModelElement('s1', ' from '),
+      IpAddressDataModelElement.IpAddressDataModelElement('clientip')
+]))
+
+  typeChildren.append(SequenceModelElement.SequenceModelElement('invalid-user-auth-req', [
+      FixedDataModelElement.FixedDataModelElement('s0', 'input_userauth_request: invalid user '),
+      DelimitedDataModelElement.DelimitedDataModelElement('user', ' [preauth]'),
+      FixedDataModelElement.FixedDataModelElement('s1', ' [preauth]')
+]))
 
   typeChildren.append(SequenceModelElement.SequenceModelElement('postppk', [FixedDataModelElement.FixedDataModelElement('s0', 'Postponed publickey for '),
       userNameModel,
@@ -68,8 +89,13 @@ after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement.FixedDataModelElement('s0', 'Received disconnect from '),
       IpAddressDataModelElement.IpAddressDataModelElement('clientip'),
       FixedDataModelElement.FixedDataModelElement('s1', ': 11: '),
-      FixedWordlistDataModelElement.FixedWordlistDataModelElement('reason',
-          ['Bye Bye [preauth]', 'disconnected by user']),
+      FirstMatchModelElement.FirstMatchModelElement('reason', [
+          FixedDataModelElement.FixedDataModelElement('disconnected', 'disconnected by user'),
+          SequenceModelElement.SequenceModelElement('remotemsg', [
+              DelimitedDataModelElement.DelimitedDataModelElement('msg', ' [preauth]'),
+              FixedDataModelElement.FixedDataModelElement('s0', ' [preauth]')
+          ]),
+      ]),
   ]))
 
   typeChildren.append(SequenceModelElement.SequenceModelElement('signal', [
