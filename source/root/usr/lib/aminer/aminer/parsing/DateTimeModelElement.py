@@ -9,7 +9,6 @@ class DateTimeModelElement:
   values of fixed length. Common formats are:
   * '%b %d %H:%M:%S' e.g. for 'Nov 19 05:08:43'"""
   def __init__(self, id, dateFormat, dateDataLength, formatHasYearFlag, startYear=None):
-    self.data = []
     self.id=id
     self.syslogTimeZone=pytz.timezone('UTC')
     self.dateFormat=dateFormat
@@ -44,7 +43,9 @@ class DateTimeModelElement:
 # any year information and completely unsorted logs, this will
 # cause year number to increase quickly.
         parsedDateTime=datetime.datetime.strptime('%s %d' % (dateStr, self.startYear), self.pythonYearParsingWorkaroundFormat)
-        if (parsedDateTime-self.pythonYearParsingWorkaroundLastDatetime).total_seconds()<-3600*24*7:
+# Avoid timedelta.total_seconds(), not supported in Python 2.6.
+        delta=(parsedDateTime-self.pythonYearParsingWorkaroundLastDatetime)
+        if (delta.days*86400+delta.seconds+delta.microseconds)<-3600*24*7:
           print >>sys.stderr, 'WARNING: DateTimeModelElement unqualified timestamp year wraparound detected from %s to %s' % (self.pythonYearParsingWorkaroundLastDatetime, dateStr)
           parsedDateTime=parsedDateTime.replace(parsedDateTime.year+1)
           self.startYear+=1
@@ -52,7 +53,9 @@ class DateTimeModelElement:
     except:
       return(None)
 
-    totalSeconds=(parsedDateTime-self.totalSecondsStartTime).total_seconds()
+# Avoid timedelta.total_seconds(), not supported in Python 2.6.
+    delta=(parsedDateTime-self.totalSecondsStartTime)
+    totalSeconds=(delta.days*86400+delta.seconds+delta.microseconds)
     matchContext.update(dateStr)
     return(MatchElement.MatchElement("%s/%s" % (path, self.id),
         dateStr, (parsedDateTime, totalSeconds,), None))
