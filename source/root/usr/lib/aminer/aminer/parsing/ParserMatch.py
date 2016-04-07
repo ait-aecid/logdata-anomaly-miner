@@ -33,6 +33,10 @@ class ParserMatch:
 
 
   def setDefaultTimestamp(self, timestamp):
+    """Update the default timestamp value associated with this
+    ParserMatch. The method can be called more than once to allow
+    correction of fine-adjusting of timestamps by analysis filters
+    after initial parsing procedure."""
     self.defaultTimestamp=timestamp
 
 
