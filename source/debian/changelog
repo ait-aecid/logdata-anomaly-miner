@@ -1,3 +1,16 @@
+logdata-anomaly-miner (0.0.1) xenial; urgency=low
+
+  * Bugfixes
+  * Minor feature improvements (options)
+  * New features:
+    * MultiLocaleDateTimeModelElement: decode timestamps not encoded
+      using local system language or byte encoding.
+    * ParsedAtomFilters: filter received atoms and filter to other handlers
+    * TimestampCorrectionFilters: Correct timestamps from broken
+      sources to have monotonic time.
+
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Thu, 07 Apr 2016 16:50:00 +0000
+
 logdata-anomaly-miner (0.0.0) xenial; urgency=low
 
   * Initial Release Features:
@@ -24,4 +37,4 @@ logdata-anomaly-miner (0.0.0) xenial; urgency=low
       * TimeCorrelationViolationDetector: check if usually correlated
         loglines are really found both.
 
- -- Roman Fiedler <roman.fiedler@ait.ac.at>  Thu, 18 Feb 2016 15:51:00 +0000
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Fri, 4 Mar 2016 18:45:00 +0000

@@ -12,6 +12,29 @@ CAVEAT: Keep that in mind using AMiner
 PRODUCTION: This is a hint for production use
 
 
+Installation Requirements:
+==========================
+
+* Python language compatibility:
+
+Code is compatible with Python 2.6, software was tested on:
+
+  * CentOS 6.7: Released 2015-08-07, Python 2.6.6
+  * Ubuntu Xenial 1604: FIXME: Beta-Release, Python 2.???
+
+
+* System requirements:
+
+Requirements are depending on AMiner configuration.
+
+  * Simple Logcheck-like operation: As opposed to logcheck, AMiner
+    runs in stream-processing mode. For simple filtering 32MB RAM
+    are sufficient.
+
+  * Advanced operation: See documentation of analysis components
+    configured to learn about memory requirements.
+
+
 Concepts:
 =========
 

@@ -27,7 +27,6 @@ analysis component.
 
 List of components:
 
-
 * HistogramAnalysis.HistogramAnalysis (R): Create histogram reports
   for parsed values.
 
@@ -57,6 +56,10 @@ List of components:
 
 * TimeCorrelationViolationDetector.TimeCorrelationViolationDetector (H):
   Detect changes in time correlation on a given ruleset.
+
+* TimestampCorrectionFilters.SimpleMonotonicTimestampAdjust (F):
+  Adjust decreasing timestamp of new records to the maximum observed
+  so far to ensure monotony for other analysis components.
 
 * WhitelistViolationDetector.WhitelistViolationDetector (FH):
   Check all inputs using ruleset and create events, forward input
@@ -146,3 +149,38 @@ HistogramAnalysis.HistogramAnalysis, see documentation there.
       resetAfterReportFlag=True)  # Zero counters after sending of report
   # Send the appropriate input feed to the component
   parsedAtomHandlers.append(pathDependentHistogramAnalysis)
+
+
+WhitelistViolationDetector.WhitelistViolationDetector:
+======================================================
+
+This detector manages a list of whitelist rules to filter parsed
+atoms. All atoms not hit by any whitelist rule will cause events
+to be generated. When an atom is matched by a rule, it will be
+regarded as whitelisted by default but there is also an option
+to call user-defined functions on a matching rule, e.g. to forward
+the atom to another analyzer in one pass.
+
+* Example:
+
+# Run a whitelisting over the parsed lines.
+  from aminer.analysis import Rules
+  from aminer.analysis import WhitelistViolationDetector
+  violationAction=WhitelistViolationDetector.ViolationAction(anomalyEventHandlers)
+  whitelistRules=[]
+# Filter out things so bad, that we do not want to accept the
+# risk, that a too broad whitelisting rule will accept the data
+# later on.
+  whitelistRules.append(Rules.ValueMatchRule('/model/services/cron/msgtype/exec/user', 'hacker', violationAction))
+# Ignore Exim queue run start/stop messages
+  whitelistRules.append(Rules.PathExistsMatchRule('/model/services/exim/msg/queue/pid'))
+# Add a debugging rule in the middle to see everything not whitelisted
+# up to this point.
+  whitelistRules.append(Rules.DebugMatchRule(False))
+# Ignore hourly cronjobs, but only when started at expected time
+# and duration is not too long.
+  whitelistRules.append(Rules.AndMatchRule([
+      Rules.ValueMatchRule('/model/services/cron/msgtype/exec/command', '(   cd / && run-parts --report /etc/cron.hourly)'),
+      Rules.ModuloTimeMatchRule('/model/syslog/time', 3600, 17*60, 17*60+5)]))
+
+  parsedAtomHandlers.append(WhitelistViolationDetector.WhitelistViolationDetector(whitelistRules, anomalyEventHandlers))
