@@ -40,6 +40,14 @@ after any standard logging preamble, e.g. from syslog."""
       WhiteSpaceLimitedDataModelElement.WhiteSpaceLimitedDataModelElement('id'),
       FixedDataModelElement.FixedDataModelElement('s0', ' Completed')]))
 
+  typeChildren.append(SequenceModelElement.SequenceModelElement('started', [
+      FixedDataModelElement.FixedDataModelElement('s0', ' exim '),
+      WhiteSpaceLimitedDataModelElement.WhiteSpaceLimitedDataModelElement('version'),
+      FixedDataModelElement.FixedDataModelElement('s1', ' daemon started: pid='),
+      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('pid'),
+      FixedDataModelElement.FixedDataModelElement('s2', ', -q30m, listening for SMTP on [127.0.0.1]:25')
+  ]))
+
   model=SequenceModelElement.SequenceModelElement('exim', [FixedDataModelElement.FixedDataModelElement('sname', 'exim['),
       DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('pid'),
       FixedDataModelElement.FixedDataModelElement('s0', ']: '),
