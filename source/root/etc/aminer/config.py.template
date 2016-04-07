@@ -113,9 +113,14 @@ def buildAnalysisPipeline(aminerConfig):
   anomalyEventHandlers=[]
   timeTriggeredHandlers=[]
 
+# Add handler to parse the raw atoms, extract timestamp if available.
   from aminer.parsing import SimpleParsingModelRawAtomHandler
-  rawAtomHandlers.append(SimpleParsingModelRawAtomHandler.SimpleParsingModelRawAtomHandler(parsingModel, parsedAtomHandlers, unparsedAtomHandlers))
+  rawAtomHandlers.append(
+      SimpleParsingModelRawAtomHandler.SimpleParsingModelRawAtomHandler(
+          parsingModel, parsedAtomHandlers, unparsedAtomHandlers,
+          defaultTimestampPath='/model/syslog/time'))
 
+# Just report all unparsed atoms to the event handlers.
   from aminer.events import SimpleUnparsedAtomHandler
   unparsedAtomHandlers.append(SimpleUnparsedAtomHandler.SimpleUnparsedAtomHandler(anomalyEventHandlers))
 
