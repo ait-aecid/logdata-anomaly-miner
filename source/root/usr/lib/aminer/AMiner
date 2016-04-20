@@ -1,4 +1,4 @@
-#!/usr/bin/python -BEsSt
+#!/usr/bin/python2 -BEsSt
 # This is the main program of the "aminer" logfile miner tool.
 # It does not import any local default site packages to decrease
 # the attack surface due to manipulation of unused but available
