@@ -220,10 +220,14 @@ class ValueRangeMatchRule(MatchRule):
 
 class ModuloTimeMatchRule(MatchRule):
   """Match elements of this class return true when the given path
-  exists, denotes a datetime object and the seconds on that day
-  modulo the given value are included in [lower, upper] range."""
+  exists, denotes a datetime object and the seconds since 1970
+  from that date modulo the given value are included in [lower,
+  upper] range."""
 
   def __init__(self, path, secondsModulo, lowerLimit, upperLimit, matchAction=None):
+    """@param path the path to the datetime object to use to evaluate
+    the modulo time rules on. When None, the default timestamp associated
+    with the match is used."""
     self.path=path
     self.secondsModulo=secondsModulo
     self.lowerLimit=lowerLimit
@@ -231,8 +235,15 @@ class ModuloTimeMatchRule(MatchRule):
     self.matchAction=matchAction
 
   def match(self, parserMatch):
-# Use the class object as marker for nonexisting entries
-    testValue=parserMatch.getDefaultTimestamp()
+    testValue=None
+    if self.path==None:
+      testValue=parserMatch.getDefaultTimestamp()
+    else:
+      timeMatch=parserMatch.getMatchDictionary().get(self.path, None)
+      if (timeMatch==None) or not(isinstance(timeMatch.matchObject, tuple)) or not(isinstance(timeMatch.matchObject[0], datetime.datetime)):
+        return(False)
+      testValue=timeMatch.matchObject[1]
+
     if testValue==None: return(False)
     testValue%=self.secondsModulo
     if (testValue>=self.lowerLimit) and (testValue<=self.upperLimit):
