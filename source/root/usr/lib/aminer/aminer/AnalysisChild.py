@@ -33,6 +33,10 @@ class AnalysisChild:
 
 
   def runAnalysis(self, masterFd):
+    """This method runs the analysis thread.
+    @param masterFd the main communication socket to the parent
+    to receive logfile updates from the parent."""
+
 # Expect the parent/child communication socket on fd 3. This also
 # duplicates the fd, so close the old one.
     childSocket=socket.fromfd(masterFd, socket.AF_UNIX, socket.SOCK_DGRAM, 0)
@@ -59,22 +63,25 @@ class AnalysisChild:
         (readList, writeList, exceptList)=select.select(childSocketSelectList, [], [], 0)
       for readFd in readList:
         if readFd==childSocket.fileno():
-          newLogfileInfo=AMinerUtils.receiveFileDescriptor(childSocket)
-          resource=AMinerUtils.LogDataResource(newLogfileInfo[1], newLogfileInfo[0])
+# We cannot fail with None here as the childSocket was in the readList.
+          (receivedFd, receivedTypeInfo, annotationData)=AMinerUtils.receiveAnnotedFileDescriptor(childSocket)
+          if 'logstream'==receivedTypeInfo:
+            resource=AMinerUtils.LogDataResource(annotationData, receivedFd)
 # Make fd nonblocking
-          fdFlags=fcntl.fcntl(resource.logFileFd, fcntl.F_GETFL)
-          fcntl.fcntl(resource.logFileFd, fcntl.F_SETFL, fdFlags|os.O_NONBLOCK)
-
-          logStream=logStreamsByName.get(resource.logFileName)
-          if logStream==None:
-            logStream=LogStream(resource)
-            logStreams.append(logStream)
-            logStreamsByName[resource.logFileName]=logStream
+            fdFlags=fcntl.fcntl(resource.logFileFd, fcntl.F_GETFL)
+            fcntl.fcntl(resource.logFileFd, fcntl.F_SETFL, fdFlags|os.O_NONBLOCK)
+            logStream=logStreamsByName.get(resource.logFileName)
+            if logStream==None:
+              logStream=LogStream(resource)
+              logStreams.append(logStream)
+              logStreamsByName[resource.logFileName]=logStream
+            else:
+              logStream.rollOver(resource)
           else:
-            logStream.rollOver(resource)
+            raise Exception('Unhandled type info on received fd: %s' %
+                repr(receivedTypeInfo))
           continue
-
-        raise Error('Illegal state reached')
+        raise Exception('Illegal state reached')
 
       if time.time()>=nextListenerTriggerTime:
         nextTriggerOffset=3600

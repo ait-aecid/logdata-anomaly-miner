@@ -251,7 +251,7 @@ childSocket.close()
 # process.
 for resource in logDataResourceList:
   if resource.logFileFd>=0:
-    AMinerUtils.sendFileDescriptor(parentSocket, resource.logFileFd, resource.logFileName)
+    AMinerUtils.sendLogstreamDescriptor(parentSocket, resource.logFileFd, resource.logFileName)
 
 childTerminationTriggeredFlag=False
 exitStatus=0
@@ -292,7 +292,7 @@ while True:
     if (resource.statData==None) or (statData.st_ino!=resource.statData.st_ino) or (statData.st_dev!=resource.statData.st_dev):
       resource.logFileFd=logFileFd
       resource.statData=statData
-      AMinerUtils.sendFileDescriptor(parentSocket, resource.logFileFd, resource.logFileName)
+      AMinerUtils.sendLogstreamDescriptor(parentSocket, resource.logFileFd, resource.logFileName)
     os.close(logFileFd)
 
   time.sleep(1)

@@ -169,12 +169,23 @@ def workaroundCreateSocketLibcBindings():
   workaroundSocketLibcBindingRecvmsg.restype=ctypes.c_int
 
 
-def sendFileDescriptor(sendSocket, sendFd, sendFileName):
-  """Send file descriptor and associated file name via SCM_RIGHTS."""
+def sendAnnotatedFileDescriptor(sendSocket, sendFd, typeInfo,
+    annotationData):
+  """Send file descriptor and associated annotation data via SCM_RIGHTS.
+  @param typeInfo has to be a null-byte free string to inform
+  the receiver how to handle the file descriptor and how to interpret
+  the annotationData.
+  @param annotationData this optional string may convey additional
+  information about the file descriptor."""
+# Construct the message data first
+  if typeInfo.find(b'\x00')>=0:
+    raise Exception('Null bytes not supported in typeInfo')
+  messageData=b'%s\x00%s' % (typeInfo, annotationData)
+
 # Bad luck: only most recent Python versions from 3.3 on support
 # the sendSocket.sendmsg call. If available, call it.
   if hasattr(sendSocket, 'sendmsg'):
-    sendSocket.sendmsg(sendFileName,
+    sendSocket.sendmsg(messageData,
         [(socket.SOL_SOCKET, socket.SCM_RIGHTS, struct.pack('i', sendFd))])
     return
 
@@ -183,8 +194,8 @@ def sendFileDescriptor(sendSocket, sendFd, sendFileName):
     workaroundCreateSocketLibcBindings()
 
   ioVec=WorkaroundIoVec()
-  ioVec.iovBase=sendFileName
-  ioVec.iovLength=len(sendFileName)
+  ioVec.iovBase=messageData
+  ioVec.iovLength=len(messageData)
 
   controlMsg=WorkaroundControlMsg()
   controlMsg.controlMsgHeader.cmsgLen=CMSG_LEN(ctypes.sizeof(ctypes.c_int))
@@ -211,16 +222,24 @@ def sendFileDescriptor(sendSocket, sendFd, sendFileName):
   if result==-1:
     callErrno=ctypes.get_errno()
     raise OSError(callErrno, 'Socket sendmsg failed: %d' % callErrno)
-  if result!=len(sendFileName):
+  if result!=len(messageData):
     raise Error('Sendfd short write, abort for security reasons')
 
 
-def receiveFileDescriptor(receiveSocket):
-  """Receive a single file descriptor via SCM_RIGHTS via the given
-  socket.
-  @return a tuple containing the received file descriptor and
-  the data content of the received message as file name or None
-  when recvmsg was performed on non-blocking socket."""
+def sendLogstreamDescriptor(sendSocket, sendFd, sendFileName):
+  """Send a file descriptor to be used as standard log data stream
+  source for the analysis pipeline."""
+  sendAnnotatedFileDescriptor(sendSocket, sendFd, 'logstream',
+      sendFileName);
+
+
+def receiveAnnotedFileDescriptor(receiveSocket):
+  """Receive a single file descriptor and attached annotation
+  information via SCM_RIGHTS via the given socket.
+  @return a tuple containing the received file descriptor, type
+  information (see sendAnnotatedFileDescriptor) and the annotation
+  information. When operating on a non-blocking socket and no
+  message was received, None is returned."""
   if hasattr(receiveSocket, 'recvmsg'):
     fileName, ancData, flags, remoteAddress=receiveSocket.recvmsg(1<<16,
         socket.CMSG_LEN(struct.calcsize('i')))
@@ -234,8 +253,9 @@ def receiveFileDescriptor(receiveSocket):
     workaroundCreateSocketLibcBindings()
 
   ioVec=WorkaroundIoVec()
-  ioVec.iovBase=b'A'*(1<<16)
-  ioVec.iovLength=len(ioVec.iovBase)
+  messageDataBuffer=ctypes.c_buffer(b'', 1<<16)
+  ioVec.iovBase=ctypes.cast(messageDataBuffer, ctypes.c_char_p)
+  ioVec.iovLength=len(messageDataBuffer.raw)
 
   controlMsg=WorkaroundControlMsg()
   controlMsg.controlMsgHeader.cmsgLen=CMSG_LEN(ctypes.sizeof(ctypes.c_int))
@@ -265,8 +285,14 @@ def receiveFileDescriptor(receiveSocket):
   if (controlMsg.controlMsgHeader.cmsgLevel!=socket.SOL_SOCKET) or (controlMsg.controlMsgHeader.cmsgType!=1):
     raise Exception('Received invalid message from remote side: level %d, type %d' % (controlMsg.controlMsgHeader.cmsgLevel, controlMsg.controlMsgHeader.cmsgType))
 
-  logFileName=ioVec.iovBase[:result]
-  logFd=struct.unpack_from('i', controlMsg.controlMsgData)[0]
-  if logFd<=2:
-    print >>sys.stderr, 'WARNING: received "reserved" fd %d' % logFd
-  return(logFd, logFileName)
+  messageData=messageDataBuffer.raw[:result]
+  splitPos=messageData.find(b'\x00')
+  if splitPos<0:
+    print >>sys.stderr, 'ERROR: malformed message data'
+    raise Exception('No null byte in received message')
+  typeInfo=messageData[:splitPos]
+  annotationData=messageData[splitPos+1:]
+  receivedFd=struct.unpack_from('i', controlMsg.controlMsgData)[0]
+  if receivedFd<=2:
+    print >>sys.stderr, 'WARNING: received "reserved" fd %d' % receivedFd
+  return(receivedFd, typeInfo, annotationData)
