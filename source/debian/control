@@ -3,14 +3,14 @@ Section: misc
 Priority: extra
 Maintainer: Roman Fiedler <roman.fiedler@ait.ac.at>
 Build-Depends: debhelper (>= 9.0.0), docbook-xsl, docbook-xml, xsltproc
-Standards-Version: 3.9.6
+Standards-Version: 3.9.7
 Homepage: https://launchpad.net/logdata-anomaly-miner/
-Vcs-Git: git://git.launchpad.net/logdata-anomaly-miner
-Vcs-Browser: https://bazaar.launchpad.net/~roman-fiedler/logdata-anomaly-miner/roman-fiedler/files
+Vcs-Git: https://git.launchpad.net/logdata-anomaly-miner
+Vcs-Browser: https://git.launchpad.net/logdata-anomaly-miner/tree/
 
 Package: logdata-anomaly-miner
 Architecture: all
-Depends: python-tz, ${misc:Depends}
+Depends: python2.6 | python2.7, python-tz, ${misc:Depends}
 Suggests: python-scipy
 Description: logdata-anomaly-miner allows to create log analysis
   pipelines to analyze log data streams and detect violations
