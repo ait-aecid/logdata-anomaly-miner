@@ -32,12 +32,25 @@ class MatchElement:
     return(self.children)
 
 
-  def annotateMatch(self, intendStr):
-    result='%s%s: %s (\'%s\')' % (intendStr, self.path, self.matchObject, self.matchString)
-    if len(intendStr) == 0: intendStr=b'\n  '
-    else: intendStr+='  '
-
+  def annotateMatch(self, indentStr):
+    """Annotate a given match element showing the match path elements
+    and the parsed values.
+    @param indentStr if None, all elements are separated just
+    with a single space, no matter how deep the nesting level
+    of those elements is. If not None, all elements are put into
+    an own lines, that is prefixed by the given indentStr and
+    indenting is increased by two spaces for earch level."""
+    nextIndent=None
+    result=None
+    if indentStr==None:
+      result='%s: %s (\'%s\')' % (self.path, self.matchObject, self.matchString)
+    else:
+      result='%s%s: %s (\'%s\')' % (indentStr, self.path, self.matchObject, self.matchString)
+      nextIndent=indentStr+'  '
     if self.children != None:
       for childMatch in self.children:
-        result+=childMatch.annotateMatch(intendStr)
+        if nextIndent==None:
+          result+=' '+childMatch.annotateMatch(None)
+        else:
+          result+='\n'+childMatch.annotateMatch(nextIndent)
     return(result)
