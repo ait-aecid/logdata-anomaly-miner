@@ -20,6 +20,11 @@ configProperties['LogFileList']=['test.log']
 # configProperties['AMinerUser']='aminer'
 # configProperties['AMinerGroup']='aminer'
 
+# Define the path, where aminer will listen for incoming remote
+# control connections. When missing, no remote control socket
+# will be created.
+# configProperties['RemoteControlSocket']='/var/run/aminer-remote.socket'
+
 # Read the analyis from this file. That part of configuration
 # is separated from the main configuration so that it can be loaded
 # only within the analysis child. Non-absolute path names are
@@ -85,9 +90,8 @@ AMinerUtils.secureOpenFile=insecureDemoOpen
 # Add your ruleset here:
 
 # Define the function to create pipeline for parsing the log data.
-# The function has to return a tuple containing a list of listeners
-# for RawAtoms and the list of components needing timer interrupts.
-def buildAnalysisPipeline(aminerConfig):
+# It has to register at least a single RawAtomHandler.
+def buildAnalysisPipeline(analysisContext):
 # Build the parsing model first
   from aminer.parsing import FirstMatchModelElement
   from aminer.parsing import SequenceModelElement
@@ -114,18 +118,17 @@ def buildAnalysisPipeline(aminerConfig):
 # Create all global handler lists here and append the real handlers
 # later on.
 # List for raw (unprocessed) log data atoms.
-  rawAtomHandlers=[]
   parsedAtomHandlers=[]
   unparsedAtomHandlers=[]
   anomalyEventHandlers=[]
-  timeTriggeredHandlers=[]
 
 # Add handler to parse the raw atoms, extract timestamp if available.
   from aminer.parsing import SimpleParsingModelRawAtomHandler
-  rawAtomHandlers.append(
+  analysisContext.registerComponent(
       SimpleParsingModelRawAtomHandler.SimpleParsingModelRawAtomHandler(
           parsingModel, parsedAtomHandlers, unparsedAtomHandlers,
-          defaultTimestampPath='/model/syslog/time'))
+          defaultTimestampPath='/model/syslog/time'),
+      componentName=None, registerAsRawAtomHandler=True)
 
 # Always report the unparsed lines: a part of the parsing model
 # seems to be missing or wrong.
@@ -135,9 +138,12 @@ def buildAnalysisPipeline(aminerConfig):
 # Report new parsing model path values. Those occurr when a line
 # with new structural properties was parsed.
   from aminer.analysis import NewMatchPathDetector
-  newMatchPathDetector=NewMatchPathDetector.NewMatchPathDetector(aminerConfig, anomalyEventHandlers, autoIncludeFlag=True)
+  newMatchPathDetector=NewMatchPathDetector.NewMatchPathDetector(
+      analysisContext.aminerConfig, anomalyEventHandlers, autoIncludeFlag=True)
+  analysisContext.registerComponent(newMatchPathDetector,
+      componentName=None, registerAsRawAtomHandler=False,
+      registerAsTimeTriggeredHandler=True)
   parsedAtomHandlers.append(newMatchPathDetector)
-  timeTriggeredHandlers.append(newMatchPathDetector)
 
 # Run a whitelisting over the parsed lines.
   from aminer.analysis import Rules
@@ -164,13 +170,14 @@ def buildAnalysisPipeline(aminerConfig):
 # Include the e-mail notification handler only if the configuration
 # parameter was set.
   from aminer.events import DefaultMailNotificationEventHandler
-  if aminerConfig.configProperties.has_key(DefaultMailNotificationEventHandler.configKeyMailAlertingTargetAddress):
-    mailNotificationHandler=DefaultMailNotificationEventHandler.DefaultMailNotificationEventHandler(aminerConfig)
+  if analysisContext.aminerConfig.configProperties.has_key(
+      DefaultMailNotificationEventHandler.configKeyMailAlertingTargetAddress):
+    mailNotificationHandler=DefaultMailNotificationEventHandler.DefaultMailNotificationEventHandler(analysisContext.aminerConfig)
+    analysisContext.registerComponent(mailNotificationHandler,
+        componentName=None, registerAsRawAtomHandler=False,
+        registerAsTimeTriggeredHandler=True)
     anomalyEventHandlers.append(mailNotificationHandler)
-    timeTriggeredHandlers.append(mailNotificationHandler)
 
 # Add stdout stream printing for debugging, tuning.
   from aminer.events import StreamPrinterEventHandler
-  anomalyEventHandlers.append(StreamPrinterEventHandler.StreamPrinterEventHandler(aminerConfig))
-
-  return((rawAtomHandlers, timeTriggeredHandlers))
+  anomalyEventHandlers.append(StreamPrinterEventHandler.StreamPrinterEventHandler(analysisContext.aminerConfig))
