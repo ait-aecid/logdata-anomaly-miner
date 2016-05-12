@@ -14,5 +14,5 @@ override_dh_auto_build:
 	--param man.charmap.use.subset 0 \
 	-o debian/ \
 	http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl \
-	debian/AMiner.1.xml
+	debian/AMiner.1.xml debian/AMinerRemoteControl.1.xml
 	dh_auto_build

@@ -1,0 +1,67 @@
+#!/usr/bin/python2 -BEsSt
+# This tool allows to connect to a remote control socket, send
+# requests and retrieve the responses. To allow remote use of
+# this tool, e.g. via SSH forwarding, the remote control address
+# can be set on the command line, no configuration is read.
+
+import json
+import socket
+import sys
+import traceback
+
+remoteControlSocketName='/var/run/aminer-remote.socket'
+remoteControlData=None
+argPos=1
+commandList=[]
+while argPos<len(sys.argv): 
+  paramName=sys.argv[argPos]
+  argPos+=1
+
+  if paramName=='--ControlSocket':
+    remoteControlSocketName=sys.argv[argPos]
+    argPos+=1
+    continue
+  if paramName=='--Exec':
+    commandList.append((sys.argv[argPos], remoteControlData))
+    argPos+=1
+    continue
+  if paramName=='--Data':
+    remoteControlData=json.loads(sys.argv[argPos])
+    argPos+=1
+    continue
+  print >>sys.stderr, 'Unknown parameter "%s"' % paramName
+  sys.exit(1)
+
+
+sys.path=sys.path[1:]+['/usr/lib/aminer']
+from aminer.AnalysisChild import AnalysisChildRemoteControlHandler
+
+remoteControlSocket=socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+remoteControlSocket.connect(remoteControlSocketName)
+remoteControlSocket.setblocking(1)
+
+controlHandler=AnalysisChildRemoteControlHandler(remoteControlSocket.fileno())
+
+for remoteControlCode, remoteControlData in commandList:
+  controlHandler.putExecuteRequest(remoteControlCode, remoteControlData)
+  while True:
+    while controlHandler.maySend():
+      controlHandler.doSend()
+    while not controlHandler.mayProcess():
+      controlHandler.doReceive()
+    requestData=controlHandler.doGet()
+    requestType=requestData[4:8]
+    if requestType=='RRRR':
+      try:
+        remoteData=json.loads(requestData[8:])
+        if remoteData[0]!=None:
+          print >>sys.stderr, 'Remote execution exception:\n%s' % remoteData[0]
+        print 'Remote execution response: %s' % repr(remoteData[1])
+      except:
+        print >>sys.stderr, 'Failed to process response %s' % repr(requestData)
+        traceback.print_exc()
+    else:
+      raise Exception('Invalid request type %s' % repr(requestType))
+    break
+
+remoteControlSocket.close()
