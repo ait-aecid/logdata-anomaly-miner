@@ -1,10 +1,17 @@
-logdata-anomaly-miner (0.0.2~pre0) xenial; urgency=low
+logdata-anomaly-miner (0.0.2) xenial; urgency=low
 
+  * Added remote control support, command line tool for sending
+    commands.
+  * Added AnalysisContext as registry for analysis components
+    and access point for remote control.
+  * Added component to write events to syslog (read component
+    documentation for CAVEATs)
   * Package structure fixes from Debian mentoring procedure
   * Bugfixes:
     * ModuloTimeMatchRule: time object path was ignored on error
+    * Indent-formatting repaired, single-line mode added
 
- -- Roman Fiedler <roman.fiedler@ait.ac.at>  Mon, 20 Apr 2016 12:00:00 +0000
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Thu, 12 May 2016 16:46:00 +0000
 
 logdata-anomaly-miner (0.0.1) xenial; urgency=low
 
