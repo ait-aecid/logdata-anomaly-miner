@@ -6,6 +6,48 @@ import struct
 import sys
 import time
 
+
+class AnalysisContext:
+  """This class collects information about the current analysis
+  context to access it during analysis or remote management."""
+  def __init__(self, aminerConfig):
+    self.aminerConfig=aminerConfig
+# Keep a registry of all analysis and filter configuration for
+# later use. Remote control interface may then access them for
+# runtime reconfiguration.
+    self.nextRegistryId=0
+    self.registeredComponents={}
+# Keep a list of all handlers that should receive the raw atoms
+# directly from the log sources.
+    self.rawAtomHandlers=[]
+    self.timeTriggeredHandlers=[]
+
+  def addRawAtomHandler(self, rawAtomHandler):
+    self.rawAtomHandlers.append(rawAtomHandler)
+  def addTimeTriggeredHandler(self, timeTriggeredHandler):
+    self.timeTriggeredHandlers.append(timeTriggeredHandler)
+
+  def registerComponent(self, component, componentName=None,
+      registerAsRawAtomHandler=False, registerAsTimeTriggeredHandler=False):
+    self.registeredComponents[self.nextRegistryId]=(component, componentName)
+    self.nextRegistryId+=1
+    if registerAsRawAtomHandler:
+      self.addRawAtomHandler(component)
+    if registerAsTimeTriggeredHandler:
+      self.addTimeTriggeredHandler(component)
+  def getRegisteredComponentIds(self):
+    """Get a list of currently known component IDs"""
+    return(self.registeredComponents.keys())
+  def getComponentById(self, id):
+    """Get a component by ID.
+    @return None if not found."""
+    return(self.registeredComponents.get(id, None))
+
+  def buildAnalysisPipeline(self):
+    """Convenience method to create the pipeline."""
+    self.aminerConfig.buildAnalysisPipeline(self)
+
+
 class LogDataResource:
   """This class defines a single log data resource under monitoring
   of aminer. The resource does not need to exist at the time of

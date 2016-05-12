@@ -144,6 +144,34 @@ except:
   print >>sys.stderr, 'Failed to resolve %s or %s' % (AMinerConfig.KEY_AMINER_USER, AMinerConfig.KEY_AMINER_GROUP)
   sys.exit(1)
 
+# Create the remote control socket, if any. Do this in privileged
+# mode to allow binding it at arbitrary locations and support restricted
+# permissions of any type for current (privileged) uid.
+remoteControlSocketFd=-1
+remoteControlSocketName=aminerConfig.configProperties.get(AMinerConfig.KEY_REMOTE_CONTROL_SOCKET_PATH, None)
+remoteControlSocket=None
+if remoteControlSocketName!=None:
+  if os.path.exists(remoteControlSocketName):
+    try:
+      os.unlink(remoteControlSocketName)
+    except OSError:
+      print >>sys.stderr, 'Failed to clean up old remote control socket at %s' % remoteControlSocketName
+      sys.exit(1)
+# Create the local socket: there is no easy way to create it with
+# correct permissions, hence a fork is needed, setting umask,
+# bind the socket. It is also recomended to create the socket
+# in a directory having the correct permissions already.
+  remoteControlSocket=socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+  remoteControlSocket.setblocking(0)
+  bindChildPid=os.fork()
+  if bindChildPid==0:
+    os.umask(0177)
+    remoteControlSocket.bind(remoteControlSocketName)
+# Do not perform any cleanup, flushing of streams.
+    os._exit(0)
+  os.waitpid(bindChildPid, 0)
+  remoteControlSocket.listen(4)
+
 # Now have checked all we can get from the configuration in the
 # privileged process. Detach from the TTY when in daemon mode.
 if not(runInForegroundFlag):
@@ -196,6 +224,9 @@ childSocket.setblocking(0)
 
 
 # Use normal fork, we should have been detached from TTY already.
+# Flush stderr to avoid duplication of output if both child and
+# parent want to write something.
+sys.stderr.flush()
 childPid=os.fork()
 if childPid==0:
 # Relocate the child socket fd to 3 if needed
@@ -211,7 +242,9 @@ if childPid==0:
     except OSError as openOsError:
       if openOsError.errno==errno.EBADF: continue
       print >>sys.stderr, '%s: unexpected exception closing file descriptors: %s' % (programName, openOsError)
-      sys.exit(1)
+# Flush stderr before exit without any cleanup.
+      sys.stderr.flush()
+      os._exit(1)
 
 # Clear the supplementary groups before dropping privileges. This
 # makes only sense when changing the uid or gid.
@@ -243,7 +276,8 @@ if childPid==0:
   execArgs=['AMinerChild', '--RunAnalysis', '--Config', analysisConfigFileName]
   os.execve(sys.argv[0], execArgs, {})
   print >>sys.stderr, '%s: Failed to execute child process'
-  sys.exit(1)
+  sys.stderr.flush()
+  os._exit(1)
 
 childSocket.close()
 
@@ -252,6 +286,13 @@ childSocket.close()
 for resource in logDataResourceList:
   if resource.logFileFd>=0:
     AMinerUtils.sendLogstreamDescriptor(parentSocket, resource.logFileFd, resource.logFileName)
+
+# Send the remote control server socket, if any and close it afterwards.
+# It is not needed any more on parent side.
+if remoteControlSocket!=None:
+  AMinerUtils.sendAnnotatedFileDescriptor(parentSocket,
+      remoteControlSocket.fileno(), 'remotecontrol', '')
+  remoteControlSocket.close()
 
 childTerminationTriggeredFlag=False
 exitStatus=0
