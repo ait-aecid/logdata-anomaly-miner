@@ -10,6 +10,7 @@ import sys
 # where this binary resides.
 sys.path=sys.path[1:]+['/usr/lib/logdata-anomaly-miner']
 
+import errno
 import json
 import socket
 import traceback
@@ -40,7 +41,11 @@ while argPos<len(sys.argv):
   sys.exit(1)
 
 remoteControlSocket=socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-remoteControlSocket.connect(remoteControlSocketName)
+try:
+  remoteControlSocket.connect(remoteControlSocketName)
+except socket.error as connectException:
+  print >>sys.stderr, 'Failed to connect to socket %s, AMiner might not be running or remote control is disabled in configuration: %s' % (remoteControlSocketName, str(connectException))
+  sys.exit(1)
 remoteControlSocket.setblocking(1)
 
 controlHandler=AnalysisChildRemoteControlHandler(remoteControlSocket.fileno())
