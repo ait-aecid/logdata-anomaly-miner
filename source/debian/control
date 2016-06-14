@@ -2,32 +2,32 @@ Source: logdata-anomaly-miner
 Section: misc
 Priority: extra
 Maintainer: Roman Fiedler <roman.fiedler@ait.ac.at>
-Build-Depends: debhelper (>= 9.0.0), docbook-xsl, docbook-xml, xsltproc
-Standards-Version: 3.9.7
+Build-Depends: debhelper (>= 9.0.0), dh-python, dh-systemd, docbook-xsl, docbook-xml, python-all, xsltproc
+Standards-Version: 3.9.8
 Homepage: https://launchpad.net/logdata-anomaly-miner/
 Vcs-Git: https://git.launchpad.net/logdata-anomaly-miner
 Vcs-Browser: https://git.launchpad.net/logdata-anomaly-miner/tree/
 
 Package: logdata-anomaly-miner
 Architecture: all
-Depends: python2.6 | python2.7, python-tz, ${misc:Depends}
+Depends: ${python:Depends}, python-tz, ${misc:Depends}
 Suggests: python-scipy
-Description: logdata-anomaly-miner allows to create log analysis
-  pipelines to analyze log data streams and detect violations
-  or anomalies in it. It can be run from console, as daemon with
-  e-mail alerting or embedded as library into own programs. It
-  was designed to run the analysis with limited resources and
-  lowest possible permissions to make it suitable for production
-  server use. Analysis methods include:
-  .
+Description: This tool allows one to create log analysis pipelines
+ to analyze log data streams and detect violations or anomalies
+ in it. It can be run from console, as daemon with e-mail alerting
+ or embedded as library into own programs. It was designed to
+ run the analysis with limited resources and lowest possible permissions
+ to make it suitable for production server use. Analysis methods
+ include:
+ .
   * static check patterns similar to logcheck but with extended
     syntax and options.
   * detection of new data elements (IPs, user names, MAC addresses)
   * statistical anomalies in log line values and frequencies
   * correlation rules between log lines as described in th AECID
     approach http://dx.doi.org/10.1016/j.cose.2014.09.006
-  .
-  The tool is suitable to replace logcheck but also to operate
-  as a sensor feeding a SIEM.
-  .
-  Please report bugs at https://bugs.launchpad.net/logdata-anomaly-miner/+filebug
+ .
+ The tool is suitable to replace logcheck but also to operate
+ as a sensor feeding a SIEM.
+ .
+ Please report bugs at https://bugs.launchpad.net/logdata-anomaly-miner/+filebug

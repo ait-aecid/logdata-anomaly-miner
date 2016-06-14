@@ -1,4 +1,4 @@
-#!/usr/bin/python2 -BEsSt
+#!/usr/bin/python2 -BEsStt
 # This is the main program of the "aminer" logfile miner tool.
 # It does not import any local default site packages to decrease
 # the attack surface due to manipulation of unused but available
@@ -24,11 +24,15 @@
 #   of the unprivileged aminer background child performing the
 #   real analysis.
 
+import sys
+# As site packages are not included, define from where we need
+# to execute code before loading it.
+sys.path=sys.path[1:]+['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
+
 import errno
 import os
 import re
 import socket
-import sys
 import time
 
 # Extract program name, but only when sure to contain no problematic
@@ -66,10 +70,6 @@ while argPos<len(sys.argv):
 
   print >>sys.stderr, 'Unknown parameter "%s"' % argName
   sys.exit(1)
-
-# As site packages are not included, define from where we need
-# to execute code here.
-sys.path=sys.path[1:]+['/usr/lib/aminer', '/etc/aminer/conf-enabled']
 
 # Load the main configuration file.
 if not(os.path.exists(configFileName)):

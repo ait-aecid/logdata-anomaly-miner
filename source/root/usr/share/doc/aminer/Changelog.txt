@@ -1,0 +1,60 @@
+V0.0.3 (Unreleased):
+====================
+
+* Backport of changes from Debian ITP process review, see
+  https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=813096
+
+
+V0.0.2 (2016-05-12):
+====================
+
+* Added remote control support, command line tool for sending
+  commands.
+* Added AnalysisContext as registry for analysis components and
+  access point for remote control.
+* Added component to write events to syslog (read component documentation
+  for CAVEATs)
+* Package structure fixes from Debian mentoring procedure
+* Bugfixes:
+  * ModuloTimeMatchRule: time object path was ignored on error
+  * Indent-formatting repaired, single-line mode added
+
+
+V0.0.1 (2016-04-07):
+====================
+
+* Bugfixes
+* Minor feature improvements (options)
+* New features:
+  * MultiLocaleDateTimeModelElement: decode timestamps not encoded
+    using local system language or byte encoding.
+  * ParsedAtomFilters: filter received atoms and filter to other handlers
+  * TimestampCorrectionFilters: Correct timestamps from broken
+    sources to have monotonic time.
+
+V0.0.0 (2016-03-04):
+====================
+
+Initial Release Features:
+
+* Common parsing model elements available: fixed strings, numbers,
+  IP addresses, date-time fields, delimited fields, fixed alphabet
+   fields, ...
+* Common parsing model structural elements: sequences, branches,
+  repeated elements, optional elements.
+* Stream and file reading, splitting into lines.
+* Operating system integration: privileged parent process forwarding
+  file descriptors to analysis child.
+* Reopening of log files using open/fstat loop.
+* Functionality for state persistence handling between restarts.
+* Analysis components:
+  * NewMatchPathDetector: generate events when new match path
+    is detected.
+  * HistogramAnalysis: generate complete and path-dependent histograms
+    for given properties.
+  * MatchValueQueueSplitter: split input from e.g. one parser
+    and forward it to different analyzers depending on match values.
+  * WhitelistViolationDetector: ignore log data that is whitelisted
+    at least by single rule (logcheck equivalent behaviour)
+  * TimeCorrelationViolationDetector: check if usually correlated
+    loglines are really found both.

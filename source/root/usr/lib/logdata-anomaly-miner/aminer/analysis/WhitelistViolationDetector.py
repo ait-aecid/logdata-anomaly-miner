@@ -1,7 +1,7 @@
 import datetime
 
 class WhitelistViolationDetector:
-  """This class allows to handle a list of whitelist rules to
+  """Objects of this class handle a list of whitelist rules to
   ensure, that each received log-atom is at least covered by a
   single whitelist rule. To avoid traversing the complete rule
   tree more than once, the whitelist rules may have match actions

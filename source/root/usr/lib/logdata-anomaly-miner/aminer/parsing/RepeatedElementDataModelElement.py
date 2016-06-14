@@ -1,7 +1,7 @@
 import MatchElement
 
 class RepeatedElementDataModelElement:
-  """This class allows to find repeats of one element."""
+  """Objects of this class match on repeats of a given element."""
   def __init__(self, id, repeatedElement, minRepeat=-1, maxRepeat=-1, repeatRef=None):
     self.id=id
     self.repeatedElement=repeatedElement

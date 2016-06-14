@@ -1,13 +1,20 @@
-#!/usr/bin/python2 -BEsSt
+#!/usr/bin/python2 -BEsStt
 # This tool allows to connect to a remote control socket, send
 # requests and retrieve the responses. To allow remote use of
 # this tool, e.g. via SSH forwarding, the remote control address
 # can be set on the command line, no configuration is read.
 
+import sys
+# Get rid of the default sys path immediately. Otherwise Python
+# also attempts to load the following imports from e.g. directory
+# where this binary resides.
+sys.path=sys.path[1:]+['/usr/lib/logdata-anomaly-miner']
+
 import json
 import socket
-import sys
 import traceback
+
+from aminer.AnalysisChild import AnalysisChildRemoteControlHandler
 
 remoteControlSocketName='/var/run/aminer-remote.socket'
 remoteControlData=None
@@ -31,10 +38,6 @@ while argPos<len(sys.argv):
     continue
   print >>sys.stderr, 'Unknown parameter "%s"' % paramName
   sys.exit(1)
-
-
-sys.path=sys.path[1:]+['/usr/lib/aminer']
-from aminer.AnalysisChild import AnalysisChildRemoteControlHandler
 
 remoteControlSocket=socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 remoteControlSocket.connect(remoteControlSocketName)

@@ -4,7 +4,7 @@ Documentation=man:AMiner(1)
 
 [Service]
 Type=forking
-ExecStart=/usr/lib/aminer/AMiner
+ExecStart=/usr/lib/logdata-anomaly-miner/AMiner
 KillMode=control-group
 # Write everything to /dev/null: if AMiner is misconfigured, it
 # may detect anonamies in its own log data, thus creating a logging

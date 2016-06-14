@@ -134,7 +134,7 @@ a directory "aminer" and run AMiner from that working directory
 or you may adjust the demo configuration.
 
 gzip -cd /usr/share/doc/aminer/demo/ubuntu-syslog-config.py.gz > config.py
-/usr/lib/aminer/AMiner --Config config.py
+/usr/bin/AMiner --Config config.py
 
 On the first run you may notice, that AMiner will report detection
 of numerous new path elements, e.g.
