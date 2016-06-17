@@ -1,4 +1,5 @@
 import os
+import sys
 
 KEY_LOG_FILE_LIST='LogFileList'
 KEY_AMINER_USER='AMinerUser'
@@ -10,8 +11,14 @@ KEY_REMOTE_CONTROL_SOCKET_PATH='RemoteControlSocket'
 
 def loadConfig(configFileName):
   """Load the configuration file using the import module."""
-  import imp
-  aminerConfig=imp.load_module('aminerConfig', open(configFileName, 'r'), configFileName, ('', 'r', imp.PY_SOURCE))
+  aminerConfig=None
+  try:
+    import imp
+    aminerConfig=imp.load_module('aminerConfig', open(configFileName, 'r'), configFileName, ('', 'r', imp.PY_SOURCE))
+  except:
+    print >>sys.stderr, 'Failed to load configuration from %s' % configFileName
+    exceptionInfo=sys.exc_info()
+    raise exceptionInfo[0], exceptionInfo[1], exceptionInfo[2]
   return(aminerConfig)
 
 def buildPersistenceFileName(aminerConfig, *args):
