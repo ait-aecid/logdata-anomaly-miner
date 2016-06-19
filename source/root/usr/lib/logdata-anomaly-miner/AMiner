@@ -265,7 +265,7 @@ if childPid==0:
   analysisConfigFileName=aminerConfig.configProperties.get(AMinerConfig.KEY_ANALYSIS_CONFIG_FILE, None)
   if analysisConfigFileName==None:
     analysisConfigFileName=configFileName
-  elif (not(os.path.isabs(analysisConfigFileName))) and (os.path.isabs(configFileName)):
+  elif not(os.path.isabs(analysisConfigFileName)):
     analysisConfigFileName=os.path.join(os.path.dirname(configFileName), analysisConfigFileName)
 
 # Now execute the very same program again, but user might have
