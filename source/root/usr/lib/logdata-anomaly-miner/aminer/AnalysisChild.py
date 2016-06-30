@@ -139,7 +139,16 @@ class AnalysisChild:
 # FIXME: no message read synchronization beween multiple fds,
 # see Readme.txt (Multiple file synchronization)
         for logLine in range(0, 1000):
-          lineData=logStream.readLine()
+          lineData=None
+          try:
+            lineData=logStream.readLine()
+          except ValueError as valueError:
+# This should only happen on input data failures, e.g. overlong or
+# corrupted lines. Just log it but continue using the stream:
+# each error should be reported only once by the stream.
+            print >>sys.stderr, 'ERROR: Invalid input data reading from stream %s: %s' % (logStream.logDataResource.logFileName, str(valueError))
+            continue
+
           if lineData==None:
             if logStream.byteLineReader.isEndOfStream():
               logStreams.remove(logStream)

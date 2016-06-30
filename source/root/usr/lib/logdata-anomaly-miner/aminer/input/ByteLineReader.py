@@ -6,6 +6,10 @@ class ByteLineReader:
   def __init__(self, inputFd, maxLineLength):
     self.inputFd=inputFd
     self.maxLineLength=maxLineLength
+# This field holds input data already read from the inputFd but
+# not yet passed on outside this reader. This field will be set
+# to None when inputFd EOF was detected or signalled and all the
+# data was passed on, all pending exceptions were thrown.
     self.streamData=b''
     self.inOverlongLineFlag=False
     self.endOfStreamReached=False
@@ -15,8 +19,9 @@ class ByteLineReader:
     """Read one line from the input stream including the final
     newline. This method may block if the file descriptor is configured
     for blocking read behaviour. 
-    @throws Error when read from stream fails, overlong line or
-    incomplete last line is encountered.
+    @throws ValueError when read from stream fails, overlong line
+    or incomplete last line is encountered. The error will contain
+    the problematic line data as first optional argument.
     @return the next line or None if read returned no data or
     EOF was reached."""
     while (self.inOverlongLineFlag):
@@ -24,14 +29,20 @@ class ByteLineReader:
 # data till newline or EOF is reached.
 # FIXME: No handling of EOF errors on pipes/sockets
       chunk=os.read(self.inputFd, self.maxLineLength)
-      if len(chunk)==0: return(None)
+      if len(chunk)==0:
+# This seems to be the EOF, but we do not known if there is more
+# to expect, unless someone told us, that this is the end.
+        if self.endOfStreamReached:
+          self.inOverlongLineFlag=False
+          break
+        return(None)
       endPos=chunk.find('\n')
       if (endPos>=0):
         self.inOverlongLineFlag=False;
         self.streamData=chunk[endPos+1:]
         break
 
-    while True:
+    while self.streamData!=None:
       lineEndPos=self.streamData.find('\n')
       if (lineEndPos>=0):
 # Something was found in normal line, return it.
@@ -45,7 +56,8 @@ class ByteLineReader:
 # exception. Next read operation will discard all data belonging
 # to this overlong line.
         self.inOverlongLineFlag=True;
-        raise Error("Line longer than input buffer size encountered");
+        raise ValueError('Line longer than input buffer size encountered',
+            self.streamData)
 
       if(not(self.endOfStreamReached)):
         chunk=os.read(self.inputFd, self.maxLineLength-len(self.streamData))
@@ -61,8 +73,11 @@ class ByteLineReader:
 
       if(self.endOfStreamReached):
         if (len(self.streamData)==0): return(None)
+        streamData=self.streamData
         self.streamData=None
-        raise Error("Incomplete last line");
+        raise ValueError('Incomplete last line', streamData);
+    return(None)
+
 
   def isEndOfStream(self):
     """Check if the end of stream was reached, all data was processed

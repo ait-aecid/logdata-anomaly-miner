@@ -2,8 +2,9 @@ logdata-anomaly-miner (0.0.3~pre0) xenial; urgency=low
 
   * Backport of changes from Debian ITP process review, see
     https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=813096
+  * Handle rollover from one logfile to the next more graceful
 
- -- Roman Fiedler <roman.fiedler@ait.ac.at>  Tue, 14 Jun 2016 12:00:00 +0000
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Tue, 30 Jun 2016 12:00:00 +0000
 
 logdata-anomaly-miner (0.0.2) xenial; urgency=low
 
