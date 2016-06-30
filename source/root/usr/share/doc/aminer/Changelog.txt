@@ -4,6 +4,8 @@ V0.0.3 (Unreleased):
 * Backport of changes from Debian ITP process review, see
   https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=813096
 * Handle rollover from one logfile to the next more graceful
+* Added MissingMatchPathValueDetector to detect when data values
+  were not reported for an extended period of time.
 
 
 V0.0.2 (2016-05-12):

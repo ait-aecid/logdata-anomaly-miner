@@ -44,6 +44,10 @@ List of components:
   input data e.g. as CSV list, to other compoments via stream,
   e.g. to perform analysis in another tool.
 
+* MissingMatchPathValueDetector.MissingMatchPathValueDetector (AH):
+  Detect when values for a given path are not received for a longer
+  timespan, e.g. a host, service or address stopped sending/reporting.
+
 * NewMatchPathDetector.NewMatchPathDetector (AH): Generate events
   when new parser pathes are found.
 
