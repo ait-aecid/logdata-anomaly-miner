@@ -1,0 +1,392 @@
+Preamble:
+=========
+
+This document provides an installation guide to all those paranoid
+users, who
+
+* do not trust their systems to be in a completely sane state
+  when starting the analysis,
+* do not trust the aminer analysis features without understanding
+  (and perhaps auditing) them and
+* do not trust the aminer autoconfiguration features to perform
+  correctly or want to avoid them accepting parts of the insane
+  system state as normal.
+
+Thus the following instructions will show how to enable each small
+feature manually to create full blown and really paranoid realtime
+mining configuration for syslog data.
+
+
+Creating the basic service configuration:
+=========================================
+
+AMiner supports splitting the configuration loaded by the parent
+and child process. As the parent usually has to be run with root
+privileges, one might want to avoid loading the full configuration
+here.
+
+Steps:
+
+* Create parent configuration:
+
+cd /etc/aminer
+cp config.py.template config.py
+
+Remove everything below configuration property "AnalysisConfigFile".
+Define the child configuration file:
+
+configProperties['AnalysisConfigFile']='analysis.py'
+
+While not fully configured, you may want to start with an empty
+input file. A paranoid aminer instance will report everything
+not explicitely whitelisted as an error. Basically you would get
+your whole syslog echoed back, just with an amplification factor
+applied. In that case use:
+
+configProperties['LogFileList']=['/etc/aminer/test.log']
+
+touch /etc/aminer/test.log
+chmod 0600 /etc/aminer/test.log
+
+Enable also the remote control socket: it will be needed to adjust
+aminer child settings on the fly without reloading of the configuration
+or editing of persistency files. In default configuration, only
+root user can connect to the socket. The remote control commands
+are executed within the analysis child process usually running
+as a dedicated less-privileged user.
+
+configProperties['RemoteControlSocket']='/var/run/aminer-remote.socket'
+
+ 
+* Create child configuration:
+
+cp config.py.template analysis.py
+
+Remove everything below (but keeping) "configProperties={}" down
+to (including) configuration property "AnalysisConfigFile".
+
+You may want to define the "MailAlerting.TargetAddress" parameter
+to receive e-mail alerts and data reports.
+
+During testing the "StreamPrinterEventHandler" is useful to get
+the aminer events printed to stdout. Therefore configuration line
+comments have to be removed:
+
+  from aminer.events import StreamPrinterEventHandler
+  anomalyEventHandlers.append(StreamPrinterEventHandler.StreamPrinterEventHandler(analysisContext.aminerConfig))
+
+
+* Allow python code imports:
+
+AMiner does not use the default dist/site-packages to load code.
+See Design.txt "Loading of python code" for explanation. By default
+pytz is used for timestamp handling, so add it:
+
+ln -s /usr/lib/python2.7/dist-packages/pytz /etc/aminer/conf-enabled
+
+
+* Check for configuration errors:
+
+AMiner --Foreground --Config /etc/aminer/config.py
+
+Here you will get some warnings. The rationale behind that is
+not to be silent about code that is not hardened to the maximum
+level. The code should be secure in the current execution environment
+where
+
+* semantics of kernel syscall interface did not change over time
+* component is used as recommended in documentation
+* core system services or users are not already under control
+  of an adversery
+
+Here are short explanations for the warnings:
+
+* WARNING: SECURITY: No secure open yet due to missing openat in python!
+
+  Python2.7 os module does not support "openat". Without that,
+  Linux kernel does not provide any secury way to open a file
+  in an untrusted directory, e.g. "/var/log", a directory owned
+  by user "syslog". The only way using "(f)chdir/open" repeats
+  is not really practical. But usually when your syslog user is
+  controlled by an adversery, you will be done anyway. 
+
+* WARNING: SECURITY: Open should use O_PATH, but not yet available in python
+
+  Linux allos to open files and directories with "O_PATH" flag.
+  The file descriptor can be used as a reference to the file but
+  not for reading/writing. Thus leak of file descriptor to other
+  process (no close before exit) or standard stdin/stdout write
+  data corruption can be avoided. Aminer (or your specific setup)
+  would need to have such a vulnerability in first place to let
+  the "O_PATH" hardening become effective.
+
+* WARNING: SECURITY: No checking for backdoor access via POSIX ACLs, use "getfacl" from "acl" package to check manually.
+
+  Apart from the standard file mode flags, each file or directory
+  may also have "POSIX ACLs" attached. When not checking for them,
+  an adversery may use them to gain access even to newly created
+  files which is not expected when just looking at the file mode.
+  But again, this would require, that someone has acquired access
+  to some core system file directories, e.g. "/var/log", beforehand.
+
+* WARNING: SECURITY: unsafe unlink (unavailable unlinkat/linkat should be used, but not available in python)
+
+  Same as "No secure open yet due to missing openat" from above.
+
+
+When up and running using a test file, you can test the aminer
+output adding a test line:
+
+head -n 1 /var/log/syslog >> /etc/aminer/test.log
+
+As there is no hardcoded parsing model or parsing model generator
+configured, you should get:
+
+Unparsed data (1 lines)
+  Jun 19 00:10:01 somehost.local rsyslogd: [origin ...
+
+
+Adding the first parsing model element:
+=======================================
+
+When using the first line from your syslog for testing, it should
+be a line from the syslog daemon startup. Hence the default parsing
+model might match the syslog daemon output on your system. To
+enable add
+
+ln -s ../conf-available/generic/RsyslogParsingModel.py /etc/aminer/conf-enabled
+
+and edit your configuration:
+
+  import RsyslogParsingModel
+  serviceChildren.append(RsyslogParsingModel.getModel())
+
+When starting aminer again, no warning about unparsed data should
+be printed. If still present, the model might not match your line.
+
+
+* Creating or modifying a model:
+
+Unlike logfile parsing tools, e.g. logcheck and many SIEMs, aminer
+does not use regular expressions, that have to be applied to each
+log line separately. The parsing model is more like a tree, having
+a common trunk, e.g. the syslog preamble with timestamp and hostname,
+and specific service outputs being handled in model branches.
+See Readme.txt "Concepts" for more information.
+
+
+Create a model file e.g. in "conf-available/local" and link it
+or directly in "conf-enabled", whatever suits your production
+process best.
+
+mkdir /etc/aminer/conf-available/local
+cp /etc/aminer/conf-available/generic/RsyslogParsingModel.py /etc/aminer/conf-available/local
+
+Edit /etc/aminer/conf-available/local/RsyslogParsingModel.py
+
+See ParsingModel.txt for documentation on the available model
+elements. Especially the "DebugModelElement" can be inserted at
+any position in your model to see where parsing breaks when parsing
+failures seem unexplainable.
+
+When even parsing of the syslog preamble using ConfigSyslogPreambleModel
+fails, this can be adjusted to your needs also. You may have to
+supply a different time model element, e.g. using
+
+  ConfigSyslogPreambleModel.getModel(
+      DateTimeModelElement.DateTimeModelElement('time', [formatstring],
+          15, False))
+
+or even switch to MultiLocaleDateTimeModelElement. See source
+code documentation in those files, e.g.
+/usr/lib/logdata-anomaly-miner/aminer/parsing/DateTimeModelElement.py
+/usr/lib/logdata-anomaly-miner/aminer/parsing/MultiLocaleDateTimeModelElement.py
+
+and Python format string specification in
+
+https://docs.python.org/2/library/datetime.html#strftime-strptime-behavior
+
+
+* Contributing to the model templates:
+
+If your model configuration might be useful for others and you
+are willing and legally alowed to publish it under "GNU GPL v3",
+please consider sending the change to a maintainer or filing a
+bug, both available at https://launchpad.net/logdata-anomaly-miner
+
+
+Adding detection for new parser pathes:
+=======================================
+
+Usually your systems will not emit an arbitrary large number of
+differently structured loglines. In normal operation with a given
+set of configuration options and standard software use patterns,
+each service only produces a small subset of log message type
+compared to all the messages it could theoretically create. On
+the other hand, service failures or attacks often result in new
+message types to be seen. Hence each new parser path corresponding
+to a new message type should cause some distrust.
+
+You may use the configuration from the config.py.template, but
+when really paranoid, following changes might be useful:
+
+* Disable autoinclusion: autoIncludeFlag=False
+* Register as named component: componentName='DefaultNewMatchPathDetector'
+
+  from aminer.analysis import NewMatchPathDetector
+  newMatchPathDetector=NewMatchPathDetector.NewMatchPathDetector(
+      analysisContext.aminerConfig, anomalyEventHandlers, autoIncludeFlag=False)
+  analysisContext.registerComponent(newMatchPathDetector,
+      componentName='DefaultNewMatchPathDetector',
+      registerAsRawAtomHandler=False, registerAsTimeTriggeredHandler=True)
+  parsedAtomHandlers.append(newMatchPathDetector)
+
+With automatic inclusion enabled, the detector would complain
+about each new path seen exactly once and then add it to the list
+of accepted pathes. Setting this flag to True during configuration
+phase is very good to shorten the configuration time, but it will
+also work without that. And therefore the "componentName" comes
+in handy.
+
+As you may have run aminer with autoinclusion enabled already
+during "Adding the first parsing model element", you may want
+to delete all the included patterns by stopping aminer and deleting
+"/var/lib/aminer/NewMatchPathDetector/Default".
+
+
+* Using different detectors for subset of sources:
+
+When running aminer on a remote logging host, you may process
+messages from completely different systems. While e.g. a sudo
+message is completely normal on one machine, it might be completely
+unexpected on another one. To use different detectors for different
+host groups, a filter has to be installed to separate the data:
+
+  * Create different NewMatchPathDetector instances with unique
+    persistance IDs:
+
+  newMatchPathDetectorA=NewMatchPathDetector.NewMatchPathDetector(
+      analysisContext.aminerConfig, anomalyEventHandlers,
+      peristenceId='WwwHostsGroup', autoIncludeFlag=False)
+
+  * Create the filter:
+
+  from aminer.analysis import ParsedAtomFilters
+  hostnameValueFilter=ParsedAtomFilters.MatchValueFilter(
+      '/model/syslog/host',
+      {'host-a': newMatchPathDetectorA, ...},
+      defaultNewMatchPathDetector)
+  parsedAtomHandlers.append(hostnameValueFilter)
+
+In production, you may want to create all those groups in a loop,
+reading from a list of host/group mappings.
+
+
+Using the remote control interface for runtime changes:
+=======================================================
+
+When really running with autoIncludeFlag=False, each unknown path
+would be reported over and over again. On some installations you
+may want to roll out the known path persistency files containing
+simple JSON data and load them when starting aminer. Therefore
+adding the new item to the persistency file is sufficient. This
+has to be done while aminer is NOT running, otherwise shutdown
+may overwrite the files.
+
+More common is to add the changes via the remote control interface
+e.g.
+
+  * manually (for demonstration as shown below)
+  * using custom integration code, e.g. embedded in your SIEM
+    that is receiving the aminer events
+  * use orchestration tools
+
+
+* Verify remote control is working:
+
+For manual inclusion, remote control socket has to be enabled
+and accessible. To have more robust configuration procedures,
+the detectors should be registered as named components. To verify,
+that remote control is working, just execute:
+
+AMinerRemoteControl --ControlSocket /var/run/aminer-remote.socket --Exec 'remoteControlResponse=analysisContext.getRegisteredComponentNames()'
+Remote execution response: [u'DefaultNewMatchPathDetector']
+
+The command executed is executed inside the running aminer child
+process. See man page of AMinerRemoteControl for more information.
+
+
+* Modify the detector state:
+
+AMinerRemoteControl --ControlSocket /var/run/aminer-remote.socket --Data '["/model/services/rsyslog/msg/statechange/type/HUPed"]' --Exec 'for pathName in remoteControlData: analysisContext.getComponentByName("DefaultNewMatchPathDetector").knownPathSet.add(pathName)' --Exec 'analysisContext.getComponentByName("DefaultNewMatchPathDetector").doPersist()'
+
+
+Detect missing logs:
+====================
+
+Logdata analysis might detect anomalies within the data as long
+as data is available. On small scale setups, that might not be
+such an issue, but in larger setups, nobody might notice, that
+one service or even host stopped to emit log messates. The reason
+for that might be an error or an attack, that is left to the admin
+to find out.
+
+Here is an example how to detect that hosts stop sending logs
+and to generate alerts:
+
+  from aminer.analysis import MissingMatchPathValueDetector
+  missingMatchPathValueDetector=MissingMatchPathValueDetector.MissingMatchPathValueDetector(
+      analysisContext.aminerConfig, '/model/syslog/host',
+      anomalyEventHandlers, autoIncludeFlag=True, defaultInterval=24*3600)
+  analysisContext.registerComponent(missingMatchPathValueDetector,
+      componentName='DefaultMissingMatchPathValueDetector',
+      registerAsRawAtomHandler=False, registerAsTimeTriggeredHandler=True)
+  parsedAtomHandlers.append(missingMatchPathValueDetector)
+
+The default interval should fit your operational procedures:
+
+* When aminer is used to detect malfunction of business critical
+  processes not monitored via other means, the interval should
+  be so low to react early enough to fullfil your SLAs. A busy
+  webserver not serving (and logging) a page for 2 minutes might
+  be of relevance. You may want to feed those alerts into your
+  monitoring solution to have event-deduplication e.g. during
+  maintenance downtimes.
+
+* For problems you would not start dealing with immediately, where
+  the service is not that important, a longer timeout might be
+  suitable. Just let aminer wait some before alerting to see if
+  the problem vanishes without interaction.
+
+By setting the "componentName" in the code example above, you
+again make it easier to perform remote control actions on the
+running miner, e.g.
+
+* Change check interval for single value:
+
+AMinerRemoteControl --ControlSocket /var/run/aminer-remote.socket --Exec 'analysisContext.getComponentByName("DefaultMissingMatchPathValueDetector").setCheckValue("buildhost.localdomain", 12*3600)'
+
+* Remove value from monitoring:
+
+AMinerRemoteControl --ControlSocket /var/run/aminer-remote.socket --Exec 'analysisContext.getComponentByName("DefaultMissingMatchPathValueDetector").removeCheckValue("buildhost.localdomain")'
+
+* Force persistency write when your changes were that important:
+
+AMinerRemoteControl --ControlSocket /var/run/aminer-remote.socket --Exec 'analysisContext.getComponentByName("DefaultMissingMatchPathValueDetector").doPersist()'
+
+
+Apply whitelisting to parsed entries:
+=====================================
+
+Even when a log-atom was parsed using parsing model parts already
+matching previous atoms, this does not mean, that this should
+be treated a normal situation. As opposed to SIEM solutions, that
+frequently apply blacklisting for event generation, the aminer
+rules engine can be used to whitelist elements based on combinations
+of parameters. For performance reasons, those rules can also be
+arranged in a tree-like fashion. Rules can also be used to invoke
+actions when it matches. Parsed data that does not match any rule
+will trigger an event.
+
+See "/usr/share/doc/aminer/demo/ubuntu-syslog-config.py" for example
+how the WhitelistViolationDetector is added to the configuration.
