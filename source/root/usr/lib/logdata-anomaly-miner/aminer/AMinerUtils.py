@@ -59,7 +59,10 @@ class LogDataResource:
     if logFileFd>=0:
       self.statData=os.fstat(logFileFd)
 
+# Those should go away as soon as Python (or aminer via libc)
+# provides those functions.
 noSecureOpenWarnOnceFlag=True
+noSecureLinkUnlinkAtWarnOnceFlag=True
 
 def secureOpenFile(fileName, flags, trustedRoot='/'):
   """Secure opening of a file with given flags. This call will
@@ -140,7 +143,11 @@ def createTemporaryPersistenceFile(fileName):
 
 def replacePersistenceFile(fileName, newFileHandle):
   """Replace the named file with the file refered by the handle."""
-  print >>sys.stderr, 'WARNING: SECURITY: unsafe unlink (unavailable unlinkat/linkat should be used, but not available in python)'
+
+  global noSecureLinkUnlinkAtWarnOnceFlag
+  if noSecureLinkUnlinkAtWarnOnceFlag:
+    print >>sys.stderr, 'WARNING: SECURITY: unsafe unlink (unavailable unlinkat/linkat should be used, but not available in python)'
+    noSecureLinkUnlinkAtWarnOnceFlag=False
   try:
     os.unlink(fileName)
   except OSError as openOsError:
