@@ -17,10 +17,10 @@ Installation Requirements:
 
 * Python language compatibility:
 
-Code is compatible with Python 2.6, software was tested on:
+Code is compatible with Python 2.6-2.7, software was tested on:
 
-  * CentOS 6.7: Released 2015-08-07, Python 2.6.6
-  * Ubuntu Xenial 1604: FIXME: Beta-Release, Python 2.???
+  * CentOS 6.7:         Released 2015-08-07, Python 2.6.6
+  * Ubuntu Xenial 1604: Released 2016-04-21, Python 2.7.11-7
 
 
 * System requirements:
@@ -114,6 +114,10 @@ Following features are partially implemented:
 
 Getting Started:
 ================
+
+This document contains only an overview and simplified instructions
+for aminer use. The most accurate setup documentation including
+all the gory details is currently "ParanoidsInstallationGuide.txt".
 
 * Test AMiner with generic configuration:
 
