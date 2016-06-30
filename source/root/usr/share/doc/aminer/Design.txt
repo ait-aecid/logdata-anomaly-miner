@@ -23,7 +23,40 @@ Design:
 =======
 
 * Configuration layout:
-  * Split model configuration and statistics/rule configuration
+
+The behaviour of AMiner is controlled by 3 different configuration
+data sources:
+
+  * config.py: This configuration file is used by the privileged
+    parent process for startup and launching of child process.
+    To avoid parsing and loading larger amounts of configuration
+    into a privileged process, this configuration may contain
+    only the minimal set of parameters required by the parent
+    process.
+
+  * analysis.py: This (optional) configuration file contains the
+    whole analysis child configuration (code). When missing those
+    configuration parameters are also taken from the main config.
+
+  * /var/lib/aminer: This directory is used for persistency of
+    runtime data, e.g. learned patterns, statistical data, between
+    different AMiner invocations.
+
+
+* Loading of python code:
+
+AMiner does not use the default dist/site-packages to load code.
+The rationale behind that is:
+
+  * Avoid unused code to be loadable or even loaded by default:
+    that code may only increase the attack surface or the memory
+    footprint.
+
+  * Reduce risk of side effects of unrelated updates: even when
+    not good practices, some pyhton modules try to detect existence
+    of other modules to adapt behaviour when available. This may
+    cause unintended runtime changes when installing or updating
+    completely unrelated python software.
 
 * Log file reading:
 
