@@ -17,6 +17,8 @@ class AnalysisContext:
 # runtime reconfiguration.
     self.nextRegistryId=0
     self.registeredComponents={}
+# Keep also a list of components by name.
+    self.registeredComponentsByName={}
 # Keep a list of all handlers that should receive the raw atoms
 # directly from the log sources.
     self.rawAtomHandlers=[]
@@ -29,19 +31,34 @@ class AnalysisContext:
 
   def registerComponent(self, component, componentName=None,
       registerAsRawAtomHandler=False, registerAsTimeTriggeredHandler=False):
+    """Register a new component.
+    @param componentName when not none, the component is also
+    added to the named components. When a component with the same
+    name was already registered, this will cause an error."""
+    if (componentName!=None) and (self.registeredComponentsByName.has_key(componentName)):
+      raise Exception('Component with same name already registered')
     self.registeredComponents[self.nextRegistryId]=(component, componentName)
     self.nextRegistryId+=1
+    if componentName!=None:
+      self.registeredComponentsByName[componentName]=component
     if registerAsRawAtomHandler:
       self.addRawAtomHandler(component)
     if registerAsTimeTriggeredHandler:
       self.addTimeTriggeredHandler(component)
   def getRegisteredComponentIds(self):
-    """Get a list of currently known component IDs"""
+    """Get a list of currently known component IDs."""
     return(self.registeredComponents.keys())
   def getComponentById(self, id):
     """Get a component by ID.
     @return None if not found."""
     return(self.registeredComponents.get(id, None))
+  def getRegisteredComponentNames(self):
+    """Get a list of currently known component names."""
+    return(self.registeredComponentsByName.keys())
+  def getComponentByName(self, name):
+    """Get a component by name.
+    @return None if not found."""
+    return(self.registeredComponentsByName.get(name, None))
 
   def buildAnalysisPipeline(self):
     """Convenience method to create the pipeline."""
