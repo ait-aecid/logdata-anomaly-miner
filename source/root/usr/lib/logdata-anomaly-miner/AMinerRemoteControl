@@ -17,7 +17,7 @@ import traceback
 
 from aminer.AnalysisChild import AnalysisChildRemoteControlHandler
 
-remoteControlSocketName='/var/run/aminer-remote.socket'
+remoteControlSocketName=None
 remoteControlData=None
 argPos=1
 commandList=[]
@@ -26,18 +26,40 @@ while argPos<len(sys.argv):
   argPos+=1
 
   if paramName=='--ControlSocket':
+    if remoteControlSocketName!=None:
+      print >>sys.stderr, '%s: %s parameter given twice' % (sys.argv[0], paramName)
+      sys.exit(1)
     remoteControlSocketName=sys.argv[argPos]
-    argPos+=1
-    continue
-  if paramName=='--Exec':
-    commandList.append((sys.argv[argPos], remoteControlData))
     argPos+=1
     continue
   if paramName=='--Data':
     remoteControlData=json.loads(sys.argv[argPos])
     argPos+=1
     continue
-  print >>sys.stderr, 'Unknown parameter "%s"' % paramName
+  if paramName=='--Exec':
+    commandList.append((sys.argv[argPos], remoteControlData))
+    argPos+=1
+    continue
+  if paramName=='--Help':
+    if len(sys.argv)!=2:
+      print >>sys.stderr, 'Ignoring all other arguments with --Help'
+    print """Usage: %s [arguments]
+  --ControlSocket [socketpath]: when given, use nonstandard control socket.
+  --Data [data]: provide this json serialized data within execution
+    environment as 'remoteControlData' (see man page).
+  --Exec [command]: add command to the execution list, can be
+    used more than once.
+  --Help: this output""" % sys.argv[0]
+    sys.exit(0)
+
+  print >>sys.stderr, 'Unknown parameter "%s", use --Help for overview' % paramName
+  sys.exit(1)
+
+if remoteControlSocketName==None:
+  remoteControlSocketName='/var/run/aminer-remote.socket'
+
+if len(commandList)==0:
+  print >>sys.stderr, 'No commands given, use --Exec [cmd]'
   sys.exit(1)
 
 remoteControlSocket=socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
