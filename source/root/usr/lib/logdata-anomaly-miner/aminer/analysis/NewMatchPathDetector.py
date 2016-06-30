@@ -15,7 +15,8 @@ class NewMatchPathDetector:
     self.nextPersistTime=None
 
     PersistencyUtil.addPersistableComponent(self)
-    self.persistenceFileName=AMinerConfig.buildPersistenceFileName(aminerConfig, 'NewMatchPathDetector', peristenceId)
+    self.persistenceFileName=AMinerConfig.buildPersistenceFileName(
+        aminerConfig, self.__class__.__name__, peristenceId)
     persistenceData=PersistencyUtil.loadJson(self.persistenceFileName)
     if persistenceData==None:
       self.knownPathSet=set()
@@ -34,7 +35,8 @@ class NewMatchPathDetector:
       if self.nextPersistTime==None:
         self.nextPersistTime=time.time()+600
       for listener in self.anomalyEventHandlers:
-        listener.receiveEvent('Analysis.NewMatchPathDetector', 'New path(es) %s ' % (', '.join(unknownPathList)), [atomData], match)
+        listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
+            'New path(es) %s ' % (', '.join(unknownPathList)), [atomData], match)
 
 
   def checkTriggers(self):
