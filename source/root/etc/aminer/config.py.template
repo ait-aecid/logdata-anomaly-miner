@@ -23,8 +23,10 @@ configProperties['AMinerGroup']='aminer'
 # is separated from the main configuration so that it can be loaded
 # only within the analysis child. Non-absolute path names are
 # interpreted relatively to the main configuration file (this
-# file). Defaults to "analysis.py".
+# file). When empty, this configuration has to contain the configuration
+# for the child also.
 # configProperties['AnalysisConfigFile']='analysis.py'
+
 
 # Read and store information to be used between multiple invocations
 # of AMiner in this directory. The directory must only be accessible
