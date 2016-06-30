@@ -1,0 +1,36 @@
+Preamble:
+=========
+
+Sorry, this part of the documentation was not yet written!
+
+Check the source code documentation headers from files in directory
+/usr/lib/logdata-anomaly-miner/aminer/parsing.
+
+Here is a short list of the most common model elements with short
+description:
+
+* AnyByteDataModelElement: Match anything till end of a log-atom.
+* DateTimeModelElement: Simple datetime parsing using python
+  datetime module. See also MultiLocaleDateTimeModelElement
+* DebugModelElement: Output debugging information while parsing
+  a log-atom
+* DecimalIntegerValueModelElement
+* DelimitedDataModelElement: Same as AnyByteDataModelElement but
+  include data only up to given delimiter string.
+* FirstMatchModelElement: Branch the model taking the first branch
+  matching the remaining log-atom data.
+* FixedDataModelElement: Match a fixed (constant) string.
+* FixedWordlistDataModelElement: Match one of the fixed strings
+  from a list.
+* HexStringModelElement: Match a hexadecimal string.
+* IpAddressDataModelElement: Match an IPv4 address.
+* MultiLocaleDateTimeModelElement: Parse datetime elements with
+  leap year correction, multiple locale support.
+* OptionalMatchModelElement: Match subelements zero or one time.
+* RepeatedElementDataModelElement: Match subelements a given number
+  of times.
+* SequenceModelElement: Match all the subelements exactly in the
+  given order.
+* VariableByteDataModelElement: Match variable length data encoded
+  within a given alphabet.
+* WhiteSpaceLimitedDataModelElement: Match string till next whitespace.
