@@ -173,7 +173,8 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
           --Exec operations until changed again using another
           --Data option. Take into account, that there are size
           limits for the request, very large data objects may
-          exceed those limits.</para>
+          exceed those limits. The execution context will expose
+          the data as variable 'remoteControlData'.</para>
         </listitem>
       </varlistentry>
     </variablelist>
