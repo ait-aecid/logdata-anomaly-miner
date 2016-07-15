@@ -6,6 +6,8 @@ V0.0.3 (Unreleased):
 * Handle rollover from one logfile to the next more graceful
 * Added MissingMatchPathValueDetector to detect when data values
   were not reported for an extended period of time.
+* AMinerRemoteControl: Added "--ExecFile" parameter to execute
+  commands from file.
 
 
 V0.0.2 (2016-05-12):

@@ -105,6 +105,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
       <!-- These are several examples, how syntaxes could look -->
       <arg choice="plain"><option>--ControlSocket <replaceable>socket</replaceable></option></arg>
       <arg choice="opt"><option>--Exec <replaceable>code</replaceable></option></arg>
+      <arg choice="opt"><option>--ExecFile <replaceable>file</replaceable></option></arg>
       <arg choice="opt"><option>--Data <replaceable>data</replaceable></option></arg>
     </cmdsynopsis>
   </refsynopsisdiv>
@@ -163,6 +164,15 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
           the local variable 'remoteControlResponse' within the
           executed code, the object is serialized using json and
           sent back in the response.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>--ExecFile <replaceable>file</replaceable></option></term>
+        <listitem>
+          <para>For each --ExecFile option, the named file is
+          loaded and content submitted in the very same way as
+          if --Exec parameter with content as string would have
+          been used.</para>
         </listitem>
       </varlistentry>
       <varlistentry>

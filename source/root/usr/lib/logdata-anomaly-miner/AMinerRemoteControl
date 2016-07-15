@@ -12,6 +12,7 @@ sys.path=sys.path[1:]+['/usr/lib/logdata-anomaly-miner']
 
 import errno
 import json
+import os
 import socket
 import traceback
 
@@ -38,6 +39,16 @@ while argPos<len(sys.argv):
     continue
   if paramName=='--Exec':
     commandList.append((sys.argv[argPos], remoteControlData))
+    argPos+=1
+    continue
+  if paramName=='--ExecFile':
+    if not os.path.exists(sys.argv[argPos]):
+      print >>sys.stderr, 'File %s does not exit' % sys.argv[argPos]
+      sys.exit(1)
+    execFile=file(sys.argv[argPos], 'rb')
+    execData=execFile.read()
+    execFile.close()
+    commandList.append((execData, remoteControlData))
     argPos+=1
     continue
   if paramName=='--Help':
