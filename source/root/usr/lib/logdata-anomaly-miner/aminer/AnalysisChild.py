@@ -51,14 +51,18 @@ class AnalysisChild:
 # Locate the real analysis configuration.
     self.analysisContext.buildAnalysisPipeline()
     rawAtomHandlers=self.analysisContext.rawAtomHandlers
-    timeTriggeredHandlers=self.analysisContext.timeTriggeredHandlers
+    realTimeTriggeredComponents=self.analysisContext.realTimeTriggeredComponents
+    analysisTimeTriggeredComponents=self.analysisContext.analysisTimeTriggeredComponents
 
     logStreams=[]
     logStreamsByName={}
     remoteControlSocket=None
     childSocketSelectList=[masterControlSocket.fileno(),]
 
-    nextListenerTriggerTime=time.time()
+# Every number is larger than None so using this starting value
+# will cause the trigger to be invoked on the first event.
+    nextRealTimeTriggerTime=None
+    nextAnalysisTimeTriggerTime=None
 
 # The number of lines read during the last pass over all log data
 # streams. Start with -1 to make first round of select return
@@ -126,15 +130,7 @@ class AnalysisChild:
           continue
         raise Exception('Illegal state reached')
 
-      if time.time()>=nextListenerTriggerTime:
-        nextTriggerOffset=3600
-        for handler in timeTriggeredHandlers:
-          nextTriggerRequest=handler.checkTriggers()
-          nextTriggerOffset=min(nextTriggerOffset, nextTriggerRequest)
-        nextListenerTriggerTime=time.time()+nextTriggerOffset
-
       lastReadLines=0
-
       for logStream in logStreams:
 # FIXME: no message read synchronization beween multiple fds,
 # see Readme.txt (Multiple file synchronization)
@@ -158,6 +154,26 @@ class AnalysisChild:
           lastReadLines+=1
           for handler in rawAtomHandlers:
             handler.receiveAtom(lineData)
+
+# Handle the real time events.
+      realTime=time.time()
+      if realTime>=nextRealTimeTriggerTime:
+        nextTriggerOffset=3600
+        for component in realTimeTriggeredComponents:
+          nextTriggerRequest=component.doTimer(realTime)
+          nextTriggerOffset=min(nextTriggerOffset, nextTriggerRequest)
+        nextRealTimeTriggerTime=realTime+nextTriggerOffset
+
+# Handle the analysis time events. The analysis time will be different
+# when an analysis time component is registered.
+      analysisTime=self.analysisContext.analysisTime
+      if analysisTime==None: analysisTime=realTime
+      if analysisTime>=nextAnalysisTimeTriggerTime:
+        nextTriggerOffset=3600
+        for component in analysisTimeTriggeredComponents:
+          nextTriggerRequest=component.doTimer(realTime)
+          nextTriggerOffset=min(nextTriggerOffset, nextTriggerRequest)
+        nextAnalysisTimeTriggerTime=analysisTime+nextTriggerOffset
 
 
 class AnalysisChildRemoteControlHandler:
