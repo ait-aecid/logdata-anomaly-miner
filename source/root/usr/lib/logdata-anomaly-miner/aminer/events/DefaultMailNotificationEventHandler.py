@@ -4,36 +4,44 @@ import subprocess
 import sys
 import time
 
+from aminer.util import TimeTriggeredComponentInterface
+from aminer.events import EventHandlerInterface
 from aminer.parsing import ParserMatch
 
-
-configKeyMailAlertingTargetAddress='MailAlerting.TargetAddress'
-configKeyMailAlertingFromAddress='MailAlerting.FromAddress'
-configKeyMailAlertingSubjectPrefix='MailAlerting.SubjectPrefix'
-configKeyMailAlertingAlertGraceTime='MailAlerting.AlertGraceTime'
-configKeyMailAlertingEventCollectTime='MailAlerting.EventCollectTime'
-configKeyMailAlertingMinAlertGap='MailAlerting.MinAlertGap'
-configKeyMailAlertingMaxAlertGap='MailAlerting.MaxAlertGap'
-configKeyMailAlertingMaxEventsPerMessage='MailAlerting.MaxEventsPerMessage'
-
-
-class DefaultMailNotificationEventHandler:
+class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredComponentInterface):
   """This class implements an event record listener, that will pool
 received events, reduce the amount of events below the maximum
 number allowed per timeframe, create text representation of received
 events and send them via "sendmail" transport."""
+
+  CONFIG_KEY_MAIL_TARGET_ADDRESS='MailAlerting.TargetAddress'
+  CONFIG_KEY_MAIL_FROM_ADDRESS='MailAlerting.FromAddress'
+  CONFIG_KEY_MAIL_SUBJECT_PREFIX='MailAlerting.SubjectPrefix'
+  CONFIG_KEY_MAIL_ALERT_GRACE_TIME='MailAlerting.AlertGraceTime'
+  CONFIG_KEY_EVENT_COLLECT_TIME='MailAlerting.EventCollectTime'
+  CONFIG_KEY_ALERT_MIN_GAP='MailAlerting.MinAlertGap'
+  CONFIG_KEY_ALERT_MAX_GAP='MailAlerting.MaxAlertGap'
+  CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE='MailAlerting.MaxEventsPerMessage'
+
   def __init__(self, aminerConfig):
-    self.recipientAddress=aminerConfig.configProperties.get(configKeyMailAlertingTargetAddress)
+    self.recipientAddress=aminerConfig.configProperties.get(
+        DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS)
     if self.recipientAddress==None:
       raise Error('Cannot create e-mail notification listener without target address')
 
-    self.senderAddress=aminerConfig.configProperties.get(configKeyMailAlertingFromAddress)
-    self.subjectPrefix=aminerConfig.configProperties.get(configKeyMailAlertingSubjectPrefix, 'AMiner Alerts:')
-    self.alertGraceTimeEnd=aminerConfig.configProperties.get(configKeyMailAlertingAlertGraceTime, 0)
-    self.eventCollectTime=aminerConfig.configProperties.get(configKeyMailAlertingEventCollectTime, 10)
-    self.minAlertGap=aminerConfig.configProperties.get(configKeyMailAlertingMinAlertGap, 600)
-    self.maxAlertGap=aminerConfig.configProperties.get(configKeyMailAlertingMaxAlertGap, 600)
-    self.maxEventsPerMessage=aminerConfig.configProperties.get(configKeyMailAlertingMaxEventsPerMessage, 1000)
+    self.senderAddress=aminerConfig.configProperties.get(
+        DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_FROM_ADDRESS)
+    self.subjectPrefix=aminerConfig.configProperties.get(
+        DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_SUBJECT_PREFIX, 'AMiner Alerts:')
+    self.alertGraceTimeEnd=aminerConfig.configProperties.get(
+        DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_ALERT_GRACE_TIME, 0)
+    self.eventCollectTime=aminerConfig.configProperties.get(
+        DefaultMailNotificationEventHandler.CONFIG_KEY_EVENT_COLLECT_TIME, 10)
+    self.minAlertGap=aminerConfig.configProperties.get(
+        DefaultMailNotificationEventHandler.CONFIG_KEY_ALERT_MIN_GAP, 600)
+    self.maxAlertGap=aminerConfig.configProperties.get(CONFIG_KEY_ALERT_MAX_GAP, 600)
+    self.maxEventsPerMessage=aminerConfig.configProperties.get(
+        DefaultMailNotificationEventHandler.CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE, 1000)
     if self.alertGraceTimeEnd>0:
       self.alertGraceTimeEnd+=time.time()
     self.eventsCollected=0
@@ -98,14 +106,21 @@ events and send them via "sendmail" transport."""
     return
 
 
-  def checkTriggers(self):
+  def getTimeTriggerClass(self):
+    """Get the trigger class this component can be registered
+    for. See AnalysisContext class for different trigger classes
+    available."""
+    return(AnalysisContext.TIME_TRIGGER_CLASS_REALTIME)
+
+
+  def doTimer(self, time):
     """Check if alerts should be sent."""
-    if (self.nextAlertTime!=0) and (time.time()>=self.nextAlertTime):
-      self.sendNotification()
+    if (self.nextAlertTime!=0) and (time>=self.nextAlertTime):
+      self.sendNotification(time)
     return(10)
 
 
-  def sendNotification(self):
+  def sendNotification(self, time):
     """Really send out the message."""
     if len(self.runningSendmailProcesses)!=0:
       runningProcesses=[]
@@ -124,7 +139,7 @@ events and send them via "sendmail" transport."""
     message=email.mime.Text.MIMEText(self.currentMessage)
     subjectText='%s Collected Events' % self.subjectPrefix
     if self.lastAlertTime != 0:
-      subjectText+=' in the last %d seconds' % (time.time()-self.lastAlertTime)
+      subjectText+=' in the last %d seconds' % (time-self.lastAlertTime)
     message['Subject']=subjectText
     if self.senderAddress!=None:
       message['From']=self.senderAddress
@@ -144,7 +159,7 @@ events and send them via "sendmail" transport."""
     self.runningSendmailProcesses.append(process)
     messageTmpFile.close()
 
-    self.lastAlertTime=time.time()
+    self.lastAlertTime=time
     self.eventsCollected=0
     self.currentMessage=''
     self.nextAlertTime=0
