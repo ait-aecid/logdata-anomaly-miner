@@ -97,26 +97,32 @@ def secureOpenFile(fileName, flags, trustedRoot='/'):
   if (fileName[-1]=='/') and ((flags&os.O_DIRECTORY)==0):
     raise Exception('Opening directory but O_DIRECTORY flag missing')
 
-  """
-  if trustedRoot=='/':
-    fileName=fileName[1:]
-  else:
-    if (not fileName.startswith(trustedRoot)) or (fileName[len(trustedRoot)]!='/'):
-      raise Exception('File name not within trusted root')
-    fileName=fileName[len(trustedRoot)+1:]
-
-  dirFd=os.open(trustedRoot, os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW|os.O_NOCTTY)
-# Get rid of duplicated slashes
-  pathParts=[]
-  for part in fileName.split['/']:
-    if len(part): pathParts.append(part)
-  
-  for dirPart in pathParts[:-1]:
-    nextFd=os.openat(dirFd, os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW|os.O_NOCTTY)
-    os.close(dirFd)
-    dirFd=nextFd
-  return(os.openat(dirFd, pathParts[-1], flags|os.O_NOFOLLOW|os.O_NOCTTY))
-  """
+# This code would allow secure open but openat is not available
+# in python2 series. A long way to go, but keep it here for the
+# python3 port to come.
+# if trustedRoot=='/':
+#   fileName=fileName[1:]
+# else:
+#   if (not fileName.startswith(trustedRoot)) or (fileName[len(trustedRoot)]!='/'):
+#     raise Exception('File name not within trusted root')
+#   fileName=fileName[len(trustedRoot)+1:]
+#
+# dirFd=os.open(trustedRoot, os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW|os.O_NOCTTY)
+# lastPathPart=None
+# Open all path parts excluding the last one only as directory.
+# This will prevent us from opening something unexpected if a
+# user would move around directories while traversing.
+# for part in fileName.split['/']:
+#   if len(part)==0: continue
+#   if lastPathPart!=None:
+#     nextFd=os.openat(dirFd, os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW|os.O_NOCTTY)
+#     os.close(dirFd)
+#     dirFd=nextFd
+#   lastPathPart=part
+# if lastPathPart==None: lastPathPart='.'
+# result=os.openat(dirFd, lastPathPart, flags|os.O_NOFOLLOW|os.O_NOCTTY)
+# os.close(dirFd)
+# return(result)
 
   global noSecureOpenWarnOnceFlag
   if noSecureOpenWarnOnceFlag:
