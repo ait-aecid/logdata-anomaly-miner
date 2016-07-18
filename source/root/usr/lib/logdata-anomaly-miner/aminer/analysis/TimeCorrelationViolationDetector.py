@@ -1,9 +1,9 @@
 import time
 
 from aminer import AMinerConfig
+from aminer.util import LogarithmicBackoffHistory
 from aminer.util import PersistencyUtil
 import Rules
-import Utils
 
 class TimeCorrelationViolationDetector:
   """This class creates events when one of the given time correlation
@@ -121,7 +121,7 @@ class CorrelationRule:
     self.historyAEvents=[]
     self.historyBEvents=[]
     self.lastTimestampSeen=0.0
-    self.correlationHistory=Utils.LogarithmicBackoffHistory(10)
+    self.correlationHistory=LogarithmicBackoffHistory(10)
 
 
   def updateArtefactA(self, selector, parserMatch):
