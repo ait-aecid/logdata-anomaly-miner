@@ -4,10 +4,11 @@ import subprocess
 import sys
 import time
 
+from aminer.events import EventHandlerInterface
 from aminer.parsing import MatchElement
 
 
-class StreamPrinterEventHandler:
+class StreamPrinterEventHandler(EventHandlerInterface):
   """This class implements an event record listener, that will
 just print out data about the event to a stream, by default this
 is stdout"""

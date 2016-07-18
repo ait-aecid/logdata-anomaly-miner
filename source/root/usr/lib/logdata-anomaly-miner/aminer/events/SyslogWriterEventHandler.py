@@ -2,9 +2,10 @@ import io
 import os
 import syslog
 
+from aminer.events import EventHandlerInterface
 from aminer.events import StreamPrinterEventHandler
 
-class SyslogWriterEventHandler:
+class SyslogWriterEventHandler(EventHandlerInterface):
   """This class implements an event record listener to forward
   events to the local syslog instance.
   CAVEAT: USE THIS AT YOUR OWN RISK: by creating aminer/syslog
@@ -14,7 +15,7 @@ class SyslogWriterEventHandler:
     self.instanceName=instanceName
     syslog.openlog('%s[%d]' % (self.instanceName, os.getpid()),
         syslog.LOG_INFO, syslog.LOG_DAEMON)
-    syslog.syslog(syslog.LOG_INFO, 'SDS logger initialized')
+    syslog.syslog(syslog.LOG_INFO, 'Syslog logger initialized')
     self.bufferStream=io.BytesIO()
     self.eventWriter=StreamPrinterEventHandler.StreamPrinterEventHandler(
         None, self.bufferStream)

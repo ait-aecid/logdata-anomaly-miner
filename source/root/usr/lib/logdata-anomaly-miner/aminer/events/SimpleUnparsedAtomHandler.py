@@ -1,4 +1,6 @@
-class SimpleUnparsedAtomHandler:
+from aminer.events import EventHandlerInterface
+
+class SimpleUnparsedAtomHandler(EventHandlerInterface):
   """Handlers of this class will just forward received unparsed
   atoms to the registered event handlers."""
 
