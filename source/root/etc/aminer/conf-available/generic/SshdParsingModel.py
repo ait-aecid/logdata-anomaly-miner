@@ -13,149 +13,158 @@ def getModel(userNameModel=None):
 after any standard logging preamble, e.g. from syslog."""
 
   if userNameModel == None:
-    userNameModel=VariableByteDataModelElement.VariableByteDataModelElement('user', '0123456789abcdefghijklmnopqrstuvwxyz.-')
+    userNameModel=VariableByteDataModelElement('user', '0123456789abcdefghijklmnopqrstuvwxyz.-')
 
   typeChildren=[]
-  typeChildren.append(SequenceModelElement.SequenceModelElement('accepted key', [FixedDataModelElement.FixedDataModelElement('s0', 'Accepted publickey for '),
+  typeChildren.append(SequenceModelElement('accepted key', [
+      FixedDataModelElement('s0', 'Accepted publickey for '),
       userNameModel,
-      FixedDataModelElement.FixedDataModelElement('s1', ' from '),
-      IpAddressDataModelElement.IpAddressDataModelElement('clientip'),
-      FixedDataModelElement.FixedDataModelElement('s2', ' port '),
-      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('port'),
-      FixedDataModelElement.FixedDataModelElement('s3', ' ssh2: RSA '),
-      VariableByteDataModelElement.VariableByteDataModelElement('user', '0123456789abcdef:')]))
+      FixedDataModelElement('s1', ' from '),
+      IpAddressDataModelElement('clientip'),
+      FixedDataModelElement('s2', ' port '),
+      DecimalIntegerValueModelElement('port'),
+      FixedDataModelElement('s3', ' ssh2: RSA '),
+      VariableByteDataModelElement('user', '0123456789abcdef:')]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('btmp-perm', [
-      FixedDataModelElement.FixedDataModelElement('s0', 'Excess permission or bad ownership on file /var/log/btmp')
+  typeChildren.append(SequenceModelElement('btmp-perm', [
+      FixedDataModelElement('s0', 'Excess permission or bad ownership on file /var/log/btmp')
 ]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('closing', [FixedDataModelElement.FixedDataModelElement('s0', 'Closing connection to '),
-      IpAddressDataModelElement.IpAddressDataModelElement('clientip'),
-      FixedDataModelElement.FixedDataModelElement('s1', ' port '),
-      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('port')]))
+  typeChildren.append(SequenceModelElement('closing', [
+      FixedDataModelElement('s0', 'Closing connection to '),
+      IpAddressDataModelElement('clientip'),
+      FixedDataModelElement('s1', ' port '),
+      DecimalIntegerValueModelElement('port')]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('closed', [FixedDataModelElement.FixedDataModelElement('s0', 'Connection closed by '),
-      IpAddressDataModelElement.IpAddressDataModelElement('clientip')]))
+  typeChildren.append(SequenceModelElement('closed', [
+      FixedDataModelElement('s0', 'Connection closed by '),
+      IpAddressDataModelElement('clientip')]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('connect', [FixedDataModelElement.FixedDataModelElement('s0', 'Connection from '),
-      IpAddressDataModelElement.IpAddressDataModelElement('clientip'),
-      FixedDataModelElement.FixedDataModelElement('s1', ' port '),
-      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('port'),
-      FixedDataModelElement.FixedDataModelElement('s2', ' on '),
-      IpAddressDataModelElement.IpAddressDataModelElement('serverip'),
-      FixedDataModelElement.FixedDataModelElement('s3', ' port '),
-      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('sport')]))
+  typeChildren.append(SequenceModelElement('connect', [
+      FixedDataModelElement('s0', 'Connection from '),
+      IpAddressDataModelElement('clientip'),
+      FixedDataModelElement('s1', ' port '),
+      DecimalIntegerValueModelElement('port'),
+      FixedDataModelElement('s2', ' on '),
+      IpAddressDataModelElement('serverip'),
+      FixedDataModelElement('s3', ' port '),
+      DecimalIntegerValueModelElement('sport')]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('error-bind', [
-      FixedDataModelElement.FixedDataModelElement('s0', 'error: bind: Cannot assign requested address')]))
+  typeChildren.append(SequenceModelElement('error-bind', [
+      FixedDataModelElement('s0', 'error: bind: Cannot assign requested address')]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('error-channel-setup', [
-      FixedDataModelElement.FixedDataModelElement('s0', 'error: channel_setup_fwd_listener: cannot listen to port: '),
-      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('port')]))
+  typeChildren.append(SequenceModelElement('error-channel-setup', [
+      FixedDataModelElement('s0', 'error: channel_setup_fwd_listener: cannot listen to port: '),
+      DecimalIntegerValueModelElement('port')]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('ident-missing', [
-      FixedDataModelElement.FixedDataModelElement('s0', 'Did not receive identification string from '),
-      IpAddressDataModelElement.IpAddressDataModelElement('clientip')
+  typeChildren.append(SequenceModelElement('ident-missing', [
+      FixedDataModelElement('s0', 'Did not receive identification string from '),
+      IpAddressDataModelElement('clientip')
 ]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('invalid-user', [
-      FixedDataModelElement.FixedDataModelElement('s0', 'Invalid user '),
-      DelimitedDataModelElement.DelimitedDataModelElement('user', ' from '),
-      FixedDataModelElement.FixedDataModelElement('s1', ' from '),
-      IpAddressDataModelElement.IpAddressDataModelElement('clientip')
+  typeChildren.append(SequenceModelElement('invalid-user', [
+      FixedDataModelElement('s0', 'Invalid user '),
+      DelimitedDataModelElement('user', ' from '),
+      FixedDataModelElement('s1', ' from '),
+      IpAddressDataModelElement('clientip')
 ]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('invalid-user-auth-req', [
-      FixedDataModelElement.FixedDataModelElement('s0', 'input_userauth_request: invalid user '),
-      DelimitedDataModelElement.DelimitedDataModelElement('user', ' [preauth]'),
-      FixedDataModelElement.FixedDataModelElement('s1', ' [preauth]')
+  typeChildren.append(SequenceModelElement('invalid-user-auth-req', [
+      FixedDataModelElement('s0', 'input_userauth_request: invalid user '),
+      DelimitedDataModelElement('user', ' [preauth]'),
+      FixedDataModelElement('s1', ' [preauth]')
 ]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('postppk', [FixedDataModelElement.FixedDataModelElement('s0', 'Postponed publickey for '),
+  typeChildren.append(SequenceModelElement('postppk', [
+      FixedDataModelElement('s0', 'Postponed publickey for '),
       userNameModel,
-      FixedDataModelElement.FixedDataModelElement('s1', ' from '),
-      IpAddressDataModelElement.IpAddressDataModelElement('clientip'),
-      FixedDataModelElement.FixedDataModelElement('s2', ' port '),
-      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('port'),
-      FixedDataModelElement.FixedDataModelElement('s3', ' ssh2 [preauth]')]))
+      FixedDataModelElement('s1', ' from '),
+      IpAddressDataModelElement('clientip'),
+      FixedDataModelElement('s2', ' port '),
+      DecimalIntegerValueModelElement('port'),
+      FixedDataModelElement('s3', ' ssh2 [preauth]')]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('readerr', [
-      FixedDataModelElement.FixedDataModelElement('s0', 'Read error from remote host '),
-      IpAddressDataModelElement.IpAddressDataModelElement('clientip'),
-      FixedDataModelElement.FixedDataModelElement('s1', ': Connection timed out'),
+  typeChildren.append(SequenceModelElement('readerr', [
+      FixedDataModelElement('s0', 'Read error from remote host '),
+      IpAddressDataModelElement('clientip'),
+      FixedDataModelElement('s1', ': Connection timed out'),
   ]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('disconnect', [
-      FixedDataModelElement.FixedDataModelElement('s0', 'Received disconnect from '),
-      IpAddressDataModelElement.IpAddressDataModelElement('clientip'),
-      FixedDataModelElement.FixedDataModelElement('s1', ': 11: '),
-      FirstMatchModelElement.FirstMatchModelElement('reason', [
-          FixedDataModelElement.FixedDataModelElement('disconnected', 'disconnected by user'),
-          SequenceModelElement.SequenceModelElement('remotemsg', [
-              DelimitedDataModelElement.DelimitedDataModelElement('msg', ' [preauth]'),
-              FixedDataModelElement.FixedDataModelElement('s0', ' [preauth]')
+  typeChildren.append(SequenceModelElement('disconnect', [
+      FixedDataModelElement('s0', 'Received disconnect from '),
+      IpAddressDataModelElement('clientip'),
+      FixedDataModelElement('s1', ': 11: '),
+      FirstMatchModelElement('reason', [
+          FixedDataModelElement('disconnected', 'disconnected by user'),
+          SequenceModelElement('remotemsg', [
+              DelimitedDataModelElement('msg', ' [preauth]'),
+              FixedDataModelElement('s0', ' [preauth]')
           ]),
       ]),
   ]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('signal', [
-      FixedDataModelElement.FixedDataModelElement('s0', 'Received signal '),
-      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('signal'),
-      FixedDataModelElement.FixedDataModelElement('s1', '; terminating.'),
+  typeChildren.append(SequenceModelElement('signal', [
+      FixedDataModelElement('s0', 'Received signal '),
+      DecimalIntegerValueModelElement('signal'),
+      FixedDataModelElement('s1', '; terminating.'),
   ]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('server', [
-      FixedDataModelElement.FixedDataModelElement('s0', 'Server listening on '),
-      DelimitedDataModelElement.DelimitedDataModelElement('serverip', ' '),
-      FixedDataModelElement.FixedDataModelElement('s1', ' port '),
-      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('port'),
-      FixedDataModelElement.FixedDataModelElement('s2', '.'),
+  typeChildren.append(SequenceModelElement('server', [
+      FixedDataModelElement('s0', 'Server listening on '),
+      DelimitedDataModelElement('serverip', ' '),
+      FixedDataModelElement('s1', ' port '),
+      DecimalIntegerValueModelElement('port'),
+      FixedDataModelElement('s2', '.'),
   ]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('oom-adjust', [
-      FixedDataModelElement.FixedDataModelElement('s0', 'Set /proc/self/oom_score_adj '),
-      OptionalMatchModelElement.OptionalMatchModelElement('from', FixedDataModelElement.FixedDataModelElement('default', 'from 0 ')),
-      FixedDataModelElement.FixedDataModelElement('s1', 'to '),
-      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('newval', valueSignType=DecimalIntegerValueModelElement.DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL)
+  typeChildren.append(SequenceModelElement('oom-adjust', [
+      FixedDataModelElement('s0', 'Set /proc/self/oom_score_adj '),
+      OptionalMatchModelElement('from', FixedDataModelElement('default', 'from 0 ')),
+      FixedDataModelElement('s1', 'to '),
+      DecimalIntegerValueModelElement('newval', valueSignType=DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL)
   ]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('session-start', [
-      FixedDataModelElement.FixedDataModelElement('s0', 'Starting session: '),
-      FirstMatchModelElement.FirstMatchModelElement('sess-info', [
-          SequenceModelElement.SequenceModelElement('shell', [
-              FixedDataModelElement.FixedDataModelElement('s0', 'shell on '),
-              DelimitedDataModelElement.DelimitedDataModelElement('terminal', ' '),
+  typeChildren.append(SequenceModelElement('session-start', [
+      FixedDataModelElement('s0', 'Starting session: '),
+      FirstMatchModelElement('sess-info', [
+          SequenceModelElement('shell', [
+              FixedDataModelElement('s0', 'shell on '),
+              DelimitedDataModelElement('terminal', ' '),
           ]),
-          SequenceModelElement.SequenceModelElement('subsystem', [
-              FixedDataModelElement.FixedDataModelElement('s0', 'subsystem \'sftp\''),
+          SequenceModelElement('subsystem', [
+              FixedDataModelElement('s0', 'subsystem \'sftp\''),
           ]),
       ]),
-      FixedDataModelElement.FixedDataModelElement('s1', ' for '),
+      FixedDataModelElement('s1', ' for '),
       userNameModel,
-      FixedDataModelElement.FixedDataModelElement('s2', ' from '),
-      IpAddressDataModelElement.IpAddressDataModelElement('clientip'),
-      FixedDataModelElement.FixedDataModelElement('s3', ' port '),
-      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('port'),
+      FixedDataModelElement('s2', ' from '),
+      IpAddressDataModelElement('clientip'),
+      FixedDataModelElement('s3', ' port '),
+      DecimalIntegerValueModelElement('port'),
   ]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('transferred', [FixedDataModelElement.FixedDataModelElement('s0', 'Transferred: sent '),
-      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('sent'),
-      FixedDataModelElement.FixedDataModelElement('s1', ', received '),
-      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('received'),
-      FixedDataModelElement.FixedDataModelElement('s1', ' bytes')]))
+  typeChildren.append(SequenceModelElement('transferred', [
+      FixedDataModelElement('s0', 'Transferred: sent '),
+      DecimalIntegerValueModelElement('sent'),
+      FixedDataModelElement('s1', ', received '),
+      DecimalIntegerValueModelElement('received'),
+      FixedDataModelElement('s1', ' bytes')]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('pam', [FixedDataModelElement.FixedDataModelElement('s0', 'pam_unix(sshd:session): session '),
-      FixedWordlistDataModelElement.FixedWordlistDataModelElement('change', ['opened', 'closed']),
-      FixedDataModelElement.FixedDataModelElement('s1', ' for user '),
+  typeChildren.append(SequenceModelElement('pam', [
+      FixedDataModelElement('s0', 'pam_unix(sshd:session): session '),
+      FixedWordlistDataModelElement('change', ['opened', 'closed']),
+      FixedDataModelElement('s1', ' for user '),
       userNameModel,
-      OptionalMatchModelElement.OptionalMatchModelElement('openby', FixedDataModelElement.FixedDataModelElement('default', ' by (uid=0)')),
-]))
+      OptionalMatchModelElement('openby', FixedDataModelElement('default', ' by (uid=0)')),
+  ]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('child', [FixedDataModelElement.FixedDataModelElement('s0', 'User child is on pid '),
-      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('pid')]))
+  typeChildren.append(SequenceModelElement('child', [
+      FixedDataModelElement('s0', 'User child is on pid '),
+      DecimalIntegerValueModelElement('pid')]))
 
-  model=SequenceModelElement.SequenceModelElement('sshd', [FixedDataModelElement.FixedDataModelElement('sname', 'sshd['),
-      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('pid'),
-      FixedDataModelElement.FixedDataModelElement('s0', ']: '),
-      FirstMatchModelElement.FirstMatchModelElement('msg', typeChildren)])
+  model=SequenceModelElement('sshd', [
+      FixedDataModelElement('sname', 'sshd['),
+      DecimalIntegerValueModelElement('pid'),
+      FixedDataModelElement('s0', ']: '),
+      FirstMatchModelElement('msg', typeChildren)])
   return(model)

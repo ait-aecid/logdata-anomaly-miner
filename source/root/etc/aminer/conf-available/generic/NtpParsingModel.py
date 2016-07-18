@@ -8,55 +8,55 @@ from aminer.parsing import SequenceModelElement
 from aminer.parsing import VariableByteDataModelElement
 
 def getModel():
-  interfaceNameModel=VariableByteDataModelElement.VariableByteDataModelElement('interface', '0123456789abcdefghijklmnopqrstuvwxyz.')
+  interfaceNameModel=VariableByteDataModelElement('interface', '0123456789abcdefghijklmnopqrstuvwxyz.')
 
   typeChildren=[]
-  typeChildren.append(SequenceModelElement.SequenceModelElement('exit', [
-      FixedDataModelElement.FixedDataModelElement('s0', 'ntpd exiting on signal '),
-      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('signal')
+  typeChildren.append(SequenceModelElement('exit', [
+      FixedDataModelElement('s0', 'ntpd exiting on signal '),
+      DecimalIntegerValueModelElement('signal')
   ]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('listen-drop', [
-      FixedDataModelElement.FixedDataModelElement('s0', 'Listen and drop on '),
-      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('fd'),
-      FixedDataModelElement.FixedDataModelElement('s1', ' '),
+  typeChildren.append(SequenceModelElement('listen-drop', [
+      FixedDataModelElement('s0', 'Listen and drop on '),
+      DecimalIntegerValueModelElement('fd'),
+      FixedDataModelElement('s1', ' '),
       interfaceNameModel,
-      FixedDataModelElement.FixedDataModelElement('s2', ' '),
-      FirstMatchModelElement.FirstMatchModelElement('address', [
-          IpAddressDataModelElement.IpAddressDataModelElement('ipv4'),
-          DelimitedDataModelElement.DelimitedDataModelElement('ipv6', ' '),
+      FixedDataModelElement('s2', ' '),
+      FirstMatchModelElement('address', [
+          IpAddressDataModelElement('ipv4'),
+          DelimitedDataModelElement('ipv6', ' '),
       ]),
-      FixedDataModelElement.FixedDataModelElement('s3', ' UDP 123')
+      FixedDataModelElement('s3', ' UDP 123')
   ]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('listen-normal', [
-      FixedDataModelElement.FixedDataModelElement('s0', 'Listen normally on '),
-      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('fd'),
-      FixedDataModelElement.FixedDataModelElement('s1', ' '),
+  typeChildren.append(SequenceModelElement('listen-normal', [
+      FixedDataModelElement('s0', 'Listen normally on '),
+      DecimalIntegerValueModelElement('fd'),
+      FixedDataModelElement('s1', ' '),
       interfaceNameModel,
-      FixedDataModelElement.FixedDataModelElement('s2', ' '),
-      IpAddressDataModelElement.IpAddressDataModelElement('ip'),
-      FixedDataModelElement.FixedDataModelElement('s3', ' UDP 123')
+      FixedDataModelElement('s2', ' '),
+      IpAddressDataModelElement('ip'),
+      FixedDataModelElement('s3', ' UDP 123')
   ]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('listen-routing', [
-      FixedDataModelElement.FixedDataModelElement('s0', 'Listening on routing socket on fd #'),
-      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('fd'),
-      FixedDataModelElement.FixedDataModelElement('s1', ' for interface updates')
+  typeChildren.append(SequenceModelElement('listen-routing', [
+      FixedDataModelElement('s0', 'Listening on routing socket on fd #'),
+      DecimalIntegerValueModelElement('fd'),
+      FixedDataModelElement('s1', ' for interface updates')
   ]))
 
-  typeChildren.append(FixedDataModelElement.FixedDataModelElement('ntp-io', 'ntp_io: estimated max descriptors: 1024, initial socket boundary: 16'))
+  typeChildren.append(FixedDataModelElement('ntp-io', 'ntp_io: estimated max descriptors: 1024, initial socket boundary: 16'))
 
-  typeChildren.append(FixedDataModelElement.FixedDataModelElement('peers-refreshed', 'peers refreshed'))
+  typeChildren.append(FixedDataModelElement('peers-refreshed', 'peers refreshed'))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('precision', [
-      FixedDataModelElement.FixedDataModelElement('s0', 'proto: precision = '),
-      DelimitedDataModelElement.DelimitedDataModelElement('precision', ' '),
-      FixedDataModelElement.FixedDataModelElement('s1', ' usec')
+  typeChildren.append(SequenceModelElement('precision', [
+      FixedDataModelElement('s0', 'proto: precision = '),
+      DelimitedDataModelElement('precision', ' '),
+      FixedDataModelElement('s1', ' usec')
   ]))
 
-  model=SequenceModelElement.SequenceModelElement('ntpd', [FixedDataModelElement.FixedDataModelElement('sname', 'ntpd['),
-      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('pid'),
-      FixedDataModelElement.FixedDataModelElement('s0', ']: '),
-      FirstMatchModelElement.FirstMatchModelElement('msg', typeChildren)])
+  model=SequenceModelElement('ntpd', [FixedDataModelElement('sname', 'ntpd['),
+      DecimalIntegerValueModelElement('pid'),
+      FixedDataModelElement('s0', ']: '),
+      FirstMatchModelElement('msg', typeChildren)])
   return(model)

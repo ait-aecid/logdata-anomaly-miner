@@ -10,15 +10,15 @@ def getModel(messagesModel=None):
   to check if log data matches this model before returning the
   complete unparsed message as single string."""
 
-  realMessagesModel=AnyByteDataModelElement.AnyByteDataModelElement('msg')
+  realMessagesModel=AnyByteDataModelElement('msg')
   if messagesModel!=None:
-    realMessagesModel=FirstMatchModelElement.FirstMatchModelElement('msg', [
+    realMessagesModel=FirstMatchModelElement('msg', [
         messagesModel,
         realMessagesModel])
 
-  model=SequenceModelElement.SequenceModelElement('kernel', [
-      FixedDataModelElement.FixedDataModelElement('sname', 'kernel: ['),
-      DelimitedDataModelElement.DelimitedDataModelElement('timestamp', ']'),
-      FixedDataModelElement.FixedDataModelElement('s0', '] '),
-      AnyByteDataModelElement.AnyByteDataModelElement('msg')])
+  model=SequenceModelElement('kernel', [
+      FixedDataModelElement('sname', 'kernel: ['),
+      DelimitedDataModelElement('timestamp', ']'),
+      FixedDataModelElement('s0', '] '),
+      AnyByteDataModelElement('msg')])
   return(model)

@@ -1,8 +1,11 @@
 from aminer.parsing import AnyByteDataModelElement
 from aminer.parsing import DecimalIntegerValueModelElement
+from aminer.parsing import DelimitedDataModelElement
 from aminer.parsing import FirstMatchModelElement
 from aminer.parsing import FixedDataModelElement
 from aminer.parsing import FixedWordlistDataModelElement
+from aminer.parsing import IpAddressDataModelElement
+from aminer.parsing import OptionalMatchModelElement
 from aminer.parsing import SequenceModelElement
 from aminer.parsing import WhiteSpaceLimitedDataModelElement
 
@@ -11,45 +14,58 @@ def getModel(userNameModel=None):
 after any standard logging preamble, e.g. from syslog."""
 
   typeChildren=[]
-  typeChildren.append(SequenceModelElement.SequenceModelElement('queue', [
-      FixedWordlistDataModelElement.FixedWordlistDataModelElement('type', ['Start', 'End']),
-      FixedDataModelElement.FixedDataModelElement('s0', ' queue run: pid='),
-      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('pid')]))
+  typeChildren.append(SequenceModelElement('queue', [
+      FixedWordlistDataModelElement('type', ['Start', 'End']),
+      FixedDataModelElement('s0', ' queue run: pid='),
+      DecimalIntegerValueModelElement('pid')]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('rec-log', [
-      WhiteSpaceLimitedDataModelElement.WhiteSpaceLimitedDataModelElement('id'),
-      FixedDataModelElement.FixedDataModelElement('s0', ' <= '),
-      WhiteSpaceLimitedDataModelElement.WhiteSpaceLimitedDataModelElement('env-from'),
-      FixedDataModelElement.FixedDataModelElement('s1', ' U='),
-      WhiteSpaceLimitedDataModelElement.WhiteSpaceLimitedDataModelElement('user'),
-      FixedDataModelElement.FixedDataModelElement('s2', ' P='),
-      WhiteSpaceLimitedDataModelElement.WhiteSpaceLimitedDataModelElement('proto'),
-      FixedDataModelElement.FixedDataModelElement('s3', ' S='),
-      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('size')
+  typeChildren.append(SequenceModelElement('rec-log', [
+      WhiteSpaceLimitedDataModelElement('id'),
+      FixedDataModelElement('s0', ' <= '),
+      WhiteSpaceLimitedDataModelElement('env-from'),
+      FirstMatchModelElement('source', [
+          SequenceModelElement('network', [
+              FixedDataModelElement('s0', ' H=('),
+              DelimitedDataModelElement('hostname', ') '),
+              FixedDataModelElement('s1', ') ['),
+              IpAddressDataModelElement('hostip'),
+              FixedDataModelElement('s2', ']')]),
+          SequenceModelElement('user', [
+              FixedDataModelElement('s0', ' U='),
+              WhiteSpaceLimitedDataModelElement('user')])
+      ]),
+      FixedDataModelElement('s2', ' P='),
+      WhiteSpaceLimitedDataModelElement('proto'),
+      FixedDataModelElement('s3', ' S='),
+      DecimalIntegerValueModelElement('size'),
+      OptionalMatchModelElement('idopt', SequenceModelElement('iddata', [
+          FixedDataModelElement('s0', ' id='),
+          AnyByteDataModelElement('id')]))
   ]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('send-log', [
-      WhiteSpaceLimitedDataModelElement.WhiteSpaceLimitedDataModelElement('id'),
-      FixedDataModelElement.FixedDataModelElement('s0', ' => '),
-      WhiteSpaceLimitedDataModelElement.WhiteSpaceLimitedDataModelElement('env-to'),
-      FixedDataModelElement.FixedDataModelElement('s1', ' R='),
-      AnyByteDataModelElement.AnyByteDataModelElement('unparsed')
+  typeChildren.append(SequenceModelElement('send-log', [
+      WhiteSpaceLimitedDataModelElement('id'),
+      FixedDataModelElement('s0', ' => '),
+      WhiteSpaceLimitedDataModelElement('env-to'),
+      FixedDataModelElement('s1', ' R='),
+      AnyByteDataModelElement('unparsed')
   ]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('sent', [
-      WhiteSpaceLimitedDataModelElement.WhiteSpaceLimitedDataModelElement('id'),
-      FixedDataModelElement.FixedDataModelElement('s0', ' Completed')]))
+  typeChildren.append(SequenceModelElement('sent', [
+      WhiteSpaceLimitedDataModelElement('id'),
+      FixedDataModelElement('s0', ' Completed')]))
 
-  typeChildren.append(SequenceModelElement.SequenceModelElement('started', [
-      FixedDataModelElement.FixedDataModelElement('s0', ' exim '),
-      WhiteSpaceLimitedDataModelElement.WhiteSpaceLimitedDataModelElement('version'),
-      FixedDataModelElement.FixedDataModelElement('s1', ' daemon started: pid='),
-      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('pid'),
-      FixedDataModelElement.FixedDataModelElement('s2', ', -q30m, listening for SMTP on [127.0.0.1]:25')
+  typeChildren.append(SequenceModelElement('started', [
+      FixedDataModelElement('s0', ' exim '),
+      WhiteSpaceLimitedDataModelElement('version'),
+      FixedDataModelElement('s1', ' daemon started: pid='),
+      DecimalIntegerValueModelElement('pid'),
+      FixedDataModelElement('s2', ', -q30m, listening for SMTP on [127.0.0.1]:25')
   ]))
 
-  model=SequenceModelElement.SequenceModelElement('exim', [FixedDataModelElement.FixedDataModelElement('sname', 'exim['),
-      DecimalIntegerValueModelElement.DecimalIntegerValueModelElement('pid'),
-      FixedDataModelElement.FixedDataModelElement('s0', ']: '),
-      FirstMatchModelElement.FirstMatchModelElement('msg', typeChildren)])
+  model=SequenceModelElement('exim', [
+      FixedDataModelElement('sname', 'exim['),
+      DecimalIntegerValueModelElement('pid'),
+      FixedDataModelElement('s0', ']: '),
+      FirstMatchModelElement('msg', typeChildren)])
   return(model)
