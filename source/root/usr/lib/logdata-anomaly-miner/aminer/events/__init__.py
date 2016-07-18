@@ -22,3 +22,13 @@ class EventHandlerInterface:
     @param eventData type-specific event data object, should not
     be used unless listener really knows about the eventType."""
     raise Exception('Not implemented')
+
+
+# Add also the namespace references to classes defined in this
+# directory.
+
+from DefaultMailNotificationEventHandler import DefaultMailNotificationEventHandler
+from SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler
+from StreamPrinterEventHandler import StreamPrinterEventHandler
+from SyslogWriterEventHandler import SyslogWriterEventHandler
+from Utils import VolatileLogarithmicBackoffEventHistory
