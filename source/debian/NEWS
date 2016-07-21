@@ -1,0 +1,46 @@
+logdata-anomaly-miner (0.0.3) xenial; urgency=low
+
+  Following API changes were introduced:
+
+  * To improve readability of configuration files, main parser,
+    analysis and event classes were added to the submodule namespaces.
+    After imports directly from the submodule, e.g.
+    "from aminer.parsing import FixedDataModelElement",
+    the name duplication "FixedDataModelElement.FixedDataModelElement"
+    is not required any more, "FixedDataModelElement" is sufficient.
+    Use "sed -i -e 's/Name.Name/Name/g' [files]" to adapt.
+
+  * Component timing was restructured to allow forensic/realtime
+    triggering. Therefore also clean interface was added, which
+    is now also used to reduce redundant code in component registration.
+    Old way:
+
+    analysisContext.registerComponent(newMatchPathDetector,
+      componentName=None, registerAsRawAtomHandler=False,
+      registerAsTimeTriggeredHandler=True)
+
+    New way:
+
+    analysisContext.registerComponent(newMatchPathDetector,
+      registerAsRawAtomHandler=False)
+
+    For own custom time-triggered components, make sure to implement
+    the "aminer.util.TimeTriggeredComponentInterface". Use any standard
+    component, e.g. "/usr/lib/logdata-anomaly-miner/aminer/analysis/NewMatchPathDetector.py"
+    as example.
+
+  * Introduction of "AnalysisContext" to have common handle for
+    all data required to perform the analysis. Therefore also
+    the signature of "buildAnalysisPipeline" in "config.py/analysis.py"
+    has changed from
+
+    def buildAnalysisPipeline(aminerConfig):
+
+    to
+
+    def buildAnalysisPipeline(analysisContext):
+
+    Old references to "aminerConfig" within the configuration
+    script have to be replaced by "analysisContext.aminerConfig".
+    
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Thu, 21 Jul 2016 19:00:00 +0000
