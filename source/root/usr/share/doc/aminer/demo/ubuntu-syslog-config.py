@@ -148,7 +148,8 @@ def buildAnalysisPipeline(analysisContext):
 # Run a whitelisting over the parsed lines.
   from aminer.analysis import Rules
   from aminer.analysis import WhitelistViolationDetector
-  violationAction=WhitelistViolationDetector.ViolationAction(anomalyEventHandlers)
+  violationAction=Rules.EventGenerationMatchAction('Analysis.GenericViolation',
+      'Violation detected', anomalyEventHandlers)
   whitelistRules=[]
 # Filter out things so bad, that we do not want to accept the
 # risk, that a too broad whitelisting rule will accept the data
@@ -156,6 +157,8 @@ def buildAnalysisPipeline(analysisContext):
   whitelistRules.append(Rules.ValueMatchRule('/model/services/cron/msgtype/exec/user', 'hacker', violationAction))
 # Ignore Exim queue run start/stop messages
   whitelistRules.append(Rules.PathExistsMatchRule('/model/services/exim/msg/queue/pid'))
+# Ignore all ntpd messages for now.
+  whitelistRules.append(Rules.PathExistsMatchRule('/model/services/ntpd'))
 # Add a debugging rule in the middle to see everything not whitelisted
 # up to this point.
   whitelistRules.append(Rules.DebugMatchRule(False))

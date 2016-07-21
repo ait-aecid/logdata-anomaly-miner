@@ -33,30 +33,29 @@ List of components:
 * HistogramAnalysis.PathDependentHistogramAnalysis (R): Create
   path-dependent histogram reports.
 
-* MatchValueAverageChangeDetector.MatchValueAverageChangeDetector (AS):
-  Detect when average value of given parsed value changes over
-  time.
+* MatchValueAverageChangeDetector (AS): Detect when average value
+  of given parsed value changes over time.
 
-* MatchValueQueueSplitter.MatchValueQueueSplitter (F): Use value
-  of parsed element to forward input data to other analyzers.
+* ParsedAtomFilters.MatchValueFilter (F): Use value of parsed
+  element to forward input data to other analyzers.
 
-* MatchValueStreamWriter.MatchValueStreamWriter (F): Forward selected
-  input data e.g. as CSV list, to other compoments via stream,
-  e.g. to perform analysis in another tool.
+* MatchValueStreamWriter (F): Forward selected input data e.g.
+  as CSV list, to other compoments via stream, e.g. to perform
+  analysis in another tool.
 
-* MissingMatchPathValueDetector.MissingMatchPathValueDetector (AH):
-  Detect when values for a given path are not received for a longer
-  timespan, e.g. a host, service or address stopped sending/reporting.
+* MissingMatchPathValueDetector (AH): Detect when values for a
+  given path are not received for a longer timespan, e.g. a host,
+  service or address stopped sending/reporting.
 
-* NewMatchPathDetector.NewMatchPathDetector (AH): Generate events
-  when new parser pathes are found.
+* NewMatchPathDetector (AH): Generate events when new parser pathes
+  are found.
 
-* NewMatchPathValueDetector.NewMatchPathValueDetector (AH): Generate
-  events when new parsed values are observed for a given path,
-  e.g. new MAC addresses, user names, ...
+* NewMatchPathValueDetector (AH): Generate events when new parsed
+  values are observed for a given path, e.g. new MAC addresses,
+  user names, ...
 
-* TimeCorrelationDetector.TimeCorrelationDetector (ANR): Try to
-  detect time correlations and report them.
+* TimeCorrelationDetector (ANR): Try to detect time correlations
+  and report them.
 
 * TimeCorrelationViolationDetector.TimeCorrelationViolationDetector (H):
   Detect changes in time correlation on a given ruleset.
@@ -65,9 +64,8 @@ List of components:
   Adjust decreasing timestamp of new records to the maximum observed
   so far to ensure monotony for other analysis components.
 
-* WhitelistViolationDetector.WhitelistViolationDetector (FH):
-  Check all inputs using ruleset and create events, forward input
-  to other components.
+* WhitelistViolationDetector (FH): Check all inputs using ruleset
+  and create events, forward input to other components.
 
 
 HistogramAnalysis.HistogramAnalysis:
@@ -155,8 +153,8 @@ HistogramAnalysis.HistogramAnalysis, see documentation there.
   parsedAtomHandlers.append(pathDependentHistogramAnalysis)
 
 
-WhitelistViolationDetector.WhitelistViolationDetector:
-======================================================
+WhitelistViolationDetector:
+===========================
 
 This detector manages a list of whitelist rules to filter parsed
 atoms. All atoms not hit by any whitelist rule will cause events
@@ -170,7 +168,8 @@ the atom to another analyzer in one pass.
 # Run a whitelisting over the parsed lines.
   from aminer.analysis import Rules
   from aminer.analysis import WhitelistViolationDetector
-  violationAction=WhitelistViolationDetector.ViolationAction(anomalyEventHandlers)
+  violationAction=Rules.EventGenerationMatchAction('Analysis.GenericViolation',
+      'Violation detected', anomalyEventHandlers)
   whitelistRules=[]
 # Filter out things so bad, that we do not want to accept the
 # risk, that a too broad whitelisting rule will accept the data
@@ -187,4 +186,4 @@ the atom to another analyzer in one pass.
       Rules.ValueMatchRule('/model/services/cron/msgtype/exec/command', '(   cd / && run-parts --report /etc/cron.hourly)'),
       Rules.ModuloTimeMatchRule('/model/syslog/time', 3600, 17*60, 17*60+5)]))
 
-  parsedAtomHandlers.append(WhitelistViolationDetector.WhitelistViolationDetector(whitelistRules, anomalyEventHandlers))
+  parsedAtomHandlers.append(WhitelistViolationDetector(whitelistRules, anomalyEventHandlers))

@@ -73,7 +73,7 @@ the aminer events printed to stdout. Therefore configuration line
 comments have to be removed:
 
   from aminer.events import StreamPrinterEventHandler
-  anomalyEventHandlers.append(StreamPrinterEventHandler.StreamPrinterEventHandler(analysisContext.aminerConfig))
+  anomalyEventHandlers.append(StreamPrinterEventHandler(analysisContext.aminerConfig))
 
 
 * Allow python code imports:
@@ -194,8 +194,7 @@ fails, this can be adjusted to your needs also. You may have to
 supply a different time model element, e.g. using
 
   ConfigSyslogPreambleModel.getModel(
-      DateTimeModelElement.DateTimeModelElement('time', [formatstring],
-          15, False))
+      DateTimeModelElement('time', [formatstring], 15, False))
 
 or even switch to MultiLocaleDateTimeModelElement. See source
 code documentation in those files, e.g.
@@ -234,11 +233,11 @@ when really paranoid, following changes might be useful:
 * Register as named component: componentName='DefaultNewMatchPathDetector'
 
   from aminer.analysis import NewMatchPathDetector
-  newMatchPathDetector=NewMatchPathDetector.NewMatchPathDetector(
+  newMatchPathDetector=NewMatchPathDetector(
       analysisContext.aminerConfig, anomalyEventHandlers, autoIncludeFlag=False)
   analysisContext.registerComponent(newMatchPathDetector,
       componentName='DefaultNewMatchPathDetector',
-      registerAsRawAtomHandler=False, registerAsTimeTriggeredHandler=True)
+      registerAsRawAtomHandler=False)
   parsedAtomHandlers.append(newMatchPathDetector)
 
 With automatic inclusion enabled, the detector would complain
@@ -265,7 +264,7 @@ host groups, a filter has to be installed to separate the data:
   * Create different NewMatchPathDetector instances with unique
     persistance IDs:
 
-  newMatchPathDetectorA=NewMatchPathDetector.NewMatchPathDetector(
+  newMatchPathDetectorA=NewMatchPathDetector(
       analysisContext.aminerConfig, anomalyEventHandlers,
       peristenceId='WwwHostsGroup', autoIncludeFlag=False)
 
@@ -314,6 +313,8 @@ Remote execution response: [u'DefaultNewMatchPathDetector']
 
 The command executed is executed inside the running aminer child
 process. See man page of AMinerRemoteControl for more information.
+For multiline Pyhton code, writing it to a file and using "--ExecFile"
+for invocation is recommended.
 
 
 * Modify the detector state:
@@ -335,12 +336,12 @@ Here is an example how to detect that hosts stop sending logs
 and to generate alerts:
 
   from aminer.analysis import MissingMatchPathValueDetector
-  missingMatchPathValueDetector=MissingMatchPathValueDetector.MissingMatchPathValueDetector(
+  missingMatchPathValueDetector=MissingMatchPathValueDetector(
       analysisContext.aminerConfig, '/model/syslog/host',
       anomalyEventHandlers, autoIncludeFlag=True, defaultInterval=24*3600)
   analysisContext.registerComponent(missingMatchPathValueDetector,
       componentName='DefaultMissingMatchPathValueDetector',
-      registerAsRawAtomHandler=False, registerAsTimeTriggeredHandler=True)
+      registerAsRawAtomHandler=False)
   parsedAtomHandlers.append(missingMatchPathValueDetector)
 
 The default interval should fit your operational procedures:
