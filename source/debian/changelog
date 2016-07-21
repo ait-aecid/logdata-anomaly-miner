@@ -1,20 +1,20 @@
 logdata-anomaly-miner (0.0.3) xenial; urgency=low
 
-* Backport of changes from Debian ITP process review, see
-  https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=813096
-* Handle rollover from one logfile to the next more graceful.
-* New features:
-  * Added support for multiple parallel timescales in component
-    trigger timing, e.g. real-time and forensic-time.
-  * Added MissingMatchPathValueDetector to detect when data values
-    were not reported for an extended period of time.
-  * Added VolatileLogarithmicBackoffEventHistory to keep data
-    of limited number of events in memory for automated processing.
-  * AMinerRemoteControl: Added "--ExecFile" parameter to execute
-    commands from file, "--StringResponse" for direct output.
-* Bugfixes:
-  * debian/postinst: disable service start when not already enabled
-    using standard methods debian/rules and debian/postinst.
+  * Backport of changes from Debian ITP process review, see
+    https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=813096
+  * Handle rollover from one logfile to the next more graceful.
+  * New features:
+    * Added support for multiple parallel timescales in component
+      trigger timing, e.g. real-time and forensic-time.
+    * Added MissingMatchPathValueDetector to detect when data
+      values were not reported for an extended period of time.
+    * Added VolatileLogarithmicBackoffEventHistory to keep data
+      of limited number of events in memory for automated processing.
+    * AMinerRemoteControl: Added "--ExecFile" parameter to execute
+      commands from file, "--StringResponse" for direct output.
+  * Bugfixes:
+    * debian/postinst: disable service start when not already
+      enabled using standard methods debian/rules and debian/postinst.
 
  -- Roman Fiedler <roman.fiedler@ait.ac.at>  Thu, 21 Jul 2016 19:00:00 +0000
 
