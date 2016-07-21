@@ -11,6 +11,9 @@ V0.0.3 (Unreleased):
     were not reported for an extended period of time.
   * Added VolatileLogarithmicBackoffEventHistory to keep data
     of limited number of events in memory for automated processing.
+* Bugfixes:
+  * debian/postinst: disable service start when not already enabled
+    using standard methods debian/rules and debian/postinst.
 * AMinerRemoteControl: Added "--ExecFile" parameter to execute
   commands from file.
 
