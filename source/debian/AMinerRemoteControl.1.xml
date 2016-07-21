@@ -107,6 +107,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
       <arg choice="opt"><option>--Exec <replaceable>code</replaceable></option></arg>
       <arg choice="opt"><option>--ExecFile <replaceable>file</replaceable></option></arg>
       <arg choice="opt"><option>--Data <replaceable>data</replaceable></option></arg>
+      <arg choice="opt"><option>--StringResponse</option></arg>
     </cmdsynopsis>
   </refsynopsisdiv>
   <refsect1 id="description">
@@ -185,6 +186,21 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
           limits for the request, very large data objects may
           exceed those limits. The execution context will expose
           the data as variable 'remoteControlData'.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>--StringResponse</option></term>
+        <listitem>
+          <para>When set, AMinerRemoteControl will not pass the
+          result to repr. The returned object is just converted
+          to a plain string via str(object) and the result is
+          printed to avoid escaping of quotation marks, newlines,
+          .... WARNING: This might be insecure: without escaping
+          the printed data may contain terminal control sequences
+          to exploit vulnerabilities or misconfiguration of your
+          terminal to execute code with privileges of terminal
+          or the process calling AMinerRemoteControl (usually
+          root).</para>
         </listitem>
       </varlistentry>
     </variablelist>

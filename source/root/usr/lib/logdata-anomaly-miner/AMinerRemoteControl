@@ -22,6 +22,7 @@ remoteControlSocketName=None
 remoteControlData=None
 argPos=1
 commandList=[]
+stringResponseFlag=False
 while argPos<len(sys.argv): 
   paramName=sys.argv[argPos]
   argPos+=1
@@ -60,8 +61,13 @@ while argPos<len(sys.argv):
     environment as 'remoteControlData' (see man page).
   --Exec [command]: add command to the execution list, can be
     used more than once.
-  --Help: this output""" % sys.argv[0]
+  --Help: this output
+  --StringResponse: if set, print the response just as string
+    instead of passing it to repr.""" % sys.argv[0]
     sys.exit(0)
+  if paramName=='--StringResponse':
+    stringResponseFlag=True
+    continue
 
   print >>sys.stderr, 'Unknown parameter "%s", use --Help for overview' % paramName
   sys.exit(1)
@@ -97,7 +103,10 @@ for remoteControlCode, remoteControlData in commandList:
         remoteData=json.loads(requestData[8:])
         if remoteData[0]!=None:
           print >>sys.stderr, 'Remote execution exception:\n%s' % remoteData[0]
-        print 'Remote execution response: %s' % repr(remoteData[1])
+        if stringResponseFlag:
+          print 'Remote execution response: %s' % str(remoteData[1])
+        else:
+          print 'Remote execution response: %s' % repr(remoteData[1])
       except:
         print >>sys.stderr, 'Failed to process response %s' % repr(requestData)
         traceback.print_exc()
