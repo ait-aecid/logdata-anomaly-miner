@@ -1,6 +1,9 @@
 import datetime
 
-class WhitelistViolationDetector:
+from aminer.parsing import ParsedAtomHandlerInterface
+
+
+class WhitelistViolationDetector(ParsedAtomHandlerInterface):
   """Objects of this class handle a list of whitelist rules to
   ensure, that each received log-atom is at least covered by a
   single whitelist rule. To avoid traversing the complete rule
@@ -19,23 +22,3 @@ class WhitelistViolationDetector:
       if rule.match(parserMatch): return
     for listener in self.anomalyEventHandlers:
       listener.receiveEvent('Analysis.WhitelistViolationDetector', 'No whitelisting for current atom', [atomData], parserMatch)
-
-  def checkTriggers(self):
-    return(1<<16)
-
-
-class MatchAction:
-  """This is the interface of all match actions."""
-  def performAction(parserMatch):
-    pass
-
-
-class ViolationAction(MatchAction):
-  """Export the violation action so that can also be added to
-  the ruleset for triggering on selected rule matches."""
-  def __init__(self, anomalyEventHandlers):
-    self.anomalyEventHandlers=anomalyEventHandlers
-
-  def performAction(self, parserMatch):
-    for listener in self.anomalyEventHandlers:
-      listener.receiveEvent('Analysis.WhitelistViolationDetector', 'Violation detected', [parserMatch.matchString], parserMatch)

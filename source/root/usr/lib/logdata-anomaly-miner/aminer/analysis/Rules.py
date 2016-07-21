@@ -17,6 +17,20 @@ class MatchAction:
     raise Exception('Interface called')
 
 
+class EventGenerationMatchAction(MatchAction):
+  """This generic match action forwards information about a rule
+  match on parsed data to a list of event handlers."""
+  def __init__(self, eventType, eventMessage, eventHandlers):
+    self.eventType=eventType
+    self.eventMessage=eventMessage
+    self.eventHandlers=eventHandlers
+
+  def performAction(self, parserMatch):
+    for handler in self.eventHandlers:
+      handler.receiveEvent(self.eventType, self.eventMessage,
+          [parserMatch.matchString], parserMatch)
+
+
 class MatchRule:
   """This is the interface of all match rules."""
   def match(self, parserMatch):
