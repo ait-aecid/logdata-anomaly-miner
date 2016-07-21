@@ -1,7 +1,11 @@
 import time
 
 from aminer import AMinerConfig
+from aminer.AMinerUtils import AnalysisContext
+from aminer.parsing import ParsedAtomHandlerInterface
 from aminer.util import PersistencyUtil
+from aminer.util import TimeTriggeredComponentInterface
+
 
 binomialTest=None
 try:
@@ -180,7 +184,7 @@ class HistogramData():
     return(result)
 
 
-class HistogramAnalysis:
+class HistogramAnalysis(ParsedAtomHandlerInterface, TimeTriggeredComponentInterface):
   """This class creates a histogram for one or more properties
   extracted from a parsed atom."""
   
@@ -234,13 +238,19 @@ class HistogramAnalysis:
       self.nextPersistTime=time.time()+600
 
 
-  def checkTriggers(self):
+  def getTimeTriggerClass(self):
+    """Get the trigger class this component should be registered
+    for. This trigger is used only for persistency, so real-time
+    triggering is needed."""
+    return(AnalysisContext.TIME_TRIGGER_CLASS_REALTIME)
+
+  def doTimer(self, time):
     """Check current ruleset should be persisted"""
     if self.nextPersistTime==None: return(600)
 
-    delta=self.nextPersistTime-time.time()
+    delta=self.nextPersistTime-time
     if(delta<0):
-      doPersist()
+      self.doPersist()
       delta=600
     return(delta)
 
@@ -269,7 +279,7 @@ class HistogramAnalysis:
     self.nextReportTime=timestamp+self.reportInterval
 
 
-class PathDependentHistogramAnalysis:
+class PathDependentHistogramAnalysis(ParsedAtomHandlerInterface, TimeTriggeredComponentInterface):
   """This class provides a histogram analysis for only one property
   but separate histograms for each group of correlated match pathes.
   Assume there two pathes that include the requested property
@@ -368,11 +378,17 @@ class PathDependentHistogramAnalysis:
       self.nextPersistTime=time.time()+600
 
 
-  def checkTriggers(self):
+  def getTimeTriggerClass(self):
+    """Get the trigger class this component should be registered
+    for. This trigger is used only for persistency, so real-time
+    triggering is needed."""
+    return(AnalysisContext.TIME_TRIGGER_CLASS_REALTIME)
+
+  def doTimer(self, time):
     """Check current ruleset should be persisted"""
     if self.nextPersistTime==None: return(600)
 
-    delta=self.nextPersistTime-time.time()
+    delta=self.nextPersistTime-time
     if(delta<0):
       doPersist()
       delta=600

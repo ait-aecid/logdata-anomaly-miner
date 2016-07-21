@@ -4,6 +4,7 @@ import subprocess
 import sys
 import time
 
+from aminer.AMinerUtils import AnalysisContext
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.events import EventHandlerInterface
 from aminer.parsing import ParserMatch
@@ -39,7 +40,8 @@ events and send them via "sendmail" transport."""
         DefaultMailNotificationEventHandler.CONFIG_KEY_EVENT_COLLECT_TIME, 10)
     self.minAlertGap=aminerConfig.configProperties.get(
         DefaultMailNotificationEventHandler.CONFIG_KEY_ALERT_MIN_GAP, 600)
-    self.maxAlertGap=aminerConfig.configProperties.get(CONFIG_KEY_ALERT_MAX_GAP, 600)
+    self.maxAlertGap=aminerConfig.configProperties.get(
+        DefaultMailNotificationEventHandler.CONFIG_KEY_ALERT_MAX_GAP, 600)
     self.maxEventsPerMessage=aminerConfig.configProperties.get(
         DefaultMailNotificationEventHandler.CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE, 1000)
     if self.alertGraceTimeEnd>0:
@@ -76,7 +78,7 @@ events and send them via "sendmail" transport."""
       for line in sortedLogLines:
         self.currentMessage+='  '+line+'\n'
       if eventData!=None:
-        if isinstance(eventData, ParserMatch.ParserMatch):
+        if isinstance(eventData, ParserMatch):
           self.currentMessage+='  '+eventData.getMatchElement().annotateMatch('')+'\n'
         else:
           self.currentMessage+='  '+str(eventData)+'\n'
@@ -102,7 +104,7 @@ events and send them via "sendmail" transport."""
         self.nextAlertTime=currentTime+self.eventCollectTime
 
     if (self.nextAlertTime!=0) and (currentTime>=self.nextAlertTime):
-      self.sendNotification()
+      self.sendNotification(currentTime)
     return
 
 

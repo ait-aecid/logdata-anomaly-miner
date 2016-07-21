@@ -1,9 +1,12 @@
 import time
 
 from aminer import AMinerConfig
+from aminer.AMinerUtils import AnalysisContext
+from aminer.parsing import ParsedAtomHandlerInterface
+from aminer.util import TimeTriggeredComponentInterface
 from aminer.util import PersistencyUtil
 
-class MissingMatchPathValueDetector:
+class MissingMatchPathValueDetector(ParsedAtomHandlerInterface, TimeTriggeredComponentInterface):
   """This class creates events when an expected value is not seen
   within a given timespan, e.g. because the service was deactivated
   or logging disabled unexpectedly. This is complementary to the
@@ -103,11 +106,18 @@ class MissingMatchPathValueDetector:
     del self.expectedValuesDict[value]
 
 
-  def checkTriggers(self):
+  def getTimeTriggerClass(self):
+    """Get the trigger class this component can be registered
+    for. This detector only needs persisteny triggers in real
+    time."""
+    return(AnalysisContext.TIME_TRIGGER_CLASS_REALTIME)
+
+
+  def doTimer(self, time):
     """Check current ruleset should be persisted"""
     if self.nextPersistTime==None: return(600)
-    delta=self.nextPersistTime-time.time()
-    if(delta<0):
+    delta=self.nextPersistTime-time
+    if(delta<=0):
       PersistencyUtil.storeJson(self.persistenceFileName, self.expectedValuesDict)
       self.nextPersistTime=None
       delta=600

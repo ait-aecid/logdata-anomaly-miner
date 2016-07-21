@@ -1,9 +1,12 @@
 import time
 
 from aminer import AMinerConfig
+from aminer.AMinerUtils import AnalysisContext
+from aminer.parsing import ParsedAtomHandlerInterface
+from aminer.util import TimeTriggeredComponentInterface
 from aminer.util import PersistencyUtil
 
-class NewMatchPathDetector:
+class NewMatchPathDetector(ParsedAtomHandlerInterface, TimeTriggeredComponentInterface):
   """This class creates events when new data path was found in
   a parsed atom."""
 
@@ -36,20 +39,25 @@ class NewMatchPathDetector:
         self.nextPersistTime=time.time()+600
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
-            'New path(es) %s ' % (', '.join(unknownPathList)), [atomData], match)
+            'New path(es) %s ' % (', '.join(unknownPathList)), [atomData], [match, unknownPathList])
 
 
-  def checkTriggers(self):
+  def getTimeTriggerClass(self):
+    """Get the trigger class this component can be registered
+    for. This detector only needs persisteny triggers in real
+    time."""
+    return(AnalysisContext.TIME_TRIGGER_CLASS_REALTIME)
+
+  def doTimer(self, time):
     """Check current ruleset should be persisted"""
     if self.nextPersistTime==None: return(600)
 
-    delta=self.nextPersistTime-time.time()
-    if(delta<0):
+    delta=self.nextPersistTime-time
+    if(delta<=0):
       PersistencyUtil.storeJson(self.persistenceFileName, list(self.knownPathSet))
       self.nextPersistTime=None
       delta=600
     return(delta)
-
 
   def doPersist(self):
     """Immediately write persistence data to storage."""

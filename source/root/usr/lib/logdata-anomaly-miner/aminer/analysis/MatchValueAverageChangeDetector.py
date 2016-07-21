@@ -1,9 +1,12 @@
 import time
 
 from aminer import AMinerConfig
+from aminer.AMinerUtils import AnalysisContext
+from aminer.parsing import ParsedAtomHandlerInterface
 from aminer.util import PersistencyUtil
+from aminer.util import TimeTriggeredComponentInterface
 
-class MatchValueAverageChangeDetector:
+class MatchValueAverageChangeDetector(ParsedAtomHandlerInterface, TimeTriggeredComponentInterface):
   """This detector calculates the average of a given list of values
   to monitor and reports if the average of the latest diverges
   significantly from the values observed before."""
@@ -77,11 +80,17 @@ class MatchValueAverageChangeDetector:
         listener.receiveEvent('Analysis.MatchValueAverageChangeDetector', 'Statistical data report\n%s' % analysisSummary, [atomData], match)
 
 
-  def checkTriggers(self):
+  def getTimeTriggerClass(self):
+    """Get the trigger class this component should be registered
+    for. This trigger is used only for persistency, so real-time
+    triggering is needed."""
+    return(AnalysisContext.TIME_TRIGGER_CLASS_REALTIME)
+
+  def doTimer(self, time):
     """Check current ruleset should be persisted"""
     if self.nextPersistTime==None: return(600)
 
-    delta=self.nextPersistTime-time.time()
+    delta=self.nextPersistTime-time
     if(delta<0):
 #     PersistencyUtil.storeJson(self.persistenceFileName, list(self.knownPathSet))
       self.nextPersistTime=None

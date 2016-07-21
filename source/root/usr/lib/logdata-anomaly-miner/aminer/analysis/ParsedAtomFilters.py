@@ -1,8 +1,10 @@
 # This file collects various classes useful to filter parsed atoms
 # and pass them to different handlers.
 
+from aminer.parsing import ParsedAtomHandlerInterface
 
-class SubhandlerFilter:
+
+class SubhandlerFilter(ParsedAtomHandlerInterface):
   """Handlers of this class pass the received atoms to one or
   more subhandlers. Depending on configuration, the atom is passed
   to all subhandlers or only up to the first suitable to handle
@@ -24,7 +26,7 @@ class SubhandlerFilter:
     return(result)
 
 
-class MatchPathFilter:
+class MatchPathFilter(ParsedAtomHandlerInterface):
   """This class just splits incoming matches according to existance
   of pathes in the match."""
 
@@ -47,8 +49,7 @@ class MatchPathFilter:
     return(self.defaultParsedAtomHandler.receiveParsedAtom(atomData, match))
 
 
-
-class MatchValueFilter:
+class MatchValueFilter(ParsedAtomHandlerInterface):
   """This class just splits incoming matches using a given match
   value and forward them to different handlers."""
 

@@ -1,8 +1,10 @@
 # This file collects various classes useful to filter and correct
 # the timestamp associated with a received parsed atom.
 
+from aminer.parsing import ParsedAtomHandlerInterface
 
-class SimpleMonotonicTimestampAdjust:
+
+class SimpleMonotonicTimestampAdjust(ParsedAtomHandlerInterface):
   """Handlers of this class compare the timestamp of a newly received
   atom with the largest timestamp seen so far. When below, the
   timestamp of this atom is adjusted to the largest value seen,

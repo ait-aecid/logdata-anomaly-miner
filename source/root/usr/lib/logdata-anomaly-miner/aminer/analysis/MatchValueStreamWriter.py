@@ -1,6 +1,7 @@
-import time
+from aminer.parsing import ParsedAtomHandlerInterface
+from aminer.util import TimeTriggeredComponentInterface
 
-class MatchValueStreamWriter:
+class MatchValueStreamWriter(ParsedAtomHandlerInterface, TimeTriggeredComponentInterface):
   """This class extracts values from a given match and writes
   them to a stream. This can be used to forward this values to
   another program (when stream is a wrapped network socket) or
@@ -29,7 +30,14 @@ class MatchValueStreamWriter:
     self.stream.write(result)
     self.stream.write('\n')
 
-  def checkTriggers(self):
+
+  def getTimeTriggerClass(self):
+    """Get the trigger class this component should be registered
+    for. This trigger is used only for persistency, so real-time
+    triggering is needed."""
+    return(AnalysisContext.TIME_TRIGGER_CLASS_REALTIME)
+
+  def doTimer(self, time):
     self.stream.flush()
     return(10)
 
