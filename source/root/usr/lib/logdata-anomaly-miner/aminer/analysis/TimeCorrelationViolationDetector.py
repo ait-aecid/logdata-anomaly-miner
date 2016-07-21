@@ -1,23 +1,36 @@
 import time
 
 from aminer import AMinerConfig
+from aminer.AMinerUtils import AnalysisContext
+from aminer.parsing import ParsedAtomHandlerInterface
 from aminer.util import LogarithmicBackoffHistory
 from aminer.util import PersistencyUtil
+from aminer.util import TimeTriggeredComponentInterface
 import Rules
 
-class TimeCorrelationViolationDetector:
+class TimeCorrelationViolationDetector(ParsedAtomHandlerInterface, TimeTriggeredComponentInterface):
   """This class creates events when one of the given time correlation
   rules is violated. This is used to implement checks as depicted
   in http://dx.doi.org/10.1016/j.cose.2014.09.006"""
 
   def __init__(self, aminerConfig, ruleset, anomalyEventHandlers, peristenceId='Default'):
     """Initialize the detector. This will also trigger reading
-    or creation of persistence storage location."""
-    self.ruleset=ruleset
+    or creation of persistence storage location.
+    @param ruleset a list of MatchRule rules with appropriate
+    CorrelationRules attached as actions."""
+    self.eventClassificationRuleset=ruleset
     self.anomalyEventHandlers=anomalyEventHandlers
-    self.nextPersistTime=time.time()+3600.0
+    self.nextPersistTime=time.time()+600.0
     self.historyAEvents=[]
     self.historyBEvents=[]
+
+    eventCorrelationSet=set()
+    for rule in self.eventClassificationRuleset:
+      if rule.matchAction.artefactARules!=None:
+        eventCorrelationSet|=set(rule.matchAction.artefactARules)
+      if rule.matchAction.artefactBRules!=None:
+        eventCorrelationSet|=set(rule.matchAction.artefactBRules)
+    self.eventCorrelationRuleset=list(eventCorrelationSet)
 
     PersistencyUtil.addPersistableComponent(self)
     self.persistenceFileName=AMinerConfig.buildPersistenceFileName(
@@ -30,19 +43,23 @@ class TimeCorrelationViolationDetector:
 
 
   def receiveParsedAtom(self, atomData, match):
-    for targetPath in self.targetPathList:
-      pathValue=match.getMatchDictionary().get(targetPath, None)
-      if pathValue==None: continue
-      if not(pathValue.matchObject in self.knownPathSet):
-        if self.autoIncludeFlag:
-          self.knownPathSet.add(pathValue)
-          if self.nextPersistTime==None:
-            self.nextPersistTime=time.time()+600
-        for listener in self.anomalyEventHandlers:
-          listener.receiveEvent('Analysis.TimeCorrelationViolationDetector', 'Correlation mismatch in rule %s: score %d' % (targetPath, pathValue), [atomData], match)
+    """Receive a parsed atom and check all the classification
+    rules, that will trigger correlation rule evaluation and event
+    triggering on violations."""
+    for rule in self.eventClassificationRuleset:
+       rule.match(match)
 
 
-  def checkTriggers(self):
+  def getTimeTriggerClass(self):
+    """Get the trigger class this component should be registered
+    for. This trigger is used mainly for persistency, so real-time
+    triggering is needed. Use also real-time triggering for analysis:
+    usually events for violations (timeouts) are generated when
+    receiving newer atoms. This is just the fallback periods of
+    input silence."""
+    return(AnalysisContext.TIME_TRIGGER_CLASS_REALTIME)
+
+  def doTimer(self, time):
     """Check for any rule violations and if the current ruleset
     should be persisted."""
 # Persist the state only quite infrequently: As most correlation
@@ -50,7 +67,7 @@ class TimeCorrelationViolationDetector:
 # likely be unsuitable to catch lost events. So persistency is
 # mostly to capture the correlation rule context, e.g. the history
 # of loglines matched before.
-    if(self.nextPersistTime-time.time()<0): self.doPersist()
+    if(self.nextPersistTime-time<0): self.doPersist()
 
 # Check all correlation rules, generate single events for each
 # violated rule, possibly containing multiple records. As we might
@@ -60,10 +77,10 @@ class TimeCorrelationViolationDetector:
 # impossible to fulfil. Take the newest timestamp of any rule
 # and use it for checking.
     newestTimestamp=0.0
-    for rule in self.ruleset:
+    for rule in self.eventCorrelationRuleset:
       newestTimestamp=max(newestTimestamp, rule.lastTimestampSeen)
 
-    for rule in self.ruleset:
+    for rule in self.eventCorrelationRuleset:
       checkResult=rule.checkStatus(newestTimestamp)
       if checkResult==None: continue
       for listener in self.anomalyEventHandlers:
@@ -74,7 +91,7 @@ class TimeCorrelationViolationDetector:
   def doPersist(self):
     """Immediately write persistence data to storage."""
 #   PersistencyUtil.storeJson(self.persistenceFileName, list(self.knownPathSet))
-    self.nextPersistTime=time.time()+3600.0
+    self.nextPersistTime=time.time()+600.0
 
 
 class EventClassSelector(Rules.MatchAction):

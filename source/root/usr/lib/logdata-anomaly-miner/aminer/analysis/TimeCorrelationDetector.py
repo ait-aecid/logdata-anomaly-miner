@@ -3,11 +3,14 @@ import random
 import time
 
 from aminer import AMinerConfig
+from aminer.AMinerUtils import AnalysisContext
 from aminer.analysis import Rules
-from aminer.analysis import Utils
+from aminer.parsing import ParsedAtomHandlerInterface
+from aminer.util import getLogInt
 from aminer.util import PersistencyUtil
+from aminer.util import TimeTriggeredComponentInterface
 
-class TimeCorrelationDetector:
+class TimeCorrelationDetector(ParsedAtomHandlerInterface, TimeTriggeredComponentInterface):
   """This class tries to find time correlation patterns between
   different log atoms. When a possible correlation rule is detected,
   it creates an event including the rules. This is useful to implement
@@ -49,7 +52,9 @@ class TimeCorrelationDetector:
     if timestamp==None: timestamp=time.time()
     if timestamp<self.lastTimestamp:
       for listener in self.anomalyEventHandlers:
-        listener.receiveEvent('Analysis.TimeCorrelationDetector', 'Logdata not sorted', [atomData], parserMatch)
+        listener.receiveEvent('Analysis.TimeCorrelationDetector',
+            'Logdata not sorted: last %s, current %s' % (self.lastTimestamp, timestamp),
+            [atomData], parserMatch)
       return
     self.lastTimestamp=timestamp
 
@@ -86,11 +91,17 @@ class TimeCorrelationDetector:
       self.resetStatistics()
 
 
-  def checkTriggers(self):
+  def getTimeTriggerClass(self):
+    """Get the trigger class this component should be registered
+    for. This trigger is used only for persistency, so real-time
+    triggering is needed."""
+    return(AnalysisContext.TIME_TRIGGER_CLASS_REALTIME)
+
+  def doTimer(self, time):
     """Check current ruleset should be persisted"""
     if self.nextPersistTime==None: return(600)
 
-    delta=self.nextPersistTime-time.time()
+    delta=self.nextPersistTime-time
     if(delta<0):
 #     PersistencyUtil.storeJson(self.persistenceFileName, list(self.knownPathSet))
       self.nextPersistTime=None
@@ -107,7 +118,7 @@ class TimeCorrelationDetector:
   def createRandomRule(self, parserMatch):
     subRules=[]
     allKeys=parserMatch.getMatchDictionary().keys()
-    attributeCount=Utils.getLogInt(self.maxRuleAttributes)+1
+    attributeCount=getLogInt(self.maxRuleAttributes)+1
     while attributeCount>0:
       keyPos=random.randint(0, len(allKeys)-1)
       keyName=allKeys[keyPos]
@@ -122,9 +133,9 @@ class TimeCorrelationDetector:
       attributeCount-=1
       ruleType=random.randint(0, 1)
       if ruleType==0:
-        subRules.append(Rules.PathExistsMatchElement(keyName))
+        subRules.append(Rules.PathExistsMatchRule(keyName))
       elif ruleType==1:
-        subRules.append(Rules.ValueMatchElement(keyName, keyValue))
+        subRules.append(Rules.ValueMatchRule(keyName, keyValue))
       else:
         raise Exception('Invalid rule type')
       if len(allKeys)==0: break
