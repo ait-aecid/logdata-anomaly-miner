@@ -36,7 +36,10 @@ def getModel():
       interfaceNameModel,
       FixedDataModelElement('s2', ' '),
       IpAddressDataModelElement('ip'),
-      FixedDataModelElement('s3', ' UDP 123')
+      FirstMatchModelElement('msg', [
+          FixedDataModelElement('port-new', ':123'),
+          FixedDataModelElement('port-old', ' UDP 123')
+      ])
   ]))
 
   typeChildren.append(SequenceModelElement('listen-routing', [
@@ -44,6 +47,8 @@ def getModel():
       DecimalIntegerValueModelElement('fd'),
       FixedDataModelElement('s1', ' for interface updates')
   ]))
+
+  typeChildren.append(FixedDataModelElement('new-interfaces', 'new interface(s) found: waking up resolver'))
 
   typeChildren.append(FixedDataModelElement('ntp-io', 'ntp_io: estimated max descriptors: 1024, initial socket boundary: 16'))
 

@@ -46,8 +46,11 @@ after any standard logging preamble, e.g. from syslog."""
   typeChildren.append(SequenceModelElement('send-log', [
       WhiteSpaceLimitedDataModelElement('id'),
       FixedDataModelElement('s0', ' => '),
-      WhiteSpaceLimitedDataModelElement('env-to'),
+      DelimitedDataModelElement('env-to', ' R='),
       FixedDataModelElement('s1', ' R='),
+      WhiteSpaceLimitedDataModelElement('route'),
+      FixedDataModelElement('s2', ' T='),
+      WhiteSpaceLimitedDataModelElement('transport'),
       AnyByteDataModelElement('unparsed')
   ]))
 
