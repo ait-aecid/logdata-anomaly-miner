@@ -93,7 +93,9 @@ class AnalysisContext:
   def getComponentById(self, id):
     """Get a component by ID.
     @return None if not found."""
-    return(self.registeredComponents.get(id, None))
+    componentInfo=self.registeredComponents.get(id, None)
+    if componentInfo==None: return(None)
+    return(componentInfo[0])
   def getRegisteredComponentNames(self):
     """Get a list of currently known component names."""
     return(self.registeredComponentsByName.keys())
