@@ -27,7 +27,6 @@ case "$1" in
       chown "root.${analysisGroup}" -- /etc/aminer
       chmod 00750 -- /etc/aminer
     fi
-    mkdir -p -- /var/lib/aminer
     if ! dpkg-statoverride --list /var/lib/aminer > /dev/null; then
       chmod 00700 -- /var/lib/aminer
       chown "${analysisUser}.${analysisGroup}" -- /var/lib/aminer
