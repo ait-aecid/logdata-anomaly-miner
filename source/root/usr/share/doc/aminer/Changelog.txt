@@ -4,6 +4,7 @@ V0.0.4 (2016-xx-xx):
 * Bugfixes:
   * Packaging: unowned directory after purge, see
     https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=832347
+  * EventGenerationMatchAction: wrong method name, class field access
 
 
 V0.0.3 (2016-07-21):

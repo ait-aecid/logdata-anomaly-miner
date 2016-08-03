@@ -25,10 +25,10 @@ class EventGenerationMatchAction(MatchAction):
     self.eventMessage=eventMessage
     self.eventHandlers=eventHandlers
 
-  def performAction(self, parserMatch):
+  def matchAction(self, parserMatch):
     for handler in self.eventHandlers:
       handler.receiveEvent(self.eventType, self.eventMessage,
-          [parserMatch.matchString], parserMatch)
+          [parserMatch.matchElement.matchString], parserMatch)
 
 
 class MatchRule:
