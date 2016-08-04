@@ -1,6 +1,8 @@
 import datetime
 import sys
 
+from ParsedAtomFilters import SubhandlerFilter
+
 """This package contains various classes to build check rulesets.
 The ruleset also supports parallel rule evaluation, e.g. the two
 rules "A and B and C" and "A and B and D" will only peform the
@@ -29,6 +31,17 @@ class EventGenerationMatchAction(MatchAction):
     for handler in self.eventHandlers:
       handler.receiveEvent(self.eventType, self.eventMessage,
           [parserMatch.matchElement.matchString], parserMatch, self)
+
+
+class ParsedAtomFilterMatchAction(MatchAction, SubhandlerFilter):
+  """This generic match rule forwards all rule matches to a list
+  of ParsedAtomHandlerInterface instaces using the
+  analysis.ParsedAtomFilters.SubhandlerFilter."""
+  def __init__(self, subhandlerList, stopWhenHandledFlag=False):
+    SubhandlerFilter.__init__(self, subhandlerList, stopWhenHandledFlag)
+
+  def matchAction(self, parserMatch):
+    self.receiveParsedAtom(parserMatch.matchElement.matchString, parserMatch)
 
 
 class MatchRule:

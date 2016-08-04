@@ -160,8 +160,16 @@ This detector manages a list of whitelist rules to filter parsed
 atoms. All atoms not hit by any whitelist rule will cause events
 to be generated. When an atom is matched by a rule, it will be
 regarded as whitelisted by default but there is also an option
-to call user-defined functions on a matching rule, e.g. to forward
-the atom to another analyzer in one pass.
+to call user-defined functions on a matching rule via MatchAction
+elements, e.g. to forward the atom to another analyzer in one
+pass. Predefined actions are:
+
+  * EventGenerationMatchAction: Generate events, when a rule matches,
+    e.g. to report interesting matches, violations or for debugging.
+
+  * ParsedAtomFilterMatchAction: Filter out the parsed atoms on
+    match and forward it to other handlers, e.g. analysis components.
+
 
 * Example:
 
