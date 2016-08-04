@@ -12,6 +12,7 @@ from MatchValueAverageChangeDetector import MatchValueAverageChangeDetector
 from MatchValueStreamWriter import MatchValueStreamWriter
 from MissingMatchPathValueDetector import MissingMatchPathValueDetector
 from NewMatchPathDetector import NewMatchPathDetector
+from NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
 from NewMatchPathValueDetector import NewMatchPathValueDetector
 # ParsedAtomFilters.py
 # Rules.py

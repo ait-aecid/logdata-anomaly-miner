@@ -50,6 +50,10 @@ List of components:
 * NewMatchPathDetector (AH): Generate events when new parser pathes
   are found.
 
+* NewMatchPathValueComboDetector (AH): Same as NewMatchPathValueDetector
+  but considers combination of values for list of data pathes,
+  e.g. source IP, destination IP, destination port for link analysis.
+
 * NewMatchPathValueDetector (AH): Generate events when new parsed
   values are observed for a given path, e.g. new MAC addresses,
   user names, ...

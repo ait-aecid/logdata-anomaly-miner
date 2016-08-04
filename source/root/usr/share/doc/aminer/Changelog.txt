@@ -2,6 +2,8 @@ V0.0.4 (2016-xx-xx):
 ====================
 
 * New features:
+  * NewMatchPathValueComboDetector: Detect new combination of
+    values for list of data pathes, e.g. for link analysis.
   * ParsedAtomFilterMatchAction: Forward data to specific handlers
     when rules match.
   * VolatileLogarithmicBackoffEventHistory: Added unique EventId
