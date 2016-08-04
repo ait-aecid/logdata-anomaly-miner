@@ -10,6 +10,8 @@ class SubhandlerFilter(ParsedAtomHandlerInterface):
   to all subhandlers or only up to the first suitable to handle
   the atom."""
   def __init__(self, subhandlerList, stopWhenHandledFlag=False):
+    if (not(isinstance(subhandlerList, list))) or (not(all(isinstance(handler, ParsedAtomHandlerInterface) for handler in subhandlerList))):
+      raise Exception('Only subclasses of ParsedAtomHandlerInterface allowed in subhandlerList')
     self.subhandlerList=subhandlerList
     self.stopWhenHandledFlag=stopWhenHandledFlag
 
