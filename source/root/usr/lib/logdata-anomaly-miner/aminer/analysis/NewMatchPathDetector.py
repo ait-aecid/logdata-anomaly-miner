@@ -39,7 +39,8 @@ class NewMatchPathDetector(ParsedAtomHandlerInterface, TimeTriggeredComponentInt
         self.nextPersistTime=time.time()+600
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
-            'New path(es) %s ' % (', '.join(unknownPathList)), [atomData], [match, unknownPathList])
+            'New path(es) %s ' % (', '.join(unknownPathList)),
+            [atomData], [match, unknownPathList], self)
 
 
   def getTimeTriggerClass(self):

@@ -77,7 +77,9 @@ class MatchValueAverageChangeDetector(ParsedAtomHandlerInterface, TimeTriggeredC
  
     if len(analysisSummary)!=0:
       for listener in self.anomalyEventHandlers:
-        listener.receiveEvent('Analysis.MatchValueAverageChangeDetector', 'Statistical data report\n%s' % analysisSummary, [atomData], match)
+        listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
+            'Statistical data report\n%s' % analysisSummary, [atomData], match,
+            self)
 
 
   def getTimeTriggerClass(self):

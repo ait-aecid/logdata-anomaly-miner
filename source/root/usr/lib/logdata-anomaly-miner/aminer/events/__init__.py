@@ -10,7 +10,8 @@ class EventHandlerInterface:
   actions within the call. Longer running tasks have to be performed
   asynchronously."""
 
-  def receiveEvent(self, eventType, eventMessage, sortedLogLines, eventData):
+  def receiveEvent(self, eventType, eventMessage, sortedLogLines, eventData,
+      eventSource):
     """Receive information about a detected event.
     @param eventType is a string with the event type class this
     event belongs to. This information can be used to interpret
@@ -20,7 +21,8 @@ class EventHandlerInterface:
     when generating the event, as far as available to the time
     of the event. The list has to contain at least one line.
     @param eventData type-specific event data object, should not
-    be used unless listener really knows about the eventType."""
+    be used unless listener really knows about the eventType.
+    @param eventSource reference to detector generating the event"""
     raise Exception('Not implemented')
 
 

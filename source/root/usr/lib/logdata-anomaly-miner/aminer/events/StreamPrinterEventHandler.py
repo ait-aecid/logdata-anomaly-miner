@@ -15,7 +15,8 @@ is stdout"""
   def __init__(self, aminerConfig, stream=sys.stdout):
     self.stream=stream
 
-  def receiveEvent(self, eventType, eventMessage, sortedLogLines, eventData):
+  def receiveEvent(self, eventType, eventMessage, sortedLogLines, eventData,
+      eventSource):
     """Receive information about a detected event."""
     message='%s (%d lines)\n' % (eventMessage, len(sortedLogLines))
     for line in sortedLogLines:

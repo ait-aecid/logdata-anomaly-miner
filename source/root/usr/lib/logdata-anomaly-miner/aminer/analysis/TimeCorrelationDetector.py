@@ -52,9 +52,9 @@ class TimeCorrelationDetector(ParsedAtomHandlerInterface, TimeTriggeredComponent
     if timestamp==None: timestamp=time.time()
     if timestamp<self.lastTimestamp:
       for listener in self.anomalyEventHandlers:
-        listener.receiveEvent('Analysis.TimeCorrelationDetector',
+        listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
             'Logdata not sorted: last %s, current %s' % (self.lastTimestamp, timestamp),
-            [atomData], parserMatch)
+            [atomData], parserMatch, self)
       return
     self.lastTimestamp=timestamp
 
@@ -87,7 +87,9 @@ class TimeCorrelationDetector(ParsedAtomHandlerInterface, TimeTriggeredComponent
 
     if (self.totalRecords%0x10000)==0:
       for listener in self.anomalyEventHandlers:
-        listener.receiveEvent('Analysis.TimeCorrelationDetector', 'Correlation report', [self.analysisStatusToString()], parserMatch)
+        listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
+            'Correlation report', [self.analysisStatusToString()],
+            parserMatch, self)
       self.resetStatistics()
 
 

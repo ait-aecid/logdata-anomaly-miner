@@ -21,4 +21,5 @@ class WhitelistViolationDetector(ParsedAtomHandlerInterface):
     for rule in self.whitelistRules:
       if rule.match(parserMatch): return
     for listener in self.anomalyEventHandlers:
-      listener.receiveEvent('Analysis.WhitelistViolationDetector', 'No whitelisting for current atom', [atomData], parserMatch)
+      listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
+          'No whitelisting for current atom', [atomData], parserMatch, self)

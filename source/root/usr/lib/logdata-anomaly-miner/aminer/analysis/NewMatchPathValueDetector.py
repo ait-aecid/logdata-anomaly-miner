@@ -40,7 +40,8 @@ class NewMatchPathValueDetector(ParsedAtomHandlerInterface, TimeTriggeredCompone
             self.nextPersistTime=time.time()+600
         for listener in self.anomalyEventHandlers:
           listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
-              'New value for path %s: %s ' % (targetPath, match.matchObject), [atomData], match)
+              'New value for path %s: %s ' % (targetPath, match.matchObject),
+              [atomData], match, self)
 
 
   def getTimeTriggerClass(self):

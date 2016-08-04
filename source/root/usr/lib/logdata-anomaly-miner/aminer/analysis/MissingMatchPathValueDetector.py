@@ -86,7 +86,9 @@ class MissingMatchPathValueDetector(ParsedAtomHandlerInterface, TimeTriggeredCom
         for value, overdueTime, interval in missingValueList:
           messagePart='\n  %s overdue %ss (interval %s)' % (value, overdueTime, interval)
         for listener in self.anomalyEventHandlers:
-          listener.receiveEvent('Analysis.MissingMatchPathValueDetector', 'Interval too large between values for path %s:%s ' % (self.targetPath, messagePart), [atomData], missingValueList)
+          listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
+              'Interval too large between values for path %s:%s ' % (self.targetPath, messagePart),
+              [atomData], missingValueList, self)
 
 
   def setCheckValue(self, value, interval):

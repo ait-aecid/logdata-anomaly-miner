@@ -84,7 +84,9 @@ class TimeCorrelationViolationDetector(ParsedAtomHandlerInterface, TimeTriggered
       checkResult=rule.checkStatus(newestTimestamp)
       if checkResult==None: continue
       for listener in self.anomalyEventHandlers:
-        listener.receiveEvent('Analysis.TimeCorrelationViolationDetector', 'Correlation rule "%s" violated' % rule.id, checkResult[1], checkResult[0])
+        listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
+            'Correlation rule "%s" violated' % rule.id, checkResult[1],
+            checkResult[0], self)
     return(10.0)
 
 

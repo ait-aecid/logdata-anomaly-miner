@@ -9,4 +9,5 @@ class SimpleUnparsedAtomHandler(EventHandlerInterface):
 
   def receiveUnparsedAtom(self, atomData, unparsedAtomData, match):
     for listener in self.eventHandlers:
-      listener.receiveEvent('ParserModel.UnparsedData', 'Unparsed data', [atomData], match)
+      listener.receiveEvent('ParserModel.UnparsedData', 'Unparsed data',
+          [atomData], match, self)

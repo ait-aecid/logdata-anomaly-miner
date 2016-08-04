@@ -61,7 +61,8 @@ events and send them via "sendmail" transport."""
     self.runningSendmailProcesses=[]
 
 
-  def receiveEvent(self, eventType, eventMessage, sortedLogLines, eventData):
+  def receiveEvent(self, eventType, eventMessage, sortedLogLines,
+      eventData, eventSource):
     """Receive information about a detected event."""
     if self.alertGraceTimeEnd!=0:
       if self.alertGraceTimeEnd>=time.time(): return()

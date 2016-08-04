@@ -269,8 +269,8 @@ class HistogramAnalysis(ParsedAtomHandlerInterface, TimeTriggeredComponentInterf
     for dataItem in self.histogramData:
       reportStr+='\n'+dataItem.toString('  ')
     for listener in self.reportEventHandlers:
-      listener.receiveEvent('Analysis.HistogramAnalysis', 'Histogram report',
-          [], reportStr)
+      listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
+          'Histogram report', [], reportStr, self)
     if self.resetAfterReportFlag:
       for dataItem in self.histogramData:
         dataItem.reset()
@@ -419,8 +419,8 @@ class PathDependentHistogramAnalysis(ParsedAtomHandlerInterface, TimeTriggeredCo
       if self.resetAfterReportFlag:
         histogramMapping[1].reset()
     for listener in self.reportEventHandlers:
-      listener.receiveEvent('Analysis.HistogramAnalysis', 'Histogram report',
-          [], reportStr)
+      listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
+          'Histogram report', [], reportStr, self)
 
     self.lastReportTime=timestamp
     self.nextReportTime=timestamp+self.reportInterval
