@@ -9,10 +9,12 @@ class VolatileLogarithmicBackoffEventHistory(EventHandlerInterface, LogarithmicB
   def __init__(self, maxItems):
     """Initialize the history component."""
     LogarithmicBackoffHistory.__init__(self, maxItems)
+    self.eventId=0
 
   def receiveEvent(self, eventType, eventMessage, sortedLogLines,
       eventData, eventSource):
     """Receive information about a detected event and store all
     related data as tuple to the history log."""
-    self.addObject((eventType, eventMessage, sortedLogLines, eventData, eventSource))
+    self.addObject((self.eventId, eventType, eventMessage, sortedLogLines, eventData, eventSource))
+    self.eventId+=1
     return(True)

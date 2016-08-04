@@ -2,6 +2,21 @@ logdata-anomaly-miner (0.0.3) xenial; urgency=low
 
   Following API changes were introduced:
 
+  * Event handling (general): Change of EventHandlerInterface
+    to include also eventSource as last parameter. See
+    /usr/lib/logdata-anomaly-miner/aminer/events/__init__.py
+
+  * VolatileLogarithmicBackoffEventHistory: Added event ID and
+    source to stored tuple to allow unique identification of events.
+    Split result of "getHistory()" to include "eventId, eventType,
+    eventMessage, sortedLogLines, eventData, eventSource".
+
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Thu,  4 Aug 2016 06:35:00 +0000
+
+logdata-anomaly-miner (0.0.3) xenial; urgency=low
+
+  Following API changes were introduced:
+
   * To improve readability of configuration files, main parser,
     analysis and event classes were added to the submodule namespaces.
     After imports directly from the submodule, e.g.

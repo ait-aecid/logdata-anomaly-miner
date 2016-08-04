@@ -4,6 +4,7 @@ V0.0.4 (2016-xx-xx):
 * New features:
   * ParsedAtomFilterMatchAction: Forward data to specific handlers
     when rules match.
+  * VolatileLogarithmicBackoffEventHistory: Added unique EventId
   * Pass event source reference to event handlers to allow query/change
     of source parameters when handling the event.
 * Bugfixes:
