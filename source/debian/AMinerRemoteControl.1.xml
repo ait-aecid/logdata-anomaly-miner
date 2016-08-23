@@ -84,8 +84,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         (and may be used by others).</para>
       <para>Permission is granted to copy, distribute and/or modify this
         document under the terms of the GNU General Public License,
-        Version 3 or (at your option) any later version published by
-        the Free Software Foundation.</para>
+        Version 3.</para>
       <para>On Debian systems, the complete text of the GNU General Public
         License can be found in
         <filename>/usr/share/common-licenses/GPL</filename>.</para>
@@ -223,5 +222,12 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
       Report bugs via your distribution's bug tracking system.
       For bugs in the the software trunk, report via
       at <ulink url="https://bugs.launchpad.net/logdata-anomaly-miner/+filebug"/>.</para>
+  </refsect1>
+  <refsect1 id="see_also">
+    <title>SEE ALSO</title>
+<!-- In alpabetical order. -->
+    <para>
+      <citerefentry><refentrytitle>AMiner</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+    </para>
   </refsect1>
 </refentry>
