@@ -9,6 +9,9 @@
 #   at the end of the script. By using it that way, no garbage files
 #   are left over after building and symlink attacks on temporary
 #   directories are prevented.
+#
+#   The script will place the new packages in the current working
+#   directory, overwriting any existing files of same name.
 
 if [ "${EUID} ${UID}" = "0 0" ] && touch /fake-root-detect 2> /dev/null; then
   rm /fake-root-detect
@@ -35,7 +38,7 @@ cp -a -- "${_projectDir}/source/debian" "${_projectDir}/source/root" "${_debDire
 # -sa: force inclusion of original source
 (set -e; cd -- "${_debDirectory}"; dpkg-buildpackage -S -us -uc -sa; dpkg-buildpackage -b -uc)
 rm -rf -- "${_debDirectory}"
-cp -ai -- "${_tmpRoot}/logdata-anomaly-miner_"* .
+cp -a -- "${_tmpRoot}/logdata-anomaly-miner_"* .
 rm -rf -- "${_tmpRoot}"
 
 echo "Build successful" >&2
