@@ -36,7 +36,10 @@ class MatchPathFilter(ParsedAtomHandlerInterface):
     """Initialize the filter.
     @param parsedAtomHandlerLookupList has to contain tuples with
     search path string and handler. When the handler is None,
-    the filter will just drop a received atom without forwarding."""
+    the filter will just drop a received atom without forwarding.
+    @param defaultParsedAtomHandler invoke this handler when no
+    handler was found for given match path or do not invoke any
+    handler when None."""
     self.parsedAtomHandlerLookupList=parsedAtomHandlerLookupList
     self.defaultParsedAtomHandler=defaultParsedAtomHandler
 
@@ -48,6 +51,7 @@ class MatchPathFilter(ParsedAtomHandlerInterface):
         if targetHandler!=None:
           targetHandler.receiveParsedAtom(atomData, match)
         return True
+    if self.defaultParsedAtomHandler==None: return(False)
     return(self.defaultParsedAtomHandler.receiveParsedAtom(atomData, match))
 
 
@@ -56,7 +60,10 @@ class MatchValueFilter(ParsedAtomHandlerInterface):
   value and forward them to different handlers."""
 
   def __init__(self, targetPath, parsedAtomHandlerDict, defaultParsedAtomHandler):
-    """Initialize the splitter."""
+    """Initialize the splitter.
+    @param defaultParsedAtomHandler invoke this default handler
+    when no value handler was found or do not invoke any handler
+    when None."""
     self.targetPath=targetPath
     self.parsedAtomHandlerDict=parsedAtomHandlerDict
     self.defaultParsedAtomHandler=defaultParsedAtomHandler
@@ -67,4 +74,5 @@ class MatchValueFilter(ParsedAtomHandlerInterface):
     if targetValue!=None: targetValue=targetValue.matchObject
     targetHandler=self.parsedAtomHandlerDict.get(targetValue,
         self.defaultParsedAtomHandler)
+    if targetHandler==None: return(False)
     return(targetHandler.receiveParsedAtom(atomData, match))
