@@ -24,7 +24,7 @@ after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement('s2', ' port '),
       DecimalIntegerValueModelElement('port'),
       FixedDataModelElement('s3', ' ssh2: RSA '),
-      VariableByteDataModelElement('user', '0123456789abcdef:')]))
+      VariableByteDataModelElement('fingerprint', '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ:')]))
 
   typeChildren.append(SequenceModelElement('btmp-perm', [
       FixedDataModelElement('s0', 'Excess permission or bad ownership on file /var/log/btmp')
