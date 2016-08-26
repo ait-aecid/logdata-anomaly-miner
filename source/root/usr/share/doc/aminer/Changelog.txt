@@ -9,6 +9,7 @@ V0.0.4 (2016-xx-xx):
   * VolatileLogarithmicBackoffEventHistory: Added unique EventId
   * Pass event source reference to event handlers to allow query/change
     of source parameters when handling the event.
+  * Generic logdata parsing model improvements
 * Bugfixes:
   * Packaging: unowned directory after purge, see
     https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=832347
