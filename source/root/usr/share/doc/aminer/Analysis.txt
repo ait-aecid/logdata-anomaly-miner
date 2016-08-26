@@ -174,6 +174,30 @@ pass. Predefined actions are:
   * ParsedAtomFilterMatchAction: Filter out the parsed atoms on
     match and forward it to other handlers, e.g. analysis components.
 
+* Rules:
+
+The ruleset of this detector is created from classes defined in
+aminer.analysis.Rules. See below for short list of supported rules
+or source for full documentation:
+
+  * AndMatchRule: match only if all subrules match
+  * DebugMatchRule: print debugging text when matching
+  * IPv4InRFC1918MatchRule: match IPs in private networks
+  * ModuloTimeMatchRule: match cyclic time values, e.g. nighttime
+  * NegationMatchRule: match only if other rule did not
+  * OrMatchRule: match if any subrule matches
+  * ParallelMatchRule: match if any subrule matches but do not
+    stop at first successful match
+  * PathExistsMatchRule: match if parsed data contains given path
+  * ValueDependentDelegatedMatchRule: select match rules according
+    to values from parsed data
+  * ValueDependentModuloTimeMatchRule: like ModuloTimeMatchRule
+    but select limits according to values from parsed data
+  * ValueListMatchRule: match if value is in given lookup list
+  * ValueMatchRule: match if parsed data contains specific value
+  * ValueRangeMatchRule: match if parsed data value is within
+    given range
+
 
 * Example:
 

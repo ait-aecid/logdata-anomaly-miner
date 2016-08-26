@@ -145,6 +145,50 @@ class ParallelMatchRule(MatchRule):
     return(result)
 
 
+class ValueDependentDelegatedMatchRule(MatchRule):
+  """This class is a rule delegating rule checking to subrules
+  depending on values found within the ParserMatch. The result
+  of this rule is the result of the selected delegation rule."""
+
+  def __init__(self, valuePathList, ruleLookupDict, defaultRule=None,
+      matchAction=None):
+    """Create the rule.
+    @param list with value pathes that are used to extract the
+    lookup keys for ruleLookupDict. If value lookup fails, None
+    will be used for lookup.
+    @param ruleLookupDict dicitionary with tuple containing values
+    for valuePathList as key and target rule as value.
+    @param defaultRule when not none, this rule will be executed
+    as default. Otherwise when rule lookup failed, False will
+    be returned unconditionally.
+    @param matchAction if None, no action is performed."""
+    self.valuePathList=valuePathList
+    self.ruleLookupDict=ruleLookupDict
+    self.defaultRule=defaultRule
+    self.matchAction=matchAction
+
+  def match(self, parserMatch):
+    """Try to locate a rule for delegation or use the default
+    rule.
+    @return True when selected delegation rule matched."""
+    matchDict=parserMatch.getMatchDictionary()
+    valueList=[]
+    for path in self.valuePathList:
+      valueElement=matchDict.get(path, None)
+      if valueElement==None: valueList.append(None)
+      else: valueList.append(valueElement.matchObject)
+    rule=self.ruleLookupDict.get(tuple(valueList), self.defaultRule)
+    if rule==None: return(False)
+    if rule.match(parserMatch):
+      if self.matchAction!=None: self.matchAction.matchAction(parserMatch)
+      return(True)
+    return(False)
+
+  def __str__(self):
+    result='ValueDependentDelegatedMatchRule'
+    return(result)
+
+
 class NegationMatchRule(MatchRule):
   """Match elements of this class return true when the subrule
   did not match."""
@@ -274,6 +318,54 @@ class ModuloTimeMatchRule(MatchRule):
     if testValue==None: return(False)
     testValue%=self.secondsModulo
     if (testValue>=self.lowerLimit) and (testValue<=self.upperLimit):
+      if self.matchAction!=None: self.matchAction.matchAction(parserMatch)
+      return(True)
+    return(False)
+
+
+class ValueDependentModuloTimeMatchRule(MatchRule):
+  """Match elements of this class return true when the given path
+  exists, denotes a datetime object and the seconds since 1970
+  from that date modulo the given value are included in a [lower,
+  upper] range selected by values from the match."""
+
+  def __init__(self, path, secondsModulo, valuePathList, limitLookupDict,
+      defaultLimit=None, matchAction=None):
+    """@param path the path to the datetime object to use to evaluate
+    the modulo time rules on. When None, the default timestamp associated
+    with the match is used.
+    @param defaultLimit use this default limit when limit lookup
+    failed. Without a default limit, a failed lookup will cause
+    the rule not to match."""
+    self.path=path
+    self.secondsModulo=secondsModulo
+    self.valuePathList=valuePathList
+    self.limitLookupDict=limitLookupDict
+    self.defaultLimit=defaultLimit
+    self.matchAction=matchAction
+
+  def match(self, parserMatch):
+    matchDict=parserMatch.getMatchDictionary()
+    valueList=[]
+    for path in self.valuePathList:
+      valueElement=matchDict.get(path, None)
+      if valueElement==None: valueList.append(None)
+      else: valueList.append(valueElement.matchObject)
+    limits=self.limitLookupDict.get(tuple(valueList), self.defaultLimit)
+    if limits==None: return(False)
+
+    testValue=None
+    if self.path==None:
+      testValue=parserMatch.getDefaultTimestamp()
+    else:
+      timeMatch=parserMatch.getMatchDictionary().get(self.path, None)
+      if (timeMatch==None) or not(isinstance(timeMatch.matchObject, tuple)) or not(isinstance(timeMatch.matchObject[0], datetime.datetime)):
+        return(False)
+      testValue=timeMatch.matchObject[1]
+
+    if testValue==None: return(False)
+    testValue%=self.secondsModulo
+    if (testValue>=limits[0]) and (testValue<=limits[1]):
       if self.matchAction!=None: self.matchAction.matchAction(parserMatch)
       return(True)
     return(False)
