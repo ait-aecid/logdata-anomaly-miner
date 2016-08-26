@@ -117,17 +117,13 @@ events and send them via "sendmail" transport."""
 
 
   def doTimer(self, time):
-    """Check if alerts should be sent."""
-    if (self.nextAlertTime!=0) and (time>=self.nextAlertTime):
-      self.sendNotification(time)
-    return(10)
-
-
-  def sendNotification(self, time):
-    """Really send out the message."""
+    """Check exit status of previous mail sending procedures and
+    check if alerts should be sent."""
+# Cleanup old sendmail processes.
     if len(self.runningSendmailProcesses)!=0:
       runningProcesses=[]
       for process in self.runningSendmailProcesses:
+        process.poll()
         if process.returncode==None:
           runningProcesses.append(process)
           continue
@@ -135,6 +131,13 @@ events and send them via "sendmail" transport."""
           print >>sys.stderr, 'WARNING: Sending mail terminated with error %d' % process.returncode
       self.runningSendmailProcesses=runningProcesses
 
+    if (self.nextAlertTime!=0) and (time>=self.nextAlertTime):
+      self.sendNotification(time)
+    return(10)
+
+
+  def sendNotification(self, time):
+    """Really send out the message."""
     if self.eventsCollected==0: return()
 
 # Write whole message to file to allow sendmail send it asynchronously.
@@ -159,6 +162,8 @@ events and send them via "sendmail" transport."""
 # Start the sendmail process. Use close_fds to avoid leaking of
 # any open file descriptors to the new client.
     process=subprocess.Popen(sendmailArgs, executable=self.sendmailBinaryPath, stdin=messageTmpFile, close_fds=True)
+# Just append the process to the list of running processes. It
+# will remain in zombie state until next invocation of list cleanup.
     self.runningSendmailProcesses.append(process)
     messageTmpFile.close()
 

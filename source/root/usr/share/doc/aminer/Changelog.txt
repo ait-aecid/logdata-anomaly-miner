@@ -12,6 +12,8 @@ V0.0.4 (2016-xx-xx):
 * Bugfixes:
   * Packaging: unowned directory after purge, see
     https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=832347
+  * DefaultMailNotificationEventHandler: cleanup of old sendmail
+    process instances not working
   * EventGenerationMatchAction: wrong method name, class field access
 
 
