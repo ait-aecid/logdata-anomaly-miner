@@ -1,3 +1,25 @@
+logdata-anomaly-miner (0.0.4) xenial; urgency=low
+
+  * New features:
+    * NewMatchPathValueComboDetector: Detect new combination of
+      values for list of data pathes, e.g. for link analysis.
+    * ParsedAtomFilterMatchAction: Forward data to specific handlers
+      when rules match.
+    * VolatileLogarithmicBackoffEventHistory: Added unique EventId
+    * Pass event source reference to event handlers to allow query/change
+      of source parameters when handling the event.
+    * Generic logdata parsing model improvements
+    * Added new rule types: ValueDependentDelegatedMatchRule and
+      ValueDependentModuloTimeMatchRule
+  * Bugfixes:
+    * Packaging: unowned directory after purge, see
+      https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=832347
+    * DefaultMailNotificationEventHandler: cleanup of old sendmail
+      process instances not working
+    * EventGenerationMatchAction: wrong method name, class field access
+
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Fri, 26 Aug 2016 15:15:00 +0000
+
 logdata-anomaly-miner (0.0.3) xenial; urgency=low
 
   * Backport of changes from Debian ITP process review, see

@@ -1,4 +1,4 @@
-logdata-anomaly-miner (0.0.3) xenial; urgency=low
+logdata-anomaly-miner (0.0.4) xenial; urgency=low
 
   Following API changes were introduced:
 
@@ -11,7 +11,7 @@ logdata-anomaly-miner (0.0.3) xenial; urgency=low
     Split result of "getHistory()" to include "eventId, eventType,
     eventMessage, sortedLogLines, eventData, eventSource".
 
- -- Roman Fiedler <roman.fiedler@ait.ac.at>  Thu,  4 Aug 2016 06:35:00 +0000
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Fri, 26 Aug 2016 15:15:00 +0000
 
 logdata-anomaly-miner (0.0.3) xenial; urgency=low
 
