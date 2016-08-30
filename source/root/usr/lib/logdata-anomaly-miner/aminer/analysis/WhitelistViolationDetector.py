@@ -12,8 +12,8 @@ class WhitelistViolationDetector(ParsedAtomHandlerInterface):
 
   def __init__(self, whitelistRules, anomalyEventHandlers):
     """Initialize the detector.
-    @param whitelistRules: list 
-    """
+    @param whitelistRules list of rules executed in same way as
+    inside Rules.OrMatchRule."""
     self.whitelistRules=whitelistRules
     self.anomalyEventHandlers=anomalyEventHandlers
 
