@@ -50,12 +50,12 @@ class NewMatchPathValueComboDetector(ParsedAtomHandlerInterface, TimeTriggeredCo
     matchDict=match.getMatchDictionary()
     matchValueList=[]
     for targetPath in self.targetPathList:
-      match=matchDict.get(targetPath, None)
-      if match==None:
+      matchElement=matchDict.get(targetPath, None)
+      if matchElement==None:
         if not(self.allowMissingValuesFlag): return(False)
         matchValueList.append(None)
       else:
-        matchValueList.append(match.matchObject)
+        matchValueList.append(matchElement.matchObject)
 
     matchValueTuple=tuple(matchValueList)
     if not(matchValueTuple in self.knownValuesSet):
