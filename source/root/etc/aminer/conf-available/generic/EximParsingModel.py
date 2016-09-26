@@ -45,7 +45,9 @@ after any standard logging preamble, e.g. from syslog."""
 
   typeChildren.append(SequenceModelElement('send-log', [
       WhiteSpaceLimitedDataModelElement('id'),
-      FixedDataModelElement('s0', ' => '),
+# Strange: first address seems to use different separator than
+# second one.
+      FixedWordlistDataModelElement('s0', [' => ', ' ->' ]),
       DelimitedDataModelElement('env-to', ' R='),
       FixedDataModelElement('s1', ' R='),
       WhiteSpaceLimitedDataModelElement('route'),
