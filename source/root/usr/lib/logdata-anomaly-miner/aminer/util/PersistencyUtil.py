@@ -43,3 +43,4 @@ def storeJson(fileName, objectData):
   fd=AMinerUtils.createTemporaryPersistenceFile(fileName)
   os.write(fd, persistenceData)
   AMinerUtils.replacePersistenceFile(fileName, fd)
+  os.close(fd)

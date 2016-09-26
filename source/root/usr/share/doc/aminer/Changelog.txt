@@ -1,3 +1,9 @@
+V0.0.5 (2016-09-??):
+====================
+
+* Bugfixes:
+  * Fixed file descriptor leak in PersistencyUtil.py on store
+
 V0.0.4 (2016-08-26):
 ====================
 
