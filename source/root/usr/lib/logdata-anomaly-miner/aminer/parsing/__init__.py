@@ -30,6 +30,7 @@ from FixedDataModelElement import FixedDataModelElement
 from FixedWordlistDataModelElement import FixedWordlistDataModelElement
 from HexStringModelElement import HexStringModelElement
 from IpAddressDataModelElement import IpAddressDataModelElement
+from MatchContext import DebugMatchContext
 from MatchContext import MatchContext
 from MatchElement import MatchElement
 from MultiLocaleDateTimeModelElement import MultiLocaleDateTimeModelElement

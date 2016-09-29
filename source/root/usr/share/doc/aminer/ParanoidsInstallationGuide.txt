@@ -205,6 +205,21 @@ and Python format string specification in
 
 https://docs.python.org/2/library/datetime.html#strftime-strptime-behavior
 
+* Debugging a model:
+
+Being paranoid and using only own, handcrafted models, one will
+usually experience problems that some atom is not handled as expected.
+To follow the parsing model, a DebugMatchContext can be used instead
+of the default context. It is slower but it will capture state
+information about the matching process. With remote control (see
+below), debugging can even occur while AMiner is processing data.
+Remote control code for that purpose could would be:
+
+  from aminer.parsing import DebugMatchContext
+  matchContext=DebugMatchContext('Your test input here')
+  # Working with registered components is handy...
+  match=analysisContext.registeredComponentsByName['ParsingModel'].getMatchElement('', matchContext)
+  remoteControlResponse='Result: %s, debug info %s' % (str(match), matchContext.getDebugInfo())
 
 * Contributing to the model templates:
 

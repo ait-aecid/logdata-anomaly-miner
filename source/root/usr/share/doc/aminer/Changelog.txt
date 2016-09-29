@@ -1,6 +1,9 @@
 V0.0.5 (2016-09-??):
 ====================
 
+* New features:
+  * Added helper class for parser matching process debugging.
+  * Added minimal model for parsing Tomcat start/stop syslog messages.
 * Bugfixes:
   * Fixed file descriptor leak in PersistencyUtil.py on store
 
