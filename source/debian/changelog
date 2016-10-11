@@ -1,3 +1,17 @@
+logdata-anomaly-miner (0.0.5) xenial; urgency=low
+
+  * New features:
+    * Added helper class for parser matching process debugging.
+    * Added interface to ease detector state updates after triggering
+      an event.
+    * Added minimal model for parsing Tomcat start/stop syslog messages.
+    * Added support for logfile reading continuation after shutdown,
+      alternative lowlevel data stream splitting tools (atomizers).
+  * Bugfixes:
+    * Fixed file descriptor leak in PersistencyUtil.py on store.
+
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Tue, 11 Oct 2016 18:00:00 +0000
+
 logdata-anomaly-miner (0.0.4) xenial; urgency=low
 
   * New features:

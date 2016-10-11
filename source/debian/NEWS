@@ -24,8 +24,7 @@ logdata-anomaly-miner (0.0.5) xenial; urgency=low
     * SimpleUnparsedAtomHandler was moved from "aminer.events"
       to "aminer.input".
 
-
- -- Roman Fiedler <roman.fiedler@ait.ac.at>  Mon, 11 Oct 2016 08:00:00 +0000
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Mon, 11 Oct 2016 18:00:00 +0000
 
 logdata-anomaly-miner (0.0.4) xenial; urgency=low
 
