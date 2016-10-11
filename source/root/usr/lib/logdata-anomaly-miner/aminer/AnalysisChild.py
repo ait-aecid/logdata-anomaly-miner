@@ -146,7 +146,7 @@ class AnalysisChild:
                 repr(receivedTypeInfo))
           continue
 
-        if readFd==remoteControlSocket.fileno():
+        if (remoteControlSocket!=None) and (readFd==remoteControlSocket.fileno()):
 # Remote we received an connection, accept it.
           (controlClientSocket, remoteAddress)=remoteControlSocket.accept()
 # Keep track of information received via this remote control socket.
