@@ -109,6 +109,21 @@ Solutions:
     is fstat'ed to known the maximum size of the file, then the
     remaining data is read before closing the old file descriptor.
 
+  * Multiple file synchronization: Useful file synchronization
+    requires basic understanding of reported timestamps which
+    implies the need for parsing. Also timestamp correction should
+    be performed before using the timestamp for synchronization,
+    e.g. host clocks might drift away or logging may use wrong
+    timezone. When processing multiple log data streams, all parsed
+    log atoms will be reordered using the timestamp. One stream
+    might not be read at all for some time, when an atom from
+    that stream has timestamp larger than those from other streams.
+    When reaching the end of input on all streams, marks on all
+    reordering queues of unforwarded parsed log atoms are set.
+    Everything before that mark will be forwared anyway after
+    a configurable timespan. This should prevent bogus items from
+    staying within the reordering queue forever due to timestamps
+    far in future.
 
 * Input parsing:
 
