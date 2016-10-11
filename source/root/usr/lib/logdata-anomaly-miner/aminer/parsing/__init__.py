@@ -3,18 +3,21 @@
 # directory. All classes are defined in separate files, only the
 # namespace references are added here to simplify the code.
 
+
 class ParsedAtomHandlerInterface:
   """This is the common interface of all handlers suitable for
   receiving of parsed atoms."""
 
-  def receiveParsedAtom(self, atomData, match):
+  def receiveParsedAtom(self, atomData, parserMatch):
     """Receive on parsed atom and the information about the parser
     match.
+    @param atomData binary raw atom data
+    @param parserMatch for atomData
     @return True if this handler was really able to handle and
     process the match. Depending on this information, the caller
     may decide if it makes sense passing the parsed atom also
     to other handlers."""
-    raise Exception('Not implemented')
+    raise Exception('Interface method called')
 
 
 # Add also the namespace references to classes defined in this
@@ -38,6 +41,5 @@ from OptionalMatchModelElement import OptionalMatchModelElement
 from ParserMatch import ParserMatch
 from RepeatedElementDataModelElement import RepeatedElementDataModelElement
 from SequenceModelElement import SequenceModelElement
-from SimpleParsingModelRawAtomHandler import SimpleParsingModelRawAtomHandler
 from VariableByteDataModelElement import VariableByteDataModelElement
 from WhiteSpaceLimitedDataModelElement import WhiteSpaceLimitedDataModelElement

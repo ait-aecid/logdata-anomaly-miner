@@ -17,7 +17,6 @@ Roadmap:
 
 Next features to be added, sorted by priority:
 
-* Implement log reading continuation persistance
 * Improved documentation, example configuration, testdata.
 * Implement statistical value distribution analysis persistence
 * Implement frequency analysis on parsed line parameters

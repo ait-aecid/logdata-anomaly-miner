@@ -47,7 +47,6 @@ class EventSourceInterface:
 # directory.
 
 from DefaultMailNotificationEventHandler import DefaultMailNotificationEventHandler
-from SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler
 from StreamPrinterEventHandler import StreamPrinterEventHandler
 from SyslogWriterEventHandler import SyslogWriterEventHandler
 from Utils import VolatileLogarithmicBackoffEventHistory

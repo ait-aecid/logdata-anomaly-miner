@@ -2,6 +2,25 @@ logdata-anomaly-miner (0.0.5) xenial; urgency=low
 
   Following API changes were introduced:
 
+  * Lower input layers dealing with binary data stream reading,
+    splitting into atoms and forwarding data to the parsing model
+    were redesigned. Following configuration changes are required
+    to adapt "config.py" and probably "analysis.py" to the new
+    API:
+
+    * analysisContext.registerComponent(): registerAsRawAtomHandler
+      parameter not needed any more, can be removed.
+
+    * SimpleParsingModelRawAtomHandler is not needed any more,
+      that part can be replaced by configuration:
+
+  # Now define the AtomizerFactory using the model. A simple line
+  # based one is usually sufficient.
+    from aminer.input import SimpleByteStreamLineAtomizerFactory
+    analysisContext.atomizerFactory=SimpleByteStreamLineAtomizerFactory(
+        parsingModel, parsedAtomHandlers, unparsedAtomHandlers,
+        anomalyEventHandlers, defaultTimestampPath='/model/syslog/time')
+
     * SimpleUnparsedAtomHandler was moved from "aminer.events"
       to "aminer.input".
 
