@@ -30,6 +30,7 @@ class DebugMatchContext(MatchContext):
   def __init__(self, matchData):
     self.debugInfo=''
     self.lastMatchData=None
+    self.shortestUnmatchedData=None
     super(DebugMatchContext, self).__init__(matchData)
 
   def update(self, matchString):
@@ -42,10 +43,19 @@ class DebugMatchContext(MatchContext):
       raise Exception('Illegal state')
     self.matchData=self.matchData[len(matchString):]
     self.lastMatchData=self.matchData
+    if (self.shortestUnmatchedData==None) or (len(self.matchData)<len(self.shortestUnmatchedData)):
+      self.shortestUnmatchedData=self.matchData
     self.debugInfo+='Removed %s, remaining %d bytes\n' % (repr(matchString), len(self.matchData))
 
   def getDebugInfo(self):
     """Get the current debugging information and reset it."""
     result=self.debugInfo
     self.debugInfo=''
+    result+='Shortest unmatched data was %s\n' % repr(self.shortestUnmatchedData)
     return(result)
+
+  def getshortestUnmatchedData(self):
+    """Get shortest matchData found while updating the internal
+    state. This is useful to find out where the parsing process
+    has terminated."""
+    return(self.shortestUnmatchedData)
