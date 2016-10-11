@@ -90,7 +90,9 @@ AMinerUtils.secureOpenFile=insecureDemoOpen
 # Add your ruleset here:
 
 # Define the function to create pipeline for parsing the log data.
-# It has to register at least a single RawAtomHandler.
+# It has also to define an AtomizerFactory to instruct AMiner
+# how to process incoming data streams to create log atoms from
+# them.
 def buildAnalysisPipeline(analysisContext):
 # Build the parsing model first
   from aminer.parsing import FirstMatchModelElement
@@ -107,12 +109,12 @@ def buildAnalysisPipeline(analysisContext):
   import RsyslogParsingModel
   serviceChildren.append(RsyslogParsingModel.getModel())
 
-  from aminer.parsing import ConfigSyslogPreambleModel
-  syslogPreambleModel=ConfigSyslogPreambleModel.getModel()
+  import SyslogPreambleModel
+  syslogPreambleModel=SyslogPreambleModel.getModel()
 
-  parsingModel=SequenceModelElement.SequenceModelElement('model', [
+  parsingModel=SequenceModelElement('model', [
       syslogPreambleModel,
-      FirstMatchModelElement.FirstMatchModelElement('services', serviceChildren)])
+      FirstMatchModelElement('services', serviceChildren)])
 
 
 # Create all global handler lists here and append the real handlers
@@ -122,27 +124,24 @@ def buildAnalysisPipeline(analysisContext):
   unparsedAtomHandlers=[]
   anomalyEventHandlers=[]
 
-# Add handler to parse the raw atoms, extract timestamp if available.
-  from aminer.parsing import SimpleParsingModelRawAtomHandler
-  analysisContext.registerComponent(
-      SimpleParsingModelRawAtomHandler.SimpleParsingModelRawAtomHandler(
-          parsingModel, parsedAtomHandlers, unparsedAtomHandlers,
-          defaultTimestampPath='/model/syslog/time'),
-      componentName=None, registerAsRawAtomHandler=True)
+# Now define the AtomizerFactory using the model. A simple line
+# based one is usually sufficient.
+  from aminer.input import SimpleByteStreamLineAtomizerFactory
+  analysisContext.atomizerFactory=SimpleByteStreamLineAtomizerFactory(
+      parsingModel, parsedAtomHandlers, unparsedAtomHandlers,
+      anomalyEventHandlers, defaultTimestampPath='/model/syslog/time')
 
 # Always report the unparsed lines: a part of the parsing model
 # seems to be missing or wrong.
-  from aminer.events import SimpleUnparsedAtomHandler
-  unparsedAtomHandlers.append(SimpleUnparsedAtomHandler.SimpleUnparsedAtomHandler(anomalyEventHandlers))
+  from aminer.input import SimpleUnparsedAtomHandler
+  unparsedAtomHandlers.append(SimpleUnparsedAtomHandler(anomalyEventHandlers))
 
 # Report new parsing model path values. Those occurr when a line
 # with new structural properties was parsed.
   from aminer.analysis import NewMatchPathDetector
-  newMatchPathDetector=NewMatchPathDetector.NewMatchPathDetector(
+  newMatchPathDetector=NewMatchPathDetector(
       analysisContext.aminerConfig, anomalyEventHandlers, autoIncludeFlag=True)
-  analysisContext.registerComponent(newMatchPathDetector,
-      componentName=None, registerAsRawAtomHandler=False,
-      registerAsTimeTriggeredHandler=True)
+  analysisContext.registerComponent(newMatchPathDetector, componentName=None)
   parsedAtomHandlers.append(newMatchPathDetector)
 
 # Run a whitelisting over the parsed lines.
@@ -168,19 +167,18 @@ def buildAnalysisPipeline(analysisContext):
       Rules.ValueMatchRule('/model/services/cron/msgtype/exec/command', '(   cd / && run-parts --report /etc/cron.hourly)'),
       Rules.ModuloTimeMatchRule('/model/syslog/time', 3600, 17*60, 17*60+5)]))
 
-  parsedAtomHandlers.append(WhitelistViolationDetector.WhitelistViolationDetector(whitelistRules, anomalyEventHandlers))
+  parsedAtomHandlers.append(WhitelistViolationDetector(whitelistRules, anomalyEventHandlers))
 
 # Include the e-mail notification handler only if the configuration
 # parameter was set.
   from aminer.events import DefaultMailNotificationEventHandler
   if analysisContext.aminerConfig.configProperties.has_key(
-      DefaultMailNotificationEventHandler.configKeyMailAlertingTargetAddress):
-    mailNotificationHandler=DefaultMailNotificationEventHandler.DefaultMailNotificationEventHandler(analysisContext.aminerConfig)
+      DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS):
+    mailNotificationHandler=DefaultMailNotificationEventHandler(analysisContext.aminerConfig)
     analysisContext.registerComponent(mailNotificationHandler,
-        componentName=None, registerAsRawAtomHandler=False,
-        registerAsTimeTriggeredHandler=True)
+        componentName=None)
     anomalyEventHandlers.append(mailNotificationHandler)
 
 # Add stdout stream printing for debugging, tuning.
   from aminer.events import StreamPrinterEventHandler
-  anomalyEventHandlers.append(StreamPrinterEventHandler.StreamPrinterEventHandler(analysisContext.aminerConfig))
+  anomalyEventHandlers.append(StreamPrinterEventHandler(analysisContext.aminerConfig))
