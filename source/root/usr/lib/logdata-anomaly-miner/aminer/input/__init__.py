@@ -1,42 +1,76 @@
-import os
-import sys
+# This file contains interface definition useful implemented by
+# classes in this directory and for use from code outside this
+# directory. All classes are defined in separate files, only the
+# namespace references are added here to simplify the code.
 
-class LogStream:
-  """This class defines a continuous stream of logging data from
-  a given source. This class also handles rollover from one file
-  descriptor to a new one and performs the resynchronization after
-  a restart."""
+class AtomizerFactory:
+  """This is the common interface of all factories to create atomizers
+  for new data sources and integrate them into the downstream
+  processing pipeline."""
 
-  def __init__(self, logDataResource):
-    self.logDataResource=logDataResource
-    self.byteLineReader=ByteLineReader.ByteLineReader(logDataResource.logFileFd, 1<<16)
-    self.nextResources=[]
+  def getAtomizerForResource(self, resourceName):
+    """Get an atomizer for a given resource.
+    @return a StreamAtomizer object"""
+    raise Exception('Interface method called')
 
-  def rollOver(self, logDataResource):
-    """Roll over from one fd to another one pointing to the newer
-    version of the same file. The method will query the size of
-    the old file to see how many bytes are left for reading. When
-    those were processed also, real roll over will be completed."""
-# Just append the resource to the list of next resources. The
-# next read operation without any input from the primary resource
-# will pick it up automatically.
-    self.nextResources.append(logDataResource)
 
-  def readLine(self):
-    result=self.byteLineReader.readLine()
-    if result!=None: return(result)
+class StreamAtomizer:
+  """This is the common interface of all binary stream atomizers.
+  Atomizers in general should be good detecting and reporting
+  malformed atoms but continue to function by attempting error
+  correction or resynchronization with the stream after the bad
+  atom.
+  This type of atomizer also signals a stream source when the
+  stream data cannot be handled at the moment to throttle reading
+  of the underlying stream."""
 
-    if len(self.nextResources)!=0:
-# The old one seems to have been read till the end of the file.
-# Signal the end of the stream here.
-      self.byteLineReader.markEndOfStream()
-# Try to read again: this will report errors due to incomplete
-# records.
-      result=self.byteLineReader.readLine()
-      if result!=None:
-        raise Exception('Unexpected read result: %s' % repr(result))
+  def consumeData(self, streamData, endOfStreamFlag=False):
+    """Consume data from the underlying stream for atomizing.
+    Data should only be consumed after splitting of an atom. The
+    caller has to keep unconsumed data till the next invocation.
+    @param streamData the data offered to be consumed or zero
+    length data when endOfStreamFlag is True (see below).
+    @param endOfStreamFlag this flag is used to indicate, that
+    the streamData offered is the last from the input stream.
+    If the streamData does not form a complete atom, no rollover
+    is expected or rollover would have honoured the atom boundaries,
+    then the StreamAtomizer should treat that as an error. With
+    rollover, consuming of the stream end data will signal the
+    invoker to continue with data from next stream. When end of
+    stream was reached but invoker has no streamData to send,
+    it will invoke this method with zero-length data, which has
+    to be consumed with a zero-length reply.
+    @return the number of consumed bytes, 0 if the atomizer would
+    need more data for a complete atom or -1 when no data was
+    consumed at the moment but data might be consumed later on.
+    The only situation where 0 is not an allowed return value
+    is when endOfStreamFlag is set and streamData not empty."""
+    raise Exception('Interface method called')
 
-      os.close(self.logDataResource.logFileFd)
-      self.logDataResource=self.nextResources[0]
-      self.nextResources=self.nextResources[1:]
-      self.byteLineReader=ByteLineReader.ByteLineReader(self.logDataResource.logFileFd, 1<<16)
+class UnparsedAtomHandler:
+  """This is the common interface of all handlers of unparsed
+  data."""
+
+  def receiveUnparsedAtom(self, message, atomData, unparsedAtomData,
+      parserMatch):
+    """Receive information about a single unparsed atom.
+    @param message message indicating the cause of parsing failure.
+    @param atomData the full atom data as analyzed by the parser.
+    When atomizing did not work or an atom was truncated, the
+    data might be shorter than expected.
+    @param unparsedAtomData the part of atomData that did not
+    match any parsing procedures. A parser not working from the
+    ends of atomData, thus carving out multiple unparsed parts
+    from atomData may use a list of strings, otherwise a single
+    string should be used. When detection of parsed and unparsed
+    parts was not possible, None should be given.
+    @param the incomplete match structure if the parser supports
+    such operation mode, None otherwise."""
+    raise Exception('Interface method called')
+
+
+from ByteStreamLineAtomizer import ByteStreamLineAtomizer
+from LogStream import LogDataResource
+from LogStream import LogStream
+from SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
+from SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler
