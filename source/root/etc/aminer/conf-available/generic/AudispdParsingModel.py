@@ -77,6 +77,29 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement('s2', '):')])
 
   typeChildren=[]
+  typeChildren.append(SequenceModelElement('adduser', [
+      FixedDataModelElement('type', 'ADD_USER '),
+      msgIdPart,
+      FixedDataModelElement('s0', ' pid='),
+      DecimalIntegerValueModelElement('pid'),
+      FixedDataModelElement('s1', ' uid='),
+      DecimalIntegerValueModelElement('uid'),
+      FixedDataModelElement('s2', ' auid='),
+      DecimalIntegerValueModelElement('auid'),
+      FixedDataModelElement('s3', ' ses='),
+      DecimalIntegerValueModelElement('ses'),
+      FixedDataModelElement('s4', ' msg=\'op=adding user id='),
+      DecimalIntegerValueModelElement('newuserid'),
+      FixedDataModelElement('s5', ' exe="'),
+      DelimitedDataModelElement('exec', '"'),
+      FixedDataModelElement('s6', '" hostname='),
+      DelimitedDataModelElement('clientname', ' '),
+      FixedDataModelElement('s7', ' addr='),
+      DelimitedDataModelElement('clienip', ' '),
+      FixedDataModelElement('s8', ' terminal='),
+      WhiteSpaceLimitedDataModelElement('terminal'),
+      FixedDataModelElement('s9', ' res=success\'')
+  ]))
   typeChildren.append(SequenceModelElement('bprmfcaps', [
       FixedDataModelElement('type', 'BPRM_FCAPS '),
       msgIdPart,
