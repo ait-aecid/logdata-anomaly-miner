@@ -1,5 +1,4 @@
 import datetime
-import pytz
 import sys
 
 import MatchElement
@@ -10,6 +9,9 @@ class DateTimeModelElement:
   * '%b %d %H:%M:%S' e.g. for 'Nov 19 05:08:43'"""
   def __init__(self, id, dateFormat, dateDataLength, formatHasYearFlag, startYear=None):
     self.id=id
+# Import in constructor to avoid failures reading the class in
+# module initialization on setups without pytz.
+    import pytz
     self.syslogTimeZone=pytz.timezone('UTC')
     self.dateFormat=dateFormat
     self.pythonYearParsingWorkaroundFormat=None

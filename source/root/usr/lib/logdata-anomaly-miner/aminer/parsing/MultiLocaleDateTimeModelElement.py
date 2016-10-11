@@ -1,6 +1,5 @@
 import datetime
 import locale
-import pytz
 import sys
 
 import MatchElement
@@ -316,6 +315,9 @@ class DateFormatComponent:
       nextComponent.addFormat(formatString[parsePos:], formatLocale,
           formatTimezone)
     else:
+# Import in constructor to avoid failures reading the class in
+# module initialization on setups without pytz.
+      import pytz
       nextComponent.makeEndNode(pytz.timezone(formatTimezone))
 
 
