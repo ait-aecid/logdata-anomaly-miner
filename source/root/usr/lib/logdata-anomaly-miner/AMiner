@@ -97,9 +97,11 @@ if runAnalysisChildFlag:
 
   import aminer
   child=aminer.AnalysisChild(programName, aminerConfig)
-# This function call will never return
-  child.runAnalysis(3)
-  print >>sys.stderr, '%s: runAnalysis did complete but should not' % programName
+# This function call will only return on error or signal induced
+# normal termination.
+  childReturnStatus=child.runAnalysis(3)
+  if childReturnStatus==0: sys.exit(0)
+  print >>sys.stderr, '%s: runAnalysis terminated with unexpected status %d' % (programName, childReturnStatus)
   sys.exit(1)
 
 # Start importing of aminer specific components after reading
@@ -113,11 +115,12 @@ if (logFileList==None) or (len(logFileList)==0):
   sys.exit(1)
 
 # Now create the management entries for each logfile.
-logDataResourceList=[]
+logDataResourceDict={}
 for logFileName in logFileList:
-  logFileFd=-1
+  logFileInfo=None
   try:
     logFileFd=AMinerUtils.secureOpenFile(logFileName, os.O_RDONLY)
+    logFileInfo=[logFileFd, os.fstat(logFileFd)]
   except OSError as openOsError:
     if openOsError.errno==errno.ENOENT:
       pass
@@ -127,7 +130,7 @@ for logFileName in logFileList:
     else:
       print >>sys.stderr, '%s: unexpected error opening %s: %d (%s)' % (programName, logFileName, openOsError.errno, os.strerror(openOsError.errno))
       sys.exit(1)
-  logDataResourceList.append(AMinerUtils.LogDataResource(logFileName, logFileFd))
+  logDataResourceDict[logFileName]=logFileInfo
 
 childUserName=aminerConfig.configProperties.get(AMinerConfig.KEY_AMINER_USER, None)
 childGroupName=aminerConfig.configProperties.get(AMinerConfig.KEY_AMINER_GROUP, None)
@@ -207,10 +210,14 @@ if not(runInForegroundFlag):
 
 # Install a signal handler catching common stop signals and relaying
 # it to all children for sure.
+childTerminationTriggeredFlag=False
 def gracefulShutdownHandler(_signo, _stackFrame):
   print >>sys.stderr, '%s: caught signal, shutting down' % programName
-  os.kill(0, signal.SIGTERM)
-  sys.exit(0)
+# Just set the flag. It is likely, that child received same signal
+# also so avoid multiple signaling, which could interrupt the
+# shutdown procedure again.
+  global childTerminationTriggeredFlag
+  childTerminationTriggeredFlag=True
 import signal
 signal.signal(signal.SIGHUP, gracefulShutdownHandler)
 signal.signal(signal.SIGINT, gracefulShutdownHandler)
@@ -283,9 +290,11 @@ childSocket.close()
 
 # Send all log resource information currently available to child
 # process.
-for resource in logDataResourceList:
-  if resource.logFileFd>=0:
-    AMinerUtils.sendLogstreamDescriptor(parentSocket, resource.logFileFd, resource.logFileName)
+for fileName, logFileInfo in logDataResourceDict.iteritems():
+  if logFileInfo!=None:
+    AMinerUtils.sendLogstreamDescriptor(parentSocket, logFileInfo[0], fileName)
+    os.close(logFileInfo[0])
+    logFileInfo[0]=-1
 
 # Send the remote control server socket, if any and close it afterwards.
 # It is not needed any more on parent side.
@@ -294,17 +303,26 @@ if remoteControlSocket!=None:
       remoteControlSocket.fileno(), 'remotecontrol', '')
   remoteControlSocket.close()
 
-childTerminationTriggeredFlag=False
 exitStatus=0
 warnOnceFlag=True
+childTerminationTriggeredCount=0
 while True:
+  if childTerminationTriggeredFlag:
+    if childTerminationTriggeredCount==0:
+      time.sleep(1)
+    elif childTerminationTriggeredCount<5:
+      os.kill(childPid, signal.SIGTERM)
+    else:
+      os.kill(0, signal.SIGKILL)
+    childTerminationTriggeredCount+=1
+
   (sigChildPid, sigStatus)=os.waitpid(-1, os.WNOHANG)
   if sigChildPid!=0:
     if sigChildPid==childPid:
       if childTerminationTriggeredFlag:
 # This was expected, just terminate.
         break
-      print >>sys.stderr, '%s: Analysis child terminated unexpectedly with signal 0x%x' % (programName, sigStatus)
+      print >>sys.stderr, '%s: Analysis child process %d terminated unexpectedly with signal 0x%x' % (programName, sigChildPid, sigStatus)
       exitStatus=1
       break
 # So the child has been cloned, the clone has terminated. This
@@ -313,12 +331,12 @@ while True:
     exitStatus=1
 
 # Child information handled, scan for rotated logfiles.
-  for resource in logDataResourceList:
+  for fileName, logFileInfo in logDataResourceDict.iteritems():
 # FIXME: some inotify-scheme would be nicer, but start with primitive
 # open at first.
     logFileFd=-1
     try:
-      logFileFd=AMinerUtils.secureOpenFile(resource.logFileName, os.O_RDONLY)
+      logFileFd=AMinerUtils.secureOpenFile(logFileName, os.O_RDONLY)
     except OSError as openOsError:
       if openOsError.errno==errno.ENOENT:
         continue
@@ -330,10 +348,14 @@ while True:
       continue
 
     statData=os.fstat(logFileFd)
-    if (resource.statData==None) or (statData.st_ino!=resource.statData.st_ino) or (statData.st_dev!=resource.statData.st_dev):
-      resource.logFileFd=logFileFd
-      resource.statData=statData
-      AMinerUtils.sendLogstreamDescriptor(parentSocket, resource.logFileFd, resource.logFileName)
+    if (logFileInfo==None) or (statData.st_ino!=logFileInfo[1].st_ino) or (statData.st_dev!=logFileInfo[1].st_dev):
+      if logFileInfo==None:
+        logFileInfo=[-1, statData]
+        logDataResourceDict[fileName]=logFileInfo
+      else:
+        logFileInfo[0]=-1
+        logFileInfo[1]=statData
+      AMinerUtils.sendLogstreamDescriptor(parentSocket, logFileFd, logFileName)
     os.close(logFileFd)
 
   time.sleep(1)

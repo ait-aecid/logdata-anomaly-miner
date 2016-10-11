@@ -1,4 +1,4 @@
-V0.0.5 (2016-09-??):
+V0.0.5 (2016-10-11):
 ====================
 
 * New features:
@@ -6,6 +6,8 @@ V0.0.5 (2016-09-??):
   * Added interface to ease detector state updates after triggering
     an event.
   * Added minimal model for parsing Tomcat start/stop syslog messages.
+  * Added support for logfile reading continuation after shutdown,
+    alternative lowlevel data stream splitting tools (atomizers).
 * Bugfixes:
   * Fixed file descriptor leak in PersistencyUtil.py on store
 

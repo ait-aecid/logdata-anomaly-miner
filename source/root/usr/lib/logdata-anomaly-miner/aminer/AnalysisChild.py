@@ -1,4 +1,5 @@
 import base64
+import errno
 import fcntl
 import json
 import os
@@ -9,9 +10,11 @@ import sys
 import time
 import traceback
 
+from aminer import AMinerConfig
 from aminer import AMinerUtils
+from aminer.input import LogDataResource
 from aminer.input import LogStream
-from aminer.input import ByteLineReader
+from aminer.util import PersistencyUtil
 
 
 class AnalysisChild:
@@ -23,13 +26,12 @@ class AnalysisChild:
   def __init__(self, programName, aminerConfig):
     self.programName=programName
     self.analysisContext=AMinerUtils.AnalysisContext(aminerConfig)
+    self.runAnalysisLoopFlag=True
 
 # Override the signal handler to allow graceful shutdown.
     def gracefulShutdownHandler(_signo, _stackFrame):
       print >>sys.stderr, '%s: caught signal, shutting down' % programName
-      from aminer.util import PersistencyUtil
-      PersistencyUtil.persistAll()
-      sys.exit(0)
+      self.runAnalysisLoopFlag=False
     import signal
     signal.signal(signal.SIGHUP, gracefulShutdownHandler)
     signal.signal(signal.SIGINT, gracefulShutdownHandler)
@@ -39,7 +41,9 @@ class AnalysisChild:
   def runAnalysis(self, masterFd):
     """This method runs the analysis thread.
     @param masterFd the main communication socket to the parent
-    to receive logfile updates from the parent."""
+    to receive logfile updates from the parent.
+    @return 0 on success, e.g. normal termination via signal or
+    1 on error."""
 
 # The masterControlSocket is the socket to communicate with the
 # master process to receive commands or logstream data. Expect
@@ -50,46 +54,85 @@ class AnalysisChild:
 
 # Locate the real analysis configuration.
     self.analysisContext.buildAnalysisPipeline()
-    rawAtomHandlers=self.analysisContext.rawAtomHandlers
+    if self.analysisContext.atomizerFactory==None:
+      print >>sys.stderr, 'FATAL: buildAnalysisPipeline() did not initialize atomizerFactory, terminating'
+      return(1)
+
     realTimeTriggeredComponents=self.analysisContext.realTimeTriggeredComponents
     analysisTimeTriggeredComponents=self.analysisContext.analysisTimeTriggeredComponents
 
-    logStreams=[]
     logStreamsByName={}
+# Load continuation data for last known log streams. The loaded
+# data has to be a dictionary with repositioning information for
+# each stream. The data is used only when creating the first stream
+# with that name.
+    persistenceFileName=AMinerConfig.buildPersistenceFileName(
+        self.analysisContext.aminerConfig,
+        self.__class__.__name__+'/RepositioningData')
+    repositioningDataDict=PersistencyUtil.loadJson(persistenceFileName)
+    if repositioningDataDict==None: repositioningDataDict={}
+
     remoteControlSocket=None
-    childSocketSelectList=[masterControlSocket.fileno(),]
+    childSocketSelectList=[masterControlSocket.fileno()]
+# This list has the same number of elements as childSocketSelectList.
+# For each select file descriptor from a logStream it keeps the
+# logStream object at same position for quick reference.
+    childSocketSelectStreams=[None]
+# A list of LogStreams where handleStream() blocked due to downstream
+# not being able to consume the data yet.
+    blockedLogStreams=[]
 
 # Every number is larger than None so using this starting value
 # will cause the trigger to be invoked on the first event.
     nextRealTimeTriggerTime=None
     nextAnalysisTimeTriggerTime=None
 
-# The number of lines read during the last pass over all log data
-# streams. Start with -1 to make first round of select return
-# immediately.
-    lastReadLines=-1
-
-    while True:
-      if lastReadLines==0:
+    delayedReturnStatus=0
+    while self.runAnalysisLoopFlag:
+      readList=None
+      writeList=None
+      exceptList=None
+      try:
         (readList, writeList, exceptList)=select.select(childSocketSelectList, [], [], 1)
-      else:
-        (readList, writeList, exceptList)=select.select(childSocketSelectList, [], [], 0)
+      except select.error as selectError:
+# Interrupting signals, e.g. for shutdown are OK.
+        if selectError[0]==errno.EINTR: continue
+        print >>sys.stderr, 'Unexpected select result %s' % str(selectError)
+        delayedReturnStatus=1
+        break
+      if len(readList)==0:
+# All reads failed. Unblock all blocked streams to retry those
+# too.
+        for logStream in blockedLogStreams:
+          currentFd=logStream.getCurrentFd()
+          if currentFd<0: continue
+          childSocketSelectList.append(currentFd)
+          childSocketSelectStreams.append(logStream)
+          blockedLogStreams.remove(logStream)
+          continue
       for readFd in readList:
         if readFd==masterControlSocket.fileno():
 # We cannot fail with None here as the socket was in the readList.
           (receivedFd, receivedTypeInfo, annotationData)=AMinerUtils.receiveAnnotedFileDescriptor(masterControlSocket)
           if 'logstream'==receivedTypeInfo:
-            resource=AMinerUtils.LogDataResource(annotationData, receivedFd)
+            repositioningData=repositioningDataDict.get(annotationData, None)
+            if repositioningData!=None:
+              del repositioningDataDict[annotationData]
+            resource=LogDataResource(annotationData,
+                receivedFd, repositioningData=repositioningData)
 # Make fd nonblocking
             fdFlags=fcntl.fcntl(resource.logFileFd, fcntl.F_GETFL)
             fcntl.fcntl(resource.logFileFd, fcntl.F_SETFL, fdFlags|os.O_NONBLOCK)
             logStream=logStreamsByName.get(resource.logFileName)
             if logStream==None:
-              logStream=LogStream(resource)
-              logStreams.append(logStream)
+              streamAtomizer=self.analysisContext.atomizerFactory.getAtomizerForResource(resource.logFileName)
+              logStream=LogStream(resource, streamAtomizer)
               logStreamsByName[resource.logFileName]=logStream
+# Add the stream to the select list.
+              childSocketSelectList.append(resource.logFileFd)
+              childSocketSelectStreams.append(logStream)
             else:
-              logStream.rollOver(resource)
+              logStream.addNextResource(resource)
           elif 'remotecontrol'==receivedTypeInfo:
             if remoteControlSocket!=None:
               raise Exception('Received another remote control socket: multiple remote control not (yet?) supported.')
@@ -97,16 +140,17 @@ class AnalysisChild:
                 socket.SOCK_STREAM, 0)
             os.close(receivedFd)
             childSocketSelectList.append(remoteControlSocket.fileno())
+            childSocketSelectStreams.append(None)
           else:
             raise Exception('Unhandled type info on received fd: %s' %
                 repr(receivedTypeInfo))
           continue
-        elif readFd==remoteControlSocket.fileno():
+
+        if readFd==remoteControlSocket.fileno():
 # Remote we received an connection, accept it.
           (controlClientSocket, remoteAddress)=remoteControlSocket.accept()
 # Keep track of information received via this remote control socket.
           remoteControlHandler=AnalysisChildRemoteControlHandler(controlClientSocket.fileno())
-
 # FIXME: Here we should enter asynchronous read mode as described
 # in the header of AnalysisChildRemoteControlHandler. At the moment
 # everything is done within the thread. Make sure to continue
@@ -128,32 +172,17 @@ class AnalysisChild:
 # from closing and freeing the socket too early.
           controlClientSocket.close()
           continue
-        raise Exception('Illegal state reached')
 
-      lastReadLines=0
-      for logStream in logStreams:
-# FIXME: no message read synchronization beween multiple fds,
-# see Readme.txt (Multiple file synchronization)
-        for logLine in range(0, 1000):
-          lineData=None
-          try:
-            lineData=logStream.readLine()
-          except ValueError as valueError:
-# This should only happen on input data failures, e.g. overlong or
-# corrupted lines. Just log it but continue using the stream:
-# each error should be reported only once by the stream.
-            print >>sys.stderr, 'ERROR: Invalid input data reading from stream %s: %s' % (logStream.logDataResource.logFileName, str(valueError))
-            continue
+# This has to be a logStream, handle it. Only when downstream
+# blocks, add the stream to the blocked stream list.
+        streamPos=childSocketSelectList.index(readFd)
+        logStream=childSocketSelectStreams[streamPos]
+        handleResult=logStream.handleStream()
+        if handleResult<0:
+          del childSocketSelectList[streamPos]
+          del childSocketSelectStreams[streamPos]
+          blockedLogStreams.append(logStream)
 
-          if lineData==None:
-            if logStream.byteLineReader.isEndOfStream():
-              logStreams.remove(logStream)
-              logStreamsByName.remove(logStream.logDataResource.logFileName)
-            break
-
-          lastReadLines+=1
-          for handler in rawAtomHandlers:
-            handler.receiveAtom(lineData)
 
 # Handle the real time events.
       realTime=time.time()
@@ -174,6 +203,17 @@ class AnalysisChild:
           nextTriggerRequest=component.doTimer(realTime)
           nextTriggerOffset=min(nextTriggerOffset, nextTriggerRequest)
         nextAnalysisTimeTriggerTime=analysisTime+nextTriggerOffset
+
+# Analysis loop is only left on shutdown. Try to persist everything
+# and leave.
+    PersistencyUtil.persistAll()
+    repositioningDataDict={}
+    for logStreamName, logStream in logStreamsByName.iteritems():
+      repositioningData=logStream.getRepositioningData()
+      if repositioningData!=None:
+        repositioningDataDict[logStreamName]=repositioningData
+    PersistencyUtil.storeJson(persistenceFileName, repositioningDataDict)
+    return(delayedReturnStatus)
 
 
 class AnalysisChildRemoteControlHandler:
@@ -311,7 +351,7 @@ class AnalysisChildRemoteControlHandler:
     if len(requestData)+8>self.maxControlPacketSize:
       raise Exception('Data too large to fit into single packet')
     self.outputBuffer+=struct.pack("!I", len(requestData)+8)+requestType+requestData
-    
+
   def putExecuteRequest(self, remoteControlCode, remoteControlData):
     remoteControlData=json.dumps([remoteControlCode, remoteControlData])
     self.putRequest('EEEE', remoteControlData)

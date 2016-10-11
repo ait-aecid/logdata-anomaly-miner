@@ -18,6 +18,9 @@ class AnalysisContext:
 
   def __init__(self, aminerConfig):
     self.aminerConfig=aminerConfig
+# This is the factory to create atomiziers for incoming data streams
+# and link them to the analysis pipeline.
+    self.atomizerFactory=None
 # This is the current log processing and analysis time regarding
 # the data stream being analyzed. While None, the analysis time
 # e.g. used to trigger components (see analysisTimeTriggeredComponents),
@@ -33,16 +36,11 @@ class AnalysisContext:
     self.registeredComponents={}
 # Keep also a list of components by name.
     self.registeredComponentsByName={}
-# Keep a list of all handlers that should receive the raw atoms
-# directly from the log sources.
-    self.rawAtomHandlers=[]
 # Keep lists of components that should receive timer interrupts
 # when real time or analysis time has elapsed.
     self.realTimeTriggeredComponents=[]
     self.analysisTimeTriggeredComponents=[]
 
-  def addRawAtomHandler(self, rawAtomHandler):
-    self.rawAtomHandlers.append(rawAtomHandler)
 
   def addTimeTriggeredComponent(self, component, triggerClass=None):
     if not(isinstance(component, TimeTriggeredComponentInterface)):
@@ -57,7 +55,7 @@ class AnalysisContext:
       raise Exception('Attempting to timer component for unknown class %s' % triggerClass)
 
   def registerComponent(self, component, componentName=None,
-      registerAsRawAtomHandler=False, registerTimeTriggerClassOverride=None):
+      registerTimeTriggerClassOverride=None):
     """Register a new component. A component implementing the
     TimeTriggeredComponentInterface will also be added to the
     appropriate lists unless registerTimeTriggerClassOverride
@@ -78,8 +76,6 @@ class AnalysisContext:
     self.nextRegistryId+=1
     if componentName!=None:
       self.registeredComponentsByName[componentName]=component
-    if registerAsRawAtomHandler:
-      self.addRawAtomHandler(component)
     if isinstance(component, TimeTriggeredComponentInterface):
       if registerTimeTriggerClassOverride==None:
         self.addTimeTriggeredComponent(component)
@@ -108,17 +104,6 @@ class AnalysisContext:
     """Convenience method to create the pipeline."""
     self.aminerConfig.buildAnalysisPipeline(self)
 
-
-class LogDataResource:
-  """This class defines a single log data resource under monitoring
-  of aminer. The resource does not need to exist at the time of
-  creation of this record."""
-  def __init__(self, logFileName, logFileFd):
-    self.logFileName=logFileName
-    self.logFileFd=logFileFd
-    self.statData=None
-    if logFileFd>=0:
-      self.statData=os.fstat(logFileFd)
 
 # Those should go away as soon as Python (or aminer via libc)
 # provides those functions.
