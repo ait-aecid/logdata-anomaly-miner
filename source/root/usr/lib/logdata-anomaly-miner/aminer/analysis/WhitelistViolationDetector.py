@@ -18,8 +18,17 @@ class WhitelistViolationDetector(ParsedAtomHandlerInterface):
     self.anomalyEventHandlers=anomalyEventHandlers
 
   def receiveParsedAtom(self, atomData, parserMatch):
+    """Receive on parsed atom and the information about the parser
+    match.
+    @param atomData binary raw atom data
+    @param parserMatch for atomData
+    @return True if this handler was really able to handle and
+    process the match. Depending on this information, the caller
+    may decide if it makes sense passing the parsed atom also
+    to other handlers."""
     for rule in self.whitelistRules:
       if rule.match(parserMatch): return
     for listener in self.anomalyEventHandlers:
       listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
           'No whitelisting for current atom', [atomData], parserMatch, self)
+    return(True)
