@@ -251,8 +251,7 @@ when really paranoid, following changes might be useful:
   newMatchPathDetector=NewMatchPathDetector(
       analysisContext.aminerConfig, anomalyEventHandlers, autoIncludeFlag=False)
   analysisContext.registerComponent(newMatchPathDetector,
-      componentName='DefaultNewMatchPathDetector',
-      registerAsRawAtomHandler=False)
+      componentName='DefaultNewMatchPathDetector')
   parsedAtomHandlers.append(newMatchPathDetector)
 
 With automatic inclusion enabled, the detector would complain
@@ -355,8 +354,7 @@ and to generate alerts:
       analysisContext.aminerConfig, '/model/syslog/host',
       anomalyEventHandlers, autoIncludeFlag=True, defaultInterval=24*3600)
   analysisContext.registerComponent(missingMatchPathValueDetector,
-      componentName='DefaultMissingMatchPathValueDetector',
-      registerAsRawAtomHandler=False)
+      componentName='DefaultMissingMatchPathValueDetector')
   parsedAtomHandlers.append(missingMatchPathValueDetector)
 
 The default interval should fit your operational procedures:
