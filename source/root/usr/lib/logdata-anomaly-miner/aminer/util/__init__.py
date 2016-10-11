@@ -63,7 +63,7 @@ class TimeTriggeredComponentInterface:
     """Get the trigger class this component can be registered
     for. See AnalysisContext class for different trigger classes
     available."""
-    raise Exception('Not implemented')
+    raise Exception('Interface method called')
 
   def doTimer(self, time):
     """This method is called to perform trigger actions and to
@@ -79,4 +79,4 @@ class TimeTriggeredComponentInterface:
     the forensic log timescale time value.
     @return the number of seconds when next invocation of this
     trigger is required."""
-    raise Exception('Not implemented')
+    raise Exception('Interface method called')
