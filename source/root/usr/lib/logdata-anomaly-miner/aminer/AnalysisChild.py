@@ -73,11 +73,6 @@ class AnalysisChild:
     if repositioningDataDict==None: repositioningDataDict={}
 
     remoteControlSocket=None
-    childSocketSelectList=[masterControlSocket.fileno()]
-# This list has the same number of elements as childSocketSelectList.
-# For each select file descriptor from a logStream it keeps the
-# logStream object at same position for quick reference.
-    childSocketSelectStreams=[None]
 # A list of LogStreams where handleStream() blocked due to downstream
 # not being able to consume the data yet.
     blockedLogStreams=[]
@@ -89,11 +84,31 @@ class AnalysisChild:
 
     delayedReturnStatus=0
     while self.runAnalysisLoopFlag:
+# Build the list of inputs to select for anew each time: the LogStream
+# file descriptors may change due to rollover.
+      inputSelectFdList=[masterControlSocket.fileno()]
+# This list has the same number of elements as inputSelectFdList.
+# For each select file descriptor from a logStream it keeps the
+# logStream object at same position for quick reference.
+      inputSelectStreams=[None]
+      if remoteControlSocket!=None:
+        inputSelectFdList.append(remoteControlSocket.fileno())
+        inputSelectStreams.append(None)
+      for logStream in logStreamsByName.values():
+        if logStream in blockedLogStreams:
+# See if it could be unblocked by retrying the last consume.
+          if logStream.handleStream()<0: continue
+          blockedLogStreams.remove(logStream)
+        streamFd=logStream.getCurrentFd()
+        if streamFd<0: continue
+        inputSelectFdList.append(streamFd)
+        inputSelectStreams.append(logStream)
+
       readList=None
       writeList=None
       exceptList=None
       try:
-        (readList, writeList, exceptList)=select.select(childSocketSelectList, [], [], 1)
+        (readList, writeList, exceptList)=select.select(inputSelectFdList, [], [], 1)
       except select.error as selectError:
 # Interrupting signals, e.g. for shutdown are OK.
         if selectError[0]==errno.EINTR: continue
@@ -101,15 +116,9 @@ class AnalysisChild:
         delayedReturnStatus=1
         break
       if len(readList)==0:
-# All reads failed. Unblock all blocked streams to retry those
-# too.
-        for logStream in blockedLogStreams:
-          currentFd=logStream.getCurrentFd()
-          if currentFd<0: continue
-          childSocketSelectList.append(currentFd)
-          childSocketSelectStreams.append(logStream)
-          blockedLogStreams.remove(logStream)
-          continue
+# Nothing to read, just try again, most likely just sleeping for
+# a moment in the next select call.
+        continue
       for readFd in readList:
         if readFd==masterControlSocket.fileno():
 # We cannot fail with None here as the socket was in the readList.
@@ -128,9 +137,6 @@ class AnalysisChild:
               streamAtomizer=self.analysisContext.atomizerFactory.getAtomizerForResource(resource.logFileName)
               logStream=LogStream(resource, streamAtomizer)
               logStreamsByName[resource.logFileName]=logStream
-# Add the stream to the select list.
-              childSocketSelectList.append(resource.logFileFd)
-              childSocketSelectStreams.append(logStream)
             else:
               logStream.addNextResource(resource)
           elif 'remotecontrol'==receivedTypeInfo:
@@ -139,8 +145,6 @@ class AnalysisChild:
             remoteControlSocket=socket.fromfd(receivedFd, socket.AF_UNIX,
                 socket.SOCK_STREAM, 0)
             os.close(receivedFd)
-            childSocketSelectList.append(remoteControlSocket.fileno())
-            childSocketSelectStreams.append(None)
           else:
             raise Exception('Unhandled type info on received fd: %s' %
                 repr(receivedTypeInfo))
@@ -175,12 +179,10 @@ class AnalysisChild:
 
 # This has to be a logStream, handle it. Only when downstream
 # blocks, add the stream to the blocked stream list.
-        streamPos=childSocketSelectList.index(readFd)
-        logStream=childSocketSelectStreams[streamPos]
+        streamPos=inputSelectFdList.index(readFd)
+        logStream=inputSelectStreams[streamPos]
         handleResult=logStream.handleStream()
         if handleResult<0:
-          del childSocketSelectList[streamPos]
-          del childSocketSelectStreams[streamPos]
           blockedLogStreams.append(logStream)
 
 
