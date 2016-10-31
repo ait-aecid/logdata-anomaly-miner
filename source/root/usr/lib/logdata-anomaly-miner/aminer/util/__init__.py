@@ -5,6 +5,8 @@
 
 import random
 
+from aminer.input import AtomHandlerInterface
+
 def getLogInt(maxBits):
   """Get a log-distributed random integer integer in range 0 to
   maxBits-1."""
@@ -80,3 +82,18 @@ class TimeTriggeredComponentInterface:
     @return the number of seconds when next invocation of this
     trigger is required."""
     raise Exception('Interface method called')
+
+
+class VolatileLogarithmicBackoffAtomHistory(AtomHandlerInterface, LogarithmicBackoffHistory):
+  """This class is a volatile filter to keep a history of log
+  atoms, e.g. for analysis by other components or for external
+  access via remote control interface."""
+
+  def __init__(self, maxItems):
+    """Initialize the history component."""
+    LogarithmicBackoffHistory.__init__(self, maxItems)
+
+  def receiveAtom(self, logAtom):
+    """Receive an atom and add it to the history log."""
+    self.addObject(logAtom)
+    return(True)

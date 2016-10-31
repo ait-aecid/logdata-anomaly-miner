@@ -27,6 +27,12 @@ logdata-anomaly-miner (0.0.6) xenial; urgency=low
 -    print '%s' % atomData
 +    print '%s' % logAtom.rawData
 
+    * With parsed/unparsed atom processing path convergence, naming
+      of other classes does not make sense any more (U):
+
+-from aminer.analysis import VolatileLogarithmicBackoffParsedAtomHistory
++from aminer.util import VolatileLogarithmicBackoffAtomHistory
+
  -- Roman Fiedler <roman.fiedler@ait.ac.at>  Mon, 31 Oct 2016 xx:00:00 +0000
 
 logdata-anomaly-miner (0.0.5) xenial; urgency=low
