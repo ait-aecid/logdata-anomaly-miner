@@ -119,22 +119,22 @@ def buildAnalysisPipeline(analysisContext):
 
 # Create all global handler lists here and append the real handlers
 # later on.
-# List for raw (unprocessed) log data atoms.
-  parsedAtomHandlers=[]
-  unparsedAtomHandlers=[]
+# Use this filter to distribute all atoms to the analysis handlers.
+  atomFilter=AtomFilters.SubhandlerFilter(None)
   anomalyEventHandlers=[]
 
 # Now define the AtomizerFactory using the model. A simple line
 # based one is usually sufficient.
   from aminer.input import SimpleByteStreamLineAtomizerFactory
   analysisContext.atomizerFactory=SimpleByteStreamLineAtomizerFactory(
-      parsingModel, parsedAtomHandlers, unparsedAtomHandlers,
-      anomalyEventHandlers, defaultTimestampPath='/model/syslog/time')
+      parsingModel, [atomFilter], anomalyEventHandlers,
+      defaultTimestampPath='/model/syslog/time')
 
 # Always report the unparsed lines: a part of the parsing model
 # seems to be missing or wrong.
   from aminer.input import SimpleUnparsedAtomHandler
-  unparsedAtomHandlers.append(SimpleUnparsedAtomHandler(anomalyEventHandlers))
+  atomFilter.addHandler(SimpleUnparsedAtomHandler(anomalyEventHandlers),
+      stopWhenHandledFlag=True)
 
 # Report new parsing model path values. Those occurr when a line
 # with new structural properties was parsed.
@@ -142,7 +142,7 @@ def buildAnalysisPipeline(analysisContext):
   newMatchPathDetector=NewMatchPathDetector(
       analysisContext.aminerConfig, anomalyEventHandlers, autoIncludeFlag=True)
   analysisContext.registerComponent(newMatchPathDetector, componentName=None)
-  parsedAtomHandlers.append(newMatchPathDetector)
+  atomFilter.addHandler(newMatchPathDetector)
 
 # Run a whitelisting over the parsed lines.
   from aminer.analysis import Rules
@@ -167,7 +167,7 @@ def buildAnalysisPipeline(analysisContext):
       Rules.ValueMatchRule('/model/services/cron/msgtype/exec/command', '(   cd / && run-parts --report /etc/cron.hourly)'),
       Rules.ModuloTimeMatchRule('/model/syslog/time', 3600, 17*60, 17*60+5)]))
 
-  parsedAtomHandlers.append(WhitelistViolationDetector(whitelistRules, anomalyEventHandlers))
+  atomFilter.addHandler(WhitelistViolationDetector(whitelistRules, anomalyEventHandlers))
 
 # Include the e-mail notification handler only if the configuration
 # parameter was set.

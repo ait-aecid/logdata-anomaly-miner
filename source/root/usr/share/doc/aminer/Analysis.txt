@@ -36,8 +36,8 @@ List of components:
 * MatchValueAverageChangeDetector (AS): Detect when average value
   of given parsed value changes over time.
 
-* ParsedAtomFilters.MatchValueFilter (F): Use value of parsed
-  element to forward input data to other analyzers.
+* AtomFilters.MatchValueFilter (F): Use value of parsed element
+  to forward input data to other analyzers.
 
 * MatchValueStreamWriter (F): Forward selected input data e.g.
   as CSV list, to other compoments via stream, e.g. to perform
@@ -119,7 +119,7 @@ a report every week:
       reportEventHandlers,        # Send report to those handlers
       resetAfterReportFlag=True)  # Zero counters after sending of report
   # Send the appropriate input feed to the component
-  parsedAtomHandlers.append(histogramAnalysis)
+  atomFilter.addHandler(histogramAnalysis)
 
 
 HistogramAnalysis.PathDependentHistogramAnalysis:
@@ -158,7 +158,7 @@ HistogramAnalysis.HistogramAnalysis, see documentation there.
       reportEventHandlers,        # Send report to those handlers
       resetAfterReportFlag=True)  # Zero counters after sending of report
   # Send the appropriate input feed to the component
-  parsedAtomHandlers.append(pathDependentHistogramAnalysis)
+  atomFilter.addHandler(pathDependentHistogramAnalysis)
 
 
 WhitelistViolationDetector:
@@ -175,8 +175,8 @@ pass. Predefined actions are:
   * EventGenerationMatchAction: Generate events, when a rule matches,
     e.g. to report interesting matches, violations or for debugging.
 
-  * ParsedAtomFilterMatchAction: Filter out the parsed atoms on
-    match and forward it to other handlers, e.g. analysis components.
+  * AtomFilterMatchAction: Filter out the parsed atoms on match
+    and forward it to other handlers, e.g. analysis components.
 
 * Rules:
 
@@ -226,4 +226,4 @@ or source for full documentation:
       Rules.ValueMatchRule('/model/services/cron/msgtype/exec/command', '(   cd / && run-parts --report /etc/cron.hourly)'),
       Rules.ModuloTimeMatchRule('/model/syslog/time', 3600, 17*60, 17*60+5)]))
 
-  parsedAtomHandlers.append(WhitelistViolationDetector(whitelistRules, anomalyEventHandlers))
+  atomFilter.addHandler(WhitelistViolationDetector(whitelistRules, anomalyEventHandlers))

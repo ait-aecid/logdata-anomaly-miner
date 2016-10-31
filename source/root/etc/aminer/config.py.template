@@ -113,26 +113,27 @@ def buildAnalysisPipeline(analysisContext):
 
 # Create all global handler lists here and append the real handlers
 # later on.
-  parsedAtomHandlers=[]
-  unparsedAtomHandlers=[]
+# Use this filter to distribute all atoms to the analysis handlers.
+  atomFilter=AtomFilters.SubhandlerFilter(None)
   anomalyEventHandlers=[]
 
 # Now define the AtomizerFactory using the model. A simple line
 # based one is usually sufficient.
   from aminer.input import SimpleByteStreamLineAtomizerFactory
   analysisContext.atomizerFactory=SimpleByteStreamLineAtomizerFactory(
-      parsingModel, parsedAtomHandlers, unparsedAtomHandlers,
-      anomalyEventHandlers, defaultTimestampPath='/model/syslog/time')
+      parsingModel, [atomFilter], anomalyEventHandlers,
+      defaultTimestampPath='/model/syslog/time')
 
 # Just report all unparsed atoms to the event handlers.
   from aminer.input import SimpleUnparsedAtomHandler
-  unparsedAtomHandlers.append(SimpleUnparsedAtomHandler(anomalyEventHandlers))
+  atomFilter.addHandler(SimpleUnparsedAtomHandler(anomalyEventHandlers),
+      stopWhenHandledFlag=True)
 
   from aminer.analysis import NewMatchPathDetector
   newMatchPathDetector=NewMatchPathDetector(
       analysisContext.aminerConfig, anomalyEventHandlers, autoIncludeFlag=True)
   analysisContext.registerComponent(newMatchPathDetector, componentName=None)
-  parsedAtomHandlers.append(newMatchPathDetector)
+  atomFilter.addHandler(newMatchPathDetector)
 
 # Include the e-mail notification handler only if the configuration
 # parameter was set.

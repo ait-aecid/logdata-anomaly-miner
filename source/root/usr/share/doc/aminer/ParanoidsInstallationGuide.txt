@@ -252,7 +252,7 @@ when really paranoid, following changes might be useful:
       analysisContext.aminerConfig, anomalyEventHandlers, autoIncludeFlag=False)
   analysisContext.registerComponent(newMatchPathDetector,
       componentName='DefaultNewMatchPathDetector')
-  parsedAtomHandlers.append(newMatchPathDetector)
+  atomFilter.addHandler(newMatchPathDetector)
 
 With automatic inclusion enabled, the detector would complain
 about each new path seen exactly once and then add it to the list
@@ -284,12 +284,12 @@ host groups, a filter has to be installed to separate the data:
 
   * Create the filter:
 
-  from aminer.analysis import ParsedAtomFilters
-  hostnameValueFilter=ParsedAtomFilters.MatchValueFilter(
+  from aminer.analysis import AtomFilters
+  hostnameValueFilter=AtomFilters.MatchValueFilter(
       '/model/syslog/host',
       {'host-a': newMatchPathDetectorA, ...},
       defaultNewMatchPathDetector)
-  parsedAtomHandlers.append(hostnameValueFilter)
+  atomFilter.addHandler(hostnameValueFilter)
 
 In production, you may want to create all those groups in a loop,
 reading from a list of host/group mappings.
@@ -355,7 +355,7 @@ and to generate alerts:
       anomalyEventHandlers, autoIncludeFlag=True, defaultInterval=24*3600)
   analysisContext.registerComponent(missingMatchPathValueDetector,
       componentName='DefaultMissingMatchPathValueDetector')
-  parsedAtomHandlers.append(missingMatchPathValueDetector)
+  atomFilter.addHandler(missingMatchPathValueDetector)
 
 The default interval should fit your operational procedures:
 

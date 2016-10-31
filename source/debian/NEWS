@@ -32,8 +32,31 @@ logdata-anomaly-miner (0.0.6) xenial; urgency=low
 
 -from aminer.analysis import VolatileLogarithmicBackoffParsedAtomHistory
 +from aminer.util import VolatileLogarithmicBackoffAtomHistory
+- from aminer.analysis import ParsedAtomFilters
++ from aminer.analysis import AtomFilters
+- matchAction=Rules.ParsedAtomFilterMatchAction(...
++ matchAction=Rules.AtomFilterMatchAction(...
 
- -- Roman Fiedler <roman.fiedler@ait.ac.at>  Mon, 31 Oct 2016 xx:00:00 +0000
+- parsedAtomHandlers=[]
+- unparsedAtomHandlers=[]
+- analysisContext.atomizerFactory=SimpleByteStreamLineAtomizerFactory(
+-     parsingModel, parsedAtomHandlers, unparsedAtomHandlers, ...
++ atomFilter=AtomFilters.SubhandlerFilter(None)
++ analysisContext.atomizerFactory=SimpleByteStreamLineAtomizerFactory(
++     parsingModel, [atomFilter], ...
+
+For handling of unparsed atoms:
+
+- unparsedAtomHandlers.append(SimpleUnparsedAtomHandler(anomalyEventHandlers))
++ atomFilter.addHandler(SimpleUnparsedAtomHandler(anomalyEventHandlers),
++     stopWhenHandledFlag=True)
+
+For handling of parsed atoms:
+
+- parsedAtomHandlers.append(...
++ atomFilter.addHandler(...
+
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Mon, 31 Oct 2016 18:00:00 +0000
 
 logdata-anomaly-miner (0.0.5) xenial; urgency=low
 
