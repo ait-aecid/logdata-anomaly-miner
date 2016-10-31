@@ -5,7 +5,7 @@ import sys
 import time
 
 from aminer.events import EventHandlerInterface
-from aminer.parsing import MatchElement
+from aminer.input import LogAtom
 
 
 class StreamPrinterEventHandler(EventHandlerInterface):
@@ -22,8 +22,10 @@ is stdout"""
     for line in sortedLogLines:
       message+='  '+line+'\n'
     if eventData!=None:
-      if isinstance(eventData, MatchElement):
-        message+='  '+eventData.annotateMatch('')+'\n'
+      if isinstance(eventData, LogAtom):
+        message+='  [%s/%s]' % (eventData.getTimestamp(), eventData.source)
+        if eventData.parserMatch!=None:
+          message+=' '+eventData.parserMatch.matchElement.annotateMatch('')+'\n'
       else:
         message+='  '+str(eventData)+'\n'
     print >>self.stream, '%s' % message
