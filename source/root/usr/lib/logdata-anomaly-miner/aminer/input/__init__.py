@@ -68,4 +68,5 @@ from LogAtom import LogAtom
 from LogStream import LogDataResource
 from LogStream import LogStream
 from SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
+from SimpleMultisourceAtomSync import SimpleMultisourceAtomSync
 from SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler
