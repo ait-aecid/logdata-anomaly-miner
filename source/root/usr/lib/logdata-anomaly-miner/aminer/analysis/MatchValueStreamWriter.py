@@ -1,7 +1,7 @@
-from aminer.parsing import ParsedAtomHandlerInterface
+from aminer.input import AtomHandlerInterface
 from aminer.util import TimeTriggeredComponentInterface
 
-class MatchValueStreamWriter(ParsedAtomHandlerInterface, TimeTriggeredComponentInterface):
+class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterface):
   """This class extracts values from a given match and writes
   them to a stream. This can be used to forward this values to
   another program (when stream is a wrapped network socket) or
@@ -17,8 +17,8 @@ class MatchValueStreamWriter(ParsedAtomHandlerInterface, TimeTriggeredComponentI
     self.separatorString=separatorString
     self.missingValueString=missingValueString
 
-  def receiveParsedAtom(self, atomData, match):
-    matchDict=match.getMatchDictionary()
+  def receiveAtom(self, logAtom):
+    matchDict=logAtom.parserMatch.getMatchDictionary()
     addSepFlag=False
     result=b''
     for path in self.matchValuePathList:

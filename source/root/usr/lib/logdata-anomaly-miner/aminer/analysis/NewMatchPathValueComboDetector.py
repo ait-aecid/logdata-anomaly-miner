@@ -3,11 +3,11 @@ import time
 from aminer import AMinerConfig
 from aminer.AMinerUtils import AnalysisContext
 from aminer.events import EventSourceInterface
-from aminer.parsing import ParsedAtomHandlerInterface
+from aminer.input import AtomHandlerInterface
 from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
 
-class NewMatchPathValueComboDetector(ParsedAtomHandlerInterface,
+class NewMatchPathValueComboDetector(AtomHandlerInterface,
       TimeTriggeredComponentInterface, EventSourceInterface):
   """This class creates events when a new value combination for
   a given list of match data pathes were found."""
@@ -43,13 +43,13 @@ class NewMatchPathValueComboDetector(ParsedAtomHandlerInterface,
       self.knownValuesSet=set([tuple(record) for record in persistenceData])
 
 
-  def receiveParsedAtom(self, atomData, match):
+  def receiveAtom(self, logAtom):
     """Receive on parsed atom and the information about the parser
     match.
     @return True if a value combination was extracted and checked
     against the list of known combinations, no matter if the checked
     values were new or not."""
-    matchDict=match.getMatchDictionary()
+    matchDict=logAtom.parserMatch.getMatchDictionary()
     matchValueList=[]
     for targetPath in self.targetPathList:
       matchElement=matchDict.get(targetPath, None)
@@ -68,7 +68,7 @@ class NewMatchPathValueComboDetector(ParsedAtomHandlerInterface,
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
             'New value combination for path(es) %s: %s' % (', '.join(self.targetPathList), repr(matchValueTuple)),
-            [atomData], (match, matchValueTuple), self)
+            [logAtom.rawData], (logAtom, matchValueTuple), self)
     return(True)
 
 

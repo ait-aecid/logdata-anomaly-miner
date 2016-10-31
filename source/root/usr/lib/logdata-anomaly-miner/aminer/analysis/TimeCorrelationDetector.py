@@ -5,12 +5,12 @@ import time
 from aminer import AMinerConfig
 from aminer.AMinerUtils import AnalysisContext
 from aminer.analysis import Rules
-from aminer.parsing import ParsedAtomHandlerInterface
+from aminer.input import AtomHandlerInterface
 from aminer.util import getLogInt
 from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
 
-class TimeCorrelationDetector(ParsedAtomHandlerInterface, TimeTriggeredComponentInterface):
+class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
   """This class tries to find time correlation patterns between
   different log atoms. When a possible correlation rule is detected,
   it creates an event including the rules. This is useful to implement
@@ -47,16 +47,17 @@ class TimeCorrelationDetector(ParsedAtomHandlerInterface, TimeTriggeredComponent
 #     self.knownPathSet=set(persistenceData)
 
 
-  def receiveParsedAtom(self, atomData, parserMatch):
-    timestamp=parserMatch.getDefaultTimestamp()
+  def receiveAtom(self, logAtom):
+    timestamp=logAtom.getTimestamp()
     if timestamp==None: timestamp=time.time()
     if timestamp<self.lastTimestamp:
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
             'Logdata not sorted: last %s, current %s' % (self.lastTimestamp, timestamp),
-            [atomData], parserMatch, self)
+            [logAtom.rawData], logAtom, self)
       return
     self.lastTimestamp=timestamp
+    parserMatch=logAtom.parserMatch
 
     self.totalRecords+=1
     featuresFoundList=[]

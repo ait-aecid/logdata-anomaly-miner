@@ -2,7 +2,7 @@ import time
 
 from aminer import AMinerConfig
 from aminer.AMinerUtils import AnalysisContext
-from aminer.parsing import ParsedAtomHandlerInterface
+from aminer.input import AtomHandlerInterface
 from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
 
@@ -184,7 +184,7 @@ class HistogramData():
     return(result)
 
 
-class HistogramAnalysis(ParsedAtomHandlerInterface, TimeTriggeredComponentInterface):
+class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
   """This class creates a histogram for one or more properties
   extracted from a parsed atom."""
   
@@ -217,8 +217,8 @@ class HistogramAnalysis(ParsedAtomHandlerInterface, TimeTriggeredComponentInterf
       raise Exception('No data reading, def merge yet')
 
 
-  def receiveParsedAtom(self, atomData, parserMatch):
-    matchDict=parserMatch.getMatchDictionary()
+  def receiveAtom(self, logAtom):
+    matchDict=logAtom.parserMatch.getMatchDictionary()
     dataUpdatedFlag=False
     for dataItem in self.histogramData:
       match=matchDict.get(dataItem.propertyPath, None)
@@ -226,7 +226,7 @@ class HistogramAnalysis(ParsedAtomHandlerInterface, TimeTriggeredComponentInterf
       dataUpdatedFlag=True
       dataItem.addValue(match.matchObject)
 
-    timestamp=parserMatch.getDefaultTimestamp()
+    timestamp=logAtom.getTimestamp()
     if self.nextReportTime<timestamp:
       if self.lastReportTime==None:
         self.lastReportTime=timestamp
@@ -279,7 +279,7 @@ class HistogramAnalysis(ParsedAtomHandlerInterface, TimeTriggeredComponentInterf
     self.nextReportTime=timestamp+self.reportInterval
 
 
-class PathDependentHistogramAnalysis(ParsedAtomHandlerInterface, TimeTriggeredComponentInterface):
+class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
   """This class provides a histogram analysis for only one property
   but separate histograms for each group of correlated match pathes.
   Assume there two pathes that include the requested property
@@ -316,8 +316,8 @@ class PathDependentHistogramAnalysis(ParsedAtomHandlerInterface, TimeTriggeredCo
       raise Exception('No data reading, def merge yet')
 
 
-  def receiveParsedAtom(self, atomData, parserMatch):
-    matchDict=parserMatch.getMatchDictionary()
+  def receiveAtom(self, logAtom):
+    matchDict=logAtom.parserMatch.getMatchDictionary()
     dataUpdatedFlag=False
 
     match=matchDict.get(self.propertyPath, None)
@@ -345,7 +345,7 @@ class PathDependentHistogramAnalysis(ParsedAtomHandlerInterface, TimeTriggeredCo
       if len(missingPathes)==0:
 # Everything OK, just add the value to the mapping.
         histogramMapping[1].addValue(matchValue)
-        histogramMapping[2]=parserMatch
+        histogramMapping[2]=logAtom.parserMatch
       else:
 # We need to split the current set here. Keep the current statistics
 # for all the missingPathes but clone the data for the remaining
@@ -353,7 +353,7 @@ class PathDependentHistogramAnalysis(ParsedAtomHandlerInterface, TimeTriggeredCo
         newHistogram=histogramMapping[1].clone()
         newHistogram.addValue(matchValue)
         newPathSet=histogramMapping[0]-missingPathes
-        newHistogramMapping=[newPathSet, newHistogram, parserMatch]
+        newHistogramMapping=[newPathSet, newHistogram, logAtom.parserMatch]
         for mappedPath in newPathSet:
           self.histogramData[mappedPath]=newHistogramMapping
         histogramMapping[0]=missingPathes
@@ -362,11 +362,11 @@ class PathDependentHistogramAnalysis(ParsedAtomHandlerInterface, TimeTriggeredCo
     if len(unmappedPath)!=0:
       histogram=HistogramData(self.propertyPath, self.binDefinition)
       histogram.addValue(matchValue)
-      newRecord=[set(unmappedPath), histogram, parserMatch]
+      newRecord=[set(unmappedPath), histogram, logAtom.parserMatch]
       for path in unmappedPath:
         self.histogramData[path]=newRecord
 
-    timestamp=parserMatch.getDefaultTimestamp()
+    timestamp=logAtom.getTimestamp()
     if self.nextReportTime<timestamp:
       if self.lastReportTime==None:
         self.lastReportTime=timestamp

@@ -2,13 +2,13 @@ import time
 
 from aminer import AMinerConfig
 from aminer.AMinerUtils import AnalysisContext
-from aminer.parsing import ParsedAtomHandlerInterface
+from aminer.input import AtomHandlerInterface
 from aminer.util import LogarithmicBackoffHistory
 from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
 import Rules
 
-class TimeCorrelationViolationDetector(ParsedAtomHandlerInterface, TimeTriggeredComponentInterface):
+class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
   """This class creates events when one of the given time correlation
   rules is violated. This is used to implement checks as depicted
   in http://dx.doi.org/10.1016/j.cose.2014.09.006"""
@@ -42,12 +42,12 @@ class TimeCorrelationViolationDetector(ParsedAtomHandlerInterface, TimeTriggered
 #     self.knownPathSet=set(persistenceData)
 
 
-  def receiveParsedAtom(self, atomData, match):
+  def receiveAtom(self, logAtom):
     """Receive a parsed atom and check all the classification
     rules, that will trigger correlation rule evaluation and event
     triggering on violations."""
     for rule in self.eventClassificationRuleset:
-       rule.match(match)
+       rule.match(logAtom.parserMatch)
 
 
   def getTimeTriggerClass(self):

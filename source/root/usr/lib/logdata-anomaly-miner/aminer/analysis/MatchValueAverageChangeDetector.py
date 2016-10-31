@@ -2,11 +2,11 @@ import time
 
 from aminer import AMinerConfig
 from aminer.AMinerUtils import AnalysisContext
-from aminer.parsing import ParsedAtomHandlerInterface
+from aminer.input import AtomHandlerInterface
 from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
 
-class MatchValueAverageChangeDetector(ParsedAtomHandlerInterface, TimeTriggeredComponentInterface):
+class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
   """This detector calculates the average of a given list of values
   to monitor and reports if the average of the latest diverges
   significantly from the values observed before."""
@@ -45,10 +45,11 @@ class MatchValueAverageChangeDetector(ParsedAtomHandlerInterface, TimeTriggeredC
 #     self.knownPathSet=set(persistenceData)
 
 
-  def receiveParsedAtom(self, atomData, match):
-    valueDict=match.getMatchDictionary()
+  def receiveAtom(self, logAtom):
+    parserMatch=logAtom.parserMatch
+    valueDict=parserMatch.getMatchDictionary()
 
-    timestampValue=None
+    timestampValue=logAtom.getTimestamp()
     if self.timestampPath!=None:
       matchValue=valueDict.get(self.timestampPath)
       if matchValue==None: return

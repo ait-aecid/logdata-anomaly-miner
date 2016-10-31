@@ -3,11 +3,11 @@ import time
 from aminer import AMinerConfig
 from aminer.AMinerUtils import AnalysisContext
 from aminer.events import EventSourceInterface
-from aminer.parsing import ParsedAtomHandlerInterface
+from aminer.input import AtomHandlerInterface
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.util import PersistencyUtil
 
-class NewMatchPathDetector(ParsedAtomHandlerInterface,
+class NewMatchPathDetector(AtomHandlerInterface,
     TimeTriggeredComponentInterface, EventSourceInterface):
   """This class creates events when new data path was found in
   a parsed atom."""
@@ -29,17 +29,16 @@ class NewMatchPathDetector(ParsedAtomHandlerInterface,
       self.knownPathSet=set(persistenceData)
 
 
-  def receiveParsedAtom(self, atomData, match):
+  def receiveAtom(self, logAtom):
     """Receive on parsed atom and the information about the parser
     match.
-    @param atomData binary raw atom data
-    @param parserMatch for atomData
+    @param logAtom the parsed log atom
     @return True if this handler was really able to handle and
     process the match. Depending on this information, the caller
     may decide if it makes sense passing the parsed atom also
     to other handlers."""
     unknownPathList=[]
-    for path in match.getMatchDictionary().keys():
+    for path in logAtom.parserMatch.getMatchDictionary().keys():
       if not(path in self.knownPathSet):
         unknownPathList.append(path)
         if self.autoIncludeFlag:
@@ -50,7 +49,7 @@ class NewMatchPathDetector(ParsedAtomHandlerInterface,
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
             'New path(es) %s ' % (', '.join(unknownPathList)),
-            [atomData], [match, unknownPathList], self)
+            [logAtom.rawData], [logAtom, unknownPathList], self)
     return(True)
 
 

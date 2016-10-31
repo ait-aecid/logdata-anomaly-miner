@@ -3,11 +3,11 @@ import time
 from aminer import AMinerConfig
 from aminer.AMinerUtils import AnalysisContext
 from aminer.events import EventSourceInterface
-from aminer.parsing import ParsedAtomHandlerInterface
+from aminer.input import AtomHandlerInterface
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.util import PersistencyUtil
 
-class MissingMatchPathValueDetector(ParsedAtomHandlerInterface,
+class MissingMatchPathValueDetector(AtomHandlerInterface,
     TimeTriggeredComponentInterface, EventSourceInterface):
   """This class creates events when an expected value is not seen
   within a given timespan, e.g. because the service was deactivated
@@ -40,11 +40,12 @@ class MissingMatchPathValueDetector(ParsedAtomHandlerInterface,
       self.expectedValuesDict=persistenceData
 
 
-  def receiveParsedAtom(self, atomData, match):
-    matchElement=match.getMatchDictionary().get(self.targetPath, None)
-    if matchElement==None: return
+  def receiveAtom(self, logAtom):
+    matchElement=logAtom.parserMatch.getMatchDictionary().get(
+        self.targetPath, None)
+    if matchElement==None: return(False)
     value=matchElement.matchObject
-    timeStamp=match.getDefaultTimestamp()
+    timeStamp=logAtom.getTimestamp()
     detectorInfo=self.expectedValuesDict.get(value, None)
     if detectorInfo!=None:
 # Just update the last seen value and switch from non-reporting
@@ -90,7 +91,8 @@ class MissingMatchPathValueDetector(ParsedAtomHandlerInterface,
         for listener in self.anomalyEventHandlers:
           listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
               'Interval too large between values for path %s:%s ' % (self.targetPath, messagePart),
-              [atomData], missingValueList, self)
+              [logAtom.rawData], missingValueList, self)
+    return(True)
 
 
   def setCheckValue(self, value, interval):

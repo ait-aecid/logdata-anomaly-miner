@@ -2,11 +2,11 @@ import time
 
 from aminer import AMinerConfig
 from aminer.AMinerUtils import AnalysisContext
-from aminer.parsing import ParsedAtomHandlerInterface
+from aminer.input import AtomHandlerInterface
 from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
 
-class NewMatchPathValueDetector(ParsedAtomHandlerInterface, TimeTriggeredComponentInterface):
+class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
   """This class creates events when new values for a given data
   path were found."""
 
@@ -28,8 +28,8 @@ class NewMatchPathValueDetector(ParsedAtomHandlerInterface, TimeTriggeredCompone
       self.knownPathSet=set(persistenceData)
 
 
-  def receiveParsedAtom(self, atomData, match):
-    matchDict=match.getMatchDictionary()
+  def receiveAtom(self, logAtom):
+    matchDict=logAtom.parserMatch.getMatchDictionary()
     for targetPath in self.targetPathList:
       match=matchDict.get(targetPath, None)
       if match==None: continue
@@ -41,7 +41,7 @@ class NewMatchPathValueDetector(ParsedAtomHandlerInterface, TimeTriggeredCompone
         for listener in self.anomalyEventHandlers:
           listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
               'New value for path %s: %s ' % (targetPath, match.matchObject),
-              [atomData], match, self)
+              [logAtom.rawData], logAtom, self)
 
 
   def getTimeTriggerClass(self):
