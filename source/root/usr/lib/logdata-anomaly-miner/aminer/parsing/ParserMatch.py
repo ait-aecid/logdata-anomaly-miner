@@ -6,11 +6,15 @@ class ParserMatch:
   fields to store information commonly used when dealing with
   the match."""
 
-  def __init__(self, matchElement):
-    """Initialize the match."""
+  def __init__(self, matchElement, parsingProcessData=None):
+    """Initialize the match.
+    @param parsingProcessData this parameter might provide more
+    information about the parsing process, e.g. when parsing produced
+    warnings. The data is specific for the source producing the
+    match."""
     self.matchElement=matchElement
+    self.parsingProcessData=parsingProcessData
     self.matchDictionary=None
-    self.defaultTimestamp=None
 
 
   def getMatchElement(self):
@@ -32,18 +36,5 @@ class ParserMatch:
     return(dict)
 
 
-  def setDefaultTimestamp(self, timestamp):
-    """Update the default timestamp value associated with this
-    ParserMatch. The method can be called more than once to allow
-    correction of fine-adjusting of timestamps by analysis filters
-    after initial parsing procedure."""
-    self.defaultTimestamp=timestamp
-
-
-  def getDefaultTimestamp(self):
-    """Get the default timestamp value for this MatchElement.
-    @return the timestamp as number of seconds since 1970."""
-    return(self.defaultTimestamp)
-
   def __str__(self):
-    return('ParserMatch (%s): %s' % (self.defaultTimestamp, self.matchElement.annotateMatch('  ')))
+    return('ParserMatch: %s' % (self.matchElement.annotateMatch('  ')))

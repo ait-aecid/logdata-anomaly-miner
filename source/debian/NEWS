@@ -1,3 +1,34 @@
+logdata-anomaly-miner (0.0.6) xenial; urgency=low
+
+  The input IO-handling was redesigned, thus introducing following
+  API changes. The changes are flaged with (D)eveloper and (U)ser
+  to indicate if only developers of own AMiner addons are affected
+  or also users may need to migrate their configuration.
+
+  * Upper layers receive LogAtom objects instead of log lines,
+    parsing data as separate parameters. Thus also separate pathes
+    for forwarding of parsed and unparsed atoms are not required
+    any more. See below for details (D, U):
+
+    * Update any own UnparsedAtomHandler/ParsedAtomHandlerInterface
+      implementations to use new interface "input.AtomHandlerInterface"
+      and access to additional information to new methods and
+      fields (D):
+
+-from aminer.parsing import ParsedAtomHandlerInterface
++from aminer.input import AtomHandlerInterface
+-class YourHandler(ParsedAtomHandlerInterface, ...
++class YourHandler(AtomHandlerInterface,
+-  def receiveParsedAtom(self, atomData, parserMatch):
++  def receiveAtom(self, logAtom):
+-    timestamp=parserMatch.getDefaultTimestamp()
++    timestamp=logAtom.getTimestamp()
++    parserMatch=logAtom.parserMatch
+-    print '%s' % atomData
++    print '%s' % logAtom.rawData
+
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Mon, 31 Oct 2016 xx:00:00 +0000
+
 logdata-anomaly-miner (0.0.5) xenial; urgency=low
 
   Following API changes were introduced:
@@ -85,5 +116,5 @@ logdata-anomaly-miner (0.0.3) xenial; urgency=low
 
     Old references to "aminerConfig" within the configuration
     script have to be replaced by "analysisContext.aminerConfig".
-    
+
  -- Roman Fiedler <roman.fiedler@ait.ac.at>  Thu, 21 Jul 2016 19:00:00 +0000

@@ -47,29 +47,24 @@ class StreamAtomizer:
     is when endOfStreamFlag is set and streamData not empty."""
     raise Exception('Interface method called')
 
-class UnparsedAtomHandler:
-  """This is the common interface of all handlers of unparsed
-  data."""
 
-  def receiveUnparsedAtom(self, message, atomData, unparsedAtomData,
-      parserMatch):
-    """Receive information about a single unparsed atom.
-    @param message message indicating the cause of parsing failure.
-    @param atomData the full atom data as analyzed by the parser.
-    When atomizing did not work or an atom was truncated, the
-    data might be shorter than expected.
-    @param unparsedAtomData the part of atomData that did not
-    match any parsing procedures. A parser not working from the
-    ends of atomData, thus carving out multiple unparsed parts
-    from atomData may use a list of strings, otherwise a single
-    string should be used. When detection of parsed and unparsed
-    parts was not possible, None should be given.
-    @param the incomplete match structure if the parser supports
-    such operation mode, None otherwise."""
+class AtomHandlerInterface:
+  """This is the common interface of all handlers suitable for
+  receiving log atoms."""
+
+  def receiveAtom(self, logAtom):
+    """Receive a log atom from a source.
+    @param atomData binary raw atom data
+    @return True if this handler was really able to handle and
+    process the atom. Depending on this information, the caller
+    may decide if it makes sense passing the atom also to other
+    handlers or to retry later. This behaviour has to be documented
+    at each source implementation sending LogAtoms."""
     raise Exception('Interface method called')
 
 
 from ByteStreamLineAtomizer import ByteStreamLineAtomizer
+from LogAtom import LogAtom
 from LogStream import LogDataResource
 from LogStream import LogStream
 from SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
