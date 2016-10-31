@@ -4,6 +4,8 @@ V0.0.6 (2016-10-xx):
 * New features:
   * Added "LogAtom" and "AtomHandlerInterface" to pass data from
     IO-layer to upper layers consistently.
+  * Added TimestampsUnsortedDetector.py to fail (exit) when data
+    is not properly sorted.
 * Bugfixes:
   * Logic flaw in logfile rollover handling, selecting on bad fd.
   * Unassigned, reused variable caused same logfile to be opened

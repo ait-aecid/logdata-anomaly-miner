@@ -18,5 +18,6 @@ from NewMatchPathValueDetector import NewMatchPathValueDetector
 # Rules.py
 from TimeCorrelationDetector import TimeCorrelationDetector
 from TimeCorrelationViolationDetector import TimeCorrelationViolationDetector
+from TimestampsUnsortedDetector import TimestampsUnsortedDetector
 # TimestampCorrectionFilters.py
 from WhitelistViolationDetector import WhitelistViolationDetector

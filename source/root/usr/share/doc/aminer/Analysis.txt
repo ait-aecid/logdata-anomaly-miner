@@ -68,6 +68,10 @@ List of components:
   Adjust decreasing timestamp of new records to the maximum observed
   so far to ensure monotony for other analysis components.
 
+* TimestampsUnsortedDetector.TimestampsUnsortedDetector (HR):
+  This detector is useful to to detect algorithm malfunction or
+  configuration errors, e.g. invalid timezone configuration.
+
 * WhitelistViolationDetector (FH): Check all inputs using ruleset
   and create events, forward input to other components.
 
