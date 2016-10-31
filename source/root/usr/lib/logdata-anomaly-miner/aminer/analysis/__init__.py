@@ -8,16 +8,15 @@
 # Add also the namespace references to classes defined in this
 # directory.
 
+# AtomFilters.py
 from MatchValueAverageChangeDetector import MatchValueAverageChangeDetector
 from MatchValueStreamWriter import MatchValueStreamWriter
 from MissingMatchPathValueDetector import MissingMatchPathValueDetector
 from NewMatchPathDetector import NewMatchPathDetector
 from NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
 from NewMatchPathValueDetector import NewMatchPathValueDetector
-# ParsedAtomFilters.py
 # Rules.py
 from TimeCorrelationDetector import TimeCorrelationDetector
 from TimeCorrelationViolationDetector import TimeCorrelationViolationDetector
 # TimestampCorrectionFilters.py
-# Utils.py
 from WhitelistViolationDetector import WhitelistViolationDetector
