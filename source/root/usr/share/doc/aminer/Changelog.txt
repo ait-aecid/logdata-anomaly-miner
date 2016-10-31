@@ -3,6 +3,8 @@ V0.0.6 (2016-10-xx):
 
 * Bugfixes:
   * Logic flaw in logfile rollover handling, selecting on bad fd.
+  * Unassigned, reused variable caused same logfile to be opened
+    more than once.
 
 V0.0.5 (2016-10-11):
 ====================

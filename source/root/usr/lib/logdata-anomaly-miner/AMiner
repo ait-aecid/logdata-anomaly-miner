@@ -290,9 +290,10 @@ childSocket.close()
 
 # Send all log resource information currently available to child
 # process.
-for fileName, logFileInfo in logDataResourceDict.iteritems():
+for logFileName, logFileInfo in logDataResourceDict.iteritems():
   if logFileInfo!=None:
-    AMinerUtils.sendLogstreamDescriptor(parentSocket, logFileInfo[0], fileName)
+    AMinerUtils.sendLogstreamDescriptor(parentSocket, logFileInfo[0],
+        logFileName)
     os.close(logFileInfo[0])
     logFileInfo[0]=-1
 
@@ -331,7 +332,7 @@ while True:
     exitStatus=1
 
 # Child information handled, scan for rotated logfiles.
-  for fileName, logFileInfo in logDataResourceDict.iteritems():
+  for logFileName, logFileInfo in logDataResourceDict.iteritems():
 # FIXME: some inotify-scheme would be nicer, but start with primitive
 # open at first.
     logFileFd=-1
@@ -351,7 +352,7 @@ while True:
     if (logFileInfo==None) or (statData.st_ino!=logFileInfo[1].st_ino) or (statData.st_dev!=logFileInfo[1].st_dev):
       if logFileInfo==None:
         logFileInfo=[-1, statData]
-        logDataResourceDict[fileName]=logFileInfo
+        logDataResourceDict[logFileName]=logFileInfo
       else:
         logFileInfo[0]=-1
         logFileInfo[1]=statData
