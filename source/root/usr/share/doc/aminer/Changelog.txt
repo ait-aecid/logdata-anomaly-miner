@@ -6,6 +6,8 @@ V0.0.6 (2016-10-xx):
     IO-layer to upper layers consistently.
   * Added TimestampsUnsortedDetector.py to fail (exit) when data
     is not properly sorted.
+  * Added SimpleMultisourceAtomSync.py to merge LogAtoms read
+    from parallel streams, e.g. from multiple logfiles.
 * Bugfixes:
   * Logic flaw in logfile rollover handling, selecting on bad fd.
   * Unassigned, reused variable caused same logfile to be opened
