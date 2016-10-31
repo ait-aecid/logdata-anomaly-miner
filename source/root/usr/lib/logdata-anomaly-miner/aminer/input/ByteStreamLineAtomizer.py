@@ -1,3 +1,4 @@
+from aminer.input import LogAtom
 from aminer.input import StreamAtomizer
 from aminer.parsing import MatchContext
 from aminer.parsing import ParserMatch
@@ -12,8 +13,8 @@ class ByteStreamLineAtomizer(StreamAtomizer):
   registered (the data will be discarded in that case) or when
   at least one downstream consumed the data."""
 
-  def __init__(self, parsingModel, parsedAtomHandlers, unparsedAtomHandlers,
-      eventHandlerList, maxLineLength, defaultTimestampPath):
+  def __init__(self, parsingModel, atomHandlerList, eventHandlerList,
+       maxLineLength, defaultTimestampPath):
     """Create the atomizer.
     @param eventHandlerList when not None, send events to those
     handlers. The list might be empty at invocation and populated
@@ -21,8 +22,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
     @param maxLineLength the maximal line length including the
     final line separator."""
     self.parsingModel=parsingModel
-    self.parsedAtomHandlers=parsedAtomHandlers
-    self.unparsedAtomHandlers=unparsedAtomHandlers
+    self.atomHandlerList=atomHandlerList
     self.eventHandlerList=eventHandlerList
     self.maxLineLength=maxLineLength
     self.defaultTimestampPath=defaultTimestampPath
@@ -32,8 +32,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
 # handlers refused to handle it, keep the data and the parsed
 # object to avoid expensive duplicate parsing operation. The data
 # does not include the line separators any more.
-    self.lastUnconsumedData=None
-    self.lastUncosumedParserMatch=None
+    self.lastUnconsumedLogAtom=None
 
   def consumeData(self, streamData, endOfStreamFlag=False):
     """Consume data from the underlying stream for atomizing.
@@ -46,10 +45,10 @@ class ByteStreamLineAtomizer(StreamAtomizer):
 # one more iteration to handle also the flag.
     consumedLength=0
     while True:
-      if self.lastUnconsumedData!=None:
+      if self.lastUnconsumedLogAtom!=None:
 # Keep length before dispatching: dispatch will reset the field.
-        dataLength=len(self.lastUnconsumedData)
-        if self.dispatchData(self.lastUnconsumedData, self.lastUncosumedParserMatch):
+        dataLength=len(self.lastUnconsumedLogAtom.rawData)
+        if self.dispatchAtom(self.lastUnconsumedLogAtom):
           consumedLength+=dataLength+1
           continue
 # Nothing consumed, tell upstream to wait if appropriate.
@@ -91,17 +90,17 @@ class ByteStreamLineAtomizer(StreamAtomizer):
 
 # This is a normal line.
       lineData=streamData[consumedLength:lineEnd]
-      parsedAtom=None
+      logAtom=LogAtom.LogAtom(lineData, None, None, self)
       if self.parsingModel!=None:
         matchContext=MatchContext(lineData)
         matchElement=self.parsingModel.getMatchElement('', matchContext)
         if matchElement!=None:
-          parsedAtom=ParserMatch(matchElement)
+          logAtom.parserMatch=ParserMatch(matchElement)
           if self.defaultTimestampPath!=None:
-            tsMatch=parsedAtom.getMatchDictionary().get(self.defaultTimestampPath, None)
+            tsMatch=logAtom.parserMatch.getMatchDictionary().get(self.defaultTimestampPath, None)
             if tsMatch!=None:
-              parsedAtom.setDefaultTimestamp(tsMatch.matchObject[1])
-      if self.dispatchData(lineData, parsedAtom):
+              logAtom.setTimestamp(tsMatch.matchObject[1])
+      if self.dispatchAtom(logAtom):
         consumedLength=lineEnd+1
         continue
       if consumedLength==0:
@@ -111,27 +110,19 @@ class ByteStreamLineAtomizer(StreamAtomizer):
       break
     return(consumedLength)
 
-  def dispatchData(self, lineData, parserMatch):
+  def dispatchAtom(self, logAtom):
     """Dispatch the data using the appropriate handlers. Also clean
     or set lastUnconsumed fields depending on outcome of dispatching."""
     wasConsumedFlag=False
-    if parserMatch==None:  
-      if len(self.unparsedAtomHandlers)==0: wasConsumedFlag=True
-      else:
-        for handler in self.unparsedAtomHandlers:
-          if handler.receiveUnparsedAtom('Unparsed data', lineData, lineData, None):
-            wasConsumedFlag=True
+    if len(self.atomHandlerList)==0: wasConsumedFlag=True
     else:
-      if len(self.parsedAtomHandlers)==0: wasConsumedFlag=True
-      else:
-        for handler in self.parsedAtomHandlers:
-          if handler.receiveParsedAtom(lineData, parserMatch): wasConsumedFlag=True
+      for handler in self.atomHandlerList:
+        if handler.receiveAtom(logAtom): wasConsumedFlag=True
+
     if wasConsumedFlag:
-      self.lastUnconsumedData=None
-      self.lastUncosumedParserMatch=None
+      self.lastUnconsumedLogAtom=None
     else:
-      self.lastUnconsumedData=lineData
-      self.lastUncosumedParserMatch=parserMatch
+      self.lastUnconsumedLogAtom=logAtom
     return(wasConsumedFlag)
 
   def dispatchEvent(self, message, lineData):
