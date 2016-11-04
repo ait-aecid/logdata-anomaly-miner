@@ -6,7 +6,7 @@ logdata-anomaly-miner (0.0.6) xenial; urgency=low
   or also users may need to migrate their configuration.
 
   * Upper layers receive LogAtom objects instead of log lines,
-    parsing data as separate parameters. Thus also separate pathes
+    parsing data as separate parameters. Thus also separate paths
     for forwarding of parsed and unparsed atoms are not required
     any more. See below for details (D, U):
 
@@ -15,48 +15,48 @@ logdata-anomaly-miner (0.0.6) xenial; urgency=low
       and access to additional information to new methods and
       fields (D):
 
--from aminer.parsing import ParsedAtomHandlerInterface
-+from aminer.input import AtomHandlerInterface
--class YourHandler(ParsedAtomHandlerInterface, ...
-+class YourHandler(AtomHandlerInterface,
--  def receiveParsedAtom(self, atomData, parserMatch):
-+  def receiveAtom(self, logAtom):
--    timestamp=parserMatch.getDefaultTimestamp()
-+    timestamp=logAtom.getTimestamp()
-+    parserMatch=logAtom.parserMatch
--    print '%s' % atomData
-+    print '%s' % logAtom.rawData
+  -from aminer.parsing import ParsedAtomHandlerInterface
+  +from aminer.input import AtomHandlerInterface
+  -class YourHandler(ParsedAtomHandlerInterface, ...
+  +class YourHandler(AtomHandlerInterface,
+  -  def receiveParsedAtom(self, atomData, parserMatch):
+  +  def receiveAtom(self, logAtom):
+  -    timestamp=parserMatch.getDefaultTimestamp()
+  +    timestamp=logAtom.getTimestamp()
+  +    parserMatch=logAtom.parserMatch
+  -    print '%s' % atomData
+  +    print '%s' % logAtom.rawData
 
     * With parsed/unparsed atom processing path convergence, naming
       of other classes does not make sense any more (U):
 
--from aminer.analysis import VolatileLogarithmicBackoffParsedAtomHistory
-+from aminer.util import VolatileLogarithmicBackoffAtomHistory
-- from aminer.analysis import ParsedAtomFilters
-+ from aminer.analysis import AtomFilters
-- matchAction=Rules.ParsedAtomFilterMatchAction(...
-+ matchAction=Rules.AtomFilterMatchAction(...
+  -from aminer.analysis import VolatileLogarithmicBackoffParsedAtomHistory
+  +from aminer.util import VolatileLogarithmicBackoffAtomHistory
+  - from aminer.analysis import ParsedAtomFilters
+  + from aminer.analysis import AtomFilters
+  - matchAction=Rules.ParsedAtomFilterMatchAction(...
+  + matchAction=Rules.AtomFilterMatchAction(...
 
-- parsedAtomHandlers=[]
-- unparsedAtomHandlers=[]
-- analysisContext.atomizerFactory=SimpleByteStreamLineAtomizerFactory(
--     parsingModel, parsedAtomHandlers, unparsedAtomHandlers, ...
-+ atomFilter=AtomFilters.SubhandlerFilter(None)
-+ analysisContext.atomizerFactory=SimpleByteStreamLineAtomizerFactory(
-+     parsingModel, [atomFilter], ...
+  - parsedAtomHandlers=[]
+  - unparsedAtomHandlers=[]
+  - analysisContext.atomizerFactory=SimpleByteStreamLineAtomizerFactory(
+  -     parsingModel, parsedAtomHandlers, unparsedAtomHandlers, ...
+  + atomFilter=AtomFilters.SubhandlerFilter(None)
+  + analysisContext.atomizerFactory=SimpleByteStreamLineAtomizerFactory(
+  +     parsingModel, [atomFilter], ...
 
-For handling of unparsed atoms:
+  For handling of unparsed atoms:
 
-- unparsedAtomHandlers.append(SimpleUnparsedAtomHandler(anomalyEventHandlers))
-+ atomFilter.addHandler(SimpleUnparsedAtomHandler(anomalyEventHandlers),
-+     stopWhenHandledFlag=True)
+  - unparsedAtomHandlers.append(SimpleUnparsedAtomHandler(anomalyEventHandlers))
+  + atomFilter.addHandler(SimpleUnparsedAtomHandler(anomalyEventHandlers),
+  +     stopWhenHandledFlag=True)
 
-For handling of parsed atoms:
+  For handling of parsed atoms:
 
-- parsedAtomHandlers.append(...
-+ atomFilter.addHandler(...
+  - parsedAtomHandlers.append(...
+  + atomFilter.addHandler(...
 
- -- Roman Fiedler <roman.fiedler@ait.ac.at>  Mon, 31 Oct 2016 18:00:00 +0000
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Fri, 4 Nov 2016 18:00:00 +0000
 
 logdata-anomaly-miner (0.0.5) xenial; urgency=low
 
