@@ -1,3 +1,20 @@
+logdata-anomaly-miner (0.0.6) xenial; urgency=low
+
+  New features:
+  * Added "LogAtom" and "AtomHandlerInterface" to pass data from
+    IO-layer to upper layers consistently.
+  * Added TimestampsUnsortedDetector.py to fail (exit) when data
+    is not properly sorted.
+  * Added SimpleMultisourceAtomSync.py to merge LogAtoms read
+    from parallel streams, e.g. from multiple logfiles.
+
+  Bugfixes:
+  * Logic flaw in logfile rollover handling, selecting on bad fd.
+  * Unassigned, reused variable caused same logfile to be opened
+    more than once.
+
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Fri, 4 Nov 2016 18:00:00 +0000
+
 logdata-anomaly-miner (0.0.5) xenial; urgency=low
 
   * New features:
