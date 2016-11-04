@@ -111,6 +111,9 @@ def buildAnalysisPipeline(analysisContext):
       syslogPreambleModel,
       FirstMatchModelElement('services', serviceChildren)])
 
+# Some generic imports.
+  from aminer.analysis import AtomFilters
+
 # Create all global handler lists here and append the real handlers
 # later on.
 # Use this filter to distribute all atoms to the analysis handlers.
