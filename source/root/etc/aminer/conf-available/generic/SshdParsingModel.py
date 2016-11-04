@@ -30,6 +30,17 @@ after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement('s0', 'Excess permission or bad ownership on file /var/log/btmp')
 ]))
 
+  typeChildren.append(SequenceModelElement('close-sess', [
+      FixedDataModelElement('s0', 'Close session: user '),
+      userNameModel,
+      FixedDataModelElement('s1', ' from '),
+      IpAddressDataModelElement('clientip'),
+      FixedDataModelElement('s2', ' port '),
+      DecimalIntegerValueModelElement('port'),
+      FixedDataModelElement('s3', ' id '),
+      DecimalIntegerValueModelElement('userid')
+  ]))
+
   typeChildren.append(SequenceModelElement('closing', [
       FixedDataModelElement('s0', 'Closing connection to '),
       IpAddressDataModelElement('clientip'),
@@ -141,6 +152,10 @@ after any standard logging preamble, e.g. from syslog."""
       IpAddressDataModelElement('clientip'),
       FixedDataModelElement('s3', ' port '),
       DecimalIntegerValueModelElement('port'),
+      OptionalMatchModelElement('idinfo', SequenceModelElement('idinfo', [
+          FixedDataModelElement('s0', ' id '),
+          DecimalIntegerValueModelElement('id')
+      ]))
   ]))
 
   typeChildren.append(SequenceModelElement('transferred', [
