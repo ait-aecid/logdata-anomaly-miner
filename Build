@@ -41,4 +41,10 @@ rm -rf -- "${_debDirectory}"
 cp -a -- "${_tmpRoot}/logdata-anomaly-miner_"* .
 rm -rf -- "${_tmpRoot}"
 
+# Build the alienated package for CentOS/Redhat.
+_debFileName="$(ls -- logdata-anomaly-miner_*_all.deb)"
+_debVersion="$(echo "${_debFileName}" | sed -r -e 's/logdata-anomaly-miner_([0-9a-z.~-]+)_all.deb/\1/')"
+fakeroot -- /usr/bin/alien --to-rpm --scripts "${_debFileName}"
+mv -i -- "logdata-anomaly-miner-${_debVersion}-2.noarch.rpm" "logdata-anomaly-miner-${_debVersion}-2.noarch.alien.rpm" < /dev/null
+
 echo "Build successful" >&2
