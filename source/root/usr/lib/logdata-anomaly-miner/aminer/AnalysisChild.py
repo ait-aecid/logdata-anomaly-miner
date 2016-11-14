@@ -115,75 +115,72 @@ class AnalysisChild:
         print >>sys.stderr, 'Unexpected select result %s' % str(selectError)
         delayedReturnStatus=1
         break
-      if len(readList)==0:
-# Nothing to read, just try again, most likely just sleeping for
-# a moment in the next select call.
-        continue
-      for readFd in readList:
-        if readFd==masterControlSocket.fileno():
+      if len(readList)!=0:
+        for readFd in readList:
+          if readFd==masterControlSocket.fileno():
 # We cannot fail with None here as the socket was in the readList.
-          (receivedFd, receivedTypeInfo, annotationData)=AMinerUtils.receiveAnnotedFileDescriptor(masterControlSocket)
-          if 'logstream'==receivedTypeInfo:
-            repositioningData=repositioningDataDict.get(annotationData, None)
-            if repositioningData!=None:
-              del repositioningDataDict[annotationData]
-            resource=LogDataResource(annotationData,
-                receivedFd, repositioningData=repositioningData)
+            (receivedFd, receivedTypeInfo, annotationData)=AMinerUtils.receiveAnnotedFileDescriptor(masterControlSocket)
+            if 'logstream'==receivedTypeInfo:
+              repositioningData=repositioningDataDict.get(annotationData, None)
+              if repositioningData!=None:
+                del repositioningDataDict[annotationData]
+              resource=LogDataResource(annotationData,
+                  receivedFd, repositioningData=repositioningData)
 # Make fd nonblocking
-            fdFlags=fcntl.fcntl(resource.logFileFd, fcntl.F_GETFL)
-            fcntl.fcntl(resource.logFileFd, fcntl.F_SETFL, fdFlags|os.O_NONBLOCK)
-            logStream=logStreamsByName.get(resource.logFileName)
-            if logStream==None:
-              streamAtomizer=self.analysisContext.atomizerFactory.getAtomizerForResource(resource.logFileName)
-              logStream=LogStream(resource, streamAtomizer)
-              logStreamsByName[resource.logFileName]=logStream
+              fdFlags=fcntl.fcntl(resource.logFileFd, fcntl.F_GETFL)
+              fcntl.fcntl(resource.logFileFd, fcntl.F_SETFL, fdFlags|os.O_NONBLOCK)
+              logStream=logStreamsByName.get(resource.logFileName)
+              if logStream==None:
+                streamAtomizer=self.analysisContext.atomizerFactory.getAtomizerForResource(resource.logFileName)
+                logStream=LogStream(resource, streamAtomizer)
+                logStreamsByName[resource.logFileName]=logStream
+              else:
+                logStream.addNextResource(resource)
+            elif 'remotecontrol'==receivedTypeInfo:
+              if remoteControlSocket!=None:
+                raise Exception('Received another remote control socket: multiple remote control not (yet?) supported.')
+              remoteControlSocket=socket.fromfd(receivedFd, socket.AF_UNIX,
+                  socket.SOCK_STREAM, 0)
+              os.close(receivedFd)
             else:
-              logStream.addNextResource(resource)
-          elif 'remotecontrol'==receivedTypeInfo:
-            if remoteControlSocket!=None:
-              raise Exception('Received another remote control socket: multiple remote control not (yet?) supported.')
-            remoteControlSocket=socket.fromfd(receivedFd, socket.AF_UNIX,
-                socket.SOCK_STREAM, 0)
-            os.close(receivedFd)
-          else:
-            raise Exception('Unhandled type info on received fd: %s' %
-                repr(receivedTypeInfo))
-          continue
+              raise Exception('Unhandled type info on received fd: %s' %
+                  repr(receivedTypeInfo))
+            continue
 
-        if (remoteControlSocket!=None) and (readFd==remoteControlSocket.fileno()):
+          if (remoteControlSocket!=None) and (readFd==remoteControlSocket.fileno()):
 # Remote we received an connection, accept it.
-          (controlClientSocket, remoteAddress)=remoteControlSocket.accept()
+            (controlClientSocket, remoteAddress)=remoteControlSocket.accept()
 # Keep track of information received via this remote control socket.
-          remoteControlHandler=AnalysisChildRemoteControlHandler(controlClientSocket.fileno())
+            remoteControlHandler=AnalysisChildRemoteControlHandler(controlClientSocket.fileno())
 # FIXME: Here we should enter asynchronous read mode as described
 # in the header of AnalysisChildRemoteControlHandler. At the moment
 # everything is done within the thread. Make sure to continue
 # in blocking mode.
-          controlClientSocket.setblocking(1)
-          while True:
-            while remoteControlHandler.maySend():
-              remoteControlHandler.doSend()
-            if remoteControlHandler.mayProcess():
-              remoteControlHandler.doProcess(self.analysisContext)
-              continue
-            if not(remoteControlHandler.doReceive()): break
-          try:
-            remoteControlHandler.terminate()
-          except Exception as terminateException:
-            print >>sys.stderr, 'Unclear termination of remote control: %s' % str(terminateException)
+            controlClientSocket.setblocking(1)
+            while True:
+              while remoteControlHandler.maySend():
+                remoteControlHandler.doSend()
+              if remoteControlHandler.mayProcess():
+                remoteControlHandler.doProcess(self.analysisContext)
+                continue
+              if not(remoteControlHandler.doReceive()): break
+            try:
+              remoteControlHandler.terminate()
+            except Exception as terminateException:
+              print >>sys.stderr, 'Unclear termination of remote control: %s' % str(terminateException)
 # This is quite useless, the file descriptor was closed already.
 # by terminate. But call just anything to keep garbage collection
 # from closing and freeing the socket too early.
-          controlClientSocket.close()
-          continue
+            controlClientSocket.close()
+            continue
 
 # This has to be a logStream, handle it. Only when downstream
 # blocks, add the stream to the blocked stream list.
-        streamPos=inputSelectFdList.index(readFd)
-        logStream=inputSelectStreams[streamPos]
-        handleResult=logStream.handleStream()
-        if handleResult<0:
-          blockedLogStreams.append(logStream)
+          streamPos=inputSelectFdList.index(readFd)
+          logStream=inputSelectStreams[streamPos]
+          handleResult=logStream.handleStream()
+          if handleResult<0:
+            blockedLogStreams.append(logStream)
 
 
 # Handle the real time events.
