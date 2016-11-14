@@ -65,8 +65,7 @@ class NewMatchPathDetector(AtomHandlerInterface,
 
     delta=self.nextPersistTime-time
     if(delta<=0):
-      PersistencyUtil.storeJson(self.persistenceFileName, list(self.knownPathSet))
-      self.nextPersistTime=None
+      self.doPersist()
       delta=600
     return(delta)
 
