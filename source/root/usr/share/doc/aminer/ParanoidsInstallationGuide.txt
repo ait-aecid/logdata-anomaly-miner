@@ -194,7 +194,7 @@ fails, this can be adjusted to your needs also. You may have to
 supply a different time model element, e.g. using
 
   ConfigSyslogPreambleModel.getModel(
-      DateTimeModelElement('time', [formatstring], 15, False))
+      DateTimeModelElement('time', [formatstring]))
 
 or even switch to MultiLocaleDateTimeModelElement. See source
 code documentation in those files, e.g.
