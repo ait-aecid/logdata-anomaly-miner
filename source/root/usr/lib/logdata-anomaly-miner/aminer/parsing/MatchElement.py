@@ -54,3 +54,13 @@ class MatchElement:
         else:
           result+='\n'+childMatch.annotateMatch(nextIndent)
     return(result)
+
+  def serializeObject(self):
+    """Create a serialization of this match element and all the
+    children. With sane and unique path elements, the serialized
+    object will also be unique."""
+    chld = []
+    if self.children:
+      for childMatch in self.children:
+        chld.append(childMatch.serializeObject())
+    return {"path": self.path, "matchobject": self.matchObject, "matchString": self.matchString, "children": chld}
