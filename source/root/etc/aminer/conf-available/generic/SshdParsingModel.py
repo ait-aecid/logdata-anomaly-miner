@@ -59,7 +59,26 @@ after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement('s2', ' on '),
       IpAddressDataModelElement('serverip'),
       FixedDataModelElement('s3', ' port '),
-      DecimalIntegerValueModelElement('sport')]))
+      DecimalIntegerValueModelElement('sport')
+  ]))
+
+  typeChildren.append(SequenceModelElement('disconnectreq', [
+      FixedDataModelElement('s0', 'Received disconnect from '),
+      IpAddressDataModelElement('clientip'),
+      FixedDataModelElement('s1', ' port '),
+      DecimalIntegerValueModelElement('port'),
+      FixedDataModelElement('s2', ':'),
+      DecimalIntegerValueModelElement('session'),
+      FixedDataModelElement('s3', ': '),
+      FixedWordlistDataModelElement('reason', ['disconnected by user'])
+  ]))
+
+  typeChildren.append(SequenceModelElement('disconnected', [
+      FixedDataModelElement('s0', 'Disconnected from '),
+      IpAddressDataModelElement('clientip'),
+      FixedDataModelElement('s1', ' port '),
+      DecimalIntegerValueModelElement('port')
+  ]))
 
   typeChildren.append(SequenceModelElement('error-bind', [
       FixedDataModelElement('s0', 'error: bind: Cannot assign requested address')]))
