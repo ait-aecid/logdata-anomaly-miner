@@ -17,6 +17,8 @@ description:
 * DecimalIntegerValueModelElement
 * DelimitedDataModelElement: Same as AnyByteDataModelElement but
   include data only up to given delimiter string.
+* ElementValueBranchModelElement: conditional branching due to
+  previously parsed values.
 * FirstMatchModelElement: Branch the model taking the first branch
   matching the remaining log-atom data.
 * FixedDataModelElement: Match a fixed (constant) string.
