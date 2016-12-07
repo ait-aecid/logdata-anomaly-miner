@@ -186,6 +186,7 @@ or source for full documentation:
 
   * AndMatchRule: match only if all subrules match
   * DebugMatchRule: print debugging text when matching
+  * DebugHistoryMatchRule: keep history of matched LogAtoms
   * IPv4InRFC1918MatchRule: match IPs in private networks
   * ModuloTimeMatchRule: match cyclic time values, e.g. nighttime
   * NegationMatchRule: match only if other rule did not

@@ -1,6 +1,9 @@
 import datetime
 import sys
 
+from aminer.util import LogarithmicBackoffHistory
+from aminer.util import ObjectHistory
+
 from AtomFilters import SubhandlerFilter
 
 """This package contains various classes to build check rulesets.
@@ -411,3 +414,32 @@ class DebugMatchRule(MatchRule):
 
   def __str__(self):
     return('%s' % self.debugMatchResult)
+
+
+class DebugHistoryMatchRule(MatchRule):
+  """This rule can be inserted into a normal ruleset just to see
+  when a match attempt is made. It just adds the evaluated logAtom
+  to a ObjectHistory."""
+
+  def __init__(self, objectHistory=None, debugMatchResult=False,
+      matchAction=None):
+    """Create a DebugHistoryMatchRule object.
+    @param objectHistory use this ObjectHistory to collect the
+    LogAtoms. When None, a default LogarithmicBackoffHistory for
+    10 items."""
+    if objectHistory==None:
+      objectHistory=LogarithmicBackoffHistory(10)
+    elif not(isinstance(objectHistory, ObjectHistory)):
+      raise Exception('objectHistory is not an instance of ObjectHistory')
+    self.objectHistory=objectHistory
+    self.debugMatchResult=debugMatchResult
+    self.matchAction=matchAction
+
+  def match(self, logAtom):
+    self.objectHistory.addObject(logAtom)
+    if self.matchAction!=None: self.matchAction.matchAction(logAtom)
+    return(self.debugMatchResult)
+
+  def getHistory(self):
+    """Get the history object from this debug rule."""
+    return(self.objectHistory)

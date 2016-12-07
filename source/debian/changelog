@@ -5,6 +5,7 @@ logdata-anomaly-miner (0.0.7~pre0) xenial; urgency=low
     fix various shortcomings of strptime in Python and libc.
   * ElementValueBranchModelElement added to support conditional
     branching.
+  * DebugHistoryMatchRule added: keep history of matched LogAtoms.
 
  -- Roman Fiedler <roman.fiedler@ait.ac.at>  Wed,  7 Nov 2016 08:00:00 +0000
 

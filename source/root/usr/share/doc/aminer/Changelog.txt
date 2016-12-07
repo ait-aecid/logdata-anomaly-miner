@@ -6,6 +6,7 @@ V0.0.7 (2016-12-07):
     fix various shortcomings of strptime in Python and libc.
   * ElementValueBranchModelElement added to support conditional
     branching.
+  * DebugHistoryMatchRule added: keep history of matched LogAtoms.
 
 
 V0.0.6 (2016-11-04):
