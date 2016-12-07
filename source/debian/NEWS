@@ -1,3 +1,19 @@
+logdata-anomaly-miner (0.0.7) xenial; urgency=low
+
+  The datetime parsing DateTimeModelElement was reimplemented
+  to fix various shortcomings of strptime in Python and libc.
+  This will require changes in configuration due to API changes,
+  e.g.:
+
+  -timeModel=DateTimeModelElement('time', '%b %d %H:%M:%S', 15, False)
+  +timeModel=DateTimeModelElement('time', '%b %d %H:%M:%S')
+
+  See /usr/lib/logdata-anomaly-miner/aminer/parsing/DateTimeModelElement.py
+  source code documentation for currently supported datetime format
+  options.
+
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Wed, 7 Dec 2016 08:00:00 +0000
+
 logdata-anomaly-miner (0.0.6) xenial; urgency=low
 
   The input IO-handling was redesigned, thus introducing following
