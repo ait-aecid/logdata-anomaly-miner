@@ -1,3 +1,11 @@
+V0.0.7 (2016-12-07):
+====================
+
+* New features:
+  * Datetime parsing reimplemented in DateTimeModelElement to
+    fix various shortcomings of strptime in Python and libc.
+
+
 V0.0.6 (2016-11-04):
 ====================
 
@@ -24,7 +32,8 @@ V0.0.5 (2016-10-11):
   * Added support for logfile reading continuation after shutdown,
     alternative lowlevel data stream splitting tools (atomizers).
 * Bugfixes:
-  * Fixed file descriptor leak in PersistencyUtil.py on store
+  * Fixed file descriptor leak in PersistencyUtil.py on store.
+
 
 V0.0.4 (2016-08-26):
 ====================

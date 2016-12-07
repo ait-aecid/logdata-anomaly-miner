@@ -14,7 +14,7 @@ def getModel(timeModel=None):
   instead.
   """
   if timeModel==None:
-    timeModel=DateTimeModelElement('time', '%b %d %H:%M:%S', 15, False)
+    timeModel=DateTimeModelElement('time', '%b %d %H:%M:%S')
   hostNameModel=VariableByteDataModelElement('host', '-.01234567890abcdefghijklmnopqrstuvwxyz')
   model=SequenceModelElement('syslog', [
       timeModel,
