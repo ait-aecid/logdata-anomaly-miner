@@ -18,7 +18,30 @@ def getLogInt(maxBits):
   return(result)
 
 
-class LogarithmicBackoffHistory:
+class ObjectHistory:
+  """This is the superinterface of all object histories. The idea
+  behind that is to use that type of history best suited for a
+  purpose considering amount of data, possibility for history
+  size limits to be reached, priorization which elements should
+  be dropped first."""
+
+  def addObject(self, newObject):
+    """Add an object to this history. This method call may evict
+    other objects from the history."""
+    raise Exception('Interface method called')
+
+  def getHistory(self):
+    """Get the whole history list. Make sure to clone the list
+    before modification when influences on this object are not
+    intended."""
+    raise Exception('Interface method called')
+
+  def clearHistory(self):
+    """Clean the whole history."""
+    raise Exception('Interface method called')
+
+
+class LogarithmicBackoffHistory(ObjectHistory):
   """This class keeps a history list of items with logarithmic
   storage characteristics. When adding objects, the list will
   be filled to the maximum size with the newest items at the end.
@@ -28,9 +51,11 @@ class LogarithmicBackoffHistory:
   last 2 elements are moved, with 1/8 the last 3, ... Thus the
   list will in average span a time range of 2^maxItems items with
   growing size of holes towards the earliest element."""
-  def __init__(self, maxItems, initialList=[]):
+
+  def __init__(self, maxItems, initialList=None):
     self.maxItems=maxItems
-    if len(initialList)>maxItems: initialList=initialList[:maxItems]
+    if initialList==None: initialList=[]
+    else: initialList=initialList[:maxItems]
     self.history=initialList
 
   def addObject(self, newObject):
@@ -50,6 +75,10 @@ class LogarithmicBackoffHistory:
     before modification when influences on this object are not
     intended."""
     return(self.history)
+
+  def clearHistory(self):
+    """Clean the whole history."""
+    self.history[:]=[]
 
 
 class TimeTriggeredComponentInterface:
