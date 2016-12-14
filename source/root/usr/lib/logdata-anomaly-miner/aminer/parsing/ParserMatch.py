@@ -8,6 +8,8 @@ class ParserMatch:
 
   def __init__(self, matchElement, parsingProcessData=None):
     """Initialize the match.
+    @param matchElement the root MatchElement from the parsing
+    process.
     @param parsingProcessData this parameter might provide more
     information about the parsing process, e.g. when parsing produced
     warnings. The data is specific for the source producing the
