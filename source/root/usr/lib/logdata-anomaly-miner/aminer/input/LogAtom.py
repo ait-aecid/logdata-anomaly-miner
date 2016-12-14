@@ -6,6 +6,11 @@ class LogAtom:
     self.atomTime=atomTime
     self.source=source
 
+  def getParserMatch(self):
+    """Get the parser match associated with this LogAtom.
+    @return the match or None for (yet) unparsed LogAtoms."""
+    return(self.parserMatch)
+
   def setTimestamp(self, timestamp):
     """Update the default timestamp value associated with this
     LogAtom. The method can be called more than once to allow
