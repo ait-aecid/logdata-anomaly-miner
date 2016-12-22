@@ -3,7 +3,7 @@ import random
 import time
 
 from aminer import AMinerConfig
-from aminer.AMinerUtils import AnalysisContext
+from aminer.AnalysisChild import AnalysisContext
 from aminer.analysis import Rules
 from aminer.input import AtomHandlerInterface
 from aminer.util import getLogInt

@@ -4,7 +4,7 @@ import subprocess
 import sys
 import time
 
-from aminer.AMinerUtils import AnalysisContext
+from aminer.AnalysisChild import AnalysisContext
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.events import EventHandlerInterface
 from aminer.parsing import ParserMatch

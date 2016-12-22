@@ -1,7 +1,7 @@
 import time
 
 from aminer import AMinerConfig
-from aminer.AMinerUtils import AnalysisContext
+from aminer.AnalysisContext import AnalysisContext
 from aminer.input import AtomHandlerInterface
 from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
