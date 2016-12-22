@@ -4,9 +4,7 @@ import os
 import socket
 import struct
 import sys
-import time
 
-from aminer.util import SecureOSFunctions
 from aminer.util import TimeTriggeredComponentInterface
 
 
@@ -104,58 +102,3 @@ class AnalysisContext:
   def buildAnalysisPipeline(self):
     """Convenience method to create the pipeline."""
     self.aminerConfig.buildAnalysisPipeline(self)
-
-
-# Those should go away as soon as Python (or aminer via libc)
-# provides those functions.
-noSecureLinkUnlinkAtWarnOnceFlag=True
-
-def openPersistenceFile(fileName, flags):
-  """This function opens the given persistence file. When O_CREAT
-  was specified, the function will attempt to create the directories
-  too."""
-
-  try:
-    fd=SecureOSFunctions.secureOpenFile(fileName, flags)
-    return(fd)
-  except OSError as openOsError:
-    if ((flags&os.O_CREAT)==0) or (openOsError.errno!=errno.ENOENT):
-      raise openOsError
-
-# Find out, which directory is missing by stating our way up.
-  dirNameLength=fileName.rfind('/')
-  if(dirNameLength>0): os.makedirs(fileName[:dirNameLength])
-  return(SecureOSFunctions.secureOpenFile(fileName, flags))
-
-
-def createTemporaryPersistenceFile(fileName):
-  """Create a temporary file within persistence directory to write
-  new persistence data to it. Thus the old data is not modified,
-  any error creating or writing the file will not harm the old
-  state."""
-
-  fd=None
-  while True:
-# FIXME: This should use O_TMPFILE, but not yet available. That would
-# obsolete the loop also.
-    fd=openPersistenceFile('%s.tmp-%f' % (fileName, time.time()), os.O_WRONLY|os.O_CREAT|os.O_EXCL)
-    break
-  return(fd)
-
-
-def replacePersistenceFile(fileName, newFileHandle):
-  """Replace the named file with the file refered by the handle."""
-
-  global noSecureLinkUnlinkAtWarnOnceFlag
-  if noSecureLinkUnlinkAtWarnOnceFlag:
-    print >>sys.stderr, 'WARNING: SECURITY: unsafe unlink (unavailable unlinkat/linkat should be used, but not available in python)'
-    noSecureLinkUnlinkAtWarnOnceFlag=False
-  try:
-    os.unlink(fileName)
-  except OSError as openOsError:
-    if openOsError.errno!=errno.ENOENT:
-      raise openOsError
-
-  tmpFileName=os.readlink('/proc/self/fd/%d' % newFileHandle)
-  os.link(tmpFileName, fileName)
-  os.unlink(tmpFileName)
