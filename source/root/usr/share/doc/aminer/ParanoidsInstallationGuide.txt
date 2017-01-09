@@ -35,7 +35,7 @@ cp config.py.template config.py
 Remove everything below configuration property "AnalysisConfigFile".
 Define the child configuration file:
 
-configProperties['AnalysisConfigFile']='analysis.py'
+configProperties['AnalysisConfigFile'] = 'analysis.py'
 
 While not fully configured, you may want to start with an empty
 input file. A paranoid aminer instance will report everything
@@ -43,7 +43,7 @@ not explicitely whitelisted as an error. Basically you would get
 your whole syslog echoed back, just with an amplification factor
 applied. In that case use:
 
-configProperties['LogFileList']=['/etc/aminer/test.log']
+configProperties['LogResourceList'] = ['file:///etc/aminer/test.log']
 
 touch /etc/aminer/test.log
 chmod 0600 /etc/aminer/test.log
@@ -55,14 +55,14 @@ root user can connect to the socket. The remote control commands
 are executed within the analysis child process usually running
 as a dedicated less-privileged user.
 
-configProperties['RemoteControlSocket']='/var/run/aminer-remote.socket'
+configProperties['RemoteControlSocket'] = '/var/run/aminer-remote.socket'
 
  
 * Create child configuration:
 
 cp config.py.template analysis.py
 
-Remove everything below (but keeping) "configProperties={}" down
+Remove everything below (but keeping) "configProperties = {}" down
 to (including) configuration property "AnalysisConfigFile".
 
 You may want to define the "MailAlerting.TargetAddress" parameter
@@ -216,10 +216,10 @@ below), debugging can even occur while AMiner is processing data.
 Remote control code for that purpose could would be:
 
   from aminer.parsing import DebugMatchContext
-  matchContext=DebugMatchContext('Your test input here')
+  matchContext = DebugMatchContext('Your test input here')
   # Working with registered components is handy...
-  match=analysisContext.registeredComponentsByName['ParsingModel'].getMatchElement('', matchContext)
-  remoteControlResponse='Result: %s, debug info %s' % (str(match), matchContext.getDebugInfo())
+  match = analysisContext.registeredComponentsByName['ParsingModel'].getMatchElement('', matchContext)
+  remoteControlResponse = 'Result: %s, debug info %s' % (str(match), matchContext.getDebugInfo())
 
 * Contributing to the model templates:
 
@@ -244,14 +244,14 @@ to a new message type should cause some distrust.
 You may use the configuration from the config.py.template, but
 when really paranoid, following changes might be useful:
 
-* Disable autoinclusion: autoIncludeFlag=False
-* Register as named component: componentName='DefaultNewMatchPathDetector'
+* Disable autoinclusion: autoIncludeFlag = False
+* Register as named component: componentName = 'DefaultNewMatchPathDetector'
 
   from aminer.analysis import NewMatchPathDetector
-  newMatchPathDetector=NewMatchPathDetector(
+  newMatchPathDetector = NewMatchPathDetector(
       analysisContext.aminerConfig, anomalyEventHandlers, autoIncludeFlag=False)
-  analysisContext.registerComponent(newMatchPathDetector,
-      componentName='DefaultNewMatchPathDetector')
+  analysisContext.registerComponent(
+      newMatchPathDetector, componentName='DefaultNewMatchPathDetector')
   atomFilter.addHandler(newMatchPathDetector)
 
 With automatic inclusion enabled, the detector would complain
@@ -278,14 +278,14 @@ host groups, a filter has to be installed to separate the data:
   * Create different NewMatchPathDetector instances with unique
     persistance IDs:
 
-  newMatchPathDetectorA=NewMatchPathDetector(
+  newMatchPathDetectorA = NewMatchPathDetector(
       analysisContext.aminerConfig, anomalyEventHandlers,
       peristenceId='WwwHostsGroup', autoIncludeFlag=False)
 
   * Create the filter:
 
   from aminer.analysis import AtomFilters
-  hostnameValueFilter=AtomFilters.MatchValueFilter(
+  hostnameValueFilter = AtomFilters.MatchValueFilter(
       '/model/syslog/host',
       {'host-a': newMatchPathDetectorA, ...},
       defaultNewMatchPathDetector)
@@ -322,7 +322,7 @@ and accessible. To have more robust configuration procedures,
 the detectors should be registered as named components. To verify,
 that remote control is working, just execute:
 
-AMinerRemoteControl --ControlSocket /var/run/aminer-remote.socket --Exec 'remoteControlResponse=analysisContext.getRegisteredComponentNames()'
+AMinerRemoteControl --ControlSocket /var/run/aminer-remote.socket --Exec 'remoteControlResponse = analysisContext.getRegisteredComponentNames()'
 Remote execution response: [u'DefaultNewMatchPathDetector']
 
 The command executed is executed inside the running aminer child
@@ -350,10 +350,11 @@ Here is an example how to detect that hosts stop sending logs
 and to generate alerts:
 
   from aminer.analysis import MissingMatchPathValueDetector
-  missingMatchPathValueDetector=MissingMatchPathValueDetector(
+  missingMatchPathValueDetector = MissingMatchPathValueDetector(
       analysisContext.aminerConfig, '/model/syslog/host',
       anomalyEventHandlers, autoIncludeFlag=True, defaultInterval=24*3600)
-  analysisContext.registerComponent(missingMatchPathValueDetector,
+  analysisContext.registerComponent(
+      missingMatchPathValueDetector,
       componentName='DefaultMissingMatchPathValueDetector')
   atomFilter.addHandler(missingMatchPathValueDetector)
 

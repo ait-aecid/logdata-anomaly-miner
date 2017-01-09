@@ -1,33 +1,34 @@
 #!/usr/bin/python2 -BEsStt
-# This is the main program of the "aminer" logfile miner tool.
-# It does not import any local default site packages to decrease
-# the attack surface due to manipulation of unused but available
-# packages.
-#
-# CAVEAT: This process will keep running with current permissions,
-# no matter what was specified in 'AMinerUser' and 'AMinerGroup'
-# configuration properties. This is required to allow the aminer
-# parent parent process to reopen log files, which might need
-# the elevated privileges.
-#
-# NOTE: This tool is developed to allow secure operation even
-# in hostile environment, e.g. when one directory, where aminer
-# should open logfiles is already under full control of an attacker.
-# However it is not intended to be run as SUID-binary, this would
-# require code changes to protect also against standard SUID attacks.
-#
-# Parameters:
-# * --Config [file]: Location of configuration file, defaults
-#   to '/etc/aminer/config.py' when not set.
-# * --RunAnalysis: This parameters is NOT intended to be used
-#   on command line when starting aminer, it will trigger execution
-#   of the unprivileged aminer background child performing the
-#   real analysis.
+
+"""This is the main program of the "aminer" logfile miner tool.
+It does not import any local default site packages to decrease
+the attack surface due to manipulation of unused but available
+packages.
+
+CAVEAT: This process will keep running with current permissions,
+no matter what was specified in 'AMinerUser' and 'AMinerGroup'
+configuration properties. This is required to allow the AMiner
+parent parent process to reopen log files, which might need the
+elevated privileges.
+
+NOTE: This tool is developed to allow secure operation even in
+hostile environment, e.g. when one directory, where AMiner attempts
+to open logfiles is already under full control of an attacker.
+However it is not intended to be run as SUID-binary, this would
+require code changes to protect also against standard SUID attacks.
+
+Parameters:
+* --Config [file]: Location of configuration file, defaults to
+  '/etc/aminer/config.py' when not set.
+* --RunAnalysis: This parameters is NOT intended to be used on
+  command line when starting aminer, it will trigger execution
+  of the unprivileged aminer background child performing the real
+  analysis."""
 
 import sys
 # As site packages are not included, define from where we need
 # to execute code before loading it.
-sys.path=sys.path[1:]+['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
+sys.path = sys.path[1:]+['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
 
 import errno
 import os
@@ -37,71 +38,83 @@ import time
 
 # Extract program name, but only when sure to contain no problematic
 # characters.
-programName=sys.argv[0].split('/')[-1]
-if (programName=='.') or (programName=='..') or (re.match('^[a-zA-Z0-9._-]+$', programName)==None):
+programName = sys.argv[0].split('/')[-1]
+if ((programName == '.') or (programName == '..') or
+    (re.match('^[a-zA-Z0-9._-]+$', programName) is None)):
   print >>sys.stderr, 'Invalid program name, check your execution args'
   sys.exit(1)
 
 # We will not read stdin from here on, so get rid of it immediately,
 # thus aberrant child cannot manipulate caller's stdin using it.
-stdinFd=os.open('/dev/null', os.O_RDONLY)
+stdinFd = os.open('/dev/null', os.O_RDONLY)
 os.dup2(stdinFd, 0)
 os.close(stdinFd)
 
-configFileName='/etc/aminer/config.py'
-runInForegroundFlag=False
-runAnalysisChildFlag=False
+configFileName = '/etc/aminer/config.py'
+runInForegroundFlag = False
+runAnalysisChildFlag = False
 
-argPos=1
-while argPos<len(sys.argv):
-  argName=sys.argv[argPos]
-  argPos+=1
+argPos = 1
+while argPos < len(sys.argv):
+  argName = sys.argv[argPos]
+  argPos += 1
 
-  if argName=='--Config':
-    configFileName=sys.argv[argPos]
-    argPos+=1
+  if argName == '--Config':
+    configFileName = sys.argv[argPos]
+    argPos += 1
     continue
-  if argName=='--Foreground':
-    runInForegroundFlag=True
+  if argName == '--Foreground':
+    runInForegroundFlag = True
     continue
-  if argName=='--RunAnalysis':
-    runAnalysisChildFlag=True
+  if argName == '--RunAnalysis':
+    runAnalysisChildFlag = True
     continue
 
   print >>sys.stderr, 'Unknown parameter "%s"' % argName
   sys.exit(1)
 
 # Load the main configuration file.
-if not(os.path.exists(configFileName)):
+if not os.path.exists(configFileName):
   print >>sys.stderr, '%s: config "%s" not (yet) available!' % (programName, configFileName)
   sys.exit(1)
 
 # Minimal import to avoid loading too much within the privileged
 # process.
 from aminer import AMinerConfig
-aminerConfig=AMinerConfig.loadConfig(configFileName)
+aminerConfig = AMinerConfig.loadConfig(configFileName)
 
 if runAnalysisChildFlag:
 # Verify existance and ownership of persistence directory.
-  persistanceDirName=aminerConfig.configProperties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
+  persistanceDirName = aminerConfig.configProperties.get(
+      AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
   from aminer.util import SecureOSFunctions
   print >>sys.stderr, 'WARNING: SECURITY: Open should use O_PATH, but not yet available in python'
-  persistenceDirFd=SecureOSFunctions.secureOpenFile(persistanceDirName, os.O_RDONLY|os.O_DIRECTORY)
-  statResult=os.fstat(persistenceDirFd)
+  persistenceDirFd = SecureOSFunctions.secureOpenFile(
+      persistanceDirName, os.O_RDONLY|os.O_DIRECTORY)
+  statResult = os.fstat(persistenceDirFd)
   import stat
-  if (not stat.S_ISDIR(statResult.st_mode)) or ((statResult.st_mode&stat.S_IRWXU)!=0700) or (statResult.st_uid!=os.getuid()) or (statResult.st_gid!=os.getgid()):
-    print >>sys.stderr, 'FATAL: persistence directory "%s" has to be owned by analysis process (uid %d!=%d, gid %d!=%d) and have access mode 0700 only!' % (persistanceDirName, statResult.st_uid, os.getuid(), statResult.st_gid, os.getgid())
+  if ((not stat.S_ISDIR(statResult.st_mode)) or
+      ((statResult.st_mode&stat.S_IRWXU) != 0o700) or
+      (statResult.st_uid != os.getuid()) or (statResult.st_gid != os.getgid())):
+    print >>sys.stderr, 'FATAL: persistence directory "%s" has ' \
+        'to be owned by analysis process (uid %d!=%d, gid %d!=%d) ' \
+        'and have access mode 0700 only!' % (
+            persistanceDirName, statResult.st_uid, os.getuid(), statResult.st_gid, os.getgid())
     sys.exit(1)
-  print >>sys.stderr, 'WARNING: SECURITY: No checking for backdoor access via POSIX ACLs, use "getfacl" from "acl" package to check manually.'
+  print >>sys.stderr, 'WARNING: SECURITY: No checking for backdoor ' \
+      'access via POSIX ACLs, use "getfacl" from "acl" package ' \
+      'to check manually.'
   os.close(persistenceDirFd)
 
-  import aminer
-  child=aminer.AnalysisChild(programName, aminerConfig)
+  from aminer.AnalysisChild import AnalysisChild
+  child = AnalysisChild(programName, aminerConfig)
 # This function call will only return on error or signal induced
 # normal termination.
-  childReturnStatus=child.runAnalysis(3)
-  if childReturnStatus==0: sys.exit(0)
-  print >>sys.stderr, '%s: runAnalysis terminated with unexpected status %d' % (programName, childReturnStatus)
+  childReturnStatus = child.runAnalysis(3)
+  if childReturnStatus == 0:
+    sys.exit(0)
+  print >>sys.stderr, '%s: runAnalysis terminated with unexpected status %d' % (
+      programName, childReturnStatus)
   sys.exit(1)
 
 # Start importing of aminer specific components after reading
@@ -109,65 +122,78 @@ if runAnalysisChildFlag:
 # from within configuration.
 from aminer.util import SecureOSFunctions
 
-logFileList=aminerConfig.configProperties.get(AMinerConfig.KEY_LOG_FILE_LIST, None)
-if (logFileList==None) or (len(logFileList)==0):
-  print >>sys.stderr, '%s: %s not defined' % (programName, AMinerConfig.KEY_LOG_FILE_LIST)
+logSourcesList = aminerConfig.configProperties.get(AMinerConfig.KEY_LOG_SOURCES_LIST, None)
+if (logSourcesList is None) or (len(logSourcesList) == 0):
+  print >>sys.stderr, '%s: %s not defined' % (programName, AMinerConfig.KEY_LOG_SOURCES_LIST)
   sys.exit(1)
 
 # Now create the management entries for each logfile.
-logDataResourceDict={}
-for logFileName in logFileList:
-  logFileInfo=None
+logDataResourceDict = {}
+for logResourceName in logSourcesList:
+  logResource = None
+  if logResourceName.startswith('file://'):
+    from aminer.input.LogStream import FileLogDataResource
+    logResource = FileLogDataResource(logResourceName, -1)
+  elif logResourceName.startswith('unix://'):
+    from aminer.input.LogStream import UnixSocketLogDataResource
+    logResource = UnixSocketLogDataResource(logResourceName, -1)
+  else:
+    print >>sys.stderr, 'Unsupported schema in %s: %s' % (
+        AMinerConfig.KEY_LOG_SOURCES_LIST, logResourceName)
+    sys.exit(1)
+
   try:
-    logFileFd=SecureOSFunctions.secureOpenFile(logFileName, os.O_RDONLY)
-    logFileInfo=[logFileFd, os.fstat(logFileFd)]
+    logResource.open()
   except OSError as openOsError:
-    if openOsError.errno==errno.ENOENT:
-      pass
-    elif openOsError.errno==errno.EACCES:
-      print >>sys.stderr, '%s: no permission to access %s' % (programName, logFileName)
+    if openOsError.errno == errno.EACCES:
+      print >>sys.stderr, '%s: no permission to access %s' % (
+          programName, logResourceName)
       sys.exit(1)
     else:
-      print >>sys.stderr, '%s: unexpected error opening %s: %d (%s)' % (programName, logFileName, openOsError.errno, os.strerror(openOsError.errno))
+      print >>sys.stderr, '%s: unexpected error opening %s: %d (%s)' % (
+          programName, logResourceName, openOsError.errno, os.strerror(openOsError.errno))
       sys.exit(1)
-  logDataResourceDict[logFileName]=logFileInfo
+  logDataResourceDict[logResourceName] = logResource
 
-childUserName=aminerConfig.configProperties.get(AMinerConfig.KEY_AMINER_USER, None)
-childGroupName=aminerConfig.configProperties.get(AMinerConfig.KEY_AMINER_GROUP, None)
-childUserId=-1
-childGroupId=-1
+childUserName = aminerConfig.configProperties.get(AMinerConfig.KEY_AMINER_USER, None)
+childGroupName = aminerConfig.configProperties.get(AMinerConfig.KEY_AMINER_GROUP, None)
+childUserId = -1
+childGroupId = -1
 try:
-  if childUserName!=None:
+  if childUserName != None:
     from pwd import getpwnam
-    childUserId=getpwnam(childUserName).pw_uid
-  if childGroupName!=None:
+    childUserId = getpwnam(childUserName).pw_uid
+  if childGroupName != None:
     from grp import getgrnam
-    childGroupId=getgrnam(childUserName).gr_gid
+    childGroupId = getgrnam(childUserName).gr_gid
 except:
-  print >>sys.stderr, 'Failed to resolve %s or %s' % (AMinerConfig.KEY_AMINER_USER, AMinerConfig.KEY_AMINER_GROUP)
+  print >>sys.stderr, 'Failed to resolve %s or %s' % (
+      AMinerConfig.KEY_AMINER_USER, AMinerConfig.KEY_AMINER_GROUP)
   sys.exit(1)
 
 # Create the remote control socket, if any. Do this in privileged
 # mode to allow binding it at arbitrary locations and support restricted
 # permissions of any type for current (privileged) uid.
-remoteControlSocketFd=-1
-remoteControlSocketName=aminerConfig.configProperties.get(AMinerConfig.KEY_REMOTE_CONTROL_SOCKET_PATH, None)
-remoteControlSocket=None
-if remoteControlSocketName!=None:
+remoteControlSocketFd = -1
+remoteControlSocketName = aminerConfig.configProperties.get(
+    AMinerConfig.KEY_REMOTE_CONTROL_SOCKET_PATH, None)
+remoteControlSocket = None
+if remoteControlSocketName != None:
   if os.path.exists(remoteControlSocketName):
     try:
       os.unlink(remoteControlSocketName)
     except OSError:
-      print >>sys.stderr, 'Failed to clean up old remote control socket at %s' % remoteControlSocketName
+      print >>sys.stderr, 'Failed to clean up old remote control ' \
+          'socket at %s' % remoteControlSocketName
       sys.exit(1)
 # Create the local socket: there is no easy way to create it with
 # correct permissions, hence a fork is needed, setting umask,
 # bind the socket. It is also recomended to create the socket
 # in a directory having the correct permissions already.
-  remoteControlSocket=socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+  remoteControlSocket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
   remoteControlSocket.setblocking(0)
-  bindChildPid=os.fork()
-  if bindChildPid==0:
+  bindChildPid = os.fork()
+  if bindChildPid == 0:
     os.umask(0177)
     remoteControlSocket.bind(remoteControlSocketName)
 # Do not perform any cleanup, flushing of streams.
@@ -177,15 +203,15 @@ if remoteControlSocketName!=None:
 
 # Now have checked all we can get from the configuration in the
 # privileged process. Detach from the TTY when in daemon mode.
-if not(runInForegroundFlag):
-  childPid=0
+if not runInForegroundFlag:
+  childPid = 0
   try:
 # Fork a child to make sure, we are not the process group leader already.
-    childPid=os.fork()
+    childPid = os.fork()
   except Exception as forkException:
     print >>sys.stderr, 'Failed to daemonize: %s' % forkException
     sys.exit(1)
-  if childPid!=0:
+  if childPid != 0:
 # This is the parent. Exit without any python cleanup.
     os._exit(0)
 # This is the child. Create a new session and become process group
@@ -194,11 +220,11 @@ if not(runInForegroundFlag):
 # Fork again to become an orphaned process not being session leader,
 # hence not able to get a controlling tty again.
   try:
-    childPid=os.fork()
+    childPid = os.fork()
   except Exception as forkException:
     print >>sys.stderr, 'Failed to daemonize: %s' % forkException
     sys.exit(1)
-  if childPid!=0:
+  if childPid != 0:
 # This is the parent. Exit without any python cleanup.
     os._exit(0)
 # Move to root directory to avoid lingering in some cwd someone
@@ -210,21 +236,23 @@ if not(runInForegroundFlag):
 
 # Install a signal handler catching common stop signals and relaying
 # it to all children for sure.
-childTerminationTriggeredFlag=False
+childTerminationTriggeredFlag = False
 def gracefulShutdownHandler(_signo, _stackFrame):
+  """This is the signal handler function to react on typical shutdown
+  signals."""
   print >>sys.stderr, '%s: caught signal, shutting down' % programName
 # Just set the flag. It is likely, that child received same signal
 # also so avoid multiple signaling, which could interrupt the
 # shutdown procedure again.
   global childTerminationTriggeredFlag
-  childTerminationTriggeredFlag=True
+  childTerminationTriggeredFlag = True
 import signal
 signal.signal(signal.SIGHUP, gracefulShutdownHandler)
 signal.signal(signal.SIGINT, gracefulShutdownHandler)
 signal.signal(signal.SIGTERM, gracefulShutdownHandler)
 
 # Now create the socket to connect the analysis child.
-(parentSocket, childSocket)=socket.socketpair(socket.AF_UNIX, socket.SOCK_DGRAM, 0)
+(parentSocket, childSocket) = socket.socketpair(socket.AF_UNIX, socket.SOCK_DGRAM, 0)
 # Have it nonblocking from here on.
 parentSocket.setblocking(0)
 childSocket.setblocking(0)
@@ -234,10 +262,10 @@ childSocket.setblocking(0)
 # Flush stderr to avoid duplication of output if both child and
 # parent want to write something.
 sys.stderr.flush()
-childPid=os.fork()
-if childPid==0:
+childPid = os.fork()
+if childPid == 0:
 # Relocate the child socket fd to 3 if needed
-  if childSocket.fileno()!=3:
+  if childSocket.fileno() != 3:
     os.dup2(childSocket.fileno(), 3)
     childSocket.close()
 
@@ -247,40 +275,44 @@ if childPid==0:
     try:
       os.close(closeFd)
     except OSError as openOsError:
-      if openOsError.errno==errno.EBADF: continue
-      print >>sys.stderr, '%s: unexpected exception closing file descriptors: %s' % (programName, openOsError)
+      if openOsError.errno == errno.EBADF:
+        continue
+      print >>sys.stderr, '%s: unexpected exception closing file ' \
+          'descriptors: %s' % (programName, openOsError)
 # Flush stderr before exit without any cleanup.
       sys.stderr.flush()
       os._exit(1)
 
 # Clear the supplementary groups before dropping privileges. This
 # makes only sense when changing the uid or gid.
-  if os.getuid()==0:
-    if ((childUserId!=-1) and (childUserId!=os.getuid())) or ((childGroupId!=-1) and (childGroupId!=os.getgid())):
+  if os.getuid() == 0:
+    if (((childUserId != -1) and (childUserId != os.getuid())) or
+        ((childGroupId != -1) and (childGroupId != os.getgid()))):
       os.setgroups([])
 
 # Drop privileges before executing child. setuid/gid will raise
 # an exception when call has failed.
-    if childGroupId!=-1:
+    if childGroupId != -1:
       os.setgid(childGroupId)
-    if childUserId!=-1:
+    if childUserId != -1:
       os.setuid(childUserId)
   else:
     print >>sys.stderr, 'INFO: No privilege separation when started as unprivileged user'
 
 # Now resolve the specific analysis configuration file (if any).
-  analysisConfigFileName=aminerConfig.configProperties.get(AMinerConfig.KEY_ANALYSIS_CONFIG_FILE, None)
-  if analysisConfigFileName==None:
-    analysisConfigFileName=configFileName
-  elif not(os.path.isabs(analysisConfigFileName)):
-    analysisConfigFileName=os.path.join(os.path.dirname(configFileName), analysisConfigFileName)
+  analysisConfigFileName = aminerConfig.configProperties.get(
+      AMinerConfig.KEY_ANALYSIS_CONFIG_FILE, None)
+  if analysisConfigFileName is None:
+    analysisConfigFileName = configFileName
+  elif not os.path.isabs(analysisConfigFileName):
+    analysisConfigFileName = os.path.join(os.path.dirname(configFileName), analysisConfigFileName)
 
 # Now execute the very same program again, but user might have
 # moved or renamed it meanwhile. This would be problematic with
 # SUID-binaries (which we do not yet support).
 # Do NOT just fork but also exec to avoid child circumventing
 # parent's ALSR due to cloned kernel VMA.
-  execArgs=['AMinerChild', '--RunAnalysis', '--Config', analysisConfigFileName]
+  execArgs = ['AMinerChild', '--RunAnalysis', '--Config', analysisConfigFileName]
   os.execve(sys.argv[0], execArgs, {})
   print >>sys.stderr, '%s: Failed to execute child process'
   sys.stderr.flush()
@@ -290,74 +322,68 @@ childSocket.close()
 
 # Send all log resource information currently available to child
 # process.
-for logFileName, logFileInfo in logDataResourceDict.iteritems():
-  if logFileInfo!=None:
-    SecureOSFunctions.sendLogstreamDescriptor(parentSocket, logFileInfo[0],
-        logFileName)
-    os.close(logFileInfo[0])
-    logFileInfo[0]=-1
+for logResourceName, logResource in logDataResourceDict.iteritems():
+  if (logResource != None) and (logResource.getFileDescriptor() >= 0):
+    SecureOSFunctions.sendLogstreamDescriptor(
+        parentSocket, logResource.getFileDescriptor(), logResourceName)
+    logResource.close()
 
 # Send the remote control server socket, if any and close it afterwards.
 # It is not needed any more on parent side.
-if remoteControlSocket!=None:
-  SecureOSFunctions.sendAnnotatedFileDescriptor(parentSocket,
-      remoteControlSocket.fileno(), 'remotecontrol', '')
+if remoteControlSocket != None:
+  SecureOSFunctions.sendAnnotatedFileDescriptor(
+      parentSocket, remoteControlSocket.fileno(), 'remotecontrol', '')
   remoteControlSocket.close()
 
-exitStatus=0
-warnOnceFlag=True
-childTerminationTriggeredCount=0
+exitStatus = 0
+warnOnceFlag = True
+childTerminationTriggeredCount = 0
 while True:
   if childTerminationTriggeredFlag:
-    if childTerminationTriggeredCount==0:
+    if childTerminationTriggeredCount == 0:
       time.sleep(1)
-    elif childTerminationTriggeredCount<5:
+    elif childTerminationTriggeredCount < 5:
       os.kill(childPid, signal.SIGTERM)
     else:
       os.kill(0, signal.SIGKILL)
-    childTerminationTriggeredCount+=1
+    childTerminationTriggeredCount += 1
 
-  (sigChildPid, sigStatus)=os.waitpid(-1, os.WNOHANG)
-  if sigChildPid!=0:
-    if sigChildPid==childPid:
+  (sigChildPid, sigStatus) = os.waitpid(-1, os.WNOHANG)
+  if sigChildPid != 0:
+    if sigChildPid == childPid:
       if childTerminationTriggeredFlag:
 # This was expected, just terminate.
         break
-      print >>sys.stderr, '%s: Analysis child process %d terminated unexpectedly with signal 0x%x' % (programName, sigChildPid, sigStatus)
-      exitStatus=1
+      print >>sys.stderr, '%s: Analysis child process %d terminated ' \
+          'unexpectedly with signal 0x%x' % (
+              programName, sigChildPid, sigStatus)
+      exitStatus = 1
       break
 # So the child has been cloned, the clone has terminated. This
 # should not happen either.
-    print >>sys.stderr, '%s: untracked child %d terminated with with signal 0x%x' % (programName, sigChildPid, sigStatus)
-    exitStatus=1
+    print >>sys.stderr, '%s: untracked child %d terminated with ' \
+        'with signal 0x%x' % (programName, sigChildPid, sigStatus)
+    exitStatus = 1
 
-# Child information handled, scan for rotated logfiles.
-  for logFileName, logFileInfo in logDataResourceDict.iteritems():
-# FIXME: some inotify-scheme would be nicer, but start with primitive
-# open at first.
-    logFileFd=-1
+# Child information handled, scan for rotated logfiles or other
+# resources, where reopening might make sense.
+  for logResouceName, logDataResource in logDataResourceDict.iteritems():
     try:
-      logFileFd=SecureOSFunctions.secureOpenFile(logFileName, os.O_RDONLY)
-    except OSError as openOsError:
-      if openOsError.errno==errno.ENOENT:
+      if not logDataResource.open(reopenFlag=True):
         continue
-      if openOsError.errno==errno.EACCES:
-        print >>sys.stderr, '%s: no permission to access %s' % (programName, logFileName)
+    except OSError as openOsError:
+      if openOsError.errno == errno.EACCES:
+        print >>sys.stderr, '%s: no permission to access %s' % (
+            programName, logResouceName)
       else:
-        print >>sys.stderr, '%s: unexpected error opening %s: %d (%s)' % (programName, logFileName, openOsError.errno, os.strerror(openOsError.errno))
-      exitStatus=2
+        print >>sys.stderr, '%s: unexpected error reopening %s: %d (%s)' % (
+            programName, logResouceName, openOsError.errno, os.strerror(openOsError.errno))
+      exitStatus = 2
       continue
 
-    statData=os.fstat(logFileFd)
-    if (logFileInfo==None) or (statData.st_ino!=logFileInfo[1].st_ino) or (statData.st_dev!=logFileInfo[1].st_dev):
-      if logFileInfo==None:
-        logFileInfo=[-1, statData]
-        logDataResourceDict[logFileName]=logFileInfo
-      else:
-        logFileInfo[0]=-1
-        logFileInfo[1]=statData
-      SecureOSFunctions.sendLogstreamDescriptor(parentSocket, logFileFd, logFileName)
-    os.close(logFileFd)
+    SecureOSFunctions.sendLogstreamDescriptor(
+        parentSocket, logDataResource.getFileDescriptor(), logResouceName)
+    logDataResource.close()
 
   time.sleep(1)
 sys.exit(exitStatus)

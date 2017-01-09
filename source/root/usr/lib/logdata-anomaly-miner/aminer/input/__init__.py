@@ -1,9 +1,9 @@
-# This file contains interface definition useful implemented by
-# classes in this directory and for use from code outside this
-# directory. All classes are defined in separate files, only the
-# namespace references are added here to simplify the code.
+"""This file contains interface definition useful implemented
+by classes in this directory and for use from code outside this
+directory. All classes are defined in separate files, only the
+namespace references are added here to simplify the code."""
 
-class AtomizerFactory:
+class AtomizerFactory(object):
   """This is the common interface of all factories to create atomizers
   for new data sources and integrate them into the downstream
   processing pipeline."""
@@ -14,7 +14,7 @@ class AtomizerFactory:
     raise Exception('Interface method called')
 
 
-class StreamAtomizer:
+class StreamAtomizer(object):
   """This is the common interface of all binary stream atomizers.
   Atomizers in general should be good detecting and reporting
   malformed atoms but continue to function by attempting error
@@ -48,7 +48,7 @@ class StreamAtomizer:
     raise Exception('Interface method called')
 
 
-class AtomHandlerInterface:
+class AtomHandlerInterface(object):
   """This is the common interface of all handlers suitable for
   receiving log atoms."""
 
@@ -65,8 +65,6 @@ class AtomHandlerInterface:
 
 from ByteStreamLineAtomizer import ByteStreamLineAtomizer
 from LogAtom import LogAtom
-from LogStream import LogDataResource
-from LogStream import LogStream
 from SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
 from SimpleMultisourceAtomSync import SimpleMultisourceAtomSync
 from SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler

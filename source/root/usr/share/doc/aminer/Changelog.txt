@@ -1,4 +1,4 @@
-V0.0.7 (2016-12-22):
+V0.0.7 (2017-01-09):
 ====================
 
 * New features:
@@ -7,6 +7,8 @@ V0.0.7 (2016-12-22):
   * ElementValueBranchModelElement added to support conditional
     branching.
   * DebugHistoryMatchRule added: keep history of matched LogAtoms.
+  * Unix socket input support: improved logdata reading now also
+    supporting connects to UNIX server sockets for reading.
 * Changes:
   * Restructured AMinerUtils and utils package.
 
