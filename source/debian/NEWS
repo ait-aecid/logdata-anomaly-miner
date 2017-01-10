@@ -12,7 +12,14 @@ logdata-anomaly-miner (0.0.7) xenial; urgency=low
   source code documentation for currently supported datetime format
   options.
 
- -- Roman Fiedler <roman.fiedler@ait.ac.at>  Wed, 7 Dec 2016 08:00:00 +0000
+  The code for reading log input was improved to allow also input
+  from UNIX sockets. Thus the configuration was changed to support
+  those modes:
+
+  -configProperties['LogFileList']=['/var/log/auth.log', ...
+  +configProperties['LogResourceList'] = ['file:///var/log/auth.log', ...
+
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Mon, 9 Jan 2017 18:00:00 +0000
 
 logdata-anomaly-miner (0.0.6) xenial; urgency=low
 
