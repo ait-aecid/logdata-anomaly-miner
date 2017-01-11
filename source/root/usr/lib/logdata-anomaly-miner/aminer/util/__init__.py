@@ -1,7 +1,7 @@
-# This file contains various methods and class definitions useful
-# for various components from parsing, analysis and event handling.
-# Larger separate blocks of code should be split into own subfiles
-# or submodules, e.g. persistency.
+"""This module contains various methods and class definitions
+useful for various components from parsing, analysis and event
+handling. Larger separate blocks of code should be split into
+own subfiles or submodules, e.g. persistency."""
 
 import random
 
@@ -10,15 +10,15 @@ from aminer.input import AtomHandlerInterface
 def getLogInt(maxBits):
   """Get a log-distributed random integer integer in range 0 to
   maxBits-1."""
-  randBits=random.randint(0, (1<<maxBits)-1)
-  result=0
-  while (randBits&1)!=0:
-    result+=1
-    randBits>>=1
-  return(result)
+  randBits = random.randint(0, (1<<maxBits)-1)
+  result = 0
+  while (randBits&1) != 0:
+    result += 1
+    randBits >>= 1
+  return result
 
 
-class ObjectHistory:
+class ObjectHistory(object):
   """This is the superinterface of all object histories. The idea
   behind that is to use that type of history best suited for a
   purpose considering amount of data, possibility for history
@@ -53,35 +53,37 @@ class LogarithmicBackoffHistory(ObjectHistory):
   growing size of holes towards the earliest element."""
 
   def __init__(self, maxItems, initialList=None):
-    self.maxItems=maxItems
-    if initialList==None: initialList=[]
-    else: initialList=initialList[:maxItems]
-    self.history=initialList
+    self.maxItems = maxItems
+    if initialList is None:
+      initialList = []
+    else: initialList = initialList[:maxItems]
+    self.history = initialList
 
   def addObject(self, newObject):
     """Add a new object to the list according to the rules described
     in the class docstring."""
-    if len(self.history)<self.maxItems:
+    if len(self.history) < self.maxItems:
       self.history.append(newObject)
     else:
-      movePos=getLogInt(self.maxItems)
-      if movePos!=0:
-        self.history=self.history[:self.maxItems-movePos]+self.history[self.maxItems+1-movePos:]+[newObject]
+      movePos = getLogInt(self.maxItems)
+      if movePos != 0:
+        self.history = self.history[:self.maxItems-movePos]+ \
+            self.history[self.maxItems+1-movePos:]+[newObject]
       else:
-        self.history[-1]=newObject
+        self.history[-1] = newObject
 
   def getHistory(self):
     """Get the whole history list. Make sure to clone the list
     before modification when influences on this object are not
     intended."""
-    return(self.history)
+    return self.history
 
   def clearHistory(self):
     """Clean the whole history."""
-    self.history[:]=[]
+    self.history[:] = []
 
 
-class TimeTriggeredComponentInterface:
+class TimeTriggeredComponentInterface(object):
   """This is the common interface of all components that can be
   registered to receive timer interrupts. There might be different
   timelines for triggering, real time and normalized log data
@@ -96,7 +98,7 @@ class TimeTriggeredComponentInterface:
     available."""
     raise Exception('Interface method called')
 
-  def doTimer(self, time):
+  def doTimer(self, triggerTime):
     """This method is called to perform trigger actions and to
     determine the time for next invocation. The caller may decide
     to invoke this method earlier than requested during the previous
@@ -105,9 +107,9 @@ class TimeTriggeredComponentInterface:
     method as it might delay trigger signals to other components.
     For extensive compuational work or IO, a separate thread should
     be used.
-    @param time the time this trigger is invoked. This might be
-    the current real time when invoked from real time timers or
-    the forensic log timescale time value.
+    @param triggerTime the time this trigger is invoked. This
+    might be the current real time when invoked from real time
+    timers or the forensic log timescale time value.
     @return the number of seconds when next invocation of this
     trigger is required."""
     raise Exception('Interface method called')
@@ -125,4 +127,4 @@ class VolatileLogarithmicBackoffAtomHistory(AtomHandlerInterface, LogarithmicBac
   def receiveAtom(self, logAtom):
     """Receive an atom and add it to the history log."""
     self.addObject(logAtom)
-    return(True)
+    return True
