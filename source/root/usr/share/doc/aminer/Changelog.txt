@@ -1,3 +1,10 @@
+V0.0.8 (2017-0x-xx):
+====================
+
+* Changes:
+  * Various bugfixes
+  * Code cleanup using pylint
+
 V0.0.7 (2017-01-09):
 ====================
 
