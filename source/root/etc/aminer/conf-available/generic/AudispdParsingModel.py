@@ -1,3 +1,6 @@
+"""This module contains functions and classes to create the parsing
+model."""
+
 from aminer.parsing import AnyByteDataModelElement
 from aminer.parsing import DecimalIntegerValueModelElement
 from aminer.parsing import DelimitedDataModelElement
@@ -18,57 +21,64 @@ def getModel():
   """This function defines how to parse a audispd message logged
 via syslog after any standard logging preamble, e.g. from syslog."""
 
-  class ExecArgumentDataModelElement:
+  class ExecArgumentDataModelElement(object):
+    """This is a helper class for parsing the (encoded) exec argument
+    strings found within audit logs."""
     def __init__(self, id):
-      self.id=id
+      self.id = id
 
     def getChildElements(self):
-      return(None)
+      """Get the children of this element (none)."""
+      return None
 
     def getMatchElement(self, path, matchContext):
       """Find the maximum number of bytes belonging to an exec
       argument.
       @return a match when at least two bytes were found including
       the delimiters."""
-      data=matchContext.matchData
-      matchLen=0
-      matchValue=''
+      data = matchContext.matchData
+      matchLen = 0
+      matchValue = ''
       if data[0] == '"':
-        matchLen=data.find('"', 1)
-        if matchLen==-1: return(None)
-        matchValue=data[1:matchLen]
-        matchLen+=1
+        matchLen = data.find('"', 1)
+        if matchLen == -1:
+          return None
+        matchValue = data[1:matchLen]
+        matchLen += 1
       elif data.startswith('(null)'):
-        matchLen=6
-        matchValue=None
+        matchLen = 6
+        matchValue = None
       else:
 # Must be upper case hex encoded:
-        nextValue=-1
+        nextValue = -1
         for dByte in data:
-          dOrd=ord(dByte)
-          if (dOrd>=0x30) and (dOrd<=0x39):
-            dOrd-=0x30
-          elif (dOrd>=0x41) and (dOrd<=0x46):
-            dOrd-=0x37
+          dOrd = ord(dByte)
+          if (dOrd >= 0x30) and (dOrd <= 0x39):
+            dOrd -= 0x30
+          elif (dOrd >= 0x41) and (dOrd <= 0x46):
+            dOrd -= 0x37
           else:
             break
-          if nextValue==-1: nextValue=(dOrd<<4)
+          if nextValue == -1:
+            nextValue = (dOrd<<4)
           else:
-            matchValue+=chr(nextValue|dOrd)
-            nextValue=-1
-          matchLen+=1
-        if nextValue!=-1: return(None)
+            matchValue += chr(nextValue|dOrd)
+            nextValue = -1
+          matchLen += 1
+        if nextValue != -1:
+          return None
 
-      matchData=data[:matchLen]
+      matchData = data[:matchLen]
       matchContext.update(matchData)
-      return(MatchElement("%s/%s" % (path, self.id),
-          matchData, matchValue, None))
+      return MatchElement(
+          "%s/%s" % (path, self.id), matchData, matchValue, None)
 
-  pamStatusWordList=FixedWordlistDataModelElement('status', ['failed', 'success'])
+  pamStatusWordList = FixedWordlistDataModelElement(
+      'status', ['failed', 'success'])
 
 
-  typeBranches={}
-  typeBranches['ADD_USER']=SequenceModelElement('adduser', [
+  typeBranches = {}
+  typeBranches['ADD_USER'] = SequenceModelElement('adduser', [
       FixedDataModelElement('s0', ' pid='),
       DecimalIntegerValueModelElement('pid'),
       FixedDataModelElement('s1', ' uid='),
@@ -84,13 +94,13 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement('s6', '" hostname='),
       DelimitedDataModelElement('clientname', ' '),
       FixedDataModelElement('s7', ' addr='),
-      DelimitedDataModelElement('clienip', ' '),
+      DelimitedDataModelElement('clientip', ' '),
       FixedDataModelElement('s8', ' terminal='),
       WhiteSpaceLimitedDataModelElement('terminal'),
       FixedDataModelElement('s9', ' res=success\'')
   ])
 
-  typeBranches['BPRM_FCAPS']=SequenceModelElement('bprmfcaps', [
+  typeBranches['BPRM_FCAPS'] = SequenceModelElement('bprmfcaps', [
       FixedDataModelElement('s0', ' fver=0 fp='),
       HexStringModelElement('fp'),
       FixedDataModelElement('s1', ' fi='),
@@ -111,7 +121,7 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       HexStringModelElement('pe-new')
   ])
 
-  typeBranches['CONFIG_CHANGE']=SequenceModelElement('conf-change', [
+  typeBranches['CONFIG_CHANGE'] = SequenceModelElement('conf-change', [
       FixedDataModelElement('s0', ' auid='),
       DecimalIntegerValueModelElement('auid'),
       FixedDataModelElement('s1', ' ses='),
@@ -122,7 +132,7 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       DecimalIntegerValueModelElement('result')
   ])
 
-  typeBranches['CRED_ACQ']=SequenceModelElement('credacq', [
+  typeBranches['CRED_ACQ'] = SequenceModelElement('credacq', [
       FixedDataModelElement('s0', ' pid='),
       DecimalIntegerValueModelElement('pid'),
       FixedDataModelElement('s1', ' uid='),
@@ -138,13 +148,13 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement('s6', '" hostname='),
       DelimitedDataModelElement('clientname', ' '),
       FixedDataModelElement('s7', ' addr='),
-      DelimitedDataModelElement('clienip', ' '),
+      DelimitedDataModelElement('clientip', ' '),
       FixedDataModelElement('s8', ' terminal='),
       WhiteSpaceLimitedDataModelElement('terminal'),
       FixedDataModelElement('s9', ' res=success\'')
   ])
 
-  typeBranches['CRED_DISP']=SequenceModelElement('creddisp', [
+  typeBranches['CRED_DISP'] = SequenceModelElement('creddisp', [
       FixedDataModelElement('s0', ' pid='),
       DecimalIntegerValueModelElement('pid'),
       FixedDataModelElement('s1', ' uid='),
@@ -160,13 +170,13 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement('s6', '" hostname='),
       DelimitedDataModelElement('clientname', ' '),
       FixedDataModelElement('s7', ' addr='),
-      DelimitedDataModelElement('clienip', ' '),
+      DelimitedDataModelElement('clientip', ' '),
       FixedDataModelElement('s8', ' terminal='),
       WhiteSpaceLimitedDataModelElement('terminal'),
       FixedDataModelElement('s9', ' res=success\'')
   ])
 
-  typeBranches['CRED_REFR']=SequenceModelElement('creddisp', [
+  typeBranches['CRED_REFR'] = SequenceModelElement('creddisp', [
       FixedDataModelElement('s0', ' pid='),
       DecimalIntegerValueModelElement('pid'),
       FixedDataModelElement('s1', ' uid='),
@@ -175,31 +185,32 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       DecimalIntegerValueModelElement('auid'),
       FixedDataModelElement('s3', ' ses='),
       DecimalIntegerValueModelElement('ses'),
-      FixedDataModelElement('s4', ' msg=\'op=PAM:setcred acct="root" exe="/usr/sbin/sshd" hostname='),
+      FixedDataModelElement('s4', ' msg=\'op=PAM:setcred acct="root" ' \
+          'exe="/usr/sbin/sshd" hostname='),
       IpAddressDataModelElement('clientname'),
       FixedDataModelElement('s5', ' addr='),
       IpAddressDataModelElement('clientip'),
       FixedDataModelElement('s6', ' terminal=ssh res=success\'')])
 
-  typeBranches['CWD']=SequenceModelElement('cwd', [
+  typeBranches['CWD'] = SequenceModelElement('cwd', [
       FixedDataModelElement('s0', '  cwd='),
       ExecArgumentDataModelElement('cwd')])
 
-  typeBranches['EOE']=SequenceModelElement('eoe', [])
+  typeBranches['EOE'] = SequenceModelElement('eoe', [])
 
-  execArgModel=SequenceModelElement('execarg', [
+  execArgModel = SequenceModelElement('execarg', [
       FixedDataModelElement('s0', ' a'),
       DecimalIntegerValueModelElement('argn'),
       FixedDataModelElement('s1', '='),
       ExecArgumentDataModelElement('argval')])
 
-  typeBranches['EXECVE']=SequenceModelElement('execve', [
+  typeBranches['EXECVE'] = SequenceModelElement('execve', [
       FixedDataModelElement('s0', ' argc='),
       DecimalIntegerValueModelElement('argc'),
       RepeatedElementDataModelElement('arg', execArgModel)])
 
 # This message differs on Ubuntu 32/64 bit variants.
-  typeBranches['LOGIN']=SequenceModelElement('login', [
+  typeBranches['LOGIN'] = SequenceModelElement('login', [
       FixedDataModelElement('s0', ' pid='),
       DecimalIntegerValueModelElement('pid'),
       FixedDataModelElement('s1', ' uid='),
@@ -215,11 +226,11 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement('s6', ' res='),
       DecimalIntegerValueModelElement('result')])
 
-  inodeInfoModelElement=SequenceModelElement('inodeinfo', [
+  inodeInfoModelElement = SequenceModelElement('inodeinfo', [
       FixedDataModelElement('s0', ' inode='),
       DecimalIntegerValueModelElement('inode'),
       FixedDataModelElement('s1', ' dev='),
-# FIXME: dev element
+# A special major/minor device element could be better here.
       VariableByteDataModelElement('dev', '0123456789abcdef:'),
       FixedDataModelElement('s2', ' mode='),
 # FIXME: is octal
@@ -229,11 +240,11 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement('s4', ' ogid='),
       DecimalIntegerValueModelElement('ogid'),
       FixedDataModelElement('s5', ' rdev='),
-# FIXME: dev element
+# A special major/minor device element could be better here (see above).
       VariableByteDataModelElement('rdev', '0123456789abcdef:'),
       FixedDataModelElement('s6', ' nametype=')])
 
-  typeBranches['NETFILTER_CFG']=SequenceModelElement('conf-change', [
+  typeBranches['NETFILTER_CFG'] = SequenceModelElement('conf-change', [
       FixedDataModelElement('s0', ' table='),
       FixedWordlistDataModelElement('table', ['filter', 'mangle', 'nat']),
       FixedDataModelElement('s1', ' family='),
@@ -242,7 +253,7 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       DecimalIntegerValueModelElement('entries')
   ])
 
-  typeBranches['PATH']=SequenceModelElement('path', [
+  typeBranches['PATH'] = SequenceModelElement('path', [
       FixedDataModelElement('s0', ' item='),
       DecimalIntegerValueModelElement('item'),
       FixedDataModelElement('s1', ' name='),
@@ -250,14 +261,15 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       FirstMatchModelElement('fsinfo', [
           inodeInfoModelElement,
           FixedDataModelElement('noinfo', ' nametype=')]),
-      FixedWordlistDataModelElement('nametype', ['CREATE', 'DELETE', 'NORMAL', 'PARENT', 'UNKNOWN']),
+      FixedWordlistDataModelElement(
+          'nametype', ['CREATE', 'DELETE', 'NORMAL', 'PARENT', 'UNKNOWN']),
   ])
 
-  typeBranches['PROCTITLE']=SequenceModelElement('proctitle', [
+  typeBranches['PROCTITLE'] = SequenceModelElement('proctitle', [
       FixedDataModelElement('s1', ' proctitle='),
       ExecArgumentDataModelElement('proctitle')])
 
-  typeBranches['SERVICE_START']=SequenceModelElement('service', [
+  typeBranches['SERVICE_START'] = SequenceModelElement('service', [
       FixedDataModelElement('s0', ' pid='),
       DecimalIntegerValueModelElement('pid'),
       FixedDataModelElement('s1', ' uid='),
@@ -273,21 +285,21 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement('s6', '" hostname='),
       DelimitedDataModelElement('clientname', ' '),
       FixedDataModelElement('s7', ' addr='),
-      DelimitedDataModelElement('clienip', ' '),
+      DelimitedDataModelElement('clientip', ' '),
       FixedDataModelElement('s8', ' terminal='),
       WhiteSpaceLimitedDataModelElement('terminal'),
       FixedDataModelElement('s9', ' res='),
       pamStatusWordList,
       FixedDataModelElement('s10', '\'')
   ])
-  typeBranches['SERVICE_STOP']=typeBranches['SERVICE_START']
+  typeBranches['SERVICE_STOP'] = typeBranches['SERVICE_START']
 
-  typeBranches['SOCKADDR']=SequenceModelElement('sockaddr', [
+  typeBranches['SOCKADDR'] = SequenceModelElement('sockaddr', [
       FixedDataModelElement('s0', ' saddr='),
       HexStringModelElement('sockaddr'),
   ])
 
-  typeBranches['SYSCALL']=SequenceModelElement('syscall', [
+  typeBranches['SYSCALL'] = SequenceModelElement('syscall', [
       FixedDataModelElement('s0', ' arch='),
       HexStringModelElement('arch'),
       FixedDataModelElement('s1', ' syscall='),
@@ -299,7 +311,9 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement('s2', ' success='),
       FixedWordlistDataModelElement('succes', ['no', 'yes']),
       FixedDataModelElement('s3', ' exit='),
-      DecimalIntegerValueModelElement('exit', valueSignType=DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL),
+      DecimalIntegerValueModelElement(
+          'exit',
+          valueSignType=DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL),
       FixedDataModelElement('s4', ' a0='),
       HexStringModelElement('arg0'),
       FixedDataModelElement('s5', ' a1='),
@@ -348,12 +362,12 @@ via syslog after any standard logging preamble, e.g. from syslog."""
 # of the event, usually because the kernel is more recent than
 # audispd, thus emiting yet unknown event types.
 # * type=1327: procitle: see https://www.redhat.com/archives/linux-audit/2014-February/msg00047.html
-  typeBranches['UNKNOWN[1327]']=SequenceModelElement('unknown-proctitle', [
+  typeBranches['UNKNOWN[1327]'] = SequenceModelElement('unknown-proctitle', [
       FixedDataModelElement('s0', ' proctitle='),
       ExecArgumentDataModelElement('proctitle')
   ])
 
-  typeBranches['USER_ACCT']=SequenceModelElement('useracct', [
+  typeBranches['USER_ACCT'] = SequenceModelElement('useracct', [
       FixedDataModelElement('s0', ' pid='),
       DecimalIntegerValueModelElement('pid'),
       FixedDataModelElement('s1', ' uid='),
@@ -369,13 +383,13 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement('s6', '" hostname='),
       DelimitedDataModelElement('clientname', ' '),
       FixedDataModelElement('s7', ' addr='),
-      DelimitedDataModelElement('clienip', ' '),
+      DelimitedDataModelElement('clientip', ' '),
       FixedDataModelElement('s8', ' terminal='),
       WhiteSpaceLimitedDataModelElement('terminal'),
       FixedDataModelElement('s9', ' res=success\'')
   ])
 
-  typeBranches['USER_AUTH']=SequenceModelElement('userauth', [
+  typeBranches['USER_AUTH'] = SequenceModelElement('userauth', [
       FixedDataModelElement('s0', ' pid='),
       DecimalIntegerValueModelElement('pid'),
       FixedDataModelElement('s1', ' uid='),
@@ -391,13 +405,13 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement('s6', '" hostname='),
       DelimitedDataModelElement('clientname', ' '),
       FixedDataModelElement('s7', ' addr='),
-      DelimitedDataModelElement('clienip', ' '),
+      DelimitedDataModelElement('clientip', ' '),
       FixedDataModelElement('s8', ' terminal='),
       WhiteSpaceLimitedDataModelElement('terminal'),
       FixedDataModelElement('s9', ' res=success\'')
   ])
 
-  typeBranches['USER_START']=SequenceModelElement('userstart', [
+  typeBranches['USER_START'] = SequenceModelElement('userstart', [
       FixedDataModelElement('s0', ' pid='),
       DecimalIntegerValueModelElement('pid'),
       FixedDataModelElement('s1', ' uid='),
@@ -413,13 +427,13 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement('s6', '" hostname='),
       DelimitedDataModelElement('clientname', ' '),
       FixedDataModelElement('s7', ' addr='),
-      DelimitedDataModelElement('clienip', ' '),
+      DelimitedDataModelElement('clientip', ' '),
       FixedDataModelElement('s8', ' terminal='),
       WhiteSpaceLimitedDataModelElement('terminal'),
       FixedDataModelElement('s9', ' res=success\'')
   ])
 
-  typeBranches['USER_END']=SequenceModelElement('userend', [
+  typeBranches['USER_END'] = SequenceModelElement('userend', [
       FixedDataModelElement('s0', ' pid='),
       DecimalIntegerValueModelElement('pid'),
       FixedDataModelElement('s1', ' uid='),
@@ -435,13 +449,13 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement('s6', '" hostname='),
       DelimitedDataModelElement('clientname', ' '),
       FixedDataModelElement('s7', ' addr='),
-      DelimitedDataModelElement('clienip', ' '),
+      DelimitedDataModelElement('clientip', ' '),
       FixedDataModelElement('s8', ' terminal='),
       WhiteSpaceLimitedDataModelElement('terminal'),
       FixedDataModelElement('s9', ' res=success\'')
   ])
 
-  typeBranches['USER_ERR']=SequenceModelElement('usererr', [
+  typeBranches['USER_ERR'] = SequenceModelElement('usererr', [
       FixedDataModelElement('s0', ' pid='),
       DecimalIntegerValueModelElement('pid'),
       FixedDataModelElement('s1', ' uid='),
@@ -455,13 +469,13 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement('s5', '" hostname='),
       DelimitedDataModelElement('clientname', ' '),
       FixedDataModelElement('s6', ' addr='),
-      DelimitedDataModelElement('clienip', ' '),
+      DelimitedDataModelElement('clientip', ' '),
       FixedDataModelElement('s7', ' terminal='),
       WhiteSpaceLimitedDataModelElement('terminal'),
       FixedDataModelElement('s8', ' res=failed\'')
   ])
 
-  typeBranches['USER_LOGIN']=SequenceModelElement('userlogin', [
+  typeBranches['USER_LOGIN'] = SequenceModelElement('userlogin', [
       FixedDataModelElement('s0', ' pid='),
       DecimalIntegerValueModelElement('pid'),
       FixedDataModelElement('s1', ' uid='),
@@ -482,7 +496,7 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement('s6', '" hostname='),
       DelimitedDataModelElement('clientname', ' '),
       FixedDataModelElement('s7', ' addr='),
-      DelimitedDataModelElement('clienip', ' '),
+      DelimitedDataModelElement('clientip', ' '),
       FixedDataModelElement('s8', ' terminal='),
       WhiteSpaceLimitedDataModelElement('terminal'),
       FixedDataModelElement('s9', ' res='),
@@ -490,11 +504,11 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement('s10', '\'')
   ])
 
-  model=SequenceModelElement('audispd', [
+  model = SequenceModelElement('audispd', [
       FixedDataModelElement('sname', 'audispd: '),
       FirstMatchModelElement('msg', [
-          ElementValueBranchModelElement('record',
-              SequenceModelElement('preamble', [
+          ElementValueBranchModelElement(
+              'record', SequenceModelElement('preamble', [
                   FixedDataModelElement('s0', 'type='),
                   WhiteSpaceLimitedDataModelElement('type'),
                   FixedDataModelElement('s1', ' msg=audit('),
@@ -509,4 +523,4 @@ via syslog after any standard logging preamble, e.g. from syslog."""
           FixedDataModelElement('queue-full', 'queue is full - dropping event')
       ])
   ])
-  return(model)
+  return model
