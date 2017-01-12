@@ -1,7 +1,7 @@
-# Add also the namespace references to classes defined in this
-# directory.
+"""This module defines various interfaces for log atom parsing
+and namespace shortcuts to the ModelElements."""
 
-class ModelElementInterface:
+class ModelElementInterface(object):
   """This is the superinterface of all model elements."""
 
   def getId(self):
@@ -27,24 +27,25 @@ class ModelElementInterface:
     @return the matchElement or None if model did not match."""
 
 
-from AnyByteDataModelElement import AnyByteDataModelElement
-from DateTimeModelElement import DateTimeModelElement
-from DebugModelElement import DebugModelElement
-from DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
-from DelimitedDataModelElement import DelimitedDataModelElement
-from ElementValueBranchModelElement import ElementValueBranchModelElement
-from FirstMatchModelElement import FirstMatchModelElement
-from FixedDataModelElement import FixedDataModelElement
-from FixedWordlistDataModelElement import FixedWordlistDataModelElement
-from HexStringModelElement import HexStringModelElement
-from IpAddressDataModelElement import IpAddressDataModelElement
-from MatchContext import DebugMatchContext
-from MatchContext import MatchContext
-from MatchElement import MatchElement
-from MultiLocaleDateTimeModelElement import MultiLocaleDateTimeModelElement
-from OptionalMatchModelElement import OptionalMatchModelElement
-from ParserMatch import ParserMatch
-from RepeatedElementDataModelElement import RepeatedElementDataModelElement
-from SequenceModelElement import SequenceModelElement
-from VariableByteDataModelElement import VariableByteDataModelElement
-from WhiteSpaceLimitedDataModelElement import WhiteSpaceLimitedDataModelElement
+from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
+from aminer.parsing.Base64StringModelElement import Base64StringModelElement
+from aminer.parsing.DateTimeModelElement import DateTimeModelElement
+from aminer.parsing.DebugModelElement import DebugModelElement
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
+from aminer.parsing.ElementValueBranchModelElement import ElementValueBranchModelElement
+from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
+from aminer.parsing.FixedDataModelElement import FixedDataModelElement
+from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
+from aminer.parsing.HexStringModelElement import HexStringModelElement
+from aminer.parsing.IpAddressDataModelElement import IpAddressDataModelElement
+from aminer.parsing.MatchContext import DebugMatchContext
+from aminer.parsing.MatchContext import MatchContext
+from aminer.parsing.MatchElement import MatchElement
+from aminer.parsing.MultiLocaleDateTimeModelElement import MultiLocaleDateTimeModelElement
+from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
+from aminer.parsing.ParserMatch import ParserMatch
+from aminer.parsing.RepeatedElementDataModelElement import RepeatedElementDataModelElement
+from aminer.parsing.SequenceModelElement import SequenceModelElement
+from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
+from aminer.parsing.WhiteSpaceLimitedDataModelElement import WhiteSpaceLimitedDataModelElement

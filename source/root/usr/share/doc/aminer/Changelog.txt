@@ -1,6 +1,8 @@
 V0.0.8 (2017-0x-xx):
 ====================
 
+* New features:
+  * Base64StringModelElement for parsing of base64 strings
 * Changes:
   * Various bugfixes
   * Code cleanup using pylint
