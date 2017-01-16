@@ -51,7 +51,6 @@ class AnalysisContext(object):
     self.realTimeTriggeredComponents = []
     self.analysisTimeTriggeredComponents = []
 
-
   def addTimeTriggeredComponent(self, component, triggerClass=None):
     """Add a time-triggered component to the registry."""
     if not isinstance(component, TimeTriggeredComponentInterface):
@@ -120,7 +119,7 @@ class AnalysisContext(object):
     """Convenience method to create the pipeline."""
     self.aminerConfig.buildAnalysisPipeline(self)
 
-class AnalysisChild(object):
+class AnalysisChild(TimeTriggeredComponentInterface):
   """This class defines the child performing the complete analysis
   workflow. When splitting privileges between analysis and monitor
   process, this class should only be initialized within the analysis
@@ -130,6 +129,24 @@ class AnalysisChild(object):
     self.programName = programName
     self.analysisContext = AnalysisContext(aminerConfig)
     self.runAnalysisLoopFlag = True
+    self.logStreamsByName = {}
+    self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
+        self.analysisContext.aminerConfig,
+        self.__class__.__name__+'/RepositioningData')
+    self.nextPersistTime = time.time()+600
+
+    self.repositioningDataDict = {}
+    self.masterControlSocket = None
+    self.remoteControlSocket = None
+
+# This dictionary provides a lookup list from file descriptor
+# to associated object for handling the data to and from the given
+# descriptor. Currently supported handler objects are:
+# * Parent process socket
+# * Remote control listening socket
+# * LogStreams
+# * Remote control connections
+    self.trackedFdsDict = {}
 
 # Override the signal handler to allow graceful shutdown.
     def gracefulShutdownHandler(_signo, _stackFrame):
@@ -141,6 +158,10 @@ class AnalysisChild(object):
     signal.signal(signal.SIGHUP, gracefulShutdownHandler)
     signal.signal(signal.SIGINT, gracefulShutdownHandler)
     signal.signal(signal.SIGTERM, gracefulShutdownHandler)
+
+# Do this on at the end of the initialization to avoid having
+# partially initialized objects inside the registry.
+    self.analysisContext.addTimeTriggeredComponent(self)
 
 
   def runAnalysis(self, masterFd):
@@ -154,9 +175,11 @@ class AnalysisChild(object):
 # master process to receive commands or logstream data. Expect
 # the parent/child communication socket on fd 3. This also duplicates
 # the fd, so close the old one.
-    masterControlSocket = socket.fromfd(
+    self.masterControlSocket = socket.fromfd(
         masterFd, socket.AF_UNIX, socket.SOCK_DGRAM, 0)
     os.close(masterFd)
+    self.trackedFdsDict[self.masterControlSocket.fileno()] = \
+        self.masterControlSocket
 
 # Locate the real analysis configuration.
     self.analysisContext.buildAnalysisPipeline()
@@ -168,19 +191,15 @@ class AnalysisChild(object):
     realTimeTriggeredComponents = self.analysisContext.realTimeTriggeredComponents
     analysisTimeTriggeredComponents = self.analysisContext.analysisTimeTriggeredComponents
 
-    logStreamsByName = {}
 # Load continuation data for last known log streams. The loaded
 # data has to be a dictionary with repositioning information for
 # each stream. The data is used only when creating the first stream
 # with that name.
-    persistenceFileName = AMinerConfig.buildPersistenceFileName(
-        self.analysisContext.aminerConfig,
-        self.__class__.__name__+'/RepositioningData')
-    repositioningDataDict = PersistencyUtil.loadJson(persistenceFileName)
-    if repositioningDataDict is None:
-      repositioningDataDict = {}
+    self.repositioningDataDict = PersistencyUtil.loadJson(
+        self.persistenceFileName)
+    if self.repositioningDataDict is None:
+      self.repositioningDataDict = {}
 
-    remoteControlSocket = None
 # A list of LogStreams where handleStream() blocked due to downstream
 # not being able to consume the data yet.
     blockedLogStreams = []
@@ -194,32 +213,36 @@ class AnalysisChild(object):
     while self.runAnalysisLoopFlag:
 # Build the list of inputs to select for anew each time: the LogStream
 # file descriptors may change due to rollover.
-      inputSelectFdList = [masterControlSocket.fileno()]
-# This list has the same number of elements as inputSelectFdList.
-# For each select file descriptor from a logStream it keeps the
-# logStream object at same position for quick reference.
-      inputSelectStreams = [None]
-      if remoteControlSocket != None:
-        inputSelectFdList.append(remoteControlSocket.fileno())
-        inputSelectStreams.append(None)
-      for logStream in logStreamsByName.values():
-        if logStream in blockedLogStreams:
-# See if it could be unblocked by retrying the last consume.
-          if logStream.handleStream() < 0:
+      inputSelectFdList = []
+      outputSelectFdList = []
+      for fdHandlerObject in self.trackedFdsDict.values():
+        if isinstance(fdHandlerObject, LogStream):
+          streamFd = fdHandlerObject.getCurrentFd()
+          if streamFd < 0:
             continue
+          inputSelectFdList.append(streamFd)
+        elif isinstance(fdHandlerObject, AnalysisChildRemoteControlHandler):
+          fdHandlerObject.addSelectFds(
+              inputSelectFdList, outputSelectFdList)
+        else:
+# This has to be a socket, just add the file descriptor.
+          inputSelectFdList.append(fdHandlerObject.fileno())
+
+# Loop over the list in reverse order to avoid skipping elements
+# in remove.
+      for logStream in reversed(blockedLogStreams):
+        currentStreamFd = logStream.handleStream()
+        if currentStreamFd >= 0:
+          self.trackedFdsDict[currentStreamFd] = logStream
+          inputSelectFdList.append(currentStreamFd)
           blockedLogStreams.remove(logStream)
-        streamFd = logStream.getCurrentFd()
-        if streamFd < 0:
-          continue
-        inputSelectFdList.append(streamFd)
-        inputSelectStreams.append(logStream)
 
       readList = None
       writeList = None
       exceptList = None
       try:
         (readList, writeList, exceptList) = select.select(
-            inputSelectFdList, [], [], 1)
+            inputSelectFdList, outputSelectFdList, [], 1)
       except select.error as selectError:
 # Interrupting signals, e.g. for shutdown are OK.
         if selectError[0] == errno.EINTR:
@@ -227,85 +250,64 @@ class AnalysisChild(object):
         print >>sys.stderr, 'Unexpected select result %s' % str(selectError)
         delayedReturnStatus = 1
         break
-      if len(readList) != 0:
-        for readFd in readList:
-          if readFd == masterControlSocket.fileno():
-# We cannot fail with None here as the socket was in the readList.
-            (receivedFd, receivedTypeInfo, annotationData) = SecureOSFunctions.receiveAnnotedFileDescriptor(masterControlSocket)
-            if receivedTypeInfo == 'logstream':
-              repositioningData = repositioningDataDict.get(annotationData, None)
-              if repositioningData != None:
-                del repositioningDataDict[annotationData]
-              resource = None
-              if annotationData.startswith('file://'):
-                from aminer.input.LogStream import FileLogDataResource
-                resource = FileLogDataResource(
-                    annotationData, receivedFd,
-                    repositioningData=repositioningData)
-              elif annotationData.startswith('unix://'):
-                from aminer.input.LogStream import UnixSocketLogDataResource
-                resource = UnixSocketLogDataResource(
-                    annotationData, receivedFd)
-              else:
-                raise Exception('Filedescriptor of unknown type received')
-# Make fd nonblocking.
-              fdFlags = fcntl.fcntl(resource.getFileDescriptor(), fcntl.F_GETFL)
-              fcntl.fcntl(resource.getFileDescriptor(), fcntl.F_SETFL, fdFlags|os.O_NONBLOCK)
-              logStream = logStreamsByName.get(resource.getResourceName())
-              if logStream is None:
-                streamAtomizer = self.analysisContext.atomizerFactory.getAtomizerForResource(resource.getResourceName())
-                logStream = LogStream(resource, streamAtomizer)
-                logStreamsByName[resource.getResourceName()] = logStream
-              else:
-                logStream.addNextResource(resource)
-            elif receivedTypeInfo == 'remotecontrol':
-              if remoteControlSocket != None:
-                raise Exception('Received another remote control ' \
-                    'socket: multiple remote control not (yet?) supported.')
-              remoteControlSocket = socket.fromfd(
-                  receivedFd, socket.AF_UNIX, socket.SOCK_STREAM, 0)
-              os.close(receivedFd)
-            else:
-              raise Exception('Unhandled type info on received fd: %s' % (
-                  repr(receivedTypeInfo)))
-            continue
-
-          if (remoteControlSocket != None) and (readFd == remoteControlSocket.fileno()):
-# Remote we received an connection, accept it.
-            (controlClientSocket, remoteAddress) = remoteControlSocket.accept()
-# Keep track of information received via this remote control socket.
-            remoteControlHandler = AnalysisChildRemoteControlHandler(controlClientSocket.fileno())
-# FIXME: Here we should enter asynchronous read mode as described
-# in the header of AnalysisChildRemoteControlHandler. At the moment
-# everything is done within the thread. Make sure to continue
-# in blocking mode.
-            controlClientSocket.setblocking(1)
-            while True:
-              while remoteControlHandler.maySend():
-                remoteControlHandler.doSend()
-              if remoteControlHandler.mayProcess():
-                remoteControlHandler.doProcess(self.analysisContext)
-                continue
-              if not remoteControlHandler.doReceive():
-                break
-            try:
-              remoteControlHandler.terminate()
-            except Exception as terminateException:
-              print >>sys.stderr, 'Unclear termination of remote ' \
-                  'control: %s' % str(terminateException)
-# This is quite useless, the file descriptor was closed already.
-# by terminate. But call just anything to keep garbage collection
-# from closing and freeing the socket too early.
-            controlClientSocket.close()
-            continue
-
-# This has to be a logStream, handle it. Only when downstream
-# blocks, add the stream to the blocked stream list.
-          streamPos = inputSelectFdList.index(readFd)
-          logStream = inputSelectStreams[streamPos]
-          handleResult = logStream.handleStream()
+      for readFd in readList:
+        fdHandlerObject = self.trackedFdsDict[readFd]
+        if isinstance(fdHandlerObject, LogStream):
+# Handle this LogStream. Only when downstream processing blocks,
+# add the stream to the blocked stream list.
+          handleResult = fdHandlerObject.handleStream()
           if handleResult < 0:
-            blockedLogStreams.append(logStream)
+# No need to care if current internal file descriptor in LogStream
+# has changed in handleStream(), this will be handled when unblocking.
+            del self.trackedFdsDict[readFd]
+            blockedLogStreams.append(fdHandlerObject)
+          elif handleResult != readFd:
+# The current fd has changed, update the tracking list.
+            del self.trackedFdsDict[readFd]
+            self.trackedFdsDict[handleResult] = fdHandlerObject
+          continue
+
+        if isinstance(fdHandlerObject, AnalysisChildRemoteControlHandler):
+          try:
+            fdHandlerObject.doReceive()
+          except Exception as receiveException:
+            print >>sys.stderr, 'Unclean termination of remote ' \
+                'control: %s' % str(receiveException)
+          if fdHandlerObject.isDead():
+            del self.trackedFdsDict[readFd]
+# Reading is only attempted when output buffer was already flushed.
+# Try processing the next request to fill the output buffer for
+# next round.
+          else:
+            fdHandlerObject.doProcess(self.analysisContext)
+          continue
+
+        if fdHandlerObject == self.masterControlSocket:
+          self.handleMasterControlSocketReceive()
+          continue
+
+        if fdHandlerObject == self.remoteControlSocket:
+# We received a remote connection, accept it unconditionally.
+# Users should make sure, that they do not exhaust resources by
+# hogging open connections.
+          (controlClientSocket, remoteAddress) = \
+              self.remoteControlSocket.accept()
+# Keep track of information received via this remote control socket.
+          remoteControlHandler = AnalysisChildRemoteControlHandler(
+              controlClientSocket)
+          self.trackedFdsDict[controlClientSocket.fileno()] = remoteControlHandler
+          continue
+        raise Exception('Unhandled object type %s' % type(fdHandlerObject))
+
+      for writeFd in writeList:
+        fdHandlerObject = self.trackedFdsDict[writeFd]
+        if isinstance(fdHandlerObject, AnalysisChildRemoteControlHandler):
+          if fdHandlerObject.doSend():
+            fdHandlerObject.doProcess(self.analysisContext)
+          if fdHandlerObject.isDead():
+            del self.trackedFdsDict[writeFd]
+          continue
+        raise Exception('Unhandled object type %s' % type(fdHandlerObject))
 
 
 # Handle the real time events.
@@ -332,13 +334,91 @@ class AnalysisChild(object):
 # Analysis loop is only left on shutdown. Try to persist everything
 # and leave.
     PersistencyUtil.persistAll()
-    repositioningDataDict = {}
-    for logStreamName, logStream in logStreamsByName.iteritems():
-      repositioningData = logStream.getRepositioningData()
-      if repositioningData != None:
-        repositioningDataDict[logStreamName] = repositioningData
-    PersistencyUtil.storeJson(persistenceFileName, repositioningDataDict)
     return delayedReturnStatus
+
+
+  def handleMasterControlSocketReceive(self):
+    """Receive information from the parent process via the master
+    control socket. This method may only be invoked when receiving
+    is guaranteed to be nonblocking and to return data."""
+
+# We cannot fail with None here as the socket was in the readList.
+    (receivedFd, receivedTypeInfo, annotationData) = \
+        SecureOSFunctions.receiveAnnotedFileDescriptor(self.masterControlSocket)
+    if receivedTypeInfo == 'logstream':
+      repositioningData = self.repositioningDataDict.get(annotationData, None)
+      if repositioningData != None:
+        del self.repositioningDataDict[annotationData]
+      resource = None
+      if annotationData.startswith('file://'):
+        from aminer.input.LogStream import FileLogDataResource
+        resource = FileLogDataResource(
+            annotationData, receivedFd,
+            repositioningData=repositioningData)
+      elif annotationData.startswith('unix://'):
+        from aminer.input.LogStream import UnixSocketLogDataResource
+        resource = UnixSocketLogDataResource(
+            annotationData, receivedFd)
+      else:
+        raise Exception('Filedescriptor of unknown type received')
+# Make fd nonblocking.
+      fdFlags = fcntl.fcntl(resource.getFileDescriptor(), fcntl.F_GETFL)
+      fcntl.fcntl(resource.getFileDescriptor(), fcntl.F_SETFL, fdFlags|os.O_NONBLOCK)
+      logStream = self.logStreamsByName.get(resource.getResourceName())
+      if logStream is None:
+        streamAtomizer = self.analysisContext.atomizerFactory.getAtomizerForResource(resource.getResourceName())
+        logStream = LogStream(resource, streamAtomizer)
+        self.trackedFdsDict[resource.getFileDescriptor()] = \
+            logStream
+        self.logStreamsByName[resource.getResourceName()] = logStream
+      else:
+        logStream.addNextResource(resource)
+    elif receivedTypeInfo == 'remotecontrol':
+      if self.remoteControlSocket != None:
+        raise Exception('Received another remote control ' \
+            'socket: multiple remote control not (yet?) supported.')
+      self.remoteControlSocket = socket.fromfd(
+          receivedFd, socket.AF_UNIX, socket.SOCK_STREAM, 0)
+      os.close(receivedFd)
+      self.trackedFdsDict[self.remoteControlSocket.fileno()] = \
+          self.remoteControlSocket
+    else:
+      raise Exception('Unhandled type info on received fd: %s' % (
+          repr(receivedTypeInfo)))
+
+
+  def getTimeTriggerClass(self):
+    """Get the trigger class this component can be registered
+    for. See AnalysisContext class for different trigger classes
+    available."""
+    return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
+
+  def doTimer(self, triggerTime):
+    """This method is called to perform trigger actions and to
+    determine the time for next invocation. The caller may decide
+    to invoke this method earlier than requested during the previous
+    call. Classes implementing this method have to handle such
+    cases. Each class should try to limit the time spent in this
+    method as it might delay trigger signals to other components.
+    For extensive compuational work or IO, a separate thread should
+    be used.
+    @param triggerTime the time this trigger is invoked. This
+    might be the current real time when invoked from real time
+    timers or the forensic log timescale time value.
+    @return the number of seconds when next invocation of this
+    trigger is required."""
+    delta = self.nextPersistTime-triggerTime
+    if delta <= 0:
+      self.repositioningDataDict = {}
+      for logStreamName, logStream in self.logStreamsByName.iteritems():
+        repositioningData = logStream.getRepositioningData()
+        if repositioningData != None:
+          self.repositioningDataDict[logStreamName] = repositioningData
+      PersistencyUtil.storeJson(
+          self.persistenceFileName, self.repositioningDataDict)
+      delta = 600
+      self.nextPersistTime = triggerTime+delta
+    return delta
 
 
 class AnalysisChildRemoteControlHandler(object):
@@ -380,8 +460,9 @@ class AnalysisChildRemoteControlHandler(object):
 
   maxControlPacketSize = 1<<16
 
-  def __init__(self, remoteControlFd):
-    self.remoteControlFd = remoteControlFd
+  def __init__(self, controlClientSocket):
+    self.controlClientSocket = controlClientSocket
+    self.remoteControlFd = controlClientSocket.fileno()
     self.inputBuffer = ''
     self.outputBuffer = ''
 
@@ -389,26 +470,11 @@ class AnalysisChildRemoteControlHandler(object):
     """Check if this handler may receive more requests."""
     return len(self.outputBuffer) == 0
 
-  def maySend(self):
-    """Check if this remote control handler has data ready for
-    sending."""
-    return len(self.outputBuffer) != 0
-
-  def mayProcess(self):
-    """Check if this handler has sufficient data to process the
-    action described in the input buffer."""
-    if len(self.inputBuffer) < 8:
-      return False
-    requestLength = struct.unpack("!I", self.inputBuffer[:4])[0]
-# If length value is malformed, still return true. Handle all
-# the malformed packet stuff in the execute functions.
-    if (requestLength < 0) or (requestLength >= self.maxControlPacketSize):
-      return True
-    return requestLength <= len(self.inputBuffer)
-
   def doProcess(self, analysisContext):
-    """Process the next request."""
+    """Process the next request, if any."""
     requestData = self.doGet()
+    if requestData is None:
+      return
     requestType = requestData[4:8]
     if requestType == 'EEEE':
       execLocals = {'analysisContext': analysisContext}
@@ -456,13 +522,28 @@ class AnalysisChildRemoteControlHandler(object):
     else:
       raise Exception('Invalid request type %s' % repr(requestType))
 
+  def mayGet(self):
+    """Check if a call to doGet would make sense.
+    @return True if the input buffer already contains a complete
+    wellformed packet or definitely malformed one."""
+    if len(self.inputBuffer) < 4:
+      return False
+    requestLength = struct.unpack("!I", self.inputBuffer[:4])[0]
+    return (requestLength <= len(self.inputBuffer)) or \
+        (requestLength >= self.maxControlPacketSize)
+
   def doGet(self):
-    """Get the next packet from the input and remove it.
-    @return the packet data."""
+    """Get the next packet from the input buffer and remove it.
+    @return the packet data including the length preamble or None
+    when request not yet complete."""
+    if len(self.inputBuffer) < 4:
+      return None
     requestLength = struct.unpack("!I", self.inputBuffer[:4])[0]
     if (requestLength < 0) or (requestLength >= self.maxControlPacketSize):
       raise Exception('Invalid length value 0x%x in malformed ' \
           'request starting with b64:%s' % (requestLength, base64.b64encode(self.inputBuffer[:60])))
+    if requestLength > len(self.inputBuffer):
+      return None
     requestData = self.inputBuffer[:requestLength]
     self.inputBuffer = self.inputBuffer[requestLength:]
     return requestData
@@ -470,18 +551,28 @@ class AnalysisChildRemoteControlHandler(object):
   def doReceive(self):
     """Receive data from the remote side and add it to the input
     buffer. This method call expects to read at least one byte
-    of data. A zero byte read indicates EOF.
-    @return true if read was successful, false if EOF is reached
-    without reading any data."""
+    of data. A zero byte read indicates EOF and will cause normal
+    handler termination when all input and output buffers are
+    empty. Any other state or error causes handler termination
+    before reporting the error.
+    @return True if read was successful, false if EOF is reached
+    without reading any data and all buffers are empty.
+    @throws Exception when unexpected errors occured while receiving
+    or shuting down the connection."""
     data = os.read(self.remoteControlFd, 1<<16)
     self.inputBuffer += data
-    return len(data) != 0
+    if len(data) == 0:
+      self.terminate()
 
   def doSend(self):
-    """Send data from the output buffer to the remote side."""
-    os.write(self.remoteControlFd, self.outputBuffer)
-    self.outputBuffer = ''
-
+    """Send data from the output buffer to the remote side.
+    @return True if output buffer was emptied."""
+    sendLength = os.write(self.remoteControlFd, self.outputBuffer)
+    if sendLength == len(self.outputBuffer):
+      self.outputBuffer = ''
+      return True
+    self.outputBuffer = self.outputBuffer[sendLength:]
+    return False
 
   def putRequest(self, requestType, requestData):
     """Add a request of given type to the send queue."""
@@ -496,10 +587,23 @@ class AnalysisChildRemoteControlHandler(object):
     remoteControlData = json.dumps([remoteControlCode, remoteControlData])
     self.putRequest('EEEE', remoteControlData)
 
+  def addSelectFds(self, inputSelectFdList, outputSelectFdList):
+    """Update the file descriptor lists for selecting on read
+    and write file descriptors."""
+    if len(self.outputBuffer) != 0:
+      outputSelectFdList.append(self.remoteControlFd)
+    else:
+      inputSelectFdList.append(self.remoteControlFd)
+
   def terminate(self):
     """End this remote control session."""
-    os.close(self.remoteControlFd)
+    self.controlClientSocket.close()
 # Avoid accidential reuse.
+    self.controlClientSocket = None
     self.remoteControlFd = -1
     if (len(self.inputBuffer) != 0) or (len(self.outputBuffer) != 0):
       raise Exception('Unhandled input data')
+
+  def isDead(self):
+    """Check if this remote control connection is already dead."""
+    return self.remoteControlFd == -1
