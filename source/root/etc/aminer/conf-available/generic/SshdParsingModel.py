@@ -1,3 +1,5 @@
+"""This module provides support for parsing of sshd messages."""
+
 from aminer.parsing import DecimalIntegerValueModelElement
 from aminer.parsing import DelimitedDataModelElement
 from aminer.parsing import FirstMatchModelElement
@@ -9,13 +11,13 @@ from aminer.parsing import SequenceModelElement
 from aminer.parsing import VariableByteDataModelElement
 
 def getModel(userNameModel=None):
-  """This function defines how to parse a su session information message
-after any standard logging preamble, e.g. from syslog."""
+  """This function defines how to parse a sshd information message
+  after any standard logging preamble, e.g. from syslog."""
 
-  if userNameModel == None:
-    userNameModel=VariableByteDataModelElement('user', '0123456789abcdefghijklmnopqrstuvwxyz.-')
+  if userNameModel is None:
+    userNameModel = VariableByteDataModelElement('user', '0123456789abcdefghijklmnopqrstuvwxyz.-')
 
-  typeChildren=[]
+  typeChildren = []
   typeChildren.append(SequenceModelElement('accepted key', [
       FixedDataModelElement('s0', 'Accepted publickey for '),
       userNameModel,
@@ -24,11 +26,14 @@ after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement('s2', ' port '),
       DecimalIntegerValueModelElement('port'),
       FixedDataModelElement('s3', ' ssh2: RSA '),
-      VariableByteDataModelElement('fingerprint', '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ:')]))
+      VariableByteDataModelElement(
+          'fingerprint',
+          '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ:')
+  ]))
 
   typeChildren.append(SequenceModelElement('btmp-perm', [
       FixedDataModelElement('s0', 'Excess permission or bad ownership on file /var/log/btmp')
-]))
+  ]))
 
   typeChildren.append(SequenceModelElement('close-sess', [
       FixedDataModelElement('s0', 'Close session: user '),
@@ -90,20 +95,20 @@ after any standard logging preamble, e.g. from syslog."""
   typeChildren.append(SequenceModelElement('ident-missing', [
       FixedDataModelElement('s0', 'Did not receive identification string from '),
       IpAddressDataModelElement('clientip')
-]))
+  ]))
 
   typeChildren.append(SequenceModelElement('invalid-user', [
       FixedDataModelElement('s0', 'Invalid user '),
       DelimitedDataModelElement('user', ' from '),
       FixedDataModelElement('s1', ' from '),
       IpAddressDataModelElement('clientip')
-]))
+  ]))
 
   typeChildren.append(SequenceModelElement('invalid-user-auth-req', [
       FixedDataModelElement('s0', 'input_userauth_request: invalid user '),
       DelimitedDataModelElement('user', ' [preauth]'),
       FixedDataModelElement('s1', ' [preauth]')
-]))
+  ]))
 
   typeChildren.append(SequenceModelElement('postppk', [
       FixedDataModelElement('s0', 'Postponed publickey for '),
@@ -151,7 +156,9 @@ after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement('s0', 'Set /proc/self/oom_score_adj '),
       OptionalMatchModelElement('from', FixedDataModelElement('default', 'from 0 ')),
       FixedDataModelElement('s1', 'to '),
-      DecimalIntegerValueModelElement('newval', valueSignType=DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL)
+      DecimalIntegerValueModelElement(
+          'newval',
+          valueSignType=DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL)
   ]))
 
   typeChildren.append(SequenceModelElement('session-start', [
@@ -164,6 +171,11 @@ after any standard logging preamble, e.g. from syslog."""
           SequenceModelElement('subsystem', [
               FixedDataModelElement('s0', 'subsystem \'sftp\''),
           ]),
+          SequenceModelElement('forced-command', [
+              FixedDataModelElement('s0', 'forced-command (key-option) \''),
+              DelimitedDataModelElement('command', '\' for '),
+              FixedDataModelElement('s1', '\''),
+          ])
       ]),
       FixedDataModelElement('s1', ' for '),
       userNameModel,
@@ -196,9 +208,9 @@ after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement('s0', 'User child is on pid '),
       DecimalIntegerValueModelElement('pid')]))
 
-  model=SequenceModelElement('sshd', [
+  model = SequenceModelElement('sshd', [
       FixedDataModelElement('sname', 'sshd['),
       DecimalIntegerValueModelElement('pid'),
       FixedDataModelElement('s0', ']: '),
       FirstMatchModelElement('msg', typeChildren)])
-  return(model)
+  return model
