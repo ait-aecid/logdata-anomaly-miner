@@ -150,7 +150,8 @@ def buildAnalysisPipeline(analysisContext):
   from aminer.analysis import NewMatchPathDetector
   newMatchPathDetector = NewMatchPathDetector(
       analysisContext.aminerConfig, anomalyEventHandlers, autoIncludeFlag=True)
-  analysisContext.registerComponent(newMatchPathDetector, componentName=None)
+  analysisContext.registerComponent(
+      newMatchPathDetector, componentName='DefaultMatchPathDetector')
   atomFilter.addHandler(newMatchPathDetector)
 
 # Run a whitelisting over the parsed lines.
