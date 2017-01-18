@@ -1,16 +1,15 @@
 #!/usr/bin/python2 -BEsStt
-# This tool allows to connect to a remote control socket, send
-# requests and retrieve the responses. To allow remote use of
-# this tool, e.g. via SSH forwarding, the remote control address
-# can be set on the command line, no configuration is read.
+"""This tool allows to connect to a remote control socket, send
+requests and retrieve the responses. To allow remote use of this
+tool, e.g. via SSH forwarding, the remote control address can
+be set on the command line, no configuration is read."""
 
 import sys
 # Get rid of the default sys path immediately. Otherwise Python
 # also attempts to load the following imports from e.g. directory
 # where this binary resides.
-sys.path=sys.path[1:]+['/usr/lib/logdata-anomaly-miner']
+sys.path = sys.path[1:]+['/usr/lib/logdata-anomaly-miner']
 
-import errno
 import json
 import os
 import socket
@@ -18,42 +17,42 @@ import traceback
 
 from aminer.AnalysisChild import AnalysisChildRemoteControlHandler
 
-remoteControlSocketName=None
-remoteControlData=None
-argPos=1
-commandList=[]
-stringResponseFlag=False
-while argPos<len(sys.argv): 
-  paramName=sys.argv[argPos]
-  argPos+=1
+remoteControlSocketName = None
+remoteControlData = None
+argPos = 1
+commandList = []
+stringResponseFlag = False
+while argPos < len(sys.argv):
+  paramName = sys.argv[argPos]
+  argPos += 1
 
-  if paramName=='--ControlSocket':
-    if remoteControlSocketName!=None:
+  if paramName == '--ControlSocket':
+    if remoteControlSocketName != None:
       print >>sys.stderr, '%s: %s parameter given twice' % (sys.argv[0], paramName)
       sys.exit(1)
-    remoteControlSocketName=sys.argv[argPos]
-    argPos+=1
+    remoteControlSocketName = sys.argv[argPos]
+    argPos += 1
     continue
-  if paramName=='--Data':
-    remoteControlData=json.loads(sys.argv[argPos])
-    argPos+=1
+  if paramName == '--Data':
+    remoteControlData = json.loads(sys.argv[argPos])
+    argPos += 1
     continue
-  if paramName=='--Exec':
+  if paramName == '--Exec':
     commandList.append((sys.argv[argPos], remoteControlData))
-    argPos+=1
+    argPos += 1
     continue
-  if paramName=='--ExecFile':
+  if paramName == '--ExecFile':
     if not os.path.exists(sys.argv[argPos]):
       print >>sys.stderr, 'File %s does not exit' % sys.argv[argPos]
       sys.exit(1)
-    execFile=file(sys.argv[argPos], 'rb')
-    execData=execFile.read()
+    execFile = file(sys.argv[argPos], 'rb')
+    execData = execFile.read()
     execFile.close()
     commandList.append((execData, remoteControlData))
-    argPos+=1
+    argPos += 1
     continue
-  if paramName=='--Help':
-    if len(sys.argv)!=2:
+  if paramName == '--Help':
+    if len(sys.argv) != 2:
       print >>sys.stderr, 'Ignoring all other arguments with --Help'
     print """Usage: %s [arguments]
   --ControlSocket [socketpath]: when given, use nonstandard control socket.
@@ -65,53 +64,54 @@ while argPos<len(sys.argv):
   --StringResponse: if set, print the response just as string
     instead of passing it to repr.""" % sys.argv[0]
     sys.exit(0)
-  if paramName=='--StringResponse':
-    stringResponseFlag=True
+  if paramName == '--StringResponse':
+    stringResponseFlag = True
     continue
 
   print >>sys.stderr, 'Unknown parameter "%s", use --Help for overview' % paramName
   sys.exit(1)
 
-if remoteControlSocketName==None:
-  remoteControlSocketName='/var/run/aminer-remote.socket'
+if remoteControlSocketName is None:
+  remoteControlSocketName = '/var/run/aminer-remote.socket'
 
-if len(commandList)==0:
+if len(commandList) == 0:
   print >>sys.stderr, 'No commands given, use --Exec [cmd]'
   sys.exit(1)
 
-remoteControlSocket=socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+remoteControlSocket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 try:
   remoteControlSocket.connect(remoteControlSocketName)
 except socket.error as connectException:
-  print >>sys.stderr, 'Failed to connect to socket %s, AMiner might not be running or remote control is disabled in configuration: %s' % (remoteControlSocketName, str(connectException))
+  print >>sys.stderr, 'Failed to connect to socket %s, AMiner ' \
+      'might not be running or remote control is disabled in ' \
+      'configuration: %s' % (remoteControlSocketName, str(connectException))
   sys.exit(1)
 remoteControlSocket.setblocking(1)
 
-controlHandler=AnalysisChildRemoteControlHandler(remoteControlSocket.fileno())
+controlHandler = AnalysisChildRemoteControlHandler(remoteControlSocket)
 
 for remoteControlCode, remoteControlData in commandList:
   controlHandler.putExecuteRequest(remoteControlCode, remoteControlData)
-  while True:
-    while controlHandler.maySend():
-      controlHandler.doSend()
-    while not controlHandler.mayProcess():
-      controlHandler.doReceive()
-    requestData=controlHandler.doGet()
-    requestType=requestData[4:8]
-    if requestType=='RRRR':
-      try:
-        remoteData=json.loads(requestData[8:])
-        if remoteData[0]!=None:
-          print >>sys.stderr, 'Remote execution exception:\n%s' % remoteData[0]
-        if stringResponseFlag:
-          print 'Remote execution response: %s' % str(remoteData[1])
-        else:
-          print 'Remote execution response: %s' % repr(remoteData[1])
-      except:
-        print >>sys.stderr, 'Failed to process response %s' % repr(requestData)
-        traceback.print_exc()
-    else:
-      raise Exception('Invalid request type %s' % repr(requestType))
-    break
+# Send data until we are ready for receiving.
+  while not controlHandler.mayReceive():
+    controlHandler.doSend()
+  while not controlHandler.mayGet():
+    controlHandler.doReceive()
+  requestData = controlHandler.doGet()
+  requestType = requestData[4:8]
+  if requestType == 'RRRR':
+    try:
+      remoteData = json.loads(requestData[8:])
+      if remoteData[0] != None:
+        print >>sys.stderr, 'Remote execution exception:\n%s' % remoteData[0]
+      if stringResponseFlag:
+        print 'Remote execution response: %s' % str(remoteData[1])
+      else:
+        print 'Remote execution response: %s' % repr(remoteData[1])
+    except:
+      print >>sys.stderr, 'Failed to process response %s' % repr(requestData)
+      traceback.print_exc()
+  else:
+    raise Exception('Invalid request type %s' % repr(requestType))
 
 remoteControlSocket.close()
