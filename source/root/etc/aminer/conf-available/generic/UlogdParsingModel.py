@@ -1,3 +1,5 @@
+"""This module defines the parser for ulogd messages."""
+
 from aminer.parsing import DecimalIntegerValueModelElement
 from aminer.parsing import DelimitedDataModelElement
 from aminer.parsing import FirstMatchModelElement
@@ -10,7 +12,7 @@ def getModel():
   """This function defines how to parse a su session information message
 after any standard logging preamble, e.g. from syslog."""
 
-  typeChildren=[]
+  typeChildren = []
   typeChildren.append(SequenceModelElement('build-stack', [
       FixedDataModelElement('s0', 'building new pluginstance stack: \''),
       DelimitedDataModelElement('stack', '\''),
@@ -46,7 +48,8 @@ after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement('s12', ' PKTS='),
       DecimalIntegerValueModelElement('rpkts'),
       FixedDataModelElement('s13', ' BYTES='),
-      DecimalIntegerValueModelElement('rbytes')
+      DecimalIntegerValueModelElement('rbytes'),
+      FixedDataModelElement('s14', ' ')
   ]))
 
   typeChildren.append(FixedDataModelElement('nfct-plugin', 'NFCT plugin working in event mode'))
@@ -54,9 +57,9 @@ after any standard logging preamble, e.g. from syslog."""
   typeChildren.append(FixedDataModelElement('signal', 'signal received, calling pluginstances'))
   typeChildren.append(FixedDataModelElement('uidchange', 'Changing UID / GID'))
 
-  model=SequenceModelElement('ulogd', [
+  model = SequenceModelElement('ulogd', [
       FixedDataModelElement('sname', 'ulogd['),
       DecimalIntegerValueModelElement('pid'),
       FixedDataModelElement('s0', ']: '),
       FirstMatchModelElement('msg', typeChildren)])
-  return(model)
+  return model

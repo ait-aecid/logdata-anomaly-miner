@@ -196,7 +196,8 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement('s0', '  cwd='),
       ExecArgumentDataModelElement('cwd')])
 
-  typeBranches['EOE'] = SequenceModelElement('eoe', [])
+  typeBranches['EOE'] = SequenceModelElement('eoe', [
+      FixedDataModelElement('s0', ' ')])
 
   execArgModel = SequenceModelElement('execarg', [
       FixedDataModelElement('s0', ' a'),
