@@ -194,6 +194,9 @@ or source for full documentation:
   * ParallelMatchRule: match if any subrule matches but do not
     stop at first successful match
   * PathExistsMatchRule: match if parsed data contains given path
+  * StringRegexMatchRule: match if parsed data string matches
+    given regular expression. If applicable, Value[X]MatchRule
+    should be used instead.
   * ValueDependentDelegatedMatchRule: select match rules according
     to values from parsed data
   * ValueDependentModuloTimeMatchRule: like ModuloTimeMatchRule

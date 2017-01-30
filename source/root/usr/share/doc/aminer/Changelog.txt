@@ -6,6 +6,7 @@ V0.0.8 (2017-0x-xx):
   * AnalysisChild full asynchronous remote control connection
     handling
   * MissingMatchPathValueDetector realerting support added
+  * StringRegexMatchRule for matching parsed data using regex
 * Changes:
   * Various bugfixes
   * Code cleanup using pylint

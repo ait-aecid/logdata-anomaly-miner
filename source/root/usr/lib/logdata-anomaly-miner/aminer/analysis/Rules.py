@@ -306,6 +306,30 @@ class ValueRangeMatchRule(MatchRule):
         self.path, self.lowerLimit, self.upperLimit)
 
 
+class StringRegexMatchRule(MatchRule):
+  """Match elements of this class return true when the given path
+  exists and the string representation of the value matches the
+  given compiled regular expression."""
+
+  def __init__(self, path, matchRegex, matchAction=None):
+    self.path = path
+    self.matchRegex = matchRegex
+    self.matchAction = matchAction
+
+  def match(self, logAtom):
+# Use the class object as marker for nonexisting entries
+    testValue = logAtom.parserMatch.getMatchDictionary().get(self.path, None)
+    if ((testValue is None) or
+        (self.matchRegex.match(testValue.matchString) is None)):
+      return False
+    if self.matchAction != None:
+      self.matchAction.matchAction(logAtom)
+    return True
+
+  def __str__(self):
+    return 'string(%s) =regex= %s' % (self.path, self.matchRegex.pattern)
+
+
 class ModuloTimeMatchRule(MatchRule):
   """Match elements of this class return true when the given path
   exists, denotes a datetime object and the seconds since 1970
