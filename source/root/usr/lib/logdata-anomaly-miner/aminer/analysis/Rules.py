@@ -1,19 +1,19 @@
-import datetime
-import sys
-
-from aminer.util import LogarithmicBackoffHistory
-from aminer.util import ObjectHistory
-
-from AtomFilters import SubhandlerFilter
-
 """This package contains various classes to build check rulesets.
 The ruleset also supports parallel rule evaluation, e.g. the two
 rules "A and B and C" and "A and B and D" will only peform the
 checks for A and B once, then performs check C and D and trigger
 a match action."""
 
+import datetime
+import sys
 
-class MatchAction:
+from aminer.util import LogarithmicBackoffHistory
+from aminer.util import ObjectHistory
+
+from aminer.analysis.AtomFilters import SubhandlerFilter
+
+
+class MatchAction(object):
   """This is the interface of all match actions."""
   def matchAction(self, logAtom):
     """This method is invoked if a rule rule has matched.
@@ -25,14 +25,14 @@ class EventGenerationMatchAction(MatchAction):
   """This generic match action forwards information about a rule
   match on parsed data to a list of event handlers."""
   def __init__(self, eventType, eventMessage, eventHandlers):
-    self.eventType=eventType
-    self.eventMessage=eventMessage
-    self.eventHandlers=eventHandlers
+    self.eventType = eventType
+    self.eventMessage = eventMessage
+    self.eventHandlers = eventHandlers
 
   def matchAction(self, logAtom):
     for handler in self.eventHandlers:
-      handler.receiveEvent(self.eventType, self.eventMessage,
-          [logAtom.rawData], logAtom, self)
+      handler.receiveEvent(
+          self.eventType, self.eventMessage, [logAtom.rawData], logAtom, self)
 
 
 class AtomFilterMatchAction(MatchAction, SubhandlerFilter):
@@ -45,7 +45,7 @@ class AtomFilterMatchAction(MatchAction, SubhandlerFilter):
     self.receiveAtom(logAtom)
 
 
-class MatchRule:
+class MatchRule(object):
   """This is the interface of all match rules."""
   def match(self, logAtom):
     """Check if this rule matches. On match an optional matchAction
@@ -60,8 +60,8 @@ class AndMatchRule(MatchRule):
   def __init__(self, subRules, matchAction=None):
     """Create the rule.
     @param matchAction if None, no action is performed."""
-    self.subRules=subRules
-    self.matchAction=matchAction
+    self.subRules = subRules
+    self.matchAction = matchAction
 
   def match(self, logAtom):
     """Check if this rule matches. Rule evaluation will stop when
@@ -69,17 +69,19 @@ class AndMatchRule(MatchRule):
     rule, it will be invoked at the end of all checks.
     @return True when all subrules matched."""
     for rule in self.subRules:
-      if not(rule.match(logAtom)): return(False)
-    if self.matchAction!=None: self.matchAction.matchAction(logAtom)
-    return(True)
+      if not rule.match(logAtom):
+        return False
+    if self.matchAction != None:
+      self.matchAction.matchAction(logAtom)
+    return True
 
   def __str__(self):
-    result=''
-    preamble=''
+    result = ''
+    preamble = ''
     for matchElement in self.subRules:
-      result+='%s(%s)' % (preamble, matchElement)
-      preamble=' and '
-    return(result)
+      result += '%s(%s)' % (preamble, matchElement)
+      preamble = ' and '
+    return result
 
 class OrMatchRule(MatchRule):
   """This class provides a rule to match any subRules (logical
@@ -88,8 +90,8 @@ class OrMatchRule(MatchRule):
   def __init__(self, subRules, matchAction=None):
     """Create the rule.
     @param matchAction if None, no action is performed."""
-    self.subRules=subRules
-    self.matchAction=matchAction
+    self.subRules = subRules
+    self.matchAction = matchAction
 
   def match(self, logAtom):
     """Check if this rule matches. Rule evaluation will stop when
@@ -98,17 +100,18 @@ class OrMatchRule(MatchRule):
     @return True when any subrule matched."""
     for rule in self.subRules:
       if rule.match(logAtom):
-        if self.matchAction!=None: self.matchAction.matchAction(logAtom)
-        return(True)
-    return(False)
+        if self.matchAction != None:
+          self.matchAction.matchAction(logAtom)
+        return True
+    return False
 
   def __str__(self):
-    result=''
-    preamble=''
+    result = ''
+    preamble = ''
     for matchElement in self.subRules:
-      result+='%s(%s)' % (preamble, matchElement)
-      preamble=' or '
-    return(result)
+      result += '%s(%s)' % (preamble, matchElement)
+      preamble = ' or '
+    return result
 
 
 class ParallelMatchRule(MatchRule):
@@ -121,8 +124,8 @@ class ParallelMatchRule(MatchRule):
   def __init__(self, subRules, matchAction=None):
     """Create the rule.
     @param matchAction if None, no action is performed."""
-    self.subRules=subRules
-    self.matchAction=matchAction
+    self.subRules = subRules
+    self.matchAction = matchAction
 
   def match(self, logAtom):
     """Check if any of the subrules rule matches. The matching
@@ -130,20 +133,21 @@ class ParallelMatchRule(MatchRule):
     a matchAction is attached to this rule, it will be invoked
     at the end of all checks.
     @return True when any subrule matched."""
-    matchFlag=False
+    matchFlag = False
     for rule in self.subRules:
-      if rule.match(logAtom): matchFlag=True
-    if (matchFlag) and (self.matchAction!=None):
+      if rule.match(logAtom):
+        matchFlag = True
+    if matchFlag and (self.matchAction != None):
       self.matchAction.matchAction(logAtom)
-    return(matchFlag)
+    return matchFlag
 
   def __str__(self):
-    result=''
-    preamble=''
+    result = ''
+    preamble = ''
     for matchElement in self.subRules:
-      result+='%s(%s)' % (preamble, matchElement)
-      preamble=' por '
-    return(result)
+      result += '%s(%s)' % (preamble, matchElement)
+      preamble = ' por '
+    return result
 
 
 class ValueDependentDelegatedMatchRule(MatchRule):
@@ -151,7 +155,8 @@ class ValueDependentDelegatedMatchRule(MatchRule):
   depending on values found within the parserMatch. The result
   of this rule is the result of the selected delegation rule."""
 
-  def __init__(self, valuePathList, ruleLookupDict, defaultRule=None,
+  def __init__(
+      self, valuePathList, ruleLookupDict, defaultRule=None,
       matchAction=None):
     """Create the rule.
     @param list with value pathes that are used to extract the
@@ -163,31 +168,34 @@ class ValueDependentDelegatedMatchRule(MatchRule):
     as default. Otherwise when rule lookup failed, False will
     be returned unconditionally.
     @param matchAction if None, no action is performed."""
-    self.valuePathList=valuePathList
-    self.ruleLookupDict=ruleLookupDict
-    self.defaultRule=defaultRule
-    self.matchAction=matchAction
+    self.valuePathList = valuePathList
+    self.ruleLookupDict = ruleLookupDict
+    self.defaultRule = defaultRule
+    self.matchAction = matchAction
 
   def match(self, logAtom):
     """Try to locate a rule for delegation or use the default
     rule.
     @return True when selected delegation rule matched."""
-    matchDict=logAtom.parserMatch.getMatchDictionary()
-    valueList=[]
+    matchDict = logAtom.parserMatch.getMatchDictionary()
+    valueList = []
     for path in self.valuePathList:
-      valueElement=matchDict.get(path, None)
-      if valueElement==None: valueList.append(None)
+      valueElement = matchDict.get(path, None)
+      if valueElement is None:
+        valueList.append(None)
       else: valueList.append(valueElement.matchObject)
-    rule=self.ruleLookupDict.get(tuple(valueList), self.defaultRule)
-    if rule==None: return(False)
+    rule = self.ruleLookupDict.get(tuple(valueList), self.defaultRule)
+    if rule is None:
+      return False
     if rule.match(logAtom):
-      if self.matchAction!=None: self.matchAction.matchAction(logAtom)
-      return(True)
-    return(False)
+      if self.matchAction != None:
+        self.matchAction.matchAction(logAtom)
+      return True
+    return False
 
   def __str__(self):
-    result='ValueDependentDelegatedMatchRule'
-    return(result)
+    result = 'ValueDependentDelegatedMatchRule'
+    return result
 
 
 class NegationMatchRule(MatchRule):
@@ -195,16 +203,18 @@ class NegationMatchRule(MatchRule):
   did not match."""
 
   def __init__(self, subRule, matchAction=None):
-    self.subRule=subRule
-    self.matchAction=matchAction
+    self.subRule = subRule
+    self.matchAction = matchAction
 
   def match(self, logAtom):
-    if subRule.match(logAtom): return(False)
-    if self.matchAction!=None: self.matchAction.matchAction(logAtom)
-    return(True)
+    if self.subRule.match(logAtom):
+      return False
+    if self.matchAction != None:
+      self.matchAction.matchAction(logAtom)
+    return True
 
   def __str__(self):
-    return('not %s' % subRule)
+    return 'not %s' % self.subRule
 
 
 class PathExistsMatchRule(MatchRule):
@@ -212,17 +222,18 @@ class PathExistsMatchRule(MatchRule):
   was found in the parsed match data."""
 
   def __init__(self, path, matchAction=None):
-    self.path=path
-    self.matchAction=matchAction
+    self.path = path
+    self.matchAction = matchAction
 
   def match(self, logAtom):
     if logAtom.parserMatch.getMatchDictionary().has_key(self.path):
-      if self.matchAction!=None: self.matchAction.matchAction(logAtom)
-      return(True)
-    return(False)
+      if self.matchAction != None:
+        self.matchAction.matchAction(logAtom)
+      return True
+    return False
 
   def __str__(self):
-    return('hasPath(%s)' % self.path)
+    return 'hasPath(%s)' % self.path
 
 
 class ValueMatchRule(MatchRule):
@@ -230,20 +241,21 @@ class ValueMatchRule(MatchRule):
   exists and has exactly the given parsed value."""
 
   def __init__(self, path, value, matchAction=None):
-    self.path=path
-    self.value=value
-    self.matchAction=matchAction
+    self.path = path
+    self.value = value
+    self.matchAction = matchAction
 
   def match(self, logAtom):
 # Use the class object as marker for nonexisting entries
-    testValue=logAtom.parserMatch.getMatchDictionary().get(self.path, None)
-    if (testValue!=None) and (testValue.matchObject==self.value):
-      if self.matchAction!=None: self.matchAction.matchAction(logAtom)
-      return(True)
-    return(False)
+    testValue = logAtom.parserMatch.getMatchDictionary().get(self.path, None)
+    if (testValue != None) and (testValue.matchObject is self.value):
+      if self.matchAction != None:
+        self.matchAction.matchAction(logAtom)
+      return True
+    return False
 
   def __str__(self):
-    return('value(%s)==%s' % (self.path, self.value))
+    return 'value(%s)==%s' % (self.path, self.value)
 
 
 class ValueListMatchRule(MatchRule):
@@ -252,19 +264,20 @@ class ValueListMatchRule(MatchRule):
   list."""
 
   def __init__(self, path, valueList, matchAction=None):
-    self.path=path
-    self.valueList=valueList
-    self.matchAction=matchAction
+    self.path = path
+    self.valueList = valueList
+    self.matchAction = matchAction
 
   def match(self, logAtom):
-    testValue=logAtom.parserMatch.getMatchDictionary().get(self.path, None)
-    if (testValue!=None) and (testValue.matchObject in self.valueList):
-      if self.matchAction!=None: self.matchAction.matchAction(logAtom)
-      return(True)
-    return(False)
+    testValue = logAtom.parserMatch.getMatchDictionary().get(self.path, None)
+    if (testValue != None) and (testValue.matchObject in self.valueList):
+      if self.matchAction != None:
+        self.matchAction.matchAction(logAtom)
+      return True
+    return False
 
   def __str__(self):
-    return('value(%s) in %s' % (self.path, ' '.join(self.valueList)))
+    return 'value(%s) in %s' % (self.path, ' '.join(self.valueList))
 
 
 class ValueRangeMatchRule(MatchRule):
@@ -272,22 +285,25 @@ class ValueRangeMatchRule(MatchRule):
   exists and the value is included in [lower, upper] range."""
 
   def __init__(self, path, lowerLimit, upperLimit, matchAction=None):
-    self.path=path
-    self.lowerLimit=lowerLimit
-    self.upperLimit=upperLimit
-    self.matchAction=matchAction
+    self.path = path
+    self.lowerLimit = lowerLimit
+    self.upperLimit = upperLimit
+    self.matchAction = matchAction
 
   def match(self, logAtom):
-    testValue=logAtom.parserMatch.getMatchDictionary().get(self.path, None)
-    if testValue==None: return(False)
-    testValue=testValue.matchObject
-    if (testValue>=self.lowerLimit) and (testValue<=self.upperLimit):
-      if self.matchAction!=None: self.matchAction.matchAction(logAtom)
-      return(True)
-    return(False)
+    testValue = logAtom.parserMatch.getMatchDictionary().get(self.path, None)
+    if testValue is None:
+      return False
+    testValue = testValue.matchObject
+    if (testValue >= self.lowerLimit) and (testValue <= self.upperLimit):
+      if self.matchAction != None:
+        self.matchAction.matchAction(logAtom)
+      return True
+    return False
 
   def __str__(self):
-    return('value(%s) inrange (%s, %s)' % (self.path, lowerLimit, upperLimit))
+    return 'value(%s) inrange (%s, %s)' % (
+        self.path, self.lowerLimit, self.upperLimit)
 
 
 class ModuloTimeMatchRule(MatchRule):
@@ -300,28 +316,31 @@ class ModuloTimeMatchRule(MatchRule):
     """@param path the path to the datetime object to use to evaluate
     the modulo time rules on. When None, the default timestamp associated
     with the match is used."""
-    self.path=path
-    self.secondsModulo=secondsModulo
-    self.lowerLimit=lowerLimit
-    self.upperLimit=upperLimit
-    self.matchAction=matchAction
+    self.path = path
+    self.secondsModulo = secondsModulo
+    self.lowerLimit = lowerLimit
+    self.upperLimit = upperLimit
+    self.matchAction = matchAction
 
   def match(self, logAtom):
-    testValue=None
-    if self.path==None:
-      testValue=logAtom.getTimestamp()
+    testValue = None
+    if self.path is None:
+      testValue = logAtom.getTimestamp()
     else:
-      timeMatch=logAtom.parserMatch.getMatchDictionary().get(self.path, None)
-      if (timeMatch==None) or not(isinstance(timeMatch.matchObject, tuple)) or not(isinstance(timeMatch.matchObject[0], datetime.datetime)):
-        return(False)
-      testValue=timeMatch.matchObject[1]
+      timeMatch = logAtom.parserMatch.getMatchDictionary().get(self.path, None)
+      if ((timeMatch is None) or not isinstance(timeMatch.matchObject, tuple) or
+          not isinstance(timeMatch.matchObject[0], datetime.datetime)):
+        return False
+      testValue = timeMatch.matchObject[1]
 
-    if testValue==None: return(False)
-    testValue%=self.secondsModulo
-    if (testValue>=self.lowerLimit) and (testValue<=self.upperLimit):
-      if self.matchAction!=None: self.matchAction.matchAction(logAtom)
-      return(True)
-    return(False)
+    if testValue is None:
+      return False
+    testValue %= self.secondsModulo
+    if (testValue >= self.lowerLimit) and (testValue <= self.upperLimit):
+      if self.matchAction != None:
+        self.matchAction.matchAction(logAtom)
+      return True
+    return False
 
 
 class ValueDependentModuloTimeMatchRule(MatchRule):
@@ -330,7 +349,8 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
   from that date modulo the given value are included in a [lower,
   upper] range selected by values from the match."""
 
-  def __init__(self, path, secondsModulo, valuePathList, limitLookupDict,
+  def __init__(
+      self, path, secondsModulo, valuePathList, limitLookupDict,
       defaultLimit=None, matchAction=None):
     """@param path the path to the datetime object to use to evaluate
     the modulo time rules on. When None, the default timestamp associated
@@ -338,38 +358,44 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
     @param defaultLimit use this default limit when limit lookup
     failed. Without a default limit, a failed lookup will cause
     the rule not to match."""
-    self.path=path
-    self.secondsModulo=secondsModulo
-    self.valuePathList=valuePathList
-    self.limitLookupDict=limitLookupDict
-    self.defaultLimit=defaultLimit
-    self.matchAction=matchAction
+    self.path = path
+    self.secondsModulo = secondsModulo
+    self.valuePathList = valuePathList
+    self.limitLookupDict = limitLookupDict
+    self.defaultLimit = defaultLimit
+    self.matchAction = matchAction
 
   def match(self, logAtom):
-    matchDict=logAtom.parserMatch.getMatchDictionary()
-    valueList=[]
+    matchDict = logAtom.parserMatch.getMatchDictionary()
+    valueList = []
     for path in self.valuePathList:
-      valueElement=matchDict.get(path, None)
-      if valueElement==None: valueList.append(None)
-      else: valueList.append(valueElement.matchObject)
-    limits=self.limitLookupDict.get(tuple(valueList), self.defaultLimit)
-    if limits==None: return(False)
+      valueElement = matchDict.get(path, None)
+      if valueElement is None:
+        valueList.append(None)
+      else:
+        valueList.append(valueElement.matchObject)
+    limits = self.limitLookupDict.get(tuple(valueList), self.defaultLimit)
+    if limits is None:
+      return False
 
-    testValue=None
-    if self.path==None:
-      testValue=logAtom.getTimestamp()
+    testValue = None
+    if self.path is None:
+      testValue = logAtom.getTimestamp()
     else:
-      timeMatch=logAtom.parserMatch.getMatchDictionary().get(self.path, None)
-      if (timeMatch==None) or not(isinstance(timeMatch.matchObject, tuple)) or not(isinstance(timeMatch.matchObject[0], datetime.datetime)):
-        return(False)
-      testValue=timeMatch.matchObject[1]
+      timeMatch = logAtom.parserMatch.getMatchDictionary().get(self.path, None)
+      if ((timeMatch is None) or not isinstance(timeMatch.matchObject, tuple) or
+          not isinstance(timeMatch.matchObject[0], datetime.datetime)):
+        return False
+      testValue = timeMatch.matchObject[1]
 
-    if testValue==None: return(False)
-    testValue%=self.secondsModulo
-    if (testValue>=limits[0]) and (testValue<=limits[1]):
-      if self.matchAction!=None: self.matchAction.matchAction(logAtom)
-      return(True)
-    return(False)
+    if testValue is None:
+      return False
+    testValue %= self.secondsModulo
+    if (testValue >= limits[0]) and (testValue <= limits[1]):
+      if self.matchAction != None:
+        self.matchAction.matchAction(logAtom)
+      return True
+    return False
 
 
 class IPv4InRFC1918MatchRule(MatchRule):
@@ -380,21 +406,24 @@ class IPv4InRFC1918MatchRule(MatchRule):
   for it."""
 
   def __init__(self, path, matchAction=None):
-    self.path=path
-    self.matchAction=matchAction
+    self.path = path
+    self.matchAction = matchAction
 
   def match(self, logAtom):
-    matchElement=logAtom.parserMatch.getMatchDictionary().get(self.path, None)
-    if (matchElement==None) or not(isinstance(matchElement.matchObject, int)):
-      return(False)
-    value=matchElement.matchObject
-    if ((value&0xff000000)==0xa000000) or ((value&0xfff00000)==0xac100000) or ((value&0xffff0000)==0xc0a80000):
-      if self.matchAction!=None: self.matchAction.matchAction(logAtom)
-      return(True)
-    return(False)
+    matchElement = logAtom.parserMatch.getMatchDictionary().get(self.path, None)
+    if (matchElement is None) or not isinstance(matchElement.matchObject, int):
+      return False
+    value = matchElement.matchObject
+    if (((value&0xff000000) == 0xa000000) or
+        ((value&0xfff00000) == 0xac100000) or
+        ((value&0xffff0000) == 0xc0a80000)):
+      if self.matchAction != None:
+        self.matchAction.matchAction(logAtom)
+      return True
+    return False
 
   def __str__(self):
-    return('hasPath(%s)' % self.path)
+    return 'hasPath(%s)' % self.path
 
 
 class DebugMatchRule(MatchRule):
@@ -404,16 +433,18 @@ class DebugMatchRule(MatchRule):
   when defined, no matter which match result is returned."""
 
   def __init__(self, debugMatchResult=False, matchAction=None):
-    self.debugMatchResult=debugMatchResult
-    self.matchAction=matchAction
+    self.debugMatchResult = debugMatchResult
+    self.matchAction = matchAction
 
   def match(self, logAtom):
-    print >>sys.stderr, 'Rules.DebugMatchRule: triggered while handling "%s"' % (logAtom.parserMatch.matchElement.matchString)
-    if self.matchAction!=None: self.matchAction.matchAction(logAtom)
-    return(self.debugMatchResult)
+    print >>sys.stderr, 'Rules.DebugMatchRule: triggered while ' \
+        'handling "%s"' % (logAtom.parserMatch.matchElement.matchString)
+    if self.matchAction != None:
+      self.matchAction.matchAction(logAtom)
+    return self.debugMatchResult
 
   def __str__(self):
-    return('%s' % self.debugMatchResult)
+    return '%s' % self.debugMatchResult
 
 
 class DebugHistoryMatchRule(MatchRule):
@@ -421,25 +452,26 @@ class DebugHistoryMatchRule(MatchRule):
   when a match attempt is made. It just adds the evaluated logAtom
   to a ObjectHistory."""
 
-  def __init__(self, objectHistory=None, debugMatchResult=False,
-      matchAction=None):
+  def __init__(
+      self, objectHistory=None, debugMatchResult=False, matchAction=None):
     """Create a DebugHistoryMatchRule object.
     @param objectHistory use this ObjectHistory to collect the
     LogAtoms. When None, a default LogarithmicBackoffHistory for
     10 items."""
-    if objectHistory==None:
-      objectHistory=LogarithmicBackoffHistory(10)
-    elif not(isinstance(objectHistory, ObjectHistory)):
+    if objectHistory is None:
+      objectHistory = LogarithmicBackoffHistory(10)
+    elif not isinstance(objectHistory, ObjectHistory):
       raise Exception('objectHistory is not an instance of ObjectHistory')
-    self.objectHistory=objectHistory
-    self.debugMatchResult=debugMatchResult
-    self.matchAction=matchAction
+    self.objectHistory = objectHistory
+    self.debugMatchResult = debugMatchResult
+    self.matchAction = matchAction
 
   def match(self, logAtom):
     self.objectHistory.addObject(logAtom)
-    if self.matchAction!=None: self.matchAction.matchAction(logAtom)
-    return(self.debugMatchResult)
+    if self.matchAction != None:
+      self.matchAction.matchAction(logAtom)
+    return self.debugMatchResult
 
   def getHistory(self):
     """Get the history object from this debug rule."""
-    return(self.objectHistory)
+    return self.objectHistory
