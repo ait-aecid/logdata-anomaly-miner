@@ -11,7 +11,7 @@ class ModelElementInterface(object):
   def getChildElements(self):
     """Get all possible child model elements of this element.
     If this element implements a branching model element, then
-    not all child element IDs will be found in mathces produced
+    not all child element IDs will be found in matches produced
     by getMatchElement.
     @return a list with all children"""
     raise Exception('Interface method called')
