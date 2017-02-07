@@ -10,11 +10,13 @@ Here is a short list of the most common model elements with short
 description:
 
 * AnyByteDataModelElement: Match anything till end of a log-atom.
+* Base64StringModelElement: Parse base64 strings as binary data.
 * DateTimeModelElement: Simple datetime parsing using python
   datetime module. See also MultiLocaleDateTimeModelElement
 * DebugModelElement: Output debugging information while parsing
   a log-atom
-* DecimalIntegerValueModelElement
+* DecimalFloatValueModelElement: parsing of float values
+* DecimalIntegerValueModelElement: parsing of interger values
 * DelimitedDataModelElement: Same as AnyByteDataModelElement but
   include data only up to given delimiter string.
 * ElementValueBranchModelElement: conditional branching due to

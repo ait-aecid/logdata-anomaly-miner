@@ -3,6 +3,7 @@ V0.0.8 (2017-0x-xx):
 
 * New features:
   * Base64StringModelElement for parsing of base64 strings
+  * DecimalFloatValueModelElement for parsing of floats
   * AnalysisChild full asynchronous remote control connection
     handling
   * MissingMatchPathValueDetector realerting support added
