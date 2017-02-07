@@ -246,9 +246,8 @@ class ValueMatchRule(MatchRule):
     self.matchAction = matchAction
 
   def match(self, logAtom):
-# Use the class object as marker for nonexisting entries
     testValue = logAtom.parserMatch.getMatchDictionary().get(self.path, None)
-    if (testValue != None) and (testValue.matchObject is self.value):
+    if (testValue != None) and (testValue.matchObject == self.value):
       if self.matchAction != None:
         self.matchAction.matchAction(logAtom)
       return True
