@@ -28,7 +28,7 @@ def getModel(userNameModel=None):
       FixedDataModelElement('s3', ' ssh2: RSA '),
       VariableByteDataModelElement(
           'fingerprint',
-          '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ:')
+          '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/:')
   ]))
 
   typeChildren.append(SequenceModelElement('btmp-perm', [
