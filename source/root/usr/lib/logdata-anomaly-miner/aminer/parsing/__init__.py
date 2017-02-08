@@ -31,6 +31,7 @@ from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
 from aminer.parsing.Base64StringModelElement import Base64StringModelElement
 from aminer.parsing.DateTimeModelElement import DateTimeModelElement
 from aminer.parsing.DebugModelElement import DebugModelElement
+from aminer.parsing.DecimalFloatValueModelElement import DecimalFloatValueModelElement
 from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
 from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
 from aminer.parsing.ElementValueBranchModelElement import ElementValueBranchModelElement
