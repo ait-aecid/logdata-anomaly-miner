@@ -1,16 +1,20 @@
+"""This module defines the parsing model for ntpd logs."""
+
+from aminer.parsing import DecimalFloatValueModelElemen
 from aminer.parsing import DecimalIntegerValueModelElement
 from aminer.parsing import DelimitedDataModelElement
 from aminer.parsing import FirstMatchModelElement
 from aminer.parsing import FixedDataModelElement
 from aminer.parsing import IpAddressDataModelElement
-from aminer.parsing import OptionalMatchModelElement
 from aminer.parsing import SequenceModelElement
 from aminer.parsing import VariableByteDataModelElement
 
 def getModel():
-  interfaceNameModel=VariableByteDataModelElement('interface', '0123456789abcdefghijklmnopqrstuvwxyz.')
+  """Get the model."""
+  interfaceNameModel = VariableByteDataModelElement(
+      'interface', '0123456789abcdefghijklmnopqrstuvwxyz.')
 
-  typeChildren=[]
+  typeChildren = []
   typeChildren.append(SequenceModelElement('exit', [
       FixedDataModelElement('s0', 'ntpd exiting on signal '),
       DecimalIntegerValueModelElement('signal')
@@ -48,20 +52,25 @@ def getModel():
       FixedDataModelElement('s1', ' for interface updates')
   ]))
 
-  typeChildren.append(FixedDataModelElement('new-interfaces', 'new interface(s) found: waking up resolver'))
+  typeChildren.append(FixedDataModelElement(
+      'new-interfaces', 'new interface(s) found: waking up resolver'))
 
-  typeChildren.append(FixedDataModelElement('ntp-io', 'ntp_io: estimated max descriptors: 1024, initial socket boundary: 16'))
+  typeChildren.append(FixedDataModelElement(
+      'ntp-io',
+      'ntp_io: estimated max descriptors: 1024, initial socket boundary: 16'))
 
-  typeChildren.append(FixedDataModelElement('peers-refreshed', 'peers refreshed'))
+  typeChildren.append(FixedDataModelElement(
+      'peers-refreshed', 'peers refreshed'))
 
   typeChildren.append(SequenceModelElement('precision', [
       FixedDataModelElement('s0', 'proto: precision = '),
-      DelimitedDataModelElement('precision', ' '),
+      DecimalFloatValueModelElemen('precision'),
       FixedDataModelElement('s1', ' usec')
   ]))
 
-  model=SequenceModelElement('ntpd', [FixedDataModelElement('sname', 'ntpd['),
+  model = SequenceModelElement('ntpd', [
+      FixedDataModelElement('sname', 'ntpd['),
       DecimalIntegerValueModelElement('pid'),
       FixedDataModelElement('s0', ']: '),
       FirstMatchModelElement('msg', typeChildren)])
-  return(model)
+  return model
