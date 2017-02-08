@@ -6,6 +6,7 @@ from aminer.parsing import FirstMatchModelElement
 from aminer.parsing import FixedDataModelElement
 from aminer.parsing import FixedWordlistDataModelElement
 from aminer.parsing import IpAddressDataModelElement
+from aminer.parsing import OptionalMatchModelElement
 from aminer.parsing import SequenceModelElement
 
 def getModel():
@@ -49,7 +50,8 @@ after any standard logging preamble, e.g. from syslog."""
       DecimalIntegerValueModelElement('rpkts'),
       FixedDataModelElement('s13', ' BYTES='),
       DecimalIntegerValueModelElement('rbytes'),
-      FixedDataModelElement('s14', ' ')
+# No additional whitespace from Ubuntu Trusty 14.04 on.
+      OptionalMatchModelElement('tail', FixedDataModelElement('s0', ' ')),
   ]))
 
   typeChildren.append(FixedDataModelElement('nfct-plugin', 'NFCT plugin working in event mode'))
