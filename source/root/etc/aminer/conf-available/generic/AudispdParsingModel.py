@@ -196,8 +196,10 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement('s0', '  cwd='),
       ExecArgumentDataModelElement('cwd')])
 
-  typeBranches['EOE'] = SequenceModelElement('eoe', [
-      FixedDataModelElement('s0', ' ')])
+# We need a type branch here also, but there is no additional
+# data in EOE records after Ubuntu Trusty any more.
+  typeBranches['EOE'] = OptionalMatchModelElement(
+      'eoe', FixedDataModelElement('s0', ''))
 
   execArgModel = SequenceModelElement('execarg', [
       FixedDataModelElement('s0', ' a'),
@@ -297,7 +299,7 @@ via syslog after any standard logging preamble, e.g. from syslog."""
 
   typeBranches['SOCKADDR'] = SequenceModelElement('sockaddr', [
       FixedDataModelElement('s0', ' saddr='),
-      HexStringModelElement('sockaddr'),
+      HexStringModelElement('sockaddr', upperCase=True),
   ])
 
   typeBranches['SYSCALL'] = SequenceModelElement('syscall', [
