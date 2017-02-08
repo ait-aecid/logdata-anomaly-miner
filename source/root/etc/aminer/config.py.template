@@ -75,7 +75,7 @@ configProperties['MailAlerting.TargetAddress'] = 'root@localhost'
 # Add your ruleset here:
 
 def buildAnalysisPipeline(analysisContext):
-  """Define the function to create pipeline for parsing the log 
+  """Define the function to create pipeline for parsing the log
   data. It has also to define an AtomizerFactory to instruct AMiner
   how to process incoming data streams to create log atoms from
   them."""
