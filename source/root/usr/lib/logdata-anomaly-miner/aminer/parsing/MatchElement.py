@@ -1,7 +1,7 @@
 """This module provides only the MatchElement class to store results
 from parser element matching process."""
 
-class MatchElement:
+class MatchElement(object):
   """This class allows storage and handling of data related to
   a match found by a model element."""
 
@@ -75,3 +75,12 @@ class MatchElement:
     return {
         "path": self.path, "matchobject": self.matchObject,
         "matchString": self.matchString, "children": chld}
+
+  def __str__(self):
+    """Get a string representation of this match element excluding
+    the children"""
+    numChildren = 0
+    if self.children != None:
+      numChildren = len(self.children)
+    return 'MatchElement: path=%s, string=%s, object=%s, children=%d' % (
+        self.path, self.matchString, self.matchObject, numChildren)
