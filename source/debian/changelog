@@ -1,8 +1,20 @@
-logdata-anomaly-miner (0.0.8~rc0) xenial; urgency=low
+logdata-anomaly-miner (0.0.8) xenial; urgency=low
 
-  Dummy entry for current release candidate.
+  New features:
+  * Base64StringModelElement for parsing of base64 strings
+  * DecimalFloatValueModelElement for parsing of floats
+  * AnalysisChild full asynchronous remote control connection
+    handling
+  * MissingMatchPathValueDetector realerting support added
+  * StringRegexMatchRule for matching parsed data using regex
+  * EnhancedNewMatchPathValueComboDetector added for more complex
+    value combination detection providing transformation, annotation,
+    features ...
+  Changes:
+  * Various bugfixes
+  * Code cleanup using pylint
 
- -- Roman Fiedler <roman.fiedler@ait.ac.at>  Mon, 16 Jan 2017 15:00:00 +0000
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Tue, 30 May 2017 17:00:00 +0000
 
 logdata-anomaly-miner (0.0.7) xenial; urgency=low
 
