@@ -212,6 +212,12 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       DecimalIntegerValueModelElement('argc'),
       RepeatedElementDataModelElement('arg', execArgModel)])
 
+  typeBranches['FD_PAIR'] = SequenceModelElement('fdpair', [
+      FixedDataModelElement('s0', ' fd0='),
+      DecimalIntegerValueModelElement('fd0'),
+      FixedDataModelElement('s1', ' fd1='),
+      DecimalIntegerValueModelElement('fd1')])
+
 # This message differs on Ubuntu 32/64 bit variants.
   typeBranches['LOGIN'] = SequenceModelElement('login', [
       FixedDataModelElement('s0', ' pid='),
@@ -254,6 +260,23 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       DecimalIntegerValueModelElement('family'),
       FixedDataModelElement('s2', ' entries='),
       DecimalIntegerValueModelElement('entries')
+  ])
+
+  typeBranches['OBJ_PID'] = SequenceModelElement('objpid', [
+      FixedDataModelElement('s0', ' opid='),
+      DecimalIntegerValueModelElement('opid'),
+      FixedDataModelElement('s1', ' oauid='),
+      DecimalIntegerValueModelElement(
+          'oauid',
+          valueSignType=DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL),
+      FixedDataModelElement('s2', ' ouid='),
+      DecimalIntegerValueModelElement('ouid'),
+      FixedDataModelElement('s3', ' oses='),
+      DecimalIntegerValueModelElement(
+          'oses',
+          valueSignType=DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL),
+      FixedDataModelElement('s4', ' ocomm='),
+      ExecArgumentDataModelElement('ocomm'),
   ])
 
   typeBranches['PATH'] = SequenceModelElement('path', [
@@ -311,12 +334,14 @@ via syslog after any standard logging preamble, e.g. from syslog."""
           FixedDataModelElement('s0', ' per='),
           DecimalIntegerValueModelElement('personality'),
       ])),
-      FixedDataModelElement('s2', ' success='),
-      FixedWordlistDataModelElement('succes', ['no', 'yes']),
-      FixedDataModelElement('s3', ' exit='),
-      DecimalIntegerValueModelElement(
-          'exit',
-          valueSignType=DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL),
+      OptionalMatchModelElement('result', SequenceModelElement('rseq', [
+          FixedDataModelElement('s2', ' success='),
+          FixedWordlistDataModelElement('succes', ['no', 'yes']),
+          FixedDataModelElement('s3', ' exit='),
+          DecimalIntegerValueModelElement(
+              'exit',
+              valueSignType=DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL),
+      ])),
       FixedDataModelElement('s4', ' a0='),
       HexStringModelElement('arg0'),
       FixedDataModelElement('s5', ' a1='),
