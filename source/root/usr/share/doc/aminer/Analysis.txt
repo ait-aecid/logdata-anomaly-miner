@@ -27,6 +27,10 @@ analysis component.
 
 List of components:
 
+* EnhancedNewMatchPathValueComboDetector (AH): Same as
+  NewMatchPathValueComboDetector but also supporting value transformation
+  and storage of extra data.
+
 * HistogramAnalysis.HistogramAnalysis (R): Create histogram reports
   for parsed values.
 

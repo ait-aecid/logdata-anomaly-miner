@@ -8,6 +8,9 @@ V0.0.8 (2017-0x-xx):
     handling
   * MissingMatchPathValueDetector realerting support added
   * StringRegexMatchRule for matching parsed data using regex
+  * EnhancedNewMatchPathValueComboDetector added for more complex
+    value combination detection providing transformation, annotation,
+    features ...
 * Changes:
   * Various bugfixes
   * Code cleanup using pylint
