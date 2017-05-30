@@ -1,3 +1,7 @@
+"""This file defines the basic NewMatchPathValueComboDetector
+detector to extract values from LogAtoms and check, if the value
+combination was already seen before."""
+
 import time
 
 from aminer import AMinerConfig
@@ -7,12 +11,14 @@ from aminer.input import AtomHandlerInterface
 from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
 
-class NewMatchPathValueComboDetector(AtomHandlerInterface,
-      TimeTriggeredComponentInterface, EventSourceInterface):
+class NewMatchPathValueComboDetector(
+    AtomHandlerInterface, TimeTriggeredComponentInterface,
+    EventSourceInterface):
   """This class creates events when a new value combination for
   a given list of match data pathes were found."""
 
-  def __init__(self, aminerConfig, targetPathList, anomalyEventHandlers,
+  def __init__(
+      self, aminerConfig, targetPathList, anomalyEventHandlers,
       peristenceId='Default', allowMissingValuesFlag=False,
       autoIncludeFlag=False):
     """Initialize the detector. This will also trigger reading
@@ -25,22 +31,27 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface,
     @param autoIncludeFlag when set to True, this detector will
     report a new value only the first time before including it
     in the known values set automatically."""
-    self.targetPathList=targetPathList
-    self.anomalyEventHandlers=anomalyEventHandlers
-    self.autoIncludeFlag=autoIncludeFlag
-    self.allowMissingValuesFlag=allowMissingValuesFlag
-    self.nextPersistTime=None
+    self.targetPathList = targetPathList
+    self.anomalyEventHandlers = anomalyEventHandlers
+    self.allowMissingValuesFlag = allowMissingValuesFlag
+    self.autoIncludeFlag = autoIncludeFlag
 
-    PersistencyUtil.addPersistableComponent(self)
-    self.persistenceFileName=AMinerConfig.buildPersistenceFileName(
+    self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
         aminerConfig, self.__class__.__name__, peristenceId)
-    persistenceData=PersistencyUtil.loadJson(self.persistenceFileName)
-    if persistenceData==None:
-      self.knownValuesSet=set()
+    self.nextPersistTime = None
+    self.loadPersistencyData()
+    PersistencyUtil.addPersistableComponent(self)
+
+
+  def loadPersistencyData(self):
+    """Load the persistency data from storage."""
+    persistenceData = PersistencyUtil.loadJson(self.persistenceFileName)
+    if persistenceData is None:
+      self.knownValuesSet = set()
     else:
 # Set and tuples were stored as list of lists. Transform the inner
 # lists to tuples to allow hash operation needed by set.
-      self.knownValuesSet=set([tuple(record) for record in persistenceData])
+      self.knownValuesSet = set([tuple(record) for record in persistenceData])
 
 
   def receiveAtom(self, logAtom):
@@ -49,62 +60,68 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface,
     @return True if a value combination was extracted and checked
     against the list of known combinations, no matter if the checked
     values were new or not."""
-    matchDict=logAtom.parserMatch.getMatchDictionary()
-    matchValueList=[]
+    matchDict = logAtom.parserMatch.getMatchDictionary()
+    matchValueList = []
     for targetPath in self.targetPathList:
-      matchElement=matchDict.get(targetPath, None)
-      if matchElement==None:
-        if not(self.allowMissingValuesFlag): return(False)
+      matchElement = matchDict.get(targetPath, None)
+      if matchElement is None:
+        if not self.allowMissingValuesFlag:
+          return False
         matchValueList.append(None)
       else:
         matchValueList.append(matchElement.matchObject)
 
-    matchValueTuple=tuple(matchValueList)
-    if not(matchValueTuple in self.knownValuesSet):
+    matchValueTuple = tuple(matchValueList)
+    if matchValueTuple not in self.knownValuesSet:
       if self.autoIncludeFlag:
         self.knownValuesSet.add(matchValueTuple)
-        if self.nextPersistTime==None:
-          self.nextPersistTime=time.time()+600
+        if self.nextPersistTime is None:
+          self.nextPersistTime = time.time()+600
       for listener in self.anomalyEventHandlers:
-        listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
-            'New value combination for path(es) %s: %s' % (', '.join(self.targetPathList), repr(matchValueTuple)),
+        listener.receiveEvent(
+            'Analysis.%s' % self.__class__.__name__,
+            'New value combination for path(es) %s: %s' % (
+                ', '.join(self.targetPathList), repr(matchValueTuple)),
             [logAtom.rawData], (logAtom, matchValueTuple), self)
-    return(True)
+    return True
 
 
   def getTimeTriggerClass(self):
     """Get the trigger class this component should be registered
     for. This trigger is used only for persistency, so real-time
     triggering is needed."""
-    return(AnalysisContext.TIME_TRIGGER_CLASS_REALTIME)
+    return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-  def doTimer(self, time):
+  def doTimer(self, triggerTime):
     """Check current ruleset should be persisted"""
-    if self.nextPersistTime==None: return(600)
+    if self.nextPersistTime is None:
+      return 600
 
-    delta=self.nextPersistTime-time
-    if(delta<0):
+    delta = self.nextPersistTime-triggerTime
+    if delta < 0:
       self.doPersist()
-      delta=600
-    return(delta)
+      delta = 600
+    return delta
 
 
   def doPersist(self):
     """Immediately write persistence data to storage."""
-    PersistencyUtil.storeJson(self.persistenceFileName, list(self.knownValuesSet))
-    self.nextPersistTime=None
+    PersistencyUtil.storeJson(
+        self.persistenceFileName, list(self.knownValuesSet))
+    self.nextPersistTime = None
 
 
-  def whitelistEvent(self, eventType, sortedLogLines, eventData,
-      whitelistingData):
+  def whitelistEvent(
+      self, eventType, sortedLogLines, eventData, whitelistingData):
     """Whitelist an event generated by this source using the information
     emitted when generating the event.
     @return a message with information about whitelisting
     @throws Exception when whitelisting of this special event
     using given whitelistingData was not possible."""
-    if eventType!='Analysis.%s' % self.__class__.__name__:
+    if eventType != 'Analysis.%s' % self.__class__.__name__:
       raise Exception('Event not from this source')
-    if whitelistingData!=None:
+    if whitelistingData != None:
       raise Exception('Whitelisting data not understood by this detector')
     self.knownValuesSet.add(eventData[1])
-    return('Whitelisted path(es) %s with %s in %s' % (', '.join(self.targetPathList), eventData[1], sortedLogLines[0]))
+    return 'Whitelisted path(es) %s with %s in %s' % (
+        ', '.join(self.targetPathList), eventData[1], sortedLogLines[0])
