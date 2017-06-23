@@ -1,5 +1,7 @@
 logdata-anomaly-miner (0.0.9~pre0) xenial; urgency=low
 
+  Features:
+  * New MissingMatchPathListValueDetector to detect stream interuption
   Bugfixes:
   * AnalysisChild: handle remote control client connection errors correctly
 

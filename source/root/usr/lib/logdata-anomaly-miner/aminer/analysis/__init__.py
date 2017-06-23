@@ -11,6 +11,7 @@
 # AtomFilters.py
 from MatchValueAverageChangeDetector import MatchValueAverageChangeDetector
 from MatchValueStreamWriter import MatchValueStreamWriter
+from MissingMatchPathValueDetector import MissingMatchPathListValueDetector
 from MissingMatchPathValueDetector import MissingMatchPathValueDetector
 from NewMatchPathDetector import NewMatchPathDetector
 from NewMatchPathValueComboDetector import NewMatchPathValueComboDetector

@@ -51,6 +51,9 @@ List of components:
   given path are not received for a longer timespan, e.g. a host,
   service or address stopped sending/reporting.
 
+* MissingMatchPathListValueDetector (AH): Like MissingMatchPathValueDetector
+  but looking on more than one match path for key extraction.
+
 * NewMatchPathDetector (AH): Generate events when new parser pathes
   are found.
 

@@ -23,14 +23,17 @@ class MissingMatchPathValueDetector(
   is added to expectedValuesDict. It stores three numbers: the
   timestamp the extracted value was last seen, the maximum allowed
   gap between observations and the next alerting time when currently
-  in error state."""
+  in error state. When in normal (alerting) state, the value is
+  zero."""
 
   def __init__(
       self, aminerConfig, targetPath, anomalyEventHandlers,
       peristenceId='Default', autoIncludeFlag=False, defaultInterval=3600,
       realertInterval=86400):
     """Initialize the detector. This will also trigger reading
-    or creation of persistence storage location."""
+    or creation of persistence storage location.
+    @param targetPath to extract a source identification value
+    from each logatom."""
     self.targetPath = targetPath
     self.anomalyEventHandlers = anomalyEventHandlers
     self.autoIncludeFlag = autoIncludeFlag
@@ -61,11 +64,9 @@ class MissingMatchPathValueDetector(
     may decide if it makes sense passing the atom also to other
     handlers or to retry later. This behaviour has to be documented
     at each source implementation sending LogAtoms."""
-    matchElement = logAtom.parserMatch.getMatchDictionary().get(
-        self.targetPath, None)
-    if matchElement is None:
+    value = self.getChannelKey(logAtom)
+    if value is None:
       return False
-    value = matchElement.matchObject
     timeStamp = logAtom.getTimestamp()
     detectorInfo = self.expectedValuesDict.get(value, None)
     if detectorInfo != None:
@@ -87,7 +88,22 @@ class MissingMatchPathValueDetector(
 # in the records change even when no new hosts are added.
     if self.nextPersistTime is None:
       self.nextPersistTime = time.time()+600
+    self.checkTimeouts(timeStamp)
 
+
+  def getChannelKey(self, logAtom):
+    """Get the key identifying the channel this logAtom is coming
+    from."""
+    matchElement = logAtom.parserMatch.getMatchDictionary().get(
+        self.targetPath, None)
+    if matchElement is None:
+      return None
+    return matchElement.matchObject
+
+
+  def checkTimeouts(self, timeStamp):
+    """Check if there was any timeout on a channel, thus triggering
+    event dispatching."""
     self.lastSeenTimestamp = max(self.lastSeenTimestamp, timeStamp)
     if self.lastSeenTimestamp > self.nextCheckTimestamp:
       missingValueList = []
@@ -190,3 +206,38 @@ class MissingMatchPathValueDetector(
       else:
         self.setCheckValue(keyName, newInterval)
     return 'Updated %d entries' % len(eventData)
+
+
+
+class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
+  """This detector works similar to the MissingMatchPathValueDetector.
+  It only can lookup values from a list of pathes until one path
+  really exists. It then uses this value as key to detect logAtoms
+  belonging to the same data stream. This is useful when e.g.
+  due to different log formats, the hostname, servicename or any
+  other relevant channel identifier has alternative pathes."""
+
+  def __init__(
+      self, aminerConfig, targetPathList, anomalyEventHandlers,
+      peristenceId='Default', autoIncludeFlag=False, defaultInterval=3600,
+      realertInterval=86400):
+    """Initialize the detector. This will also trigger reading
+    or creation of persistence storage location.
+    @param targetPath to extract a source identification value
+    from each logatom."""
+    super(MissingMatchPathListValueDetector, self).__init__(
+        aminerConfig, None, anomalyEventHandlers, peristenceId,
+        autoIncludeFlag, defaultInterval, realertInterval)
+    self.targetPathList = targetPathList
+
+
+  def getChannelKey(self, logAtom):
+    """Get the key identifying the channel this logAtom is coming
+    from."""
+    for targetPath in self.targetPathList:
+      matchElement = logAtom.parserMatch.getMatchDictionary().get(
+          targetPath, None)
+      if matchElement is None:
+        continue
+      return matchElement.matchObject
+    return None
