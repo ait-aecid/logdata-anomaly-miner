@@ -1,3 +1,10 @@
+logdata-anomaly-miner (0.0.9~pre0) xenial; urgency=low
+
+  Bugfixes:
+  * AnalysisChild: handle remote control client connection errors correctly
+
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Fri, 23 Jun 2017 17:00:00 +0000
+
 logdata-anomaly-miner (0.0.8) xenial; urgency=low
 
   New features:

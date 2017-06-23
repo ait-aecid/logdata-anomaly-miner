@@ -302,7 +302,18 @@ class AnalysisChild(TimeTriggeredComponentInterface):
       for writeFd in writeList:
         fdHandlerObject = self.trackedFdsDict[writeFd]
         if isinstance(fdHandlerObject, AnalysisChildRemoteControlHandler):
-          if fdHandlerObject.doSend():
+          bufferFlushedFlag = False
+          try:
+            bufferFlushedFlag = fdHandlerObject.doSend()
+          except OSError as sendError:
+            print >>sys.stderr, 'Error sending data via remote ' \
+                'control: %s' % str(sendError)
+            try:
+              fdHandlerObject.terminate()
+            except Exception as terminateException:
+              print >>sys.stderr, 'Unclean termination of remote ' \
+                  'control: %s' % str(terminateException)
+          if bufferFlushedFlag:
             fdHandlerObject.doProcess(self.analysisContext)
           if fdHandlerObject.isDead():
             del self.trackedFdsDict[writeFd]
