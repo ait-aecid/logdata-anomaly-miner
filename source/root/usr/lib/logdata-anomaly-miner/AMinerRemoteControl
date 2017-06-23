@@ -60,6 +60,8 @@ while argPos < len(sys.argv):
     environment as 'remoteControlData' (see man page).
   --Exec [command]: add command to the execution list, can be
     used more than once.
+  --ExecFile [file]: add commands from file to the execution list
+    in same way as if content would have been used with "--Exec".
   --Help: this output
   --StringResponse: if set, print the response just as string
     instead of passing it to repr.""" % sys.argv[0]
