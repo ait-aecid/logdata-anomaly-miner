@@ -88,7 +88,7 @@ class MissingMatchPathValueDetector(
 # in the records change even when no new hosts are added.
     if self.nextPersistTime is None:
       self.nextPersistTime = time.time()+600
-    self.checkTimeouts(timeStamp)
+    self.checkTimeouts(timeStamp, logAtom)
 
 
   def getChannelKey(self, logAtom):
@@ -101,7 +101,7 @@ class MissingMatchPathValueDetector(
     return matchElement.matchObject
 
 
-  def checkTimeouts(self, timeStamp):
+  def checkTimeouts(self, timeStamp, logAtom):
     """Check if there was any timeout on a channel, thus triggering
     event dispatching."""
     self.lastSeenTimestamp = max(self.lastSeenTimestamp, timeStamp)
