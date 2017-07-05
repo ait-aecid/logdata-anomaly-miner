@@ -1,3 +1,9 @@
+V0.0.9 (2017-xx-xx):
+====================
+
+* New features:
+  * Added parsing support for kernel IP layer martian package messages
+
 V0.0.8 (2017-05-30):
 ====================
 

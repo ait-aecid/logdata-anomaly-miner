@@ -2,23 +2,34 @@ from aminer.parsing import AnyByteDataModelElement
 from aminer.parsing import DelimitedDataModelElement
 from aminer.parsing import FirstMatchModelElement
 from aminer.parsing import FixedDataModelElement
+from aminer.parsing import FixedWordlistDataModelElement
+from aminer.parsing import IpAddressDataModelElement
 from aminer.parsing import SequenceModelElement
 
-def getModel(messagesModel=None):
-  """This function defines how to parse messages from kernel logging.
-  @param if messagesModel is defined, model will first attempt
-  to check if log data matches this model before returning the
-  complete unparsed message as single string."""
+def getModel():
+  """This function defines how to parse messages from kernel logging."""
 
-  realMessagesModel=AnyByteDataModelElement('msg')
-  if messagesModel!=None:
-    realMessagesModel=FirstMatchModelElement('msg', [
-        messagesModel,
-        realMessagesModel])
+  typeChildren = []
+  typeChildren.append(SequenceModelElement('ipv4-martian', [
+      FixedDataModelElement('s0', 'IPv4: martian '),
+      FixedWordlistDataModelElement('direction', ['source', 'destination']),
+      FixedDataModelElement('s1', ' '),
+      IpAddressDataModelElement('destination'),
+      FixedDataModelElement('s2', ' from '),
+      IpAddressDataModelElement('source'),
+      FixedDataModelElement('s3', ', on dev '),
+      AnyByteDataModelElement('interface')
+  ]))
+
+  typeChildren.append(SequenceModelElement('net-llheader', [
+      FixedDataModelElement('s0', 'll header: '),
+      AnyByteDataModelElement('data')]))
+
+  typeChildren.append(AnyByteDataModelElement('unparsed'))
 
   model=SequenceModelElement('kernel', [
       FixedDataModelElement('sname', 'kernel: ['),
       DelimitedDataModelElement('timestamp', ']'),
       FixedDataModelElement('s0', '] '),
-      AnyByteDataModelElement('msg')])
+      FirstMatchModelElement('msg', typeChildren)])
   return(model)
