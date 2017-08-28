@@ -6,6 +6,7 @@ from aminer.parsing import DecimalIntegerValueModelElement
 from aminer.parsing import DelimitedDataModelElement
 from aminer.parsing import FirstMatchModelElement
 from aminer.parsing import FixedDataModelElement
+from aminer.parsing import OptionalMatchModelElement
 from aminer.parsing import SequenceModelElement
 from aminer.parsing import VariableByteDataModelElement
 
@@ -16,10 +17,15 @@ def getSystemdModel():
   typeChildren.append(FixedDataModelElement(
       'apt-daily-start', 'Starting Daily apt activities...'))
 
+  typeChildren.append(FixedDataModelElement(
+      'apt-daily-started', 'Started Daily apt activities.'))
+
   typeChildren.append(SequenceModelElement('apt-daily-timer', [
-      FixedDataModelElement('s0', 'Adding '),
-      DecimalIntegerValueModelElement('hours'),
-      FixedDataModelElement('s1', 'h '),
+      FixedDataModelElement('s0', 'apt-daily.timer: Adding '),
+      OptionalMatchModelElement('hopt', SequenceModelElement('hblock', [
+          DecimalIntegerValueModelElement('hours'),
+          FixedDataModelElement('s1', 'h '),
+      ])),
       DecimalIntegerValueModelElement('minutes'),
       FixedDataModelElement('s2', 'min '),
       DecimalFloatValueModelElement('seconds'),
@@ -27,6 +33,9 @@ def getSystemdModel():
 
   typeChildren.append(FixedDataModelElement(
       'tmp-file-cleanup', 'Starting Cleanup of Temporary Directories...'))
+
+  typeChildren.append(FixedDataModelElement(
+      'tmp-file-cleanup-started', 'Started Cleanup of Temporary Directories.'))
 
   model = SequenceModelElement('systemd', [
       FixedDataModelElement('sname', 'systemd['),
