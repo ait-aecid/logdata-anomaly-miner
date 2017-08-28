@@ -17,7 +17,9 @@ class DateTimeModelElement(ModelElementInterface):
   in libc strptime, no support to determine the length of the
   parsed string."""
 
-  def __init__(self, id, dateFormat, timeZone=None, textLocale=None, startYear=None):
+  def __init__(
+      self, pathId, dateFormat, timeZone=None, textLocale=None,
+      startYear=None, maxTimeJumpSeconds=86400):
     """Create a DateTimeModelElement to parse dates using a custom,
     timezone and locale-aware implementation similar to strptime.
     @param dateFormat the date format for parsing, see Python
@@ -39,12 +41,35 @@ class DateTimeModelElement(ModelElementInterface):
     when None.
     @param textLocale the locale to use for parsing the day, month
     names or None to use the default locale. Locale changing is
-    not yet implemented, use locale.setlocale() in global configuration."""
-    self.id = id
+    not yet implemented, use locale.setlocale() in global configuration.
+    @param startYear when parsing date records without any year
+    information, assume this is the year of the first value parsed.
+    @param maxTimeJumpSeconds for detection of year wraps with
+    date formats missing year information, also the current time
+    of values has to be tracked. This value defines the window
+    within that the time may jump between two matches. When not
+    within that window, the value is still parsed, corrected to
+    the most likely value but does not change the detection year."""
+    self.pathId = pathId
     self.timeZone = timeZone
 # Make sure that dateFormat is valid and extract the relevant
 # parts from it.
     self.formatHasYearFlag = False
+    self.dateFormatParts = None
+    self.scanDateFormat(dateFormat)
+
+    self.startYear = startYear
+    if (not self.formatHasYearFlag) and (startYear is None):
+      self.startYear = time.gmtime(None).tm_year
+    self.maxTimeJumpSeconds = maxTimeJumpSeconds
+    self.lastParsedSeconds = 0
+    self.epochStartTime = datetime.datetime.fromtimestamp(0, self.timeZone)
+
+
+  def scanDateFormat(self, dateFormat):
+    """Scan the date format."""
+    if self.dateFormatParts != None:
+      raise Exception('Cannot rescan date format after initialization')
     dateFormatParts = []
     dateFormatTypeSet = set()
     scanPos = 0
@@ -99,11 +124,6 @@ class DateTimeModelElement(ModelElementInterface):
       raise Exception('Cannot use %%s (seconds since epoch) with other non-second format types')
     self.dateFormatParts = dateFormatParts
 
-    self.startYear = startYear
-    if (not self.formatHasYearFlag) and (startYear is None):
-      self.startYear = time.gmtime(None).tm_year
-    self.lastParsedSeconds = 0
-    self.epochStartTime = datetime.datetime.fromtimestamp(0, self.timeZone)
 
   def getChildElements(self):
     """Get all possible child model elements of this element.
@@ -206,17 +226,47 @@ class DateTimeModelElement(ModelElementInterface):
       totalSeconds = (delta.days*86400+delta.seconds)
 
 # See if this is change from one year to next.
-      if ((not self.formatHasYearFlag) and
-          (totalSeconds < self.lastParsedSeconds-3600*24*7)):
-        print >>sys.stderr, 'WARNING: DateTimeModelElement unqualified ' \
-            'timestamp year wraparound detected from %s to %s' % (
-                datetime.datetime.fromtimestamp(
-                    self.lastParsedSeconds, self.timeZone).isoformat(),
-                parsedDateTime.isoformat())
-        self.startYear += 1
-        parsedDateTime = parsedDateTime.replace(self.startYear)
 
-      self.lastParsedSeconds = totalSeconds
+      if not self.formatHasYearFlag:
+        if self.lastParsedSeconds == 0:
+# There cannot be a wraparound if we do not know any previous
+# time values yet.
+          self.lastParsedSeconds = totalSeconds
+        else:
+          delta = self.lastParsedSeconds-totalSeconds
+          if abs(delta) <= self.maxTimeJumpSeconds:
+            self.lastParsedSeconds = totalSeconds
+          else:
+# This might be the first date value for the next year or one
+# from the previous. Test both cases and see, what is more likely.
+            nextYearDateTime = parsedDateTime.replace(self.startYear+1)
+            delta = nextYearDateTime-self.epochStartTime
+            nextYearTotalSeconds = (delta.days*86400+delta.seconds)
+            if nextYearTotalSeconds-self.lastParsedSeconds <= self.maxTimeJumpSeconds:
+              self.startYear += 1
+              parsedDateTime = nextYearDateTime
+              totalSeconds = nextYearTotalSeconds
+              self.lastParsedSeconds = totalSeconds
+              print >>sys.stderr, 'WARNING: DateTimeModelElement unqualified ' \
+                  'timestamp year wraparound detected from %s to %s' % (
+                      datetime.datetime.fromtimestamp(
+                          self.lastParsedSeconds, self.timeZone).isoformat(),
+                      parsedDateTime.isoformat())
+            else:
+              lastYearDateTime = parsedDateTime.replace(self.startYear-1)
+              delta = lastYearDateTime-self.epochStartTime
+              lastYearTotalSeconds = (delta.days*86400+delta.seconds)
+              if self.lastParsedSeconds-lastYearTotalSeconds <= self.maxTimeJumpSeconds:
+                parsedDateTime = lastYearDateTime
+                totalSeconds = lastYearTotalSeconds
+                self.lastParsedSeconds = totalSeconds
+              else:
+# None of both seems correct, just report that.
+                print >>sys.stderr, 'WARNING: DateTimeModelElement ' \
+                    'time inconsistencies parsing %s, expecting value ' \
+                    'around %d. Check your settings!' % (
+                        dateStr, self.lastParsedSeconds)
+
 # We discarded the parsedDateTime microseconds beforehand, use
 # the full float value here instead of the rounded integer.
       if result[6] != None:
@@ -224,7 +274,7 @@ class DateTimeModelElement(ModelElementInterface):
 
     matchContext.update(dateStr)
     return MatchElement(
-        "%s/%s" % (path, self.id), dateStr, (parsedDateTime, totalSeconds,),
+        "%s/%s" % (path, self.pathId), dateStr, (parsedDateTime, totalSeconds,),
         None)
 
   @staticmethod
