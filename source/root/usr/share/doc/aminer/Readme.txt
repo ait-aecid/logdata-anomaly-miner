@@ -17,10 +17,10 @@ Installation Requirements:
 
 * Python language compatibility:
 
-Code is compatible with Python 2.6-2.7, software was tested on:
-
-  * CentOS 6.7:         Released 2015-08-07, Python 2.6.6
-  * Ubuntu Xenial 1604: Released 2016-04-21, Python 2.7.11-7
+Code is compatible with Python 3, software was tested on:
+  
+  * Ubuntu Xenial 1604: Released 2016-04-21, Python 3.6.5
+  * Ubuntu Bionic 1804: Released 2018-09-13, Python 3.6.5
 
 
 * System requirements:

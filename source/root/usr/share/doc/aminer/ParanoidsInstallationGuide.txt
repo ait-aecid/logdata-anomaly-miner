@@ -41,9 +41,11 @@ While not fully configured, you may want to start with an empty
 input file. A paranoid aminer instance will report everything
 not explicitely whitelisted as an error. Basically you would get
 your whole syslog echoed back, just with an amplification factor
-applied. In that case use:
+applied. In that case change the property "LogResourceList" to:
 
 configProperties['LogResourceList'] = ['file:///etc/aminer/test.log']
+
+and do:
 
 touch /etc/aminer/test.log
 chmod 0600 /etc/aminer/test.log
@@ -82,7 +84,7 @@ AMiner does not use the default dist/site-packages to load code.
 See Design.txt "Loading of python code" for explanation. By default
 pytz is used for timestamp handling, so add it:
 
-ln -s /usr/lib/python2.7/dist-packages/pytz /etc/aminer/conf-enabled
+ln -s /usr/lib/python3/dist-packages/pytz /etc/aminer/conf-enabled
 
 
 * Check for configuration errors:
@@ -189,12 +191,11 @@ elements. Especially the "DebugModelElement" can be inserted at
 any position in your model to see where parsing breaks when parsing
 failures seem unexplainable.
 
-When even parsing of the syslog preamble using ConfigSyslogPreambleModel
+When even parsing of the syslog preamble using SyslogPreambleModel
 fails, this can be adjusted to your needs also. You may have to
-supply a different time model element, e.g. using
+supply a different time model element, or host name model in:
 
-  ConfigSyslogPreambleModel.getModel(
-      DateTimeModelElement('time', [formatstring]))
+/etc/aminer/conf-available/SyslogPreambleModel.py
 
 or even switch to MultiLocaleDateTimeModelElement. See source
 code documentation in those files, e.g.
@@ -203,7 +204,7 @@ code documentation in those files, e.g.
 
 and Python format string specification in
 
-https://docs.python.org/2/library/datetime.html#strftime-strptime-behavior
+https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior
 
 * Debugging a model:
 
@@ -220,6 +221,18 @@ Remote control code for that purpose could would be:
   # Working with registered components is handy...
   match = analysisContext.registeredComponentsByName['ParsingModel'].getMatchElement('', matchContext)
   remoteControlResponse = 'Result: %s, debug info %s' % (str(match), matchContext.getDebugInfo())
+
+Without remote control change in 
+
+/usr/lib/logdata-anomaly-miner/aminer/input/ByteStreamLineAtomizer.py 
+
+the matchContext and add an appropriate output, e.g.,
+
+  matchContext = DebugMatchContext(lineData)
+  matchElement = self.parsingModel.getMatchElement('', matchContext)
+  print('Result: %s, debug info %s' % (str(matchElement), matchContext.getDebugInfo()))
+
+Also the import of DebugMatchContext might be required.
 
 * Contributing to the model templates:
 
