@@ -45,11 +45,11 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
 -->
 
   <!-- Fill in your name for FIRSTNAME and SURNAME. -->
-  <!ENTITY dhfirstname "Roman">
-  <!ENTITY dhsurname   "Fiedler">
+  <!ENTITY dhfirstname "Markus">
+  <!ENTITY dhsurname   "Wurzenberger">
   <!-- dhusername could also be set to "&dhfirstname; &dhsurname;". -->
-  <!ENTITY dhusername  "Roman Fiedler">
-  <!ENTITY dhemail     "roman.fiedler@ait.ac.at">
+  <!ENTITY dhusername  "Markus Wurzenberger">
+  <!ENTITY dhemail     "markus.wurzenberger@ait.ac.at">
   <!-- SECTION should be 1-8, maybe w/ subsection other parameters are
        allowed: see man(7), man(1) and
        http://www.tldp.org/HOWTO/Man-Page/q2.html. -->

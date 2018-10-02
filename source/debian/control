@@ -1,7 +1,7 @@
 Source: logdata-anomaly-miner
 Section: admin
 Priority: optional
-Maintainer: Roman Fiedler <roman.fiedler@ait.ac.at>
+Maintainer: Markus Wurzenberger <markus.wurzenberger@ait.ac.at>
 Build-Depends: debhelper (>= 9.0.0), dh-python, dh-systemd, docbook-xsl, docbook-xml, python-all, xsltproc
 Standards-Version: 3.9.8
 Homepage: https://launchpad.net/logdata-anomaly-miner/
