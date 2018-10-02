@@ -1,3 +1,20 @@
+logdata-anomaly-miner (1.0.0) bionic; urgency=low
+  
+  Changes:
+  * Ported code to Python 3
+  * Code cleanup using pylint
+  * Added util/JsonUtil.py to encode byte strings for storing them as json objects
+  * Added docs/development-procedures.txt which documents development procedures
+  Features:
+  * New MissingMatchPathListValueDetector to detect stream interuption
+  * Added parsing support for kernel IP layer martian package messages
+  * Systemd parsing of apt invocation messages.
+  Bugfixes:
+  * AnalysisChild: handle remote control client connection errors correctly
+  * Various bugfixes
+
+ -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Tue,  2 Oct 2018 17:00:00 +0000
+
 logdata-anomaly-miner (0.0.8) xenial; urgency=low
 
   Apart from bugfixes, new parsing and analysis components were added:
