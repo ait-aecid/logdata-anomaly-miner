@@ -62,9 +62,9 @@ class AtomHandlerInterface(object):
     at each source implementation sending LogAtoms."""
     raise Exception('Interface method called')
 
+from aminer.input.ByteStreamLineAtomizer import ByteStreamLineAtomizer
+from aminer.input.LogAtom import LogAtom
+from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
+from aminer.input.SimpleMultisourceAtomSync import SimpleMultisourceAtomSync
+from aminer.input.SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler
 
-from ByteStreamLineAtomizer import ByteStreamLineAtomizer
-from LogAtom import LogAtom
-from SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
-from SimpleMultisourceAtomSync import SimpleMultisourceAtomSync
-from SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler

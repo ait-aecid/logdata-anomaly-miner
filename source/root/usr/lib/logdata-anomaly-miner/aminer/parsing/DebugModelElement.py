@@ -1,6 +1,10 @@
+"""This moduel defines a debug model element that can be used to
+check whether a specific poistion in the parsing tree is reached
+by log atoms."""
+
 import sys
 
-import MatchElement
+from aminer.parsing.MatchElement import MatchElement
 
 class DebugModelElement:
   """This class defines a model element matching any data of length
@@ -11,17 +15,20 @@ class DebugModelElement:
   stderr for inspection."""
 
 
-  def __init__(self, id):
-    self.id=id
+  def __init__(self, elementId):
+    self.elementId = elementId
 # To avoid having those elements hidden in production configuration,
 # write a line every time the class is instantiated.
-    print >>sys.stderr, 'DebugModelElement %s added' % id
+    print('DebugModelElement %s added' % elementId, file=sys.stderr)
 
   def getChildElements(self):
-    return(None)
+    """Get all possible child model elements of this element.
+    @return empty list as there are no children of this element."""
+    return None
 
   def getMatchElement(self, path, matchContext):
     """@return Always return a match."""
-    print >>sys.stderr, 'DebugModelElement path="%s/%s", unmatched="%s"' % (path, self.id, matchContext.matchData)
-    return(MatchElement.MatchElement('%s/%s' % (path, self.id),
-        '', '', None))
+    print('DebugModelElement path = "%s/%s", unmatched = "%s"' % \
+      (path, self.elementId, repr(matchContext.matchData)), file=sys.stderr)
+    return MatchElement('%s/%s' % (path, self.elementId), \
+        '', '', None)

@@ -10,12 +10,50 @@ from aminer.input import AtomHandlerInterface
 def getLogInt(maxBits):
   """Get a log-distributed random integer integer in range 0 to
   maxBits-1."""
-  randBits = random.randint(0, (1<<maxBits)-1)
+  randBits = random.randint(0, (1 << maxBits)-1)
   result = 0
   while (randBits&1) != 0:
     result += 1
     randBits >>= 1
   return result
+
+
+def decodeStringAsByteString(string):
+  """Decodes a string produced by the encode function
+  encodeByteStringAsString(byteString) below.
+  @return string."""
+  decoded = b''
+  count = 0
+  while count < len(string):
+    if string[count] in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRS' \
+            'TUVWXYZ1234567890!"#$&\'()*+,-./:;<=>?@[]\\^_`' \
+            '{}|~ ':
+      decoded += bytes(string[count], 'ascii')
+      count += 1
+    elif string[count] == '%':
+      decoded += bytearray((int(string[count+1:count+3], 16),))
+      count += 3
+    else:
+      raise Exception('Invalid encoded character')
+  return decoded
+
+
+def encodeByteStringAsString(byteString):
+  """Encodes an arbitrary byte string to a string by replacing
+  all non ascii-7 bytes and all non printable ascii-7 bytes
+  and % character by replacing with their escape sequence
+  %[hex].
+  For example byte string b'/\xc3' is encoded to '/%c3'
+  @return a string with decoded name."""
+  encoded = ''
+  for byte in byteString:
+    if byte in b'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRS' \
+            b'TUVWXYZ1234567890!"#$&\'()*+,-./:;<=>?@[]\\^_`' \
+            b'{}|~ ':
+      encoded += chr(byte)
+    else:
+      encoded += '%%%02x' % byte
+  return encoded
 
 
 class ObjectHistory(object):

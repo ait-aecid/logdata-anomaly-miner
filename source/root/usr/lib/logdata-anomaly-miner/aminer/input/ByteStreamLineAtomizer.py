@@ -60,7 +60,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
           consumedLength = -1
         break
 
-      lineEnd = streamData.find('\n', consumedLength)
+      lineEnd = streamData.find(b'\n', consumedLength)
       if self.inOverlongLineFlag:
         if lineEnd < 0:
           consumedLength = len(streamData)
@@ -100,7 +100,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
       if self.parsingModel != None:
         matchContext = MatchContext(lineData)
         matchElement = self.parsingModel.getMatchElement('', matchContext)
-        if (matchElement != None) and (len(matchContext.matchData) == 0):
+        if (matchElement != None) and not matchContext.matchData:
           logAtom.parserMatch = ParserMatch(matchElement)
           if self.defaultTimestampPath != None:
             tsMatch = logAtom.parserMatch.getMatchDictionary().get(self.defaultTimestampPath, None)
@@ -120,7 +120,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
     """Dispatch the data using the appropriate handlers. Also clean
     or set lastUnconsumed fields depending on outcome of dispatching."""
     wasConsumedFlag = False
-    if len(self.atomHandlerList) == 0:
+    if not self.atomHandlerList:
       wasConsumedFlag = True
     else:
       for handler in self.atomHandlerList:

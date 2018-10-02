@@ -27,21 +27,21 @@ class DecimalFloatValueModelElement(ModelElementInterface):
     self.pathId = pathId
     self.startCharacters = None
     if valueSignType == DecimalFloatValueModelElement.SIGN_TYPE_NONE:
-      self.startCharacters = '0123456789'
+      self.startCharacters = b'0123456789'
     elif valueSignType == DecimalFloatValueModelElement.SIGN_TYPE_OPTIONAL:
-      self.startCharacters = '-0123456789'
+      self.startCharacters = b'-0123456789'
     elif valueSignType == DecimalFloatValueModelElement.SIGN_TYPE_MANDATORY:
-      self.startCharacters = '+-'
+      self.startCharacters = b'+-'
     else:
       raise Exception('Invalid valueSignType "%s"' % valueSignType)
 
-    self.padCharacters = ''
+    self.padCharacters = b''
     if valuePadType == DecimalFloatValueModelElement.PAD_TYPE_NONE:
       pass
     elif valuePadType == DecimalFloatValueModelElement.PAD_TYPE_ZERO:
-      self.padCharacters = '0'
+      self.padCharacters = b'0'
     elif valuePadType == DecimalFloatValueModelElement.PAD_TYPE_BLANK:
-      self.padCharacters = ' '
+      self.padCharacters = b' '
     else:
       raise Exception('Invalid valuePadType "%s"' % valueSignType)
     self.valuePadType = valuePadType
@@ -65,7 +65,7 @@ class DecimalFloatValueModelElement(ModelElementInterface):
     data = matchContext.matchData
 
     allowedCharacters = self.startCharacters
-    if (len(data) == 0) or (data[0] not in allowedCharacters):
+    if not data or (data[0] not in allowedCharacters):
       return None
     matchLen = 1
 
@@ -75,14 +75,14 @@ class DecimalFloatValueModelElement(ModelElementInterface):
         break
       matchLen += 1
     numStartPos = matchLen
-    allowedCharacters = '0123456789'
+    allowedCharacters = b'0123456789'
     for testByte in data[matchLen:]:
       if testByte not in allowedCharacters:
         break
       matchLen += 1
 
     if matchLen == 1:
-      if data[0] not in '0123456789':
+      if data[0] not in b'0123456789':
         return None
     elif numStartPos == matchLen:
       return None
@@ -92,7 +92,7 @@ class DecimalFloatValueModelElement(ModelElementInterface):
       matchLen += 1
       postPointStart = matchLen
       for testByte in data[matchLen:]:
-        if testByte not in '0123456789':
+        if testByte not in b'0123456789':
           break
         matchLen += 1
       if matchLen == postPointStart:
@@ -101,13 +101,13 @@ class DecimalFloatValueModelElement(ModelElementInterface):
 
 # See if there could be any exponent following the number.
     if ((self.exponentType != DecimalFloatValueModelElement.EXP_TYPE_NONE) and
-        (matchLen+1 < len(data)) and (data[matchLen] in 'eE')):
+        (matchLen+1 < len(data)) and (data[matchLen] in b'eE')):
       matchLen += 1
-      if data[matchLen] in '+-':
+      if data[matchLen] in b'+-':
         matchLen += 1
       expNumberStart = matchLen
       for testByte in data[matchLen:]:
-        if testByte not in '0123456789':
+        if testByte not in b'0123456789':
           break
         matchLen += 1
       if matchLen == expNumberStart:

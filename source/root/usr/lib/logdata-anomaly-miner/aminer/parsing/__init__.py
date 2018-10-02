@@ -26,7 +26,6 @@ class ModelElementInterface(object):
     the data context to match against.
     @return the matchElement or None if model did not match."""
 
-
 from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
 from aminer.parsing.Base64StringModelElement import Base64StringModelElement
 from aminer.parsing.DateTimeModelElement import DateTimeModelElement

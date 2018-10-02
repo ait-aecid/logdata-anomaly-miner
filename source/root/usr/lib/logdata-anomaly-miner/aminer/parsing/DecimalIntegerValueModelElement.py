@@ -21,26 +21,28 @@ class DecimalIntegerValueModelElement(ModelElementInterface):
     self.pathId = pathId
     self.startCharacters = None
     if valueSignType == DecimalIntegerValueModelElement.SIGN_TYPE_NONE:
-      self.startCharacters = '0123456789'
+      self.startCharacters = b'0123456789'
     elif valueSignType == DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL:
-      self.startCharacters = '-0123456789'
+      self.startCharacters = b'-0123456789'
     elif valueSignType == DecimalIntegerValueModelElement.SIGN_TYPE_MANDATORY:
-      self.startCharacters = '+-'
+      self.startCharacters = b'+-'
     else:
       raise Exception('Invalid valueSignType "%s"' % valueSignType)
 
-    self.padCharacters = ''
+    self.padCharacters = b''
     if valuePadType == DecimalIntegerValueModelElement.PAD_TYPE_NONE:
       pass
     elif valuePadType == DecimalIntegerValueModelElement.PAD_TYPE_ZERO:
-      self.padCharacters = '0'
+      self.padCharacters = b'0'
     elif valuePadType == DecimalIntegerValueModelElement.PAD_TYPE_BLANK:
-      self.padCharacters = ' '
+      self.padCharacters = b' '
     else:
       raise Exception('Invalid valuePadType "%s"' % valueSignType)
     self.valuePadType = valuePadType
 
   def getChildElements(self):
+    """Get all possible child model elements of this element.
+    @return empty list as there are no children of this element."""
     return []
 
   def getMatchElement(self, path, matchContext):
@@ -50,7 +52,7 @@ class DecimalIntegerValueModelElement(ModelElementInterface):
     data = matchContext.matchData
 
     allowedCharacters = self.startCharacters
-    if (len(data) == 0) or (data[0] not in allowedCharacters):
+    if not data or (data[0] not in allowedCharacters):
       return None
     matchLen = 1
 
@@ -60,14 +62,14 @@ class DecimalIntegerValueModelElement(ModelElementInterface):
         break
       matchLen += 1
     numStartPos = matchLen
-    allowedCharacters = '0123456789'
+    allowedCharacters = b'0123456789'
     for testByte in data[matchLen:]:
       if testByte not in allowedCharacters:
         break
       matchLen += 1
 
     if matchLen == 1:
-      if data[0] not in '0123456789':
+      if data[0] not in b'0123456789':
         return None
     elif numStartPos == matchLen:
       return None

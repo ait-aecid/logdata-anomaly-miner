@@ -3,6 +3,8 @@ loading and handling functions."""
 
 import os
 import sys
+import importlib
+from importlib import util
 
 KEY_LOG_SOURCES_LIST = 'LogResourceList'
 KEY_AMINER_USER = 'AMinerUser'
@@ -16,14 +18,14 @@ def loadConfig(configFileName):
   """Load the configuration file using the import module."""
   aminerConfig = None
   try:
-    import imp
-    aminerConfig = imp.load_module(
-        'aminerConfig', open(configFileName, 'r'), configFileName,
-        ('', 'r', imp.PY_SOURCE))
+    spec = importlib.util.spec_from_file_location('aminerConfig', configFileName)
+    aminerConfig = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(aminerConfig)
+
   except:
-    print >>sys.stderr, 'Failed to load configuration from %s' % configFileName
+    print('Failed to load configuration from %s' % configFileName, file=sys.stderr)
     exceptionInfo = sys.exc_info()
-    raise exceptionInfo[0], exceptionInfo[1], exceptionInfo[2]
+    raise Exception(exceptionInfo[0], exceptionInfo[1], exceptionInfo[2])
   return aminerConfig
 
 def buildPersistenceFileName(aminerConfig, *args):

@@ -19,8 +19,7 @@ class FixedWordlistDataModelElement(ModelElementInterface):
     an Exception will be raised."""
     self.pathId = pathId
     self.wordlist = wordlist
-    for testPos in range(0, len(wordlist)):
-      refWord = wordlist[testPos]
+    for testPos, refWord in enumerate(wordlist):
       for testWord in wordlist[testPos+1:]:
         if testWord.startswith(refWord):
           raise Exception(
@@ -29,6 +28,8 @@ class FixedWordlistDataModelElement(ModelElementInterface):
 
 
   def getChildElements(self):
+    """Get all possible child model elements of this element.
+    @return None as there are no children of this element."""
     return None
 
   def getMatchElement(self, path, matchContext):

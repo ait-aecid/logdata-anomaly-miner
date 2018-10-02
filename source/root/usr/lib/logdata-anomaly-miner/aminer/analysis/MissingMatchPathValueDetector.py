@@ -90,6 +90,7 @@ class MissingMatchPathValueDetector(
       self.nextPersistTime = time.time()+600
     self.checkTimeouts(timeStamp, logAtom)
 
+    return True
 
   def getChannelKey(self, logAtom):
     """Get the key identifying the channel this logAtom is coming
@@ -110,7 +111,7 @@ class MissingMatchPathValueDetector(
 # Start with a large recheck interval. It will be lowered if any
 # of the expectation intervals is below that.
       self.nextCheckTimestamp = self.lastSeenTimestamp+86400
-      for value, detectorInfo in self.expectedValuesDict.iteritems():
+      for value, detectorInfo in self.expectedValuesDict.items():
         valueOverdueTime = self.lastSeenTimestamp-detectorInfo[0]-detectorInfo[1]
         if detectorInfo[2] != 0:
           nextCheckDelta = detectorInfo[2]-self.lastSeenTimestamp
@@ -130,10 +131,10 @@ class MissingMatchPathValueDetector(
         missingValueList.append([value, valueOverdueTime, detectorInfo[1]])
 # Set the next alerting time.
         detectorInfo[2] = self.lastSeenTimestamp+self.realertInterval
-      if len(missingValueList) != 0:
+      if missingValueList:
         messagePart = ''
         for value, overdueTime, interval in missingValueList:
-          messagePart += '\n  %s overdue %ss (interval %s)' % (value, overdueTime, interval)
+          messagePart += '\n  %s overdue %ss (interval %s)' % (repr(value), overdueTime, interval)
         for listener in self.anomalyEventHandlers:
           listener.receiveEvent(
               'Analysis.%s' % self.__class__.__name__,
@@ -200,7 +201,7 @@ class MissingMatchPathValueDetector(
     newInterval = whitelistingData
     if newInterval == -1:
       newInterval = self.defaultInterval
-    for keyName, delta, detectorInfo in eventData:
+    for keyName, in eventData:
       if newInterval < 0:
         self.removeCheckValue(keyName)
       else:

@@ -1,5 +1,5 @@
 """This module contains interfaces and classes for logdata resource
-handling and combining them to resumable virtual LogStream objects.""" 
+handling and combining them to resumable virtual LogStream objects."""
 
 import base64
 import errno
@@ -10,6 +10,7 @@ import stat
 import sys
 
 from aminer.util import SecureOSFunctions
+from aminer.util import encodeByteStringAsString
 
 class LogDataResource(object):
   """This is the superinterface of each logdata resource monitored
@@ -24,13 +25,14 @@ class LogDataResource(object):
   to wait for input via select."""
 
   def __init__(
-      self, logResourceName, logStreamFd, defaultBufferSize=1<<16,
+      self, logResourceName, logStreamFd, defaultBufferSize=1 << 16,
       repositioningData=None):
     """Create a new LogDataResource. Object creation must not
     touch the logStreamFd or read any data, unless repositioningData
     was given. In the later case, the stream has to support seek
     operation to reread data.
-    @param logResourceName the unique name of this source
+    @param logResourceName the unique encoded name of this source
+    as byte array.
     @param logStreamFd the stream for reading the resource or
     -1 if not yet opened.
     @param repositioningData if not None, attemt to position the
@@ -85,23 +87,24 @@ class FileLogDataResource(LogDataResource):
   of the stream has to be possible."""
 
   def __init__(
-      self, logResourceName, logStreamFd, defaultBufferSize=1<<16,
+      self, logResourceName, logStreamFd, defaultBufferSize=1 << 16,
       repositioningData=None):
     """Create a new file type resource.
-    @param logResourceName the unique name of this source, has to
-    start with "file://" before the file path.
+    @param logResourceName the unique name of this source as
+    bytes array, has to start with "file://" before the file
+    path.
     @param logStreamFd the stream for reading the resource or
     -1 if not yet opened.
     @param repositioningData if not None, attemt to position the
     the stream using the given data."""
-    if not logResourceName.startswith('file://'):
+    if not logResourceName.startswith(b'file://'):
       raise Exception('Attempting to create different type resource as file')
     self.logResourceName = logResourceName
     self.logFileFd = logStreamFd
     self.statData = None
     if self.logFileFd >= 0:
       self.statData = os.fstat(logStreamFd)
-    self.buffer = ''
+    self.buffer = b''
     self.defaultBufferSize = defaultBufferSize
     self.totalConsumedLength = 0
 # Create a hash for repositioning. There is no need to be cryptographically
@@ -111,11 +114,12 @@ class FileLogDataResource(LogDataResource):
 
     if (logStreamFd != -1) and (repositioningData != None):
       if repositioningData[0] != self.statData.st_ino:
-        print >>sys.stderr, 'Not attempting to reposition on %s,' \
-            'inode number mismatch' % self.logResourceName
+        print('Not attempting to reposition on %s,' \
+            'inode number mismatch' % encodeByteStringAsString(self.logResourceName),
+              file=sys.stderr)
       elif repositioningData[1] > self.statData.st_size:
-        print >>sys.stderr, 'Not attempting to reposition on %s,' \
-            'file size too small' % self.logResourceName
+        print('Not attempting to reposition on %s,' \
+            'file size too small' % encodeByteStringAsString(self.logResourceName), file=sys.stderr)
       else:
         hashAlgo = hashlib.md5()
         length = repositioningData[1]
@@ -125,9 +129,10 @@ class FileLogDataResource(LogDataResource):
             block = os.read(self.logFileFd, length)
           else:
             block = os.read(self.logFileFd, defaultBufferSize)
-          if len(block) == 0:
-            print >>sys.stderr, 'Not attempting to reposition ' \
-                'on %s, file shrunk while reading' % self.logResourceName
+          if not block:
+            print('Not attempting to reposition ' \
+                'on %s, file shrunk while reading' % encodeByteStringAsString(self.logResourceName),
+                  file=sys.stderr)
             break
           hashAlgo.update(block)
           length -= len(block)
@@ -138,8 +143,9 @@ class FileLogDataResource(LogDataResource):
             self.totalConsumedLength = repositioningData[1]
             self.repositioningDigest = hashAlgo
           else:
-            print >>sys.stderr, 'Not attempting to reposition ' \
-                'on %s, digest changed' % self.logResourceName
+            print('Not attempting to reposition ' \
+                'on %s, digest changed' % encodeByteStringAsString(self.logResourceName),
+                  file=sys.stderr)
             length = -1
         if length != 0:
 # Repositioning failed, go back to the beginning of the stream.
@@ -171,7 +177,7 @@ class FileLogDataResource(LogDataResource):
     if not stat.S_ISREG(statData.st_mode):
       os.close(logFileFd)
       raise Exception('Attempting to open non-regular file %s ' \
-          'as file' % self.logResourceName)
+          'as file' % encodeByteStringAsString(self.logResourceName))
 
     if (reopenFlag and (self.statData != None) and
         (statData.st_ino == self.statData.st_ino) and
@@ -227,15 +233,16 @@ class UnixSocketLogDataResource(LogDataResource):
   was reached."""
 
   def __init__(
-      self, logResourceName, logStreamFd, defaultBufferSize=1<<16,
+      self, logResourceName, logStreamFd, defaultBufferSize=1 << 16,
       repositioningData=None):
     """Create a new unix socket type resource.
-    @param logResourceName the unique name of this source, has to
-    start with "unix://" before the file path.
+    @param logResourceName the unique name of this source as
+    byte array, has to start with "unix://" before the file
+    path.
     @param logStreamFd the stream for reading the resource or
     -1 if not yet opened.
     @param repositioningData has to be None for this type of resource."""
-    if not logResourceName.startswith('unix://'):
+    if not logResourceName.startswith(b'unix://'):
       raise Exception('Attempting to create different type resource as unix')
     self.logResourceName = logResourceName
     self.logStreamFd = logStreamFd
@@ -351,7 +358,7 @@ class LogStream(object):
         return self.lastConsumeState
 
       if readLength == 0:
-        if len(self.nextResources) == 0:
+        if not self.nextResources:
 # There is just no input, but we still need more since last round
 # as indicated by lastConsumeState. We would not have been called
 # if this is a blocking stream, so this must be the preliminiary
@@ -365,7 +372,6 @@ class LogStream(object):
 
 # So there was something read, process it the same way as if data
 # was already available in previous round.
-      pass
     self.lastConsumeState = self.streamAtomizer.consumeData(
         self.logDataResource.buffer, False)
     if self.lastConsumeState < 0:
@@ -394,14 +400,14 @@ class LogStream(object):
 
 # This is a clear protocol violation (see StreamAtomizer documentaion):
 # When at EOF, 0 is no valid return value.
-      print >>sys.stderr, 'FATAL: Procotol violation by %s detected, ' \
-          'flushing data' % repr(self.streamAtomizer.__class__.__name__)
+      print('FATAL: Procotol violation by %s detected, ' \
+          'flushing data' % self.streamAtomizer.__class__.__name__, file=sys.stderr)
       consumedLength = len(self.logDataResource.buffer)
 
 # Everything consumed, so now ready for rollover.
     self.logDataResource.updatePosition(consumedLength)
     self.logDataResource.close()
-    if len(self.nextResources) == 0:
+    if not self.nextResources:
       self.logDataResource = None
       return -1
     self.logDataResource = self.nextResources[0]

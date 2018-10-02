@@ -24,8 +24,8 @@ via syslog after any standard logging preamble, e.g. from syslog."""
   class ExecArgumentDataModelElement(object):
     """This is a helper class for parsing the (encoded) exec argument
     strings found within audit logs."""
-    def __init__(self, id):
-      self.id = id
+    def __init__(self, elementId):
+      self.elementId = elementId
 
     def getChildElements(self):
       """Get the children of this element (none)."""
@@ -38,31 +38,30 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       the delimiters."""
       data = matchContext.matchData
       matchLen = 0
-      matchValue = ''
-      if data[0] == '"':
-        matchLen = data.find('"', 1)
+      matchValue = b''
+      if data[0] == ord(b'"'):
+        matchLen = data.find(b'"', 1)
         if matchLen == -1:
           return None
         matchValue = data[1:matchLen]
         matchLen += 1
-      elif data.startswith('(null)'):
+      elif data.startswith(b'(null)'):
         matchLen = 6
         matchValue = None
       else:
 # Must be upper case hex encoded:
         nextValue = -1
         for dByte in data:
-          dOrd = ord(dByte)
-          if (dOrd >= 0x30) and (dOrd <= 0x39):
-            dOrd -= 0x30
-          elif (dOrd >= 0x41) and (dOrd <= 0x46):
-            dOrd -= 0x37
+          if (dByte >= 0x30) and (dByte <= 0x39):
+            dByte -= 0x30
+          elif (dByte >= 0x41) and (dByte <= 0x46):
+            dByte -= 0x37
           else:
             break
           if nextValue == -1:
-            nextValue = (dOrd<<4)
+            nextValue = (dByte<<4)
           else:
-            matchValue += chr(nextValue|dOrd)
+            matchValue += bytearray(((nextValue|dByte),))
             nextValue = -1
           matchLen += 1
         if nextValue != -1:
@@ -71,318 +70,318 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       matchData = data[:matchLen]
       matchContext.update(matchData)
       return MatchElement(
-          "%s/%s" % (path, self.id), matchData, matchValue, None)
+          "%s/%s" % (path, self.elementId), matchData, matchValue, None)
 
   pamStatusWordList = FixedWordlistDataModelElement(
-      'status', ['failed', 'success'])
+      'status', [b'failed', b'success'])
 
 
   typeBranches = {}
   typeBranches['ADD_USER'] = SequenceModelElement('adduser', [
-      FixedDataModelElement('s0', ' pid='),
+      FixedDataModelElement('s0', b' pid='),
       DecimalIntegerValueModelElement('pid'),
-      FixedDataModelElement('s1', ' uid='),
+      FixedDataModelElement('s1', b' uid='),
       DecimalIntegerValueModelElement('uid'),
-      FixedDataModelElement('s2', ' auid='),
+      FixedDataModelElement('s2', b' auid='),
       DecimalIntegerValueModelElement('auid'),
-      FixedDataModelElement('s3', ' ses='),
+      FixedDataModelElement('s3', b' ses='),
       DecimalIntegerValueModelElement('ses'),
-      FixedDataModelElement('s4', ' msg=\'op=adding user id='),
+      FixedDataModelElement('s4', b' msg=\'op=adding user id='),
       DecimalIntegerValueModelElement('newuserid'),
-      FixedDataModelElement('s5', ' exe="'),
-      DelimitedDataModelElement('exec', '"'),
-      FixedDataModelElement('s6', '" hostname='),
-      DelimitedDataModelElement('clientname', ' '),
-      FixedDataModelElement('s7', ' addr='),
-      DelimitedDataModelElement('clientip', ' '),
-      FixedDataModelElement('s8', ' terminal='),
+      FixedDataModelElement('s5', b' exe="'),
+      DelimitedDataModelElement('exec', b'"'),
+      FixedDataModelElement('s6', b'" hostname='),
+      DelimitedDataModelElement('clientname', b' '),
+      FixedDataModelElement('s7', b' addr='),
+      DelimitedDataModelElement('clientip', b' '),
+      FixedDataModelElement('s8', b' terminal='),
       WhiteSpaceLimitedDataModelElement('terminal'),
-      FixedDataModelElement('s9', ' res=success\'')
+      FixedDataModelElement('s9', b' res=success\'')
   ])
 
   typeBranches['BPRM_FCAPS'] = SequenceModelElement('bprmfcaps', [
-      FixedDataModelElement('s0', ' fver=0 fp='),
+      FixedDataModelElement('s0', b' fver=0 fp='),
       HexStringModelElement('fp'),
-      FixedDataModelElement('s1', ' fi='),
+      FixedDataModelElement('s1', b' fi='),
       HexStringModelElement('fi'),
-      FixedDataModelElement('s2', ' fe='),
+      FixedDataModelElement('s2', b' fe='),
       HexStringModelElement('fe'),
-      FixedDataModelElement('s3', ' old_pp='),
+      FixedDataModelElement('s3', b' old_pp='),
       HexStringModelElement('pp-old'),
-      FixedDataModelElement('s4', ' old_pi='),
+      FixedDataModelElement('s4', b' old_pi='),
       HexStringModelElement('pi-old'),
-      FixedDataModelElement('s5', ' old_pe='),
+      FixedDataModelElement('s5', b' old_pe='),
       HexStringModelElement('pe-old'),
-      FixedDataModelElement('s6', ' new_pp='),
+      FixedDataModelElement('s6', b' new_pp='),
       HexStringModelElement('pp-new'),
-      FixedDataModelElement('s7', ' new_pi='),
+      FixedDataModelElement('s7', b' new_pi='),
       HexStringModelElement('pi-new'),
-      FixedDataModelElement('s8', ' new_pe='),
+      FixedDataModelElement('s8', b' new_pe='),
       HexStringModelElement('pe-new')
   ])
 
   typeBranches['CONFIG_CHANGE'] = SequenceModelElement('conf-change', [
-      FixedDataModelElement('s0', ' auid='),
+      FixedDataModelElement('s0', b' auid='),
       DecimalIntegerValueModelElement('auid'),
-      FixedDataModelElement('s1', ' ses='),
+      FixedDataModelElement('s1', b' ses='),
       DecimalIntegerValueModelElement('ses'),
-      FixedDataModelElement('s2', ' op="add rule" key=(null) list='),
+      FixedDataModelElement('s2', b' op="add rule" key=(null) list='),
       DecimalIntegerValueModelElement('list'),
-      FixedDataModelElement('s3', ' res='),
+      FixedDataModelElement('s3', b' res='),
       DecimalIntegerValueModelElement('result')
   ])
 
   typeBranches['CRED_ACQ'] = SequenceModelElement('credacq', [
-      FixedDataModelElement('s0', ' pid='),
+      FixedDataModelElement('s0', b' pid='),
       DecimalIntegerValueModelElement('pid'),
-      FixedDataModelElement('s1', ' uid='),
+      FixedDataModelElement('s1', b' uid='),
       DecimalIntegerValueModelElement('uid'),
-      FixedDataModelElement('s2', ' auid='),
+      FixedDataModelElement('s2', b' auid='),
       DecimalIntegerValueModelElement('auid'),
-      FixedDataModelElement('s3', ' ses='),
+      FixedDataModelElement('s3', b' ses='),
       DecimalIntegerValueModelElement('ses'),
-      FixedDataModelElement('s4', ' msg=\'op=PAM:setcred acct="'),
-      DelimitedDataModelElement('username', '"'),
-      FixedDataModelElement('s5', '" exe="'),
-      DelimitedDataModelElement('exec', '"'),
-      FixedDataModelElement('s6', '" hostname='),
-      DelimitedDataModelElement('clientname', ' '),
-      FixedDataModelElement('s7', ' addr='),
-      DelimitedDataModelElement('clientip', ' '),
-      FixedDataModelElement('s8', ' terminal='),
+      FixedDataModelElement('s4', b' msg=\'op=PAM:setcred acct="'),
+      DelimitedDataModelElement('username', b'"'),
+      FixedDataModelElement('s5', b'" exe="'),
+      DelimitedDataModelElement('exec', b'"'),
+      FixedDataModelElement('s6', b'" hostname='),
+      DelimitedDataModelElement('clientname', b' '),
+      FixedDataModelElement('s7', b' addr='),
+      DelimitedDataModelElement('clientip', b' '),
+      FixedDataModelElement('s8', b' terminal='),
       WhiteSpaceLimitedDataModelElement('terminal'),
-      FixedDataModelElement('s9', ' res=success\'')
+      FixedDataModelElement('s9', b' res=success\'')
   ])
 
   typeBranches['CRED_DISP'] = SequenceModelElement('creddisp', [
-      FixedDataModelElement('s0', ' pid='),
+      FixedDataModelElement('s0', b' pid='),
       DecimalIntegerValueModelElement('pid'),
-      FixedDataModelElement('s1', ' uid='),
+      FixedDataModelElement('s1', b' uid='),
       DecimalIntegerValueModelElement('uid'),
-      FixedDataModelElement('s2', ' auid='),
+      FixedDataModelElement('s2', b' auid='),
       DecimalIntegerValueModelElement('auid'),
-      FixedDataModelElement('s3', ' ses='),
+      FixedDataModelElement('s3', b' ses='),
       DecimalIntegerValueModelElement('ses'),
-      FixedDataModelElement('s4', ' msg=\'op=PAM:setcred acct="'),
-      DelimitedDataModelElement('username', '"'),
-      FixedDataModelElement('s5', '" exe="'),
-      DelimitedDataModelElement('exec', '"'),
-      FixedDataModelElement('s6', '" hostname='),
-      DelimitedDataModelElement('clientname', ' '),
-      FixedDataModelElement('s7', ' addr='),
-      DelimitedDataModelElement('clientip', ' '),
-      FixedDataModelElement('s8', ' terminal='),
+      FixedDataModelElement('s4', b' msg=\'op=PAM:setcred acct="'),
+      DelimitedDataModelElement('username', b'"'),
+      FixedDataModelElement('s5', b'" exe="'),
+      DelimitedDataModelElement('exec', b'"'),
+      FixedDataModelElement('s6', b'" hostname='),
+      DelimitedDataModelElement('clientname', b' '),
+      FixedDataModelElement('s7', b' addr='),
+      DelimitedDataModelElement('clientip', b' '),
+      FixedDataModelElement('s8', b' terminal='),
       WhiteSpaceLimitedDataModelElement('terminal'),
-      FixedDataModelElement('s9', ' res=success\'')
+      FixedDataModelElement('s9', b' res=success\'')
   ])
 
   typeBranches['CRED_REFR'] = SequenceModelElement('creddisp', [
-      FixedDataModelElement('s0', ' pid='),
+      FixedDataModelElement('s0', b' pid='),
       DecimalIntegerValueModelElement('pid'),
-      FixedDataModelElement('s1', ' uid='),
+      FixedDataModelElement('s1', b' uid='),
       DecimalIntegerValueModelElement('uid'),
-      FixedDataModelElement('s2', ' auid='),
+      FixedDataModelElement('s2', b' auid='),
       DecimalIntegerValueModelElement('auid'),
-      FixedDataModelElement('s3', ' ses='),
+      FixedDataModelElement('s3', b' ses='),
       DecimalIntegerValueModelElement('ses'),
-      FixedDataModelElement('s4', ' msg=\'op=PAM:setcred acct="root" ' \
-          'exe="/usr/sbin/sshd" hostname='),
+      FixedDataModelElement('s4', b' msg=\'op=PAM:setcred acct="root" ' \
+          b'exe="/usr/sbin/sshd" hostname='),
       IpAddressDataModelElement('clientname'),
-      FixedDataModelElement('s5', ' addr='),
+      FixedDataModelElement('s5', b' addr='),
       IpAddressDataModelElement('clientip'),
-      FixedDataModelElement('s6', ' terminal=ssh res=success\'')])
+      FixedDataModelElement('s6', b' terminal=ssh res=success\'')])
 
   typeBranches['CWD'] = SequenceModelElement('cwd', [
-      FixedDataModelElement('s0', '  cwd='),
+      FixedDataModelElement('s0', b'  cwd='),
       ExecArgumentDataModelElement('cwd')])
 
 # We need a type branch here also, but there is no additional
 # data in EOE records after Ubuntu Trusty any more.
   typeBranches['EOE'] = OptionalMatchModelElement(
-      'eoe', FixedDataModelElement('s0', ''))
+      'eoe', FixedDataModelElement('s0', b''))
 
   execArgModel = SequenceModelElement('execarg', [
-      FixedDataModelElement('s0', ' a'),
+      FixedDataModelElement('s0', b' a'),
       DecimalIntegerValueModelElement('argn'),
-      FixedDataModelElement('s1', '='),
+      FixedDataModelElement('s1', b'='),
       ExecArgumentDataModelElement('argval')])
 
   typeBranches['EXECVE'] = SequenceModelElement('execve', [
-      FixedDataModelElement('s0', ' argc='),
+      FixedDataModelElement('s0', b' argc='),
       DecimalIntegerValueModelElement('argc'),
       RepeatedElementDataModelElement('arg', execArgModel)])
 
   typeBranches['FD_PAIR'] = SequenceModelElement('fdpair', [
-      FixedDataModelElement('s0', ' fd0='),
+      FixedDataModelElement('s0', b' fd0='),
       DecimalIntegerValueModelElement('fd0'),
-      FixedDataModelElement('s1', ' fd1='),
+      FixedDataModelElement('s1', b' fd1='),
       DecimalIntegerValueModelElement('fd1')])
 
 # This message differs on Ubuntu 32/64 bit variants.
   typeBranches['LOGIN'] = SequenceModelElement('login', [
-      FixedDataModelElement('s0', ' pid='),
+      FixedDataModelElement('s0', b' pid='),
       DecimalIntegerValueModelElement('pid'),
-      FixedDataModelElement('s1', ' uid='),
+      FixedDataModelElement('s1', b' uid='),
       DecimalIntegerValueModelElement('uid'),
-      FixedWordlistDataModelElement('s2', [' old auid=', ' old-auid=']),
+      FixedWordlistDataModelElement('s2', [b' old auid=', b' old-auid=']),
       DecimalIntegerValueModelElement('auid-old'),
-      FixedWordlistDataModelElement('s3', [' new auid=', ' auid=']),
+      FixedWordlistDataModelElement('s3', [b' new auid=', b' auid=']),
       DecimalIntegerValueModelElement('auid-new'),
-      FixedWordlistDataModelElement('s4', [' old ses=', ' old-ses=']),
+      FixedWordlistDataModelElement('s4', [b' old ses=', b' old-ses=']),
       DecimalIntegerValueModelElement('ses-old'),
-      FixedWordlistDataModelElement('s5', [' new ses=', ' ses=']),
+      FixedWordlistDataModelElement('s5', [b' new ses=', b' ses=']),
       DecimalIntegerValueModelElement('ses-new'),
-      FixedDataModelElement('s6', ' res='),
+      FixedDataModelElement('s6', b' res='),
       DecimalIntegerValueModelElement('result')])
 
   inodeInfoModelElement = SequenceModelElement('inodeinfo', [
-      FixedDataModelElement('s0', ' inode='),
+      FixedDataModelElement('s0', b' inode='),
       DecimalIntegerValueModelElement('inode'),
-      FixedDataModelElement('s1', ' dev='),
-# A special major/minor device element could be better here.
-      VariableByteDataModelElement('dev', '0123456789abcdef:'),
-      FixedDataModelElement('s2', ' mode='),
-# FIXME: is octal
+      FixedDataModelElement('s1', b' dev='),
+      # A special major/minor device element could be better here.
+      VariableByteDataModelElement('dev', b'0123456789abcdef:'),
+      FixedDataModelElement('s2', b' mode='),
+      # FIXME: is octal
       DecimalIntegerValueModelElement('mode'),
-      FixedDataModelElement('s3', ' ouid='),
+      FixedDataModelElement('s3', b' ouid='),
       DecimalIntegerValueModelElement('ouid'),
-      FixedDataModelElement('s4', ' ogid='),
+      FixedDataModelElement('s4', b' ogid='),
       DecimalIntegerValueModelElement('ogid'),
-      FixedDataModelElement('s5', ' rdev='),
-# A special major/minor device element could be better here (see above).
-      VariableByteDataModelElement('rdev', '0123456789abcdef:'),
-      FixedDataModelElement('s6', ' nametype=')])
+      FixedDataModelElement('s5', b' rdev='),
+      # A special major/minor device element could be better here (see above).
+      VariableByteDataModelElement('rdev', b'0123456789abcdef:'),
+      FixedDataModelElement('s6', b' nametype=')])
 
   typeBranches['NETFILTER_CFG'] = SequenceModelElement('conf-change', [
-      FixedDataModelElement('s0', ' table='),
-      FixedWordlistDataModelElement('table', ['filter', 'mangle', 'nat']),
-      FixedDataModelElement('s1', ' family='),
+      FixedDataModelElement('s0', b' table='),
+      FixedWordlistDataModelElement('table', [b'filter', b'mangle', b'nat']),
+      FixedDataModelElement('s1', b' family='),
       DecimalIntegerValueModelElement('family'),
-      FixedDataModelElement('s2', ' entries='),
+      FixedDataModelElement('s2', b' entries='),
       DecimalIntegerValueModelElement('entries')
   ])
 
   typeBranches['OBJ_PID'] = SequenceModelElement('objpid', [
-      FixedDataModelElement('s0', ' opid='),
+      FixedDataModelElement('s0', b' opid='),
       DecimalIntegerValueModelElement('opid'),
-      FixedDataModelElement('s1', ' oauid='),
+      FixedDataModelElement('s1', b' oauid='),
       DecimalIntegerValueModelElement(
           'oauid',
           valueSignType=DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL),
-      FixedDataModelElement('s2', ' ouid='),
+      FixedDataModelElement('s2', b' ouid='),
       DecimalIntegerValueModelElement('ouid'),
-      FixedDataModelElement('s3', ' oses='),
+      FixedDataModelElement('s3', b' oses='),
       DecimalIntegerValueModelElement(
           'oses',
           valueSignType=DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL),
-      FixedDataModelElement('s4', ' ocomm='),
+      FixedDataModelElement('s4', b' ocomm='),
       ExecArgumentDataModelElement('ocomm'),
   ])
 
   typeBranches['PATH'] = SequenceModelElement('path', [
-      FixedDataModelElement('s0', ' item='),
+      FixedDataModelElement('s0', b' item='),
       DecimalIntegerValueModelElement('item'),
-      FixedDataModelElement('s1', ' name='),
+      FixedDataModelElement('s1', b' name='),
       ExecArgumentDataModelElement('name'),
       FirstMatchModelElement('fsinfo', [
           inodeInfoModelElement,
-          FixedDataModelElement('noinfo', ' nametype=')]),
+          FixedDataModelElement('noinfo', b' nametype=')]),
       FixedWordlistDataModelElement(
-          'nametype', ['CREATE', 'DELETE', 'NORMAL', 'PARENT', 'UNKNOWN']),
+          'nametype', [b'CREATE', b'DELETE', b'NORMAL', b'PARENT', b'UNKNOWN']),
   ])
 
   typeBranches['PROCTITLE'] = SequenceModelElement('proctitle', [
-      FixedDataModelElement('s1', ' proctitle='),
+      FixedDataModelElement('s1', b' proctitle='),
       ExecArgumentDataModelElement('proctitle')])
 
   typeBranches['SERVICE_START'] = SequenceModelElement('service', [
-      FixedDataModelElement('s0', ' pid='),
+      FixedDataModelElement('s0', b' pid='),
       DecimalIntegerValueModelElement('pid'),
-      FixedDataModelElement('s1', ' uid='),
+      FixedDataModelElement('s1', b' uid='),
       DecimalIntegerValueModelElement('uid'),
-      FixedDataModelElement('s2', ' auid='),
+      FixedDataModelElement('s2', b' auid='),
       DecimalIntegerValueModelElement('auid'),
-      FixedDataModelElement('s3', ' ses='),
+      FixedDataModelElement('s3', b' ses='),
       DecimalIntegerValueModelElement('ses'),
-      FixedDataModelElement('s4', ' msg=\'unit='),
-      DelimitedDataModelElement('unit', ' '),
-      FixedDataModelElement('s5', ' comm="systemd" exe="'),
-      DelimitedDataModelElement('exec', '"'),
-      FixedDataModelElement('s6', '" hostname='),
-      DelimitedDataModelElement('clientname', ' '),
-      FixedDataModelElement('s7', ' addr='),
-      DelimitedDataModelElement('clientip', ' '),
-      FixedDataModelElement('s8', ' terminal='),
+      FixedDataModelElement('s4', b' msg=\'unit='),
+      DelimitedDataModelElement('unit', b' '),
+      FixedDataModelElement('s5', b' comm="systemd" exe="'),
+      DelimitedDataModelElement('exec', b'"'),
+      FixedDataModelElement('s6', b'" hostname='),
+      DelimitedDataModelElement('clientname', b' '),
+      FixedDataModelElement('s7', b' addr='),
+      DelimitedDataModelElement('clientip', b' '),
+      FixedDataModelElement('s8', b' terminal='),
       WhiteSpaceLimitedDataModelElement('terminal'),
-      FixedDataModelElement('s9', ' res='),
+      FixedDataModelElement('s9', b' res='),
       pamStatusWordList,
-      FixedDataModelElement('s10', '\'')
+      FixedDataModelElement('s10', b'\'')
   ])
   typeBranches['SERVICE_STOP'] = typeBranches['SERVICE_START']
 
   typeBranches['SOCKADDR'] = SequenceModelElement('sockaddr', [
-      FixedDataModelElement('s0', ' saddr='),
+      FixedDataModelElement('s0', b' saddr='),
       HexStringModelElement('sockaddr', upperCase=True),
   ])
 
   typeBranches['SYSCALL'] = SequenceModelElement('syscall', [
-      FixedDataModelElement('s0', ' arch='),
+      FixedDataModelElement('s0', b' arch='),
       HexStringModelElement('arch'),
-      FixedDataModelElement('s1', ' syscall='),
+      FixedDataModelElement('s1', b' syscall='),
       DecimalIntegerValueModelElement('syscall'),
       OptionalMatchModelElement('personality', SequenceModelElement('pseq', [
-          FixedDataModelElement('s0', ' per='),
+          FixedDataModelElement('s0', b' per='),
           DecimalIntegerValueModelElement('personality'),
       ])),
       OptionalMatchModelElement('result', SequenceModelElement('rseq', [
-          FixedDataModelElement('s2', ' success='),
-          FixedWordlistDataModelElement('succes', ['no', 'yes']),
-          FixedDataModelElement('s3', ' exit='),
+          FixedDataModelElement('s2', b' success='),
+          FixedWordlistDataModelElement('succes', [b'no', b'yes']),
+          FixedDataModelElement('s3', b' exit='),
           DecimalIntegerValueModelElement(
               'exit',
               valueSignType=DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL),
       ])),
-      FixedDataModelElement('s4', ' a0='),
+      FixedDataModelElement('s4', b' a0='),
       HexStringModelElement('arg0'),
-      FixedDataModelElement('s5', ' a1='),
+      FixedDataModelElement('s5', b' a1='),
       HexStringModelElement('arg1'),
-      FixedDataModelElement('s6', ' a2='),
+      FixedDataModelElement('s6', b' a2='),
       HexStringModelElement('arg2'),
-      FixedDataModelElement('s7', ' a3='),
+      FixedDataModelElement('s7', b' a3='),
       HexStringModelElement('arg3'),
-      FixedDataModelElement('s8', ' items='),
+      FixedDataModelElement('s8', b' items='),
       DecimalIntegerValueModelElement('items'),
-      FixedDataModelElement('s9', ' ppid='),
+      FixedDataModelElement('s9', b' ppid='),
       DecimalIntegerValueModelElement('ppid'),
-      FixedDataModelElement('s10', ' pid='),
+      FixedDataModelElement('s10', b' pid='),
       DecimalIntegerValueModelElement('pid'),
-      FixedDataModelElement('s11', ' auid='),
+      FixedDataModelElement('s11', b' auid='),
       DecimalIntegerValueModelElement('auid'),
-      FixedDataModelElement('s12', ' uid='),
+      FixedDataModelElement('s12', b' uid='),
       DecimalIntegerValueModelElement('uid'),
-      FixedDataModelElement('s13', ' gid='),
+      FixedDataModelElement('s13', b' gid='),
       DecimalIntegerValueModelElement('gid'),
-      FixedDataModelElement('s14', ' euid='),
+      FixedDataModelElement('s14', b' euid='),
       DecimalIntegerValueModelElement('euid'),
-      FixedDataModelElement('s15', ' suid='),
+      FixedDataModelElement('s15', b' suid='),
       DecimalIntegerValueModelElement('suid'),
-      FixedDataModelElement('s16', ' fsuid='),
+      FixedDataModelElement('s16', b' fsuid='),
       DecimalIntegerValueModelElement('fsuid'),
-      FixedDataModelElement('s17', ' egid='),
+      FixedDataModelElement('s17', b' egid='),
       DecimalIntegerValueModelElement('egid'),
-      FixedDataModelElement('s18', ' sgid='),
+      FixedDataModelElement('s18', b' sgid='),
       DecimalIntegerValueModelElement('sgid'),
-      FixedDataModelElement('s19', ' fsgid='),
+      FixedDataModelElement('s19', b' fsgid='),
       DecimalIntegerValueModelElement('fsgid'),
-      FixedDataModelElement('s20', ' tty='),
-      DelimitedDataModelElement('tty', ' '),
-      FixedDataModelElement('s21', ' ses='),
+      FixedDataModelElement('s20', b' tty='),
+      DelimitedDataModelElement('tty', b' '),
+      FixedDataModelElement('s21', b' ses='),
       DecimalIntegerValueModelElement('sesid'),
-      FixedDataModelElement('s22', ' comm='),
+      FixedDataModelElement('s22', b' comm='),
       ExecArgumentDataModelElement('command'),
-      FixedDataModelElement('s23', ' exe="'),
-      DelimitedDataModelElement('executable', '"'),
-      FixedDataModelElement('s24', '" key='),
+      FixedDataModelElement('s23', b' exe="'),
+      DelimitedDataModelElement('executable', b'"'),
+      FixedDataModelElement('s24', b'" key='),
       AnyByteDataModelElement('key')
   ])
 
@@ -391,164 +390,164 @@ via syslog after any standard logging preamble, e.g. from syslog."""
 # audispd, thus emiting yet unknown event types.
 # * type=1327: procitle: see https://www.redhat.com/archives/linux-audit/2014-February/msg00047.html
   typeBranches['UNKNOWN[1327]'] = SequenceModelElement('unknown-proctitle', [
-      FixedDataModelElement('s0', ' proctitle='),
+      FixedDataModelElement('s0', b' proctitle='),
       ExecArgumentDataModelElement('proctitle')
   ])
 
   typeBranches['USER_ACCT'] = SequenceModelElement('useracct', [
-      FixedDataModelElement('s0', ' pid='),
+      FixedDataModelElement('s0', b' pid='),
       DecimalIntegerValueModelElement('pid'),
-      FixedDataModelElement('s1', ' uid='),
+      FixedDataModelElement('s1', b' uid='),
       DecimalIntegerValueModelElement('uid'),
-      FixedDataModelElement('s2', ' auid='),
+      FixedDataModelElement('s2', b' auid='),
       DecimalIntegerValueModelElement('auid'),
-      FixedDataModelElement('s3', ' ses='),
+      FixedDataModelElement('s3', b' ses='),
       DecimalIntegerValueModelElement('ses'),
-      FixedDataModelElement('s4', ' msg=\'op=PAM:accounting acct="'),
-      DelimitedDataModelElement('username', '"'),
-      FixedDataModelElement('s5', '" exe="'),
-      DelimitedDataModelElement('exec', '"'),
-      FixedDataModelElement('s6', '" hostname='),
-      DelimitedDataModelElement('clientname', ' '),
-      FixedDataModelElement('s7', ' addr='),
-      DelimitedDataModelElement('clientip', ' '),
-      FixedDataModelElement('s8', ' terminal='),
+      FixedDataModelElement('s4', b' msg=\'op=PAM:accounting acct="'),
+      DelimitedDataModelElement('username', b'"'),
+      FixedDataModelElement('s5', b'" exe="'),
+      DelimitedDataModelElement('exec', b'"'),
+      FixedDataModelElement('s6', b'" hostname='),
+      DelimitedDataModelElement('clientname', b' '),
+      FixedDataModelElement('s7', b' addr='),
+      DelimitedDataModelElement('clientip', b' '),
+      FixedDataModelElement('s8', b' terminal='),
       WhiteSpaceLimitedDataModelElement('terminal'),
-      FixedDataModelElement('s9', ' res=success\'')
+      FixedDataModelElement('s9', b' res=success\'')
   ])
 
   typeBranches['USER_AUTH'] = SequenceModelElement('userauth', [
-      FixedDataModelElement('s0', ' pid='),
+      FixedDataModelElement('s0', b' pid='),
       DecimalIntegerValueModelElement('pid'),
-      FixedDataModelElement('s1', ' uid='),
+      FixedDataModelElement('s1', b' uid='),
       DecimalIntegerValueModelElement('uid'),
-      FixedDataModelElement('s2', ' auid='),
+      FixedDataModelElement('s2', b' auid='),
       DecimalIntegerValueModelElement('auid'),
-      FixedDataModelElement('s3', ' ses='),
+      FixedDataModelElement('s3', b' ses='),
       DecimalIntegerValueModelElement('ses'),
-      FixedDataModelElement('s4', ' msg=\'op=PAM:authentication acct="'),
-      DelimitedDataModelElement('username', '"'),
-      FixedDataModelElement('s5', '" exe="'),
-      DelimitedDataModelElement('exec', '"'),
-      FixedDataModelElement('s6', '" hostname='),
-      DelimitedDataModelElement('clientname', ' '),
-      FixedDataModelElement('s7', ' addr='),
-      DelimitedDataModelElement('clientip', ' '),
-      FixedDataModelElement('s8', ' terminal='),
+      FixedDataModelElement('s4', b' msg=\'op=PAM:authentication acct="'),
+      DelimitedDataModelElement('username', b'"'),
+      FixedDataModelElement('s5', b'" exe="'),
+      DelimitedDataModelElement('exec', b'"'),
+      FixedDataModelElement('s6', b'" hostname='),
+      DelimitedDataModelElement('clientname', b' '),
+      FixedDataModelElement('s7', b' addr='),
+      DelimitedDataModelElement('clientip', b' '),
+      FixedDataModelElement('s8', b' terminal='),
       WhiteSpaceLimitedDataModelElement('terminal'),
-      FixedDataModelElement('s9', ' res=success\'')
+      FixedDataModelElement('s9', b' res=success\'')
   ])
 
   typeBranches['USER_START'] = SequenceModelElement('userstart', [
-      FixedDataModelElement('s0', ' pid='),
+      FixedDataModelElement('s0', b' pid='),
       DecimalIntegerValueModelElement('pid'),
-      FixedDataModelElement('s1', ' uid='),
+      FixedDataModelElement('s1', b' uid='),
       DecimalIntegerValueModelElement('uid'),
-      FixedDataModelElement('s2', ' auid='),
+      FixedDataModelElement('s2', b' auid='),
       DecimalIntegerValueModelElement('auid'),
-      FixedDataModelElement('s3', ' ses='),
+      FixedDataModelElement('s3', b' ses='),
       DecimalIntegerValueModelElement('ses'),
-      FixedDataModelElement('s4', ' msg=\'op=PAM:session_open acct="'),
-      DelimitedDataModelElement('username', '"'),
-      FixedDataModelElement('s5', '" exe="'),
-      DelimitedDataModelElement('exec', '"'),
-      FixedDataModelElement('s6', '" hostname='),
-      DelimitedDataModelElement('clientname', ' '),
-      FixedDataModelElement('s7', ' addr='),
-      DelimitedDataModelElement('clientip', ' '),
-      FixedDataModelElement('s8', ' terminal='),
+      FixedDataModelElement('s4', b' msg=\'op=PAM:session_open acct="'),
+      DelimitedDataModelElement('username', b'"'),
+      FixedDataModelElement('s5', b'" exe="'),
+      DelimitedDataModelElement('exec', b'"'),
+      FixedDataModelElement('s6', b'" hostname='),
+      DelimitedDataModelElement('clientname', b' '),
+      FixedDataModelElement('s7', b' addr='),
+      DelimitedDataModelElement('clientip', b' '),
+      FixedDataModelElement('s8', b' terminal='),
       WhiteSpaceLimitedDataModelElement('terminal'),
-      FixedDataModelElement('s9', ' res=success\'')
+      FixedDataModelElement('s9', b' res=success\'')
   ])
 
   typeBranches['USER_END'] = SequenceModelElement('userend', [
-      FixedDataModelElement('s0', ' pid='),
+      FixedDataModelElement('s0', b' pid='),
       DecimalIntegerValueModelElement('pid'),
-      FixedDataModelElement('s1', ' uid='),
+      FixedDataModelElement('s1', b' uid='),
       DecimalIntegerValueModelElement('uid'),
-      FixedDataModelElement('s2', ' auid='),
+      FixedDataModelElement('s2', b' auid='),
       DecimalIntegerValueModelElement('auid'),
-      FixedDataModelElement('s3', ' ses='),
+      FixedDataModelElement('s3', b' ses='),
       DecimalIntegerValueModelElement('ses'),
-      FixedDataModelElement('s4', ' msg=\'op=PAM:session_close acct="'),
-      DelimitedDataModelElement('username', '"'),
-      FixedDataModelElement('s5', '" exe="'),
-      DelimitedDataModelElement('exec', '"'),
-      FixedDataModelElement('s6', '" hostname='),
-      DelimitedDataModelElement('clientname', ' '),
-      FixedDataModelElement('s7', ' addr='),
-      DelimitedDataModelElement('clientip', ' '),
-      FixedDataModelElement('s8', ' terminal='),
+      FixedDataModelElement('s4', b' msg=\'op=PAM:session_close acct="'),
+      DelimitedDataModelElement('username', b'"'),
+      FixedDataModelElement('s5', b'" exe="'),
+      DelimitedDataModelElement('exec', b'"'),
+      FixedDataModelElement('s6', b'" hostname='),
+      DelimitedDataModelElement('clientname', b' '),
+      FixedDataModelElement('s7', b' addr='),
+      DelimitedDataModelElement('clientip', b' '),
+      FixedDataModelElement('s8', b' terminal='),
       WhiteSpaceLimitedDataModelElement('terminal'),
-      FixedDataModelElement('s9', ' res=success\'')
+      FixedDataModelElement('s9', b' res=success\'')
   ])
 
   typeBranches['USER_ERR'] = SequenceModelElement('usererr', [
-      FixedDataModelElement('s0', ' pid='),
+      FixedDataModelElement('s0', b' pid='),
       DecimalIntegerValueModelElement('pid'),
-      FixedDataModelElement('s1', ' uid='),
+      FixedDataModelElement('s1', b' uid='),
       DecimalIntegerValueModelElement('uid'),
-      FixedDataModelElement('s2', ' auid='),
+      FixedDataModelElement('s2', b' auid='),
       DecimalIntegerValueModelElement('auid'),
-      FixedDataModelElement('s3', ' ses='),
+      FixedDataModelElement('s3', b' ses='),
       DecimalIntegerValueModelElement('ses'),
-      FixedDataModelElement('s4', ' msg=\'op=PAM:bad_ident acct="?" exe="'),
-      DelimitedDataModelElement('exec', '"'),
-      FixedDataModelElement('s5', '" hostname='),
-      DelimitedDataModelElement('clientname', ' '),
-      FixedDataModelElement('s6', ' addr='),
-      DelimitedDataModelElement('clientip', ' '),
-      FixedDataModelElement('s7', ' terminal='),
+      FixedDataModelElement('s4', b' msg=\'op=PAM:bad_ident acct="?" exe="'),
+      DelimitedDataModelElement('exec', b'"'),
+      FixedDataModelElement('s5', b'" hostname='),
+      DelimitedDataModelElement('clientname', b' '),
+      FixedDataModelElement('s6', b' addr='),
+      DelimitedDataModelElement('clientip', b' '),
+      FixedDataModelElement('s7', b' terminal='),
       WhiteSpaceLimitedDataModelElement('terminal'),
-      FixedDataModelElement('s8', ' res=failed\'')
+      FixedDataModelElement('s8', b' res=failed\'')
   ])
 
   typeBranches['USER_LOGIN'] = SequenceModelElement('userlogin', [
-      FixedDataModelElement('s0', ' pid='),
+      FixedDataModelElement('s0', b' pid='),
       DecimalIntegerValueModelElement('pid'),
-      FixedDataModelElement('s1', ' uid='),
+      FixedDataModelElement('s1', b' uid='),
       DecimalIntegerValueModelElement('uid'),
-      FixedDataModelElement('s2', ' auid='),
+      FixedDataModelElement('s2', b' auid='),
       DecimalIntegerValueModelElement('auid'),
-      FixedDataModelElement('s3', ' ses='),
+      FixedDataModelElement('s3', b' ses='),
       DecimalIntegerValueModelElement('ses'),
-      FixedDataModelElement('s4', ' msg=\'op=login '),
+      FixedDataModelElement('s4', b' msg=\'op=login '),
       FirstMatchModelElement('msgtype', [
-          FixedDataModelElement('loginok', 'id=0'),
+          FixedDataModelElement('loginok', b'id=0'),
           SequenceModelElement('loginfail', [
-              FixedDataModelElement('s0', 'acct='),
+              FixedDataModelElement('s0', b'acct='),
               ExecArgumentDataModelElement('account')
           ])]),
-      FixedDataModelElement('s5', ' exe="'),
-      DelimitedDataModelElement('exec', '"'),
-      FixedDataModelElement('s6', '" hostname='),
-      DelimitedDataModelElement('clientname', ' '),
-      FixedDataModelElement('s7', ' addr='),
-      DelimitedDataModelElement('clientip', ' '),
-      FixedDataModelElement('s8', ' terminal='),
+      FixedDataModelElement('s5', b' exe="'),
+      DelimitedDataModelElement('exec', b'"'),
+      FixedDataModelElement('s6', b'" hostname='),
+      DelimitedDataModelElement('clientname', b' '),
+      FixedDataModelElement('s7', b' addr='),
+      DelimitedDataModelElement('clientip', b' '),
+      FixedDataModelElement('s8', b' terminal='),
       WhiteSpaceLimitedDataModelElement('terminal'),
-      FixedDataModelElement('s9', ' res='),
+      FixedDataModelElement('s9', b' res='),
       pamStatusWordList,
-      FixedDataModelElement('s10', '\'')
+      FixedDataModelElement('s10', b'\'')
   ])
 
   model = SequenceModelElement('audispd', [
-      FixedDataModelElement('sname', 'audispd: '),
+      FixedDataModelElement('sname', b'audispd: '),
       FirstMatchModelElement('msg', [
           ElementValueBranchModelElement(
               'record', SequenceModelElement('preamble', [
-                  FixedDataModelElement('s0', 'type='),
+                  FixedDataModelElement('s0', b'type='),
                   WhiteSpaceLimitedDataModelElement('type'),
-                  FixedDataModelElement('s1', ' msg=audit('),
+                  FixedDataModelElement('s1', b' msg=audit('),
                   DecimalIntegerValueModelElement('time'),
-                  FixedDataModelElement('s0', '.'),
+                  FixedDataModelElement('s0', b'.'),
                   DecimalIntegerValueModelElement('ms'),
-                  FixedDataModelElement('s1', ':'),
+                  FixedDataModelElement('s1', b':'),
                   DecimalIntegerValueModelElement('seq'),
-                  FixedDataModelElement('s2', '):')
+                  FixedDataModelElement('s2', b'):')
               ]),
               'type', typeBranches, defaultBranch=None),
-          FixedDataModelElement('queue-full', 'queue is full - dropping event')
+          FixedDataModelElement('queue-full', b'queue is full - dropping event')
       ])
   ])
   return model

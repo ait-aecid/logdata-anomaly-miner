@@ -1,24 +1,32 @@
-import MatchElement
+"""This module defines a model element for a variable amount of
+bytes."""
+
+from aminer.parsing.MatchElement import MatchElement
 
 class VariableByteDataModelElement:
-  def __init__(self, id, alphabet):
-    self.id=id
-    self.alphabet=alphabet
+  """This class defines a model element  that takes any string that
+  only contains characters of a given alphabet."""
+  def __init__(self, elementId, alphabet):
+    self.elementId = elementId
+    self.alphabet = alphabet
 
   def getChildElements(self):
-    return(None)
+    """Get all possible child model elements of this element.
+    @return None as there are no children of this element."""
+    return None
 
   def getMatchElement(self, path, matchContext):
     """Find the maximum number of bytes matching the given alphabet.
     @return a match when at least one byte was found within alphabet."""
-    data=matchContext.matchData
-    matchLen=0
+    data = matchContext.matchData
+    matchLen = 0
     for testByte in data:
-      if not(testByte in self.alphabet): break
-      matchLen+=1
+      if testByte not in self.alphabet:
+        break
+      matchLen += 1
 
-    if matchLen == 0: return(None)
-    matchData=data[:matchLen]
+    if matchLen == 0:
+      return None
+    matchData = data[:matchLen]
     matchContext.update(matchData)
-    return(MatchElement.MatchElement("%s/%s" % (path, self.id),
-        matchData, matchData, None))
+    return MatchElement("%s/%s" % (path, self.elementId), matchData, matchData, None)

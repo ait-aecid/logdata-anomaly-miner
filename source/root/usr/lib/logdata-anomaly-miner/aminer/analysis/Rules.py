@@ -226,7 +226,7 @@ class PathExistsMatchRule(MatchRule):
     self.matchAction = matchAction
 
   def match(self, logAtom):
-    if logAtom.parserMatch.getMatchDictionary().has_key(self.path):
+    if self.path in logAtom.parserMatch.getMatchDictionary():
       if self.matchAction != None:
         self.matchAction.matchAction(logAtom)
       return True
@@ -460,8 +460,8 @@ class DebugMatchRule(MatchRule):
     self.matchAction = matchAction
 
   def match(self, logAtom):
-    print >>sys.stderr, 'Rules.DebugMatchRule: triggered while ' \
-        'handling "%s"' % (logAtom.parserMatch.matchElement.matchString)
+    print('Rules.DebugMatchRule: triggered while ' \
+        'handling "%s"' % repr(logAtom.parserMatch.matchElement.matchString), file=sys.stderr)
     if self.matchAction != None:
       self.matchAction.matchAction(logAtom)
     return self.debugMatchResult

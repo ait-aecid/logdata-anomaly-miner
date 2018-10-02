@@ -1,3 +1,5 @@
+"""This module defines a parser for kernelmsg."""
+
 from aminer.parsing import AnyByteDataModelElement
 from aminer.parsing import DelimitedDataModelElement
 from aminer.parsing import FirstMatchModelElement
@@ -11,25 +13,25 @@ def getModel():
 
   typeChildren = []
   typeChildren.append(SequenceModelElement('ipv4-martian', [
-      FixedDataModelElement('s0', 'IPv4: martian '),
-      FixedWordlistDataModelElement('direction', ['source', 'destination']),
-      FixedDataModelElement('s1', ' '),
+      FixedDataModelElement('s0', b'IPv4: martian '),
+      FixedWordlistDataModelElement('direction', [b'source', b'destination']),
+      FixedDataModelElement('s1', b' '),
       IpAddressDataModelElement('destination'),
-      FixedDataModelElement('s2', ' from '),
+      FixedDataModelElement('s2', b' from '),
       IpAddressDataModelElement('source'),
-      FixedDataModelElement('s3', ', on dev '),
+      FixedDataModelElement('s3', b', on dev '),
       AnyByteDataModelElement('interface')
   ]))
 
   typeChildren.append(SequenceModelElement('net-llheader', [
-      FixedDataModelElement('s0', 'll header: '),
+      FixedDataModelElement('s0', b'll header: '),
       AnyByteDataModelElement('data')]))
 
   typeChildren.append(AnyByteDataModelElement('unparsed'))
 
-  model=SequenceModelElement('kernel', [
-      FixedDataModelElement('sname', 'kernel: ['),
-      DelimitedDataModelElement('timestamp', ']'),
-      FixedDataModelElement('s0', '] '),
+  model = SequenceModelElement('kernel', [
+      FixedDataModelElement('sname', b'kernel: ['),
+      DelimitedDataModelElement('timestamp', b']'),
+      FixedDataModelElement('s0', b'] '),
       FirstMatchModelElement('msg', typeChildren)])
-  return(model)
+  return model

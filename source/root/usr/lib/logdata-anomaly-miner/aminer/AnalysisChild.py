@@ -18,6 +18,7 @@ from aminer.input.LogStream import LogStream
 from aminer.util import PersistencyUtil
 from aminer.util import SecureOSFunctions
 from aminer.util import TimeTriggeredComponentInterface
+from aminer.util import JsonUtil
 
 class AnalysisContext(object):
   """This class collects information about the current analysis
@@ -79,10 +80,10 @@ class AnalysisContext(object):
     the time trigger class supplied by the component and register
     it for the classes specified in the override list. Use an
     empty list to disable registration."""
-    if (componentName != None) and (self.registeredComponentsByName.has_key(componentName)):
+    if (componentName != None) and (componentName in self.registeredComponentsByName):
       raise Exception('Component with same name already registered')
-    if ((registerTimeTriggerClassOverride != None) and
-        (not isinstance(component, TimeTriggeredComponentInterface))):
+    if (registerTimeTriggerClassOverride != None) and \
+        (not isinstance(component, TimeTriggeredComponentInterface)):
       raise Exception('Requesting override on component not implementing ' \
           'TimeTriggeredComponentInterface')
 
@@ -100,6 +101,7 @@ class AnalysisContext(object):
   def getRegisteredComponentIds(self):
     """Get a list of currently known component IDs."""
     return self.registeredComponents.keys()
+
   def getComponentById(self, idString):
     """Get a component by ID.
     @return None if not found."""
@@ -107,9 +109,11 @@ class AnalysisContext(object):
     if componentInfo is None:
       return None
     return componentInfo[0]
+
   def getRegisteredComponentNames(self):
     """Get a list of currently known component names."""
-    return self.registeredComponentsByName.keys()
+    return list(self.registeredComponentsByName.keys())
+
   def getComponentByName(self, name):
     """Get a component by name.
     @return None if not found."""
@@ -152,7 +156,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
     def gracefulShutdownHandler(_signo, _stackFrame):
       """This is the signal handler function to react on typical
       shutdown signals."""
-      print >>sys.stderr, '%s: caught signal, shutting down' % programName
+      print('%s: caught signal, shutting down' % programName, file=sys.stderr)
       self.runAnalysisLoopFlag = False
     import signal
     signal.signal(signal.SIGHUP, gracefulShutdownHandler)
@@ -184,8 +188,8 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 # Locate the real analysis configuration.
     self.analysisContext.buildAnalysisPipeline()
     if self.analysisContext.atomizerFactory is None:
-      print >>sys.stderr, 'FATAL: buildAnalysisPipeline() did ' \
-          'not initialize atomizerFactory, terminating'
+      print('FATAL: buildAnalysisPipeline() did ' \
+          'not initialize atomizerFactory, terminating', file=sys.stderr)
       return 1
 
     realTimeTriggeredComponents = self.analysisContext.realTimeTriggeredComponents
@@ -204,8 +208,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 # not being able to consume the data yet.
     blockedLogStreams = []
 
-# Every number is larger than None so using this starting value
-# will cause the trigger to be invoked on the first event.
+# Always start when number is None.
     nextRealTimeTriggerTime = None
     nextAnalysisTimeTriggerTime = None
 
@@ -247,7 +250,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 # Interrupting signals, e.g. for shutdown are OK.
         if selectError[0] == errno.EINTR:
           continue
-        print >>sys.stderr, 'Unexpected select result %s' % str(selectError)
+        print('Unexpected select result %s' % str(selectError), file=sys.stderr)
         delayedReturnStatus = 1
         break
       for readFd in readList:
@@ -271,8 +274,8 @@ class AnalysisChild(TimeTriggeredComponentInterface):
           try:
             fdHandlerObject.doReceive()
           except Exception as receiveException:
-            print >>sys.stderr, 'Unclean termination of remote ' \
-                'control: %s' % str(receiveException)
+            print('Unclean termination of remote ' \
+                'control: %s' % str(receiveException), file=sys.stderr)
           if fdHandlerObject.isDead():
             del self.trackedFdsDict[readFd]
 # Reading is only attempted when output buffer was already flushed.
@@ -306,13 +309,13 @@ class AnalysisChild(TimeTriggeredComponentInterface):
           try:
             bufferFlushedFlag = fdHandlerObject.doSend()
           except OSError as sendError:
-            print >>sys.stderr, 'Error sending data via remote ' \
-                'control: %s' % str(sendError)
+            print('Error sending data via remote ' \
+                'control: %s' % str(sendError), file=sys.stderr)
             try:
               fdHandlerObject.terminate()
             except Exception as terminateException:
-              print >>sys.stderr, 'Unclean termination of remote ' \
-                  'control: %s' % str(terminateException)
+              print('Unclean termination of remote ' \
+                  'control: %s' % str(terminateException), file=sys.stderr)
           if bufferFlushedFlag:
             fdHandlerObject.doProcess(self.analysisContext)
           if fdHandlerObject.isDead():
@@ -323,7 +326,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 
 # Handle the real time events.
       realTime = time.time()
-      if realTime >= nextRealTimeTriggerTime:
+      if nextRealTimeTriggerTime is None or realTime >= nextRealTimeTriggerTime:
         nextTriggerOffset = 3600
         for component in realTimeTriggeredComponents:
           nextTriggerRequest = component.doTimer(realTime)
@@ -335,7 +338,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
       analysisTime = self.analysisContext.analysisTime
       if analysisTime is None:
         analysisTime = realTime
-      if analysisTime >= nextAnalysisTimeTriggerTime:
+      if nextAnalysisTimeTriggerTime is None or analysisTime >= nextAnalysisTimeTriggerTime:
         nextTriggerOffset = 3600
         for component in analysisTimeTriggeredComponents:
           nextTriggerRequest = component.doTimer(realTime)
@@ -347,7 +350,6 @@ class AnalysisChild(TimeTriggeredComponentInterface):
     PersistencyUtil.persistAll()
     return delayedReturnStatus
 
-
   def handleMasterControlSocketReceive(self):
     """Receive information from the parent process via the master
     control socket. This method may only be invoked when receiving
@@ -356,20 +358,18 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 # We cannot fail with None here as the socket was in the readList.
     (receivedFd, receivedTypeInfo, annotationData) = \
         SecureOSFunctions.receiveAnnotedFileDescriptor(self.masterControlSocket)
-    if receivedTypeInfo == 'logstream':
+    if receivedTypeInfo == b'logstream':
       repositioningData = self.repositioningDataDict.get(annotationData, None)
       if repositioningData != None:
         del self.repositioningDataDict[annotationData]
       resource = None
-      if annotationData.startswith('file://'):
+      if annotationData.startswith(b'file://'):
         from aminer.input.LogStream import FileLogDataResource
-        resource = FileLogDataResource(
-            annotationData, receivedFd,
+        resource = FileLogDataResource(annotationData, receivedFd, \
             repositioningData=repositioningData)
-      elif annotationData.startswith('unix://'):
+      elif annotationData.startswith(b'unix://'):
         from aminer.input.LogStream import UnixSocketLogDataResource
-        resource = UnixSocketLogDataResource(
-            annotationData, receivedFd)
+        resource = UnixSocketLogDataResource(annotationData, receivedFd)
       else:
         raise Exception('Filedescriptor of unknown type received')
 # Make fd nonblocking.
@@ -377,14 +377,14 @@ class AnalysisChild(TimeTriggeredComponentInterface):
       fcntl.fcntl(resource.getFileDescriptor(), fcntl.F_SETFL, fdFlags|os.O_NONBLOCK)
       logStream = self.logStreamsByName.get(resource.getResourceName())
       if logStream is None:
-        streamAtomizer = self.analysisContext.atomizerFactory.getAtomizerForResource(resource.getResourceName())
+        streamAtomizer = self.analysisContext.atomizerFactory.getAtomizerForResource(
+            resource.getResourceName())
         logStream = LogStream(resource, streamAtomizer)
-        self.trackedFdsDict[resource.getFileDescriptor()] = \
-            logStream
+        self.trackedFdsDict[resource.getFileDescriptor()] = logStream
         self.logStreamsByName[resource.getResourceName()] = logStream
       else:
         logStream.addNextResource(resource)
-    elif receivedTypeInfo == 'remotecontrol':
+    elif receivedTypeInfo == b'remotecontrol':
       if self.remoteControlSocket != None:
         raise Exception('Received another remote control ' \
             'socket: multiple remote control not (yet?) supported.')
@@ -421,7 +421,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
     delta = self.nextPersistTime-triggerTime
     if delta <= 0:
       self.repositioningDataDict = {}
-      for logStreamName, logStream in self.logStreamsByName.iteritems():
+      for logStreamName, logStream in self.logStreamsByName.items():
         repositioningData = logStream.getRepositioningData()
         if repositioningData != None:
           self.repositioningDataDict[logStreamName] = repositioningData
@@ -469,13 +469,13 @@ class AnalysisChildRemoteControlHandler(object):
     to call a do...() method with the same name.
   * put...(): Those methods put a request on the buffers."""
 
-  maxControlPacketSize = 1<<16
+  maxControlPacketSize = 1 << 16
 
   def __init__(self, controlClientSocket):
     self.controlClientSocket = controlClientSocket
     self.remoteControlFd = controlClientSocket.fileno()
-    self.inputBuffer = ''
-    self.outputBuffer = ''
+    self.inputBuffer = b''
+    self.outputBuffer = b''
 
   def mayReceive(self):
     """Check if this handler may receive more requests."""
@@ -487,15 +487,15 @@ class AnalysisChildRemoteControlHandler(object):
     if requestData is None:
       return
     requestType = requestData[4:8]
-    if requestType == 'EEEE':
+    if requestType == b'EEEE':
       execLocals = {'analysisContext': analysisContext}
       jsonRemoteControlResponse = None
       exceptionData = None
       try:
-        jsonRequestData = json.loads(requestData[8:])
-        if ((jsonRequestData is None) or
-            (not isinstance(jsonRequestData, list)) or
-            (len(jsonRequestData) != 2)):
+        jsonRequestData = (json.loads(requestData[8:].decode()))
+        if (jsonRequestData is None) or \
+            (not isinstance(jsonRequestData, list)) or \
+            (len(jsonRequestData) != 2):
           raise Exception('Invalid request data')
         execLocals['remoteControlData'] = jsonRequestData[1]
         exec(jsonRequestData[0], {}, execLocals)
@@ -517,7 +517,7 @@ class AnalysisChildRemoteControlHandler(object):
         minIncludeSize = 0
         minIncludeResponseData = None
         while True:
-          testSize = (maxIncludeSize+minIncludeSize)>>1
+          testSize = (maxIncludeSize+minIncludeSize) >> 1
           if testSize == minIncludeSize:
             break
           emergencyResponseData = json.dumps(['Exception: Response ' \
@@ -529,7 +529,8 @@ class AnalysisChildRemoteControlHandler(object):
             minIncludeResponseData = emergencyResponseData
         jsonResponse = minIncludeResponseData
 # Now size is OK, send the data
-      self.outputBuffer += struct.pack("!I", len(jsonResponse)+8)+'RRRR'+jsonResponse
+      jsonResponse = jsonResponse.encode()
+      self.outputBuffer += struct.pack("!I", len(jsonResponse)+8)+b'RRRR'+jsonResponse
     else:
       raise Exception('Invalid request type %s' % repr(requestType))
 
@@ -570,9 +571,9 @@ class AnalysisChildRemoteControlHandler(object):
     without reading any data and all buffers are empty.
     @throws Exception when unexpected errors occured while receiving
     or shuting down the connection."""
-    data = os.read(self.remoteControlFd, 1<<16)
+    data = os.read(self.remoteControlFd, 1 << 16)
     self.inputBuffer += data
-    if len(data) == 0:
+    if not data:
       self.terminate()
 
   def doSend(self):
@@ -580,28 +581,37 @@ class AnalysisChildRemoteControlHandler(object):
     @return True if output buffer was emptied."""
     sendLength = os.write(self.remoteControlFd, self.outputBuffer)
     if sendLength == len(self.outputBuffer):
-      self.outputBuffer = ''
+      self.outputBuffer = b''
       return True
     self.outputBuffer = self.outputBuffer[sendLength:]
     return False
 
   def putRequest(self, requestType, requestData):
-    """Add a request of given type to the send queue."""
+    """Add a request of given type to the send queue.
+    @param requestType is a byte string denoting the type of the
+    request. Currently only 'EEEE' is supported.
+    @param requestData is a byte string denoting the content of
+    the request."""
+    if not isinstance(requestType, bytes):
+      raise Exception('Request type is not a byte string')
     if len(requestType) != 4:
       raise Exception('Request type has to be 4 bytes long')
+    if not isinstance(requestData, bytes):
+      raise Exception('Request data is not a byte string')
     if len(requestData)+8 > self.maxControlPacketSize:
       raise Exception('Data too large to fit into single packet')
     self.outputBuffer += struct.pack("!I", len(requestData)+8)+requestType+requestData
 
   def putExecuteRequest(self, remoteControlCode, remoteControlData):
     """Add a request to send exception data to the send queue."""
-    remoteControlData = json.dumps([remoteControlCode, remoteControlData])
-    self.putRequest('EEEE', remoteControlData)
+    remoteControlData = json.dumps([JsonUtil.encodeObject(remoteControlCode), \
+            JsonUtil.encodeObject(remoteControlData)])
+    self.putRequest(b'EEEE', remoteControlData.encode())
 
   def addSelectFds(self, inputSelectFdList, outputSelectFdList):
     """Update the file descriptor lists for selecting on read
     and write file descriptors."""
-    if len(self.outputBuffer) != 0:
+    if self.outputBuffer:
       outputSelectFdList.append(self.remoteControlFd)
     else:
       inputSelectFdList.append(self.remoteControlFd)
@@ -612,7 +622,7 @@ class AnalysisChildRemoteControlHandler(object):
 # Avoid accidential reuse.
     self.controlClientSocket = None
     self.remoteControlFd = -1
-    if (len(self.inputBuffer) != 0) or (len(self.outputBuffer) != 0):
+    if self.inputBuffer or self.outputBuffer:
       raise Exception('Unhandled input data')
 
   def isDead(self):

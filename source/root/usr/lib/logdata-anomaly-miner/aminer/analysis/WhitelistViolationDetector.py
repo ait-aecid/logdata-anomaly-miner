@@ -1,4 +1,5 @@
-import datetime
+"""This module defines a detector for log atoms not matching
+any whitelisted rule."""
 
 from aminer.input import AtomHandlerInterface
 
@@ -14,8 +15,8 @@ class WhitelistViolationDetector(AtomHandlerInterface):
     """Initialize the detector.
     @param whitelistRules list of rules executed in same way as
     inside Rules.OrMatchRule."""
-    self.whitelistRules=whitelistRules
-    self.anomalyEventHandlers=anomalyEventHandlers
+    self.whitelistRules = whitelistRules
+    self.anomalyEventHandlers = anomalyEventHandlers
 
   def receiveAtom(self, logAtom):
     """Receive on parsed atom and the information about the parser
@@ -23,8 +24,9 @@ class WhitelistViolationDetector(AtomHandlerInterface):
     @param logAtom atom with parsed data to check
     @return True when logAtom is whitelisted, False otherwise."""
     for rule in self.whitelistRules:
-      if rule.match(logAtom): return(True)
+      if rule.match(logAtom):
+        return True
     for listener in self.anomalyEventHandlers:
-      listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
+      listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
           'No whitelisting for current atom', [logAtom.rawData], logAtom, self)
-    return(False)
+    return False

@@ -22,9 +22,9 @@ class DateTimeModelElement(ModelElementInterface):
       startYear=None, maxTimeJumpSeconds=86400):
     """Create a DateTimeModelElement to parse dates using a custom,
     timezone and locale-aware implementation similar to strptime.
-    @param dateFormat the date format for parsing, see Python
-    strptime specification for available formats. Supported format
-    specifiers are:
+    @param dateFormat, is a byte string that represents the date format for
+    parsing, see Python strptime specification for available formats.
+    Supported format specifiers are:
     * %b: month name in current locale
     * %d: day in month, can be space or zero padded when followed
       by separator or at end of string.
@@ -74,43 +74,43 @@ class DateTimeModelElement(ModelElementInterface):
     dateFormatTypeSet = set()
     scanPos = 0
     while scanPos < len(dateFormat):
-      nextParamPos = dateFormat.find('%', scanPos)
+      nextParamPos = dateFormat.find(b'%', scanPos)
       if nextParamPos < 0:
         nextParamPos = len(dateFormat)
       newElement = None
       if nextParamPos != scanPos:
         newElement = dateFormat[scanPos:nextParamPos]
       else:
-        paramTypeCode = dateFormat[nextParamPos+1]
+        paramTypeCode = dateFormat[nextParamPos+1:nextParamPos+2]
         nextParamPos = scanPos+2
-        if paramTypeCode == '%':
-          newElement = '%'
-        elif paramTypeCode == 'b':
+        if paramTypeCode == b'%':
+          newElement = b'%'
+        elif paramTypeCode == b'b':
           import calendar
           nameDict = {}
           for monthPos in range(1, 13):
-            nameDict[calendar.month_name[monthPos][:3]] = monthPos
+            nameDict[calendar.month_name[monthPos][:3].encode()] = monthPos
           newElement = (1, 3, nameDict)
-        elif paramTypeCode == 'd':
+        elif paramTypeCode == b'd':
           newElement = (2, 2, int)
-        elif paramTypeCode == 'f':
+        elif paramTypeCode == b'f':
           newElement = (6, -1, DateTimeModelElement.parseFraction)
-        elif paramTypeCode == 'H':
+        elif paramTypeCode == b'H':
           newElement = (3, 2, int)
-        elif paramTypeCode == 'M':
+        elif paramTypeCode == b'M':
           newElement = (4, 2, int)
-        elif paramTypeCode == 'm':
+        elif paramTypeCode == b'm':
           newElement = (1, 2, int)
-        elif paramTypeCode == 'S':
+        elif paramTypeCode == b'S':
           newElement = (5, 2, int)
-        elif paramTypeCode == 's':
+        elif paramTypeCode == b's':
           newElement = (7, -1, int)
-        elif paramTypeCode == 'Y':
+        elif paramTypeCode == b'Y':
           newElement = (0, 4, int)
         else:
           raise Exception('Unknown dateformat specifier %s' % repr(paramTypeCode))
-      if isinstance(newElement, str):
-        if (len(dateFormatParts) > 0) and (isinstance(dateFormatParts[-1], str)):
+      if isinstance(newElement, bytes):
+        if dateFormatParts and (isinstance(dateFormatParts[-1], bytes)):
           dateFormatParts[-1] += newElement
         else:
           dateFormatParts.append(newElement)
@@ -142,7 +142,7 @@ class DateTimeModelElement(ModelElementInterface):
     result = [None, None, None, None, None, None, None, None]
     for partPos in range(0, len(self.dateFormatParts)):
       dateFormatPart = self.dateFormatParts[partPos]
-      if isinstance(dateFormatPart, str):
+      if isinstance(dateFormatPart, bytes):
         if not matchContext.matchData[parsePos:].startswith(dateFormatPart):
           return None
         parsePos += len(dateFormatPart)
@@ -154,7 +154,7 @@ class DateTimeModelElement(ModelElementInterface):
 # followed by a separator string.
         if (partPos+1) < len(self.dateFormatParts):
           nextPart = self.dateFormatParts[partPos+1]
-          if isinstance(nextPart, str):
+          if isinstance(nextPart, bytes):
             endPos = matchContext.matchData.find(nextPart, parsePos)
             if endPos < 0:
               return None
@@ -247,11 +247,11 @@ class DateTimeModelElement(ModelElementInterface):
               parsedDateTime = nextYearDateTime
               totalSeconds = nextYearTotalSeconds
               self.lastParsedSeconds = totalSeconds
-              print >>sys.stderr, 'WARNING: DateTimeModelElement unqualified ' \
+              print('WARNING: DateTimeModelElement unqualified ' \
                   'timestamp year wraparound detected from %s to %s' % (
                       datetime.datetime.fromtimestamp(
                           self.lastParsedSeconds, self.timeZone).isoformat(),
-                      parsedDateTime.isoformat())
+                      parsedDateTime.isoformat()), file=sys.stderr)
             else:
               lastYearDateTime = parsedDateTime.replace(self.startYear-1)
               delta = lastYearDateTime-self.epochStartTime
@@ -262,10 +262,10 @@ class DateTimeModelElement(ModelElementInterface):
                 self.lastParsedSeconds = totalSeconds
               else:
 # None of both seems correct, just report that.
-                print >>sys.stderr, 'WARNING: DateTimeModelElement ' \
+                print('WARNING: DateTimeModelElement ' \
                     'time inconsistencies parsing %s, expecting value ' \
                     'around %d. Check your settings!' % (
-                        dateStr, self.lastParsedSeconds)
+                        repr(dateStr), self.lastParsedSeconds), file=sys.stderr)
 
 # We discarded the parsedDateTime microseconds beforehand, use
 # the full float value here instead of the rounded integer.

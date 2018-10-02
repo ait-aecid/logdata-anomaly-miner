@@ -145,8 +145,7 @@ def buildAnalysisPipeline(analysisContext):
 # Include the e-mail notification handler only if the configuration
 # parameter was set.
   from aminer.events import DefaultMailNotificationEventHandler
-  if analysisContext.aminerConfig.configProperties.has_key(
-      DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS):
+  if DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS in analysisContext.aminerConfig.configProperties:
     mailNotificationHandler = DefaultMailNotificationEventHandler(
         analysisContext.aminerConfig)
     analysisContext.registerComponent(

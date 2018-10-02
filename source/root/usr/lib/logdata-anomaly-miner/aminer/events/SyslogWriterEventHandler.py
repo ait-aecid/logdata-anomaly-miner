@@ -1,3 +1,6 @@
+"""This module defines an event handler that prints data to
+a local syslog instance."""
+
 import io
 import os
 import syslog
@@ -12,36 +15,36 @@ class SyslogWriterEventHandler(EventHandlerInterface):
   log data processing loops, you will flood your syslog and probably
   fill up your disks."""
   def __init__(self, aminerConfig, instanceName='aminer'):
-    self.instanceName=instanceName
-    syslog.openlog('%s[%d]' % (self.instanceName, os.getpid()),
+    self.instanceName = instanceName
+    syslog.openlog('%s[%d]' % (self.instanceName, os.getpid()), \
         syslog.LOG_INFO, syslog.LOG_DAEMON)
     syslog.syslog(syslog.LOG_INFO, 'Syslog logger initialized')
-    self.bufferStream=io.BytesIO()
-    self.eventWriter=StreamPrinterEventHandler.StreamPrinterEventHandler(
+    self.bufferStream = io.BytesIO()
+    self.eventWriter = StreamPrinterEventHandler.StreamPrinterEventHandler(
         None, self.bufferStream)
-    self.eventId=0
+    self.eventId = 0
 
   def receiveEvent(self, eventType, eventMessage, sortedLogLines,
-      eventData, eventSource):
+                   eventData, eventSource):
     """Receive information about a detected even and forward it
     to syslog."""
     self.bufferStream.seek(0)
     self.bufferStream.truncate(0)
-    self.eventWriter.receiveEvent(eventType, eventMessage, sortedLogLines,
+    self.eventWriter.receiveEvent(eventType, eventMessage, sortedLogLines, \
         eventData, eventSource)
-    eventData=self.bufferStream.getvalue()
-    currentEventId=self.eventId
-    self.eventId+=1
-    serial=0
+    eventData = self.bufferStream.getvalue()
+    currentEventId = self.eventId
+    self.eventId += 1
+    serial = 0
     for dataLine in eventData.strip().split('\n'):
 # Python syslog is very ugly if lines are too long, so break them
 # down.
-      while len(dataLine)!=0:
-        message=None
-        if serial==0:
-          message='[%d] %s' % (currentEventId, dataLine[:800])
+      while dataLine:
+        message = None
+        if serial == 0:
+          message = '[%d] %s' % (currentEventId, dataLine[:800])
         else:
-          message='[%d-%d] %s' % (currentEventId, serial, dataLine[:800])
-        dataLine=dataLine[800:]
+          message = '[%d-%d] %s' % (currentEventId, serial, dataLine[:800])
+        dataLine = dataLine[800:]
         syslog.syslog(syslog.LOG_INFO, message)
-        serial+=1
+        serial += 1

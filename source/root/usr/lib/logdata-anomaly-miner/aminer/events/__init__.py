@@ -1,7 +1,7 @@
-# This file contains interface definition useful implemented by
-# classes in this directory and for use from code outside this
-# directory. All classes are defined in separate files, only the
-# namespace references are added here to simplify the code.
+"""This file contains interface definition useful implemented by
+classes in this directory and for use from code outside this
+directory. All classes are defined in separate files, only the
+namespace references are added here to simplify the code."""
 
 class EventHandlerInterface:
   """This is the common interface of all components that can be
@@ -46,7 +46,7 @@ class EventSourceInterface:
 # Add also the namespace references to classes defined in this
 # directory.
 
-from DefaultMailNotificationEventHandler import DefaultMailNotificationEventHandler
-from StreamPrinterEventHandler import StreamPrinterEventHandler
-from SyslogWriterEventHandler import SyslogWriterEventHandler
-from Utils import VolatileLogarithmicBackoffEventHistory
+from aminer.events.DefaultMailNotificationEventHandler import DefaultMailNotificationEventHandler
+from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
+from aminer.events.SyslogWriterEventHandler import SyslogWriterEventHandler
+from aminer.events.Utils import VolatileLogarithmicBackoffEventHistory

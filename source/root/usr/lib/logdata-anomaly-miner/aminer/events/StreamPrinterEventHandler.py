@@ -1,11 +1,10 @@
-import email
-import os
-import subprocess
+"""This module defines an event handler that prints data to
+a stream."""
+
 import sys
-import time
 
 from aminer.events import EventHandlerInterface
-from aminer.input import LogAtom
+from aminer.input.LogAtom import LogAtom
 
 
 class StreamPrinterEventHandler(EventHandlerInterface):
@@ -13,21 +12,21 @@ class StreamPrinterEventHandler(EventHandlerInterface):
 just print out data about the event to a stream, by default this
 is stdout"""
   def __init__(self, aminerConfig, stream=sys.stdout):
-    self.stream=stream
+    self.stream = stream
 
   def receiveEvent(self, eventType, eventMessage, sortedLogLines, eventData,
-      eventSource):
+                   eventSource):
     """Receive information about a detected event."""
-    message='%s (%d lines)\n' % (eventMessage, len(sortedLogLines))
+    message = '%s (%d lines)\n' % (eventMessage, len(sortedLogLines))
     for line in sortedLogLines:
-      message+='  '+line+'\n'
-    if eventData!=None:
+      message += '  '+repr(line)[2:-1]+'\n'
+    if eventData is not None:
       if isinstance(eventData, LogAtom):
-        message+='  [%s/%s]' % (eventData.getTimestamp(), eventData.source)
-        if eventData.parserMatch!=None:
-          message+=' '+eventData.parserMatch.matchElement.annotateMatch('')+'\n'
+        message += '  [%s/%s]' % (eventData.getTimestamp(), eventData.source)
+        if eventData.parserMatch is not None:
+          message += ' '+eventData.parserMatch.matchElement.annotateMatch('')+'\n'
       else:
-        message+='  '+str(eventData)+'\n'
-    print >>self.stream, '%s' % message
+        message += '  '+repr(eventData)+'\n'
+    print('%s' % message, file=self.stream)
     self.stream.flush()
     return

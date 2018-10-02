@@ -1,95 +1,105 @@
+"""This module defines functions for reading and writing files
+in a secure way."""
+
 import errno
-import json
 import os
 import sys
 import time
 
-import SecureOSFunctions
+from aminer.util import SecureOSFunctions
+from aminer.util import JsonUtil
 
 # Have a registry of all persistable components. Those might be
 # happy to be invoked before python process is terminating.
-persistableComponents=[]
+persistableComponents = []
+
 def addPersistableComponent(component):
+  """Add a component to the registry of all persistable components."""
   persistableComponents.append(component)
 
 def openPersistenceFile(fileName, flags):
   """This function opens the given persistence file. When O_CREAT
   was specified, the function will attempt to create the directories
   too."""
+  if isinstance(fileName, str):
+    fileName = fileName.encode()
   try:
-    fd=SecureOSFunctions.secureOpenFile(fileName, flags)
-    return(fd)
+    fd = SecureOSFunctions.secureOpenFile(fileName, flags)
+    return fd
   except OSError as openOsError:
-    if ((flags&os.O_CREAT)==0) or (openOsError.errno!=errno.ENOENT):
+    if ((flags&os.O_CREAT) == 0) or (openOsError.errno != errno.ENOENT):
       raise openOsError
 
 # Find out, which directory is missing by stating our way up.
-  dirNameLength=fileName.rfind('/')
-  if(dirNameLength>0): os.makedirs(fileName[:dirNameLength])
-  return(SecureOSFunctions.secureOpenFile(fileName, flags))
+  dirNameLength = fileName.rfind(b'/')
+  if dirNameLength > 0:
+    os.makedirs(fileName[:dirNameLength])
+  return SecureOSFunctions.secureOpenFile(fileName, flags)
 
 def createTemporaryPersistenceFile(fileName):
   """Create a temporary file within persistence directory to write
   new persistence data to it. Thus the old data is not modified,
   any error creating or writing the file will not harm the old
   state."""
-  fd=None
+  fd = None
   while True:
 # FIXME: This should use O_TMPFILE, but not yet available. That would
 # obsolete the loop also.
-    fd=openPersistenceFile('%s.tmp-%f' % (fileName, time.time()), os.O_WRONLY|os.O_CREAT|os.O_EXCL)
+    fd = openPersistenceFile('%s.tmp-%f' % (fileName, time.time()), \
+      os.O_WRONLY|os.O_CREAT|os.O_EXCL)
     break
-  return(fd)
+  return fd
 
-noSecureLinkUnlinkAtWarnOnceFlag=True
+noSecureLinkUnlinkAtWarnOnceFlag = True
 def replacePersistenceFile(fileName, newFileHandle):
   """Replace the named file with the file refered by the handle."""
   global noSecureLinkUnlinkAtWarnOnceFlag
   if noSecureLinkUnlinkAtWarnOnceFlag:
-    print >>sys.stderr, 'WARNING: SECURITY: unsafe unlink (unavailable unlinkat/linkat should be used, but not available in python)'
-    noSecureLinkUnlinkAtWarnOnceFlag=False
+    print('WARNING: SECURITY: unsafe unlink (unavailable unlinkat/linkat should be used, but \
+      not available in python)', file=sys.stderr)
+    noSecureLinkUnlinkAtWarnOnceFlag = False
   try:
     os.unlink(fileName)
   except OSError as openOsError:
-    if openOsError.errno!=errno.ENOENT:
+    if openOsError.errno != errno.ENOENT:
       raise openOsError
 
-  tmpFileName=os.readlink('/proc/self/fd/%d' % newFileHandle)
+  tmpFileName = os.readlink('/proc/self/fd/%d' % newFileHandle)
   os.link(tmpFileName, fileName)
   os.unlink(tmpFileName)
 
 def persistAll():
+  """Persist all persistable components in the registry."""
   for component in persistableComponents:
     component.doPersist()
 
 def loadJson(fileName):
   """Load persistency data from file.
   @return None if file did not yet exist."""
-  persistenceData=None
+  persistenceData = None
   try:
-    persistenceFileHandle=openPersistenceFile(fileName,
-        os.O_RDONLY|os.O_NOFOLLOW)
-    persistenceData=os.read(persistenceFileHandle,
-        os.fstat(persistenceFileHandle).st_size)
+    persistenceFileHandle = openPersistenceFile(fileName, os.O_RDONLY|os.O_NOFOLLOW)
+    persistenceData = os.read(persistenceFileHandle, os.fstat(persistenceFileHandle).st_size)
+    persistenceData = str(persistenceData, 'utf-8')
     os.close(persistenceFileHandle)
   except OSError as openOsError:
-    if openOsError.errno!=errno.ENOENT:
+    if openOsError.errno != errno.ENOENT:
       raise openOsError
-    return(None)
+    return None
 
-  result=None
+  result = None
   try:
-    result=json.loads(persistenceData)
+    result = JsonUtil.loadJson(persistenceData)
   except ValueError as valueError:
     raise Exception('Corrupted data in %s' % fileName, valueError)
 
-  return(result)
+  return result
 
 
 def storeJson(fileName, objectData):
   """Store persistency data to file."""
-  persistenceData=json.dumps(objectData)
-  fd=createTemporaryPersistenceFile(fileName)
-  os.write(fd, persistenceData)
+  persistenceData = JsonUtil.dumpAsJson(objectData)
+  fd = createTemporaryPersistenceFile(fileName)
+  os.write(fd, bytes(persistenceData, 'utf-8'))
   replacePersistenceFile(fileName, fd)
   os.close(fd)

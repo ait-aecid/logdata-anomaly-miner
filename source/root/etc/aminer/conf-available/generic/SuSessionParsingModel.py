@@ -1,3 +1,5 @@
+"""This module defines a parser for susession."""
+
 from aminer.parsing import DecimalIntegerValueModelElement
 from aminer.parsing import DelimitedDataModelElement
 from aminer.parsing import FirstMatchModelElement
@@ -11,40 +13,41 @@ def getModel(userNameModel=None):
   """This function defines how to parse a su session information message
 after any standard logging preamble, e.g. from syslog."""
 
-  if userNameModel == None:
-    userNameModel=VariableByteDataModelElement('user', '0123456789abcdefghijklmnopqrstuvwxyz.-')
-  srcUserNameModel=VariableByteDataModelElement('srcuser', '0123456789abcdefghijklmnopqrstuvwxyz.-')
+  if userNameModel is None:
+    userNameModel = VariableByteDataModelElement('user', b'0123456789abcdefghijklmnopqrstuvwxyz.-')
+  srcUserNameModel = VariableByteDataModelElement('srcuser', \
+          b'0123456789abcdefghijklmnopqrstuvwxyz.-')
 
-  typeChildren=[]
+  typeChildren = []
   typeChildren.append(SequenceModelElement('su-good', [
-      FixedDataModelElement('s0', 'Successful su for '),
+      FixedDataModelElement('s0', b'Successful su for '),
       userNameModel,
-      FixedDataModelElement('s1', ' by '),
+      FixedDataModelElement('s1', b' by '),
       srcUserNameModel]))
 
   typeChildren.append(SequenceModelElement('su-good', [
-      FixedDataModelElement('s0', '+ '),
-      DelimitedDataModelElement('terminal', ' '),
-      FixedDataModelElement('s1', ' '),
+      FixedDataModelElement('s0', b'+ '),
+      DelimitedDataModelElement('terminal', b' '),
+      FixedDataModelElement('s1', b' '),
       srcUserNameModel,
-      FixedDataModelElement('s2', ':'),
+      FixedDataModelElement('s2', b':'),
       userNameModel]))
 
   typeChildren.append(SequenceModelElement('pam', [
-      FixedDataModelElement('s0', 'pam_unix(su:session): session '),
-      FixedWordlistDataModelElement('change', ['opened', 'closed']),
-      FixedDataModelElement('s1', ' for user '),
+      FixedDataModelElement('s0', b'pam_unix(su:session): session '),
+      FixedWordlistDataModelElement('change', [b'opened', b'closed']),
+      FixedDataModelElement('s1', b' for user '),
       userNameModel,
-      OptionalMatchModelElement('openby',
+      OptionalMatchModelElement('openby', \
           SequenceModelElement('userinfo', [
-              FixedDataModelElement('s0', ' by (uid='),
+              FixedDataModelElement('s0', b' by (uid='),
               DecimalIntegerValueModelElement('uid'),
-              FixedDataModelElement('s1', ')')]))
+              FixedDataModelElement('s1', b')')]))
       ]))
 
-  model=SequenceModelElement('su', [
-      FixedDataModelElement('sname', 'su['),
+  model = SequenceModelElement('su', [
+      FixedDataModelElement('sname', b'su['),
       DecimalIntegerValueModelElement('pid'),
-      FixedDataModelElement('s0', ']: '),
+      FixedDataModelElement('s0', b']: '),
       FirstMatchModelElement('msg', typeChildren)])
-  return(model)
+  return model

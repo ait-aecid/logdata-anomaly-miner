@@ -1,5 +1,5 @@
-# This file collects various classes useful to filter and correct
-# the timestamp associated with a received parsed atom.
+"""This file collects various classes useful to filter and correct
+the timestamp associated with a received parsed atom."""
 
 from aminer.input import AtomHandlerInterface
 
@@ -10,24 +10,24 @@ class SimpleMonotonicTimestampAdjust(AtomHandlerInterface):
   timestamp of this atom is adjusted to the largest value seen,
   otherwise the largest value seen is updated."""
   def __init__(self, subhandlerList, stopWhenHandledFlag=False):
-    self.subhandlerList=subhandlerList
-    self.stopWhenHandledFlag=stopWhenHandledFlag
-    self.latestTimestampSeen=0
+    self.subhandlerList = subhandlerList
+    self.stopWhenHandledFlag = stopWhenHandledFlag
+    self.latestTimestampSeen = 0
 
   def receiveAtom(self, logAtom):
     """Pass the atom to the subhandlers.
     @return false when no subhandler was able to handle the atom."""
-    timestamp=logAtom.getTimestamp()
-    if timestamp<self.latestTimestampSeen:
+    timestamp = logAtom.getTimestamp()
+    if timestamp < self.latestTimestampSeen:
       logAtom.setTimestamp(self.latestTimestampSeen)
     else:
-      self.latestTimestampSeen=timestamp
+      self.latestTimestampSeen = timestamp
 
-    result=False
+    result = False
     for handler in self.subhandlerList:
-      handlerResult=handler.receiveAtom(logAtom)
-      if handlerResult==True:
-        result=True
+      handlerResult = handler.receiveAtom(logAtom)
+      if handlerResult is True:
+        result = True
         if self.stopWhenHandledFlag:
           break
-    return(result)
+    return result

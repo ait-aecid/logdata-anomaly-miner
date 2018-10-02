@@ -1,4 +1,5 @@
-#!/usr/bin/python2 -BEsStt
+#!/usr/bin/python3 -BbbEIsSttW all
+
 """This tool allows to connect to a remote control socket, send
 requests and retrieve the responses. To allow remote use of this
 tool, e.g. via SSH forwarding, the remote control address can
@@ -28,7 +29,7 @@ while argPos < len(sys.argv):
 
   if paramName == '--ControlSocket':
     if remoteControlSocketName != None:
-      print >>sys.stderr, '%s: %s parameter given twice' % (sys.argv[0], paramName)
+      print('%s: %s parameter given twice' % (sys.argv[0], paramName))
       sys.exit(1)
     remoteControlSocketName = sys.argv[argPos]
     argPos += 1
@@ -38,23 +39,23 @@ while argPos < len(sys.argv):
     argPos += 1
     continue
   if paramName == '--Exec':
-    commandList.append((sys.argv[argPos], remoteControlData))
+    commandList.append((sys.argv[argPos].encode(), remoteControlData))
     argPos += 1
     continue
   if paramName == '--ExecFile':
     if not os.path.exists(sys.argv[argPos]):
-      print >>sys.stderr, 'File %s does not exit' % sys.argv[argPos]
+      print('File %s does not exit' % sys.argv[argPos])
       sys.exit(1)
-    execFile = file(sys.argv[argPos], 'rb')
-    execData = execFile.read()
-    execFile.close()
+    execData = None
+    with open(sys.argv[argPos], 'rb') as execFile:
+      execData = execFile.read()
     commandList.append((execData, remoteControlData))
     argPos += 1
     continue
   if paramName == '--Help':
     if len(sys.argv) != 2:
-      print >>sys.stderr, 'Ignoring all other arguments with --Help'
-    print """Usage: %s [arguments]
+      print('Ignoring all other arguments with --Help')
+    print("""Usage: %s [arguments]
   --ControlSocket [socketpath]: when given, use nonstandard control socket.
   --Data [data]: provide this json serialized data within execution
     environment as 'remoteControlData' (see man page).
@@ -64,29 +65,29 @@ while argPos < len(sys.argv):
     in same way as if content would have been used with "--Exec".
   --Help: this output
   --StringResponse: if set, print the response just as string
-    instead of passing it to repr.""" % sys.argv[0]
+    instead of passing it to repr.""" % sys.argv[0])
     sys.exit(0)
   if paramName == '--StringResponse':
     stringResponseFlag = True
     continue
 
-  print >>sys.stderr, 'Unknown parameter "%s", use --Help for overview' % paramName
+  print('Unknown parameter "%s", use --Help for overview' % paramName)
   sys.exit(1)
 
 if remoteControlSocketName is None:
   remoteControlSocketName = '/var/run/aminer-remote.socket'
 
-if len(commandList) == 0:
-  print >>sys.stderr, 'No commands given, use --Exec [cmd]'
+if not commandList:
+  print('No commands given, use --Exec [cmd]')
   sys.exit(1)
 
 remoteControlSocket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 try:
   remoteControlSocket.connect(remoteControlSocketName)
 except socket.error as connectException:
-  print >>sys.stderr, 'Failed to connect to socket %s, AMiner ' \
+  print('Failed to connect to socket %s, AMiner ' \
       'might not be running or remote control is disabled in ' \
-      'configuration: %s' % (remoteControlSocketName, str(connectException))
+      'configuration: %s' % (remoteControlSocketName, str(connectException)))
   sys.exit(1)
 remoteControlSocket.setblocking(1)
 
@@ -101,17 +102,17 @@ for remoteControlCode, remoteControlData in commandList:
     controlHandler.doReceive()
   requestData = controlHandler.doGet()
   requestType = requestData[4:8]
-  if requestType == 'RRRR':
+  if requestType == b'RRRR':
     try:
       remoteData = json.loads(requestData[8:])
       if remoteData[0] != None:
-        print >>sys.stderr, 'Remote execution exception:\n%s' % remoteData[0]
+        print('Remote execution exception:\n%s' % remoteData[0])
       if stringResponseFlag:
-        print 'Remote execution response: %s' % str(remoteData[1])
+        print('Remote execution response: %s' % str(remoteData[1]))
       else:
-        print 'Remote execution response: %s' % repr(remoteData[1])
+        print('Remote execution response: %s' % repr(remoteData[1]))
     except:
-      print >>sys.stderr, 'Failed to process response %s' % repr(requestData)
+      print('Failed to process response %s' % repr(requestData))
       traceback.print_exc()
   else:
     raise Exception('Invalid request type %s' % repr(requestType))

@@ -3,7 +3,7 @@
 import base64
 
 from aminer.parsing import ModelElementInterface
-from aminer.parsing import MatchElement
+from aminer.parsing.MatchElement import MatchElement
 
 class Base64StringModelElement(ModelElementInterface):
   """This class just tries to strip off as many base64 bytes as
@@ -41,6 +41,6 @@ class Base64StringModelElement(ModelElementInterface):
 
     matchString = data[:matchLen]
     matchContext.update(matchString)
-    return MatchElement.MatchElement(
+    return MatchElement(
         "%s/%s" % (path, self.pathId), matchString,
         base64.b64decode(matchString), None)

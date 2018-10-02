@@ -1,21 +1,27 @@
+"""This module defines a model element that allows branches. The
+first matching branch is taken."""
+
 class FirstMatchModelElement:
   """This class defines a model element to return the match from
   the the first matching child model within a given list."""
-  def __init__(self, id, children):
-    self.id=id
-    self.children=children
-    if (children == None) or (None in children): raise Exception('Invalid children list')
+  def __init__(self, elementId, children):
+    self.elementId = elementId
+    self.children = children
+    if (children is None) or (None in children):
+      raise Exception('Invalid children list')
 
   def getChildElements(self):
-    return(children)
+    """Get all possible child model elements of this element."""
+    return self.children
 
   def getMatchElement(self, path, matchContext):
     """@return None when there is no match, MatchElement otherwise."""
-    currentPath="%s/%s" % (path, self.id)
+    currentPath = "%s/%s" % (path, self.elementId)
 
-    matchData=matchContext.matchData
+    matchData = matchContext.matchData
     for childElement in self.children:
-      childMatch=childElement.getMatchElement(currentPath, matchContext)
-      if childMatch != None: return(childMatch)
-      matchContext.matchData=matchData
-    return(None)
+      childMatch = childElement.getMatchElement(currentPath, matchContext)
+      if childMatch != None:
+        return childMatch
+      matchContext.matchData = matchData
+    return None

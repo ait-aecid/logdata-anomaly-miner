@@ -1,3 +1,5 @@
+"""This module defines a matching parser model element."""
+
 from collections import deque
 
 class ParserMatch:
@@ -14,29 +16,31 @@ class ParserMatch:
     information about the parsing process, e.g. when parsing produced
     warnings. The data is specific for the source producing the
     match."""
-    self.matchElement=matchElement
-    self.parsingProcessData=parsingProcessData
-    self.matchDictionary=None
-
+    self.matchElement = matchElement
+    self.parsingProcessData = parsingProcessData
+    self.matchDictionary = None
 
   def getMatchElement(self):
-    return(self.matchElement)
-
+    """Return the matching element."""
+    return self.matchElement
 
   def getMatchDictionary(self):
-    if self.matchDictionary!=None: return(self.matchDictionary)
-    stack=deque()
+    """Return a dictionary of all children matches."""
+    if self.matchDictionary is not None:
+      return self.matchDictionary
+    stack = deque()
     stack.append([self.matchElement])
-    dict={}
-    while(len(stack)):
-      matchList=stack.pop()
+    resultDict = {}
+    while stack:
+      matchList = stack.pop()
       for testMatch in matchList:
-        dict[testMatch.path]=testMatch
-        children=testMatch.children
-        if (children!=None) and (len(children)!=0): stack.append(children)
-    self.matchDictionary=dict
-    return(dict)
+        resultDict[testMatch.path] = testMatch
+        children = testMatch.children
+        if (children is not None) and children:
+          stack.append(children)
+    self.matchDictionary = resultDict
+    return resultDict
 
 
   def __str__(self):
-    return('ParserMatch: %s' % (self.matchElement.annotateMatch('  ')))
+    return 'ParserMatch: %s' % (self.matchElement.annotateMatch('  '))

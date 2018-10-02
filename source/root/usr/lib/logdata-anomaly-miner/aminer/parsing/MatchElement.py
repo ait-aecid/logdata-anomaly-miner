@@ -9,9 +9,12 @@ class MatchElement(object):
     """Initialize the MatchElement.
     @param path when None, this element is anonymous. Hence it
     cannot be added to the result data and cannot have children.
-    @param matchString the part of the input string covered by
-    the given match."""
-    if (path is None) and (len(children) != 0):
+    @param matchString the part of the input bytes string covered
+    by the given match.
+    @param matchObject the matchString converted to an object for
+    matchers detecting more complex data types, e.g., integer
+    numbers or IP addresses."""
+    if (path is None) and children:
       raise Exception("Anonymous match may not have children")
     self.path = path
     self.matchString = matchString
@@ -52,9 +55,10 @@ class MatchElement(object):
     nextIndent = None
     result = None
     if indentStr is None:
-      result = '%s: %s (\'%s\')' % (self.path, self.matchObject, self.matchString)
+      result = '%s: %s (%s)' % (self.path, repr(self.matchObject), repr(self.matchString))
     else:
-      result = '%s%s: %s (\'%s\')' % (indentStr, self.path, self.matchObject, self.matchString)
+      result = '%s%s: %s (%s)' % (indentStr, self.path, repr(self.matchObject), \
+              repr(self.matchString))
       nextIndent = indentStr+'  '
     if self.children != None:
       for childMatch in self.children:
@@ -82,5 +86,5 @@ class MatchElement(object):
     numChildren = 0
     if self.children != None:
       numChildren = len(self.children)
-    return 'MatchElement: path=%s, string=%s, object=%s, children=%d' % (
-        self.path, self.matchString, self.matchObject, numChildren)
+    return 'MatchElement: path = %s, string = %s, object = %s, children = %d' % (
+        self.path, repr(self.matchString), repr(self.matchObject), numChildren)

@@ -1,14 +1,18 @@
-import MatchElement
+"""This module defines a model element that consists of a sequence
+of model elements that all have to match."""
+
+from aminer.parsing.MatchElement import MatchElement
 
 class SequenceModelElement:
   """This class defines an element to find matches that comprise
   matches of all given child model elements."""
-  def __init__(self, id, children):
-    self.id=id
-    self.children=children
+  def __init__(self, elementId, children):
+    self.elementId = elementId
+    self.children = children
 
   def getChildElements(self):
-    return(children)
+    """Return all model elements of the sequence."""
+    return self.children
 
   def getMatchElement(self, path, matchContext):
     """Try to find a match on given data for this model element
@@ -19,17 +23,15 @@ class SequenceModelElement:
     @param matchContext an instance of MatchContext class holding
     the data context to match against.
     @return the matchElement or None if model did not match."""
-    currentPath="%s/%s" % (path, self.id)
-    startData=matchContext.matchData
-    matches=[]
+    currentPath = "%s/%s" % (path, self.elementId)
+    startData = matchContext.matchData
+    matches = []
     for childElement in self.children:
-      childMatch=childElement.getMatchElement(currentPath,
-          matchContext)
-      if(childMatch==None):
-        matchContext.matchData=startData
-        return(None);
-      matches+=[childMatch]
+      childMatch = childElement.getMatchElement(currentPath, matchContext)
+      if childMatch is None:
+        matchContext.matchData = startData
+        return None
+      matches += [childMatch]
 
-    return(MatchElement.MatchElement(currentPath,
-        startData[:len(startData)-len(matchContext.matchData)],
-        None, matches))
+    return MatchElement(currentPath, \
+        startData[:len(startData)-len(matchContext.matchData)], None, matches)

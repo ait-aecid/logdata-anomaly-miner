@@ -15,53 +15,53 @@ after any standard logging preamble, e.g. from syslog."""
 
   typeChildren = []
   typeChildren.append(SequenceModelElement('build-stack', [
-      FixedDataModelElement('s0', 'building new pluginstance stack: \''),
-      DelimitedDataModelElement('stack', '\''),
-      FixedDataModelElement('s1', '\'')
+      FixedDataModelElement('s0', b'building new pluginstance stack: \''),
+      DelimitedDataModelElement('stack', b'\''),
+      FixedDataModelElement('s1', b'\'')
   ]))
 
 # Netflow entry
   typeChildren.append(SequenceModelElement('nfct-event', [
-      FixedDataModelElement('s0', '[DESTROY] ORIG: SRC='),
+      FixedDataModelElement('s0', b'[DESTROY] ORIG: SRC='),
       IpAddressDataModelElement('osrcip'),
-      FixedDataModelElement('s1', ' DST='),
+      FixedDataModelElement('s1', b' DST='),
       IpAddressDataModelElement('odstip'),
-      FixedDataModelElement('s2', ' PROTO='),
-      FixedWordlistDataModelElement('proto', ['TCP', 'UDP']),
-      FixedDataModelElement('s3', ' SPT='),
+      FixedDataModelElement('s2', b' PROTO='),
+      FixedWordlistDataModelElement('proto', [b'TCP', b'UDP']),
+      FixedDataModelElement('s3', b' SPT='),
       DecimalIntegerValueModelElement('ospt'),
-      FixedDataModelElement('s4', ' DPT='),
+      FixedDataModelElement('s4', b' DPT='),
       DecimalIntegerValueModelElement('odpt'),
-      FixedDataModelElement('s5', ' PKTS='),
+      FixedDataModelElement('s5', b' PKTS='),
       DecimalIntegerValueModelElement('opkts'),
-      FixedDataModelElement('s6', ' BYTES='),
+      FixedDataModelElement('s6', b' BYTES='),
       DecimalIntegerValueModelElement('obytes'),
-      FixedDataModelElement('s7', ' , REPLY: SRC='),
+      FixedDataModelElement('s7', b' , REPLY: SRC='),
       IpAddressDataModelElement('rsrcip'),
-      FixedDataModelElement('s8', ' DST='),
+      FixedDataModelElement('s8', b' DST='),
       IpAddressDataModelElement('rdstip'),
-      FixedDataModelElement('s9', ' PROTO='),
-      FixedWordlistDataModelElement('rproto', ['TCP', 'UDP']),
-      FixedDataModelElement('s10', ' SPT='),
+      FixedDataModelElement('s9', b' PROTO='),
+      FixedWordlistDataModelElement('rproto', [b'TCP', b'UDP']),
+      FixedDataModelElement('s10', b' SPT='),
       DecimalIntegerValueModelElement('rspt'),
-      FixedDataModelElement('s11', ' DPT='),
+      FixedDataModelElement('s11', b' DPT='),
       DecimalIntegerValueModelElement('rdpt'),
-      FixedDataModelElement('s12', ' PKTS='),
+      FixedDataModelElement('s12', b' PKTS='),
       DecimalIntegerValueModelElement('rpkts'),
-      FixedDataModelElement('s13', ' BYTES='),
+      FixedDataModelElement('s13', b' BYTES='),
       DecimalIntegerValueModelElement('rbytes'),
-# No additional whitespace from Ubuntu Trusty 14.04 on.
-      OptionalMatchModelElement('tail', FixedDataModelElement('s0', ' ')),
+      # No additional whitespace from Ubuntu Trusty 14.04 on.
+      OptionalMatchModelElement('tail', FixedDataModelElement('s0', b' ')),
   ]))
 
-  typeChildren.append(FixedDataModelElement('nfct-plugin', 'NFCT plugin working in event mode'))
-  typeChildren.append(FixedDataModelElement('reopen', 'reopening capture file'))
-  typeChildren.append(FixedDataModelElement('signal', 'signal received, calling pluginstances'))
-  typeChildren.append(FixedDataModelElement('uidchange', 'Changing UID / GID'))
+  typeChildren.append(FixedDataModelElement('nfct-plugin', b'NFCT plugin working in event mode'))
+  typeChildren.append(FixedDataModelElement('reopen', b'reopening capture file'))
+  typeChildren.append(FixedDataModelElement('signal', b'signal received, calling pluginstances'))
+  typeChildren.append(FixedDataModelElement('uidchange', b'Changing UID / GID'))
 
   model = SequenceModelElement('ulogd', [
-      FixedDataModelElement('sname', 'ulogd['),
+      FixedDataModelElement('sname', b'ulogd['),
       DecimalIntegerValueModelElement('pid'),
-      FixedDataModelElement('s0', ']: '),
+      FixedDataModelElement('s0', b']: '),
       FirstMatchModelElement('msg', typeChildren)])
   return model
