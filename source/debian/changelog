@@ -1,3 +1,10 @@
+logdata-anomaly-miner (1.0.1~pre0) bionic; urgency=low
+  
+  Bugfixes:
+  * Fixed dependencies in Debian packaging
+
+ -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Tue,  30 Oct 2018 17:00:00 +0000
+
 logdata-anomaly-miner (1.0.0) bionic; urgency=low
   
   Changes:

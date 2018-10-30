@@ -28,8 +28,14 @@ _tmpRoot="$(mktemp -d)"
 echo "Building package at ${_tmpRoot}" >&2
 
 _debDirectory="${_tmpRoot}/deb-build"
+_tarVersion=$(head -1  source/debian/changelog | awk 'match($0, /\(.*\)/) {
+    print substr($0, RSTART+1, RLENGTH-4)
+}
+')
 mkdir -- "${_debDirectory}"
 cp -a -- "${_projectDir}/source/debian" "${_projectDir}/source/root" "${_debDirectory}"
+fakeroot -- tar -C ${_debDirectory} -czf "${_tmpRoot}/logdata-anomaly-miner_${_tarVersion}.orig.tar.gz" --transform 's,^./,deb-build/,' .
+gpg -ab "${_tmpRoot}/logdata-anomaly-miner_${_tarVersion}.orig.tar.gz"
 
 # Build packages:
 # -F: full build

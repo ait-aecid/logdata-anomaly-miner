@@ -2,15 +2,15 @@ Source: logdata-anomaly-miner
 Section: admin
 Priority: optional
 Maintainer: Markus Wurzenberger <markus.wurzenberger@ait.ac.at>
-Build-Depends: debhelper (>= 9.0.0), dh-python, dh-systemd, docbook-xsl, docbook-xml, python-all, xsltproc
-Standards-Version: 3.9.8
+Build-Depends: debhelper (>= 11.0.0), dh-python, docbook-xsl, docbook-xml, python3-all , xsltproc
+Standards-Version: 4.2.1
 Homepage: https://launchpad.net/logdata-anomaly-miner/
 Vcs-Git: https://git.launchpad.net/logdata-anomaly-miner
 Vcs-Browser: https://git.launchpad.net/logdata-anomaly-miner/tree/
 
 Package: logdata-anomaly-miner
 Architecture: all
-Depends: ${python:Depends}, python-tz, ${misc:Depends}
+Depends: ${python3:Depends}, python3-tz, ${misc:Depends}
 Suggests: python-scipy
 Description: This tool allows one to create log analysis pipelines
  to analyze log data streams and detect violations or anomalies

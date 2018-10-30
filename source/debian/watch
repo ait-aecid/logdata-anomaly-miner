@@ -1,0 +1,2 @@
+version=3
+opts=pgpsigurlmangle=s/$/.sig/ https://launchpad.net/logdata-anomaly-miner/+download .*/trunk/[a-z0-9.]+/\+download/logdata-anomaly-miner-([0-9~_.]+).tar.gz
