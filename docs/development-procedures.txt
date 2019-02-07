@@ -56,7 +56,7 @@ Packaging:
 
 Install packaging dependencies:
 
-apt-get --force-yes install alien debhelper dh-systemd docbook-xsl docbook-xml xsltproc
+apt-get --force-yes install alien debhelper dh-python docbook-xsl docbook-xml python3-all xsltproc
 
 run build in logdata-anomaly-miner base directory:
 
