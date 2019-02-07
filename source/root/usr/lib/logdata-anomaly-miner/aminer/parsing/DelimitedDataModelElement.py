@@ -2,8 +2,9 @@
 to a specific delimiter string."""
 
 from aminer.parsing.MatchElement import MatchElement
+from aminer.parsing import ModelElementInterface
 
-class DelimitedDataModelElement:
+class DelimitedDataModelElement(ModelElementInterface):
   """Find a string delimited by given delimiter string, possibly
   a match of zero byte length"""
   def __init__(self, elementId, delimiter):
@@ -22,7 +23,7 @@ class DelimitedDataModelElement:
     delimiter itself."""
     data = matchContext.matchData
     matchLen = data.find(self.delimiter)
-    if matchLen < 0:
+    if matchLen < 1:
       return None
     matchData = data[:matchLen]
     matchContext.update(matchData)
