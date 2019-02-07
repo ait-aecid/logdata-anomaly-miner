@@ -67,7 +67,8 @@ class SimpleMultisourceAtomSync(AtomHandlerInterface):
         continue
       if sourceInfo[1].atomTime < oldestSourceInfo[1].atomTime:
         oldestSourceInfo = sourceInfo
-
+    if hasIdleSourcesFlag is False:
+      self.blockingEndTime = 0
     if self.blockingEndTime != 0:
 # We cannot do anything while blocking to catch more atoms.
       if self.blockingEndTime > time.time():
