@@ -28,7 +28,7 @@ class MissingMatchPathValueDetector(
 
   def __init__(
       self, aminerConfig, targetPath, anomalyEventHandlers,
-      peristenceId='Default', autoIncludeFlag=False, defaultInterval=3600,
+      persistenceId='Default', autoIncludeFlag=False, defaultInterval=3600,
       realertInterval=86400):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location.
@@ -48,7 +48,7 @@ class MissingMatchPathValueDetector(
 
     PersistencyUtil.addPersistableComponent(self)
     self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
-        aminerConfig, self.__class__.__name__, peristenceId)
+        aminerConfig, self.__class__.__name__, persistenceId)
     persistenceData = PersistencyUtil.loadJson(self.persistenceFileName)
     if persistenceData is None:
       self.expectedValuesDict = {}
@@ -220,14 +220,14 @@ class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
 
   def __init__(
       self, aminerConfig, targetPathList, anomalyEventHandlers,
-      peristenceId='Default', autoIncludeFlag=False, defaultInterval=3600,
+      persistenceId='Default', autoIncludeFlag=False, defaultInterval=3600,
       realertInterval=86400):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location.
     @param targetPath to extract a source identification value
     from each logatom."""
     super(MissingMatchPathListValueDetector, self).__init__(
-        aminerConfig, None, anomalyEventHandlers, peristenceId,
+        aminerConfig, None, anomalyEventHandlers, persistenceId,
         autoIncludeFlag, defaultInterval, realertInterval)
     self.targetPathList = targetPathList
 

@@ -23,7 +23,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
 
   def __init__(
       self, aminerConfig, targetPathList, anomalyEventHandlers,
-      peristenceId='Default', allowMissingValuesFlag=False,
+      persistenceId='Default', allowMissingValuesFlag=False,
       autoIncludeFlag=False, tupleTransformationFunction=None):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location.
@@ -40,7 +40,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     transform it. It may modify the list directly or create a
     new one to return it."""
     super(EnhancedNewMatchPathValueComboDetector, self).__init__(
-        aminerConfig, targetPathList, anomalyEventHandlers, peristenceId,
+        aminerConfig, targetPathList, anomalyEventHandlers, persistenceId,
         allowMissingValuesFlag, autoIncludeFlag)
     self.tupleTransformationFunction = tupleTransformationFunction
 

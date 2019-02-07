@@ -15,7 +15,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
   rules is violated. This is used to implement checks as depicted
   in http://dx.doi.org/10.1016/j.cose.2014.09.006"""
 
-  def __init__(self, aminerConfig, ruleset, anomalyEventHandlers, peristenceId='Default'):
+  def __init__(self, aminerConfig, ruleset, anomalyEventHandlers, persistenceId='Default'):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location.
     @param ruleset a list of MatchRule rules with appropriate
@@ -36,7 +36,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
 
     PersistencyUtil.addPersistableComponent(self)
     self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
-        aminerConfig, 'TimeCorrelationViolationDetector', peristenceId)
+        aminerConfig, 'TimeCorrelationViolationDetector', persistenceId)
 #    persistenceData = PersistencyUtil.loadJson(self.persistenceFileName)
 #   if persistenceData is None:
 #     self.knownPathSet = set()

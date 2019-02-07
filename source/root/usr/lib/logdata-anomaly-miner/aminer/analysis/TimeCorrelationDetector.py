@@ -19,7 +19,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
   checks as depicted in http://dx.doi.org/10.1016/j.cose.2014.09.006."""
 
   def __init__(self, aminerConfig, parallelCheckCount, correlationTestCount, \
-    maxFailCount, anomalyEventHandlers, peristenceId='Default'):
+    maxFailCount, anomalyEventHandlers, persistenceId='Default'):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location.
     @param parallelCheckCount number of rule detection checks
@@ -40,7 +40,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
 
     PersistencyUtil.addPersistableComponent(self)
     self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
-        aminerConfig, 'TimeCorrelationDetector', peristenceId)
+        aminerConfig, 'TimeCorrelationDetector', persistenceId)
     persistenceData = PersistencyUtil.loadJson(self.persistenceFileName)
     if persistenceData is None:
       self.featureList = []

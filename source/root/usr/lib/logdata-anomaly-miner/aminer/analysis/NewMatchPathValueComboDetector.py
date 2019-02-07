@@ -19,7 +19,7 @@ class NewMatchPathValueComboDetector(
 
   def __init__(
       self, aminerConfig, targetPathList, anomalyEventHandlers,
-      peristenceId='Default', allowMissingValuesFlag=False,
+      persistenceId='Default', allowMissingValuesFlag=False,
       autoIncludeFlag=False):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location.
@@ -37,7 +37,7 @@ class NewMatchPathValueComboDetector(
     self.autoIncludeFlag = autoIncludeFlag
 
     self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
-        aminerConfig, self.__class__.__name__, peristenceId)
+        aminerConfig, self.__class__.__name__, persistenceId)
     self.nextPersistTime = None
     self.loadPersistencyData()
     PersistencyUtil.addPersistableComponent(self)

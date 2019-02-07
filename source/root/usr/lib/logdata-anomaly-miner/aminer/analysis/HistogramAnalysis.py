@@ -245,7 +245,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
   def __init__(self, aminerConfig, histogramDefs, reportInterval,
                reportEventHandlers, resetAfterReportFlag=True,
-               peristenceId='Default'):
+               persistenceId='Default'):
     """Initialize the analysis component.
     @param histogramDefs is a list of tuples containing the target
     property path to analyze and the BinDefinition to apply for
@@ -262,12 +262,12 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
     self.reportInterval = reportInterval
     self.reportEventHandlers = reportEventHandlers
     self.resetAfterReportFlag = resetAfterReportFlag
-    self.peristenceId = peristenceId
+    self.persistenceId = persistenceId
     self.nextPersistTime = None
 
     PersistencyUtil.addPersistableComponent(self)
     self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
-        aminerConfig, 'HistogramAnalysis', peristenceId)
+        aminerConfig, 'HistogramAnalysis', persistenceId)
     persistenceData = PersistencyUtil.loadJson(self.persistenceFileName)
     if persistenceData != None:
       raise Exception('No data reading, def merge yet')
@@ -350,7 +350,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
 
   def __init__(self, aminerConfig, propertyPath, binDefinition,
                reportInterval, reportEventHandlers, resetAfterReportFlag=True,
-               peristenceId='Default'):
+               perstenceId='Default'):
     """Initialize the analysis component.
     @param reportInterval delay in seconds between creation of two
     reports. The parameter is applied to the parsed record data
@@ -364,12 +364,12 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
     self.reportInterval = reportInterval
     self.reportEventHandlers = reportEventHandlers
     self.resetAfterReportFlag = resetAfterReportFlag
-    self.peristenceId = peristenceId
+    self.persistenceId = persistenceId
     self.nextPersistTime = None
 
     PersistencyUtil.addPersistableComponent(self)
     self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
-        aminerConfig, 'PathDependentHistogramAnalysis', peristenceId)
+        aminerConfig, 'PathDependentHistogramAnalysis', persistenceId)
     persistenceData = PersistencyUtil.loadJson(self.persistenceFileName)
     if persistenceData is not None:
       raise Exception('No data reading, def merge yet')
