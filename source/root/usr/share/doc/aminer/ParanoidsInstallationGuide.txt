@@ -30,18 +30,63 @@ Steps:
 * Create parent configuration:
 
 cd /etc/aminer
-cp config.py.template config.py
 
-Remove everything below configuration property "AnalysisConfigFile".
+If permission denied user has to be added to user group aminer. A reboot
+might be required.
+
+Create a new config file
+
+touch config.py
+
+Define a dictionary for the configuration properties by adding 
+
+configProperties = {}
+
+to config.py.
+
+Define the list of log resources to read from: the resources named here
+do not need to exist when aminer is started. This will just result in
+a warning. However if they exist, they have to be readable by the aminer
+process! Supported types are:
+ * file://[path]: Read data from file, reopen it after rollover
+ * unix://[path]: Open the path as UNIX local socket for reading
+
+configProperties['LogResourceList'] = []
+
+Define the uid/gid of the process that runs the calculation after opening
+the log files:
+
+configProperties['AMinerUser'] = 'aminer'
+configProperties['AMinerGroup'] = 'aminer'
+
+Optional: Define the path, where aminer will listen for incoming remote
+          control connections. When missing, no remote control socket
+		  will be created.
+		  
+		  configProperties['RemoteControlSocket'] = '/var/run/aminer-remote.socket'
+		  
+		  Enable the remote control socket: it will allow to adjust
+		  aminer child settings on the fly without reloading of the configuration
+		  or editing of persistency files. In default configuration,
+		  only root user can connect to the socket. The remote control
+		  commands are executed within the analysis child process usually
+		  running  as a dedicated less-privileged user.
+
 Define the child configuration file:
 
 configProperties['AnalysisConfigFile'] = 'analysis.py'
 
-While not fully configured, you may want to start with an empty
-input file. A paranoid aminer instance will report everything
-not explicitely whitelisted as an error. Basically you would get
-your whole syslog echoed back, just with an amplification factor
-applied. In that case change the property "LogResourceList" to:
+Read the analyis from this file. That part of configuration is separated
+from the main configuration so that it can be loaded only within the
+analysis child. Non-absolute path names are interpreted relatively to
+the main configuration file (config.py). When empty, this configuration
+has to contain the configuration for the child also.
+
+While not fully configured, you may want to start with an empty input
+file. A paranoid aminer instance will report everything not explicitely
+whitelisted as an error. Basically you would get your whole syslog echoed
+back, just with an amplification factor applied. In that case change
+the property "LogResourceList" to:
 
 configProperties['LogResourceList'] = ['file:///etc/aminer/test.log']
 
@@ -49,40 +94,142 @@ and do:
 
 touch /etc/aminer/test.log
 chmod 0600 /etc/aminer/test.log
-
-Enable also the remote control socket: it will be needed to adjust
-aminer child settings on the fly without reloading of the configuration
-or editing of persistency files. In default configuration, only
-root user can connect to the socket. The remote control commands
-are executed within the analysis child process usually running
-as a dedicated less-privileged user.
-
-configProperties['RemoteControlSocket'] = '/var/run/aminer-remote.socket'
-
  
 * Create child configuration:
 
-cp config.py.template analysis.py
+touch analysis.py
 
-Remove everything below (but keeping) "configProperties = {}" down
-to (including) configuration property "AnalysisConfigFile".
+Add again "configProperties = {}".
 
-You may want to define the "MailAlerting.TargetAddress" parameter
-to receive e-mail alerts and data reports.
+The AMiner reads and stores information to be used between multiple invocations
+in a persistency directory. The directory must only be accessible to
+the 'AMinerUser' but not group/world readable. On violation, AMiner will
+refuse to start. When undefined, '/var/lib/aminer' is used. Therefore
+optionally add
 
-During testing the "StreamPrinterEventHandler" is useful to get
-the aminer events printed to stdout. Therefore configuration line
-comments have to be removed:
+configProperties['Core.PersistenceDir'] = <path>
 
-  from aminer.events import StreamPrinterEventHandler
-  anomalyEventHandlers.append(StreamPrinterEventHandler(analysisContext.aminerConfig))
+Optional: You may want to define the "MailAlerting.TargetAddress" parameter
+          to receive e-mail alerts and data reports. Therefore add
+		  
+		  configProperties['MailAlerting.TargetAddress'] = 'root@localhost'
+		  
+		  When undefined, no e-mail notification hooks are added. Sender
+		  address of e-mail alerts. When undefined, "sendmail" implementation
+		  on host will decide, which sender address should be used.
+		  
+		  configProperties['MailAlerting.FromAddress'] = 'root@localhost'
+		  
+		  Define, which text should be prepended to the standard aminer
+		  subject. Defaults to "AMiner Alerts:"
+		  
+		  configProperties['MailAlerting.SubjectPrefix'] = 'AMiner Alerts:'
+		  
+		  Define a grace time after startup before aminer will react to
+		  an event and send the first alert e-mail. Defaults to 0 (any
+		  event can immediately trigger alerting).
+		  
+		  configProperties['MailAlerting.AlertGraceTime'] = 0
+		  
+		  Define how many seconds to wait after a first event triggered
+		  the alerting procedure before really sending out the e-mail.
+		  In that timespan, events are collected and will be sent all 
+		  using a single e-mail. Defaults to 10 seconds.
+		  
+		  configProperties['MailAlerting.EventCollectTime'] = 10
+		  
+		  Define the minimum time between two alert e-mails in seconds
+		  to avoid spamming. All events during this timespan are collected
+		  and sent out with the next report. Defaults to 600 seconds.
+		  configProperties['MailAlerting.MinAlertGap'] = 600
+		  
+		  Define the maximum time between two alert e-mails in seconds.
+		  When undefined this defaults to "MailAlerting.MinAlertGap".
+		  Otherwise this will activate an exponential backoff to reduce
+		  messages during permanent error states by increasing the alert
+		  gap by 50% when more alert-worthy events were recorded while
+		  the previous gap time was not yet elapsed.
+		  
+		  configProperties['MailAlerting.MaxAlertGap'] = 600
+		  
+		  Define how many events should be included in one alert mail
+		  at most. This defaults to 1000
+		  
+		  configProperties['MailAlerting.MaxEventsPerMessage'] = 1000
 
+Now define the analysis pipeline: Define the function buildAnalysisPipeline(analysisContext)
+to create pipeline for parsing the log data and applien other features.
+It has also to define an AtomizerFactory to instruct AMiner how to process
+incoming data streams to create log atoms from them.
+
+First import the FirstMatchModelElement and the SequenceModelElement, 
+and define an empty list of services and an empty parsering:
+
+from aminer.parsing import FirstMatchModelElement
+from aminer.parsing import SequenceModelElement
+
+serviceChildren = [] 
+
+parsingModel = SequenceModelElement('model', [])
+
+Create all global handler lists and append the real handlers later on.
+Use this filter to distribute all atoms to the analysis handlers.
+
+from aminer.analysis import AtomFilters
+
+atomFilter = AtomFilters.SubhandlerFilter(None)
+anomalyEventHandlers = []
+
+Now define the AtomizerFactory using the model. A simple line based one
+is usually sufficient.
+
+from aminer.input import SimpleByteStreamLineAtomizerFactory
+
+analysisContext.atomizerFactory = SimpleByteStreamLineAtomizerFactory(
+      parsingModel, [atomFilter], anomalyEventHandlers,
+      defaultTimestampPath='/model/syslog/time')
+
+Report all unparsed atoms to the event handlers and add a new match patch
+detector (further information see "Adding detection for new parser pathes" 
+in the remaining file):
+
+from aminer.input import SimpleUnparsedAtomHandler
+
+atomFilter.addHandler(
+      SimpleUnparsedAtomHandler(anomalyEventHandlers),
+      stopWhenHandledFlag=True)
+
+from aminer.analysis import NewMatchPathDetector
+
+newMatchPathDetector = NewMatchPathDetector(
+      analysisContext.aminerConfig, anomalyEventHandlers, autoIncludeFlag=True)
+analysisContext.registerComponent(newMatchPathDetector, componentName=None)
+atomFilter.addHandler(newMatchPathDetector)
+
+Optional: Include the e-mail notification handler only if the configuration
+          parameter was set.
+		  
+		  from aminer.events import DefaultMailNotificationEventHandler
+		  
+		  if DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS in analysisContext.aminerConfig.configProperties:
+            mailNotificationHandler = DefaultMailNotificationEventHandler(
+              analysisContext.aminerConfig)
+		    analysisContext.registerComponent(
+              mailNotificationHandler, componentName=None)
+            anomalyEventHandlers.append(mailNotificationHandler)
+
+		  
+During testing the "StreamPrinterEventHandler" is useful to get the aminer
+events printed to stdout. Therefore add:
+
+from aminer.events import StreamPrinterEventHandler
+anomalyEventHandlers.append(StreamPrinterEventHandler(analysisContext.aminerConfig))
 
 * Allow python code imports:
 
-AMiner does not use the default dist/site-packages to load code.
-See Design.txt "Loading of python code" for explanation. By default
-pytz is used for timestamp handling, so add it:
+AMiner does not use the default dist/site-packages to load code. See Design.txt
+"Loading of python code" for explanation. By default pytz is used for
+timestamp handling, so add it:
 
 ln -s /usr/lib/python3/dist-packages/pytz /etc/aminer/conf-enabled
 
@@ -156,12 +303,21 @@ be a line from the syslog daemon startup. Hence the default parsing
 model might match the syslog daemon output on your system. To
 enable add
 
-ln -s ../conf-available/generic/RsyslogParsingModel.py /etc/aminer/conf-enabled
+ln -s /etc/aminer/conf-available/generic/SyslogPreambleModel.py /etc/aminer/conf-enabled
 
 and edit your configuration:
 
-  import RsyslogParsingModel
-  serviceChildren.append(RsyslogParsingModel.getModel())
+import SyslogPreambleModel
+syslogPreambleModel = SyslogPreambleModel.getModel()
+
+from aminer.parsing import AnyByteDataModelElement
+
+parsingModel = SequenceModelElement('model', [
+      syslogPreambleModel,
+      AnyByteDataModelElement('logmessage')]) # to parse the remaining log line
+
+Furthermore change the defaultTimestampPath of the AtomizerFactory to 
+'/model/syslog/time'.
 
 When starting aminer again, no warning about unparsed data should
 be printed. If still present, the model might not match your line.
@@ -169,16 +325,15 @@ be printed. If still present, the model might not match your line.
 
 * Creating or modifying a model:
 
-Unlike logfile parsing tools, e.g. logcheck and many SIEMs, aminer
+Unlike logfile parsing tools, e.g. logcheck and many SIEMs, AMiner
 does not use regular expressions, that have to be applied to each
 log line separately. The parsing model is more like a tree, having
-a common trunk, e.g. the syslog preamble with timestamp and hostname,
+a common trunk, e.g., the syslog preamble with timestamp and hostname,
 and specific service outputs being handled in model branches.
 See Readme.txt "Concepts" for more information.
 
-
 Create a model file e.g. in "conf-available/local" and link it
-or directly in "conf-enabled", whatever suits your production
+or directly create it in "conf-enabled", whatever suits your production
 process best.
 
 mkdir /etc/aminer/conf-available/local
@@ -214,7 +369,7 @@ To follow the parsing model, a DebugMatchContext can be used instead
 of the default context. It is slower but it will capture state
 information about the matching process. With remote control (see
 below), debugging can even occur while AMiner is processing data.
-Remote control code for that purpose could would be:
+Remote control code for that purpose could be:
 
   from aminer.parsing import DebugMatchContext
   matchContext = DebugMatchContext('Your test input here')
@@ -245,17 +400,17 @@ bug, both available at https://launchpad.net/logdata-anomaly-miner
 Adding detection for new parser pathes:
 =======================================
 
-Usually your systems will not emit an arbitrary large number of
+Usually, your system will not emit an arbitrary large number of
 differently structured loglines. In normal operation with a given
 set of configuration options and standard software use patterns,
-each service only produces a small subset of log message type
+each service only produces a small subset of log message types
 compared to all the messages it could theoretically create. On
 the other hand, service failures or attacks often result in new
-message types to be seen. Hence each new parser path corresponding
+message types. Hence, each new parser path corresponding
 to a new message type should cause some distrust.
 
-You may use the configuration from the config.py.template, but
-when really paranoid, following changes might be useful:
+You may use the configuration defined before, but when really paranoid,
+following changes might be useful:
 
 * Disable autoinclusion: autoIncludeFlag = False
 * Register as named component: componentName = 'DefaultNewMatchPathDetector'
@@ -355,7 +510,7 @@ Detect missing logs:
 Logdata analysis might detect anomalies within the data as long
 as data is available. On small scale setups, that might not be
 such an issue, but in larger setups, nobody might notice, that
-one service or even host stopped to emit log messates. The reason
+one service or even host stopped to emit log messages. The reason
 for that might be an error or an attack, that is left to the admin
 to find out.
 
