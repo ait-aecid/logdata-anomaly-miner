@@ -2,8 +2,9 @@
 of arbitrary length."""
 
 from aminer.parsing.MatchElement import MatchElement
+from aminer.parsing import ModelElementInterface
 
-class HexStringModelElement:
+class HexStringModelElement(ModelElementInterface):
   """This class just tries to strip off as many hex bytes as possible
   from a given data string."""
   def __init__(self, elementId, upperCase=False):

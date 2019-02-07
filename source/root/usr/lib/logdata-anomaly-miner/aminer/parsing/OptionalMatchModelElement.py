@@ -1,8 +1,9 @@
 """This module defines a model element that is optional."""
 
 from aminer.parsing.MatchElement import MatchElement
+from aminer.parsing import ModelElementInterface
 
-class OptionalMatchModelElement:
+class OptionalMatchModelElement(ModelElementInterface):
   """This class defines a model element tries to match against
   a given model element and if that fails returns a zero length
   match anyway."""

@@ -1,7 +1,9 @@
 """This module defines a model element that allows branches. The
 first matching branch is taken."""
 
-class FirstMatchModelElement:
+from aminer.parsing import ModelElementInterface
+
+class FirstMatchModelElement(ModelElementInterface):
   """This class defines a model element to return the match from
   the the first matching child model within a given list."""
   def __init__(self, elementId, children):

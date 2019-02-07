@@ -2,8 +2,9 @@
 address."""
 
 from aminer.parsing.MatchElement import MatchElement
+from aminer.parsing import ModelElementInterface
 
-class IpAddressDataModelElement:
+class IpAddressDataModelElement(ModelElementInterface):
   """This class defines a model element that matches an IPv4 IP
   address."""
   def __init__(self, elementId):

@@ -2,8 +2,9 @@
 up to the next white space."""
 
 from aminer.parsing.MatchElement import MatchElement
+from aminer.parsing import ModelElementInterface
 
-class WhiteSpaceLimitedDataModelElement:
+class WhiteSpaceLimitedDataModelElement(ModelElementInterface):
   """This class defines a model element that represents a variable
   amount of characters delimited by a white space."""
   def __init__(self, elementId):

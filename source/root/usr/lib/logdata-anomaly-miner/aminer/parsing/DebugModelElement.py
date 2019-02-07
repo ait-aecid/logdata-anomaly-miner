@@ -5,8 +5,9 @@ by log atoms."""
 import sys
 
 from aminer.parsing.MatchElement import MatchElement
+from aminer.parsing import ModelElementInterface
 
-class DebugModelElement:
+class DebugModelElement(ModelElementInterface):
   """This class defines a model element matching any data of length
   zero at any position. Thus it can never fail to match and can
   be inserted at any position in the parsing tree, where matching

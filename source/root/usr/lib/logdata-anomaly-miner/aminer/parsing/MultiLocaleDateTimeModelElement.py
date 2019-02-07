@@ -6,8 +6,9 @@ import locale
 import sys
 
 from aminer.parsing.MatchElement import MatchElement
+from aminer.parsing import ModelElementInterface
 
-class MultiLocaleDateTimeModelElement:
+class MultiLocaleDateTimeModelElement(ModelElementInterface):
   """This class defines a model element to parse date or datetime
   values from log sources containing timestamps encoded in different
   locales or on machines, where host/service locale does not match

@@ -2,8 +2,9 @@
 bytes."""
 
 from aminer.parsing.MatchElement import MatchElement
+from aminer.parsing import ModelElementInterface
 
-class VariableByteDataModelElement:
+class VariableByteDataModelElement(ModelElementInterface):
   """This class defines a model element  that takes any string that
   only contains characters of a given alphabet."""
   def __init__(self, elementId, alphabet):

@@ -1,8 +1,9 @@
 """This module defines a model element that matches any byte."""
 
 from aminer.parsing.MatchElement import MatchElement
+from aminer.parsing import ModelElementInterface
 
-class AnyByteDataModelElement:
+class AnyByteDataModelElement(ModelElementInterface):
   """This class matches any byte but at least one. Thus a match
   will always span the complete data from beginning to end."""
   def __init__(self, elementId):

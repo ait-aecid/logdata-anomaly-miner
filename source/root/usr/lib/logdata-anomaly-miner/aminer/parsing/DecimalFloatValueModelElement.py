@@ -88,7 +88,7 @@ class DecimalFloatValueModelElement(ModelElementInterface):
       return None
 
 # See if there is decimal part after decimal point.
-    if (matchLen < len(data)) and (data[matchLen] == '.'):
+    if (matchLen < len(data)) and (chr(data[matchLen]) == '.'):
       matchLen += 1
       postPointStart = matchLen
       for testByte in data[matchLen:]:

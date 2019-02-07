@@ -162,8 +162,7 @@ class DateTimeModelElement(ModelElementInterface):
         if nextLength < 0:
 # No separator, so get the number of decimal digits.
           nextLength = 0
-          for digitChar in matchContext.matchData[parsePos:]:
-            digitOrd = ord(digitChar)
+          for digitOrd in matchContext.matchData[parsePos:]:
             if (digitOrd < 0x30) or (digitOrd > 0x39):
               break
             nextLength += 1
@@ -281,4 +280,4 @@ class DateTimeModelElement(ModelElementInterface):
   def parseFraction(valueStr):
     """This method is just required to pass it as function pointer
     to the parsing logic."""
-    return float('0.'+valueStr)
+    return float(b'0.'+valueStr)
