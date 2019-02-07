@@ -75,7 +75,10 @@ class DecimalIntegerValueModelElement(ModelElementInterface):
       return None
 
     matchString = data[:matchLen]
-    matchValue = int(matchString)
+    if self.padCharacters == b' ' and matchString[0] in b'+-':
+      matchValue = int(matchString.replace(b' ', b'', 1))
+    else:
+      matchValue = int(matchString)
     matchContext.update(matchString)
     return MatchElement(
         '%s/%s' % (path, self.pathId), matchString, matchValue, None)
