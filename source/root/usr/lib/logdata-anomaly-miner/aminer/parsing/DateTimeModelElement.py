@@ -106,6 +106,7 @@ class DateTimeModelElement(ModelElementInterface):
         elif paramTypeCode == b's':
           newElement = (7, -1, int)
         elif paramTypeCode == b'Y':
+          self.formatHasYearFlag = True
           newElement = (0, 4, int)
         else:
           raise Exception('Unknown dateformat specifier %s' % repr(paramTypeCode))
