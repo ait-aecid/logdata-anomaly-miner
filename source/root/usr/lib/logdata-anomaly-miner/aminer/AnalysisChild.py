@@ -119,6 +119,22 @@ class AnalysisContext(object):
     @return None if not found."""
     return self.registeredComponentsByName.get(name, None)
 
+  def getNameByComponent(self, component):
+    """Get the name of a component.
+    @return None if not found."""
+    for componentName, componentIter in self.regisreredComponentsByName.items():
+      if componentIter == component:
+        return componentName
+    return None
+
+  def getIdByComponent(self, component):
+    """Get the name of a component.
+    @return None if not found."""
+    for componentName, componentIter in self.registeredComponentsByName.items():
+      if componentIter == component:
+        return componentName
+    return None
+
   def buildAnalysisPipeline(self):
     """Convenience method to create the pipeline."""
     self.aminerConfig.buildAnalysisPipeline(self)
