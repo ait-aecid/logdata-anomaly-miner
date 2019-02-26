@@ -120,7 +120,7 @@ class LinearNumericBinDefinition(BinDefinition):
     start = self.lowerLimit
     for binPos in range(1, self.binCount+1):
       end = self.lowerLimit+binPos*self.binSize
-      self.binNames.append('[%s-%s)]' % (start, end))
+      self.binNames.append('[%s-%s)' % (start, end))
       start = end
     if self.outlierBinsFlag:
       self.binNames.append('[%s-...' % start)
