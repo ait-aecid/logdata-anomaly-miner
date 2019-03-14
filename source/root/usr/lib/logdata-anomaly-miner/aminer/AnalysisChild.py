@@ -122,7 +122,7 @@ class AnalysisContext(object):
   def getNameByComponent(self, component):
     """Get the name of a component.
     @return None if not found."""
-    for componentName, componentIter in self.regisreredComponentsByName.items():
+    for componentName, componentIter in self.registeredComponentsByName.items():
       if componentIter == component:
         return componentName
     return None
