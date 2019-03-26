@@ -136,11 +136,19 @@ class MissingMatchPathValueDetector(
         for value, overdueTime, interval in missingValueList:
           messagePart += '\n  %s overdue %ss (interval %s)' % (repr(value), overdueTime, interval)
         for listener in self.anomalyEventHandlers:
-          listener.receiveEvent(
+          self.sendEventToHandlers(listener, logAtom, messagePart, missingValueList)
+          #listener.receiveEvent(
+          #    'Analysis.%s' % self.__class__.__name__,
+          #    'Interval too large between values for path %s:%s ' % (self.targetPath, messagePart),
+          #    [logAtom.rawData], missingValueList, self)
+    return True
+
+
+  def sendEventToHandlers(self, anomalyEventHandler, logAtom, messagePart, missingValueList):
+    anomalyEventHandler.receiveEvent(
               'Analysis.%s' % self.__class__.__name__,
               'Interval too large between values for path %s:%s ' % (self.targetPath, messagePart),
               [logAtom.rawData], missingValueList, self)
-    return True
 
 
   def setCheckValue(self, value, interval):
@@ -242,3 +250,14 @@ class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
         continue
       return matchElement.matchObject
     return None
+
+
+  def sendEventToHandlers(self, anomalyEventHandler, logAtom, messagePart, missingValueList):
+    targetPaths = ''
+    for targetPath in self.targetPathList:
+      targetPaths += targetPath + ', '
+    anomalyEventHandler.receiveEvent(
+              'Analysis.%s' % self.__class__.__name__,
+              'Interval too large between values for path %s:%s ' % (targetPaths[:-2], messagePart),
+              [logAtom.rawData], missingValueList, self)
+
