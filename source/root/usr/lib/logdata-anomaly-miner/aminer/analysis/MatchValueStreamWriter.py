@@ -36,7 +36,7 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
         result += match.matchString
       addSepFlag = True
     self.stream.write(result)
-    self.stream.write('\n')
+    self.stream.write(b'\n')
 
 
   def getTimeTriggerClass(self):
