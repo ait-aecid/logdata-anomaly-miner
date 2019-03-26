@@ -19,8 +19,8 @@ class SyslogWriterEventHandler(EventHandlerInterface):
     syslog.openlog('%s[%d]' % (self.instanceName, os.getpid()), \
         syslog.LOG_INFO, syslog.LOG_DAEMON)
     syslog.syslog(syslog.LOG_INFO, 'Syslog logger initialized')
-    self.bufferStream = io.BytesIO()
-    self.eventWriter = StreamPrinterEventHandler.StreamPrinterEventHandler(
+    self.bufferStream = io.StringIO()
+    self.eventWriter = StreamPrinterEventHandler(
         None, self.bufferStream)
     self.eventId = 0
 
