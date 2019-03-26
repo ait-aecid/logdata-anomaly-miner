@@ -115,7 +115,10 @@ class DecimalFloatValueModelElement(ModelElementInterface):
         return None
 
     matchString = data[:matchLen]
-    matchValue = float(matchString)
+    if self.padCharacters == b' ' and matchString[0] in b'+-':
+      matchValue = float(matchString.replace(b' ', b'', 1))
+    else:
+      matchValue = float(matchString)
     matchContext.update(matchString)
     return MatchElement(
         '%s/%s' % (path, self.pathId), matchString, matchValue, None)
