@@ -350,7 +350,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
 
   def __init__(self, aminerConfig, propertyPath, binDefinition,
                reportInterval, reportEventHandlers, resetAfterReportFlag=True,
-               perstenceId='Default'):
+               persistenceId='Default'):
     """Initialize the analysis component.
     @param reportInterval delay in seconds between creation of two
     reports. The parameter is applied to the parsed record data
