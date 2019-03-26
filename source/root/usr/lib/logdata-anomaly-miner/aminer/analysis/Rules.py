@@ -397,7 +397,7 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
         valueList.append(None)
       else:
         valueList.append(valueElement.matchObject)
-    limits = self.limitLookupDict.get(tuple(valueList), self.defaultLimit)
+    limits = self.limitLookupDict.get(tuple(valueList)[0], self.defaultLimit)
     if limits is None:
       return False
 
