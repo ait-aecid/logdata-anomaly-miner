@@ -2,17 +2,23 @@ logdata-anomaly-miner (1.0.1~pre0) bionic; urgency=low
 
   Changes:
   * Updated and improved ParanoidInstallationGuide
+  * Updated Readme
+  * Added functions getNameByComponent and getIdByComponent to
+    AnalysisChild.py
   Bugfixes including:
   * Fixed dependencies in Debian packaging
   * Fixed typo in various analysis components
   * Fixed import of ModelElementInterface in various parsing components
   * Fixed issues with byte/string comparison
-  * Fixed issue in DecimalIntegerValueModelElement, when parsing integer
-    including sign and padding character
+  * Fixed issue in DecimalIntegerValueModelElement, when parsing
+    integer including sign and padding character
   * Fixed unnecessary long blocking time in SimpleMultisourceAtomSync
-  * Changed minimum matchLen in DelimitedDataModelElement to 1 byte
+  * Changed minum matchLen in DelimitedDataModelElement to 1 byte
+  * Fixed NewMatchPathValueDetector list of transferred parameters in
+    receiveAtom
+  * Minor bugfixes
 
- -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Thu,  07 Feb 2019 17:00:00 +0000
+ -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Tue, 27 Mar 2019 17:00:00 +0000
 
 logdata-anomaly-miner (1.0.0) bionic; urgency=low
   

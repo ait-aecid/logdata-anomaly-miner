@@ -1,8 +1,11 @@
-V1.0.1 (2019-02-07):
+V1.0.1 (2019-03-27):
 ====================
 
 * Changes:
   * Updated and improved ParanoidInstallationGuide
+  * Updated Readme
+  * Added functions getNameByComponent and getIdByComponent to
+    AnalysisChild.py
 * Bugfixes including:
   * Fixed dependencies in Debian packaging
   * Fixed typo in various analysis components
@@ -12,6 +15,9 @@ V1.0.1 (2019-02-07):
     integer including sign and padding character
   * Fixed unnecessary long blocking time in SimpleMultisourceAtomSync
   * Changed minum matchLen in DelimitedDataModelElement to 1 byte
+  * Fixed NewMatchPathValueDetector list of transferred parameters in
+    receiveAtom
+  * Minor bugfixes
 
 
 V1.0.0 (2018-10-02):
@@ -67,7 +73,7 @@ V0.0.6 (2016-11-04):
 
 * New features:
   * Added "LogAtom" and "AtomHandlerInterface" to pass data from
-    IO-layer to upper layers consistently.
+    -IO-layer to upper layers consistently.
   * Added TimestampsUnsortedDetector.py to fail (exit) when data
     is not properly sorted.
   * Added SimpleMultisourceAtomSync.py to merge LogAtoms read
