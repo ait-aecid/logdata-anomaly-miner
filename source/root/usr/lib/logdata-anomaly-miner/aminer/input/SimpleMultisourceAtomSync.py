@@ -35,11 +35,21 @@ class SimpleMultisourceAtomSync(AtomHandlerInterface):
     self.blockingEndTime = time.time()+self.syncWaitTime
     self.blockingSources = 0
     self.timestampsUnsortedFlag = False
+    self.lastForwardedSource = None
+    self.bufferEmptyCounter = 0
 
   def receiveAtom(self, logAtom):
+    if self.lastForwardedSource is not None and logAtom.source != self.lastForwardedSource and self.bufferEmptyCounter < (2 * len(self.sourcesDict.keys())):
+      self.bufferEmptyCounter += 1
+      return False
+    else:
+      self.bufferEmptyCounter = 0
+      self.lastForwardedSource = None
+
     timestamp = logAtom.atomTime
     if timestamp is None:
       self.forwardAtom(logAtom)
+      self.lastForwardedSource = logAtom.source
       return True
 
     sourceInfo = self.sourcesDict.get(logAtom.source, None)
@@ -51,6 +61,7 @@ class SimpleMultisourceAtomSync(AtomHandlerInterface):
 # Atoms not sorted, not our problem. Forward it immediately.
         self.timestampsUnsortedFlag = True
         self.forwardAtom(logAtom)
+        self.lastForwardedSource = logAtom.source
         return True
       if sourceInfo[1] is None:
         sourceInfo[1] = logAtom
@@ -67,8 +78,6 @@ class SimpleMultisourceAtomSync(AtomHandlerInterface):
         continue
       if sourceInfo[1].atomTime < oldestSourceInfo[1].atomTime:
         oldestSourceInfo = sourceInfo
-    if hasIdleSourcesFlag is False:
-      self.blockingEndTime = 0
     if self.blockingEndTime != 0:
 # We cannot do anything while blocking to catch more atoms.
       if self.blockingEndTime > time.time():
@@ -98,6 +107,7 @@ class SimpleMultisourceAtomSync(AtomHandlerInterface):
     if logAtom != oldestSourceInfo[1]:
       return False
     self.forwardAtom(logAtom)
+    self.lastForwardedSource = logAtom.source
     oldestSourceInfo[1] = None
     if timestamp > oldestSourceInfo[0]:
       oldestSourceInfo[0] = timestamp
