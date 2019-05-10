@@ -246,7 +246,7 @@ class UnixSocketLogDataResource(LogDataResource):
       raise Exception('Attempting to create different type resource as unix')
     self.logResourceName = logResourceName
     self.logStreamFd = logStreamFd
-    self.buffer = ''
+    self.buffer = b''
     self.defaultBufferSize = defaultBufferSize
     self.totalConsumedLength = 0
 
@@ -293,7 +293,7 @@ class UnixSocketLogDataResource(LogDataResource):
     information is not updated, updatePosition() has to be used.
     @return the number of bytes read or -1 on error or end."""
     data = os.read(self.logStreamFd, self.defaultBufferSize)
-    self.buffer += data.decode()
+    self.buffer += data
     return len(data)
 
   def updatePosition(self, length):
