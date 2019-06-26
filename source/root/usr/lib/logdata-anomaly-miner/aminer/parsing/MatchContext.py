@@ -32,7 +32,7 @@ class DebugMatchContext(MatchContext):
   def __init__(self, matchData):
     self.debugInfo = ''
     self.lastMatchData = None
-    self.shortestUnmatchedData = None
+    self.shortestUnmatchedData = matchData 
     super(DebugMatchContext, self).__init__(matchData)
 
   def update(self, matchString):
