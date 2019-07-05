@@ -1,4 +1,4 @@
-V1.0.1 (2019-03-27):
+V1.0.1 (2019-07-05):
 ====================
 
 * Changes:
@@ -6,6 +6,7 @@ V1.0.1 (2019-03-27):
   * Updated Readme
   * Added functions getNameByComponent and getIdByComponent to
     AnalysisChild.py
+  * Update DefaultMailNotificationEventHandler.py to python3
 * Bugfixes including:
   * Fixed dependencies in Debian packaging
   * Fixed typo in various analysis components
