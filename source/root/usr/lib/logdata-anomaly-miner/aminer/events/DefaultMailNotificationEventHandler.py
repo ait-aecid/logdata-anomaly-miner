@@ -1,7 +1,8 @@
 """This module defines the event handler for reporting via emails."""
 
-import email
+import email.mime.text
 import os
+import tempfile
 import subprocess
 import sys
 import time
@@ -80,7 +81,7 @@ events and send them via "sendmail" transport."""
       self.eventsCollected += 1
       self.currentMessage += '%s (%d lines)\n' % (eventMessage, len(sortedLogLines))
       for line in sortedLogLines:
-        self.currentMessage += '  '+repr(line)+'\n'
+        self.currentMessage += '  '+line.decode("utf-8")+'\n'
       if eventData is not None:
         if isinstance(eventData, ParserMatch):
           self.currentMessage += '  '+eventData.getMatchElement().annotateMatch('')+'\n'
@@ -146,16 +147,16 @@ events and send them via "sendmail" transport."""
       return
 
 # Write whole message to file to allow sendmail send it asynchronously.
-    messageTmpFile = os.tmpfile()
-    message = email.mime.Text.MIMEText(self.currentMessage)
+    messageTmpFile = tempfile.TemporaryFile()
+    message = email.mime.text.MIMEText(self.currentMessage)
     subjectText = '%s Collected Events' % self.subjectPrefix
     if self.lastAlertTime != 0:
-      subjectText += ' in the last %d seconds' % (time-self.lastAlertTime)
+      subjectText += ' in the last %d seconds' % (triggerTime-self.lastAlertTime)
     message['Subject'] = subjectText
     if self.senderAddress is not None:
       message['From'] = self.senderAddress
     message['To'] = self.recipientAddress
-    messageTmpFile.write(message.as_string())
+    messageTmpFile.write(message.as_bytes())
 
 # Rewind before handling over the fd to sendmail.
     messageTmpFile.seek(0)
@@ -173,7 +174,8 @@ events and send them via "sendmail" transport."""
     self.runningSendmailProcesses.append(process)
     messageTmpFile.close()
 
-    self.lastAlertTime = time
+    self.lastAlertTime = triggerTime
     self.eventsCollected = 0
     self.currentMessage = ''
     self.nextAlertTime = 0
+
