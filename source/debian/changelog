@@ -5,6 +5,7 @@ logdata-anomaly-miner (1.0.1~pre0) bionic; urgency=low
   * Updated Readme
   * Added functions getNameByComponent and getIdByComponent to
     AnalysisChild.py
+  * Update DefaultMailNotificationEventHandler.py to python3
   Bugfixes including:
   * Fixed dependencies in Debian packaging
   * Fixed typo in various analysis components
@@ -18,7 +19,7 @@ logdata-anomaly-miner (1.0.1~pre0) bionic; urgency=low
     receiveAtom
   * Minor bugfixes
 
- -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Tue, 27 Mar 2019 17:00:00 +0000
+ -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Fir, 05 Jul 2019 17:00:00 +0000
 
 logdata-anomaly-miner (1.0.0) bionic; urgency=low
   
