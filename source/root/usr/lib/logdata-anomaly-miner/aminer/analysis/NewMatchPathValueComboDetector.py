@@ -82,7 +82,7 @@ class NewMatchPathValueComboDetector(
             'Analysis.%s' % self.__class__.__name__,
             'New value combination for path(es) %s: %s' % (
                 ', '.join(self.targetPathList), repr(matchValueTuple)),
-            [logAtom.rawData], (logAtom, matchValueTuple), self)
+            [logAtom.rawData], [logAtom, matchValueTuple], self)
     return True
 
 
