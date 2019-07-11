@@ -93,7 +93,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
             'Analysis.%s' % self.__class__.__name__,
             'New value combination for path(es) %s: %s' % (
                 ', '.join(self.targetPathList), repr(matchValueTuple)),
-            [logAtom.rawData], (logAtom, matchValueTuple), self)
+            [logAtom.rawData], [logAtom, matchValueTuple], self)
     return True
 
 
@@ -122,3 +122,4 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         currentTimestamp, currentTimestamp, 1, None]
     return 'Whitelisted path(es) %s with %s in %s' % (
         ', '.join(self.targetPathList), eventData[1], sortedLogLines[0])
+
