@@ -335,7 +335,7 @@ class ModuloTimeMatchRule(MatchRule):
   from that date modulo the given value are included in [lower,
   upper] range."""
 
-  def __init__(self, path, secondsModulo, lowerLimit, upperLimit, matchAction=None):
+  def __init__(self, path, secondsModulo, lowerLimit, upperLimit, matchAction=None, tzinfo=None):
     """@param path the path to the datetime object to use to evaluate
     the modulo time rules on. When None, the default timestamp associated
     with the match is used."""
@@ -344,6 +344,9 @@ class ModuloTimeMatchRule(MatchRule):
     self.lowerLimit = lowerLimit
     self.upperLimit = upperLimit
     self.matchAction = matchAction
+    self.tzinfo = tzinfo
+    if tzinfo is None:
+      self.tzinfo = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
 
   def match(self, logAtom):
     testValue = None
@@ -354,8 +357,8 @@ class ModuloTimeMatchRule(MatchRule):
       if ((timeMatch is None) or not isinstance(timeMatch.matchObject, tuple) or
           not isinstance(timeMatch.matchObject[0], datetime.datetime)):
         return False
-      testValue = timeMatch.matchObject[1]
-
+      testValue = timeMatch.matchObject[1] + datetime.datetime.now(self.tzinfo).utcoffset().total_seconds()
+    
     if testValue is None:
       return False
     testValue %= self.secondsModulo
@@ -498,3 +501,4 @@ class DebugHistoryMatchRule(MatchRule):
   def getHistory(self):
     """Get the history object from this debug rule."""
     return self.objectHistory
+
