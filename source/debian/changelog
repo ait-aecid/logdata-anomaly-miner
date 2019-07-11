@@ -17,9 +17,10 @@ logdata-anomaly-miner (1.0.1~pre0) bionic; urgency=low
   * Changed minum matchLen in DelimitedDataModelElement to 1 byte
   * Fixed NewMatchPathValueDetector list of transferred parameters in
     receiveAtom
+  * Fixed timezone offset in ModuloTimeMatchRule
   * Minor bugfixes
 
- -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Fir, 05 Jul 2019 17:00:00 +0000
+ -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Thu, 11 Jul 2019 17:00:00 +0000
 
 logdata-anomaly-miner (1.0.0) bionic; urgency=low
   
