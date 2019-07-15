@@ -10,3 +10,5 @@ Project Structure:
 
 * source/root/usr/share/doc/aminer: Directory containing the user
   and developer documentation for AMiner.
+
+Merge Test!
