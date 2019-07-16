@@ -83,12 +83,13 @@ class LogarithmicBackoffHistory(ObjectHistory):
   """This class keeps a history list of items with logarithmic
   storage characteristics. When adding objects, the list will
   be filled to the maximum size with the newest items at the end.
-  When filled, adding a new element will move with probability
-  1/2 the last element to the next lower position before putting
-  the new item to the end position. With a chance of 1/4, the
-  last 2 elements are moved, with 1/8 the last 3, ... Thus the
-  list will in average span a time range of 2^maxItems items with
-  growing size of holes towards the earliest element."""
+  When filled, adding a new element will replace with probability
+  1/2 the last element. With a chance of 1/4, the last element
+  will be moved to the next lower position, before putting the
+  new element at the end of the list. With a chance of 1/8, the
+  last two elements are moved, ... Thus the list will in average
+  span a time range of 2^maxItems items with growing size of 
+  holes towards the earliest element."""
 
   def __init__(self, maxItems, initialList=None):
     self.maxItems = maxItems
@@ -103,12 +104,10 @@ class LogarithmicBackoffHistory(ObjectHistory):
     if len(self.history) < self.maxItems:
       self.history.append(newObject)
     else:
-      movePos = getLogInt(self.maxItems)
-      if movePos != 0:
-        self.history = self.history[:self.maxItems-movePos]+ \
-            self.history[self.maxItems+1-movePos:]+[newObject]
-      else:
-        self.history[-1] = newObject
+      movePos = getLogInt(self.maxItems-1)
+      #print(movePos)
+      self.history = self.history[:self.maxItems-movePos-1]+ \
+            self.history[self.maxItems-movePos:]+[newObject]
 
   def getHistory(self):
     """Get the whole history list. Make sure to clone the list
