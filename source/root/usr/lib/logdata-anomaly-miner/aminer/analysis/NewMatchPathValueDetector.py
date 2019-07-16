@@ -45,7 +45,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         for listener in self.anomalyEventHandlers:
           listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
               'New value for path %s: %s ' % (targetPath, repr(match.matchObject)), \
-              [logAtom.rawData], (logAtom, [match.matchObject]), self)
+              [logAtom.rawData], [logAtom, [match.matchObject]], self)
 
 
   def getTimeTriggerClass(self):

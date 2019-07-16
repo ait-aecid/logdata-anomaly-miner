@@ -30,7 +30,7 @@ class TimestampsUnsortedDetector(AtomHandlerInterface, EventSourceInterface):
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
             'Timestamp %s below %s ' % (timestamp, self.lastTimestamp), \
-            [logAtom.rawData], [logAtom], self)
+            [logAtom.rawData], logAtom, self)
       if self.exitOnErrorFlag:
         import sys
         sys.exit(1)

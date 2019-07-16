@@ -90,11 +90,12 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
     elif self.nextPersistTime is None:
       self.nextPersistTime = time.time()+600
 
+    logAtom.parserMatch = parserMatch
     if (self.totalRecords%0x10000) == 0:
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
             'Correlation report', [self.analysisStatusToString()], \
-            parserMatch, self)
+            logAtom, self)
       self.resetStatistics()
 
 

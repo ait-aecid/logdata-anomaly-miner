@@ -4,8 +4,7 @@ a stream."""
 import sys
 
 from aminer.events import EventHandlerInterface
-from aminer.input.LogAtom import LogAtom
-
+from aminer.events.EventData import EventData
 
 class StreamPrinterEventHandler(EventHandlerInterface):
   """This class implements an event record listener, that will
@@ -17,16 +16,8 @@ is stdout"""
   def receiveEvent(self, eventType, eventMessage, sortedLogLines, eventData,
                    eventSource):
     """Receive information about a detected event."""
-    message = '%s (%d lines)\n' % (eventMessage, len(sortedLogLines))
-    for line in sortedLogLines:
-      message += '  '+repr(line)[2:-1]+'\n'
-    if eventData is not None:
-      if isinstance(eventData, LogAtom):
-        message += '  [%s/%s]' % (eventData.getTimestamp(), eventData.source)
-        if eventData.parserMatch is not None:
-          message += ' '+eventData.parserMatch.matchElement.annotateMatch('')+'\n'
-      else:
-        message += '  '+repr(eventData)+'\n'
+    self.eventData = EventData(eventType, eventMessage, sortedLogLines, eventData, eventSource)
+    message = self.eventData.receiveEventString()
     print('%s' % message, file=self.stream)
     self.stream.flush()
     return

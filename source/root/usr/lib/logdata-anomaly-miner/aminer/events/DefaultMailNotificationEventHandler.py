@@ -10,7 +10,7 @@ import time
 from aminer.AnalysisChild import AnalysisContext
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.events import EventHandlerInterface
-from aminer.parsing import ParserMatch
+from aminer.events.EventData import EventData
 
 class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredComponentInterface):
   """This class implements an event record listener, that will pool
@@ -79,14 +79,8 @@ events and send them via "sendmail" transport."""
       if self.eventsCollected == 0:
         self.eventCollectionStartTime = currentTime
       self.eventsCollected += 1
-      self.currentMessage += '%s (%d lines)\n' % (eventMessage, len(sortedLogLines))
-      for line in sortedLogLines:
-        self.currentMessage += '  '+line.decode("utf-8")+'\n'
-      if eventData is not None:
-        if isinstance(eventData, ParserMatch):
-          self.currentMessage += '  '+eventData.getMatchElement().annotateMatch('')+'\n'
-        else:
-          self.currentMessage += '  '+repr(eventData)+'\n'
+      self.eventData = EventData(eventType, eventMessage, sortedLogLines, eventData, eventSource)
+      self.currentMessage += eventData.receiveEventString() 
 
     if self.nextAlertTime == 0:
       if self.lastAlertTime != 0:
