@@ -27,7 +27,7 @@ def encodeObject(term):
       key = encodeObject(key)
       var = encodeObject(var)
       encodedObject[key] = var
-  elif isinstance(term, (bool, int)) or term is None:
+  elif isinstance(term, (bool, int, float)) or term is None:
     encodedObject = term
   else:
     raise Exception('Unencodeable object %s' % type(term))
