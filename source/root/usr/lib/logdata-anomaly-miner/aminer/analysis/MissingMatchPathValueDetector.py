@@ -132,9 +132,15 @@ class MissingMatchPathValueDetector(
 # Set the next alerting time.
         detectorInfo[2] = self.lastSeenTimestamp+self.realertInterval
       if missingValueList:
-        messagePart = ''
+        messagePart = []
         for value, overdueTime, interval in missingValueList:
-          messagePart += '\n  %s overdue %ss (interval %s)' % (repr(value), overdueTime, interval)
+          if self.__class__.__name__ == 'MissingMatchPathValueDetector':
+            messagePart.append('  %s: %s overdue %ss (interval %s)' % (self.targetPath, repr(value), overdueTime, interval))
+          else:
+            targetPaths = ''
+            for targetPath in self.targetPathList:
+              targetPaths += targetPath + ', '
+            messagePart.append('  %s: %s overdue %ss (interval %s)' % (targetPaths[:-2], repr(value), overdueTime, interval))
         for listener in self.anomalyEventHandlers:
           self.sendEventToHandlers(listener, logAtom, messagePart, missingValueList)
           #listener.receiveEvent(
@@ -145,10 +151,8 @@ class MissingMatchPathValueDetector(
 
 
   def sendEventToHandlers(self, anomalyEventHandler, logAtom, messagePart, missingValueList):
-    anomalyEventHandler.receiveEvent(
-              'Analysis.%s' % self.__class__.__name__,
-              'Interval too large between values for path %s:%s ' % (self.targetPath, messagePart),
-              [logAtom.rawData], missingValueList, self)
+    anomalyEventHandler.receiveEvent('Analysis.%s' % self.__class__.__name__,
+        'Interval too large between values ', messagePart, logAtom, self)
 
 
   def setCheckValue(self, value, interval):
@@ -256,8 +260,6 @@ class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
     targetPaths = ''
     for targetPath in self.targetPathList:
       targetPaths += targetPath + ', '
-    anomalyEventHandler.receiveEvent(
-              'Analysis.%s' % self.__class__.__name__,
-              'Interval too large between values for path %s:%s ' % (targetPaths[:-2], messagePart),
-              [logAtom.rawData], missingValueList, self)
+    anomalyEventHandler.receiveEvent('Analysis.%s' % self.__class__.__name__, 
+        'Interval too large between values ', messagePart, logAtom, self)
 
