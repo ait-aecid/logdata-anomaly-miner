@@ -1,4 +1,5 @@
 from aminer.input.LogAtom import LogAtom
+from datetime import datetime
 
 class EventData(object):
 
@@ -9,24 +10,36 @@ class EventData(object):
       self.eventSource = eventSource
       if isinstance(eventData, LogAtom):
         self.logAtom = eventData
-      elif isinstance(eventData, list) and len(eventData) == 2:
-        if isinstance(eventData[0], LogAtom):
-          self.logAtom = eventData[0]
-        if isinstance(eventData[1], tuple):
-          self.dataList = list(eventData[1])
-        elif isinstance(eventData[1], list):
-          self.dataList = eventData[1]
+#         self.dataList = None
+#       elif isinstance(eventData, list) and len(eventData) == 2:
+#         if isinstance(eventData[0], LogAtom):
+#           self.logAtom = eventData[0]
+#         if isinstance(eventData[1], tuple):
+#           self.dataList = list(eventData[1])
+#         elif isinstance(eventData[1], list):
+#           self.dataList = eventData[1]
       else:
         raise(Exception("wrong eventData type!"))
     
     def receiveEventString(self):
-      message = '%s (%d lines)\n' % (self.eventMessage, len(self.sortedLogLines))
-      for line in self.sortedLogLines:
-        message += '  '+line.decode("utf-8")+'\n'
+      if not isinstance(self.logAtom.getTimestamp(), datetime):
+        atomTime = datetime.fromtimestamp(self.logAtom.getTimestamp())
+      else:
+        atomTime = self.logAtom.getTimestamp()
+      message = '%s ' % atomTime.strftime("%Y-%m-%d %H:%M:%S")
+      message += '%s\n' % (self.eventMessage)
       if self.logAtom.getTimestamp() is not None:
-        message += '  [%s/%s]' % (self.logAtom.getTimestamp(), self.logAtom.source)
-      if self.logAtom.parserMatch is not None:
-        message += ' '+self.logAtom.parserMatch.matchElement.annotateMatch('')+'\n'
+        message += '%s: (%d lines)\n' % (self.logAtom.source.__class__.__name__, len(self.sortedLogLines))
+      #if self.logAtom.parserMatch is not None:
+      #  message += '  '+self.logAtom.parserMatch.matchElement.annotateMatch('')+'\n'
+      for line in self.sortedLogLines:
+        if isinstance(line, bytes):
+          message += '  '+line.decode("utf-8")+'\n'
+        else:
+          message += '  '+line+'\n'
+      #if self.dataList is not None:
+      #  for line in self.dataList:
+      #    message += '  '+line+'\n'
       print("%s" % message)
       return message
         
