@@ -289,7 +289,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.lastReportTime = timestamp
         self.nextReportTime = timestamp+self.reportInterval
       else:
-        self.sendReport(timestamp)
+        self.sendReport(logAtom, timestamp)
 
     if (self.nextPersistTime is None) and (dataUpdatedFlag):
       self.nextPersistTime = time.time()+600
@@ -319,17 +319,19 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
     self.nextPersistTime = None
 
 
-  def sendReport(self, timestamp):
+  def sendReport(self, logAtom, timestamp):
     """Sends a report to the event handlers."""
     reportStr = 'Histogram report '
     if self.lastReportTime is not None:
       reportStr += 'from %s ' % self.lastReportTime
     reportStr += 'till %s' % timestamp
+    reportStr = [reportStr]
     for dataItem in self.histogramData:
-      reportStr += '\n'+dataItem.toString('  ')
+      for line in dataItem.toString('  ').split('\n'):
+        reportStr.append(line)
     for listener in self.reportEventHandlers:
       listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
-                            'Histogram report', [], reportStr, self)
+                            'Histogram report', reportStr, logAtom, self)
     if self.resetAfterReportFlag:
       for dataItem in self.histogramData:
         dataItem.reset()
@@ -431,7 +433,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
         self.lastReportTime = timestamp
         self.nextReportTime = timestamp+self.reportInterval
       else:
-        self.sendReport(timestamp)
+        self.sendReport(logAtom, timestamp)
 
     if self.nextPersistTime is None:
       self.nextPersistTime = time.time()+600
@@ -461,27 +463,28 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
     self.nextPersistTime = None
 
 
-  def sendReport(self, timestamp):
+  def sendReport(self, logAtom, timestamp):
     """Send report to event handlers."""
     reportStr = 'Path histogram report '
     if self.lastReportTime != None:
       reportStr += 'from %s ' % self.lastReportTime
     reportStr += 'till %s' % timestamp
+    reportStr = [reportStr]
     allPathSet = set(self.histogramData.keys())
     while allPathSet:
       path = allPathSet.pop()
       histogramMapping = self.histogramData.get(path)
       for path in histogramMapping[0]:
         allPathSet.discard(path)
-      reportStr += '\nPath values "%s":\nExample: %s\n%s' % (
-          '", "'.join(histogramMapping[0]),
-          histogramMapping[2].matchElement.matchString,
-          histogramMapping[1].toString('  '))
+      reportStr.append('Path values "%s":' % '", "'.join(histogramMapping[0]))
+      reportStr.append('Example: %s' % histogramMapping[2].matchElement.matchString)
+      for line in histogramMapping[1].toString('  ').split('\n'):
+        reportStr.append('%s' % line) 
       if self.resetAfterReportFlag:
         histogramMapping[1].reset()
     for listener in self.reportEventHandlers:
       listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
-          'Histogram report', [], reportStr, self)
+          'Histogram report', reportStr, logAtom, self)
 
     self.lastReportTime = timestamp
     self.nextReportTime = timestamp+self.reportInterval
