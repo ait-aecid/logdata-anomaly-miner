@@ -377,7 +377,7 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
 
   def __init__(
       self, path, secondsModulo, valuePathList, limitLookupDict,
-      defaultLimit=None, matchAction=None):
+      defaultLimit=None, matchAction=None, tzinfo=None):
     """@param path the path to the datetime object to use to evaluate
     the modulo time rules on. When None, the default timestamp associated
     with the match is used.
@@ -390,6 +390,9 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
     self.limitLookupDict = limitLookupDict
     self.defaultLimit = defaultLimit
     self.matchAction = matchAction
+    self.tzinfo = tzinfo
+    if tzinfo is None:
+      self.tzinfo = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
 
   def match(self, logAtom):
     matchDict = logAtom.parserMatch.getMatchDictionary()
@@ -412,7 +415,7 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
       if ((timeMatch is None) or not isinstance(timeMatch.matchObject, tuple) or
           not isinstance(timeMatch.matchObject[0], datetime.datetime)):
         return False
-      testValue = timeMatch.matchObject[1]
+      testValue = timeMatch.matchObject[1] + datetime.datetime.now(self.tzinfo).utcoffset().total_seconds()
 
     if testValue is None:
       return False
@@ -501,4 +504,3 @@ class DebugHistoryMatchRule(MatchRule):
   def getHistory(self):
     """Get the history object from this debug rule."""
     return self.objectHistory
-

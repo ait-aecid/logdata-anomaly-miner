@@ -34,9 +34,11 @@ class EventData(object):
       #  message += '  '+self.logAtom.parserMatch.matchElement.annotateMatch('')+'\n'
       for line in self.sortedLogLines:
         if isinstance(line, bytes):
-          message += '  '+line.decode("utf-8")+'\n'
+          if line is not b'':
+            message += '  '+line.decode("utf-8")+'\n'
         else:
-          message += '  '+line+'\n'
+          if line is not '':
+            message += '  '+line+'\n'
       #if self.dataList is not None:
       #  for line in self.dataList:
       #    message += '  '+line+'\n'
