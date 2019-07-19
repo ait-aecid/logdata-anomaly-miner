@@ -28,5 +28,5 @@ class WhitelistViolationDetector(AtomHandlerInterface):
         return True
     for listener in self.anomalyEventHandlers:
       listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
-          'No whitelisting for current atom', [logAtom.rawData], logAtom, self)
+          'No whitelisting for current atom', [logAtom.parserMatch.matchElement.annotateMatch('')], logAtom, self)
     return False
