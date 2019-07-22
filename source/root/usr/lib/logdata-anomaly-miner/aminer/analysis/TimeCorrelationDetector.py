@@ -58,7 +58,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
             'Logdata not sorted: last %s, current %s' % (self.lastTimestamp, timestamp), \
-            [logAtom.rawData], logAtom, self)
+            [logAtom.parserMatch.matchElement.annotateMatch('')], logAtom, self)
       return
     self.lastTimestamp = timestamp
     parserMatch = logAtom.parserMatch
@@ -127,7 +127,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
   def createRandomRule(self, parserMatch):
     """Create a random existing path rule or value match rule."""
     subRules = []
-    allKeys = parserMatch.getMatchDictionary().keys()
+    allKeys = list(parserMatch.getMatchDictionary().keys())
     attributeCount = getLogInt(self.maxRuleAttributes)+1
     while attributeCount > 0:
       keyPos = random.randint(0, len(allKeys)-1)
