@@ -24,7 +24,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
   def __init__(
       self, aminerConfig, targetPathList, anomalyEventHandlers,
       persistenceId='Default', allowMissingValuesFlag=False,
-      autoIncludeFlag=False, tupleTransformationFunction=None):
+      autoIncludeFlag=False, tupleTransformationFunction=None, analysisContext=None):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location.
     @param targetPathList the list of values to extract from each
@@ -41,8 +41,9 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     new one to return it."""
     super(EnhancedNewMatchPathValueComboDetector, self).__init__(
         aminerConfig, targetPathList, anomalyEventHandlers, persistenceId,
-        allowMissingValuesFlag, autoIncludeFlag)
+        allowMissingValuesFlag, autoIncludeFlag, analysisContext)
     self.tupleTransformationFunction = tupleTransformationFunction
+    self.analysisContext = analysisContext
 
 
   def loadPersistencyData(self):
@@ -91,7 +92,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent(
             'Analysis.%s' % self.__class__.__name__, 'New value combinations detected',
-            [logAtom.parserMatch.matchElement.annotateMatch('')], logAtom, self)
+            [logAtom.parserMatch.matchElement.annotateMatch('')], logAtom, self, self.analysisContext)
     return True
 
 

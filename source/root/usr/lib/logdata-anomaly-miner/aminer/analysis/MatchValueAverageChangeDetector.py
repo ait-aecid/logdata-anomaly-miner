@@ -16,7 +16,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
 
   def __init__(self, aminerConfig, anomalyEventHandlers, timestampPath,
                analyzePathList, minBinElements, minBinTime, syncBinsFlag=True,
-               debugMode=False, persistenceId='Default'):
+               debugMode=False, persistenceId='Default', analysisContext=None):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location.
     @param timestampPath if not None, use this path value for
@@ -38,6 +38,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
     self.syncBinsFlag = syncBinsFlag
     self.debugMode = debugMode
     self.nextPersistTime = None
+    self.analysisContext = analysisContext
 
     PersistencyUtil.addPersistableComponent(self)
     self.persistenceFileName = AMinerConfig.buildPersistenceFileName(aminerConfig, \
@@ -90,7 +91,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
             'Statistical data report', analysisSummary, logAtom, \
-            self)
+            self, self.analysisContext)
 
 
   def getTimeTriggerClass(self):

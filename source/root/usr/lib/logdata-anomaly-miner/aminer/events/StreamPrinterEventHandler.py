@@ -14,9 +14,9 @@ is stdout"""
     self.stream = stream
 
   def receiveEvent(self, eventType, eventMessage, sortedLogLines, eventData,
-                   eventSource):
+                   eventSource, analysisContext):
     """Receive information about a detected event."""
-    self.eventData = EventData(eventType, eventMessage, sortedLogLines, eventData, eventSource)
+    self.eventData = EventData(eventType, eventMessage, sortedLogLines, eventData, eventSource, analysisContext)
     message = self.eventData.receiveEventString()
     print('%s' % message, file=self.stream)
     self.stream.flush()

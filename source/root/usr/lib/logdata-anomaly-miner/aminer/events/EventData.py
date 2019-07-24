@@ -3,11 +3,15 @@ from datetime import datetime
 
 class EventData(object):
 
-    def __init__(self, eventType, eventMessage, sortedLogLines, eventData, eventSource):
+    def __init__(self, eventType, eventMessage, sortedLogLines, eventData, eventSource, analysisContext):
       self.eventType = eventType
       self.eventMessage = eventMessage
       self.sortedLogLines = sortedLogLines
       self.eventSource = eventSource
+      if analysisContext is not None:
+        self.description = '"%s"' % analysisContext.getNameByComponent(eventSource)
+      else:
+        self.description = ''
       if isinstance(eventData, LogAtom):
         self.logAtom = eventData
 #         self.dataList = None
@@ -29,7 +33,7 @@ class EventData(object):
       message = '%s ' % atomTime.strftime("%Y-%m-%d %H:%M:%S")
       message += '%s\n' % (self.eventMessage)
       if self.logAtom.getTimestamp() is not None:
-        message += '%s: (%d lines)\n' % (self.logAtom.source.__class__.__name__, len(self.sortedLogLines))
+        message += '%s: %s (%d lines)\n' % (self.logAtom.source.__class__.__name__, self.description, len(self.sortedLogLines))
       #if self.logAtom.parserMatch is not None:
       #  message += '  '+self.logAtom.parserMatch.matchElement.annotateMatch('')+'\n'
       for line in self.sortedLogLines:

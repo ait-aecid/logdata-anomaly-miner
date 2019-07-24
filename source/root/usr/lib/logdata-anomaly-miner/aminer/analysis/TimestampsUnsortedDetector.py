@@ -8,12 +8,12 @@ class TimestampsUnsortedDetector(AtomHandlerInterface, EventSourceInterface):
   This is useful mostly to detect algorithm malfunction or configuration
   errors, e.g. invalid timezone configuration."""
 
-  def __init__(self, anomalyEventHandlers, exitOnErrorFlag=False):
+  def __init__(self, anomalyEventHandlers, exitOnErrorFlag=False, analysisContext=None):
     """Initialize the detector."""
     self.anomalyEventHandlers = anomalyEventHandlers
     self.lastTimestamp = 0
     self.exitOnErrorFlag = exitOnErrorFlag
-
+    self.analysisContext = analysisContext
 
   def receiveAtom(self, logAtom):
     """Receive on parsed atom and the information about the parser
@@ -30,7 +30,7 @@ class TimestampsUnsortedDetector(AtomHandlerInterface, EventSourceInterface):
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
             'Timestamp %s below %s ' % (timestamp, self.lastTimestamp), \
-            [logAtom.parserMatch.matchElement.annotateMatch('')], logAtom, self)
+            [logAtom.parserMatch.matchElement.annotateMatch('')], logAtom, self, self.analysisContext)
       if self.exitOnErrorFlag:
         import sys
         sys.exit(1)
