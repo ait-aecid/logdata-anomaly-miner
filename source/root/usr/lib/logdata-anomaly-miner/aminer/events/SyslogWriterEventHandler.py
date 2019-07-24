@@ -14,24 +14,24 @@ class SyslogWriterEventHandler(EventHandlerInterface):
   CAVEAT: USE THIS AT YOUR OWN RISK: by creating aminer/syslog
   log data processing loops, you will flood your syslog and probably
   fill up your disks."""
-  def __init__(self, aminerConfig, instanceName='aminer'):
+  def __init__(self, analysisContext, instanceName='aminer'):
     self.instanceName = instanceName
     syslog.openlog('%s[%d]' % (self.instanceName, os.getpid()), \
         syslog.LOG_INFO, syslog.LOG_DAEMON)
     syslog.syslog(syslog.LOG_INFO, 'Syslog logger initialized')
     self.bufferStream = io.StringIO()
     self.eventWriter = StreamPrinterEventHandler(
-        None, self.bufferStream)
+        analysisContext, self.bufferStream)
     self.eventId = 0
 
   def receiveEvent(self, eventType, eventMessage, sortedLogLines,
-                   eventData, eventSource, analysisContext):
+                   eventData, eventSource):
     """Receive information about a detected even and forward it
     to syslog."""
     self.bufferStream.seek(0)
     self.bufferStream.truncate(0)
     self.eventWriter.receiveEvent(eventType, eventMessage, sortedLogLines, \
-        eventData, eventSource, analysisContext)
+        eventData, eventSource)
     eventData = self.bufferStream.getvalue()
     currentEventId = self.eventId
     self.eventId += 1

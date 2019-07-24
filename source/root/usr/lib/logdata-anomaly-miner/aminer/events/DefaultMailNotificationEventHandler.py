@@ -27,7 +27,9 @@ events and send them via "sendmail" transport."""
   CONFIG_KEY_ALERT_MAX_GAP = 'MailAlerting.MaxAlertGap'
   CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE = 'MailAlerting.MaxEventsPerMessage'
 
-  def __init__(self, aminerConfig):
+  def __init__(self, analysisContext):
+    self.analysisContext = analysisContext
+    aminerConfig = analysisContext.aminerConfig
     self.recipientAddress = aminerConfig.configProperties.get(
         DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS)
     if self.recipientAddress is None:
@@ -65,7 +67,7 @@ events and send them via "sendmail" transport."""
 
 
   def receiveEvent(self, eventType, eventMessage, sortedLogLines,
-                   eventData, eventSource, analysisContext):
+                   eventData, eventSource):
     """Receive information about a detected event."""
     if self.alertGraceTimeEnd != 0:
       if self.alertGraceTimeEnd >= time.time():
@@ -79,7 +81,7 @@ events and send them via "sendmail" transport."""
       if self.eventsCollected == 0:
         self.eventCollectionStartTime = currentTime
       self.eventsCollected += 1
-      self.eventData = EventData(eventType, eventMessage, sortedLogLines, eventData, eventSource, analysisContext)
+      self.eventData = EventData(eventType, eventMessage, sortedLogLines, eventData, eventSource, self.analysisContext)
       self.currentMessage += self.eventData.receiveEventString() 
 
     if self.nextAlertTime == 0:

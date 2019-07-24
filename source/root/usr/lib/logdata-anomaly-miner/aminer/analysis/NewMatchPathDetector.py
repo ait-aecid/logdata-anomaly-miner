@@ -14,8 +14,8 @@ class NewMatchPathDetector(AtomHandlerInterface, \
   """This class creates events when new data path was found in
   a parsed atom."""
 
-  def __init__(self, aminerConfig, anomalyEventHandlers, \
-    persistenceId='Default', autoIncludeFlag=False, analysisContext=None):
+  def __init__(self, analysisContext, anomalyEventHandlers, \
+    persistenceId='Default', autoIncludeFlag=False):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location."""
     self.anomalyEventHandlers = anomalyEventHandlers
@@ -25,7 +25,7 @@ class NewMatchPathDetector(AtomHandlerInterface, \
 
     PersistencyUtil.addPersistableComponent(self)
     self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
-        aminerConfig, self.__class__.__name__, persistenceId)
+        self.analysisContext.aminerConfig, self.__class__.__name__, persistenceId)
     persistenceData = PersistencyUtil.loadJson(self.persistenceFileName)
     if persistenceData is None:
       self.knownPathSet = set()
@@ -51,8 +51,8 @@ class NewMatchPathDetector(AtomHandlerInterface, \
       if self.nextPersistTime is None:
         self.nextPersistTime = time.time()+600
       for listener in self.anomalyEventHandlers:
-        listener.receiveEvent('Analysis.%s' % self.__class__.__name__, 'New path(es) detected ', 
-            [logAtom.parserMatch.matchElement.annotateMatch('')], logAtom, self, self.analysisContext)
+        listener.receiveEvent('Analysis.%s' % self.__class__.__name__, 'New path(es) detected', 
+            [logAtom.parserMatch.matchElement.annotateMatch('')], logAtom, self)
     return True
 
 

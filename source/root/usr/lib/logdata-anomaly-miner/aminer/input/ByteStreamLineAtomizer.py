@@ -96,7 +96,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
 
 # This is a normal line.
       lineData = streamData[consumedLength:lineEnd]
-      logAtom = LogAtom.LogAtom(lineData, None, None, self)
+      logAtom = LogAtom(lineData, None, None, self)
       if self.parsingModel != None:
         matchContext = MatchContext(lineData)
         matchElement = self.parsingModel.getMatchElement('', matchContext)
