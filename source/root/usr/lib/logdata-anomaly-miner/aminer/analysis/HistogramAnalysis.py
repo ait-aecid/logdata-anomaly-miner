@@ -42,6 +42,7 @@ a report every week:
 """
 
 import time
+from datetime import datetime
 
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
@@ -243,7 +244,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
   """This class creates a histogram for one or more properties
   extracted from a parsed atom."""
 
-  def __init__(self, aminerConfig, histogramDefs, reportInterval,
+  def __init__(self, analysisContext, histogramDefs, reportInterval,
                reportEventHandlers, resetAfterReportFlag=True,
                persistenceId='Default'):
     """Initialize the analysis component.
@@ -264,6 +265,8 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
     self.resetAfterReportFlag = resetAfterReportFlag
     self.persistenceId = persistenceId
     self.nextPersistTime = None
+    self.analysisContext = analysisContext
+    aminerConfig = analysisContext.aminerConfig
 
     PersistencyUtil.addPersistableComponent(self)
     self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
@@ -323,8 +326,8 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """Sends a report to the event handlers."""
     reportStr = 'Histogram report '
     if self.lastReportTime is not None:
-      reportStr += 'from %s ' % self.lastReportTime
-    reportStr += 'till %s' % timestamp
+      reportStr += 'from %s ' % datetime.fromtimestamp(self.lastReportTime).strftime("%Y-%m-%d %H:%M:%S")
+    reportStr += 'till %s' % datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
     reportStr = [reportStr]
     for dataItem in self.histogramData:
       for line in dataItem.toString('  ').split('\n'):
@@ -350,7 +353,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
   and one for each separate subpath, counting only those property
   values where the specific subpath was followed."""
 
-  def __init__(self, aminerConfig, propertyPath, binDefinition,
+  def __init__(self, analysisContext, propertyPath, binDefinition,
                reportInterval, reportEventHandlers, resetAfterReportFlag=True,
                persistenceId='Default'):
     """Initialize the analysis component.
@@ -368,6 +371,8 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
     self.resetAfterReportFlag = resetAfterReportFlag
     self.persistenceId = persistenceId
     self.nextPersistTime = None
+    self.analysisContext = analysisContext
+    aminerConfig = analysisContext.aminerConfig
 
     PersistencyUtil.addPersistableComponent(self)
     self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
@@ -467,8 +472,8 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
     """Send report to event handlers."""
     reportStr = 'Path histogram report '
     if self.lastReportTime != None:
-      reportStr += 'from %s ' % self.lastReportTime
-    reportStr += 'till %s' % timestamp
+      reportStr += 'from %s ' % datetime.fromtimestamp(self.lastReportTime).strftime("%Y-%m-%d %H:%M:%S")
+    reportStr += 'till %s' % datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
     reportStr = [reportStr]
     allPathSet = set(self.histogramData.keys())
     while allPathSet:
