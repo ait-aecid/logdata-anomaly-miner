@@ -11,13 +11,12 @@ class WhitelistViolationDetector(AtomHandlerInterface):
   tree more than once, the whitelist rules may have match actions
   attached that set off an alarm by themselves."""
 
-  def __init__(self, whitelistRules, anomalyEventHandlers, analysisContext=None):
+  def __init__(self, whitelistRules, anomalyEventHandlers):
     """Initialize the detector.
     @param whitelistRules list of rules executed in same way as
     inside Rules.OrMatchRule."""
     self.whitelistRules = whitelistRules
     self.anomalyEventHandlers = anomalyEventHandlers
-    self.analysisContext = analysisContext
 
   def receiveAtom(self, logAtom):
     """Receive on parsed atom and the information about the parser
@@ -29,5 +28,5 @@ class WhitelistViolationDetector(AtomHandlerInterface):
         return True
     for listener in self.anomalyEventHandlers:
       listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
-          'No whitelisting for current atom', [logAtom.parserMatch.matchElement.annotateMatch('')], logAtom, self, self.analysisContext)
+          'No whitelisting for current atom', [logAtom.parserMatch.matchElement.annotateMatch('')], logAtom, self)
     return False

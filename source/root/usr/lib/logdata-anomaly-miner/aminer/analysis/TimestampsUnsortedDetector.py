@@ -2,18 +2,18 @@
 
 from aminer.events import EventSourceInterface
 from aminer.input import AtomHandlerInterface
+from datetime import datetime
 
 class TimestampsUnsortedDetector(AtomHandlerInterface, EventSourceInterface):
   """This class creates events when unsorted timestamps are detected.
   This is useful mostly to detect algorithm malfunction or configuration
   errors, e.g. invalid timezone configuration."""
 
-  def __init__(self, anomalyEventHandlers, exitOnErrorFlag=False, analysisContext=None):
+  def __init__(self, anomalyEventHandlers, exitOnErrorFlag=False):
     """Initialize the detector."""
     self.anomalyEventHandlers = anomalyEventHandlers
     self.lastTimestamp = 0
     self.exitOnErrorFlag = exitOnErrorFlag
-    self.analysisContext = analysisContext
 
   def receiveAtom(self, logAtom):
     """Receive on parsed atom and the information about the parser
@@ -29,8 +29,9 @@ class TimestampsUnsortedDetector(AtomHandlerInterface, EventSourceInterface):
     if timestamp < self.lastTimestamp:
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
-            'Timestamp %s below %s ' % (timestamp, self.lastTimestamp), \
-            [logAtom.parserMatch.matchElement.annotateMatch('')], logAtom, self, self.analysisContext)
+            'Timestamp %s below %s' % (datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S"),
+            datetime.fromtimestamp(self.lastTimestamp).strftime("%Y-%m-%d %H:%M:%S")), \
+            [logAtom.parserMatch.matchElement.annotateMatch('')], logAtom, self)
       if self.exitOnErrorFlag:
         import sys
         sys.exit(1)

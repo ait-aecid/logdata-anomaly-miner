@@ -20,7 +20,7 @@ class NewMatchPathValueComboDetector(
   def __init__(
       self, aminerConfig, targetPathList, anomalyEventHandlers,
       persistenceId='Default', allowMissingValuesFlag=False,
-      autoIncludeFlag=False, analysisContext=None):
+      autoIncludeFlag=False):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location.
     @param targetPathList the list of values to extract from each
@@ -35,7 +35,6 @@ class NewMatchPathValueComboDetector(
     self.anomalyEventHandlers = anomalyEventHandlers
     self.allowMissingValuesFlag = allowMissingValuesFlag
     self.autoIncludeFlag = autoIncludeFlag
-    self.analysisContext = analysisContext
 
     self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
         aminerConfig, self.__class__.__name__, persistenceId)
@@ -81,7 +80,7 @@ class NewMatchPathValueComboDetector(
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent(
             'Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected',
-            [logAtom.parserMatch.matchElement.annotateMatch('')], logAtom, self, self.analysisContext)
+            [logAtom.parserMatch.matchElement.annotateMatch('')], logAtom, self)
     return True
 
 
