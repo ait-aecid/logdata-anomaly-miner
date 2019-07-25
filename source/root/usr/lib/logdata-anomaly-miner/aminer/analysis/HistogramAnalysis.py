@@ -244,7 +244,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
   """This class creates a histogram for one or more properties
   extracted from a parsed atom."""
 
-  def __init__(self, analysisContext, histogramDefs, reportInterval,
+  def __init__(self, aminerConfig, histogramDefs, reportInterval,
                reportEventHandlers, resetAfterReportFlag=True,
                persistenceId='Default'):
     """Initialize the analysis component.
@@ -265,8 +265,6 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
     self.resetAfterReportFlag = resetAfterReportFlag
     self.persistenceId = persistenceId
     self.nextPersistTime = None
-    self.analysisContext = analysisContext
-    aminerConfig = analysisContext.aminerConfig
 
     PersistencyUtil.addPersistableComponent(self)
     self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
@@ -353,7 +351,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
   and one for each separate subpath, counting only those property
   values where the specific subpath was followed."""
 
-  def __init__(self, analysisContext, propertyPath, binDefinition,
+  def __init__(self, aminerConfig, propertyPath, binDefinition,
                reportInterval, reportEventHandlers, resetAfterReportFlag=True,
                persistenceId='Default'):
     """Initialize the analysis component.
@@ -371,8 +369,6 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
     self.resetAfterReportFlag = resetAfterReportFlag
     self.persistenceId = persistenceId
     self.nextPersistTime = None
-    self.analysisContext = analysisContext
-    aminerConfig = analysisContext.aminerConfig
 
     PersistencyUtil.addPersistableComponent(self)
     self.persistenceFileName = AMinerConfig.buildPersistenceFileName(

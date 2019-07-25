@@ -152,7 +152,7 @@ class MissingMatchPathValueDetector(
 
   def sendEventToHandlers(self, anomalyEventHandler, logAtom, messagePart, missingValueList):
     anomalyEventHandler.receiveEvent('Analysis.%s' % self.__class__.__name__,
-        'Interval too large between values ', messagePart, logAtom, self)
+        'Interval too large between values', messagePart, logAtom, self)
 
 
   def setCheckValue(self, value, interval):
