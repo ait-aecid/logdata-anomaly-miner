@@ -6,6 +6,7 @@ import time
 
 from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
 from aminer.util import PersistencyUtil
+from datetime import datetime
 
 class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
   """This class creates events when a new value combination for
@@ -24,7 +25,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
   def __init__(
       self, aminerConfig, targetPathList, anomalyEventHandlers,
       persistenceId='Default', allowMissingValuesFlag=False,
-      autoIncludeFlag=False, tupleTransformationFunction=None, analysisContext=None):
+      autoIncludeFlag=False, tupleTransformationFunction=None):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location.
     @param targetPathList the list of values to extract from each
@@ -41,9 +42,8 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     new one to return it."""
     super(EnhancedNewMatchPathValueComboDetector, self).__init__(
         aminerConfig, targetPathList, anomalyEventHandlers, persistenceId,
-        allowMissingValuesFlag, autoIncludeFlag, analysisContext)
+        allowMissingValuesFlag, autoIncludeFlag)
     self.tupleTransformationFunction = tupleTransformationFunction
-    self.analysisContext = analysisContext
 
 
   def loadPersistencyData(self):
@@ -77,8 +77,9 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     if self.tupleTransformationFunction != None:
       matchValueList = self.tupleTransformationFunction(matchValueList)
     matchValueTuple = tuple(matchValueList)
+    sortedLogLines = matchValueTuple
 
-    currentTimestamp = logAtom.getTimestamp()
+    currentTimestamp = datetime.fromtimestamp(logAtom.getTimestamp()).strftime("%Y-%m-%d %H:%M:%S")
     extraData = self.knownValuesDict.get(matchValueTuple, None)
     if extraData != None:
       extraData[1] = currentTimestamp
@@ -87,12 +88,13 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
       if self.autoIncludeFlag:
         self.knownValuesDict[matchValueTuple] = [
             currentTimestamp, currentTimestamp, 1, None]
+        sortedLogLines = self.knownValuesDict
         if self.nextPersistTime is None:
           self.nextPersistTime = time.time()+600
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent(
-            'Analysis.%s' % self.__class__.__name__, 'New value combinations detected',
-            [logAtom.parserMatch.matchElement.annotateMatch('')], logAtom, self, self.analysisContext)
+            'Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected',
+            [str(sortedLogLines)], logAtom, self)
     return True
 
 
@@ -116,7 +118,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
       raise Exception('Event not from this source')
     if whitelistingData != None:
       raise Exception('Whitelisting data not understood by this detector')
-    currentTimestamp = eventData[0].getTimestamp()
+    currentTimestamp = datetime.fromtimestamp(eventData[0].getTimestamp()).strftime("%Y-%m-%d %H:%M:%S")
     self.knownValuesDict[eventData[1]] = [
         currentTimestamp, currentTimestamp, 1, None]
     return 'Whitelisted path(es) %s with %s in %s' % (

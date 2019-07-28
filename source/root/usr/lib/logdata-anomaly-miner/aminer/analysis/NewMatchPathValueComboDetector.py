@@ -80,7 +80,7 @@ class NewMatchPathValueComboDetector(
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent(
             'Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected',
-            [logAtom.parserMatch.matchElement.annotateMatch('')], logAtom, self)
+            [str(matchValueTuple)], logAtom, self)
     return True
 
 
