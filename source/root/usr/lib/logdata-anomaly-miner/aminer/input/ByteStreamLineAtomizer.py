@@ -1,7 +1,7 @@
 """This module provides support for splitting a data stream into
 atoms, perform parsing and forward the results."""
 
-from aminer.input import LogAtom
+from aminer.input.LogAtom import LogAtom
 from aminer.input import StreamAtomizer
 from aminer.parsing import MatchContext
 from aminer.parsing import ParserMatch

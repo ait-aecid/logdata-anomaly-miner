@@ -14,6 +14,8 @@ class EventData(object):
         self.description = ''
       if isinstance(eventData, LogAtom):
         self.logAtom = eventData
+      elif isinstance(eventData, list):
+        self.eventData = eventData
 #         self.dataList = None
 #       elif isinstance(eventData, list) and len(eventData) == 2:
 #         if isinstance(eventData[0], LogAtom):
@@ -22,18 +24,32 @@ class EventData(object):
 #           self.dataList = list(eventData[1])
 #         elif isinstance(eventData[1], list):
 #           self.dataList = eventData[1]
+      elif eventData is None:
+        return
       else:
         raise(Exception("wrong eventData type!"))
     
     def receiveEventString(self):
-      if not isinstance(self.logAtom.getTimestamp(), datetime):
-        atomTime = datetime.fromtimestamp(self.logAtom.getTimestamp())
+      message = ''
+      if hasattr(self, "logAtom"):
+        if not isinstance(self.logAtom.getTimestamp(), datetime):
+          atomTime = datetime.fromtimestamp(self.logAtom.getTimestamp())
+        else:
+          atomTime = self.logAtom.getTimestamp()
+        message += '%s ' % atomTime.strftime("%Y-%m-%d %H:%M:%S")
+        message += '%s\n' % (self.eventMessage)
+        if self.logAtom.getTimestamp() is not None:
+          message += '%s: %s (%d lines)\n' % (self.logAtom.source.__class__.__name__, self.description, len(self.sortedLogLines))
+      elif hasattr(self, "eventData"):
+        for line in self.eventData:
+          if isinstance(line, bytes):
+            if line is not b'':
+              message += '  '+line.decode("utf-8")+'\n'
+            else:
+              if line is not '':
+                message += '  '+line+'\n'
       else:
-        atomTime = self.logAtom.getTimestamp()
-      message = '%s ' % atomTime.strftime("%Y-%m-%d %H:%M:%S")
-      message += '%s\n' % (self.eventMessage)
-      if self.logAtom.getTimestamp() is not None:
-        message += '%s: %s (%d lines)\n' % (self.logAtom.source.__class__.__name__, self.description, len(self.sortedLogLines))
+        message += '%s (%d lines)\n' % (self.eventMessage, len(self.sortedLogLines))
       #if self.logAtom.parserMatch is not None:
       #  message += '  '+self.logAtom.parserMatch.matchElement.annotateMatch('')+'\n'
       for line in self.sortedLogLines:
