@@ -1,5 +1,7 @@
 from aminer.input.LogAtom import LogAtom
 from datetime import datetime
+from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
+
 
 class EventData(object):
 
@@ -8,6 +10,7 @@ class EventData(object):
       self.eventMessage = eventMessage
       self.sortedLogLines = sortedLogLines
       self.eventSource = eventSource
+      self.analysisContext = analysisContext
       if analysisContext is not None:
         self.description = '"%s"' % analysisContext.getNameByComponent(eventSource)
       else:
@@ -57,7 +60,9 @@ class EventData(object):
           if line is not b'':
             message += '  '+line.decode("utf-8")+'\n'
         else:
-          if line is not '':
+          if line.startswith(self.analysisContext.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)):
+            message+= line+'\n'
+          elif line is not '':
             message += '  '+line+'\n'
       #if self.dataList is not None:
       #  for line in self.dataList:

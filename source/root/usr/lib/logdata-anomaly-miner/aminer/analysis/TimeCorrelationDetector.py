@@ -19,7 +19,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
   checks as depicted in http://dx.doi.org/10.1016/j.cose.2014.09.006."""
 
   def __init__(self, aminerConfig, parallelCheckCount, correlationTestCount, \
-    maxFailCount, anomalyEventHandlers, persistenceId='Default', analysisContext=None):
+    maxFailCount, anomalyEventHandlers, persistenceId='Default'):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location.
     @param parallelCheckCount number of rule detection checks
@@ -37,7 +37,6 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
     self.lastUnhandledMatch = None
     self.nextPersistTime = None
     self.totalRecords = 0
-    self.analysisContext = analysisContext
 
     PersistencyUtil.addPersistableComponent(self)
     self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
@@ -59,7 +58,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
             'Logdata not sorted: last %s, current %s' % (self.lastTimestamp, timestamp), \
-            [logAtom.parserMatch.matchElement.annotateMatch('')], logAtom, self, self.analysisContext)
+            [logAtom.parserMatch.matchElement.annotateMatch('')], logAtom, self)
       return
     self.lastTimestamp = timestamp
     parserMatch = logAtom.parserMatch

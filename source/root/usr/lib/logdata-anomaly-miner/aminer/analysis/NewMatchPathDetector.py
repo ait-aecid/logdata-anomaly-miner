@@ -8,6 +8,8 @@ from aminer.events import EventSourceInterface
 from aminer.input import AtomHandlerInterface
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.util import PersistencyUtil
+from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
+
 
 class NewMatchPathDetector(AtomHandlerInterface, \
     TimeTriggeredComponentInterface, EventSourceInterface):
@@ -15,12 +17,14 @@ class NewMatchPathDetector(AtomHandlerInterface, \
   a parsed atom."""
 
   def __init__(self, aminerConfig, anomalyEventHandlers, \
-    persistenceId='Default', autoIncludeFlag=False):
+    persistenceId='Default', autoIncludeFlag=False, outputLogLine=True):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location."""
     self.anomalyEventHandlers = anomalyEventHandlers
     self.autoIncludeFlag = autoIncludeFlag
     self.nextPersistTime = None
+    self.outputLogLine = outputLogLine
+    self.aminerConfig = aminerConfig
 
     PersistencyUtil.addPersistableComponent(self)
     self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
@@ -49,9 +53,14 @@ class NewMatchPathDetector(AtomHandlerInterface, \
     if unknownPathList:
       if self.nextPersistTime is None:
         self.nextPersistTime = time.time()+600
+      if self.outputLogLine:
+          sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch(''), 
+            self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)+repr(logAtom.rawData)]
+      else:
+        sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')]
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__, 'New path(es) detected', 
-            [logAtom.parserMatch.matchElement.annotateMatch('')], logAtom, self)
+            sortedLogLines, logAtom, self)
     return True
 
 

@@ -7,6 +7,7 @@ import time
 from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
 from aminer.util import PersistencyUtil
 from datetime import datetime
+from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
 class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
   """This class creates events when a new value combination for
@@ -25,7 +26,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
   def __init__(
       self, aminerConfig, targetPathList, anomalyEventHandlers,
       persistenceId='Default', allowMissingValuesFlag=False,
-      autoIncludeFlag=False, tupleTransformationFunction=None):
+      autoIncludeFlag=False, tupleTransformationFunction=None, outputLogLine=True):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location.
     @param targetPathList the list of values to extract from each
@@ -44,6 +45,8 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         aminerConfig, targetPathList, anomalyEventHandlers, persistenceId,
         allowMissingValuesFlag, autoIncludeFlag)
     self.tupleTransformationFunction = tupleTransformationFunction
+    self.outputLogLine = outputLogLine
+    self.aminerConfig = aminerConfig
 
 
   def loadPersistencyData(self):
@@ -89,9 +92,13 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
       sortedLogLines = self.knownValuesDict
     if (self.autoIncludeFlag and self.knownValuesDict.get(matchValueTuple, None)[2] is 1) or not self.autoIncludeFlag:
       for listener in self.anomalyEventHandlers:
+        if self.outputLogLine:
+          sortedLogLines = [str(sortedLogLines), self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)+repr(logAtom.rawData)]
+        else:
+          sortedLogLines = [str(sortedLogLines)]
         listener.receiveEvent(
           'Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected',
-          [str(sortedLogLines)], logAtom, self)
+          sortedLogLines, logAtom, self)
     if self.autoIncludeFlag:
       if self.nextPersistTime is None:
         self.nextPersistTime = time.time() + 600

@@ -10,6 +10,7 @@ from aminer.events import EventSourceInterface
 from aminer.input import AtomHandlerInterface
 from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
+from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
 class MissingMatchPathValueDetector(
     AtomHandlerInterface, TimeTriggeredComponentInterface,
@@ -29,7 +30,7 @@ class MissingMatchPathValueDetector(
   def __init__(
       self, aminerConfig, targetPath, anomalyEventHandlers,
       persistenceId='Default', autoIncludeFlag=False, defaultInterval=3600,
-      realertInterval=86400):
+      realertInterval=86400, outputLogLine=True):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location.
     @param targetPath to extract a source identification value
@@ -45,6 +46,8 @@ class MissingMatchPathValueDetector(
     self.nextCheckTimestamp = 0
     self.lastSeenTimestamp = 0
     self.nextPersistTime = None
+    self.outputLogLine = outputLogLine
+    self.aminerConfig = aminerConfig
 
     PersistencyUtil.addPersistableComponent(self)
     self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
@@ -141,6 +144,8 @@ class MissingMatchPathValueDetector(
             for targetPath in self.targetPathList:
               targetPaths += targetPath + ', '
             messagePart.append('  %s: %s overdue %ss (interval %s)' % (targetPaths[:-2], repr(value), overdueTime, interval))
+        if self.outputLogLine:
+          messagePart.append(self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)+repr(logAtom.rawData))
         for listener in self.anomalyEventHandlers:
           self.sendEventToHandlers(listener, logAtom, messagePart, missingValueList)
           #listener.receiveEvent(
@@ -261,5 +266,5 @@ class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
     for targetPath in self.targetPathList:
       targetPaths += targetPath + ', '
     anomalyEventHandler.receiveEvent('Analysis.%s' % self.__class__.__name__, 
-        'Interval too large between values ', messagePart, logAtom, self)
+        'Interval too large between values', messagePart, logAtom, self)
 

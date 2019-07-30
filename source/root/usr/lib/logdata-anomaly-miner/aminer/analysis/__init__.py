@@ -8,6 +8,8 @@ No generic interfaces here yet.
 Add also the namespace references to classes defined in this
 directory."""
 
+CONFIG_KEY_LOG_LINE_PREFIX = 'LogPrefix'
+
 # AtomFilters.py
 from aminer.analysis.MatchValueAverageChangeDetector import MatchValueAverageChangeDetector
 from aminer.analysis.MatchValueStreamWriter import MatchValueStreamWriter
