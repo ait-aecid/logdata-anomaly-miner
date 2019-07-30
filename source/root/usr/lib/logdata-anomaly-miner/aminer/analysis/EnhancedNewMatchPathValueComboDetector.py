@@ -85,16 +85,16 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
       extraData[1] = currentTimestamp
       extraData[2] += 1
     else:
-      if self.autoIncludeFlag:
-        self.knownValuesDict[matchValueTuple] = [
-            currentTimestamp, currentTimestamp, 1, None]
-        sortedLogLines = self.knownValuesDict
-        if self.nextPersistTime is None:
-          self.nextPersistTime = time.time()+600
+      self.knownValuesDict[matchValueTuple] = [currentTimestamp, currentTimestamp, 1]
+      sortedLogLines = self.knownValuesDict
+    if (self.autoIncludeFlag and self.knownValuesDict.get(matchValueTuple, None)[2] is 1) or not self.autoIncludeFlag:
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent(
-            'Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected',
-            [str(sortedLogLines)], logAtom, self)
+          'Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected',
+          [str(sortedLogLines)], logAtom, self)
+    if self.autoIncludeFlag:
+      if self.nextPersistTime is None:
+        self.nextPersistTime = time.time() + 600
     return True
 
 
