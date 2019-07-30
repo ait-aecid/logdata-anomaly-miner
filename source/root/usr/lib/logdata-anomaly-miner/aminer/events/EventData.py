@@ -87,6 +87,7 @@ class EventData(object):
       #if self.dataList is not None:
       #  for line in self.dataList:
       #    message += '  '+line+'\n'
-      print("%s" % message)
+      
+      #print("%s" % message)
       return message
         
