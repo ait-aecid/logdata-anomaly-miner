@@ -89,13 +89,12 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
       extraData[2] += 1
     else:
       self.knownValuesDict[matchValueTuple] = [currentTimestamp, currentTimestamp, 1]
-      sortedLogLines = self.knownValuesDict
     if (self.autoIncludeFlag and self.knownValuesDict.get(matchValueTuple, None)[2] is 1) or not self.autoIncludeFlag:
       for listener in self.anomalyEventHandlers:
         if self.outputLogLine:
-          sortedLogLines = [str(sortedLogLines), self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)+repr(logAtom.rawData)]
+          sortedLogLines = [str(self.knownValuesDict), self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)+repr(logAtom.rawData)]
         else:
-          sortedLogLines = [str(sortedLogLines)]
+          sortedLogLines = [str(self.knownValuesDict)]
         listener.receiveEvent(
           'Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected',
           sortedLogLines, logAtom, self)
