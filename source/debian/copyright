@@ -3,11 +3,17 @@ Upstream-Name: logdata-anomaly-miner
 Source: git+ssh://git.launchpad.net/logdata-anomaly-miner
 
 Files: *
-Copyright: 2016 Roman Fiedler <roman.fiedler@ait.ac.at>
+Copyright: 2016-2018, Roman Fiedler
+           2018, Markus Wurzenberger <markus.wurzenberger@ait.ac.at>
+           2018, Max Landauer <max.landauer@ait.ac.at>
+           2016, AIT Austrian Institute of Technology GmbH <office@ait.ac.at>
 License: GPL-3.0+
 
 Files: debian/*
-Copyright: 2016 Roman Fiedler <roman.fiedler@ait.ac.at>
+Copyright: 2016-2018, Roman Fiedler
+           2018, Markus Wurzenberger <markus.wurzenberger@ait.ac.at>
+           2018, Max Landauer <max.landauer@ait.ac.at>
+           2016, AIT Austrian Institute of Technology GmbH <office@ait.ac.at>
 License: GPL-3.0+
 
 License: GPL-3.0+
