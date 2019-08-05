@@ -11,6 +11,7 @@ from aminer.input import AtomHandlerInterface
 from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
+from datetime import datetime
 
 class MissingMatchPathValueDetector(
     AtomHandlerInterface, TimeTriggeredComponentInterface,
@@ -71,6 +72,10 @@ class MissingMatchPathValueDetector(
     if value is None:
       return False
     timeStamp = logAtom.getTimestamp()
+    if isinstance(timeStamp, datetime):
+      timeStamp = timeStamp.timestamp()
+    if timeStamp is None:
+      timeStamp = round(time.time())
     detectorInfo = self.expectedValuesDict.get(value, None)
     if detectorInfo != None:
 # Just update the last seen value and switch from non-reporting
@@ -108,12 +113,15 @@ class MissingMatchPathValueDetector(
   def checkTimeouts(self, timeStamp, logAtom):
     """Check if there was any timeout on a channel, thus triggering
     event dispatching."""
+    #if self.lastSeenTimestamp is None:
+    #  self.lastSeenTimestamp = timeStamp
     self.lastSeenTimestamp = max(self.lastSeenTimestamp, timeStamp)
     if self.lastSeenTimestamp > self.nextCheckTimestamp:
       missingValueList = []
 # Start with a large recheck interval. It will be lowered if any
 # of the expectation intervals is below that.
-      self.nextCheckTimestamp = self.lastSeenTimestamp+86400
+      if not self.nextCheckTimestamp:
+        self.nextCheckTimestamp = self.lastSeenTimestamp+86400
       for value, detectorInfo in self.expectedValuesDict.items():
         valueOverdueTime = self.lastSeenTimestamp-detectorInfo[0]-detectorInfo[1]
         if detectorInfo[2] != 0:
@@ -126,11 +134,13 @@ class MissingMatchPathValueDetector(
         else:
 # No alerting yet, see if alerting is required.
           if valueOverdueTime < 0:
+            old = self.nextCheckTimestamp
             self.nextCheckTimestamp = min(
                 self.nextCheckTimestamp,
                 self.lastSeenTimestamp-valueOverdueTime)
-            continue
-
+            if old != self.nextCheckTimestamp:
+              continue
+            
         missingValueList.append([value, valueOverdueTime, detectorInfo[1]])
 # Set the next alerting time.
         detectorInfo[2] = self.lastSeenTimestamp+self.realertInterval
