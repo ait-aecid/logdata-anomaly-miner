@@ -81,8 +81,11 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
       matchValueList = self.tupleTransformationFunction(matchValueList)
     matchValueTuple = tuple(matchValueList)
     sortedLogLines = matchValueTuple
-
-    currentTimestamp = datetime.fromtimestamp(logAtom.getTimestamp()).strftime("%Y-%m-%d %H:%M:%S")
+    currentTimestamp = logAtom.getTimestamp()
+    if currentTimestamp is None:
+      currentTimestamp = round(time.time())
+    if not isinstance(currentTimestamp, datetime):
+      currentTimestamp = datetime.fromtimestamp(currentTimestamp).strftime("%Y-%m-%d %H:%M:%S")
     extraData = self.knownValuesDict.get(matchValueTuple, None)
     if extraData != None:
       extraData[1] = currentTimestamp
@@ -126,7 +129,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
       raise Exception('Whitelisting data not understood by this detector')
     currentTimestamp = datetime.fromtimestamp(eventData[0].getTimestamp()).strftime("%Y-%m-%d %H:%M:%S")
     self.knownValuesDict[eventData[1]] = [
-        currentTimestamp, currentTimestamp, 1, None]
+        currentTimestamp, currentTimestamp, 1]
     return 'Whitelisted path(es) %s with %s in %s' % (
         ', '.join(self.targetPathList), eventData[1], sortedLogLines[0])
 
