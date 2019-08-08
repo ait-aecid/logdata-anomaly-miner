@@ -82,7 +82,8 @@ class MissingMatchPathValueDetector(
 # error state to normal state.
       detectorInfo[0] = timeStamp
       if detectorInfo[2] != 0:
-        detectorInfo[2] = 0
+        if timeStamp >= detectorInfo[2]:
+          detectorInfo[2] = 0
 # Delta of this detector might be lower than the default maximum
 # recheck time.
         self.nextCheckTimestamp = min(
@@ -113,8 +114,6 @@ class MissingMatchPathValueDetector(
   def checkTimeouts(self, timeStamp, logAtom):
     """Check if there was any timeout on a channel, thus triggering
     event dispatching."""
-    #if self.lastSeenTimestamp is None:
-    #  self.lastSeenTimestamp = timeStamp
     self.lastSeenTimestamp = max(self.lastSeenTimestamp, timeStamp)
     if self.lastSeenTimestamp > self.nextCheckTimestamp:
       missingValueList = []
@@ -138,12 +137,13 @@ class MissingMatchPathValueDetector(
             self.nextCheckTimestamp = min(
                 self.nextCheckTimestamp,
                 self.lastSeenTimestamp-valueOverdueTime)
-            if old != self.nextCheckTimestamp:
+            if old > self.nextCheckTimestamp or self.nextCheckTimestamp < detectorInfo[2]:
               continue
             
         missingValueList.append([value, valueOverdueTime, detectorInfo[1]])
 # Set the next alerting time.
         detectorInfo[2] = self.lastSeenTimestamp+self.realertInterval
+        self.expectedValuesDict[value] = detectorInfo
       if missingValueList:
         messagePart = []
         for value, overdueTime, interval in missingValueList:
@@ -158,10 +158,6 @@ class MissingMatchPathValueDetector(
           messagePart.append(self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)+repr(logAtom.rawData))
         for listener in self.anomalyEventHandlers:
           self.sendEventToHandlers(listener, logAtom, messagePart, missingValueList)
-          #listener.receiveEvent(
-          #    'Analysis.%s' % self.__class__.__name__,
-          #    'Interval too large between values for path %s:%s ' % (self.targetPath, messagePart),
-          #    [logAtom.rawData], missingValueList, self)
     return True
 
 

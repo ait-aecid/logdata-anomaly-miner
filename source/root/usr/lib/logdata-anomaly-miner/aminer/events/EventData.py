@@ -18,14 +18,6 @@ class EventData(object):
         self.logAtom = eventData
       elif isinstance(eventData, list):
         self.eventData = eventData
-#         self.dataList = None
-#       elif isinstance(eventData, list) and len(eventData) == 2:
-#         if isinstance(eventData[0], LogAtom):
-#           self.logAtom = eventData[0]
-#         if isinstance(eventData[1], tuple):
-#           self.dataList = list(eventData[1])
-#         elif isinstance(eventData[1], list):
-#           self.dataList = eventData[1]
       elif eventData is None:
         return
       else:
@@ -73,8 +65,6 @@ class EventData(object):
         elif not line.endswith("\n"):
           size += 1
         message += '%s (%d lines)\n' % (self.eventMessage, size)
-      #if self.logAtom.parserMatch is not None:
-      #  message += '  '+self.logAtom.parserMatch.matchElement.annotateMatch('')+'\n'
       for line in self.sortedLogLines:
         if isinstance(line, bytes):
           if line is not b'':
@@ -84,10 +74,8 @@ class EventData(object):
             message+= line+'\n'
           elif line is not '':
             message += '  '+line+'\n'
-      #if self.dataList is not None:
-      #  for line in self.dataList:
-      #    message += '  '+line+'\n'
-      
+            
+      #uncomment the following line for debugging..
       #print("%s" % message)
       return message
         

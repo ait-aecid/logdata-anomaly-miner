@@ -105,7 +105,6 @@ class LogarithmicBackoffHistory(ObjectHistory):
       self.history.append(newObject)
     else:
       movePos = getLogInt(self.maxItems-1)
-      #print(movePos)
       self.history = self.history[:self.maxItems-movePos-1]+ \
             self.history[self.maxItems-movePos:]+[newObject]
 
