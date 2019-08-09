@@ -2,6 +2,7 @@
 an average."""
 
 import time
+import os
 
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
@@ -63,7 +64,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         return
       timestampValue = matchValue.matchObject[1]
 
-    analysisSummary = []
+    analysisSummary = ''
     if self.syncBinsFlag:
       readyForAnalysisFlag = True
       for (path, statData) in self.statData:
@@ -79,7 +80,12 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         for (path, statData) in self.statData:
           analysisData = self.analyze(statData)
           if analysisData is not None:
-            analysisSummary.append('"%s": %s' % (path, analysisData))
+            if analysisSummary == '':
+              analysisSummary += '"%s": %s' % (path, analysisData)
+            else:
+              analysisSummary += os.linesep
+              analysisSummary += '  "%s": %s' % (path, analysisData)
+            
 
         if self.nextPersistTime is None:
           self.nextPersistTime = time.time()+600
@@ -89,7 +95,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
     if analysisSummary:
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
-            'Statistical data report', analysisSummary, logAtom, \
+            'Statistical data report', [analysisSummary], logAtom, \
             self)
 
 

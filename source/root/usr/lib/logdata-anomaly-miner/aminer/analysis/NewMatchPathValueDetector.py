@@ -1,6 +1,7 @@
 """This module defines a detector for new values in a data path."""
 
 import time
+import os
 
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
@@ -49,7 +50,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
           originalLogLinePrefix = self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
           if originalLogLinePrefix is None:
             originalLogLinePrefix = ''
-          sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch(''), 
+          sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')+os.linesep+ 
             originalLogLinePrefix+repr(logAtom.rawData)]
         else:
           sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')]

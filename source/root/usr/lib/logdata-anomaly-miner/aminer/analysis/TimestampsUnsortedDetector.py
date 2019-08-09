@@ -1,5 +1,7 @@
 """This module defines a detector for unsorted timestamps."""
 
+import os
+
 from aminer.events import EventSourceInterface
 from aminer.input import AtomHandlerInterface
 from datetime import datetime
@@ -34,7 +36,7 @@ class TimestampsUnsortedDetector(AtomHandlerInterface, EventSourceInterface):
         originalLogLinePrefix = self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
         if originalLogLinePrefix is None:
           originalLogLinePrefix = ''
-        sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch(''), 
+        sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')+os.linesep+ 
           originalLogLinePrefix+repr(logAtom.rawData)]
       else:
         sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')]

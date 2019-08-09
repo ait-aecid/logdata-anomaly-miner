@@ -3,6 +3,7 @@ detector to extract values from LogAtoms and check, if the value
 combination was already seen before."""
 
 import time
+import os
 
 from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
 from aminer.util import PersistencyUtil
@@ -98,7 +99,8 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         if originalLogLinePrefix is None:
           originalLogLinePrefix = ''
         if self.outputLogLine:
-          sortedLogLines = [str(self.knownValuesDict), originalLogLinePrefix+repr(logAtom.rawData)]
+          sortedLogLines = [str(self.knownValuesDict)+os.linesep+ 
+          originalLogLinePrefix+repr(logAtom.rawData)]
         else:
           sortedLogLines = [str(self.knownValuesDict)]
         listener.receiveEvent(

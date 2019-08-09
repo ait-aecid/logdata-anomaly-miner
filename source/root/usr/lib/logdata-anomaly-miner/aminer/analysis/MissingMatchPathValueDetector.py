@@ -160,7 +160,7 @@ class MissingMatchPathValueDetector(
             originalLogLinePrefix = ''
           messagePart.append(originalLogLinePrefix+repr(logAtom.rawData))
         for listener in self.anomalyEventHandlers:
-          self.sendEventToHandlers(listener, logAtom, messagePart, missingValueList)
+          self.sendEventToHandlers(listener, logAtom, [''.join(messagePart)], missingValueList)
     return True
 
 

@@ -1,6 +1,8 @@
 """This module defines a detector for log atoms not matching
 any whitelisted rule."""
 
+import os
+
 from aminer.input import AtomHandlerInterface
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
@@ -32,7 +34,7 @@ class WhitelistViolationDetector(AtomHandlerInterface):
       originalLogLinePrefix = self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
       if originalLogLinePrefix is None:
           originalLogLinePrefix = ''
-      sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch(''), 
+      sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')+os.linesep+ 
         originalLogLinePrefix+repr(logAtom.rawData)]
     else:
       sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')]
