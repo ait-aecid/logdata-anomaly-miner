@@ -31,8 +31,11 @@ class TimestampsUnsortedDetector(AtomHandlerInterface, EventSourceInterface):
       return False
     if timestamp < self.lastTimestamp:
       if self.outputLogLine:
+        originalLogLinePrefix = self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+        if originalLogLinePrefix is None:
+          originalLogLinePrefix = ''
         sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch(''), 
-          self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)+repr(logAtom.rawData)]
+          originalLogLinePrefix+repr(logAtom.rawData)]
       else:
         sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')]
       for listener in self.anomalyEventHandlers:

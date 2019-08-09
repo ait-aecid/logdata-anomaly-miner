@@ -70,7 +70,8 @@ class EventData(object):
           if line is not b'':
             message += '  '+line.decode("utf-8")+'\n'
         else:
-          if line.startswith(self.analysisContext.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)):
+          originalLogLinePrefix = self.analysisContext.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+          if originalLogLinePrefix is not None and line.startswith(originalLogLinePrefix):
             message+= line+'\n'
           elif line is not '':
             message += '  '+line+'\n'

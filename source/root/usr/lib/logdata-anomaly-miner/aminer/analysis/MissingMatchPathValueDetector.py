@@ -155,7 +155,10 @@ class MissingMatchPathValueDetector(
               targetPaths += targetPath + ', '
             messagePart.append('  %s: %s overdue %ss (interval %s)' % (targetPaths[:-2], repr(value), overdueTime, interval))
         if self.outputLogLine:
-          messagePart.append(self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)+repr(logAtom.rawData))
+          originalLogLinePrefix = self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+          if originalLogLinePrefix is None:
+            originalLogLinePrefix = ''
+          messagePart.append(originalLogLinePrefix+repr(logAtom.rawData))
         for listener in self.anomalyEventHandlers:
           self.sendEventToHandlers(listener, logAtom, messagePart, missingValueList)
     return True

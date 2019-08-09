@@ -94,8 +94,11 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
       self.knownValuesDict[matchValueTuple] = [currentTimestamp, currentTimestamp, 1]
     if (self.autoIncludeFlag and self.knownValuesDict.get(matchValueTuple, None)[2] is 1) or not self.autoIncludeFlag:
       for listener in self.anomalyEventHandlers:
+        originalLogLinePrefix = self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+        if originalLogLinePrefix is None:
+          originalLogLinePrefix = ''
         if self.outputLogLine:
-          sortedLogLines = [str(self.knownValuesDict), self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)+repr(logAtom.rawData)]
+          sortedLogLines = [str(self.knownValuesDict), originalLogLinePrefix+repr(logAtom.rawData)]
         else:
           sortedLogLines = [str(self.knownValuesDict)]
         listener.receiveEvent(

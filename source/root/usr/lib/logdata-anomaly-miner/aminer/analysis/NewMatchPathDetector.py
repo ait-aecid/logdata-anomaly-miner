@@ -54,8 +54,11 @@ class NewMatchPathDetector(AtomHandlerInterface, \
       if self.nextPersistTime is None:
         self.nextPersistTime = time.time()+600
       if self.outputLogLine:
-          sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch(''), 
-            self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)+repr(logAtom.rawData)]
+        originalLogLinePrefix = self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+        if originalLogLinePrefix is None:
+          originalLogLinePrefix = ''
+        sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch(''), 
+          originalLogLinePrefix+repr(logAtom.rawData)]
       else:
         sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')]
       for listener in self.anomalyEventHandlers:
