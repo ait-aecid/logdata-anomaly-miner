@@ -32,7 +32,7 @@ class EventGenerationMatchAction(MatchAction):
   def matchAction(self, logAtom):
     for handler in self.eventHandlers:
       handler.receiveEvent(
-          self.eventType, self.eventMessage, [logAtom.rawData], logAtom, self)
+          self.eventType, self.eventMessage, [logAtom.parserMatch.matchElement.annotateMatch('')], logAtom, self)
 
 
 class AtomFilterMatchAction(MatchAction, SubhandlerFilter):

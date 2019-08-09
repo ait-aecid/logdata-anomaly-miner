@@ -44,7 +44,9 @@ class EventData(object):
           size = len(self.sortedLogLines)
         elif not line.endswith("\n"):
           size += 1
-        message += '%s: %s (%d lines)\n' % (self.logAtom.source.__class__.__name__, self.description, size)
+        message += '%s: %s (%d lines)\n' % (self.eventSource.__class__.__name__, self.description, size)
+#### https://stackoverflow.com/questions/28802417/how-to-count-lines-in-multi-lined-strings
+####        message += '%s: %s (%d lines)\n' % (self.eventSource.__class__.__name__, self.description, len([self.logAtom.rawData]))
       elif hasattr(self, "eventData"):
         for line in self.eventData:
           if isinstance(line, bytes):
@@ -65,6 +67,7 @@ class EventData(object):
         elif not line.endswith("\n"):
           size += 1
         message += '%s (%d lines)\n' % (self.eventMessage, size)
+####          message += '%s (%d lines)\n' % (self.eventMessage, len([self.logAtom.rawData]))
       for line in self.sortedLogLines:
         if isinstance(line, bytes):
           if line is not b'':
