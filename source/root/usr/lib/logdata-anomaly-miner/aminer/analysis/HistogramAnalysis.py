@@ -42,6 +42,7 @@ a report every week:
 """
 
 import time
+import os
 from datetime import datetime
 
 from aminer import AMinerConfig
@@ -117,11 +118,11 @@ class LinearNumericBinDefinition(BinDefinition):
       return self.binNames
     self.binNames = []
     if self.outlierBinsFlag:
-      self.binNames.append('...-%s)' % self.lowerLimit)
+      self.binNames.append('...-%s]' % self.lowerLimit)
     start = self.lowerLimit
     for binPos in range(1, self.binCount+1):
       end = self.lowerLimit+binPos*self.binSize
-      self.binNames.append('[%s-%s)' % (start, end))
+      self.binNames.append('[%s-%s]' % (start, end))
       start = end
     if self.outlierBinsFlag:
       self.binNames.append('[%s-...' % start)
@@ -175,7 +176,7 @@ class ModuloTimeBinDefinition(LinearNumericBinDefinition):
     and outlier bins were not requested. With outliers, bin 0
     is the bin with outliers below limit, first normal bin is
     at index 1."""
-    timeValue = (value[1]%self.moduloValue)/self.timeUnit
+    timeValue = (value%self.moduloValue)/self.timeUnit
     return super(ModuloTimeBinDefinition, self).getBin(timeValue)
 
 
@@ -285,6 +286,8 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
       dataItem.addValue(match.matchObject)
 
     timestamp = logAtom.getTimestamp()
+    if timestamp is None:
+      timestamp = time.time()
     if self.nextReportTime < timestamp:
       if self.lastReportTime is None:
         self.lastReportTime = timestamp
@@ -326,13 +329,15 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
     if self.lastReportTime is not None:
       reportStr += 'from %s ' % datetime.fromtimestamp(self.lastReportTime).strftime("%Y-%m-%d %H:%M:%S")
     reportStr += 'till %s' % datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
-    reportStr = [reportStr]
+    res = None
     for dataItem in self.histogramData:
       for line in dataItem.toString('  ').split('\n'):
-        reportStr.append(line)
+        reportStr += os.linesep+line
+        res = [''] * dataItem.totalElements
+    res[0]  = reportStr
     for listener in self.reportEventHandlers:
       listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
-                            'Histogram report', reportStr, logAtom, self)
+                            'Histogram report', res, logAtom, self)
     if self.resetAfterReportFlag:
       for dataItem in self.histogramData:
         dataItem.reset()
@@ -470,22 +475,21 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
     if self.lastReportTime != None:
       reportStr += 'from %s ' % datetime.fromtimestamp(self.lastReportTime).strftime("%Y-%m-%d %H:%M:%S")
     reportStr += 'till %s' % datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
-    reportStr = [reportStr]
     allPathSet = set(self.histogramData.keys())
     while allPathSet:
       path = allPathSet.pop()
       histogramMapping = self.histogramData.get(path)
       for path in histogramMapping[0]:
         allPathSet.discard(path)
-      reportStr.append('Path values "%s":' % '", "'.join(histogramMapping[0]))
-      reportStr.append('Example: %s' % histogramMapping[2].matchElement.matchString)
+      reportStr += os.linesep+'Path values "%s":' % '", "'.join(histogramMapping[0])
+      reportStr += os.linesep+'Example: %s' % histogramMapping[2].matchElement.matchString
       for line in histogramMapping[1].toString('  ').split('\n'):
-        reportStr.append('%s' % line) 
+        reportStr += os.linesep+'%s' % line
       if self.resetAfterReportFlag:
         histogramMapping[1].reset()
     for listener in self.reportEventHandlers:
       listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
-          'Histogram report', reportStr, logAtom, self)
+          'Histogram report', [reportStr], logAtom, self)
 
     self.lastReportTime = timestamp
     self.nextReportTime = timestamp+self.reportInterval
