@@ -93,9 +93,11 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
       raise Exception('FIXME: not implemented')
 
     if analysisSummary:
+      res = [''] * statData[2][0]
+      res[0] = analysisSummary
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
-            'Statistical data report', [analysisSummary], logAtom, \
+            'Statistical data report', res, logAtom, \
             self)
 
 
