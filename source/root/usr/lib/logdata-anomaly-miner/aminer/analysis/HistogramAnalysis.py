@@ -293,6 +293,8 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
     timestamp = logAtom.getTimestamp()
     if timestamp is None:
       timestamp = time.time()
+    if isinstance(timestamp, datetime):
+      timestamp = (datetime.fromtimestamp(0)-timestamp).total_seconds()
     if self.nextReportTime < timestamp:
       if self.lastReportTime is None:
         self.lastReportTime = timestamp
@@ -341,8 +343,8 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
       res += [''] * dataItem.totalElements
     if len(res) > 0:
       res[0]  = reportStr
-    for listener in self.reportEventHandlers:
-      listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
+      for listener in self.reportEventHandlers:
+        listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
                             'Histogram report', res, logAtom, self)
     if self.resetAfterReportFlag:
       for dataItem in self.histogramData:

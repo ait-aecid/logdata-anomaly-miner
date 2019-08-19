@@ -84,15 +84,18 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     sortedLogLines = matchValueTuple
     currentTimestamp = logAtom.getTimestamp()
     if currentTimestamp is None:
-      currentTimestamp = round(time.time())
-    if not isinstance(currentTimestamp, datetime):
+      currentTimestamp = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d %H:%M:%S")
+    if not isinstance(currentTimestamp, datetime) and not isinstance(currentTimestamp, str):
       currentTimestamp = datetime.fromtimestamp(currentTimestamp).strftime("%Y-%m-%d %H:%M:%S")
     extraData = self.knownValuesDict.get(matchValueTuple, None)
     if extraData != None:
       extraData[1] = currentTimestamp
       extraData[2] += 1
     else:
-      self.knownValuesDict[matchValueTuple] = [currentTimestamp, currentTimestamp, 1]
+      if isinstance(currentTimestamp, datetime):
+        self.knownValuesDict[matchValueTuple] = [currentTimestamp.strftime("%Y-%m-%d %H:%M:%S"), currentTimestamp.strftime("%Y-%m-%d %H:%M:%S"), 1]
+      else:
+        self.knownValuesDict[matchValueTuple] = [currentTimestamp, currentTimestamp, 1]
     if (self.autoIncludeFlag and self.knownValuesDict.get(matchValueTuple, None)[2] is 1) or not self.autoIncludeFlag:
       for listener in self.anomalyEventHandlers:
         originalLogLinePrefix = self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
