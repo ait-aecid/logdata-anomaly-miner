@@ -254,6 +254,8 @@ class ValueMatchRule(MatchRule):
     return False
 
   def __str__(self):
+    if isinstance(self.value, bytes):
+      self.value = self.value.decode("utf-8")
     return 'value(%s)==%s' % (self.path, self.value)
 
 
