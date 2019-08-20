@@ -2,6 +2,8 @@
 the timestamp associated with a received parsed atom."""
 
 from aminer.input import AtomHandlerInterface
+import time
+from datetime import datetime
 
 
 class SimpleMonotonicTimestampAdjust(AtomHandlerInterface):
@@ -18,6 +20,10 @@ class SimpleMonotonicTimestampAdjust(AtomHandlerInterface):
     """Pass the atom to the subhandlers.
     @return false when no subhandler was able to handle the atom."""
     timestamp = logAtom.getTimestamp()
+    if timestamp is None:
+      timestamp = time.time()
+    if isinstance(timestamp, datetime):
+      timestamp = (datetime.fromtimestamp(0)-timestamp).total_seconds()
     if timestamp < self.latestTimestampSeen:
       logAtom.setTimestamp(self.latestTimestampSeen)
     else:
