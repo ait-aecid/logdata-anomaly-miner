@@ -229,7 +229,7 @@ class CorrelationRule:
             violationLine = aEvent[3].matchElement.matchString
             if isinstance(violationLine, bytes):
               violationLine = violationLine.decode("utf-8")
-              violationMessage = 'FAIL: \"%s\" (%s): %s is not equal %s' % (
+              violationMessage = 'FAIL: \"%s\" (%s) %s is not equal %s' % (
                 violationLine, aEvent[2].actionId, aEvent[checkPos], bEvent[checkPos])
               violationLogs = []
               violationLogs.append(violationLine)
@@ -311,9 +311,10 @@ class CorrelationRule:
     if self.artefactMatchParameters is not None:
       pos = 4
       vDict = parserMatch.getMatchDictionary()
-      for paramPath in self.artefactMatchParameters:
-        matchElement = vDict.get(paramPath, None)
-        if matchElement is not None:
-          result[pos] = matchElement.matchObject
-          pos += 1
+      for artefactMatchParameter in self.artefactMatchParameters:
+        for paramPath in artefactMatchParameter:
+          matchElement = vDict.get(paramPath, None)
+          if matchElement is not None:
+            result[pos] = matchElement.matchObject
+            pos += 1
     return result
