@@ -37,4 +37,5 @@ class RepeatedElementDataModelElement(ModelElementInterface):
       return None
 
     return MatchElement(currentPath, \
-        startData[:len(startData)-len(matchContext.matchData)], None, matches)
+        startData[:len(startData)-len(matchContext.matchData)], 
+        startData[:len(startData)-len(matchContext.matchData)], matches)

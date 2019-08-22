@@ -26,4 +26,5 @@ class OptionalMatchModelElement(ModelElementInterface):
           '', None, None)
 
     return MatchElement(currentPath, \
-        startData[:len(startData)-len(matchContext.matchData)], None, [match])
+        startData[:len(startData)-len(matchContext.matchData)], 
+        startData[:len(startData)-len(matchContext.matchData)], [match])
