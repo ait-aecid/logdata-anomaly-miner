@@ -122,6 +122,16 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
         parsedFields[COMPONENT_TYPE_YEAR] = self.startYear
       else:
         parsedFields[COMPONENT_TYPE_YEAR] = datetime.datetime.utcnow().year
+    if parsedFields[COMPONENT_TYPE_MONTH] is None:
+      parsedFields[COMPONENT_TYPE_MONTH] = 1
+    if parsedFields[COMPONENT_TYPE_DAY] is None:
+      parsedFields[COMPONENT_TYPE_DAY] = 1
+    if parsedFields[COMPONENT_TYPE_HOUR] is None:
+      parsedFields[COMPONENT_TYPE_HOUR] = 0
+    if parsedFields[COMPONENT_TYPE_MINUTE] is None:
+      parsedFields[COMPONENT_TYPE_MINUTE] = 0
+    if parsedFields[COMPONENT_TYPE_SECOND] is None:
+      parsedFields[COMPONENT_TYPE_SECOND] = 0
 # Around new year, the year correction could change a semiqualified
 # date to the beginning of the year or could change a semiqualified
 # date lagging behind the latest date seen to the end of the following
@@ -159,7 +169,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
       self.checkTimestampValueInRange()
       if self.latestParsedTimestamp is not None:
         delta = (self.latestParsedTimestamp-self.latestParsedTimestamp)
-        deltaSeconds = (delta.days*86400+delta.seconds+delta.microseconds)
+        deltaSeconds = (delta.days*86400+delta.seconds+delta.microseconds/1000)
         if (deltaSeconds < -86400) or (deltaSeconds > 86400*30):
           print('Delta to last timestamp out of range for %s' % repr(dateStr), file=sys.stderr)
           return None
@@ -177,13 +187,13 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
         print('Delta to last timestamp out of range for %s' % repr(dateStr), file=sys.stderr)
         return None
 
-    parsedValue = parsedValue.replace(tzinfo=None)
+    self.totalSecondsStartTime = datetime.datetime(1970, 1, 1, tzinfo=parsedValue.tzinfo)
     matchContext.update(dateStr)
     delta = (parsedValue-self.totalSecondsStartTime)
-    totalSeconds = (delta.days*86400+delta.seconds+delta.microseconds)
+    totalSeconds = (delta.days*86400+delta.seconds+delta.microseconds/1000)+parsedValue.utcoffset().total_seconds()
     if (self.latestParsedTimestamp is None) or (self.latestParsedTimestamp < parsedValue):
       self.latestParsedTimestamp = parsedValue
-    return MatchElement("%s/%s" % (path, self.elementId), dateStr, (parsedValue, totalSeconds,), \
+    return MatchElement("%s/%s" % (path, self.elementId), dateStr, (parsedValue, totalSeconds), \
             None)
 
 
@@ -192,7 +202,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
     if self.latestParsedTimestamp is None:
       return True
     delta = (self.latestParsedTimestamp-self.latestParsedTimestamp)
-    deltaSeconds = (delta.days*86400+delta.seconds+delta.microseconds)
+    deltaSeconds = (delta.days*86400+delta.seconds+delta.microseconds/1000)
     return (deltaSeconds >= -86400) and (deltaSeconds < 86400*30)
 
 
@@ -234,6 +244,11 @@ class DateFormatComponent:
 
   def addFormat(self, formatString, formatLocale, formatTimezone):
     """Add a new format to be parsed."""
+    if isinstance(formatString, bytes):
+      formatString = formatString.decode('utf-8')
+    if formatTimezone is None:
+      formatTimezone = 'UTC'
+    
     if formatString[0] != '%':
       raise Exception('Format string has to start with "%", strip away all static data outside \
         this formatter before starting to parse')
@@ -244,7 +259,7 @@ class DateFormatComponent:
     componentType = -1
     componentLength = -1
     translationDictionary = None
-    if formatString[parsePos] == 'b':
+    if formatString[parsePos] == 'b' or formatString[parsePos] == 'B':
 # Month name
       parsePos += 1
       componentType = COMPONENT_TYPE_MONTH
@@ -254,14 +269,13 @@ class DateFormatComponent:
       for monthNum in range(1, 13):
 # As we have switched locale before, this will return the byte
 # string for the month name encoded using the correct encoding.
-        newValue = datetime.datetime(1970, monthNum, 1).strftime('%b')
+        newValue = datetime.datetime(1970, monthNum, 1).strftime('%'+formatString[parsePos-1])
         for oldValue in translationDictionary:
           if (oldValue.startswith(newValue)) or (newValue.startswith(oldValue)):
             raise Exception('Strange locale with month names too similar')
         translationDictionary[newValue] = monthNum
       if len(translationDictionary) != 12:
         raise Exception('Internal error: less than 12 month a year')
-
     elif formatString[parsePos] == 'd':
 # Day number
       parsePos += 1
@@ -282,16 +296,31 @@ class DateFormatComponent:
       parsePos += 1
       componentType = COMPONENT_TYPE_SECOND
       componentLength = 2
+    elif formatString[parsePos] == 'Y':
+# Year
+      parsePos += 1
+      componentType = COMPONENT_TYPE_YEAR
+      componentLength = 4
+    elif formatString[parsePos] == 'm':
+# Month
+      parsePos += 1
+      componentType = COMPONENT_TYPE_MONTH
+      componentLength = 2
+    elif formatString[parsePos] == 'f':
+# Microseconds
+      parsePos += 1
+      componentType = COMPONENT_TYPE_MICROSECOND
+      componentLength = 6
     else:
       raise Exception('Unsupported date format code "%s"' % formatString[parsePos])
 
     endPos = formatString.find('%', parsePos)
     endSeparator = None
     if endPos < 0:
-      endSeparator = formatString[parsePos:]
+      endSeparator = formatString[parsePos:].encode()
       parsePos = len(formatString)
     else:
-      endSeparator = formatString[parsePos:endPos]
+      endSeparator = formatString[parsePos:endPos].encode()
       parsePos = endPos
     if not endSeparator:
       endSeparator = None
@@ -397,7 +426,7 @@ class DateFormatComponent:
         if self.translationDictionary is None:
           componentValue = int(valueStr.strip())
         else:
-          componentValue = self.translationDictionary.get(valueStr)
+          componentValue = self.translationDictionary.get(valueStr.decode())
           if componentValue is None:
             return None
       else:
