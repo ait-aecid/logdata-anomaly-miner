@@ -144,7 +144,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
           parsedFields[COMPONENT_TYPE_SECOND], \
           parsedFields[COMPONENT_TYPE_MICROSECOND], \
           timeZoneInfo)
-      if not self.checkTimestampValueInRange():
+      if not self.checkTimestampValueInRange(parsedValue):
         parsedValue = datetime.datetime(parsedFields[COMPONENT_TYPE_YEAR]+1, \
             parsedFields[COMPONENT_TYPE_MONTH], \
             parsedFields[COMPONENT_TYPE_DAY], \
@@ -153,7 +153,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
             parsedFields[COMPONENT_TYPE_SECOND], \
             parsedFields[COMPONENT_TYPE_MICROSECOND], \
             timeZoneInfo)
-        if not self.checkTimestampValueInRange():
+        if not self.checkTimestampValueInRange(parsedValue):
           parsedValue = datetime.datetime(parsedFields[COMPONENT_TYPE_YEAR]-1, \
               parsedFields[COMPONENT_TYPE_MONTH], \
               parsedFields[COMPONENT_TYPE_DAY], \
@@ -162,11 +162,11 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
               parsedFields[COMPONENT_TYPE_SECOND], \
               parsedFields[COMPONENT_TYPE_MICROSECOND], \
               timeZoneInfo)
-          if not self.checkTimestampValueInRange():
+          if not self.checkTimestampValueInRange(parsedValue):
             print('Delta to last timestamp out of range for %s' % repr(dateStr), file=sys.stderr)
             return None
 
-      self.checkTimestampValueInRange()
+      self.checkTimestampValueInRange(parsedValue)
       if self.latestParsedTimestamp is not None:
         delta = (self.latestParsedTimestamp-self.latestParsedTimestamp)
         deltaSeconds = (delta.days*86400+delta.seconds+delta.microseconds/1000)
@@ -183,7 +183,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
           parsedFields[COMPONENT_TYPE_SECOND], \
           parsedFields[COMPONENT_TYPE_MICROSECOND], \
           timeZoneInfo)
-      if not self.checkTimestampValueInRange():
+      if not self.checkTimestampValueInRange(parsedValue):
         print('Delta to last timestamp out of range for %s' % repr(dateStr), file=sys.stderr)
         return None
 
@@ -197,11 +197,11 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
             None)
 
 
-  def checkTimestampValueInRange(self):
+  def checkTimestampValueInRange(self, parsedValue):
     """Return True if value is None."""
     if self.latestParsedTimestamp is None:
       return True
-    delta = (self.latestParsedTimestamp-self.latestParsedTimestamp)
+    delta = (self.latestParsedTimestamp-parsedValue)
     deltaSeconds = (delta.days*86400+delta.seconds+delta.microseconds/1000)
     return (deltaSeconds >= -86400) and (deltaSeconds < 86400*30)
 
