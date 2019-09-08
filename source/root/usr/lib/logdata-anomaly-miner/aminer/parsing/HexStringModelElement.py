@@ -37,4 +37,4 @@ class HexStringModelElement(ModelElementInterface):
     matchString = data[:matchLen]
     matchContext.update(matchString)
     return MatchElement("%s/%s" % (path, self.elementId), \
-        matchString, matchString, None)
+        bytes.fromhex(matchString.decode('utf-8')), matchString, None)

@@ -317,10 +317,10 @@ class DateFormatComponent:
     endPos = formatString.find('%', parsePos)
     endSeparator = None
     if endPos < 0:
-      endSeparator = formatString[parsePos:].encode()
+      endSeparator = formatString[parsePos:]
       parsePos = len(formatString)
     else:
-      endSeparator = formatString[parsePos:endPos].encode()
+      endSeparator = formatString[parsePos:endPos]
       parsePos = endPos
     if not endSeparator:
       endSeparator = None
@@ -340,6 +340,9 @@ class DateFormatComponent:
       lookupKey = '%sn%d' % (endSeparator, componentLength)
     else:
       lookupKey = '%st%d' % (endSeparator, componentLength)
+      
+    if endSeparator is not None:
+      endSeparator = endSeparator.encode()
 
     nextComponent = self.nextComponents.get(lookupKey, None)
     if nextComponent is None:
@@ -424,7 +427,10 @@ class DateFormatComponent:
       if endPos != -1:
         valueStr = dateString[parsePos:endPos]
         if self.translationDictionary is None:
-          componentValue = int(valueStr.strip())
+          try:
+            componentValue = int(valueStr.strip())
+          except ValueError:
+            return None
         else:
           componentValue = self.translationDictionary.get(valueStr.decode())
           if componentValue is None:
