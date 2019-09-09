@@ -78,11 +78,12 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
       if (random.randint(0, 1) != 0) and (self.lastUnhandledMatch is not None):
         logAtom = self.lastUnhandledMatch
       newRule = self.createRandomRule(logAtom)
-      newFeature = CorrelationFeature(newRule, len(self.featureList), timestamp)
-      self.featureList.append(newFeature)
-      newFeature.triggerCount = 1
-      self.updateTablesForFeature(newFeature, timestamp)
-      featuresFoundList.append(newFeature)
+      if newRule is not None:
+        newFeature = CorrelationFeature(newRule, len(self.featureList), timestamp)
+        self.featureList.append(newFeature)
+        newFeature.triggerCount = 1
+        self.updateTablesForFeature(newFeature, timestamp)
+        featuresFoundList.append(newFeature)
 
     for feature in featuresFoundList:
       feature.lastTriggerTime = timestamp
@@ -158,7 +159,10 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
 
     if len(subRules) > 1:
       return Rules.AndMatchRule(subRules)
-    return subRules[0]
+    if len(subRules) > 0:
+      return subRules[0]
+    return None
+    
 
 
   def updateTablesForFeature(self, targetFeature, timestamp):
