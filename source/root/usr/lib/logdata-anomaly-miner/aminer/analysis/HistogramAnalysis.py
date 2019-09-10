@@ -181,6 +181,9 @@ class ModuloTimeBinDefinition(LinearNumericBinDefinition):
     if isinstance(value, bytes):
       value = int.from_bytes(value, 'big')
       return super(ModuloTimeBinDefinition, self).getBin(value)
+    if isinstance(value, str):
+      value = int.from_bytes(value.encode(), 'big')
+      return super(ModuloTimeBinDefinition, self).getBin(value)
     timeValue = (value%self.moduloValue)/self.timeUnit
     return super(ModuloTimeBinDefinition, self).getBin(timeValue)
 

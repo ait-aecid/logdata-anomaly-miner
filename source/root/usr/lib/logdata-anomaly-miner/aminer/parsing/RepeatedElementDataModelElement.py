@@ -31,7 +31,6 @@ class RepeatedElementDataModelElement(ModelElementInterface):
         break
       matches += [childMatch]
       matchCount += 1
-    print(matchCount)
     if matchCount < self.minRepeat or matchCount > self.maxRepeat:
       matchContext.matchData = startData
       return None
