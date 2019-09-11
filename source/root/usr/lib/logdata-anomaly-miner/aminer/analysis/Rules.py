@@ -248,9 +248,9 @@ class ValueMatchRule(MatchRule):
   def match(self, logAtom):
     testValue = logAtom.parserMatch.getMatchDictionary().get(self.path, None)
     if testValue is not None:
-      if isinstance(self.value, bytes) and not isinstance(testValue.matchObject, bytes):
+      if isinstance(self.value, bytes) and not isinstance(testValue.matchObject, bytes) and testValue.matchObject is not None:
         testValue.matchObject = testValue.matchObject.encode()
-      elif not isinstance(self.value, bytes) and isinstance(testValue.matchObject, bytes):
+      elif not isinstance(self.value, bytes) and isinstance(testValue.matchObject, bytes) and self.value is not None:
         self.value = self.value.encode()
     if (testValue != None) and (testValue.matchObject == self.value):
       if self.matchAction != None:

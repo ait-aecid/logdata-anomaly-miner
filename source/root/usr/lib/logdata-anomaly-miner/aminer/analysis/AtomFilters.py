@@ -43,7 +43,7 @@ class MatchPathFilter(AtomHandlerInterface):
   """This class just splits incoming matches according to existance
   of pathes in the match."""
 
-  def __init__(self, parsedAtomHandlerLookupList, defaultParsedAtomHandler):
+  def __init__(self, parsedAtomHandlerLookupList, defaultParsedAtomHandler=None):
     """Initialize the filter.
     @param parsedAtomHandlerLookupList has to contain tuples with
     search path string and handler. When the handler is None,
