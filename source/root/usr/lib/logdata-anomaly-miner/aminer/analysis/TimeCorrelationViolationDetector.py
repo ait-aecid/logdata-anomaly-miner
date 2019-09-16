@@ -175,6 +175,8 @@ class CorrelationRule:
     bPosStart = 0
     for aPos in range(0, len(self.historyAEvents)):
       aEvent = self.historyAEvents[aPos]
+      if aEvent is None:
+        continue
       aEventTime = aEvent[0]
       if newestTimestamp-aEventTime <= self.maxTimeDelta:
 # This event is so new, that timewindow for related event has
@@ -236,6 +238,7 @@ class CorrelationRule:
               del self.historyAEvents[aPos]
               return (violationMessage, violationLogs)
             break
+        checkPos = checkPos+1
         if checkPos != len(aEvent):
           continue
 # We found the match. Mark aEvent as done.

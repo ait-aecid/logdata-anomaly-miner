@@ -77,7 +77,7 @@ class MatchValueFilter(AtomHandlerInterface):
   """This class just splits incoming matches using a given match
   value and forward them to different handlers."""
 
-  def __init__(self, targetPath, parsedAtomHandlerDict, defaultParsedAtomHandler):
+  def __init__(self, targetPath, parsedAtomHandlerDict, defaultParsedAtomHandler=None):
     """Initialize the splitter.
     @param defaultParsedAtomHandler invoke this default handler
     when no value handler was found or do not invoke any handler
