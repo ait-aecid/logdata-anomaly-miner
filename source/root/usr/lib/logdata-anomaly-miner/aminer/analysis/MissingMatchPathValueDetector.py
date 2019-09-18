@@ -10,6 +10,8 @@ from aminer.events import EventSourceInterface
 from aminer.input import AtomHandlerInterface
 from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
+from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
+from datetime import datetime
 
 class MissingMatchPathValueDetector(
     AtomHandlerInterface, TimeTriggeredComponentInterface,
@@ -29,7 +31,7 @@ class MissingMatchPathValueDetector(
   def __init__(
       self, aminerConfig, targetPath, anomalyEventHandlers,
       persistenceId='Default', autoIncludeFlag=False, defaultInterval=3600,
-      realertInterval=86400):
+      realertInterval=86400, outputLogLine=True):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location.
     @param targetPath to extract a source identification value
@@ -45,6 +47,8 @@ class MissingMatchPathValueDetector(
     self.nextCheckTimestamp = 0
     self.lastSeenTimestamp = 0
     self.nextPersistTime = None
+    self.outputLogLine = outputLogLine
+    self.aminerConfig = aminerConfig
 
     PersistencyUtil.addPersistableComponent(self)
     self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
@@ -68,13 +72,18 @@ class MissingMatchPathValueDetector(
     if value is None:
       return False
     timeStamp = logAtom.getTimestamp()
+    if isinstance(timeStamp, datetime):
+      timeStamp = timeStamp.timestamp()
+    if timeStamp is None:
+      timeStamp = round(time.time())
     detectorInfo = self.expectedValuesDict.get(value, None)
     if detectorInfo != None:
 # Just update the last seen value and switch from non-reporting
 # error state to normal state.
       detectorInfo[0] = timeStamp
       if detectorInfo[2] != 0:
-        detectorInfo[2] = 0
+        if timeStamp >= detectorInfo[2]:
+          detectorInfo[2] = 0
 # Delta of this detector might be lower than the default maximum
 # recheck time.
         self.nextCheckTimestamp = min(
@@ -110,7 +119,8 @@ class MissingMatchPathValueDetector(
       missingValueList = []
 # Start with a large recheck interval. It will be lowered if any
 # of the expectation intervals is below that.
-      self.nextCheckTimestamp = self.lastSeenTimestamp+86400
+      if not self.nextCheckTimestamp:
+        self.nextCheckTimestamp = self.lastSeenTimestamp+86400
       for value, detectorInfo in self.expectedValuesDict.items():
         valueOverdueTime = self.lastSeenTimestamp-detectorInfo[0]-detectorInfo[1]
         if detectorInfo[2] != 0:
@@ -123,32 +133,40 @@ class MissingMatchPathValueDetector(
         else:
 # No alerting yet, see if alerting is required.
           if valueOverdueTime < 0:
+            old = self.nextCheckTimestamp
             self.nextCheckTimestamp = min(
                 self.nextCheckTimestamp,
                 self.lastSeenTimestamp-valueOverdueTime)
-            continue
-
+            if old > self.nextCheckTimestamp or self.nextCheckTimestamp < detectorInfo[2]:
+              continue
+            
         missingValueList.append([value, valueOverdueTime, detectorInfo[1]])
 # Set the next alerting time.
         detectorInfo[2] = self.lastSeenTimestamp+self.realertInterval
+        self.expectedValuesDict[value] = detectorInfo
       if missingValueList:
-        messagePart = ''
+        messagePart = []
         for value, overdueTime, interval in missingValueList:
-          messagePart += '\n  %s overdue %ss (interval %s)' % (repr(value), overdueTime, interval)
+          if self.__class__.__name__ == 'MissingMatchPathValueDetector':
+            messagePart.append('  %s: %s overdue %ss (interval %s)' % (self.targetPath, repr(value), overdueTime, interval))
+          else:
+            targetPaths = ''
+            for targetPath in self.targetPathList:
+              targetPaths += targetPath + ', '
+            messagePart.append('  %s: %s overdue %ss (interval %s)' % (targetPaths[:-2], repr(value), overdueTime, interval))
+        if self.outputLogLine:
+          originalLogLinePrefix = self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+          if originalLogLinePrefix is None:
+            originalLogLinePrefix = ''
+          messagePart.append(originalLogLinePrefix+repr(logAtom.rawData))
         for listener in self.anomalyEventHandlers:
-          self.sendEventToHandlers(listener, logAtom, messagePart, missingValueList)
-          #listener.receiveEvent(
-          #    'Analysis.%s' % self.__class__.__name__,
-          #    'Interval too large between values for path %s:%s ' % (self.targetPath, messagePart),
-          #    [logAtom.rawData], missingValueList, self)
+          self.sendEventToHandlers(listener, logAtom, [''.join(messagePart)], missingValueList)
     return True
 
 
   def sendEventToHandlers(self, anomalyEventHandler, logAtom, messagePart, missingValueList):
-    anomalyEventHandler.receiveEvent(
-              'Analysis.%s' % self.__class__.__name__,
-              'Interval too large between values for path %s:%s ' % (self.targetPath, messagePart),
-              [logAtom.rawData], missingValueList, self)
+    anomalyEventHandler.receiveEvent('Analysis.%s' % self.__class__.__name__,
+        'Interval too large between values', messagePart, logAtom, self)
 
 
   def setCheckValue(self, value, interval):
@@ -256,8 +274,6 @@ class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
     targetPaths = ''
     for targetPath in self.targetPathList:
       targetPaths += targetPath + ', '
-    anomalyEventHandler.receiveEvent(
-              'Analysis.%s' % self.__class__.__name__,
-              'Interval too large between values for path %s:%s ' % (targetPaths[:-2], messagePart),
-              [logAtom.rawData], missingValueList, self)
+    anomalyEventHandler.receiveEvent('Analysis.%s' % self.__class__.__name__, 
+        'Interval too large between values', messagePart, logAtom, self)
 

@@ -34,7 +34,12 @@ class HexStringModelElement(ModelElementInterface):
     if matchLen == 0:
       return None
 
-    matchString = data[:matchLen]
-    matchContext.update(matchString)
+    matchObject = data[:matchLen]
+    try:
+      matchString = bytes.fromhex(matchObject.decode('utf-8'))
+    except ValueError:
+      return None
+    
+    matchContext.update(matchObject)
     return MatchElement("%s/%s" % (path, self.elementId), \
-        matchString, matchString, None)
+        matchString, matchObject, None)

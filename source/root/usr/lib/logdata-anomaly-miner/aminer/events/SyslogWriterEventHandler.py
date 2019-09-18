@@ -14,14 +14,14 @@ class SyslogWriterEventHandler(EventHandlerInterface):
   CAVEAT: USE THIS AT YOUR OWN RISK: by creating aminer/syslog
   log data processing loops, you will flood your syslog and probably
   fill up your disks."""
-  def __init__(self, aminerConfig, instanceName='aminer'):
+  def __init__(self, analysisContext, instanceName='aminer'):
     self.instanceName = instanceName
     syslog.openlog('%s[%d]' % (self.instanceName, os.getpid()), \
         syslog.LOG_INFO, syslog.LOG_DAEMON)
     syslog.syslog(syslog.LOG_INFO, 'Syslog logger initialized')
     self.bufferStream = io.StringIO()
     self.eventWriter = StreamPrinterEventHandler(
-        None, self.bufferStream)
+        analysisContext, self.bufferStream)
     self.eventId = 0
 
   def receiveEvent(self, eventType, eventMessage, sortedLogLines,

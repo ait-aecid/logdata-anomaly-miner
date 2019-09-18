@@ -17,7 +17,7 @@ class ElementValueBranchModelElement(ModelElementInterface):
     of None indicates, that the match element of the valueModel
     should be used directly.
     @param branchModelDict a dictionary to select a branch for
-    a the value identified by valuePath.
+    the value identified by valuePath.
     @param defaultBranch when lookup in branchModelDict fails,
     use this as default branch or fail when None."""
     self.elementId = elementId
@@ -33,10 +33,10 @@ class ElementValueBranchModelElement(ModelElementInterface):
   def getChildElements(self):
     """Get all possible child model elements of this element.
     If this element implements a branching model element, then
-    not all child element IDs will be found in mathces produced
+    not all child element IDs will be found in matches produced
     by getMatchElement.
     @return a list with all children"""
-    allChildren = [self.valueModel]+self.branchModelDict.values()
+    allChildren = [self.valueModel]+list(self.branchModelDict.values())
     if self.defaultBranch is not None:
       allChildren.append(self.defaultBranch)
     return allChildren
@@ -81,8 +81,12 @@ class ElementValueBranchModelElement(ModelElementInterface):
 
     branchMatch = None
     if testMatch is not None:
-      branchModel = self.branchModelDict.get(testMatch.getMatchObject().decode(), \
-        self.defaultBranch)
+      if isinstance(testMatch.getMatchObject(), bytes):
+        branchModel = self.branchModelDict.get(testMatch.getMatchObject().decode(), \
+          self.defaultBranch)
+      else:
+        branchModel = self.branchModelDict.get(testMatch.getMatchObject(), \
+          self.defaultBranch)
       if branchModel is not None:
         branchMatch = branchModel.getMatchElement(currentPath, matchContext)
     if branchMatch is None:
@@ -90,4 +94,4 @@ class ElementValueBranchModelElement(ModelElementInterface):
       return None
     return MatchElement(currentPath, \
         startData[:len(startData)-len(matchContext.matchData)], \
-        None, [modelMatch, branchMatch])
+        startData[:len(startData)-len(matchContext.matchData)], [modelMatch, branchMatch])

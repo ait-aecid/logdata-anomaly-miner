@@ -1,25 +1,29 @@
 """This module defines a detector for new values in a data path."""
 
 import time
+import os
 
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input import AtomHandlerInterface
 from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
+from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
 class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
   """This class creates events when new values for a given data
   path were found."""
 
   def __init__(self, aminerConfig, targetPathList, anomalyEventHandlers, \
-    persistenceId='Default', autoIncludeFlag=False):
+    persistenceId='Default', autoIncludeFlag=False, outputLogLine=True):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location."""
     self.targetPathList = targetPathList
     self.anomalyEventHandlers = anomalyEventHandlers
     self.autoIncludeFlag = autoIncludeFlag
     self.nextPersistTime = None
+    self.outputLogLine = outputLogLine
+    self.aminerConfig = aminerConfig
 
     PersistencyUtil.addPersistableComponent(self)
     self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
@@ -42,10 +46,17 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
           self.knownPathSet.add(match.matchObject)
           if self.nextPersistTime is None:
             self.nextPersistTime = time.time()+600
+        if self.outputLogLine:
+          originalLogLinePrefix = self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+          if originalLogLinePrefix is None:
+            originalLogLinePrefix = ''
+          sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')+os.linesep+ 
+            originalLogLinePrefix+repr(logAtom.rawData)]
+        else:
+          sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')]
         for listener in self.anomalyEventHandlers:
-          listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
-              'New value for path %s: %s ' % (targetPath, repr(match.matchObject)), \
-              [logAtom.rawData], (logAtom, [match.matchObject]), self)
+          listener.receiveEvent('Analysis.%s' % self.__class__.__name__, 'New value(s) detected', \
+              sortedLogLines, logAtom, self)
 
 
   def getTimeTriggerClass(self):

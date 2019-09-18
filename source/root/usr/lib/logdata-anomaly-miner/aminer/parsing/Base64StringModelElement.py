@@ -22,7 +22,7 @@ class Base64StringModelElement(ModelElementInterface):
     matchLen = 0
     atEndFlag = False
     for testByte in data:
-      bVal = ord(testByte)
+      bVal = testByte
       if atEndFlag:
         if ((matchLen&0x3) == 0) or (bVal != 0x3d):
           break

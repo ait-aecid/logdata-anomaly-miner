@@ -9,6 +9,7 @@ from aminer.util import LogarithmicBackoffHistory
 from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.analysis import Rules
+from datetime import datetime
 
 class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
   """This class creates events when one of the given time correlation
@@ -48,8 +49,9 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
     """Receive a parsed atom and check all the classification
     rules, that will trigger correlation rule evaluation and event
     triggering on violations."""
+    self.lastLogAtom = logAtom
     for rule in self.eventClassificationRuleset:
-      rule.match(logAtom.parserMatch)
+      rule.match(logAtom)
 
 
   def getTimeTriggerClass(self):
@@ -87,10 +89,11 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
       checkResult = rule.checkStatus(newestTimestamp)
       if checkResult is None:
         continue
+      self.lastLogAtom.atomTime = triggerTime
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
-            'Correlation rule "%s" violated' % rule.id, checkResult[1], \
-            checkResult[0], self)
+            'Correlation rule "%s" violated' % rule.ruleId, [checkResult[0]], \
+            self.lastLogAtom, self)
     return 10.0
 
 
@@ -129,7 +132,7 @@ class CorrelationRule:
                artefactMatchParameters=None):
     """Create the correlation rule.
     @param artefactMatchParameters if not none, two artefacts
-    A and B will be only treated as correlated when the all the
+    A and B will be only treated as correlated when all the
     parsed artefact attributes identified by the list of attribute
     path tuples match.
     @param minTimeDelta minimal delta in seconds, that artefact
@@ -147,16 +150,16 @@ class CorrelationRule:
     self.correlationHistory = LogarithmicBackoffHistory(10)
 
 
-  def updateArtefactA(self, selector, parserMatch):
+  def updateArtefactA(self, selector, logAtom):
     """Append entry to the event history A."""
-    historyEntry = self.prepareHistoryEntry(selector, parserMatch)
+    historyEntry = self.prepareHistoryEntry(selector, logAtom)
 # FIXME: Check if event A could be discarded immediately.
     self.historyAEvents.append(historyEntry)
 
 
-  def updateArtefactB(self, selector, parserMatch):
+  def updateArtefactB(self, selector, logAtom):
     """Append entry to the event history B."""
-    historyEntry = self.prepareHistoryEntry(selector, parserMatch)
+    historyEntry = self.prepareHistoryEntry(selector, logAtom)
 # FIXME: Check if event B could be discarded immediately.
     self.historyBEvents.append(historyEntry)
 
@@ -172,11 +175,22 @@ class CorrelationRule:
     bPosStart = 0
     for aPos in range(0, len(self.historyAEvents)):
       aEvent = self.historyAEvents[aPos]
+      if aEvent is None:
+        continue
       aEventTime = aEvent[0]
       if newestTimestamp-aEventTime <= self.maxTimeDelta:
 # This event is so new, that timewindow for related event has
 # not expired yet.
-        break
+        t = datetime.fromtimestamp(time.time())
+        if newestTimestamp-aEventTime == 0 and aEventTime-(t-datetime.fromtimestamp(0)).total_seconds() <= self.maxTimeDelta:
+          violationLine = aEvent[3].matchElement.matchString
+          if isinstance(violationLine, bytes):
+            violationLine = violationLine.decode("utf-8")
+          violationMessage = 'FAIL: B-Event for \"%s\" (%s) not found!' % (violationLine, aEvent[2].actionId)
+          violationLogs = []
+          violationLogs.append(violationLine)
+          del self.historyAEvents[aPos]
+          return (violationMessage, violationLogs)
 
       for bPos in range(bPosStart, len(self.historyBEvents)):
         bEvent = self.historyBEvents[bPos]
@@ -189,15 +203,42 @@ class CorrelationRule:
 # check again any older aEvents in this loop, skip all bEvents
 # up to this position in future runs.
           bPosStart = bPos+1
+          if bPosStart == len(self.historyBEvents):
+            violationLine = aEvent[3].matchElement.matchString
+            if isinstance(violationLine, bytes):
+              violationLine = violationLine.decode("utf-8")
+              violationMessage = 'FAIL: B-Event for \"%s\" (%s) was found too early!' % (violationLine, aEvent[2].actionId)
+              violationLogs = []
+              violationLogs.append(violationLine)
+              del self.historyAEvents[aPos]
+              return (violationMessage, violationLogs)
           continue
 # Too late, no other bEvent may match this aEvent
         if delta > self.maxTimeDelta:
+          violationLine = aEvent[3].matchElement.matchString
+          if isinstance(violationLine, bytes):
+            violationLine = violationLine.decode("utf-8")
+            violationMessage = 'FAIL: B-Event for \"%s\" (%s) was not found in time!' % (violationLine, aEvent[2].actionId)
+            violationLogs = []
+            violationLogs.append(violationLine)
+            del self.historyAEvents[aPos]
+            return (violationMessage, violationLogs)
           break
 # So time range is OK, see if match parameters are also equal.
         checkPos = 4
         for checkPos in range(4, len(aEvent)):
           if aEvent[checkPos] != bEvent[checkPos]:
+            violationLine = aEvent[3].matchElement.matchString
+            if isinstance(violationLine, bytes):
+              violationLine = violationLine.decode("utf-8")
+              violationMessage = 'FAIL: \"%s\" (%s) %s is not equal %s' % (
+                violationLine, aEvent[2].actionId, aEvent[checkPos], bEvent[checkPos])
+              violationLogs = []
+              violationLogs.append(violationLine)
+              del self.historyAEvents[aPos]
+              return (violationMessage, violationLogs)
             break
+        checkPos = checkPos+1
         if checkPos != len(aEvent):
           continue
 # We found the match. Mark aEvent as done.
@@ -211,8 +252,8 @@ class CorrelationRule:
 # We want to keep a history of good matches to ease diagnosis
 # of correlation failures. Keep information about current line
 # for reference.
-        self.correlationHistory.addObject((aEvent[3].matchElement.matchString, aEvent[2].id, \
-          bEvent[3].matchElement.matchString, bEvent[2].id))
+        self.correlationHistory.addObject((aEvent[3].matchElement.matchString, aEvent[2].actionId, \
+          bEvent[3].matchElement.matchString, bEvent[2].actionId))
         aPos += 1
         break
 
@@ -230,11 +271,13 @@ class CorrelationRule:
       if numViolations > maxViolations:
         continue
       violationLine = aEvent[3].matchElement.matchString
-      violationMessage += 'FAIL: \"%s\" (%s)\n' % (violationLine, aEvent[2].id)
+      if isinstance(violationLine, bytes):
+            violationLine = violationLine.decode("utf-8")
+      violationMessage += 'FAIL: \"%s\" (%s)' % (violationLine, aEvent[2].actionId)
       violationLogs.append(violationLine)
     if numViolations > maxViolations:
       violationMessage += '... (%d more)\n' % (numViolations-maxViolations)
-    if numViolations != 0:
+    if numViolations != 0 and len(self.correlationHistory.getHistory()) > 0:
       violationMessage += 'Historic examples:\n'
       for record in self.correlationHistory.getHistory():
         violationMessage += '  "%s" (%s) ==> "%s" (%s)\n' % record
@@ -247,16 +290,22 @@ class CorrelationRule:
     return (violationMessage, violationLogs)
 
 
-  def prepareHistoryEntry(self, selector, parserMatch):
+  def prepareHistoryEntry(self, selector, logAtom):
     """Return a history entry for a parser match."""
+    parserMatch = logAtom.parserMatch
     length = 4
     if self.artefactMatchParameters is not None:
       length += len(self.artefactMatchParameters)
     result = [None]*length
-    result[0] = parserMatch.getDefaultTimestamp()
+    result[0] = logAtom.getTimestamp()
     result[1] = 0
     result[2] = selector
     result[3] = parserMatch
+
+    if result[0] is None:
+      result[0] = datetime.fromtimestamp(time.time())
+    if isinstance(result[0], datetime):
+      result[0] = (result[0]-datetime.fromtimestamp(0)).total_seconds()
 
     if result[0] < self.lastTimestampSeen:
       raise Exception('Unsorted!')
@@ -265,9 +314,10 @@ class CorrelationRule:
     if self.artefactMatchParameters is not None:
       pos = 4
       vDict = parserMatch.getMatchDictionary()
-      for paramPath in self.artefactMatchParameters:
-        matchElement = vDict.get(paramPath, None)
-        if matchElement is not None:
-          result[pos] = matchElement.matchObject
-        pos += 1
+      for artefactMatchParameter in self.artefactMatchParameters:
+        for paramPath in artefactMatchParameter:
+          matchElement = vDict.get(paramPath, None)
+          if matchElement is not None:
+            result[pos] = matchElement.matchObject
+            pos += 1
     return result

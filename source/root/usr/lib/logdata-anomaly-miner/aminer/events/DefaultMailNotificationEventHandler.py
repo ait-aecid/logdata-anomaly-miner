@@ -10,7 +10,7 @@ import time
 from aminer.AnalysisChild import AnalysisContext
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.events import EventHandlerInterface
-from aminer.parsing import ParserMatch
+from aminer.events.EventData import EventData
 
 class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredComponentInterface):
   """This class implements an event record listener, that will pool
@@ -27,7 +27,9 @@ events and send them via "sendmail" transport."""
   CONFIG_KEY_ALERT_MAX_GAP = 'MailAlerting.MaxAlertGap'
   CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE = 'MailAlerting.MaxEventsPerMessage'
 
-  def __init__(self, aminerConfig):
+  def __init__(self, analysisContext):
+    self.analysisContext = analysisContext
+    aminerConfig = analysisContext.aminerConfig
     self.recipientAddress = aminerConfig.configProperties.get(
         DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS)
     if self.recipientAddress is None:
@@ -79,14 +81,8 @@ events and send them via "sendmail" transport."""
       if self.eventsCollected == 0:
         self.eventCollectionStartTime = currentTime
       self.eventsCollected += 1
-      self.currentMessage += '%s (%d lines)\n' % (eventMessage, len(sortedLogLines))
-      for line in sortedLogLines:
-        self.currentMessage += '  '+line.decode("utf-8")+'\n'
-      if eventData is not None:
-        if isinstance(eventData, ParserMatch):
-          self.currentMessage += '  '+eventData.getMatchElement().annotateMatch('')+'\n'
-        else:
-          self.currentMessage += '  '+repr(eventData)+'\n'
+      self.eventData = EventData(eventType, eventMessage, sortedLogLines, eventData, eventSource, self.analysisContext)
+      self.currentMessage += self.eventData.receiveEventString() 
 
     if self.nextAlertTime == 0:
       if self.lastAlertTime != 0:

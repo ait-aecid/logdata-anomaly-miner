@@ -32,7 +32,7 @@ class EventGenerationMatchAction(MatchAction):
   def matchAction(self, logAtom):
     for handler in self.eventHandlers:
       handler.receiveEvent(
-          self.eventType, self.eventMessage, [logAtom.rawData], logAtom, self)
+          self.eventType, self.eventMessage, [logAtom.parserMatch.matchElement.annotateMatch('')], logAtom, self)
 
 
 class AtomFilterMatchAction(MatchAction, SubhandlerFilter):
@@ -247,6 +247,11 @@ class ValueMatchRule(MatchRule):
 
   def match(self, logAtom):
     testValue = logAtom.parserMatch.getMatchDictionary().get(self.path, None)
+    if testValue is not None:
+      if isinstance(self.value, bytes) and not isinstance(testValue.matchObject, bytes) and testValue.matchObject is not None:
+        testValue.matchObject = testValue.matchObject.encode()
+      elif not isinstance(self.value, bytes) and isinstance(testValue.matchObject, bytes) and self.value is not None:
+        self.value = self.value.encode()
     if (testValue != None) and (testValue.matchObject == self.value):
       if self.matchAction != None:
         self.matchAction.matchAction(logAtom)
@@ -254,6 +259,8 @@ class ValueMatchRule(MatchRule):
     return False
 
   def __str__(self):
+    if isinstance(self.value, bytes):
+      self.value = self.value.decode("utf-8")
     return 'value(%s)==%s' % (self.path, self.value)
 
 
@@ -377,7 +384,7 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
 
   def __init__(
       self, path, secondsModulo, valuePathList, limitLookupDict,
-      defaultLimit=None, matchAction=None):
+      defaultLimit=None, matchAction=None, tzinfo=None):
     """@param path the path to the datetime object to use to evaluate
     the modulo time rules on. When None, the default timestamp associated
     with the match is used.
@@ -390,6 +397,9 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
     self.limitLookupDict = limitLookupDict
     self.defaultLimit = defaultLimit
     self.matchAction = matchAction
+    self.tzinfo = tzinfo
+    if tzinfo is None:
+      self.tzinfo = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
 
   def match(self, logAtom):
     matchDict = logAtom.parserMatch.getMatchDictionary()
@@ -412,7 +422,7 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
       if ((timeMatch is None) or not isinstance(timeMatch.matchObject, tuple) or
           not isinstance(timeMatch.matchObject[0], datetime.datetime)):
         return False
-      testValue = timeMatch.matchObject[1]
+      testValue = timeMatch.matchObject[1] + datetime.datetime.now(self.tzinfo).utcoffset().total_seconds()
 
     if testValue is None:
       return False
@@ -501,4 +511,3 @@ class DebugHistoryMatchRule(MatchRule):
   def getHistory(self):
     """Get the history object from this debug rule."""
     return self.objectHistory
-
