@@ -3,6 +3,7 @@ detector to extract values from LogAtoms and check, if the value
 combination was already seen before."""
 
 import time
+import os
 
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
@@ -10,6 +11,7 @@ from aminer.events import EventSourceInterface
 from aminer.input import AtomHandlerInterface
 from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
+from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
 class NewMatchPathValueComboDetector(
     AtomHandlerInterface, TimeTriggeredComponentInterface,
@@ -20,7 +22,7 @@ class NewMatchPathValueComboDetector(
   def __init__(
       self, aminerConfig, targetPathList, anomalyEventHandlers,
       persistenceId='Default', allowMissingValuesFlag=False,
-      autoIncludeFlag=False):
+      autoIncludeFlag=False, outputLogLine=True):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location.
     @param targetPathList the list of values to extract from each
@@ -35,6 +37,8 @@ class NewMatchPathValueComboDetector(
     self.anomalyEventHandlers = anomalyEventHandlers
     self.allowMissingValuesFlag = allowMissingValuesFlag
     self.autoIncludeFlag = autoIncludeFlag
+    self.outputLogLine = outputLogLine
+    self.aminerConfig = aminerConfig
 
     self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
         aminerConfig, self.__class__.__name__, persistenceId)
@@ -77,12 +81,17 @@ class NewMatchPathValueComboDetector(
         self.knownValuesSet.add(matchValueTuple)
         if self.nextPersistTime is None:
           self.nextPersistTime = time.time()+600
+      if self.outputLogLine:
+        originalLogLinePrefix = self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+        if originalLogLinePrefix is None:
+          originalLogLinePrefix = ''
+        sortedLogLines = [str(matchValueTuple)+os.linesep+originalLogLinePrefix+repr(logAtom.rawData)]
+      else:
+        sortedLogLines = [str(matchValueTuple)]
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent(
-            'Analysis.%s' % self.__class__.__name__,
-            'New value combination for path(es) %s: %s' % (
-                ', '.join(self.targetPathList), repr(matchValueTuple)),
-            [logAtom.rawData], [logAtom, matchValueTuple], self)
+            'Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected',
+            sortedLogLines, logAtom, self)
     return True
 
 

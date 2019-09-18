@@ -42,6 +42,8 @@ a report every week:
 """
 
 import time
+import os
+from datetime import datetime
 
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
@@ -116,11 +118,11 @@ class LinearNumericBinDefinition(BinDefinition):
       return self.binNames
     self.binNames = []
     if self.outlierBinsFlag:
-      self.binNames.append('...-%s)' % self.lowerLimit)
+      self.binNames.append('...-%s]' % self.lowerLimit)
     start = self.lowerLimit
     for binPos in range(1, self.binCount+1):
       end = self.lowerLimit+binPos*self.binSize
-      self.binNames.append('[%s-%s)' % (start, end))
+      self.binNames.append('[%s-%s]' % (start, end))
       start = end
     if self.outlierBinsFlag:
       self.binNames.append('[%s-...' % start)
@@ -174,7 +176,15 @@ class ModuloTimeBinDefinition(LinearNumericBinDefinition):
     and outlier bins were not requested. With outliers, bin 0
     is the bin with outliers below limit, first normal bin is
     at index 1."""
-    timeValue = (value[1]%self.moduloValue)/self.timeUnit
+    if value is None:
+      value = 0
+    if isinstance(value, bytes):
+      value = int.from_bytes(value, 'big')
+      return super(ModuloTimeBinDefinition, self).getBin(value)
+    if isinstance(value, str):
+      value = int.from_bytes(value.encode(), 'big')
+      return super(ModuloTimeBinDefinition, self).getBin(value)
+    timeValue = (value%self.moduloValue)/self.timeUnit
     return super(ModuloTimeBinDefinition, self).getBin(timeValue)
 
 
@@ -284,12 +294,16 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
       dataItem.addValue(match.matchObject)
 
     timestamp = logAtom.getTimestamp()
+    if timestamp is None:
+      timestamp = time.time()
+    if isinstance(timestamp, datetime):
+      timestamp = (datetime.fromtimestamp(0)-timestamp).total_seconds()
     if self.nextReportTime < timestamp:
       if self.lastReportTime is None:
         self.lastReportTime = timestamp
         self.nextReportTime = timestamp+self.reportInterval
       else:
-        self.sendReport(timestamp)
+        self.sendReport(logAtom, timestamp)
 
     if (self.nextPersistTime is None) and (dataUpdatedFlag):
       self.nextPersistTime = time.time()+600
@@ -319,17 +333,22 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
     self.nextPersistTime = None
 
 
-  def sendReport(self, timestamp):
+  def sendReport(self, logAtom, timestamp):
     """Sends a report to the event handlers."""
     reportStr = 'Histogram report '
     if self.lastReportTime is not None:
-      reportStr += 'from %s ' % self.lastReportTime
-    reportStr += 'till %s' % timestamp
+      reportStr += 'from %s ' % datetime.fromtimestamp(self.lastReportTime).strftime("%Y-%m-%d %H:%M:%S")
+    reportStr += 'till %s' % datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
+    res = []
     for dataItem in self.histogramData:
-      reportStr += '\n'+dataItem.toString('  ')
-    for listener in self.reportEventHandlers:
-      listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
-                            'Histogram report', [], reportStr, self)
+      for line in dataItem.toString('  ').split('\n'):
+        reportStr += os.linesep+line
+      res += [''] * dataItem.totalElements
+    if len(res) > 0:
+      res[0]  = reportStr
+      for listener in self.reportEventHandlers:
+        listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
+                            'Histogram report', res, logAtom, self)
     if self.resetAfterReportFlag:
       for dataItem in self.histogramData:
         dataItem.reset()
@@ -377,7 +396,6 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
 
   def receiveAtom(self, logAtom):
     matchDict = logAtom.parserMatch.getMatchDictionary()
-
     match = matchDict.get(self.propertyPath, None)
     if match is None:
       return
@@ -395,14 +413,20 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
 # So the path is already mapped to one histogram. See if all pathes
 # to the given histogram are still in allPathSet. If not, a split
 # within the mapping is needed.
+      cloneSet = allPathSet.copy()
       for mappedPath in histogramMapping[0]:
         try:
-          allPathSet.remove(mappedPath)
+          cloneSet.remove(mappedPath)
         except:
           if mappedPath != path:
             missingPathes.add(mappedPath)
       if not missingPathes:
 # Everything OK, just add the value to the mapping.
+        match = matchDict.get(mappedPath, None)
+        matchValue = match.matchObject
+        if isinstance(match.matchObject, bytes):
+          match.matchObject = match.matchObject.decode("utf-8")
+        histogramMapping[1].propertyPath = mappedPath
         histogramMapping[1].addValue(matchValue)
         histogramMapping[2] = logAtom.parserMatch
       else:
@@ -410,6 +434,9 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
 # for all the missingPathes but clone the data for the remaining
 # pathes.
         newHistogram = histogramMapping[1].clone()
+        match = matchDict.get(mappedPath, None)
+        matchValue = match.matchObject
+        histogramMapping[1].propertyPath = mappedPath
         newHistogram.addValue(matchValue)
         newPathSet = histogramMapping[0]-missingPathes
         newHistogramMapping = [newPathSet, newHistogram, logAtom.parserMatch]
@@ -423,15 +450,20 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
       histogram.addValue(matchValue)
       newRecord = [set(unmappedPath), histogram, logAtom.parserMatch]
       for path in unmappedPath:
+        newRecord[1].propertyPath = path
         self.histogramData[path] = newRecord
 
     timestamp = logAtom.getTimestamp()
+    if timestamp is None:
+      timestamp = time.time()
+    if isinstance(timestamp, datetime):
+      timestamp = (datetime.fromtimestamp(0)-timestamp).total_seconds()
     if self.nextReportTime < timestamp:
       if self.lastReportTime is None:
         self.lastReportTime = timestamp
         self.nextReportTime = timestamp+self.reportInterval
       else:
-        self.sendReport(timestamp)
+        self.sendReport(logAtom, timestamp)
 
     if self.nextPersistTime is None:
       self.nextPersistTime = time.time()+600
@@ -461,27 +493,33 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
     self.nextPersistTime = None
 
 
-  def sendReport(self, timestamp):
+  def sendReport(self, logAtom, timestamp):
     """Send report to event handlers."""
     reportStr = 'Path histogram report '
     if self.lastReportTime != None:
-      reportStr += 'from %s ' % self.lastReportTime
-    reportStr += 'till %s' % timestamp
+      reportStr += 'from %s ' % datetime.fromtimestamp(self.lastReportTime).strftime("%Y-%m-%d %H:%M:%S")
+    reportStr += 'till %s' % datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
     allPathSet = set(self.histogramData.keys())
+    res = []
     while allPathSet:
       path = allPathSet.pop()
       histogramMapping = self.histogramData.get(path)
-      for path in histogramMapping[0]:
-        allPathSet.discard(path)
-      reportStr += '\nPath values "%s":\nExample: %s\n%s' % (
-          '", "'.join(histogramMapping[0]),
-          histogramMapping[2].matchElement.matchString,
-          histogramMapping[1].toString('  '))
-      if self.resetAfterReportFlag:
+      reportStr += os.linesep+'Path values "%s":' % '", "'.join(histogramMapping[0])
+      if isinstance(histogramMapping[2].matchElement.matchString, bytes):
+        histogramMapping[2].matchElement.matchString = histogramMapping[2].matchElement.matchString.decode("utf-8")
+      reportStr += os.linesep+'Example: %s' % histogramMapping[2].matchElement.matchString
+      if len(res) < histogramMapping[1].totalElements:
+        res = [''] * histogramMapping[1].totalElements
+      for line in histogramMapping[1].toString('  ').split('\n'):
+        reportStr += os.linesep+'%s' % line
+      if len(res) > 0:
+        res[0] = reportStr
+      allPathSet.discard(path)
+    if self.resetAfterReportFlag:
         histogramMapping[1].reset()
     for listener in self.reportEventHandlers:
       listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
-          'Histogram report', [], reportStr, self)
+          'Histogram report', res, logAtom, self)
 
     self.lastReportTime = timestamp
     self.nextReportTime = timestamp+self.reportInterval

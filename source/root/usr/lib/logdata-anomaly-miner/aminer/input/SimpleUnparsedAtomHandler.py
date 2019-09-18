@@ -16,5 +16,5 @@ class SimpleUnparsedAtomHandler(AtomHandlerInterface):
       return False
     for listener in self.eventHandlers:
       listener.receiveEvent('Input.UnparsedAtomHandler', \
-          'Unparsed atom received', [logAtom.rawData], [logAtom], self)
+          'Unparsed atom received', [logAtom.rawData], logAtom, self)
     return True

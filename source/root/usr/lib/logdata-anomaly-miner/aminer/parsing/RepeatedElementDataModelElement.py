@@ -6,9 +6,11 @@ from aminer.parsing import ModelElementInterface
 
 class RepeatedElementDataModelElement(ModelElementInterface):
   """Objects of this class match on repeats of a given element."""
-  def __init__(self, elementId, repeatedElement, minRepeat=-1, maxRepeat=-1, repeatRef=None):
+  def __init__(self, elementId, repeatedElement, minRepeat=0, maxRepeat=0x100000, repeatRef=None):
     self.elementId = elementId
     self.repeatedElement = repeatedElement
+    self.minRepeat = minRepeat
+    self.maxRepeat = maxRepeat
 
   def getChildElements(self):
     """Return a list of all children model elements."""
@@ -18,13 +20,10 @@ class RepeatedElementDataModelElement(ModelElementInterface):
     """Find a suitable number of repeats."""
     currentPath = "%s/%s" % (path, self.elementId)
 
-    minRepeat = 0
-    maxRepeat = 0x100000
-
     startData = matchContext.matchData
     matches = []
     matchCount = 0
-    while matchCount != maxRepeat:
+    while matchCount != self.maxRepeat+1:
       childMatch = self.repeatedElement.getMatchElement(
           '%s/%s' % (currentPath, matchCount),
           matchContext)
@@ -32,9 +31,10 @@ class RepeatedElementDataModelElement(ModelElementInterface):
         break
       matches += [childMatch]
       matchCount += 1
-    if matchCount < minRepeat:
+    if matchCount < self.minRepeat or matchCount > self.maxRepeat:
       matchContext.matchData = startData
       return None
 
     return MatchElement(currentPath, \
-        startData[:len(startData)-len(matchContext.matchData)], None, matches)
+        startData[:len(startData)-len(matchContext.matchData)], 
+        startData[:len(startData)-len(matchContext.matchData)], matches)

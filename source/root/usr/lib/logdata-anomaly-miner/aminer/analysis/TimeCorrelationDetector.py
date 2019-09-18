@@ -19,7 +19,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
   checks as depicted in http://dx.doi.org/10.1016/j.cose.2014.09.006."""
 
   def __init__(self, aminerConfig, parallelCheckCount, correlationTestCount, \
-    maxFailCount, anomalyEventHandlers, persistenceId='Default'):
+    maxFailCount, anomalyEventHandlers, persistenceId='Default', recordCountBeforeEvent=0x10000):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location.
     @param parallelCheckCount number of rule detection checks
@@ -37,6 +37,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
     self.lastUnhandledMatch = None
     self.nextPersistTime = None
     self.totalRecords = 0
+    self.recordCountBeforeEvent = recordCountBeforeEvent
 
     PersistencyUtil.addPersistableComponent(self)
     self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
@@ -53,48 +54,52 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
   def receiveAtom(self, logAtom):
     timestamp = logAtom.getTimestamp()
     if timestamp is None:
-      timestamp = time.time()
+      timestamp = datetime.utcnow()
+    if isinstance(timestamp, datetime):
+      timestamp = (timestamp.utcnow()-datetime.fromtimestamp(0)).total_seconds()
     if timestamp < self.lastTimestamp:
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
             'Logdata not sorted: last %s, current %s' % (self.lastTimestamp, timestamp), \
-            [logAtom.rawData], logAtom, self)
+            [logAtom.parserMatch.matchElement.annotateMatch('')], logAtom, self)
       return
     self.lastTimestamp = timestamp
-    parserMatch = logAtom.parserMatch
 
     self.totalRecords += 1
     featuresFoundList = []
 
     for feature in self.featureList:
-      if feature.rule.match(parserMatch):
+      if feature.rule.match(logAtom):
         feature.triggerCount += 1
         self.updateTablesForFeature(feature, timestamp)
         featuresFoundList.append(feature)
 
     if len(self.featureList) < self.parallelCheckCount:
       if (random.randint(0, 1) != 0) and (self.lastUnhandledMatch is not None):
-        parserMatch = self.lastUnhandledMatch
-      newRule = self.createRandomRule(parserMatch)
-      newFeature = CorrelationFeature(newRule, len(self.featureList), timestamp)
-      self.featureList.append(newFeature)
-      newFeature.triggerCount = 1
-      self.updateTablesForFeature(newFeature, timestamp)
-      featuresFoundList.append(newFeature)
+        logAtom = self.lastUnhandledMatch
+      newRule = self.createRandomRule(logAtom)
+      if newRule is not None:
+        newFeature = CorrelationFeature(newRule, len(self.featureList), timestamp)
+        self.featureList.append(newFeature)
+        newFeature.triggerCount = 1
+        self.updateTablesForFeature(newFeature, timestamp)
+        featuresFoundList.append(newFeature)
 
     for feature in featuresFoundList:
       feature.lastTriggerTime = timestamp
 
     if not featuresFoundList:
-      self.lastUnhandledMatch = parserMatch
+      self.lastUnhandledMatch = logAtom
     elif self.nextPersistTime is None:
       self.nextPersistTime = time.time()+600
 
-    if (self.totalRecords%0x10000) == 0:
+    result = int(self.totalRecords/(self.totalRecords/10))*['']
+    result[0] = self.analysisStatusToString()
+    if (self.totalRecords%self.recordCountBeforeEvent) == 0:
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
-            'Correlation report', [self.analysisStatusToString()], \
-            parserMatch, self)
+            'Correlation report', result, \
+            logAtom, self)
       self.resetStatistics()
 
 
@@ -123,10 +128,11 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
     self.nextPersistTime = None
 
 
-  def createRandomRule(self, parserMatch):
+  def createRandomRule(self, logAtom):
     """Create a random existing path rule or value match rule."""
+    parserMatch = logAtom.parserMatch
     subRules = []
-    allKeys = parserMatch.getMatchDictionary().keys()
+    allKeys = list(parserMatch.getMatchDictionary().keys())
     attributeCount = getLogInt(self.maxRuleAttributes)+1
     while attributeCount > 0:
       keyPos = random.randint(0, len(allKeys)-1)
@@ -153,7 +159,10 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
 
     if len(subRules) > 1:
       return Rules.AndMatchRule(subRules)
-    return subRules[0]
+    if len(subRules) > 0:
+      return subRules[0]
+    return None
+    
 
 
   def updateTablesForFeature(self, targetFeature, timestamp):

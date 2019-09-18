@@ -2,6 +2,7 @@
 an average."""
 
 import time
+import os
 
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
@@ -79,7 +80,12 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         for (path, statData) in self.statData:
           analysisData = self.analyze(statData)
           if analysisData is not None:
-            analysisSummary += '"%s": %s' % (path, analysisData)
+            if analysisSummary == '':
+              analysisSummary += '"%s": %s' % (path, analysisData)
+            else:
+              analysisSummary += os.linesep
+              analysisSummary += '  "%s": %s' % (path, analysisData)
+            
 
         if self.nextPersistTime is None:
           self.nextPersistTime = time.time()+600
@@ -87,9 +93,11 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
       raise Exception('FIXME: not implemented')
 
     if analysisSummary:
+      res = [''] * statData[2][0]
+      res[0] = analysisSummary
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
-            'Statistical data report\n%s' % analysisSummary, [logAtom.rawData], match, \
+            'Statistical data report', res, logAtom, \
             self)
 
 
@@ -163,7 +171,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
       statData[2] = (currentBin[0], currentBin[1], currentBin[2], currentAverage, currentVariance,)
       statData[3] = (0, 0.0, 0.0)
       if self.debugMode:
-        return 'Initial: n = %d, avg = %s, var = %s\n' % (currentBin[0], \
+        return 'Initial: n = %d, avg = %s, var = %s' % (currentBin[0], \
           currentAverage+statData[1], currentVariance)
     else:
       totalN = oldBin[0]+currentBin[0]
@@ -176,7 +184,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
 
       if (currentVariance > 2*oldBin[4]) or (abs(currentAverage-oldBin[3]) > oldBin[4]) \
          or self.debugMode:
-        return 'Change: new: n = %d, avg = %s, var = %s; old: n = %d, avg = %s, var = %s\n' % \
+        return 'Change: new: n = %d, avg = %s, var = %s; old: n = %d, avg = %s, var = %s' % \
                (currentBin[0], currentAverage+statData[1], currentVariance, oldBin[0], \
                 oldBin[3]+statData[1], oldBin[4])
     return None

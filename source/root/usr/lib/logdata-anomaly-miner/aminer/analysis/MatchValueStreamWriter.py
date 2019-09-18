@@ -4,6 +4,7 @@ to a stream."""
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input import AtomHandlerInterface
 from aminer.util import TimeTriggeredComponentInterface
+import _io
 
 class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterface):
   """This class extracts values from a given match and writes
@@ -25,6 +26,7 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
     """Forward match value information to the stream."""
     matchDict = logAtom.parserMatch.getMatchDictionary()
     addSepFlag = False
+    containsData = False
     result = b''
     for path in self.matchValuePathList:
       if addSepFlag:
@@ -34,9 +36,15 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
         result += self.missingValueString
       else:
         result += match.matchString
+        containsData = True
       addSepFlag = True
-    self.stream.write(result)
-    self.stream.write(b'\n')
+    if containsData:
+      if not isinstance(self.stream, _io.BytesIO):
+        self.stream.buffer.write(result)
+        self.stream.buffer.write(b'\n')
+      else:
+        self.stream.write(result)
+        self.stream.write(b'\n')
 
 
   def getTimeTriggerClass(self):

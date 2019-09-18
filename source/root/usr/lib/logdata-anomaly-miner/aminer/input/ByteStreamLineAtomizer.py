@@ -1,7 +1,7 @@
 """This module provides support for splitting a data stream into
 atoms, perform parsing and forward the results."""
 
-from aminer.input import LogAtom
+from aminer.input.LogAtom import LogAtom
 from aminer.input import StreamAtomizer
 from aminer.parsing import MatchContext
 from aminer.parsing import ParserMatch
@@ -96,7 +96,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
 
 # This is a normal line.
       lineData = streamData[consumedLength:lineEnd]
-      logAtom = LogAtom.LogAtom(lineData, None, None, self)
+      logAtom = LogAtom(lineData, None, None, self)
       if self.parsingModel != None:
         matchContext = MatchContext(lineData)
         matchElement = self.parsingModel.getMatchElement('', matchContext)

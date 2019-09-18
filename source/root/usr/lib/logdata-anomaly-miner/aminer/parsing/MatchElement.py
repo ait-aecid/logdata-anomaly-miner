@@ -14,7 +14,7 @@ class MatchElement(object):
     @param matchObject the matchString converted to an object for
     matchers detecting more complex data types, e.g., integer
     numbers or IP addresses."""
-    if (path is None) and children:
+    if (not path) and children:
       raise Exception("Anonymous match may not have children")
     self.path = path
     self.matchString = matchString
@@ -55,10 +55,9 @@ class MatchElement(object):
     nextIndent = None
     result = None
     if indentStr is None:
-      result = '%s: %s (%s)' % (self.path, repr(self.matchObject), repr(self.matchString))
+      result = '%s: %s' % (self.path, repr(self.matchObject))
     else:
-      result = '%s%s: %s (%s)' % (indentStr, self.path, repr(self.matchObject), \
-              repr(self.matchString))
+      result = '%s%s: %s' % (indentStr, self.path, repr(self.matchObject))
       nextIndent = indentStr+'  '
     if self.children != None:
       for childMatch in self.children:
