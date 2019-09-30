@@ -89,6 +89,8 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
       checkResult = rule.checkStatus(newestTimestamp)
       if checkResult is None:
         continue
+      rule.historyAEvents = []
+      rule.historyBEvents = []
       self.lastLogAtom.atomTime = triggerTime
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
