@@ -13,6 +13,8 @@ KEY_ANALYSIS_CONFIG_FILE = 'AnalysisConfigFile'
 KEY_PERSISTENCE_DIR = 'Core.PersistenceDir'
 DEFAULT_PERSISTENCE_DIR = '/var/lib/aminer'
 KEY_REMOTE_CONTROL_SOCKET_PATH = 'RemoteControlSocket'
+KEY_LOG_PREFIX = 'LogPrefix'
+KEY_RESSOURCES_MAX_MEMORY_USAGE = 'Ressources.MaxMemoryUsage'
 
 def loadConfig(configFileName):
   """Load the configuration file using the import module."""

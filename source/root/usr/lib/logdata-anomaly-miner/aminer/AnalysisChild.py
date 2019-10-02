@@ -12,6 +12,7 @@ import struct
 import sys
 import time
 import traceback
+import resource
 
 from aminer import AMinerConfig
 from aminer.input.LogStream import LogStream
@@ -210,6 +211,17 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 
     realTimeTriggeredComponents = self.analysisContext.realTimeTriggeredComponents
     analysisTimeTriggeredComponents = self.analysisContext.analysisTimeTriggeredComponents
+
+    maxMemoryMB = self.analysisContext.aminerConfig.configProperties.get(AMinerConfig.KEY_RESSOURCES_MAX_MEMORY_USAGE, None)
+    if maxMemoryMB is not None:
+      try:
+        maxMemoryMB = int(maxMemoryMB)
+        resource.setrlimit(resource.RLIMIT_AS, (maxMemoryMB*1024*1024, resource.RLIM_INFINITY))
+      except ValueError:
+        print('FATAL: %s must be an integer, terminating'
+          % AMinerConfig.KEY_RESSOURCES_MAX_MEMORY_USAGE, file=sys.stderr)
+        return 1
+      
 
 # Load continuation data for last known log streams. The loaded
 # data has to be a dictionary with repositioning information for
