@@ -1,4 +1,4 @@
-"""This module contains classes for execution of AMiner child
+"""This module contains classes for execution of py child
 process main analysis loop."""
 
 import base64
@@ -13,6 +13,7 @@ import sys
 import time
 import traceback
 import resource
+import subprocess
 
 from aminer import AMinerConfig
 from aminer.input.LogStream import LogStream
@@ -20,6 +21,8 @@ from aminer.util import PersistencyUtil
 from aminer.util import SecureOSFunctions
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.util import JsonUtil
+from aminer.input.ByteStreamLineAtomizer import ByteStreamLineAtomizer
+from builtins import str
 
 class AnalysisContext(object):
   """This class collects information about the current analysis
@@ -145,7 +148,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
   workflow. When splitting privileges between analysis and monitor
   process, this class should only be initialized within the analysis
   process!"""
-
+  
   def __init__(self, programName, aminerConfig):
     self.programName = programName
     self.analysisContext = AnalysisContext(aminerConfig)
@@ -211,17 +214,43 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 
     realTimeTriggeredComponents = self.analysisContext.realTimeTriggeredComponents
     analysisTimeTriggeredComponents = self.analysisContext.analysisTimeTriggeredComponents
-
-    maxMemoryMB = self.analysisContext.aminerConfig.configProperties.get(AMinerConfig.KEY_RESSOURCES_MAX_MEMORY_USAGE, None)
+    
+    maxMemoryMB = self.analysisContext.aminerConfig.configProperties.get(AMinerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE, None)
     if maxMemoryMB is not None:
       try:
         maxMemoryMB = int(maxMemoryMB)
         resource.setrlimit(resource.RLIMIT_AS, (maxMemoryMB*1024*1024, resource.RLIM_INFINITY))
       except ValueError:
         print('FATAL: %s must be an integer, terminating'
-          % AMinerConfig.KEY_RESSOURCES_MAX_MEMORY_USAGE, file=sys.stderr)
+          % AMinerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE, file=sys.stderr)
         return 1
       
+    maxCpuPercentUsage = self.analysisContext.aminerConfig.configProperties.get(AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE)
+    if maxCpuPercentUsage is not None:
+      try:
+        maxCpuPercentUsage = int(maxCpuPercentUsage)
+        # limit
+        pid = os.getpid()
+        packageInstalledCmd = ['dpkg', '-l', 'cpulimit']
+        cpulimitCmd = ['cpulimit', '-p', str(pid), '-l', str(maxCpuPercentUsage)]
+        
+        out = subprocess.Popen(packageInstalledCmd, 
+           stdout=subprocess.PIPE, 
+           stderr=subprocess.STDOUT)
+        stdout,stderr = out.communicate()
+        
+        if 'dpkg-query: no packages found matching cpulimit' in stdout.decode():
+          print('FATAL: cpulimit package must be installed, when using the property %s'
+            % AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE, file=sys.stderr)
+          return 1
+        else:
+          out = subprocess.Popen(cpulimitCmd, 
+           stdout=subprocess.PIPE, 
+           stderr=subprocess.STDOUT)
+      except ValueError:
+        print('FATAL: %s must be an integer, terminating' 
+          % AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE, file=sys.stderr)
+        return 1
 
 # Load continuation data for last known log streams. The loaded
 # data has to be a dictionary with repositioning information for
