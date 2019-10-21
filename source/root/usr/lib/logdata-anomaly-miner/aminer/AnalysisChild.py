@@ -550,6 +550,7 @@ class AnalysisChildRemoteControlHandler(object):
       exceptionData = None
       try:
         jsonRequestData = (json.loads(requestData[8:].decode()))
+        jsonRequestData = JsonUtil.decodeObject(jsonRequestData)
         if (jsonRequestData is None) or \
             (not isinstance(jsonRequestData, list)) or \
             (len(jsonRequestData) != 2):
