@@ -23,6 +23,7 @@ from aminer.util import TimeTriggeredComponentInterface
 from aminer.util import JsonUtil
 from aminer.input.ByteStreamLineAtomizer import ByteStreamLineAtomizer
 from builtins import str
+from aminer.AMinerRemoteControlExecutionMethods import AMinerRemoteControlExecutionMethods
 
 class AnalysisContext(object):
   """This class collects information about the current analysis
@@ -545,7 +546,6 @@ class AnalysisChildRemoteControlHandler(object):
       return
     requestType = requestData[4:8]
     if requestType == b'EEEE':
-      execLocals = {'analysisContext': analysisContext}
       jsonRemoteControlResponse = None
       exceptionData = None
       try:
@@ -555,10 +555,20 @@ class AnalysisChildRemoteControlHandler(object):
             (not isinstance(jsonRequestData, list)) or \
             (len(jsonRequestData) != 2):
           raise Exception('Invalid request data')
-        execLocals['remoteControlData'] = jsonRequestData[1]
-        exec(jsonRequestData[0], {}, execLocals)
+        methods = AMinerRemoteControlExecutionMethods()
+        execLocals = {'analysisContext':analysisContext, 'remoteControlData':jsonRequestData[1], 
+                      'print':print, 'printResponse':methods.printResponse, 'dir':dir, 'methods':methods,
+                      'changeConfigProperty':methods.changeConfigProperty}
+        exec(jsonRequestData[0], {'__builtins__' : None}, execLocals)
+        exec("print(dir())", {'__builtins__' : None}, execLocals)
         jsonRemoteControlResponse = json.dumps(
             execLocals.get('remoteControlResponse', None))
+        if (methods.REMOTE_CONTROL_RESPONSE == ''):
+          methods.REMOTE_CONTROL_RESPONSE = None
+        if execLocals.get('remoteControlResponse', None) is None:
+          jsonRemoteControlResponse = json.dumps(methods.REMOTE_CONTROL_RESPONSE)
+        else:
+          jsonRemoteControlResponse = json.dumps(execLocals.get('remoteControlResponse', None) + methods.REMOTE_CONTROL_RESPONSE)
       except:
         exceptionData = traceback.format_exc()
 # This is little dirty but avoids having to pass over remoteControlResponse
