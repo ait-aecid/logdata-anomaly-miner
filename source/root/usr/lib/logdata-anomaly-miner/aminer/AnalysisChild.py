@@ -1,4 +1,4 @@
-"""This module contains classes for execution of AMiner child
+"""This module contains classes for execution of py child
 process main analysis loop."""
 
 import base64
@@ -12,6 +12,8 @@ import struct
 import sys
 import time
 import traceback
+import resource
+import subprocess
 
 from aminer import AMinerConfig
 from aminer.input.LogStream import LogStream
@@ -19,6 +21,9 @@ from aminer.util import PersistencyUtil
 from aminer.util import SecureOSFunctions
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.util import JsonUtil
+from aminer.input.ByteStreamLineAtomizer import ByteStreamLineAtomizer
+from builtins import str
+from aminer.AMinerRemoteControlExecutionMethods import AMinerRemoteControlExecutionMethods
 
 class AnalysisContext(object):
   """This class collects information about the current analysis
@@ -144,7 +149,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
   workflow. When splitting privileges between analysis and monitor
   process, this class should only be initialized within the analysis
   process!"""
-
+  
   def __init__(self, programName, aminerConfig):
     self.programName = programName
     self.analysisContext = AnalysisContext(aminerConfig)
@@ -210,6 +215,43 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 
     realTimeTriggeredComponents = self.analysisContext.realTimeTriggeredComponents
     analysisTimeTriggeredComponents = self.analysisContext.analysisTimeTriggeredComponents
+    
+    maxMemoryMB = self.analysisContext.aminerConfig.configProperties.get(AMinerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE, None)
+    if maxMemoryMB is not None:
+      try:
+        maxMemoryMB = int(maxMemoryMB)
+        resource.setrlimit(resource.RLIMIT_AS, (maxMemoryMB*1024*1024, resource.RLIM_INFINITY))
+      except ValueError:
+        print('FATAL: %s must be an integer, terminating'
+          % AMinerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE, file=sys.stderr)
+        return 1
+      
+    maxCpuPercentUsage = self.analysisContext.aminerConfig.configProperties.get(AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE)
+    if maxCpuPercentUsage is not None:
+      try:
+        maxCpuPercentUsage = int(maxCpuPercentUsage)
+        # limit
+        pid = os.getpid()
+        packageInstalledCmd = ['dpkg', '-l', 'cpulimit']
+        cpulimitCmd = ['cpulimit', '-p', str(pid), '-l', str(maxCpuPercentUsage)]
+        
+        out = subprocess.Popen(packageInstalledCmd, 
+           stdout=subprocess.PIPE, 
+           stderr=subprocess.STDOUT)
+        stdout,stderr = out.communicate()
+        
+        if 'dpkg-query: no packages found matching cpulimit' in stdout.decode():
+          print('FATAL: cpulimit package must be installed, when using the property %s'
+            % AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE, file=sys.stderr)
+          return 1
+        else:
+          out = subprocess.Popen(cpulimitCmd, 
+           stdout=subprocess.PIPE, 
+           stderr=subprocess.STDOUT)
+      except ValueError:
+        print('FATAL: %s must be an integer, terminating' 
+          % AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE, file=sys.stderr)
+        return 1
 
 # Load continuation data for last known log streams. The loaded
 # data has to be a dictionary with repositioning information for
@@ -504,19 +546,29 @@ class AnalysisChildRemoteControlHandler(object):
       return
     requestType = requestData[4:8]
     if requestType == b'EEEE':
-      execLocals = {'analysisContext': analysisContext}
       jsonRemoteControlResponse = None
       exceptionData = None
       try:
         jsonRequestData = (json.loads(requestData[8:].decode()))
+        jsonRequestData = JsonUtil.decodeObject(jsonRequestData)
         if (jsonRequestData is None) or \
             (not isinstance(jsonRequestData, list)) or \
             (len(jsonRequestData) != 2):
           raise Exception('Invalid request data')
-        execLocals['remoteControlData'] = jsonRequestData[1]
-        exec(jsonRequestData[0], {}, execLocals)
+        methods = AMinerRemoteControlExecutionMethods()
+        execLocals = {'analysisContext':analysisContext, 'remoteControlData':jsonRequestData[1], 
+                      'print':print, 'printResponse':methods.printResponse, 'dir':dir, 'methods':methods,
+                      'changeConfigProperty':methods.changeConfigProperty}
+        exec(jsonRequestData[0], {'__builtins__' : None}, execLocals)
+        exec("print(dir())", {'__builtins__' : None}, execLocals)
         jsonRemoteControlResponse = json.dumps(
             execLocals.get('remoteControlResponse', None))
+        if (methods.REMOTE_CONTROL_RESPONSE == ''):
+          methods.REMOTE_CONTROL_RESPONSE = None
+        if execLocals.get('remoteControlResponse', None) is None:
+          jsonRemoteControlResponse = json.dumps(methods.REMOTE_CONTROL_RESPONSE)
+        else:
+          jsonRemoteControlResponse = json.dumps(execLocals.get('remoteControlResponse', None) + methods.REMOTE_CONTROL_RESPONSE)
       except:
         exceptionData = traceback.format_exc()
 # This is little dirty but avoids having to pass over remoteControlResponse

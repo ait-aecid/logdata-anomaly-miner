@@ -172,27 +172,19 @@ class CorrelationRule:
 # FIXME: This part of code would be good target to be implemented
 # as native library with optimized algorithm in future.
     aPos = 0
-    bPosStart = 0
-    for aPos in range(0, len(self.historyAEvents)):
+    checkRange = len(self.historyAEvents)
+    violationLogs = []
+    violationMessage = ''
+    numViolations = 0
+    while aPos < checkRange:
+      deleted = False
+      checkRange = len(self.historyAEvents)
       aEvent = self.historyAEvents[aPos]
       if aEvent is None:
         continue
       aEventTime = aEvent[0]
-      if newestTimestamp-aEventTime <= self.maxTimeDelta:
-# This event is so new, that timewindow for related event has
-# not expired yet.
-        t = datetime.fromtimestamp(time.time())
-        if newestTimestamp-aEventTime == 0 and aEventTime-(t-datetime.fromtimestamp(0)).total_seconds() <= self.maxTimeDelta:
-          violationLine = aEvent[3].matchElement.matchString
-          if isinstance(violationLine, bytes):
-            violationLine = violationLine.decode("utf-8")
-          violationMessage = 'FAIL: B-Event for \"%s\" (%s) not found!' % (violationLine, aEvent[2].actionId)
-          violationLogs = []
-          violationLogs.append(violationLine)
-          del self.historyAEvents[aPos]
-          return (violationMessage, violationLogs)
-
-      for bPos in range(bPosStart, len(self.historyBEvents)):
+      bPos = 0
+      while bPos < len(self.historyBEvents):
         bEvent = self.historyBEvents[bPos]
         if bEvent is None:
           continue
@@ -202,89 +194,97 @@ class CorrelationRule:
 # See if too early, if yes go to next element. As we will not
 # check again any older aEvents in this loop, skip all bEvents
 # up to this position in future runs.
-          bPosStart = bPos+1
-          if bPosStart == len(self.historyBEvents):
+          if bPos < len(self.historyBEvents):
             violationLine = aEvent[3].matchElement.matchString
             if isinstance(violationLine, bytes):
               violationLine = violationLine.decode("utf-8")
-              violationMessage = 'FAIL: B-Event for \"%s\" (%s) was found too early!' % (violationLine, aEvent[2].actionId)
-              violationLogs = []
+              if numViolations <= maxViolations:
+                violationMessage += 'FAIL: B-Event for \"%s\" (%s) was found too early!\n' % (violationLine, aEvent[2].actionId)
               violationLogs.append(violationLine)
               del self.historyAEvents[aPos]
-              return (violationMessage, violationLogs)
+              del self.historyBEvents[bPos]
+              deleted = True
+              checkRange = checkRange - 1
+              numViolations = numViolations + 1
+              break
           continue
 # Too late, no other bEvent may match this aEvent
         if delta > self.maxTimeDelta:
           violationLine = aEvent[3].matchElement.matchString
           if isinstance(violationLine, bytes):
             violationLine = violationLine.decode("utf-8")
-            violationMessage = 'FAIL: B-Event for \"%s\" (%s) was not found in time!' % (violationLine, aEvent[2].actionId)
-            violationLogs = []
+            if numViolations <= maxViolations:
+              violationMessage += 'FAIL: B-Event for \"%s\" (%s) was not found in time!\n' % (violationLine, aEvent[2].actionId)
             violationLogs.append(violationLine)
             del self.historyAEvents[aPos]
-            return (violationMessage, violationLogs)
+            del self.historyBEvents[bPos]
+            deleted = True
+            checkRange = checkRange - 1
+            numViolations = numViolations + 1
           break
 # So time range is OK, see if match parameters are also equal.
         checkPos = 4
+        violationFound = False
         for checkPos in range(4, len(aEvent)):
           if aEvent[checkPos] != bEvent[checkPos]:
             violationLine = aEvent[3].matchElement.matchString
             if isinstance(violationLine, bytes):
               violationLine = violationLine.decode("utf-8")
-              violationMessage = 'FAIL: \"%s\" (%s) %s is not equal %s' % (
-                violationLine, aEvent[2].actionId, aEvent[checkPos], bEvent[checkPos])
-              violationLogs = []
+              if numViolations <= maxViolations:
+                violationMessage += 'FAIL: \"%s\" (%s) %s is not equal %s\n' % (
+                  violationLine, aEvent[2].actionId, aEvent[checkPos], bEvent[checkPos])
               violationLogs.append(violationLine)
               del self.historyAEvents[aPos]
-              return (violationMessage, violationLogs)
+              del self.historyBEvents[bPos]
+              deleted = True
+              checkRange = checkRange - 1
+              numViolations = numViolations + 1
+              violationFound = True
             break
         checkPos = checkPos+1
-        if checkPos != len(aEvent):
+        if violationFound:
           continue
-# We found the match. Mark aEvent as done.
-        self.historyAEvents[aPos] = None
-# See how many eEvents this bEvent might collect. Clean it also
-# when limit was reached.
-        bEvent[1] += 1
-        if bEvent[1] == self.maxArtefactsAForSingleB:
-          self.historyBEvents[bPos] = None
 
 # We want to keep a history of good matches to ease diagnosis
 # of correlation failures. Keep information about current line
 # for reference.
         self.correlationHistory.addObject((aEvent[3].matchElement.matchString, aEvent[2].actionId, \
           bEvent[3].matchElement.matchString, bEvent[2].actionId))
-        aPos += 1
-        break
-
+        del self.historyAEvents[aPos]
+        del self.historyBEvents[bPos]
+        deleted = True
+        checkRange = checkRange - 1
+        bPos = bPos + 1
+      if deleted == False:
+        aPos = aPos + 1
 # After checking all aEvents before aPos were cleared, otherwise
 # they violate a correlation rule.
-    checkRange = aPos
-    violationLogs = []
-    violationMessage = ''
-    numViolations = 0
     for aPos in range(0, checkRange):
       aEvent = self.historyAEvents[aPos]
       if aEvent is None:
         continue
-      numViolations += 1
-      if numViolations > maxViolations:
-        continue
-      violationLine = aEvent[3].matchElement.matchString
-      if isinstance(violationLine, bytes):
-            violationLine = violationLine.decode("utf-8")
-      violationMessage += 'FAIL: \"%s\" (%s)' % (violationLine, aEvent[2].actionId)
-      violationLogs.append(violationLine)
+      delta = newestTimestamp - aEvent[0]
+      if delta > self.maxTimeDelta:
+        violationLine = aEvent[3].matchElement.matchString
+        if isinstance(violationLine, bytes):
+          violationLine = violationLine.decode("utf-8")
+          if numViolations <= maxViolations:
+            violationMessage += 'FAIL: B-Event for \"%s\" (%s) was not found in time!\n' % (violationLine, aEvent[2].actionId)
+          violationLogs.append(violationLine)
+          del self.historyAEvents[aPos]
+          deleted = True
+          checkRange = checkRange - 1
+          numViolations = numViolations + 1
+        break
+      
     if numViolations > maxViolations:
       violationMessage += '... (%d more)\n' % (numViolations-maxViolations)
     if numViolations != 0 and len(self.correlationHistory.getHistory()) > 0:
       violationMessage += 'Historic examples:\n'
       for record in self.correlationHistory.getHistory():
-        violationMessage += '  "%s" (%s) ==> "%s" (%s)\n' % record
+        violationMessage += '  "%s" (%s) ==> "%s" (%s)\n' % (record[0].decode(), 
+        record[1], record[2].decode(), record[3])
 
-# Prune out all handled event records
-    self.historyAEvents = self.historyAEvents[checkRange:]
-    self.historyBEvents = self.historyBEvents[bPosStart:]
     if numViolations == 0:
       return None
     return (violationMessage, violationLogs)

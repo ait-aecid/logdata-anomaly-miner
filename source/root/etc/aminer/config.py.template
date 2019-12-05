@@ -71,6 +71,17 @@ configProperties['MailAlerting.TargetAddress'] = 'root@localhost'
 # at most. This defaults to 1000
 # configProperties['MailAlerting.MaxEventsPerMessage'] = 1000
 
+# Most analysis components implement the outputLogLine-property,
+# which is True by default. Define a prefix to the original
+# captured log lines. This defaults to ''
+configProperties['LogPrefix'] = ''
+
+# This property limits the maximal possible RAM in MB which the
+# AMiner process can use. Be careful at choosing the value, as
+# a shortage of memory causes a MemoryError. This defaults to
+# -1, which means that there is no limit.
+configProperties['Ressources.MaxMemoryUsage'] = -1
+
 
 # Add your ruleset here:
 
