@@ -3,6 +3,7 @@ events when expected values were not seen for an extended period
 of time."""
 
 import time
+from datetime import datetime
 
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
@@ -11,7 +12,6 @@ from aminer.input import AtomHandlerInterface
 from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
-from datetime import datetime
 
 class MissingMatchPathValueDetector(
     AtomHandlerInterface, TimeTriggeredComponentInterface,
@@ -139,7 +139,7 @@ class MissingMatchPathValueDetector(
                 self.lastSeenTimestamp-valueOverdueTime)
             if old > self.nextCheckTimestamp or self.nextCheckTimestamp < detectorInfo[2]:
               continue
-            
+
         missingValueList.append([value, valueOverdueTime, detectorInfo[1]])
 # Set the next alerting time.
         detectorInfo[2] = self.lastSeenTimestamp+self.realertInterval
@@ -148,12 +148,14 @@ class MissingMatchPathValueDetector(
         messagePart = []
         for value, overdueTime, interval in missingValueList:
           if self.__class__.__name__ == 'MissingMatchPathValueDetector':
-            messagePart.append('  %s: %s overdue %ss (interval %s)' % (self.targetPath, repr(value), overdueTime, interval))
+            messagePart.append('  %s: %s overdue %ss (interval %s)' % ( \
+                    self.targetPath, repr(value), overdueTime, interval))
           else:
             targetPaths = ''
             for targetPath in self.targetPathList:
               targetPaths += targetPath + ', '
-            messagePart.append('  %s: %s overdue %ss (interval %s)' % (targetPaths[:-2], repr(value), overdueTime, interval))
+            messagePart.append('  %s: %s overdue %ss (interval %s)' % ( \
+                    targetPaths[:-2], repr(value), overdueTime, interval))
         if self.outputLogLine:
           originalLogLinePrefix = self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
           if originalLogLinePrefix is None:
@@ -165,7 +167,7 @@ class MissingMatchPathValueDetector(
 
 
   def sendEventToHandlers(self, anomalyEventHandler, logAtom, messagePart, missingValueList):
-    anomalyEventHandler.receiveEvent('Analysis.%s' % self.__class__.__name__,
+    anomalyEventHandler.receiveEvent('Analysis.%s' % self.__class__.__name__, \
         'Interval too large between values', messagePart, logAtom, self)
 
 
@@ -274,6 +276,5 @@ class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
     targetPaths = ''
     for targetPath in self.targetPathList:
       targetPaths += targetPath + ', '
-    anomalyEventHandler.receiveEvent('Analysis.%s' % self.__class__.__name__, 
+    anomalyEventHandler.receiveEvent('Analysis.%s' % self.__class__.__name__, \
         'Interval too large between values', messagePart, logAtom, self)
-

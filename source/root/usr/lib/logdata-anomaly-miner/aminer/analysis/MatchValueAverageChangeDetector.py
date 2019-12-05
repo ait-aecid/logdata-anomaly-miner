@@ -85,8 +85,6 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             else:
               analysisSummary += os.linesep
               analysisSummary += '  "%s": %s' % (path, analysisData)
-            
-
         if self.nextPersistTime is None:
           self.nextPersistTime = time.time()+600
     else:

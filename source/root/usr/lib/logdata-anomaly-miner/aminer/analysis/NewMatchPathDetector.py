@@ -58,12 +58,12 @@ class NewMatchPathDetector(AtomHandlerInterface, \
         originalLogLinePrefix = self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
         if originalLogLinePrefix is None:
           originalLogLinePrefix = ''
-        sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')+os.linesep+ 
+        sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')+os.linesep+ \
           originalLogLinePrefix+repr(logAtom.rawData)]
       else:
         sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')]
       for listener in self.anomalyEventHandlers:
-        listener.receiveEvent('Analysis.%s' % self.__class__.__name__, 'New path(es) detected', 
+        listener.receiveEvent('Analysis.%s' % self.__class__.__name__, 'New path(es) detected', \
             sortedLogLines, logAtom, self)
     return True
 

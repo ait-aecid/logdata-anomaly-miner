@@ -1,6 +1,7 @@
 """This module defines a detector for time correlation rules."""
 
 import time
+from datetime import datetime
 
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
@@ -9,7 +10,6 @@ from aminer.util import LogarithmicBackoffHistory
 from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.analysis import Rules
-from datetime import datetime
 
 class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
   """This class creates events when one of the given time correlation
@@ -182,11 +182,13 @@ class CorrelationRule:
 # This event is so new, that timewindow for related event has
 # not expired yet.
         t = datetime.fromtimestamp(time.time())
-        if newestTimestamp-aEventTime == 0 and aEventTime-(t-datetime.fromtimestamp(0)).total_seconds() <= self.maxTimeDelta:
+        if newestTimestamp-aEventTime == 0 and \
+                aEventTime-(t-datetime.fromtimestamp(0)).total_seconds() <= self.maxTimeDelta:
           violationLine = aEvent[3].matchElement.matchString
           if isinstance(violationLine, bytes):
             violationLine = violationLine.decode("utf-8")
-          violationMessage = 'FAIL: B-Event for \"%s\" (%s) not found!' % (violationLine, aEvent[2].actionId)
+          violationMessage = 'FAIL: B-Event for \"%s\" (%s) not found!' % \
+                  (violationLine, aEvent[2].actionId)
           violationLogs = []
           violationLogs.append(violationLine)
           del self.historyAEvents[aPos]
@@ -207,7 +209,8 @@ class CorrelationRule:
             violationLine = aEvent[3].matchElement.matchString
             if isinstance(violationLine, bytes):
               violationLine = violationLine.decode("utf-8")
-              violationMessage = 'FAIL: B-Event for \"%s\" (%s) was found too early!' % (violationLine, aEvent[2].actionId)
+              violationMessage = 'FAIL: B-Event for \"%s\" (%s) was found too early!' % \
+                      (violationLine, aEvent[2].actionId)
               violationLogs = []
               violationLogs.append(violationLine)
               del self.historyAEvents[aPos]
@@ -218,7 +221,8 @@ class CorrelationRule:
           violationLine = aEvent[3].matchElement.matchString
           if isinstance(violationLine, bytes):
             violationLine = violationLine.decode("utf-8")
-            violationMessage = 'FAIL: B-Event for \"%s\" (%s) was not found in time!' % (violationLine, aEvent[2].actionId)
+            violationMessage = 'FAIL: B-Event for \"%s\" (%s) was not found in time!' % \
+                    (violationLine, aEvent[2].actionId)
             violationLogs = []
             violationLogs.append(violationLine)
             del self.historyAEvents[aPos]
@@ -231,7 +235,7 @@ class CorrelationRule:
             violationLine = aEvent[3].matchElement.matchString
             if isinstance(violationLine, bytes):
               violationLine = violationLine.decode("utf-8")
-              violationMessage = 'FAIL: \"%s\" (%s) %s is not equal %s' % (
+              violationMessage = 'FAIL: \"%s\" (%s) %s is not equal %s' % ( \
                 violationLine, aEvent[2].actionId, aEvent[checkPos], bEvent[checkPos])
               violationLogs = []
               violationLogs.append(violationLine)
@@ -272,12 +276,12 @@ class CorrelationRule:
         continue
       violationLine = aEvent[3].matchElement.matchString
       if isinstance(violationLine, bytes):
-            violationLine = violationLine.decode("utf-8")
+        violationLine = violationLine.decode("utf-8")
       violationMessage += 'FAIL: \"%s\" (%s)' % (violationLine, aEvent[2].actionId)
       violationLogs.append(violationLine)
     if numViolations > maxViolations:
       violationMessage += '... (%d more)\n' % (numViolations-maxViolations)
-    if numViolations != 0 and len(self.correlationHistory.getHistory()) > 0:
+    if numViolations != 0 and self.correlationHistory.getHistory():
       violationMessage += 'Historic examples:\n'
       for record in self.correlationHistory.getHistory():
         violationMessage += '  "%s" (%s) ==> "%s" (%s)\n' % record

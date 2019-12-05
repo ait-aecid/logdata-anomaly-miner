@@ -1,10 +1,10 @@
 """This module defines a detector for unsorted timestamps."""
 
 import os
+from datetime import datetime
 
 from aminer.events import EventSourceInterface
 from aminer.input import AtomHandlerInterface
-from datetime import datetime
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
 class TimestampsUnsortedDetector(AtomHandlerInterface, EventSourceInterface):
@@ -36,13 +36,14 @@ class TimestampsUnsortedDetector(AtomHandlerInterface, EventSourceInterface):
         originalLogLinePrefix = self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
         if originalLogLinePrefix is None:
           originalLogLinePrefix = ''
-        sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')+os.linesep+ 
+        sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')+os.linesep+ \
           originalLogLinePrefix+repr(logAtom.rawData)]
       else:
         sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')]
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
-            'Timestamp %s below %s' % (datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S"),
+            'Timestamp %s below %s' % \
+            (datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S"), \
             datetime.fromtimestamp(self.lastTimestamp).strftime("%Y-%m-%d %H:%M:%S")), \
             sortedLogLines, logAtom, self)
       if self.exitOnErrorFlag:

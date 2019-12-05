@@ -337,17 +337,18 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """Sends a report to the event handlers."""
     reportStr = 'Histogram report '
     if self.lastReportTime is not None:
-      reportStr += 'from %s ' % datetime.fromtimestamp(self.lastReportTime).strftime("%Y-%m-%d %H:%M:%S")
+      reportStr += 'from %s ' % datetime.fromtimestamp( \
+              self.lastReportTime).strftime("%Y-%m-%d %H:%M:%S")
     reportStr += 'till %s' % datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
     res = []
     for dataItem in self.histogramData:
       for line in dataItem.toString('  ').split('\n'):
         reportStr += os.linesep+line
       res += [''] * dataItem.totalElements
-    if len(res) > 0:
-      res[0]  = reportStr
+    if res:
+      res[0] = reportStr
       for listener in self.reportEventHandlers:
-        listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
+        listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
                             'Histogram report', res, logAtom, self)
     if self.resetAfterReportFlag:
       for dataItem in self.histogramData:
@@ -497,7 +498,8 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
     """Send report to event handlers."""
     reportStr = 'Path histogram report '
     if self.lastReportTime != None:
-      reportStr += 'from %s ' % datetime.fromtimestamp(self.lastReportTime).strftime("%Y-%m-%d %H:%M:%S")
+      reportStr += 'from %s ' % datetime.fromtimestamp( \
+              self.lastReportTime).strftime("%Y-%m-%d %H:%M:%S")
     reportStr += 'till %s' % datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
     allPathSet = set(self.histogramData.keys())
     res = []
@@ -506,17 +508,18 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
       histogramMapping = self.histogramData.get(path)
       reportStr += os.linesep+'Path values "%s":' % '", "'.join(histogramMapping[0])
       if isinstance(histogramMapping[2].matchElement.matchString, bytes):
-        histogramMapping[2].matchElement.matchString = histogramMapping[2].matchElement.matchString.decode("utf-8")
+        histogramMapping[2].matchElement.matchString = \
+                histogramMapping[2].matchElement.matchString.decode("utf-8")
       reportStr += os.linesep+'Example: %s' % histogramMapping[2].matchElement.matchString
       if len(res) < histogramMapping[1].totalElements:
         res = [''] * histogramMapping[1].totalElements
       for line in histogramMapping[1].toString('  ').split('\n'):
         reportStr += os.linesep+'%s' % line
-      if len(res) > 0:
+      if res:
         res[0] = reportStr
       allPathSet.discard(path)
     if self.resetAfterReportFlag:
-        histogramMapping[1].reset()
+      histogramMapping[1].reset()
     for listener in self.reportEventHandlers:
       listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
           'Histogram report', res, logAtom, self)

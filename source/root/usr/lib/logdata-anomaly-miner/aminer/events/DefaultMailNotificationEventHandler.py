@@ -57,6 +57,7 @@ events and send them via "sendmail" transport."""
     self.nextAlertTime = 0
     self.currentAlertGap = self.minAlertGap
     self.currentMessage = ''
+    self.eventData = None
 
 # Locate the sendmail binary immediately at startup to avoid delayed
 # errors due to misconfiguration.
@@ -81,8 +82,9 @@ events and send them via "sendmail" transport."""
       if self.eventsCollected == 0:
         self.eventCollectionStartTime = currentTime
       self.eventsCollected += 1
-      self.eventData = EventData(eventType, eventMessage, sortedLogLines, eventData, eventSource, self.analysisContext)
-      self.currentMessage += self.eventData.receiveEventString() 
+      self.eventData = EventData(eventType, eventMessage, sortedLogLines, \
+              eventData, eventSource, self.analysisContext)
+      self.currentMessage += self.eventData.receiveEventString()
 
     if self.nextAlertTime == 0:
       if self.lastAlertTime != 0:
@@ -174,4 +176,3 @@ events and send them via "sendmail" transport."""
     self.eventsCollected = 0
     self.currentMessage = ''
     self.nextAlertTime = 0
-

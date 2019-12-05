@@ -190,7 +190,8 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
     self.totalSecondsStartTime = datetime.datetime(1970, 1, 1, tzinfo=parsedValue.tzinfo)
     matchContext.update(dateStr)
     delta = (parsedValue-self.totalSecondsStartTime)
-    totalSeconds = (delta.days*86400+delta.seconds+delta.microseconds/1000)+parsedValue.utcoffset().total_seconds()
+    totalSeconds = (delta.days*86400+delta.seconds+delta.microseconds/1000)+ \
+            parsedValue.utcoffset().total_seconds()
     if (self.latestParsedTimestamp is None) or (self.latestParsedTimestamp < parsedValue):
       self.latestParsedTimestamp = parsedValue
     return MatchElement("%s/%s" % (path, self.elementId), dateStr, (parsedValue, totalSeconds), \
@@ -248,7 +249,7 @@ class DateFormatComponent:
       formatString = formatString.decode('utf-8')
     if formatTimezone is None:
       formatTimezone = 'UTC'
-    
+
     if formatString[0] != '%':
       raise Exception('Format string has to start with "%", strip away all static data outside \
         this formatter before starting to parse')
@@ -340,7 +341,7 @@ class DateFormatComponent:
       lookupKey = '%sn%d' % (endSeparator, componentLength)
     else:
       lookupKey = '%st%d' % (endSeparator, componentLength)
-      
+
     if endSeparator is not None:
       endSeparator = endSeparator.encode()
 

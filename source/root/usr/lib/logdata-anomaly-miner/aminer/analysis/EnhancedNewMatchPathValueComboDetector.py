@@ -4,11 +4,11 @@ combination was already seen before."""
 
 import time
 import os
-
-from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
-from aminer.util import PersistencyUtil
 from datetime import datetime
+
+from aminer.util import PersistencyUtil
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
+from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
 
 class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
   """This class creates events when a new value combination for
@@ -93,21 +93,24 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
       extraData[2] += 1
     else:
       if isinstance(currentTimestamp, datetime):
-        self.knownValuesDict[matchValueTuple] = [currentTimestamp.strftime("%Y-%m-%d %H:%M:%S"), currentTimestamp.strftime("%Y-%m-%d %H:%M:%S"), 1]
+        self.knownValuesDict[matchValueTuple] = [currentTimestamp.strftime("%Y-%m-%d %H:%M:%S"), \
+                currentTimestamp.strftime("%Y-%m-%d %H:%M:%S"), 1]
       else:
-        self.knownValuesDict[matchValueTuple] = [currentTimestamp, currentTimestamp, 1]
-    if (self.autoIncludeFlag and self.knownValuesDict.get(matchValueTuple, None)[2] is 1) or not self.autoIncludeFlag:
+        self.knownValuesDict[matchValueTuple] = [currentTimestamp, \
+                currentTimestamp, 1]
+    if (self.autoIncludeFlag and self.knownValuesDict.get(matchValueTuple, None)[2] is 1) or not \
+            self.autoIncludeFlag:
       for listener in self.anomalyEventHandlers:
         originalLogLinePrefix = self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
         if originalLogLinePrefix is None:
           originalLogLinePrefix = ''
         if self.outputLogLine:
-          sortedLogLines = [str(self.knownValuesDict)+os.linesep+ 
+          sortedLogLines = [str(self.knownValuesDict)+os.linesep+ \
           originalLogLinePrefix+repr(logAtom.rawData)]
         else:
           sortedLogLines = [str(self.knownValuesDict)]
-        listener.receiveEvent(
-          'Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected',
+        listener.receiveEvent( \
+          'Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected', \
           sortedLogLines, logAtom, self)
     if self.autoIncludeFlag:
       if self.nextPersistTime is None:
@@ -135,9 +138,9 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
       raise Exception('Event not from this source')
     if whitelistingData != None:
       raise Exception('Whitelisting data not understood by this detector')
-    currentTimestamp = datetime.fromtimestamp(eventData[0].getTimestamp()).strftime("%Y-%m-%d %H:%M:%S")
+    currentTimestamp = datetime.fromtimestamp( \
+            eventData[0].getTimestamp()).strftime("%Y-%m-%d %H:%M:%S")
     self.knownValuesDict[eventData[1]] = [
         currentTimestamp, currentTimestamp, 1]
     return 'Whitelisted path(es) %s with %s in %s' % (
         ', '.join(self.targetPathList), eventData[1], sortedLogLines[0])
-

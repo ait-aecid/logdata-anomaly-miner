@@ -85,7 +85,8 @@ class NewMatchPathValueComboDetector(
         originalLogLinePrefix = self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
         if originalLogLinePrefix is None:
           originalLogLinePrefix = ''
-        sortedLogLines = [str(matchValueTuple)+os.linesep+originalLogLinePrefix+repr(logAtom.rawData)]
+        sortedLogLines = [str(matchValueTuple)+os.linesep+originalLogLinePrefix+ \
+                repr(logAtom.rawData)]
       else:
         sortedLogLines = [str(matchValueTuple)]
       for listener in self.anomalyEventHandlers:

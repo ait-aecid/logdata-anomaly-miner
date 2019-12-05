@@ -33,8 +33,8 @@ class WhitelistViolationDetector(AtomHandlerInterface):
     if self.outputLogLine:
       originalLogLinePrefix = self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
       if originalLogLinePrefix is None:
-          originalLogLinePrefix = ''
-      sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')+os.linesep+ 
+        originalLogLinePrefix = ''
+      sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')+os.linesep+ \
         originalLogLinePrefix+repr(logAtom.rawData)]
     else:
       sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')]

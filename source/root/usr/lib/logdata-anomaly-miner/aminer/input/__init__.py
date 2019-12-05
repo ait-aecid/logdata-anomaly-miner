@@ -67,4 +67,4 @@ from aminer.input.LogAtom import LogAtom
 from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
 from aminer.input.SimpleMultisourceAtomSync import SimpleMultisourceAtomSync
 from aminer.input.SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler
-
+from aminer.input.VerboseUnparsedAtomHandler import VerboseUnparsedAtomHandler

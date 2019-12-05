@@ -159,11 +159,9 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
 
     if len(subRules) > 1:
       return Rules.AndMatchRule(subRules)
-    if len(subRules) > 0:
+    if subRules:
       return subRules[0]
     return None
-    
-
 
   def updateTablesForFeature(self, targetFeature, timestamp):
     """Assume that this event was the effect of a previous cause-related

@@ -39,7 +39,7 @@ class HexStringModelElement(ModelElementInterface):
       matchString = bytes.fromhex(matchObject.decode('utf-8'))
     except ValueError:
       return None
-    
+
     matchContext.update(matchObject)
     return MatchElement("%s/%s" % (path, self.elementId), \
         matchString, matchObject, None)

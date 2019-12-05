@@ -1,10 +1,10 @@
 """This file collects various classes useful to filter and correct
 the timestamp associated with a received parsed atom."""
 
-from aminer.input import AtomHandlerInterface
 import time
 from datetime import datetime
 
+from aminer.input import AtomHandlerInterface
 
 class SimpleMonotonicTimestampAdjust(AtomHandlerInterface):
   """Handlers of this class compare the timestamp of a newly received
