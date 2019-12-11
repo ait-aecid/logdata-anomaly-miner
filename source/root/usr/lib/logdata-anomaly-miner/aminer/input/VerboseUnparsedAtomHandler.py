@@ -20,7 +20,7 @@ class VerboseUnparsedAtomHandler(AtomHandlerInterface):
     matchContext = DebugMatchContext(logAtom.rawData)
     self.parsingModel.getMatchElement('', matchContext)
     for listener in self.eventHandlers:
-      listener.receiveEvent('Input.UnparsedAtomHandler', \
-          ('Unparsed atom received\n%s\n' % (matchContext.getDebugInfo())), \
-          [logAtom.rawData], [logAtom], self)
+      listener.receiveEvent('Input.VerboseUnparsedAtomHandler', \
+          'Unparsed atom received\n%s\n' % (matchContext.getDebugInfo()), \
+          [logAtom.rawData], logAtom, self)
     return True
