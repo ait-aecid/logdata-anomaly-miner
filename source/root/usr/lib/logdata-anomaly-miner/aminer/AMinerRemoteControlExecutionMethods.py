@@ -35,6 +35,8 @@ class AMinerRemoteControlExecutionMethods(object):
       
       elif (propertyName == AMinerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE):
         result = self.changeConfigPropertyMaxMemory(analysisContext, value)
+      elif (propertyName == AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE):
+        result = self.changeConfigPropertyMaxCpuPercentUsage(analysisContext, value)
       elif (propertyName in configKeysMailAlerting):
         result = self.changeConfigPropertyMailAlerting(analysisContext, propertyName, value)
       elif (propertyName == AMinerConfig.KEY_LOG_PREFIX):
@@ -81,5 +83,8 @@ class AMinerRemoteControlExecutionMethods(object):
     def renameRegisteredAnalysisComponent(self, oldComponentName, newComponentName):
       raise Exception("not implemented yet..")
     
+    def printConfigProperty(self, analysisContext, propertyName):
+      self.REMOTE_CONTROL_RESPONSE = propertyName + " : " + str(analysisContext.aminerConfig.configProperties[propertyName])
+      
     # to be continued with methods from the AecidCli..
     

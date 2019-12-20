@@ -1,6 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
-"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
+<!-- This document was created with Syntext Serna Free. --><!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
 
 <!--
 
@@ -60,14 +59,13 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
   <!ENTITY dhucpackage "LOGDATA-ANOMALY-MINER">
   <!ENTITY dhpackage   "logdata-anomaly-miner">
 ]>
-
 <refentry>
   <refentryinfo>
     <title>&dhtitle;</title>
     <productname>&dhpackage;</productname>
     <authorgroup>
       <author>
-       <firstname>&dhfirstname;</firstname>
+        <firstname>&dhfirstname;</firstname>
         <surname>&dhsurname;</surname>
         <contrib>Wrote this manpage for the Debian system.</contrib>
         <address>
@@ -101,12 +99,21 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>AMinerRemoteControl</command>
-      <!-- These are several examples, how syntaxes could look -->
-      <arg choice="plain"><option>--ControlSocket <replaceable>socket</replaceable></option></arg>
-      <arg choice="opt"><option>--Exec <replaceable>code</replaceable></option></arg>
-      <arg choice="opt"><option>--ExecFile <replaceable>file</replaceable></option></arg>
-      <arg choice="opt"><option>--Data <replaceable>data</replaceable></option></arg>
-      <arg choice="opt"><option>--StringResponse</option></arg>
+<!-- These are several examples, how syntaxes could look -->      <arg choice="plain">
+        <option>--ControlSocket <replaceable>socket</replaceable></option>
+      </arg>
+      <arg choice="opt">
+        <option>--Exec <replaceable>command</replaceable></option>
+      </arg>
+      <arg choice="opt">
+        <option>--ExecFile <replaceable>file</replaceable></option>
+      </arg>
+      <arg choice="opt">
+        <option>--Data <replaceable>data</replaceable></option>
+      </arg>
+      <arg choice="opt">
+        <option>--StringResponse</option>
+      </arg>
     </cmdsynopsis>
   </refsynopsisdiv>
   <refsect1 id="description">
@@ -120,29 +127,48 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
       outside the child process, e.g. files. For more details
       see also packaged documentation at
       /usr/share/doc/logdata-anomaly-miner.</para>
-    <para>Example usecases:</para>
-    <para>Just a test: /usr/bin/AMinerRemoteControl --Data '["Some text", 123]' --Exec 'remoteControlResponse="It works! Data %s" % repr(remoteControlData)'</para>
-    <para>Query remote module configuration: /usr/bin/AMinerRemoteControl --Exec 'remoteControlResponse=analysisContext.getRegisteredComponentIds()'</para>
+    <refsect2 id="example_usecases">
+      <title>Example usecases:</title>
+      <variablelist>
+        <varlistentry>
+          <term>
+            <option>Print a property of the running AMinerConfig:</option>
+          </term>
+          <listitem>
+            <para>/usr/bin/AMinerRemoteControl --Data &apos;[&quot;LogResourceList&quot;]&apos; --Exec &apos;printConfigProperty(analysisContext,  &quot;%s&quot; % remoteControlData[0])&apos;</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <option>Print the complete AMinerConfig:</option>
+          </term>
+          <listitem>
+            <para>/usr/bin/AMinerRemoteControl --Exec &apos;printCurrentConfig(analysisContext)&apos;</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </refsect2>
   </refsect1>
   <refsect1 id="options">
     <title>OPTIONS</title>
     <para>
-      with long options starting with two dashes (`-').  A summary of
+      with long options starting with two dashes (&apos;-&apos;).  A summary of
       options is included below.  For a complete description, see the
       <citerefentry>
         <refentrytitle>info</refentrytitle>
         <manvolnum>1</manvolnum>
       </citerefentry> files.</para>
     <variablelist>
-      <!-- Use the variablelist.term.separator and the
+<!-- Use the variablelist.term.separator and the
            variablelist.term.break.after parameters to
-           control the term elements. -->
-      <varlistentry>
-        <term><option>--ControlSocket <replaceable>socket</replaceable></option></term>
+           control the term elements. -->      <varlistentry>
+        <term>
+          <option>--ControlSocket <replaceable>socket</replaceable></option>
+        </term>
         <listitem>
           <para>Specify the Unix domain remote control socket
           path, otherwise /var/run/aminer-remote.socket is used.
-          The socket is opened by AMiner when 'RemoteControlSocket'
+          The socket is opened by AMiner when &apos;RemoteControlSocket&apos;
           feature is enabled in configuration. As the socket is
           of SOCK_STREAM type, it may also be forwarded via any
           other stream forwarders, e.g. socat (see UNIX-CONNECT
@@ -153,21 +179,25 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>--Exec <replaceable>code</replaceable></option></term>
+        <term>
+          <option>--Exec <replaceable>command</replaceable></option>
+        </term>
         <listitem>
           <para>For each --Exec option, the next argument is sent
           in a separate remote execution request using additional
-          execution data (see --Data). The code is executed in
-          a separate separate execution namespace with only some
+          execution data (see --Data). The command is executed in
+          a separate execution namespace with only some
           variables added to the local namespace, e.g. execution
-          data is available as 'remoteControlData'. When setting
-          the local variable 'remoteControlResponse' within the
-          executed code, the object is serialized using json and
+          data is available as &apos;remoteControlData&apos;. When setting
+          the local variable &apos;remoteControlResponse&apos; within the
+          executed command, the object is serialized using json and
           sent back in the response.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>--ExecFile <replaceable>file</replaceable></option></term>
+        <term>
+          <option>--ExecFile <replaceable>file</replaceable></option>
+        </term>
         <listitem>
           <para>For each --ExecFile option, the named file is
           loaded and content submitted in the very same way as
@@ -176,7 +206,9 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>--Data <replaceable>data</replaceable></option></term>
+        <term>
+          <option>--Data <replaceable>data</replaceable></option>
+        </term>
         <listitem>
           <para>This parameter defines a json string defining
           Python objects, that will be sent with all subsequent
@@ -184,11 +216,13 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
           --Data option. Take into account, that there are size
           limits for the request, very large data objects may
           exceed those limits. The execution context will expose
-          the data as variable 'remoteControlData'.</para>
+          the data as variable &apos;remoteControlData&apos;.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>--StringResponse</option></term>
+        <term>
+          <option>--StringResponse</option>
+        </term>
         <listitem>
           <para>When set, AMinerRemoteControl will not pass the
           result to repr. The returned object is just converted
@@ -203,12 +237,61 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         </listitem>
       </varlistentry>
     </variablelist>
+    <refsect2 id="command">
+      <title>Commands</title>
+      <variablelist>
+        <varlistentry>
+          <term>
+            <option>
+              <replaceable>changeConfigProperty(analysisContext,propertyName,value)</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>This method allows you to change properties from the 
+            AMinerConfig at runtime. For every property to be changed 
+            this method must be used. The method prints 
+            &quot;<replaceable>propertyName</replaceable> changed to 
+            <replaceable>value</replaceable> successfully.&quot; if the 
+            changes were successful and an individual message if the changes failed.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+      <table frame="all" xml:id="ex.calstable" tocentry="1">
+        <title>Valid PropertyNames</title>
+        <tgroup cols="3" colsep="0" rowsep="0">
+          <colspec colname="Property"/>
+          <colspec colname="Value"/>
+          <colspec colname="Description"/>
+          <thead>
+            <row>
+              <entry align="center">Property</entry>
+              <entry align="center">Value</entry>
+              <entry align="center">Description</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>b1</entry>
+              <entry>b2</entry> 
+              <entry></entry>
+            </row>
+            <row>
+              <entry>b1</entry>
+              <entry>b2</entry> 
+              <entry>b3dddddd dddddddddd dddddddddd dddddd dddddddd dddd ddddddddddd ddddddddd ddddd ddddddd ddd ddddd ddd d d dd dddd ddd ddddd</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+    </refsect2>
   </refsect1>
   <refsect1 id="files">
     <title>FILES</title>
     <variablelist>
       <varlistentry>
-        <term><filename>/var/run/aminer-remote.socket</filename></term>
+        <term>
+          <filename>/var/run/aminer-remote.socket</filename>
+        </term>
         <listitem>
           <para>This is the default remote control socket used
           when not changed using the --ControlSocket option.</para>
@@ -219,15 +302,17 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
   <refsect1 id="bugs">
     <title>BUGS</title>
     <para>
-      Report bugs via your distribution's bug tracking system.
+      Report bugs via your distribution&apos;s bug tracking system.
       For bugs in the the software trunk, report via
       at <ulink url="https://bugs.launchpad.net/logdata-anomaly-miner/+filebug"/>.</para>
   </refsect1>
   <refsect1 id="see_also">
     <title>SEE ALSO</title>
-<!-- In alpabetical order. -->
-    <para>
-      <citerefentry><refentrytitle>AMiner</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+<!-- In alpabetical order. -->    <para>
+      <citerefentry>
+        <refentrytitle>AMiner</refentrytitle>
+        <manvolnum>1</manvolnum>
+      </citerefentry>
     </para>
   </refsect1>
 </refentry>

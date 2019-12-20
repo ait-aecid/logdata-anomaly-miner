@@ -557,10 +557,9 @@ class AnalysisChildRemoteControlHandler(object):
           raise Exception('Invalid request data')
         methods = AMinerRemoteControlExecutionMethods()
         execLocals = {'analysisContext':analysisContext, 'remoteControlData':jsonRequestData[1], 
-                      'print':print, 'printResponse':methods.printResponse, 'dir':dir, 'methods':methods,
-                      'changeConfigProperty':methods.changeConfigProperty}
+                      'print':methods.printConfigProperty, 'methods':methods,'changeConfigProperty':methods.changeConfigProperty}
         exec(jsonRequestData[0], {'__builtins__' : None}, execLocals)
-        exec("print(dir())", {'__builtins__' : None}, execLocals)
+        #exec("print(dir())", {'__builtins__' : None}, execLocals)
         jsonRemoteControlResponse = json.dumps(
             execLocals.get('remoteControlResponse', None))
         if (methods.REMOTE_CONTROL_RESPONSE == ''):
