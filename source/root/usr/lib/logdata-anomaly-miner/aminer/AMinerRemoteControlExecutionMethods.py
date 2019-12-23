@@ -1,5 +1,10 @@
 """This module contains methods which can be executed from the
 AMinerRemoteControl class."""
+
+############################### Könnte Import Error lösen
+#import sys
+#sys.path = sys.path[1:]+['/usr/lib/logdata-anomaly-miner']
+
 from aminer import AMinerConfig, AnalysisChild
 import resource
 
@@ -24,7 +29,6 @@ class AMinerRemoteControlExecutionMethods(object):
       configKeysMailAlerting = {self.CONFIG_KEY_MAIL_TARGET_ADDRESS, 
                                 self.CONFIG_KEY_MAIL_FROM_ADDRESS,
                                 self.CONFIG_KEY_MAIL_SUBJECT_PREFIX,
-                                self.CONFIG_KEY_MAIL_ALERT_GRACE_TIME,
                                 self.CONFIG_KEY_EVENT_COLLECT_TIME,
                                 self.CONFIG_KEY_ALERT_MIN_GAP,
                                 self.CONFIG_KEY_ALERT_MAX_GAP,
@@ -33,6 +37,8 @@ class AMinerRemoteControlExecutionMethods(object):
         self.REMOTE_CONTROL_RESPONSE += "FAILURE: the analysisContext must be of type %s\n" % AnalysisChild.AnalysisContext.__class__
         return
       
+      if (propertyName == AMinerConfig.KEY_PERSISTENCE_DIR):
+        result = self.changeConfigPropertyPersistenceDir(analysisContext, value)
       elif (propertyName == AMinerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE):
         result = self.changeConfigPropertyMaxMemory(analysisContext, value)
       elif (propertyName == AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE):
@@ -53,17 +59,20 @@ class AMinerRemoteControlExecutionMethods(object):
       if (result == 0):
         self.REMOTE_CONTROL_RESPONSE += "%s changed to %s successfully."%(propertyName, value)
       
+    def changeConfigPropertyPersistenceDir(self, analysisContext, newPersistenceDir):
+      raise Exception("not implemented yet..")
       
     def changeConfigPropertyMailAlerting(self, analysisContext, propertyName, value):
+      #go through every DefaultMailNotificationEventHandler and set the new property.
       raise Exception("not implemented yet..")
     
-    def changeConfigPropertyLogResourcesList(self, analysisContext, value):
+    def changeConfigPropertyLogResourcesList(self, analysisContext, newLogResourceList):
       raise Exception("not implemented yet..")
       
     def changeConfigPropertyMaxMemory(self, analysisContext, maxMemoryMB):
       try:
         maxMemoryMB = int(maxMemoryMB)
-        if (maxMemoryMB < 32):
+        if (maxMemoryMB < 32 and maxMemoryMB != -1):
           self.REMOTE_CONTROL_RESPONSE += "FAILURE: it is not safe to run the AMiner with less than 32MB RAM."
           return 1
         resource.setrlimit(resource.RLIMIT_AS, (maxMemoryMB*1024*1024, resource.RLIM_INFINITY))
@@ -85,6 +94,10 @@ class AMinerRemoteControlExecutionMethods(object):
     
     def printConfigProperty(self, analysisContext, propertyName):
       self.REMOTE_CONTROL_RESPONSE = propertyName + " : " + str(analysisContext.aminerConfig.configProperties[propertyName])
+      
+    def printCurrentConfig(self, analysisContext):
+      #self.REMOTE_CONTROL_RESPONSE = propertyName + " : " + str(analysisContext.aminerConfig.configProperties[propertyName])
+      raise Exception("not implemented yet..")
       
     # to be continued with methods from the AecidCli..
     

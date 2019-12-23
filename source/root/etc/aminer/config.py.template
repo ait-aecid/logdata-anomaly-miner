@@ -80,8 +80,12 @@ configProperties['LogPrefix'] = ''
 # AMiner process can use. Be careful at choosing the value, as
 # a shortage of memory causes a MemoryError. This defaults to
 # -1, which means that there is no limit.
-configProperties['Ressources.MaxMemoryUsage'] = -1
+configProperties['Resources.MaxMemoryUsage'] = -1
 
+# By limiting the AMiner process to a fraction of possible CPU usage
+# the system can not longer be overloaded by it. The percentages can
+# only be full numbers and must be between 1 and 100.
+configProperties['Resources.MaxCpuPercentUsage'] = 100
 
 # Add your ruleset here:
 
