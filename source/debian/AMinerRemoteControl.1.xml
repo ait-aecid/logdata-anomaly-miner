@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- This document was created with Syntext Serna Free. --><!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
 
 <!--
 
@@ -135,7 +135,8 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             <option>Print a property of the running AMinerConfig:</option>
           </term>
           <listitem>
-            <para>/usr/bin/AMinerRemoteControl --Data &apos;[&quot;LogResourceList&quot;]&apos; --Exec &apos;printConfigProperty(analysisContext,  &quot;%s&quot; % remoteControlData[0])&apos;</para>
+            <para>/usr/bin/AMinerRemoteControl --Data &apos;[&quot;LogResourceList&quot;]&apos; --Exec &apos;
+            printConfigProperty(analysisContext,  &quot;%s&quot; % remoteControlData[0])&apos;</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -255,121 +256,98 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             changes were successful and an individual message if the changes failed.</para>
           </listitem>
         </varlistentry>
+        <varlistentry>
+          <term>
+            <option>
+              <replaceable>changeAttributeOfRegisteredAnalysisComponent(analysisContext,componentName,attribute,value)</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>This method allows you to change attributes from components of the 
+            AMinerConfig at runtime. For every attribute to be changed this method 
+            must be used. The method prints &quot;<replaceable>componentName.attribute
+            </replaceable> changed to <replaceable>value</replaceable> successfully.
+            &quot; if the changes were successful and an individual message if the changes failed.
+            The type of the new <replaceable>value</replaceable> must be the same like the
+            old value of the <replaceable>componentName.attribute</replaceable></para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+            "changeAttributeOfRegisteredAnalysisComponent(analysisContext, 
+            'NewMatchPath', 'autoIncludeFlag', False)"</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <option>
+              <replaceable>TODO: renameRegisteredAnalysisComponent(oldComponentName,newComponentName)</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>Renames the component from the <replaceable>oldComponentName</replaceable>
+            to <replaceable>newComponentName</replaceable>. Therefore the component with the
+            <replaceable>oldComponentName</replaceable> is deleted from the registered components
+            and registered with the <replaceable>newComponentName</replaceable>.</para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+            "renameRegisteredAnalysisComponent('NewMatchPath','NewMatchPathDetector')"</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <option>
+              <replaceable>TODO: printConfigProperty(analysisContext,propertyName)</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>Prints the property with the <replaceable>propertyName</replaceable> 
+            from the current AMinerConfig.</para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+            "printConfigProperty(analysisContext,'NewMatchPath')"</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <option>
+              <replaceable>TODO: printCurrentConfig(analysisContext)</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>Prints the current AMinerConfig.</para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+            "printCurrentConfig(analysisContext)"</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>
+            <option>
+              <replaceable>TODO: saveCurrentConfig(analysisContext,destinationFile)</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>Saves the current AMinerConfig into <replaceable>destinationFile</replaceable>.
+            <replaceable>destinationFile</replaceable> must have write permissions by the 
+             AMinerRemoteControl process or it returns an <option>PermissionError</option>.</para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+            "printCurrentConfig(analysisContext)"</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>
+            <option>
+              <replaceable>TO BE CONTINUED..: AecidCli methods</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>These methods will be implemented in future..</para>
+            <para><replaceable>example</replaceable>: </para>
+          </listitem>
+        </varlistentry>
       </variablelist>
-     <table frame="all" tocentry="1" xml:id="ex.calstable">
-        <title>Valid PropertyNames</title>
-        <tgroup cols="3" colsep="0" rowsep="0">
-          <colspec colname="Property"/>
-          <colspec colname="Value"/>
-          <colspec colname="Description"/>
-          <thead>
-            <row>
-              <entry align="center">Property</entry>
-              <entry align="center">Value</entry>
-              <entry align="center">Description</entry>
-            </row>
-          </thead>
-          <tbody>
-            <row>
-              <entry>TODO: LogResourceList</entry>
-              <entry>
-                <para>[&apos;FileName&apos;, &apos;FileName&apos;]</para>
-                <para>example: AMinerRemoteControl --Exec &quot;changeConfigProperty(analysisContext, &apos;LogResourceList&apos;, [&apos;file:///var/log/syslog&apos;, &apos;file:///var/log/auth.log&apos;])&quot;</para>
-              </entry>
-              <entry>Define the list of log resources to read from: the resources named here do not need to exist when aminer is started. This will just result in a warning. However if they exist, they have to be readable by the aminer process! Supported types are: <para>* file://[path]: Read data from file, reopen it after rollover</para><para>* unix://[path]: Open the path as UNIX local socket for reading</para></entry>
-            </row>
-            <row>
-              <entry>TODO: Core.PersistenceDir</entry>
-              <entry>
-                <para>&apos;DirName&apos;</para>
-                <para>example: AMinerRemoteControl --Exec &quot;changeConfigProperty(analysisContext, &apos;Core.PersistenceDir&apos;, &apos;/var/lib/aminer&apos;)&quot;</para>
-              </entry>
-              <entry>Read and store information to be used between multiple invocations of AMiner in this directory. The directory must only be accessible to the &apos;AMinerUser&apos; but not group/world readable. On violation, AMiner will refuse to run.</entry>
-            </row>
-            <row>
-              <entry>TODO: MailAlerting.TargetAddress</entry>
-              <entry>
-                <para>&apos;E-Mail Address&apos;</para>
-                <para>example: AMinerRemoteControl --Exec &quot;changeConfigProperty(analysisContext, &apos;MailAlerting.TargetAddress&apos;, &apos;root@localhost&apos;)&quot;</para>
-              </entry>
-              <entry>Define a target e-mail address to send alerts to. When undefined, no e-mail notification hooks are added.</entry>
-            </row>
-            <row>
-              <entry>TODO: MailAlerting.FromAddress</entry>
-              <entry>
-                <para>&apos;E-Mail Address&apos;</para>
-                <para>example: AMinerRemoteControl --Exec &quot;changeConfigProperty(analysisContext, &apos;MailAlerting.FromAddress&apos;, &apos;root@localhost&apos;)&quot;</para>
-              </entry>
-              <entry>Sender address of e-mail alerts. When undefined, &quot;sendmail&quot; implementation on host will decide, which sender address should be used.</entry>
-            </row>
-            <row>
-              <entry>TODO: MailAlerting.SubjectPrefix</entry>
-              <entry>
-                <para>&apos;String&apos;</para>
-                <para>example: AMinerRemoteControl --Exec &quot;changeConfigProperty(analysisContext, &apos;MailAlerting.SubjectPrefix&apos;, &apos;AMiner Alerts:&apos;)&quot;</para>
-              </entry>
-              <entry>Define, which text should be prepended to the standard aminer subject. Defaults to &quot;AMiner Alerts:&quot;</entry>
-            </row>
-            <row>
-              <entry>TODO: MailAlerting.EventCollectTime</entry>
-              <entry>
-                <para>Seconds (Integer)</para>
-                <para>example: AMinerRemoteControl --Exec &quot;changeConfigProperty(analysisContext, &apos;MailAlerting.EventCollectTime&apos;, 10)&quot;</para>
-              </entry>
-              <entry>Define how many seconds to wait after a first event triggered the alerting procedure before really sending out the e-mail. In that timespan, events are collected and will be sent all using a single e-mail. Defaults to 10 seconds.</entry>
-            </row>
-            <row>
-              <entry>TODO: MailAlerting.MinAlertGap</entry>
-              <entry>
-                <para>Seconds (Integer)</para>
-                <para>example: AMinerRemoteControl --Exec &quot;changeConfigProperty(analysisContext, &apos;MailAlerting.MinAlertGap&apos;, 600)&quot;</para>
-              </entry>
-              <entry>Define the minimum time between two alert e-mails in seconds to avoid spamming. All events during this timespan are collected and sent out with the next report. Defaults to 600 seconds.</entry>
-            </row>
-            <row>
-              <entry>TODO: MailAlerting.MaxAlertGap</entry>
-              <entry>
-                <para>Seconds (Integer)</para>
-                <para>example: AMinerRemoteControl --Exec &quot;changeConfigProperty(analysisContext, &apos;MailAlerting.MaxAlertGap&apos;, 1000)&quot;</para>
-              </entry>
-              <entry>Define the maximum time between two alert e-mails in seconds. When undefined this defaults to &quot;MailAlerting.MinAlertGap&quot;. Otherwise this will activate an exponential backoff to reduce messages during permanent error states by increasing the alert gap by 50% when more alert-worthy events were recorded while the previous gap time was not yet elapsed.</entry>
-            </row>
-            <row>
-              <entry>TODO: MailAlerting.MaxEventsPerMessage</entry>
-              <entry>
-                <para>Number of messages (Integer)</para>
-                <para>example: AMinerRemoteControl --Exec &quot;changeConfigProperty(analysisContext, &apos;MailAlerting.MaxEventsPerMessage&apos;, 1000)&quot;</para>
-              </entry>
-              <entry>Define how many events should be included in one alert mail at most. This defaults to 1000</entry>
-            </row>
-            <row>
-              <entry>LogPrefix</entry>
-              <entry>
-                <para>&apos;String&apos;</para>
-                <para>example: AMinerRemoteControl --Exec &quot;changeConfigProperty(analysisContext, &apos;LogPrefix&apos;, &apos;Original log line: &apos;)&quot;</para>
-              </entry>
-              <entry>Most analysis components implement the outputLogLine-property, which is True by default. Define a prefix to the original captured log lines. This defaults to &apos;&apos;</entry>
-            </row>
-            <row>
-              <entry>Resources.MaxMemoryUsage</entry>
-              <entry>
-                <para>&apos;Allowed RAM usage in Megabytes (Integer: 32-maxSystemRAM)&apos;</para>
-                <para>example: AMinerRemoteControl --Exec &quot;changeConfigProperty(analysisContext, &apos;Resources.MaxMemoryUsage&apos;, -1)&quot;</para>
-              </entry>
-              <entry>This property limits the maximal possible RAM in MB which the AMiner process can use. Be careful at choosing the value, as a shortage of memory causes a MemoryError. This defaults to -1, which means that there is no limit.</entry>
-            </row>
-            <row>
-              <entry>TODO: Resources.MaxCpuPercentUsage</entry>
-              <entry>
-                <para>Integer: 1-100</para>
-                <para>example: AMinerRemoteControl --Exec &quot;changeConfigProperty(analysisContext, &apos;Resources.MaxCpuPercentUsage&apos;, 30)</para>
-              </entry>
-              <entry>By limiting the AMiner process to a fraction of possible CPU usage the system can not longer be overloaded by it. The percentages can only be full numbers and must be between 1 and 100.</entry>
-            </row>
-          </tbody>
-        </tgroup>
-      </table>
     </refsect2>
+
+
+
+
     <refsect2 id="PropertyNames">
       <title>Valid Property Names</title>
       <variablelist>
@@ -378,84 +356,166 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             <replaceable>TODO: LogResourceList</replaceable>
           </term>
           <listitem>
-            <para><replaceable>Value</replaceable>: [&apos;FileName&apos;, &apos;FileName&apos;]</para>
-            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec &quot;changeConfigProperty(analysisContext, 
-            &apos;LogResourceList&apos;, [&apos;file:///var/log/syslog&apos;, &apos;file:///var/log/auth.log&apos;])&quot;</para>
-
-            Define the list of log resources to read from: the resources named here do not need to exist when aminer is started. 
-            This will just result in a warning. However if they exist, they have to be readable by the aminer process! Supported types are: 
-            <para>* file://[path]: Read data from file, reopen it after rollover</para>
-            <para>* unix://[path]: Open the path as UNIX local socket for reading</para>
-          </listitem>
-        </varlistentry>
-
-
-        <varlistentry>
-          <term>
-            <replaceable>TODO: LogResourceList</replaceable>
-          </term>
-          <listitem>
-            <para><replaceable>Value</replaceable>: [&apos;FileName&apos;, &apos;FileName&apos;]</para>
-            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec &quot;changeConfigProperty(analysisContext, 
-            &apos;LogResourceList&apos;, [&apos;file:///var/log/syslog&apos;, &apos;file:///var/log/auth.log&apos;])&quot;</para>
-
-            Define the list of log resources to read from: the resources named here do not need to exist when aminer is started. 
-            This will just result in a warning. However if they exist, they have to be readable by the aminer process! Supported types are: 
+            <para><replaceable>Value</replaceable>: [&apos;FileName&apos;, 
+            &apos;FileName&apos;]</para>
+            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;changeConfigProperty(analysisContext, &apos;LogResourceList&apos;, 
+            [&apos;file:///var/log/syslog&apos;, &apos;file:///var/log/auth.log&apos;])&quot;</para>
+            <para>Define the list of log resources to read from: the resources named here do not need 
+            to exist when aminer is started. This will just result in a warning. However if they exist, 
+            they have to be readable by the aminer process! Supported types are: </para>
             <para>* file://[path]: Read data from file, reopen it after rollover</para>
             <para>* unix://[path]: Open the path as UNIX local socket for reading</para>
           </listitem>
-        </varlistentry>
-
+        </varlistentry>
         <varlistentry>
           <term>
-            <replaceable>TODO: LogResourceList</replaceable>
+            <replaceable>TODO: Core.PersistenceDir</replaceable>
           </term>
           <listitem>
-            <para><replaceable>Value</replaceable>: [&apos;FileName&apos;, &apos;FileName&apos;]</para>
-            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec &quot;changeConfigProperty(analysisContext, 
-            &apos;LogResourceList&apos;, [&apos;file:///var/log/syslog&apos;, &apos;file:///var/log/auth.log&apos;])&quot;</para>
-
-            Define the list of log resources to read from: the resources named here do not need to exist when aminer is started. 
-            This will just result in a warning. However if they exist, they have to be readable by the aminer process! Supported types are: 
-            <para>* file://[path]: Read data from file, reopen it after rollover</para>
-            <para>* unix://[path]: Open the path as UNIX local socket for reading</para>
+            <para><replaceable>Value</replaceable>: &apos;DirName&apos;</para>
+            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;changeConfigProperty(analysisContext, &apos;Core.PersistenceDir&apos;, 
+            &apos;/var/lib/aminer&apos;)&quot;</para>
+            <para>Read and store information to be used between multiple invocations of AMiner 
+             in this directory. The directory must only be accessible to the &apos;AMinerUser&apos; 
+             but not group/world readable. On violation, AMiner will refuse to run.</para>
           </listitem>
-        </varlistentry>
-
-
+        </varlistentry>
         <varlistentry>
           <term>
-            <replaceable>TODO: LogResourceList</replaceable>
+            <replaceable>TODO: MailAlerting.TargetAddress</replaceable>
           </term>
           <listitem>
-            <para><replaceable>Value</replaceable>: [&apos;FileName&apos;, &apos;FileName&apos;]</para>
-            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec &quot;changeConfigProperty(analysisContext, 
-            &apos;LogResourceList&apos;, [&apos;file:///var/log/syslog&apos;, &apos;file:///var/log/auth.log&apos;])&quot;</para>
-
-            Define the list of log resources to read from: the resources named here do not need to exist when aminer is started. 
-            This will just result in a warning. However if they exist, they have to be readable by the aminer process! Supported types are: 
-            <para>* file://[path]: Read data from file, reopen it after rollover</para>
-            <para>* unix://[path]: Open the path as UNIX local socket for reading</para>
+            <para><replaceable>Value</replaceable>: &apos;E-Mail Address&apos;</para>
+            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;changeConfigProperty(analysisContext, &apos;MailAlerting.TargetAddress&apos;,
+            &apos;root@localhost&apos;)&quot;</para>
+            <para>Define a target e-mail address to send alerts to. When undefined, no e-mail notification hooks are added.</para>
           </listitem>
-        </varlistentry>
-
+        </varlistentry>
         <varlistentry>
           <term>
-            <replaceable>TODO: LogResourceList</replaceable>
+            <replaceable>TODO: MailAlerting.FromAddress</replaceable>
           </term>
           <listitem>
-            <para><replaceable>Value</replaceable>: [&apos;FileName&apos;, &apos;FileName&apos;]</para>
-            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec &quot;changeConfigProperty(analysisContext, 
-            &apos;LogResourceList&apos;, [&apos;file:///var/log/syslog&apos;, &apos;file:///var/log/auth.log&apos;])&quot;</para>
-
-            Define the list of log resources to read from: the resources named here do not need to exist when aminer is started. 
-            This will just result in a warning. However if they exist, they have to be readable by the aminer process! Supported types are: 
-            <para>* file://[path]: Read data from file, reopen it after rollover</para>
-            <para>* unix://[path]: Open the path as UNIX local socket for reading</para>
+            <para><replaceable>Value</replaceable>: &apos;E-Mail Address&apos;</para>
+            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;changeConfigProperty(analysisContext, &apos;MailAlerting.FromAddress&apos;, 
+            &apos;root@localhost&apos;)&quot;</para>
+            <para>Sender address of e-mail alerts. When undefined, &quot;sendmail&quot; 
+            implementation on host will decide, which sender address should be used.</para>
           </listitem>
-        </varlistentry>
-
-
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <replaceable>TODO: MailAlerting.SubjectPrefix</replaceable>
+          </term>
+          <listitem>
+            <para><replaceable>Value</replaceable>: &apos;String&apos;</para>
+            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;changeConfigProperty(analysisContext, &apos;MailAlerting.SubjectPrefix&apos;, 
+            &apos;AMiner Alerts:&apos;)&quot;</para>
+            <para>Define, which text should be prepended to the standard aminer subject. 
+            Defaults to &quot;AMiner Alerts:&quot;</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <replaceable>TODO: MailAlerting.EventCollectTime</replaceable>
+          </term>
+          <listitem>
+            <para><replaceable>Value</replaceable>: Seconds (Integer)</para>
+            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;changeConfigProperty(analysisContext, &apos;MailAlerting.EventCollectTime&apos;, 10)&quot;</para>
+            <para>Define how many seconds to wait after a first event triggered the alerting procedure 
+            before really sending out the e-mail. In that timespan, events are collected and will be sent 
+            all using a single e-mail. Defaults to 10 seconds.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <replaceable>TODO: MailAlerting.MinAlertGap</replaceable>
+          </term>
+          <listitem>
+            <para><replaceable>Value</replaceable>: Seconds (Integer)</para>
+            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;changeConfigProperty(analysisContext, &apos;MailAlerting.MinAlertGap
+            &apos;, 600)&quot;</para>
+            <para>Define the minimum time between two alert e-mails in seconds to avoid spamming. 
+             All events during this timespan are collected and sent out with the next report. Defaults to 600 seconds.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <replaceable>TODO: MailAlerting.MaxAlertGap</replaceable>
+          </term>
+          <listitem>
+            <para><replaceable>Value</replaceable>: Seconds (Integer)</para>
+            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;changeConfigProperty(analysisContext, &apos;MailAlerting.MaxAlertGap
+            &apos;, 1000)&quot;</para>
+            <para>Define the maximum time between two alert e-mails in seconds. 
+            When undefined this defaults to &quot;MailAlerting.MinAlertGap&quot;. 
+            Otherwise this will activate an exponential backoff to reduce messages 
+            during permanent error states by increasing the alert gap by 50% when more 
+            alert-worthy events were recorded while the previous gap time was not yet elapsed.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <replaceable>TODO: MailAlerting.MaxEventsPerMessage</replaceable>
+          </term>
+          <listitem>
+            <para><replaceable>Value</replaceable>: Number of messages (Integer)</para>
+            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;changeConfigProperty(analysisContext, &apos;MailAlerting.MaxEventsPerMessage
+            &apos;, 1000)&quot;</para>
+            <para>Define how many events should be included in one alert mail at most. This defaults to 1000.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <replaceable>LogPrefix</replaceable>
+          </term>
+          <listitem>
+            <para><replaceable>Value</replaceable>: &apos;String&apos;</para>
+            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;changeConfigProperty(analysisContext, &apos;LogPrefix&apos;, &apos;
+            Original log line: &apos;)&quot;</para>
+            <para>Most analysis components implement the outputLogLine-property, which is True by default. 
+             Define a prefix to the original captured log lines. This defaults to &apos;&apos;</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <replaceable>Resources.MaxMemoryUsage</replaceable>
+          </term>
+          <listitem>
+            <para><replaceable>Value</replaceable>: &apos;Allowed RAM usage in Megabytes 
+            (Integer: 32-maxSystemRAM)&apos;</para>
+            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;changeConfigProperty(analysisContext, &apos;Resources.MaxMemoryUsage
+            &apos;, -1)&quot;</para>
+            <para>This property limits the maximal possible RAM in MB which the AMiner process can use. 
+            Be careful at choosing the value, as a shortage of memory causes a MemoryError. This defaults to 
+           -1, which means that there is no limit.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <replaceable>Resources.MaxCpuPercentUsage</replaceable>
+          </term>
+          <listitem>
+            <para><replaceable>Value</replaceable>: Integer: 1-100</para>
+            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;changeConfigProperty(analysisContext, &apos;Resources.MaxCpuPercentUsage
+            &apos;, 30)</para>
+            <para>By limiting the AMiner process to a fraction of possible CPU usage the system 
+            can not longer be overloaded by it. The percentages can only be full numbers and must 
+            be between 1 and 100.</para>
+          </listitem>
+        </varlistentry>
       </variablelist>
     </refsect2>
   </refsect1>

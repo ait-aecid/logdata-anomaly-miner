@@ -235,10 +235,10 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         packageInstalledCmd = ['dpkg', '-l', 'cpulimit']
         cpulimitCmd = ['cpulimit', '-p', str(pid), '-l', str(maxCpuPercentUsage)]
         
-        out = subprocess.Popen(packageInstalledCmd, 
+        with subprocess.Popen(packageInstalledCmd, 
            stdout=subprocess.PIPE, 
-           stderr=subprocess.STDOUT)
-        stdout,stderr = out.communicate()
+           stderr=subprocess.STDOUT) as out:
+          stdout,stderr = out.communicate()
         
         if 'dpkg-query: no packages found matching cpulimit' in stdout.decode():
           print('FATAL: cpulimit package must be installed, when using the property %s'
@@ -557,9 +557,16 @@ class AnalysisChildRemoteControlHandler(object):
           raise Exception('Invalid request data')
         methods = AMinerRemoteControlExecutionMethods()
         execLocals = {'analysisContext':analysisContext, 'remoteControlData':jsonRequestData[1], 
-                      'print':methods.printConfigProperty, 'methods':methods,'changeConfigProperty':methods.changeConfigProperty}
+                      'printCurrentConfig':methods.printCurrentConfig, 'printConfigProperty':methods.printConfigProperty,
+                      'changeConfigProperty':methods.changeConfigProperty,
+                      'changeAttributeOfRegisteredAnalysisComponent':methods.changeAttributeOfRegisteredAnalysisComponent,
+                      'renameRegisteredAnalysisComponent':methods.renameRegisteredAnalysisComponent,
+                      'saveCurrentConfig':methods.saveCurrentConfig
+                      }
+        # write this to the log file!
+        print(jsonRequestData[0].decode())
+
         exec(jsonRequestData[0], {'__builtins__' : None}, execLocals)
-        #exec("print(dir())", {'__builtins__' : None}, execLocals)
         jsonRemoteControlResponse = json.dumps(
             execLocals.get('remoteControlResponse', None))
         if (methods.REMOTE_CONTROL_RESPONSE == ''):

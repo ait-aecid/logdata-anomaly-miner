@@ -7,6 +7,7 @@ AMinerRemoteControl class."""
 
 from aminer import AMinerConfig, AnalysisChild
 import resource
+import subprocess
 
 class AMinerRemoteControlExecutionMethods(object):
 
@@ -83,11 +84,43 @@ class AMinerRemoteControlExecutionMethods(object):
         return 1
       
     def changeConfigPropertyMaxCpuPercentUsage(self, analysisContext, maxCpuPercentUsage):
-      raise Exception("not implemented yet..")
+      try:
+        maxCpuPercentUsage = int(maxCpuPercentUsage)
+        # limit
+        with subprocess.Popen(['pgrep', '-f', 'AMiner'], stdout=subprocess.PIPE, shell=False) as child:
+          response = child.communicate()[0].split()
+        pid = response[len(response)-1]
+        packageInstalledCmd = ['dpkg', '-l', 'cpulimit']
+        cpulimitCmd = ['cpulimit', '-p', pid.decode(), '-l', str(maxCpuPercentUsage)]
+        
+        with subprocess.Popen(packageInstalledCmd, 
+           stdout=subprocess.PIPE, 
+           stderr=subprocess.STDOUT) as out:
+          stdout,stderr = out.communicate()
+        
+        if 'dpkg-query: no packages found matching cpulimit' in stdout.decode():
+          self.REMOTE_CONTROL_RESPONSE = 'FATAL: cpulimit package must be installed, ' 
+          + 'when using the property %s' % AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE
+          return 1
+        else:
+          with subprocess.Popen(cpulimitCmd, 
+           stdout=subprocess.PIPE, 
+           stderr=subprocess.STDOUT) as out:
+            return 0
+      except ValueError:
+        self.REMOTE_CONTROL_RESPONSE = 'FATAL: %s must be an integer, terminating' %(
+          AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE)
+        return 1
     
-    def changeAttributeOfRegisteredAnalysisComponent(self, componentName, attribute, value):
-      # value must be of the same type af the oldValue of attribute
-      raise Exception("not implemented yet..")
+    def changeAttributeOfRegisteredAnalysisComponent(self, analysisContext, componentName, attribute, value):
+      attr = getattr(analysisContext.getComponentByName(componentName), attribute)
+      if (type(attr) == type(value)):
+        setattr(analysisContext.getComponentByName(componentName), attribute, value)
+        self.REMOTE_CONTROL_RESPONSE += "'%s.%s' changed from %s to %s successfully."%(componentName, 
+            attribute, repr(attr), value)
+      else:
+        self.REMOTE_CONTROL_RESPONSE += "FAILURE: property '%s.%s' must be of type %s!\n"%(componentName,
+            attribute, type(attr))
     
     def renameRegisteredAnalysisComponent(self, oldComponentName, newComponentName):
       raise Exception("not implemented yet..")
@@ -98,6 +131,9 @@ class AMinerRemoteControlExecutionMethods(object):
     def printCurrentConfig(self, analysisContext):
       #self.REMOTE_CONTROL_RESPONSE = propertyName + " : " + str(analysisContext.aminerConfig.configProperties[propertyName])
       raise Exception("not implemented yet..")
-      
+    
+    def saveCurrentConfig(self, analysisContext, destinationFile):
+      raise Exception("not implemented yet..")
+    
     # to be continued with methods from the AecidCli..
     
