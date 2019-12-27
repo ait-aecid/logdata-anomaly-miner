@@ -136,6 +136,8 @@ class AMinerRemoteControlExecutionMethods(object):
       self.REMOTE_CONTROL_RESPONSE = propertyName + " : " + str(analysisContext.aminerConfig.configProperties[propertyName])
       
     def printCurrentConfig(self, analysisContext):
+      for configProperty in analysisContext.aminerConfig.configProperties:
+        self.REMOTE_CONTROL_RESPONSE += "%s\n"%configProperty
       print(analysisContext.aminerConfig.configProperties)
     
     def saveCurrentConfig(self, analysisContext, destinationFile):

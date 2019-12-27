@@ -280,7 +280,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         <varlistentry>
           <term>
             <option>
-              <replaceable>TODO: renameRegisteredAnalysisComponent(analysisContext,oldComponentName,newComponentName)</replaceable>
+              <replaceable>renameRegisteredAnalysisComponent(analysisContext,oldComponentName,newComponentName)</replaceable>
             </option>
           </term>
           <listitem>
@@ -295,7 +295,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         <varlistentry>
           <term>
             <option>
-              <replaceable>TODO: printConfigProperty(analysisContext,propertyName)</replaceable>
+              <replaceable>printConfigProperty(analysisContext,propertyName)</replaceable>
             </option>
           </term>
           <listitem>
@@ -308,11 +308,12 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         <varlistentry>
           <term>
             <option>
-              <replaceable>TODO: printCurrentConfig(analysisContext)</replaceable>
+              <replaceable>printCurrentConfig(analysisContext)</replaceable>
             </option>
           </term>
           <listitem>
-            <para>Prints the current AMinerConfig.</para>
+            <para>Prints the current AMinerConfig. It is strongly recommended to use the 
+            <option>--StringResponse</option> parameter for better readability.</para>
             <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
             &quot;printCurrentConfig(analysisContext)&quot;</para>
           </listitem>
@@ -320,7 +321,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         <varlistentry>
           <term>
             <option>
-              <replaceable>TODO: saveCurrentConfig(analysisContext,destinationFile)</replaceable>
+              <replaceable>saveCurrentConfig(analysisContext,destinationFile)</replaceable>
             </option>
           </term>
           <listitem>
