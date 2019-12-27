@@ -14,6 +14,7 @@ import time
 import traceback
 import resource
 import subprocess
+import logging
 
 from aminer import AMinerConfig
 from aminer.input.LogStream import LogStream
@@ -564,7 +565,10 @@ class AnalysisChildRemoteControlHandler(object):
                       'saveCurrentConfig':methods.saveCurrentConfig
                       }
         # write this to the log file!
-        print(jsonRequestData[0].decode())
+        logging.basicConfig(filename=AMinerConfig.LOG_FILE,level=logging.DEBUG, 
+            format='%(asctime)s %(levelname)s %(message)s', datefmt='%d.%m.%Y %H:%M:%S')
+        logging.addLevelName(15, "REMOTECONTROL")
+        logging.log(15, jsonRequestData[0].decode())
 
         exec(jsonRequestData[0], {'__builtins__' : None}, execLocals)
         jsonRemoteControlResponse = json.dumps(

@@ -35,7 +35,7 @@ class AMinerRemoteControlExecutionMethods(object):
                                 self.CONFIG_KEY_ALERT_MAX_GAP,
                                 self.CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE}
       if (not isinstance(analysisContext, AnalysisChild.AnalysisContext)):
-        self.REMOTE_CONTROL_RESPONSE += "FAILURE: the analysisContext must be of type %s\n" % AnalysisChild.AnalysisContext.__class__
+        self.REMOTE_CONTROL_RESPONSE += "FAILURE: the analysisContext must be of type %s." % AnalysisChild.AnalysisContext.__class__
         return
       
       if (propertyName == AMinerConfig.KEY_PERSISTENCE_DIR):
@@ -50,12 +50,12 @@ class AMinerRemoteControlExecutionMethods(object):
         if (isinstance(value, str)):
           analysisContext.aminerConfig.configProperties[AMinerConfig.KEY_LOG_PREFIX] = str(value)
         else:
-          self.REMOTE_CONTROL_RESPONSE += "FAILURE: property 'LogPrefix' must be of type String!\n"
+          self.REMOTE_CONTROL_RESPONSE += "FAILURE: property 'LogPrefix' must be of type String!"
       elif (propertyName == AMinerConfig.KEY_LOG_SOURCES_LIST):
         self.changeConfigPropertyLogResourcesList(analysisContext, value)
       
       else:
-        self.REMOTE_CONTROL_RESPONSE += "FAILURE: property %s could not be changed. Please check the propertyName again.\n" % propertyName
+        self.REMOTE_CONTROL_RESPONSE += "FAILURE: property %s could not be changed. Please check the propertyName again." % propertyName
         return
       if (result == 0):
         self.REMOTE_CONTROL_RESPONSE += "%s changed to %s successfully."%(propertyName, value)
@@ -80,10 +80,10 @@ class AMinerRemoteControlExecutionMethods(object):
         analysisContext.aminerConfig.configProperties[AMinerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE] = maxMemoryMB
         return 0
       except ValueError:
-        self.REMOTE_CONTROL_RESPONSE += "FAILURE: property 'maxMemoryUsage' must be of type Integer!\n"
+        self.REMOTE_CONTROL_RESPONSE += "FAILURE: property 'maxMemoryUsage' must be of type Integer!"
         return 1
       
-    def changeConfigPropertyMaxCpuPercentUsage(self, analysisContext, maxCpuPercentUsage):
+    def changeConfigPropertyMaxCpuPercentUsage(self, maxCpuPercentUsage):
       try:
         maxCpuPercentUsage = int(maxCpuPercentUsage)
         # limit
@@ -98,9 +98,9 @@ class AMinerRemoteControlExecutionMethods(object):
            stderr=subprocess.STDOUT) as out:
           stdout,stderr = out.communicate()
         
-        if 'dpkg-query: no packages found matching cpulimit' in stdout.decode():
+        if 'dpkg-query: no packages found matching cpulimit.' in stdout.decode():
           self.REMOTE_CONTROL_RESPONSE = 'FATAL: cpulimit package must be installed, ' 
-          + 'when using the property %s' % AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE
+          + 'when using the property %s.' % AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE
           return 1
         else:
           with subprocess.Popen(cpulimitCmd, 
@@ -108,7 +108,7 @@ class AMinerRemoteControlExecutionMethods(object):
            stderr=subprocess.STDOUT) as out:
             return 0
       except ValueError:
-        self.REMOTE_CONTROL_RESPONSE = 'FATAL: %s must be an integer, terminating' %(
+        self.REMOTE_CONTROL_RESPONSE = 'FATAL: %s must be an integer, terminating.' %(
           AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE)
         return 1
     
@@ -119,21 +119,28 @@ class AMinerRemoteControlExecutionMethods(object):
         self.REMOTE_CONTROL_RESPONSE += "'%s.%s' changed from %s to %s successfully."%(componentName, 
             attribute, repr(attr), value)
       else:
-        self.REMOTE_CONTROL_RESPONSE += "FAILURE: property '%s.%s' must be of type %s!\n"%(componentName,
+        self.REMOTE_CONTROL_RESPONSE += "FAILURE: property '%s.%s' must be of type %s!"%(componentName,
             attribute, type(attr))
     
-    def renameRegisteredAnalysisComponent(self, oldComponentName, newComponentName):
-      raise Exception("not implemented yet..")
+    def renameRegisteredAnalysisComponent(self, analysisContext, oldComponentName, newComponentName):
+      component = analysisContext.getComponentByName(oldComponentName)
+      if component == None:
+        self.REMOTE_CONTROL_RESPONSE += "FAILURE: component '%s' does not exist!"%oldComponentName
+        return
+      else:
+        analysisContext.registeredComponentsByName[oldComponentName] = None
+        analysisContext.registeredComponentsByName[newComponentName] = component
+        self.REMOTE_CONTROL_RESPONSE += "Component '%s' renamed to '%s' successfully."%(oldComponentName, newComponentName)
     
     def printConfigProperty(self, analysisContext, propertyName):
       self.REMOTE_CONTROL_RESPONSE = propertyName + " : " + str(analysisContext.aminerConfig.configProperties[propertyName])
       
     def printCurrentConfig(self, analysisContext):
-      #self.REMOTE_CONTROL_RESPONSE = propertyName + " : " + str(analysisContext.aminerConfig.configProperties[propertyName])
-      raise Exception("not implemented yet..")
+      print(analysisContext.aminerConfig.configProperties)
     
     def saveCurrentConfig(self, analysisContext, destinationFile):
-      raise Exception("not implemented yet..")
+      self.REMOTE_CONTROL_RESPONSE = AMinerConfig.saveConfig(analysisContext, destinationFile)
+      self.REMOTE_CONTROL_RESPONSE += "Successfully saved the current config to %s."%destinationFile
     
     # to be continued with methods from the AecidCli..
     

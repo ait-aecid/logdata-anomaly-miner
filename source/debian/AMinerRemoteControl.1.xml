@@ -1,4 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
+<!-- This document was created with Syntext Serna Free. -->
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
 
 <!--
@@ -254,6 +255,8 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             &quot;<replaceable>propertyName</replaceable> changed to 
             <replaceable>value</replaceable> successfully.&quot; if the 
             changes were successful and an individual message if the changes failed.</para>
+            <para>Read more about which properties can be changed in the <option>Valid Property Names
+           </option>section.</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -265,20 +268,19 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
           <listitem>
             <para>This method allows you to change attributes from components of the 
             AMinerConfig at runtime. For every attribute to be changed this method 
-            must be used. The method prints &quot;<replaceable>componentName.attribute
-            </replaceable> changed to <replaceable>value</replaceable> successfully.
+            must be used. The method prints &quot;<replaceable>componentName.attribute </replaceable> changed to <replaceable>value</replaceable> successfully.
             &quot; if the changes were successful and an individual message if the changes failed.
             The type of the new <replaceable>value</replaceable> must be the same like the
             old value of the <replaceable>componentName.attribute</replaceable></para>
             <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
-            "changeAttributeOfRegisteredAnalysisComponent(analysisContext, 
-            'NewMatchPath', 'autoIncludeFlag', False)"</para>
+            &quot;changeAttributeOfRegisteredAnalysisComponent(analysisContext, 
+            &apos;NewMatchPath&apos;, &apos;autoIncludeFlag&apos;, False)&quot;</para>
           </listitem>
         </varlistentry>
         <varlistentry>
           <term>
             <option>
-              <replaceable>TODO: renameRegisteredAnalysisComponent(oldComponentName,newComponentName)</replaceable>
+              <replaceable>TODO: renameRegisteredAnalysisComponent(analysisContext,oldComponentName,newComponentName)</replaceable>
             </option>
           </term>
           <listitem>
@@ -287,7 +289,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             <replaceable>oldComponentName</replaceable> is deleted from the registered components
             and registered with the <replaceable>newComponentName</replaceable>.</para>
             <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
-            "renameRegisteredAnalysisComponent('NewMatchPath','NewMatchPathDetector')"</para>
+           &quot;renameRegisteredAnalysisComponent(analysisContext,&apos;NewMatchPath&apos;,&apos;NewMatchPathDetector&apos;)&quot;</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -300,7 +302,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             <para>Prints the property with the <replaceable>propertyName</replaceable> 
             from the current AMinerConfig.</para>
             <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
-            "printConfigProperty(analysisContext,'NewMatchPath')"</para>
+            &quot;printConfigProperty(analysisContext,&apos;NewMatchPath&apos;)&quot;</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -312,10 +314,9 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
           <listitem>
             <para>Prints the current AMinerConfig.</para>
             <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
-            "printCurrentConfig(analysisContext)"</para>
+            &quot;printCurrentConfig(analysisContext)&quot;</para>
           </listitem>
         </varlistentry>
-
         <varlistentry>
           <term>
             <option>
@@ -327,10 +328,9 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             <replaceable>destinationFile</replaceable> must have write permissions by the 
              AMinerRemoteControl process or it returns an <option>PermissionError</option>.</para>
             <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
-            "printCurrentConfig(analysisContext)"</para>
+            &quot;saveCurrentConfig(analysisContext,'/tmp/config.py')&quot;</para>
           </listitem>
         </varlistentry>
-
         <varlistentry>
           <term>
             <option>
@@ -344,10 +344,6 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         </varlistentry>
       </variablelist>
     </refsect2>
-
-
-
-
     <refsect2 id="PropertyNames">
       <title>Valid Property Names</title>
       <variablelist>
@@ -440,8 +436,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
           <listitem>
             <para><replaceable>Value</replaceable>: Seconds (Integer)</para>
             <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
-            &quot;changeConfigProperty(analysisContext, &apos;MailAlerting.MinAlertGap
-            &apos;, 600)&quot;</para>
+            &quot;changeConfigProperty(analysisContext, &apos;MailAlerting.MinAlertGap&apos;, 600)&quot;</para>
             <para>Define the minimum time between two alert e-mails in seconds to avoid spamming. 
              All events during this timespan are collected and sent out with the next report. Defaults to 600 seconds.</para>
           </listitem>
@@ -453,8 +448,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
           <listitem>
             <para><replaceable>Value</replaceable>: Seconds (Integer)</para>
             <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
-            &quot;changeConfigProperty(analysisContext, &apos;MailAlerting.MaxAlertGap
-            &apos;, 1000)&quot;</para>
+            &quot;changeConfigProperty(analysisContext, &apos;MailAlerting.MaxAlertGap&apos;, 1000)&quot;</para>
             <para>Define the maximum time between two alert e-mails in seconds. 
             When undefined this defaults to &quot;MailAlerting.MinAlertGap&quot;. 
             Otherwise this will activate an exponential backoff to reduce messages 
@@ -469,8 +463,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
           <listitem>
             <para><replaceable>Value</replaceable>: Number of messages (Integer)</para>
             <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
-            &quot;changeConfigProperty(analysisContext, &apos;MailAlerting.MaxEventsPerMessage
-            &apos;, 1000)&quot;</para>
+            &quot;changeConfigProperty(analysisContext, &apos;MailAlerting.MaxEventsPerMessage&apos;, 1000)&quot;</para>
             <para>Define how many events should be included in one alert mail at most. This defaults to 1000.</para>
           </listitem>
         </varlistentry>
@@ -495,8 +488,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             <para><replaceable>Value</replaceable>: &apos;Allowed RAM usage in Megabytes 
             (Integer: 32-maxSystemRAM)&apos;</para>
             <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
-            &quot;changeConfigProperty(analysisContext, &apos;Resources.MaxMemoryUsage
-            &apos;, -1)&quot;</para>
+            &quot;changeConfigProperty(analysisContext, &apos;Resources.MaxMemoryUsage&apos;, -1)&quot;</para>
             <para>This property limits the maximal possible RAM in MB which the AMiner process can use. 
             Be careful at choosing the value, as a shortage of memory causes a MemoryError. This defaults to 
            -1, which means that there is no limit.</para>
@@ -509,8 +501,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
           <listitem>
             <para><replaceable>Value</replaceable>: Integer: 1-100</para>
             <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
-            &quot;changeConfigProperty(analysisContext, &apos;Resources.MaxCpuPercentUsage
-            &apos;, 30)</para>
+            &quot;changeConfigProperty(analysisContext, &apos;Resources.MaxCpuPercentUsage&apos;, 30)</para>
             <para>By limiting the AMiner process to a fraction of possible CPU usage the system 
             can not longer be overloaded by it. The percentages can only be full numbers and must 
             be between 1 and 100.</para>
