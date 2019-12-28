@@ -1,6 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- This document was created with Syntext Serna Free. -->
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
+<!-- This document was created with Syntext Serna Free. --><!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
 
 <!--
 
@@ -255,8 +254,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             &quot;<replaceable>propertyName</replaceable> changed to 
             <replaceable>value</replaceable> successfully.&quot; if the 
             changes were successful and an individual message if the changes failed.</para>
-            <para>Read more about which properties can be changed in the <option>Valid Property Names
-           </option>section.</para>
+            <para>Read more about which properties can be changed in the <option>Valid Property Names </option>section.</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -308,6 +306,19 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         <varlistentry>
           <term>
             <option>
+              <replaceable>printAttributeOfRegisteredAnalysisComponent(analysisContext,componentName, attribute)</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>Prints the <replaceable>attribute</replaceable> of the component 
+            with the <replaceable>componentName</replaceable>.</para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;printAttributeOfRegisteredAnalysisComponent(analysisContext,&apos;NewMatchPath&apos;, &apos;autoIncludeFlag&apos;)&quot;</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <option>
               <replaceable>printCurrentConfig(analysisContext)</replaceable>
             </option>
           </term>
@@ -315,7 +326,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             <para>Prints the current AMinerConfig. It is strongly recommended to use the 
             <option>--StringResponse</option> parameter for better readability.</para>
             <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
-            &quot;printCurrentConfig(analysisContext)&quot;</para>
+            &quot;printCurrentConfig(analysisContext)&quot; --StringResponse</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -329,7 +340,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             <replaceable>destinationFile</replaceable> must have write permissions by the 
              AMinerRemoteControl process or it returns an <option>PermissionError</option>.</para>
             <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
-            &quot;saveCurrentConfig(analysisContext,'/tmp/config.py')&quot;</para>
+            &quot;saveCurrentConfig(analysisContext,&apos;/tmp/config.py&apos;)&quot;</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -348,37 +359,6 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
     <refsect2 id="PropertyNames">
       <title>Valid Property Names</title>
       <variablelist>
-        <varlistentry>
-          <term>
-            <replaceable>TODO: LogResourceList</replaceable>
-          </term>
-          <listitem>
-            <para><replaceable>Value</replaceable>: [&apos;FileName&apos;, 
-            &apos;FileName&apos;]</para>
-            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
-            &quot;changeConfigProperty(analysisContext, &apos;LogResourceList&apos;, 
-            [&apos;file:///var/log/syslog&apos;, &apos;file:///var/log/auth.log&apos;])&quot;</para>
-            <para>Define the list of log resources to read from: the resources named here do not need 
-            to exist when aminer is started. This will just result in a warning. However if they exist, 
-            they have to be readable by the aminer process! Supported types are: </para>
-            <para>* file://[path]: Read data from file, reopen it after rollover</para>
-            <para>* unix://[path]: Open the path as UNIX local socket for reading</para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term>
-            <replaceable>TODO: Core.PersistenceDir</replaceable>
-          </term>
-          <listitem>
-            <para><replaceable>Value</replaceable>: &apos;DirName&apos;</para>
-            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
-            &quot;changeConfigProperty(analysisContext, &apos;Core.PersistenceDir&apos;, 
-            &apos;/var/lib/aminer&apos;)&quot;</para>
-            <para>Read and store information to be used between multiple invocations of AMiner 
-             in this directory. The directory must only be accessible to the &apos;AMinerUser&apos; 
-             but not group/world readable. On violation, AMiner will refuse to run.</para>
-          </listitem>
-        </varlistentry>
         <varlistentry>
           <term>
             <replaceable>TODO: MailAlerting.TargetAddress</replaceable>

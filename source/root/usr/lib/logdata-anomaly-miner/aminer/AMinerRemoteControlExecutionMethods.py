@@ -1,10 +1,6 @@
 """This module contains methods which can be executed from the
 AMinerRemoteControl class."""
 
-############################### Könnte Import Error lösen
-#import sys
-#sys.path = sys.path[1:]+['/usr/lib/logdata-anomaly-miner']
-
 from aminer import AMinerConfig, AnalysisChild
 import resource
 import subprocess
@@ -58,17 +54,19 @@ class AMinerRemoteControlExecutionMethods(object):
         self.REMOTE_CONTROL_RESPONSE += "FAILURE: property %s could not be changed. Please check the propertyName again." % propertyName
         return
       if (result == 0):
-        self.REMOTE_CONTROL_RESPONSE += "%s changed to %s successfully."%(propertyName, value)
-      
-    def changeConfigPropertyPersistenceDir(self, analysisContext, newPersistenceDir):
-      raise Exception("not implemented yet..")
+        self.REMOTE_CONTROL_RESPONSE += "'%s' changed to '%s' successfully."%(propertyName, value)
       
     def changeConfigPropertyMailAlerting(self, analysisContext, propertyName, value):
-      #go through every DefaultMailNotificationEventHandler and set the new property.
-      raise Exception("not implemented yet..")
-    
-    def changeConfigPropertyLogResourcesList(self, analysisContext, newLogResourceList):
-      raise Exception("not implemented yet..")
+      t = type(analysisContext.aminerConfig.configProperties[propertyName])
+      if not isinstance(value, t):
+        self.REMOTE_CONTROL_RESPONSE += "FAILURE: the value of the property '%s' must be of type %s!"%(propertyName,t)
+        return 1
+      analysisContext.aminerConfig.configProperties[propertyName] = value
+      for analysisComponentId in analysisContext.getRegisteredComponentIds():
+        component = analysisContext.getComponentById(analysisComponentId)
+        if component.__class__.__name__ == "DefaultMailNotificationEventHandler":
+          setattr(component, propertyName, value)
+      return 0
       
     def changeConfigPropertyMaxMemory(self, analysisContext, maxMemoryMB):
       try:
@@ -134,11 +132,26 @@ class AMinerRemoteControlExecutionMethods(object):
     
     def printConfigProperty(self, analysisContext, propertyName):
       self.REMOTE_CONTROL_RESPONSE = propertyName + " : " + str(analysisContext.aminerConfig.configProperties[propertyName])
+    
+    def printAttributeOfRegisteredAnalysisComponent(self, analysisContext, componentName, attribute):
+      self.REMOTE_CONTROL_RESPONSE += "%s.%s = %s"%(componentName, attribute, 
+        repr(getattr(analysisContext.getComponentByName(componentName), attribute)))
       
     def printCurrentConfig(self, analysisContext):
       for configProperty in analysisContext.aminerConfig.configProperties:
-        self.REMOTE_CONTROL_RESPONSE += "%s\n"%configProperty
-      print(analysisContext.aminerConfig.configProperties)
+        if isinstance(analysisContext.aminerConfig.configProperties[configProperty], str):
+          self.REMOTE_CONTROL_RESPONSE += "%s = '%s'\n"%(configProperty, 
+            analysisContext.aminerConfig.configProperties[configProperty])
+        else:
+          self.REMOTE_CONTROL_RESPONSE += "%s = %s\n"%(configProperty, 
+            analysisContext.aminerConfig.configProperties[configProperty])
+      for componentId in analysisContext.getRegisteredComponentIds():
+        self.REMOTE_CONTROL_RESPONSE += "%s {\n"%analysisContext.getNameByComponent(
+          analysisContext.getComponentById(componentId))
+        for var in vars(analysisContext.getComponentById(componentId)):
+          self.REMOTE_CONTROL_RESPONSE += "  %s = %s\n"%(var, 
+            repr(getattr(analysisContext.getComponentById(componentId), var)))
+        self.REMOTE_CONTROL_RESPONSE += "}\n\n"
     
     def saveCurrentConfig(self, analysisContext, destinationFile):
       self.REMOTE_CONTROL_RESPONSE = AMinerConfig.saveConfig(analysisContext, destinationFile)

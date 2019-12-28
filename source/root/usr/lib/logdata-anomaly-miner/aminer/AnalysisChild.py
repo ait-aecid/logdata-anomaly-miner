@@ -559,7 +559,7 @@ class AnalysisChildRemoteControlHandler(object):
         methods = AMinerRemoteControlExecutionMethods()
         execLocals = {'analysisContext':analysisContext, 'remoteControlData':jsonRequestData[1], 
                       'printCurrentConfig':methods.printCurrentConfig, 'printConfigProperty':methods.printConfigProperty,
-                      'changeConfigProperty':methods.changeConfigProperty,
+                      'printAttributeOfRegisteredAnalysisComponent':methods.printAttributeOfRegisteredAnalysisComponent,'changeConfigProperty':methods.changeConfigProperty,
                       'changeAttributeOfRegisteredAnalysisComponent':methods.changeAttributeOfRegisteredAnalysisComponent,
                       'renameRegisteredAnalysisComponent':methods.renameRegisteredAnalysisComponent,
                       'saveCurrentConfig':methods.saveCurrentConfig
