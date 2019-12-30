@@ -29,10 +29,6 @@ def loadConfig(configFileName):
     spec = importlib.util.spec_from_file_location('aminerConfig', configFileName)
     aminerConfig = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(aminerConfig)
-    
-    logging.basicConfig(filename=LOG_FILE,level=logging.DEBUG, 
-      format='%(asctime)s %(levelname)s %(message)s', datefmt='%d.%m.%Y %H:%M:%S')
-    logging.info("AMiner started.")
 
   except:
     print('Failed to load configuration from %s' % configFileName, file=sys.stderr)
@@ -59,7 +55,7 @@ def saveConfig(analysisContext, newFile):
       msg += "WARNING: %s not found in the old config file."%findStr
       logging.basicConfig(filename=LOG_FILE,level=logging.DEBUG, 
           format='%(asctime)s %(levelname)s %(message)s', datefmt='%d.%m.%Y %H:%M:%S')
-      logging.warn("WARNING: %s not found in the old config file.")
+      logging.warning("WARNING: %s not found in the old config file.")
     else:
       string = old[pos + len(findStr):]
       oldLen = string.find('\n')

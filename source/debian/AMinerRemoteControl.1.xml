@@ -346,6 +346,29 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         <varlistentry>
           <term>
             <option>
+              <replaceable>whitelistEvent(analysisContext,componentName,eventData,whitelistingData=None)</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>Whitelists a path from <replaceable>eventData</replaceable> with the
+             whitelistEvent-method from the corresponding class of the component with the
+            <replaceable>componentName</replaceable>. Only the following classes
+             support whitelisting: EnhancedNewMatchPathValueComboDetector, 
+             MissingMatchPathValueDetector, NewMatchPathDetector and NewMatchPathValueComboDetector.
+             Please read the examples of this method to use the correct parameters.</para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;whitelistEvent(analysisContext,&apos;EnhancedNewMatchPathValueComboDetector&apos;,&apos;new/path&apos;)&quot;</para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;whitelistEvent(analysisContext,&apos;MissingMatchPathValueDetector&apos;,&apos;new/path&apos;,-11)&quot;</para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;whitelistEvent(analysisContext,&apos;NewMatchPathDetector&apos;,[&apos;new/path&apos;])&quot;</para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;whitelistEvent(analysisContext,&apos;NewMatchPathValueComboDetector&apos;,&apos;new/path&apos;)&quot;</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <option>
               <replaceable>TO BE CONTINUED..: AecidCli methods</replaceable>
             </option>
           </term>

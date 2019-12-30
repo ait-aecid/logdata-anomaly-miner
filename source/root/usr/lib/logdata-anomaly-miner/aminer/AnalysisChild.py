@@ -57,6 +57,10 @@ class AnalysisContext(object):
 # when real time or analysis time has elapsed.
     self.realTimeTriggeredComponents = []
     self.analysisTimeTriggeredComponents = []
+    
+    logging.basicConfig(filename=AMinerConfig.LOG_FILE,level=logging.DEBUG, 
+      format='%(asctime)s %(levelname)s %(message)s', datefmt='%d.%m.%Y %H:%M:%S')
+    logging.info("AMiner started.")
 
   def addTimeTriggeredComponent(self, component, triggerClass=None):
     """Add a time-triggered component to the registry."""
@@ -562,7 +566,8 @@ class AnalysisChildRemoteControlHandler(object):
                       'printAttributeOfRegisteredAnalysisComponent':methods.printAttributeOfRegisteredAnalysisComponent,'changeConfigProperty':methods.changeConfigProperty,
                       'changeAttributeOfRegisteredAnalysisComponent':methods.changeAttributeOfRegisteredAnalysisComponent,
                       'renameRegisteredAnalysisComponent':methods.renameRegisteredAnalysisComponent,
-                      'saveCurrentConfig':methods.saveCurrentConfig
+                      'saveCurrentConfig':methods.saveCurrentConfig,
+                      'whitelistEvent':methods.whitelistEvent
                       }
         # write this to the log file!
         logging.basicConfig(filename=AMinerConfig.LOG_FILE,level=logging.DEBUG, 
