@@ -353,8 +353,17 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             <para>Whitelists a path from <replaceable>eventData</replaceable> with the
              whitelistEvent-method from the corresponding class of the component with the
             <replaceable>componentName</replaceable>. Only the following classes
-             support whitelisting: EnhancedNewMatchPathValueComboDetector, 
-             MissingMatchPathValueDetector, NewMatchPathDetector and NewMatchPathValueComboDetector.
+             support whitelisting: <replaceable>EnhancedNewMatchPathValueComboDetector
+             </replaceable>, <replaceable>MissingMatchPathValueDetector</replaceable>, 
+             <replaceable>NewMatchPathDetector</replaceable> and 
+             <replaceable>NewMatchPathValueComboDetector</replaceable>.
+             For most of the components no <replaceable>whitelistingData</replaceable> 
+             is needed and the <replaceable>eventData</replaceable> is a path. The 
+            <replaceable>NewMatchPathDetector</replaceable> supports a list of multiple 
+             pathes. The <replaceable>MissingMatchPathValueComboDetector</replaceable> 
+             needs an integer as <replaceable>whitelistingData</replaceable>. A positive value 
+             sets the interval in seconds to the value. -1 sets the interval to the default value of 3600. 
+             A negative value removes the missingMatchPath.
              Please read the examples of this method to use the correct parameters.</para>
             <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
             &quot;whitelistEvent(analysisContext,&apos;EnhancedNewMatchPathValueComboDetector&apos;,&apos;new/path&apos;)&quot;</para>
