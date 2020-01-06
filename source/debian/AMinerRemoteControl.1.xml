@@ -147,6 +147,16 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             <para>/usr/bin/AMinerRemoteControl --Exec &apos;printCurrentConfig(analysisContext)&apos;</para>
           </listitem>
         </varlistentry>
+        <varlistentry>
+          <term>
+            <option>Print a property of the running AMinerConfig, change it and confirm the changed value by printing it again:</option>
+          </term>
+          <listitem>
+            <para>/usr/bin/AMinerRemoteControl --Data &apos;[&quot;Resources.MaxMemoryUsage&quot;, -1]&apos; --Exec &apos;
+            printConfigProperty(analysisContext,  &quot;%s&quot; % remoteControlData[0])&apos; --Exec &apos;changeConfigProperty(analysisContext, &quot;%s&quot; % remoteControlData[0], remoteControlData[1])&apos; --Exec &apos;
+            printConfigProperty(analysisContext,  &quot;%s&quot; % remoteControlData[0])&apos;</para>
+          </listitem>
+        </varlistentry>
       </variablelist>
     </refsect2>
   </refsect1>
@@ -353,8 +363,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             <para>Whitelists a path from <replaceable>eventData</replaceable> with the
              whitelistEvent-method from the corresponding class of the component with the
             <replaceable>componentName</replaceable>. Only the following classes
-             support whitelisting: <replaceable>EnhancedNewMatchPathValueComboDetector
-             </replaceable>, <replaceable>MissingMatchPathValueDetector</replaceable>, 
+             support whitelisting: <replaceable>EnhancedNewMatchPathValueComboDetector </replaceable>, <replaceable>MissingMatchPathValueDetector</replaceable>, 
              <replaceable>NewMatchPathDetector</replaceable> and 
              <replaceable>NewMatchPathValueComboDetector</replaceable>.
              For most of the components no <replaceable>whitelistingData</replaceable> 
