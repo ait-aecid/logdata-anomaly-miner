@@ -178,4 +178,25 @@ class AMinerRemoteControlExecutionMethods(object):
         except Exception as e:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
 
-    # to be continued with methods from the AecidCli..
+    def addHandlerToAtomFilterAndRegisterAnalysisComponent(self, analysisContext, atomHandler, component, componentName):
+        atomFilter = analysisContext.getComponentByName(atomHandler)
+        if atomFilter is None:
+            self.REMOTE_CONTROL_RESPONSE += "FAILURE: atomHandler '%s' does not exist!" % atomHandler
+            return
+        if analysisContext.getComponentByName(componentName) is not None:
+            self.REMOTE_CONTROL_RESPONSE += "FAILURE: Component with same name already registered! (%s)" % componentName
+            return
+        atomFilter.addHandler(component)
+        analysisContext.registeredComponentsByName[atomHandler] = atomFilter
+        analysisContext.registerComponent(component, componentName)
+        self.REMOTE_CONTROL_RESPONSE += "Component '%s' added to '%s' successfully." % (
+            componentName, atomHandler)
+
+    def dumpEventsFromHistory(self, analysisContext, historyComponentName, eventIds):
+        self.REMOTE_CONTROL_RESPONSE = "not implemented yet.."
+
+    def ignoreEventsFromHistory(self, analysisContext, historyComponentName, eventIds):
+        self.REMOTE_CONTROL_RESPONSE = "not implemented yet.."
+
+    def listEventsFromHistory(self, analysisContext, historyComponentName, maxEventCount=None):
+        self.REMOTE_CONTROL_RESPONSE = "not implemented yet.."

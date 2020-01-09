@@ -303,6 +303,20 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         <varlistentry>
           <term>
             <option>
+              <replaceable>TODO: addHandlerToAtomFilterAndRegisterAnalysisComponent(analysisContext,atomHandler,component,componentName)</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>Adds the <replaceable>component</replaceable> to the <replaceable>atomFilter</replaceable> and registers 
+            it with the <replaceable>componentName</replaceable>.</para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+           &quot;addHandlerToAtomFilterAndRegisterAnalysisComponent(analysisContext,analysisContext.atomizerFactory.atomHandlerList,
+           NewMatchPathDetector(analysisContext.aminerConfig, [StreamPrinterEventHandler(analysisContext)], autoIncludeFlag=True),&apos;NewMatchPathDetector2&apos;)&quot;</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <option>
               <replaceable>printConfigProperty(analysisContext,propertyName)</replaceable>
             </option>
           </term>
@@ -387,12 +401,47 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         <varlistentry>
           <term>
             <option>
-              <replaceable>TO BE CONTINUED..: AecidCli methods</replaceable>
+              <replaceable>TODO: dumpEventsFromHistory(analysisContext,historyComponentName,eventIds)</replaceable>
             </option>
           </term>
           <listitem>
-            <para>These methods will be implemented in future..</para>
-            <para><replaceable>example</replaceable>: </para>
+            <para>This method returns the string representation of a list of events with the <replaceable>eventIds</replaceable>.
+            If no event with the <replaceable>eventId</replaceable> could be found, the message 
+            &quot;FAILURE: the event with <replaceable>eventId</replaceable> could not be found!&quot;
+            is returned. <replaceable>historyComponentName</replaceable> is the registered component of the class
+            <replaceable>VolatileLogarithmicBackoffEventHistory</replaceable>.</para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;dumpEventsFromHistory(analysisContext,&apos;VolatileLogarithmicBackoffEventHistory&apos;,[12,13,15])&quot;</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <option>
+              <replaceable>TODO: ignoreEventsFromHistory(analysisContext,historyComponentName,eventIds)</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>This method deletes the events with the <replaceable>eventIds</replaceable> from the history.
+            <replaceable>historyComponentName</replaceable> is the registered component of the class
+            <replaceable>VolatileLogarithmicBackoffEventHistory</replaceable>. The number of deleted
+            events is returned.</para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;ignoreEventsFromHistory(analysisContext,&apos;VolatileLogarithmicBackoffEventHistory&apos;,[12,13,15])&quot;</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <option>
+              <replaceable>TODO: listEventsFromHistory(analysisContext,historyComponentName,maxEventCount=None)</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>This method lists <replaceable>maxEventCount</replaceable> events from the history.
+            <replaceable>historyComponentName</replaceable> is the registered component of the class
+            <replaceable>VolatileLogarithmicBackoffEventHistory</replaceable>. If 
+            <replaceable>maxEventCount</replaceable> is None, all events from the history are returned.</para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;listEventsFromHistory(analysisContext,&apos;VolatileLogarithmicBackoffEventHistory&apos;,600)&quot;</para>
           </listitem>
         </varlistentry>
       </variablelist>

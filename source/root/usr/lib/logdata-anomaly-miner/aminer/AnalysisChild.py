@@ -561,13 +561,31 @@ class AnalysisChildRemoteControlHandler(object):
             (len(jsonRequestData) != 2):
           raise Exception('Invalid request data')
         methods = AMinerRemoteControlExecutionMethods()
+        import aminer.analysis
         execLocals = {'analysisContext':analysisContext, 'remoteControlData':jsonRequestData[1], 
                       'printCurrentConfig':methods.printCurrentConfig, 'printConfigProperty':methods.printConfigProperty,
                       'printAttributeOfRegisteredAnalysisComponent':methods.printAttributeOfRegisteredAnalysisComponent,'changeConfigProperty':methods.changeConfigProperty,
                       'changeAttributeOfRegisteredAnalysisComponent':methods.changeAttributeOfRegisteredAnalysisComponent,
                       'renameRegisteredAnalysisComponent':methods.renameRegisteredAnalysisComponent,
+                      'addHandlerToAtomFilterAndRegisterAnalysisComponent':methods.addHandlerToAtomFilterAndRegisterAnalysisComponent,
                       'saveCurrentConfig':methods.saveCurrentConfig,
-                      'whitelistEvent':methods.whitelistEvent
+                      'whitelistEvent':methods.whitelistEvent,
+                      'dumpEventsFromHistory':methods.dumpEventsFromHistory,
+                      'ignoreEventsFromHistory':methods.ignoreEventsFromHistory,
+                      'listEventsFromHistory':methods.listEventsFromHistory,
+                      'EnhancedNewMatchPathValueComboDetector':aminer.analysis.EnhancedNewMatchPathDetector,
+                      'HistogramAnalysis':aminer.analysis.HistogramAnalysis,
+                      'MatchValueAverageChangeDetector':aminer.analysis.MatchValueAverageChangeDetector,
+                      'MatchValueStreamWriter':aminer.analysis.MatchValueStreamWriter,
+                      'MissingMatchPathValueDetector':aminer.analysis.MissingMatchPathValueDetector,
+                      'NewMatchPathDetector':aminer.analysis.NewMatchPathDetector,
+                      'NewMatchPathValueComboDetector':aminer.analysis.NewMatchPathValueComboDetector,
+                      'Rules':aminer.analysis.Rules,
+                      'TimeCorrelationDetector':aminer.analysis.TimeCorrelationDetector,
+                      'TimeCorrelationViolationDetector':aminer.analysis.TimeCorrelationViolationDetector,
+                      'TimestampCorrectionFilters':aminer.analysis.TimestampCorrectionFilters,
+                      'TimestampsUnsortedDetector':aminer.analysis.TimestampsUnsortedDetector,
+                      'WhitelistViolationDetector':aminer.analysis.WhitelistViolationDetector
                       }
         # write this to the log file!
         logging.basicConfig(filename=AMinerConfig.LOG_FILE,level=logging.DEBUG, 
