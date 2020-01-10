@@ -34,8 +34,9 @@ class AMinerRemoteControlExecutionMethods(object):
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: the analysisContext must be of type %s." % AnalysisChild.AnalysisContext.__class__
             return
 
-        if propertyName == AMinerConfig.KEY_PERSISTENCE_DIR:
-            result = self.changeConfigPropertyPersistenceDir(analysisContext, value)
+        if propertyName == AMinerConfig.KEY_PERSISTENCE_DIR or propertyName == AMinerConfig.KEY_LOG_SOURCES_LIST:
+            self.REMOTE_CONTROL_RESPONSE += "FAILURE: the property '%s' can only be changed at " \
+                                            "startup in the AMiner root process!" % propertyName
         elif propertyName == AMinerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE:
             result = self.changeConfigPropertyMaxMemory(analysisContext, value)
         elif propertyName == AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE:
@@ -47,9 +48,6 @@ class AMinerRemoteControlExecutionMethods(object):
                 analysisContext.aminerConfig.configProperties[AMinerConfig.KEY_LOG_PREFIX] = str(value)
             else:
                 self.REMOTE_CONTROL_RESPONSE += "FAILURE: property 'LogPrefix' must be of type String!"
-        elif propertyName == AMinerConfig.KEY_LOG_SOURCES_LIST:
-            self.changeConfigPropertyLogResourcesList(analysisContext, value)
-
         else:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: property %s could not be changed. Please check the propertyName " \
                                             "again." % propertyName
@@ -157,7 +155,7 @@ class AMinerRemoteControlExecutionMethods(object):
         self.REMOTE_CONTROL_RESPONSE = AMinerConfig.saveConfig(analysisContext, destinationFile)
         self.REMOTE_CONTROL_RESPONSE += "Successfully saved the current config to %s." % destinationFile
 
-    def whitelistEvent(self, analysisContext, componentName, eventData, whitelistingData=None):
+    def whitelistEventInComponent(self, analysisContext, componentName, eventData, whitelistingData=None):
         component = analysisContext.getComponentByName(componentName)
         if component is None:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: component '%s' does not exist!" % component
@@ -192,11 +190,133 @@ class AMinerRemoteControlExecutionMethods(object):
         self.REMOTE_CONTROL_RESPONSE += "Component '%s' added to '%s' successfully." % (
             componentName, atomHandler)
 
-    def dumpEventsFromHistory(self, analysisContext, historyComponentName, eventIds):
-        self.REMOTE_CONTROL_RESPONSE = "not implemented yet.."
+    def dumpEventsFromHistory(self, analysisContext, historyComponentName, dumpEventId):
+        self.REMOTE_CONTROL_RESPONSE = None
+        historyHandler = analysisContext.getComponentByName(historyComponentName)
+        if historyHandler is None:
+            self.REMOTE_CONTROL_RESPONSE = 'Event history component not found'
+        else:
+            historyData = historyHandler.getHistory()
+            resultString = 'FAIL: not found'
+            for eventPos in range(0, len(historyData)):
+                eventId, eventType, eventMessage, sortedLogLines, eventData, eventSource = historyData[eventPos]
+                if eventId != dumpEventId:
+                    continue
+                appendLogLinesFlag = True
+                resultString = 'OK\nEvent %d: %s (%s)' % (eventId, eventMessage, eventType)
+                if eventType == 'Analysis.NewMatchPathDetector':
+                    resultString += '\n  Logline: %s' % (sortedLogLines[0],)
+                elif eventType == 'Analysis.NewMatchPathValueComboDetector':
+                    resultString += '\nParser match:\n' + eventData[0].parserMatch.matchElement.annotateMatch('  ')
+                elif eventType == 'Analysis.WhitelistViolationDetector':
+                    resultString += '\nParser match:\n' + eventData.parserMatch.matchElement.annotateMatch('  ')
+                elif eventType == 'ParserModel.UnparsedData':
+                    resultString += '\n  Unparsed line: %s' % sortedLogLines[0]
+                    appendLogLinesFlag = False
+                else:
+                    resultString += '\n  Data: %s' % str(eventData)
+
+                if appendLogLinesFlag and (sortedLogLines != None) and (len(sortedLogLines) != 0):
+                    resultString += '\n  Log lines:\n    %s' % '\n    '.join(sortedLogLines)
+                break
+            self.REMOTE_CONTROL_RESPONSE = resultString
 
     def ignoreEventsFromHistory(self, analysisContext, historyComponentName, eventIds):
-        self.REMOTE_CONTROL_RESPONSE = "not implemented yet.."
+        historyHandler = analysisContext.getComponentByName(historyComponentName)
+        if historyHandler is None:
+            self.REMOTE_CONTROL_RESPONSE = 'Event history component not found'
+            return
+        historyData = historyHandler.getHistory()
+        idSpecList = []
+        for element in eventIds:
+            if isinstance(element, list):
+                idSpecList.append(element)
+        deleteCount = 0
+        eventPos = 0
+        while eventPos < len(historyData):
+            eventId, eventType, eventMessage, sortedLogLines, eventData, eventSource = historyData[eventPos]
+            mayDeleteFlag = False
+            if eventId in eventIds:
+                mayDeleteFlag = True
+            else:
+                for idRange in idSpecList:
+                    if (eventId >= idRange[0]) and (eventId <= idRange[1]):
+                        mayDeleteFlag = True
+            if mayDeleteFlag:
+                historyData[:] = historyData[:eventPos] + historyData[eventPos + 1:]
+                deleteCount += 1
+            else:
+                eventPos += 1
+        self.REMOTE_CONTROL_RESPONSE = 'OK\n%d elements ignored' % deleteCount
 
     def listEventsFromHistory(self, analysisContext, historyComponentName, maxEventCount=None):
-        self.REMOTE_CONTROL_RESPONSE = "not implemented yet.."
+        historyHandler = analysisContext.getComponentByName(historyComponentName)
+        if historyHandler is None:
+            self.REMOTE_CONTROL_RESPONSE = 'Event history component not found'
+        else:
+            historyData = historyHandler.getHistory()
+            maxEvents = len(historyData)
+            if maxEventCount is None or maxEvents < maxEventCount:
+                maxEventCount = maxEvents
+            resultString = 'OK'
+            for eventId, eventType, eventMessage, sortedLogLines, eventData, eventSource in historyData[:maxEventCount]:
+                resultString += ('\nEvent %d: %s; Log data: %s' % (eventId, eventMessage, repr(sortedLogLines)))[:240]
+            self.REMOTE_CONTROL_RESPONSE = resultString
+
+    def whitelistEventsFromHistory(self, analysisContext, historyComponentName, idSpecList, whitelistingData=None):
+        from aminer.events import EventSourceInterface
+        historyHandler = analysisContext.getComponentByName(historyComponentName)
+        if historyHandler is None:
+            self.REMOTE_CONTROL_RESPONSE = 'Event history component not found'
+            return
+        elif idSpecList is None or not isinstance(idSpecList, list):
+            self.REMOTE_CONTROL_RESPONSE = 'Request requires remoteControlData with ID specification list and optional whitelisting information'
+            return
+        historyData = historyHandler.getHistory()
+        resultString = ''
+        lookupCount = 0
+        whitelistCount = 0
+        eventPos = 0
+        while eventPos < len(historyData):
+            eventId, eventType, eventMessage, sortedLogLines, eventData, eventSource = historyData[eventPos]
+            foundFlag = False
+            if eventId in idSpecList:
+                foundFlag = True
+            else:
+                for idRange in idSpecList:
+                    if ((isinstance(idRange, list)) and (eventId >= idRange[0]) and
+                            (eventId <= idRange[1])):
+                        foundFlag = True
+            if not foundFlag:
+                eventPos += 1
+                continue
+            lookupCount += 1
+            whitelistedFlag = False
+            if isinstance(eventSource, EventSourceInterface):
+                # This should be the default for all detectors.
+                try:
+                    message = eventSource.whitelistEvent(
+                        eventType, sortedLogLines, eventData, whitelistingData)
+                    resultString += 'OK %d: %s\n' % (eventId, message)
+                    whitelistedFlag = True
+                except Exception as wlException:
+                    if isinstance(wlException, NotImplementedError):
+                        resultString += 'FAIL %d: component does not support whitelisting' % eventId
+                    else:
+                        resultString += 'FAIL %d: %s\n' % (eventId, str(wlException))
+            elif eventType == 'Analysis.WhitelistViolationDetector':
+                resultString += 'FAIL %d: No automatic modification of whitelist rules, manual changes required\n' % eventId
+                whitelistedFlag = True
+            elif eventType == 'ParserModel.UnparsedData':
+                resultString += 'FAIL %d: No automatic modification of parsers yet\n' % eventId
+            else:
+                resultString += 'FAIL %d: Unsupported event type %s\n' % (eventId, eventType)
+            if whitelistedFlag:
+                # Clear the whitelisted event.
+                historyData[:] = historyData[:eventPos] + historyData[eventPos + 1:]
+                whitelistCount += 1
+            else:
+                eventPos += 1
+        if lookupCount == 0:
+            resultString = 'FAIL: Not a single event ID from specification found'
+        self.REMOTE_CONTROL_RESPONSE = resultString

@@ -370,7 +370,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         <varlistentry>
           <term>
             <option>
-              <replaceable>whitelistEvent(analysisContext,componentName,eventData,whitelistingData=None)</replaceable>
+              <replaceable>whitelistEventInComponent(analysisContext,componentName,eventData,whitelistingData=None)</replaceable>
             </option>
           </term>
           <listitem>
@@ -389,35 +389,35 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
              A negative value removes the missingMatchPath.
              Please read the examples of this method to use the correct parameters.</para>
             <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
-            &quot;whitelistEvent(analysisContext,&apos;EnhancedNewMatchPathValueComboDetector&apos;,&apos;new/path&apos;)&quot;</para>
+            &quot;whitelistEventInComponent(analysisContext,&apos;EnhancedNewMatchPathValueComboDetector&apos;,&apos;new/path&apos;)&quot;</para>
             <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
-            &quot;whitelistEvent(analysisContext,&apos;MissingMatchPathValueDetector&apos;,&apos;new/path&apos;,-11)&quot;</para>
+            &quot;whitelistEventInComponent(analysisContext,&apos;MissingMatchPathValueDetector&apos;,&apos;new/path&apos;,-11)&quot;</para>
             <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
-            &quot;whitelistEvent(analysisContext,&apos;NewMatchPathDetector&apos;,[&apos;new/path&apos;])&quot;</para>
+            &quot;whitelistEventInComponent(analysisContext,&apos;NewMatchPathDetector&apos;,[&apos;new/path&apos;])&quot;</para>
             <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
-            &quot;whitelistEvent(analysisContext,&apos;NewMatchPathValueComboDetector&apos;,&apos;new/path&apos;)&quot;</para>
+            &quot;whitelistEventInComponent(analysisContext,&apos;NewMatchPathValueComboDetector&apos;,&apos;new/path&apos;)&quot;</para>
           </listitem>
         </varlistentry>
         <varlistentry>
           <term>
             <option>
-              <replaceable>TODO: dumpEventsFromHistory(analysisContext,historyComponentName,eventIds)</replaceable>
+              <replaceable>dumpEventsFromHistory(analysisContext,historyComponentName,dumpEventId)</replaceable>
             </option>
           </term>
           <listitem>
-            <para>This method returns the string representation of a list of events with the <replaceable>eventIds</replaceable>.
-            If no event with the <replaceable>eventId</replaceable> could be found, the message 
-            &quot;FAILURE: the event with <replaceable>eventId</replaceable> could not be found!&quot;
+            <para>This method returns the string representation of a history event with the <replaceable>dumpEventId</replaceable>.
+            If no event with the <replaceable>dumpEventId</replaceable> could be found, the message 
+            &quot;FAILURE: the event with <replaceable>dumpEventId</replaceable> could not be found!&quot;
             is returned. <replaceable>historyComponentName</replaceable> is the registered component of the class
             <replaceable>VolatileLogarithmicBackoffEventHistory</replaceable>.</para>
             <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
-            &quot;dumpEventsFromHistory(analysisContext,&apos;VolatileLogarithmicBackoffEventHistory&apos;,[12,13,15])&quot;</para>
+            &quot;dumpEventsFromHistory(analysisContext,&apos;VolatileLogarithmicBackoffEventHistory&apos;,12)&quot;</para>
           </listitem>
         </varlistentry>
         <varlistentry>
           <term>
             <option>
-              <replaceable>TODO: ignoreEventsFromHistory(analysisContext,historyComponentName,eventIds)</replaceable>
+              <replaceable>ignoreEventsFromHistory(analysisContext,historyComponentName,eventIds)</replaceable>
             </option>
           </term>
           <listitem>
@@ -432,7 +432,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         <varlistentry>
           <term>
             <option>
-              <replaceable>TODO: listEventsFromHistory(analysisContext,historyComponentName,maxEventCount=None)</replaceable>
+              <replaceable>listEventsFromHistory(analysisContext,historyComponentName,maxEventCount=None)</replaceable>
             </option>
           </term>
           <listitem>
@@ -444,6 +444,20 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             &quot;listEventsFromHistory(analysisContext,&apos;VolatileLogarithmicBackoffEventHistory&apos;,600)&quot;</para>
           </listitem>
         </varlistentry>
+        <varlistentry>
+          <term>
+            <option>
+              <replaceable>whitelistEventsFromHistory(analysisContext,historyComponentName,idSpecList,whitelistingData=None)</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>This method whitelists the events with the ids in the<replaceable>idSpecList</replaceable> from the history.
+            <replaceable>historyComponentName</replaceable> is the registered component of the class
+            <replaceable>VolatileLogarithmicBackoffEventHistory</replaceable>. The whitelisting response is returned.</para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;whitelistEventsFromHistory(analysisContext,&apos;VolatileLogarithmicBackoffEventHistory&apos;,[12,13,15])&quot;</para>
+          </listitem>
+        </varlistentry>
       </variablelist>
     </refsect2>
     <refsect2 id="PropertyNames">
@@ -451,7 +465,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
       <variablelist>
         <varlistentry>
           <term>
-            <replaceable>TODO: MailAlerting.TargetAddress</replaceable>
+            <replaceable>MailAlerting.TargetAddress</replaceable>
           </term>
           <listitem>
             <para><replaceable>Value</replaceable>: &apos;E-Mail Address&apos;</para>
@@ -463,7 +477,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         </varlistentry>
         <varlistentry>
           <term>
-            <replaceable>TODO: MailAlerting.FromAddress</replaceable>
+            <replaceable>MailAlerting.FromAddress</replaceable>
           </term>
           <listitem>
             <para><replaceable>Value</replaceable>: &apos;E-Mail Address&apos;</para>
@@ -476,7 +490,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         </varlistentry>
         <varlistentry>
           <term>
-            <replaceable>TODO: MailAlerting.SubjectPrefix</replaceable>
+            <replaceable>MailAlerting.SubjectPrefix</replaceable>
           </term>
           <listitem>
             <para><replaceable>Value</replaceable>: &apos;String&apos;</para>
@@ -489,7 +503,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         </varlistentry>
         <varlistentry>
           <term>
-            <replaceable>TODO: MailAlerting.EventCollectTime</replaceable>
+            <replaceable>MailAlerting.EventCollectTime</replaceable>
           </term>
           <listitem>
             <para><replaceable>Value</replaceable>: Seconds (Integer)</para>
@@ -502,7 +516,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         </varlistentry>
         <varlistentry>
           <term>
-            <replaceable>TODO: MailAlerting.MinAlertGap</replaceable>
+            <replaceable>MailAlerting.MinAlertGap</replaceable>
           </term>
           <listitem>
             <para><replaceable>Value</replaceable>: Seconds (Integer)</para>
@@ -514,7 +528,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         </varlistentry>
         <varlistentry>
           <term>
-            <replaceable>TODO: MailAlerting.MaxAlertGap</replaceable>
+            <replaceable>MailAlerting.MaxAlertGap</replaceable>
           </term>
           <listitem>
             <para><replaceable>Value</replaceable>: Seconds (Integer)</para>
@@ -529,7 +543,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         </varlistentry>
         <varlistentry>
           <term>
-            <replaceable>TODO: MailAlerting.MaxEventsPerMessage</replaceable>
+            <replaceable>MailAlerting.MaxEventsPerMessage</replaceable>
           </term>
           <listitem>
             <para><replaceable>Value</replaceable>: Number of messages (Integer)</para>
