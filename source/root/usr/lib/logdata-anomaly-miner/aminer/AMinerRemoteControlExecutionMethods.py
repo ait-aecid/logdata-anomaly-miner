@@ -185,7 +185,6 @@ class AMinerRemoteControlExecutionMethods(object):
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: Component with same name already registered! (%s)" % componentName
             return
         atomFilter.addHandler(component)
-        analysisContext.registeredComponentsByName[atomHandler] = atomFilter
         analysisContext.registerComponent(component, componentName)
         self.REMOTE_CONTROL_RESPONSE += "Component '%s' added to '%s' successfully." % (
             componentName, atomHandler)
