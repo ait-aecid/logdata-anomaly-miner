@@ -303,15 +303,15 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         <varlistentry>
           <term>
             <option>
-              <replaceable>TODO: addHandlerToAtomFilterAndRegisterAnalysisComponent(analysisContext,atomHandler,component,componentName)</replaceable>
+              <replaceable>addHandlerToAtomFilterAndRegisterAnalysisComponent(analysisContext,atomHandler,component,componentName)</replaceable>
             </option>
           </term>
           <listitem>
             <para>Adds the <replaceable>component</replaceable> to the <replaceable>atomFilter</replaceable> and registers 
             it with the <replaceable>componentName</replaceable>.</para>
             <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
-           &quot;addHandlerToAtomFilterAndRegisterAnalysisComponent(analysisContext,analysisContext.atomizerFactory.atomHandlerList,
-           NewMatchPathDetector(analysisContext.aminerConfig, [StreamPrinterEventHandler(analysisContext)], autoIncludeFlag=True),&apos;NewMatchPathDetector2&apos;)&quot;</para>
+           &quot;addHandlerToAtomFilterAndRegisterAnalysisComponent(analysisContext, &apos;AtomFilter&apos;,
+           NewMatchPathDetector(analysisContext.aminerConfig, analysisContext.atomizerFactory.atomHandlerList, autoIncludeFlag=True), &apos;NewMatchPathDet&apos;)&quot;</para>
           </listitem>
         </varlistentry>
         <varlistentry>
