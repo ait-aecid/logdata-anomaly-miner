@@ -6,6 +6,7 @@ import sys
 import importlib
 from importlib import util
 import logging
+import random
 
 KEY_LOG_SOURCES_LIST = 'LogResourceList'
 KEY_AMINER_USER = 'AMinerUser'
@@ -46,10 +47,11 @@ def buildPersistenceFileName(aminerConfig, *args):
 def saveConfig(analysisContext, newFile):
   msg = ""
   with open(configFN, "r") as file:
-    old = file.read()
+    oldConfig = file.read()
   
   for configProperty in analysisContext.aminerConfig.configProperties:
     findStr = "configProperties['%s'] = "%configProperty
+    old = oldConfig
     pos = old.find(findStr)
     if pos == -1:
       msg += "WARNING: %s not found in the old config file."%findStr
@@ -71,6 +73,7 @@ def saveConfig(analysisContext, newFile):
     component = analysisContext.getComponentById(componentId)
     name = analysisContext.getNameByComponent(component)
     start = 0
+    old = oldConfig
     for i in range(0, componentId+1):
       start = start + 1
       start = old.find('.registerComponent(', start)
@@ -109,7 +112,8 @@ def saveConfig(analysisContext, newFile):
       else:
         attr = arr[2].split('"')[1]
       value = arr[3].strip().split(")")[0]
-      
+
+      old = oldConfig
       pos = old.find('componentName="%s"'%componentName)
       if pos == -1:
         pos = old.find("componentName='%s'"%componentName)
@@ -123,6 +127,33 @@ def saveConfig(analysisContext, newFile):
       pos = old.find(attr, pos)
       end = min(old.find(")", pos), old.find(",", pos))
       old = old[:old.find("=", pos)+1] + "%s"%value + old[end:]
+
+
+    if "REMOTECONTROL addHandlerToAtomFilterAndRegisterAnalysisComponent" in logs[i]:
+      old = oldConfig
+      parameters = logs[i].split(",",2)
+
+      #find the name of the filter variable in the old config.
+      pos1 = 0
+      pos0 = -1
+      filter = ''
+      while pos0 == -1:
+        pos1 = old.find(parameters[1].strip(' \'"'), pos1)
+        pos = pos1
+        filter = old[pos-70:pos]
+        pos = filter.find('registerComponent(') + len('registerComponent(')
+        pos0 = filter.find(',',pos)
+        if pos0 == -1:
+          pos1 = pos1+1
+        filter = filter[pos:filter.find(',',pos)].strip()
+
+      newParameters = parameters[2].split(")")
+      componentName = newParameters[1].strip(', ')
+
+      var = "var%d"%random.randint(0,10000)
+      old = old + "\n  %s = %s)"%(var, newParameters[0].strip())
+      old = old + "\n  %s.registerComponent(%s, componentName=%s)"%(filter, var, componentName)
+      old = old + "\n  %s.addHandler(%s)"%(filter, var)
   
   with open(newFile, "w") as file:
     file.write(old)
