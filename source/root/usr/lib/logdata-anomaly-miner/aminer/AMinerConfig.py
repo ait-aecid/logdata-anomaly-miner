@@ -6,7 +6,6 @@ import sys
 import importlib
 from importlib import util
 import logging
-import random
 
 KEY_LOG_SOURCES_LIST = 'LogResourceList'
 KEY_AMINER_USER = 'AMinerUser'
@@ -20,6 +19,7 @@ KEY_RESOURCES_MAX_MEMORY_USAGE = 'Resources.MaxMemoryUsage'
 KEY_RESOURCES_MAX_PERCENT_CPU_USAGE = 'Resources.MaxCpuPercentUsage'
 LOG_FILE = '/tmp/AMinerRemoteLog.txt'
 configFN = None
+VAR_ID = 0
 
 def loadConfig(configFileName):
   """Load the configuration file using the import module."""
@@ -45,19 +45,20 @@ def buildPersistenceFileName(aminerConfig, *args):
   return os.path.join(persistenceDirName, *args)
 
 def saveConfig(analysisContext, newFile):
+  global VAR_ID
+  VAR_ID = 0
   msg = ""
   with open(configFN, "r") as file:
-    oldConfig = file.read()
+    old = file.read()
   
   for configProperty in analysisContext.aminerConfig.configProperties:
     findStr = "configProperties['%s'] = "%configProperty
-    old = oldConfig
     pos = old.find(findStr)
     if pos == -1:
       msg += "WARNING: %s not found in the old config file."%findStr
       logging.basicConfig(filename=LOG_FILE,level=logging.DEBUG, 
           format='%(asctime)s %(levelname)s %(message)s', datefmt='%d.%m.%Y %H:%M:%S')
-      logging.warning("WARNING: %s not found in the old config file.")
+      logging.warning("WARNING: %s not found in the old config file."%findStr)
     else:
       string = old[pos + len(findStr):]
       oldLen = string.find('\n')
@@ -73,11 +74,14 @@ def saveConfig(analysisContext, newFile):
     component = analysisContext.getComponentById(componentId)
     name = analysisContext.getNameByComponent(component)
     start = 0
-    old = oldConfig
+    oldStart = 0
     for i in range(0, componentId+1):
       start = start + 1
       start = old.find('.registerComponent(', start)
-      
+    if oldStart > start:
+      break
+    oldStart = start
+
     if old.find('componentName', start) < old.find(')', start):
       oldComponentNameStart = old.find('"', old.find('componentName', start))
       oldComponentNameEnd = old.find('"', oldComponentNameStart+1)
@@ -102,7 +106,7 @@ def saveConfig(analysisContext, newFile):
 
   for i in range(0, len(logs)):
     if "REMOTECONTROL changeAttributeOfRegisteredAnalysisComponent" in logs[i]:
-      arr = logs[i].split(',')
+      arr = logs[i].split(',',3)
       if arr[1].find("'"):
         componentName = arr[1].split("'")[1]
       else:
@@ -113,7 +117,6 @@ def saveConfig(analysisContext, newFile):
         attr = arr[2].split('"')[1]
       value = arr[3].strip().split(")")[0]
 
-      old = oldConfig
       pos = old.find('componentName="%s"'%componentName)
       if pos == -1:
         pos = old.find("componentName='%s'"%componentName)
@@ -125,35 +128,43 @@ def saveConfig(analysisContext, newFile):
       if pos == -1:
         pos = old.find("%s="%var)
       pos = old.find(attr, pos)
-      end = min(old.find(")", pos), old.find(",", pos))
+      p1 = old.find(")", pos)
+      p2 = old.find(",", pos)
+      if p1 != -1 and p2 != -1:
+        end = min(old.find(")", pos), old.find(",", pos))
+      elif p1 == -1 and p2 == -1:
+        msg += "WARNING: '%s.%s' could not be found in the current config!\n"%(componentName, attr)
+        continue
+      elif p1 == -1:
+        end = p2
+      elif p2 == -1:
+        end = p1
       old = old[:old.find("=", pos)+1] + "%s"%value + old[end:]
 
 
     if "REMOTECONTROL addHandlerToAtomFilterAndRegisterAnalysisComponent" in logs[i]:
-      old = oldConfig
       parameters = logs[i].split(",",2)
 
       #find the name of the filter variable in the old config.
-      pos1 = 0
-      pos0 = -1
-      filter = ''
-      while pos0 == -1:
-        pos1 = old.find(parameters[1].strip(' \'"'), pos1)
-        pos = pos1
-        filter = old[pos-70:pos]
-        pos = filter.find('registerComponent(') + len('registerComponent(')
-        pos0 = filter.find(',',pos)
-        if pos0 == -1:
-          pos1 = pos1+1
-        filter = filter[pos:filter.find(',',pos)].strip()
+      pos = old.find(parameters[1].strip())
+      newPos = pos
+      while old[newPos] != '\n':
+        newPos = newPos - 1
+      filter = old[newPos:pos]
+      pos = filter.find('registerComponent(') + len('registerComponent(')
+      filter = filter[pos:filter.find(',',pos)].strip()
 
       newParameters = parameters[2].split(")")
       componentName = newParameters[1].strip(', ')
 
-      var = "var%d"%random.randint(0,10000)
+      var = "analysisComponent%d"%VAR_ID
+      VAR_ID = VAR_ID + 1
       old = old + "\n  %s = %s)"%(var, newParameters[0].strip())
       old = old + "\n  %s.registerComponent(%s, componentName=%s)"%(filter, var, componentName)
-      old = old + "\n  %s.addHandler(%s)"%(filter, var)
+      old = old + "\n  %s.addHandler(%s)\n"%(filter, var)
+
+  #remove double lines
+  old = old.replace('\n\n\n', '\n\n')
   
   with open(newFile, "w") as file:
     file.write(old)
