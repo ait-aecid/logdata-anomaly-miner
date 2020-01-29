@@ -30,8 +30,8 @@ class SyslogWriterEventHandler(EventHandlerInterface):
     to syslog."""
     self.bufferStream.seek(0)
     self.bufferStream.truncate(0)
-    self.eventWriter.receiveEvent(eventType, eventMessage, sortedLogLines, logAtom, \
-        eventData, eventSource)
+    self.eventWriter.receiveEvent(eventType, eventMessage, sortedLogLines, eventData, \
+        logAtom, eventSource)
     eventData = self.bufferStream.getvalue()
     currentEventId = self.eventId
     self.eventId += 1

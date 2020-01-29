@@ -11,7 +11,7 @@ class EventHandlerInterface:
   asynchronously."""
 
   def receiveEvent(self, eventType, eventMessage, sortedLogLines, eventData,
-      eventSource):
+      logAtom, eventSource):
     """Receive information about a detected event.
     @param eventType is a string with the event type class this
     event belongs to. This information can be used to interpret
