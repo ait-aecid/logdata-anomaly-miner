@@ -17,6 +17,6 @@ class VolatileLogarithmicBackoffEventHistory(EventHandlerInterface, LogarithmicB
                    logAtom, eventSource):
     """Receive information about a detected event and store all
     related data as tuple to the history log."""
-    self.addObject((self.eventId, eventType, eventMessage, sortedLogLines, logAtom, eventData, eventSource))
+    self.addObject((self.eventId, eventType, eventMessage, sortedLogLines, eventData, logAtom, eventSource))
     self.eventId += 1
     return True
