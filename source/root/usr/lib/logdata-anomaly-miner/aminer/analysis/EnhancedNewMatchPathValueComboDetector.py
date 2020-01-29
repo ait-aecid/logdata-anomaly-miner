@@ -69,6 +69,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     values were new or not."""
     matchDict = logAtom.parserMatch.getMatchDictionary()
     matchValueList = []
+    eventData = dict()
     for targetPath in self.targetPathList:
       matchElement = matchDict.get(targetPath, None)
       if matchElement is None:
@@ -108,7 +109,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
           sortedLogLines = [str(self.knownValuesDict)]
         listener.receiveEvent(
           'Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected',
-          sortedLogLines, logAtom, self)
+          sortedLogLines, eventData, logAtom, self)
     if self.autoIncludeFlag:
       if self.nextPersistTime is None:
         self.nextPersistTime = time.time() + 600

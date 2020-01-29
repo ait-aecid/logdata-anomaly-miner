@@ -56,6 +56,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
     """Sends summary to all event handlers."""
     parserMatch = logAtom.parserMatch
     valueDict = parserMatch.getMatchDictionary()
+    eventData = dict()
 
     timestampValue = logAtom.getTimestamp()
     if self.timestampPath is not None:
@@ -97,7 +98,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
       res[0] = analysisSummary
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
-            'Statistical data report', res, logAtom, \
+            'Statistical data report', res, eventData, logAtom, \
             self)
 
 

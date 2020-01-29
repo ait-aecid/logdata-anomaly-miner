@@ -27,6 +27,7 @@ class WhitelistViolationDetector(AtomHandlerInterface):
     match.
     @param logAtom atom with parsed data to check
     @return True when logAtom is whitelisted, False otherwise."""
+    eventData = dict()
     for rule in self.whitelistRules:
       if rule.match(logAtom):
         return True
@@ -40,5 +41,5 @@ class WhitelistViolationDetector(AtomHandlerInterface):
       sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')]
     for listener in self.anomalyEventHandlers:
       listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
-          'No whitelisting for current atom', sortedLogLines, logAtom, self)
+          'No whitelisting for current atom', sortedLogLines, eventData, logAtom, self)
     return False

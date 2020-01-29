@@ -52,6 +52,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
 
 
   def receiveAtom(self, logAtom):
+    eventData = dict()
     timestamp = logAtom.getTimestamp()
     if timestamp is None:
       timestamp = datetime.utcnow()
@@ -99,7 +100,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
             'Correlation report', result, \
-            logAtom, self)
+            eventData, logAtom, self)
       self.resetStatistics()
 
 

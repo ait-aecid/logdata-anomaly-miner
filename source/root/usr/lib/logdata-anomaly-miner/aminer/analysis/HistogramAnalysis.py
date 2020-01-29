@@ -335,6 +335,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
   def sendReport(self, logAtom, timestamp):
     """Sends a report to the event handlers."""
+    eventData = dict()
     reportStr = 'Histogram report '
     if self.lastReportTime is not None:
       reportStr += 'from %s ' % datetime.fromtimestamp(self.lastReportTime).strftime("%Y-%m-%d %H:%M:%S")
@@ -348,7 +349,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
       res[0]  = reportStr
       for listener in self.reportEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
-                            'Histogram report', res, logAtom, self)
+                            'Histogram report', res, eventData, logAtom, self)
     if self.resetAfterReportFlag:
       for dataItem in self.histogramData:
         dataItem.reset()
@@ -495,6 +496,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
 
   def sendReport(self, logAtom, timestamp):
     """Send report to event handlers."""
+    eventData = dict()
     reportStr = 'Path histogram report '
     if self.lastReportTime != None:
       reportStr += 'from %s ' % datetime.fromtimestamp(self.lastReportTime).strftime("%Y-%m-%d %H:%M:%S")
@@ -519,7 +521,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
         histogramMapping[1].reset()
     for listener in self.reportEventHandlers:
       listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
-          'Histogram report', res, logAtom, self)
+          'Histogram report', res, eventData, logAtom, self)
 
     self.lastReportTime = timestamp
     self.nextReportTime = timestamp+self.reportInterval

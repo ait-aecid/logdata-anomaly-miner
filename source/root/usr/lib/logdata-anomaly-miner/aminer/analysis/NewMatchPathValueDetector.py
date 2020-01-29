@@ -37,6 +37,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
 
   def receiveAtom(self, logAtom):
     matchDict = logAtom.parserMatch.getMatchDictionary()
+    eventData = dict()
     for targetPath in self.targetPathList:
       match = matchDict.get(targetPath, None)
       if match is None:
@@ -56,7 +57,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
           sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')]
         for listener in self.anomalyEventHandlers:
           listener.receiveEvent('Analysis.%s' % self.__class__.__name__, 'New value(s) detected', \
-              sortedLogLines, logAtom, self)
+              sortedLogLines, eventData, logAtom, self)
 
 
   def getTimeTriggerClass(self):

@@ -114,6 +114,7 @@ class MissingMatchPathValueDetector(
   def checkTimeouts(self, timeStamp, logAtom):
     """Check if there was any timeout on a channel, thus triggering
     event dispatching."""
+    eventData = dict()
     self.lastSeenTimestamp = max(self.lastSeenTimestamp, timeStamp)
     if self.lastSeenTimestamp > self.nextCheckTimestamp:
       missingValueList = []
@@ -160,13 +161,13 @@ class MissingMatchPathValueDetector(
             originalLogLinePrefix = ''
           messagePart.append(originalLogLinePrefix+repr(logAtom.rawData))
         for listener in self.anomalyEventHandlers:
-          self.sendEventToHandlers(listener, logAtom, [''.join(messagePart)], missingValueList)
+          self.sendEventToHandlers(listener, eventData, logAtom, [''.join(messagePart)], missingValueList)
     return True
 
 
-  def sendEventToHandlers(self, anomalyEventHandler, logAtom, messagePart, missingValueList):
+  def sendEventToHandlers(self, anomalyEventHandler, eventData, logAtom, messagePart, missingValueList):
     anomalyEventHandler.receiveEvent('Analysis.%s' % self.__class__.__name__,
-        'Interval too large between values', messagePart, logAtom, self)
+        'Interval too large between values', messagePart, eventData, logAtom, self)
 
 
   def setCheckValue(self, value, interval):

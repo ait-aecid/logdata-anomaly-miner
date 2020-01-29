@@ -28,6 +28,7 @@ class TimestampsUnsortedDetector(AtomHandlerInterface, EventSourceInterface):
     process the match. Depending on this information, the caller
     may decide if it makes sense passing the parsed atom also
     to other handlers."""
+    eventData = dict()
     timestamp = logAtom.getTimestamp()
     if timestamp is None:
       return False
@@ -44,7 +45,7 @@ class TimestampsUnsortedDetector(AtomHandlerInterface, EventSourceInterface):
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
             'Timestamp %s below %s' % (datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S"),
             datetime.fromtimestamp(self.lastTimestamp).strftime("%Y-%m-%d %H:%M:%S")), \
-            sortedLogLines, logAtom, self)
+            sortedLogLines, eventData, logAtom, self)
       if self.exitOnErrorFlag:
         import sys
         sys.exit(1)

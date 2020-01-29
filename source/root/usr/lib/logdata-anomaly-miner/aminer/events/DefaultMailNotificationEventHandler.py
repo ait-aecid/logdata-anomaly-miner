@@ -38,7 +38,7 @@ events and send them via "sendmail" transport."""
     self.senderAddress = aminerConfig.configProperties.get(
         DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_FROM_ADDRESS)
     self.subjectPrefix = aminerConfig.configProperties.get(
-        DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_SUBJECT_PREFIX, 'AMiner Alerts:')
+        DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_SUBJECT_PREFIX, 'py Alerts:')
     self.alertGraceTimeEnd = aminerConfig.configProperties.get(
         DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_ALERT_GRACE_TIME, 0)
     self.eventCollectTime = aminerConfig.configProperties.get(
@@ -66,7 +66,7 @@ events and send them via "sendmail" transport."""
     self.runningSendmailProcesses = []
 
 
-  def receiveEvent(self, eventType, eventMessage, sortedLogLines,
+  def receiveEvent(self, eventType, eventMessage, sortedLogLines, logAtom,
                    eventData, eventSource):
     """Receive information about a detected event."""
     if self.alertGraceTimeEnd != 0:
@@ -81,7 +81,7 @@ events and send them via "sendmail" transport."""
       if self.eventsCollected == 0:
         self.eventCollectionStartTime = currentTime
       self.eventsCollected += 1
-      self.eventData = EventData(eventType, eventMessage, sortedLogLines, eventData, eventSource, self.analysisContext)
+      self.eventData = EventData(eventType, eventMessage, sortedLogLines, logAtom, eventData, eventSource, self.analysisContext)
       self.currentMessage += self.eventData.receiveEventString() 
 
     if self.nextAlertTime == 0:

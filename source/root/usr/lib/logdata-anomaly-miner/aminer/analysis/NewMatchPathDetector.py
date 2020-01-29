@@ -46,6 +46,7 @@ class NewMatchPathDetector(AtomHandlerInterface, \
     may decide if it makes sense passing the parsed atom also
     to other handlers."""
     unknownPathList = []
+    eventData = dict()
     for path in logAtom.parserMatch.getMatchDictionary().keys():
       if path not in self.knownPathSet:
         unknownPathList.append(path)
@@ -58,13 +59,16 @@ class NewMatchPathDetector(AtomHandlerInterface, \
         originalLogLinePrefix = self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
         if originalLogLinePrefix is None:
           originalLogLinePrefix = ''
-        sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')+os.linesep+ 
+        sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')+os.linesep+
           originalLogLinePrefix+repr(logAtom.rawData)]
       else:
         sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')]
+      eventData["nextPersistTime"] = self.nextPersistTime
+      eventData["knownPathSet"] = str(self.knownPathSet)
       for listener in self.anomalyEventHandlers:
-        listener.receiveEvent('Analysis.%s' % self.__class__.__name__, 'New path(es) detected', 
-            sortedLogLines, logAtom, self)
+        listener.receiveEvent('Analysis.%s' % self.__class__.__name__, 'New path(es) detected',
+          sortedLogLines, eventData, logAtom, self)
+        #    sortedLogLines, logAtom, self)
     return True
 
 
@@ -108,5 +112,5 @@ class NewMatchPathDetector(AtomHandlerInterface, \
       self.knownPathSet.add(pathName)
       if whitelistedStr:
         whitelistedStr += ', '
-      whitelistedStr += repr(pathName)
+      whitelistedStr += pathName
     return 'Whitelisted path(es) %s in %s' % (whitelistedStr, sortedLogLines[0])

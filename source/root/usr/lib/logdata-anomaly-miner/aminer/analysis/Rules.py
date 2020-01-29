@@ -30,9 +30,10 @@ class EventGenerationMatchAction(MatchAction):
     self.eventHandlers = eventHandlers
 
   def matchAction(self, logAtom):
+    eventData = dict()
     for handler in self.eventHandlers:
       handler.receiveEvent(
-          self.eventType, self.eventMessage, [logAtom.parserMatch.matchElement.annotateMatch('')], logAtom, self)
+          self.eventType, self.eventMessage, [logAtom.parserMatch.matchElement.annotateMatch('')], eventData, logAtom, self)
 
 
 class AtomFilterMatchAction(MatchAction, SubhandlerFilter):

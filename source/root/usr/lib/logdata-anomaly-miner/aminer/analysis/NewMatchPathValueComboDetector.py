@@ -66,6 +66,7 @@ class NewMatchPathValueComboDetector(
     values were new or not."""
     matchDict = logAtom.parserMatch.getMatchDictionary()
     matchValueList = []
+    eventData = dict()
     for targetPath in self.targetPathList:
       matchElement = matchDict.get(targetPath, None)
       if matchElement is None:
@@ -91,7 +92,7 @@ class NewMatchPathValueComboDetector(
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent(
             'Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected',
-            sortedLogLines, logAtom, self)
+            sortedLogLines, eventData, logAtom, self)
     return True
 
 
