@@ -14,7 +14,8 @@ class SimpleUnparsedAtomHandler(AtomHandlerInterface):
     """Receive an unparsed atom to create events for each."""
     if logAtom.isParsed():
       return False
+    eventData = dict()
     for listener in self.eventHandlers:
       listener.receiveEvent('Input.UnparsedAtomHandler', \
-          'Unparsed atom received', [logAtom.rawData], logAtom, self)
+          'Unparsed atom received', [logAtom.rawData], eventData, logAtom, self)
     return True

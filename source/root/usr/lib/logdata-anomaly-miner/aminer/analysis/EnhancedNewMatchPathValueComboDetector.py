@@ -89,6 +89,8 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     if not isinstance(currentTimestamp, datetime) and not isinstance(currentTimestamp, str):
       currentTimestamp = datetime.fromtimestamp(currentTimestamp).strftime("%Y-%m-%d %H:%M:%S")
     extraData = self.knownValuesDict.get(matchValueTuple, None)
+    if isinstance(currentTimestamp, datetime):
+      currentTimestamp = currentTimestamp.strftime("%Y-%m-%d %H:%M:%S")
     if extraData != None:
       extraData[1] = currentTimestamp
       extraData[2] += 1
