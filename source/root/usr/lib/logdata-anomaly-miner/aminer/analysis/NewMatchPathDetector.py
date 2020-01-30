@@ -64,11 +64,11 @@ class NewMatchPathDetector(AtomHandlerInterface, \
       else:
         sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')]
       eventData["nextPersistTime"] = self.nextPersistTime
-      eventData["knownPathSet"] = str(self.knownPathSet)
+      eventData["knownPathList"] = list(self.knownPathSet)
+      eventData["unknownPathList"] = list(unknownPathList)
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__, 'New path(es) detected',
           sortedLogLines, eventData, logAtom, self)
-        #    sortedLogLines, logAtom, self)
     return True
 
 
