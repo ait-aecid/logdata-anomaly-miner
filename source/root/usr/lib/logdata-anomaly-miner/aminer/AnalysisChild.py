@@ -142,7 +142,7 @@ class AnalysisContext(object):
     @return None if not found."""
     for componentName, componentIter in self.registeredComponentsByName.items():
       if componentIter == component:
-        return componentName
+        return componentIter
     return None
 
   def buildAnalysisPipeline(self):
