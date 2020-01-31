@@ -15,7 +15,9 @@ class ByteStreamLineAtomizer(StreamAtomizer):
   Data will be consumed only when there was no downstream handler
   registered (the data will be discarded in that case) or when
   at least one downstream consumed the data."""
-
+  
+  COUNTER = 0
+  
   def __init__(
       self, parsingModel, atomHandlerList, eventHandlerList,
       maxLineLength, defaultTimestampPath):
@@ -119,6 +121,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
   def dispatchAtom(self, logAtom):
     """Dispatch the data using the appropriate handlers. Also clean
     or set lastUnconsumed fields depending on outcome of dispatching."""
+    type(self).COUNTER = type(self).COUNTER + 1
     wasConsumedFlag = False
     if not self.atomHandlerList:
       wasConsumedFlag = True
@@ -141,4 +144,4 @@ class ByteStreamLineAtomizer(StreamAtomizer):
     for handler in self.eventHandlerList:
       handler.receiveEvent(
           'Input.%s' % self.__class__.__name__, message, [lineData],
-          None, self)
+          None, None, self)

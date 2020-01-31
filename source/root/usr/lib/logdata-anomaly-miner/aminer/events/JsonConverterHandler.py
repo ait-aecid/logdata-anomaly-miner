@@ -21,17 +21,10 @@ class JsonConverterHandler(EventHandlerInterface):
   def receiveEvent(self, eventType, eventMessage, sortedLogLines, eventData, logAtom,
                    eventSource):
     """Receive information about a detected event."""
-
-    #print("eventType: %s, eventMessage: %s, sortedLogLines: %s, eventData: %s, logAtom: %s, eventSource: %s"%(eventType,
-    #  eventMessage, sortedLogLines, eventData, logAtom, eventSource))
-
-    ##### Training Mode: Ausgabe wird verhindert, wenn True
-
     self.eventData = EventData(eventType, eventMessage, sortedLogLines, eventData, logAtom, eventSource, self.analysisContext)
 
-    eventData['SourceBlock'] = 'log'
-
     detector = dict()
+    detector['ID'] = self.analysisContext.getIdByComponent(eventSource)
     if eventSource.__class__.__name__ == 'ExtractedData_class':
       detector['Type'] = 'DistributionDetector'
     else:
@@ -48,8 +41,11 @@ class JsonConverterHandler(EventHandlerInterface):
     eventData['Detectors'] = [detector]
     eventData['Description'] = eventMessage
     eventData['Timestamp'] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
-    eventData["rawData"] = bytes.decode(logAtom.rawData)
-    eventData["annotatedMatchElement"] = logAtom.parserMatch.matchElement.annotateMatch('')
+    eventData['rawData'] = bytes.decode(logAtom.rawData)
+    eventData['annotatedMatchElement'] = logAtom.parserMatch.matchElement.annotateMatch('')
+    eventData['eventSource'] = eventSource.__class__.__name__
+    eventData['logLinesCount'] = len(sortedLogLines)
+    eventData['trainingMode'] = self.trainingMode
 
     if hasattr(eventSource, 'targetPathList'):
       path = eventSource.targetPathList[0]
@@ -62,9 +58,7 @@ class JsonConverterHandler(EventHandlerInterface):
     jsonData = json.dumps(eventData, indent=2)
     print(jsonData)
 
-    sortedLogLines[0] = str(jsonData)
-
     for listener in self.jsonEventHandlers:
-      listener.receiveEvent(eventType, eventMessage, sortedLogLines, {}, logAtom, eventSource)
+      listener.receiveEvent(eventType, eventMessage, [str(jsonData)], {}, logAtom, eventSource)
 
     return

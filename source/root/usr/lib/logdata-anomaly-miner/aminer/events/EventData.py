@@ -12,13 +12,13 @@ class EventData(object):
       self.eventData = eventData
       self.eventSource = eventSource
       self.analysisContext = analysisContext
-      self.logAtom = logAtom
       if analysisContext is not None:
         self.description = '"%s"' % analysisContext.getNameByComponent(eventSource)
       else:
         self.description = ''
       if logAtom is None:
         return
+      self.logAtom = logAtom
     
     def receiveEventString(self):
       message = ''

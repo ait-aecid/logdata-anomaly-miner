@@ -271,10 +271,10 @@ class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
     return None
 
 
-  def sendEventToHandlers(self, anomalyEventHandler, logAtom, messagePart, missingValueList):
+  def sendEventToHandlers(self, anomalyEventHandler, eventData, logAtom, messagePart, missingValueList):
     targetPaths = ''
     for targetPath in self.targetPathList:
       targetPaths += targetPath + ', '
     anomalyEventHandler.receiveEvent('Analysis.%s' % self.__class__.__name__, 
-        'Interval too large between values', messagePart, logAtom, self)
+        'Interval too large between values', messagePart, eventData, logAtom, self)
 
