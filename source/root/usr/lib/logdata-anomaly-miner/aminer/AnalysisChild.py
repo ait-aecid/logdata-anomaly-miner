@@ -140,9 +140,9 @@ class AnalysisContext(object):
   def getIdByComponent(self, component):
     """Get the name of a component.
     @return None if not found."""
-    for componentName, componentIter in self.registeredComponentsByName.items():
-      if componentIter == component:
-        return componentIter
+    for componentId, componentIter in self.registeredComponents.items():
+      if componentIter[0] == component:
+        return componentId
     return None
 
   def buildAnalysisPipeline(self):
