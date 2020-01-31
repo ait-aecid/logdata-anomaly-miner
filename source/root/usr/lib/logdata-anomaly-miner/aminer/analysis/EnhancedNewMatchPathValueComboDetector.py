@@ -82,7 +82,12 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     if self.tupleTransformationFunction != None:
       matchValueList = self.tupleTransformationFunction(matchValueList)
     matchValueTuple = tuple(matchValueList)
-    sortedLogLines = matchValueTuple
+    matchValList = []
+    for matchValue in matchValueList:
+      if isinstance(matchValue, bytes):
+        matchValue = matchValue.decode()
+      matchValList.append(matchValue)
+    eventData['matchValueList'] = matchValList
     currentTimestamp = logAtom.getTimestamp()
     if currentTimestamp is None:
       currentTimestamp = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d %H:%M:%S")
@@ -94,11 +99,24 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     if extraData != None:
       extraData[1] = currentTimestamp
       extraData[2] += 1
+      eventData['extraData'] = extraData
     else:
       if isinstance(currentTimestamp, datetime):
         self.knownValuesDict[matchValueTuple] = [currentTimestamp.strftime("%Y-%m-%d %H:%M:%S"), currentTimestamp.strftime("%Y-%m-%d %H:%M:%S"), 1]
       else:
         self.knownValuesDict[matchValueTuple] = [currentTimestamp, currentTimestamp, 1]
+    knownVals = []
+    for knownVal in self.knownValuesDict:
+      l = {}
+      l['matchValue'] = str(knownVal)
+      values = self.knownValuesDict[knownVal]
+      l['timeFirstOccurrence'] = values[0]
+      l['timeLastOccurence'] = values[1]
+      l['numberOfOccurences'] = values[2]
+      knownVals.append(l)
+    eventData['knownValuesList'] = knownVals
+    eventData['autoIncludeFlag'] = self.autoIncludeFlag
+    eventData['persistenceId'] = self.persistenceId
     if (self.autoIncludeFlag and self.knownValuesDict.get(matchValueTuple, None)[2] is 1) or not self.autoIncludeFlag:
       for listener in self.anomalyEventHandlers:
         originalLogLinePrefix = self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
@@ -116,7 +134,6 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
       if self.nextPersistTime is None:
         self.nextPersistTime = time.time() + 600
     return True
-
 
   def doPersist(self):
     """Immediately write persistence data to storage."""

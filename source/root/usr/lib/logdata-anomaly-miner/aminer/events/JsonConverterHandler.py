@@ -56,7 +56,7 @@ class JsonConverterHandler(EventHandlerInterface):
       eventData['Path'] = short_path
 
     jsonData = json.dumps(eventData, indent=2)
-    print(jsonData)
+    #print(jsonData)
 
     for listener in self.jsonEventHandlers:
       listener.receiveEvent(eventType, eventMessage, [str(jsonData)], {}, logAtom, eventSource)

@@ -39,6 +39,7 @@ class NewMatchPathValueComboDetector(
     self.autoIncludeFlag = autoIncludeFlag
     self.outputLogLine = outputLogLine
     self.aminerConfig = aminerConfig
+    self.persistenceId = persistenceId
 
     self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
         aminerConfig, self.__class__.__name__, persistenceId)
