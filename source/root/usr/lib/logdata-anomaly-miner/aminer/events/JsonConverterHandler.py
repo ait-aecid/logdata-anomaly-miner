@@ -41,11 +41,12 @@ class JsonConverterHandler(EventHandlerInterface):
     eventData['Detectors'] = [detector]
     eventData['Description'] = eventMessage
     eventData['Timestamp'] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
-    eventData['rawData'] = bytes.decode(logAtom.rawData)
-    eventData['annotatedMatchElement'] = logAtom.parserMatch.matchElement.annotateMatch('')
-    eventData['eventSource'] = eventSource.__class__.__name__
-    eventData['logLinesCount'] = len(sortedLogLines)
-    eventData['trainingMode'] = self.trainingMode
+    eventData['RawData'] = bytes.decode(logAtom.rawData)
+    if logAtom.parserMatch is not None:
+      eventData['AnnotatedMatchElement'] = logAtom.parserMatch.matchElement.annotateMatch('')
+    eventData['EventSource'] = eventSource.__class__.__name__
+    eventData['LogLinesCount'] = len(sortedLogLines)
+    eventData['TrainingMode'] = self.trainingMode
 
     if hasattr(eventSource, 'targetPathList'):
       path = eventSource.targetPathList[0]
@@ -56,9 +57,11 @@ class JsonConverterHandler(EventHandlerInterface):
       eventData['Path'] = short_path
 
     jsonData = json.dumps(eventData, indent=2)
+    res = [''] * len(sortedLogLines)
+    res[0] = str(jsonData)
     #print(jsonData)
 
     for listener in self.jsonEventHandlers:
-      listener.receiveEvent(eventType, eventMessage, [str(jsonData)], {}, logAtom, eventSource)
+      listener.receiveEvent(eventType, eventMessage, res, {}, logAtom, eventSource)
 
     return

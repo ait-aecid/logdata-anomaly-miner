@@ -341,10 +341,36 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
       reportStr += 'from %s ' % datetime.fromtimestamp(self.lastReportTime).strftime("%Y-%m-%d %H:%M:%S")
     reportStr += 'till %s' % datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
     res = []
+    h = []
     for dataItem in self.histogramData:
+      d = {}
+      bins = {}
+      i = 0
+      while i < len(dataItem.binNames):
+        bins[dataItem.binNames[i]] = dataItem.binData[i]
+        i = i + 1
+      d['TotalElements'] = dataItem.totalElements
+      d['BinnedElements'] = dataItem.binnedElements
+      d['HasOutlierBinsFlag'] = dataItem.hasOutlierBinsFlag
+      d['Bins'] = bins
+      binDefinition = {}
+      binDefinition['Type'] = str(dataItem.binDefinition.__class__.__name__)
+      binDefinition['LowerLimit'] = dataItem.binDefinition.lowerLimit
+      binDefinition['BinSize'] = dataItem.binDefinition.binSize
+      binDefinition['BinCount'] = dataItem.binDefinition.binCount
+      binDefinition['OutlierBinsFlag'] = dataItem.binDefinition.outlierBinsFlag
+      binDefinition['BinNames'] = dataItem.binDefinition.binNames
+      binDefinition['ExpectedBinRatio'] = dataItem.binDefinition.expectedBinRatio
+      if isinstance(dataItem.binDefinition, ModuloTimeBinDefinition):
+        binDefinition['ModuloValue'] = dataItem.binDefinition.moduloValue
+        binDefinition['TimeUnit'] = dataItem.binDefinition.timeUnit
+      d['BinDefinition'] = binDefinition
+      d['PropertyPath'] = dataItem.propertyPath
       for line in dataItem.toString('  ').split('\n'):
         reportStr += os.linesep+line
       res += [''] * dataItem.totalElements
+      h.append(d)
+    eventData['HistogramData'] = h
     if len(res) > 0:
       res[0]  = reportStr
       for listener in self.reportEventHandlers:
@@ -502,10 +528,36 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
       reportStr += 'from %s ' % datetime.fromtimestamp(self.lastReportTime).strftime("%Y-%m-%d %H:%M:%S")
     reportStr += 'till %s' % datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
     allPathSet = set(self.histogramData.keys())
+    eventData['AllPathList'] = list(allPathSet)
     res = []
+    h = []
     while allPathSet:
+      d = {}
       path = allPathSet.pop()
       histogramMapping = self.histogramData.get(path)
+      dataItem = histogramMapping[1]
+      bins = {}
+      i = 0
+      while i < len(dataItem.binNames):
+        bins[dataItem.binNames[i]] = dataItem.binData[i]
+        i = i + 1
+      d['TotalElements'] = dataItem.totalElements
+      d['BinnedElements'] = dataItem.binnedElements
+      d['HasOutlierBinsFlag'] = dataItem.hasOutlierBinsFlag
+      d['Bins'] = bins
+      binDefinition = {}
+      binDefinition['Type'] = str(dataItem.binDefinition.__class__.__name__)
+      binDefinition['LowerLimit'] = dataItem.binDefinition.lowerLimit
+      binDefinition['BinSize'] = dataItem.binDefinition.binSize
+      binDefinition['BinCount'] = dataItem.binDefinition.binCount
+      binDefinition['OutlierBinsFlag'] = dataItem.binDefinition.outlierBinsFlag
+      binDefinition['BinNames'] = dataItem.binDefinition.binNames
+      binDefinition['ExpectedBinRatio'] = dataItem.binDefinition.expectedBinRatio
+      if isinstance(dataItem.binDefinition, ModuloTimeBinDefinition):
+        binDefinition['ModuloValue'] = dataItem.binDefinition.moduloValue
+        binDefinition['TimeUnit'] = dataItem.binDefinition.timeUnit
+      d['BinDefinition'] = binDefinition
+      d['PropertyPath'] = dataItem.propertyPath
       reportStr += os.linesep+'Path values "%s":' % '", "'.join(histogramMapping[0])
       if isinstance(histogramMapping[2].matchElement.matchString, bytes):
         histogramMapping[2].matchElement.matchString = histogramMapping[2].matchElement.matchString.decode("utf-8")
@@ -517,6 +569,10 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
       if len(res) > 0:
         res[0] = reportStr
       allPathSet.discard(path)
+      h.append(d)
+    eventData['HistogramData'] = h
+    eventData['MissingPathes'] = list(histogramMapping[0])
+
     if self.resetAfterReportFlag:
         histogramMapping[1].reset()
     for listener in self.reportEventHandlers:

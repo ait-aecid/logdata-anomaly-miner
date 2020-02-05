@@ -87,7 +87,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
       if isinstance(matchValue, bytes):
         matchValue = matchValue.decode()
       matchValList.append(matchValue)
-    eventData['matchValueList'] = matchValList
+    eventData['MatchValueList'] = matchValList
     currentTimestamp = logAtom.getTimestamp()
     if currentTimestamp is None:
       currentTimestamp = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d %H:%M:%S")
@@ -99,7 +99,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     if extraData != None:
       extraData[1] = currentTimestamp
       extraData[2] += 1
-      eventData['extraData'] = extraData
+      eventData['ExtraData'] = extraData
     else:
       if isinstance(currentTimestamp, datetime):
         self.knownValuesDict[matchValueTuple] = [currentTimestamp.strftime("%Y-%m-%d %H:%M:%S"), currentTimestamp.strftime("%Y-%m-%d %H:%M:%S"), 1]
@@ -108,15 +108,15 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     knownVals = []
     for knownVal in self.knownValuesDict:
       l = {}
-      l['matchValue'] = str(knownVal)
+      l['MatchValue'] = str(knownVal)
       values = self.knownValuesDict[knownVal]
-      l['timeFirstOccurrence'] = values[0]
-      l['timeLastOccurence'] = values[1]
-      l['numberOfOccurences'] = values[2]
+      l['TimeFirstOccurrence'] = values[0]
+      l['TimeLastOccurence'] = values[1]
+      l['NumberOfOccurences'] = values[2]
       knownVals.append(l)
-    eventData['knownValuesList'] = knownVals
-    eventData['autoIncludeFlag'] = self.autoIncludeFlag
-    eventData['persistenceId'] = self.persistenceId
+    eventData['KnownValuesList'] = knownVals
+    eventData['AutoIncludeFlag'] = self.autoIncludeFlag
+    eventData['PersistenceId'] = self.persistenceId
     if (self.autoIncludeFlag and self.knownValuesDict.get(matchValueTuple, None)[2] is 1) or not self.autoIncludeFlag:
       for listener in self.anomalyEventHandlers:
         originalLogLinePrefix = self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
