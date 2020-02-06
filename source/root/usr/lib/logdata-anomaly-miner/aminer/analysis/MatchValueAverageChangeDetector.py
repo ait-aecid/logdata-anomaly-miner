@@ -64,6 +64,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
       if matchValue is None:
         return
       timestampValue = matchValue.matchObject[1]
+      eventData['MatchValue'] = matchValue.matchObject[0]
 
     analysisSummary = ''
     if self.syncBinsFlag:
@@ -78,15 +79,36 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             timestampValue, match.matchObject))
 
       if readyForAnalysisFlag:
+        stats = []
         for (path, statData) in self.statData:
           analysisData = self.analyze(statData)
           if analysisData is not None:
+            d = {}
+            d['Path'] = path
+            a = {}
+            new = {}
+            old = {}
+            new['N'] = analysisData[1]
+            new['Avg'] = analysisData[2]
+            new['Var'] = analysisData[3]
+            old['N'] = analysisData[4]
+            old['Avg'] = analysisData[5]
+            old['Var'] = analysisData[6]
+            a['New'] = new
+            a['Old'] = old
+            d['AnalysisData'] = a
             if analysisSummary == '':
-              analysisSummary += '"%s": %s' % (path, analysisData)
+              analysisSummary += '"%s": %s' % (path, analysisData[0])
             else:
               analysisSummary += os.linesep
-              analysisSummary += '  "%s": %s' % (path, analysisData)
-            
+              analysisSummary += '  "%s": %s' % (path, analysisData[0])
+            stats.append(d)
+        eventData['StatData'] = stats
+
+        eventData['MinBinElements'] = self.minBinElements
+        eventData['MinBinTime'] = self.minBinTime
+        eventData['SyncBinsFlag'] = self.syncBinsFlag
+        eventData['DebugMode'] = self.debugMode
 
         if self.nextPersistTime is None:
           self.nextPersistTime = time.time()+600
@@ -185,7 +207,9 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
 
       if (currentVariance > 2*oldBin[4]) or (abs(currentAverage-oldBin[3]) > oldBin[4]) \
          or self.debugMode:
-        return 'Change: new: n = %d, avg = %s, var = %s; old: n = %d, avg = %s, var = %s' % \
+        res = ['Change: new: n = %d, avg = %s, var = %s; old: n = %d, avg = %s, var = %s' % \
                (currentBin[0], currentAverage+statData[1], currentVariance, oldBin[0], \
-                oldBin[3]+statData[1], oldBin[4])
+                oldBin[3]+statData[1], oldBin[4]), currentBin[0], currentAverage+statData[1], currentVariance, oldBin[0], \
+                oldBin[3]+statData[1], oldBin[4]]
+        return res
     return None

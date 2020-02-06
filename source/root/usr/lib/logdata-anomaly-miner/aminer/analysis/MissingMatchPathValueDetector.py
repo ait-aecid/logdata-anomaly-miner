@@ -147,14 +147,23 @@ class MissingMatchPathValueDetector(
         self.expectedValuesDict[value] = detectorInfo
       if missingValueList:
         messagePart = []
+        m = []
         for value, overdueTime, interval in missingValueList:
+          e = {}
           if self.__class__.__name__ == 'MissingMatchPathValueDetector':
+            e['TargetPath'] = self.targetPath
             messagePart.append('  %s: %s overdue %ss (interval %s)' % (self.targetPath, repr(value), overdueTime, interval))
           else:
             targetPaths = ''
             for targetPath in self.targetPathList:
               targetPaths += targetPath + ', '
+            e['TargetPathList'] = self.targetPathList
             messagePart.append('  %s: %s overdue %ss (interval %s)' % (targetPaths[:-2], repr(value), overdueTime, interval))
+          e['Value'] = repr(value)
+          e['OverdueTime'] = overdueTime
+          e['Interval'] = interval
+          m.append(e)
+        eventData['MissingValues'] = m
         if self.outputLogLine:
           originalLogLinePrefix = self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
           if originalLogLinePrefix is None:
