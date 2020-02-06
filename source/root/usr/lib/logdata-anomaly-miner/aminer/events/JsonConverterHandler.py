@@ -40,7 +40,13 @@ class JsonConverterHandler(EventHandlerInterface):
 
     eventData['Detectors'] = [detector]
     eventData['Description'] = eventMessage
-    eventData['Timestamp'] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+    if logAtom.atomTime is not None:
+      if isinstance(logAtom.atomTime, datetime.datetime): 
+        eventData['Timestamp'] = str(logAtom.atomTime.strftime('%Y-%m-%dT%H:%M:%SZ'))
+      else:
+        eventData['Timestamp'] = logAtom.atomTime
+    else:
+      eventData['Timestamp'] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
     eventData['RawData'] = bytes.decode(logAtom.rawData)
     if logAtom.parserMatch is not None:
       eventData['AnnotatedMatchElement'] = logAtom.parserMatch.matchElement.annotateMatch('')

@@ -78,11 +78,26 @@ class NewMatchPathValueComboDetector(
         matchValueList.append(matchElement.matchObject)
 
     matchValueTuple = tuple(matchValueList)
+    m = []
+    for matchValue in matchValueList:
+      if isinstance(matchValue, bytes):
+        matchValue = matchValue.decode()
+      m.append(matchValue)
+    eventData['MatchValueList'] = m
     if matchValueTuple not in self.knownValuesSet:
       if self.autoIncludeFlag:
         self.knownValuesSet.add(matchValueTuple)
         if self.nextPersistTime is None:
           self.nextPersistTime = time.time()+600
+      m = []
+      for knownValue in self.knownValuesSet:
+        l = []
+        for val in knownValue:
+          if isinstance(val, bytes):
+            val = val.decode()
+          l.append(val)
+        m.append(l)
+      eventData['KnownValuesList'] = m
       if self.outputLogLine:
         originalLogLinePrefix = self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
         if originalLogLinePrefix is None:

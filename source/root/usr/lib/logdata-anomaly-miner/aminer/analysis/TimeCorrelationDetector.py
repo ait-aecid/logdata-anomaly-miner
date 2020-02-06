@@ -94,8 +94,32 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
     elif self.nextPersistTime is None:
       self.nextPersistTime = time.time()+600
 
-    result = int(self.totalRecords/(self.totalRecords/10))*['']
+    result = self.totalRecords*['']
     result[0] = self.analysisStatusToString()
+    m = []
+    for foundFeature in featuresFoundList:
+      l = {}
+      l['Rule'] = foundFeature.rule
+      l['Index'] = foundFeature.index
+      l['CreationTime'] = foundFeature.creationTime
+      l['LastTriggerTime'] = foundFeature.lastTriggerTime
+      l['TriggerCount'] = foundFeature.triggerCount
+      m.append(l)
+    eventData['FeaturesFoundList'] = m
+    m = []
+    for feature in self.featureList:
+      l = {}
+      l['Rule'] = repr(feature.rule)
+      l['Index'] = feature.index
+      l['CreationTime'] = feature.creationTime
+      l['LastTriggerTime'] = feature.lastTriggerTime
+      l['TriggerCount'] = feature.triggerCount
+      m.append(l)
+    eventData['FeatureList'] = m
+    eventData['AnalysisStatus'] = result[0]
+    eventData['TotalRecords'] = self.totalRecords
+    eventData['EventCountTable'] = self.eventCountTable
+    eventData['EventDeltaTable'] = self.eventDeltaTable
     if (self.totalRecords%self.recordCountBeforeEvent) == 0:
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
