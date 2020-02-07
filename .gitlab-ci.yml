@@ -18,6 +18,5 @@ ubuntu:
                 - git clone https://gitlab+deploy-token-aecidtestsuite:vu18Eo6k7xfA22vPvorx@git-service.ait.ac.at/ict-caiscluster/aecid-testsuite.git
                 - ln -s /builds/ict-caiscluster/logdata-anomaly-miner/source/root/usr/lib/logdata-anomaly-miner/aminer /builds/ict-caiscluster/logdata-anomaly-miner/aecid-testsuite/aminer
                 - cd aecid-testsuite
-                - mkdir /tmp
                 - touch /tmp/syslog
                 - python3 -m unittest discover -s unit -p '*Test.py'
