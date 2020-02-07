@@ -431,7 +431,7 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
       testValue = timeMatch.matchObject[1] + datetime.datetime.now(self.tzinfo).utcoffset().total_seconds()
 
     if testValue is None:
-      print("return False 3dddddd")
+      print("return False 3ddddddd")
       return False
     testValue %= self.secondsModulo
     print("testValue %d"%testValue)
