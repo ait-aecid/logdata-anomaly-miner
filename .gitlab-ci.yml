@@ -12,7 +12,7 @@ ubuntu:
         before_script:
                 - pip3 install pytz
                 - apt install sendmail -y
-                - apt install language-pack-de
+                - apt install language-pack-de -y
         
         script:
                 - ansible-playbook /opt/ansible/playbook.yml
