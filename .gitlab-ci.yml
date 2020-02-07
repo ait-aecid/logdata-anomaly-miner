@@ -10,11 +10,8 @@ ubuntu:
         image: git-service.ait.ac.at:8010/ict-caiscluster/logdata-anomaly-miner/aminer-ubuntu
         
         before_script:
-                - pip3 install pytz
-                - pip3 install scipy
-                - apt install sendmail -y
-                - apt install language-pack-de -y
-                - apt install language-pack-en -y
+                - service rsyslog start
+                - service exim start
         
         script:
                 - ansible-playbook /opt/ansible/playbook.yml
