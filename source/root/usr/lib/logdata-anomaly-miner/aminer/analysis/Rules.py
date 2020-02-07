@@ -413,6 +413,7 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
         valueList.append(valueElement.matchObject)
     limits = self.limitLookupDict.get(tuple(valueList)[0], self.defaultLimit)
     if limits is None:
+      print("return False 1")
       return False
 
     testValue = None
@@ -422,16 +423,20 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
       timeMatch = logAtom.parserMatch.getMatchDictionary().get(self.path, None)
       if ((timeMatch is None) or not isinstance(timeMatch.matchObject, tuple) or
           not isinstance(timeMatch.matchObject[0], datetime.datetime)):
+        print("return False 2")
         return False
       testValue = timeMatch.matchObject[1] + datetime.datetime.now(self.tzinfo).utcoffset().total_seconds()
 
     if testValue is None:
+      print("return False 3")
       return False
     testValue %= self.secondsModulo
+    print("testValue %d"%testValue)
     if (testValue >= limits[0]) and (testValue <= limits[1]):
       if self.matchAction != None:
         self.matchAction.matchAction(logAtom)
       return True
+    print("return False 4")
     return False
 
 
