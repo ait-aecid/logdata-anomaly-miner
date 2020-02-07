@@ -1,0 +1,15 @@
+debian:
+        image: git-service.ait.ac.at:8010/ict-caiscluster/logdata-anomaly-miner/aminer-debian
+
+        script:
+                - pwd
+                - ls -l
+#                - ansible-playbook /opt/ansible/playbook.yml
+
+ubuntu:
+        image: git-service.ait.ac.at:8010/ict-caiscluster/logdata-anomaly-miner/aminer-ubuntu
+
+        script:
+                - pwd
+                - ls -l
+#                - ansible-playbook /opt/ansible/playbook.yml
