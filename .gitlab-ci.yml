@@ -1,6 +1,10 @@
 debian:
         image: git-service.ait.ac.at:8010/ict-caiscluster/logdata-anomaly-miner/aminer-debian
 
+        before_script:
+                - service rsyslog start
+                - service exim start
+
         script:
                 - pwd
                 - ls -l
@@ -11,6 +15,7 @@ ubuntu:
         
         before_script:
                 - service rsyslog start
+                - service exim start
         
         script:
                 - ansible-playbook /opt/ansible/playbook.yml
