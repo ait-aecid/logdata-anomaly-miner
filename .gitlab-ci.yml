@@ -8,7 +8,9 @@ debian:
 
 ubuntu:
         image: git-service.ait.ac.at:8010/ict-caiscluster/logdata-anomaly-miner/aminer-ubuntu
-
+        
+        before_script:
+                - apt install git
         script:
                 - pwd
                 - ls -l
