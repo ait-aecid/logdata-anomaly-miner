@@ -9,6 +9,10 @@ debian:
 ubuntu:
         image: git-service.ait.ac.at:8010/ict-caiscluster/logdata-anomaly-miner/aminer-ubuntu
         
+        before_script:
+                - pip3 install pytz
+                - apt install sendmail
+        
         script:
                 - ansible-playbook /opt/ansible/playbook.yml
                 - git clone https://gitlab+deploy-token-aecidtestsuite:vu18Eo6k7xfA22vPvorx@git-service.ait.ac.at/ict-caiscluster/aecid-testsuite.git
