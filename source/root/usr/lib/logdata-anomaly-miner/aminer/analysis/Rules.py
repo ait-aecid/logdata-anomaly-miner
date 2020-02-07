@@ -415,6 +415,7 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
     if limits is None:
       print("limits: %s"%repr(limits))
       print("valueList: %s"%repr(valueList))
+      print("limitLookupDict"%repr(self.limitLookupDict))
       print("return False 1")
       return False
 
