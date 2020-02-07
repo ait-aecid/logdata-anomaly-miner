@@ -11,7 +11,7 @@ ubuntu:
         
         before_script:
                 - pip3 install pytz
-                - apt install sendmail
+                - apt install sendmail -y
         
         script:
                 - ansible-playbook /opt/ansible/playbook.yml
