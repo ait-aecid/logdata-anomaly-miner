@@ -41,6 +41,8 @@ class TimestampsUnsortedDetector(AtomHandlerInterface, EventSourceInterface):
           originalLogLinePrefix+repr(logAtom.rawData)]
       else:
         sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')]
+      eventData['Timestamp'] = timestamp
+      eventData['LastTimestamp'] = self.lastTimestamp
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
             'Timestamp %s below %s' % (datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S"),

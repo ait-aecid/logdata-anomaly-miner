@@ -91,6 +91,25 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
       if checkResult is None:
         continue
       self.lastLogAtom.atomTime = triggerTime
+      r = {}
+      r['RuleId'] = rule.ruleId
+      r['MinTimeDelta'] = rule.minTimeDelta
+      r['MaxTimeDelta'] = rule.maxTimeDelta
+      r['MaxArtefactsAForSingleB'] = rule.maxArtefactsAForSingleB
+      r['ArtefactMatchParameters'] = rule.artefactMatchParameters
+      r['HistoryAEvents'] = rule.historyAEvents
+      r['HistoryBEvents'] = rule.historyBEvents
+      r['LastTimestampSeen'] = rule.lastTimestampSeen
+      history = {}
+      history['MaxItems'] = rule.correlationHistory.maxItems
+      h = []
+      for item in rule.correlationHistory.history:
+        h.append(repr(item))
+      history['History'] = h
+      r['CorrelationHistory'] = history
+      eventData['Rule'] = r
+      eventData['CheckResult'] = checkResult
+      eventData['NewestTimestamp'] = newestTimestamp
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
             'Correlation rule "%s" violated' % rule.ruleId, [checkResult[0]], \
