@@ -3,7 +3,7 @@ debian:
 
         before_script:
                 - service rsyslog start
-                - service exim start
+                - service exim4 start
 
         script:
                 - pwd
@@ -15,7 +15,7 @@ ubuntu:
         
         before_script:
                 - service rsyslog start
-                - service exim start
+                - service exim4 start
         
         script:
                 - ansible-playbook /opt/ansible/playbook.yml
