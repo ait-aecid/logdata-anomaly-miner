@@ -14,6 +14,7 @@ ubuntu:
                 - pip3 install scipy
                 - apt install sendmail -y
                 - apt install language-pack-de -y
+                - apt install language-pack-en -y
         
         script:
                 - ansible-playbook /opt/ansible/playbook.yml
