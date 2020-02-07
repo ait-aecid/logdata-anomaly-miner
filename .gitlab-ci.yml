@@ -12,5 +12,5 @@ ubuntu:
         script:
                 - ansible-playbook /opt/ansible/playbook.yml
                 - git clone https://gitlab+deploy-token-aecidtestsuite:vu18Eo6k7xfA22vPvorx@git-service.ait.ac.at/ict-caiscluster/aecid-testsuite.git
-                - cd aecid-testsuite
-                - python3 -m unittest discover -s unit -p '*Test.py'
+                - cd source/root/usr/lib/logdata-anomaly-miner
+                - python3 -m unittest discover -s /builds/ict-caiscluster/logdata-anomaly-miner/aecid-testsuite/unit -p '*Test.py'
