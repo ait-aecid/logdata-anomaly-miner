@@ -25,6 +25,9 @@ ubuntu:
                 - cd aecid-testsuite
                 #- python3 -m unittest discover -s unit -p '*Test.py'
                 - ls -la /usr/bin/AMiner
+                - ls -la /usr/lib/logdata-anomaly-miner/AMiner
+                - ls -la /usr/lib/logdata-anomaly-miner
+                - ls -la /usr/lib/logdata-anomaly-miner/
                 - cd integration
                 - cp config* /tmp
                 - chmod +x aminerIntegrationTest.sh
