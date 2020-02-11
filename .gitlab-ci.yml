@@ -17,7 +17,6 @@ ubuntu:
         before_script:
                 - service rsyslog start
                 - service exim4 start
-                - apt install systemd -y
         
         script:
                 - ansible-playbook /opt/ansible/playbook.yml
