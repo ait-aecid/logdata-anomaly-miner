@@ -25,7 +25,5 @@ ubuntu:
                 - python3 -m unittest discover -s unit -p '*Test.py'
                 - cd integration
                 - cp config* /tmp
-                - cp declarations.sh /tmp
-                - sudo mkdir /tmp/lib
-                - ./aminerIntegrationTest.sh
+                - ./aminerIntegrationTest3.sh
                 - ./aminerIntegrationTest2.sh
