@@ -31,5 +31,5 @@ ubuntu:
                 - cp config* /tmp
                 - chmod +x aminerIntegrationTest.sh
                 - chmod +x aminerIntegrationTest2.sh
-                #- ./aminerIntegrationTest.sh
+                - ./aminerIntegrationTest.sh
                 - ./aminerIntegrationTest2.sh
