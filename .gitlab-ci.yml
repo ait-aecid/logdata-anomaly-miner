@@ -25,7 +25,7 @@ ubuntu:
                 - cd aecid-testsuite
                 #- python3 -m unittest discover -s unit -p '*Test.py'
                 - chown -R aminer:aminer /usr/lib/logdata-anomaly-miner
-                - chown aminer:aminer /usr/bin/AMiner
+                - chown -h aminer:aminer /usr/bin/AMiner
                 - ls -la /usr/bin/AMiner
                 - ls -la /usr/lib/logdata-anomaly-miner/AMiner
                 - ls -la /usr/lib/logdata-anomaly-miner
