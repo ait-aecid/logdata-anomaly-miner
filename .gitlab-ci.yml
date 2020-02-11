@@ -11,7 +11,6 @@ debian:
                 - git clone https://gitlab+deploy-token-aecidtestsuite:vu18Eo6k7xfA22vPvorx@git-service.ait.ac.at/ict-caiscluster/aecid-testsuite.git
                 - ln -s /builds/ict-caiscluster/logdata-anomaly-miner/source/root/usr/lib/logdata-anomaly-miner/aminer /builds/ict-caiscluster/logdata-anomaly-miner/aecid-testsuite/aminer
                 - cd aecid-testsuite
-                - python3 -m unittest discover -s unit -p '*Test.py'
                 - chown -R aminer:aminer /usr/lib/logdata-anomaly-miner
                 - chown -h aminer:aminer /usr/bin/AMiner
                 - chmod +x /usr/lib/logdata-anomaly-miner/AMiner
@@ -21,6 +20,7 @@ debian:
                 - chmod +x aminerIntegrationTest2.sh
                 - ./aminerIntegrationTest.sh
                 - ./aminerIntegrationTest2.sh
+                - python3 -m unittest discover -s unit -p '*Test.py'
                 
 ubuntu:
         image: git-service.ait.ac.at:8010/ict-caiscluster/logdata-anomaly-miner/aminer-ubuntu
@@ -34,7 +34,6 @@ ubuntu:
                 - git clone https://gitlab+deploy-token-aecidtestsuite:vu18Eo6k7xfA22vPvorx@git-service.ait.ac.at/ict-caiscluster/aecid-testsuite.git
                 - ln -s /builds/ict-caiscluster/logdata-anomaly-miner/source/root/usr/lib/logdata-anomaly-miner/aminer /builds/ict-caiscluster/logdata-anomaly-miner/aecid-testsuite/aminer
                 - cd aecid-testsuite
-                #- python3 -m unittest discover -s unit -p '*Test.py'
                 - chown -R aminer:aminer /usr/lib/logdata-anomaly-miner
                 - chown -h aminer:aminer /usr/bin/AMiner
                 - chmod +x /usr/lib/logdata-anomaly-miner/AMiner
@@ -44,3 +43,4 @@ ubuntu:
                 - chmod +x aminerIntegrationTest2.sh
                 - ./aminerIntegrationTest.sh
                 - ./aminerIntegrationTest2.sh
+                - python3 -m unittest discover -s unit -p '*Test.py'
