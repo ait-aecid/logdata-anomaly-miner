@@ -20,6 +20,7 @@ debian:
                 - chmod +x aminerIntegrationTest2.sh
                 - ./aminerIntegrationTest.sh
                 - ./aminerIntegrationTest2.sh
+                - echo p | mail > /tmp/out
                 - cd ..
                 - python3 -m unittest discover -s unit -p '*Test.py'
                 
@@ -44,5 +45,6 @@ ubuntu:
                 - chmod +x aminerIntegrationTest2.sh
                 - ./aminerIntegrationTest.sh
                 - ./aminerIntegrationTest2.sh
+                - echo p | mail > /tmp/out
                 - cd ..
                 - python3 -m unittest discover -s unit -p '*Test.py'
