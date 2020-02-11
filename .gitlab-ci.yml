@@ -28,6 +28,7 @@ ubuntu:
                 - chown -h aminer:aminer /usr/bin/AMiner
                 - ls -la /usr/bin/AMiner
                 - ls -la /usr/lib/logdata-anomaly-miner/AMiner
+                - chmod +x /usr/lib/logdata-anomaly-miner/AMiner
                 - ls -la /usr/lib/logdata-anomaly-miner
                 - ls -la /usr/lib/logdata-anomaly-miner/
                 - cd integration
