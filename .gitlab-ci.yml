@@ -26,4 +26,4 @@ ubuntu:
                 - cd integration
                 - cp config* /tmp
                 - ./aminerIntegrationTest3.sh
-                - ./aminerIntegrationTest2.sh
+                - ./aminerIntegrationTest2d.sh
