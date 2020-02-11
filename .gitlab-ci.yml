@@ -9,8 +9,7 @@ debian:
                 - pwd
                 - ls -l
                 - ansible-playbook /opt/ansible/playbook.yml
-                - ls -l
-
+                
 ubuntu:
         image: git-service.ait.ac.at:8010/ict-caiscluster/logdata-anomaly-miner/aminer-ubuntu
         
