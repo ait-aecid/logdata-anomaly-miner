@@ -23,3 +23,8 @@ ubuntu:
                 - ln -s /builds/ict-caiscluster/logdata-anomaly-miner/source/root/usr/lib/logdata-anomaly-miner/aminer /builds/ict-caiscluster/logdata-anomaly-miner/aecid-testsuite/aminer
                 - cd aecid-testsuite
                 - python3 -m unittest discover -s unit -p '*Test.py'
+                - cd integration
+                - cp config* /tmp
+                - cp declarations.sh /tmp
+                - ./aminerIntegrationTest.sh
+                - ./aminerIntegrationTest2.sh
