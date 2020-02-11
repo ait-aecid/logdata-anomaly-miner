@@ -26,5 +26,6 @@ ubuntu:
                 - cd integration
                 - cp config* /tmp
                 - cp declarations.sh /tmp
+                - sudo mkdir /tmp/lib
                 - ./aminerIntegrationTest.sh
                 - ./aminerIntegrationTest2.sh
