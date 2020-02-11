@@ -21,7 +21,7 @@ debian:
                 - ./aminerIntegrationTest.sh
                 - ./aminerIntegrationTest2.sh
                 - rm /var/mail/mail
-                - cd ..
+                - cd .. #
                 - python3 -m unittest discover -s unit -p '*Test.py'
                 
 ubuntu:
