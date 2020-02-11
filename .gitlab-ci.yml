@@ -20,7 +20,6 @@ debian:
                 - chmod +x aminerIntegrationTest2.sh
                 - ./aminerIntegrationTest.sh
                 - ./aminerIntegrationTest2.sh
-                - echo p | mail
                 - cd ..
                 - python3 -m unittest discover -s unit -p '*Test.py'
                 
@@ -39,12 +38,11 @@ ubuntu:
                 - chown -R aminer:aminer /usr/lib/logdata-anomaly-miner
                 - chown -h aminer:aminer /usr/bin/AMiner
                 - chmod +x /usr/lib/logdata-anomaly-miner/AMiner
-                - python3 -m unittest discover -s unit -p '*Test.py'
+                #- python3 -m unittest discover -s unit -p '*Test.py'
                 - cd integration
                 - cp config* /tmp
                 - chmod +x aminerIntegrationTest.sh
                 - chmod +x aminerIntegrationTest2.sh
                 - ./aminerIntegrationTest.sh
                 - ./aminerIntegrationTest2.sh
-                - echo p | mail
                 - cd ..
