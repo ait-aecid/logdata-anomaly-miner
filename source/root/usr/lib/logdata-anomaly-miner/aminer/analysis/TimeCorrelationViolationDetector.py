@@ -26,6 +26,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
     self.nextPersistTime = time.time()+600.0
     self.historyAEvents = []
     self.historyBEvents = []
+    self.persistenceId = persistenceId
 
     eventCorrelationSet = set()
     for rule in self.eventClassificationRuleset:

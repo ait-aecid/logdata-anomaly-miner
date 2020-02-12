@@ -13,54 +13,67 @@ from aminer.input.LogAtom import LogAtom
 class JsonConverterHandler(EventHandlerInterface):
   """This class implements an event record listener, that will
   convert event data to JSON format."""
-  def __init__(self, jsonEventHandlers, analysisContext, trainingMode):
+  def __init__(self, jsonEventHandlers, analysisContext):
     self.jsonEventHandlers = jsonEventHandlers
     self.analysisContext = analysisContext
-    self.trainingMode = trainingMode
 
   def receiveEvent(self, eventType, eventMessage, sortedLogLines, eventData, logAtom,
                    eventSource):
     """Receive information about a detected event."""
     self.eventData = EventData(eventType, eventMessage, sortedLogLines, eventData, logAtom, eventSource, self.analysisContext)
 
-    detector = dict()
-    detector['ID'] = self.analysisContext.getIdByComponent(eventSource)
-    if eventSource.__class__.__name__ == 'ExtractedData_class':
-      detector['Type'] = 'DistributionDetector'
+    logData = dict()
+    if isinstance(logAtom.rawData, bytes):
+      logData['RawLogData'] = bytes.decode(logAtom.rawData)
     else:
-      detector['Type'] = str(eventSource.__class__.__name__)
-    detector['Description'] = self.analysisContext.getNameByComponent(eventSource)
-
-    if eventSource.__class__.__name__ == 'VariableTypeDetector' and len(eventData) >= 4 and isinstance(eventData[3], float):
-      detector['Confidence'] = float(eventData[3])
-      eventData['Confidence'] = float(eventData[3])
-    else:
-      detector['Confidence'] = 1.0
-      eventData['Confidence'] = 1.0
-
-    eventData['Detectors'] = [detector]
-    eventData['Description'] = eventMessage
+      logData['RawLogData'] = logAtom.rawData
     if logAtom.atomTime is not None:
-      if isinstance(logAtom.atomTime, datetime.datetime): 
-        eventData['Timestamp'] = str(logAtom.atomTime.strftime('%Y-%m-%dT%H:%M:%SZ'))
+      if isinstance(logAtom.atomTime, datetime.datetime):
+        logData['Timestamp'] = str(logAtom.atomTime.strftime('%Y-%m-%dT%H:%M:%SZ'))
       else:
-        eventData['Timestamp'] = logAtom.atomTime
+        logData['Timestamp'] = logAtom.atomTime
     else:
-      eventData['Timestamp'] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
-    eventData['RawData'] = bytes.decode(logAtom.rawData)
+      logData['Timestamp'] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+    logData['LogLinesCount'] = len(sortedLogLines)
     if logAtom.parserMatch is not None:
-      eventData['AnnotatedMatchElement'] = logAtom.parserMatch.matchElement.annotateMatch('')
-    eventData['EventSource'] = eventSource.__class__.__name__
-    eventData['LogLinesCount'] = len(sortedLogLines)
-    eventData['TrainingMode'] = self.trainingMode
+      logData['AnnotatedMatchElement'] = logAtom.parserMatch.matchElement.annotateMatch('')
 
-    if hasattr(eventSource, 'targetPathList'):
-      path = eventSource.targetPathList[0]
-      path_parts = path.split('/')
-      short_path = ''
-      for i in range(1, len(path_parts) - 1):
-        short_path += path_parts[i] + '/'
-      eventData['Path'] = short_path
+    analysisComponent = dict()
+    analysisComponent['AnalysisComponentIdentifier'] = self.analysisContext.getIdByComponent(eventSource)
+    if eventSource.__class__.__name__ == 'ExtractedData_class':
+      analysisComponent['AnalysisComponentType'] = 'DistributionDetector'
+    else:
+      analysisComponent['AnalysisComponentType'] = str(eventSource.__class__.__name__)
+    analysisComponent['AnalysisComponentName'] = self.analysisContext.getNameByComponent(eventSource)
+
+    oldAnalysisComponent = eventData.get('AnalysisComponent', None)
+    if oldAnalysisComponent is not None:
+      for key in oldAnalysisComponent:
+        analysisComponent[key] = oldAnalysisComponent.get(key, None)
+            
+    analysisComponent['Message'] = eventMessage
+    analysisComponent['PersistenceFileName'] = eventSource.persistenceId
+    if hasattr(eventSource, 'autoIncludeFlag'):
+      analysisComponent['TrainingMode'] = eventSource.autoIncludeFlag
+
+
+    eventData['LogData'] = logData
+    eventData['AnalysisComponent'] = analysisComponent
+
+    # if eventSource.__class__.__name__ == 'VariableTypeDetector' and len(eventData) >= 4 and isinstance(eventData[3], float):
+    #   detector['Confidence'] = float(eventData[3])
+    #   eventData['Confidence'] = float(eventData[3])
+    # else:
+    #   detector['Confidence'] = 1.0
+    #   eventData['Confidence'] = 1.0
+
+    # if hasattr(eventSource, 'targetPathList'):
+    #   path = eventSource.targetPathList[0]
+    #   path_parts = path.split('/')
+    #   short_path = ''
+    #   for i in range(1, len(path_parts) - 1):
+    #     short_path += path_parts[i] + '/'
+    #   eventData['Path'] = short_path
 
     jsonData = json.dumps(eventData, indent=2)
     res = [''] * len(sortedLogLines)

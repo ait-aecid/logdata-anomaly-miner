@@ -24,7 +24,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
     or creation of persistence storage location.
     @param parallelCheckCount number of rule detection checks
     to run in parallel.
-    @param correlationTestCount number of tests to perform on a rule under
+    @param correlationTestCount number of unit to perform on a rule under
     test.
     @param maxFailCount maximal number of test failures so that
     rule is still eligible for reporting."""
@@ -38,6 +38,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
     self.nextPersistTime = None
     self.totalRecords = 0
     self.recordCountBeforeEvent = recordCountBeforeEvent
+    self.persistenceId = persistenceId
 
     PersistencyUtil.addPersistableComponent(self)
     self.persistenceFileName = AMinerConfig.buildPersistenceFileName(

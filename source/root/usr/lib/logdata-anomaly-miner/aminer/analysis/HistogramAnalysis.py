@@ -370,7 +370,11 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
         reportStr += os.linesep+line
       res += [''] * dataItem.totalElements
       h.append(d)
-    eventData['HistogramData'] = h
+    analysisComponent = dict()
+    analysisComponent['HistogramData'] = h
+    analysisComponent['ReportInterval'] = self.reportInterval
+    analysisComponent['ResetAfterReportFlag'] = self.resetAfterReportFlag
+    eventData['AnalysisComponent'] = analysisComponent
     if len(res) > 0:
       res[0]  = reportStr
       for listener in self.reportEventHandlers:
@@ -570,8 +574,12 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
         res[0] = reportStr
       allPathSet.discard(path)
       h.append(d)
-    eventData['HistogramData'] = h
-    eventData['MissingPathes'] = list(histogramMapping[0])
+    analysisComponent = dict()
+    analysisComponent['HistogramData'] = h
+    analysisComponent['MissingPathes'] = list(histogramMapping[0])
+    analysisComponent['ReportInterval'] = self.reportInterval
+    analysisComponent['ResetAfterReportFlag'] = self.resetAfterReportFlag
+    eventData['AnalysisComponent'] = analysisComponent
 
     if self.resetAfterReportFlag:
         histogramMapping[1].reset()

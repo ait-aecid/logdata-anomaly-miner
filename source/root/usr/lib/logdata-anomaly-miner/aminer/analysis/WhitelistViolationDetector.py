@@ -21,6 +21,7 @@ class WhitelistViolationDetector(AtomHandlerInterface):
     self.anomalyEventHandlers = anomalyEventHandlers
     self.outputLogLine = outputLogLine
     self.aminerConfig = aminerConfig
+    self.persistenceId = None
 
   def receiveAtom(self, logAtom):
     """Receive on parsed atom and the information about the parser

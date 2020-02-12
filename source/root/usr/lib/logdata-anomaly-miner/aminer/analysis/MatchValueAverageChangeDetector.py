@@ -39,6 +39,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
     self.syncBinsFlag = syncBinsFlag
     self.debugMode = debugMode
     self.nextPersistTime = None
+    self.persistenceId = persistenceId
 
     PersistencyUtil.addPersistableComponent(self)
     self.persistenceFileName = AMinerConfig.buildPersistenceFileName(aminerConfig, \

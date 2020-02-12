@@ -82,41 +82,38 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     if self.tupleTransformationFunction != None:
       matchValueList = self.tupleTransformationFunction(matchValueList)
     matchValueTuple = tuple(matchValueList)
-    matchValList = []
-    for matchValue in matchValueList:
-      if isinstance(matchValue, bytes):
-        matchValue = matchValue.decode()
-      matchValList.append(matchValue)
-    eventData['MatchValueList'] = matchValList
+
     currentTimestamp = logAtom.getTimestamp()
     if currentTimestamp is None:
       currentTimestamp = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d %H:%M:%S")
     if not isinstance(currentTimestamp, datetime) and not isinstance(currentTimestamp, str):
       currentTimestamp = datetime.fromtimestamp(currentTimestamp).strftime("%Y-%m-%d %H:%M:%S")
-    extraData = self.knownValuesDict.get(matchValueTuple, None)
     if isinstance(currentTimestamp, datetime):
       currentTimestamp = currentTimestamp.strftime("%Y-%m-%d %H:%M:%S")
-    if extraData != None:
+    if self.knownValuesDict.get(matchValueTuple, None) is None:
+      self.knownValuesDict[matchValueTuple] = [currentTimestamp, currentTimestamp, 1]
+    else:
+      extraData = self.knownValuesDict.get(matchValueTuple, None)
       extraData[1] = currentTimestamp
       extraData[2] += 1
-      eventData['ExtraData'] = extraData
-    else:
-      if isinstance(currentTimestamp, datetime):
-        self.knownValuesDict[matchValueTuple] = [currentTimestamp.strftime("%Y-%m-%d %H:%M:%S"), currentTimestamp.strftime("%Y-%m-%d %H:%M:%S"), 1]
-      else:
-        self.knownValuesDict[matchValueTuple] = [currentTimestamp, currentTimestamp, 1]
-    knownVals = []
-    for knownVal in self.knownValuesDict:
-      l = {}
-      l['MatchValue'] = str(knownVal)
-      values = self.knownValuesDict[knownVal]
-      l['TimeFirstOccurrence'] = values[0]
-      l['TimeLastOccurence'] = values[1]
-      l['NumberOfOccurences'] = values[2]
-      knownVals.append(l)
-    eventData['KnownValuesList'] = knownVals
-    eventData['AutoIncludeFlag'] = self.autoIncludeFlag
-    eventData['PersistenceId'] = self.persistenceId
+
+    affectedLogAtomValues = []
+    l = {}
+    matchValueList = []
+    for matchValue in list(matchValueTuple):
+      if isinstance(matchValue, bytes):
+        matchValue = matchValue.decode()
+      matchValueList.append(matchValue)
+    l['MatchValueList'] = matchValueList
+    values = self.knownValuesDict.get(matchValueTuple, None)
+    l['TimeFirstOccurrence'] = values[0]
+    l['TimeLastOccurence'] = values[1]
+    l['NumberOfOccurences'] = values[2]
+    affectedLogAtomValues.append(l)
+
+    analysisComponent = dict()
+    analysisComponent['AffectedLogAtomValues'] = affectedLogAtomValues
+    eventData['AnalysisComponent'] = analysisComponent
     if (self.autoIncludeFlag and self.knownValuesDict.get(matchValueTuple, None)[2] is 1) or not self.autoIncludeFlag:
       for listener in self.anomalyEventHandlers:
         originalLogLinePrefix = self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)

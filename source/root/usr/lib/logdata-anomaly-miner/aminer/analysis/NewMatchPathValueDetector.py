@@ -24,6 +24,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
     self.nextPersistTime = None
     self.outputLogLine = outputLogLine
     self.aminerConfig = aminerConfig
+    self.persistenceId = persistenceId
 
     PersistencyUtil.addPersistableComponent(self)
     self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
