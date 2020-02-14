@@ -21,6 +21,7 @@ class JsonConverterHandler(EventHandlerInterface):
                    eventSource):
     """Receive information about a detected event."""
     self.eventData = EventData(eventType, eventMessage, sortedLogLines, eventData, logAtom, eventSource, self.analysisContext)
+    jsonError = ''
 
     logData = dict()
     if isinstance(logAtom.rawData, bytes):
@@ -45,20 +46,23 @@ class JsonConverterHandler(EventHandlerInterface):
     else:
       analysisComponent['AnalysisComponentType'] = str(eventSource.__class__.__name__)
     analysisComponent['AnalysisComponentName'] = self.analysisContext.getNameByComponent(eventSource)
-
-    oldAnalysisComponent = eventData.get('AnalysisComponent', None)
-    if oldAnalysisComponent is not None:
-      for key in oldAnalysisComponent:
-        analysisComponent[key] = oldAnalysisComponent.get(key, None)
-            
     analysisComponent['Message'] = eventMessage
     analysisComponent['PersistenceFileName'] = eventSource.persistenceId
     if hasattr(eventSource, 'autoIncludeFlag'):
       analysisComponent['TrainingMode'] = eventSource.autoIncludeFlag
 
+    oldAnalysisComponent = eventData.get('AnalysisComponent', None)
+    if oldAnalysisComponent is not None:
+      for key in oldAnalysisComponent:
+        if key in analysisComponent.keys():
+          jsonError += "AnalysisComponent attribute '%s' is already in use and can not be overwritten!\n" % key
+          continue
+        analysisComponent[key] = oldAnalysisComponent.get(key, None)
 
     eventData['LogData'] = logData
     eventData['AnalysisComponent'] = analysisComponent
+    if jsonError != '':
+      eventData['JsonError'] = jsonError
 
     # if eventSource.__class__.__name__ == 'VariableTypeDetector' and len(eventData) >= 4 and isinstance(eventData[3], float):
     #   detector['Confidence'] = float(eventData[3])
