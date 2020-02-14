@@ -27,7 +27,6 @@ debian:
                 - touch /tmp/report
                 - echo 'Statement Coverage:' > /tmp/report
                 - coverage report >> /tmp/report
-                - echo > /tmp/report
                 - coverage run --source=./aminer --branch -m unittest discover -s unit -p '*Test.py'
                 - echo 'Branch Coverage:' >> /tmp/report
                 - coverage report >> /tmp/report
