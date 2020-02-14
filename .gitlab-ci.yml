@@ -10,7 +10,7 @@ debian:
         script:
                 - ansible-playbook /opt/ansible/playbook.yml
                 - git clone https://gitlab+deploy-token-aecidtestsuite:vu18Eo6k7xfA22vPvorx@git-service.ait.ac.at/ict-caiscluster/aecid-testsuite.git
-                - ln -s /builds/ict-caiscluster/logdata-anomaly-miner/source/root/usr/lib/logdata-anomaly-miner/aminer /builds/ict-caiscluster/logdata-anomaly-miner/aecid-testsuite/aminer
+                - cp /builds/ict-caiscluster/logdata-anomaly-miner/source/root/usr/lib/logdata-anomaly-miner/aminer /builds/ict-caiscluster/logdata-anomaly-miner/aecid-testsuite/aminer
                 - cd aecid-testsuite
                 - chown -R aminer:aminer /usr/lib/logdata-anomaly-miner
                 - chown -h aminer:aminer /usr/bin/AMiner
@@ -31,7 +31,6 @@ debian:
                 - coverage run --source=./aminer --branch -m unittest discover -s unit -p '*Test.py'
                 - echo 'Branch Coverage:' >> /tmp/report
                 - coverage report >> /tmp/report
-                - sed -i 's+/builds/ict-caiscluster/logdata-anomaly-miner/source/root/usr/lib/logdata-anomaly-miner/aminer/+aminer/+g' /tmp/report
                 - cat /tmp/report
                 
 ubuntu:
@@ -45,7 +44,7 @@ ubuntu:
         script:
                 - ansible-playbook /opt/ansible/playbook.yml
                 - git clone https://gitlab+deploy-token-aecidtestsuite:vu18Eo6k7xfA22vPvorx@git-service.ait.ac.at/ict-caiscluster/aecid-testsuite.git
-                - ln -s /builds/ict-caiscluster/logdata-anomaly-miner/source/root/usr/lib/logdata-anomaly-miner/aminer /builds/ict-caiscluster/logdata-anomaly-miner/aecid-testsuite/aminer
+                - cp /builds/ict-caiscluster/logdata-anomaly-miner/source/root/usr/lib/logdata-anomaly-miner/aminer /builds/ict-caiscluster/logdata-anomaly-miner/aecid-testsuite/aminer
                 - cd aecid-testsuite
                 - chown -R aminer:aminer /usr/lib/logdata-anomaly-miner
                 - chown -h aminer:aminer /usr/bin/AMiner
@@ -62,9 +61,7 @@ ubuntu:
                 - touch /tmp/report
                 - echo 'Statement Coverage:' > /tmp/report
                 - coverage report >> /tmp/report
-                - echo >> /tmp/report
                 - coverage run --source=./aminer --branch -m unittest discover -s unit -p '*Test.py'
                 - echo 'Branch Coverage:' >> /tmp/report
                 - coverage report >> /tmp/report
-                - sed -i 's+/builds/ict-caiscluster/logdata-anomaly-miner/source/root/usr/lib/logdata-anomaly-miner/aminer/+aminer/+g' /tmp/report
                 - cat /tmp/report
