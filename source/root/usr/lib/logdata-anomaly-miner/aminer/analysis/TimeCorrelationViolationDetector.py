@@ -24,8 +24,6 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
     self.eventClassificationRuleset = ruleset
     self.anomalyEventHandlers = anomalyEventHandlers
     self.nextPersistTime = time.time()+600.0
-    self.historyAEvents = []
-    self.historyBEvents = []
     self.persistenceId = persistenceId
 
     eventCorrelationSet = set()
@@ -108,9 +106,11 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
         h.append(repr(item))
       history['History'] = h
       r['CorrelationHistory'] = history
-      eventData['Rule'] = r
-      eventData['CheckResult'] = checkResult
-      eventData['NewestTimestamp'] = newestTimestamp
+      analysisComponent = dict()
+      analysisComponent['Rule'] = r
+      analysisComponent['CheckResult'] = checkResult
+      analysisComponent['NewestTimestamp'] = newestTimestamp
+      eventData['AnalysisComponent'] = analysisComponent
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
             'Correlation rule "%s" violated' % rule.ruleId, [checkResult[0]], \

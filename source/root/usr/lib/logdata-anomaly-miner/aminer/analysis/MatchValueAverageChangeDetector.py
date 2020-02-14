@@ -80,7 +80,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             timestampValue, match.matchObject))
 
       if readyForAnalysisFlag:
-        stats = []
+        anomalyScores = []
         for (path, statData) in self.statData:
           analysisData = self.analyze(statData)
           if analysisData is not None:
@@ -103,13 +103,15 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             else:
               analysisSummary += os.linesep
               analysisSummary += '  "%s": %s' % (path, analysisData[0])
-            stats.append(d)
-        eventData['StatData'] = stats
+            anomalyScores.append(d)
+        analysisComponent = dict()
+        analysisComponent['AnomalyScores'] = anomalyScores
+        analysisComponent['MinBinElements'] = self.minBinElements
+        analysisComponent['MinBinTime'] = self.minBinTime
+        analysisComponent['SyncBinsFlag'] = self.syncBinsFlag
+        analysisComponent['DebugMode'] = self.debugMode
 
-        eventData['MinBinElements'] = self.minBinElements
-        eventData['MinBinTime'] = self.minBinTime
-        eventData['SyncBinsFlag'] = self.syncBinsFlag
-        eventData['DebugMode'] = self.debugMode
+        eventData['AnalysisComponent'] = analysisComponent
 
         if self.nextPersistTime is None:
           self.nextPersistTime = time.time()+600

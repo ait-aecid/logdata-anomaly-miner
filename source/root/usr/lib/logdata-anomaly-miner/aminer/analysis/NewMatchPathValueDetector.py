@@ -43,21 +43,19 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
       match = matchDict.get(targetPath, None)
       if match is None:
         continue
-      if isinstance(match.matchObject, bytes):
-        eventData['MatchObject'] = match.matchObject.decode()
-      else:
-        eventData['MatchObject'] = match.matchObject
       if match.matchObject not in self.knownPathSet:
         if self.autoIncludeFlag:
           self.knownPathSet.add(match.matchObject)
           if self.nextPersistTime is None:
             self.nextPersistTime = time.time()+600
-        m = []
-        for knownPath in list(self.knownPathSet):
-          if isinstance(knownPath, bytes):
-            knownPath = knownPath.decode()
-          m.append(knownPath)
-        eventData['KnownPathList'] = m
+
+        if isinstance(match.matchObject, bytes):
+          affectedLogAtomValues = match.matchObject.decode()
+        else:
+          affectedLogAtomValues = match.matchObject
+        analysisComponent = dict()
+        analysisComponent['AffectedLogAtomValues'] = affectedLogAtomValues
+        eventData['AnalysisComponent'] = analysisComponent
         if self.outputLogLine:
           originalLogLinePrefix = self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
           if originalLogLinePrefix is None:
