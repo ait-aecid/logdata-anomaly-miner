@@ -23,12 +23,12 @@ debian:
                 - ./aminerIntegrationTest2.sh
                 - rm /var/mail/mail
                 - cd .. #
-                - coverage run --source=/builds/ict-caiscluster/logdata-anomaly-miner/source/root/usr/lib/logdata-anomaly-miner/aminer -m unittest discover -s unit -p '*Test.py'
+                - coverage run --source=./aminer -m unittest discover -s unit -p '*Test.py'
                 - touch /tmp/report
                 - echo 'Statement Coverage:' > /tmp/report
                 - coverage report >> /tmp/report
                 - echo > /tmp/report
-                - coverage run --source=/builds/ict-caiscluster/logdata-anomaly-miner/source/root/usr/lib/logdata-anomaly-miner/aminer --branch -m unittest discover -s unit -p '*Test.py'
+                - coverage run --source=./aminer --branch -m unittest discover -s unit -p '*Test.py'
                 - echo 'Branch Coverage:' >> /tmp/report
                 - coverage report >> /tmp/report
                 - sed -i 's+/builds/ict-caiscluster/logdata-anomaly-miner/source/root/usr/lib/logdata-anomaly-miner/aminer/+aminer/+g' /tmp/report
@@ -58,12 +58,12 @@ ubuntu:
                 - ./aminerIntegrationTest2.sh
                 - rm /var/mail/mail
                 - cd ..
-                - coverage run --source=/builds/ict-caiscluster/logdata-anomaly-miner/source/root/usr/lib/logdata-anomaly-miner/aminer -m unittest discover -s unit -p '*Test.py'
+                - coverage run --source=./aminer -m unittest discover -s unit -p '*Test.py'
                 - touch /tmp/report
                 - echo 'Statement Coverage:' > /tmp/report
                 - coverage report >> /tmp/report
                 - echo >> /tmp/report
-                - coverage run --source=/builds/ict-caiscluster/logdata-anomaly-miner/source/root/usr/lib/logdata-anomaly-miner/aminer --branch -m unittest discover -s unit -p '*Test.py'
+                - coverage run --source=./aminer --branch -m unittest discover -s unit -p '*Test.py'
                 - echo 'Branch Coverage:' >> /tmp/report
                 - coverage report >> /tmp/report
                 - sed -i 's+/builds/ict-caiscluster/logdata-anomaly-miner/source/root/usr/lib/logdata-anomaly-miner/aminer/+aminer/+g' /tmp/report
