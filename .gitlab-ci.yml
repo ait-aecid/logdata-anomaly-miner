@@ -23,7 +23,6 @@ debian:
                 - ./aminerIntegrationTest2.sh
                 - rm /var/mail/mail
                 - cd .. 
-                - python3 -m unittest discover -s unit -p '*Test.py'
                 - coverage run --source=./aminer -m unittest discover -s unit -p '*Test.py'
                 - touch /tmp/report
                 - echo 'Statement Coverage:' > /tmp/report
