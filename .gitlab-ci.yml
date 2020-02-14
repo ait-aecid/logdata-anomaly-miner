@@ -23,14 +23,14 @@ debian:
                 - ./aminerIntegrationTest2.sh
                 - rm /var/mail/mail
                 - cd .. #
-                - coverage run --source=. -m unittest discover -s unit -p '*Test.py'
+                - coverage run --source=.. -m unittest discover -s unit -p '*Test.py'
                 - touch /tmp/report
                 - echo 'Statement Coverage:' > /tmp/report
-                - coverage report > /tmp/report
+                - coverage report >> /tmp/report
                 - echo > /tmp/report
-                - coverage run --source=. --branch -m unittest discover -s unit -p '*Test.py'
-                - echo 'Branch Coverage:' > /tmp/report
-                - coverage report > /tmp/report
+                - coverage run --source=.. --branch -m unittest discover -s unit -p '*Test.py'
+                - echo 'Branch Coverage:' >> /tmp/report
+                - coverage report >> /tmp/report
                 - cat /tmp/report
                 
 ubuntu:
@@ -57,12 +57,12 @@ ubuntu:
                 - ./aminerIntegrationTest2.sh
                 - rm /var/mail/mail
                 - cd ..
-                - coverage run --source=. -m unittest discover -s unit -p '*Test.py'
+                - coverage run --source=.. -m unittest discover -s unit -p '*Test.py'
                 - touch /tmp/report
                 - echo 'Statement Coverage:' > /tmp/report
-                - coverage report > /tmp/report
-                - echo > /tmp/report
-                - coverage run --source=. --branch -m unittest discover -s unit -p '*Test.py'
-                - echo 'Branch Coverage:' > /tmp/report
-                - coverage report > /tmp/report
+                - coverage report >> /tmp/report
+                - echo >> /tmp/report
+                - coverage run --source=.. --branch -m unittest discover -s unit -p '*Test.py'
+                - echo 'Branch Coverage:' >> /tmp/report
+                - coverage report >> /tmp/report
                 - cat /tmp/report
