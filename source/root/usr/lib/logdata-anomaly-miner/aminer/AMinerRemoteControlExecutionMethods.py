@@ -1,10 +1,11 @@
 """This module contains methods which can be executed from the
 AMinerRemoteControl class."""
-
+import aminer
 from aminer import AMinerConfig, AnalysisChild
 import resource
 import subprocess
 from aminer.input import LogAtom
+from aminer.input import AtomHandlerInterface
 
 class AMinerRemoteControlExecutionMethods(object):
     REMOTE_CONTROL_RESPONSE = ''
@@ -34,6 +35,16 @@ class AMinerRemoteControlExecutionMethods(object):
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: the analysisContext must be of type %s." % AnalysisChild.AnalysisContext.__class__
             return
 
+        if not propertyName in analysisContext.aminerConfig.configProperties:
+            self.REMOTE_CONTROL_RESPONSE = "FAILURE: the property '%s' does not exist in the current config!"%propertyName
+            return
+
+        t = type(analysisContext.aminerConfig.configProperties[propertyName])
+        if not isinstance(value, t):
+            self.REMOTE_CONTROL_RESPONSE += "FAILURE: the value of the property '%s' must be of type %s!" % (
+                propertyName, t)
+            return
+
         if propertyName == AMinerConfig.KEY_PERSISTENCE_DIR or propertyName == AMinerConfig.KEY_LOG_SOURCES_LIST:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: the property '%s' can only be changed at " \
                                             "startup in the AMiner root process!" % propertyName
@@ -44,10 +55,7 @@ class AMinerRemoteControlExecutionMethods(object):
         elif propertyName in configKeysMailAlerting:
             result = self.changeConfigPropertyMailAlerting(analysisContext, propertyName, value)
         elif propertyName == AMinerConfig.KEY_LOG_PREFIX:
-            if isinstance(value, str):
-                analysisContext.aminerConfig.configProperties[AMinerConfig.KEY_LOG_PREFIX] = str(value)
-            else:
-                self.REMOTE_CONTROL_RESPONSE += "FAILURE: property 'LogPrefix' must be of type String!"
+            result = self.changeConfigPropertyLogPrefix(analysisContext, value)
         else:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: property %s could not be changed. Please check the propertyName " \
                                             "again." % propertyName
@@ -56,11 +64,6 @@ class AMinerRemoteControlExecutionMethods(object):
             self.REMOTE_CONTROL_RESPONSE += "'%s' changed to '%s' successfully." % (propertyName, value)
 
     def changeConfigPropertyMailAlerting(self, analysisContext, propertyName, value):
-        t = type(analysisContext.aminerConfig.configProperties[propertyName])
-        if not isinstance(value, t):
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: the value of the property '%s' must be of type %s!" % (
-                propertyName, t)
-            return 1
         analysisContext.aminerConfig.configProperties[propertyName] = value
         for analysisComponentId in analysisContext.getRegisteredComponentIds():
             component = analysisContext.getComponentById(analysisComponentId)
@@ -106,6 +109,10 @@ class AMinerRemoteControlExecutionMethods(object):
                 AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE)
             return 1
 
+    def changeConfigPropertyLogPrefix(self, analysisContext, logPrefix):
+        analysisContext.aminerConfig.configProperties[AMinerConfig.KEY_LOG_PREFIX] = str(logPrefix)
+        return 0
+
     def changeAttributeOfRegisteredAnalysisComponent(self, analysisContext, componentName, attribute, value):
         attr = getattr(analysisContext.getComponentByName(componentName), attribute)
         if type(attr) == type(value):
@@ -117,6 +124,9 @@ class AMinerRemoteControlExecutionMethods(object):
                 attribute, type(attr))
 
     def renameRegisteredAnalysisComponent(self, analysisContext, oldComponentName, newComponentName):
+        if type(oldComponentName) is not str or type(newComponentName) is not str:
+            self.REMOTE_CONTROL_RESPONSE = "FAILURE: the parameters 'oldComponentName' and 'newComponentName' must be of type str."
+            return
         component = analysisContext.getComponentByName(oldComponentName)
         if component is None:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: component '%s' does not exist!" % oldComponentName
@@ -132,8 +142,22 @@ class AMinerRemoteControlExecutionMethods(object):
             analysisContext.aminerConfig.configProperties[propertyName])
 
     def printAttributeOfRegisteredAnalysisComponent(self, analysisContext, componentName, attribute):
-        self.REMOTE_CONTROL_RESPONSE += "%s.%s = %s" % (componentName, attribute, repr(getattr(
-            analysisContext.getComponentByName(componentName), attribute)))
+        if type(componentName) is not str or type(attribute) is not str:
+            self.REMOTE_CONTROL_RESPONSE = "FAILURE: the parameters 'componentName' and 'attribute' must be of type str."
+            return
+        if hasattr(analysisContext.getComponentByName(componentName), attribute):
+            attr = getattr(analysisContext.getComponentByName(componentName), attribute)
+            if hasattr(attr, '__dict__') and self.isinstanceAminerClass(attr):
+                newAttr = self.getAllVars(attr, '  ')
+            elif isinstance(attr, list):
+                for l in attr:
+                    if hasattr(l, '__dict__') and self.isinstanceAminerClass(l):
+                        newAttr = "\n[\n  " + l.__class__.__name__ + "  {\n" + self.getAllVars(l, '  ') + "  }\n]"
+                    else:
+                        newAttr = "%s = %s\n" % (attribute, repr(l))
+            self.REMOTE_CONTROL_RESPONSE += "%s.%s = %s" % (componentName, attribute, newAttr)
+        else:
+            self.REMOTE_CONTROL_RESPONSE += "FAILURE: the component '%s' does not have an attribute named '%s'"%(componentName, attribute)
 
     def printCurrentConfig(self, analysisContext):
         for configProperty in analysisContext.aminerConfig.configProperties:
@@ -146,14 +170,60 @@ class AMinerRemoteControlExecutionMethods(object):
         for componentId in analysisContext.getRegisteredComponentIds():
             self.REMOTE_CONTROL_RESPONSE += "%s {\n" % analysisContext.getNameByComponent(
                 analysisContext.getComponentById(componentId))
-            for var in vars(analysisContext.getComponentById(componentId)):
-                self.REMOTE_CONTROL_RESPONSE += "  %s = %s\n" % (var, repr(getattr(
-                    analysisContext.getComponentById(componentId), var)))
+            component = analysisContext.getComponentById(componentId)
+            self.REMOTE_CONTROL_RESPONSE += self.getAllVars(component, '  ')
             self.REMOTE_CONTROL_RESPONSE += "}\n\n"
+
+    def getAllVars(self, obj, indent):
+        result = ''
+        for var in vars(obj):
+            attr = getattr(obj, var)
+            if hasattr(attr, '__dict__') and self.isinstanceAminerClass(attr):
+                result += indent + "%s = {\n"%var + self.getAllVars(attr, indent + '  ') + indent + "}\n"
+            elif isinstance(attr, list):
+                for l in attr:
+                    if hasattr(l, '__dict__') and self.isinstanceAminerClass(l):
+                        result += indent + "%s = [\n"%var + indent + '  ' + l.__class__.__name__ + " {\n" + self.getAllVars(l, indent + '    ') + indent + '  ' + "}\n" + indent + ']\n'
+                    else:
+                        result += indent + "%s = %s\n" % (var, repr(attr))
+                        break
+            else:
+                result += indent + "%s = %s\n" % (var, repr(attr))
+        return result
+
+    def isinstanceAminerClass(self, obj):
+        from aminer.analysis.TimeCorrelationDetector import CorrelationFeature
+        from aminer.analysis.TimeCorrelationViolationDetector import CorrelationRule
+        classList = [aminer.analysis.AtomFilters.SubhandlerFilter, aminer.analysis.AtomFilters.MatchPathFilter, aminer.analysis.AtomFilters.MatchValueFilter,
+                     aminer.analysis.HistogramAnalysis.BinDefinition, aminer.analysis.HistogramAnalysis.HistogramData, aminer.analysis.Rules.MatchAction,
+                     aminer.analysis.Rules.MatchRule, CorrelationRule, CorrelationFeature, aminer.events.EventHandlerInterface, aminer.util.ObjectHistory]
+        for c in classList:
+            if isinstance(obj, c):
+                return True
+        return False
+
+
+
+        # result = ''
+        # for var in vars(obj):
+        #     attr = getattr(obj, var)
+        #     if hasattr(attr, '__dict__'):
+        #         ret = ''
+        #         for v in vars(attr):
+        #             ret = '    %s = %s\n'%(v, repr(attr))
+        #         if ret == '':
+        #             result += indent + '%s = %s\n'%(var, repr(attr))
+        #         else:
+        #             result += '%s = {\n'%var
+        #             result += ret
+        #             result += '}\n'
+        #     #
+        #     else:
+        #         result += indent + "%s = %s\n" % (var, repr(attr))
+        return result
 
     def saveCurrentConfig(self, analysisContext, destinationFile):
         self.REMOTE_CONTROL_RESPONSE = AMinerConfig.saveConfig(analysisContext, destinationFile)
-        self.REMOTE_CONTROL_RESPONSE += "Successfully saved the current config to %s." % destinationFile
 
     def whitelistEventInComponent(self, analysisContext, componentName, eventData, whitelistingData=None):
         component = analysisContext.getComponentByName(componentName)
@@ -182,7 +252,10 @@ class AMinerRemoteControlExecutionMethods(object):
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: atomHandler '%s' does not exist!" % atomHandler
             return
         if analysisContext.getComponentByName(componentName) is not None:
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: Component with same name already registered! (%s)" % componentName
+            self.REMOTE_CONTROL_RESPONSE += "FAILURE: component with same name already registered! (%s)" % componentName
+            return
+        if not isinstance(component, AtomHandlerInterface):
+            self.REMOTE_CONTROL_RESPONSE += "FAILURE: 'component' must implement the AtomHandlerInterface!"
             return
         atomFilter.addHandler(component)
         analysisContext.registerComponent(component, componentName)

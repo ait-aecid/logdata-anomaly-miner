@@ -51,13 +51,13 @@ class JsonConverterHandler(EventHandlerInterface):
     if hasattr(eventSource, 'autoIncludeFlag'):
       analysisComponent['TrainingMode'] = eventSource.autoIncludeFlag
 
-    oldAnalysisComponent = eventData.get('AnalysisComponent', None)
-    if oldAnalysisComponent is not None:
-      for key in oldAnalysisComponent:
+    detectorAnalysisComponent = eventData.get('AnalysisComponent', None)
+    if detectorAnalysisComponent is not None:
+      for key in detectorAnalysisComponent:
         if key in analysisComponent.keys():
           jsonError += "AnalysisComponent attribute '%s' is already in use and can not be overwritten!\n" % key
           continue
-        analysisComponent[key] = oldAnalysisComponent.get(key, None)
+        analysisComponent[key] = detectorAnalysisComponent.get(key, None)
 
     eventData['LogData'] = logData
     eventData['AnalysisComponent'] = analysisComponent

@@ -4,6 +4,7 @@ from datetime import datetime
 import random
 import time
 
+import aminer
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.analysis import Rules
@@ -102,7 +103,8 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
       featureList = []
       for feature in self.featureList:
         l = {}
-        l['Rule'] = repr(feature.rule)
+        r = self.ruleToDict(feature.rule)
+        l['Rule'] = r
         l['Index'] = feature.index
         l['CreationTime'] = feature.creationTime
         l['LastTriggerTime'] = feature.lastTriggerTime
@@ -113,9 +115,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
       analysisComponent['FeatureList'] = featureList
       analysisComponent['AnalysisStatus'] = result[0]
       analysisComponent['TotalRecords'] = self.totalRecords
-      analysisComponent['EventCountTable'] = self.eventCountTable
-      analysisComponent['EventDeltaTable'] = self.eventDeltaTable
-      
+
       eventData['AnalysisComponent'] = analysisComponent
       for listener in self.anomalyEventHandlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
@@ -123,6 +123,21 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
             eventData, logAtom, self)
       self.resetStatistics()
 
+  def ruleToDict(self, rule):
+    r = {}
+    r['Type'] = str(rule.__class__.__name__)
+    for var in vars(rule):
+      attr = getattr(rule, var)
+      if isinstance(attr, list):
+        l = []
+        for v in attr:
+          d = self.ruleToDict(v)
+          d['Type'] = str(v.__class__.__name__)
+          l.append(d)
+        r['subRules'] = l
+      else:
+        r[var] = getattr(rule, var)
+    return r
 
   def getTimeTriggerClass(self):
     """Get the trigger class this component should be registered
