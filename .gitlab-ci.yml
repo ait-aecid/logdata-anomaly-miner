@@ -11,7 +11,7 @@ debian:
                 - service rsyslog start
                 - service exim4 start
                 - apt install procps -y
-                #- pip3 install coverage
+                - pip3 install coverage
 
         script:
                 - ansible-playbook /opt/ansible/playbook.yml
@@ -29,15 +29,14 @@ debian:
                 - ./aminerIntegrationTest2.sh
                 - rm /var/mail/mail
                 - cd .. 
-                #- coverage run --source=./aminer -m unittest discover -s unit -p '*Test.py'
-                - python3 -m unittest discover -s unit -p '*Test.py'
-                #- touch /tmp/report
-                #- echo 'Statement Coverage:' > /tmp/report
-                #- coverage report >> /tmp/report
-                #- coverage run --source=./aminer --branch -m unittest discover -s unit -p '*Test.py'
-                #- echo 'Branch Coverage:' >> /tmp/report
-                #- coverage report >> /tmp/report
-                ##- cat /tmp/report
+                - coverage run --source=./aminer -m unittest discover -s unit -p '*Test.py'
+                - touch /tmp/report
+                - echo 'Statement Coverage:' > /tmp/report
+                - coverage report >> /tmp/report
+                - coverage run --source=./aminer --branch -m unittest discover -s unit -p '*Test.py'
+                - echo 'Branch Coverage:' >> /tmp/report
+                - coverage report >> /tmp/report
+                - cat /tmp/report
                 
 ubuntu:
         image: git-service.ait.ac.at:8010/ict-caiscluster/logdata-anomaly-miner/aminer-ubuntu
@@ -45,7 +44,7 @@ ubuntu:
         before_script:
                 - service rsyslog start
                 - service exim4 start
-                #- pip3 install coverage
+                - pip3 install coverage
         
         script:
                 - ansible-playbook /opt/ansible/playbook.yml
@@ -63,12 +62,11 @@ ubuntu:
                 - ./aminerIntegrationTest2.sh
                 - rm /var/mail/mail
                 - cd ..
-                #- coverage run --source=./aminer -m unittest discover -s unit -p '*Test.py'
-                - python3 -m unittest discover -s unit -p '*Test.py'
-                #- touch /tmp/report
-                #- echo 'Statement Coverage:' > /tmp/report
-                #- coverage report >> /tmp/report
-                #- coverage run --source=./aminer --branch -m unittest discover -s unit -p '*Test.py'
-                #- echo 'Branch Coverage:' >> /tmp/report
-                #- coverage report >> /tmp/report
-                #- cat /tmp/report
+                - coverage run --source=./aminer -m unittest discover -s unit -p '*Test.py'
+                - touch /tmp/report
+                - echo 'Statement Coverage:' > /tmp/report
+                - coverage report >> /tmp/report
+                - coverage run --source=./aminer --branch -m unittest discover -s unit -p '*Test.py'
+                - echo 'Branch Coverage:' >> /tmp/report
+                - coverage report >> /tmp/report
+                - cat /tmp/report
