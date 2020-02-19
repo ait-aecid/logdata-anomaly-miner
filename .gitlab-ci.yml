@@ -9,6 +9,7 @@ debian:
 
         script:
                 - ansible-playbook /opt/ansible/playbook.yml
+                - $(find /opt/ -type f -name sonar-scanner) -Dsonar.projectName=Aminer-Dev -Dsonar.host.url=http://10.103.251.153:9000 -Dsonar.projectKey=deff975a5561d285e315daa894ab291c7bd10a19
                 - git clone https://gitlab+deploy-token-aecidtestsuite:vu18Eo6k7xfA22vPvorx@git-service.ait.ac.at/ict-caiscluster/aecid-testsuite.git
                 - cp -r /builds/ict-caiscluster/logdata-anomaly-miner/source/root/usr/lib/logdata-anomaly-miner/aminer /builds/ict-caiscluster/logdata-anomaly-miner/aecid-testsuite/aminer
                 - cd aecid-testsuite
@@ -31,7 +32,6 @@ debian:
                 - echo 'Branch Coverage:' >> /tmp/report
                 - coverage report >> /tmp/report
                 - cat /tmp/report
-                - $(find /opt/ -type f -name sonar-scanner) -Dsonar.projectName=Aminer-Dev -Dsonar.host.url=http://10.103.251.153:9000 -Dsonar.projectKey=deff975a5561d285e315daa894ab291c7bd10a19
                 
 ubuntu:
         image: git-service.ait.ac.at:8010/ict-caiscluster/logdata-anomaly-miner/aminer-ubuntu
@@ -43,6 +43,7 @@ ubuntu:
         
         script:
                 - ansible-playbook /opt/ansible/playbook.yml
+                - $(find /opt/ -type f -name sonar-scanner) -Dsonar.projectName=Aminer-Dev -Dsonar.host.url=http://10.103.251.153:9000 -Dsonar.projectKey=deff975a5561d285e315daa894ab291c7bd10a19
                 - git clone https://gitlab+deploy-token-aecidtestsuite:vu18Eo6k7xfA22vPvorx@git-service.ait.ac.at/ict-caiscluster/aecid-testsuite.git
                 - cp -r /builds/ict-caiscluster/logdata-anomaly-miner/source/root/usr/lib/logdata-anomaly-miner/aminer /builds/ict-caiscluster/logdata-anomaly-miner/aecid-testsuite/aminer
                 - cd aecid-testsuite
@@ -65,4 +66,3 @@ ubuntu:
                 - echo 'Branch Coverage:' >> /tmp/report
                 - coverage report >> /tmp/report
                 - cat /tmp/report
-                - $(find /opt/ -type f -name sonar-scanner) -Dsonar.projectName=Aminer-Dev -Dsonar.host.url=http://10.103.251.153:9000 -Dsonar.projectKey=deff975a5561d285e315daa894ab291c7bd10a19
