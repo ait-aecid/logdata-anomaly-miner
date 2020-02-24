@@ -34,7 +34,7 @@ class JsonConverterHandler(EventHandlerInterface):
       else:
         logData['Timestamp'] = round(logAtom.atomTime, 2)
     else:
-      logData['Timestamp'] = str(round(datetime.datetime.utcnow()).strftime('%Y-%m-%dT%H:%M:%SZ'))
+      logData['Timestamp'] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
     logData['LogLinesCount'] = len(sortedLogLines)
     if logAtom.parserMatch is not None:
       logData['AnnotatedMatchElement'] = logAtom.parserMatch.matchElement.annotateMatch('')

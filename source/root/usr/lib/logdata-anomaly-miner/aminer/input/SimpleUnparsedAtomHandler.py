@@ -9,6 +9,7 @@ class SimpleUnparsedAtomHandler(AtomHandlerInterface):
 
   def __init__(self, eventHandlers):
     self.eventHandlers = eventHandlers
+    self.persistenceId = None
 
   def receiveAtom(self, logAtom):
     """Receive an unparsed atom to create events for each."""
