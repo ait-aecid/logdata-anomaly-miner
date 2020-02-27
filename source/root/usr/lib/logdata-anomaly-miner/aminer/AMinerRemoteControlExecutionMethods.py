@@ -202,26 +202,6 @@ class AMinerRemoteControlExecutionMethods(object):
                 return True
         return False
 
-
-
-        # result = ''
-        # for var in vars(obj):
-        #     attr = getattr(obj, var)
-        #     if hasattr(attr, '__dict__'):
-        #         ret = ''
-        #         for v in vars(attr):
-        #             ret = '    %s = %s\n'%(v, repr(attr))
-        #         if ret == '':
-        #             result += indent + '%s = %s\n'%(var, repr(attr))
-        #         else:
-        #             result += '%s = {\n'%var
-        #             result += ret
-        #             result += '}\n'
-        #     #
-        #     else:
-        #         result += indent + "%s = %s\n" % (var, repr(attr))
-        return result
-
     def saveCurrentConfig(self, analysisContext, destinationFile):
         self.REMOTE_CONTROL_RESPONSE = AMinerConfig.saveConfig(analysisContext, destinationFile)
 
