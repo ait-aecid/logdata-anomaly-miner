@@ -70,4 +70,3 @@ ubuntu:
                 - echo 'Branch Coverage:' >> /tmp/report
                 - coverage report >> /tmp/report
                 - cat /tmp/report
-                # test
