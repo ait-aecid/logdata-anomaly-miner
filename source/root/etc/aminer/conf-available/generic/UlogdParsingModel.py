@@ -9,19 +9,19 @@ from aminer.parsing import IpAddressDataModelElement
 from aminer.parsing import OptionalMatchModelElement
 from aminer.parsing import SequenceModelElement
 
-def getModel():
+def get_model():
   """This function defines how to parse a su session information message
 after any standard logging preamble, e.g. from syslog."""
 
-  typeChildren = []
-  typeChildren.append(SequenceModelElement('build-stack', [
+  type_children = []
+  type_children.append(SequenceModelElement('build-stack', [
       FixedDataModelElement('s0', b'building new pluginstance stack: \''),
       DelimitedDataModelElement('stack', b'\''),
       FixedDataModelElement('s1', b'\'')
   ]))
 
 # Netflow entry
-  typeChildren.append(SequenceModelElement('nfct-event', [
+  type_children.append(SequenceModelElement('nfct-event', [
       FixedDataModelElement('s0', b'[DESTROY] ORIG: SRC='),
       IpAddressDataModelElement('osrcip'),
       FixedDataModelElement('s1', b' DST='),
@@ -54,14 +54,14 @@ after any standard logging preamble, e.g. from syslog."""
       OptionalMatchModelElement('tail', FixedDataModelElement('s0', b' ')),
   ]))
 
-  typeChildren.append(FixedDataModelElement('nfct-plugin', b'NFCT plugin working in event mode'))
-  typeChildren.append(FixedDataModelElement('reopen', b'reopening capture file'))
-  typeChildren.append(FixedDataModelElement('signal', b'signal received, calling pluginstances'))
-  typeChildren.append(FixedDataModelElement('uidchange', b'Changing UID / GID'))
+  type_children.append(FixedDataModelElement('nfct-plugin', b'NFCT plugin working in event mode'))
+  type_children.append(FixedDataModelElement('reopen', b'reopening capture file'))
+  type_children.append(FixedDataModelElement('signal', b'signal received, calling pluginstances'))
+  type_children.append(FixedDataModelElement('uidchange', b'Changing UID / GID'))
 
   model = SequenceModelElement('ulogd', [
       FixedDataModelElement('sname', b'ulogd['),
       DecimalIntegerValueModelElement('pid'),
       FixedDataModelElement('s0', b']: '),
-      FirstMatchModelElement('msg', typeChildren)])
+      FirstMatchModelElement('msg', type_children)])
   return model

@@ -6,10 +6,10 @@ from aminer.parsing import FirstMatchModelElement
 from aminer.parsing import FixedDataModelElement
 from aminer.parsing import SequenceModelElement
 
-def getModel():
+def get_model():
   """This function returns the model."""
-  typeChildren = []
-  typeChildren.append(SequenceModelElement('sent', [
+  type_children = []
+  type_children.append(SequenceModelElement('sent', [
       FixedDataModelElement('s0', b'Sent mail for '),
       DelimitedDataModelElement('to-addr', b' ('),
       FixedDataModelElement('s1', b' ('),
@@ -26,5 +26,5 @@ def getModel():
       FixedDataModelElement('sname', b'sSMTP['),
       DecimalIntegerValueModelElement('pid'),
       FixedDataModelElement('s0', b']: '),
-      FirstMatchModelElement('msg', typeChildren)])
+      FirstMatchModelElement('msg', type_children)])
   return model

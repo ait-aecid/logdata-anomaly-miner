@@ -11,17 +11,17 @@ from aminer.parsing import OptionalMatchModelElement
 from aminer.parsing import SequenceModelElement
 from aminer.parsing import WhiteSpaceLimitedDataModelElement
 
-def getModel(userNameModel=None):
+def get_model(user_name_model=None):
   """This function defines how to parse a su session information message
 after any standard logging preamble, e.g. from syslog."""
 
-  typeChildren = []
-  typeChildren.append(SequenceModelElement('queue', [
+  type_children = []
+  type_children.append(SequenceModelElement('queue', [
       FixedWordlistDataModelElement('type', [b'Start', b'End']),
       FixedDataModelElement('s0', b' queue run: pid='),
       DecimalIntegerValueModelElement('pid')]))
 
-  typeChildren.append(SequenceModelElement('rec-log', [
+  type_children.append(SequenceModelElement('rec-log', [
       WhiteSpaceLimitedDataModelElement('id'),
       FixedDataModelElement('s0', b' <= '),
       WhiteSpaceLimitedDataModelElement('env-from'),
@@ -45,7 +45,7 @@ after any standard logging preamble, e.g. from syslog."""
           AnyByteDataModelElement('id')]))
   ]))
 
-  typeChildren.append(SequenceModelElement('send-log', [
+  type_children.append(SequenceModelElement('send-log', [
       WhiteSpaceLimitedDataModelElement('id'),
       # Strange: first address seems to use different separator than
       # second one.
@@ -58,11 +58,11 @@ after any standard logging preamble, e.g. from syslog."""
       AnyByteDataModelElement('unparsed')
   ]))
 
-  typeChildren.append(SequenceModelElement('sent', [
+  type_children.append(SequenceModelElement('sent', [
       WhiteSpaceLimitedDataModelElement('id'),
       FixedDataModelElement('s0', b' Completed')]))
 
-  typeChildren.append(SequenceModelElement('started', [
+  type_children.append(SequenceModelElement('started', [
       FixedDataModelElement('s0', b' exim '),
       WhiteSpaceLimitedDataModelElement('version'),
       FixedDataModelElement('s1', b' daemon started: pid='),
@@ -74,5 +74,5 @@ after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement('sname', b'exim['),
       DecimalIntegerValueModelElement('pid'),
       FixedDataModelElement('s0', b']: '),
-      FirstMatchModelElement('msg', typeChildren)])
+      FirstMatchModelElement('msg', type_children)])
   return model
