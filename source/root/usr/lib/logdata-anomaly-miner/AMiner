@@ -123,7 +123,7 @@ def main():
 # Minimal import to avoid loading too much within the privileged
 # process.
   from aminer import AMinerConfig
-  aminerConfig = AMinerConfig.loadConfig(configFileName)
+  aminerConfig = AMinerConfig.load_config(configFileName)
 
   if runAnalysisChildFlag:
 # Call analysis process, this function will never return.
