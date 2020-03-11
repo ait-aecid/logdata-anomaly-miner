@@ -168,7 +168,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
 
       self.checkTimestampValueInRange(parsedValue)
       if self.latestParsedTimestamp is not None:
-        delta = (self.latestParsedTimestamp-self.latestParsedTimestamp)
+        delta = (parsedValue-self.latestParsedTimestamp)
         deltaSeconds = (delta.days*86400+delta.seconds+delta.microseconds/1000)
         if (deltaSeconds < -86400) or (deltaSeconds > 86400*30):
           print('Delta to last timestamp out of range for %s' % repr(dateStr), file=sys.stderr)

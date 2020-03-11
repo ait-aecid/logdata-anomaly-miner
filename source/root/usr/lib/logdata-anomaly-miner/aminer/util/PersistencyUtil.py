@@ -42,14 +42,15 @@ def createTemporaryPersistenceFile(fileName):
   any error creating or writing the file will not harm the old
   state."""
   fd = None
-  while True:
-# FIXME: This should use O_TMPFILE, but not yet available. That would
-# obsolete the loop also.
-    fd = openPersistenceFile('%s.tmp-%f' % (fileName, time.time()), \
-      os.O_WRONLY|os.O_CREAT|os.O_EXCL)
-    break
+  # FIXME: This should use O_TMPFILE, but not yet available. That would
+  # obsolete the loop also.
+  # while True:
+  #  fd = openPersistenceFile('%s.tmp-%f' % (fileName, time.time()), \
+  #    os.O_WRONLY|os.O_CREAT|os.O_EXCL)
+  #  break
+  fd = openPersistenceFile('%s.tmp-%f' % (fileName, time.time()), \
+     os.O_WRONLY|os.O_CREAT|os.O_EXCL)
   return fd
-
 noSecureLinkUnlinkAtWarnOnceFlag = True
 def replacePersistenceFile(fileName, newFileHandle):
   """Replace the named file with the file refered by the handle."""
