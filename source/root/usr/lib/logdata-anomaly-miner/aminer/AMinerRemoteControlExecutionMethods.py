@@ -203,7 +203,7 @@ class AMinerRemoteControlExecutionMethods(object):
         return False
 
     def saveCurrentConfig(self, analysisContext, destinationFile):
-        self.REMOTE_CONTROL_RESPONSE = AMinerConfig.saveConfig(analysisContext, destinationFile)
+        self.REMOTE_CONTROL_RESPONSE = AMinerConfig.save_config(analysisContext, destinationFile)
 
     def whitelistEventInComponent(self, analysisContext, componentName, eventData, whitelistingData=None):
         component = analysisContext.getComponentByName(componentName)

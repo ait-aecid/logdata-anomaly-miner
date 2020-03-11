@@ -75,7 +75,7 @@ def get_logind_model(user_name_model=None):
   return model
 
 
-def getTmpfilesModel():
+def get_tmp_files_model():
   """This function defines how to parse a systemd tmpfiles daemon
   message after any standard logging preamble, e.g. from syslog."""
 

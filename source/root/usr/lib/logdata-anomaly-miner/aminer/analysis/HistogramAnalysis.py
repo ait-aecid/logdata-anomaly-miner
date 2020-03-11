@@ -276,7 +276,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
     self.nextPersistTime = None
 
     PersistencyUtil.addPersistableComponent(self)
-    self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
+    self.persistenceFileName = AMinerConfig.build_persistence_file_name(
         aminerConfig, 'HistogramAnalysis', persistenceId)
     persistenceData = PersistencyUtil.loadJson(self.persistenceFileName)
     if persistenceData != None:
@@ -418,7 +418,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
     self.nextPersistTime = None
 
     PersistencyUtil.addPersistableComponent(self)
-    self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
+    self.persistenceFileName = AMinerConfig.build_persistence_file_name(
         aminerConfig, 'PathDependentHistogramAnalysis', persistenceId)
     persistenceData = PersistencyUtil.loadJson(self.persistenceFileName)
     if persistenceData is not None:

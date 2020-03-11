@@ -52,7 +52,7 @@ class MissingMatchPathValueDetector(
     self.persistenceId = persistenceId
 
     PersistencyUtil.addPersistableComponent(self)
-    self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
+    self.persistenceFileName = AMinerConfig.build_persistence_file_name(
         aminerConfig, self.__class__.__name__, persistenceId)
     persistenceData = PersistencyUtil.loadJson(self.persistenceFileName)
     if persistenceData is None:

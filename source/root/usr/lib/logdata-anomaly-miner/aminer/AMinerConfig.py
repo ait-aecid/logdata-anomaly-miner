@@ -21,78 +21,82 @@ LOG_FILE = '/tmp/AMinerRemoteLog.txt'
 configFN = None
 VAR_ID = 0
 
-def loadConfig(configFileName):
+
+def load_config(config_file_name):
   """Load the configuration file using the import module."""
-  aminerConfig = None
+  aminer_config = None
   global configFN
-  configFN = configFileName
+  configFN = config_file_name
   try:
-    spec = importlib.util.spec_from_file_location('aminerConfig', configFileName)
-    aminerConfig = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(aminerConfig)
+    spec = importlib.util.spec_from_file_location('aminerConfig', config_file_name)
+    aminer_config = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(aminer_config)
 
   except:
-    print('Failed to load configuration from %s' % configFileName, file=sys.stderr)
-    exceptionInfo = sys.exc_info()
-    raise Exception(exceptionInfo[0], exceptionInfo[1], exceptionInfo[2])
-  return aminerConfig
+    print('Failed to load configuration from %s' % config_file_name, file=sys.stderr)
+    exception_info = sys.exc_info()
+    raise Exception(exception_info[0], exception_info[1], exception_info[2])
+  return aminer_config
 
-def buildPersistenceFileName(aminerConfig, *args):
+
+def build_persistence_file_name(aminer_config, *args):
   """Build the full persistency file name from persistency directory
   configuration and path parts."""
-  persistenceDirName = aminerConfig.configProperties.get(
+  persistence_dir_name = aminer_config.configProperties.get(
       KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR)
-  return os.path.join(persistenceDirName, *args)
+  return os.path.join(persistence_dir_name, *args)
 
-def saveConfig(analysisContext, newFile):
+
+def save_config(analysis_context, new_file):
+  register_component = 'registerComponent('
   global VAR_ID
   VAR_ID = 0
   msg = ""
   with open(configFN, "r") as file:
     old = file.read()
   
-  for configProperty in analysisContext.aminerConfig.configProperties:
-    findStr = "configProperties['%s'] = "%configProperty
-    pos = old.find(findStr)
+  for config_property in analysis_context.aminerConfig.configProperties:
+    find_str = "configProperties['%s'] = "%config_property
+    pos = old.find(find_str)
     if pos == -1:
-      msg += "WARNING: %s not found in the old config file."%findStr
+      msg += "WARNING: %s not found in the old config file."%find_str
       logging.basicConfig(filename=LOG_FILE,level=logging.DEBUG, 
           format='%(asctime)s %(levelname)s %(message)s', datefmt='%d.%m.%Y %H:%M:%S')
-      logging.warning("WARNING: %s not found in the old config file."%findStr)
+      logging.warning("WARNING: %s not found in the old config file."%find_str)
     else:
-      string = old[pos + len(findStr):]
-      oldLen = string.find('\n')
-      string = string[:oldLen]
-      prop = analysisContext.aminerConfig.configProperties[configProperty]
+      string = old[pos + len(find_str):]
+      old_len = string.find('\n')
+      string = string[:old_len]
+      prop = analysis_context.aminerConfig.configProperties[config_property]
       if (string[0] == "'" and string[len(string)-1] == "'") or \
           (string[0] == '"' and string[len(string)-1] == '"'):
         prop = "'" + prop + "'"
       if "%s"%string != "%s"%prop:
-        old = old[:pos+len(findStr)] + "%s"%prop + old[pos+len(findStr)+oldLen:]
+        old = old[:pos+len(find_str)] + "%s"%prop + old[pos+len(find_str)+old_len:]
       
-  for componentId in analysisContext.getRegisteredComponentIds():
-    component = analysisContext.getComponentById(componentId)
-    name = analysisContext.getNameByComponent(component)
+  for component_id in analysis_context.getRegisteredComponentIds():
+    component = analysis_context.getComponentById(component_id)
+    name = analysis_context.getNameByComponent(component)
     start = 0
-    oldStart = 0
-    for i in range(0, componentId+1):
+    old_start = 0
+    for i in range(0, component_id+1):
       start = start + 1
       start = old.find('.registerComponent(', start)
-    if oldStart > start:
+    if old_start > start:
       break
-    oldStart = start
+    old_start = start
 
     if old.find('componentName', start) < old.find(')', start):
-      oldComponentNameStart = old.find('"', old.find('componentName', start))
-      oldComponentNameEnd = old.find('"', oldComponentNameStart+1)
-      if oldComponentNameStart > old.find(')', start) or oldComponentNameStart == -1:
-        oldComponentNameStart = old.find("'", old.find('componentName', start))
-        oldComponentNameEnd = old.find("'", oldComponentNameStart+1)
-      oldLen = oldComponentNameEnd - oldComponentNameStart + 1
-      oldComponentName = old[oldComponentNameStart:]
-      oldComponentName = oldComponentName[:oldLen]
-      if oldComponentName != '"%s"'%name:
-        old = old[:oldComponentNameStart] + '"%s"'%name + old[oldComponentNameEnd+1:]
+      old_component_name_start = old.find('"', old.find('componentName', start))
+      old_component_name_end = old.find('"', old_component_name_start+1)
+      if old_component_name_start > old.find(')', start) or old_component_name_start == -1:
+        old_component_name_start = old.find("'", old.find('componentName', start))
+        old_component_name_end = old.find("'", old_component_name_start+1)
+      old_len = old_component_name_end - old_component_name_start + 1
+      old_component_name = old[old_component_name_start:]
+      old_component_name = old_component_name[:old_len]
+      if old_component_name != '"%s"'%name:
+        old = old[:old_component_name_start] + '"%s"'%name + old[old_component_name_end+1:]
         
   with open(LOG_FILE, "r") as logFile:
     logs = logFile.readlines()
@@ -108,21 +112,21 @@ def saveConfig(analysisContext, newFile):
     if "REMOTECONTROL changeAttributeOfRegisteredAnalysisComponent" in logs[i]:
       arr = logs[i].split(',',3)
       if arr[1].find("'"):
-        componentName = arr[1].split("'")[1]
+        component_name = arr[1].split("'")[1]
       else:
-        componentName = arr[1].split('"')[1]
+        component_name = arr[1].split('"')[1]
       if arr[2].find("'"):
         attr = arr[2].split("'")[1]
       else:
         attr = arr[2].split('"')[1]
       value = arr[3].strip().split(")")[0]
 
-      pos = old.find('componentName="%s"'%componentName)
+      pos = old.find('componentName="%s"'%component_name)
       if pos == -1:
-        pos = old.find("componentName='%s'"%componentName)
+        pos = old.find("componentName='%s'"%component_name)
       while old[pos] != '\n':
         pos = pos - 1
-      pos = old.find('registerComponent(', pos) + len('registerComponent(')
+      pos = old.find(register_component, pos) + len(register_component)
       var = old[pos:old.find(',', pos)]
       pos = old.find("%s ="%var)
       if pos == -1:
@@ -133,7 +137,7 @@ def saveConfig(analysisContext, newFile):
       if p1 != -1 and p2 != -1:
         end = min(old.find(")", pos), old.find(",", pos))
       elif p1 == -1 and p2 == -1:
-        msg += "WARNING: '%s.%s' could not be found in the current config!\n"%(componentName, attr)
+        msg += "WARNING: '%s.%s' could not be found in the current config!\n"%(component_name, attr)
         continue
       elif p1 == -1:
         end = p2
@@ -141,38 +145,35 @@ def saveConfig(analysisContext, newFile):
         end = p1
       old = old[:old.find("=", pos)+1] + "%s"%value + old[end:]
 
-
     if "REMOTECONTROL addHandlerToAtomFilterAndRegisterAnalysisComponent" in logs[i]:
       parameters = logs[i].split(",",2)
 
       #find the name of the filter variable in the old config.
       pos = old.find(parameters[1].strip())
-      newPos = pos
-      while old[newPos] != '\n':
-        newPos = newPos - 1
-      filter = old[newPos:pos]
-      pos = filter.find('registerComponent(') + len('registerComponent(')
+      new_pos = pos
+      while old[new_pos] != '\n':
+        new_pos = new_pos - 1
+      filter = old[new_pos:pos]
+      pos = filter.find(register_component) + len(register_component)
       filter = filter[pos:filter.find(',',pos)].strip()
 
-      newParameters = parameters[2].split(")")
-      componentName = newParameters[1].strip(', ')
+      new_parameters = parameters[2].split(")")
+      component_name = new_parameters[1].strip(', ')
 
       var = "analysisComponent%d"%VAR_ID
       VAR_ID = VAR_ID + 1
-      old = old + "\n  %s = %s)"%(var, newParameters[0].strip())
-      old = old + "\n  %s.registerComponent(%s, componentName=%s)"%(filter, var, componentName)
+      old = old + "\n  %s = %s)"%(var, new_parameters[0].strip())
+      old = old + "\n  %s.registerComponent(%s, componentName=%s)"%(filter, var, component_name)
       old = old + "\n  %s.addHandler(%s)\n"%(filter, var)
 
   #remove double lines
   old = old.replace('\n\n\n', '\n\n')
 
   try:
-    with open(newFile, "w") as file:
+    with open(new_file, "w") as file:
       file.write(old)
-    msg += "Successfully saved the current config to %s." % newFile
+    msg += "Successfully saved the current config to %s." % new_file
     return msg
   except FileNotFoundError:
-    msg += "FAILURE: file '%s' could not be found or opened!"%newFile
+    msg += "FAILURE: file '%s' could not be found or opened!" % new_file
     return msg
-  
-

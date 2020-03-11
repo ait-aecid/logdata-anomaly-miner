@@ -160,7 +160,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
     self.analysisContext = AnalysisContext(aminerConfig)
     self.runAnalysisLoopFlag = True
     self.logStreamsByName = {}
-    self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
+    self.persistenceFileName = AMinerConfig.build_persistence_file_name(
         self.analysisContext.aminerConfig,
         self.__class__.__name__+'/RepositioningData')
     self.nextPersistTime = time.time()+600
@@ -184,6 +184,15 @@ class AnalysisChild(TimeTriggeredComponentInterface):
       shutdown signals."""
       print('%s: caught signal, shutting down' % programName, file=sys.stderr)
       self.runAnalysisLoopFlag = False
+
+      #######################################
+      # delete after Performance testing
+      #f=open("/tmp/results.csv", "a+")
+      #f.write("%s log lines could be handled"%ByteStreamLineAtomizer.COUNTER)
+      #f.close()
+      print(ByteStreamLineAtomizer.COUNTER)
+      #######################################
+
     import signal
     signal.signal(signal.SIGHUP, gracefulShutdownHandler)
     signal.signal(signal.SIGINT, gracefulShutdownHandler)
@@ -532,7 +541,7 @@ class AnalysisChildRemoteControlHandler(object):
     to call a do...() method with the same name.
   * put...(): Those methods put a request on the buffers."""
 
-  maxControlPacketSize = 1 << 16
+  maxControlPacketSize = 1 << 32
 
   def __init__(self, controlClientSocket):
     self.controlClientSocket = controlClientSocket

@@ -41,7 +41,7 @@ class NewMatchPathValueComboDetector(
     self.aminerConfig = aminerConfig
     self.persistenceId = persistenceId
 
-    self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
+    self.persistenceFileName = AMinerConfig.build_persistence_file_name(
         aminerConfig, self.__class__.__name__, persistenceId)
     self.nextPersistTime = None
     self.loadPersistencyData()
