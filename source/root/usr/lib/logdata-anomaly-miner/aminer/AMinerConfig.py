@@ -165,9 +165,14 @@ def saveConfig(analysisContext, newFile):
 
   #remove double lines
   old = old.replace('\n\n\n', '\n\n')
-  
-  with open(newFile, "w") as file:
-    file.write(old)
-  return msg
+
+  try:
+    with open(newFile, "w") as file:
+      file.write(old)
+    msg += "Successfully saved the current config to %s." % newFile
+    return msg
+  except FileNotFoundError:
+    msg += "FAILURE: file '%s' could not be found or opened!"%newFile
+    return msg
   
 
