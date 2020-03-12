@@ -3,13 +3,15 @@ to a specific delimiter string."""
 
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing import ModelElementInterface
+import re
 
 class DelimitedDataModelElement(ModelElementInterface):
-  """Find a string delimited by given delimiter string, possibly
-  a match of zero byte length"""
-  def __init__(self, elementId, delimiter):
+  """Find a string delimited by given non-escaped delimiter string,
+  possibly a match of zero byte length"""
+  def __init__(self, elementId, delimiter, escape=None):
     self.elementId = elementId
     self.delimiter = delimiter
+    self.escape = escape
 
   def getChildElements(self):
     """Get all possible child model elements of this element.
@@ -18,11 +20,14 @@ class DelimitedDataModelElement(ModelElementInterface):
 
   def getMatchElement(self, path, matchContext):
     """Find the maximum number of bytes before encountering the
-    delimiter.
+    non-escaped delimiter.
     @return a match when at least one byte was found but not the
     delimiter itself."""
     data = matchContext.matchData
-    matchLen = data.find(self.delimiter)
+    if self.escape is None:
+      matchLen = re.search(self.delimiter, data).start()
+    else:
+      matchLen = re.search(rb'(?<!' + re.escape(self.escape) + rb')' + self.delimiter, data).start()
     if matchLen < 1:
       return None
     matchData = data[:matchLen]
