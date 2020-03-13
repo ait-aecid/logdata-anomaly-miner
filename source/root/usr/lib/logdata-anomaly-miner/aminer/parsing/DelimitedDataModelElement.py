@@ -24,10 +24,15 @@ class DelimitedDataModelElement(ModelElementInterface):
     @return a match when at least one byte was found but not the
     delimiter itself."""
     data = matchContext.matchData
+    matchLen = -1
     if self.escape is None:
-      matchLen = re.search(self.delimiter, data).start()
+      search = re.search(re.escape(self.delimiter), data)
+      if search is not None:
+        matchLen = search.start()
     else:
-      matchLen = re.search(rb'(?<!' + re.escape(self.escape) + rb')' + self.delimiter, data).start()
+      search = re.search(rb'(?<!' + re.escape(self.escape) + rb')' + re.escape(self.delimiter), data)
+      if search is not None:
+        matchLen = search.start()
     if matchLen < 1:
       return None
     matchData = data[:matchLen]
