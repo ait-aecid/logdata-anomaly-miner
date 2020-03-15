@@ -128,13 +128,13 @@ class TimeTriggeredComponentInterface(object):
   the component should state, which type of triggering it would
   require."""
 
-  def getTimeTriggerClass(self):
+  def get_time_trigger_class(self):
     """Get the trigger class this component can be registered
     for. See AnalysisContext class for different trigger classes
     available."""
     raise Exception('Interface method called')
 
-  def doTimer(self, triggerTime):
+  def do_timer(self, triggerTime):
     """This method is called to perform trigger actions and to
     determine the time for next invocation. The caller may decide
     to invoke this method earlier than requested during the previous

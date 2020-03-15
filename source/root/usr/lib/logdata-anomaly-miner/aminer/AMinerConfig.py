@@ -74,9 +74,9 @@ def save_config(analysis_context, new_file):
       if "%s"%string != "%s"%prop:
         old = old[:pos+len(find_str)] + "%s"%prop + old[pos+len(find_str)+old_len:]
       
-  for component_id in analysis_context.getRegisteredComponentIds():
-    component = analysis_context.getComponentById(component_id)
-    name = analysis_context.getNameByComponent(component)
+  for component_id in analysis_context.get_registered_component_ids():
+    component = analysis_context.get_component_by_id(component_id)
+    name = analysis_context.get_name_by_component(component)
     start = 0
     old_start = 0
     for i in range(0, component_id+1):

@@ -40,12 +40,12 @@ class JsonConverterHandler(EventHandlerInterface):
       logData['AnnotatedMatchElement'] = logAtom.parserMatch.matchElement.annotateMatch('')
 
     analysisComponent = dict()
-    analysisComponent['AnalysisComponentIdentifier'] = self.analysisContext.getIdByComponent(eventSource)
+    analysisComponent['AnalysisComponentIdentifier'] = self.analysisContext.get_id_by_component(eventSource)
     if eventSource.__class__.__name__ == 'ExtractedData_class':
       analysisComponent['AnalysisComponentType'] = 'DistributionDetector'
     else:
       analysisComponent['AnalysisComponentType'] = str(eventSource.__class__.__name__)
-    analysisComponent['AnalysisComponentName'] = self.analysisContext.getNameByComponent(eventSource)
+    analysisComponent['AnalysisComponentName'] = self.analysisContext.get_name_by_component(eventSource)
     analysisComponent['Message'] = eventMessage
     analysisComponent['PersistenceFileName'] = eventSource.persistenceId
     if hasattr(eventSource, 'autoIncludeFlag'):

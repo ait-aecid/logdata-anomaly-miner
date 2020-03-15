@@ -38,11 +38,11 @@ class AMinerRemoteControlExecutionMethods(object):
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: the analysisContext must be of type %s." % AnalysisChild.AnalysisContext.__class__
             return
 
-        if not property_name in analysis_context.aminerConfig.configProperties:
+        if not property_name in analysis_context.aminer_config.configProperties:
             self.REMOTE_CONTROL_RESPONSE = "FAILURE: the property '%s' does not exist in the current config!" % property_name
             return
 
-        t = type(analysis_context.aminerConfig.configProperties[property_name])
+        t = type(analysis_context.aminer_config.configProperties[property_name])
         if not isinstance(value, t):
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: the value of the property '%s' must be of type %s!" % (
                 property_name, t)
@@ -68,8 +68,8 @@ class AMinerRemoteControlExecutionMethods(object):
 
     def change_config_property_mail_alerting(self, analysis_context, property_name, value):
         analysis_context.aminerConfig.configProperties[property_name] = value
-        for analysis_component_id in analysis_context.getRegisteredComponentIds():
-            component = analysis_context.getComponentById(analysis_component_id)
+        for analysis_component_id in analysis_context.get_registered_component_ids():
+            component = analysis_context.get_component_by_id(analysis_component_id)
             if component.__class__.__name__ == "DefaultMailNotificationEventHandler":
                 setattr(component, property_name, value)
         return 0
@@ -117,9 +117,9 @@ class AMinerRemoteControlExecutionMethods(object):
         return 0
 
     def change_attribute_of_registered_analysis_component(self, analysis_context, component_name, attribute, value):
-        attr = getattr(analysis_context.getComponentByName(component_name), attribute)
+        attr = getattr(analysis_context.get_component_by_name(component_name), attribute)
         if type(attr) == type(value):
-            setattr(analysis_context.getComponentByName(component_name), attribute, value)
+            setattr(analysis_context.get_component_by_name(component_name), attribute, value)
             self.REMOTE_CONTROL_RESPONSE += "'%s.%s' changed from %s to %s successfully." % (component_name,
                                                                                              attribute, repr(attr), value)
         else:
@@ -130,10 +130,9 @@ class AMinerRemoteControlExecutionMethods(object):
         if type(old_component_name) is not str or type(new_component_name) is not str:
             self.REMOTE_CONTROL_RESPONSE = "FAILURE: the parameters 'oldComponentName' and 'newComponentName' must be of type str."
         else:
-            component = analysis_context.getComponentByName(old_component_name)
+            component = analysis_context.get_component_by_name(old_component_name)
             if component is None:
                 self.REMOTE_CONTROL_RESPONSE += "FAILURE: component '%s' does not exist!" % old_component_name
-                return
             else:
                 analysis_context.registeredComponentsByName[old_component_name] = None
                 analysis_context.registeredComponentsByName[new_component_name] = component
@@ -148,8 +147,8 @@ class AMinerRemoteControlExecutionMethods(object):
         if type(component_name) is not str or type(attribute) is not str:
             self.REMOTE_CONTROL_RESPONSE = "FAILURE: the parameters 'componentName' and 'attribute' must be of type str."
             return
-        if hasattr(analysis_context.getComponentByName(component_name), attribute):
-            attr = getattr(analysis_context.getComponentByName(component_name), attribute)
+        if hasattr(analysis_context.get_component_by_name(component_name), attribute):
+            attr = getattr(analysis_context.get_component_by_name(component_name), attribute)
             if hasattr(attr, '__dict__') and self.isinstance_aminer_class(attr):
                 new_attr = self.get_all_vars(attr, '  ')
             elif isinstance(attr, list):
@@ -170,10 +169,10 @@ class AMinerRemoteControlExecutionMethods(object):
             else:
                 self.REMOTE_CONTROL_RESPONSE += attr_str % (config_property,
                                                                analysis_context.aminerConfig.configProperties[config_property])
-        for component_id in analysis_context.getRegisteredComponentIds():
-            self.REMOTE_CONTROL_RESPONSE += "%s {\n" % analysis_context.getNameByComponent(
-                analysis_context.getComponentById(component_id))
-            component = analysis_context.getComponentById(component_id)
+        for component_id in analysis_context.get_registered_component_ids():
+            self.REMOTE_CONTROL_RESPONSE += "%s {\n" % analysis_context.get_name_by_component(
+                analysis_context.get_component_by_id(component_id))
+            component = analysis_context.get_component_by_id(component_id)
             self.REMOTE_CONTROL_RESPONSE += self.get_all_vars(component, '  ')
             self.REMOTE_CONTROL_RESPONSE += "}\n\n"
 
@@ -209,7 +208,7 @@ class AMinerRemoteControlExecutionMethods(object):
         self.REMOTE_CONTROL_RESPONSE = AMinerConfig.save_config(analysis_context, destination_file)
 
     def whitelist_event_in_component(self, analysis_context, component_name, event_data, whitelisting_data=None):
-        component = analysis_context.getComponentByName(component_name)
+        component = analysis_context.get_component_by_name(component_name)
         if component is None:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: component '%s' does not exist!" % component
             return
@@ -230,24 +229,24 @@ class AMinerRemoteControlExecutionMethods(object):
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
 
     def add_handler_to_atom_filter_and_register_analysis_component(self, analysis_context, atom_handler, component, component_name):
-        atom_filter = analysis_context.getComponentByName(atom_handler)
+        atom_filter = analysis_context.get_component_by_name(atom_handler)
         if atom_filter is None:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: atomHandler '%s' does not exist!" % atom_handler
             return
-        if analysis_context.getComponentByName(component_name) is not None:
+        if analysis_context.get_component_by_name(component_name) is not None:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: component with same name already registered! (%s)" % component_name
             return
         if not isinstance(component, AtomHandlerInterface):
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: 'component' must implement the AtomHandlerInterface!"
             return
         atom_filter.addHandler(component)
-        analysis_context.registerComponent(component, component_name)
+        analysis_context.register_component(component, component_name)
         self.REMOTE_CONTROL_RESPONSE += "Component '%s' added to '%s' successfully." % (
             component_name, atom_handler)
 
     def dump_events_from_history(self, analysis_context, history_component_name, dump_event_id):
         self.REMOTE_CONTROL_RESPONSE = None
-        history_handler = analysis_context.getComponentByName(history_component_name)
+        history_handler = analysis_context.get_component_by_name(history_component_name)
         if history_handler is None:
             self.REMOTE_CONTROL_RESPONSE = component_not_found
         else:
@@ -277,7 +276,7 @@ class AMinerRemoteControlExecutionMethods(object):
             self.REMOTE_CONTROL_RESPONSE = result_string
 
     def ignore_events_from_history(self, analysis_context, history_component_name, event_ids):
-        history_handler = analysis_context.getComponentByName(history_component_name)
+        history_handler = analysis_context.get_component_by_name(history_component_name)
         if history_handler is None:
             self.REMOTE_CONTROL_RESPONSE = component_not_found
             return
@@ -305,7 +304,7 @@ class AMinerRemoteControlExecutionMethods(object):
         self.REMOTE_CONTROL_RESPONSE = 'OK\n%d elements ignored' % delete_count
 
     def list_events_from_history(self, analysis_context, history_component_name, max_event_count=None):
-        history_handler = analysis_context.getComponentByName(history_component_name)
+        history_handler = analysis_context.get_component_by_name(history_component_name)
         if history_handler is None:
             self.REMOTE_CONTROL_RESPONSE = component_not_found
         else:
@@ -320,7 +319,7 @@ class AMinerRemoteControlExecutionMethods(object):
 
     def whitelist_events_from_history(self, analysis_context, history_component_name, id_spec_list, whitelisting_data=None):
         from aminer.events import EventSourceInterface
-        history_handler = analysis_context.getComponentByName(history_component_name)
+        history_handler = analysis_context.get_component_by_name(history_component_name)
         if history_handler is None:
             self.REMOTE_CONTROL_RESPONSE = component_not_found
             return
@@ -330,7 +329,6 @@ class AMinerRemoteControlExecutionMethods(object):
         history_data = history_handler.getHistory()
         result_string = ''
         lookup_count = 0
-        # whitelist_count = 0
         event_pos = 0
         while event_pos < len(history_data):
             event_id, event_type, event_message, sorted_log_lines, event_data, event_source = history_data[event_pos]
@@ -369,7 +367,6 @@ class AMinerRemoteControlExecutionMethods(object):
             if whitelisted_flag:
                 # Clear the whitelisted event.
                 history_data[:] = history_data[:event_pos] + history_data[event_pos + 1:]
-                # whitelist_count += 1
             else:
                 event_pos += 1
         if lookup_count == 0:
