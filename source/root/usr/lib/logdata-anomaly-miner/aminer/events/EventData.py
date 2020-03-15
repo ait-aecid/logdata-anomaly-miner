@@ -13,7 +13,7 @@ class EventData(object):
       self.eventSource = eventSource
       self.analysisContext = analysisContext
       if analysisContext is not None:
-        self.description = '"%s"' % analysisContext.getNameByComponent(eventSource)
+        self.description = '"%s"' % analysisContext.get_name_by_component(eventSource)
       else:
         self.description = ''
       if logAtom is None:

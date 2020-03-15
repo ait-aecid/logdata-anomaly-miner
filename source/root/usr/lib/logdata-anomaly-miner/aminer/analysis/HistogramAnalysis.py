@@ -309,13 +309,13 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
       self.nextPersistTime = time.time()+600
 
 
-  def getTimeTriggerClass(self):
+  def get_time_trigger_class(self):
     """Get the trigger class this component should be registered
     for. This trigger is used only for persistency, so real-time
     triggering is needed."""
     return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-  def doTimer(self, triggerTime):
+  def do_timer(self, triggerTime):
     """Check current ruleset should be persisted"""
     if self.nextPersistTime is None:
       return 600
@@ -500,13 +500,13 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
       self.nextPersistTime = time.time()+600
 
 
-  def getTimeTriggerClass(self):
+  def get_time_trigger_class(self):
     """Get the trigger class this component should be registered
     for. This trigger is used only for persistency, so real-time
     triggering is needed."""
     return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-  def doTimer(self, triggerTime):
+  def do_timer(self, triggerTime):
     """Check current ruleset should be persisted"""
     if self.nextPersistTime is None:
       return 600

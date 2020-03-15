@@ -109,14 +109,14 @@ events and send them via "sendmail" transport."""
     return
 
 
-  def getTimeTriggerClass(self):
+  def get_time_trigger_class(self):
     """Get the trigger class this component can be registered
     for. See AnalysisContext class for different trigger classes
     available."""
     return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
 
-  def doTimer(self, triggerTime):
+  def do_timer(self, triggerTime):
     """Check exit status of previous mail sending procedures and
     check if alerts should be sent."""
 # Cleanup old sendmail processes.

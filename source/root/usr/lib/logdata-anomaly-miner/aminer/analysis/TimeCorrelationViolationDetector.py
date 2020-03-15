@@ -53,7 +53,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
       rule.match(logAtom)
 
 
-  def getTimeTriggerClass(self):
+  def get_time_trigger_class(self):
     """Get the trigger class this component should be registered
     for. This trigger is used mainly for persistency, so real-time
     triggering is needed. Use also real-time triggering for analysis:
@@ -62,7 +62,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
     input silence."""
     return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-  def doTimer(self, triggerTime):
+  def do_timer(self, triggerTime):
     """Check for any rule violations and if the current ruleset
     should be persisted."""
 # Persist the state only quite infrequently: As most correlation
