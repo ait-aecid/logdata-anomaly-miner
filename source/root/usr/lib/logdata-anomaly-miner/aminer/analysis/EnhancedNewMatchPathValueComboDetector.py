@@ -61,7 +61,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         self.knownValuesDict[tuple(valueTuple)] = extraData
 
 
-  def receiveAtom(self, logAtom):
+  def receive_atom(self, logAtom):
     """Receive on parsed atom and the information about the parser
     match.
     @return True if a value combination was extracted and checked

@@ -36,7 +36,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
       self.knownPathSet = set(persistenceData)
 
 
-  def receiveAtom(self, logAtom):
+  def receive_atom(self, logAtom):
     matchDict = logAtom.parserMatch.getMatchDictionary()
     eventData = dict()
     for targetPath in self.targetPathList:

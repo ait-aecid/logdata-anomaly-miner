@@ -39,11 +39,11 @@ class EventGenerationMatchAction(MatchAction):
 class AtomFilterMatchAction(MatchAction, SubhandlerFilter):
   """This generic match rule forwards all rule matches to a list
   of AtomHandlerInterface instaces using the analysis.AtomFilters.SubhandlerFilter."""
-  def __init__(self, subhandlerList, stopWhenHandledFlag=False):
-    SubhandlerFilter.__init__(self, subhandlerList, stopWhenHandledFlag)
+  def __init__(self, subhandlerList, stop_when_handled_flag=False):
+    SubhandlerFilter.__init__(self, subhandlerList, stop_when_handled_flag)
 
   def matchAction(self, logAtom):
-    self.receiveAtom(logAtom)
+    self.receive_atom(logAtom)
 
 
 class MatchRule(object):

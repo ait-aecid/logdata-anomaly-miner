@@ -22,7 +22,7 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
     self.separatorString = separatorString
     self.missingValueString = missingValueString
 
-  def receiveAtom(self, logAtom):
+  def receive_atom(self, logAtom):
     """Forward match value information to the stream."""
     matchDict = logAtom.parserMatch.getMatchDictionary()
     addSepFlag = False

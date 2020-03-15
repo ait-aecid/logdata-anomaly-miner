@@ -59,7 +59,7 @@ class NewMatchPathValueComboDetector(
       self.knownValuesSet = set([tuple(record) for record in persistenceData])
 
 
-  def receiveAtom(self, logAtom):
+  def receive_atom(self, logAtom):
     """Receive on parsed atom and the information about the parser
     match.
     @return True if a value combination was extracted and checked

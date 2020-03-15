@@ -52,7 +52,7 @@ class AtomHandlerInterface(object):
   """This is the common interface of all handlers suitable for
   receiving log atoms."""
 
-  def receiveAtom(self, logAtom):
+  def receive_atom(self, logAtom):
     """Receive a log atom from a source.
     @param atomData binary raw atom data
     @return True if this handler was really able to handle and

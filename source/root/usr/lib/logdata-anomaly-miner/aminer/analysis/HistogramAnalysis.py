@@ -283,7 +283,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
       raise Exception('No data reading, def merge yet')
 
 
-  def receiveAtom(self, logAtom):
+  def receive_atom(self, logAtom):
     matchDict = logAtom.parserMatch.getMatchDictionary()
     dataUpdatedFlag = False
     for dataItem in self.histogramData:
@@ -425,7 +425,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
       raise Exception('No data reading, def merge yet')
 
 
-  def receiveAtom(self, logAtom):
+  def receive_atom(self, logAtom):
     matchDict = logAtom.parserMatch.getMatchDictionary()
     match = matchDict.get(self.propertyPath, None)
     if match is None:

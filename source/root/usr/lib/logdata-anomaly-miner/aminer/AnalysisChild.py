@@ -105,8 +105,8 @@ class AnalysisContext(object):
       if register_time_trigger_class_override is None:
         self.add_time_triggered_component(component)
       else:
-        for triggerClass in register_time_trigger_class_override:
-          self.add_time_triggered_component(component, triggerClass)
+        for trigger_class in register_time_trigger_class_override:
+          self.add_time_triggered_component(component, trigger_class)
 
   def get_registered_component_ids(self):
     """Get a list of currently known component IDs."""
@@ -179,7 +179,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
     self.tracked_fds_dict = {}
 
 # Override the signal handler to allow graceful shutdown.
-    def graceful_shutdown_handler(_signo, _stackFrame):
+    def graceful_shutdown_handler(_signo, _stack_frame):
       """This is the signal handler function to react on typical
       shutdown signals."""
       print('%s: caught signal, shutting down' % program_name, file=sys.stderr)
@@ -314,7 +314,6 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 
       read_list = None
       write_list = None
-      except_list = None
       try:
         (read_list, write_list, except_list) = select.select(
             input_select_fd_list, output_select_fd_list, [], 1)

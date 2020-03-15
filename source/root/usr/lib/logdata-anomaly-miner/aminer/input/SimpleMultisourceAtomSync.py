@@ -38,7 +38,7 @@ class SimpleMultisourceAtomSync(AtomHandlerInterface):
     self.lastForwardedSource = None
     self.bufferEmptyCounter = 0
 
-  def receiveAtom(self, logAtom):
+  def receive_atom(self, logAtom):
     if self.lastForwardedSource is not None and logAtom.source != self.lastForwardedSource and self.bufferEmptyCounter < (2 * len(self.sourcesDict.keys())):
       self.bufferEmptyCounter += 1
       return False
@@ -118,4 +118,4 @@ class SimpleMultisourceAtomSync(AtomHandlerInterface):
   def forwardAtom(self, logAtom):
     """Forward atom to all atom handlers."""
     for handler in self.atomHandlerList:
-      handler.receiveAtom(logAtom)
+      handler.receive_atom(logAtom)

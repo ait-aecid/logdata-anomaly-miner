@@ -239,7 +239,7 @@ class AMinerRemoteControlExecutionMethods(object):
         if not isinstance(component, AtomHandlerInterface):
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: 'component' must implement the AtomHandlerInterface!"
             return
-        atom_filter.addHandler(component)
+        atom_filter.add_handler(component)
         analysis_context.register_component(component, component_name)
         self.REMOTE_CONTROL_RESPONSE += "Component '%s' added to '%s' successfully." % (
             component_name, atom_handler)

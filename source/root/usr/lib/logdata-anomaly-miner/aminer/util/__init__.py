@@ -160,7 +160,7 @@ class VolatileLogarithmicBackoffAtomHistory(AtomHandlerInterface, LogarithmicBac
     """Initialize the history component."""
     LogarithmicBackoffHistory.__init__(self, maxItems)
 
-  def receiveAtom(self, logAtom):
+  def receive_atom(self, logAtom):
     """Receive an atom and add it to the history log."""
     self.addObject(logAtom)
     return True

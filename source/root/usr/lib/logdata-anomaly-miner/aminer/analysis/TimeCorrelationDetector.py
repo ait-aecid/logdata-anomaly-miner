@@ -53,7 +53,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
 #     self.knownPathSet = set(persistenceData)
 
 
-  def receiveAtom(self, logAtom):
+  def receive_atom(self, logAtom):
     eventData = dict()
     timestamp = logAtom.getTimestamp()
     if timestamp is None:

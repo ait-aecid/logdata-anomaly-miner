@@ -20,7 +20,7 @@ class TimestampsUnsortedDetector(AtomHandlerInterface, EventSourceInterface):
     self.outputLogLine = outputLogLine
     self.aminerConfig = aminerConfig
 
-  def receiveAtom(self, logAtom):
+  def receive_atom(self, logAtom):
     """Receive on parsed atom and the information about the parser
     match.
     @param logAtom the parsed log atom

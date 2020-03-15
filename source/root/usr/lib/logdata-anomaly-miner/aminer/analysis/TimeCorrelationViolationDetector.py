@@ -44,7 +44,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
 #     self.knownPathSet = set(persistenceData)
 
 
-  def receiveAtom(self, logAtom):
+  def receive_atom(self, logAtom):
     """Receive a parsed atom and check all the classification
     rules, that will trigger correlation rule evaluation and event
     triggering on violations."""

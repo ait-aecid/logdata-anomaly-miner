@@ -16,7 +16,7 @@ class SimpleMonotonicTimestampAdjust(AtomHandlerInterface):
     self.stopWhenHandledFlag = stopWhenHandledFlag
     self.latestTimestampSeen = 0
 
-  def receiveAtom(self, logAtom):
+  def receive_atom(self, logAtom):
     """Pass the atom to the subhandlers.
     @return false when no subhandler was able to handle the atom."""
     timestamp = logAtom.getTimestamp()
@@ -31,7 +31,7 @@ class SimpleMonotonicTimestampAdjust(AtomHandlerInterface):
 
     result = False
     for handler in self.subhandlerList:
-      handlerResult = handler.receiveAtom(logAtom)
+      handlerResult = handler.receive_atom(logAtom)
       if handlerResult is True:
         result = True
         if self.stopWhenHandledFlag:

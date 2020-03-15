@@ -53,7 +53,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
 #     self.knownPathSet = set(persistenceData)
 
 
-  def receiveAtom(self, logAtom):
+  def receive_atom(self, logAtom):
     """Sends summary to all event handlers."""
     parserMatch = logAtom.parserMatch
     valueDict = parserMatch.getMatchDictionary()

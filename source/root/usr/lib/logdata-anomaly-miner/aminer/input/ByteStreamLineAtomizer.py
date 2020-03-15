@@ -127,7 +127,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
       wasConsumedFlag = True
     else:
       for handler in self.atomHandlerList:
-        if handler.receiveAtom(logAtom):
+        if handler.receive_atom(logAtom):
           wasConsumedFlag = True
 
     if wasConsumedFlag:

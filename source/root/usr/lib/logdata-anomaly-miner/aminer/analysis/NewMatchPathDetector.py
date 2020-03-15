@@ -38,7 +38,7 @@ class NewMatchPathDetector(AtomHandlerInterface, \
       self.knownPathSet = set(persistenceData)
 
 
-  def receiveAtom(self, logAtom):
+  def receive_atom(self, logAtom):
     """Receive on parsed atom and the information about the parser
     match.
     @param logAtom the parsed log atom
