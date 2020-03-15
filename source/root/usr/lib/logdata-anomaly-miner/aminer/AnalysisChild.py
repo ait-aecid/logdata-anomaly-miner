@@ -62,7 +62,7 @@ class AnalysisContext(object):
       format='%(asctime)s %(levelname)s %(message)s', datefmt='%d.%m.%Y %H:%M:%S')
     logging.info("AMiner started.")
 
-  def addTimeTriggeredComponent(self, component, trigger_class=None):
+  def add_time_triggered_component(self, component, trigger_class=None):
     """Add a time-triggered component to the registry."""
     if not isinstance(component, TimeTriggeredComponentInterface):
       raise Exception('Attempting to register component of class ' \
@@ -103,10 +103,10 @@ class AnalysisContext(object):
       self.registered_components_by_name[component_name] = component
     if isinstance(component, TimeTriggeredComponentInterface):
       if register_time_trigger_class_override is None:
-        self.addTimeTriggeredComponent(component)
+        self.add_time_triggered_component(component)
       else:
         for triggerClass in register_time_trigger_class_override:
-          self.addTimeTriggeredComponent(component, triggerClass)
+          self.add_time_triggered_component(component, triggerClass)
 
   def get_registered_component_ids(self):
     """Get a list of currently known component IDs."""
@@ -200,7 +200,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 
 # Do this on at the end of the initialization to avoid having
 # partially initialized objects inside the registry.
-    self.analysis_context.addTimeTriggeredComponent(self)
+    self.analysis_context.add_time_triggered_component(self)
 
 
   def run_analysis(self, master_fd):
