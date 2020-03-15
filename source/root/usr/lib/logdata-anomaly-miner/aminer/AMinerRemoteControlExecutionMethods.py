@@ -7,6 +7,9 @@ import subprocess
 from aminer.input import LogAtom
 from aminer.input import AtomHandlerInterface
 
+attr_str = "%s = %s\n"
+component_not_found = 'Event history component not found'
+
 class AMinerRemoteControlExecutionMethods(object):
     REMOTE_CONTROL_RESPONSE = ''
 
@@ -24,7 +27,7 @@ class AMinerRemoteControlExecutionMethods(object):
 
     def change_config_property(self, analysis_context, property_name, value):
         result = 0
-        configKeysMailAlerting = {self.CONFIG_KEY_MAIL_TARGET_ADDRESS,
+        config_keys_mail_alerting = {self.CONFIG_KEY_MAIL_TARGET_ADDRESS,
                                   self.CONFIG_KEY_MAIL_FROM_ADDRESS,
                                   self.CONFIG_KEY_MAIL_SUBJECT_PREFIX,
                                   self.CONFIG_KEY_EVENT_COLLECT_TIME,
@@ -52,7 +55,7 @@ class AMinerRemoteControlExecutionMethods(object):
             result = self.change_config_property_max_memory(analysis_context, value)
         elif property_name == AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE:
             result = self.change_config_property_max_cpu_percent_usage(analysis_context, value)
-        elif property_name in configKeysMailAlerting:
+        elif property_name in config_keys_mail_alerting:
             result = self.change_config_property_mail_alerting(analysis_context, property_name, value)
         elif property_name == AMinerConfig.KEY_LOG_PREFIX:
             result = self.change_config_property_log_prefix(analysis_context, value)
@@ -65,8 +68,8 @@ class AMinerRemoteControlExecutionMethods(object):
 
     def change_config_property_mail_alerting(self, analysis_context, property_name, value):
         analysis_context.aminerConfig.configProperties[property_name] = value
-        for analysisComponentId in analysis_context.getRegisteredComponentIds():
-            component = analysis_context.getComponentById(analysisComponentId)
+        for analysis_component_id in analysis_context.getRegisteredComponentIds():
+            component = analysis_context.getComponentById(analysis_component_id)
             if component.__class__.__name__ == "DefaultMailNotificationEventHandler":
                 setattr(component, property_name, value)
         return 0
@@ -91,10 +94,10 @@ class AMinerRemoteControlExecutionMethods(object):
             with subprocess.Popen(['pgrep', '-f', 'AMiner'], stdout=subprocess.PIPE, shell=False) as child:
                 response = child.communicate()[0].split()
             pid = response[len(response) - 1]
-            packageInstalledCmd = ['dpkg', '-l', 'cpulimit']
-            cpulimitCmd = ['cpulimit', '-p', pid.decode(), '-l', str(max_cpu_percent_usage)]
+            package_installed_cmd = ['dpkg', '-l', 'cpulimit']
+            cpulimit_cmd = ['cpulimit', '-p', pid.decode(), '-l', str(max_cpu_percent_usage)]
 
-            with subprocess.Popen(packageInstalledCmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as out:
+            with subprocess.Popen(package_installed_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as out:
                 stdout, stderr = out.communicate()
 
             if 'dpkg-query: no packages found matching cpulimit.' in stdout.decode():
@@ -102,7 +105,7 @@ class AMinerRemoteControlExecutionMethods(object):
                 + 'when using the property %s.' % AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE
                 return 1
             else:
-                with subprocess.Popen(cpulimitCmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as out:
+                with subprocess.Popen(cpulimit_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as out:
                     return 0
         except ValueError:
             self.REMOTE_CONTROL_RESPONSE = 'FATAL: %s must be an integer, terminating.' % (
@@ -126,16 +129,16 @@ class AMinerRemoteControlExecutionMethods(object):
     def rename_registered_analysis_component(self, analysis_context, old_component_name, new_component_name):
         if type(old_component_name) is not str or type(new_component_name) is not str:
             self.REMOTE_CONTROL_RESPONSE = "FAILURE: the parameters 'oldComponentName' and 'newComponentName' must be of type str."
-            return
-        component = analysis_context.getComponentByName(old_component_name)
-        if component is None:
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: component '%s' does not exist!" % old_component_name
-            return
         else:
-            analysis_context.registeredComponentsByName[old_component_name] = None
-            analysis_context.registeredComponentsByName[new_component_name] = component
-            self.REMOTE_CONTROL_RESPONSE += "Component '%s' renamed to '%s' successfully." % (
-                old_component_name, new_component_name)
+            component = analysis_context.getComponentByName(old_component_name)
+            if component is None:
+                self.REMOTE_CONTROL_RESPONSE += "FAILURE: component '%s' does not exist!" % old_component_name
+                return
+            else:
+                analysis_context.registeredComponentsByName[old_component_name] = None
+                analysis_context.registeredComponentsByName[new_component_name] = component
+                self.REMOTE_CONTROL_RESPONSE += "Component '%s' renamed to '%s' successfully." % (
+                    old_component_name, new_component_name)
 
     def print_config_property(self, analysis_context, property_name):
         self.REMOTE_CONTROL_RESPONSE = property_name + " : " + str(
@@ -148,25 +151,25 @@ class AMinerRemoteControlExecutionMethods(object):
         if hasattr(analysis_context.getComponentByName(component_name), attribute):
             attr = getattr(analysis_context.getComponentByName(component_name), attribute)
             if hasattr(attr, '__dict__') and self.isinstance_aminer_class(attr):
-                newAttr = self.get_all_vars(attr, '  ')
+                new_attr = self.get_all_vars(attr, '  ')
             elif isinstance(attr, list):
                 for l in attr:
                     if hasattr(l, '__dict__') and self.isinstance_aminer_class(l):
-                        newAttr = "\n[\n  " + l.__class__.__name__ + "  {\n" + self.get_all_vars(l, '  ') + "  }\n]"
+                        new_attr = "\n[\n  " + l.__class__.__name__ + "  {\n" + self.get_all_vars(l, '  ') + "  }\n]"
                     else:
-                        newAttr = "%s = %s\n" % (attribute, repr(l))
-            self.REMOTE_CONTROL_RESPONSE += "%s.%s = %s" % (component_name, attribute, newAttr)
+                        new_attr = attr_str % (attribute, repr(l))
+            self.REMOTE_CONTROL_RESPONSE += "%s.%s = %s" % (component_name, attribute, new_attr)
         else:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: the component '%s' does not have an attribute named '%s'"%(component_name, attribute)
 
     def print_current_config(self, analysis_context):
-        for configProperty in analysis_context.aminerConfig.configProperties:
-            if isinstance(analysis_context.aminerConfig.configProperties[configProperty], str):
-                self.REMOTE_CONTROL_RESPONSE += "%s = '%s'\n" % (configProperty,
-                                                                 analysis_context.aminerConfig.configProperties[configProperty])
+        for config_property in analysis_context.aminerConfig.configProperties:
+            if isinstance(analysis_context.aminerConfig.configProperties[config_property], str):
+                self.REMOTE_CONTROL_RESPONSE += "%s = '%s'\n" % (config_property,
+                                                                 analysis_context.aminerConfig.configProperties[config_property])
             else:
-                self.REMOTE_CONTROL_RESPONSE += "%s = %s\n" % (configProperty,
-                                                               analysis_context.aminerConfig.configProperties[configProperty])
+                self.REMOTE_CONTROL_RESPONSE += attr_str % (config_property,
+                                                               analysis_context.aminerConfig.configProperties[config_property])
         for component_id in analysis_context.getRegisteredComponentIds():
             self.REMOTE_CONTROL_RESPONSE += "%s {\n" % analysis_context.getNameByComponent(
                 analysis_context.getComponentById(component_id))
@@ -185,10 +188,10 @@ class AMinerRemoteControlExecutionMethods(object):
                     if hasattr(l, '__dict__') and self.isinstance_aminer_class(l):
                         result += indent + "%s = [\n" % var + indent + '  ' + l.__class__.__name__ + " {\n" + self.get_all_vars(l, indent + '    ') + indent + '  ' + "}\n" + indent + ']\n'
                     else:
-                        result += indent + "%s = %s\n" % (var, repr(attr))
+                        result += indent + attr_str % (var, repr(attr))
                         break
             else:
-                result += indent + "%s = %s\n" % (var, repr(attr))
+                result += indent + attr_str % (var, repr(attr))
         return result
 
     def isinstance_aminer_class(self, obj):
@@ -246,7 +249,7 @@ class AMinerRemoteControlExecutionMethods(object):
         self.REMOTE_CONTROL_RESPONSE = None
         history_handler = analysis_context.getComponentByName(history_component_name)
         if history_handler is None:
-            self.REMOTE_CONTROL_RESPONSE = 'Event history component not found'
+            self.REMOTE_CONTROL_RESPONSE = component_not_found
         else:
             history_data = history_handler.getHistory()
             result_string = 'FAIL: not found'
@@ -276,7 +279,7 @@ class AMinerRemoteControlExecutionMethods(object):
     def ignore_events_from_history(self, analysis_context, history_component_name, event_ids):
         history_handler = analysis_context.getComponentByName(history_component_name)
         if history_handler is None:
-            self.REMOTE_CONTROL_RESPONSE = 'Event history component not found'
+            self.REMOTE_CONTROL_RESPONSE = component_not_found
             return
         history_data = history_handler.getHistory()
         id_spec_list = []
@@ -304,7 +307,7 @@ class AMinerRemoteControlExecutionMethods(object):
     def list_events_from_history(self, analysis_context, history_component_name, max_event_count=None):
         history_handler = analysis_context.getComponentByName(history_component_name)
         if history_handler is None:
-            self.REMOTE_CONTROL_RESPONSE = 'Event history component not found'
+            self.REMOTE_CONTROL_RESPONSE = component_not_found
         else:
             history_data = history_handler.getHistory()
             max_events = len(history_data)
@@ -319,7 +322,7 @@ class AMinerRemoteControlExecutionMethods(object):
         from aminer.events import EventSourceInterface
         history_handler = analysis_context.getComponentByName(history_component_name)
         if history_handler is None:
-            self.REMOTE_CONTROL_RESPONSE = 'Event history component not found'
+            self.REMOTE_CONTROL_RESPONSE = component_not_found
             return
         elif id_spec_list is None or not isinstance(id_spec_list, list):
             self.REMOTE_CONTROL_RESPONSE = 'Request requires remoteControlData with ID specification list and optional whitelisting information'
@@ -327,7 +330,7 @@ class AMinerRemoteControlExecutionMethods(object):
         history_data = history_handler.getHistory()
         result_string = ''
         lookup_count = 0
-        whitelist_count = 0
+        # whitelist_count = 0
         event_pos = 0
         while event_pos < len(history_data):
             event_id, event_type, event_message, sorted_log_lines, event_data, event_source = history_data[event_pos]
@@ -366,7 +369,7 @@ class AMinerRemoteControlExecutionMethods(object):
             if whitelisted_flag:
                 # Clear the whitelisted event.
                 history_data[:] = history_data[:event_pos] + history_data[event_pos + 1:]
-                whitelist_count += 1
+                # whitelist_count += 1
             else:
                 event_pos += 1
         if lookup_count == 0:
