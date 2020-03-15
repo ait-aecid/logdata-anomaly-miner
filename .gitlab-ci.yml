@@ -21,7 +21,6 @@ debian:
                 - chown -R aminer:aminer /usr/lib/logdata-anomaly-miner
                 - chown -h aminer:aminer /usr/bin/AMiner
                 - chmod +x /usr/lib/logdata-anomaly-miner/AMiner
-                - python3 -m unittest discover -s unit -p '*Test.py'
                 - cd integration
                 - cp config* /tmp
                 - chmod +x aminerIntegrationTest.sh
@@ -38,7 +37,6 @@ debian:
                 - echo 'Branch Coverage:' >> /tmp/report
                 - coverage report >> /tmp/report
                 - cat /tmp/report
-                #
                 
 ubuntu:
         image: git-service.ait.ac.at:8010/ict-caiscluster/logdata-anomaly-miner/aminer-ubuntu
