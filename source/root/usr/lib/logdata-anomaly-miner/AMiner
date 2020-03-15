@@ -69,7 +69,7 @@ def runAnalysisChild(aminerConfig, programName):
   child = AnalysisChild(programName, aminerConfig)
 # This function call will only return on error or signal induced
 # normal termination.
-  childReturnStatus = child.runAnalysis(3)
+  childReturnStatus = child.run_analysis(3)
   if childReturnStatus == 0:
     sys.exit(0)
   print('%s: runAnalysis terminated with unexpected status %d' % (
