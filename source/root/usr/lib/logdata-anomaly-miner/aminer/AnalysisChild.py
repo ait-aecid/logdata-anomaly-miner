@@ -221,7 +221,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         self.master_control_socket
 
 # Locate the real analysis configuration.
-    self.analysis_context.buildAnalysisPipeline()
+    self.analysis_context.build_analysis_pipeline()
     if self.analysis_context.atomizer_factory is None:
       print('FATAL: buildAnalysisPipeline() did ' \
           'not initialize atomizerFactory, terminating', file=sys.stderr)
