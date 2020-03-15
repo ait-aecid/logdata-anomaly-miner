@@ -29,7 +29,7 @@ events and send them via "sendmail" transport."""
 
   def __init__(self, analysisContext):
     self.analysisContext = analysisContext
-    aminerConfig = analysisContext.aminerConfig
+    aminerConfig = analysisContext.aminer_config
     self.recipientAddress = aminerConfig.configProperties.get(
         DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS)
     if self.recipientAddress is None:
