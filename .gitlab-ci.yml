@@ -38,7 +38,6 @@ debian:
                 #- echo 'Branch Coverage:' >> /tmp/report
                 #- coverage report >> /tmp/report
                 #- cat /tmp/report
-                #
                 
 ubuntu:
         image: git-service.ait.ac.at:8010/ict-caiscluster/logdata-anomaly-miner/aminer-ubuntu
