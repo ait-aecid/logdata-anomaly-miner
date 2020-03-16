@@ -269,8 +269,8 @@ class CorrelationRule:
 # We want to keep a history of good matches to ease diagnosis
 # of correlation failures. Keep information about current line
 # for reference.
-        self.correlation_history.addObject((a_event[3].matchElement.matchString, a_event[2].action_id, \
-                                            b_event[3].matchElement.matchString, b_event[2].action_id))
+        self.correlation_history.add_object((a_event[3].matchElement.matchString, a_event[2].action_id, \
+                                             b_event[3].matchElement.matchString, b_event[2].action_id))
         del self.history_a_events[a_pos]
         del self.history_b_events[b_pos]
         deleted = True

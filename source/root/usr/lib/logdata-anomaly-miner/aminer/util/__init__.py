@@ -63,7 +63,7 @@ class ObjectHistory(object):
   size limits to be reached, priorization which elements should
   be dropped first."""
 
-  def addObject(self, newObject):
+  def add_object(self, newObject):
     """Add an object to this history. This method call may evict
     other objects from the history."""
     raise Exception('Interface method called')
@@ -98,7 +98,7 @@ class LogarithmicBackoffHistory(ObjectHistory):
     else: initialList = initialList[:maxItems]
     self.history = initialList
 
-  def addObject(self, newObject):
+  def add_object(self, newObject):
     """Add a new object to the list according to the rules described
     in the class docstring."""
     if len(self.history) < self.maxItems:
@@ -162,5 +162,5 @@ class VolatileLogarithmicBackoffAtomHistory(AtomHandlerInterface, LogarithmicBac
 
   def receive_atom(self, logAtom):
     """Receive an atom and add it to the history log."""
-    self.addObject(logAtom)
+    self.add_object(logAtom)
     return True

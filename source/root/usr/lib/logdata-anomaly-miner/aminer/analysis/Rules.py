@@ -504,7 +504,7 @@ class DebugHistoryMatchRule(MatchRule):
     self.match_action = match_action
 
   def match(self, log_atom):
-    self.object_history.addObject(log_atom)
+    self.object_history.add_object(log_atom)
     if self.match_action != None:
       self.match_action.match_action(log_atom)
     return self.debug_match_result

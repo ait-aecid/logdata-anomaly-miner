@@ -86,4 +86,3 @@ class JsonConverterHandler(EventHandlerInterface):
 
     for listener in self.json_event_handlers:
       listener.receive_event(event_type, event_message, res, {}, log_atom, event_source)
-    return
