@@ -33,24 +33,24 @@ class NewMatchPathValueComboDetector(
     @param autoIncludeFlag when set to True, this detector will
     report a new value only the first time before including it
     in the known values set automatically."""
-    self.targetPathList = targetPathList
-    self.anomalyEventHandlers = anomalyEventHandlers
-    self.allowMissingValuesFlag = allowMissingValuesFlag
-    self.autoIncludeFlag = autoIncludeFlag
-    self.outputLogLine = outputLogLine
-    self.aminerConfig = aminerConfig
+    self.target_path_list = targetPathList
+    self.anomaly_event_handlers = anomalyEventHandlers
+    self.allow_missing_values_flag = allowMissingValuesFlag
+    self.auto_include_flag = autoIncludeFlag
+    self.output_log_line = outputLogLine
+    self.aminer_config = aminerConfig
     self.persistenceId = persistenceId
 
-    self.persistenceFileName = AMinerConfig.build_persistence_file_name(
+    self.persistence_file_name = AMinerConfig.build_persistence_file_name(
         aminerConfig, self.__class__.__name__, persistenceId)
-    self.nextPersistTime = None
+    self.next_persist_time = None
     self.loadPersistencyData()
     PersistencyUtil.addPersistableComponent(self)
 
 
   def loadPersistencyData(self):
     """Load the persistency data from storage."""
-    persistenceData = PersistencyUtil.loadJson(self.persistenceFileName)
+    persistenceData = PersistencyUtil.loadJson(self.persistence_file_name)
     if persistenceData is None:
       self.knownValuesSet = set()
     else:
@@ -68,10 +68,10 @@ class NewMatchPathValueComboDetector(
     matchDict = logAtom.parserMatch.getMatchDictionary()
     matchValueList = []
     eventData = dict()
-    for targetPath in self.targetPathList:
+    for targetPath in self.target_path_list:
       matchElement = matchDict.get(targetPath, None)
       if matchElement is None:
-        if not self.allowMissingValuesFlag:
+        if not self.allow_missing_values_flag:
           return False
         matchValueList.append(None)
       else:
@@ -84,22 +84,22 @@ class NewMatchPathValueComboDetector(
         matchValue = matchValue.decode()
       affectedLogAtomValues.append(matchValue)
     if matchValueTuple not in self.knownValuesSet:
-      if self.autoIncludeFlag:
+      if self.auto_include_flag:
         self.knownValuesSet.add(matchValueTuple)
-        if self.nextPersistTime is None:
-          self.nextPersistTime = time.time()+600
+        if self.next_persist_time is None:
+          self.next_persist_time = time.time() + 600
 
       analysisComponent = dict()
       analysisComponent['AffectedLogAtomValues'] = affectedLogAtomValues
       eventData['AnalysisComponent'] = analysisComponent
-      if self.outputLogLine:
-        originalLogLinePrefix = self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+      if self.output_log_line:
+        originalLogLinePrefix = self.aminer_config.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
         if originalLogLinePrefix is None:
           originalLogLinePrefix = ''
         sortedLogLines = [str(matchValueTuple)+os.linesep+originalLogLinePrefix+repr(logAtom.rawData)]
       else:
         sortedLogLines = [str(matchValueTuple)]
-      for listener in self.anomalyEventHandlers:
+      for listener in self.anomaly_event_handlers:
         listener.receiveEvent(
             'Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected',
             sortedLogLines, eventData, logAtom, self)
@@ -114,10 +114,10 @@ class NewMatchPathValueComboDetector(
 
   def do_timer(self, triggerTime):
     """Check current ruleset should be persisted"""
-    if self.nextPersistTime is None:
+    if self.next_persist_time is None:
       return 600
 
-    delta = self.nextPersistTime-triggerTime
+    delta = self.next_persist_time - triggerTime
     if delta < 0:
       self.doPersist()
       delta = 600
@@ -127,8 +127,8 @@ class NewMatchPathValueComboDetector(
   def doPersist(self):
     """Immediately write persistence data to storage."""
     PersistencyUtil.storeJson(
-        self.persistenceFileName, list(self.knownValuesSet))
-    self.nextPersistTime = None
+        self.persistence_file_name, list(self.knownValuesSet))
+    self.next_persist_time = None
 
 
   def whitelistEvent(
@@ -144,4 +144,4 @@ class NewMatchPathValueComboDetector(
       raise Exception('Whitelisting data not understood by this detector')
     self.knownValuesSet.add(eventData[1])
     return 'Whitelisted path(es) %s with %s in %s' % (
-        ', '.join(self.targetPathList), eventData[1], sortedLogLines[0])
+        ', '.join(self.target_path_list), eventData[1], sortedLogLines[0])

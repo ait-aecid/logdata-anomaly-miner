@@ -72,7 +72,7 @@ def replacePersistenceFile(fileName, newFileHandle):
 def persistAll():
   """Persist all persistable components in the registry."""
   for component in persistableComponents:
-    component.doPersist()
+    component.do_persist()
 
 def loadJson(fileName):
   """Load persistency data from file.
