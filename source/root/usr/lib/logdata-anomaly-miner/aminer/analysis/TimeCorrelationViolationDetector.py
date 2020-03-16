@@ -83,7 +83,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
     event_data = dict()
     newest_timestamp = 0.0
     for rule in self.event_correlation_ruleset:
-      newest_timestamp = max(newest_timestamp, rule.lastTimestampSeen)
+      newest_timestamp = max(newest_timestamp, rule.last_timestamp_seen)
 
     for rule in self.event_correlation_ruleset:
       check_result = rule.check_status(newest_timestamp)
@@ -220,7 +220,7 @@ class CorrelationRule:
             if isinstance(violation_line, bytes):
               violation_line = violation_line.decode("utf-8")
               if num_violations <= max_violations:
-                violation_message += 'FAIL: B-Event for \"%s\" (%s) was found too early!\n' % (violation_line, a_event[2].actionId)
+                violation_message += 'FAIL: B-Event for \"%s\" (%s) was found too early!\n' % (violation_line, a_event[2].action_id)
               violation_logs.append(violation_line)
               del self.history_a_events[a_pos]
               del self.history_b_events[b_pos]
@@ -235,7 +235,7 @@ class CorrelationRule:
           if isinstance(violation_line, bytes):
             violation_line = violation_line.decode("utf-8")
             if num_violations <= max_violations:
-              violation_message += 'FAIL: B-Event for \"%s\" (%s) was not found in time!\n' % (violation_line, a_event[2].actionId)
+              violation_message += 'FAIL: B-Event for \"%s\" (%s) was not found in time!\n' % (violation_line, a_event[2].action_id)
             violation_logs.append(violation_line)
             del self.history_a_events[a_pos]
             del self.history_b_events[b_pos]
@@ -253,7 +253,7 @@ class CorrelationRule:
               violation_line = violation_line.decode("utf-8")
               if num_violations <= max_violations:
                 violation_message += 'FAIL: \"%s\" (%s) %s is not equal %s\n' % (
-                  violation_line, a_event[2].actionId, a_event[check_pos], b_event[check_pos])
+                  violation_line, a_event[2].action_id, a_event[check_pos], b_event[check_pos])
               violation_logs.append(violation_line)
               del self.history_a_events[a_pos]
               del self.history_b_events[b_pos]
@@ -269,8 +269,8 @@ class CorrelationRule:
 # We want to keep a history of good matches to ease diagnosis
 # of correlation failures. Keep information about current line
 # for reference.
-        self.correlation_history.addObject((a_event[3].matchElement.matchString, a_event[2].actionId, \
-                                            b_event[3].matchElement.matchString, b_event[2].actionId))
+        self.correlation_history.addObject((a_event[3].matchElement.matchString, a_event[2].action_id, \
+                                            b_event[3].matchElement.matchString, b_event[2].action_id))
         del self.history_a_events[a_pos]
         del self.history_b_events[b_pos]
         deleted = True
@@ -290,7 +290,7 @@ class CorrelationRule:
         if isinstance(violation_line, bytes):
           violation_line = violation_line.decode("utf-8")
           if num_violations <= max_violations:
-            violation_message += 'FAIL: B-Event for \"%s\" (%s) was not found in time!\n' % (violation_line, a_event[2].actionId)
+            violation_message += 'FAIL: B-Event for \"%s\" (%s) was not found in time!\n' % (violation_line, a_event[2].action_id)
           violation_logs.append(violation_line)
           del self.history_a_events[a_pos]
           deleted = True

@@ -168,10 +168,10 @@ class MissingMatchPathValueDetector(
         analysis_component['AffectedLogAtomValues'] = affected_log_atom_values
         event_data['AnalysisComponent'] = analysis_component
         if self.output_log_line:
-          originalLogLinePrefix = self.aminer_config.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-          if originalLogLinePrefix is None:
-            originalLogLinePrefix = ''
-          message_part.append(originalLogLinePrefix + repr(log_atom.rawData))
+          original_log_line_prefix = self.aminer_config.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+          if original_log_line_prefix is None:
+            original_log_line_prefix = ''
+          message_part.append(original_log_line_prefix + repr(log_atom.rawData))
         for listener in self.anomaly_event_handlers:
           self.send_event_to_handlers(listener, event_data, log_atom, [''.join(message_part)], missing_value_list)
     return True
@@ -284,9 +284,6 @@ class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
 
 
   def send_event_to_handlers(self, anomaly_event_handler, event_data, log_atom, message_part, missing_value_list):
-    target_paths = ''
-    for target_path in self.target_path_list:
-      target_paths += target_path + ', '
     anomaly_event_handler.receiveEvent('Analysis.%s' % self.__class__.__name__,
         'Interval too large between values', message_part, event_data, log_atom, self)
 

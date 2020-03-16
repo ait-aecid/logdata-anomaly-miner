@@ -71,7 +71,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
 
     for feature in self.feature_list:
       if feature.rule.match(log_atom):
-        feature.triggerCount += 1
+        feature.trigger_count += 1
         self.update_tables_for_feature(feature, timestamp)
         features_found_list.append(feature)
 
