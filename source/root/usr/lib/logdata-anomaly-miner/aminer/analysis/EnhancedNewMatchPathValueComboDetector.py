@@ -50,7 +50,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     self.aminer_config = aminer_config
 
 
-  def loadPersistencyData(self):
+  def load_persistency_data(self):
     """Load the persistency data from storage."""
     self.known_values_dict = {}
     persistence_data = PersistencyUtil.loadJson(self.persistence_file_name)
