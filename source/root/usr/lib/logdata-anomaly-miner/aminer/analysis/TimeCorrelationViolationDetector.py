@@ -100,21 +100,21 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
       r['HistoryBEvents'] = rule.history_b_events
       r['LastTimestampSeen'] = rule.last_timestamp_seen
       history = {}
-      history['MaxItems'] = rule.correlationHistory.maxItems
+      history['MaxItems'] = rule.correlation_history.max_items
       h = []
-      for item in rule.correlationHistory.history:
+      for item in rule.correlation_history.history:
         h.append(repr(item))
       history['History'] = h
-      r['CorrelationHistory'] = history
+      r['correlation_history'] = history
       analysis_component = dict()
       analysis_component['Rule'] = r
       analysis_component['CheckResult'] = check_result
       analysis_component['NewestTimestamp'] = newest_timestamp
       event_data['AnalysisComponent'] = analysis_component
       for listener in self.anomaly_event_handlers:
-        listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
+        listener.receive_event('Analysis.%s' % self.__class__.__name__, \
             'Correlation rule "%s" violated' % rule.ruleId, [check_result[0]], \
-                              event_data, self.last_log_atom, self)
+                               event_data, self.last_log_atom, self)
     return 10.0
 
 
@@ -180,9 +180,9 @@ class CorrelationRule:
 
   def update_artefact_b(self, selector, log_atom):
     """Append entry to the event history B."""
-    historyEntry = self.prepare_history_entry(selector, log_atom)
+    history_entry = self.prepare_history_entry(selector, log_atom)
 # FIXME: Check if event B could be discarded immediately.
-    self.history_b_events.append(historyEntry)
+    self.history_b_events.append(history_entry)
 
 
   def check_status(self, newest_timestamp, max_violations=20):
