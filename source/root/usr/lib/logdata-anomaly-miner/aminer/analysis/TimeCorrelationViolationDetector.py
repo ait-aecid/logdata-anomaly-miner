@@ -16,27 +16,27 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
   rules is violated. This is used to implement checks as depicted
   in http://dx.doi.org/10.1016/j.cose.2014.09.006"""
 
-  def __init__(self, aminerConfig, ruleset, anomalyEventHandlers, persistenceId='Default'):
+  def __init__(self, aminer_config, ruleset, anomaly_event_handlers, persistence_id='Default'):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location.
     @param ruleset a list of MatchRule rules with appropriate
     CorrelationRules attached as actions."""
-    self.eventClassificationRuleset = ruleset
-    self.anomalyEventHandlers = anomalyEventHandlers
-    self.nextPersistTime = time.time()+600.0
-    self.persistenceId = persistenceId
+    self.event_classification_ruleset = ruleset
+    self.anomaly_event_handlers = anomaly_event_handlers
+    self.next_persist_time = time.time() + 600.0
+    self.persistence_id = persistence_id
 
-    eventCorrelationSet = set()
-    for rule in self.eventClassificationRuleset:
+    event_correlation_set = set()
+    for rule in self.event_classification_ruleset:
       if rule.match_action.artefactARules is not None:
-        eventCorrelationSet |= set(rule.match_action.artefactARules)
+        event_correlation_set |= set(rule.match_action.artefactARules)
       if rule.match_action.artefactBRules is not None:
-        eventCorrelationSet |= set(rule.match_action.artefactBRules)
-    self.eventCorrelationRuleset = list(eventCorrelationSet)
+        event_correlation_set |= set(rule.match_action.artefactBRules)
+    self.event_correlation_ruleset = list(event_correlation_set)
 
     PersistencyUtil.addPersistableComponent(self)
-    self.persistenceFileName = AMinerConfig.build_persistence_file_name(
-        aminerConfig, 'TimeCorrelationViolationDetector', persistenceId)
+    self.persistence_file_name = AMinerConfig.build_persistence_file_name(
+        aminer_config, 'TimeCorrelationViolationDetector', persistence_id)
 #    persistenceData = PersistencyUtil.loadJson(self.persistenceFileName)
 #   if persistenceData is None:
 #     self.knownPathSet = set()
@@ -44,13 +44,13 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
 #     self.knownPathSet = set(persistenceData)
 
 
-  def receive_atom(self, logAtom):
+  def receive_atom(self, log_atom):
     """Receive a parsed atom and check all the classification
     rules, that will trigger correlation rule evaluation and event
     triggering on violations."""
-    self.lastLogAtom = logAtom
-    for rule in self.eventClassificationRuleset:
-      rule.match(logAtom)
+    self.last_log_atom = log_atom
+    for rule in self.event_classification_ruleset:
+      rule.match(log_atom)
 
 
   def get_time_trigger_class(self):
@@ -62,7 +62,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
     input silence."""
     return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-  def do_timer(self, triggerTime):
+  def do_timer(self, trigger_time):
     """Check for any rule violations and if the current ruleset
     should be persisted."""
 # Persist the state only quite infrequently: As most correlation
@@ -70,8 +70,8 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
 # likely be unsuitable to catch lost events. So persistency is
 # mostly to capture the correlation rule context, e.g. the history
 # of loglines matched before.
-    if self.nextPersistTime-triggerTime < 0:
-      self.doPersist()
+    if self.next_persist_time-trigger_time < 0:
+      self.do_persist()
 
 # Check all correlation rules, generate single events for each
 # violated rule, possibly containing multiple records. As we might
@@ -80,25 +80,25 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
 # for a long time, that they hold information about correlation
 # impossible to fulfil. Take the newest timestamp of any rule
 # and use it for checking.
-    eventData = dict()
-    newestTimestamp = 0.0
-    for rule in self.eventCorrelationRuleset:
-      newestTimestamp = max(newestTimestamp, rule.lastTimestampSeen)
+    event_data = dict()
+    newest_timestamp = 0.0
+    for rule in self.event_correlation_ruleset:
+      newest_timestamp = max(newest_timestamp, rule.lastTimestampSeen)
 
-    for rule in self.eventCorrelationRuleset:
-      checkResult = rule.check_status(newestTimestamp)
-      if checkResult is None:
+    for rule in self.event_correlation_ruleset:
+      check_result = rule.check_status(newest_timestamp)
+      if check_result is None:
         continue
-      self.lastLogAtom.atomTime = triggerTime
+      self.last_log_atom.atomTime = trigger_time
       r = {}
-      r['RuleId'] = rule.ruleId
-      r['MinTimeDelta'] = rule.minTimeDelta
-      r['MaxTimeDelta'] = rule.maxTimeDelta
-      r['MaxArtefactsAForSingleB'] = rule.maxArtefactsAForSingleB
-      r['ArtefactMatchParameters'] = rule.artefactMatchParameters
-      r['HistoryAEvents'] = rule.historyAEvents
-      r['HistoryBEvents'] = rule.historyBEvents
-      r['LastTimestampSeen'] = rule.lastTimestampSeen
+      r['RuleId'] = rule.rule_id
+      r['MinTimeDelta'] = rule.min_time_delta
+      r['MaxTimeDelta'] = rule.max_time_delta
+      r['MaxArtefactsAForSingleB'] = rule.max_artefacts_a_for_single_b
+      r['ArtefactMatchParameters'] = rule.artefact_match_parameters
+      r['HistoryAEvents'] = rule.history_a_events
+      r['HistoryBEvents'] = rule.history_b_events
+      r['LastTimestampSeen'] = rule.last_timestamp_seen
       history = {}
       history['MaxItems'] = rule.correlationHistory.maxItems
       h = []
@@ -106,42 +106,42 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
         h.append(repr(item))
       history['History'] = h
       r['CorrelationHistory'] = history
-      analysisComponent = dict()
-      analysisComponent['Rule'] = r
-      analysisComponent['CheckResult'] = checkResult
-      analysisComponent['NewestTimestamp'] = newestTimestamp
-      eventData['AnalysisComponent'] = analysisComponent
-      for listener in self.anomalyEventHandlers:
+      analysis_component = dict()
+      analysis_component['Rule'] = r
+      analysis_component['CheckResult'] = check_result
+      analysis_component['NewestTimestamp'] = newest_timestamp
+      event_data['AnalysisComponent'] = analysis_component
+      for listener in self.anomaly_event_handlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
-            'Correlation rule "%s" violated' % rule.ruleId, [checkResult[0]], \
-            eventData, self.lastLogAtom, self)
+            'Correlation rule "%s" violated' % rule.ruleId, [check_result[0]], \
+                              event_data, self.last_log_atom, self)
     return 10.0
 
 
-  def doPersist(self):
+  def do_persist(self):
     """Immediately write persistence data to storage."""
 #   PersistencyUtil.storeJson(self.persistenceFileName, list(self.knownPathSet))
-    self.nextPersistTime = time.time()+600.0
+    self.next_persist_time = time.time() + 600.0
 
 
 class EventClassSelector(Rules.MatchAction):
   """This match action selects one event class by adding it to
   to a MatchRule. Itthen triggers the appropriate CorrelationRules."""
-  def __init__(self, actionId, artefactARules, artefactBRules):
-    self.actionId = actionId
-    self.artefactARules = artefactARules
-    self.artefactBRules = artefactBRules
+  def __init__(self, action_id, artefact_a_rules, artefact_b_rules):
+    self.action_id = action_id
+    self.artefact_a_rules = artefact_a_rules
+    self.artefact_b_rules = artefact_b_rules
 
   def match_action(self, log_atom):
     """This method is invoked if a rule rule has matched.
     @param log_atom the parser MatchElement that was also matching
     the rules."""
-    if self.artefactARules is not None:
-      for aRule in self.artefactARules:
-        aRule.update_artefact_a(self, log_atom)
-    if self.artefactBRules is not None:
-      for bRule in self.artefactBRules:
-        bRule.update_artefact_b(self, log_atom)
+    if self.artefact_a_rules is not None:
+      for a_rule in self.artefact_a_rules:
+        a_rule.update_artefact_a(self, log_atom)
+    if self.artefact_b_rules is not None:
+      for b_rule in self.artefact_b_rules:
+        b_rule.update_artefact_b(self, log_atom)
 
 
 class CorrelationRule:
