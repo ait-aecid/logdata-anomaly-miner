@@ -26,12 +26,12 @@ class SubhandlerFilter(AtomHandlerInterface):
     """Add a handler to the list of handlers."""
     self.subhandler_list.append((atom_handler, stop_when_handled_flag))
 
-  def receive_atom(self, logAtom):
+  def receive_atom(self, log_atom):
     """Pass the atom to the subhandlers.
     @return false when no subhandler was able to handle the atom."""
     result = False
     for handler, stop_when_handled_flag in self.subhandler_list:
-      handler_result = handler.receive_atom(logAtom)
+      handler_result = handler.receive_atom(log_atom)
       if handler_result is True:
         result = True
         if stop_when_handled_flag:
@@ -61,9 +61,9 @@ class MatchPathFilter(AtomHandlerInterface):
     not forwarded to any handler, True otherwise."""
     if log_atom.parserMatch is None:
       return False
-    matchDict = log_atom.parserMatch.getMatchDictionary()
+    match_dict = log_atom.parserMatch.getMatchDictionary()
     for path_name, target_handler in self.parsed_atom_handler_lookup_list:
-      if path_name in matchDict:
+      if path_name in match_dict:
         if target_handler is not None:
           target_handler.receive_atom(log_atom)
         return True
@@ -87,15 +87,15 @@ class MatchValueFilter(AtomHandlerInterface):
     self.default_parsed_atom_handler = default_parsed_atom_handler
 
 
-  def receive_atom(self, logAtom):
-    if logAtom.parserMatch is None:
+  def receive_atom(self, log_atom):
+    if log_atom.parserMatch is None:
       return False
-    target_value = logAtom.parserMatch.getMatchDictionary().get(self.target_path, None)
+    target_value = log_atom.parserMatch.getMatchDictionary().get(self.target_path, None)
     if target_value is not None:
       target_value = target_value.matchObject
     target_handler = self.parsed_atom_handler_dict.get(target_value, \
                                                       self.default_parsed_atom_handler)
     if target_handler is None:
       return False
-    target_handler.receive_atom(logAtom)
+    target_handler.receive_atom(log_atom)
     return True
