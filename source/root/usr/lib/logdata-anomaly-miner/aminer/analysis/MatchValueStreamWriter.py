@@ -15,12 +15,12 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
   time to time, add the writer object also to the time trigger
   list."""
 
-  def __init__(self, stream, matchValuePathList, separatorString, missingValueString):
+  def __init__(self, stream, match_value_path_list, separator_string, missing_value_string):
     """Initialize the writer."""
     self.stream = stream
-    self.matchValuePathList = matchValuePathList
-    self.separatorString = separatorString
-    self.missingValueString = missingValueString
+    self.matchValuePathList = match_value_path_list
+    self.separatorString = separator_string
+    self.missingValueString = missing_value_string
 
   def receive_atom(self, logAtom):
     """Forward match value information to the stream."""

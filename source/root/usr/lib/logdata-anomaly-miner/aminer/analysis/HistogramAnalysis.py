@@ -234,17 +234,17 @@ class HistogramData():
     result = '%sProperty "%s" (%d elements):' % (indent, self.property_path, self.total_elements)
     f_elements = float(self.total_elements)
     base_element = self.binned_elements if self.has_outlier_bins_flag else self.total_elements
-    for binPos in range(0, len(self.bin_data)):
-      count = self.bin_data[binPos]
+    for bin_pos in range(0, len(self.bin_data)):
+      count = self.bin_data[bin_pos]
       if count == 0:
         continue
-      p_value = self.bin_definition.get_bin_p_value(binPos, base_element, count)
+      p_value = self.bin_definition.get_bin_p_value(bin_pos, base_element, count)
       if p_value is None:
-        result += '\n%s* %s: %d (ratio = %.2e)' % (indent, self.bin_names[binPos], \
+        result += '\n%s* %s: %d (ratio = %.2e)' % (indent, self.bin_names[bin_pos], \
             count, float(count)/f_elements)
       else:
         result += '\n%s* %s: %d (ratio = %.2e, p = %.2e)' % (indent, \
-                                                             self.bin_names[binPos], count, float(count) / f_elements, \
+                                                             self.bin_names[bin_pos], count, float(count) / f_elements, \
                                                              p_value)
     return result
 
@@ -284,10 +284,10 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
 
   def receive_atom(self, log_atom):
-    matchDict = log_atom.parserMatch.getMatchDictionary()
+    match_dict = log_atom.parserMatch.getMatchDictionary()
     data_updated_flag = False
     for data_item in self.histogram_data:
-      match = matchDict.get(data_item.property_path, None)
+      match = match_dict.get(data_item.property_path, None)
       if match is None:
         continue
       data_updated_flag = True
@@ -315,12 +315,12 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
     triggering is needed."""
     return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-  def do_timer(self, triggerTime):
+  def do_timer(self, trigger_time):
     """Check current ruleset should be persisted"""
     if self.next_persist_time is None:
       return 600
 
-    delta = self.next_persist_time - triggerTime
+    delta = self.next_persist_time - trigger_time
     if delta < 0:
       self.do_persist()
       delta = 600
@@ -506,12 +506,12 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
     triggering is needed."""
     return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-  def do_timer(self, triggerTime):
+  def do_timer(self, trigger_time):
     """Check current ruleset should be persisted"""
     if self.next_persist_time is None:
       return 600
 
-    delta = self.next_persist_time - triggerTime
+    delta = self.next_persist_time - trigger_time
     if delta < 0:
       self.do_persist()
       delta = 600

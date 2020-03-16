@@ -86,11 +86,11 @@ class NewMatchPathDetector(AtomHandlerInterface, \
 
     delta = self.nextPersistTime-triggerTime
     if delta <= 0:
-      self.doPersist()
+      self.do_persist()
       delta = 600
     return delta
 
-  def doPersist(self):
+  def do_persist(self):
     """Immediately write persistence data to storage."""
     PersistencyUtil.storeJson(self.persistenceFileName, list(self.knownPathSet))
     self.nextPersistTime = None
