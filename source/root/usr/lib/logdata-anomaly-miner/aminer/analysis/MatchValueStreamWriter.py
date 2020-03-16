@@ -18,27 +18,27 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
   def __init__(self, stream, match_value_path_list, separator_string, missing_value_string):
     """Initialize the writer."""
     self.stream = stream
-    self.matchValuePathList = match_value_path_list
-    self.separatorString = separator_string
-    self.missingValueString = missing_value_string
+    self.match_value_path_list = match_value_path_list
+    self.separator_string = separator_string
+    self.missing_value_string = missing_value_string
 
-  def receive_atom(self, logAtom):
+  def receive_atom(self, log_atom):
     """Forward match value information to the stream."""
-    matchDict = logAtom.parserMatch.getMatchDictionary()
-    addSepFlag = False
-    containsData = False
+    match_dict = log_atom.parserMatch.getMatchDictionary()
+    add_sep_flag = False
+    contains_data = False
     result = b''
-    for path in self.matchValuePathList:
-      if addSepFlag:
-        result += self.separatorString
-      match = matchDict.get(path, None)
+    for path in self.match_value_path_list:
+      if add_sep_flag:
+        result += self.separator_string
+      match = match_dict.get(path, None)
       if match is None:
-        result += self.missingValueString
+        result += self.missing_value_string
       else:
         result += match.matchString
-        containsData = True
-      addSepFlag = True
-    if containsData:
+        contains_data = True
+      add_sep_flag = True
+    if contains_data:
       if not isinstance(self.stream, _io.BytesIO):
         self.stream.buffer.write(result)
         self.stream.buffer.write(b'\n')
@@ -53,11 +53,11 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
     triggering is needed."""
     return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-  def do_timer(self, triggerTime):
+  def do_timer(self, trigger_time):
     """Flush the timer."""
     self.stream.flush()
     return 10
 
-  def doPersist(self):
+  def do_persist(self):
     """Flush the timer."""
     self.stream.flush()

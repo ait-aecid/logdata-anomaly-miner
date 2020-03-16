@@ -220,11 +220,11 @@ class AMinerRemoteControlExecutionMethods(object):
             return
         try:
             if component.__class__.__name__ == "MissingMatchPathValueDetector":
-                self.REMOTE_CONTROL_RESPONSE += component.whitelistEvent("Analysis.%s" % component.__class__.__name__,
-                                                                         [component.__class__.__name__], event_data, whitelisting_data)
+                self.REMOTE_CONTROL_RESPONSE += component.whitelist_event("Analysis.%s" % component.__class__.__name__,
+                                                                          [component.__class__.__name__], event_data, whitelisting_data)
             else:
-                self.REMOTE_CONTROL_RESPONSE += component.whitelistEvent("Analysis.%s" % component.__class__.__name__,
-                                                                         [component.__class__.__name__], [LogAtom("", None, 1666.0, None), event_data], whitelisting_data)
+                self.REMOTE_CONTROL_RESPONSE += component.whitelist_event("Analysis.%s" % component.__class__.__name__,
+                                                                          [component.__class__.__name__], [LogAtom("", None, 1666.0, None), event_data], whitelisting_data)
         except Exception as e:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
 
@@ -348,7 +348,7 @@ class AMinerRemoteControlExecutionMethods(object):
             if isinstance(event_source, EventSourceInterface):
                 # This should be the default for all detectors.
                 try:
-                    message = event_source.whitelistEvent(
+                    message = event_source.whitelist_event(
                         event_type, sorted_log_lines, event_data, whitelisting_data)
                     result_string += 'OK %d: %s\n' % (event_id, message)
                     whitelisted_flag = True

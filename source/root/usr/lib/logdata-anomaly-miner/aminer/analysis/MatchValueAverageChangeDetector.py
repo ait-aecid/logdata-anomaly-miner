@@ -133,12 +133,12 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
     triggering is needed."""
     return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-  def do_timer(self, triggerTime):
+  def do_timer(self, trigger_time):
     """Check current ruleset should be persisted"""
     if self.next_persist_time is None:
       return 600
 
-    delta = self.next_persist_time - triggerTime
+    delta = self.next_persist_time - trigger_time
     if delta < 0:
 #     PersistencyUtil.storeJson(self.persistenceFileName, list(self.knownPathSet))
       self.next_persist_time = None
