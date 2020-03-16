@@ -122,9 +122,9 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
       res = [''] * stat_data[2][0]
       res[0] = analysis_summary
       for listener in self.anomaly_event_handlers:
-        listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
+        listener.receive_event('Analysis.%s' % self.__class__.__name__, \
             'Statistical data report', res, event_data, log_atom, \
-                              self)
+                               self)
 
 
   def get_time_trigger_class(self):

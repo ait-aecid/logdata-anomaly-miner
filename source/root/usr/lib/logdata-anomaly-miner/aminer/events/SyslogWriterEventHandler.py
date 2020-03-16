@@ -24,14 +24,14 @@ class SyslogWriterEventHandler(EventHandlerInterface):
         analysisContext, self.bufferStream)
     self.eventId = 0
 
-  def receiveEvent(self, eventType, eventMessage, sortedLogLines, eventData,
-                   logAtom, eventSource):
+  def receive_event(self, eventType, eventMessage, sortedLogLines, eventData,
+                    logAtom, eventSource):
     """Receive information about a detected even and forward it
     to syslog."""
     self.bufferStream.seek(0)
     self.bufferStream.truncate(0)
-    self.eventWriter.receiveEvent(eventType, eventMessage, sortedLogLines, eventData, \
-        logAtom, eventSource)
+    self.eventWriter.receive_event(eventType, eventMessage, sortedLogLines, eventData, \
+                                   logAtom, eventSource)
     eventData = self.bufferStream.getvalue()
     currentEventId = self.eventId
     self.eventId += 1

@@ -17,6 +17,6 @@ class SimpleUnparsedAtomHandler(AtomHandlerInterface):
       return False
     eventData = dict()
     for listener in self.eventHandlers:
-      listener.receiveEvent('Input.UnparsedAtomHandler', \
+      listener.receive_event('Input.UnparsedAtomHandler', \
           'Unparsed atom received', [logAtom.rawData], eventData, logAtom, self)
     return True

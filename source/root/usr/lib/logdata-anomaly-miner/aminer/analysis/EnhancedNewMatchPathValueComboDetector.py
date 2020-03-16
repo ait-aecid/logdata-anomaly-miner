@@ -124,7 +124,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
                             original_log_line_prefix + repr(log_atom.rawData)]
         else:
           sorted_log_lines = [str(self.known_values_dict)]
-        listener.receiveEvent(
+        listener.receive_event(
           'Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected',
           sorted_log_lines, event_data, log_atom, self)
     if self.auto_include_flag:

@@ -41,6 +41,6 @@ class WhitelistViolationDetector(AtomHandlerInterface):
     else:
       sorted_log_lines = [log_atom.parserMatch.matchElement.annotateMatch('')]
     for listener in self.anomaly_event_handlers:
-      listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
+      listener.receive_event('Analysis.%s' % self.__class__.__name__, \
           'No whitelisting for current atom', sorted_log_lines, event_data, log_atom, self)
     return False

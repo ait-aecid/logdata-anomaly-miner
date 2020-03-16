@@ -142,6 +142,6 @@ class ByteStreamLineAtomizer(StreamAtomizer):
     if self.eventHandlerList is None:
       return
     for handler in self.eventHandlerList:
-      handler.receiveEvent(
+      handler.receive_event(
           'Input.%s' % self.__class__.__name__, message, [lineData],
           None, None, self)

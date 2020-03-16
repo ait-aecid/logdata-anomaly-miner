@@ -100,7 +100,7 @@ class NewMatchPathValueComboDetector(
       else:
         sorted_log_lines = [str(match_value_tuple)]
       for listener in self.anomaly_event_handlers:
-        listener.receiveEvent(
+        listener.receive_event(
             'Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected',
             sorted_log_lines, event_data, log_atom, self)
     return True

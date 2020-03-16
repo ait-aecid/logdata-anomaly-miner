@@ -17,8 +17,8 @@ class JsonConverterHandler(EventHandlerInterface):
     self.jsonEventHandlers = jsonEventHandlers
     self.analysisContext = analysisContext
 
-  def receiveEvent(self, eventType, eventMessage, sortedLogLines, eventData, logAtom,
-                   eventSource):
+  def receive_event(self, eventType, eventMessage, sortedLogLines, eventData, logAtom,
+                    eventSource):
     """Receive information about a detected event."""
     self.eventData = EventData(eventType, eventMessage, sortedLogLines, eventData, logAtom, eventSource, self.analysisContext)
     jsonError = ''
@@ -85,6 +85,6 @@ class JsonConverterHandler(EventHandlerInterface):
     #print(jsonData)
 
     for listener in self.jsonEventHandlers:
-      listener.receiveEvent(eventType, eventMessage, res, {}, logAtom, eventSource)
+      listener.receive_event(eventType, eventMessage, res, {}, logAtom, eventSource)
 
     return

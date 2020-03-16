@@ -60,9 +60,9 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
       timestamp = (timestamp.utcnow()-datetime.fromtimestamp(0)).total_seconds()
     if timestamp < self.last_timestamp:
       for listener in self.anomaly_event_handlers:
-        listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
+        listener.receive_event('Analysis.%s' % self.__class__.__name__, \
             'Logdata not sorted: last %s, current %s' % (self.last_timestamp, timestamp), \
-                              [log_atom.parserMatch.matchElement.annotateMatch('')], event_data, log_atom, self)
+                               [log_atom.parserMatch.matchElement.annotateMatch('')], event_data, log_atom, self)
       return
     self.last_timestamp = timestamp
 
@@ -116,9 +116,9 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
 
       event_data['AnalysisComponent'] = analysis_component
       for listener in self.anomaly_event_handlers:
-        listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
+        listener.receive_event('Analysis.%s' % self.__class__.__name__, \
             'Correlation report', result, \
-                              event_data, log_atom, self)
+                               event_data, log_atom, self)
       self.reset_statistics()
 
   def rule_to_dict(self, rule):

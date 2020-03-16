@@ -32,7 +32,7 @@ class EventGenerationMatchAction(MatchAction):
   def match_action(self, log_atom):
     event_data = dict()
     for handler in self.event_handlers:
-      handler.receiveEvent(
+      handler.receive_event(
           self.event_type, self.event_message, [log_atom.parserMatch.matchElement.annotateMatch('')], event_data, log_atom, self)
 
 
@@ -222,9 +222,9 @@ class PathExistsMatchRule(MatchRule):
   """Match elements of this class return true when the given path
   was found in the parsed match data."""
 
-  def __init__(self, path, matchAction=None):
+  def __init__(self, path, match_action=None):
     self.path = path
-    self.match_action = matchAction
+    self.match_action = match_action
 
   def match(self, log_atom):
     if self.path in log_atom.parserMatch.getMatchDictionary():

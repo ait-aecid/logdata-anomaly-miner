@@ -378,7 +378,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
     if len(res) > 0:
       res[0]  = report_str
       for listener in self.report_event_handlers:
-        listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
+        listener.receive_event('Analysis.%s' % self.__class__.__name__,
                             'Histogram report', res, event_data, log_atom, self)
     if self.reset_after_report_flag:
       for data_item in self.histogram_data:
@@ -584,7 +584,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
     if self.reset_after_report_flag:
         histogram_mapping[1].reset()
     for listener in self.report_event_handlers:
-      listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
+      listener.receive_event('Analysis.%s' % self.__class__.__name__, \
           'Histogram report', res, event_data, log_atom, self)
 
     self.last_report_time = timestamp

@@ -14,8 +14,8 @@ is stdout"""
     self.analysisContext = analysisContext
     self.stream = stream
 
-  def receiveEvent(self, eventType, eventMessage, sortedLogLines, eventData, logAtom,
-                   eventSource):
+  def receive_event(self, eventType, eventMessage, sortedLogLines, eventData, logAtom,
+                    eventSource):
     """Receive information about a detected event."""
     self.eventData = EventData(eventType, eventMessage, sortedLogLines, eventData, logAtom, eventSource, self.analysisContext)
     message = self.eventData.receiveEventString()
