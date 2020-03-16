@@ -22,7 +22,7 @@ class EventData(object):
     
     def receive_event_string(self):
       message = ''
-      if hasattr(self, "logAtom"):
+      if hasattr(self, "log_atom"):
         if self.log_atom.getTimestamp() is None:
           self.log_atom.atomTime = datetime.now()
         if not isinstance(self.log_atom.getTimestamp(), datetime):

@@ -7,16 +7,16 @@ class SimpleUnparsedAtomHandler(AtomHandlerInterface):
   """Handlers of this class will just forward received unparsed
   atoms to the registered event handlers."""
 
-  def __init__(self, eventHandlers):
-    self.eventHandlers = eventHandlers
-    self.persistenceId = None
+  def __init__(self, event_handlers):
+    self.event_handlers = event_handlers
+    self.persistence_id = None
 
-  def receive_atom(self, logAtom):
+  def receive_atom(self, log_atom):
     """Receive an unparsed atom to create events for each."""
-    if logAtom.isParsed():
+    if log_atom.isParsed():
       return False
-    eventData = dict()
-    for listener in self.eventHandlers:
+    event_data = dict()
+    for listener in self.event_handlers:
       listener.receive_event('Input.UnparsedAtomHandler', \
-          'Unparsed atom received', [logAtom.rawData], eventData, logAtom, self)
+          'Unparsed atom received', [log_atom.rawData], event_data, log_atom, self)
     return True

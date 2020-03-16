@@ -113,7 +113,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
       event_data['AnalysisComponent'] = analysis_component
       for listener in self.anomaly_event_handlers:
         listener.receive_event('Analysis.%s' % self.__class__.__name__, \
-            'Correlation rule "%s" violated' % rule.ruleId, [check_result[0]], \
+            'Correlation rule "%s" violated' % rule.rule_id, [check_result[0]], \
                                event_data, self.last_log_atom, self)
     return 10.0
 
