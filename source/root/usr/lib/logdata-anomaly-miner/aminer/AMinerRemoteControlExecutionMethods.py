@@ -250,7 +250,7 @@ class AMinerRemoteControlExecutionMethods(object):
         if history_handler is None:
             self.REMOTE_CONTROL_RESPONSE = component_not_found
         else:
-            history_data = history_handler.getHistory()
+            history_data = history_handler.get_history()
             result_string = 'FAIL: not found'
             for event_pos in range(0, len(history_data)):
                 event_id, event_type, event_message, sorted_log_lines, event_data, event_source = history_data[event_pos]
@@ -280,7 +280,7 @@ class AMinerRemoteControlExecutionMethods(object):
         if history_handler is None:
             self.REMOTE_CONTROL_RESPONSE = component_not_found
             return
-        history_data = history_handler.getHistory()
+        history_data = history_handler.get_history()
         id_spec_list = []
         for element in event_ids:
             if isinstance(element, list):
@@ -308,7 +308,7 @@ class AMinerRemoteControlExecutionMethods(object):
         if history_handler is None:
             self.REMOTE_CONTROL_RESPONSE = component_not_found
         else:
-            history_data = history_handler.getHistory()
+            history_data = history_handler.get_history()
             max_events = len(history_data)
             if max_event_count is None or max_events < max_event_count:
                 max_event_count = max_events
@@ -326,7 +326,7 @@ class AMinerRemoteControlExecutionMethods(object):
         elif id_spec_list is None or not isinstance(id_spec_list, list):
             self.REMOTE_CONTROL_RESPONSE = 'Request requires remoteControlData with ID specification list and optional whitelisting information'
             return
-        history_data = history_handler.getHistory()
+        history_data = history_handler.get_history()
         result_string = ''
         lookup_count = 0
         event_pos = 0

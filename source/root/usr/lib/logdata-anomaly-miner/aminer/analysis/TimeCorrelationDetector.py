@@ -4,7 +4,6 @@ from datetime import datetime
 import random
 import time
 
-import aminer
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.analysis import Rules
@@ -19,111 +18,110 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
   it creates an event including the rules. This is useful to implement
   checks as depicted in http://dx.doi.org/10.1016/j.cose.2014.09.006."""
 
-  def __init__(self, aminerConfig, parallelCheckCount, correlationTestCount, \
-    maxFailCount, anomalyEventHandlers, persistenceId='Default', recordCountBeforeEvent=0x10000):
+  def __init__(self, aminer_config, parallel_check_count, correlation_test_count, \
+               max_fail_count, anomaly_event_handlers, persistence_id='Default', record_count_before_event=0x10000):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location.
-    @param parallelCheckCount number of rule detection checks
+    @param parallel_check_count number of rule detection checks
     to run in parallel.
-    @param correlationTestCount number of unit to perform on a rule under
+    @param correlation_test_count number of unit to perform on a rule under
     test.
-    @param maxFailCount maximal number of test failures so that
+    @param max_fail_count maximal number of test failures so that
     rule is still eligible for reporting."""
-    self.lastTimestamp = 0.0
-    self.parallelCheckCount = parallelCheckCount
-    self.correlationTestCount = correlationTestCount
-    self.maxFailCount = maxFailCount
-    self.anomalyEventHandlers = anomalyEventHandlers
-    self.maxRuleAttributes = 5
-    self.lastUnhandledMatch = None
-    self.nextPersistTime = None
-    self.totalRecords = 0
-    self.recordCountBeforeEvent = recordCountBeforeEvent
-    self.persistenceId = persistenceId
+    self.last_timestamp = 0.0
+    self.parallel_check_count = parallel_check_count
+    self.correlation_test_count = correlation_test_count
+    self.max_fail_count = max_fail_count
+    self.anomaly_event_handlers = anomaly_event_handlers
+    self.max_rule_attributes = 5
+    self.last_unhandled_match = None
+    self.next_persist_time = None
+    self.total_records = 0
+    self.record_count_before_event = record_count_before_event
+    self.persistence_id = persistence_id
 
     PersistencyUtil.addPersistableComponent(self)
-    self.persistenceFileName = AMinerConfig.build_persistence_file_name(
-        aminerConfig, 'TimeCorrelationDetector', persistenceId)
-    persistenceData = PersistencyUtil.loadJson(self.persistenceFileName)
-    if persistenceData is None:
-      self.featureList = []
-      self.eventCountTable = [0]*parallelCheckCount*parallelCheckCount*2
-      self.eventDeltaTable = [0]*parallelCheckCount*parallelCheckCount*2
+    self.persistence_file_name = AMinerConfig.build_persistence_file_name(
+        aminer_config, 'TimeCorrelationDetector', persistence_id)
+    persistence_data = PersistencyUtil.loadJson(self.persistence_file_name)
+    if persistence_data is None:
+      self.feature_list = []
+      self.event_count_table = [0] * parallel_check_count * parallel_check_count * 2
+      self.event_delta_table = [0] * parallel_check_count * parallel_check_count * 2
 #   else:
 #     self.knownPathSet = set(persistenceData)
 
-
-  def receive_atom(self, logAtom):
-    eventData = dict()
-    timestamp = logAtom.getTimestamp()
+  def receive_atom(self, log_atom):
+    event_data = dict()
+    timestamp = log_atom.getTimestamp()
     if timestamp is None:
       timestamp = datetime.utcnow()
     if isinstance(timestamp, datetime):
       timestamp = (timestamp.utcnow()-datetime.fromtimestamp(0)).total_seconds()
-    if timestamp < self.lastTimestamp:
-      for listener in self.anomalyEventHandlers:
+    if timestamp < self.last_timestamp:
+      for listener in self.anomaly_event_handlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
-            'Logdata not sorted: last %s, current %s' % (self.lastTimestamp, timestamp), \
-            [logAtom.parserMatch.matchElement.annotateMatch('')], eventData, logAtom, self)
+            'Logdata not sorted: last %s, current %s' % (self.last_timestamp, timestamp), \
+                              [log_atom.parserMatch.matchElement.annotateMatch('')], event_data, log_atom, self)
       return
-    self.lastTimestamp = timestamp
+    self.last_timestamp = timestamp
 
-    self.totalRecords += 1
-    featuresFoundList = []
+    self.total_records += 1
+    features_found_list = []
 
-    for feature in self.featureList:
-      if feature.rule.match(logAtom):
+    for feature in self.feature_list:
+      if feature.rule.match(log_atom):
         feature.triggerCount += 1
-        self.updateTablesForFeature(feature, timestamp)
-        featuresFoundList.append(feature)
+        self.update_tables_for_feature(feature, timestamp)
+        features_found_list.append(feature)
 
-    if len(self.featureList) < self.parallelCheckCount:
-      if (random.randint(0, 1) != 0) and (self.lastUnhandledMatch is not None):
-        logAtom = self.lastUnhandledMatch
-      newRule = self.createRandomRule(logAtom)
-      if newRule is not None:
-        newFeature = CorrelationFeature(newRule, len(self.featureList), timestamp)
-        self.featureList.append(newFeature)
-        newFeature.triggerCount = 1
-        self.updateTablesForFeature(newFeature, timestamp)
-        featuresFoundList.append(newFeature)
+    if len(self.feature_list) < self.parallel_check_count:
+      if (random.randint(0, 1) != 0) and (self.last_unhandled_match is not None):
+        log_atom = self.last_unhandled_match
+      new_rule = self.create_random_rule(log_atom)
+      if new_rule is not None:
+        new_feature = CorrelationFeature(new_rule, len(self.feature_list), timestamp)
+        self.feature_list.append(new_feature)
+        new_feature.trigger_count = 1
+        self.update_tables_for_feature(new_feature, timestamp)
+        features_found_list.append(new_feature)
 
-    for feature in featuresFoundList:
-      feature.lastTriggerTime = timestamp
+    for feature in features_found_list:
+      feature.last_trigger_time = timestamp
 
-    if not featuresFoundList:
-      self.lastUnhandledMatch = logAtom
-    elif self.nextPersistTime is None:
-      self.nextPersistTime = time.time()+600
+    if not features_found_list:
+      self.last_unhandled_match = log_atom
+    elif self.next_persist_time is None:
+      self.next_persist_time = time.time() + 600
 
-    if (self.totalRecords%self.recordCountBeforeEvent) == 0:
-      result = self.totalRecords * ['']
-      result[0] = self.analysisStatusToString()
+    if (self.total_records % self.record_count_before_event) == 0:
+      result = self.total_records * ['']
+      result[0] = self.analysis_status_to_string()
 
-      featureList = []
-      for feature in self.featureList:
+      feature_list = []
+      for feature in self.feature_list:
         l = {}
-        r = self.ruleToDict(feature.rule)
+        r = self.rule_to_dict(feature.rule)
         l['Rule'] = r
         l['Index'] = feature.index
-        l['CreationTime'] = feature.creationTime
-        l['LastTriggerTime'] = feature.lastTriggerTime
-        l['TriggerCount'] = feature.triggerCount
-        featureList.append(l)
+        l['CreationTime'] = feature.creation_time
+        l['LastTriggerTime'] = feature.last_trigger_time
+        l['TriggerCount'] = feature.trigger_count
+        feature_list.append(l)
 
-      analysisComponent = dict()
-      analysisComponent['FeatureList'] = featureList
-      analysisComponent['AnalysisStatus'] = result[0]
-      analysisComponent['TotalRecords'] = self.totalRecords
+      analysis_component = dict()
+      analysis_component['FeatureList'] = feature_list
+      analysis_component['AnalysisStatus'] = result[0]
+      analysis_component['TotalRecords'] = self.total_records
 
-      eventData['AnalysisComponent'] = analysisComponent
-      for listener in self.anomalyEventHandlers:
+      event_data['AnalysisComponent'] = analysis_component
+      for listener in self.anomaly_event_handlers:
         listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
             'Correlation report', result, \
-            eventData, logAtom, self)
-      self.resetStatistics()
+                              event_data, log_atom, self)
+      self.reset_statistics()
 
-  def ruleToDict(self, rule):
+  def rule_to_dict(self, rule):
     r = {}
     r['Type'] = str(rule.__class__.__name__)
     for var in vars(rule):
@@ -131,7 +129,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
       if isinstance(attr, list):
         l = []
         for v in attr:
-          d = self.ruleToDict(v)
+          d = self.rule_to_dict(v)
           d['Type'] = str(v.__class__.__name__)
           l.append(d)
         r['subRules'] = l
@@ -145,127 +143,127 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
     triggering is needed."""
     return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-  def do_timer(self, triggerTime):
+  def do_timer(self, trigger_time):
     """Check current ruleset should be persisted"""
-    if self.nextPersistTime is None:
+    if self.next_persist_time is None:
       return 600
 
-    delta = self.nextPersistTime-triggerTime
+    delta = self.next_persist_time - trigger_time
     if delta < 0:
 #     PersistencyUtil.storeJson(self.persistenceFileName, list(self.knownPathSet))
-      self.nextPersistTime = None
+      self.next_persist_time = None
       delta = 600
     return delta
 
 
-  def doPersist(self):
+  def do_persist(self):
     """Immediately write persistence data to storage."""
 #   PersistencyUtil.storeJson(self.persistenceFileName, list(self.knownPathSet))
-    self.nextPersistTime = None
+    self.next_persist_time = None
 
 
-  def createRandomRule(self, logAtom):
+  def create_random_rule(self, log_atom):
     """Create a random existing path rule or value match rule."""
-    parserMatch = logAtom.parserMatch
-    subRules = []
-    allKeys = list(parserMatch.getMatchDictionary().keys())
-    attributeCount = getLogInt(self.maxRuleAttributes)+1
-    while attributeCount > 0:
-      keyPos = random.randint(0, len(allKeys)-1)
-      keyName = allKeys[keyPos]
-      allKeys = allKeys[:keyPos]+allKeys[keyPos+1:]
-      keyValue = parserMatch.getMatchDictionary().get(keyName).matchObject
+    parser_match = log_atom.parserMatch
+    sub_rules = []
+    all_keys = list(parser_match.getMatchDictionary().keys())
+    attribute_count = getLogInt(self.max_rule_attributes) + 1
+    while attribute_count > 0:
+      key_pos = random.randint(0, len(all_keys)-1)
+      key_name = all_keys[key_pos]
+      all_keys = all_keys[:key_pos]+all_keys[key_pos+1:]
+      key_value = parser_match.getMatchDictionary().get(key_name).matchObject
 # Not much sense handling parsed date values in this implementation,
 # so just ignore this attribute.
-      if (isinstance(keyValue, tuple)) and (isinstance(keyValue[0], datetime)):
-        if not allKeys:
+      if (isinstance(key_value, tuple)) and (isinstance(key_value[0], datetime)):
+        if not all_keys:
           break
         continue
 
-      attributeCount -= 1
-      ruleType = random.randint(0, 1)
-      if ruleType == 0:
-        subRules.append(Rules.PathExistsMatchRule(keyName))
-      elif ruleType == 1:
-        subRules.append(Rules.ValueMatchRule(keyName, keyValue))
+      attribute_count -= 1
+      rule_type = random.randint(0, 1)
+      if rule_type == 0:
+        sub_rules.append(Rules.PathExistsMatchRule(key_name))
+      elif rule_type == 1:
+        sub_rules.append(Rules.ValueMatchRule(key_name, key_value))
       else:
         raise Exception('Invalid rule type')
-      if not allKeys:
+      if not all_keys:
         break
 
-    if len(subRules) > 1:
-      return Rules.AndMatchRule(subRules)
-    if len(subRules) > 0:
-      return subRules[0]
+    if len(sub_rules) > 1:
+      return Rules.AndMatchRule(sub_rules)
+    if len(sub_rules) > 0:
+      return sub_rules[0]
     return None
     
 
 
-  def updateTablesForFeature(self, targetFeature, timestamp):
+  def update_tables_for_feature(self, target_feature, timestamp):
     """Assume that this event was the effect of a previous cause-related
     event. Loop over all cause-related features (rows) to search
     for matches."""
-    featureTablePos = (targetFeature.index << 1)
-    for feature in self.featureList:
+    feature_table_pos = (target_feature.index << 1)
+    for feature in self.feature_list:
+      delta = timestamp-feature.last_trigger_time
+      if delta <= 10.0:
+        self.event_count_table[feature_table_pos] += 1
+        self.event_delta_table[feature_table_pos] += int(delta * 1000)
+      feature_table_pos += (self.parallel_check_count << 1)
+
+    feature_table_pos = ((target_feature.index * self.parallel_check_count) << 1) + 1
+    for feature in self.feature_list:
       delta = timestamp-feature.lastTriggerTime
       if delta <= 10.0:
-        self.eventCountTable[featureTablePos] += 1
-        self.eventDeltaTable[featureTablePos] += int(delta*1000)
-      featureTablePos += (self.parallelCheckCount << 1)
-
-    featureTablePos = ((targetFeature.index*self.parallelCheckCount) << 1)+1
-    for feature in self.featureList:
-      delta = timestamp-feature.lastTriggerTime
-      if delta <= 10.0:
-        self.eventCountTable[featureTablePos] += 1
-        self.eventDeltaTable[featureTablePos] -= int(delta*1000)
-      featureTablePos += 2
+        self.event_count_table[feature_table_pos] += 1
+        self.event_delta_table[feature_table_pos] -= int(delta * 1000)
+      feature_table_pos += 2
 
 
-  def analysisStatusToString(self):
+  def analysis_status_to_string(self):
     """Get a string representation of all features."""
     result = ''
-    for feature in self.featureList:
-      triggerCount = feature.triggerCount
-      result += '%s (%d) e = %d:' % (feature.rule, feature.index, triggerCount)
-      statPos = (self.parallelCheckCount*feature.index) << 1
-      for featurePos in range(0, len(self.featureList)):
-        eventCount = self.eventCountTable[statPos]
+    for feature in self.feature_list:
+      trigger_count = feature.trigger_count
+      result += '%s (%d) e = %d:' % (feature.rule, feature.index, trigger_count)
+      stat_pos = (self.parallel_check_count * feature.index) << 1
+      for feature_pos in range(0, len(self.feature_list)):
+        event_count = self.event_count_table[stat_pos]
         ratio = '-'
-        if triggerCount != 0:
-          ratio = '%.2e' % (float(eventCount)/triggerCount)
+        if trigger_count != 0:
+          ratio = '%.2e' % (float(event_count)/trigger_count)
         delta = '-'
-        if eventCount != 0:
-          delta = '%.2e' % (float(self.eventDeltaTable[statPos])*0.001/eventCount)
-        result += '\n  %d: {c = %#6d r = %s dt = %s' % (featurePos, eventCount, ratio, delta)
-        statPos += 1
-        eventCount = self.eventCountTable[statPos]
+        if event_count != 0:
+          delta = '%.2e' % (float(self.event_delta_table[stat_pos]) * 0.001 / event_count)
+        result += '\n  %d: {c = %#6d r = %s dt = %s' % (feature_pos, event_count, ratio, delta)
+        stat_pos += 1
+        event_count = self.event_count_table[stat_pos]
         ratio = '-'
-        if triggerCount != 0:
-          ratio = '%.2e' % (float(eventCount)/triggerCount)
+        if trigger_count != 0:
+          ratio = '%.2e' % (float(event_count)/trigger_count)
         delta = '-'
-        if eventCount != 0:
-          delta = '%.2e' % (float(self.eventDeltaTable[statPos])*0.001/eventCount)
-        result += ' c = %#6d r = %s dt = %s}' % (eventCount, ratio, delta)
-        statPos += 1
+        if event_count != 0:
+          delta = '%.2e' % (float(self.event_delta_table[stat_pos]) * 0.001 / event_count)
+        result += ' c = %#6d r = %s dt = %s}' % (event_count, ratio, delta)
+        stat_pos += 1
       result += '\n'
     return result
 
-  def resetStatistics(self):
+  def reset_statistics(self):
     """Reset all features."""
-    for feature in self.featureList:
-      feature.creationTime = 0
-      feature.lastTriggerTime = 0
-      feature.triggerCount = 0
-    self.eventCountTable = [0]*self.parallelCheckCount*self.parallelCheckCount*2
-    self.eventDeltaTable = [0]*self.parallelCheckCount*self.parallelCheckCount*2
+    for feature in self.feature_list:
+      feature.creation_time = 0
+      feature.last_trigger_time = 0
+      feature.trigger_count = 0
+    self.event_count_table = [0] * self.parallel_check_count * self.parallel_check_count * 2
+    self.event_delta_table = [0] * self.parallel_check_count * self.parallel_check_count * 2
 
 
 class CorrelationFeature:
   """This class defines a correlation feature."""
-  def __init__(self, rule, index, creationTime):
+  def __init__(self, rule, index, creation_time):
     self.rule = rule
     self.index = index
-    self.creationTime = creationTime
-    self.lastTriggerTime = 0.0
-    self.triggerCount = 0
+    self.creation_time = creation_time
+    self.last_trigger_time = 0.0
+    self.trigger_count = 0
