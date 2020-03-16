@@ -28,10 +28,10 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
 
     event_correlation_set = set()
     for rule in self.event_classification_ruleset:
-      if rule.match_action.artefactARules is not None:
-        event_correlation_set |= set(rule.match_action.artefactARules)
-      if rule.match_action.artefactBRules is not None:
-        event_correlation_set |= set(rule.match_action.artefactBRules)
+      if rule.match_action.artefact_a_rules is not None:
+        event_correlation_set |= set(rule.match_action.artefact_a_rules)
+      if rule.match_action.artefact_b_rules is not None:
+        event_correlation_set |= set(rule.match_action.artefact_b_rules)
     self.event_correlation_ruleset = list(event_correlation_set)
 
     PersistencyUtil.addPersistableComponent(self)

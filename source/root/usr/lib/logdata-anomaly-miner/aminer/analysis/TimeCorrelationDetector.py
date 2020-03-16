@@ -213,7 +213,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
 
     feature_table_pos = ((target_feature.index * self.parallel_check_count) << 1) + 1
     for feature in self.feature_list:
-      delta = timestamp-feature.lastTriggerTime
+      delta = timestamp-feature.last_trigger_time
       if delta <= 10.0:
         self.event_count_table[feature_table_pos] += 1
         self.event_delta_table[feature_table_pos] -= int(delta * 1000)
