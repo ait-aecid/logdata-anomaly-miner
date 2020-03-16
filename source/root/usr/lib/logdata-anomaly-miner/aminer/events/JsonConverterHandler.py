@@ -13,56 +13,56 @@ from aminer.input.LogAtom import LogAtom
 class JsonConverterHandler(EventHandlerInterface):
   """This class implements an event record listener, that will
   convert event data to JSON format."""
-  def __init__(self, jsonEventHandlers, analysisContext):
-    self.jsonEventHandlers = jsonEventHandlers
-    self.analysisContext = analysisContext
+  def __init__(self, json_event_handlers, analysis_context):
+    self.json_event_handlers = json_event_handlers
+    self.analysis_context = analysis_context
 
-  def receive_event(self, eventType, eventMessage, sortedLogLines, eventData, logAtom,
-                    eventSource):
+  def receive_event(self, event_type, event_message, sorted_log_lines, event_data, log_atom,
+                    event_source):
     """Receive information about a detected event."""
-    self.eventData = EventData(eventType, eventMessage, sortedLogLines, eventData, logAtom, eventSource, self.analysisContext)
-    jsonError = ''
+    self.event_data = EventData(event_type, event_message, sorted_log_lines, event_data, log_atom, event_source, self.analysis_context)
+    json_error = ''
 
-    logData = dict()
-    if isinstance(logAtom.rawData, bytes):
-      logData['RawLogData'] = bytes.decode(logAtom.rawData)
+    log_data = dict()
+    if isinstance(log_atom.rawData, bytes):
+      log_data['RawLogData'] = bytes.decode(log_atom.rawData)
     else:
-      logData['RawLogData'] = logAtom.rawData
-    if logAtom.atomTime is not None:
-      if isinstance(logAtom.atomTime, datetime.datetime):
-        logData['Timestamp'] = str(round(logAtom.atomTime, 2).strftime('%Y-%m-%dT%H:%M:%SZ'))
+      log_data['RawLogData'] = log_atom.rawData
+    if log_atom.atomTime is not None:
+      if isinstance(log_atom.atomTime, datetime.datetime):
+        log_data['Timestamp'] = str(round(log_atom.atomTime, 2).strftime('%Y-%m-%dT%H:%M:%SZ'))
       else:
-        logData['Timestamp'] = round(logAtom.atomTime, 2)
+        log_data['Timestamp'] = round(log_atom.atomTime, 2)
     else:
-      logData['Timestamp'] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
-    logData['LogLinesCount'] = len(sortedLogLines)
-    if logAtom.parserMatch is not None:
-      logData['AnnotatedMatchElement'] = logAtom.parserMatch.matchElement.annotateMatch('')
+      log_data['Timestamp'] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+    log_data['LogLinesCount'] = len(sorted_log_lines)
+    if log_atom.parserMatch is not None:
+      log_data['AnnotatedMatchElement'] = log_atom.parserMatch.matchElement.annotateMatch('')
 
-    analysisComponent = dict()
-    analysisComponent['AnalysisComponentIdentifier'] = self.analysisContext.get_id_by_component(eventSource)
-    if eventSource.__class__.__name__ == 'ExtractedData_class':
-      analysisComponent['AnalysisComponentType'] = 'DistributionDetector'
+    analysis_component = dict()
+    analysis_component['AnalysisComponentIdentifier'] = self.analysis_context.get_id_by_component(event_source)
+    if event_source.__class__.__name__ == 'ExtractedData_class':
+      analysis_component['AnalysisComponentType'] = 'DistributionDetector'
     else:
-      analysisComponent['AnalysisComponentType'] = str(eventSource.__class__.__name__)
-    analysisComponent['AnalysisComponentName'] = self.analysisContext.get_name_by_component(eventSource)
-    analysisComponent['Message'] = eventMessage
-    analysisComponent['PersistenceFileName'] = eventSource.persistenceId
-    if hasattr(eventSource, 'autoIncludeFlag'):
-      analysisComponent['TrainingMode'] = eventSource.autoIncludeFlag
+      analysis_component['AnalysisComponentType'] = str(event_source.__class__.__name__)
+    analysis_component['AnalysisComponentName'] = self.analysis_context.get_name_by_component(event_source)
+    analysis_component['Message'] = event_message
+    analysis_component['PersistenceFileName'] = event_source.persistence_id
+    if hasattr(event_source, 'autoIncludeFlag'):
+      analysis_component['TrainingMode'] = event_source.auto_include_flag
 
-    detectorAnalysisComponent = eventData.get('AnalysisComponent', None)
-    if detectorAnalysisComponent is not None:
-      for key in detectorAnalysisComponent:
-        if key in analysisComponent.keys():
-          jsonError += "AnalysisComponent attribute '%s' is already in use and can not be overwritten!\n" % key
+    detector_analysis_component = event_data.get('AnalysisComponent', None)
+    if detector_analysis_component is not None:
+      for key in detector_analysis_component:
+        if key in analysis_component.keys():
+          json_error += "AnalysisComponent attribute '%s' is already in use and can not be overwritten!\n" % key
           continue
-        analysisComponent[key] = detectorAnalysisComponent.get(key, None)
+        analysis_component[key] = detector_analysis_component.get(key, None)
 
-    eventData['LogData'] = logData
-    eventData['AnalysisComponent'] = analysisComponent
-    if jsonError != '':
-      eventData['JsonError'] = jsonError
+    event_data['LogData'] = log_data
+    event_data['AnalysisComponent'] = analysis_component
+    if json_error != '':
+      event_data['JsonError'] = json_error
 
     # if eventSource.__class__.__name__ == 'VariableTypeDetector' and len(eventData) >= 4 and isinstance(eventData[3], float):
     #   detector['Confidence'] = float(eventData[3])
@@ -79,12 +79,11 @@ class JsonConverterHandler(EventHandlerInterface):
     #     short_path += path_parts[i] + '/'
     #   eventData['Path'] = short_path
 
-    jsonData = json.dumps(eventData, indent=2)
-    res = [''] * len(sortedLogLines)
-    res[0] = str(jsonData)
-    #print(jsonData)
+    json_data = json.dumps(event_data, indent=2)
+    res = [''] * len(sorted_log_lines)
+    res[0] = str(json_data)
+    #print(json_data)
 
-    for listener in self.jsonEventHandlers:
-      listener.receive_event(eventType, eventMessage, res, {}, logAtom, eventSource)
-
+    for listener in self.json_event_handlers:
+      listener.receive_event(event_type, event_message, res, {}, log_atom, event_source)
     return

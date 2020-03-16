@@ -82,7 +82,7 @@ events and send them via "sendmail" transport."""
         self.event_collection_start_time = current_time
       self.events_collected += 1
       self.event_data = EventData(event_type, event_message, sorted_log_lines, event_data, log_atom, event_source, self.analysis_context)
-      self.current_message += self.event_data.receiveEventString()
+      self.current_message += self.event_data.receive_event_string()
 
     if self.next_alert_time == 0:
       if self.last_alert_time != 0:
