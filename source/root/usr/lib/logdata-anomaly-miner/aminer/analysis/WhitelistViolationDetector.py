@@ -36,10 +36,10 @@ class WhitelistViolationDetector(AtomHandlerInterface):
       original_log_line_prefix = self.aminer_config.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
       if original_log_line_prefix is None:
           original_log_line_prefix = ''
-      sorted_log_lines = [log_atom.parser_match.matchElement.annotateMatch('') + os.linesep +
-                        original_log_line_prefix + repr(log_atom.rawData)]
+      sorted_log_lines = [log_atom.parser_match.matchElement.annotate_match('') + os.linesep +
+                          original_log_line_prefix + repr(log_atom.rawData)]
     else:
-      sorted_log_lines = [log_atom.parser_match.matchElement.annotateMatch('')]
+      sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('')]
     for listener in self.anomaly_event_handlers:
       listener.receive_event('Analysis.%s' % self.__class__.__name__, \
           'No whitelisting for current atom', sorted_log_lines, event_data, log_atom, self)

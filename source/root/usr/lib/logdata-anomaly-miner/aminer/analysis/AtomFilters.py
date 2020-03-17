@@ -61,7 +61,7 @@ class MatchPathFilter(AtomHandlerInterface):
     not forwarded to any handler, True otherwise."""
     if log_atom.parser_match is None:
       return False
-    match_dict = log_atom.parser_match.getMatchDictionary()
+    match_dict = log_atom.parser_match.get_match_dictionary()
     for path_name, target_handler in self.parsed_atom_handler_lookup_list:
       if path_name in match_dict:
         if target_handler is not None:
@@ -90,9 +90,9 @@ class MatchValueFilter(AtomHandlerInterface):
   def receive_atom(self, log_atom):
     if log_atom.parser_match is None:
       return False
-    target_value = log_atom.parser_match.getMatchDictionary().get(self.target_path, None)
+    target_value = log_atom.parser_match.get_match_dictionary().get(self.target_path, None)
     if target_value is not None:
-      target_value = target_value.matchObject
+      target_value = target_value.match_object
     target_handler = self.parsed_atom_handler_dict.get(target_value, \
                                                       self.default_parsed_atom_handler)
     if target_handler is None:

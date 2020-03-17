@@ -284,14 +284,14 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
 
   def receive_atom(self, log_atom):
-    match_dict = log_atom.parser_match.getMatchDictionary()
+    match_dict = log_atom.parser_match.get_match_dictionary()
     data_updated_flag = False
     for data_item in self.histogram_data:
       match = match_dict.get(data_item.property_path, None)
       if match is None:
         continue
       data_updated_flag = True
-      data_item.add_value(match.matchObject)
+      data_item.add_value(match.match_object)
 
     timestamp = log_atom.get_timestamp()
     if timestamp is None:
@@ -426,11 +426,11 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
 
 
   def receive_atom(self, log_atom):
-    match_dict = log_atom.parser_match.getMatchDictionary()
+    match_dict = log_atom.parser_match.get_match_dictionary()
     match = match_dict.get(self.property_path, None)
     if match is None:
       return
-    match_value = match.matchObject
+    match_value = match.match_object
 
     all_path_set = set(match_dict.keys())
     unmapped_path = []
@@ -454,9 +454,9 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
       if not missing_pathes:
 # Everything OK, just add the value to the mapping.
         match = match_dict.get(mapped_path, None)
-        match_value = match.matchObject
-        if isinstance(match.matchObject, bytes):
-          match.matchObject = match.matchObject.decode("utf-8")
+        match_value = match.match_object
+        if isinstance(match.match_object, bytes):
+          match.match_object = match.match_object.decode("utf-8")
         histogram_mapping[1].propertyPath = mapped_path
         histogram_mapping[1].add_value(match_value)
         histogram_mapping[2] = log_atom.parser_match
@@ -563,9 +563,9 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
       d['BinDefinition'] = bin_definition
       d['PropertyPath'] = data_item.propertyPath
       report_str += os.linesep+'Path values "%s":' % '", "'.join(histogram_mapping[0])
-      if isinstance(histogram_mapping[2].matchElement.matchString, bytes):
-        histogram_mapping[2].matchElement.matchString = histogram_mapping[2].matchElement.matchString.decode("utf-8")
-      report_str += os.linesep+'Example: %s' % histogram_mapping[2].matchElement.matchString
+      if isinstance(histogram_mapping[2].match_element.match_string, bytes):
+        histogram_mapping[2].match_element.matchString = histogram_mapping[2].match_element.matchString.decode("utf-8")
+      report_str += os.linesep+'Example: %s' % histogram_mapping[2].match_element.match_string
       if len(res) < histogram_mapping[1].total_elements:
         res = [''] * histogram_mapping[1].total_elements
       for line in histogram_mapping[1].to_string('  ').split('\n'):

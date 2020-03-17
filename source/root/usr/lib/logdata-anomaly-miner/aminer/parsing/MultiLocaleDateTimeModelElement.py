@@ -102,14 +102,14 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
     not be applied correctly, then the method will also return
     None."""
 
-# Convert the head of the matchData to a timestamp value.
-    parsed_data = self.date_formats.parse(match_context.matchData, 0)
+# Convert the head of the match_data to a timestamp value.
+    parsed_data = self.date_formats.parse(match_context.match_data, 0)
     if parsed_data is None:
       return None
     parsed_fields = parsed_data[0]
     time_zone_info = parsed_data[2]
 
-    date_str = match_context.matchData[0:parsed_data[1]]
+    date_str = match_context.match_data[0:parsed_data[1]]
     if parsed_fields[COMPONENT_TYPE_MICROSECOND] is None:
       parsed_fields[COMPONENT_TYPE_MICROSECOND] = 0
 

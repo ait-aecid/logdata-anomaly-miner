@@ -20,10 +20,10 @@ class FirstMatchModelElement(ModelElementInterface):
     """@return None when there is no match, MatchElement otherwise."""
     current_path = "%s/%s" % (path, self.element_id)
 
-    match_data = match_context.matchData
+    match_data = match_context.match_data
     for child_element in self.children:
       child_match = child_element.get_match_element(current_path, match_context)
       if child_match != None:
         return child_match
-      match_context.matchData = match_data
+      match_context.match_data = match_data
     return None

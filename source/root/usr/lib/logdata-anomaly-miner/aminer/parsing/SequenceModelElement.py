@@ -25,15 +25,15 @@ class SequenceModelElement(ModelElementInterface):
     the data context to match against.
     @return the matchElement or None if model did not match."""
     current_path = "%s/%s" % (path, self.element_id)
-    start_data = match_context.matchData
+    start_data = match_context.match_data
     matches = []
-    for childElement in self.children:
-      child_match = childElement.get_match_element(current_path, match_context)
+    for child_element in self.children:
+      child_match = child_element.get_match_element(current_path, match_context)
       if child_match is None:
-        match_context.matchData = start_data
+        match_context.match_data = start_data
         return None
       matches += [child_match]
 
     return MatchElement(current_path, \
-                        start_data[:len(start_data)-len(match_context.matchData)],
-                        start_data[:len(start_data)-len(match_context.matchData)], matches)
+                        start_data[:len(start_data)-len(match_context.match_data)],
+                        start_data[:len(start_data)-len(match_context.match_data)], matches)

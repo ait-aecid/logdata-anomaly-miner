@@ -62,7 +62,7 @@ class DecimalFloatValueModelElement(ModelElementInterface):
     """Find the maximum number of bytes forming a decimal number
     according to the parameters specified.
     @return a match when at least one byte being a digit was found"""
-    data = match_context.matchData
+    data = match_context.match_data
 
     allowed_characters = self.start_characters
     if not data or (data[0] not in allowed_characters):

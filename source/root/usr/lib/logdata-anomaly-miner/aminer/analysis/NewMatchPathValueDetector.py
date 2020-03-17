@@ -37,22 +37,22 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
 
 
   def receive_atom(self, log_atom):
-    match_dict = log_atom.parser_match.getMatchDictionary()
+    match_dict = log_atom.parser_match.get_match_dictionary()
     event_data = dict()
     for target_path in self.target_path_list:
       match = match_dict.get(target_path, None)
       if match is None:
         continue
-      if match.matchObject not in self.known_path_set:
+      if match.match_object not in self.known_path_set:
         if self.auto_include_flag:
-          self.known_path_set.add(match.matchObject)
+          self.known_path_set.add(match.match_object)
           if self.next_persist_time is None:
             self.next_persist_time = time.time() + 600
 
-        if isinstance(match.matchObject, bytes):
-          affected_log_atom_values = match.matchObject.decode()
+        if isinstance(match.match_object, bytes):
+          affected_log_atom_values = match.match_object.decode()
         else:
-          affected_log_atom_values = match.matchObject
+          affected_log_atom_values = match.match_object
         analysis_component = dict()
         analysis_component['AffectedLogAtomValues'] = affected_log_atom_values
         event_data['AnalysisComponent'] = analysis_component
@@ -60,10 +60,10 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
           original_log_line_prefix = self.aminer_config.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
           if original_log_line_prefix is None:
             original_log_line_prefix = ''
-          sorted_log_lines = [log_atom.parserMatch.matchElement.annotateMatch('') + os.linesep +
-                            original_log_line_prefix + repr(log_atom.rawData)]
+          sorted_log_lines = [log_atom.parserMatch.match_element.annotate_match('') + os.linesep +
+                              original_log_line_prefix + repr(log_atom.rawData)]
         else:
-          sorted_log_lines = [log_atom.parser_match.matchElement.annotateMatch('')]
+          sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('')]
         for listener in self.anomaly_event_handlers:
           listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New value(s) detected', \
                                  sorted_log_lines, event_data, log_atom, self)

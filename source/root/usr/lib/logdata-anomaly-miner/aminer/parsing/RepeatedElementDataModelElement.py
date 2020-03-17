@@ -20,7 +20,7 @@ class RepeatedElementDataModelElement(ModelElementInterface):
     """Find a suitable number of repeats."""
     current_path = "%s/%s" % (path, self.element_id)
 
-    start_data = match_context.matchData
+    start_data = match_context.match_data
     matches = []
     match_count = 0
     while match_count != self.max_repeat+1:
@@ -32,9 +32,9 @@ class RepeatedElementDataModelElement(ModelElementInterface):
       matches += [child_match]
       match_count += 1
     if match_count < self.min_repeat or match_count > self.max_repeat:
-      match_context.matchData = start_data
+      match_context.match_data = start_data
       return None
 
     return MatchElement(current_path, \
-                        start_data[:len(start_data)-len(match_context.matchData)],
-                        start_data[:len(start_data)-len(match_context.matchData)], matches)
+                        start_data[:len(start_data)-len(match_context.match_data)],
+                        start_data[:len(start_data)-len(match_context.match_data)], matches)

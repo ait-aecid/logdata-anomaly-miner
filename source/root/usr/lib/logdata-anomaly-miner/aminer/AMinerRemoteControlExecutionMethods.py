@@ -261,9 +261,9 @@ class AMinerRemoteControlExecutionMethods(object):
                 if event_type == 'Analysis.NewMatchPathDetector':
                     result_string += '\n  Logline: %s' % (sorted_log_lines[0],)
                 elif event_type == 'Analysis.NewMatchPathValueComboDetector':
-                    result_string += '\nParser match:\n' + event_data[0].parserMatch.matchElement.annotateMatch('  ')
+                    result_string += '\nParser match:\n' + event_data[0].parserMatch.matchElement.annotate_match('  ')
                 elif event_type == 'Analysis.WhitelistViolationDetector':
-                    result_string += '\nParser match:\n' + event_data.parserMatch.matchElement.annotateMatch('  ')
+                    result_string += '\nParser match:\n' + event_data.parserMatch.matchElement.annotate_match('  ')
                 elif event_type == 'ParserModel.UnparsedData':
                     result_string += '\n  Unparsed line: %s' % sorted_log_lines[0]
                     append_log_lines_flag = False

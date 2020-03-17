@@ -19,7 +19,7 @@ class IpAddressDataModelElement(ModelElementInterface):
   def get_match_element(self, path, match_context):
     """Read an IP address at the current data position. When found,
     the matchObject will be """
-    data = match_context.matchData
+    data = match_context.match_data
 
     number_count = 0
     digit_count = 0

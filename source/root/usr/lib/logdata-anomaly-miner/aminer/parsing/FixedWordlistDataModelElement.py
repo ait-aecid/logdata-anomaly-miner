@@ -34,7 +34,7 @@ class FixedWordlistDataModelElement(ModelElementInterface):
 
   def get_match_element(self, path, match_context):
     """@return None when there is no match, MatchElement otherwise."""
-    data = match_context.matchData
+    data = match_context.match_data
     match_data = None
     word_pos = 0
     for word in self.wordlist:

@@ -30,6 +30,6 @@ class DebugModelElement(ModelElementInterface):
   def get_match_element(self, path, match_context):
     """@return Always return a match."""
     print('DebugModelElement path = "%s/%s", unmatched = "%s"' % \
-          (path, self.element_id, repr(match_context.matchData)), file=sys.stderr)
+          (path, self.element_id, repr(match_context.match_data)), file=sys.stderr)
     return MatchElement('%s/%s' % (path, self.element_id), \
         '', '', None)

@@ -37,10 +37,10 @@ class TimestampsUnsortedDetector(AtomHandlerInterface, EventSourceInterface):
         original_log_line_prefix = self.aminer_config.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
         if original_log_line_prefix is None:
           original_log_line_prefix = ''
-        sorted_log_lines = [log_atom.parserMatch.matchElement.annotateMatch('') + os.linesep +
-                          original_log_line_prefix + repr(log_atom.rawData)]
+        sorted_log_lines = [log_atom.parserMatch.match_element.annotate_match('') + os.linesep +
+                            original_log_line_prefix + repr(log_atom.rawData)]
       else:
-        sorted_log_lines = [log_atom.parser_match.matchElement.annotateMatch('')]
+        sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('')]
       analysis_component = dict()
       analysis_component['LastTimestamp'] = self.last_timestamp
       event_data['AnalysisComponent'] = analysis_component

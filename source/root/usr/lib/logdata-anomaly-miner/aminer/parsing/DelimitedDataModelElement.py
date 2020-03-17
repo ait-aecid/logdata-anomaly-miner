@@ -21,7 +21,7 @@ class DelimitedDataModelElement(ModelElementInterface):
     delimiter.
     @return a match when at least one byte was found but not the
     delimiter itself."""
-    data = match_context.matchData
+    data = match_context.match_data
     match_len = data.find(self.delimiter)
     if match_len < 1:
       return None

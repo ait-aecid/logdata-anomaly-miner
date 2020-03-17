@@ -24,7 +24,7 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
 
   def receive_atom(self, log_atom):
     """Forward match value information to the stream."""
-    match_dict = log_atom.parser_match.getMatchDictionary()
+    match_dict = log_atom.parser_match.get_match_dictionary()
     add_sep_flag = False
     contains_data = False
     result = b''
@@ -35,7 +35,7 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
       if match is None:
         result += self.missing_value_string
       else:
-        result += match.matchString
+        result += match.match_string
         contains_data = True
       add_sep_flag = True
     if contains_data:

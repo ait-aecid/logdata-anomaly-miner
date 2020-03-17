@@ -67,7 +67,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     @return True if a value combination was extracted and checked
     against the list of known combinations, no matter if the checked
     values were new or not."""
-    match_dict = log_atom.parser_match.getMatchDictionary()
+    match_dict = log_atom.parser_match.get_match_dictionary()
     match_value_list = []
     event_data = dict()
     for target_path in self.target_path_list:
@@ -77,7 +77,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
           return False
         match_value_list.append(None)
       else:
-        match_value_list.append(match_element.matchObject)
+        match_value_list.append(match_element.match_object)
 
     if self.tuple_transformation_function != None:
       match_value_list = self.tuple_transformation_function(match_value_list)

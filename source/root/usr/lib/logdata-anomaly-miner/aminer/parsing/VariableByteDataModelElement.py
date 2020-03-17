@@ -19,7 +19,7 @@ class VariableByteDataModelElement(ModelElementInterface):
   def get_match_element(self, path, match_context):
     """Find the maximum number of bytes matching the given alphabet.
     @return a match when at least one byte was found within alphabet."""
-    data = match_context.matchData
+    data = match_context.match_data
     match_len = 0
     for test_byte in data:
       if test_byte not in self.alphabet:

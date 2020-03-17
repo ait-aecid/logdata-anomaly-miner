@@ -134,7 +134,7 @@ class EventClassSelector(Rules.MatchAction):
 
   def match_action(self, log_atom):
     """This method is invoked if a rule rule has matched.
-    @param log_atom the parser MatchElement that was also matching
+    @param log_atom the parser match_element that was also matching
     the rules."""
     if self.artefact_a_rules is not None:
       for a_rule in self.artefact_a_rules:
@@ -216,7 +216,7 @@ class CorrelationRule:
 # check again any older aEvents in this loop, skip all bEvents
 # up to this position in future runs.
           if b_pos < len(self.history_b_events):
-            violation_line = a_event[3].matchElement.matchString
+            violation_line = a_event[3].match_element.match_string
             if isinstance(violation_line, bytes):
               violation_line = violation_line.decode("utf-8")
               if num_violations <= max_violations:
@@ -231,7 +231,7 @@ class CorrelationRule:
           continue
 # Too late, no other b_event may match this a_event
         if delta > self.max_time_delta:
-          violation_line = a_event[3].matchElement.matchString
+          violation_line = a_event[3].match_element.match_string
           if isinstance(violation_line, bytes):
             violation_line = violation_line.decode("utf-8")
             if num_violations <= max_violations:
@@ -248,7 +248,7 @@ class CorrelationRule:
         violation_found = False
         for check_pos in range(4, len(a_event)):
           if a_event[check_pos] != b_event[check_pos]:
-            violation_line = a_event[3].matchElement.matchString
+            violation_line = a_event[3].match_element.match_string
             if isinstance(violation_line, bytes):
               violation_line = violation_line.decode("utf-8")
               if num_violations <= max_violations:
@@ -269,8 +269,8 @@ class CorrelationRule:
 # We want to keep a history of good matches to ease diagnosis
 # of correlation failures. Keep information about current line
 # for reference.
-        self.correlation_history.add_object((a_event[3].matchElement.matchString, a_event[2].action_id, \
-                                             b_event[3].matchElement.matchString, b_event[2].action_id))
+        self.correlation_history.add_object((a_event[3].match_element.match_string, a_event[2].action_id, \
+                                             b_event[3].match_element.match_string, b_event[2].action_id))
         del self.history_a_events[a_pos]
         del self.history_b_events[b_pos]
         deleted = True
@@ -286,7 +286,7 @@ class CorrelationRule:
         continue
       delta = newest_timestamp - a_event[0]
       if delta > self.max_time_delta:
-        violation_line = a_event[3].matchElement.matchString
+        violation_line = a_event[3].match_element.match_string
         if isinstance(violation_line, bytes):
           violation_line = violation_line.decode("utf-8")
           if num_violations <= max_violations:
@@ -334,11 +334,11 @@ class CorrelationRule:
 
     if self.artefact_match_parameters is not None:
       pos = 4
-      v_dict = parser_match.getMatchDictionary()
+      v_dict = parser_match.get_match_dictionary()
       for artefact_match_parameter in self.artefact_match_parameters:
         for param_path in artefact_match_parameter:
           match_element = v_dict.get(param_path, None)
           if match_element is not None:
-            result[pos] = match_element.matchObject
+            result[pos] = match_element.match_object
             pos += 1
     return result

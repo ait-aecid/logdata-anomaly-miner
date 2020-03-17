@@ -145,7 +145,7 @@ class DateTimeModelElement(ModelElementInterface):
     for part_pos in range(0, len(self.date_format_parts)):
       date_format_part = self.date_format_parts[part_pos]
       if isinstance(date_format_part, bytes):
-        if not match_context.matchData[parse_pos:].startswith(date_format_part):
+        if not match_context.match_data[parse_pos:].startswith(date_format_part):
           return None
         parse_pos += len(date_format_part)
         continue
@@ -157,22 +157,22 @@ class DateTimeModelElement(ModelElementInterface):
         if (part_pos+1) < len(self.date_format_parts):
           next_part = self.date_format_parts[part_pos + 1]
           if isinstance(next_part, bytes):
-            end_pos = match_context.matchData.find(next_part, parse_pos)
+            end_pos = match_context.match_data.find(next_part, parse_pos)
             if end_pos < 0:
               return None
             next_length = end_pos-parse_pos
         if next_length < 0:
 # No separator, so get the number of decimal digits.
           next_length = 0
-          for digit_ord in match_context.matchData[parse_pos:]:
+          for digit_ord in match_context.match_data[parse_pos:]:
             if (digit_ord < 0x30) or (digit_ord > 0x39):
               break
             next_length += 1
           if next_length == 0:
             return None
-        next_data = match_context.matchData[parse_pos:parse_pos + next_length]
+        next_data = match_context.match_data[parse_pos:parse_pos + next_length]
       else:
-        next_data = match_context.matchData[parse_pos:parse_pos + next_length]
+        next_data = match_context.match_data[parse_pos:parse_pos + next_length]
         if len(next_data) != next_length:
           return None
       parse_pos += next_length
@@ -193,7 +193,7 @@ class DateTimeModelElement(ModelElementInterface):
 # Parsing failed, most likely due to wrong format.
           return None
 
-    date_str = match_context.matchData[:parse_pos]
+    date_str = match_context.match_data[:parse_pos]
 
 # Now combine the values and build the final value.
     parsed_date_time = None

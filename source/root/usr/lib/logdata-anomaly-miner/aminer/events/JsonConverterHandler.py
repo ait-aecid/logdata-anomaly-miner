@@ -37,7 +37,7 @@ class JsonConverterHandler(EventHandlerInterface):
       log_data['Timestamp'] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
     log_data['LogLinesCount'] = len(sorted_log_lines)
     if log_atom.parser_match is not None:
-      log_data['AnnotatedMatchElement'] = log_atom.parser_match.matchElement.annotateMatch('')
+      log_data['AnnotatedMatchElement'] = log_atom.parser_match.match_element.annotate_match('')
 
     analysis_component = dict()
     analysis_component['AnalysisComponentIdentifier'] = self.analysis_context.get_id_by_component(event_source)

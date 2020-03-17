@@ -19,7 +19,7 @@ class Base64StringModelElement(ModelElementInterface):
     """Find the maximum number of bytes forming a integer number
     according to the parameters specified
     @return a match when at least one byte being a digit was found"""
-    data = match_context.matchData
+    data = match_context.match_data
     match_len = 0
     at_end_flag = False
     for test_byte in data:

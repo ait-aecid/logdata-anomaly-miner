@@ -23,7 +23,7 @@ class HexStringModelElement(ModelElementInterface):
     """Find the maximum number of bytes forming a integer number
     according to the parameters specified
     @return a match when at least one byte being a digit was found"""
-    data = match_context.matchData
+    data = match_context.match_data
     match_len = 0
     for b_val in data:
       if ((b_val < 0x30) or (b_val > 0x39)) and ((b_val < self.char_start) or (

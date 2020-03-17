@@ -19,10 +19,10 @@ class WhiteSpaceLimitedDataModelElement(ModelElementInterface):
     """Find the maximum number of bytes before encountering whitespace
     or end of data.
     @return a match when at least one byte was found."""
-    data = match_context.matchData
+    data = match_context.match_data
     match_len = 0
-    for testByte in data:
-      if testByte in b' \t':
+    for test_byte in data:
+      if test_byte in b' \t':
         break
       match_len += 1
 

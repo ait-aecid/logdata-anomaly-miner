@@ -20,7 +20,7 @@ class FixedDataModelElement(ModelElementInterface):
 
   def get_match_element(self, path, match_context):
     """@return None when there is no match, MatchElement otherwise."""
-    if not match_context.matchData.startswith(self.fixed_data):
+    if not match_context.match_data.startswith(self.fixed_data):
       return None
     match_context.update(self.fixed_data)
     return MatchElement("%s/%s" % (path, self.element_id), \

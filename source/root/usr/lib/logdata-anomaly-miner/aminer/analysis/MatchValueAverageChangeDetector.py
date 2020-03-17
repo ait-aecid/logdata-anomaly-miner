@@ -56,7 +56,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
   def receive_atom(self, log_atom):
     """Sends summary to all event handlers."""
     parser_match = log_atom.parser_match
-    value_dict = parser_match.getMatchDictionary()
+    value_dict = parser_match.get_match_dictionary()
     event_data = dict()
 
     timestamp_value = log_atom.get_timestamp()
@@ -77,7 +77,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             timestamp_value, None))
         else:
           ready_for_analysis_flag = (ready_for_analysis_flag and self.update(stat_data, \
-            timestamp_value, match.matchObject))
+            timestamp_value, match.match_object))
 
       if ready_for_analysis_flag:
         anomaly_scores = []

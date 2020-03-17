@@ -19,12 +19,12 @@ class OptionalMatchModelElement(ModelElementInterface):
     """@return the embedded child match or an empty match."""
     current_path = "%s/%s" % (path, self.element_id)
 
-    start_data = match_context.matchData
+    start_data = match_context.match_data
     match = self.optional_element.get_match_element(current_path, match_context)
     if match is None:
       return MatchElement("%s/%s" % (path, self.element_id), \
           '', None, None)
 
     return MatchElement(current_path, \
-                        start_data[:len(start_data)-len(match_context.matchData)],
-                        start_data[:len(start_data)-len(match_context.matchData)], [match])
+                        start_data[:len(start_data)-len(match_context.match_data)],
+                        start_data[:len(start_data)-len(match_context.match_data)], [match])

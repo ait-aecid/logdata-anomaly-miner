@@ -105,11 +105,11 @@ class MissingMatchPathValueDetector(
   def get_channel_key(self, log_atom):
     """Get the key identifying the channel this logAtom is coming
     from."""
-    match_element = log_atom.parser_match.getMatchDictionary().get(
+    match_element = log_atom.parser_match.get_match_dictionary().get(
         self.target_path, None)
     if match_element is None:
       return None
-    return match_element.matchObject
+    return match_element.match_object
 
 
   def check_timeouts(self, timestamp, log_atom):
@@ -275,11 +275,11 @@ class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
     """Get the key identifying the channel this logAtom is coming
     from."""
     for target_path in self.target_path_list:
-      match_element = log_atom.parser_match.getMatchDictionary().get(
+      match_element = log_atom.parser_match.get_match_dictionary().get(
           target_path, None)
       if match_element is None:
         continue
-      return match_element.matchObject
+      return match_element.match_object
     return None
 
 

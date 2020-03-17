@@ -62,7 +62,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
       for listener in self.anomaly_event_handlers:
         listener.receive_event('Analysis.%s' % self.__class__.__name__, \
             'Logdata not sorted: last %s, current %s' % (self.last_timestamp, timestamp), \
-                               [log_atom.parserMatch.matchElement.annotateMatch('')], event_data, log_atom, self)
+                               [log_atom.parserMatch.matchElement.annotate_match('')], event_data, log_atom, self)
       return
     self.last_timestamp = timestamp
 
@@ -166,13 +166,13 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
     """Create a random existing path rule or value match rule."""
     parser_match = log_atom.parser_match
     sub_rules = []
-    all_keys = list(parser_match.getMatchDictionary().keys())
+    all_keys = list(parser_match.get_match_dictionary().keys())
     attribute_count = getLogInt(self.max_rule_attributes) + 1
     while attribute_count > 0:
       key_pos = random.randint(0, len(all_keys)-1)
       key_name = all_keys[key_pos]
       all_keys = all_keys[:key_pos]+all_keys[key_pos+1:]
-      key_value = parser_match.getMatchDictionary().get(key_name).matchObject
+      key_value = parser_match.get_match_dictionary().get(key_name).match_object
 # Not much sense handling parsed date values in this implementation,
 # so just ignore this attribute.
       if (isinstance(key_value, tuple)) and (isinstance(key_value[0], datetime)):
