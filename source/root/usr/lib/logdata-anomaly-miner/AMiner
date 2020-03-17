@@ -338,9 +338,9 @@ def main():
 # Send all log resource information currently available to child
 # process.
   for logResourceName, logResource in logDataResourceDict.items():
-    if (logResource != None) and (logResource.getFileDescriptor() >= 0):
+    if (logResource != None) and (logResource.get_file_descriptor() >= 0):
       SecureOSFunctions.sendLogstreamDescriptor(
-          parentSocket, logResource.getFileDescriptor(), logResourceName)
+          parentSocket, logResource.get_file_descriptor(), logResourceName)
       logResource.close()
 
 # Send the remote control server socket, if any and close it afterwards.
@@ -383,7 +383,7 @@ def main():
 # resources, where reopening might make sense.
     for logResouceName, logDataResource in logDataResourceDict.items():
       try:
-        if not logDataResource.open(reopenFlag=True):
+        if not logDataResource.open(reopen_flag=True):
           continue
       except OSError as openOsError:
         if openOsError.errno == errno.EACCES:
@@ -397,7 +397,7 @@ def main():
         continue
 
       SecureOSFunctions.sendLogstreamDescriptor(
-          parentSocket, logDataResource.getFileDescriptor(), logResouceName)
+          parentSocket, logDataResource.get_file_descriptor(), logResouceName)
       logDataResource.close()
 
     time.sleep(1)
