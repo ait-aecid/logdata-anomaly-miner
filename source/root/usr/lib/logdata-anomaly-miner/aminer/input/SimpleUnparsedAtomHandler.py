@@ -13,10 +13,10 @@ class SimpleUnparsedAtomHandler(AtomHandlerInterface):
 
   def receive_atom(self, log_atom):
     """Receive an unparsed atom to create events for each."""
-    if log_atom.isParsed():
+    if log_atom.is_parsed():
       return False
     event_data = dict()
     for listener in self.event_handlers:
       listener.receive_event('Input.UnparsedAtomHandler', \
-          'Unparsed atom received', [log_atom.rawData], event_data, log_atom, self)
+          'Unparsed atom received', [log_atom.raw_data], event_data, log_atom, self)
     return True

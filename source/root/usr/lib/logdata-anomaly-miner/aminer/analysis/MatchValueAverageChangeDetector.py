@@ -55,11 +55,11 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
 
   def receive_atom(self, log_atom):
     """Sends summary to all event handlers."""
-    parser_match = log_atom.parserMatch
+    parser_match = log_atom.parser_match
     value_dict = parser_match.getMatchDictionary()
     event_data = dict()
 
-    timestamp_value = log_atom.getTimestamp()
+    timestamp_value = log_atom.get_timestamp()
     if self.timestamp_path is not None:
       match_value = value_dict.get(self.timestamp_path)
       if match_value is None:

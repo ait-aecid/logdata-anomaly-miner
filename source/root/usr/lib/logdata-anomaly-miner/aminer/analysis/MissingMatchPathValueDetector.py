@@ -72,7 +72,7 @@ class MissingMatchPathValueDetector(
     value = self.get_channel_key(log_atom)
     if value is None:
       return False
-    timestamp = log_atom.getTimestamp()
+    timestamp = log_atom.get_timestamp()
     if isinstance(timestamp, datetime):
       timestamp = timestamp.timestamp()
     if timestamp is None:
@@ -105,7 +105,7 @@ class MissingMatchPathValueDetector(
   def get_channel_key(self, log_atom):
     """Get the key identifying the channel this logAtom is coming
     from."""
-    match_element = log_atom.parserMatch.getMatchDictionary().get(
+    match_element = log_atom.parser_match.getMatchDictionary().get(
         self.target_path, None)
     if match_element is None:
       return None
@@ -171,7 +171,7 @@ class MissingMatchPathValueDetector(
           original_log_line_prefix = self.aminer_config.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
           if original_log_line_prefix is None:
             original_log_line_prefix = ''
-          message_part.append(original_log_line_prefix + repr(log_atom.rawData))
+          message_part.append(original_log_line_prefix + repr(log_atom.raw_data))
         for listener in self.anomaly_event_handlers:
           self.send_event_to_handlers(listener, event_data, log_atom, [''.join(message_part)], missing_value_list)
     return True
@@ -275,7 +275,7 @@ class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
     """Get the key identifying the channel this logAtom is coming
     from."""
     for target_path in self.target_path_list:
-      match_element = log_atom.parserMatch.getMatchDictionary().get(
+      match_element = log_atom.parser_match.getMatchDictionary().get(
           target_path, None)
       if match_element is None:
         continue

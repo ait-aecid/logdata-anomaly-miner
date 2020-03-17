@@ -23,12 +23,15 @@ class EventData(object):
     def receive_event_string(self):
       message = ''
       if hasattr(self, "log_atom"):
-        if self.log_atom.getTimestamp() is None:
+        if self.log_atom.get_timestamp() is None:
           self.log_atom.atomTime = datetime.now()
-        if not isinstance(self.log_atom.getTimestamp(), datetime):
-          atom_time = datetime.fromtimestamp(self.log_atom.getTimestamp())
+        if isinstance(self.log_atom.get_timestamp(), type(None)):
+          import time
+          self.log_atom.atom_time = time.time()
+        if not isinstance(self.log_atom.get_timestamp(), datetime):
+          atom_time = datetime.fromtimestamp(self.log_atom.get_timestamp())
         else:
-          atom_time = self.log_atom.getTimestamp()
+          atom_time = self.log_atom.get_timestamp()
         message += '%s ' % atom_time.strftime("%Y-%m-%d %H:%M:%S")
         message += '%s\n' % (self.event_message)
         message += '%s: %s (%d lines)\n' % (self.event_source.__class__.__name__, self.description, len(self.sorted_log_lines))

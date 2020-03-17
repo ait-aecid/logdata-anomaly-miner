@@ -59,9 +59,9 @@ class MatchPathFilter(AtomHandlerInterface):
     """Receive an atom and pass it to the subhandlers.
     @return False when logAtom did not contain match data or was
     not forwarded to any handler, True otherwise."""
-    if log_atom.parserMatch is None:
+    if log_atom.parser_match is None:
       return False
-    match_dict = log_atom.parserMatch.getMatchDictionary()
+    match_dict = log_atom.parser_match.getMatchDictionary()
     for path_name, target_handler in self.parsed_atom_handler_lookup_list:
       if path_name in match_dict:
         if target_handler is not None:
@@ -88,9 +88,9 @@ class MatchValueFilter(AtomHandlerInterface):
 
 
   def receive_atom(self, log_atom):
-    if log_atom.parserMatch is None:
+    if log_atom.parser_match is None:
       return False
-    target_value = log_atom.parserMatch.getMatchDictionary().get(self.target_path, None)
+    target_value = log_atom.parser_match.getMatchDictionary().get(self.target_path, None)
     if target_value is not None:
       target_value = target_value.matchObject
     target_handler = self.parsed_atom_handler_dict.get(target_value, \

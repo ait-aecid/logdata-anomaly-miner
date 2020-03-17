@@ -46,7 +46,7 @@ class SimpleMultisourceAtomSync(AtomHandlerInterface):
       self.bufferEmptyCounter = 0
       self.lastForwardedSource = None
 
-    timestamp = logAtom.atomTime
+    timestamp = logAtom.atom_time
     if timestamp is None:
       self.forwardAtom(logAtom)
       self.lastForwardedSource = logAtom.source
@@ -76,7 +76,7 @@ class SimpleMultisourceAtomSync(AtomHandlerInterface):
       if oldestSourceInfo is None:
         oldestSourceInfo = sourceInfo
         continue
-      if sourceInfo[1].atomTime < oldestSourceInfo[1].atomTime:
+      if sourceInfo[1].atom_time < oldestSourceInfo[1].atom_time:
         oldestSourceInfo = sourceInfo
     if self.blockingEndTime != 0:
 # We cannot do anything while blocking to catch more atoms.

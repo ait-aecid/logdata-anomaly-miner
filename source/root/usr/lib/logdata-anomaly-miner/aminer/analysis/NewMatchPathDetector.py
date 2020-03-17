@@ -48,7 +48,7 @@ class NewMatchPathDetector(AtomHandlerInterface, \
     to other handlers."""
     unknown_path_list = []
     event_data = dict()
-    for path in log_atom.parserMatch.getMatchDictionary().keys():
+    for path in log_atom.parser_match.getMatchDictionary().keys():
       if path not in self.known_path_set:
         unknown_path_list.append(path)
         if self.auto_include_flag:
@@ -60,10 +60,10 @@ class NewMatchPathDetector(AtomHandlerInterface, \
         original_log_line_prefix = self.aminer_config.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
         if original_log_line_prefix is None:
           original_log_line_prefix = ''
-        sorted_log_lines = [log_atom.parserMatch.matchElement.annotateMatch('') + os.linesep +
-                          original_log_line_prefix + repr(log_atom.rawData)]
+        sorted_log_lines = [log_atom.parser_match.matchElement.annotateMatch('') + os.linesep +
+                          original_log_line_prefix + repr(log_atom.raw_data)]
       else:
-        sorted_log_lines = [log_atom.parserMatch.matchElement.annotateMatch('')]
+        sorted_log_lines = [log_atom.parser_match.matchElement.annotateMatch('')]
       analysis_component = dict()
       analysis_component['AffectedParserPaths'] = list(unknown_path_list)
       event_data['AnalysisComponent'] = analysis_component

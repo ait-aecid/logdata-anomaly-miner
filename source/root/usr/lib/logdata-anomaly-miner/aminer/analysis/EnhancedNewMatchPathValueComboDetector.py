@@ -67,7 +67,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     @return True if a value combination was extracted and checked
     against the list of known combinations, no matter if the checked
     values were new or not."""
-    match_dict = log_atom.parserMatch.getMatchDictionary()
+    match_dict = log_atom.parser_match.getMatchDictionary()
     match_value_list = []
     event_data = dict()
     for target_path in self.target_path_list:
@@ -83,7 +83,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
       match_value_list = self.tuple_transformation_function(match_value_list)
     match_value_tuple = tuple(match_value_list)
 
-    current_timestamp = log_atom.getTimestamp()
+    current_timestamp = log_atom.get_timestamp()
     if current_timestamp is None:
       current_timestamp = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d %H:%M:%S")
     if not isinstance(current_timestamp, datetime) and not isinstance(current_timestamp, str):
@@ -152,7 +152,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
       raise Exception('Event not from this source')
     if whitelisting_data != None:
       raise Exception('Whitelisting data not understood by this detector')
-    current_timestamp = datetime.fromtimestamp(event_data[0].getTimestamp()).strftime("%Y-%m-%d %H:%M:%S")
+    current_timestamp = datetime.fromtimestamp(event_data[0].get_timestamp()).strftime("%Y-%m-%d %H:%M:%S")
     self.known_values_dict[event_data[1]] = [
         current_timestamp, current_timestamp, 1]
     return 'Whitelisted path(es) %s with %s in %s' % (

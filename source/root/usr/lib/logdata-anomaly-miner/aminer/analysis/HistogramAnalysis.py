@@ -284,7 +284,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
 
   def receive_atom(self, log_atom):
-    match_dict = log_atom.parserMatch.getMatchDictionary()
+    match_dict = log_atom.parser_match.getMatchDictionary()
     data_updated_flag = False
     for data_item in self.histogram_data:
       match = match_dict.get(data_item.property_path, None)
@@ -293,7 +293,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
       data_updated_flag = True
       data_item.add_value(match.matchObject)
 
-    timestamp = log_atom.getTimestamp()
+    timestamp = log_atom.get_timestamp()
     if timestamp is None:
       timestamp = time.time()
     if isinstance(timestamp, datetime):
@@ -426,7 +426,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
 
 
   def receive_atom(self, log_atom):
-    match_dict = log_atom.parserMatch.getMatchDictionary()
+    match_dict = log_atom.parser_match.getMatchDictionary()
     match = match_dict.get(self.property_path, None)
     if match is None:
       return
@@ -459,7 +459,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
           match.matchObject = match.matchObject.decode("utf-8")
         histogram_mapping[1].propertyPath = mapped_path
         histogram_mapping[1].add_value(match_value)
-        histogram_mapping[2] = log_atom.parserMatch
+        histogram_mapping[2] = log_atom.parser_match
       else:
 # We need to split the current set here. Keep the current statistics
 # for all the missingPathes but clone the data for the remaining
@@ -470,7 +470,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
         histogram_mapping[1].propertyPath = mapped_path
         new_histogram.add_value(match_value)
         new_path_set = histogram_mapping[0] - missing_pathes
-        new_histogram_mapping = [new_path_set, new_histogram, log_atom.parserMatch]
+        new_histogram_mapping = [new_path_set, new_histogram, log_atom.parser_match]
         for mapped_path in new_path_set:
           self.histogram_data[mapped_path] = new_histogram_mapping
         histogram_mapping[0] = missing_pathes
@@ -479,12 +479,12 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
     if unmapped_path:
       histogram = HistogramData(self.property_path, self.bin_definition)
       histogram.add_value(match_value)
-      new_record = [set(unmapped_path), histogram, log_atom.parserMatch]
+      new_record = [set(unmapped_path), histogram, log_atom.parser_match]
       for path in unmapped_path:
         new_record[1].property_path = path
         self.histogram_data[path] = new_record
 
-    timestamp = log_atom.getTimestamp()
+    timestamp = log_atom.get_timestamp()
     if timestamp is None:
       timestamp = time.time()
     if isinstance(timestamp, datetime):

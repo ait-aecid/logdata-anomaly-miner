@@ -33,7 +33,7 @@ class EventGenerationMatchAction(MatchAction):
     event_data = dict()
     for handler in self.event_handlers:
       handler.receive_event(
-          self.event_type, self.event_message, [log_atom.parserMatch.matchElement.annotateMatch('')], event_data, log_atom, self)
+          self.event_type, self.event_message, [log_atom.parser_match.matchElement.annotateMatch('')], event_data, log_atom, self)
 
 
 class AtomFilterMatchAction(MatchAction, SubhandlerFilter):
@@ -153,7 +153,7 @@ class ParallelMatchRule(MatchRule):
 
 class ValueDependentDelegatedMatchRule(MatchRule):
   """This class is a rule delegating rule checking to subrules
-  depending on values found within the parserMatch. The result
+  depending on values found within the parser_match. The result
   of this rule is the result of the selected delegation rule."""
 
   def __init__(
@@ -178,7 +178,7 @@ class ValueDependentDelegatedMatchRule(MatchRule):
     """Try to locate a rule for delegation or use the default
     rule.
     @return True when selected delegation rule matched."""
-    match_dict = log_atom.parserMatch.getMatchDictionary()
+    match_dict = log_atom.parser_match.getMatchDictionary()
     value_list = []
     for path in self.value_path_list:
       value_element = match_dict.get(path, None)
@@ -227,7 +227,7 @@ class PathExistsMatchRule(MatchRule):
     self.match_action = match_action
 
   def match(self, log_atom):
-    if self.path in log_atom.parserMatch.getMatchDictionary():
+    if self.path in log_atom.parser_match.getMatchDictionary():
       if self.match_action != None:
         self.match_action.match_action(log_atom)
       return True
@@ -247,7 +247,7 @@ class ValueMatchRule(MatchRule):
     self.match_action = match_action
 
   def match(self, log_atom):
-    test_value = log_atom.parserMatch.getMatchDictionary().get(self.path, None)
+    test_value = log_atom.parser_match.getMatchDictionary().get(self.path, None)
     if test_value is not None:
       if isinstance(self.value, bytes) and not isinstance(test_value.matchObject, bytes) and test_value.matchObject is not None:
         test_value.matchObject = test_value.matchObject.encode()
@@ -276,7 +276,7 @@ class ValueListMatchRule(MatchRule):
     self.match_action = match_action
 
   def match(self, log_atom):
-    test_value = log_atom.parserMatch.getMatchDictionary().get(self.path, None)
+    test_value = log_atom.parser_match.getMatchDictionary().get(self.path, None)
     if (test_value != None) and (test_value.matchObject in self.value_list):
       if self.match_action != None:
         self.match_action.match_action(log_atom)
@@ -298,7 +298,7 @@ class ValueRangeMatchRule(MatchRule):
     self.match_action = match_action
 
   def match(self, log_atom):
-    test_value = log_atom.parserMatch.getMatchDictionary().get(self.path, None)
+    test_value = log_atom.parser_match.getMatchDictionary().get(self.path, None)
     if test_value is None:
       return False
     test_value = test_value.matchObject
@@ -325,7 +325,7 @@ class StringRegexMatchRule(MatchRule):
 
   def match(self, log_atom):
 # Use the class object as marker for nonexisting entries
-    test_value = log_atom.parserMatch.getMatchDictionary().get(self.path, None)
+    test_value = log_atom.parser_match.getMatchDictionary().get(self.path, None)
     if ((test_value is None) or
         (self.match_regex.match(test_value.matchString) is None)):
       return False
@@ -359,9 +359,9 @@ class ModuloTimeMatchRule(MatchRule):
   def match(self, log_atom):
     test_value = None
     if self.path is None:
-      test_value = log_atom.getTimestamp()
+      test_value = log_atom.get_timestamp()
     else:
-      time_match = log_atom.parserMatch.getMatchDictionary().get(self.path, None)
+      time_match = log_atom.parser_match.getMatchDictionary().get(self.path, None)
       if ((time_match is None) or not isinstance(time_match.matchObject, tuple) or
           not isinstance(time_match.matchObject[0], datetime.datetime)):
         return False
@@ -403,7 +403,7 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
       self.tzinfo = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
 
   def match(self, log_atom):
-    match_dict = log_atom.parserMatch.getMatchDictionary()
+    match_dict = log_atom.parser_match.getMatchDictionary()
     value_list = []
     for path in self.value_path_list:
       value_element = match_dict.get(path, None)
@@ -417,9 +417,9 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
 
     test_value = None
     if self.path is None:
-      test_value = log_atom.getTimestamp()
+      test_value = log_atom.get_timestamp()
     else:
-      time_match = log_atom.parserMatch.getMatchDictionary().get(self.path, None)
+      time_match = log_atom.parser_match.getMatchDictionary().get(self.path, None)
       if ((time_match is None) or not isinstance(time_match.matchObject, tuple) or
           not isinstance(time_match.matchObject[0], datetime.datetime)):
         return False
@@ -447,7 +447,7 @@ class IPv4InRFC1918MatchRule(MatchRule):
     self.match_action = match_action
 
   def match(self, log_atom):
-    match_element = log_atom.parserMatch.getMatchDictionary().get(self.path, None)
+    match_element = log_atom.parser_match.getMatchDictionary().get(self.path, None)
     if (match_element is None) or not isinstance(match_element.matchObject, int):
       return False
     value = match_element.matchObject
@@ -475,7 +475,7 @@ class DebugMatchRule(MatchRule):
 
   def match(self, log_atom):
     print('Rules.DebugMatchRule: triggered while ' \
-        'handling "%s"' % repr(log_atom.parserMatch.matchElement.matchString), file=sys.stderr)
+        'handling "%s"' % repr(log_atom.parser_match.matchElement.matchString), file=sys.stderr)
     if self.matchAction != None:
       self.matchAction.match_action(log_atom)
     return self.debug_match_result

@@ -65,7 +65,7 @@ class NewMatchPathValueComboDetector(
     @return True if a value combination was extracted and checked
     against the list of known combinations, no matter if the checked
     values were new or not."""
-    match_dict = log_atom.parserMatch.getMatchDictionary()
+    match_dict = log_atom.parser_match.getMatchDictionary()
     match_value_list = []
     event_data = dict()
     for target_path in self.target_path_list:
@@ -96,7 +96,7 @@ class NewMatchPathValueComboDetector(
         original_log_line_prefix = self.aminer_config.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
         if original_log_line_prefix is None:
           original_log_line_prefix = ''
-        sorted_log_lines = [str(match_value_tuple) + os.linesep + original_log_line_prefix + repr(log_atom.rawData)]
+        sorted_log_lines = [str(match_value_tuple) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
       else:
         sorted_log_lines = [str(match_value_tuple)]
       for listener in self.anomaly_event_handlers:

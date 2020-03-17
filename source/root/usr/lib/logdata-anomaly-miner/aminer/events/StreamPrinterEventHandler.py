@@ -21,4 +21,3 @@ is stdout"""
     message = self.event_data.receive_event_string()
     print('%s' % message, file=self.stream)
     self.stream.flush()
-    return

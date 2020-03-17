@@ -24,20 +24,20 @@ class JsonConverterHandler(EventHandlerInterface):
     json_error = ''
 
     log_data = dict()
-    if isinstance(log_atom.rawData, bytes):
-      log_data['RawLogData'] = bytes.decode(log_atom.rawData)
+    if isinstance(log_atom.raw_data, bytes):
+      log_data['RawLogData'] = bytes.decode(log_atom.raw_data)
     else:
-      log_data['RawLogData'] = log_atom.rawData
-    if log_atom.atomTime is not None:
-      if isinstance(log_atom.atomTime, datetime.datetime):
+      log_data['RawLogData'] = log_atom.raw_data
+    if log_atom.atom_time is not None:
+      if isinstance(log_atom.atom_time, datetime.datetime):
         log_data['Timestamp'] = str(round(log_atom.atomTime, 2).strftime('%Y-%m-%dT%H:%M:%SZ'))
       else:
-        log_data['Timestamp'] = round(log_atom.atomTime, 2)
+        log_data['Timestamp'] = round(log_atom.atom_time, 2)
     else:
       log_data['Timestamp'] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
     log_data['LogLinesCount'] = len(sorted_log_lines)
-    if log_atom.parserMatch is not None:
-      log_data['AnnotatedMatchElement'] = log_atom.parserMatch.matchElement.annotateMatch('')
+    if log_atom.parser_match is not None:
+      log_data['AnnotatedMatchElement'] = log_atom.parser_match.matchElement.annotateMatch('')
 
     analysis_component = dict()
     analysis_component['AnalysisComponentIdentifier'] = self.analysis_context.get_id_by_component(event_source)

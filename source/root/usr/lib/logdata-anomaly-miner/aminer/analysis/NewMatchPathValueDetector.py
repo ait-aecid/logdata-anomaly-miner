@@ -37,7 +37,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
 
 
   def receive_atom(self, log_atom):
-    match_dict = log_atom.parserMatch.getMatchDictionary()
+    match_dict = log_atom.parser_match.getMatchDictionary()
     event_data = dict()
     for target_path in self.target_path_list:
       match = match_dict.get(target_path, None)
@@ -63,7 +63,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
           sorted_log_lines = [log_atom.parserMatch.matchElement.annotateMatch('') + os.linesep +
                             original_log_line_prefix + repr(log_atom.rawData)]
         else:
-          sorted_log_lines = [log_atom.parserMatch.matchElement.annotateMatch('')]
+          sorted_log_lines = [log_atom.parser_match.matchElement.annotateMatch('')]
         for listener in self.anomaly_event_handlers:
           listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New value(s) detected', \
                                  sorted_log_lines, event_data, log_atom, self)

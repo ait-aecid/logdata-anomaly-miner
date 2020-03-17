@@ -29,7 +29,7 @@ class TimestampsUnsortedDetector(AtomHandlerInterface, EventSourceInterface):
     may decide if it makes sense passing the parsed atom also
     to other handlers."""
     event_data = dict()
-    timestamp = log_atom.getTimestamp()
+    timestamp = log_atom.get_timestamp()
     if timestamp is None:
       return False
     if timestamp < self.last_timestamp:
@@ -40,7 +40,7 @@ class TimestampsUnsortedDetector(AtomHandlerInterface, EventSourceInterface):
         sorted_log_lines = [log_atom.parserMatch.matchElement.annotateMatch('') + os.linesep +
                           original_log_line_prefix + repr(log_atom.rawData)]
       else:
-        sorted_log_lines = [log_atom.parserMatch.matchElement.annotateMatch('')]
+        sorted_log_lines = [log_atom.parser_match.matchElement.annotateMatch('')]
       analysis_component = dict()
       analysis_component['LastTimestamp'] = self.last_timestamp
       event_data['AnalysisComponent'] = analysis_component

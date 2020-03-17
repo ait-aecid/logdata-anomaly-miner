@@ -292,7 +292,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
       output_select_fd_list = []
       for fd_handler_object in self.tracked_fds_dict.values():
         if isinstance(fd_handler_object, LogStream):
-          stream_fd = fd_handler_object.getCurrentFd()
+          stream_fd = fd_handler_object.get_current_fd()
           if stream_fd < 0:
             continue
           input_select_fd_list.append(stream_fd)
@@ -306,7 +306,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 # Loop over the list in reverse order to avoid skipping elements
 # in remove.
       for log_stream in reversed(blocked_log_streams):
-        current_stream_fd = log_stream.handleStream()
+        current_stream_fd = log_stream.handle_stream()
         if current_stream_fd >= 0:
           self.tracked_fds_dict[current_stream_fd] = log_stream
           input_select_fd_list.append(current_stream_fd)
@@ -329,7 +329,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         if isinstance(fd_handler_object, LogStream):
 # Handle this LogStream. Only when downstream processing blocks,
 # add the stream to the blocked stream list.
-          handle_result = fd_handler_object.handleStream()
+          handle_result = fd_handler_object.handle_stream()
           if handle_result < 0:
 # No need to care if current internal file descriptor in LogStream
 # has changed in handleStream(), this will be handled when unblocking.
@@ -437,22 +437,22 @@ class AnalysisChild(TimeTriggeredComponentInterface):
       if annotation_data.startswith(b'file://'):
         from aminer.input.LogStream import FileLogDataResource
         resource = FileLogDataResource(annotation_data, received_fd, \
-            repositioningData=repositioning_data)
+                                       repositioning_data=repositioning_data)
       elif annotation_data.startswith(b'unix://'):
         from aminer.input.LogStream import UnixSocketLogDataResource
         resource = UnixSocketLogDataResource(annotation_data, received_fd)
       else:
         raise Exception('Filedescriptor of unknown type received')
 # Make fd nonblocking.
-      fd_flags = fcntl.fcntl(resource.getFileDescriptor(), fcntl.F_GETFL)
-      fcntl.fcntl(resource.getFileDescriptor(), fcntl.F_SETFL, fd_flags|os.O_NONBLOCK)
-      log_stream = self.log_streams_by_name.get(resource.getResourceName())
+      fd_flags = fcntl.fcntl(resource.get_file_descriptor(), fcntl.F_GETFL)
+      fcntl.fcntl(resource.get_file_descriptor(), fcntl.F_SETFL, fd_flags | os.O_NONBLOCK)
+      log_stream = self.log_streams_by_name.get(resource.get_resource_name())
       if log_stream is None:
         stream_atomizer = self.analysis_context.atomizer_factory.getAtomizerForResource(
-            resource.getResourceName())
+            resource.get_resource_name())
         log_stream = LogStream(resource, stream_atomizer)
-        self.tracked_fds_dict[resource.getFileDescriptor()] = log_stream
-        self.log_streams_by_name[resource.getResourceName()] = log_stream
+        self.tracked_fds_dict[resource.get_file_descriptor()] = log_stream
+        self.log_streams_by_name[resource.get_resource_name()] = log_stream
       else:
         log_stream.addNextResource(resource)
     elif received_type_info == b'remotecontrol':
@@ -493,7 +493,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
     if delta <= 0:
       self.repositioning_data_dict = {}
       for log_stream_name, log_stream in self.log_streams_by_name.items():
-        repositioning_data = log_stream.getRepositioningData()
+        repositioning_data = log_stream.get_repositioning_data()
         if repositioning_data != None:
           self.repositioning_data_dict[log_stream_name] = repositioning_data
       PersistencyUtil.storeJson(

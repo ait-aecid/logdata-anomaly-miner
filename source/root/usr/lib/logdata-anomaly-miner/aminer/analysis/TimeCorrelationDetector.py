@@ -53,7 +53,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
 
   def receive_atom(self, log_atom):
     event_data = dict()
-    timestamp = log_atom.getTimestamp()
+    timestamp = log_atom.get_timestamp()
     if timestamp is None:
       timestamp = datetime.utcnow()
     if isinstance(timestamp, datetime):
@@ -164,7 +164,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
 
   def create_random_rule(self, log_atom):
     """Create a random existing path rule or value match rule."""
-    parser_match = log_atom.parserMatch
+    parser_match = log_atom.parser_match
     sub_rules = []
     all_keys = list(parser_match.getMatchDictionary().keys())
     attribute_count = getLogInt(self.max_rule_attributes) + 1

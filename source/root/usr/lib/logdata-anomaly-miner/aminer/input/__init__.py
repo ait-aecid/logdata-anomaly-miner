@@ -24,7 +24,7 @@ class StreamAtomizer(object):
   stream data cannot be handled at the moment to throttle reading
   of the underlying stream."""
 
-  def consumeData(self, streamData, endOfStreamFlag=False):
+  def consume_data(self, streamData, endOfStreamFlag=False):
     """Consume data from the underlying stream for atomizing.
     Data should only be consumed after splitting of an atom. The
     caller has to keep unconsumed data till the next invocation.
