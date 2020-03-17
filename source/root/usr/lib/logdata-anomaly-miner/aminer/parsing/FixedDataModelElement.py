@@ -7,11 +7,11 @@ class FixedDataModelElement(ModelElementInterface):
   """This class defines a model element of a fixed string. The model
   element is considered a match if the fixed string is found at
   this position in the log atom."""
-  def __init__(self, element_id, fixedData):
-    if not isinstance(fixedData, bytes):
+  def __init__(self, element_id, fixed_data):
+    if not isinstance(fixed_data, bytes):
       raise Exception('fixedData has to be byte string')
     self.element_id = element_id
-    self.fixed_data = fixedData
+    self.fixed_data = fixed_data
 
   def get_child_elements(self):
     """Get all possible child model elements of this element.

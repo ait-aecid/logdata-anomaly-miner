@@ -78,7 +78,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
 # to analyze a given timestamp. The tree is created containing
 # nodes of form (separator, digitsOnlyFlag, length)
     for format_string, format_locale, format_timezone in date_formats:
-      self.date_formats.addFormat(format_string, format_locale, format_timezone)
+      self.date_formats.add_format(format_string, format_locale, format_timezone)
 # Restore previous locale settings. There seems to be no way in
 # python to get back to the exact same state. Hence perform the
 # reset only when locale has changed. This would also change the
@@ -242,7 +242,7 @@ class DateFormatComponent:
     self.next_components = {}
 
 
-  def addFormat(self, format_string, format_locale, format_timezone):
+  def add_format(self, format_string, format_locale, format_timezone):
     """Add a new format to be parsed."""
     if isinstance(format_string, bytes):
       format_string = format_string.decode('utf-8')
@@ -355,8 +355,8 @@ class DateFormatComponent:
           translation_dictionary)
 
     if parse_pos != len(format_string):
-      next_component.addFormat(format_string[parse_pos:], format_locale, \
-                              format_timezone)
+      next_component.add_format(format_string[parse_pos:], format_locale, \
+                                format_timezone)
     else:
 # Import in constructor to avoid failures reading the class in
 # module initialization on setups without pytz.

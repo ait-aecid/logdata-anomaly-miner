@@ -8,7 +8,7 @@ class AtomizerFactory(object):
   for new data sources and integrate them into the downstream
   processing pipeline."""
 
-  def get_atomizer_for_resource(self, resourceName):
+  def get_atomizer_for_resource(self, resource_name):
     """Get an atomizer for a given resource.
     @return a StreamAtomizer object"""
     raise Exception('Interface method called')
@@ -24,13 +24,13 @@ class StreamAtomizer(object):
   stream data cannot be handled at the moment to throttle reading
   of the underlying stream."""
 
-  def consume_data(self, streamData, endOfStreamFlag=False):
+  def consume_data(self, stream_data, end_of_stream_flag=False):
     """Consume data from the underlying stream for atomizing.
     Data should only be consumed after splitting of an atom. The
     caller has to keep unconsumed data till the next invocation.
-    @param streamData the data offered to be consumed or zero
+    @param stream_data the data offered to be consumed or zero
     length data when endOfStreamFlag is True (see below).
-    @param endOfStreamFlag this flag is used to indicate, that
+    @param end_of_stream_flag this flag is used to indicate, that
     the streamData offered is the last from the input stream.
     If the streamData does not form a complete atom, no rollover
     is expected or rollover would have honoured the atom boundaries,
@@ -52,7 +52,7 @@ class AtomHandlerInterface(object):
   """This is the common interface of all handlers suitable for
   receiving log atoms."""
 
-  def receive_atom(self, logAtom):
+  def receive_atom(self, log_atom):
     """Receive a log atom from a source.
     @param atomData binary raw atom data
     @return True if this handler was really able to handle and

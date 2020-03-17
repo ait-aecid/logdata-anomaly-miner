@@ -21,8 +21,8 @@ class FirstMatchModelElement(ModelElementInterface):
     current_path = "%s/%s" % (path, self.element_id)
 
     match_data = match_context.matchData
-    for childElement in self.children:
-      child_match = childElement.get_match_element(current_path, match_context)
+    for child_element in self.children:
+      child_match = child_element.get_match_element(current_path, match_context)
       if child_match != None:
         return child_match
       match_context.matchData = match_data
