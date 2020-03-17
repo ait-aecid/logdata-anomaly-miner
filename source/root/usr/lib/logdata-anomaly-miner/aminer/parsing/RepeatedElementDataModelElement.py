@@ -16,25 +16,25 @@ class RepeatedElementDataModelElement(ModelElementInterface):
     """Return a list of all children model elements."""
     return [self.repeatedElement]
 
-  def get_match_element(self, path, matchContext):
+  def get_match_element(self, path, match_context):
     """Find a suitable number of repeats."""
     currentPath = "%s/%s" % (path, self.elementId)
 
-    startData = matchContext.matchData
+    startData = match_context.matchData
     matches = []
     matchCount = 0
     while matchCount != self.maxRepeat+1:
       childMatch = self.repeatedElement.get_match_element(
           '%s/%s' % (currentPath, matchCount),
-          matchContext)
+          match_context)
       if childMatch is None:
         break
       matches += [childMatch]
       matchCount += 1
     if matchCount < self.minRepeat or matchCount > self.maxRepeat:
-      matchContext.matchData = startData
+      match_context.matchData = startData
       return None
 
     return MatchElement(currentPath, \
-        startData[:len(startData)-len(matchContext.matchData)], 
-        startData[:len(startData)-len(matchContext.matchData)], matches)
+                        startData[:len(startData)-len(match_context.matchData)],
+                        startData[:len(startData)-len(match_context.matchData)], matches)

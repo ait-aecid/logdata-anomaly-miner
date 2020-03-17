@@ -22,16 +22,16 @@ class Base64StringModelElement(ModelElementInterface):
     data = match_context.matchData
     match_len = 0
     at_end_flag = False
-    for testByte in data:
-      bVal = testByte
+    for test_byte in data:
+      b_val = test_byte
       if at_end_flag:
-        if ((match_len&0x3) == 0) or (bVal != 0x3d):
+        if ((match_len&0x3) == 0) or (b_val != 0x3d):
           break
-      elif (not ((bVal >= 0x30) and (bVal <= 0x39)) and
-            not ((bVal >= 0x41) and (bVal <= 0x5a)) and
-            not ((bVal >= 0x61) and (bVal <= 0x7a)) and
-            (bVal not in [0x2b, 0x2f])):
-        if (bVal != 0x3d) or ((match_len&0x2) == 0):
+      elif (not ((b_val >= 0x30) and (b_val <= 0x39)) and
+            not ((b_val >= 0x41) and (b_val <= 0x5a)) and
+            not ((b_val >= 0x61) and (b_val <= 0x7a)) and
+            (b_val not in [0x2b, 0x2f])):
+        if (b_val != 0x3d) or ((match_len&0x2) == 0):
           break
         at_end_flag = True
       match_len += 1

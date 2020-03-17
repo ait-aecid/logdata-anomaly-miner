@@ -6,8 +6,8 @@ from aminer.parsing import ModelElementInterface
 class FirstMatchModelElement(ModelElementInterface):
   """This class defines a model element to return the match from
   the the first matching child model within a given list."""
-  def __init__(self, elementId, children):
-    self.elementId = elementId
+  def __init__(self, element_id, children):
+    self.element_id = element_id
     self.children = children
     if (children is None) or (None in children):
       raise Exception('Invalid children list')
@@ -16,14 +16,14 @@ class FirstMatchModelElement(ModelElementInterface):
     """Get all possible child model elements of this element."""
     return self.children
 
-  def get_match_element(self, path, matchContext):
+  def get_match_element(self, path, match_context):
     """@return None when there is no match, MatchElement otherwise."""
-    currentPath = "%s/%s" % (path, self.elementId)
+    current_path = "%s/%s" % (path, self.element_id)
 
-    matchData = matchContext.matchData
+    match_data = match_context.matchData
     for childElement in self.children:
-      childMatch = childElement.get_match_element(currentPath, matchContext)
-      if childMatch != None:
-        return childMatch
-      matchContext.matchData = matchData
+      child_match = childElement.get_match_element(current_path, match_context)
+      if child_match != None:
+        return child_match
+      match_context.matchData = match_data
     return None

@@ -7,39 +7,39 @@ from aminer.parsing import ModelElementInterface
 class HexStringModelElement(ModelElementInterface):
   """This class just tries to strip off as many hex bytes as possible
   from a given data string."""
-  def __init__(self, elementId, upperCase=False):
-    self.elementId = elementId
-    if upperCase:
-      self.charStart = ord('A')
+  def __init__(self, element_id, upper_case=False):
+    self.element_id = element_id
+    if upper_case:
+      self.char_start = ord('A')
     else:
-      self.charStart = ord('a')
+      self.char_start = ord('a')
 
   def get_child_elements(self):
     """Get all possible child model elements of this element.
     @return None as there are no children of this element."""
     return None
 
-  def get_match_element(self, path, matchContext):
+  def get_match_element(self, path, match_context):
     """Find the maximum number of bytes forming a integer number
     according to the parameters specified
     @return a match when at least one byte being a digit was found"""
-    data = matchContext.matchData
-    matchLen = 0
-    for bVal in data:
-      if ((bVal < 0x30) or (bVal > 0x39)) and ((bVal < self.charStart) or (
-          bVal-self.charStart > 5)):
+    data = match_context.matchData
+    match_len = 0
+    for b_val in data:
+      if ((b_val < 0x30) or (b_val > 0x39)) and ((b_val < self.char_start) or (
+              b_val - self.char_start > 5)):
         break
-      matchLen += 1
+      match_len += 1
 
-    if matchLen == 0:
+    if match_len == 0:
       return None
 
-    matchObject = data[:matchLen]
+    match_object = data[:match_len]
     try:
-      matchString = bytes.fromhex(matchObject.decode('utf-8'))
+      match_string = bytes.fromhex(match_object.decode('utf-8'))
     except ValueError:
       return None
     
-    matchContext.update(matchObject)
-    return MatchElement("%s/%s" % (path, self.elementId), \
-        matchString, matchObject, None)
+    match_context.update(match_object)
+    return MatchElement("%s/%s" % (path, self.element_id), \
+                        match_string, match_object, None)

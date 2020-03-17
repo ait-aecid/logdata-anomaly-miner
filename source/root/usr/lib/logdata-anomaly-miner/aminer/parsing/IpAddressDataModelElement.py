@@ -7,53 +7,53 @@ from aminer.parsing import ModelElementInterface
 class IpAddressDataModelElement(ModelElementInterface):
   """This class defines a model element that matches an IPv4 IP
   address."""
-  def __init__(self, elementId):
+  def __init__(self, element_id):
     """Create an element to match IPv4 IP addresses."""
-    self.elementId = elementId
+    self.element_id = element_id
 
   def get_child_elements(self):
     """Get all possible child model elements of this element.
     @return None as there are no children of this element."""
     return None
 
-  def get_match_element(self, path, matchContext):
+  def get_match_element(self, path, match_context):
     """Read an IP address at the current data position. When found,
     the matchObject will be """
-    data = matchContext.matchData
+    data = match_context.matchData
 
-    numberCount = 0
-    digitCount = 0
-    matchLen = 0
-    extractedAddress = 0
-    for testByte in data:
-      matchLen += 1
-      if testByte in b'0123456789':
-        digitCount += 1
+    number_count = 0
+    digit_count = 0
+    match_len = 0
+    extracted_address = 0
+    for test_byte in data:
+      match_len += 1
+      if test_byte in b'0123456789':
+        digit_count += 1
         continue
-      if digitCount == 0:
+      if digit_count == 0:
         return None
 
-      ipBits = int(data[matchLen-digitCount-1:matchLen-1])
-      if ipBits > 0xff:
+      ip_bits = int(data[match_len-digit_count-1:match_len-1])
+      if ip_bits > 0xff:
         return None
-      extractedAddress = (extractedAddress << 8)|ipBits
-      digitCount = 0
-      numberCount += 1
-      if numberCount == 4:
+      extracted_address = (extracted_address << 8)|ip_bits
+      digit_count = 0
+      number_count += 1
+      if number_count == 4:
 # We are now after the first byte not belonging to the IP. So
 # go back one step
-        matchLen -= 1
+        match_len -= 1
         break
-      if testByte != ord(b'.'):
+      if test_byte != ord(b'.'):
         return None
 
-    if digitCount != 0:
-      ipBits = int(data[matchLen-digitCount:matchLen])
-      if ipBits > 0xff:
+    if digit_count != 0:
+      ip_bits = int(data[match_len-digit_count:match_len])
+      if ip_bits > 0xff:
         return None
-      extractedAddress = (extractedAddress << 8)|ipBits
+      extracted_address = (extracted_address << 8)|ip_bits
 
-    matchString = data[:matchLen]
-    matchContext.update(matchString)
-    return MatchElement("%s/%s" % (path, self.elementId), \
-        matchString, extractedAddress, None)
+    match_string = data[:match_len]
+    match_context.update(match_string)
+    return MatchElement("%s/%s" % (path, self.element_id), \
+                        match_string, extracted_address, None)

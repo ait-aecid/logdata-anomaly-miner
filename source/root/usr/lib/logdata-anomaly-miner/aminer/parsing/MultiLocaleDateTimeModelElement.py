@@ -34,17 +34,17 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
     names to bytes during object creation and just keep the lookup
     list."""
 
-  def __init__(self, elementId, dateFormats, startYear=None):
+  def __init__(self, element_id, date_formats, start_year=None):
     """Create a new MultiLocaleDateTimeModelElement object.
-    @param dateFormats this parameter is a list of tuples, each
+    @param date_formats this parameter is a list of tuples, each
     tuple containing information about one date format to support.
-    The tuple structure is (formatString, formatLocale, formatTimezone).
-    The formatString may contain the same elements as supported
-    by strptime from datetime.datetime. The formatLocale defines
+    The tuple structure is (format_string, format_locale, format_timezone).
+    The format_string may contain the same elements as supported
+    by strptime from datetime.datetime. The format_locale defines
     the locale for the string content, e.g. de_DE for german,
     but also the data IO encoding, e.g. ISO-8859-1. The locale
     information has to be available, e.g. using "locale-gen" on
-    Debian systems. The formatTimezone can be used to define the
+    Debian systems. The format_timezone can be used to define the
     timezone of the timestamp parsed. When None, UTC is used.
     The timezone support may only be sufficient for very simple
     usecases, e.g. all data from one source configured to create
@@ -54,10 +54,10 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
     be left empty here and a separate filtering component should
     be used to apply timestamp corrections afterwards. See the
     FIXME-Filter component for that.
-    Also having the same formatString for two different timezones
+    Also having the same format_string for two different timezones
     will result in an error as correct timezone to apply cannot
     be distinguished just from format.
-    @param startYear when given, parsing will use this year value
+    @param start_year when given, parsing will use this year value
     for semiqualified timestamps to add correct year information.
     This is especially relevant for historic datasets as otherwise
     leap year handling may fail. The startYear parameter will
@@ -66,24 +66,24 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
     is extracted from this record. When empty and first parsing
     invocation involves a semiqualified date, the current year
     in UTC timezone is used."""
-    self.elementId = elementId
-    self.startYear = startYear
+    self.element_id = element_id
+    self.start_year = start_year
 # The latest parsed timestamp value.
-    self.latestParsedTimestamp = None
-    self.totalSecondsStartTime = datetime.datetime(1970, 1, 1)
+    self.latest_parsed_timestamp = None
+    self.total_seconds_start_time = datetime.datetime(1970, 1, 1)
 
-    self.dateFormats = DateFormatComponent(-1, None, -1, None, None)
-    defaultLocale = locale.getlocale()
+    self.date_formats = DateFormatComponent(-1, None, -1, None, None)
+    default_locale = locale.getlocale()
 # Build a decision tree for all format variants describing how
 # to analyze a given timestamp. The tree is created containing
 # nodes of form (separator, digitsOnlyFlag, length)
-    for formatString, formatLocale, formatTimezone in dateFormats:
-      self.dateFormats.addFormat(formatString, formatLocale, formatTimezone)
+    for format_string, format_locale, format_timezone in date_formats:
+      self.date_formats.addFormat(format_string, format_locale, format_timezone)
 # Restore previous locale settings. There seems to be no way in
 # python to get back to the exact same state. Hence perform the
 # reset only when locale has changed. This would also change the
 # locale from (None, None) to some system-dependent locale.
-    if locale.getlocale() != defaultLocale:
+    if locale.getlocale() != default_locale:
       locale.resetlocale()
 
   def get_child_elements(self):
@@ -92,7 +92,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
     return None
 
 
-  def get_match_element(self, path, matchContext):
+  def get_match_element(self, path, match_context):
     """This method checks if the data to match within the content
     is suitable to be parsed by any of the supplied date formats.
     @return On match return a matchObject containing a tuple of
@@ -103,107 +103,107 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
     None."""
 
 # Convert the head of the matchData to a timestamp value.
-    parsedData = self.dateFormats.parse(matchContext.matchData, 0)
-    if parsedData is None:
+    parsed_data = self.date_formats.parse(match_context.matchData, 0)
+    if parsed_data is None:
       return None
-    parsedFields = parsedData[0]
-    timeZoneInfo = parsedData[2]
+    parsed_fields = parsed_data[0]
+    time_zone_info = parsed_data[2]
 
-    dateStr = matchContext.matchData[0:parsedData[1]]
-    if parsedFields[COMPONENT_TYPE_MICROSECOND] is None:
-      parsedFields[COMPONENT_TYPE_MICROSECOND] = 0
+    date_str = match_context.matchData[0:parsed_data[1]]
+    if parsed_fields[COMPONENT_TYPE_MICROSECOND] is None:
+      parsed_fields[COMPONENT_TYPE_MICROSECOND] = 0
 
 # FIXME: Values without day/month not handled yet
-    parsedValue = None
-    if parsedFields[COMPONENT_TYPE_YEAR] is None:
-      if self.latestParsedTimestamp is not None:
-        parsedFields[COMPONENT_TYPE_YEAR] = self.latestParsedTimestamp.year
-      elif self.startYear is not None:
-        parsedFields[COMPONENT_TYPE_YEAR] = self.startYear
+    parsed_value = None
+    if parsed_fields[COMPONENT_TYPE_YEAR] is None:
+      if self.latest_parsed_timestamp is not None:
+        parsed_fields[COMPONENT_TYPE_YEAR] = self.latest_parsed_timestamp.year
+      elif self.start_year is not None:
+        parsed_fields[COMPONENT_TYPE_YEAR] = self.start_year
       else:
-        parsedFields[COMPONENT_TYPE_YEAR] = datetime.datetime.utcnow().year
-    if parsedFields[COMPONENT_TYPE_MONTH] is None:
-      parsedFields[COMPONENT_TYPE_MONTH] = 1
-    if parsedFields[COMPONENT_TYPE_DAY] is None:
-      parsedFields[COMPONENT_TYPE_DAY] = 1
-    if parsedFields[COMPONENT_TYPE_HOUR] is None:
-      parsedFields[COMPONENT_TYPE_HOUR] = 0
-    if parsedFields[COMPONENT_TYPE_MINUTE] is None:
-      parsedFields[COMPONENT_TYPE_MINUTE] = 0
-    if parsedFields[COMPONENT_TYPE_SECOND] is None:
-      parsedFields[COMPONENT_TYPE_SECOND] = 0
+        parsed_fields[COMPONENT_TYPE_YEAR] = datetime.datetime.utcnow().year
+    if parsed_fields[COMPONENT_TYPE_MONTH] is None:
+      parsed_fields[COMPONENT_TYPE_MONTH] = 1
+    if parsed_fields[COMPONENT_TYPE_DAY] is None:
+      parsed_fields[COMPONENT_TYPE_DAY] = 1
+    if parsed_fields[COMPONENT_TYPE_HOUR] is None:
+      parsed_fields[COMPONENT_TYPE_HOUR] = 0
+    if parsed_fields[COMPONENT_TYPE_MINUTE] is None:
+      parsed_fields[COMPONENT_TYPE_MINUTE] = 0
+    if parsed_fields[COMPONENT_TYPE_SECOND] is None:
+      parsed_fields[COMPONENT_TYPE_SECOND] = 0
 # Around new year, the year correction could change a semiqualified
 # date to the beginning of the year or could change a semiqualified
 # date lagging behind the latest date seen to the end of the following
 # year.
-      parsedValue = datetime.datetime(parsedFields[COMPONENT_TYPE_YEAR], \
-          parsedFields[COMPONENT_TYPE_MONTH], \
-          parsedFields[COMPONENT_TYPE_DAY], \
-          parsedFields[COMPONENT_TYPE_HOUR], \
-          parsedFields[COMPONENT_TYPE_MINUTE], \
-          parsedFields[COMPONENT_TYPE_SECOND], \
-          parsedFields[COMPONENT_TYPE_MICROSECOND], \
-          timeZoneInfo)
-      if not self.checkTimestampValueInRange(parsedValue):
-        parsedValue = datetime.datetime(parsedFields[COMPONENT_TYPE_YEAR]+1, \
-            parsedFields[COMPONENT_TYPE_MONTH], \
-            parsedFields[COMPONENT_TYPE_DAY], \
-            parsedFields[COMPONENT_TYPE_HOUR], \
-            parsedFields[COMPONENT_TYPE_MINUTE], \
-            parsedFields[COMPONENT_TYPE_SECOND], \
-            parsedFields[COMPONENT_TYPE_MICROSECOND], \
-            timeZoneInfo)
-        if not self.checkTimestampValueInRange(parsedValue):
-          parsedValue = datetime.datetime(parsedFields[COMPONENT_TYPE_YEAR]-1, \
-              parsedFields[COMPONENT_TYPE_MONTH], \
-              parsedFields[COMPONENT_TYPE_DAY], \
-              parsedFields[COMPONENT_TYPE_HOUR], \
-              parsedFields[COMPONENT_TYPE_MINUTE], \
-              parsedFields[COMPONENT_TYPE_SECOND], \
-              parsedFields[COMPONENT_TYPE_MICROSECOND], \
-              timeZoneInfo)
-          if not self.checkTimestampValueInRange(parsedValue):
-            print('Delta to last timestamp out of range for %s' % repr(dateStr), file=sys.stderr)
+      parsed_value = datetime.datetime(parsed_fields[COMPONENT_TYPE_YEAR], \
+          parsed_fields[COMPONENT_TYPE_MONTH], \
+          parsed_fields[COMPONENT_TYPE_DAY], \
+          parsed_fields[COMPONENT_TYPE_HOUR], \
+          parsed_fields[COMPONENT_TYPE_MINUTE], \
+          parsed_fields[COMPONENT_TYPE_SECOND], \
+          parsed_fields[COMPONENT_TYPE_MICROSECOND], \
+          time_zone_info)
+      if not self.checkTimestampValueInRange(parsed_value):
+        parsed_value = datetime.datetime(parsed_fields[COMPONENT_TYPE_YEAR]+1, \
+            parsed_fields[COMPONENT_TYPE_MONTH], \
+            parsed_fields[COMPONENT_TYPE_DAY], \
+            parsed_fields[COMPONENT_TYPE_HOUR], \
+            parsed_fields[COMPONENT_TYPE_MINUTE], \
+            parsed_fields[COMPONENT_TYPE_SECOND], \
+            parsed_fields[COMPONENT_TYPE_MICROSECOND], \
+            time_zone_info)
+        if not self.checkTimestampValueInRange(parsed_value):
+          parsed_value = datetime.datetime(parsed_fields[COMPONENT_TYPE_YEAR]-1, \
+              parsed_fields[COMPONENT_TYPE_MONTH], \
+              parsed_fields[COMPONENT_TYPE_DAY], \
+              parsed_fields[COMPONENT_TYPE_HOUR], \
+              parsed_fields[COMPONENT_TYPE_MINUTE], \
+              parsed_fields[COMPONENT_TYPE_SECOND], \
+              parsed_fields[COMPONENT_TYPE_MICROSECOND], \
+              time_zone_info)
+          if not self.checkTimestampValueInRange(parsed_value):
+            print('Delta to last timestamp out of range for %s' % repr(date_str), file=sys.stderr)
             return None
 
-      self.checkTimestampValueInRange(parsedValue)
-      if self.latestParsedTimestamp is not None:
-        delta = (parsedValue-self.latestParsedTimestamp)
-        deltaSeconds = (delta.days*86400+delta.seconds+delta.microseconds/1000)
-        if (deltaSeconds < -86400) or (deltaSeconds > 86400*30):
-          print('Delta to last timestamp out of range for %s' % repr(dateStr), file=sys.stderr)
+      self.checkTimestampValueInRange(parsed_value)
+      if self.latest_parsed_timestamp is not None:
+        delta = (parsed_value - self.latest_parsed_timestamp)
+        delta_seconds = (delta.days*86400+delta.seconds+delta.microseconds/1000)
+        if (delta_seconds < -86400) or (delta_seconds > 86400*30):
+          print('Delta to last timestamp out of range for %s' % repr(date_str), file=sys.stderr)
           return None
 
     else:
-      parsedValue = datetime.datetime(parsedFields[COMPONENT_TYPE_YEAR], \
-          parsedFields[COMPONENT_TYPE_MONTH], \
-          parsedFields[COMPONENT_TYPE_DAY], \
-          parsedFields[COMPONENT_TYPE_HOUR], \
-          parsedFields[COMPONENT_TYPE_MINUTE], \
-          parsedFields[COMPONENT_TYPE_SECOND], \
-          parsedFields[COMPONENT_TYPE_MICROSECOND], \
-          timeZoneInfo)
-      if not self.checkTimestampValueInRange(parsedValue):
-        print('Delta to last timestamp out of range for %s' % repr(dateStr), file=sys.stderr)
+      parsed_value = datetime.datetime(parsed_fields[COMPONENT_TYPE_YEAR], \
+          parsed_fields[COMPONENT_TYPE_MONTH], \
+          parsed_fields[COMPONENT_TYPE_DAY], \
+          parsed_fields[COMPONENT_TYPE_HOUR], \
+          parsed_fields[COMPONENT_TYPE_MINUTE], \
+          parsed_fields[COMPONENT_TYPE_SECOND], \
+          parsed_fields[COMPONENT_TYPE_MICROSECOND], \
+          time_zone_info)
+      if not self.checkTimestampValueInRange(parsed_value):
+        print('Delta to last timestamp out of range for %s' % repr(date_str), file=sys.stderr)
         return None
 
-    self.totalSecondsStartTime = datetime.datetime(1970, 1, 1, tzinfo=parsedValue.tzinfo)
-    matchContext.update(dateStr)
-    delta = (parsedValue-self.totalSecondsStartTime)
-    totalSeconds = (delta.days*86400+delta.seconds+delta.microseconds/1000)+parsedValue.utcoffset().total_seconds()
-    if (self.latestParsedTimestamp is None) or (self.latestParsedTimestamp < parsedValue):
-      self.latestParsedTimestamp = parsedValue
-    return MatchElement("%s/%s" % (path, self.elementId), dateStr, (parsedValue, totalSeconds), \
-            None)
+    self.total_seconds_start_time = datetime.datetime(1970, 1, 1, tzinfo=parsed_value.tzinfo)
+    match_context.update(date_str)
+    delta = (parsed_value - self.total_seconds_start_time)
+    total_seconds = (delta.days*86400+delta.seconds+delta.microseconds/1000)+parsed_value.utcoffset().total_seconds()
+    if (self.latest_parsed_timestamp is None) or (self.latest_parsed_timestamp < parsed_value):
+      self.latest_parsed_timestamp = parsed_value
+    return MatchElement("%s/%s" % (path, self.element_id), date_str, (parsed_value, total_seconds), \
+                        None)
 
 
-  def checkTimestampValueInRange(self, parsedValue):
+  def checkTimestampValueInRange(self, parsed_value):
     """Return True if value is None."""
-    if self.latestParsedTimestamp is None:
+    if self.latest_parsed_timestamp is None:
       return True
-    delta = (self.latestParsedTimestamp-parsedValue)
-    deltaSeconds = (delta.days*86400+delta.seconds+delta.microseconds/1000)
-    return (deltaSeconds >= -86400) and (deltaSeconds < 86400*30)
+    delta = (self.latest_parsed_timestamp - parsed_value)
+    delta_seconds = (delta.days*86400+delta.seconds+delta.microseconds/1000)
+    return (delta_seconds >= -86400) and (delta_seconds < 86400*30)
 
 
 
@@ -218,269 +218,263 @@ COMPONENT_TYPE_LENGTH = 7
 
 class DateFormatComponent:
   """This class defines a component in the date format."""
-  def __init__(self, componentType, endSeparator, componentLength,
-               translationDictionary, parentComponent):
+  def __init__(self, component_type, end_separator, component_length,
+               translation_dictionary, parent_component):
     """Create the component object.
-    @param endSeparator when not none, this component is separated
+    @param end_separator when not none, this component is separated
     from the next by the given separator.
-    @param componentLength length of component for fixed length
+    @param component_length length of component for fixed length
     components, 0 otherwise.
-    @param translationDictionary a dictionary describing how
+    @param translation_dictionary a dictionary describing how
     the bytes of a formatted date component should be translated
     into a number by plain lookup. When None, the component will
     be treated as normal number."""
-    self.componentType = componentType
-    if (endSeparator is not None) and not endSeparator:
+    self.component_type = component_type
+    if (end_separator is not None) and not end_separator:
       raise Exception('Invalid zero-length separator string')
-    self.endSeparator = endSeparator
-    if (endSeparator is None) and (componentLength == 0) and (translationDictionary is None):
+    self.end_separator = end_separator
+    if (end_separator is None) and (component_length == 0) and (translation_dictionary is None):
       raise Exception('Invalid parameters to determine the length of the field')
-    self.componentLength = componentLength
-    self.translationDictionary = translationDictionary
-    self.parentComponent = parentComponent
-    self.formatTimezone = None
-    self.nextComponents = {}
+    self.component_length = component_length
+    self.translation_dictionary = translation_dictionary
+    self.parent_component = parent_component
+    self.format_timezone = None
+    self.next_components = {}
 
 
-  def addFormat(self, formatString, formatLocale, formatTimezone):
+  def addFormat(self, format_string, format_locale, format_timezone):
     """Add a new format to be parsed."""
-    if isinstance(formatString, bytes):
-      formatString = formatString.decode('utf-8')
-    if formatTimezone is None:
-      formatTimezone = 'UTC'
+    if isinstance(format_string, bytes):
+      format_string = format_string.decode('utf-8')
+    if format_timezone is None:
+      format_timezone = 'UTC'
     
-    if formatString[0] != '%':
+    if format_string[0] != '%':
       raise Exception('Format string has to start with "%", strip away all static data outside \
         this formatter before starting to parse')
-    if self.formatTimezone is not None:
+    if self.format_timezone is not None:
       raise Exception('Current node is already an end node, no format adding any more')
 
-    parsePos = 1
-    componentType = -1
-    componentLength = -1
-    translationDictionary = None
-    if formatString[parsePos] == 'b' or formatString[parsePos] == 'B':
+    parse_pos = 1
+    component_type = -1
+    component_length = -1
+    translation_dictionary = None
+    if format_string[parse_pos] == 'b' or format_string[parse_pos] == 'B':
 # Month name
-      parsePos += 1
-      componentType = COMPONENT_TYPE_MONTH
-      componentLength = 0
-      locale.setlocale(locale.LC_ALL, formatLocale)
-      translationDictionary = {}
-      for monthNum in range(1, 13):
+      parse_pos += 1
+      component_type = COMPONENT_TYPE_MONTH
+      component_length = 0
+      locale.setlocale(locale.LC_ALL, format_locale)
+      translation_dictionary = {}
+      for month_num in range(1, 13):
 # As we have switched locale before, this will return the byte
 # string for the month name encoded using the correct encoding.
-        newValue = datetime.datetime(1970, monthNum, 1).strftime('%'+formatString[parsePos-1])
-        for oldValue in translationDictionary:
-          if (oldValue.startswith(newValue)) or (newValue.startswith(oldValue)):
+        new_value = datetime.datetime(1970, month_num, 1).strftime('%' + format_string[parse_pos - 1])
+        for old_value in translation_dictionary:
+          if (old_value.startswith(new_value)) or (new_value.startswith(old_value)):
             raise Exception('Strange locale with month names too similar')
-        translationDictionary[newValue] = monthNum
-      if len(translationDictionary) != 12:
+        translation_dictionary[new_value] = month_num
+      if len(translation_dictionary) != 12:
         raise Exception('Internal error: less than 12 month a year')
-    elif formatString[parsePos] == 'd':
+    elif format_string[parse_pos] == 'd':
 # Day number
-      parsePos += 1
-      componentType = COMPONENT_TYPE_DAY
-      componentLength = 2
-    elif formatString[parsePos] == 'H':
+      parse_pos += 1
+      component_type = COMPONENT_TYPE_DAY
+      component_length = 2
+    elif format_string[parse_pos] == 'H':
 # Hour 0..23
-      parsePos += 1
-      componentType = COMPONENT_TYPE_HOUR
-      componentLength = 2
-    elif formatString[parsePos] == 'M':
+      parse_pos += 1
+      component_type = COMPONENT_TYPE_HOUR
+      component_length = 2
+    elif format_string[parse_pos] == 'M':
 # Minute
-      parsePos += 1
-      componentType = COMPONENT_TYPE_MINUTE
-      componentLength = 2
-    elif formatString[parsePos] == 'S':
+      parse_pos += 1
+      component_type = COMPONENT_TYPE_MINUTE
+      component_length = 2
+    elif format_string[parse_pos] == 'S':
 # Second
-      parsePos += 1
-      componentType = COMPONENT_TYPE_SECOND
-      componentLength = 2
-    elif formatString[parsePos] == 'Y':
+      parse_pos += 1
+      component_type = COMPONENT_TYPE_SECOND
+      component_length = 2
+    elif format_string[parse_pos] == 'Y':
 # Year
-      parsePos += 1
-      componentType = COMPONENT_TYPE_YEAR
-      componentLength = 4
-    elif formatString[parsePos] == 'm':
+      parse_pos += 1
+      component_type = COMPONENT_TYPE_YEAR
+      component_length = 4
+    elif format_string[parse_pos] == 'm':
 # Month
-      parsePos += 1
-      componentType = COMPONENT_TYPE_MONTH
-      componentLength = 2
-    elif formatString[parsePos] == 'f':
+      parse_pos += 1
+      component_type = COMPONENT_TYPE_MONTH
+      component_length = 2
+    elif format_string[parse_pos] == 'f':
 # Microseconds
-      parsePos += 1
-      componentType = COMPONENT_TYPE_MICROSECOND
-      componentLength = 6
+      parse_pos += 1
+      component_type = COMPONENT_TYPE_MICROSECOND
+      component_length = 6
     else:
-      raise Exception('Unsupported date format code "%s"' % formatString[parsePos])
+      raise Exception('Unsupported date format code "%s"' % format_string[parse_pos])
 
-    endPos = formatString.find('%', parsePos)
-    endSeparator = None
-    if endPos < 0:
-      endSeparator = formatString[parsePos:]
-      parsePos = len(formatString)
+    end_pos = format_string.find('%', parse_pos)
+    end_separator = None
+    if end_pos < 0:
+      end_separator = format_string[parse_pos:]
+      parse_pos = len(format_string)
     else:
-      endSeparator = formatString[parsePos:endPos]
-      parsePos = endPos
-    if not endSeparator:
-      endSeparator = None
+      end_separator = format_string[parse_pos:end_pos]
+      parse_pos = end_pos
+    if not end_separator:
+      end_separator = None
 
 # Make sure all values are sane.
 
 # Make sure no parent component is parsing the same type.
-    checkComponent = self
-    while checkComponent is not None:
-      if checkComponent.componentType == componentType:
+    check_component = self
+    while check_component is not None:
+      if check_component.component_type == component_type:
         raise Exception('Current format defines component of type %d twice' %
-                        componentType)
-      checkComponent = checkComponent.parentComponent
+                        component_type)
+      check_component = check_component.parent_component
 
-    lookupKey = None
-    if translationDictionary is None:
-      lookupKey = '%sn%d' % (endSeparator, componentLength)
+    lookup_key = None
+    if translation_dictionary is None:
+      lookup_key = '%sn%d' % (end_separator, component_length)
     else:
-      lookupKey = '%st%d' % (endSeparator, componentLength)
+      lookup_key = '%st%d' % (end_separator, component_length)
       
-    if endSeparator is not None:
-      endSeparator = endSeparator.encode()
+    if end_separator is not None:
+      end_separator = end_separator.encode()
 
-    nextComponent = self.nextComponents.get(lookupKey, None)
-    if nextComponent is None:
-      nextComponent = DateFormatComponent(componentType, endSeparator, \
-          componentLength, translationDictionary, self)
-      self.nextComponents[lookupKey] = nextComponent
+    next_component = self.next_components.get(lookup_key, None)
+    if next_component is None:
+      next_component = DateFormatComponent(component_type, end_separator, \
+          component_length, translation_dictionary, self)
+      self.next_components[lookup_key] = next_component
     else:
 # Merge needed.
-      nextComponent.mergeComponentData(componentType, componentLength, \
-          translationDictionary)
+      next_component.mergeComponentData(component_type, component_length, \
+          translation_dictionary)
 
-    if parsePos != len(formatString):
-      nextComponent.addFormat(formatString[parsePos:], formatLocale, \
-          formatTimezone)
+    if parse_pos != len(format_string):
+      next_component.addFormat(format_string[parse_pos:], format_locale, \
+                              format_timezone)
     else:
 # Import in constructor to avoid failures reading the class in
 # module initialization on setups without pytz.
       import pytz
-      nextComponent.makeEndNode(pytz.timezone(formatTimezone))
+      next_component.make_end_node(pytz.timezone(format_timezone))
 
 
-  def mergeComponentData(self, componentType, componentLength,
-                         translationDictionary):
+  def merge_component_data(self, component_type, component_length,
+                           translation_dictionary):
     """Merge data of given component type, length and lookup information
     into the current dataset."""
-    if (self.componentType != componentType) or (self.componentLength != componentLength):
+    if (self.component_type != component_type) or (self.component_length != component_length):
       raise Exception('Cannot merge data with different type or length')
-    if (self.translationDictionary is not None) != (translationDictionary is not None):
+    if (self.translation_dictionary is not None) != (translation_dictionary is not None):
       raise Exception('Cannot merge digit and translated data')
-    if translationDictionary is None:
+    if translation_dictionary is None:
 # Without dictionary, we are done here: length and type are matching.
       return
 
-    for key in translationDictionary:
-      for oldKey in self.translationDictionary:
-        if ((key.startswith(oldKey)) or (oldKey.startswith(key))) and (key != oldKey):
+    for key in translation_dictionary:
+      for old_key in self.translation_dictionary:
+        if ((key.startswith(old_key)) or (old_key.startswith(key))) and (key != old_key):
           raise Exception('Translation strings from different locales too similar for \
             unambiguous parsing')
-      value = translationDictionary.get(key)
-      currentValue = self.translationDictionary.get(key, None)
-      if currentValue is None:
-        self.translationDictionary[key] = value
-      elif currentValue != value:
+      value = translation_dictionary.get(key)
+      current_value = self.translation_dictionary.get(key, None)
+      if current_value is None:
+        self.translation_dictionary[key] = value
+      elif current_value != value:
         raise Exception('Conflict in translation dictionary for %s: %s vs %s' % (
-            key, value, currentValue))
+            key, value, current_value))
 
 
-  def makeEndNode(self, formatTimezone):
+  def make_end_node(self, format_timezone):
     """Make this DateFormatComponent an end node. When reached
     during parsing, calculation of the timestamp value within
     the given is triggered."""
-    if (self.formatTimezone is not None) and (self.formatTimezone != formatTimezone):
+    if (self.format_timezone is not None) and (self.format_timezone != format_timezone):
       raise Exception('Node is already an end node for different timezone')
-    elif self.nextComponents:
+    elif self.next_components:
       raise Exception('Cannot make node with subcomponents an end node')
-    self.formatTimezone = formatTimezone
+    self.format_timezone = format_timezone
 
 
-  def parse(self, dateString, parsePos):
+  def parse(self, date_string, parse_pos):
     """Parse the supplied dateString starting from the given position.
     @return a triple containing the field list, the parsing end
     position and the target timezone for parsed fields."""
 
-    componentValue = None
+    component_value = None
 # Position after value the value but before an optional separator.
-    endPos = -1
-    if self.componentType >= 0:
-      if self.endSeparator is not None:
-        if self.componentLength == 0:
-          endPos = dateString.find(self.endSeparator, parsePos)
+    end_pos = -1
+    if self.component_type >= 0:
+      if self.end_separator is not None:
+        if self.component_length == 0:
+          end_pos = date_string.find(self.end_separator, parse_pos)
         else:
-          endPos = parsePos+self.componentLength
-          if not dateString.find(self.endSeparator, endPos):
-            endPos = -1
-        if endPos < 0:
+          end_pos = parse_pos + self.component_length
+          if not date_string.find(self.end_separator, end_pos):
+            end_pos = -1
+        if end_pos < 0:
           return None
-      elif self.componentLength != 0:
-        endPos = parsePos+self.componentLength
+      elif self.component_length != 0:
+        end_pos = parse_pos + self.component_length
       else:
         return None
 
-      if endPos != -1:
-        valueStr = dateString[parsePos:endPos]
-        if self.translationDictionary is None:
+      if end_pos != -1:
+        value_str = date_string[parse_pos:end_pos]
+        if self.translation_dictionary is None:
           try:
-            componentValue = int(valueStr.strip())
+            component_value = int(value_str.strip())
           except ValueError:
             return None
         else:
-          componentValue = self.translationDictionary.get(valueStr.decode())
-          if componentValue is None:
+          component_value = self.translation_dictionary.get(value_str.decode())
+          if component_value is None:
             return None
       else:
 # Without length, we need to got through all the dictionary components
 # and see if the dateString starts with that key. As keys were
 # already verified, that no key is starting portion of other key,
 # that does not need to be checked.
-        checkString = dateString[parsePos:]
-        for key in self.translationDictionary:
-          if checkString.startswith(key):
-            componentValue = self.translationDictionary.get(key)
-            endPos = parsePos+len(key)
+        check_string = date_string[parse_pos:]
+        for key in self.translation_dictionary:
+          if check_string.startswith(key):
+            component_value = self.translation_dictionary.get(key)
+            end_pos = parse_pos + len(key)
             break
-        if componentValue is None:
+        if component_value is None:
           return None
 
 # Now after parsing of value, add the length of the separator
 # but make sure, it is really present.
-      if self.endSeparator is not None:
-        if dateString.find(self.endSeparator, endPos) != endPos:
+      if self.end_separator is not None:
+        if date_string.find(self.end_separator, end_pos) != end_pos:
           return None
-        endPos += len(self.endSeparator)
+        end_pos += len(self.end_separator)
 
     else:
 # Negative componentType means, that this node is just a collector
 # of subcomponents so do not change the parsing position for the
 # next round.
-      endPos = 0
+      end_pos = 0
 
-    if self.formatTimezone is not None:
+    if self.format_timezone is not None:
 # This is the end node, return the results.
       fields = [None]*COMPONENT_TYPE_LENGTH
-      fields[self.componentType] = componentValue
-      return (fields, endPos, self.formatTimezone)
+      fields[self.component_type] = component_value
+      return (fields, end_pos, self.format_timezone)
 
 # So this is no end node. Search the list of next components and
 # continue parsing the next component.
-    for key in self.nextComponents:
-      nextComponent = self.nextComponents.get(key)
-      result = nextComponent.parse(dateString, endPos)
+    for key in self.next_components:
+      next_component = self.next_components.get(key)
+      result = next_component.parse(date_string, end_pos)
       if result is not None:
-        if componentValue is not None:
-          result[0][self.componentType] = componentValue
+        if component_value is not None:
+          result[0][self.component_type] = component_value
         return result
     return None
-
-
-# Todos:
-# * Add unit-test with
-#   * leap year
-#   * dst hour gain/loose

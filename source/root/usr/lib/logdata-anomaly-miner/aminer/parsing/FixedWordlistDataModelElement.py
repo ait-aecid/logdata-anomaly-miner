@@ -12,19 +12,19 @@ class FixedWordlistDataModelElement(ModelElementInterface):
   words, that are identical to the beginning of words later in
   the list. In that case, the longer match could never be detected."""
 
-  def __init__(self, pathId, wordlist):
+  def __init__(self, path_id, wordlist):
     """Create the model element.
     @param wordlist the list of words to search for. If it does
     not fulfill the sorting criteria mentioned in the class documentation,
     an Exception will be raised."""
-    self.pathId = pathId
+    self.path_id = path_id
     self.wordlist = wordlist
-    for testPos, refWord in enumerate(wordlist):
-      for testWord in wordlist[testPos+1:]:
-        if testWord.startswith(refWord):
+    for test_pos, ref_word in enumerate(wordlist):
+      for test_word in wordlist[test_pos+1:]:
+        if test_word.startswith(ref_word):
           raise Exception(
               'Word %s would be shadowed by word %s at lower position' % (
-                  repr(testWord), repr(refWord)))
+                  repr(test_word), repr(ref_word)))
 
 
   def get_child_elements(self):
@@ -32,20 +32,20 @@ class FixedWordlistDataModelElement(ModelElementInterface):
     @return None as there are no children of this element."""
     return None
 
-  def get_match_element(self, path, matchContext):
+  def get_match_element(self, path, match_context):
     """@return None when there is no match, MatchElement otherwise."""
-    data = matchContext.matchData
-    matchData = None
-    wordPos = 0
+    data = match_context.matchData
+    match_data = None
+    word_pos = 0
     for word in self.wordlist:
       if data.startswith(word):
-        matchData = word
+        match_data = word
         break
-      wordPos += 1
+      word_pos += 1
 
-    if matchData is None:
+    if match_data is None:
       return None
 
-    matchContext.update(matchData)
+    match_context.update(match_data)
     return MatchElement(
-        "%s/%s" % (path, self.pathId), matchData, wordPos, None)
+        "%s/%s" % (path, self.path_id), match_data, word_pos, None)

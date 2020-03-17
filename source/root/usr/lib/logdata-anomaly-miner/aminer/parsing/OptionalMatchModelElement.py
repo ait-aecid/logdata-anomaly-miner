@@ -15,16 +15,16 @@ class OptionalMatchModelElement(ModelElementInterface):
     """Return all optional elements."""
     return [self.optionalElement]
 
-  def get_match_element(self, path, matchContext):
+  def get_match_element(self, path, match_context):
     """@return the embedded child match or an empty match."""
     currentPath = "%s/%s" % (path, self.elementId)
 
-    startData = matchContext.matchData
-    match = self.optionalElement.get_match_element(currentPath, matchContext)
+    startData = match_context.matchData
+    match = self.optionalElement.get_match_element(currentPath, match_context)
     if match is None:
       return MatchElement("%s/%s" % (path, self.elementId), \
           '', None, None)
 
     return MatchElement(currentPath, \
-        startData[:len(startData)-len(matchContext.matchData)], 
-        startData[:len(startData)-len(matchContext.matchData)], [match])
+                        startData[:len(startData)-len(match_context.matchData)],
+                        startData[:len(startData)-len(match_context.matchData)], [match])

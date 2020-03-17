@@ -4,7 +4,7 @@ and namespace shortcuts to the ModelElements."""
 class ModelElementInterface(object):
   """This is the superinterface of all model elements."""
 
-  def getId(self):
+  def get_id(self):
     """Get the element ID."""
     raise Exception('Interface method called')
 
@@ -16,15 +16,15 @@ class ModelElementInterface(object):
     @return a list with all children"""
     raise Exception('Interface method called')
 
-  def get_match_element(self, path, matchContext):
+  def get_match_element(self, path, match_context):
     """Try to find a match on given data for this model element
     and all its children. When a match is found, the matchContext
     is updated accordingly.
     @param path the model path to the parent model element invoking
     this method.
-    @param matchContext an instance of MatchContext class holding
+    @param match_context an instance of MatchContext class holding
     the data context to match against.
-    @return the matchElement or None if model did not match."""
+    @return the match_element or None if model did not match."""
 
 from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
 from aminer.parsing.Base64StringModelElement import Base64StringModelElement
