@@ -448,7 +448,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
       fcntl.fcntl(resource.get_file_descriptor(), fcntl.F_SETFL, fd_flags | os.O_NONBLOCK)
       log_stream = self.log_streams_by_name.get(resource.get_resource_name())
       if log_stream is None:
-        stream_atomizer = self.analysis_context.atomizer_factory.getAtomizerForResource(
+        stream_atomizer = self.analysis_context.atomizer_factory.get_atomizer_for_resource(
             resource.get_resource_name())
         log_stream = LogStream(resource, stream_atomizer)
         self.tracked_fds_dict[resource.get_file_descriptor()] = log_stream

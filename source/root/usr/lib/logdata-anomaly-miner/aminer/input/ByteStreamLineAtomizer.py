@@ -76,15 +76,15 @@ class ByteStreamLineAtomizer(StreamAtomizer):
 
 # This is the valid start of a normal/incomplete/overlong line.
       if line_end < 0:
-        tailLength = len(stream_data) - consumed_length
-        if tailLength > self.max_line_length:
+        tail_length = len(stream_data) - consumed_length
+        if tail_length > self.max_line_length:
           self.dispatch_event(
               'Start of overlong line detected', stream_data[consumed_length:])
           self.in_overlong_line_flag = True
           consumed_length = len(stream_data)
 # Stay in loop to handle also endOfStreamFlag!
           continue
-        if end_of_stream_flag and (tailLength != 0):
+        if end_of_stream_flag and (tail_length != 0):
           self.dispatch_event('Incomplete last line', stream_data[consumed_length:])
           consumed_length = len(stream_data)
         break
@@ -105,9 +105,9 @@ class ByteStreamLineAtomizer(StreamAtomizer):
         if (match_element != None) and not match_context.matchData:
           log_atom.parser_match = ParserMatch(match_element)
           if self.default_timestamp_path != None:
-            tsMatch = log_atom.parser_match.getMatchDictionary().get(self.default_timestamp_path, None)
-            if tsMatch != None:
-              log_atom.set_timestamp(tsMatch.matchObject[1])
+            ts_match = log_atom.parser_match.getMatchDictionary().get(self.default_timestamp_path, None)
+            if ts_match != None:
+              log_atom.set_timestamp(ts_match.matchObject[1])
       if self.dispatch_atom(log_atom):
         consumed_length = line_end+1
         continue

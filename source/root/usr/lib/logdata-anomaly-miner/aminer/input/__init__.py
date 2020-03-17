@@ -8,7 +8,7 @@ class AtomizerFactory(object):
   for new data sources and integrate them into the downstream
   processing pipeline."""
 
-  def getAtomizerForResource(self, resourceName):
+  def get_atomizer_for_resource(self, resourceName):
     """Get an atomizer for a given resource.
     @return a StreamAtomizer object"""
     raise Exception('Interface method called')
