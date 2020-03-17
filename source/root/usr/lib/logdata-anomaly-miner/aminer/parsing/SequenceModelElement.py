@@ -7,8 +7,8 @@ from aminer.parsing import ModelElementInterface
 class SequenceModelElement(ModelElementInterface):
   """This class defines an element to find matches that comprise
   matches of all given child model elements."""
-  def __init__(self, elementId, children):
-    self.elementId = elementId
+  def __init__(self, element_id, children):
+    self.element_id = element_id
     self.children = children
 
   def get_child_elements(self):
@@ -24,16 +24,16 @@ class SequenceModelElement(ModelElementInterface):
     @param match_context an instance of MatchContext class holding
     the data context to match against.
     @return the matchElement or None if model did not match."""
-    currentPath = "%s/%s" % (path, self.elementId)
-    startData = match_context.matchData
+    current_path = "%s/%s" % (path, self.element_id)
+    start_data = match_context.matchData
     matches = []
     for childElement in self.children:
-      childMatch = childElement.get_match_element(currentPath, match_context)
-      if childMatch is None:
-        match_context.matchData = startData
+      child_match = childElement.get_match_element(current_path, match_context)
+      if child_match is None:
+        match_context.matchData = start_data
         return None
-      matches += [childMatch]
+      matches += [child_match]
 
-    return MatchElement(currentPath, \
-                        startData[:len(startData)-len(match_context.matchData)],
-                        startData[:len(startData)-len(match_context.matchData)], matches)
+    return MatchElement(current_path, \
+                        start_data[:len(start_data)-len(match_context.matchData)],
+                        start_data[:len(start_data)-len(match_context.matchData)], matches)

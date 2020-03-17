@@ -7,8 +7,8 @@ from aminer.parsing import ModelElementInterface
 class VariableByteDataModelElement(ModelElementInterface):
   """This class defines a model element  that takes any string that
   only contains characters of a given alphabet."""
-  def __init__(self, elementId, alphabet):
-    self.elementId = elementId
+  def __init__(self, element_id, alphabet):
+    self.element_id = element_id
     self.alphabet = alphabet
 
   def get_child_elements(self):
@@ -20,14 +20,14 @@ class VariableByteDataModelElement(ModelElementInterface):
     """Find the maximum number of bytes matching the given alphabet.
     @return a match when at least one byte was found within alphabet."""
     data = match_context.matchData
-    matchLen = 0
-    for testByte in data:
-      if testByte not in self.alphabet:
+    match_len = 0
+    for test_byte in data:
+      if test_byte not in self.alphabet:
         break
-      matchLen += 1
+      match_len += 1
 
-    if matchLen == 0:
+    if match_len == 0:
       return None
-    matchData = data[:matchLen]
-    match_context.update(matchData)
-    return MatchElement("%s/%s" % (path, self.elementId), matchData, matchData, None)
+    match_data = data[:match_len]
+    match_context.update(match_data)
+    return MatchElement("%s/%s" % (path, self.element_id), match_data, match_data, None)

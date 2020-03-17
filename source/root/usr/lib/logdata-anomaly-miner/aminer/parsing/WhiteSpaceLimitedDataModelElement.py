@@ -7,8 +7,8 @@ from aminer.parsing import ModelElementInterface
 class WhiteSpaceLimitedDataModelElement(ModelElementInterface):
   """This class defines a model element that represents a variable
   amount of characters delimited by a white space."""
-  def __init__(self, elementId):
-    self.elementId = elementId
+  def __init__(self, element_id):
+    self.element_id = element_id
 
   def get_child_elements(self):
     """Get all possible child model elements of this element.
@@ -20,14 +20,14 @@ class WhiteSpaceLimitedDataModelElement(ModelElementInterface):
     or end of data.
     @return a match when at least one byte was found."""
     data = match_context.matchData
-    matchLen = 0
+    match_len = 0
     for testByte in data:
       if testByte in b' \t':
         break
-      matchLen += 1
+      match_len += 1
 
-    if matchLen == 0:
+    if match_len == 0:
       return None
-    matchData = data[:matchLen]
-    match_context.update(matchData)
-    return MatchElement("%s/%s" % (path, self.elementId), matchData, matchData, None)
+    match_data = data[:match_len]
+    match_context.update(match_data)
+    return MatchElement("%s/%s" % (path, self.element_id), match_data, match_data, None)
