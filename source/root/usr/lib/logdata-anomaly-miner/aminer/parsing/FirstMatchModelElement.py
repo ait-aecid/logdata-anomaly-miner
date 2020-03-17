@@ -12,17 +12,17 @@ class FirstMatchModelElement(ModelElementInterface):
     if (children is None) or (None in children):
       raise Exception('Invalid children list')
 
-  def getChildElements(self):
+  def get_child_elements(self):
     """Get all possible child model elements of this element."""
     return self.children
 
-  def getMatchElement(self, path, matchContext):
+  def get_match_element(self, path, matchContext):
     """@return None when there is no match, MatchElement otherwise."""
     currentPath = "%s/%s" % (path, self.elementId)
 
     matchData = matchContext.matchData
     for childElement in self.children:
-      childMatch = childElement.getMatchElement(currentPath, matchContext)
+      childMatch = childElement.get_match_element(currentPath, matchContext)
       if childMatch != None:
         return childMatch
       matchContext.matchData = matchData

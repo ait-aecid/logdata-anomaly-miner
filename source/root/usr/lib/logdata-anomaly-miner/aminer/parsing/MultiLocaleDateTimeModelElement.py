@@ -86,13 +86,13 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
     if locale.getlocale() != defaultLocale:
       locale.resetlocale()
 
-  def getChildElements(self):
+  def get_child_elements(self):
     """Get all possible child model elements of this element.
     @return empty list as there are no children of this element."""
     return None
 
 
-  def getMatchElement(self, path, matchContext):
+  def get_match_element(self, path, matchContext):
     """This method checks if the data to match within the content
     is suitable to be parsed by any of the supplied date formats.
     @return On match return a matchObject containing a tuple of

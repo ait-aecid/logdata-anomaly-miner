@@ -16,20 +16,20 @@ class DebugModelElement(ModelElementInterface):
   stderr for inspection."""
 
 
-  def __init__(self, elementId):
-    self.elementId = elementId
+  def __init__(self, element_id):
+    self.element_id = element_id
 # To avoid having those elements hidden in production configuration,
 # write a line every time the class is instantiated.
-    print('DebugModelElement %s added' % elementId, file=sys.stderr)
+    print('DebugModelElement %s added' % element_id, file=sys.stderr)
 
-  def getChildElements(self):
+  def get_child_elements(self):
     """Get all possible child model elements of this element.
     @return empty list as there are no children of this element."""
     return None
 
-  def getMatchElement(self, path, matchContext):
+  def get_match_element(self, path, match_context):
     """@return Always return a match."""
     print('DebugModelElement path = "%s/%s", unmatched = "%s"' % \
-      (path, self.elementId, repr(matchContext.matchData)), file=sys.stderr)
-    return MatchElement('%s/%s' % (path, self.elementId), \
+          (path, self.element_id, repr(match_context.matchData)), file=sys.stderr)
+    return MatchElement('%s/%s' % (path, self.element_id), \
         '', '', None)

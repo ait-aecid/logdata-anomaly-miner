@@ -101,7 +101,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
       log_atom = LogAtom(line_data, None, None, self)
       if self.parsing_model != None:
         match_context = MatchContext(line_data)
-        match_element = self.parsing_model.getMatchElement('', match_context)
+        match_element = self.parsing_model.get_match_element('', match_context)
         if (match_element != None) and not match_context.matchData:
           log_atom.parser_match = ParserMatch(match_element)
           if self.default_timestamp_path != None:

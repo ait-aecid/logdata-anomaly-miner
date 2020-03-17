@@ -13,12 +13,12 @@ class FixedDataModelElement(ModelElementInterface):
     self.elementId = elementId
     self.fixedData = fixedData
 
-  def getChildElements(self):
+  def get_child_elements(self):
     """Get all possible child model elements of this element.
     @return None as there are no children of this element."""
     return None
 
-  def getMatchElement(self, path, matchContext):
+  def get_match_element(self, path, matchContext):
     """@return None when there is no match, MatchElement otherwise."""
     if not matchContext.matchData.startswith(self.fixedData):
       return None

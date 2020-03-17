@@ -30,7 +30,7 @@ class ElementValueBranchModelElement(ModelElementInterface):
     """Get the element ID."""
     return self.elementId
 
-  def getChildElements(self):
+  def get_child_elements(self):
     """Get all possible child model elements of this element.
     If this element implements a branching model element, then
     not all child element IDs will be found in matches produced
@@ -41,7 +41,7 @@ class ElementValueBranchModelElement(ModelElementInterface):
       allChildren.append(self.defaultBranch)
     return allChildren
 
-  def getMatchElement(self, path, matchContext):
+  def get_match_element(self, path, matchContext):
     """Try to find a match on given data for the test model and
     the selected branch.
     @param path the model path to the parent model element invoking
@@ -52,7 +52,7 @@ class ElementValueBranchModelElement(ModelElementInterface):
     match, no branch was selected or the branch did not match."""
     currentPath = "%s/%s" % (path, self.elementId)
     startData = matchContext.matchData
-    modelMatch = self.valueModel.getMatchElement(currentPath, matchContext)
+    modelMatch = self.valueModel.get_match_element(currentPath, matchContext)
     if modelMatch is None:
       return None
 
@@ -88,7 +88,7 @@ class ElementValueBranchModelElement(ModelElementInterface):
         branchModel = self.branchModelDict.get(testMatch.getMatchObject(), \
           self.defaultBranch)
       if branchModel is not None:
-        branchMatch = branchModel.getMatchElement(currentPath, matchContext)
+        branchMatch = branchModel.get_match_element(currentPath, matchContext)
     if branchMatch is None:
       matchContext.matchData = startData
       return None

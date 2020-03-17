@@ -11,11 +11,11 @@ class SequenceModelElement(ModelElementInterface):
     self.elementId = elementId
     self.children = children
 
-  def getChildElements(self):
+  def get_child_elements(self):
     """Return all model elements of the sequence."""
     return self.children
 
-  def getMatchElement(self, path, matchContext):
+  def get_match_element(self, path, matchContext):
     """Try to find a match on given data for this model element
     and all its children. When a match is found, the matchContext
     is updated accordingly.
@@ -28,7 +28,7 @@ class SequenceModelElement(ModelElementInterface):
     startData = matchContext.matchData
     matches = []
     for childElement in self.children:
-      childMatch = childElement.getMatchElement(currentPath, matchContext)
+      childMatch = childElement.get_match_element(currentPath, matchContext)
       if childMatch is None:
         matchContext.matchData = startData
         return None

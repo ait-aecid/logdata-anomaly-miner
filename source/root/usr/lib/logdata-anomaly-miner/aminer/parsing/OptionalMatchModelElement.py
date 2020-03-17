@@ -11,16 +11,16 @@ class OptionalMatchModelElement(ModelElementInterface):
     self.elementId = elementId
     self.optionalElement = optionalElement
 
-  def getChildElements(self):
+  def get_child_elements(self):
     """Return all optional elements."""
     return [self.optionalElement]
 
-  def getMatchElement(self, path, matchContext):
+  def get_match_element(self, path, matchContext):
     """@return the embedded child match or an empty match."""
     currentPath = "%s/%s" % (path, self.elementId)
 
     startData = matchContext.matchData
-    match = self.optionalElement.getMatchElement(currentPath, matchContext)
+    match = self.optionalElement.get_match_element(currentPath, matchContext)
     if match is None:
       return MatchElement("%s/%s" % (path, self.elementId), \
           '', None, None)

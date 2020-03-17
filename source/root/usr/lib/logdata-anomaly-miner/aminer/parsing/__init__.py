@@ -8,7 +8,7 @@ class ModelElementInterface(object):
     """Get the element ID."""
     raise Exception('Interface method called')
 
-  def getChildElements(self):
+  def get_child_elements(self):
     """Get all possible child model elements of this element.
     If this element implements a branching model element, then
     not all child element IDs will be found in matches produced
@@ -16,7 +16,7 @@ class ModelElementInterface(object):
     @return a list with all children"""
     raise Exception('Interface method called')
 
-  def getMatchElement(self, path, matchContext):
+  def get_match_element(self, path, matchContext):
     """Try to find a match on given data for this model element
     and all its children. When a match is found, the matchContext
     is updated accordingly.

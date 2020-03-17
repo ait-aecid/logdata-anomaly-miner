@@ -11,12 +11,12 @@ class IpAddressDataModelElement(ModelElementInterface):
     """Create an element to match IPv4 IP addresses."""
     self.elementId = elementId
 
-  def getChildElements(self):
+  def get_child_elements(self):
     """Get all possible child model elements of this element.
     @return None as there are no children of this element."""
     return None
 
-  def getMatchElement(self, path, matchContext):
+  def get_match_element(self, path, matchContext):
     """Read an IP address at the current data position. When found,
     the matchObject will be """
     data = matchContext.matchData

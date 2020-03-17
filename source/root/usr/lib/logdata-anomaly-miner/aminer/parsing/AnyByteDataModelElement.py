@@ -3,22 +3,23 @@
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing import ModelElementInterface
 
+
 class AnyByteDataModelElement(ModelElementInterface):
   """This class matches any byte but at least one. Thus a match
   will always span the complete data from beginning to end."""
-  def __init__(self, elementId):
-    self.elementId = elementId
+  def __init__(self, element_id):
+    self.element_id = element_id
 
-  def getChildElements(self):
+  def get_child_elements(self):
     """Get all possible child model elements of this element.
     @return None as there are no children of this element."""
     return None
 
-  def getMatchElement(self, path, matchContext):
+  def get_match_element(self, path, match_context):
     """Just return a match including all data from the context"""
-    matchData = matchContext.matchData
-    if not matchData:
+    match_data = match_context.matchData
+    if not match_data:
       return None
-    matchContext.update(matchData)
-    return MatchElement("%s/%s" % (path, self.elementId), \
-        matchData, matchData, None)
+    match_context.update(match_data)
+    return MatchElement("%s/%s" % (path, self.element_id), \
+                        match_data, match_data, None)

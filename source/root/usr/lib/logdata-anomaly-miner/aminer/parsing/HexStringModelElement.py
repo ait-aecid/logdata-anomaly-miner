@@ -14,12 +14,12 @@ class HexStringModelElement(ModelElementInterface):
     else:
       self.charStart = ord('a')
 
-  def getChildElements(self):
+  def get_child_elements(self):
     """Get all possible child model elements of this element.
     @return None as there are no children of this element."""
     return None
 
-  def getMatchElement(self, path, matchContext):
+  def get_match_element(self, path, matchContext):
     """Find the maximum number of bytes forming a integer number
     according to the parameters specified
     @return a match when at least one byte being a digit was found"""
