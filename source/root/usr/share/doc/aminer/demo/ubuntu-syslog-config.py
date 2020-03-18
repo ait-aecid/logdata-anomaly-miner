@@ -83,17 +83,17 @@ sys.path = sys.path+['/etc/aminer/conf-available/generic', '/usr/lib/python2.7/d
 
 # DEMO: DISABLE SECURE OPEN TO ALLOW RELATIVE PATH, SYMLINKS!
 import os
-def insecureDemoOpen(fileName, flags):
+def insecureDemoOpen(file_name, flags):
   """Perform a normal open supporting also relative path to override
   more strict secureOpenFile function in test environment."""
-  return os.open(fileName, flags|os.O_NOCTTY)
+  return os.open(file_name, flags|os.O_NOCTTY)
 from aminer.util import SecureOSFunctions
 SecureOSFunctions.secureOpenFile = insecureDemoOpen
 
 
 # Add your ruleset here:
 
-def buildAnalysisPipeline(analysisContext):
+def buildAnalysisPipeline(analysis_context):
   """Define the function to create pipeline for parsing the log
   data. It has also to define an AtomizerFactory to instruct AMiner
   how to process incoming data streams to create log atoms from
@@ -102,23 +102,23 @@ def buildAnalysisPipeline(analysisContext):
   from aminer.parsing import FirstMatchModelElement
   from aminer.parsing import SequenceModelElement
 
-  serviceChildren = []
+  service_children = []
 
   import CronParsingModel
-  serviceChildren.append(CronParsingModel.getModel())
+  service_children.append(CronParsingModel.getModel())
 
   import EximParsingModel
-  serviceChildren.append(EximParsingModel.getModel())
+  service_children.append(EximParsingModel.getModel())
 
   import RsyslogParsingModel
-  serviceChildren.append(RsyslogParsingModel.getModel())
+  service_children.append(RsyslogParsingModel.getModel())
 
-  import SyslogPreambleModel
-  syslogPreambleModel = SyslogPreambleModel.getModel()
+  import syslog_preamble_model
+  syslog_preamble_model = syslog_preamble_model.getModel()
 
-  parsingModel = SequenceModelElement('model', [
-      syslogPreambleModel,
-      FirstMatchModelElement('services', serviceChildren)])
+  parsing_model = SequenceModelElement('model', [
+      syslog_preamble_model,
+      FirstMatchModelElement('services', service_children)])
 
 
 # Some generic imports.
@@ -128,69 +128,69 @@ def buildAnalysisPipeline(analysisContext):
 # Create all global handler lists here and append the real handlers
 # later on.
 # Use this filter to distribute all atoms to the analysis handlers.
-  atomFilter = AtomFilters.SubhandlerFilter(None)
-  anomalyEventHandlers = []
+  atom_filter = AtomFilters.SubhandlerFilter(None)
+  anomaly_event_handlers = []
 
 # Now define the AtomizerFactory using the model. A simple line
 # based one is usually sufficient.
   from aminer.input import SimpleByteStreamLineAtomizerFactory
-  analysisContext.atomizerFactory = SimpleByteStreamLineAtomizerFactory(
-      parsingModel, [atomFilter], anomalyEventHandlers,
+  analysis_context.atomizerFactory = SimpleByteStreamLineAtomizerFactory(
+      parsing_model, [atom_filter], anomaly_event_handlers,
       defaultTimestampPath='/model/syslog/time')
 
 # Always report the unparsed lines: a part of the parsing model
 # seems to be missing or wrong.
   from aminer.input import SimpleUnparsedAtomHandler
-  atomFilter.addHandler(
-      SimpleUnparsedAtomHandler(anomalyEventHandlers),
+  atom_filter.addHandler(
+      SimpleUnparsedAtomHandler(anomaly_event_handlers),
       stopWhenHandledFlag=True)
 
 # Report new parsing model path values. Those occurr when a line
 # with new structural properties was parsed.
   from aminer.analysis import NewMatchPathDetector
-  newMatchPathDetector = NewMatchPathDetector(
-      analysisContext.aminerConfig, anomalyEventHandlers, autoIncludeFlag=True)
-  analysisContext.registerComponent(
-      newMatchPathDetector, componentName='DefaultMatchPathDetector')
-  atomFilter.addHandler(newMatchPathDetector)
+  new_match_path_detector = NewMatchPathDetector(
+      analysis_context.aminerConfig, anomaly_event_handlers, autoIncludeFlag=True)
+  analysis_context.registerComponent(
+      new_match_path_detector, componentName='DefaultMatchPathDetector')
+  atom_filter.addHandler(new_match_path_detector)
 
 # Run a whitelisting over the parsed lines.
   from aminer.analysis import WhitelistViolationDetector
-  violationAction = Rules.EventGenerationMatchAction(
-      'Analysis.GenericViolation', 'Violation detected', anomalyEventHandlers)
-  whitelistRules = []
+  violation_action = Rules.EventGenerationMatchAction(
+      'Analysis.GenericViolation', 'Violation detected', anomaly_event_handlers)
+  whitelist_rules = []
 # Filter out things so bad, that we do not want to accept the
 # risk, that a too broad whitelisting rule will accept the data
 # later on.
-  whitelistRules.append(Rules.ValueMatchRule(
-      '/model/services/cron/msgtype/exec/user', 'hacker', violationAction))
+  whitelist_rules.append(Rules.ValueMatchRule(
+      '/model/services/cron/msgtype/exec/user', 'hacker', violation_action))
 # Ignore Exim queue run start/stop messages
-  whitelistRules.append(Rules.PathExistsMatchRule(
+  whitelist_rules.append(Rules.PathExistsMatchRule(
       '/model/services/exim/msg/queue/pid'))
 # Ignore all ntpd messages for now.
-  whitelistRules.append(Rules.PathExistsMatchRule('/model/services/ntpd'))
+  whitelist_rules.append(Rules.PathExistsMatchRule('/model/services/ntpd'))
 # Add a debugging rule in the middle to see everything not whitelisted
 # up to this point.
-  whitelistRules.append(Rules.DebugMatchRule(False))
+  whitelist_rules.append(Rules.DebugMatchRule(False))
 # Ignore hourly cronjobs, but only when started at expected time
 # and duration is not too long.
-  whitelistRules.append(Rules.AndMatchRule([
+  whitelist_rules.append(Rules.AndMatchRule([
       Rules.ValueMatchRule(
           '/model/services/cron/msgtype/exec/command',
           '(   cd / && run-parts --report /etc/cron.hourly)'),
       Rules.ModuloTimeMatchRule('/model/syslog/time', 3600, 17*60, 17*60+5)]))
 
-  atomFilter.addHandler(WhitelistViolationDetector(whitelistRules, anomalyEventHandlers))
+  atom_filter.addHandler(WhitelistViolationDetector(whitelist_rules, anomaly_event_handlers))
 
 # Include the e-mail notification handler only if the configuration
 # parameter was set.
   from aminer.events import DefaultMailNotificationEventHandler
-  if DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS in analysisContext.aminerConfig.configProperties:
-    mailNotificationHandler = DefaultMailNotificationEventHandler(analysisContext.aminerConfig)
-    analysisContext.registerComponent(
-        mailNotificationHandler, componentName=None)
-    anomalyEventHandlers.append(mailNotificationHandler)
+  if DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS in analysis_context.aminerConfig.configProperties:
+    mail_notification_handler = DefaultMailNotificationEventHandler(analysis_context.aminerConfig)
+    analysis_context.registerComponent(
+        mail_notification_handler, componentName=None)
+    anomaly_event_handlers.append(mail_notification_handler)
 
 # Add stdout stream printing for debugging, tuning.
   from aminer.events import StreamPrinterEventHandler
-  anomalyEventHandlers.append(StreamPrinterEventHandler(analysisContext.aminerConfig))
+  anomaly_event_handlers.append(StreamPrinterEventHandler(analysis_context.aminerConfig))
