@@ -59,6 +59,7 @@ class MissingMatchPathValueDetector(
       self.expected_values_dict = {}
     else:
       self.expected_values_dict = persistence_data
+    self.analysis_string = 'Analysis.%s'
 
 
   def receive_atom(self, log_atom):
@@ -178,7 +179,7 @@ class MissingMatchPathValueDetector(
 
 
   def send_event_to_handlers(self, anomaly_event_handler, event_data, log_atom, message_part, missing_value_list):
-    anomaly_event_handler.receive_event('Analysis.%s' % self.__class__.__name__,
+    anomaly_event_handler.receive_event(self.analysis_string % self.__class__.__name__,
         'Interval too large between values', message_part, event_data, log_atom, self)
 
 
@@ -231,7 +232,7 @@ class MissingMatchPathValueDetector(
     @return a message with information about whitelisting
     @throws Exception when whitelisting of this special event
     using given whitelistingData was not possible."""
-    if event_type != 'Analysis.%s' % self.__class__.__name__:
+    if event_type != self.analysis_string % self.__class__.__name__:
       raise Exception('Event not from this source')
     if not isinstance(whitelisting_data, int):
       raise Exception('Whitelisting data has to integer with ' \
@@ -284,6 +285,6 @@ class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
 
 
   def send_event_to_handlers(self, anomaly_event_handler, event_data, log_atom, message_part, missing_value_list):
-    anomaly_event_handler.receive_event('Analysis.%s' % self.__class__.__name__,
+    anomaly_event_handler.receive_event(self.analysis_string % self.__class__.__name__,
         'Interval too large between values', message_part, event_data, log_atom, self)
 

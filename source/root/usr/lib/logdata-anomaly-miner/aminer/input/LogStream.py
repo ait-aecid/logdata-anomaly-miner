@@ -12,6 +12,8 @@ import sys
 from aminer.util import SecureOSFunctions
 from aminer.util import encode_byte_string_as_string
 
+interface_method_called = 'Interface method called'
+
 class LogDataResource(object):
   """This is the superinterface of each logdata resource monitored
   by AMiner. The interface is designed in a way, that instances
@@ -37,7 +39,7 @@ class LogDataResource(object):
     -1 if not yet opened.
     @param repositioning_data if not None, attemt to position the
     the stream using the given data."""
-    raise Exception('Interface method called')
+    raise Exception(interface_method_called)
 
   def open(self, reopen_flag=False):
     """Open the given resource.
@@ -48,36 +50,36 @@ class LogDataResource(object):
     @raise OSError when opening failed with unexpected error.
     @return True if the resource was really opened or False if
     opening was not yet possible but should be attempted again."""
-    raise Exception('Interface method called')
+    raise Exception(interface_method_called)
 
   def get_resource_name(self):
     """Get the name of this log resoruce."""
-    raise Exception('Interface method called')
+    raise Exception(interface_method_called)
 
   def get_file_descriptor(self):
     """Get the file descriptor of this open resource."""
-    raise Exception('Interface method called')
+    raise Exception(interface_method_called)
 
   def fill_buffer(self):
     """Fill the buffer data of this resource. The repositioning
-    information is not updated, updatePosition() has to be used.
+    information is not updated, update_position() has to be used.
     @return the number of bytes read or -1 on error or end."""
-    raise Exception('Interface method called')
+    raise Exception(interface_method_called)
 
   def update_position(self, length):
     """Update the positioning information and discard the buffer
     data afterwards."""
-    raise Exception('Interface method called')
+    raise Exception(interface_method_called)
 
   def get_repositioning_data(self):
     """Get the data for repositioning the stream. The returned
     structure has to be JSON serializable."""
-    raise Exception('Interface method called')
+    raise Exception(interface_method_called)
 
   def close(self):
     """Close this logdata resource. Data access methods will not
     work any more afterwards."""
-    raise Exception('Interface method called')
+    raise Exception(interface_method_called)
 
 
 class FileLogDataResource(LogDataResource):

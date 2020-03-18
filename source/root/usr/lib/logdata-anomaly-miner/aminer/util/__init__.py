@@ -6,6 +6,7 @@ own subfiles or submodules, e.g. persistency."""
 import random
 
 from aminer.input import AtomHandlerInterface
+interface_method_called = 'Interface method called'
 
 
 def get_log_int(max_bits):
@@ -67,17 +68,17 @@ class ObjectHistory(object):
   def add_object(self, new_object):
     """Add an object to this history. This method call may evict
     other objects from the history."""
-    raise Exception('Interface method called')
+    raise Exception(interface_method_called)
 
   def get_history(self):
     """Get the whole history list. Make sure to clone the list
     before modification when influences on this object are not
     intended."""
-    raise Exception('Interface method called')
+    raise Exception(interface_method_called)
 
   def clear_history(self):
     """Clean the whole history."""
-    raise Exception('Interface method called')
+    raise Exception(interface_method_called)
 
 
 class LogarithmicBackoffHistory(ObjectHistory):
@@ -133,7 +134,7 @@ class TimeTriggeredComponentInterface(object):
     """Get the trigger class this component can be registered
     for. See AnalysisContext class for different trigger classes
     available."""
-    raise Exception('Interface method called')
+    raise Exception(interface_method_called)
 
   def do_timer(self, trigger_time):
     """This method is called to perform trigger actions and to
@@ -149,7 +150,7 @@ class TimeTriggeredComponentInterface(object):
     timers or the forensic log timescale time value.
     @return the number of seconds when next invocation of this
     trigger is required."""
-    raise Exception('Interface method called')
+    raise Exception(interface_method_called)
 
 
 class VolatileLogarithmicBackoffAtomHistory(AtomHandlerInterface, LogarithmicBackoffHistory):

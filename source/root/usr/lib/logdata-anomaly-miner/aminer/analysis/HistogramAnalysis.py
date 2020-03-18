@@ -59,23 +59,26 @@ try:
 except:
   pass
 
+date_string = "%Y-%m-%d %H:%M:%S"
+
 
 class BinDefinition(object):
+  not_implemented = 'Not implemented'
   """This class defines the bins of the histogram."""
   def __init__(self):
-    raise Exception('Not implemented')
+    raise Exception(self.not_implemented)
 
   def has_outlier_bins(self):
     """Report if this binning works with outlier bins, that are
     bins for all values outside the normal binning range. If not,
     outliers are discarded. When true, the outlier bins are the
     first and last bin."""
-    raise Exception('Not implemented')
+    raise Exception(self.not_implemented)
 
   def get_bin_names(self):
     """Get the names of the bins for reporting, including the
     outlier bins if any."""
-    raise Exception('Not implemented')
+    raise Exception(self.not_implemented)
 
   def get_bin(self, value):
     """Get the number of the bin this value should belong to.
@@ -83,7 +86,7 @@ class BinDefinition(object):
     and outlier bins were not requested. With outliers, bin 0
     is the bin with outliers below limit, first normal bin is
     at index 1."""
-    raise Exception('Not implemented')
+    raise Exception(self.not_implemented)
 
   def get_bin_p_value(self, bin_pos, total_values, bin_values):
     """Calculate a p-Value, how likely the observed number of
@@ -338,8 +341,8 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
     event_data = dict()
     report_str = 'Histogram report '
     if self.last_report_time is not None:
-      report_str += 'from %s ' % datetime.fromtimestamp(self.last_report_time).strftime("%Y-%m-%d %H:%M:%S")
-    report_str += 'till %s' % datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
+      report_str += 'from %s ' % datetime.fromtimestamp(self.last_report_time).strftime(date_string)
+    report_str += 'till %s' % datetime.fromtimestamp(timestamp).strftime(date_string)
     res = []
     h = []
     for data_item in self.histogram_data:
@@ -529,8 +532,8 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
     event_data = dict()
     report_str = 'Path histogram report '
     if self.last_report_time != None:
-      report_str += 'from %s ' % datetime.fromtimestamp(self.last_report_time).strftime("%Y-%m-%d %H:%M:%S")
-    report_str += 'till %s' % datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
+      report_str += 'from %s ' % datetime.fromtimestamp(self.last_report_time).strftime(date_string)
+    report_str += 'till %s' % datetime.fromtimestamp(timestamp).strftime(date_string)
     all_path_set = set(self.histogram_data.keys())
     event_data['AllPathList'] = list(all_path_set)
     res = []

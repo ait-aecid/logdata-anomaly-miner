@@ -12,6 +12,8 @@ from aminer.util import ObjectHistory
 
 from aminer.analysis.AtomFilters import SubhandlerFilter
 
+result_string = '%s(%s)'
+
 
 class MatchAction(object):
   """This is the interface of all match actions."""
@@ -80,7 +82,7 @@ class AndMatchRule(MatchRule):
     result = ''
     preamble = ''
     for match_element in self.sub_rules:
-      result += '%s(%s)' % (preamble, match_element)
+      result += result_string % (preamble, match_element)
       preamble = ' and '
     return result
 
@@ -110,7 +112,7 @@ class OrMatchRule(MatchRule):
     result = ''
     preamble = ''
     for match_element in self.sub_rules:
-      result += '%s(%s)' % (preamble, match_element)
+      result += result_string % (preamble, match_element)
       preamble = ' or '
     return result
 
@@ -146,7 +148,7 @@ class ParallelMatchRule(MatchRule):
     result = ''
     preamble = ''
     for match_element in self.sub_rules:
-      result += '%s(%s)' % (preamble, match_element)
+      result += result_string % (preamble, match_element)
       preamble = ' por '
     return result
 

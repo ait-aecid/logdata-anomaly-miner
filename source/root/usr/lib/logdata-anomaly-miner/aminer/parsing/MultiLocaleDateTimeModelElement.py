@@ -102,6 +102,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
     not be applied correctly, then the method will also return
     None."""
 
+    delta_string = 'Delta to last timestamp out of range for %s'
 # Convert the head of the match_data to a timestamp value.
     parsed_data = self.date_formats.parse(match_context.match_data, 0)
     if parsed_data is None:
@@ -163,7 +164,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
               parsed_fields[COMPONENT_TYPE_MICROSECOND], \
               time_zone_info)
           if not self.checkTimestampValueInRange(parsed_value):
-            print('Delta to last timestamp out of range for %s' % repr(date_str), file=sys.stderr)
+            print(delta_string % repr(date_str), file=sys.stderr)
             return None
 
       self.checkTimestampValueInRange(parsed_value)
@@ -171,7 +172,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
         delta = (parsed_value - self.latest_parsed_timestamp)
         delta_seconds = (delta.days*86400+delta.seconds+delta.microseconds/1000)
         if (delta_seconds < -86400) or (delta_seconds > 86400*30):
-          print('Delta to last timestamp out of range for %s' % repr(date_str), file=sys.stderr)
+          print(delta_string % repr(date_str), file=sys.stderr)
           return None
 
     else:
@@ -184,7 +185,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
           parsed_fields[COMPONENT_TYPE_MICROSECOND], \
           time_zone_info)
       if not self.checkTimestampValueInRange(parsed_value):
-        print('Delta to last timestamp out of range for %s' % repr(date_str), file=sys.stderr)
+        print(delta_string % repr(date_str), file=sys.stderr)
         return None
 
     self.total_seconds_start_time = datetime.datetime(1970, 1, 1, tzinfo=parsed_value.tzinfo)

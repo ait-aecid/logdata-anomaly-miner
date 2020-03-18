@@ -48,6 +48,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     self.tuple_transformation_function = tuple_transformation_function
     self.output_log_line = output_log_line
     self.aminer_config = aminer_config
+    self.date_string = "%Y-%m-%d %H:%M:%S"
 
 
   def load_persistency_data(self):
@@ -85,11 +86,11 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
 
     current_timestamp = log_atom.get_timestamp()
     if current_timestamp is None:
-      current_timestamp = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d %H:%M:%S")
+      current_timestamp = datetime.fromtimestamp(time.time()).strftime(self.date_string)
     if not isinstance(current_timestamp, datetime) and not isinstance(current_timestamp, str):
-      current_timestamp = datetime.fromtimestamp(current_timestamp).strftime("%Y-%m-%d %H:%M:%S")
+      current_timestamp = datetime.fromtimestamp(current_timestamp).strftime(self.date_string)
     if isinstance(current_timestamp, datetime):
-      current_timestamp = current_timestamp.strftime("%Y-%m-%d %H:%M:%S")
+      current_timestamp = current_timestamp.strftime(self.date_string)
     if self.known_values_dict.get(match_value_tuple, None) is None:
       self.known_values_dict[match_value_tuple] = [current_timestamp, current_timestamp, 1]
     else:
@@ -152,7 +153,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
       raise Exception('Event not from this source')
     if whitelisting_data != None:
       raise Exception('Whitelisting data not understood by this detector')
-    current_timestamp = datetime.fromtimestamp(event_data[0].get_timestamp()).strftime("%Y-%m-%d %H:%M:%S")
+    current_timestamp = datetime.fromtimestamp(event_data[0].get_timestamp()).strftime(self.date_string)
     self.known_values_dict[event_data[1]] = [
         current_timestamp, current_timestamp, 1]
     return 'Whitelisted path(es) %s with %s in %s' % (

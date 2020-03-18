@@ -3,6 +3,9 @@ by classes in this directory and for use from code outside this
 directory. All classes are defined in separate files, only the
 namespace references are added here to simplify the code."""
 
+interface_method_called = 'Interface method called'
+
+
 class AtomizerFactory(object):
   """This is the common interface of all factories to create atomizers
   for new data sources and integrate them into the downstream
@@ -11,7 +14,7 @@ class AtomizerFactory(object):
   def get_atomizer_for_resource(self, resource_name):
     """Get an atomizer for a given resource.
     @return a StreamAtomizer object"""
-    raise Exception('Interface method called')
+    raise Exception(interface_method_called)
 
 
 class StreamAtomizer(object):
@@ -45,7 +48,7 @@ class StreamAtomizer(object):
     consumed at the moment but data might be consumed later on.
     The only situation where 0 is not an allowed return value
     is when endOfStreamFlag is set and streamData not empty."""
-    raise Exception('Interface method called')
+    raise Exception(interface_method_called)
 
 
 class AtomHandlerInterface(object):
@@ -60,7 +63,7 @@ class AtomHandlerInterface(object):
     may decide if it makes sense passing the atom also to other
     handlers or to retry later. This behaviour has to be documented
     at each source implementation sending LogAtoms."""
-    raise Exception('Interface method called')
+    raise Exception(interface_method_called)
 
 from aminer.input.ByteStreamLineAtomizer import ByteStreamLineAtomizer
 from aminer.input.LogAtom import LogAtom
