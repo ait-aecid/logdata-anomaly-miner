@@ -100,7 +100,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
       r['HistoryBEvents'] = rule.history_b_events
       r['LastTimestampSeen'] = rule.last_timestamp_seen
       history = {}
-      history['MaxItems'] = rule.correlation_history.maxItems
+      history['MaxItems'] = rule.correlation_history.max_items
       h = []
       for item in rule.correlation_history.history:
         h.append(repr(item))
