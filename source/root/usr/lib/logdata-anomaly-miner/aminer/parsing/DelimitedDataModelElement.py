@@ -24,7 +24,7 @@ class DelimitedDataModelElement(ModelElementInterface):
     non-escaped delimiter.
     @return a match when at least one byte was found but not the
     delimiter itself."""
-    data = match_context.matchData
+    data = match_context.match_data
     match_len = -1
     if self.escape is None:
       search = re.search(re.escape(self.delimiter), data)
