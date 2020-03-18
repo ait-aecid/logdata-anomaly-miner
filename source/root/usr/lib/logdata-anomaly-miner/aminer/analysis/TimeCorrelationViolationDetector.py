@@ -34,7 +34,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
         event_correlation_set |= set(rule.match_action.artefact_b_rules)
     self.event_correlation_ruleset = list(event_correlation_set)
 
-    PersistencyUtil.addPersistableComponent(self)
+    PersistencyUtil.add_persistable_component(self)
     self.persistence_file_name = AMinerConfig.build_persistence_file_name(
         aminer_config, 'TimeCorrelationViolationDetector', persistence_id)
 #    persistenceData = PersistencyUtil.loadJson(self.persistenceFileName)
@@ -300,9 +300,9 @@ class CorrelationRule:
       
     if num_violations > max_violations:
       violation_message += '... (%d more)\n' % (num_violations - max_violations)
-    if num_violations != 0 and len(self.correlation_history.getHistory()) > 0:
+    if num_violations != 0 and len(self.correlation_history.get_history()) > 0:
       violation_message += 'Historic examples:\n'
-      for record in self.correlation_history.getHistory():
+      for record in self.correlation_history.get_history():
         violation_message += '  "%s" (%s) ==> "%s" (%s)\n' % (record[0].decode(),
         record[1], record[2].decode(), record[3])
 

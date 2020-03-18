@@ -53,7 +53,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
   def load_persistency_data(self):
     """Load the persistency data from storage."""
     self.known_values_dict = {}
-    persistence_data = PersistencyUtil.loadJson(self.persistence_file_name)
+    persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
     if persistence_data != None:
 # Dictionary and tuples were stored as list of lists. Transform
 # the first lists to tuples to allow hash operation needed by set.
@@ -137,7 +137,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     persistency_data = []
     for dict_record in self.known_values_dict.items():
       persistency_data.append(dict_record)
-    PersistencyUtil.storeJson(self.persistence_file_name, persistency_data)
+    PersistencyUtil.store_json(self.persistence_file_name, persistency_data)
     self.next_persist_time = None
 
 

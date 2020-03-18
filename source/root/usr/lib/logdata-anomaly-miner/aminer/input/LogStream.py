@@ -10,7 +10,7 @@ import stat
 import sys
 
 from aminer.util import SecureOSFunctions
-from aminer.util import encodeByteStringAsString
+from aminer.util import encode_byte_string_as_string
 
 class LogDataResource(object):
   """This is the superinterface of each logdata resource monitored
@@ -115,11 +115,11 @@ class FileLogDataResource(LogDataResource):
     if (log_stream_fd != -1) and (repositioning_data != None):
       if repositioning_data[0] != self.stat_data.st_ino:
         print('Not attempting to reposition on %s,' \
-            'inode number mismatch' % encodeByteStringAsString(self.log_resource_name),
+            'inode number mismatch' % encode_byte_string_as_string(self.log_resource_name),
               file=sys.stderr)
       elif repositioning_data[1] > self.stat_data.st_size:
         print('Not attempting to reposition on %s,' \
-            'file size too small' % encodeByteStringAsString(self.log_resource_name), file=sys.stderr)
+            'file size too small' % encode_byte_string_as_string(self.log_resource_name), file=sys.stderr)
       else:
         hash_algo = hashlib.md5()
         length = repositioning_data[1]
@@ -131,7 +131,7 @@ class FileLogDataResource(LogDataResource):
             block = os.read(self.log_file_fd, default_buffer_size)
           if not block:
             print('Not attempting to reposition ' \
-                'on %s, file shrunk while reading' % encodeByteStringAsString(self.log_resource_name),
+                'on %s, file shrunk while reading' % encode_byte_string_as_string(self.log_resource_name),
                   file=sys.stderr)
             break
           hash_algo.update(block)
@@ -144,7 +144,7 @@ class FileLogDataResource(LogDataResource):
             self.repositioning_digest = hash_algo
           else:
             print('Not attempting to reposition ' \
-                'on %s, digest changed' % encodeByteStringAsString(self.log_resource_name),
+                'on %s, digest changed' % encode_byte_string_as_string(self.log_resource_name),
                   file=sys.stderr)
             length = -1
         if length != 0:
@@ -165,7 +165,7 @@ class FileLogDataResource(LogDataResource):
     log_file_fd = -1
     stat_data = None
     try:
-      log_file_fd = SecureOSFunctions.secureOpenFile(
+      log_file_fd = SecureOSFunctions.secure_open_file(
         self.log_resource_name[7:], os.O_RDONLY)
       stat_data = os.fstat(log_file_fd)
     except OSError as openOsError:
@@ -177,7 +177,7 @@ class FileLogDataResource(LogDataResource):
     if not stat.S_ISREG(stat_data.st_mode):
       os.close(log_file_fd)
       raise Exception('Attempting to open non-regular file %s ' \
-          'as file' % encodeByteStringAsString(self.log_resource_name))
+          'as file' % encode_byte_string_as_string(self.log_resource_name))
 
     if (reopen_flag and (self.stat_data != None) and
         (stat_data.st_ino == self.stat_data.st_ino) and

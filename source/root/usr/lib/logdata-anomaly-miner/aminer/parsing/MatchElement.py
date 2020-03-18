@@ -55,11 +55,11 @@ class MatchElement(object):
       result = '%s%s: %s' % (indent_str, self.path, repr(self.match_object))
       next_indent = indent_str + '  '
     if self.children != None:
-      for childMatch in self.children:
+      for child_match in self.children:
         if next_indent is None:
-          result += ' '+childMatch.annotate_match(None)
+          result += ' '+child_match.annotate_match(None)
         else:
-          result += '\n'+childMatch.annotate_match(next_indent)
+          result += '\n'+child_match.annotate_match(next_indent)
     return result
 
   def serialize_object(self):
@@ -68,8 +68,8 @@ class MatchElement(object):
     object will also be unique."""
     chld = []
     if self.children:
-      for childMatch in self.children:
-        chld.append(childMatch.serialize_object())
+      for child_match in self.children:
+        chld.append(child_match.serialize_object())
     return {
         "path": self.path, "matchobject": self.match_object,
         "matchString": self.match_string, "children": chld}

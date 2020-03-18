@@ -9,16 +9,16 @@ class ParserMatch:
   fields to store information commonly used when dealing with
   the match."""
 
-  def __init__(self, match_element, parsingProcessData=None):
+  def __init__(self, match_element, parsing_process_data=None):
     """Initialize the match.
     @param match_element the root MatchElement from the parsing
     process.
-    @param parsingProcessData this parameter might provide more
+    @param parsing_process_data this parameter might provide more
     information about the parsing process, e.g. when parsing produced
     warnings. The data is specific for the source producing the
     match."""
     self.match_element = match_element
-    self.parsing_process_data = parsingProcessData
+    self.parsing_process_data = parsing_process_data
     self.match_dictionary = None
 
   def get_match_element(self):

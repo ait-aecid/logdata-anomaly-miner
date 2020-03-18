@@ -7,18 +7,19 @@ import random
 
 from aminer.input import AtomHandlerInterface
 
-def getLogInt(maxBits):
+
+def get_log_int(max_bits):
   """Get a log-distributed random integer integer in range 0 to
   maxBits-1."""
-  randBits = random.randint(0, (1 << maxBits)-1)
+  rand_bits = random.randint(0, (1 << max_bits) - 1)
   result = 0
-  while (randBits&1) != 0:
+  while (rand_bits&1) != 0:
     result += 1
-    randBits >>= 1
+    rand_bits >>= 1
   return result
 
 
-def decodeStringAsByteString(string):
+def decode_string_as_byte_string(string):
   """Decodes a string produced by the encode function
   encodeByteStringAsString(byteString) below.
   @return string."""
@@ -38,7 +39,7 @@ def decodeStringAsByteString(string):
   return decoded
 
 
-def encodeByteStringAsString(byteString):
+def encode_byte_string_as_string(byte_string):
   """Encodes an arbitrary byte string to a string by replacing
   all non ascii-7 bytes and all non printable ascii-7 bytes
   and % character by replacing with their escape sequence
@@ -46,7 +47,7 @@ def encodeByteStringAsString(byteString):
   For example byte string b'/\xc3' is encoded to '/%c3'
   @return a string with decoded name."""
   encoded = ''
-  for byte in byteString:
+  for byte in byte_string:
     if byte in b'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRS' \
             b'TUVWXYZ1234567890!"#$&\'()*+,-./:;<=>?@[]\\^_`' \
             b'{}|~ ':
@@ -63,18 +64,18 @@ class ObjectHistory(object):
   size limits to be reached, priorization which elements should
   be dropped first."""
 
-  def add_object(self, newObject):
+  def add_object(self, new_object):
     """Add an object to this history. This method call may evict
     other objects from the history."""
     raise Exception('Interface method called')
 
-  def getHistory(self):
+  def get_history(self):
     """Get the whole history list. Make sure to clone the list
     before modification when influences on this object are not
     intended."""
     raise Exception('Interface method called')
 
-  def clearHistory(self):
+  def clear_history(self):
     """Clean the whole history."""
     raise Exception('Interface method called')
 
@@ -91,30 +92,30 @@ class LogarithmicBackoffHistory(ObjectHistory):
   span a time range of 2^maxItems items with growing size of 
   holes towards the earliest element."""
 
-  def __init__(self, maxItems, initialList=None):
-    self.maxItems = maxItems
-    if initialList is None:
-      initialList = []
-    else: initialList = initialList[:maxItems]
-    self.history = initialList
+  def __init__(self, max_items, initial_list=None):
+    self.max_items = max_items
+    if initial_list is None:
+      initial_list = []
+    else: initial_list = initial_list[:max_items]
+    self.history = initial_list
 
-  def add_object(self, newObject):
+  def add_object(self, new_object):
     """Add a new object to the list according to the rules described
     in the class docstring."""
-    if len(self.history) < self.maxItems:
-      self.history.append(newObject)
+    if len(self.history) < self.max_items:
+      self.history.append(new_object)
     else:
-      movePos = getLogInt(self.maxItems-1)
-      self.history = self.history[:self.maxItems-movePos-1]+ \
-            self.history[self.maxItems-movePos:]+[newObject]
+      movePos = get_log_int(self.max_items - 1)
+      self.history = self.history[:self.max_items - movePos - 1] + \
+                     self.history[self.max_items - movePos:] + [new_object]
 
-  def getHistory(self):
+  def get_history(self):
     """Get the whole history list. Make sure to clone the list
     before modification when influences on this object are not
     intended."""
     return self.history
 
-  def clearHistory(self):
+  def clear_history(self):
     """Clean the whole history."""
     self.history[:] = []
 
@@ -134,7 +135,7 @@ class TimeTriggeredComponentInterface(object):
     available."""
     raise Exception('Interface method called')
 
-  def do_timer(self, triggerTime):
+  def do_timer(self, trigger_time):
     """This method is called to perform trigger actions and to
     determine the time for next invocation. The caller may decide
     to invoke this method earlier than requested during the previous
@@ -143,7 +144,7 @@ class TimeTriggeredComponentInterface(object):
     method as it might delay trigger signals to other components.
     For extensive compuational work or IO, a separate thread should
     be used.
-    @param triggerTime the time this trigger is invoked. This
+    @param trigger_time the time this trigger is invoked. This
     might be the current real time when invoked from real time
     timers or the forensic log timescale time value.
     @return the number of seconds when next invocation of this
@@ -156,9 +157,9 @@ class VolatileLogarithmicBackoffAtomHistory(AtomHandlerInterface, LogarithmicBac
   atoms, e.g. for analysis by other components or for external
   access via remote control interface."""
 
-  def __init__(self, maxItems):
+  def __init__(self, max_items):
     """Initialize the history component."""
-    LogarithmicBackoffHistory.__init__(self, maxItems)
+    LogarithmicBackoffHistory.__init__(self, max_items)
 
   def receive_atom(self, log_atom):
     """Receive an atom and add it to the history log."""

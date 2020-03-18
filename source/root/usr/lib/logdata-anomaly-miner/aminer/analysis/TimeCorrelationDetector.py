@@ -8,7 +8,7 @@ from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.analysis import Rules
 from aminer.input import AtomHandlerInterface
-from aminer.util import getLogInt
+from aminer.util import get_log_int
 from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
 
@@ -40,10 +40,10 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
     self.record_count_before_event = record_count_before_event
     self.persistence_id = persistence_id
 
-    PersistencyUtil.addPersistableComponent(self)
+    PersistencyUtil.add_persistable_component(self)
     self.persistence_file_name = AMinerConfig.build_persistence_file_name(
         aminer_config, 'TimeCorrelationDetector', persistence_id)
-    persistence_data = PersistencyUtil.loadJson(self.persistence_file_name)
+    persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
     if persistence_data is None:
       self.feature_list = []
       self.event_count_table = [0] * parallel_check_count * parallel_check_count * 2
@@ -167,7 +167,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
     parser_match = log_atom.parser_match
     sub_rules = []
     all_keys = list(parser_match.get_match_dictionary().keys())
-    attribute_count = getLogInt(self.max_rule_attributes) + 1
+    attribute_count = get_log_int(self.max_rule_attributes) + 1
     while attribute_count > 0:
       key_pos = random.randint(0, len(all_keys)-1)
       key_name = all_keys[key_pos]

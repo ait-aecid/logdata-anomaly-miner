@@ -51,10 +51,10 @@ class MissingMatchPathValueDetector(
     self.aminer_config = aminer_config
     self.persistence_id = persistence_id
 
-    PersistencyUtil.addPersistableComponent(self)
+    PersistencyUtil.add_persistable_component(self)
     self.persistence_file_name = AMinerConfig.build_persistence_file_name(
         aminer_config, self.__class__.__name__, persistence_id)
-    persistence_data = PersistencyUtil.loadJson(self.persistence_file_name)
+    persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
     if persistence_data is None:
       self.expected_values_dict = {}
     else:
@@ -212,7 +212,7 @@ class MissingMatchPathValueDetector(
       return 600
     delta = self.next_persist_time - trigger_time
     if delta <= 0:
-      PersistencyUtil.storeJson(self.persistence_file_name, self.expected_values_dict)
+      PersistencyUtil.store_json(self.persistence_file_name, self.expected_values_dict)
       self.next_persist_time = None
       delta = 600
     return delta
@@ -220,7 +220,7 @@ class MissingMatchPathValueDetector(
 
   def do_persist(self):
     """Immediately write persistence data to storage."""
-    PersistencyUtil.storeJson(self.persistence_file_name, self.expected_values_dict)
+    PersistencyUtil.store_json(self.persistence_file_name, self.expected_values_dict)
     self.next_persist_time = None
 
 

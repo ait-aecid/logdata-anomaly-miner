@@ -271,7 +271,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 # data has to be a dictionary with repositioning information for
 # each stream. The data is used only when creating the first stream
 # with that name.
-    self.repositioning_data_dict = PersistencyUtil.loadJson(
+    self.repositioning_data_dict = PersistencyUtil.load_json(
         self.persistence_file_name)
     if self.repositioning_data_dict is None:
       self.repositioning_data_dict = {}
@@ -418,7 +418,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 
 # Analysis loop is only left on shutdown. Try to persist everything
 # and leave.
-    PersistencyUtil.persistAll()
+    PersistencyUtil.persist_all()
     return delayed_return_status
 
   def handle_master_control_socket_receive(self):
@@ -428,7 +428,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 
 # We cannot fail with None here as the socket was in the readList.
     (received_fd, received_type_info, annotation_data) = \
-        SecureOSFunctions.receiveAnnotedFileDescriptor(self.master_control_socket)
+        SecureOSFunctions.receive_annoted_file_descriptor(self.master_control_socket)
     if received_type_info == b'logstream':
       repositioning_data = self.repositioning_data_dict.get(annotation_data, None)
       if repositioning_data != None:
@@ -496,7 +496,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         repositioning_data = log_stream.get_repositioning_data()
         if repositioning_data != None:
           self.repositioning_data_dict[log_stream_name] = repositioning_data
-      PersistencyUtil.storeJson(
+      PersistencyUtil.store_json(
           self.persistence_file_name, self.repositioning_data_dict)
       delta = 600
       self.next_persist_time = trigger_time + delta
@@ -563,7 +563,7 @@ class AnalysisChildRemoteControlHandler(object):
       exception_data = None
       try:
         json_request_data = (json.loads(request_data[8:].decode()))
-        json_request_data = JsonUtil.decodeObject(json_request_data)
+        json_request_data = JsonUtil.decode_object(json_request_data)
         if (json_request_data is None) or \
             (not isinstance(json_request_data, list)) or \
             (len(json_request_data) != 2):
@@ -713,8 +713,8 @@ class AnalysisChildRemoteControlHandler(object):
 
   def put_execute_request(self, remote_control_code, remote_control_data):
     """Add a request to send exception data to the send queue."""
-    remote_control_data = json.dumps([JsonUtil.encodeObject(remote_control_code), \
-                                      JsonUtil.encodeObject(remote_control_data)])
+    remote_control_data = json.dumps([JsonUtil.encode_object(remote_control_code), \
+                                      JsonUtil.encode_object(remote_control_data)])
     self.put_request(b'EEEE', remote_control_data.encode())
 
   def add_select_fds(self, input_select_fd_list, output_select_fd_list):

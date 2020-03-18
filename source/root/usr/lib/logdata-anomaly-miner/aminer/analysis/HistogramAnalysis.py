@@ -275,10 +275,10 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
     self.persistence_id = persistence_id
     self.next_persist_time = None
 
-    PersistencyUtil.addPersistableComponent(self)
+    PersistencyUtil.add_persistable_component(self)
     self.persistenceFileName = AMinerConfig.build_persistence_file_name(
         aminer_config, 'HistogramAnalysis', persistence_id)
-    persistence_data = PersistencyUtil.loadJson(self.persistenceFileName)
+    persistence_data = PersistencyUtil.load_json(self.persistenceFileName)
     if persistence_data != None:
       raise Exception('No data reading, def merge yet')
 
@@ -417,10 +417,10 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
     self.persistence_id = persistence_id
     self.next_persist_time = None
 
-    PersistencyUtil.addPersistableComponent(self)
+    PersistencyUtil.add_persistable_component(self)
     self.persistence_file_name = AMinerConfig.build_persistence_file_name(
         aminer_config, 'PathDependentHistogramAnalysis', persistence_id)
-    persistence_data = PersistencyUtil.loadJson(self.persistence_file_name)
+    persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
     if persistence_data is not None:
       raise Exception('No data reading, def merge yet')
 
