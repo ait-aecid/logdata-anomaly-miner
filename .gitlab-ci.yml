@@ -30,15 +30,6 @@ debian:
                 - rm /var/mail/mail
                 - cd .. 
                 - python3 -m unittest discover -s unit -p '*Test.py'
-                #- coverage run --source=./aminer -m unittest discover -s unit -p '*Test.py'
-                #- touch /tmp/report
-                #- echo 'Statement Coverage:' > /tmp/report
-                #- coverage report >> /tmp/report
-                #- coverage run --source=./aminer --branch -m unittest discover -s unit -p '*Test.py'
-                #- echo 'Branch Coverage:' >> /tmp/report
-                #- coverage report >> /tmp/report
-                #- cat /tmp/report
-                #
                 
 ubuntu:
         image: git-service.ait.ac.at:8010/ict-caiscluster/logdata-anomaly-miner/aminer-ubuntu
