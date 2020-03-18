@@ -40,15 +40,15 @@ def runAnalysisChild(aminerConfig, programName):
   """Runs the Analysis Child"""
   from aminer import AMinerConfig
 # Verify existance and ownership of persistence directory.
-  persistenceDirName = aminerConfig.configProperties.get(
+  persistence_dir_name = aminerConfig.configProperties.get(
       AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
   from aminer.util import SecureOSFunctions
   print('WARNING: SECURITY: Open should use O_PATH, but not yet available in python', \
           file=sys.stderr)
-  if isinstance(persistenceDirName, str):
-    persistenceDirName = persistenceDirName.encode()
-  persistenceDirFd = SecureOSFunctions.secureOpenFile(
-      persistenceDirName, os.O_RDONLY|os.O_DIRECTORY)
+  if isinstance(persistence_dir_name, str):
+    persistence_dir_name = persistence_dir_name.encode()
+  persistenceDirFd = SecureOSFunctions.secure_open_file(
+      persistence_dir_name, os.O_RDONLY|os.O_DIRECTORY)
   statResult = os.fstat(persistenceDirFd)
   import stat
   if ((not stat.S_ISDIR(statResult.st_mode)) or
@@ -57,7 +57,7 @@ def runAnalysisChild(aminerConfig, programName):
     print('FATAL: persistence directory "%s" has ' \
         'to be owned by analysis process (uid %d!=%d, gid %d!=%d) ' \
         'and have access mode 0700 only!' % (
-            persistenceDirName.decode(), statResult.st_uid, os.getuid(), statResult.st_gid, os.getgid()),
+            persistence_dir_name, statResult.st_uid, os.getuid(), statResult.st_gid, os.getgid()),
           file=sys.stderr)
     sys.exit(1)
   print('WARNING: SECURITY: No checking for backdoor ' \
@@ -133,7 +133,7 @@ def main():
 # of "config.py" to allow replacement of components via sys.path
 # from within configuration.
   from aminer.util import SecureOSFunctions
-  from aminer.util import decodeStringAsByteString
+  from aminer.util import decode_string_as_byte_string
   logSourcesList = aminerConfig.configProperties.get(AMinerConfig.KEY_LOG_SOURCES_LIST, None)
   if (logSourcesList is None) or not logSourcesList:
     print('%s: %s not defined' % (programName, AMinerConfig.KEY_LOG_SOURCES_LIST), file=sys.stderr)
@@ -143,7 +143,7 @@ def main():
   logDataResourceDict = {}
   for logResourceName in logSourcesList:
 # From here on logResourceName is a byte array.
-    logResourceName = decodeStringAsByteString(logResourceName)
+    logResourceName = decode_string_as_byte_string(logResourceName)
     logResource = None
     if logResourceName.startswith(b'file://'):
       from aminer.input.LogStream import FileLogDataResource
@@ -339,14 +339,14 @@ def main():
 # process.
   for logResourceName, logResource in logDataResourceDict.items():
     if (logResource != None) and (logResource.get_file_descriptor() >= 0):
-      SecureOSFunctions.sendLogstreamDescriptor(
+      SecureOSFunctions.send_logstream_descriptor(
           parentSocket, logResource.get_file_descriptor(), logResourceName)
       logResource.close()
 
 # Send the remote control server socket, if any and close it afterwards.
 # It is not needed any more on parent side.
   if remoteControlSocket != None:
-    SecureOSFunctions.sendAnnotatedFileDescriptor(
+    SecureOSFunctions.send_annotated_file_descriptor(
         parentSocket, remoteControlSocket.fileno(), 'remotecontrol', '')
     remoteControlSocket.close()
 
@@ -396,7 +396,7 @@ def main():
         exitStatus = 2
         continue
 
-      SecureOSFunctions.sendLogstreamDescriptor(
+      SecureOSFunctions.send_logstream_descriptor(
           parentSocket, logDataResource.get_file_descriptor(), logResouceName)
       logDataResource.close()
 
