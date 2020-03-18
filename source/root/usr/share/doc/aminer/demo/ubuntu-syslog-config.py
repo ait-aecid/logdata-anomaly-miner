@@ -83,17 +83,17 @@ sys.path = sys.path+['/etc/aminer/conf-available/generic', '/usr/lib/python2.7/d
 
 # DEMO: DISABLE SECURE OPEN TO ALLOW RELATIVE PATH, SYMLINKS!
 import os
-def insecureDemoOpen(file_name, flags):
+def insecure_demo_open(file_name, flags):
   """Perform a normal open supporting also relative path to override
   more strict secureOpenFile function in test environment."""
   return os.open(file_name, flags|os.O_NOCTTY)
 from aminer.util import SecureOSFunctions
-SecureOSFunctions.secureOpenFile = insecureDemoOpen
+SecureOSFunctions.secureOpenFile = insecure_demo_open
 
 
 # Add your ruleset here:
 
-def buildAnalysisPipeline(analysis_context):
+def build_analysis_pipeline(analysis_context):
   """Define the function to create pipeline for parsing the log
   data. It has also to define an AtomizerFactory to instruct AMiner
   how to process incoming data streams to create log atoms from

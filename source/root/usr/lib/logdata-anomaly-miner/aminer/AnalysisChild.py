@@ -147,7 +147,7 @@ class AnalysisContext(object):
 
   def build_analysis_pipeline(self):
     """Convenience method to create the pipeline."""
-    self.aminer_config.buildAnalysisPipeline(self)
+    self.aminer_config.build_analysis_pipeline(self)
 
 class AnalysisChild(TimeTriggeredComponentInterface):
   """This class defines the child performing the complete analysis

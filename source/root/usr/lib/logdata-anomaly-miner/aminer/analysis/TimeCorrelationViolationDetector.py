@@ -244,7 +244,6 @@ class CorrelationRule:
             num_violations = num_violations + 1
           break
 # So time range is OK, see if match parameters are also equal.
-        check_pos = 4
         violation_found = False
         for check_pos in range(4, len(a_event)):
           if a_event[check_pos] != b_event[check_pos]:

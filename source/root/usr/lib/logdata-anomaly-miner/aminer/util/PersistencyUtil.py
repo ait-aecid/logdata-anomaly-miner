@@ -106,9 +106,9 @@ def load_json(file_name):
   return result
 
 
-def store_json(file_name, objectData):
+def store_json(file_name, object_data):
   """Store persistency data to file."""
-  persistence_data = JsonUtil.dump_as_json(objectData)
+  persistence_data = JsonUtil.dump_as_json(object_data)
   fd = create_temporary_persistence_file(file_name)
   os.write(fd, bytes(persistence_data, 'utf-8'))
   replace_persistence_file(file_name, fd)

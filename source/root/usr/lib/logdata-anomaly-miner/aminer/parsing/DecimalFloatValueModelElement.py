@@ -36,9 +36,7 @@ class DecimalFloatValueModelElement(ModelElementInterface):
       raise Exception('Invalid valueSignType "%s"' % value_sign_type)
 
     self.pad_characters = b''
-    if value_pad_type == DecimalFloatValueModelElement.PAD_TYPE_NONE:
-      pass
-    elif value_pad_type == DecimalFloatValueModelElement.PAD_TYPE_ZERO:
+    if value_pad_type == DecimalFloatValueModelElement.PAD_TYPE_ZERO:
       self.pad_characters = b'0'
     elif value_pad_type == DecimalFloatValueModelElement.PAD_TYPE_BLANK:
       self.pad_characters = b' '
