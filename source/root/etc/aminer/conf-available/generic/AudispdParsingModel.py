@@ -232,7 +232,7 @@ via syslog after any standard logging preamble, e.g. from syslog."""
   type_branches['LOGIN'] = SequenceModelElement('login', [
       FixedDataModelElement('s0', pid),
       DecimalIntegerValueModelElement('pid'),
-      FixedDataModelElement('s1', uid)
+      FixedDataModelElement('s1', uid),
       DecimalIntegerValueModelElement('uid'),
       FixedWordlistDataModelElement('s2', [b' old auid=', b' old-auid=']),
       DecimalIntegerValueModelElement('auid-old'),
