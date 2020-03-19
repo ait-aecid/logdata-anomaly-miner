@@ -185,14 +185,6 @@ class AnalysisChild(TimeTriggeredComponentInterface):
       print('%s: caught signal, shutting down' % program_name, file=sys.stderr)
       self.run_analysis_loop_flag = False
 
-      #######################################
-      # delete after Performance testing
-      #f=open("/tmp/results.csv", "a+")
-      #f.write("%s log lines could be handled"%ByteStreamLineAtomizer.COUNTER)
-      #f.close()
-      print(ByteStreamLineAtomizer.COUNTER)
-      #######################################
-
     import signal
     signal.signal(signal.SIGHUP, graceful_shutdown_handler)
     signal.signal(signal.SIGINT, graceful_shutdown_handler)
