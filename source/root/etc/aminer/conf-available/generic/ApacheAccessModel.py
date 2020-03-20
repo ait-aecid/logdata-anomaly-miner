@@ -1,6 +1,6 @@
 """This module defines a parser for apache2 access.log."""
 
-from aminer.parsing import Datetime_modelElement
+from aminer.parsing import DatetimeModelElement
 from aminer.parsing import DecimalIntegerValueModelElement
 from aminer.parsing import FixedDataModelElement
 from aminer.parsing import SequenceModelElement
