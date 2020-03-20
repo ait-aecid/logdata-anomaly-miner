@@ -12,6 +12,7 @@ debian:
                 - service exim4 start
                 - apt install procps -y
                 - pip3 install coverage
+                - apt install cpulimit -y
 
         script:
                 - ansible-playbook /opt/ansible/playbook.yml
@@ -30,7 +31,7 @@ debian:
                 - rm /var/mail/mail
                 - cd .. 
                 - python3 -m unittest discover -s unit -p '*Test.py'
-                #
+                
 
 ubuntu:
         image: git-service.ait.ac.at:8010/ict-caiscluster/logdata-anomaly-miner/aminer-ubuntu
@@ -39,6 +40,7 @@ ubuntu:
                 - service rsyslog start
                 - service exim4 start
                 - pip3 install coverage
+                - apt install cpulimit -y
         
         script:
                 - ansible-playbook /opt/ansible/playbook.yml
