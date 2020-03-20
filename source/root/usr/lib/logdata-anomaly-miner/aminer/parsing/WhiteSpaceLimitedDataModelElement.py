@@ -7,27 +7,27 @@ from aminer.parsing import ModelElementInterface
 class WhiteSpaceLimitedDataModelElement(ModelElementInterface):
   """This class defines a model element that represents a variable
   amount of characters delimited by a white space."""
-  def __init__(self, elementId):
-    self.elementId = elementId
+  def __init__(self, element_id):
+    self.element_id = element_id
 
-  def getChildElements(self):
+  def get_child_elements(self):
     """Get all possible child model elements of this element.
     @return None as there are no children of this element."""
     return None
 
-  def getMatchElement(self, path, matchContext):
+  def get_match_element(self, path, match_context):
     """Find the maximum number of bytes before encountering whitespace
     or end of data.
     @return a match when at least one byte was found."""
-    data = matchContext.matchData
-    matchLen = 0
-    for testByte in data:
-      if testByte in b' \t':
+    data = match_context.match_data
+    match_len = 0
+    for test_byte in data:
+      if test_byte in b' \t':
         break
-      matchLen += 1
+      match_len += 1
 
-    if matchLen == 0:
+    if match_len == 0:
       return None
-    matchData = data[:matchLen]
-    matchContext.update(matchData)
-    return MatchElement("%s/%s" % (path, self.elementId), matchData, matchData, None)
+    match_data = data[:match_len]
+    match_context.update(match_data)
+    return MatchElement("%s/%s" % (path, self.element_id), match_data, match_data, None)

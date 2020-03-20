@@ -65,7 +65,9 @@ while argPos < len(sys.argv):
     in same way as if content would have been used with "--Exec".
   --Help: this output
   --StringResponse: if set, print the response just as string
-    instead of passing it to repr.""" % sys.argv[0])
+    instead of passing it to repr.
+
+  For further information read the man pages running 'man AMinerRemoteControl'.""" % sys.argv[0])
     sys.exit(0)
   if paramName == '--StringResponse':
     stringResponseFlag = True

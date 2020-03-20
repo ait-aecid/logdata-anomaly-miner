@@ -7,33 +7,33 @@ from aminer.parsing import ModelElementInterface
 class SequenceModelElement(ModelElementInterface):
   """This class defines an element to find matches that comprise
   matches of all given child model elements."""
-  def __init__(self, elementId, children):
-    self.elementId = elementId
+  def __init__(self, element_id, children):
+    self.element_id = element_id
     self.children = children
 
-  def getChildElements(self):
+  def get_child_elements(self):
     """Return all model elements of the sequence."""
     return self.children
 
-  def getMatchElement(self, path, matchContext):
+  def get_match_element(self, path, match_context):
     """Try to find a match on given data for this model element
     and all its children. When a match is found, the matchContext
     is updated accordingly.
     @param path the model path to the parent model element invoking
     this method.
-    @param matchContext an instance of MatchContext class holding
+    @param match_context an instance of MatchContext class holding
     the data context to match against.
     @return the matchElement or None if model did not match."""
-    currentPath = "%s/%s" % (path, self.elementId)
-    startData = matchContext.matchData
+    current_path = "%s/%s" % (path, self.element_id)
+    start_data = match_context.match_data
     matches = []
-    for childElement in self.children:
-      childMatch = childElement.getMatchElement(currentPath, matchContext)
-      if childMatch is None:
-        matchContext.matchData = startData
+    for child_element in self.children:
+      child_match = child_element.get_match_element(current_path, match_context)
+      if child_match is None:
+        match_context.match_data = start_data
         return None
-      matches += [childMatch]
+      matches += [child_match]
 
-    return MatchElement(currentPath, \
-        startData[:len(startData)-len(matchContext.matchData)], \
-        startData[:len(startData)-len(matchContext.matchData)], matches)
+    return MatchElement(current_path, \
+                        start_data[:len(start_data)-len(match_context.match_data)],
+                        start_data[:len(start_data)-len(match_context.match_data)], matches)

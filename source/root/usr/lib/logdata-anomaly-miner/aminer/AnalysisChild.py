@@ -1,4 +1,4 @@
-"""This module contains classes for execution of AMiner child
+"""This module contains classes for execution of py child
 process main analysis loop."""
 
 import base64
@@ -12,6 +12,9 @@ import struct
 import sys
 import time
 import traceback
+import resource
+import subprocess
+import logging
 
 from aminer import AMinerConfig
 from aminer.input.LogStream import LogStream
@@ -19,6 +22,9 @@ from aminer.util import PersistencyUtil
 from aminer.util import SecureOSFunctions
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.util import JsonUtil
+from aminer.input.ByteStreamLineAtomizer import ByteStreamLineAtomizer
+from builtins import str
+from aminer.AMinerRemoteControlExecutionMethods import AMinerRemoteControlExecutionMethods
 
 class AnalysisContext(object):
   """This class collects information about the current analysis
@@ -27,11 +33,11 @@ class AnalysisContext(object):
   TIME_TRIGGER_CLASS_REALTIME = 1
   TIME_TRIGGER_CLASS_ANALYSISTIME = 2
 
-  def __init__(self, aminerConfig):
-    self.aminerConfig = aminerConfig
+  def __init__(self, aminer_config):
+    self.aminer_config = aminer_config
 # This is the factory to create atomiziers for incoming data streams
 # and link them to the analysis pipeline.
-    self.atomizerFactory = None
+    self.atomizer_factory = None
 # This is the current log processing and analysis time regarding
 # the data stream being analyzed. While None, the analysis time
 # e.g. used to trigger components (see analysisTimeTriggeredComponents),
@@ -39,125 +45,129 @@ class AnalysisContext(object):
 # time has to be updated to values derived from the log data input
 # to reflect the current log processing time, which will be in
 # the past and may progress much faster than real system time.
-    self.analysisTime = None
+    self.analysis_time = None
 # Keep a registry of all analysis and filter configuration for
 # later use. Remote control interface may then access them for
 # runtime reconfiguration.
-    self.nextRegistryId = 0
-    self.registeredComponents = {}
+    self.next_registry_id = 0
+    self.registered_components = {}
 # Keep also a list of components by name.
-    self.registeredComponentsByName = {}
+    self.registered_components_by_name = {}
 # Keep lists of components that should receive timer interrupts
 # when real time or analysis time has elapsed.
-    self.realTimeTriggeredComponents = []
-    self.analysisTimeTriggeredComponents = []
+    self.real_time_triggered_components = []
+    self.analysis_time_triggered_components = []
+    
+    logging.basicConfig(filename=AMinerConfig.LOG_FILE,level=logging.DEBUG, 
+      format='%(asctime)s %(levelname)s %(message)s', datefmt='%d.%m.%Y %H:%M:%S')
+    logging.info("AMiner started.")
 
-  def addTimeTriggeredComponent(self, component, triggerClass=None):
+  def add_time_triggered_component(self, component, trigger_class=None):
     """Add a time-triggered component to the registry."""
     if not isinstance(component, TimeTriggeredComponentInterface):
       raise Exception('Attempting to register component of class ' \
           '%s not implementing aminer.util.TimeTriggeredComponentInterface' % (
               component.__class__.__name__))
-    if triggerClass is None:
-      triggerClass = component.getTimeTriggerClass()
-    if triggerClass == AnalysisContext.TIME_TRIGGER_CLASS_REALTIME:
-      self.realTimeTriggeredComponents.append(component)
-    elif triggerClass == AnalysisContext.TIME_TRIGGER_CLASS_ANALYSISTIME:
-      self.analysisTimeTriggeredComponents.append(component)
+    if trigger_class is None:
+      trigger_class = component.get_time_trigger_class()
+    if trigger_class == AnalysisContext.TIME_TRIGGER_CLASS_REALTIME:
+      self.real_time_triggered_components.append(component)
+    elif trigger_class == AnalysisContext.TIME_TRIGGER_CLASS_ANALYSISTIME:
+      self.analysis_time_triggered_components.append(component)
     else:
-      raise Exception('Attempting to timer component for unknown class %s' % triggerClass)
+      raise Exception('Attempting to timer component for unknown class %s' % trigger_class)
 
-  def registerComponent(
-      self, component, componentName=None, registerTimeTriggerClassOverride=None):
+  def register_component(
+      self, component, component_name=None, register_time_trigger_class_override=None):
     """Register a new component. A component implementing the
     TimeTriggeredComponentInterface will also be added to the
     appropriate lists unless registerTimeTriggerClassOverride
     is specified.
-    @param componentName when not none, the component is also
+    @param component_name when not none, the component is also
     added to the named components. When a component with the same
     name was already registered, this will cause an error.
-    @param registerTimeTriggerClassOverride if not none, ignore
+    @param register_time_trigger_class_override if not none, ignore
     the time trigger class supplied by the component and register
     it for the classes specified in the override list. Use an
     empty list to disable registration."""
-    if (componentName != None) and (componentName in self.registeredComponentsByName):
+    if (component_name != None) and (component_name in self.registered_components_by_name):
       raise Exception('Component with same name already registered')
-    if (registerTimeTriggerClassOverride != None) and \
+    if (register_time_trigger_class_override != None) and \
         (not isinstance(component, TimeTriggeredComponentInterface)):
       raise Exception('Requesting override on component not implementing ' \
           'TimeTriggeredComponentInterface')
 
-    self.registeredComponents[self.nextRegistryId] = (component, componentName)
-    self.nextRegistryId += 1
-    if componentName != None:
-      self.registeredComponentsByName[componentName] = component
+    self.registered_components[self.next_registry_id] = (component, component_name)
+    self.next_registry_id += 1
+    if component_name != None:
+      self.registered_components_by_name[component_name] = component
     if isinstance(component, TimeTriggeredComponentInterface):
-      if registerTimeTriggerClassOverride is None:
-        self.addTimeTriggeredComponent(component)
+      if register_time_trigger_class_override is None:
+        self.add_time_triggered_component(component)
       else:
-        for triggerClass in registerTimeTriggerClassOverride:
-          self.addTimeTriggeredComponent(component, triggerClass)
+        for trigger_class in register_time_trigger_class_override:
+          self.add_time_triggered_component(component, trigger_class)
 
-  def getRegisteredComponentIds(self):
+  def get_registered_component_ids(self):
     """Get a list of currently known component IDs."""
-    return self.registeredComponents.keys()
+    return self.registered_components.keys()
 
-  def getComponentById(self, idString):
+  def get_component_by_id(self, id_string):
     """Get a component by ID.
     @return None if not found."""
-    componentInfo = self.registeredComponents.get(idString, None)
-    if componentInfo is None:
+    component_info = self.registered_components.get(id_string, None)
+    if component_info is None:
       return None
-    return componentInfo[0]
+    return component_info[0]
 
-  def getRegisteredComponentNames(self):
+  def get_registered_component_names(self):
     """Get a list of currently known component names."""
-    return list(self.registeredComponentsByName.keys())
+    return list(self.registered_components_by_name.keys())
 
-  def getComponentByName(self, name):
+  def get_component_by_name(self, name):
     """Get a component by name.
     @return None if not found."""
-    return self.registeredComponentsByName.get(name, None)
+    return self.registered_components_by_name.get(name, None)
 
-  def getNameByComponent(self, component):
+  def get_name_by_component(self, component):
     """Get the name of a component.
     @return None if not found."""
-    for componentName, componentIter in self.registeredComponentsByName.items():
-      if componentIter == component:
-        return componentName
+    for component_name, component_iter in self.registered_components_by_name.items():
+      if component_iter == component:
+        return component_name
     return None
 
-  def getIdByComponent(self, component):
+  def get_id_by_component(self, component):
     """Get the name of a component.
     @return None if not found."""
-    for componentName, componentIter in self.registeredComponentsByName.items():
-      if componentIter == component:
-        return componentName
+    for component_id, component_iter in self.registered_components.items():
+      if component_iter[0] == component:
+        return component_id
     return None
 
-  def buildAnalysisPipeline(self):
+  def build_analysis_pipeline(self):
     """Convenience method to create the pipeline."""
-    self.aminerConfig.buildAnalysisPipeline(self)
+    self.aminer_config.build_analysis_pipeline(self)
 
 class AnalysisChild(TimeTriggeredComponentInterface):
   """This class defines the child performing the complete analysis
   workflow. When splitting privileges between analysis and monitor
   process, this class should only be initialized within the analysis
   process!"""
-
-  def __init__(self, programName, aminerConfig):
-    self.programName = programName
-    self.analysisContext = AnalysisContext(aminerConfig)
-    self.runAnalysisLoopFlag = True
-    self.logStreamsByName = {}
-    self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
-        self.analysisContext.aminerConfig,
+  
+  def __init__(self, program_name, aminer_config):
+    self.program_name = program_name
+    self.analysis_context = AnalysisContext(aminer_config)
+    self.run_analysis_loop_flag = True
+    self.log_streams_by_name = {}
+    self.persistence_file_name = AMinerConfig.build_persistence_file_name(
+        self.analysis_context.aminer_config,
         self.__class__.__name__+'/RepositioningData')
-    self.nextPersistTime = time.time()+600
+    self.next_persist_time = time.time() + 600
 
-    self.repositioningDataDict = {}
-    self.masterControlSocket = None
-    self.remoteControlSocket = None
+    self.repositioning_data_dict = {}
+    self.master_control_socket = None
+    self.remote_control_socket = None
 
 # This dictionary provides a lookup list from file descriptor
 # to associated object for handling the data to and from the given
@@ -166,27 +176,28 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 # * Remote control listening socket
 # * LogStreams
 # * Remote control connections
-    self.trackedFdsDict = {}
+    self.tracked_fds_dict = {}
 
 # Override the signal handler to allow graceful shutdown.
-    def gracefulShutdownHandler(_signo, _stackFrame):
+    def graceful_shutdown_handler(_signo, _stack_frame):
       """This is the signal handler function to react on typical
       shutdown signals."""
-      print('%s: caught signal, shutting down' % programName, file=sys.stderr)
-      self.runAnalysisLoopFlag = False
+      print('%s: caught signal, shutting down' % program_name, file=sys.stderr)
+      self.run_analysis_loop_flag = False
+
     import signal
-    signal.signal(signal.SIGHUP, gracefulShutdownHandler)
-    signal.signal(signal.SIGINT, gracefulShutdownHandler)
-    signal.signal(signal.SIGTERM, gracefulShutdownHandler)
+    signal.signal(signal.SIGHUP, graceful_shutdown_handler)
+    signal.signal(signal.SIGINT, graceful_shutdown_handler)
+    signal.signal(signal.SIGTERM, graceful_shutdown_handler)
 
 # Do this on at the end of the initialization to avoid having
 # partially initialized objects inside the registry.
-    self.analysisContext.addTimeTriggeredComponent(self)
+    self.analysis_context.add_time_triggered_component(self)
 
 
-  def runAnalysis(self, masterFd):
+  def run_analysis(self, master_fd):
     """This method runs the analysis thread.
-    @param masterFd the main communication socket to the parent
+    @param master_fd the main communication socket to the parent
     to receive logfile updates from the parent.
     @return 0 on success, e.g. normal termination via signal or
     1 on error."""
@@ -195,232 +206,268 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 # master process to receive commands or logstream data. Expect
 # the parent/child communication socket on fd 3. This also duplicates
 # the fd, so close the old one.
-    self.masterControlSocket = socket.fromfd(
-        masterFd, socket.AF_UNIX, socket.SOCK_DGRAM, 0)
-    os.close(masterFd)
-    self.trackedFdsDict[self.masterControlSocket.fileno()] = \
-        self.masterControlSocket
+    self.master_control_socket = socket.fromfd(
+        master_fd, socket.AF_UNIX, socket.SOCK_DGRAM, 0)
+    os.close(master_fd)
+    self.tracked_fds_dict[self.master_control_socket.fileno()] = \
+        self.master_control_socket
 
 # Locate the real analysis configuration.
-    self.analysisContext.buildAnalysisPipeline()
-    if self.analysisContext.atomizerFactory is None:
+    self.analysis_context.build_analysis_pipeline()
+    if self.analysis_context.atomizer_factory is None:
       print('FATAL: buildAnalysisPipeline() did ' \
           'not initialize atomizerFactory, terminating', file=sys.stderr)
       return 1
 
-    realTimeTriggeredComponents = self.analysisContext.realTimeTriggeredComponents
-    analysisTimeTriggeredComponents = self.analysisContext.analysisTimeTriggeredComponents
+    real_time_triggered_components = self.analysis_context.real_time_triggered_components
+    analysis_time_triggered_components = self.analysis_context.analysis_time_triggered_components
+    
+    max_memory_mb = self.analysis_context.aminer_config.configProperties.get(AMinerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE, None)
+    if max_memory_mb is not None:
+      try:
+        max_memory_mb = int(max_memory_mb)
+        resource.setrlimit(resource.RLIMIT_AS, (max_memory_mb*1024*1024, resource.RLIM_INFINITY))
+      except ValueError:
+        print('FATAL: %s must be an integer, terminating'
+          % AMinerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE, file=sys.stderr)
+        return 1
+      
+    max_cpu_percent_usage = self.analysis_context.aminer_config.configProperties.get(AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE)
+    if max_cpu_percent_usage is not None:
+      try:
+        max_cpu_percent_usage = int(max_cpu_percent_usage)
+        # limit
+        pid = os.getpid()
+        package_installed_cmd = ['dpkg', '-l', 'cpulimit']
+        cpulimit_cmd = ['cpulimit', '-p', str(pid), '-l', str(max_cpu_percent_usage)]
+        
+        with subprocess.Popen(package_installed_cmd,
+           stdout=subprocess.PIPE, 
+           stderr=subprocess.STDOUT) as out:
+          stdout,stderr = out.communicate()
+        
+        if 'dpkg-query: no packages found matching cpulimit' in stdout.decode():
+          print('FATAL: cpulimit package must be installed, when using the property %s'
+            % AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE, file=sys.stderr)
+          return 1
+        else:
+          out = subprocess.Popen(cpulimit_cmd,
+           stdout=subprocess.PIPE, 
+           stderr=subprocess.STDOUT)
+      except ValueError:
+        print('FATAL: %s must be an integer, terminating' 
+          % AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE, file=sys.stderr)
+        return 1
 
 # Load continuation data for last known log streams. The loaded
 # data has to be a dictionary with repositioning information for
 # each stream. The data is used only when creating the first stream
 # with that name.
-    self.repositioningDataDict = PersistencyUtil.loadJson(
-        self.persistenceFileName)
-    if self.repositioningDataDict is None:
-      self.repositioningDataDict = {}
+    self.repositioning_data_dict = PersistencyUtil.load_json(
+        self.persistence_file_name)
+    if self.repositioning_data_dict is None:
+      self.repositioning_data_dict = {}
 
 # A list of LogStreams where handleStream() blocked due to downstream
 # not being able to consume the data yet.
-    blockedLogStreams = []
+    blocked_log_streams = []
 
 # Always start when number is None.
-    nextRealTimeTriggerTime = None
-    nextAnalysisTimeTriggerTime = None
+    next_real_time_trigger_time = None
+    next_analysis_time_trigger_time = None
 
-    delayedReturnStatus = 0
-    while self.runAnalysisLoopFlag:
+    delayed_return_status = 0
+    while self.run_analysis_loop_flag:
 # Build the list of inputs to select for anew each time: the LogStream
 # file descriptors may change due to rollover.
-      inputSelectFdList = []
-      outputSelectFdList = []
-      for fdHandlerObject in self.trackedFdsDict.values():
-        if isinstance(fdHandlerObject, LogStream):
-          streamFd = fdHandlerObject.getCurrentFd()
-          if streamFd < 0:
+      input_select_fd_list = []
+      output_select_fd_list = []
+      for fd_handler_object in self.tracked_fds_dict.values():
+        if isinstance(fd_handler_object, LogStream):
+          stream_fd = fd_handler_object.get_current_fd()
+          if stream_fd < 0:
             continue
-          inputSelectFdList.append(streamFd)
-        elif isinstance(fdHandlerObject, AnalysisChildRemoteControlHandler):
-          fdHandlerObject.addSelectFds(
-              inputSelectFdList, outputSelectFdList)
+          input_select_fd_list.append(stream_fd)
+        elif isinstance(fd_handler_object, AnalysisChildRemoteControlHandler):
+          fd_handler_object.add_select_fds(
+              input_select_fd_list, output_select_fd_list)
         else:
 # This has to be a socket, just add the file descriptor.
-          inputSelectFdList.append(fdHandlerObject.fileno())
+          input_select_fd_list.append(fd_handler_object.fileno())
 
 # Loop over the list in reverse order to avoid skipping elements
 # in remove.
-      for logStream in reversed(blockedLogStreams):
-        currentStreamFd = logStream.handleStream()
-        if currentStreamFd >= 0:
-          self.trackedFdsDict[currentStreamFd] = logStream
-          inputSelectFdList.append(currentStreamFd)
-          blockedLogStreams.remove(logStream)
+      for log_stream in reversed(blocked_log_streams):
+        current_stream_fd = log_stream.handle_stream()
+        if current_stream_fd >= 0:
+          self.tracked_fds_dict[current_stream_fd] = log_stream
+          input_select_fd_list.append(current_stream_fd)
+          blocked_log_streams.remove(log_stream)
 
-      readList = None
-      writeList = None
-      exceptList = None
+      read_list = None
+      write_list = None
       try:
-        (readList, writeList, exceptList) = select.select(
-            inputSelectFdList, outputSelectFdList, [], 1)
-      except select.error as selectError:
+        (read_list, write_list, except_list) = select.select(
+            input_select_fd_list, output_select_fd_list, [], 1)
+      except select.error as select_error:
 # Interrupting signals, e.g. for shutdown are OK.
-        if selectError[0] == errno.EINTR:
+        if select_error[0] == errno.EINTR:
           continue
-        print('Unexpected select result %s' % str(selectError), file=sys.stderr)
-        delayedReturnStatus = 1
+        print('Unexpected select result %s' % str(select_error), file=sys.stderr)
+        delayed_return_status = 1
         break
-      for readFd in readList:
-        fdHandlerObject = self.trackedFdsDict[readFd]
-        if isinstance(fdHandlerObject, LogStream):
+      for read_fd in read_list:
+        fd_handler_object = self.tracked_fds_dict[read_fd]
+        if isinstance(fd_handler_object, LogStream):
 # Handle this LogStream. Only when downstream processing blocks,
 # add the stream to the blocked stream list.
-          handleResult = fdHandlerObject.handleStream()
-          if handleResult < 0:
+          handle_result = fd_handler_object.handle_stream()
+          if handle_result < 0:
 # No need to care if current internal file descriptor in LogStream
 # has changed in handleStream(), this will be handled when unblocking.
-            del self.trackedFdsDict[readFd]
-            blockedLogStreams.append(fdHandlerObject)
-          elif handleResult != readFd:
+            del self.tracked_fds_dict[read_fd]
+            blocked_log_streams.append(fd_handler_object)
+          elif handle_result != read_fd:
 # The current fd has changed, update the tracking list.
-            del self.trackedFdsDict[readFd]
-            self.trackedFdsDict[handleResult] = fdHandlerObject
+            del self.tracked_fds_dict[read_fd]
+            self.tracked_fds_dict[handle_result] = fd_handler_object
           continue
 
-        if isinstance(fdHandlerObject, AnalysisChildRemoteControlHandler):
+        if isinstance(fd_handler_object, AnalysisChildRemoteControlHandler):
           try:
-            fdHandlerObject.doReceive()
+            fd_handler_object.do_receive()
           except Exception as receiveException:
             print('Unclean termination of remote ' \
                 'control: %s' % str(receiveException), file=sys.stderr)
-          if fdHandlerObject.isDead():
-            del self.trackedFdsDict[readFd]
+          if fd_handler_object.is_dead():
+            del self.tracked_fds_dict[read_fd]
 # Reading is only attempted when output buffer was already flushed.
 # Try processing the next request to fill the output buffer for
 # next round.
           else:
-            fdHandlerObject.doProcess(self.analysisContext)
+            fd_handler_object.do_process(self.analysis_context)
           continue
 
-        if fdHandlerObject == self.masterControlSocket:
-          self.handleMasterControlSocketReceive()
+        if fd_handler_object == self.master_control_socket:
+          self.handle_master_control_socket_receive()
           continue
 
-        if fdHandlerObject == self.remoteControlSocket:
+        if fd_handler_object == self.remote_control_socket:
 # We received a remote connection, accept it unconditionally.
 # Users should make sure, that they do not exhaust resources by
 # hogging open connections.
-          (controlClientSocket, remoteAddress) = \
-              self.remoteControlSocket.accept()
+          (control_client_socket, remote_address) = \
+              self.remote_control_socket.accept()
 # Keep track of information received via this remote control socket.
-          remoteControlHandler = AnalysisChildRemoteControlHandler(
-              controlClientSocket)
-          self.trackedFdsDict[controlClientSocket.fileno()] = remoteControlHandler
+          remote_control_handler = AnalysisChildRemoteControlHandler(
+              control_client_socket)
+          self.tracked_fds_dict[control_client_socket.fileno()] = remote_control_handler
           continue
-        raise Exception('Unhandled object type %s' % type(fdHandlerObject))
+        raise Exception('Unhandled object type %s' % type(fd_handler_object))
 
-      for writeFd in writeList:
-        fdHandlerObject = self.trackedFdsDict[writeFd]
-        if isinstance(fdHandlerObject, AnalysisChildRemoteControlHandler):
-          bufferFlushedFlag = False
+      for write_fd in write_list:
+        fd_handler_object = self.tracked_fds_dict[write_fd]
+        if isinstance(fd_handler_object, AnalysisChildRemoteControlHandler):
+          buffer_flushed_flag = False
           try:
-            bufferFlushedFlag = fdHandlerObject.doSend()
+            buffer_flushed_flag = fd_handler_object.do_send()
           except OSError as sendError:
             print('Error sending data via remote ' \
                 'control: %s' % str(sendError), file=sys.stderr)
             try:
-              fdHandlerObject.terminate()
+              fd_handler_object.terminate()
             except Exception as terminateException:
               print('Unclean termination of remote ' \
                   'control: %s' % str(terminateException), file=sys.stderr)
-          if bufferFlushedFlag:
-            fdHandlerObject.doProcess(self.analysisContext)
-          if fdHandlerObject.isDead():
-            del self.trackedFdsDict[writeFd]
+          if buffer_flushed_flag:
+            fd_handler_object.do_process(self.analysis_context)
+          if fd_handler_object.is_dead():
+            del self.tracked_fds_dict[write_fd]
           continue
-        raise Exception('Unhandled object type %s' % type(fdHandlerObject))
+        raise Exception('Unhandled object type %s' % type(fd_handler_object))
 
 
 # Handle the real time events.
-      realTime = time.time()
-      if nextRealTimeTriggerTime is None or realTime >= nextRealTimeTriggerTime:
-        nextTriggerOffset = 3600
-        for component in realTimeTriggeredComponents:
-          nextTriggerRequest = component.doTimer(realTime)
-          nextTriggerOffset = min(nextTriggerOffset, nextTriggerRequest)
-        nextRealTimeTriggerTime = realTime+nextTriggerOffset
+      real_time = time.time()
+      if next_real_time_trigger_time is None or real_time >= next_real_time_trigger_time:
+        next_trigger_offset = 3600
+        for component in real_time_triggered_components:
+          next_trigger_request = component.do_timer(real_time)
+          next_trigger_offset = min(next_trigger_offset, next_trigger_request)
+        next_real_time_trigger_time = real_time+next_trigger_offset
 
 # Handle the analysis time events. The analysis time will be different
 # when an analysis time component is registered.
-      analysisTime = self.analysisContext.analysisTime
-      if analysisTime is None:
-        analysisTime = realTime
-      if nextAnalysisTimeTriggerTime is None or analysisTime >= nextAnalysisTimeTriggerTime:
-        nextTriggerOffset = 3600
-        for component in analysisTimeTriggeredComponents:
-          nextTriggerRequest = component.doTimer(realTime)
-          nextTriggerOffset = min(nextTriggerOffset, nextTriggerRequest)
-        nextAnalysisTimeTriggerTime = analysisTime+nextTriggerOffset
+      analysis_time = self.analysis_context.analysis_time
+      if analysis_time is None:
+        analysis_time = real_time
+      if next_analysis_time_trigger_time is None or analysis_time >= next_analysis_time_trigger_time:
+        next_trigger_offset = 3600
+        for component in analysis_time_triggered_components:
+          next_trigger_request = component.do_timer(real_time)
+          next_trigger_offset = min(next_trigger_offset, next_trigger_request)
+        next_analysis_time_trigger_time = analysis_time+next_trigger_offset
 
 # Analysis loop is only left on shutdown. Try to persist everything
 # and leave.
-    PersistencyUtil.persistAll()
-    return delayedReturnStatus
+    PersistencyUtil.persist_all()
+    return delayed_return_status
 
-  def handleMasterControlSocketReceive(self):
+  def handle_master_control_socket_receive(self):
     """Receive information from the parent process via the master
     control socket. This method may only be invoked when receiving
     is guaranteed to be nonblocking and to return data."""
 
 # We cannot fail with None here as the socket was in the readList.
-    (receivedFd, receivedTypeInfo, annotationData) = \
-        SecureOSFunctions.receiveAnnotedFileDescriptor(self.masterControlSocket)
-    if receivedTypeInfo == b'logstream':
-      repositioningData = self.repositioningDataDict.get(annotationData, None)
-      if repositioningData != None:
-        del self.repositioningDataDict[annotationData]
+    (received_fd, received_type_info, annotation_data) = \
+        SecureOSFunctions.receive_annoted_file_descriptor(self.master_control_socket)
+    if received_type_info == b'logstream':
+      repositioning_data = self.repositioning_data_dict.get(annotation_data, None)
+      if repositioning_data != None:
+        del self.repositioning_data_dict[annotation_data]
       resource = None
-      if annotationData.startswith(b'file://'):
+      if annotation_data.startswith(b'file://'):
         from aminer.input.LogStream import FileLogDataResource
-        resource = FileLogDataResource(annotationData, receivedFd, \
-            repositioningData=repositioningData)
-      elif annotationData.startswith(b'unix://'):
+        resource = FileLogDataResource(annotation_data, received_fd, \
+                                       repositioning_data=repositioning_data)
+      elif annotation_data.startswith(b'unix://'):
         from aminer.input.LogStream import UnixSocketLogDataResource
-        resource = UnixSocketLogDataResource(annotationData, receivedFd)
+        resource = UnixSocketLogDataResource(annotation_data, received_fd)
       else:
         raise Exception('Filedescriptor of unknown type received')
 # Make fd nonblocking.
-      fdFlags = fcntl.fcntl(resource.getFileDescriptor(), fcntl.F_GETFL)
-      fcntl.fcntl(resource.getFileDescriptor(), fcntl.F_SETFL, fdFlags|os.O_NONBLOCK)
-      logStream = self.logStreamsByName.get(resource.getResourceName())
-      if logStream is None:
-        streamAtomizer = self.analysisContext.atomizerFactory.getAtomizerForResource(
-            resource.getResourceName())
-        logStream = LogStream(resource, streamAtomizer)
-        self.trackedFdsDict[resource.getFileDescriptor()] = logStream
-        self.logStreamsByName[resource.getResourceName()] = logStream
+      fd_flags = fcntl.fcntl(resource.get_file_descriptor(), fcntl.F_GETFL)
+      fcntl.fcntl(resource.get_file_descriptor(), fcntl.F_SETFL, fd_flags | os.O_NONBLOCK)
+      log_stream = self.log_streams_by_name.get(resource.get_resource_name())
+      if log_stream is None:
+        stream_atomizer = self.analysis_context.atomizer_factory.get_atomizer_for_resource(
+            resource.get_resource_name())
+        log_stream = LogStream(resource, stream_atomizer)
+        self.tracked_fds_dict[resource.get_file_descriptor()] = log_stream
+        self.log_streams_by_name[resource.get_resource_name()] = log_stream
       else:
-        logStream.addNextResource(resource)
-    elif receivedTypeInfo == b'remotecontrol':
-      if self.remoteControlSocket != None:
+        log_stream.addNextResource(resource)
+    elif received_type_info == b'remotecontrol':
+      if self.remote_control_socket != None:
         raise Exception('Received another remote control ' \
             'socket: multiple remote control not (yet?) supported.')
-      self.remoteControlSocket = socket.fromfd(
-          receivedFd, socket.AF_UNIX, socket.SOCK_STREAM, 0)
-      os.close(receivedFd)
-      self.trackedFdsDict[self.remoteControlSocket.fileno()] = \
-          self.remoteControlSocket
+      self.remote_control_socket = socket.fromfd(
+          received_fd, socket.AF_UNIX, socket.SOCK_STREAM, 0)
+      os.close(received_fd)
+      self.tracked_fds_dict[self.remote_control_socket.fileno()] = \
+          self.remote_control_socket
     else:
       raise Exception('Unhandled type info on received fd: %s' % (
-          repr(receivedTypeInfo)))
+          repr(received_type_info)))
 
 
-  def getTimeTriggerClass(self):
+  def get_time_trigger_class(self):
     """Get the trigger class this component can be registered
     for. See AnalysisContext class for different trigger classes
     available."""
     return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-  def doTimer(self, triggerTime):
+  def do_timer(self, trigger_time):
     """This method is called to perform trigger actions and to
     determine the time for next invocation. The caller may decide
     to invoke this method earlier than requested during the previous
@@ -429,22 +476,22 @@ class AnalysisChild(TimeTriggeredComponentInterface):
     method as it might delay trigger signals to other components.
     For extensive compuational work or IO, a separate thread should
     be used.
-    @param triggerTime the time this trigger is invoked. This
+    @param trigger_time the time this trigger is invoked. This
     might be the current real time when invoked from real time
     timers or the forensic log timescale time value.
     @return the number of seconds when next invocation of this
     trigger is required."""
-    delta = self.nextPersistTime-triggerTime
+    delta = self.next_persist_time - trigger_time
     if delta <= 0:
-      self.repositioningDataDict = {}
-      for logStreamName, logStream in self.logStreamsByName.items():
-        repositioningData = logStream.getRepositioningData()
-        if repositioningData != None:
-          self.repositioningDataDict[logStreamName] = repositioningData
-      PersistencyUtil.storeJson(
-          self.persistenceFileName, self.repositioningDataDict)
+      self.repositioning_data_dict = {}
+      for log_stream_name, log_stream in self.log_streams_by_name.items():
+        repositioning_data = log_stream.get_repositioning_data()
+        if repositioning_data != None:
+          self.repositioning_data_dict[log_stream_name] = repositioning_data
+      PersistencyUtil.store_json(
+          self.persistence_file_name, self.repositioning_data_dict)
       delta = 600
-      self.nextPersistTime = triggerTime+delta
+      self.next_persist_time = trigger_time + delta
     return delta
 
 
@@ -485,98 +532,136 @@ class AnalysisChildRemoteControlHandler(object):
     to call a do...() method with the same name.
   * put...(): Those methods put a request on the buffers."""
 
-  maxControlPacketSize = 1 << 16
+  max_control_packet_size = 1 << 32
 
-  def __init__(self, controlClientSocket):
-    self.controlClientSocket = controlClientSocket
-    self.remoteControlFd = controlClientSocket.fileno()
-    self.inputBuffer = b''
-    self.outputBuffer = b''
+  def __init__(self, control_client_socket):
+    self.control_client_socket = control_client_socket
+    self.remote_control_fd = control_client_socket.fileno()
+    self.input_buffer = b''
+    self.output_buffer = b''
 
-  def mayReceive(self):
+  def may_receive(self):
     """Check if this handler may receive more requests."""
-    return len(self.outputBuffer) == 0
+    return len(self.output_buffer) == 0
 
-  def doProcess(self, analysisContext):
+  def do_process(self, analysis_context):
     """Process the next request, if any."""
-    requestData = self.doGet()
-    if requestData is None:
+    request_data = self.do_get()
+    if request_data is None:
       return
-    requestType = requestData[4:8]
-    if requestType == b'EEEE':
-      execLocals = {'analysisContext': analysisContext}
-      jsonRemoteControlResponse = None
-      exceptionData = None
+    request_type = request_data[4:8]
+    if request_type == b'EEEE':
+      json_remote_control_response = None
+      exception_data = None
       try:
-        jsonRequestData = (json.loads(requestData[8:].decode()))
-        if (jsonRequestData is None) or \
-            (not isinstance(jsonRequestData, list)) or \
-            (len(jsonRequestData) != 2):
+        json_request_data = (json.loads(request_data[8:].decode()))
+        json_request_data = JsonUtil.decode_object(json_request_data)
+        if (json_request_data is None) or \
+            (not isinstance(json_request_data, list)) or \
+            (len(json_request_data) != 2):
           raise Exception('Invalid request data')
-        execLocals['remoteControlData'] = jsonRequestData[1]
-        exec(jsonRequestData[0], {}, execLocals)
-        jsonRemoteControlResponse = json.dumps(
-            execLocals.get('remoteControlResponse', None))
+        methods = AMinerRemoteControlExecutionMethods()
+        import aminer.analysis
+        exec_locals = {'analysisContext':analysis_context, 'remoteControlData':json_request_data[1],
+                      'printCurrentConfig':methods.print_current_config, 'printConfigProperty':methods.print_config_property,
+                      'printAttributeOfRegisteredAnalysisComponent':methods.print_attribute_of_registered_analysis_component, 'changeConfigProperty':methods.change_config_property,
+                      'changeAttributeOfRegisteredAnalysisComponent':methods.change_attribute_of_registered_analysis_component,
+                      'renameRegisteredAnalysisComponent':methods.rename_registered_analysis_component,
+                      'addHandlerToAtomFilterAndRegisterAnalysisComponent':methods.add_handler_to_atom_filter_and_register_analysis_component,
+                      'saveCurrentConfig':methods.save_current_config,
+                      'whitelistEventInComponent':methods.whitelist_event_in_component,
+                      'dumpEventsFromHistory':methods.dump_events_from_history,
+                      'ignoreEventsFromHistory':methods.ignore_events_from_history,
+                      'listEventsFromHistory':methods.list_events_from_history,
+                      'whitelistEventsFromHistory':methods.whitelist_events_from_history,
+                      'HistogramAnalysis':aminer.analysis.HistogramAnalysis,
+                      'MatchValueAverageChangeDetector':aminer.analysis.MatchValueAverageChangeDetector,
+                      'MatchValueStreamWriter':aminer.analysis.MatchValueStreamWriter,
+                      'MissingMatchPathValueDetector':aminer.analysis.MissingMatchPathValueDetector,
+                      'NewMatchPathDetector':aminer.analysis.NewMatchPathDetector,
+                      'NewMatchPathValueComboDetector':aminer.analysis.NewMatchPathValueComboDetector,
+                      'Rules':aminer.analysis.Rules,
+                      'TimeCorrelationDetector':aminer.analysis.TimeCorrelationDetector,
+                      'TimeCorrelationViolationDetector':aminer.analysis.TimeCorrelationViolationDetector,
+                      'TimestampCorrectionFilters':aminer.analysis.TimestampCorrectionFilters,
+                      'TimestampsUnsortedDetector':aminer.analysis.TimestampsUnsortedDetector,
+                      'WhitelistViolationDetector':aminer.analysis.WhitelistViolationDetector
+                      }
+        # write this to the log file!
+        logging.basicConfig(filename=AMinerConfig.LOG_FILE,level=logging.DEBUG, 
+            format='%(asctime)s %(levelname)s %(message)s', datefmt='%d.%m.%Y %H:%M:%S')
+        logging.addLevelName(15, "REMOTECONTROL")
+        logging.log(15, json_request_data[0].decode())
+
+        exec(json_request_data[0], {'__builtins__' : None}, exec_locals)
+        json_remote_control_response = json.dumps(
+            exec_locals.get('remoteControlResponse', None))
+        if (methods.REMOTE_CONTROL_RESPONSE == ''):
+          methods.REMOTE_CONTROL_RESPONSE = None
+        if exec_locals.get('remoteControlResponse', None) is None:
+          json_remote_control_response = json.dumps(methods.REMOTE_CONTROL_RESPONSE)
+        else:
+          json_remote_control_response = json.dumps(exec_locals.get('remoteControlResponse', None) + methods.REMOTE_CONTROL_RESPONSE)
       except:
-        exceptionData = traceback.format_exc()
+        exception_data = traceback.format_exc()
 # This is little dirty but avoids having to pass over remoteControlResponse
 # dumping again.
-      if jsonRemoteControlResponse is None:
-        jsonRemoteControlResponse = 'null'
-      jsonResponse = '[%s, %s]' % (json.dumps(exceptionData), jsonRemoteControlResponse)
-      if len(jsonResponse)+8 > self.maxControlPacketSize:
+      if json_remote_control_response is None:
+        json_remote_control_response = 'null'
+      json_response = '[%s, %s]' % (json.dumps(exception_data), json_remote_control_response)
+      if len(json_response)+8 > self.max_control_packet_size:
 # Damn: the response would be larger than packet size. Fake a
 # secondary exception and return part of the json string included.
 # Binary search of size could be more efficient, knowing the maximal
 # size increase a string could have in json.
-        maxIncludeSize = len(jsonResponse)
-        minIncludeSize = 0
-        minIncludeResponseData = None
+        max_include_size = len(json_response)
+        min_include_size = 0
+        min_include_response_data = None
         while True:
-          testSize = (maxIncludeSize+minIncludeSize) >> 1
-          if testSize == minIncludeSize:
+          test_size = (max_include_size+min_include_size) >> 1
+          if test_size == min_include_size:
             break
-          emergencyResponseData = json.dumps(['Exception: Response ' \
-              'too large\nPartial response data: %s...' % jsonResponse[:testSize], None])
-          if len(emergencyResponseData)+8 > self.maxControlPacketSize:
-            maxIncludeSize = testSize-1
+          emergency_response_data = json.dumps(['Exception: Response ' \
+              'too large\nPartial response data: %s...' % json_response[:test_size], None])
+          if len(emergency_response_data)+8 > self.max_control_packet_size:
+            max_include_size = test_size-1
           else:
-            minIncludeSize = testSize
-            minIncludeResponseData = emergencyResponseData
-        jsonResponse = minIncludeResponseData
+            min_include_size = test_size
+            min_include_response_data = emergency_response_data
+        json_response = min_include_response_data
 # Now size is OK, send the data
-      jsonResponse = jsonResponse.encode()
-      self.outputBuffer += struct.pack("!I", len(jsonResponse)+8)+b'RRRR'+jsonResponse
+      json_response = json_response.encode()
+      self.output_buffer += struct.pack("!I", len(json_response) + 8) + b'RRRR' + json_response
     else:
-      raise Exception('Invalid request type %s' % repr(requestType))
+      raise Exception('Invalid request type %s' % repr(request_type))
 
-  def mayGet(self):
+  def may_get(self):
     """Check if a call to doGet would make sense.
     @return True if the input buffer already contains a complete
     wellformed packet or definitely malformed one."""
-    if len(self.inputBuffer) < 4:
+    if len(self.input_buffer) < 4:
       return False
-    requestLength = struct.unpack("!I", self.inputBuffer[:4])[0]
-    return (requestLength <= len(self.inputBuffer)) or \
-        (requestLength >= self.maxControlPacketSize)
+    request_length = struct.unpack("!I", self.input_buffer[:4])[0]
+    return (request_length <= len(self.input_buffer)) or \
+           (request_length >= self.max_control_packet_size)
 
-  def doGet(self):
+  def do_get(self):
     """Get the next packet from the input buffer and remove it.
     @return the packet data including the length preamble or None
     when request not yet complete."""
-    if len(self.inputBuffer) < 4:
+    if len(self.input_buffer) < 4:
       return None
-    requestLength = struct.unpack("!I", self.inputBuffer[:4])[0]
-    if (requestLength < 0) or (requestLength >= self.maxControlPacketSize):
+    request_length = struct.unpack("!I", self.input_buffer[:4])[0]
+    if (request_length < 0) or (request_length >= self.max_control_packet_size):
       raise Exception('Invalid length value 0x%x in malformed ' \
-          'request starting with b64:%s' % (requestLength, base64.b64encode(self.inputBuffer[:60])))
-    if requestLength > len(self.inputBuffer):
+          'request starting with b64:%s' % (request_length, base64.b64encode(self.input_buffer[:60])))
+    if request_length > len(self.input_buffer):
       return None
-    requestData = self.inputBuffer[:requestLength]
-    self.inputBuffer = self.inputBuffer[requestLength:]
-    return requestData
+    request_data = self.input_buffer[:request_length]
+    self.input_buffer = self.input_buffer[request_length:]
+    return request_data
 
-  def doReceive(self):
+  def do_receive(self):
     """Receive data from the remote side and add it to the input
     buffer. This method call expects to read at least one byte
     of data. A zero byte read indicates EOF and will cause normal
@@ -587,60 +672,60 @@ class AnalysisChildRemoteControlHandler(object):
     without reading any data and all buffers are empty.
     @throws Exception when unexpected errors occured while receiving
     or shuting down the connection."""
-    data = os.read(self.remoteControlFd, 1 << 16)
-    self.inputBuffer += data
+    data = os.read(self.remote_control_fd, 1 << 16)
+    self.input_buffer += data
     if not data:
       self.terminate()
 
-  def doSend(self):
+  def do_send(self):
     """Send data from the output buffer to the remote side.
     @return True if output buffer was emptied."""
-    sendLength = os.write(self.remoteControlFd, self.outputBuffer)
-    if sendLength == len(self.outputBuffer):
-      self.outputBuffer = b''
+    send_length = os.write(self.remote_control_fd, self.output_buffer)
+    if send_length == len(self.output_buffer):
+      self.output_buffer = b''
       return True
-    self.outputBuffer = self.outputBuffer[sendLength:]
+    self.output_buffer = self.output_buffer[send_length:]
     return False
 
-  def putRequest(self, requestType, requestData):
+  def put_request(self, request_type, request_data):
     """Add a request of given type to the send queue.
-    @param requestType is a byte string denoting the type of the
+    @param request_type is a byte string denoting the type of the
     request. Currently only 'EEEE' is supported.
-    @param requestData is a byte string denoting the content of
+    @param request_data is a byte string denoting the content of
     the request."""
-    if not isinstance(requestType, bytes):
+    if not isinstance(request_type, bytes):
       raise Exception('Request type is not a byte string')
-    if len(requestType) != 4:
+    if len(request_type) != 4:
       raise Exception('Request type has to be 4 bytes long')
-    if not isinstance(requestData, bytes):
+    if not isinstance(request_data, bytes):
       raise Exception('Request data is not a byte string')
-    if len(requestData)+8 > self.maxControlPacketSize:
+    if len(request_data)+8 > self.max_control_packet_size:
       raise Exception('Data too large to fit into single packet')
-    self.outputBuffer += struct.pack("!I", len(requestData)+8)+requestType+requestData
+    self.output_buffer += struct.pack("!I", len(request_data) + 8) + request_type + request_data
 
-  def putExecuteRequest(self, remoteControlCode, remoteControlData):
+  def put_execute_request(self, remote_control_code, remote_control_data):
     """Add a request to send exception data to the send queue."""
-    remoteControlData = json.dumps([JsonUtil.encodeObject(remoteControlCode), \
-            JsonUtil.encodeObject(remoteControlData)])
-    self.putRequest(b'EEEE', remoteControlData.encode())
+    remote_control_data = json.dumps([JsonUtil.encode_object(remote_control_code), \
+                                      JsonUtil.encode_object(remote_control_data)])
+    self.put_request(b'EEEE', remote_control_data.encode())
 
-  def addSelectFds(self, inputSelectFdList, outputSelectFdList):
+  def add_select_fds(self, input_select_fd_list, output_select_fd_list):
     """Update the file descriptor lists for selecting on read
     and write file descriptors."""
-    if self.outputBuffer:
-      outputSelectFdList.append(self.remoteControlFd)
+    if self.output_buffer:
+      output_select_fd_list.append(self.remote_control_fd)
     else:
-      inputSelectFdList.append(self.remoteControlFd)
+      input_select_fd_list.append(self.remote_control_fd)
 
   def terminate(self):
     """End this remote control session."""
-    self.controlClientSocket.close()
+    self.control_client_socket.close()
 # Avoid accidential reuse.
-    self.controlClientSocket = None
-    self.remoteControlFd = -1
-    if self.inputBuffer or self.outputBuffer:
+    self.control_client_socket = None
+    self.remote_control_fd = -1
+    if self.input_buffer or self.output_buffer:
       raise Exception('Unhandled input data')
 
-  def isDead(self):
+  def is_dead(self):
     """Check if this remote control connection is already dead."""
-    return self.remoteControlFd == -1
+    return self.remote_control_fd == -1
