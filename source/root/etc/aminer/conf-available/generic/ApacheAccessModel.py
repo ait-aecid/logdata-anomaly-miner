@@ -10,7 +10,7 @@ from aminer.parsing import FixedWordlistDataModelElement
 
 def get_model(time_model=None):
 
-  new_time_model = Datetime_modelElement('time', b'[%d/%b/%Y:%H:%M:%S +0000]')
+  new_time_model = DatetimeModelElement('time', b'[%d/%b/%Y:%H:%M:%S +0000]')
   host_name_model = VariableByteDataModelElement('host', b'-.01234567890abcdefghijklmnopqrstuvwxyz:')
   identity_model = VariableByteDataModelElement('ident', b'-.01234567890abcdefghijklmnopqrstuvwxyz:')
   user_name_model = VariableByteDataModelElement('user', b'0123456789abcdefghijklmnopqrstuvwxyz.-')
