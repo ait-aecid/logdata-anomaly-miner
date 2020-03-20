@@ -12,6 +12,8 @@ class DelimitedDataModelElement(ModelElementInterface):
   def __init__(self, element_id, delimiter, escape=None):
     self.element_id = element_id
     self.delimiter = delimiter
+    if isinstance(escape, bytes):
+      escape = escape.decode()
     self.escape = escape
 
   def get_child_elements(self):
@@ -31,7 +33,7 @@ class DelimitedDataModelElement(ModelElementInterface):
       if search is not None:
         match_len = search.start()
     else:
-      search = re.search(rb'(?<!' + re.escape(self.escape) + rb')' + re.escape(self.delimiter), data)
+      search = re.search(rb'(?<!' + re.escape(self.escape).encode() + rb')' + re.escape(self.delimiter), data)
       if search is not None:
         match_len = search.start()
     if match_len < 1:
