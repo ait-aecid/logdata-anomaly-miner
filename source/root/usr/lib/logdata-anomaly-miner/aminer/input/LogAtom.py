@@ -2,31 +2,31 @@
 
 class LogAtom:
   """This class defines a log atom used for parsing."""
-  def __init__(self, rawData, parserMatch, atomTime, source):
+  def __init__(self, raw_data, parser_match, atom_time, source):
     """Create a log atom from scratch."""
-    self.rawData = rawData
-    self.parserMatch = parserMatch
-    self.atomTime = atomTime
+    self.raw_data = raw_data
+    self.parser_match = parser_match
+    self.atom_time = atom_time
     self.source = source
 
-  def getParserMatch(self):
+  def get_parser_match(self):
     """Get the parser match associated with this LogAtom.
     @return the match or None for (yet) unparsed LogAtoms."""
-    return self.parserMatch
+    return self.parser_match
 
-  def setTimestamp(self, timestamp):
+  def set_timestamp(self, timestamp):
     """Update the default timestamp value associated with this
     LogAtom. The method can be called more than once to allow
     correction of fine-adjusting of timestamps by analysis filters
     after initial parsing procedure."""
-    self.atomTime = timestamp
+    self.atom_time = timestamp
 
-  def getTimestamp(self):
+  def get_timestamp(self):
     """Get the default timestamp value for this LogAtom.
     @return the timestamp as number of seconds since 1970."""
-    return self.atomTime
+    return self.atom_time
 
-  def isParsed(self):
+  def is_parsed(self):
     """Check if this atom is parsed by checking if parserMatch
     object is attached."""
-    return self.parserMatch is not None
+    return self.parser_match is not None

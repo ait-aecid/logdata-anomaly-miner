@@ -6,35 +6,35 @@ from aminer.parsing import ModelElementInterface
 
 class RepeatedElementDataModelElement(ModelElementInterface):
   """Objects of this class match on repeats of a given element."""
-  def __init__(self, elementId, repeatedElement, minRepeat=0, maxRepeat=0x100000, repeatRef=None):
-    self.elementId = elementId
-    self.repeatedElement = repeatedElement
-    self.minRepeat = minRepeat
-    self.maxRepeat = maxRepeat
+  def __init__(self, element_id, repeated_element, min_repeat=0, max_repeat=0x100000, repeat_ref=None):
+    self.element_id = element_id
+    self.repeated_element = repeated_element
+    self.min_repeat = min_repeat
+    self.max_repeat = max_repeat
 
-  def getChildElements(self):
+  def get_child_elements(self):
     """Return a list of all children model elements."""
-    return [self.repeatedElement]
+    return [self.repeated_element]
 
-  def getMatchElement(self, path, matchContext):
+  def get_match_element(self, path, match_context):
     """Find a suitable number of repeats."""
-    currentPath = "%s/%s" % (path, self.elementId)
+    current_path = "%s/%s" % (path, self.element_id)
 
-    startData = matchContext.matchData
+    start_data = match_context.match_data
     matches = []
-    matchCount = 0
-    while matchCount != self.maxRepeat+1:
-      childMatch = self.repeatedElement.getMatchElement(
-          '%s/%s' % (currentPath, matchCount),
-          matchContext)
-      if childMatch is None:
+    match_count = 0
+    while match_count != self.max_repeat+1:
+      child_match = self.repeated_element.get_match_element(
+          '%s/%s' % (current_path, match_count),
+          match_context)
+      if child_match is None:
         break
-      matches += [childMatch]
-      matchCount += 1
-    if matchCount < self.minRepeat or matchCount > self.maxRepeat:
-      matchContext.matchData = startData
+      matches += [child_match]
+      match_count += 1
+    if match_count < self.min_repeat or match_count > self.max_repeat:
+      match_context.match_data = start_data
       return None
 
-    return MatchElement(currentPath, \
-        startData[:len(startData)-len(matchContext.matchData)], 
-        startData[:len(startData)-len(matchContext.matchData)], matches)
+    return MatchElement(current_path, \
+                        start_data[:len(start_data)-len(match_context.match_data)],
+                        start_data[:len(start_data)-len(match_context.match_data)], matches)
