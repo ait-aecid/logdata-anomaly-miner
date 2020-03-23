@@ -53,7 +53,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
     while True:
       if self.last_unconsumed_log_atom != None:
 # Keep length before dispatching: dispatch will reset the field.
-        data_length = len(self.last_unconsumed_log_atom.rawData)
+        data_length = len(self.last_unconsumed_log_atom.raw_data)
         if self.dispatch_atom(self.last_unconsumed_log_atom):
           consumed_length += data_length+1
           continue
@@ -107,7 +107,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
           if self.default_timestamp_path != None:
             ts_match = log_atom.parser_match.get_match_dictionary().get(self.default_timestamp_path, None)
             if ts_match != None:
-              log_atom.set_timestamp(ts_match.matchObject[1])
+              log_atom.set_timestamp(ts_match.match_object[1])
       if self.dispatch_atom(log_atom):
         consumed_length = line_end+1
         continue
