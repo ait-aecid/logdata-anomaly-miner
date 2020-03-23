@@ -8,90 +8,90 @@ class ElementValueBranchModelElement(ModelElementInterface):
   """This class defines an element that selects a branch path
   based on a previous model value."""
 
-  def __init__(self, elementId, valueModel, valuePath, branchModelDict,
-               defaultBranch=None):
+  def __init__(self, element_id, value_model, value_path, branch_model_dict,
+               default_branch=None):
     """Create the branch model element.
-    @param valuePath the relative path to the target value from
+    @param value_path the relative path to the target value from
     the valueModel element on. When the path does not resolve
     to a value, this model element will not match. A path value
     of None indicates, that the match element of the valueModel
     should be used directly.
-    @param branchModelDict a dictionary to select a branch for
+    @param branch_model_dict a dictionary to select a branch for
     the value identified by valuePath.
-    @param defaultBranch when lookup in branchModelDict fails,
+    @param default_branch when lookup in branchModelDict fails,
     use this as default branch or fail when None."""
-    self.elementId = elementId
-    self.valueModel = valueModel
-    self.valuePath = valuePath
-    self.branchModelDict = branchModelDict
-    self.defaultBranch = defaultBranch
+    self.element_id = element_id
+    self.value_model = value_model
+    self.value_path = value_path
+    self.branch_model_dict = branch_model_dict
+    self.default_branch = default_branch
 
-  def getId(self):
+  def get_id(self):
     """Get the element ID."""
-    return self.elementId
+    return self.element_id
 
-  def getChildElements(self):
+  def get_child_elements(self):
     """Get all possible child model elements of this element.
     If this element implements a branching model element, then
     not all child element IDs will be found in matches produced
     by getMatchElement.
     @return a list with all children"""
-    allChildren = [self.valueModel]+list(self.branchModelDict.values())
-    if self.defaultBranch is not None:
-      allChildren.append(self.defaultBranch)
-    return allChildren
+    all_children = [self.value_model] + list(self.branch_model_dict.values())
+    if self.default_branch is not None:
+      all_children.append(self.default_branch)
+    return all_children
 
-  def getMatchElement(self, path, matchContext):
+  def get_match_element(self, path, match_context):
     """Try to find a match on given data for the test model and
     the selected branch.
     @param path the model path to the parent model element invoking
     this method.
-    @param matchContext an instance of MatchContext class holding
+    @param match_context an instance of MatchContext class holding
     the data context to match against.
     @return the matchElement or None if the test model did not
     match, no branch was selected or the branch did not match."""
-    currentPath = "%s/%s" % (path, self.elementId)
-    startData = matchContext.matchData
-    modelMatch = self.valueModel.getMatchElement(currentPath, matchContext)
-    if modelMatch is None:
+    current_path = "%s/%s" % (path, self.element_id)
+    start_data = match_context.match_data
+    model_match = self.value_model.get_match_element(current_path, match_context)
+    if model_match is None:
       return None
 
-# Now extract the test path value from the modelMatch. From here
+# Now extract the test path value from the model_match. From here
 # on, the matchContext is already modified so we must NEVER just
 # return but revert the changes in the context first.
-    remainingValuePath = self.valuePath
-    testMatch = modelMatch
-    currentTestPath = testMatch.getPath()
-    while remainingValuePath is not None:
-      nextPartPos = remainingValuePath.find('/')
-      if nextPartPos <= 0:
-        currentTestPath += '/'+remainingValuePath
-        remainingValuePath = None
+    remaining_value_path = self.value_path
+    test_match = model_match
+    current_test_path = test_match.get_path()
+    while remaining_value_path is not None:
+      next_part_pos = remaining_value_path.find('/')
+      if next_part_pos <= 0:
+        current_test_path += '/'+remaining_value_path
+        remaining_value_path = None
       else:
-        currentTestPath += '/'+remainingValuePath[:nextPartPos]
-        remainingValuePath = remainingValuePath[nextPartPos+1:]
-      matchChildren = testMatch.getChildren()
-      testMatch = None
-      if matchChildren is None:
+        current_test_path += '/'+remaining_value_path[:next_part_pos]
+        remaining_value_path = remaining_value_path[next_part_pos+1:]
+      match_children = test_match.get_children()
+      test_match = None
+      if match_children is None:
         break
-      for child in matchChildren:
-        if child.getPath() == currentTestPath:
-          testMatch = child
+      for child in match_children:
+        if child.get_path() == current_test_path:
+          test_match = child
           break
 
-    branchMatch = None
-    if testMatch is not None:
-      if isinstance(testMatch.getMatchObject(), bytes):
-        branchModel = self.branchModelDict.get(testMatch.getMatchObject().decode(), \
-          self.defaultBranch)
+    branch_match = None
+    if test_match is not None:
+      if isinstance(test_match.get_match_object(), bytes):
+        branch_model = self.branch_model_dict.get(test_match.get_match_object().decode(), \
+                                                 self.default_branch)
       else:
-        branchModel = self.branchModelDict.get(testMatch.getMatchObject(), \
-          self.defaultBranch)
-      if branchModel is not None:
-        branchMatch = branchModel.getMatchElement(currentPath, matchContext)
-    if branchMatch is None:
-      matchContext.matchData = startData
+        branch_model = self.branch_model_dict.get(test_match.get_match_object(), \
+                                                 self.default_branch)
+      if branch_model is not None:
+        branch_match = branch_model.get_match_element(current_path, match_context)
+    if branch_match is None:
+      match_context.match_data = start_data
       return None
-    return MatchElement(currentPath, \
-        startData[:len(startData)-len(matchContext.matchData)], \
-        startData[:len(startData)-len(matchContext.matchData)], [modelMatch, branchMatch])
+    return MatchElement(current_path, \
+                        start_data[:len(start_data)-len(match_context.match_data)], \
+                        start_data[:len(start_data)-len(match_context.match_data)], [model_match, branch_match])

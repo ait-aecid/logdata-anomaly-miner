@@ -9,32 +9,32 @@ class SubhandlerFilter(AtomHandlerInterface):
   more subhandlers. Depending on configuration, the atom is passed
   to all subhandlers or only up to the first suitable to handle
   the atom."""
-  def __init__(self, subhandlerList, stopWhenHandledFlag=False):
-    """@param subhandlerList when not None, initialize this filter
+  def __init__(self, subhandler_list, stop_when_handled_flag=False):
+    """@param subhandler_list when not None, initialize this filter
     with the given list of handlers."""
-    if subhandlerList is None:
-      self.subhandlerList = []
+    if subhandler_list is None:
+      self.subhandler_list = []
     else:
-      if (not isinstance(subhandlerList, list)) or \
-         (not all(isinstance(handler, AtomHandlerInterface) for handler in subhandlerList)):
+      if (not isinstance(subhandler_list, list)) or \
+         (not all(isinstance(handler, AtomHandlerInterface) for handler in subhandler_list)):
         raise Exception('Only subclasses of AtomHandlerInterface allowed in subhandlerList')
-      self.subhandlerList = [None]*len(subhandlerList)
-      for handlerPos, handlerElement in enumerate(subhandlerList):
-        self.subhandlerList[handlerPos] = (handlerElement, stopWhenHandledFlag)
+      self.subhandler_list = [None] * len(subhandler_list)
+      for handler_pos, handler_element in enumerate(subhandler_list):
+        self.subhandler_list[handler_pos] = (handler_element, stop_when_handled_flag)
 
-  def addHandler(self, atomHandler, stopWhenHandledFlag=False):
+  def add_handler(self, atom_handler, stop_when_handled_flag=False):
     """Add a handler to the list of handlers."""
-    self.subhandlerList.append((atomHandler, stopWhenHandledFlag))
+    self.subhandler_list.append((atom_handler, stop_when_handled_flag))
 
-  def receiveAtom(self, logAtom):
+  def receive_atom(self, log_atom):
     """Pass the atom to the subhandlers.
     @return false when no subhandler was able to handle the atom."""
     result = False
-    for handler, stopWhenHandledFlag in self.subhandlerList:
-      handlerResult = handler.receiveAtom(logAtom)
-      if handlerResult is True:
+    for handler, stop_when_handled_flag in self.subhandler_list:
+      handler_result = handler.receive_atom(log_atom)
+      if handler_result is True:
         result = True
-        if stopWhenHandledFlag:
+        if stop_when_handled_flag:
           break
     return result
 
@@ -43,33 +43,33 @@ class MatchPathFilter(AtomHandlerInterface):
   """This class just splits incoming matches according to existance
   of pathes in the match."""
 
-  def __init__(self, parsedAtomHandlerLookupList, defaultParsedAtomHandler=None):
+  def __init__(self, parsed_atom_handler_lookup_list, default_parsed_atom_handler=None):
     """Initialize the filter.
-    @param parsedAtomHandlerLookupList has to contain tuples with
+    @param parsed_atom_handler_lookup_list has to contain tuples with
     search path string and handler. When the handler is None,
     the filter will just drop a received atom without forwarding.
-    @param defaultParsedAtomHandler invoke this handler when no
+    @param default_parsed_atom_handler invoke this handler when no
     handler was found for given match path or do not invoke any
     handler when None."""
-    self.parsedAtomHandlerLookupList = parsedAtomHandlerLookupList
-    self.defaultParsedAtomHandler = defaultParsedAtomHandler
+    self.parsed_atom_handler_lookup_list = parsed_atom_handler_lookup_list
+    self.default_parsed_atom_handler = default_parsed_atom_handler
 
 
-  def receiveAtom(self, logAtom):
+  def receive_atom(self, log_atom):
     """Receive an atom and pass it to the subhandlers.
     @return False when logAtom did not contain match data or was
     not forwarded to any handler, True otherwise."""
-    if logAtom.parserMatch is None:
+    if log_atom.parser_match is None:
       return False
-    matchDict = logAtom.parserMatch.getMatchDictionary()
-    for pathName, targetHandler in self.parsedAtomHandlerLookupList:
-      if pathName in matchDict:
-        if targetHandler is not None:
-          targetHandler.receiveAtom(logAtom)
+    match_dict = log_atom.parser_match.get_match_dictionary()
+    for path_name, target_handler in self.parsed_atom_handler_lookup_list:
+      if path_name in match_dict:
+        if target_handler is not None:
+          target_handler.receive_atom(log_atom)
         return True
-    if self.defaultParsedAtomHandler is None:
+    if self.default_parsed_atom_handler is None:
       return False
-    self.defaultParsedAtomHandler.receiveAtom(logAtom)
+    self.default_parsed_atom_handler.receive_atom(log_atom)
     return True
 
 
@@ -77,25 +77,25 @@ class MatchValueFilter(AtomHandlerInterface):
   """This class just splits incoming matches using a given match
   value and forward them to different handlers."""
 
-  def __init__(self, targetPath, parsedAtomHandlerDict, defaultParsedAtomHandler=None):
+  def __init__(self, target_path, parsed_atom_handler_dict, default_parsed_atom_handler=None):
     """Initialize the splitter.
-    @param defaultParsedAtomHandler invoke this default handler
+    @param default_parsed_atom_handler invoke this default handler
     when no value handler was found or do not invoke any handler
     when None."""
-    self.targetPath = targetPath
-    self.parsedAtomHandlerDict = parsedAtomHandlerDict
-    self.defaultParsedAtomHandler = defaultParsedAtomHandler
+    self.target_path = target_path
+    self.parsed_atom_handler_dict = parsed_atom_handler_dict
+    self.default_parsed_atom_handler = default_parsed_atom_handler
 
 
-  def receiveAtom(self, logAtom):
-    if logAtom.parserMatch is None:
+  def receive_atom(self, log_atom):
+    if log_atom.parser_match is None:
       return False
-    targetValue = logAtom.parserMatch.getMatchDictionary().get(self.targetPath, None)
-    if targetValue is not None:
-      targetValue = targetValue.matchObject
-    targetHandler = self.parsedAtomHandlerDict.get(targetValue, \
-        self.defaultParsedAtomHandler)
-    if targetHandler is None:
+    target_value = log_atom.parser_match.get_match_dictionary().get(self.target_path, None)
+    if target_value is not None:
+      target_value = target_value.match_object
+    target_handler = self.parsed_atom_handler_dict.get(target_value, \
+                                                      self.default_parsed_atom_handler)
+    if target_handler is None:
       return False
-    targetHandler.receiveAtom(logAtom)
+    target_handler.receive_atom(log_atom)
     return True

@@ -1,6 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
-"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
+<!-- This document was created with Syntext Serna Free. --><!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
 
 <!--
 
@@ -60,14 +59,13 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
   <!ENTITY dhucpackage "LOGDATA-ANOMALY-MINER">
   <!ENTITY dhpackage   "logdata-anomaly-miner">
 ]>
-
 <refentry>
   <refentryinfo>
     <title>&dhtitle;</title>
     <productname>&dhpackage;</productname>
     <authorgroup>
       <author>
-       <firstname>&dhfirstname;</firstname>
+        <firstname>&dhfirstname;</firstname>
         <surname>&dhsurname;</surname>
         <contrib>Wrote this manpage for the Debian system.</contrib>
         <address>
@@ -101,12 +99,21 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>AMinerRemoteControl</command>
-      <!-- These are several examples, how syntaxes could look -->
-      <arg choice="plain"><option>--ControlSocket <replaceable>socket</replaceable></option></arg>
-      <arg choice="opt"><option>--Exec <replaceable>code</replaceable></option></arg>
-      <arg choice="opt"><option>--ExecFile <replaceable>file</replaceable></option></arg>
-      <arg choice="opt"><option>--Data <replaceable>data</replaceable></option></arg>
-      <arg choice="opt"><option>--StringResponse</option></arg>
+<!-- These are several examples, how syntaxes could look -->      <arg choice="plain">
+        <option>--ControlSocket <replaceable>socket</replaceable></option>
+      </arg>
+      <arg choice="opt">
+        <option>--Exec <replaceable>command</replaceable></option>
+      </arg>
+      <arg choice="opt">
+        <option>--ExecFile <replaceable>file</replaceable></option>
+      </arg>
+      <arg choice="opt">
+        <option>--Data <replaceable>data</replaceable></option>
+      </arg>
+      <arg choice="opt">
+        <option>--StringResponse</option>
+      </arg>
     </cmdsynopsis>
   </refsynopsisdiv>
   <refsect1 id="description">
@@ -120,29 +127,59 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
       outside the child process, e.g. files. For more details
       see also packaged documentation at
       /usr/share/doc/logdata-anomaly-miner.</para>
-    <para>Example usecases:</para>
-    <para>Just a test: /usr/bin/AMinerRemoteControl --Data '["Some text", 123]' --Exec 'remoteControlResponse="It works! Data %s" % repr(remoteControlData)'</para>
-    <para>Query remote module configuration: /usr/bin/AMinerRemoteControl --Exec 'remoteControlResponse=analysisContext.getRegisteredComponentIds()'</para>
+    <refsect2 id="example_usecases">
+      <title>Example usecases:</title>
+      <variablelist>
+        <varlistentry>
+          <term>
+            <option>Print a property of the running AMinerConfig:</option>
+          </term>
+          <listitem>
+            <para>/usr/bin/AMinerRemoteControl --Data &apos;[&quot;LogResourceList&quot;]&apos; --Exec &apos;
+            printConfigProperty(analysisContext,  &quot;%s&quot; % remoteControlData[0])&apos;</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <option>Print the complete AMinerConfig:</option>
+          </term>
+          <listitem>
+            <para>/usr/bin/AMinerRemoteControl --Exec &apos;printCurrentConfig(analysisContext)&apos;</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <option>Print a property of the running AMinerConfig, change it and confirm the changed value by printing it again:</option>
+          </term>
+          <listitem>
+            <para>/usr/bin/AMinerRemoteControl --Data &apos;[&quot;Resources.MaxMemoryUsage&quot;, -1]&apos; --Exec &apos;
+            printConfigProperty(analysisContext,  &quot;%s&quot; % remoteControlData[0])&apos; --Exec &apos;changeConfigProperty(analysisContext, &quot;%s&quot; % remoteControlData[0], remoteControlData[1])&apos; --Exec &apos;
+            printConfigProperty(analysisContext,  &quot;%s&quot; % remoteControlData[0])&apos;</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </refsect2>
   </refsect1>
   <refsect1 id="options">
     <title>OPTIONS</title>
     <para>
-      with long options starting with two dashes (`-').  A summary of
+      with long options starting with two dashes (&apos;-&apos;).  A summary of
       options is included below.  For a complete description, see the
       <citerefentry>
         <refentrytitle>info</refentrytitle>
         <manvolnum>1</manvolnum>
       </citerefentry> files.</para>
     <variablelist>
-      <!-- Use the variablelist.term.separator and the
+<!-- Use the variablelist.term.separator and the
            variablelist.term.break.after parameters to
-           control the term elements. -->
-      <varlistentry>
-        <term><option>--ControlSocket <replaceable>socket</replaceable></option></term>
+           control the term elements. -->      <varlistentry>
+        <term>
+          <option>--ControlSocket <replaceable>socket</replaceable></option>
+        </term>
         <listitem>
           <para>Specify the Unix domain remote control socket
           path, otherwise /var/run/aminer-remote.socket is used.
-          The socket is opened by AMiner when 'RemoteControlSocket'
+          The socket is opened by AMiner when &apos;RemoteControlSocket&apos;
           feature is enabled in configuration. As the socket is
           of SOCK_STREAM type, it may also be forwarded via any
           other stream forwarders, e.g. socat (see UNIX-CONNECT
@@ -153,21 +190,25 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>--Exec <replaceable>code</replaceable></option></term>
+        <term>
+          <option>--Exec <replaceable>command</replaceable></option>
+        </term>
         <listitem>
           <para>For each --Exec option, the next argument is sent
           in a separate remote execution request using additional
-          execution data (see --Data). The code is executed in
-          a separate separate execution namespace with only some
+          execution data (see --Data). The command is executed in
+          a separate execution namespace with only some
           variables added to the local namespace, e.g. execution
-          data is available as 'remoteControlData'. When setting
-          the local variable 'remoteControlResponse' within the
-          executed code, the object is serialized using json and
+          data is available as &apos;remoteControlData&apos;. When setting
+          the local variable &apos;remoteControlResponse&apos; within the
+          executed command, the object is serialized using json and
           sent back in the response.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>--ExecFile <replaceable>file</replaceable></option></term>
+        <term>
+          <option>--ExecFile <replaceable>file</replaceable></option>
+        </term>
         <listitem>
           <para>For each --ExecFile option, the named file is
           loaded and content submitted in the very same way as
@@ -176,7 +217,9 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>--Data <replaceable>data</replaceable></option></term>
+        <term>
+          <option>--Data <replaceable>data</replaceable></option>
+        </term>
         <listitem>
           <para>This parameter defines a json string defining
           Python objects, that will be sent with all subsequent
@@ -184,11 +227,13 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
           --Data option. Take into account, that there are size
           limits for the request, very large data objects may
           exceed those limits. The execution context will expose
-          the data as variable 'remoteControlData'.</para>
+          the data as variable &apos;remoteControlData&apos;.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>--StringResponse</option></term>
+        <term>
+          <option>--StringResponse</option>
+        </term>
         <listitem>
           <para>When set, AMinerRemoteControl will not pass the
           result to repr. The returned object is just converted
@@ -203,12 +248,360 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         </listitem>
       </varlistentry>
     </variablelist>
+    <refsect2 id="command">
+      <title>Commands</title>
+      <variablelist>
+        <varlistentry>
+          <term>
+            <option>
+              <replaceable>changeConfigProperty(analysisContext,propertyName,value)</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>This method allows you to change properties from the 
+            AMinerConfig at runtime. For every property to be changed 
+            this method must be used. The method prints 
+            &quot;<replaceable>propertyName</replaceable> changed to 
+            <replaceable>value</replaceable> successfully.&quot; if the 
+            changes were successful and an individual message if the changes failed.</para>
+            <para>Read more about which properties can be changed in the <option>Valid Property Names </option>section.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <option>
+              <replaceable>changeAttributeOfRegisteredAnalysisComponent(analysisContext,componentName,attribute,value)</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>This method allows you to change attributes from components of the 
+            AMinerConfig at runtime. For every attribute to be changed this method 
+            must be used. The method prints &quot;<replaceable>componentName.attribute </replaceable> changed to <replaceable>value</replaceable> successfully.
+            &quot; if the changes were successful and an individual message if the changes failed.
+            The type of the new <replaceable>value</replaceable> must be the same like the
+            old value of the <replaceable>componentName.attribute</replaceable></para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;changeAttributeOfRegisteredAnalysisComponent(analysisContext, 
+            &apos;NewMatchPath&apos;, &apos;autoIncludeFlag&apos;, False)&quot;</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <option>
+              <replaceable>renameRegisteredAnalysisComponent(analysisContext,oldComponentName,newComponentName)</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>Renames the component from the <replaceable>oldComponentName</replaceable>
+            to <replaceable>newComponentName</replaceable>. Therefore the component with the
+            <replaceable>oldComponentName</replaceable> is deleted from the registered components
+            and registered with the <replaceable>newComponentName</replaceable>.</para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+           &quot;renameRegisteredAnalysisComponent(analysisContext,&apos;NewMatchPath&apos;,&apos;NewMatchPathDetector&apos;)&quot;</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <option>
+              <replaceable>addHandlerToAtomFilterAndRegisterAnalysisComponent(analysisContext,atomHandler,component,componentName)</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>Adds the <replaceable>component</replaceable> to the <replaceable>atomFilter</replaceable> and registers 
+            it with the <replaceable>componentName</replaceable>.</para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+           &quot;addHandlerToAtomFilterAndRegisterAnalysisComponent(analysisContext, &apos;AtomFilter&apos;,
+           NewMatchPathDetector(analysisContext.aminerConfig, analysisContext.atomizerFactory.atomHandlerList, autoIncludeFlag=True), &apos;NewMatchPathDet&apos;)&quot;</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <option>
+              <replaceable>printConfigProperty(analysisContext,propertyName)</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>Prints the property with the <replaceable>propertyName</replaceable> 
+            from the current AMinerConfig.</para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;printConfigProperty(analysisContext,&apos;NewMatchPath&apos;)&quot;</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <option>
+              <replaceable>printAttributeOfRegisteredAnalysisComponent(analysisContext,componentName, attribute)</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>Prints the <replaceable>attribute</replaceable> of the component 
+            with the <replaceable>componentName</replaceable>.</para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;printAttributeOfRegisteredAnalysisComponent(analysisContext,&apos;NewMatchPath&apos;, &apos;autoIncludeFlag&apos;)&quot;</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <option>
+              <replaceable>printCurrentConfig(analysisContext)</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>Prints the current AMinerConfig. It is strongly recommended to use the 
+            <option>--StringResponse</option> parameter for better readability.</para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;printCurrentConfig(analysisContext)&quot; --StringResponse</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <option>
+              <replaceable>saveCurrentConfig(analysisContext,destinationFile)</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>Saves the current AMinerConfig into <replaceable>destinationFile</replaceable>.
+            <replaceable>destinationFile</replaceable> must have write permissions by the 
+             AMinerRemoteControl process or it returns an <option>PermissionError</option>.</para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;saveCurrentConfig(analysisContext,&apos;/tmp/config.py&apos;)&quot;</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <option>
+              <replaceable>whitelistEventInComponent(analysisContext,componentName,eventData,whitelistingData=None)</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>Whitelists a path from <replaceable>eventData</replaceable> with the
+             whitelistEvent-method from the corresponding class of the component with the
+            <replaceable>componentName</replaceable>. Only the following classes
+             support whitelisting: <replaceable>EnhancedNewMatchPathValueComboDetector </replaceable>, <replaceable>MissingMatchPathValueDetector</replaceable>, 
+             <replaceable>NewMatchPathDetector</replaceable> and 
+             <replaceable>NewMatchPathValueComboDetector</replaceable>.
+             For most of the components no <replaceable>whitelistingData</replaceable> 
+             is needed and the <replaceable>eventData</replaceable> is a path. The 
+            <replaceable>NewMatchPathDetector</replaceable> supports a list of multiple 
+             pathes. The <replaceable>MissingMatchPathValueComboDetector</replaceable> 
+             needs an integer as <replaceable>whitelistingData</replaceable>. A positive value 
+             sets the interval in seconds to the value. -1 sets the interval to the default value of 3600. 
+             A negative value removes the missingMatchPath.
+             Please read the examples of this method to use the correct parameters.</para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;whitelistEventInComponent(analysisContext,&apos;EnhancedNewMatchPathValueComboDetector&apos;,&apos;new/path&apos;)&quot;</para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;whitelistEventInComponent(analysisContext,&apos;MissingMatchPathValueDetector&apos;,&apos;new/path&apos;,-11)&quot;</para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;whitelistEventInComponent(analysisContext,&apos;NewMatchPathDetector&apos;,[&apos;new/path&apos;])&quot;</para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;whitelistEventInComponent(analysisContext,&apos;NewMatchPathValueComboDetector&apos;,&apos;new/path&apos;)&quot;</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <option>
+              <replaceable>dumpEventsFromHistory(analysisContext,historyComponentName,dumpEventId)</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>This method returns the string representation of a history event with the <replaceable>dumpEventId</replaceable>.
+            If no event with the <replaceable>dumpEventId</replaceable> could be found, the message 
+            &quot;FAILURE: the event with <replaceable>dumpEventId</replaceable> could not be found!&quot;
+            is returned. <replaceable>historyComponentName</replaceable> is the registered component of the class
+            <replaceable>VolatileLogarithmicBackoffEventHistory</replaceable>.</para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;dumpEventsFromHistory(analysisContext,&apos;VolatileLogarithmicBackoffEventHistory&apos;,12)&quot;</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <option>
+              <replaceable>ignoreEventsFromHistory(analysisContext,historyComponentName,eventIds)</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>This method deletes the events with the <replaceable>eventIds</replaceable> from the history.
+            <replaceable>historyComponentName</replaceable> is the registered component of the class
+            <replaceable>VolatileLogarithmicBackoffEventHistory</replaceable>. The number of deleted
+            events is returned.</para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;ignoreEventsFromHistory(analysisContext,&apos;VolatileLogarithmicBackoffEventHistory&apos;,[12,13,15])&quot;</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <option>
+              <replaceable>listEventsFromHistory(analysisContext,historyComponentName,maxEventCount=None)</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>This method lists <replaceable>maxEventCount</replaceable> events from the history.
+            <replaceable>historyComponentName</replaceable> is the registered component of the class
+            <replaceable>VolatileLogarithmicBackoffEventHistory</replaceable>. If 
+            <replaceable>maxEventCount</replaceable> is None, all events from the history are returned.</para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;listEventsFromHistory(analysisContext,&apos;VolatileLogarithmicBackoffEventHistory&apos;,600)&quot;</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <option>
+              <replaceable>whitelistEventsFromHistory(analysisContext,historyComponentName,idSpecList,whitelistingData=None)</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>This method whitelists the events with the ids in the<replaceable>idSpecList</replaceable> from the history.
+            <replaceable>historyComponentName</replaceable> is the registered component of the class
+            <replaceable>VolatileLogarithmicBackoffEventHistory</replaceable>. The whitelisting response is returned.</para>
+            <para><replaceable>example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;whitelistEventsFromHistory(analysisContext,&apos;VolatileLogarithmicBackoffEventHistory&apos;,[12,13,15])&quot;</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </refsect2>
+    <refsect2 id="PropertyNames">
+      <title>Valid Property Names</title>
+      <variablelist>
+        <varlistentry>
+          <term>
+            <replaceable>MailAlerting.TargetAddress</replaceable>
+          </term>
+          <listitem>
+            <para><replaceable>Value</replaceable>: &apos;E-Mail Address&apos;</para>
+            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;changeConfigProperty(analysisContext, &apos;MailAlerting.TargetAddress&apos;,
+            &apos;root@localhost&apos;)&quot;</para>
+            <para>Define a target e-mail address to send alerts to. When undefined, no e-mail notification hooks are added.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <replaceable>MailAlerting.FromAddress</replaceable>
+          </term>
+          <listitem>
+            <para><replaceable>Value</replaceable>: &apos;E-Mail Address&apos;</para>
+            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;changeConfigProperty(analysisContext, &apos;MailAlerting.FromAddress&apos;, 
+            &apos;root@localhost&apos;)&quot;</para>
+            <para>Sender address of e-mail alerts. When undefined, &quot;sendmail&quot; 
+            implementation on host will decide, which sender address should be used.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <replaceable>MailAlerting.SubjectPrefix</replaceable>
+          </term>
+          <listitem>
+            <para><replaceable>Value</replaceable>: &apos;String&apos;</para>
+            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;changeConfigProperty(analysisContext, &apos;MailAlerting.SubjectPrefix&apos;, 
+            &apos;AMiner Alerts:&apos;)&quot;</para>
+            <para>Define, which text should be prepended to the standard aminer subject. 
+            Defaults to &quot;AMiner Alerts:&quot;</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <replaceable>MailAlerting.EventCollectTime</replaceable>
+          </term>
+          <listitem>
+            <para><replaceable>Value</replaceable>: Seconds (Integer)</para>
+            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;changeConfigProperty(analysisContext, &apos;MailAlerting.EventCollectTime&apos;, 10)&quot;</para>
+            <para>Define how many seconds to wait after a first event triggered the alerting procedure 
+            before really sending out the e-mail. In that timespan, events are collected and will be sent 
+            all using a single e-mail. Defaults to 10 seconds.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <replaceable>MailAlerting.MinAlertGap</replaceable>
+          </term>
+          <listitem>
+            <para><replaceable>Value</replaceable>: Seconds (Integer)</para>
+            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;changeConfigProperty(analysisContext, &apos;MailAlerting.MinAlertGap&apos;, 600)&quot;</para>
+            <para>Define the minimum time between two alert e-mails in seconds to avoid spamming. 
+             All events during this timespan are collected and sent out with the next report. Defaults to 600 seconds.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <replaceable>MailAlerting.MaxAlertGap</replaceable>
+          </term>
+          <listitem>
+            <para><replaceable>Value</replaceable>: Seconds (Integer)</para>
+            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;changeConfigProperty(analysisContext, &apos;MailAlerting.MaxAlertGap&apos;, 1000)&quot;</para>
+            <para>Define the maximum time between two alert e-mails in seconds. 
+            When undefined this defaults to &quot;MailAlerting.MinAlertGap&quot;. 
+            Otherwise this will activate an exponential backoff to reduce messages 
+            during permanent error states by increasing the alert gap by 50% when more 
+            alert-worthy events were recorded while the previous gap time was not yet elapsed.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <replaceable>MailAlerting.MaxEventsPerMessage</replaceable>
+          </term>
+          <listitem>
+            <para><replaceable>Value</replaceable>: Number of messages (Integer)</para>
+            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;changeConfigProperty(analysisContext, &apos;MailAlerting.MaxEventsPerMessage&apos;, 1000)&quot;</para>
+            <para>Define how many events should be included in one alert mail at most. This defaults to 1000.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <replaceable>LogPrefix</replaceable>
+          </term>
+          <listitem>
+            <para><replaceable>Value</replaceable>: &apos;String&apos;</para>
+            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;changeConfigProperty(analysisContext, &apos;LogPrefix&apos;, &apos;
+            Original log line: &apos;)&quot;</para>
+            <para>Most analysis components implement the outputLogLine-property, which is True by default. 
+             Define a prefix to the original captured log lines. This defaults to &apos;&apos;</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <replaceable>Resources.MaxMemoryUsage</replaceable>
+          </term>
+          <listitem>
+            <para><replaceable>Value</replaceable>: &apos;Allowed RAM usage in Megabytes 
+            (Integer: 32-maxSystemRAM)&apos;</para>
+            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;changeConfigProperty(analysisContext, &apos;Resources.MaxMemoryUsage&apos;, -1)&quot;</para>
+            <para>This property limits the maximal possible RAM in MB which the AMiner process can use. 
+            Be careful at choosing the value, as a shortage of memory causes a MemoryError. This defaults to 
+           -1, which means that there is no limit.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <replaceable>Resources.MaxCpuPercentUsage</replaceable>
+          </term>
+          <listitem>
+            <para><replaceable>Value</replaceable>: Integer: 1-100</para>
+            <para><replaceable>Example</replaceable>: AMinerRemoteControl --Exec 
+            &quot;changeConfigProperty(analysisContext, &apos;Resources.MaxCpuPercentUsage&apos;, 30)</para>
+            <para>By limiting the AMiner process to a fraction of possible CPU usage the system 
+            can not longer be overloaded by it. The percentages can only be full numbers and must 
+            be between 1 and 100.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </refsect2>
   </refsect1>
   <refsect1 id="files">
     <title>FILES</title>
     <variablelist>
       <varlistentry>
-        <term><filename>/var/run/aminer-remote.socket</filename></term>
+        <term>
+          <filename>/var/run/aminer-remote.socket</filename>
+        </term>
         <listitem>
           <para>This is the default remote control socket used
           when not changed using the --ControlSocket option.</para>
@@ -219,15 +612,17 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
   <refsect1 id="bugs">
     <title>BUGS</title>
     <para>
-      Report bugs via your distribution's bug tracking system.
+      Report bugs via your distribution&apos;s bug tracking system.
       For bugs in the the software trunk, report via
       at <ulink url="https://bugs.launchpad.net/logdata-anomaly-miner/+filebug"/>.</para>
   </refsect1>
   <refsect1 id="see_also">
     <title>SEE ALSO</title>
-<!-- In alpabetical order. -->
-    <para>
-      <citerefentry><refentrytitle>AMiner</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+<!-- In alpabetical order. -->    <para>
+      <citerefentry>
+        <refentrytitle>AMiner</refentrytitle>
+        <manvolnum>1</manvolnum>
+      </citerefentry>
     </para>
   </refsect1>
 </refentry>
