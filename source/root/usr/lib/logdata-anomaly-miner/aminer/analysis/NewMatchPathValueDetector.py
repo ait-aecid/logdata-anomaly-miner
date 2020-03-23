@@ -60,8 +60,8 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
           original_log_line_prefix = self.aminer_config.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
           if original_log_line_prefix is None:
             original_log_line_prefix = ''
-          sorted_log_lines = [log_atom.parserMatch.match_element.annotate_match('') + os.linesep +
-                              original_log_line_prefix + repr(log_atom.rawData)]
+          sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep +
+                              original_log_line_prefix + repr(log_atom.raw_data)]
         else:
           sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('')]
         for listener in self.anomaly_event_handlers:
