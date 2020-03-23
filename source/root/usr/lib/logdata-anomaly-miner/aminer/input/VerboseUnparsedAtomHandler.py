@@ -9,18 +9,20 @@ class VerboseUnparsedAtomHandler(AtomHandlerInterface):
   atoms to the registered event handlers applying the
   DebugMatchContext."""
 
-  def __init__(self, eventHandlers, parsingModel):
-    self.eventHandlers = eventHandlers
-    self.parsingModel = parsingModel
+  def __init__(self, event_handlers, parsing_model):
+    self.event_handlers = event_handlers
+    self.parsing_model = parsing_model
+    self.persistence_id = None
 
-  def receiveAtom(self, logAtom):
+  def receive_atom(self, log_atom):
     """Receive an unparsed atom to create events for each."""
-    if logAtom.isParsed():
+    if log_atom.is_parsed():
       return False
-    matchContext = DebugMatchContext(logAtom.rawData)
-    self.parsingModel.getMatchElement('', matchContext)
-    for listener in self.eventHandlers:
-      listener.receiveEvent('Input.VerboseUnparsedAtomHandler', \
-          'Unparsed atom received\n%s\n' % (matchContext.getDebugInfo()), \
-          [logAtom.rawData], logAtom, self)
+    match_context = DebugMatchContext(log_atom.raw_data)
+    self.parsing_model.get_match_element('', match_context)
+    event_data = dict()
+    for listener in self.event_handlers:
+      listener.receive_event('Input.VerboseUnparsedAtomHandler', \
+          'Unparsed atom received\n%s\n' % (match_context.get_debug_info()), \
+          [log_atom.raw_data], event_data, log_atom, self)
     return True
