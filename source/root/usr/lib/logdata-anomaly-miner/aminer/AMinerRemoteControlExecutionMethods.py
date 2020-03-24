@@ -38,11 +38,11 @@ class AMinerRemoteControlExecutionMethods(object):
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: the analysisContext must be of type %s." % AnalysisChild.AnalysisContext.__class__
             return
 
-        if not property_name in analysis_context.aminer_config.configProperties:
+        if not property_name in analysis_context.aminer_config.config_properties:
             self.REMOTE_CONTROL_RESPONSE = "FAILURE: the property '%s' does not exist in the current config!" % property_name
             return
 
-        t = type(analysis_context.aminer_config.configProperties[property_name])
+        t = type(analysis_context.aminer_config.config_properties[property_name])
         if not isinstance(value, t):
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: the value of the property '%s' must be of type %s!" % (
                 property_name, t)
@@ -67,7 +67,7 @@ class AMinerRemoteControlExecutionMethods(object):
             self.REMOTE_CONTROL_RESPONSE += "'%s' changed to '%s' successfully." % (property_name, value)
 
     def change_config_property_mail_alerting(self, analysis_context, property_name, value):
-        analysis_context.aminerConfig.configProperties[property_name] = value
+        analysis_context.aminer_config.config_properties[property_name] = value
         for analysis_component_id in analysis_context.get_registered_component_ids():
             component = analysis_context.get_component_by_id(analysis_component_id)
             if component.__class__.__name__ == "DefaultMailNotificationEventHandler":
@@ -81,7 +81,7 @@ class AMinerRemoteControlExecutionMethods(object):
                 self.REMOTE_CONTROL_RESPONSE += "FAILURE: it is not safe to run the AMiner with less than 32MB RAM."
                 return 1
             resource.setrlimit(resource.RLIMIT_AS, (max_memory_mb * 1024 * 1024, resource.RLIM_INFINITY))
-            analysis_context.aminerConfig.configProperties[AMinerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE] = max_memory_mb
+            analysis_context.aminer_config.config_properties[AMinerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE] = max_memory_mb
             return 0
         except ValueError:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: property 'maxMemoryUsage' must be of type Integer!"
@@ -113,7 +113,7 @@ class AMinerRemoteControlExecutionMethods(object):
             return 1
 
     def change_config_property_log_prefix(self, analysis_context, log_prefix):
-        analysis_context.aminerConfig.configProperties[AMinerConfig.KEY_LOG_PREFIX] = str(log_prefix)
+        analysis_context.aminer_config.config_properties[AMinerConfig.KEY_LOG_PREFIX] = str(log_prefix)
         return 0
 
     def change_attribute_of_registered_analysis_component(self, analysis_context, component_name, attribute, value):
@@ -134,14 +134,14 @@ class AMinerRemoteControlExecutionMethods(object):
             if component is None:
                 self.REMOTE_CONTROL_RESPONSE += "FAILURE: component '%s' does not exist!" % old_component_name
             else:
-                analysis_context.registeredComponentsByName[old_component_name] = None
-                analysis_context.registeredComponentsByName[new_component_name] = component
+                analysis_context.registered_components_by_name[old_component_name] = None
+                analysis_context.registered_components_by_name[new_component_name] = component
                 self.REMOTE_CONTROL_RESPONSE += "Component '%s' renamed to '%s' successfully." % (
                     old_component_name, new_component_name)
 
     def print_config_property(self, analysis_context, property_name):
         self.REMOTE_CONTROL_RESPONSE = property_name + " : " + str(
-            analysis_context.aminerConfig.configProperties[property_name])
+            analysis_context.aminer_config.config_properties[property_name])
 
     def print_attribute_of_registered_analysis_component(self, analysis_context, component_name, attribute):
         if type(component_name) is not str or type(attribute) is not str:
@@ -162,13 +162,13 @@ class AMinerRemoteControlExecutionMethods(object):
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: the component '%s' does not have an attribute named '%s'"%(component_name, attribute)
 
     def print_current_config(self, analysis_context):
-        for config_property in analysis_context.aminerConfig.configProperties:
-            if isinstance(analysis_context.aminerConfig.configProperties[config_property], str):
+        for config_property in analysis_context.aminer_config.config_properties:
+            if isinstance(analysis_context.aminer_config.config_properties[config_property], str):
                 self.REMOTE_CONTROL_RESPONSE += "%s = '%s'\n" % (config_property,
-                                                                 analysis_context.aminerConfig.configProperties[config_property])
+                                                                 analysis_context.aminer_config.config_properties[config_property])
             else:
                 self.REMOTE_CONTROL_RESPONSE += attr_str % (config_property,
-                                                               analysis_context.aminerConfig.configProperties[config_property])
+                                                               analysis_context.aminer_config.config_properties[config_property])
         for component_id in analysis_context.get_registered_component_ids():
             self.REMOTE_CONTROL_RESPONSE += "%s {\n" % analysis_context.get_name_by_component(
                 analysis_context.get_component_by_id(component_id))
@@ -261,9 +261,9 @@ class AMinerRemoteControlExecutionMethods(object):
                 if event_type == 'Analysis.NewMatchPathDetector':
                     result_string += '\n  Logline: %s' % (sorted_log_lines[0],)
                 elif event_type == 'Analysis.NewMatchPathValueComboDetector':
-                    result_string += '\nParser match:\n' + event_data[0].parserMatch.matchElement.annotate_match('  ')
+                    result_string += '\nParser match:\n' + event_data[0].parser_match.matchElement.annotate_match('  ')
                 elif event_type == 'Analysis.WhitelistViolationDetector':
-                    result_string += '\nParser match:\n' + event_data.parserMatch.matchElement.annotate_match('  ')
+                    result_string += '\nParser match:\n' + event_data.parser_match.matchElement.annotate_match('  ')
                 elif event_type == 'ParserModel.UnparsedData':
                     result_string += '\n  Unparsed line: %s' % sorted_log_lines[0]
                     append_log_lines_flag = False

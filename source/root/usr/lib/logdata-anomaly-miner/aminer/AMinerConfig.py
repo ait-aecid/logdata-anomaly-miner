@@ -28,12 +28,12 @@ def load_config(config_file_name):
   global configFN
   configFN = config_file_name
   try:
-    spec = importlib.util.spec_from_file_location('aminerConfig', config_file_name)
+    spec = importlib.util.spec_from_file_location('aminer_config', config_file_name)
     aminer_config = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(aminer_config)
 
   except:
-    print('Failed to load configuration from %s' % config_file_name, file=sys.stderr)
+    print('Failed to load configuraion from %s' % config_file_name, file=sys.stderr)
     exception_info = sys.exc_info()
     raise Exception(exception_info[0], exception_info[1], exception_info[2])
   return aminer_config
@@ -42,7 +42,7 @@ def load_config(config_file_name):
 def build_persistence_file_name(aminer_config, *args):
   """Build the full persistency file name from persistency directory
   configuration and path parts."""
-  persistence_dir_name = aminer_config.configProperties.get(
+  persistence_dir_name = aminer_config.config_properties.get(
       KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR)
   return os.path.join(persistence_dir_name, *args)
 
@@ -55,8 +55,8 @@ def save_config(analysis_context, new_file):
   with open(configFN, "r") as file:
     old = file.read()
   
-  for config_property in analysis_context.aminerConfig.configProperties:
-    find_str = "configProperties['%s'] = "%config_property
+  for config_property in analysis_context.aminer_config.config_properties:
+    find_str = "config_properties['%s'] = "%config_property
     pos = old.find(find_str)
     if pos == -1:
       msg += "WARNING: %s not found in the old config file."%find_str
@@ -67,7 +67,7 @@ def save_config(analysis_context, new_file):
       string = old[pos + len(find_str):]
       old_len = string.find('\n')
       string = string[:old_len]
-      prop = analysis_context.aminerConfig.configProperties[config_property]
+      prop = analysis_context.aminer_config.config_properties[config_property]
       if (string[0] == "'" and string[len(string)-1] == "'") or \
           (string[0] == '"' and string[len(string)-1] == '"'):
         prop = "'" + prop + "'"
