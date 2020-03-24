@@ -33,7 +33,7 @@ def load_config(config_file_name):
     spec.loader.exec_module(aminer_config)
 
   except:
-    print('Failed to load configuraion from %s' % config_file_name, file=sys.stderr)
+    print('Failed to load configuration from %s' % config_file_name, file=sys.stderr)
     exception_info = sys.exc_info()
     raise Exception(exception_info[0], exception_info[1], exception_info[2])
   return aminer_config
