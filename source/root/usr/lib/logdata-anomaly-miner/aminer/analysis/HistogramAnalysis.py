@@ -469,7 +469,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
 # pathes.
         new_histogram = histogram_mapping[1].clone()
         match = match_dict.get(mapped_path, None)
-        match_value = match.matchObject
+        match_value = match.match_object
         histogram_mapping[1].propertyPath = mapped_path
         new_histogram.add_value(match_value)
         new_path_set = histogram_mapping[0] - missing_pathes

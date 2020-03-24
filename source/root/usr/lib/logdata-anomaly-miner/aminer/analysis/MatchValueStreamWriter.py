@@ -40,8 +40,8 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
       add_sep_flag = True
     if contains_data:
       if not isinstance(self.stream, _io.BytesIO):
-        self.stream.buffer.write(result)
-        self.stream.buffer.write(b'\n')
+        self.stream.write(result.decode())
+        self.stream.write('\n')
       else:
         self.stream.write(result)
         self.stream.write(b'\n')

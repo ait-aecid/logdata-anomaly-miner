@@ -117,12 +117,12 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     event_data['AnalysisComponent'] = analysis_component
     if (self.auto_include_flag and self.known_values_dict.get(match_value_tuple, None)[2] is 1) or not self.auto_include_flag:
       for listener in self.anomaly_event_handlers:
-        original_log_line_prefix = self.aminer_config.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
         if original_log_line_prefix is None:
           original_log_line_prefix = ''
         if self.output_log_line:
           sorted_log_lines = [str(self.known_values_dict) + os.linesep +
-                            original_log_line_prefix + repr(log_atom.rawData)]
+                            original_log_line_prefix + repr(log_atom.raw_data)]
         else:
           sorted_log_lines = [str(self.known_values_dict)]
         listener.receive_event(
