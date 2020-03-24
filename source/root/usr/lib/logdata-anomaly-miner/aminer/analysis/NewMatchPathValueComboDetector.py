@@ -93,7 +93,7 @@ class NewMatchPathValueComboDetector(
       analysis_component['AffectedLogAtomValues'] = affected_log_atom_values
       event_data['AnalysisComponent'] = analysis_component
       if self.output_log_line:
-        original_log_line_prefix = self.aminer_config.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
         if original_log_line_prefix is None:
           original_log_line_prefix = ''
         sorted_log_lines = [str(match_value_tuple) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
