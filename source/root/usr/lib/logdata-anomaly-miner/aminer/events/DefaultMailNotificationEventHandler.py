@@ -30,24 +30,24 @@ events and send them via "sendmail" transport."""
   def __init__(self, analysis_context):
     self.analysis_context = analysis_context
     aminer_config = analysis_context.aminer_config
-    self.recipient_address = aminer_config.configProperties.get(
+    self.recipient_address = aminer_config.config_properties.get(
         DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS)
     if self.recipient_address is None:
       raise Exception('Cannot create e-mail notification listener without target address')
 
-    self.sender_address = aminer_config.configProperties.get(
+    self.sender_address = aminer_config.config_properties.get(
         DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_FROM_ADDRESS)
-    self.subject_prefix = aminer_config.configProperties.get(
+    self.subject_prefix = aminer_config.config_properties.get(
         DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_SUBJECT_PREFIX, 'py Alerts:')
-    self.alert_grace_time_end = aminer_config.configProperties.get(
+    self.alert_grace_time_end = aminer_config.config_properties.get(
         DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_ALERT_GRACE_TIME, 0)
-    self.event_collect_time = aminer_config.configProperties.get(
+    self.event_collect_time = aminer_config.config_properties.get(
         DefaultMailNotificationEventHandler.CONFIG_KEY_EVENT_COLLECT_TIME, 10)
-    self.min_alert_gap = aminer_config.configProperties.get(
+    self.min_alert_gap = aminer_config.config_properties.get(
         DefaultMailNotificationEventHandler.CONFIG_KEY_ALERT_MIN_GAP, 600)
-    self.max_alert_gap = aminer_config.configProperties.get(
+    self.max_alert_gap = aminer_config.config_properties.get(
         DefaultMailNotificationEventHandler.CONFIG_KEY_ALERT_MAX_GAP, 600)
-    self.max_events_per_message = aminer_config.configProperties.get(
+    self.max_events_per_message = aminer_config.config_properties.get(
         DefaultMailNotificationEventHandler.CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE, 1000)
     if self.alert_grace_time_end > 0:
       self.alert_grace_time_end += time.time()
