@@ -96,13 +96,13 @@ remoteControlSocket.setblocking(1)
 controlHandler = AnalysisChildRemoteControlHandler(remoteControlSocket)
 
 for remoteControlCode, remoteControlData in commandList:
-  controlHandler.putExecuteRequest(remoteControlCode, remoteControlData)
+  controlHandler.put_execute_request(remoteControlCode, remoteControlData)
 # Send data until we are ready for receiving.
-  while not controlHandler.mayReceive():
-    controlHandler.doSend()
-  while not controlHandler.mayGet():
-    controlHandler.doReceive()
-  requestData = controlHandler.doGet()
+  while not controlHandler.may_receive():
+    controlHandler.do_send()
+  while not controlHandler.may_get():
+    controlHandler.do_receive()
+  requestData = controlHandler.do_get()
   requestType = requestData[4:8]
   if requestType == b'RRRR':
     try:

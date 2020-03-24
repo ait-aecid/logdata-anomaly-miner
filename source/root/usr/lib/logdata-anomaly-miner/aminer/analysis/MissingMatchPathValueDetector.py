@@ -142,7 +142,6 @@ class MissingMatchPathValueDetector(
               self.last_seen_timestamp - value_overdue_time)
             if old > self.next_check_timestamp or self.next_check_timestamp < detector_info[2]:
               continue
-            
         missing_value_list.append([value, value_overdue_time, detector_info[1]])
 # Set the next alerting time.
         detector_info[2] = self.last_seen_timestamp + self.realert_interval
@@ -169,7 +168,7 @@ class MissingMatchPathValueDetector(
         analysis_component['AffectedLogAtomValues'] = affected_log_atom_values
         event_data['AnalysisComponent'] = analysis_component
         if self.output_log_line:
-          original_log_line_prefix = self.aminer_config.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+          original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
           if original_log_line_prefix is None:
             original_log_line_prefix = ''
           message_part.append(original_log_line_prefix + repr(log_atom.raw_data))

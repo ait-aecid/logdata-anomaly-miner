@@ -64,8 +64,8 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
       match_value = value_dict.get(self.timestamp_path)
       if match_value is None:
         return
-      timestamp_value = match_value.matchObject[1]
-      event_data['MatchValue'] = match_value.matchObject[0]
+      timestamp_value = match_value.match_object[1]
+      event_data['MatchValue'] = match_value.match_object[0]
 
     analysis_summary = ''
     if self.sync_bins_flag:

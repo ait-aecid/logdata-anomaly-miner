@@ -215,14 +215,14 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 # Locate the real analysis configuration.
     self.analysis_context.build_analysis_pipeline()
     if self.analysis_context.atomizer_factory is None:
-      print('FATAL: buildAnalysisPipeline() did ' \
-          'not initialize atomizerFactory, terminating', file=sys.stderr)
+      print('FATAL: build_analysis_pipeline() did ' \
+          'not initialize atomizer_factory, terminating', file=sys.stderr)
       return 1
 
     real_time_triggered_components = self.analysis_context.real_time_triggered_components
     analysis_time_triggered_components = self.analysis_context.analysis_time_triggered_components
     
-    max_memory_mb = self.analysis_context.aminer_config.configProperties.get(AMinerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE, None)
+    max_memory_mb = self.analysis_context.aminer_config.config_properties.get(AMinerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE, None)
     if max_memory_mb is not None:
       try:
         max_memory_mb = int(max_memory_mb)
@@ -232,7 +232,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
           % AMinerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE, file=sys.stderr)
         return 1
       
-    max_cpu_percent_usage = self.analysis_context.aminer_config.configProperties.get(AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE)
+    max_cpu_percent_usage = self.analysis_context.aminer_config.config_properties.get(AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE)
     if max_cpu_percent_usage is not None:
       try:
         max_cpu_percent_usage = int(max_cpu_percent_usage)

@@ -62,7 +62,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
       for listener in self.anomaly_event_handlers:
         listener.receive_event('Analysis.%s' % self.__class__.__name__, \
             'Logdata not sorted: last %s, current %s' % (self.last_timestamp, timestamp), \
-                               [log_atom.parserMatch.matchElement.annotate_match('')], event_data, log_atom, self)
+                               [log_atom.parser_match.match_element.annotate_match('')], event_data, log_atom, self)
       return
     self.last_timestamp = timestamp
 
