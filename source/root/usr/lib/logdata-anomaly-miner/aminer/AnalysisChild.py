@@ -446,7 +446,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         self.tracked_fds_dict[resource.get_file_descriptor()] = log_stream
         self.log_streams_by_name[resource.get_resource_name()] = log_stream
       else:
-        log_stream.addNextResource(resource)
+        log_stream.add_next_resource(resource)
     elif received_type_info == b'remotecontrol':
       if self.remote_control_socket != None:
         raise Exception('Received another remote control ' \
