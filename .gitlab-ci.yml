@@ -4,6 +4,14 @@ sonarqube:
         script:
                 - $(find /opt/ -type f -name sonar-scanner) -Dsonar.projectName=Aminer-Dev -Dsonar.host.url=http://10.103.251.153:9000 -Dsonar.projectKey=deff975a5561d285e315daa894ab291c7bd10a19 -Dsonar.gitlab.max_major_issues_gate=0
 
+sonarqube aecid-testsuite:
+        image: git-service.ait.ac.at:8010/ict-caiscluster/logdata-anomaly-miner/aminer-debian
+        
+        script:
+                - git clone https://gitlab+deploy-token-aecidtestsuite:vu18Eo6k7xfA22vPvorx@git-service.ait.ac.at/ict-caiscluster/aecid-testsuite.git
+                - cd aecid-testsuite
+                - $(find /opt/ -type f -name sonar-scanner) -Dsonar.projectKey=aecid-testsuite -Dsonar.sources=. -Dsonar.host.url=http://10.103.251.153:9000 -Dsonar.login=8d5c9b3e6cc7b6b9c731f02fada0c4d5018f7d34
+
 debian:
         image: git-service.ait.ac.at:8010/ict-caiscluster/logdata-anomaly-miner/aminer-debian
 
@@ -13,6 +21,9 @@ debian:
                 - apt install procps -y
                 - pip3 install coverage
                 - apt install cpulimit -y
+                - service dbus start
+                - ln -s /usr/local/lib/python3.7/dist-packages/pytz /usr/lib/python3/dist-packages/pytz
+                - ln -s /usr/local/lib/python3.7/dist-packages/pytz /usr/lib/python3.7/pytz
 
         script:
                 - ansible-playbook /opt/ansible/playbook.yml
@@ -22,13 +33,17 @@ debian:
                 - chown -R aminer:aminer /usr/lib/logdata-anomaly-miner
                 - chown -h aminer:aminer /usr/bin/AMiner
                 - chmod +x /usr/lib/logdata-anomaly-miner/AMiner
-                - python3 -m unittest discover -s unit -p '*Test.py'
+                - python3 -m unittest discover -s unit -p '*Test.py' > /dev/null
                 - rm /var/mail/mail
+                - cp demo/AMiner/demo-config.py /tmp
+                - chown -R aminer:aminer /tmp/lib
+                - chown aminer:aminer /tmp/AMinerRemoteLog.txt
+                - chmod +x demo/AMiner/aminerDemo.sh
+                - runuser -u aminer -- ./demo/AMiner/aminerDemo.sh > /tmp/demo
                 - cd integration
                 - cp config* /tmp
                 - chmod +x aminerIntegrationTest.sh
                 - chmod +x aminerIntegrationTest2.sh
-                - chown aminer:aminer /tmp/AMinerRemoteLog.txt
                 - ./aminerIntegrationTest.sh
                 - ./aminerIntegrationTest2.sh
                 - rm /var/mail/mail
@@ -50,6 +65,10 @@ ubuntu:
                 - service exim4 start
                 - pip3 install coverage
                 - apt install cpulimit -y
+                - apt install systemd -y
+                - service dbus start
+                - ln -s /usr/local/lib/python3.6/dist-packages/pytz /usr/lib/python3/dist-packages/pytz
+                - ln -s /usr/local/lib/python3.6/dist-packages/pytz /usr/lib/python3.6/pytz
         
         script:
                 - ansible-playbook /opt/ansible/playbook.yml
@@ -59,13 +78,16 @@ ubuntu:
                 - chown -R aminer:aminer /usr/lib/logdata-anomaly-miner
                 - chown -h aminer:aminer /usr/bin/AMiner
                 - chmod +x /usr/lib/logdata-anomaly-miner/AMiner
-                - python3 -m unittest discover -s unit -p '*Test.py'
-                - rm /var/mail/mail
+                - python3 -m unittest discover -s unit -p '*Test.py' > /dev/null
+                - cp demo/AMiner/demo-config.py /tmp
+                - chmod +x demo/AMiner/aminerDemo.sh
+                - chown -R aminer:aminer /tmp/lib
+                - chown aminer:aminer /tmp/AMinerRemoteLog.txt
+                - runuser -u aminer -- ./demo/AMiner/aminerDemo.sh > /tmp/demo
                 - cd integration
                 - cp config* /tmp
                 - chmod +x aminerIntegrationTest.sh
                 - chmod +x aminerIntegrationTest2.sh
-                - chown aminer:aminer /tmp/AMinerRemoteLog.txt
                 - ./aminerIntegrationTest.sh
                 - ./aminerIntegrationTest2.sh
                 - rm /var/mail/mail
