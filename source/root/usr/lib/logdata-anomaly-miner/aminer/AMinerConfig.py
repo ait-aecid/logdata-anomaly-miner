@@ -36,10 +36,10 @@ def load_config(config_file_name):
     aminer_config = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(aminer_config)
     if extension in ymlext:
-      aminer_config.loadYaml(yamlconfig)
-  except ValueError as e:
-    raise e
   # skipcq: FLK-E722
+      aminer_config.loadYaml(yaml_config)
+  except ValueError as e:
+      raise e
   except:
       print('Failed to load configuration from %s' % config_file_name, file=sys.stderr)
       exception_info = sys.exc_info()
