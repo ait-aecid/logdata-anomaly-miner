@@ -19,17 +19,25 @@ LOG_FILE = '/tmp/AMinerRemoteLog.txt'
 configFN = None
 VAR_ID = 0
 
-
 def load_config(config_file_name):
     """Load the configuration file using the import module."""
     aminer_config = None
+    ymlext = ['.YAML','.YML','.yaml','.yml']
     global configFN
     configFN = config_file_name
+    extension = os.path.splitext(config_file_name)[1]
+    yamlconfig = None
+    if extension in ymlext:
+      yamlconfig = config_file_name
+      config_file_name = os.path.dirname(os.path.abspath(__file__)) + '/' + 'config.py'
     try:
-        spec = util.spec_from_file_location('aminer_config', config_file_name)
-        aminer_config = util.module_from_spec(spec)
-        spec.loader.exec_module(aminer_config)
-
+      spec = importlib.util.spec_from_file_location('aminerConfig', config_file_name)
+      aminer_config = importlib.util.module_from_spec(spec)
+      spec.loader.exec_module(aminer_config)
+      if extension in ymlext:
+        aminer_config.loadYaml(yamlconfig)
+    except ValueError as e:
+      raise e
     # skipcq: FLK-E722
     except:
         print('Failed to load configuration from %s' % config_file_name, file=sys.stderr)
