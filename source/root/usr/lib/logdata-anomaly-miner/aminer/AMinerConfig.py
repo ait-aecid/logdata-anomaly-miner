@@ -17,11 +17,20 @@ KEY_REMOTE_CONTROL_SOCKET_PATH = 'RemoteControlSocket'
 def loadConfig(configFileName):
   """Load the configuration file using the import module."""
   aminerConfig = None
+  ymlext = ['.YAML','.YML','.yaml','.yml']
+  extension = os.path.splitext(configFileName)[1]
+  yamlconfig = None
+  if extension in ymlext:
+    yamlconfig = configFileName
+    configFileName = os.path.dirname(os.path.abspath(__file__)) + '/' + 'config.py'
   try:
     spec = importlib.util.spec_from_file_location('aminerConfig', configFileName)
     aminerConfig = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(aminerConfig)
-
+    if extension in ymlext:
+      aminerConfig.loadYaml(yamlconfig)
+  except ValueError as e:
+      raise e
   except:
     print('Failed to load configuration from %s' % configFileName, file=sys.stderr)
     exceptionInfo = sys.exc_info()
