@@ -567,7 +567,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
       d['PropertyPath'] = data_item.propertyPath
       report_str += os.linesep+'Path values "%s":' % '", "'.join(histogram_mapping[0])
       if isinstance(histogram_mapping[2].match_element.match_string, bytes):
-        histogram_mapping[2].match_element.matchString = histogram_mapping[2].match_element.matchString.decode("utf-8")
+        histogram_mapping[2].match_element.match_string = histogram_mapping[2].match_element.match_string.decode("utf-8")
       report_str += os.linesep+'Example: %s' % histogram_mapping[2].match_element.match_string
       if len(res) < histogram_mapping[1].total_elements:
         res = [''] * histogram_mapping[1].total_elements
