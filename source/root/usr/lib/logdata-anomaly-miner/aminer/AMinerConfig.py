@@ -110,12 +110,13 @@ def save_config(analysis_context, new_file):
 
   for i in range(0, len(logs)):
     if "REMOTECONTROL changeAttributeOfRegisteredAnalysisComponent" in logs[i]:
+      logs[i] = logs[i][:logs[i].find('#')]
       arr = logs[i].split(',',3)
-      if arr[1].find("'"):
+      if arr[1].find("'") != -1:
         component_name = arr[1].split("'")[1]
       else:
         component_name = arr[1].split('"')[1]
-      if arr[2].find("'"):
+      if arr[2].find("'") != -1:
         attr = arr[2].split("'")[1]
       else:
         attr = arr[2].split('"')[1]
