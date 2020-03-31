@@ -1,0 +1,20 @@
+language: python
+python:
+  - '3.7' 
+dist: bionic
+
+before_install:
+  - sudo apt-get update -y
+  - sudo apt-get install -y exim4 procps cpulimit ansible mailutils
+  - git clone https://github.com/ait-aecid/aminer-ansible.git roles/aminer
+  - git clone https://github.com/ait-aecid/aecid-testsuite.git 
+  - ln -s $PWD/source/root/usr/lib/logdata-anomaly-miner/aminer aecid-testsuite/aminer
+  - sed -e "s+{{SOURCEDIR}}+$PWD+g" .playbook.yml > playbook.yml
+
+install:
+  - pip3 install coverage
+
+script:
+  - sudo ansible-playbook playbook.yml
+  - cd aecid-testsuite
+  - sudo python3 -m unittest discover -s unit -p '*Test.py' > /dev/null
