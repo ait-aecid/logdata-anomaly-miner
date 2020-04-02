@@ -13,8 +13,36 @@ before_install:
 
 install:
   - pip3 install coverage
-
-script:
   - sudo ansible-playbook playbook.yml
   - cd aecid-testsuite
+
+script:
   - sudo python3 -m unittest discover -s unit -p '*Test.py' > /dev/null
+  - test -e /var/mail/mail && sudo rm -f /var/mail/mail
+  - cp demo/AMiner/demo-config.py /tmp
+  - sudo chown -R aminer:aminer /tmp/lib
+  - sudo chown aminer:aminer /tmp/AMinerRemoteLog.txt
+  - sudo chmod +x demo/AMiner/aminerDemo.sh
+  - sudo -u aminer ./demo/AMiner/aminerDemo.sh > /tmp/demo
+  - cp demo/AMiner/jsonConverterHandler-demo-config.py /tmp/demo-config.py
+  - sudo -u aminer ./demo/AMiner/aminerDemo.sh > /tmp/demo
+  - cd integration
+  - sudo chmod 777 /tmp
+  - cp config* /tmp
+  - ls -ld /tmp
+  - ls -l /tmp
+  - sudo chmod +x aminerIntegrationTest.sh
+  - sudo chmod +x aminerIntegrationTest2.sh
+  - sudo -u aminer ./aminerIntegrationTest.sh
+  - sudo -u aminer ./aminerIntegrationTest2.sh
+  - sudo rm /var/mail/mail
+  - cd ..
+  - coverage run --source=./aminer -m unittest discover -s unit -p '*Test.py'
+  - touch /tmp/report
+  - echo 'Statement Coverage:' > /tmp/report
+  - coverage report >> /tmp/report
+  - coverage run --source=./aminer --branch -m unittest discover -s unit -p '*Test.py'
+  - echo 'Branch Coverage:' >> /tmp/report
+  - coverage report >> /tmp/report
+  - cat /tmp/report
+  - echo "hello world"
