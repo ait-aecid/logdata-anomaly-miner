@@ -124,7 +124,7 @@ def main():
 # process.
   from aminer import AMinerConfig
   try:
-    aminerConfig = AMinerConfig.loadConfig(configFileName)
+    aminerConfig = AMinerConfig.load_config(configFileName)
   except ValueError as e:
     print("Config-Error: %s" % e)
     sys.exit(1)

@@ -1,0 +1,83 @@
+#LearnMode: false # optional
+AMinerUser: 'aminer'  # optional default: aminer
+AMinerGroup: 'aminer' # optional default: aminer
+
+LogResourceList:
+        - 'file:///var/log/apache2/access.log'
+
+#########################################################
+#
+# Parser:
+#         - id: 'timeModel'
+#           type: DateTimeModelElement
+#           name: 'time'
+#           args: '%Y-%m-%dT%H:%M:%S.%f'
+#         
+#         - id: 'hostModel'
+#           type: VariableByteDataModelElement
+#           name: 'host'
+#           args: '-.01234567890abcdefghijklmnopqrstuvwxyz:'  
+# 
+#         - id: 'reqMethodModel'
+#           type:  FixedWordlistDataModelElement
+#           name: 'method'
+#           args:
+#                   - 'GET'
+#                   - 'POST'
+#                   - 'PUT'
+#                   - 'HEAD'
+#         - id: 'apacheModel'
+#           type: ApacheAccessModel
+#           name: 'apache'
+#           args: 'apache'
+# 
+#         - id: 'START'
+#           type: SequenceModelElement
+#           name: 'model'
+#           args:
+#               - timeModel        
+#               - hostModel
+#               - reqMethodModel
+#               - apacheModel
+Parser:
+        - id: 'apacheModel'
+          type: ApacheAccessModel
+          name: 'apache'
+          args: 'apache'
+
+        - id: 'START'
+          type: SequenceModelElement
+          name: 'model'
+          args: apacheModel
+
+Input:
+        Verbose: True # optional
+        MultiSource: False # optional
+        TimestampPath: "/model/accesslog/time"
+
+
+Analysis:
+        - type: "NewMatchPathValueDetector"
+          paths: ["/model/accesslog/status"]
+          persistence_id: 'accesslog_status' # optional default: Default
+          output_logline: false # optional default: true
+          learnMode: true
+
+        - type: "NewMatchPathValueComboDetector"
+          paths: ["/model/accesslog/request","/model/accesslog/method"]
+          learnMode: true
+          persistence_id: 'accesslog_request' # optional default: Default
+          output_logline: false # optional default: true
+          allow_missing_values: false # optional default: false
+
+        - type: "NewMatchPathValueComboDetector"
+          paths: ["/model/accesslog/request","/model/accesslog/status"]
+          learnMode: true
+
+EventHandlers:
+        - id: "stpe"
+          json: true # optional default: false
+          type: "StreamPrinterEventHandler"
+
+        - id: "syslog"
+          type: "SyslogWriterEventHandler"
