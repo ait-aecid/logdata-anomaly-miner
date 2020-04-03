@@ -15,6 +15,6 @@ class SimpleUnparsedAtomHandler(AtomHandlerInterface):
     if logAtom.isParsed():
       return False
     for listener in self.eventHandlers:
-      listener.receiveEvent('Input.UnparsedAtomHandler', \
+      listener.receiveEvent('Input.SimpleUnparsedAtomHandler', \
           'Unparsed atom received', [logAtom.rawData], logAtom, self)
     return True
