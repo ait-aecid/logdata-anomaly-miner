@@ -35,8 +35,8 @@
             'required' : True,
             'type': 'dict',
             'schema': {
-                'Verbose': {'type': 'boolean', 'default': 'false'},
-                'MultiSource': {'type': 'boolean', 'default': 'false'},
+                'Verbose': {'type': 'boolean', 'required': False, 'default': 'false'},
+                'MultiSource': {'type': 'boolean', 'required': False, 'default': 'false'},
                 'TimestampPath': {'type': 'string'}
             }
         },
@@ -63,7 +63,8 @@
                 'type': 'dict',
                 'schema': {
                     'id'   : {'type': 'string'},
-                    'type' : {'type': 'string', 'allowed': ['StreamPrinterEventHandler']},
+                    'type' : {'type': 'string', 'allowed': ['StreamPrinterEventHandler','SyslogWriterEventHandler']},
+                    'json' : {'type': 'boolean', 'required': False, 'default': False},
                     'args' : {'type': ['string','list'], 'schema': {'type': 'string'}}
                 }
             }

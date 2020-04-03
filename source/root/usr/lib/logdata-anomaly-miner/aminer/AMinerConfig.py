@@ -20,30 +20,31 @@ configFN = None
 VAR_ID = 0
 
 def load_config(config_file_name):
-    """Load the configuration file using the import module."""
-    aminer_config = None
-    ymlext = ['.YAML','.YML','.yaml','.yml']
-    global configFN
-    configFN = config_file_name
-    extension = os.path.splitext(config_file_name)[1]
-    yamlconfig = None
+  """Load the configuration file using the import module."""
+  aminer_config = None
+  global configFN
+  configFN = config_file_name
+  ymlext = ['.YAML','.YML','.yaml','.yml']
+  extension = os.path.splitext(config_file_name)[1]
+  yaml_config = None
+
+  if extension in ymlext:
+    yaml_config = config_file_name
+    config_file_name = os.path.dirname(os.path.abspath(__file__)) + '/' + 'ymlconfig.py'
+  try:
+    spec = importlib.util.spec_from_file_location('aminer_config', config_file_name)
+    aminer_config = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(aminer_config)
     if extension in ymlext:
-      yamlconfig = config_file_name
-      config_file_name = os.path.dirname(os.path.abspath(__file__)) + '/' + 'config.py'
-    try:
-      spec = importlib.util.spec_from_file_location('aminerConfig', config_file_name)
-      aminer_config = importlib.util.module_from_spec(spec)
-      spec.loader.exec_module(aminer_config)
-      if extension in ymlext:
-        aminer_config.loadYaml(yamlconfig)
-    except ValueError as e:
-      raise e
-    # skipcq: FLK-E722
-    except:
-        print('Failed to load configuration from %s' % config_file_name, file=sys.stderr)
-        exception_info = sys.exc_info()
-        raise Exception(exception_info[0], exception_info[1], exception_info[2])
-    return aminer_config
+      aminer_config.loadYaml(yamlconfig)
+  except ValueError as e:
+    raise e
+  # skipcq: FLK-E722
+  except:
+      print('Failed to load configuration from %s' % config_file_name, file=sys.stderr)
+      exception_info = sys.exc_info()
+      raise Exception(exception_info[0], exception_info[1], exception_info[2])
+  return aminer_config
 
 
 def build_persistence_file_name(aminer_config, *args):

@@ -11,6 +11,16 @@ from aminer.parsing import FixedWordlistDataModelElement
 def get_model():
     """This function defines how to parse a access message logged with Apache2."""
     whitespace_str = b' '
+    new_time_model = DateTimeModelElement('time', b'[%d/%b/%Y:%H:%M:%S +0000]')
+    host_name_model = VariableByteDataModelElement('host', b'-.01234567890abcdefghijklmnopqrstuvwxyz:')
+    identity_model = VariableByteDataModelElement('ident', b'-.01234567890abcdefghijklmnopqrstuvwxyz:')
+    user_name_model = VariableByteDataModelElement('user', b'0123456789abcdefghijklmnopqrstuvwxyz.-')
+    request_method_model = FixedWordlistDataModelElement('method', [b'GET', b'POST', b'PUT', b'HEAD', b'DELETE', b'CONNECT', b'OPTIONS', b'TRACE', b'PATCH'])
+    request_model = VariableByteDataModelElement('request', b'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-/()[]{}!$%&=<?*+')
+    version_model = VariableByteDataModelElement('version', b'0123456789.')
+    status_code_model = DecimalIntegerValueModelElement('status')
+    size_model = DecimalIntegerValueModelElement('size')
+    user_agent_model = VariableByteDataModelElement('useragent', b'0123456789abcdefghijklmnopqrstuvwxyz.-/()[]{}!$%&=<?*+')
 
     model = SequenceModelElement('accesslog', [
         VariableByteDataModelElement('host', b'-.01234567890abcdefghijklmnopqrstuvwxyz:'),

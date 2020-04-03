@@ -1,7 +1,4 @@
-# This is a template for the "aminer" logdata-anomaly-miner tool. Copy
-# it to "config.py" and define your ruleset.
-
-configProperties = {}
+config_properties = {}
 yamldata = None
 
 # Define the list of log resources to read from: the resources
@@ -10,28 +7,32 @@ yamldata = None
 # to be readable by the aminer process! Supported types are:
 # * file://[path]: Read data from file, reopen it after rollover
 # * unix://[path]: Open the path as UNIX local socket for reading
-configProperties['LogResourceList'] = ['file:///var/log/apache2/access.log']
+config_properties['LogResourceList'] = ['file:///var/log/apache2/access.log']
 
 # Define the uid/gid of the process that runs the calculation
 # after opening the log files:
-configProperties['AMinerUser'] = 'aminer'
-configProperties['AMinerGroup'] = 'aminer'
+config_properties['AMinerUser'] = 'aminer'
+config_properties['AMinerGroup'] = 'aminer'
 
 # This method loads the yaml-configfile and overrides defaults if
 # neccessary
-def loadYaml(configFile):
+def loadYaml(config_file):
   global yamldata
 
   import yaml
   from cerberus import Validator
   import os
-  with open(configFile) as yamlfile:
+  with open(config_file) as yamlfile:
     try:
         yamldata = yaml.safe_load(yamlfile)
+        yamlfile.close()
     except yaml.YAMLError as exception:
         raise exception
     
-  schema = eval(open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schema.py', 'r').read())
+  with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schema.py', 'r') as sma:
+      schema = eval(sma.read())
+  sma.close()
+
   v = Validator(schema)
   # TODO: Error-handling
   if v.validate(yamldata, schema):
@@ -42,7 +43,7 @@ def loadYaml(configFile):
 
   # Set default values
   for key,val in yamldata.items():
-    configProperties[str(key)] = val;
+    config_properties[str(key)] = val;
 
 
 # Read and store information to be used between multiple invocations
@@ -50,10 +51,10 @@ def loadYaml(configFile):
 # to the 'AMinerUser' but not group/world readable. On violation,
 # AMiner will refuse to start. When undefined, '/var/lib/aminer'
 # is used.
-# configProperties['Core.PersistenceDir'] = '/var/lib/aminer'
+# config_properties['Core.PersistenceDir'] = '/var/lib/aminer'
 
 # Add your ruleset here:
-def buildAnalysisPipeline(analysisContext):
+def build_analysis_pipeline(analysis_context):
   """Define the function to create pipeline for parsing the log
   data. It has also to define an AtomizerFactory to instruct AMiner
   how to process incoming data streams to create log atoms from
@@ -79,7 +80,7 @@ def buildAnalysisPipeline(analysisContext):
           else:
             parserModelDict[item['id']] = func(item['name'],item['args'].encode())
       else:
-          func =  getattr(__import__(item['type']),'getModel')
+          func =  getattr(__import__(item['type']),'get_model')
           parserModelDict[item['id']] = func()
 
   argslist = list()
@@ -111,29 +112,29 @@ def buildAnalysisPipeline(analysisContext):
             parsing_model, [SimpleMultisourceAtomSync([atomFilter], sync_wait_time=5)], 
             anomaly_event_handlers, default_timestamp_path=yamldata['Input']['TimestampPath'])
   else:
-        analysisContext.atomizerFactory = SimpleByteStreamLineAtomizerFactory(
+        analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
             parsingModel, [atomFilter], anomalyEventHandlers,
-            defaultTimestampPath=yamldata['Input']['TimestampPath'])
+            default_timestamp_path=yamldata['Input']['TimestampPath'])
 
 # Just report all unparsed atoms to the event handlers.
   if yamldata['Input']['Verbose'] == True:
     from aminer.input import VerboseUnparsedAtomHandler
-    atomFilter.addHandler(VerboseUnparsedAtomHandler(anomalyEventHandlers, parsingModel),       stopWhenHandledFlag=True)
+    atomFilter.add_handler(VerboseUnparsedAtomHandler(anomalyEventHandlers, parsingModel),       stop_when_handled_flag=True)
   else:
     from aminer.input import SimpleUnparsedAtomHandler
-    atomFilter.addHandler(
+    atomFilter.add_handler(
           SimpleUnparsedAtomHandler(anomalyEventHandlers),
-          stopWhenHandledFlag=True)
+          stop_when_handled_flag=True)
 
   from aminer.analysis import NewMatchPathDetector
   try:
       learn = yamldata['LearnMode']
   except:
       learn = True
-  newMatchPathDetector = NewMatchPathDetector(
-      analysisContext.aminerConfig, anomalyEventHandlers, autoIncludeFlag=learn)
-  analysisContext.registerComponent(newMatchPathDetector, componentName=None)
-  atomFilter.addHandler(newMatchPathDetector)
+  nmpd = NewMatchPathDetector(
+      analysis_context.aminer_config, anomalyEventHandlers, auto_include_flag=learn)
+  analysis_context.register_component(nmpd, component_name=None)
+  atomFilter.add_handler(nmpd)
 
   for item in yamldata['Analysis']:
       if item['id'] == 'None':
@@ -146,18 +147,25 @@ def buildAnalysisPipeline(analysisContext):
         learn = item['learnMode']
       func =  getattr(__import__("aminer.analysis", fromlist=[item['type']]),item['type'])
       if item['type'] == 'NewMatchPathValueDetector':
-        tmpAnalyser = func(analysisContext.aminerConfig,item['paths'], anomalyEventHandlers, autoIncludeFlag=learn,persistenceId=item['persistence_id'],outputLogLine=item['output_logline'])
+        tmpAnalyser = func(analysis_context.aminer_config,item['paths'], anomalyEventHandlers, auto_include_flag=learn,persistence_id=item['persistence_id'],output_log_line=item['output_logline'])
       elif item['type'] == 'NewMatchPathValueComboDetector':
-        tmpAnalyser = func(analysisContext.aminerConfig,item['paths'], anomalyEventHandlers, autoIncludeFlag=learn,persistenceId=item['persistence_id'],allowMissingValuesFlag=item['allow_missing_values'],outputLogLine=item['output_logline'])
+        tmpAnalyser = func(analysis_context.aminer_config,item['paths'], anomalyEventHandlers, auto_include_flag=learn,persistence_id=item['persistence_id'],allow_missing_values_flag=item['allow_missing_values'],output_log_line=item['output_logline'])
       else:  
-        tmpAnalyser = func(analysisContext.aminerConfig,item['paths'], anomalyEventHandlers, autoIncludeFlag=learn)
-      analysisContext.registerComponent(tmpAnalyser, componentName=compName)
-      atomFilter.addHandler(tmpAnalyser)
+        tmpAnalyser = func(analysis_context.aminer_config,item['paths'], anomalyEventHandlers, auto_include_flag=learn)
+      analysis_context.register_component(tmpAnalyser, component_name=compName)
+      atomFilter.add_handler(tmpAnalyser)
 
 
   try:
       for item in yamldata['EventHandlers']:
           func =  getattr(__import__("aminer.events", fromlist=[item['type']]),item['type'])
+          ctx = None
+          if item['type'] == 'StreamPrinterEventHandler':
+             if item['json'] == True:
+               from aminer.events import JsonConverterHandler
+               ctx = JsonConverterHandler([func(analysis_context)], analysis_context)
+             else:
+               ctx = func(analysis_context)
 #          if item['type'] == 'KafkaEventHandler':
 #            try: 
 #              item['args'][0]
@@ -177,15 +185,16 @@ def buildAnalysisPipeline(analysisContext):
 #                options[key] = int(val)
 #              except:
 #                pass
-#            kafkaEventHandler = func(analysisContext.aminerConfig, item['args'][0], options)
+#            kafkaEventHandler = func(analysis_context.aminer_config, item['args'][0], options)
 #            from aminer.events import JsonConverterHandler
-#            anomalyEventHandlers.append(JsonConverterHandler(analysisContext.aminerConfig, messageQueueEventHandlers,
-#                analysisContext, learningMode))
+#            anomalyEventHandlers.append(JsonConverterHandler(analysis_context.aminer_config, messageQueueEventHandlers,
+#                analysis_context, learningMode))
 #          else:    
-          ctx = func(analysisContext)
+          if ctx == None:
+              ctx = func(analysis_context)
           anomalyEventHandlers.append(ctx)
 
   except KeyError:
       # Add stdout stream printing for debugging, tuning.
       from aminer.events import StreamPrinterEventHandler
-      anomalyEventHandlers.append(StreamPrinterEventHandler(analysisContext))
+      anomalyEventHandlers.append(StreamPrinterEventHandler(analysis_context))
