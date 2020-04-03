@@ -1,6 +1,6 @@
 """This module defines a parser for apache2 access.log."""
 
-from aminer.parsing import DatetimeModelElement
+from aminer.parsing import DateTimeModelElement
 from aminer.parsing import DecimalIntegerValueModelElement
 from aminer.parsing import FixedDataModelElement
 from aminer.parsing import SequenceModelElement
@@ -11,7 +11,7 @@ from aminer.parsing import FixedWordlistDataModelElement
 # skipcq: PYL-W0613
 def get_model(new_time_model=None):
 
-  new_time_model = DatetimeModelElement('time', b'[%d/%b/%Y:%H:%M:%S +0000]')
+  new_time_model = DateTimeModelElement('time', b'[%d/%b/%Y:%H:%M:%S +0000]')
   host_name_model = VariableByteDataModelElement('host', b'-.01234567890abcdefghijklmnopqrstuvwxyz:')
   identity_model = VariableByteDataModelElement('ident', b'-.01234567890abcdefghijklmnopqrstuvwxyz:')
   user_name_model = VariableByteDataModelElement('user', b'0123456789abcdefghijklmnopqrstuvwxyz.-')
