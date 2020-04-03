@@ -59,6 +59,9 @@ def buildAnalysisPipeline(analysisContext):
   how to process incoming data streams to create log atoms from
   them."""
   import importlib
+  import configparser   
+  import sys   
+  import json
 #  from pprint import pprint
 
   parserModelDict = dict()
@@ -133,20 +136,52 @@ def buildAnalysisPipeline(analysisContext):
   atomFilter.addHandler(newMatchPathDetector)
 
   for item in yamldata['Analysis']:
+      if item['id'] == 'None':
+          compName = None
+      else:
+          compName = item['id']
       try: 
         learn = yamldata['LearnMode']
       except:
         learn = item['learnMode']
       func =  getattr(__import__("aminer.analysis", fromlist=[item['type']]),item['type'])
-      tmpAnalyser = func(analysisContext.aminerConfig,item['paths'], anomalyEventHandlers, autoIncludeFlag=learn)
-      analysisContext.registerComponent(tmpAnalyser, componentName=None)
+      if item['type'] == 'NewMatchPathValueDetector':
+        tmpAnalyser = func(analysisContext.aminerConfig,item['paths'], anomalyEventHandlers, autoIncludeFlag=learn,persistenceId=item['persistence_id'],outputLogLine=item['output_logline'])
+      elif item['type'] == 'NewMatchPathValueComboDetector':
+        tmpAnalyser = func(analysisContext.aminerConfig,item['paths'], anomalyEventHandlers, autoIncludeFlag=learn,persistenceId=item['persistence_id'],allowMissingValuesFlag=item['allow_missing_values'],outputLogLine=item['output_logline'])
+      else:  
+        tmpAnalyser = func(analysisContext.aminerConfig,item['paths'], anomalyEventHandlers, autoIncludeFlag=learn)
+      analysisContext.registerComponent(tmpAnalyser, componentName=compName)
       atomFilter.addHandler(tmpAnalyser)
 
 
   try:
       for item in yamldata['EventHandlers']:
           func =  getattr(__import__("aminer.events", fromlist=[item['type']]),item['type'])
-          # TODO: allow use of item['args'] and different context
+#          if item['type'] == 'KafkaEventHandler':
+#            try: 
+#              item['args'][0]
+#            except:
+#              raise ValueError("Kafka-Topic not defined")
+#            try: 
+#              kafkaconfig = item['args'][1]
+#            except:
+#              kafkaconfig = '/etc/aminer/kafka-client.conf'
+#            config = configparser.ConfigParser()
+#            config.read(kafkaconfig)
+#            options = dict(config.items("DEFAULT"))
+#            for key, val in options.items():
+#              try:
+#                if key == "sasl_plain_username":
+#                  continue
+#                options[key] = int(val)
+#              except:
+#                pass
+#            kafkaEventHandler = func(analysisContext.aminerConfig, item['args'][0], options)
+#            from aminer.events import JsonConverterHandler
+#            anomalyEventHandlers.append(JsonConverterHandler(analysisContext.aminerConfig, messageQueueEventHandlers,
+#                analysisContext, learningMode))
+#          else:    
           ctx = func(analysisContext)
           anomalyEventHandlers.append(ctx)
 
