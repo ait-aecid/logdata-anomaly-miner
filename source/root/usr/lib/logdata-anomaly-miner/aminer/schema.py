@@ -46,9 +46,13 @@
             'schema': {
                 'type': 'dict',
                  'schema' : {
+                     'id': {'type': 'string', 'required': False, 'default': 'None'},
                      'type' : {'type': 'string', 'allowed': ['NewMatchPathValueDetector','NewMatchPathValueComboDetector']},
-                    'paths' : {'type': 'list', 'schema': {'type': 'string'}},
-                    'learnMode' : {'type': 'boolean'}
+                     'paths' : {'type': 'list', 'schema': {'type': 'string'}},
+                     'learnMode' : {'type': 'boolean'},
+                     'persistence_id' : {'type': 'string', 'required': False, 'default': 'Default'},
+                     'output_logline' : {'type': 'boolean', 'required': False, 'default': True},
+                     'allow_missing_values' : {'type': 'boolean', 'required': False, 'default': False}
                 }
             }
         },
@@ -60,7 +64,6 @@
                 'schema': {
                     'id'   : {'type': 'string'},
                     'type' : {'type': 'string', 'allowed': ['StreamPrinterEventHandler']},
-                    'context' : {'type': 'string', 'default': 'default'},
                     'args' : {'type': ['string','list'], 'schema': {'type': 'string'}}
                 }
             }
