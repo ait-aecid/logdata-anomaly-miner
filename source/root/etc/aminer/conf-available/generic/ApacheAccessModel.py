@@ -44,3 +44,4 @@ def get_model():
         VariableByteDataModelElement('useragent', b'0123456789abcdefghijklmnopqrstuvwxyz.-/()[]{}!$%&=<?*+'),
         FixedDataModelElement('sp9', b'"'), ])
     return model
+
