@@ -1,0 +1,8 @@
+# aminer-ansible: https://github.com/ait-aecid/aminer-ansible.git
+- hosts: localhost
+  vars:
+    aminer_gitrepo: False
+    # MODIFY THIS PATH
+    aminer_repopath: "/home/hoti/logdata-anomaly-miner"
+  roles:
+         - aminer
