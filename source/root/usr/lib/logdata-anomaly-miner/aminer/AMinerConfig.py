@@ -33,7 +33,7 @@ def load_config(config_file_name):
 
   if extension in ymlext:
     yaml_config = config_file_name
-    config_file_name = os.path.dirname(os.path.abspath(__file__)) + '/' + 'config.py'
+    config_file_name = os.path.dirname(os.path.abspath(__file__)) + '/' + 'ymlconfig.py'
   try:
     spec = importlib.util.spec_from_file_location('aminer_config', config_file_name)
     aminer_config = importlib.util.module_from_spec(spec)
@@ -42,10 +42,6 @@ def load_config(config_file_name):
       aminer_config.loadYaml(yaml_config)
   except ValueError as e:
       raise e
-  try:
-    spec = importlib.util.spec_from_file_location('aminer_config', config_file_name)
-    aminer_config = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(aminer_config)
   except:
     print('Failed to load configuration from %s' % config_file_name, file=sys.stderr)
     exception_info = sys.exc_info()
