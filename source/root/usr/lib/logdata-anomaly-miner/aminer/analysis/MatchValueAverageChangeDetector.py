@@ -15,174 +15,204 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
   to monitor and reports if the average of the latest diverges
   significantly from the values observed before."""
 
-  def __init__(self, aminerConfig, anomalyEventHandlers, timestampPath,
-               analyzePathList, minBinElements, minBinTime, syncBinsFlag=True,
-               debugMode=False, persistenceId='Default'):
+  def __init__(self, aminer_config, anomaly_event_handlers, timestamp_path,
+               analyze_path_list, min_bin_elements, min_bin_time, sync_bins_flag=True,
+               debug_mode=False, persistence_id='Default'):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location.
-    @param timestampPath if not None, use this path value for
+    @param timestamp_path if not None, use this path value for
     timestamp based bins.
-    @param analyzePathList list of match pathes to analyze in
+    @param analyze_path_list list of match pathes to analyze in
     this detector.
-    @param minBinElements evaluate the latest bin only after at
+    @param min_bin_elements evaluate the latest bin only after at
     least that number of elements was added to it.
-    @param minBinTime evaluate the latest bin only when the first
+    @param min_bin_time evaluate the latest bin only when the first
     element is received after minBinTime has elapsed.
-    @param syncBinsFlag if true the bins of all analyzed path values
+    @param sync_bins_flag if true the bins of all analyzed path values
     have to be filled enough to trigger analysis.
-    @param debugMode if true, generate an analysis report even
+    @param debug_mode if true, generate an analysis report even
     when average of last bin was within expected range."""
-    self.anomalyEventHandlers = anomalyEventHandlers
-    self.timestampPath = timestampPath
-    self.minBinElements = minBinElements
-    self.minBinTime = minBinTime
-    self.syncBinsFlag = syncBinsFlag
-    self.debugMode = debugMode
-    self.nextPersistTime = None
+    self.anomaly_event_handlers = anomaly_event_handlers
+    self.timestamp_path = timestamp_path
+    self.min_bin_elements = min_bin_elements
+    self.min_bin_time = min_bin_time
+    self.sync_bins_flag = sync_bins_flag
+    self.debug_mode = debug_mode
+    self.next_persist_time = None
+    self.persistence_id = persistence_id
 
-    PersistencyUtil.addPersistableComponent(self)
-    self.persistenceFileName = AMinerConfig.buildPersistenceFileName(aminerConfig, \
-      'MatchValueAverageChangeDetector', persistenceId)
-    persistenceData = PersistencyUtil.loadJson(self.persistenceFileName)
-    if persistenceData is None:
-      self.statData = []
-      for path in analyzePathList:
-        self.statData.append((path, [],))
+    PersistencyUtil.add_persistable_component(self)
+    self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, \
+      'MatchValueAverageChangeDetector', persistence_id)
+    persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
+    if persistence_data is None:
+      self.stat_data = []
+      for path in analyze_path_list:
+        self.stat_data.append((path, [],))
 #   else:
 #     self.knownPathSet = set(persistenceData)
 
 
-  def receiveAtom(self, logAtom):
+  def receive_atom(self, log_atom):
     """Sends summary to all event handlers."""
-    parserMatch = logAtom.parserMatch
-    valueDict = parserMatch.getMatchDictionary()
+    parser_match = log_atom.parser_match
+    value_dict = parser_match.get_match_dictionary()
+    event_data = dict()
 
-    timestampValue = logAtom.getTimestamp()
-    if self.timestampPath is not None:
-      matchValue = valueDict.get(self.timestampPath)
-      if matchValue is None:
+    timestamp_value = log_atom.get_timestamp()
+    if self.timestamp_path is not None:
+      match_value = value_dict.get(self.timestamp_path)
+      if match_value is None:
         return
-      timestampValue = matchValue.matchObject[1]
+      timestamp_value = match_value.match_object[1]
+      event_data['MatchValue'] = match_value.match_object[0]
 
-    analysisSummary = ''
-    if self.syncBinsFlag:
-      readyForAnalysisFlag = True
-      for (path, statData) in self.statData:
-        match = valueDict.get(path, None)
+    analysis_summary = ''
+    if self.sync_bins_flag:
+      ready_for_analysis_flag = True
+      for (path, stat_data) in self.stat_data:
+        match = value_dict.get(path, None)
         if match is None:
-          readyForAnalysisFlag = (readyForAnalysisFlag and self.update(statData, \
-            timestampValue, None))
+          ready_for_analysis_flag = (ready_for_analysis_flag and self.update(stat_data, \
+            timestamp_value, None))
         else:
-          readyForAnalysisFlag = (readyForAnalysisFlag and self.update(statData, \
-            timestampValue, match.matchObject))
+          ready_for_analysis_flag = (ready_for_analysis_flag and self.update(stat_data, \
+            timestamp_value, match.match_object))
 
-      if readyForAnalysisFlag:
-        for (path, statData) in self.statData:
-          analysisData = self.analyze(statData)
-          if analysisData is not None:
-            if analysisSummary == '':
-              analysisSummary += '"%s": %s' % (path, analysisData)
+      if ready_for_analysis_flag:
+        anomaly_scores = []
+        for (path, stat_data) in self.stat_data:
+          analysis_data = self.analyze(stat_data)
+          if analysis_data is not None:
+            d = {}
+            d['Path'] = path
+            a = {}
+            new = {}
+            old = {}
+            new['N'] = analysis_data[1]
+            new['Avg'] = analysis_data[2]
+            new['Var'] = analysis_data[3]
+            old['N'] = analysis_data[4]
+            old['Avg'] = analysis_data[5]
+            old['Var'] = analysis_data[6]
+            a['New'] = new
+            a['Old'] = old
+            d['AnalysisData'] = a
+            if analysis_summary == '':
+              analysis_summary += '"%s": %s' % (path, analysis_data[0])
             else:
-              analysisSummary += os.linesep
-              analysisSummary += '  "%s": %s' % (path, analysisData)
-        if self.nextPersistTime is None:
-          self.nextPersistTime = time.time()+600
+              analysis_summary += os.linesep
+              analysis_summary += '  "%s": %s' % (path, analysis_data[0])
+            anomaly_scores.append(d)
+        analysis_component = dict()
+        analysis_component['AnomalyScores'] = anomaly_scores
+        analysis_component['MinBinElements'] = self.min_bin_elements
+        analysis_component['MinBinTime'] = self.min_bin_time
+        analysis_component['SyncBinsFlag'] = self.sync_bins_flag
+        analysis_component['DebugMode'] = self.debug_mode
+
+        event_data['AnalysisComponent'] = analysis_component
+
+        if self.next_persist_time is None:
+          self.next_persist_time = time.time() + 600
     else:
       raise Exception('FIXME: not implemented')
 
-    if analysisSummary:
-      res = [''] * statData[2][0]
-      res[0] = analysisSummary
-      for listener in self.anomalyEventHandlers:
-        listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
-            'Statistical data report', res, logAtom, \
-            self)
+    if analysis_summary:
+      res = [''] * stat_data[2][0]
+      res[0] = analysis_summary
+      for listener in self.anomaly_event_handlers:
+        listener.receive_event('Analysis.%s' % self.__class__.__name__, \
+            'Statistical data report', res, event_data, log_atom, \
+                               self)
 
 
-  def getTimeTriggerClass(self):
+  def get_time_trigger_class(self):
     """Get the trigger class this component should be registered
     for. This trigger is used only for persistency, so real-time
     triggering is needed."""
     return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-  def doTimer(self, triggerTime):
+  def do_timer(self, trigger_time):
     """Check current ruleset should be persisted"""
-    if self.nextPersistTime is None:
+    if self.next_persist_time is None:
       return 600
 
-    delta = self.nextPersistTime-triggerTime
+    delta = self.next_persist_time - trigger_time
     if delta < 0:
 #     PersistencyUtil.storeJson(self.persistenceFileName, list(self.knownPathSet))
-      self.nextPersistTime = None
+      self.next_persist_time = None
       delta = 600
     return delta
 
 
-  def doPersist(self):
+  def do_persist(self):
     """Immediately write persistence data to storage."""
 #   PersistencyUtil.storeJson(self.persistenceFileName, list(self.knownPathSet))
-    self.nextPersistTime = None
+    self.next_persist_time = None
 
 
-  def update(self, statData, timestampValue, value):
+  def update(self, stat_data, timestamp_value, value):
     """Update the collected statistics data.
     @param value if value not None, check only conditions if current
     bin is full enough.
     @return true if the bin is full enough to perform an analysis."""
 
     if value is not None:
-      if not statData:
+      if not stat_data:
 # Append timestamp, k-value, old-bin (n, sum, sum2, avg, variance),
 # current-bin (n, sum, sum2)
-        statData.append(timestampValue)
-        statData.append(value)
-        statData.append(None)
-        statData.append((1, 0.0, 0.0,))
+        stat_data.append(timestamp_value)
+        stat_data.append(value)
+        stat_data.append(None)
+        stat_data.append((1, 0.0, 0.0,))
       else:
-        delta = value-statData[1]
-        binValues = statData[3]
-        statData[3] = (binValues[0]+1, binValues[1]+delta, binValues[2]+delta*delta)
+        delta = value - stat_data[1]
+        bin_values = stat_data[3]
+        stat_data[3] = (bin_values[0] + 1, bin_values[1] + delta, bin_values[2] + delta * delta)
 
-    if not statData:
+    if not stat_data:
       return False
-    if statData[3][0] < self.minBinElements:
+    if stat_data[3][0] < self.min_bin_elements:
       return False
-    if self.timestampPath is not None:
-      return timestampValue-statData[0] >= self.minBinTime
+    if self.timestamp_path is not None:
+      return timestamp_value - stat_data[0] >= self.min_bin_time
     return True
 
 
-  def analyze(self, statData):
+  def analyze(self, stat_data):
     """Perform the analysis and progress from the last bin to
     the next one.
     @return None when statistical data was as expected and debugging
     is disabled."""
 
-    currentBin = statData[3]
-    currentAverage = currentBin[1]/currentBin[0]
-    currentVariance = (currentBin[2]-(currentBin[1]*currentBin[1])/currentBin[0])/(currentBin[0]-1)
+    current_bin = stat_data[3]
+    current_average = current_bin[1]/current_bin[0]
+    current_variance = (current_bin[2]-(current_bin[1]*current_bin[1])/current_bin[0])/(current_bin[0]-1)
 # Append timestamp, k-value, old-bin (n, sum, sum2, avg, variance),
 # current-bin (n, sum, sum2)
 
-    oldBin = statData[2]
-    if oldBin is None:
-      statData[2] = (currentBin[0], currentBin[1], currentBin[2], currentAverage, currentVariance,)
-      statData[3] = (0, 0.0, 0.0)
-      if self.debugMode:
-        return 'Initial: n = %d, avg = %s, var = %s' % (currentBin[0], \
-          currentAverage+statData[1], currentVariance)
+    old_bin = stat_data[2]
+    if old_bin is None:
+      stat_data[2] = (current_bin[0], current_bin[1], current_bin[2], current_average, current_variance,)
+      stat_data[3] = (0, 0.0, 0.0)
+      if self.debug_mode:
+        return 'Initial: n = %d, avg = %s, var = %s' % (current_bin[0], \
+                                                        current_average + stat_data[1], current_variance)
     else:
-      totalN = oldBin[0]+currentBin[0]
-      totalSum = oldBin[1]+currentBin[1]
-      totalSum2 = oldBin[2]+currentBin[2]
+      total_n = old_bin[0]+current_bin[0]
+      total_sum = old_bin[1]+current_bin[1]
+      total_sum2 = old_bin[2]+current_bin[2]
 
-      statData[2] = (totalN, totalSum, totalSum2, totalSum/totalN, \
-          (totalSum2-(totalSum*totalSum)/totalN)/(totalN-1))
-      statData[3] = (0, 0.0, 0.0)
+      stat_data[2] = (total_n, total_sum, total_sum2, total_sum / total_n, \
+                      (total_sum2-(total_sum*total_sum)/total_n) / (total_n-1))
+      stat_data[3] = (0, 0.0, 0.0)
 
-      if (currentVariance > 2*oldBin[4]) or (abs(currentAverage-oldBin[3]) > oldBin[4]) \
-         or self.debugMode:
-        return 'Change: new: n = %d, avg = %s, var = %s; old: n = %d, avg = %s, var = %s' % \
-               (currentBin[0], currentAverage+statData[1], currentVariance, oldBin[0], \
-                oldBin[3]+statData[1], oldBin[4])
+      if (current_variance > 2*old_bin[4]) or (abs(current_average-old_bin[3]) > old_bin[4]) \
+         or self.debug_mode:
+        res = ['Change: new: n = %d, avg = %s, var = %s; old: n = %d, avg = %s, var = %s' % \
+               (current_bin[0], current_average + stat_data[1], current_variance, old_bin[0], \
+                old_bin[3] + stat_data[1], old_bin[4]), current_bin[0], current_average + stat_data[1], current_variance, old_bin[0], \
+               old_bin[3] + stat_data[1], old_bin[4]]
+        return res
     return None

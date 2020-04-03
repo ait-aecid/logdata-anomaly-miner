@@ -10,7 +10,9 @@ import stat
 import sys
 
 from aminer.util import SecureOSFunctions
-from aminer.util import encodeByteStringAsString
+from aminer.util import encode_byte_string_as_string
+
+interface_method_called = 'Interface method called'
 
 class LogDataResource(object):
   """This is the superinterface of each logdata resource monitored
@@ -25,59 +27,59 @@ class LogDataResource(object):
   to wait for input via select."""
 
   def __init__(
-      self, logResourceName, logStreamFd, defaultBufferSize=1 << 16,
-      repositioningData=None):
+      self, log_resource_name, log_stream_fd, default_buffer_size=1 << 16,
+      repositioning_data=None):
     """Create a new LogDataResource. Object creation must not
     touch the logStreamFd or read any data, unless repositioningData
     was given. In the later case, the stream has to support seek
     operation to reread data.
-    @param logResourceName the unique encoded name of this source
+    @param log_resource_name the unique encoded name of this source
     as byte array.
-    @param logStreamFd the stream for reading the resource or
+    @param log_stream_fd the stream for reading the resource or
     -1 if not yet opened.
-    @param repositioningData if not None, attemt to position the
+    @param repositioning_data if not None, attemt to position the
     the stream using the given data."""
-    raise Exception('Interface method called')
+    raise Exception(interface_method_called)
 
-  def open(self, reopenFlag=False):
+  def open(self, reopen_flag=False):
     """Open the given resource.
-    @param reopenFlag when True, attempt to reopen the same resource
+    @param reopen_flag when True, attempt to reopen the same resource
     and check if it differs from the previously opened one.
     @raise Exception if valid logStreamFd was already provided,
     is still open and reopenFlag is False.
     @raise OSError when opening failed with unexpected error.
     @return True if the resource was really opened or False if
     opening was not yet possible but should be attempted again."""
-    raise Exception('Interface method called')
+    raise Exception(interface_method_called)
 
-  def getResourceName(self):
+  def get_resource_name(self):
     """Get the name of this log resoruce."""
-    raise Exception('Interface method called')
+    raise Exception(interface_method_called)
 
-  def getFileDescriptor(self):
+  def get_file_descriptor(self):
     """Get the file descriptor of this open resource."""
-    raise Exception('Interface method called')
+    raise Exception(interface_method_called)
 
-  def fillBuffer(self):
+  def fill_buffer(self):
     """Fill the buffer data of this resource. The repositioning
-    information is not updated, updatePosition() has to be used.
+    information is not updated, update_position() has to be used.
     @return the number of bytes read or -1 on error or end."""
-    raise Exception('Interface method called')
+    raise Exception(interface_method_called)
 
-  def updatePosition(self, length):
+  def update_position(self, length):
     """Update the positioning information and discard the buffer
     data afterwards."""
-    raise Exception('Interface method called')
+    raise Exception(interface_method_called)
 
-  def getRepositioningData(self):
+  def get_repositioning_data(self):
     """Get the data for repositioning the stream. The returned
     structure has to be JSON serializable."""
-    raise Exception('Interface method called')
+    raise Exception(interface_method_called)
 
   def close(self):
     """Close this logdata resource. Data access methods will not
     work any more afterwards."""
-    raise Exception('Interface method called')
+    raise Exception(interface_method_called)
 
 
 class FileLogDataResource(LogDataResource):
@@ -87,143 +89,143 @@ class FileLogDataResource(LogDataResource):
   of the stream has to be possible."""
 
   def __init__(
-      self, logResourceName, logStreamFd, defaultBufferSize=1 << 16,
-      repositioningData=None):
+      self, log_resource_name, log_stream_fd, default_buffer_size=1 << 16,
+      repositioning_data=None):
     """Create a new file type resource.
-    @param logResourceName the unique name of this source as
+    @param log_resource_name the unique name of this source as
     bytes array, has to start with "file://" before the file
     path.
-    @param logStreamFd the stream for reading the resource or
+    @param log_stream_fd the stream for reading the resource or
     -1 if not yet opened.
-    @param repositioningData if not None, attemt to position the
+    @param repositioning_data if not None, attemt to position the
     the stream using the given data."""
-    if not logResourceName.startswith(b'file://'):
+    if not log_resource_name.startswith(b'file://'):
       raise Exception('Attempting to create different type resource as file')
-    self.logResourceName = logResourceName
-    self.logFileFd = logStreamFd
-    self.statData = None
-    if self.logFileFd >= 0:
-      self.statData = os.fstat(logStreamFd)
+    self.log_resource_name = log_resource_name
+    self.log_file_fd = log_stream_fd
+    self.stat_data = None
+    if self.log_file_fd >= 0:
+      self.stat_data = os.fstat(log_stream_fd)
     self.buffer = b''
-    self.defaultBufferSize = defaultBufferSize
-    self.totalConsumedLength = 0
+    self.default_buffer_size = default_buffer_size
+    self.total_consumed_length = 0
 # Create a hash for repositioning. There is no need to be cryptographically
 # secure here: if upstream can manipulate the content, to provoke
 # hash collisions, correct positioning would not matter anyway.
-    self.repositioningDigest = hashlib.md5()
+    self.repositioning_digest = hashlib.md5()
 
-    if (logStreamFd != -1) and (repositioningData != None):
-      if repositioningData[0] != self.statData.st_ino:
+    if (log_stream_fd != -1) and (repositioning_data != None):
+      if repositioning_data[0] != self.stat_data.st_ino:
         print('Not attempting to reposition on %s,' \
-            'inode number mismatch' % encodeByteStringAsString(self.logResourceName),
+            'inode number mismatch' % encode_byte_string_as_string(self.log_resource_name),
               file=sys.stderr)
-      elif repositioningData[1] > self.statData.st_size:
+      elif repositioning_data[1] > self.stat_data.st_size:
         print('Not attempting to reposition on %s,' \
-            'file size too small' % encodeByteStringAsString(self.logResourceName), file=sys.stderr)
+            'file size too small' % encode_byte_string_as_string(self.log_resource_name), file=sys.stderr)
       else:
-        hashAlgo = hashlib.md5()
-        length = repositioningData[1]
+        hash_algo = hashlib.md5()
+        length = repositioning_data[1]
         while length != 0:
           block = None
-          if length < defaultBufferSize:
-            block = os.read(self.logFileFd, length)
+          if length < default_buffer_size:
+            block = os.read(self.log_file_fd, length)
           else:
-            block = os.read(self.logFileFd, defaultBufferSize)
+            block = os.read(self.log_file_fd, default_buffer_size)
           if not block:
             print('Not attempting to reposition ' \
-                'on %s, file shrunk while reading' % encodeByteStringAsString(self.logResourceName),
+                'on %s, file shrunk while reading' % encode_byte_string_as_string(self.log_resource_name),
                   file=sys.stderr)
             break
-          hashAlgo.update(block)
+          hash_algo.update(block)
           length -= len(block)
-        digest = hashAlgo.digest()
+        digest = hash_algo.digest()
         if length == 0:
-          if digest == base64.b64decode(repositioningData[2]):
+          if digest == base64.b64decode(repositioning_data[2]):
 # Repositioning is OK, keep current digest and length data.
-            self.totalConsumedLength = repositioningData[1]
-            self.repositioningDigest = hashAlgo
+            self.total_consumed_length = repositioning_data[1]
+            self.repositioning_digest = hash_algo
           else:
             print('Not attempting to reposition ' \
-                'on %s, digest changed' % encodeByteStringAsString(self.logResourceName),
+                'on %s, digest changed' % encode_byte_string_as_string(self.log_resource_name),
                   file=sys.stderr)
             length = -1
         if length != 0:
 # Repositioning failed, go back to the beginning of the stream.
-          os.lseek(self.logFileFd, 0, os.SEEK_SET)
+          os.lseek(self.log_file_fd, 0, os.SEEK_SET)
 
-  def open(self, reopenFlag=False):
+  def open(self, reopen_flag=False):
     """Open the given resource.
-    @param reopenFlag when True, attempt to reopen the same resource
+    @param reopen_flag when True, attempt to reopen the same resource
     and check if it differs from the previously opened one.
     @raise Exception if valid logStreamFd was already provided,
     is still open and reopenFlag is False.
     @raise OSError when opening failed with unexpected error.
     @return True if the resource was really opened or False if
     opening was not yet possible but should be attempted again."""
-    if not reopenFlag and (self.logFileFd != -1):
+    if not reopen_flag and (self.log_file_fd != -1):
       raise Exception('Cannot reopen stream still open when not instructed to do so')
-    logFileFd = -1
-    statData = None
+    log_file_fd = -1
+    stat_data = None
     try:
-      logFileFd = SecureOSFunctions.secureOpenFile(
-          self.logResourceName[7:], os.O_RDONLY)
-      statData = os.fstat(logFileFd)
+      log_file_fd = SecureOSFunctions.secure_open_file(
+        self.log_resource_name[7:], os.O_RDONLY)
+      stat_data = os.fstat(log_file_fd)
     except OSError as openOsError:
-      if logFileFd != -1:
-        os.close(logFileFd)
+      if log_file_fd != -1:
+        os.close(log_file_fd)
       if openOsError.errno == errno.ENOENT:
         return False
       raise
-    if not stat.S_ISREG(statData.st_mode):
-      os.close(logFileFd)
+    if not stat.S_ISREG(stat_data.st_mode):
+      os.close(log_file_fd)
       raise Exception('Attempting to open non-regular file %s ' \
-          'as file' % encodeByteStringAsString(self.logResourceName))
+          'as file' % encode_byte_string_as_string(self.log_resource_name))
 
-    if (reopenFlag and (self.statData != None) and
-        (statData.st_ino == self.statData.st_ino) and
-        (statData.st_dev == self.statData.st_dev)):
+    if (reopen_flag and (self.stat_data != None) and
+        (stat_data.st_ino == self.stat_data.st_ino) and
+        (stat_data.st_dev == self.stat_data.st_dev)):
 # Reopening was requested, but we would reopen the file already
 # opened, which is of no use.
-      os.close(logFileFd)
+      os.close(log_file_fd)
       return False
 # This is a new file or a successful reopen attempt.
-    self.logFileFd = logFileFd
-    self.statData = statData
+    self.log_file_fd = log_file_fd
+    self.stat_data = stat_data
     return True
 
-  def getResourceName(self):
+  def get_resource_name(self):
     """Get the name of this log resoruce."""
-    return self.logResourceName
+    return self.log_resource_name
 
-  def getFileDescriptor(self):
+  def get_file_descriptor(self):
     """Get the file descriptor of this open resource."""
-    return self.logFileFd
+    return self.log_file_fd
 
-  def fillBuffer(self):
+  def fill_buffer(self):
     """Fill the buffer data of this resource. The repositioning
     information is not updated, updatePosition() has to be used.
     @return the number of bytes read or -1 on error or end."""
-    data = os.read(self.logFileFd, self.defaultBufferSize)
+    data = os.read(self.log_file_fd, self.default_buffer_size)
     self.buffer += data
     return len(data)
 
-  def updatePosition(self, length):
+  def update_position(self, length):
     """Update the positioning information and discard the buffer
     data afterwards."""
-    self.repositioningDigest.update(self.buffer[:length])
-    self.totalConsumedLength += length
+    self.repositioning_digest.update(self.buffer[:length])
+    self.total_consumed_length += length
     self.buffer = self.buffer[length:]
 
-  def getRepositioningData(self):
+  def get_repositioning_data(self):
     """Get the data for repositioning the stream. The returned
     structure has to be JSON serializable."""
     return [
-        self.statData.st_ino, self.totalConsumedLength,
-        base64.b64encode(self.repositioningDigest.digest())]
+        self.stat_data.st_ino, self.total_consumed_length,
+        base64.b64encode(self.repositioning_digest.digest())]
 
   def close(self):
-    os.close(self.logFileFd)
-    self.logFileFd = -1
+    os.close(self.log_file_fd)
+    self.log_file_fd = -1
 
 
 class UnixSocketLogDataResource(LogDataResource):
@@ -233,83 +235,83 @@ class UnixSocketLogDataResource(LogDataResource):
   was reached."""
 
   def __init__(
-      self, logResourceName, logStreamFd, defaultBufferSize=1 << 16,
-      repositioningData=None):
+      self, log_resource_name, log_stream_fd, default_buffer_size=1 << 16,
+      repositioning_data=None):
     """Create a new unix socket type resource.
-    @param logResourceName the unique name of this source as
+    @param log_resource_name the unique name of this source as
     byte array, has to start with "unix://" before the file
     path.
-    @param logStreamFd the stream for reading the resource or
+    @param log_stream_fd the stream for reading the resource or
     -1 if not yet opened.
-    @param repositioningData has to be None for this type of resource."""
-    if not logResourceName.startswith(b'unix://'):
+    @param repositioning_data has to be None for this type of resource."""
+    if not log_resource_name.startswith(b'unix://'):
       raise Exception('Attempting to create different type resource as unix')
-    self.logResourceName = logResourceName
-    self.logStreamFd = logStreamFd
+    self.log_resource_name = log_resource_name
+    self.log_stream_fd = log_stream_fd
     self.buffer = b''
-    self.defaultBufferSize = defaultBufferSize
-    self.totalConsumedLength = 0
+    self.default_buffer_size = default_buffer_size
+    self.total_consumed_length = 0
 
-  def open(self, reopenFlag=False):
+  def open(self, reopen_flag=False):
     """Open the given resource.
-    @param reopenFlag when True, attempt to reopen the same resource
+    @param reopen_flag when True, attempt to reopen the same resource
     and check if it differs from the previously opened one.
     @raise Exception if valid logStreamFd was already provided,
     is still open and reopenFlag is False.
     @raise OSError when opening failed with unexpected error.
     @return True if the resource was really opened or False if
     opening was not yet possible but should be attempted again."""
-    if reopenFlag:
-      if self.logStreamFd != -1:
+    if reopen_flag:
+      if self.log_stream_fd != -1:
         return False
-    elif self.logStreamFd != -1:
+    elif self.log_stream_fd != -1:
       raise Exception('Cannot reopen stream still open when not instructed to do so')
-    logSocket = None
+    log_socket = None
     try:
-      logSocket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-      logSocket.connect(self.logResourceName[7:])
+      log_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+      log_socket.connect(self.log_resource_name[7:])
     except socket.error as socketError:
-      if logSocket != None:
-        logSocket.close()
+      if log_socket != None:
+        log_socket.close()
       if (socketError.errno == errno.ENOENT) or (socketError.errno == errno.ECONNREFUSED):
         return False
 # Transform exception to OSError as caller does not expect something
 # else.
       raise OSError(socketError[0], socketError[1])
-    self.logStreamFd = os.dup(logSocket.fileno())
-    logSocket.close()
+    self.log_stream_fd = os.dup(log_socket.fileno())
+    log_socket.close()
     return True
 
-  def getResourceName(self):
+  def get_resource_name(self):
     """Get the name of this log resoruce."""
-    return self.logResourceName
+    return self.log_resource_name
 
-  def getFileDescriptor(self):
+  def get_file_descriptor(self):
     """Get the file descriptor of this open resource."""
-    return self.logStreamFd
+    return self.log_stream_fd
 
-  def fillBuffer(self):
+  def fill_buffer(self):
     """Fill the buffer data of this resource. The repositioning
     information is not updated, updatePosition() has to be used.
     @return the number of bytes read or -1 on error or end."""
-    data = os.read(self.logStreamFd, self.defaultBufferSize)
+    data = os.read(self.log_stream_fd, self.default_buffer_size)
     self.buffer += data
     return len(data)
 
-  def updatePosition(self, length):
+  def update_position(self, length):
     """Update the positioning information and discard the buffer
     data afterwards."""
-    self.totalConsumedLength += length
+    self.total_consumed_length += length
     self.buffer = self.buffer[length:]
 
-  def getRepositioningData(self):
+  def get_repositioning_data(self):
     """Get the data for repositioning the stream. The returned
     structure has to be JSON serializable."""
     return None
 
   def close(self):
-    os.close(self.logStreamFd)
-    self.logStreamFd = -1
+    os.close(self.log_stream_fd)
+    self.log_stream_fd = -1
 
 
 class LogStream(object):
@@ -317,19 +319,19 @@ class LogStream(object):
   a given source. This class also handles rollover from one file
   descriptor to a new one."""
 
-  def __init__(self, logDataResource, streamAtomizer):
+  def __init__(self, log_data_resource, stream_atomizer):
     """Create a new logstream with an initial logDataResource.
-    @param streamAtomizer the atomizer to forward data to."""
+    @param stream_atomizer the atomizer to forward data to."""
 # The resource currently processed. Might also be None when previous
 # resource was read till end and no rollover to new one had occured.
-    self.logDataResource = logDataResource
-    self.streamAtomizer = streamAtomizer
+    self.log_data_resource = log_data_resource
+    self.stream_atomizer = stream_atomizer
 # Last reading state, those are the same as returned by StreamAtomizer
 # consumeData() method. Start with state 0 (more data required).
-    self.lastConsumeState = 0
-    self.nextResources = []
+    self.last_consume_state = 0
+    self.next_resources = []
 
-  def addNextResource(self, nextLogDataResource):
+  def add_next_resource(self, next_log_data_resource):
     """Roll over from one fd to another one pointing to the newer
     version of the same file. This will also change reading behaviour
     of current resource to await EOF or stop as soon as first
@@ -337,28 +339,28 @@ class LogStream(object):
 # Just append the resource to the list of next resources. The
 # next read operation without any input from the primary resource
 # will pick it up automatically.
-    if self.logDataResource is None:
-      self.logDataResource = nextLogDataResource
+    if self.log_data_resource is None:
+      self.log_data_resource = next_log_data_resource
     else:
-      self.nextResources.append(nextLogDataResource)
+      self.next_resources.append(next_log_data_resource)
 
-  def handleStream(self):
+  def handle_stream(self):
     """Handle data from this stream by forwarding it to the atomizer.
     @return the file descriptor to monitoring for new input or
     -1 if there is no new data or atomizer was not yet ready to
     consume data. Handling should be tried again later on."""
 
-    if self.logDataResource is None:
+    if self.log_data_resource is None:
       return -1
-    if self.lastConsumeState == 0:
+    if self.last_consume_state == 0:
 # We need more data, read it.
-      readLength = self.logDataResource.fillBuffer()
-      if readLength == -1:
-        self.lastConsumeState = self.rollOver()
-        return self.lastConsumeState
+      read_length = self.log_data_resource.fill_buffer()
+      if read_length == -1:
+        self.last_consume_state = self.roll_over()
+        return self.last_consume_state
 
-      if readLength == 0:
-        if not self.nextResources:
+      if read_length == 0:
+        if not self.next_resources:
 # There is just no input, but we still need more since last round
 # as indicated by lastConsumeState. We would not have been called
 # if this is a blocking stream, so this must be the preliminiary
@@ -367,65 +369,62 @@ class LogStream(object):
           return -1
 
 # This seems to EOF for rollover.
-        self.lastConsumeState = self.rollOver()
-        return self.lastConsumeState
+        self.last_consume_state = self.roll_over()
+        return self.last_consume_state
 
 # So there was something read, process it the same way as if data
 # was already available in previous round.
-    self.lastConsumeState = self.streamAtomizer.consumeData(
-        self.logDataResource.buffer, False)
-    if self.lastConsumeState < 0:
+    self.last_consume_state = self.stream_atomizer.consume_data(
+        self.log_data_resource.buffer, False)
+    if self.last_consume_state < 0:
       return -1
-    if self.lastConsumeState != 0:
-      self.logDataResource.updatePosition(self.lastConsumeState)
-    return self.logDataResource.getFileDescriptor()
+    if self.last_consume_state != 0:
+      self.log_data_resource.update_position(self.last_consume_state)
+    return self.log_data_resource.get_file_descriptor()
 
-
-  def rollOver(self):
+  def roll_over(self):
     """End reading of the current resource and switch to the next.
     This method does not handle lastConsumeState, that has to
     be done outside.
     @return state in same manner as handleStream()"""
-    consumedLength = self.streamAtomizer.consumeData(
-        self.logDataResource.buffer, True)
-    if consumedLength < 0:
+    consumed_length = self.stream_atomizer.consume_data(
+        self.log_data_resource.buffer, True)
+    if consumed_length < 0:
 # Consumer is not ready to consume yet. Retry later on.
       return -1
-    if consumedLength != len(self.logDataResource.buffer):
-      if consumedLength != 0:
+    if consumed_length != len(self.log_data_resource.buffer):
+      if consumed_length != 0:
 # Some data consumed, unclear why not all when already at end
 # of stream. Retry again immediately to find out why.
-        self.logDataResource.updatePosition(consumedLength)
-        return self.logDataResource.getFileDescriptor()
+        self.log_data_resource.update_position(consumed_length)
+        return self.log_data_resource.get_file_descriptor()
 
 # This is a clear protocol violation (see StreamAtomizer documentaion):
 # When at EOF, 0 is no valid return value.
       print('FATAL: Procotol violation by %s detected, ' \
-          'flushing data' % self.streamAtomizer.__class__.__name__, file=sys.stderr)
-      consumedLength = len(self.logDataResource.buffer)
+          'flushing data' % self.stream_atomizer.__class__.__name__, file=sys.stderr)
+      consumed_length = len(self.log_data_resource.buffer)
 
 # Everything consumed, so now ready for rollover.
-    self.logDataResource.updatePosition(consumedLength)
-    self.logDataResource.close()
-    if not self.nextResources:
-      self.logDataResource = None
+    self.log_data_resource.update_position(consumed_length)
+    self.log_data_resource.close()
+    if not self.next_resources:
+      self.log_data_resource = None
       return -1
-    self.logDataResource = self.nextResources[0]
-    del self.nextResources[0]
-    return self.logDataResource.getFileDescriptor()
+    self.log_data_resource = self.next_resources[0]
+    del self.next_resources[0]
+    return self.log_data_resource.get_file_descriptor()
 
-
-  def getCurrentFd(self):
+  def get_current_fd(self):
     """Get the file descriptor for reading the currently active
     logdata resource."""
-    if self.logDataResource is None:
+    if self.log_data_resource is None:
       return -1
-    return self.logDataResource.getFileDescriptor()
+    return self.log_data_resource.get_file_descriptor()
 
-
-  def getRepositioningData(self):
+  def get_repositioning_data(self):
     """Get the respositioning information from the currently active
     underlying logdata resource."""
-    if self.logDataResource is None:
+    if self.log_data_resource is None:
       return None
-    return self.logDataResource.getRepositioningData()
+    return self.log_data_resource.get_repositioning_data()

@@ -223,7 +223,7 @@ During testing the "StreamPrinterEventHandler" is useful to get the aminer
 events printed to stdout. Therefore add:
 
 from aminer.events import StreamPrinterEventHandler
-anomalyEventHandlers.append(StreamPrinterEventHandler(analysisContext))
+anomalyEventHandlers.append(StreamPrinterEventHandler(analysisContext.aminerConfig))
 
 * Allow python code imports:
 

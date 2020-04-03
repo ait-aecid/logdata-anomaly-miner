@@ -13,32 +13,34 @@ class WhitelistViolationDetector(AtomHandlerInterface):
   tree more than once, the whitelist rules may have match actions
   attached that set off an alarm by themselves."""
 
-  def __init__(self, aminerConfig, whitelistRules, anomalyEventHandlers, outputLogLine=True):
+  def __init__(self, aminer_config, whitelist_rules, anomaly_event_handlers, output_log_line=True):
     """Initialize the detector.
-    @param whitelistRules list of rules executed in same way as
+    @param whitelist_rules list of rules executed in same way as
     inside Rules.OrMatchRule."""
-    self.whitelistRules = whitelistRules
-    self.anomalyEventHandlers = anomalyEventHandlers
-    self.outputLogLine = outputLogLine
-    self.aminerConfig = aminerConfig
+    self.whitelist_rules = whitelist_rules
+    self.anomaly_event_handlers = anomaly_event_handlers
+    self.output_log_line = output_log_line
+    self.aminer_config = aminer_config
+    self.persistence_id = None
 
-  def receiveAtom(self, logAtom):
+  def receive_atom(self, log_atom):
     """Receive on parsed atom and the information about the parser
     match.
-    @param logAtom atom with parsed data to check
+    @param log_atom atom with parsed data to check
     @return True when logAtom is whitelisted, False otherwise."""
-    for rule in self.whitelistRules:
-      if rule.match(logAtom):
+    event_data = dict()
+    for rule in self.whitelist_rules:
+      if rule.match(log_atom):
         return True
-    if self.outputLogLine:
-      originalLogLinePrefix = self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-      if originalLogLinePrefix is None:
-        originalLogLinePrefix = ''
-      sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')+os.linesep+ \
-        originalLogLinePrefix+repr(logAtom.rawData)]
+    if self.output_log_line:
+      original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+      if original_log_line_prefix is None:
+          original_log_line_prefix = ''
+      sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep +
+                          original_log_line_prefix + repr(log_atom.raw_data)]
     else:
-      sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')]
-    for listener in self.anomalyEventHandlers:
-      listener.receiveEvent('Analysis.%s' % self.__class__.__name__, \
-          'No whitelisting for current atom', sortedLogLines, logAtom, self)
+      sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('')]
+    for listener in self.anomaly_event_handlers:
+      listener.receive_event('Analysis.%s' % self.__class__.__name__, \
+          'No whitelisting for current atom', sorted_log_lines, event_data, log_atom, self)
     return False

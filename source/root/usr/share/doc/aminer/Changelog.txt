@@ -1,4 +1,4 @@
-V1.0.1 (2019-12-03):
+V1.0.1 (2019-07-11):
 ====================
 
 * Changes:
@@ -7,11 +7,6 @@ V1.0.1 (2019-12-03):
   * Added functions getNameByComponent and getIdByComponent to
     AnalysisChild.py
   * Update DefaultMailNotificationEventHandler.py to python3
-  * Add EventData.py to refactor output.
-  * Refactor and harmonize output of all classes.
-*Features:
-  * Added VerboseUnparsedAtomHandler that applies the DebugMatchContext to
-    unparsed log lines
 * Bugfixes including:
   * Fixed dependencies in Debian packaging
   * Fixed typo in various analysis components
@@ -25,6 +20,7 @@ V1.0.1 (2019-12-03):
     receiveAtom
   * Fixed timezone offset in ModuloTimeMatchRule
   * Minor bugfixes
+
 
 V1.0.0 (2018-10-02):
 ====================

@@ -15,49 +15,49 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
   time to time, add the writer object also to the time trigger
   list."""
 
-  def __init__(self, stream, matchValuePathList, separatorString, missingValueString):
+  def __init__(self, stream, match_value_path_list, separator_string, missing_value_string):
     """Initialize the writer."""
     self.stream = stream
-    self.matchValuePathList = matchValuePathList
-    self.separatorString = separatorString
-    self.missingValueString = missingValueString
+    self.match_value_path_list = match_value_path_list
+    self.separator_string = separator_string
+    self.missing_value_string = missing_value_string
 
-  def receiveAtom(self, logAtom):
+  def receive_atom(self, log_atom):
     """Forward match value information to the stream."""
-    matchDict = logAtom.parserMatch.getMatchDictionary()
-    addSepFlag = False
-    containsData = False
+    match_dict = log_atom.parser_match.get_match_dictionary()
+    add_sep_flag = False
+    contains_data = False
     result = b''
-    for path in self.matchValuePathList:
-      if addSepFlag:
-        result += self.separatorString
-      match = matchDict.get(path, None)
+    for path in self.match_value_path_list:
+      if add_sep_flag:
+        result += self.separator_string
+      match = match_dict.get(path, None)
       if match is None:
-        result += self.missingValueString
+        result += self.missing_value_string
       else:
-        result += match.matchString
-        containsData = True
-      addSepFlag = True
-    if containsData:
+        result += match.match_string
+        contains_data = True
+      add_sep_flag = True
+    if contains_data:
       if not isinstance(self.stream, _io.BytesIO):
-        self.stream.buffer.write(result)
-        self.stream.buffer.write(b'\n')
+        self.stream.write(result.decode('ascii', 'ignore'))
+        self.stream.write('\n')
       else:
         self.stream.write(result)
         self.stream.write(b'\n')
 
 
-  def getTimeTriggerClass(self):
+  def get_time_trigger_class(self):
     """Get the trigger class this component should be registered
     for. This trigger is used only for persistency, so real-time
     triggering is needed."""
     return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-  def doTimer(self, triggerTime):
+  def do_timer(self, trigger_time):
     """Flush the timer."""
     self.stream.flush()
     return 10
 
-  def doPersist(self):
+  def do_persist(self):
     """Flush the timer."""
     self.stream.flush()
