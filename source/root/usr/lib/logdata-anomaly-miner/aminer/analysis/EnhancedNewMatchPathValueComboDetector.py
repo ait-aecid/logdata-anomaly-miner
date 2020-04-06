@@ -84,18 +84,13 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
       match_value_list = self.tuple_transformation_function(match_value_list)
     match_value_tuple = tuple(match_value_list)
 
-    current_timestamp = log_atom.get_timestamp()
-    if current_timestamp is None:
-      current_timestamp = datetime.fromtimestamp(time.time()).strftime(self.date_string)
-    if not isinstance(current_timestamp, datetime) and not isinstance(current_timestamp, str):
-      current_timestamp = datetime.fromtimestamp(current_timestamp).strftime(self.date_string)
-    if isinstance(current_timestamp, datetime):
-      current_timestamp = current_timestamp.strftime(self.date_string)
+    if log_atom.get_timestamp() is None:
+      log_atom.set_timestamp(time.time())
     if self.known_values_dict.get(match_value_tuple, None) is None:
-      self.known_values_dict[match_value_tuple] = [current_timestamp, current_timestamp, 1]
+      self.known_values_dict[match_value_tuple] = [round(log_atom.get_timestamp(), 3), round(log_atom.get_timestamp(), 3), 1]
     else:
       extra_data = self.known_values_dict.get(match_value_tuple, None)
-      extra_data[1] = current_timestamp
+      extra_data[1] = round(log_atom.get_timestamp(), 3)
       extra_data[2] += 1
 
     affected_log_atom_values = []
