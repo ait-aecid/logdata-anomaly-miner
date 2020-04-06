@@ -89,7 +89,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
       check_result = rule.check_status(newest_timestamp)
       if check_result is None:
         continue
-      self.last_log_atom.atomTime = trigger_time
+      self.last_log_atom.set_timestamp(trigger_time)
       r = {}
       r['RuleId'] = rule.rule_id
       r['MinTimeDelta'] = rule.min_time_delta
@@ -314,6 +314,9 @@ class CorrelationRule:
     """Return a history entry for a parser match."""
     parser_match = log_atom.parser_match
     length = 4
+    if log_atom.get_timestamp() is None:
+      log_atom.set_timestamp(time.time())
+
     if self.artefact_match_parameters is not None:
       length += len(self.artefact_match_parameters)
     result = [None]*length
@@ -321,11 +324,6 @@ class CorrelationRule:
     result[1] = 0
     result[2] = selector
     result[3] = parser_match
-
-    if result[0] is None:
-      result[0] = datetime.fromtimestamp(time.time())
-    if isinstance(result[0], datetime):
-      result[0] = (result[0]-datetime.fromtimestamp(0)).total_seconds()
 
     if result[0] < self.last_timestamp_seen:
       raise Exception('Unsorted!')
