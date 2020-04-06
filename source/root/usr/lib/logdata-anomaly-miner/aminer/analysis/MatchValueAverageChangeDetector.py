@@ -59,6 +59,9 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
     value_dict = parser_match.get_match_dictionary()
     event_data = dict()
 
+    if log_atom.get_timestamp() is None:
+      log_atom.set_timestamp(time.time())
+
     timestamp_value = log_atom.get_timestamp()
     if self.timestamp_path is not None:
       match_value = value_dict.get(self.timestamp_path)
@@ -73,10 +76,10 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
       for (path, stat_data) in self.stat_data:
         match = value_dict.get(path, None)
         if match is None:
-          ready_for_analysis_flag = (ready_for_analysis_flag and self.update(stat_data, \
+          ready_for_analysis_flag = (ready_for_analysis_flag and self.update(stat_data,
             timestamp_value, None))
         else:
-          ready_for_analysis_flag = (ready_for_analysis_flag and self.update(stat_data, \
+          ready_for_analysis_flag = (ready_for_analysis_flag and self.update(stat_data,
             timestamp_value, match.match_object))
 
       if ready_for_analysis_flag:
@@ -122,9 +125,8 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
       res = [''] * stat_data[2][0]
       res[0] = analysis_summary
       for listener in self.anomaly_event_handlers:
-        listener.receive_event('Analysis.%s' % self.__class__.__name__, \
-            'Statistical data report', res, event_data, log_atom, \
-                               self)
+        listener.receive_event('Analysis.%s' % self.__class__.__name__,
+            'Statistical data report', res, event_data, log_atom, self)
 
 
   def get_time_trigger_class(self):
