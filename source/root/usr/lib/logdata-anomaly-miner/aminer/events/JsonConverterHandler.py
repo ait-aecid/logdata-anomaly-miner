@@ -32,7 +32,7 @@ class JsonConverterHandler(EventHandlerInterface):
       log_atom.set_timestamp(time.time())
     log_data['Timestamp'] = round(log_atom.atom_time, 2)
     log_data['LogLinesCount'] = len(sorted_log_lines)
-    if log_atom.parser_match is not None and hasattr(event_source, 'auto_include_flag') and event_source.auto_include_flag:
+    if log_atom.parser_match is not None and hasattr(event_source, 'output_log_line') and event_source.output_log_line:
       log_data['AnnotatedMatchElement'] = log_atom.parser_match.match_element.annotate_match('')
 
     analysis_component = dict()

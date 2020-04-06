@@ -7,7 +7,6 @@ import os
 
 from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
 from aminer.util import PersistencyUtil
-from datetime import datetime
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
 class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
@@ -116,6 +115,22 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         if original_log_line_prefix is None:
           original_log_line_prefix = ''
         if self.output_log_line:
+          match_paths_values = {}
+          for match_path, match_element in match_dict.items():
+            match_value = match_element.match_object
+            from datetime import datetime
+            if isinstance(match_value, tuple):
+              l = []
+              for i, val in enumerate(match_value):
+                if isinstance(match_value[i], datetime):
+                  l.append(datetime.timestamp(match_value[i]))
+                else:
+                  l.append(match_value[i])
+              match_value = l
+            if isinstance(match_value, bytes):
+              match_value = match_value.decode()
+            match_paths_values[match_path] = match_value
+          analysis_component['ParsedLogAtom'] = match_paths_values
           sorted_log_lines = [str(self.known_values_dict) + os.linesep +
                             original_log_line_prefix + repr(log_atom.raw_data)]
         else:
@@ -148,7 +163,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
       raise Exception('Event not from this source')
     if whitelisting_data != None:
       raise Exception('Whitelisting data not understood by this detector')
-    current_timestamp = datetime.fromtimestamp(event_data[0].get_timestamp()).strftime(self.date_string)
+    current_timestamp = event_data[0].get_timestamp()
     self.known_values_dict[event_data[1]] = [
         current_timestamp, current_timestamp, 1]
     return 'Whitelisted path(es) %s with %s in %s' % (
