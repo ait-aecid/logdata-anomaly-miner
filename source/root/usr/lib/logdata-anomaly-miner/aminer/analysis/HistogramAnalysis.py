@@ -258,7 +258,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
   def __init__(self, aminer_config, histogram_defs, report_interval,
                report_event_handlers, reset_after_report_flag=True,
-               persistence_id='Default'):
+               persistence_id='Default', output_log_line=True):
     """Initialize the analysis component.
     @param histogram_defs is a list of tuples containing the target
     property path to analyze and the BinDefinition to apply for
@@ -277,6 +277,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
     self.reset_after_report_flag = reset_after_report_flag
     self.persistence_id = persistence_id
     self.next_persist_time = None
+    self.output_log_line = output_log_line
 
     PersistencyUtil.add_persistable_component(self)
     self.persistenceFileName = AMinerConfig.build_persistence_file_name(
@@ -340,6 +341,10 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
     if self.last_report_time is not None:
       report_str += 'from %s ' % datetime.fromtimestamp(self.last_report_time).strftime(date_string)
     report_str += 'till %s' % datetime.fromtimestamp(timestamp).strftime(date_string)
+    affected_log_atom_pathes = []
+    for histogramData in self.histogram_data:
+      affected_log_atom_pathes.append(histogramData.property_path)
+    event_data['AffectedLogAtomPathes'] = affected_log_atom_pathes
     res = []
     h = []
     for data_item in self.histogram_data:
@@ -353,18 +358,19 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
       d['BinnedElements'] = data_item.binned_elements
       d['HasOutlierBinsFlag'] = data_item.has_outlier_bins_flag
       d['Bins'] = bins
-      bin_definition = {}
-      bin_definition['Type'] = str(data_item.bin_definition.__class__.__name__)
-      bin_definition['LowerLimit'] = data_item.bin_definition.lower_limit
-      bin_definition['BinSize'] = data_item.bin_definition.bin_size
-      bin_definition['BinCount'] = data_item.bin_definition.bin_count
-      bin_definition['OutlierBinsFlag'] = data_item.bin_definition.outlier_bins_flag
-      bin_definition['BinNames'] = data_item.bin_definition.bin_names
-      bin_definition['ExpectedBinRatio'] = data_item.bin_definition.expected_bin_ratio
-      if isinstance(data_item.bin_definition, ModuloTimeBinDefinition):
-        bin_definition['ModuloValue'] = data_item.bin_definition.modulo_value
-        bin_definition['TimeUnit'] = data_item.bin_definition.time_unit
-      d['BinDefinition'] = bin_definition
+      if self.output_log_line:
+        bin_definition = {}
+        bin_definition['Type'] = str(data_item.bin_definition.__class__.__name__)
+        bin_definition['LowerLimit'] = data_item.bin_definition.lower_limit
+        bin_definition['BinSize'] = data_item.bin_definition.bin_size
+        bin_definition['BinCount'] = data_item.bin_definition.bin_count
+        bin_definition['OutlierBinsFlag'] = data_item.bin_definition.outlier_bins_flag
+        bin_definition['BinNames'] = data_item.bin_definition.bin_names
+        bin_definition['ExpectedBinRatio'] = data_item.bin_definition.expected_bin_ratio
+        if isinstance(data_item.bin_definition, ModuloTimeBinDefinition):
+          bin_definition['ModuloValue'] = data_item.bin_definition.modulo_value
+          bin_definition['TimeUnit'] = data_item.bin_definition.time_unit
+        d['BinDefinition'] = bin_definition
       d['PropertyPath'] = data_item.property_path
       for line in data_item.to_string('  ').split('\n'):
         report_str += os.linesep+line
@@ -529,7 +535,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
       report_str += 'from %s ' % datetime.fromtimestamp(self.last_report_time).strftime(date_string)
     report_str += 'till %s' % datetime.fromtimestamp(timestamp).strftime(date_string)
     all_path_set = set(self.histogram_data.keys())
-    event_data['AllPathList'] = list(all_path_set)
+    event_data['AffectedLogAtomPathes'] = list(all_path_set)
     res = []
     h = []
     while all_path_set:
