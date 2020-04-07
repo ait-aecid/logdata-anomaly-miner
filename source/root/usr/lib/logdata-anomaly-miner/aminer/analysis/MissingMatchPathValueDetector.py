@@ -13,6 +13,7 @@ from aminer.util import TimeTriggeredComponentInterface
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 from datetime import datetime
 
+
 class MissingMatchPathValueDetector(
     AtomHandlerInterface, TimeTriggeredComponentInterface,
     EventSourceInterface):
@@ -146,6 +147,7 @@ class MissingMatchPathValueDetector(
       if missing_value_list:
         message_part = []
         affected_log_atom_values = []
+        event_data['AffectedLogAtomPathes'] = list(log_atom.parser_match.get_match_dictionary())
         for value, overdue_time, interval in missing_value_list:
           e = {}
           if self.__class__.__name__ == 'MissingMatchPathValueDetector':
@@ -162,6 +164,14 @@ class MissingMatchPathValueDetector(
           e['Interval'] = interval
           affected_log_atom_values.append(e)
         analysis_component = dict()
+        if self.output_log_line:
+          match_paths_values = {}
+          for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
+            match_value = match_element.match_object
+            if isinstance(match_value, bytes):
+              match_value = match_value.decode()
+            match_paths_values[match_path] = match_value
+          analysis_component['ParsedLogAtom'] = match_paths_values
         analysis_component['AffectedLogAtomValues'] = affected_log_atom_values
         event_data['AnalysisComponent'] = analysis_component
         if self.output_log_line:
