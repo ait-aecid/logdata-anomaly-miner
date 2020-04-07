@@ -406,7 +406,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
 
   def __init__(self, aminer_config, property_path, bin_definition,
                report_interval, report_event_handlers, reset_after_report_flag=True,
-               persistence_id='Default'):
+               persistence_id='Default', output_log_line=True):
     """Initialize the analysis component.
     @param report_interval delay in seconds between creation of two
     reports. The parameter is applied to the parsed record data
@@ -422,6 +422,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
     self.reset_after_report_flag = reset_after_report_flag
     self.persistence_id = persistence_id
     self.next_persist_time = None
+    self.output_log_line = output_log_line
 
     PersistencyUtil.add_persistable_component(self)
     self.persistence_file_name = AMinerConfig.build_persistence_file_name(
@@ -552,18 +553,19 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
       d['BinnedElements'] = data_item.binned_elements
       d['HasOutlierBinsFlag'] = data_item.has_outlier_bins_flag
       d['Bins'] = bins
-      bin_definition = {}
-      bin_definition['Type'] = str(data_item.bin_definition.__class__.__name__)
-      bin_definition['LowerLimit'] = data_item.bin_definition.lower_limit
-      bin_definition['BinSize'] = data_item.bin_definition.bin_size
-      bin_definition['BinCount'] = data_item.bin_definition.bin_count
-      bin_definition['OutlierBinsFlag'] = data_item.bin_definition.outlier_bins_flag
-      bin_definition['BinNames'] = data_item.bin_definition.bin_names
-      bin_definition['ExpectedBinRatio'] = data_item.bin_definition.expected_bin_ratio
-      if isinstance(data_item.bin_definition, ModuloTimeBinDefinition):
-        bin_definition['ModuloValue'] = data_item.bin_definition.modulo_value
-        bin_definition['TimeUnit'] = data_item.bin_definition.time_unit
-      d['BinDefinition'] = bin_definition
+      if self.output_log_line:
+        bin_definition = {}
+        bin_definition['Type'] = str(data_item.bin_definition.__class__.__name__)
+        bin_definition['LowerLimit'] = data_item.bin_definition.lower_limit
+        bin_definition['BinSize'] = data_item.bin_definition.bin_size
+        bin_definition['BinCount'] = data_item.bin_definition.bin_count
+        bin_definition['OutlierBinsFlag'] = data_item.bin_definition.outlier_bins_flag
+        bin_definition['BinNames'] = data_item.bin_definition.bin_names
+        bin_definition['ExpectedBinRatio'] = data_item.bin_definition.expected_bin_ratio
+        if isinstance(data_item.bin_definition, ModuloTimeBinDefinition):
+          bin_definition['ModuloValue'] = data_item.bin_definition.modulo_value
+          bin_definition['TimeUnit'] = data_item.bin_definition.time_unit
+        d['BinDefinition'] = bin_definition
       d['PropertyPath'] = data_item.propertyPath
       report_str += os.linesep+'Path values "%s":' % '", "'.join(histogram_mapping[0])
       if isinstance(histogram_mapping[2].match_element.match_string, bytes):
