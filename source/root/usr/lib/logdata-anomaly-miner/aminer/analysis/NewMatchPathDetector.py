@@ -12,12 +12,12 @@ from aminer.util import PersistencyUtil
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
 
-class NewMatchPathDetector(AtomHandlerInterface, \
+class NewMatchPathDetector(AtomHandlerInterface,
     TimeTriggeredComponentInterface, EventSourceInterface):
   """This class creates events when new data path was found in
   a parsed atom."""
 
-  def __init__(self, aminer_config, anomaly_event_handlers, \
+  def __init__(self, aminer_config, anomaly_event_handlers,
                persistence_id='Default', auto_include_flag=False, output_log_line=True):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location."""
@@ -65,7 +65,15 @@ class NewMatchPathDetector(AtomHandlerInterface, \
       else:
         sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('')]
       analysis_component = dict()
-      analysis_component['AffectedParserPaths'] = list(unknown_path_list)
+      if self.output_log_line:
+        match_paths_values = {}
+        for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
+          match_value = match_element.match_object
+          if isinstance(match_value, bytes):
+            match_value = match_value.decode()
+          match_paths_values[match_path] = match_value
+        analysis_component['ParsedLogAtom'] = match_paths_values
+      analysis_component['AffectedLogAtomPaths'] = list(unknown_path_list)
       event_data['AnalysisComponent'] = analysis_component
       for listener in self.anomaly_event_handlers:
         listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New path(es) detected',
