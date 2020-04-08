@@ -98,6 +98,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
 
       analysis_component = dict()
       analysis_component['AffectedLogAtomPathes'] = list(log_atom.parser_match.get_match_dictionary())
+      analysis_component['AffectedLogAtomValues'] = [log_atom.raw_data.decode()]
       if self.output_log_line:
         match_paths_values = {}
         for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():

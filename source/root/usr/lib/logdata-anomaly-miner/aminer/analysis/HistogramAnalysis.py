@@ -565,6 +565,8 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
         match_paths_values = {}
         for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
           match_value = match_element.match_object
+          if isinstance(match_value, datetime):
+            match_value = match_value.timestamp()
           if isinstance(match_value, bytes):
             match_value = match_value.decode()
           match_paths_values[match_path] = match_value

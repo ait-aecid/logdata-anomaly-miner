@@ -31,8 +31,6 @@ class WhitelistViolationDetector(AtomHandlerInterface):
     @param log_atom atom with parsed data to check
     @return True when logAtom is whitelisted, False otherwise."""
     event_data = dict()
-    match_dict = log_atom.parser_match.get_match_dictionary()
-    print(match_dict)
     for rule in self.whitelist_rules:
       if rule.match(log_atom):
         return True
