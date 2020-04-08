@@ -344,7 +344,6 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
     affected_log_atom_pathes = []
     for histogramData in self.histogram_data:
       affected_log_atom_pathes.append(histogramData.property_path)
-    event_data['AffectedLogAtomPathes'] = affected_log_atom_pathes
     res = []
     h = []
     for data_item in self.histogram_data:
@@ -359,6 +358,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
       d['HasOutlierBinsFlag'] = data_item.has_outlier_bins_flag
       d['Bins'] = bins
       analysis_component = dict()
+      analysis_component['AffectedLogAtomPathes'] = affected_log_atom_pathes
       if self.output_log_line:
         bin_definition = {}
         bin_definition['Type'] = str(data_item.bin_definition.__class__.__name__)
@@ -543,7 +543,8 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
       report_str += 'from %s ' % datetime.fromtimestamp(self.last_report_time).strftime(date_string)
     report_str += 'till %s' % datetime.fromtimestamp(timestamp).strftime(date_string)
     all_path_set = set(self.histogram_data.keys())
-    event_data['AffectedLogAtomPathes'] = list(all_path_set)
+    analysis_component = dict()
+    analysis_component['AffectedLogAtomPathes'] = list(all_path_set)
     res = []
     h = []
     while all_path_set:
@@ -560,8 +561,14 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
       d['BinnedElements'] = data_item.binned_elements
       d['HasOutlierBinsFlag'] = data_item.has_outlier_bins_flag
       d['Bins'] = bins
-      analysis_component = dict()
       if self.output_log_line:
+        match_paths_values = {}
+        for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
+          match_value = match_element.match_object
+          if isinstance(match_value, bytes):
+            match_value = match_value.decode()
+          match_paths_values[match_path] = match_value
+        analysis_component['ParsedLogAtom'] = match_paths_values
         bin_definition = {}
         bin_definition['Type'] = str(data_item.bin_definition.__class__.__name__)
         bin_definition['LowerLimit'] = data_item.bin_definition.lower_limit
@@ -574,13 +581,6 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
           bin_definition['ModuloValue'] = data_item.bin_definition.modulo_value
           bin_definition['TimeUnit'] = data_item.bin_definition.time_unit
         d['BinDefinition'] = bin_definition
-        match_paths_values = {}
-        for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
-          match_value = match_element.match_object
-          if isinstance(match_value, bytes):
-            match_value = match_value.decode()
-          match_paths_values[match_path] = match_value
-        analysis_component['ParsedLogAtom'] = match_paths_values
       d['PropertyPath'] = data_item.propertyPath
       report_str += os.linesep+'Path values "%s":' % '", "'.join(histogram_mapping[0])
       if isinstance(histogram_mapping[2].match_element.match_string, bytes):
@@ -594,8 +594,8 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
         res[0] = report_str
       all_path_set.discard(path)
       h.append(d)
-    analysis_component['HistogramData'] = h
     analysis_component['MissingPathes'] = list(histogram_mapping[0])
+    analysis_component['HistogramData'] = h
     analysis_component['ReportInterval'] = self.report_interval
     analysis_component['ResetAfterReportFlag'] = self.reset_after_report_flag
     event_data['AnalysisComponent'] = analysis_component

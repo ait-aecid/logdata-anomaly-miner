@@ -84,7 +84,6 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             timestamp_value, match.match_object))
 
       if ready_for_analysis_flag:
-        event_data['AffectedLogAtomPathes'] = list(value_dict)
         anomaly_scores = []
         for (path, stat_data) in self.stat_data:
           analysis_data = self.analyze(stat_data)
@@ -110,6 +109,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
               analysis_summary += '  "%s": %s' % (path, analysis_data[0])
             anomaly_scores.append(d)
         analysis_component = dict()
+        analysis_component['AffectedLogAtomPathes'] = list(value_dict)
         if self.output_log_line:
           match_paths_values = {}
           for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():

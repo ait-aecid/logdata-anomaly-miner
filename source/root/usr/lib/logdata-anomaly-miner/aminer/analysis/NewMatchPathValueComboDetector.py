@@ -13,6 +13,7 @@ from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
+
 class NewMatchPathValueComboDetector(
     AtomHandlerInterface, TimeTriggeredComponentInterface,
     EventSourceInterface):
@@ -90,9 +91,17 @@ class NewMatchPathValueComboDetector(
           self.next_persist_time = time.time() + 600
 
       analysis_component = dict()
+      analysis_component['AffectedLogAtomPaths'] = self.target_path_list
       analysis_component['AffectedLogAtomValues'] = affected_log_atom_values
       event_data['AnalysisComponent'] = analysis_component
       if self.output_log_line:
+        match_paths_values = {}
+        for match_path, match_element in match_dict.items():
+          match_value = match_element.match_object
+          if isinstance(match_value, bytes):
+            match_value = match_value.decode()
+          match_paths_values[match_path] = match_value
+        analysis_component['ParsedLogAtom'] = match_paths_values
         original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
         if original_log_line_prefix is None:
           original_log_line_prefix = ''

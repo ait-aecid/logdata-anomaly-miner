@@ -107,6 +107,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     affected_log_atom_values.append(l)
 
     analysis_component = dict()
+    analysis_component['AffectedLogAtomPaths'] = self.target_path_list
     analysis_component['AffectedLogAtomValues'] = affected_log_atom_values
     event_data['AnalysisComponent'] = analysis_component
     if (self.auto_include_flag and self.known_values_dict.get(match_value_tuple, None)[2] is 1) or not self.auto_include_flag:

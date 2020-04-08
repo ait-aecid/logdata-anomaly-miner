@@ -10,6 +10,7 @@ from aminer.input import AtomHandlerInterface
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.util import PersistencyUtil
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
+from datetime import datetime
 
 
 class NewMatchPathDetector(AtomHandlerInterface,
@@ -65,15 +66,24 @@ class NewMatchPathDetector(AtomHandlerInterface,
       else:
         sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('')]
       analysis_component = dict()
+      analysis_component['AffectedLogAtomPaths'] = list(unknown_path_list)
+      analysis_component['AffectedLogAtomValues'] = [log_atom.raw_data.decode()]
       if self.output_log_line:
         match_paths_values = {}
         for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
           match_value = match_element.match_object
+          if isinstance(match_value, tuple):
+            l = []
+            for i, val in enumerate(match_value):
+              if isinstance(match_value[i], datetime):
+                l.append(datetime.timestamp(match_value[i]))
+              else:
+                l.append(match_value[i])
+            match_value = l
           if isinstance(match_value, bytes):
             match_value = match_value.decode()
           match_paths_values[match_path] = match_value
         analysis_component['ParsedLogAtom'] = match_paths_values
-      analysis_component['AffectedLogAtomPaths'] = list(unknown_path_list)
       event_data['AnalysisComponent'] = analysis_component
       for listener in self.anomaly_event_handlers:
         listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New path(es) detected',
