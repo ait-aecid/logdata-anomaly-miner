@@ -18,8 +18,8 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
   it creates an event including the rules. This is useful to implement
   checks as depicted in http://dx.doi.org/10.1016/j.cose.2014.09.006."""
 
-  def __init__(self, aminer_config, parallel_check_count, correlation_test_count, \
-               max_fail_count, anomaly_event_handlers, persistence_id='Default', record_count_before_event=0x10000):
+  def __init__(self, aminer_config, parallel_check_count, correlation_test_count, max_fail_count,
+          anomaly_event_handlers, persistence_id='Default', record_count_before_event=0x10000, output_log_line=True):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location.
     @param parallel_check_count number of rule detection checks
@@ -39,6 +39,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
     self.total_records = 0
     self.record_count_before_event = record_count_before_event
     self.persistence_id = persistence_id
+    self.output_log_line = output_log_line
 
     PersistencyUtil.add_persistable_component(self)
     self.persistence_file_name = AMinerConfig.build_persistence_file_name(
@@ -95,19 +96,35 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
       result = self.total_records * ['']
       result[0] = self.analysis_status_to_string()
 
-      feature_list = []
-      for feature in self.feature_list:
-        l = {}
-        r = self.rule_to_dict(feature.rule)
-        l['Rule'] = r
-        l['Index'] = feature.index
-        l['CreationTime'] = feature.creation_time
-        l['LastTriggerTime'] = feature.last_trigger_time
-        l['TriggerCount'] = feature.trigger_count
-        feature_list.append(l)
-
       analysis_component = dict()
-      analysis_component['FeatureList'] = feature_list
+      analysis_component['AffectedLogAtomPathes'] = list(log_atom.parser_match.get_match_dictionary())
+      if self.output_log_line:
+        match_paths_values = {}
+        for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
+          match_value = match_element.match_object
+          if isinstance(match_value, tuple):
+            l = []
+            for i, val in enumerate(match_value):
+              if isinstance(match_value[i], datetime):
+                l.append(datetime.timestamp(match_value[i]))
+              else:
+                l.append(match_value[i])
+            match_value = l
+          if isinstance(match_value, bytes):
+            match_value = match_value.decode()
+          match_paths_values[match_path] = match_value
+        analysis_component['ParsedLogAtom'] = match_paths_values
+        feature_list = []
+        for feature in self.feature_list:
+          l = {}
+          r = self.rule_to_dict(feature.rule)
+          l['Rule'] = r
+          l['Index'] = feature.index
+          l['CreationTime'] = feature.creation_time
+          l['LastTriggerTime'] = feature.last_trigger_time
+          l['TriggerCount'] = feature.trigger_count
+          feature_list.append(l)
+        analysis_component['FeatureList'] = feature_list
       analysis_component['AnalysisStatus'] = result[0]
       analysis_component['TotalRecords'] = self.total_records
 
