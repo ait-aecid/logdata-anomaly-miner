@@ -84,14 +84,19 @@ def build_analysis_pipeline(analysis_context):
           parserModelDict[item['id']] = func()
 
   argslist = list()
-
-  func = getattr(__import__("aminer.parsing", fromlist=[start['type']]),start['type'])
-  if isinstance(start['args'],list):
-      for i in parserModelDict:
-          argslist.append(parserModelDict[i])
-      parsingModel = func(start['name'],argslist)
+  if start['type'].endswith('ModelElement'):
+    func = getattr(__import__("aminer.parsing", fromlist=[start['type']]),start['type'])
   else:
-      parsingModel = func(start['name'],[parserModelDict[start['args']]])
+    func =  getattr(__import__(start['type']),'get_model')
+  try:
+    if isinstance(start['args'],list):
+        for i in parserModelDict:
+            argslist.append(parserModelDict[i])
+        parsingModel = func(start['name'],argslist)
+    else:
+        parsingModel = func(start['name'],[parserModelDict[start['args']]])
+  except:
+    parsingModel = func(start['name'])
           
 
 # Some generic imports.

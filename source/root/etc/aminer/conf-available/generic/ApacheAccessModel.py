@@ -19,7 +19,7 @@ def get_model(time_model=None):
   version_model = VariableByteDataModelElement('version', b'0123456789.')
   status_code_model = DecimalIntegerValueModelElement('status')
   size_model = DecimalIntegerValueModelElement('size')
-  user_agent_model = VariableByteDataModelElement('useragent', b'0123456789abcdefghijklmnopqrstuvwxyz.-/()[]{}!$%&=<?*+')
+  user_agent_model = VariableByteDataModelElement('useragent', b'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-/()[]{}!$%&=<?*+ ')
 
   whitespace_str = b' '
   model = SequenceModelElement('accesslog', [
