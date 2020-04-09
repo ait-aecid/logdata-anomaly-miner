@@ -67,7 +67,6 @@ class NewMatchPathDetector(AtomHandlerInterface,
         sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('')]
       analysis_component = dict()
       analysis_component['AffectedLogAtomPaths'] = list(unknown_path_list)
-      analysis_component['AffectedLogAtomValues'] = [log_atom.raw_data.decode()]
       if self.output_log_line:
         match_paths_values = {}
         for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():

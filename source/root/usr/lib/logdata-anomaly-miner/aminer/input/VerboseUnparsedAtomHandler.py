@@ -21,8 +21,14 @@ class VerboseUnparsedAtomHandler(AtomHandlerInterface):
     match_context = DebugMatchContext(log_atom.raw_data)
     self.parsing_model.get_match_element('', match_context)
     event_data = dict()
+    debug_info = match_context.get_debug_info()
+    debug_lines = []
+    for line in debug_info.split('\n'):
+      if line == '':
+        continue
+      debug_lines.append(line.strip())
+    event_data['DebugLog'] = debug_lines
     for listener in self.event_handlers:
-      listener.receive_event('Input.VerboseUnparsedAtomHandler', \
-          'Unparsed atom received\n%s\n' % (match_context.get_debug_info()), \
-          [log_atom.raw_data], event_data, log_atom, self)
+      listener.receive_event('Input.VerboseUnparsedAtomHandler', 'Unparsed atom received',
+        [debug_info + log_atom.raw_data.decode()], event_data, log_atom, self)
     return True
