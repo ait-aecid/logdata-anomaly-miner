@@ -135,7 +135,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
           sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + str(self.known_values_dict)
                               + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
         else:
-          sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + str(self.known_values_dict)]
+          sorted_log_lines = [str(self.known_values_dict) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
         listener.receive_event(
           'Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected',
           sorted_log_lines, event_data, log_atom, self)

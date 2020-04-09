@@ -37,6 +37,9 @@ class WhitelistViolationDetector(AtomHandlerInterface):
     analysis_component = dict()
     analysis_component['AffectedLogAtomPathes'] = list(log_atom.parser_match.get_match_dictionary())
     analysis_component['AffectedLogAtomValues'] = [log_atom.raw_data.decode()]
+    original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+    if original_log_line_prefix is None:
+      original_log_line_prefix = ''
     if self.output_log_line:
       match_paths_values = {}
       for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
@@ -53,13 +56,10 @@ class WhitelistViolationDetector(AtomHandlerInterface):
           match_value = match_value.decode()
         match_paths_values[match_path] = match_value
       analysis_component['ParsedLogAtom'] = match_paths_values
-      original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-      if original_log_line_prefix is None:
-          original_log_line_prefix = ''
       sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep +
                           original_log_line_prefix + repr(log_atom.raw_data)]
     else:
-      sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('')]
+      sorted_log_lines = [original_log_line_prefix + repr(log_atom.raw_data)]
     event_data['AnalysisComponent'] = analysis_component
     for listener in self.anomaly_event_handlers:
       listener.receive_event('Analysis.%s' % self.__class__.__name__,

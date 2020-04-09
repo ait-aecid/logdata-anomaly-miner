@@ -57,14 +57,14 @@ class NewMatchPathDetector(AtomHandlerInterface,
     if unknown_path_list:
       if self.next_persist_time is None:
         self.next_persist_time = time.time() + 600
+      original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+      if original_log_line_prefix is None:
+        original_log_line_prefix = ''
       if self.output_log_line:
-        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-        if original_log_line_prefix is None:
-          original_log_line_prefix = ''
-        sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep +
+        sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + repr(unknown_path_list) + os.linesep +
                             original_log_line_prefix + repr(log_atom.raw_data)]
       else:
-        sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('')]
+        sorted_log_lines = [repr(unknown_path_list) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
       analysis_component = dict()
       analysis_component['AffectedLogAtomPaths'] = list(unknown_path_list)
       if self.output_log_line:

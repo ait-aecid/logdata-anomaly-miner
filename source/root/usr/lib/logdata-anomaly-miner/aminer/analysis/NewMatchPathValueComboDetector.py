@@ -94,6 +94,9 @@ class NewMatchPathValueComboDetector(
       analysis_component['AffectedLogAtomPaths'] = self.target_path_list
       analysis_component['AffectedLogAtomValues'] = affected_log_atom_values
       event_data['AnalysisComponent'] = analysis_component
+      original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+      if original_log_line_prefix is None:
+        original_log_line_prefix = ''
       if self.output_log_line:
         match_paths_values = {}
         for match_path, match_element in match_dict.items():
@@ -102,13 +105,10 @@ class NewMatchPathValueComboDetector(
             match_value = match_value.decode()
           match_paths_values[match_path] = match_value
         analysis_component['ParsedLogAtom'] = match_paths_values
-        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-        if original_log_line_prefix is None:
-          original_log_line_prefix = ''
         sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep +
                             str(match_value_tuple) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
       else:
-        sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + str(match_value_tuple)]
+        sorted_log_lines = [str(match_value_tuple) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
       for listener in self.anomaly_event_handlers:
         listener.receive_event(
             'Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected',
