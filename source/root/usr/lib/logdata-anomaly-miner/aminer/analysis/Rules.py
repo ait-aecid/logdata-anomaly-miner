@@ -364,10 +364,9 @@ class ModuloTimeMatchRule(MatchRule):
       test_value = log_atom.get_timestamp()
     else:
       time_match = log_atom.parser_match.get_match_dictionary().get(self.path, None)
-      if ((time_match is None) or not isinstance(time_match.match_object, tuple) or
-          not isinstance(time_match.match_object[0], datetime.datetime)):
+      if ((time_match is None)):
         return False
-      test_value = time_match.match_object[1] + datetime.datetime.now(self.tzinfo).utcoffset().total_seconds()
+      test_value = time_match.match_object + datetime.datetime.now(self.tzinfo).utcoffset().total_seconds()
     
     if test_value is None:
       return False
@@ -413,7 +412,7 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
         value_list.append(None)
       else:
         value_list.append(value_element.match_object)
-    limits = self.limit_lookup_dict.get(tuple(value_list)[0], self.default_limit)
+    limits = self.limit_lookup_dict.get(value_list[0], self.default_limit)
     if limits is None:
       return False
 
@@ -422,10 +421,9 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
       test_value = log_atom.get_timestamp()
     else:
       time_match = log_atom.parser_match.get_match_dictionary().get(self.path, None)
-      if ((time_match is None) or not isinstance(time_match.match_object, tuple) or
-          not isinstance(time_match.match_object[0], datetime.datetime)):
+      if time_match is None:
         return False
-      test_value = time_match.match_object[1] + datetime.datetime.now(self.tzinfo).utcoffset().total_seconds()
+      test_value = time_match.match_object + datetime.datetime.now(self.tzinfo).utcoffset().total_seconds()
 
     if test_value is None:
       return False

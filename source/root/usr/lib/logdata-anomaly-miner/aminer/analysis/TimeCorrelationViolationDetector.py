@@ -16,7 +16,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
   rules is violated. This is used to implement checks as depicted
   in http://dx.doi.org/10.1016/j.cose.2014.09.006"""
 
-  def __init__(self, aminer_config, ruleset, anomaly_event_handlers, persistence_id='Default'):
+  def __init__(self, aminer_config, ruleset, anomaly_event_handlers, persistence_id='Default', output_log_line=True):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location.
     @param ruleset a list of MatchRule rules with appropriate
@@ -25,6 +25,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
     self.anomaly_event_handlers = anomaly_event_handlers
     self.next_persist_time = time.time() + 600.0
     self.persistence_id = persistence_id
+    self.output_log_line = output_log_line
 
     event_correlation_set = set()
     for rule in self.event_classification_ruleset:
@@ -89,7 +90,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
       check_result = rule.check_status(newest_timestamp)
       if check_result is None:
         continue
-      self.last_log_atom.atomTime = trigger_time
+      self.last_log_atom.set_timestamp(trigger_time)
       r = {}
       r['RuleId'] = rule.rule_id
       r['MinTimeDelta'] = rule.min_time_delta
@@ -313,19 +314,17 @@ class CorrelationRule:
   def prepare_history_entry(self, selector, log_atom):
     """Return a history entry for a parser match."""
     parser_match = log_atom.parser_match
+    timestamp = log_atom.get_timestamp()
+    if timestamp is None:
+      timestamp = time.time()
     length = 4
     if self.artefact_match_parameters is not None:
       length += len(self.artefact_match_parameters)
     result = [None]*length
-    result[0] = log_atom.get_timestamp()
+    result[0] = timestamp
     result[1] = 0
     result[2] = selector
     result[3] = parser_match
-
-    if result[0] is None:
-      result[0] = datetime.fromtimestamp(time.time())
-    if isinstance(result[0], datetime):
-      result[0] = (result[0]-datetime.fromtimestamp(0)).total_seconds()
 
     if result[0] < self.last_timestamp_seen:
       raise Exception('Unsorted!')
