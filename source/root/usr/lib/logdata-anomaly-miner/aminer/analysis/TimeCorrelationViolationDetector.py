@@ -314,14 +314,14 @@ class CorrelationRule:
   def prepare_history_entry(self, selector, log_atom):
     """Return a history entry for a parser match."""
     parser_match = log_atom.parser_match
+    timestamp = log_atom.get_timestamp()
+    if timestamp is None:
+      timestamp = time.time()
     length = 4
-    if log_atom.get_timestamp() is None:
-      log_atom.set_timestamp(time.time())
-
     if self.artefact_match_parameters is not None:
       length += len(self.artefact_match_parameters)
     result = [None]*length
-    result[0] = log_atom.get_timestamp()
+    result[0] = timestamp
     result[1] = 0
     result[2] = selector
     result[3] = parser_match

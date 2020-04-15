@@ -194,8 +194,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
     total_seconds = (delta.days*86400+delta.seconds+delta.microseconds/1000)+parsed_value.utcoffset().total_seconds()
     if (self.latest_parsed_timestamp is None) or (self.latest_parsed_timestamp < parsed_value):
       self.latest_parsed_timestamp = parsed_value
-    return MatchElement("%s/%s" % (path, self.element_id), date_str, (parsed_value, total_seconds), \
-                        None)
+    return MatchElement("%s/%s" % (path, self.element_id), date_str, total_seconds, None)
 
 
   def checkTimestampValueInRange(self, parsed_value):

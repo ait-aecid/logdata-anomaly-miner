@@ -54,15 +54,16 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
 
   def receive_atom(self, log_atom):
     event_data = dict()
-    if log_atom.get_timestamp() is None:
-      log_atom.set_timestamp(time.time())
-    if log_atom.get_timestamp() < self.last_timestamp:
+    timestamp = log_atom.get_timestamp()
+    if timestamp is None:
+      timestamp = time.time()
+    if timestamp < self.last_timestamp:
       for listener in self.anomaly_event_handlers:
         listener.receive_event('Analysis.%s' % self.__class__.__name__,
-            'Logdata not sorted: last %s, current %s' % (self.last_timestamp, log_atom.get_timestamp()),
+            'Logdata not sorted: last %s, current %s' % (self.last_timestamp, timestamp),
                                [log_atom.parser_match.match_element.annotate_match('')], event_data, log_atom, self)
       return
-    self.last_timestamp = log_atom.get_timestamp()
+    self.last_timestamp = timestamp
 
     self.total_records += 1
     features_found_list = []
@@ -70,7 +71,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
     for feature in self.feature_list:
       if feature.rule.match(log_atom):
         feature.trigger_count += 1
-        self.update_tables_for_feature(feature, log_atom.get_timestamp())
+        self.update_tables_for_feature(feature, timestamp)
         features_found_list.append(feature)
 
     if len(self.feature_list) < self.parallel_check_count:
@@ -78,14 +79,14 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
         log_atom = self.last_unhandled_match
       new_rule = self.create_random_rule(log_atom)
       if new_rule is not None:
-        new_feature = CorrelationFeature(new_rule, len(self.feature_list), log_atom.get_timestamp())
+        new_feature = CorrelationFeature(new_rule, len(self.feature_list), timestamp)
         self.feature_list.append(new_feature)
         new_feature.trigger_count = 1
-        self.update_tables_for_feature(new_feature, log_atom.get_timestamp())
+        self.update_tables_for_feature(new_feature, timestamp)
         features_found_list.append(new_feature)
 
     for feature in features_found_list:
-      feature.last_trigger_time = log_atom.get_timestamp()
+      feature.last_trigger_time = timestamp
 
     if not features_found_list:
       self.last_unhandled_match = log_atom

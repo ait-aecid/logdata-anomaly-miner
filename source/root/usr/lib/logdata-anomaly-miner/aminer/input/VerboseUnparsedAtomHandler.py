@@ -24,8 +24,6 @@ class VerboseUnparsedAtomHandler(AtomHandlerInterface):
     debug_info = match_context.get_debug_info()
     debug_lines = []
     for line in debug_info.split('\n'):
-      if line == '':
-        continue
       debug_lines.append(line.strip())
     event_data['DebugLog'] = debug_lines
     for listener in self.event_handlers:

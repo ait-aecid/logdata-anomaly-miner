@@ -74,30 +74,31 @@ class MissingMatchPathValueDetector(
     value = self.get_channel_key(log_atom)
     if value is None:
       return False
-    if log_atom.get_timestamp() is None:
-      log_atom.set_timestamp(time.time())
+    timestamp = log_atom.get_timestamp()
+    if timestamp is None:
+      timestamp = time.time()
     detector_info = self.expected_values_dict.get(value, None)
     if detector_info != None:
 # Just update the last seen value and switch from non-reporting
 # error state to normal state.
-      detector_info[0] = log_atom.get_timestamp()
+      detector_info[0] = timestamp
       if detector_info[2] != 0:
-        if log_atom.get_timestamp() >= detector_info[2]:
+        if timestamp >= detector_info[2]:
           detector_info[2] = 0
 # Delta of this detector might be lower than the default maximum
 # recheck time.
         self.next_check_timestamp = min(
-            self.next_check_timestamp, log_atom.get_timestamp() + detector_info[1])
+            self.next_check_timestamp, timestamp + detector_info[1])
 
     elif self.auto_include_flag:
-      self.expected_values_dict[value] = [log_atom.get_timestamp(), self.default_interval, 0]
-      self.next_check_timestamp = min(self.next_check_timestamp, log_atom.get_timestamp() + self.default_interval)
+      self.expected_values_dict[value] = [timestamp, self.default_interval, 0]
+      self.next_check_timestamp = min(self.next_check_timestamp, timestamp + self.default_interval)
 
 # Always enforce persistency syncs from time to time, the timestamps
 # in the records change even when no new hosts are added.
     if self.next_persist_time is None:
       self.next_persist_time = time.time() + 600
-    self.check_timeouts(log_atom.get_timestamp(), log_atom)
+    self.check_timeouts(timestamp, log_atom)
 
     return True
 

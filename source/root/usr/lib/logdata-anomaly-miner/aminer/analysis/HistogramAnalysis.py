@@ -297,14 +297,15 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
       data_updated_flag = True
       data_item.add_value(match.match_object)
 
-    if log_atom.get_timestamp() is None:
-      log_atom.set_timestamp(time.time())
-    if self.next_report_time < log_atom.get_timestamp():
+    timestamp = log_atom.get_timestamp()
+    if timestamp is None:
+      timestamp = time.time()
+    if self.next_report_time < timestamp:
       if self.last_report_time is None:
-        self.last_report_time = log_atom.get_timestamp()
-        self.next_report_time = log_atom.get_timestamp() + self.report_interval
+        self.last_report_time = timestamp
+        self.next_report_time = timestamp + self.report_interval
       else:
-        self.send_report(log_atom, log_atom.get_timestamp())
+        self.send_report(log_atom, timestamp)
 
     if (self.next_persist_time is None) and (data_updated_flag):
       self.next_persist_time = time.time() + 600
@@ -498,14 +499,15 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
         new_record[1].property_path = path
         self.histogram_data[path] = new_record
 
-    if log_atom.get_timestamp() is None:
-      log_atom.set_timestamp(time.time())
-    if self.next_report_time < log_atom.get_timestamp():
+    timestamp = log_atom.get_timestamp()
+    if timestamp is None:
+      timestamp = time.time()
+    if self.next_report_time < timestamp:
       if self.last_report_time is None:
-        self.last_report_time = log_atom.get_timestamp()
-        self.next_report_time = log_atom.get_timestamp() + self.report_interval
+        self.last_report_time = timestamp
+        self.next_report_time = timestamp + self.report_interval
       else:
-        self.send_report(log_atom, log_atom.get_timestamp())
+        self.send_report(log_atom, timestamp)
 
     if self.next_persist_time is None:
       self.next_persist_time = time.time() + 600

@@ -60,9 +60,6 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
     value_dict = parser_match.get_match_dictionary()
     event_data = dict()
 
-    if log_atom.get_timestamp() is None:
-      log_atom.set_timestamp(time.time())
-
     timestamp_value = log_atom.get_timestamp()
     if self.timestamp_path is not None:
       match_value = value_dict.get(self.timestamp_path)

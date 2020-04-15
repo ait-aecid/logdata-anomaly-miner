@@ -55,6 +55,8 @@ class DebugMatchContext(MatchContext):
 
   def get_debug_info(self):
     """Get the current debugging information and reset it."""
+    while self.debug_info.find('\n\n') != -1:
+      self.debug_info = self.debug_info.replace('\n\n', '\n')
     result = self.debug_info
     self.debug_info = ''
     result += '  Shortest unmatched data was %s\n' % repr(self.shortest_unmatched_data)

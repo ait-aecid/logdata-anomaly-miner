@@ -9,6 +9,7 @@ from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComb
 from aminer.util import PersistencyUtil
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
+
 class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
   """This class creates events when a new value combination for
   a given list of match data pathes were found. It is similar
@@ -68,6 +69,10 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     against the list of known combinations, no matter if the checked
     values were new or not."""
     match_dict = log_atom.parser_match.get_match_dictionary()
+    timestamp = log_atom.get_timestamp()
+    if timestamp is None:
+      timestamp = time.time()
+    timestamp = round(timestamp, 3)
     match_value_list = []
     event_data = dict()
     for target_path in self.target_path_list:
@@ -83,13 +88,11 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
       match_value_list = self.tuple_transformation_function(match_value_list)
     match_value_tuple = tuple(match_value_list)
 
-    if log_atom.get_timestamp() is None:
-      log_atom.set_timestamp(time.time())
     if self.known_values_dict.get(match_value_tuple, None) is None:
-      self.known_values_dict[match_value_tuple] = [round(log_atom.get_timestamp(), 3), round(log_atom.get_timestamp(), 3), 1]
+      self.known_values_dict[match_value_tuple] = [timestamp, timestamp, 1]
     else:
       extra_data = self.known_values_dict.get(match_value_tuple, None)
-      extra_data[1] = round(log_atom.get_timestamp(), 3)
+      extra_data[1] = timestamp
       extra_data[2] += 1
 
     affected_log_atom_values = []
@@ -119,15 +122,6 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
           match_paths_values = {}
           for match_path, match_element in match_dict.items():
             match_value = match_element.match_object
-            from datetime import datetime
-            if isinstance(match_value, tuple):
-              l = []
-              for i, val in enumerate(match_value):
-                if isinstance(match_value[i], datetime):
-                  l.append(datetime.timestamp(match_value[i]))
-                else:
-                  l.append(match_value[i])
-              match_value = l
             if isinstance(match_value, bytes):
               match_value = match_value.decode()
             match_paths_values[match_path] = match_value
