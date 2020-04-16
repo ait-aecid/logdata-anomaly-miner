@@ -27,6 +27,7 @@ script:
   - cp demo/AMiner/jsonConverterHandler-demo-config.py /tmp/demo-config.py
   - sudo -u aminer ./demo/AMiner/aminerDemo.sh > /tmp/demo
   - cd integration
+  - sudo chmod 777 /tmp
   - cp config* /tmp
   - ls -ld /tmp
   - ls -l /tmp
@@ -34,7 +35,7 @@ script:
   - sudo chmod +x aminerIntegrationTest2.sh
   - sudo -u aminer ./aminerIntegrationTest.sh
   - sudo -u aminer ./aminerIntegrationTest2.sh
-  - sudo rm /var/mail/mail
+  - test -e /var/mail/mail && sudo rm -f /var/mail/mail
   - cd ..
   - coverage run --source=./aminer -m unittest discover -s unit -p '*Test.py'
   - touch /tmp/report
@@ -44,4 +45,3 @@ script:
   - echo 'Branch Coverage:' >> /tmp/report
   - coverage report >> /tmp/report
   - cat /tmp/report
-  - echo "hello world"
