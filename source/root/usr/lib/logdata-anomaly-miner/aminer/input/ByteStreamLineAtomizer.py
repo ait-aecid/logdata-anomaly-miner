@@ -107,7 +107,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
           if self.default_timestamp_path != None:
             ts_match = log_atom.parser_match.get_match_dictionary().get(self.default_timestamp_path, None)
             if ts_match != None:
-              log_atom.set_timestamp(ts_match.match_object[1])
+              log_atom.set_timestamp(ts_match.match_object)
       if self.dispatch_atom(log_atom):
         consumed_length = line_end+1
         continue

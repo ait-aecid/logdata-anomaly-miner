@@ -53,6 +53,8 @@ class DateTimeModelElement(ModelElementInterface):
     the most likely value but does not change the detection year."""
     self.path_id = path_id
     self.time_zone = time_zone
+    if time_zone is None:
+        self.time_zone = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
 # Make sure that dateFormat is valid and extract the relevant
 # parts from it.
     self.format_has_year_flag = False
@@ -274,9 +276,7 @@ class DateTimeModelElement(ModelElementInterface):
         total_seconds += result[6]
 
     match_context.update(date_str)
-    return MatchElement(
-        "%s/%s" % (path, self.path_id), date_str, (parsed_date_time, total_seconds,),
-        None)
+    return MatchElement("%s/%s" % (path, self.path_id), date_str, total_seconds, None)
 
   @staticmethod
   def parse_fraction(value_str):

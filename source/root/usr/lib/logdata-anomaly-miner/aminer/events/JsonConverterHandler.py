@@ -25,18 +25,14 @@ class JsonConverterHandler(EventHandlerInterface):
 
     log_data = dict()
     if isinstance(log_atom.raw_data, bytes):
-      log_data['RawLogData'] = bytes.decode(log_atom.raw_data)
+      log_data['RawLogData'] = [bytes.decode(log_atom.raw_data)]
     else:
-      log_data['RawLogData'] = log_atom.raw_data
-    if log_atom.atom_time is not None:
-      if isinstance(log_atom.atom_time, datetime.datetime):
-        log_data['Timestamp'] = str(round(log_atom.atomTime, 2).strftime('%Y-%m-%dT%H:%M:%SZ'))
-      else:
-        log_data['Timestamp'] = round(log_atom.atom_time, 2)
-    else:
-      log_data['Timestamp'] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+      log_data['RawLogData'] = [log_atom.raw_data]
+    if log_atom.get_timestamp() is None:
+      log_atom.set_timestamp(time.time())
+    log_data['Timestamps'] = [round(log_atom.atom_time, 2)]
     log_data['LogLinesCount'] = len(sorted_log_lines)
-    if log_atom.parser_match is not None:
+    if log_atom.parser_match is not None and hasattr(event_source, 'output_log_line') and event_source.output_log_line:
       log_data['AnnotatedMatchElement'] = log_atom.parser_match.match_element.annotate_match('')
 
     analysis_component = dict()
@@ -59,7 +55,8 @@ class JsonConverterHandler(EventHandlerInterface):
           continue
         analysis_component[key] = detector_analysis_component.get(key, None)
 
-    event_data['LogData'] = log_data
+    if 'LogData' not in event_data:
+      event_data['LogData'] = log_data
     event_data['AnalysisComponent'] = analysis_component
     if json_error != '':
       event_data['JsonError'] = json_error
