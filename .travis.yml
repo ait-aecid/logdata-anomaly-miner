@@ -27,7 +27,6 @@ script:
   - cp demo/AMiner/jsonConverterHandler-demo-config.py /tmp/demo-config.py
   - sudo -u aminer ./demo/AMiner/aminerDemo.sh > /tmp/demo
   - cd integration
-  - sudo chmod 777 /tmp
   - cp config* /tmp
   - ls -ld /tmp
   - ls -l /tmp
