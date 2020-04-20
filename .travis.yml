@@ -11,7 +11,7 @@ before_install:
   - cd aecid-testsuite
   - sudo chmod +x runUnittests.sh
   - sudo chmod +x runAMinerDemo.sh
-  - sudo chmod +x runIntegrationTest.sh
+  - sudo chmod +x runAMinerIntegrationTest.sh
   - sudo chmod +x runCoverageTests.sh
   - sed -e "s+{{SOURCEDIR}}+$PWD+g" .playbook.yml > playbook.yml
 
