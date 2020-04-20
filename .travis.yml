@@ -9,16 +9,15 @@ before_install:
   - git clone https://github.com/ait-aecid/aminer-ansible.git roles/aminer
   - ln -s $PWD/source/root/usr/lib/logdata-anomaly-miner/aminer $PWD/aecid-testsuite/aminer
   - sed -e "s+{{SOURCEDIR}}+$PWD+g" .playbook.yml > playbook.yml
-  - cd aecid-testsuite
-  - sudo chmod +x runUnittests.sh
-  - sudo chmod +x runAMinerDemo.sh
-  - sudo chmod +x runAMinerIntegrationTest.sh
-  - sudo chmod +x runCoverageTests.sh
 
 install:
   - pip3 install coverage
   - sudo ansible-playbook playbook.yml
   - cd aecid-testsuite
+  - sudo chmod +x runUnittests.sh
+  - sudo chmod +x runAMinerDemo.sh
+  - sudo chmod +x runAMinerIntegrationTest.sh
+  - sudo chmod +x runCoverageTests.sh
 
 script:
   - ./runUnittests.sh
