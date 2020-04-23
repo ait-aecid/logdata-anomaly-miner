@@ -40,8 +40,8 @@ function isDate() {
 # This function checks if the input value contains the local UName.
 # $1 = String parameter to check
 function isUname() {
-	echo "$1"
-	echo " `cat /etc/hostname`"
+	echo "1 $1"
+	echo "cat `cat /etc/hostname`"
 	if [[ $# -gt 0 && "$1" == *" `cat /etc/hostname`"* ]]; then
 		return 0
 	fi
@@ -54,7 +54,7 @@ function isUser() {
 	if [[ $# -gt 0 && "$1" == *" ` id -u -n`:"* ]]; then
 		return 0
 	fi
-	return 0
+	return 1
 }
 
 # This function checks if the input value starts with a date followed by the local UName and the name of the currently logged in user.
