@@ -12,7 +12,7 @@ do
 	cntr=$(($cntr+1))
 done
 
-./$script
+sudo ./$script
 
 cntr=0
 for var in "$@"
