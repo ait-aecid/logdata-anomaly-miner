@@ -234,7 +234,7 @@ class RuleTest(TestBase):
       
       self.match_context = MatchContext(b'14.02.2019 12:00:00')
       self.match_element = self.date_time_model_element.get_match_element(self.model_syslog, self.match_context)
-      self.log_atom = LogAtom(self.match_context.match_data, ParserMatch(self.match_element), 1550152800, self.date_time_model_element)
+      self.log_atom = LogAtom(self.match_context.match_data, ParserMatch(self.match_element), 1550138400, self.date_time_model_element)
       self.assertTrue(self.value_dependent_modulo_time_match_rule.match(self.log_atom))
     
     '''

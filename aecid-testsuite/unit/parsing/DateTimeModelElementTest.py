@@ -39,7 +39,7 @@ class DateTimeModelElementTest(unittest.TestCase):
       self.match_context = MatchContext(b'07.02 11:40:00: it still works')
       self.date_time_model_element = DateTimeModelElement('path', b'%d.%m %H:%M:%S', None, None, self.startYear)
       self.assertEqual(self.date_time_model_element.get_match_element('match1',
-        self.match_context).get_match_object(), 1518003600)
+        self.match_context).get_match_object(), 1486467600)
 
     '''
     This test case checks if the default Timezone is utc.
