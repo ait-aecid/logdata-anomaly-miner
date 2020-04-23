@@ -4,6 +4,7 @@ python:
 dist: bionic
 
 before_install:
+  - cat /etc/hostname
   - sudo apt-get update -y
   - sudo apt-get install -y exim4 procps cpulimit ansible mailutils
   - git clone https://github.com/ait-aecid/aminer-ansible.git roles/aminer
