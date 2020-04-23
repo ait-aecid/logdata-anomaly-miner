@@ -228,13 +228,14 @@ class RuleTest(TestBase):
     def test9value_dependent_modulo_time_match_rule(self):
       description = "Test9Rules"
       self.value_dependent_modulo_time_match_rule = ValueDependentModuloTimeMatchRule(self.model_syslog_time,
-          86400, [self.model_syslog_time], {1550138400:[43200, 86400]})
+          86400, [self.model_syslog_time], {1550145600:[43200, 86400]})
       self.analysis_context.register_component(self.value_dependent_modulo_time_match_rule, description)
       self.date_time_model_element = DateTimeModelElement('time', b'%d.%m.%Y %H:%M:%S')
       
       self.match_context = MatchContext(b'14.02.2019 12:00:00')
       self.match_element = self.date_time_model_element.get_match_element(self.model_syslog, self.match_context)
-      self.log_atom = LogAtom(self.match_context.match_data, ParserMatch(self.match_element), 1550152800, self.date_time_model_element)
+      print(self.match_element.get_match_object())
+      self.log_atom = LogAtom(self.match_context.match_data, ParserMatch(self.match_element), 1550138400, self.date_time_model_element)
       self.assertTrue(self.value_dependent_modulo_time_match_rule.match(self.log_atom))
     
     '''
