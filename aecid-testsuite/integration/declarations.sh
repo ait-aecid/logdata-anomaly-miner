@@ -41,7 +41,7 @@ function isDate() {
 # $1 = String parameter to check
 function isUname() {
 	echo "$1"
-	cat /etc/hostname
+	echo " `cat /etc/hostname`"
 	if [[ $# -gt 0 && "$1" == *" `cat /etc/hostname`"* ]]; then
 		return 0
 	fi
