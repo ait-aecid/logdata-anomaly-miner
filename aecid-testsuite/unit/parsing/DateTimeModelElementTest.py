@@ -27,19 +27,19 @@ class DateTimeModelElementTest(unittest.TestCase):
       self.match_context = MatchContext(b'07.02 11:40:00: it still works')
       self.date_time_model_element = DateTimeModelElement('path', b'%d.%m %H:%M:%S', None, None, 2017)
       self.assertEqual(self.date_time_model_element.get_match_element('match1',
-        self.match_context).get_match_object(), 1486460400)
+        self.match_context).get_match_object(), 1486467600)
     
     def test3_new_year_with_start_year_value(self):
       self.startYear = 2017
       self.match_context = MatchContext(b'07.02.2018 11:40:00: it still works')
       self.date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y %H:%M:%S', None, None, self.startYear)
       self.assertEqual(self.date_time_model_element.get_match_element('match1',
-        self.match_context).get_match_object(), 1517996400)
+        self.match_context).get_match_object(), 1518003600)
       
       self.match_context = MatchContext(b'07.02 11:40:00: it still works')
       self.date_time_model_element = DateTimeModelElement('path', b'%d.%m %H:%M:%S', None, None, self.startYear)
       self.assertEqual(self.date_time_model_element.get_match_element('match1',
-        self.match_context).get_match_object(), 1486460400)
+        self.match_context).get_match_object(), 1518003600)
 
     '''
     This test case checks if the default Timezone is utc.

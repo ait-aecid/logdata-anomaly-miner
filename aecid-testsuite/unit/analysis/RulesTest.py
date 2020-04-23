@@ -234,13 +234,13 @@ class RuleTest(TestBase):
       
       self.match_context = MatchContext(b'14.02.2019 12:00:00')
       self.match_element = self.date_time_model_element.get_match_element(self.model_syslog, self.match_context)
-      self.log_atom = LogAtom(self.match_context.match_data, ParserMatch(self.match_element), 1550145600, self.date_time_model_element)
+      self.log_atom = LogAtom(self.match_context.match_data, ParserMatch(self.match_element), 1550152800, self.date_time_model_element)
       self.assertTrue(self.value_dependent_modulo_time_match_rule.match(self.log_atom))
     
     '''
     This case unit the ValueDependentModuloTimeMatchRule.
     '''
-    def test10i_pv4_in_rfc1918_match_rule(self):
+    def test10ipv4_in_rfc1918_match_rule(self):
       description = "Test10Rules"
       self.i_pv4_in_rfc1918_match_rule = IPv4InRFC1918MatchRule(self.match_ipv4)
       self.analysis_context.register_component(self.i_pv4_in_rfc1918_match_rule, description)
