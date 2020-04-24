@@ -5,12 +5,13 @@ dist: bionic
 
 before_install:
   - sudo apt-get update -y
-  - sudo apt-get install -y exim4 procps cpulimit ansible mailutils python3-coverage python-coverage
+  - sudo apt-get install -y exim4 procps cpulimit ansible mailutils python3-coverage
   - git clone https://github.com/ait-aecid/aminer-ansible.git roles/aminer
   - ln -s $PWD/source/root/usr/lib/logdata-anomaly-miner/aminer $PWD/aecid-testsuite/aminer
   - sed -e "s+{{SOURCEDIR}}+$PWD+g" .playbook.yml > playbook.yml
 
 install:
+  - python3 -m pip3 install coverage
   - sudo ansible-playbook playbook.yml
   - cd aecid-testsuite
   - sudo chmod +x runUnittests.sh

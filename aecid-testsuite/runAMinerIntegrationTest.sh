@@ -26,9 +26,13 @@ done
 echo mail
 test -e /var/mail/mail && sudo rm -f /var/mail/mail
 cd ..
-echo "rm"
+echo "rm remote"
 sudo rm /tmp/AMinerRemoteLog.txt
+echo sysl
 sudo rm /tmp/syslog
+echo output
 sudo rm /tmp/output
+echo out
 test -e /tmp/out && sudo rm /tmp/out
+echo auth
 test -e /tmp/auth.log && sudo rm /tmp/auth.log
