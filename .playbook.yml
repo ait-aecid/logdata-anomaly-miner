@@ -3,6 +3,6 @@
   vars:
     aminer_gitrepo: False
     # MODIFY THIS PATH
-    aminer_repopath: "{{SOURCEDIR}}"
+    aminer_repopath: "/home/hoti/logdata-anomaly-miner"
   roles:
          - aminer

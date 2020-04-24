@@ -35,8 +35,8 @@
             'required' : True,
             'type': 'dict',
             'schema': {
-                'Verbose': {'type': 'boolean', 'required': False, 'default': 'false'},
-                'MultiSource': {'type': 'boolean', 'required': False, 'default': 'false'},
+                'Verbose': {'type': 'boolean', 'required': False, 'default': False},
+                'MultiSource': {'type': 'boolean', 'required': False, 'default': False},
                 'TimestampPath': {'type': 'string'}
             }
         },
