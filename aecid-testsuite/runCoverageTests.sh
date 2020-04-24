@@ -1,10 +1,10 @@
-coverage run --source=./aminer -m unittest discover -s unit -p '*Test.py'
+sudo coverage run --source=./aminer -m unittest discover -s unit -p '*Test.py'
 touch /tmp/report
 echo 'Statement Coverage:' > /tmp/report
-coverage report >> /tmp/report
-coverage run --source=./aminer --branch -m unittest discover -s unit -p '*Test.py'
+sudo coverage report >> /tmp/report
+sudo coverage run --source=./aminer --branch -m unittest discover -s unit -p '*Test.py'
 echo 'Branch Coverage:' >> /tmp/report
-coverage report >> /tmp/report
+sudo coverage report >> /tmp/report
 cat /tmp/report
 rm /tmp/report
 test -e /var/mail/mail && sudo rm -f /var/mail/mail
