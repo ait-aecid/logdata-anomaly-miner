@@ -1,8 +1,8 @@
-sudo sh -c "coverage run --source=./aminer -m unittest discover -s unit -p '*Test.py'"
+coverage run --source=./aminer -m unittest discover -s unit -p '*Test.py'
 touch /tmp/report
 echo 'Statement Coverage:' > /tmp/report
 coverage report >> /tmp/report
-sudo sh -c "coverage run --source=./aminer --branch -m unittest discover -s unit -p '*Test.py'"
+coverage run --source=./aminer --branch -m unittest discover -s unit -p '*Test.py'
 echo 'Branch Coverage:' >> /tmp/report
 coverage report >> /tmp/report
 cat /tmp/report

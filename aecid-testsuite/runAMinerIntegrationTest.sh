@@ -36,3 +36,4 @@ echo out
 test -e /tmp/out && sudo rm /tmp/out
 echo auth
 test -e /tmp/auth.log && sudo rm /tmp/auth.log
+echo auth end
