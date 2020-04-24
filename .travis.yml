@@ -5,42 +5,29 @@ dist: bionic
 
 before_install:
   - sudo apt-get update -y
-  - sudo apt-get install -y exim4 procps cpulimit ansible mailutils
+  - sudo apt-get install -y exim4 procps cpulimit ansible mailutils python3-pip
   - git clone https://github.com/ait-aecid/aminer-ansible.git roles/aminer
-  - git clone https://github.com/ait-aecid/aecid-testsuite.git 
-  - ln -s $PWD/source/root/usr/lib/logdata-anomaly-miner/aminer aecid-testsuite/aminer
+  - ln -s $PWD/source/root/usr/lib/logdata-anomaly-miner/aminer $PWD/aecid-testsuite/aminer
   - sed -e "s+{{SOURCEDIR}}+$PWD+g" .playbook.yml > playbook.yml
 
 install:
-  - pip3 install coverage
+  - sudo -u root pip3 install coverage
   - sudo ansible-playbook playbook.yml
   - cd aecid-testsuite
+  - sudo chmod +x runUnittests.sh
+  - sudo chmod +x runAMinerDemo.sh
+  - sudo chmod +x runAMinerIntegrationTest.sh
+  - sudo chmod +x runCoverageTests.sh
 
 script:
-  - sudo python3 -m unittest discover -s unit -p '*Test.py' > /dev/null
-  - test -e /var/mail/mail && sudo rm -f /var/mail/mail
-  - cp demo/AMiner/demo-config.py /tmp
-  - sudo chown -R aminer:aminer /tmp/lib
-  - sudo chown aminer:aminer /tmp/AMinerRemoteLog.txt
-  - sudo chmod +x demo/AMiner/aminerDemo.sh
-  - sudo -u aminer ./demo/AMiner/aminerDemo.sh > /tmp/demo
-  - cp demo/AMiner/jsonConverterHandler-demo-config.py /tmp/demo-config.py
-  - sudo -u aminer ./demo/AMiner/aminerDemo.sh > /tmp/demo
-  - cd integration
-  - cp config* /tmp
-  - ls -ld /tmp
-  - ls -l /tmp
-  - sudo chmod +x aminerIntegrationTest.sh
-  - sudo chmod +x aminerIntegrationTest2.sh
-  - sudo -u aminer ./aminerIntegrationTest.sh
-  - sudo -u aminer ./aminerIntegrationTest2.sh
-  - test -e /var/mail/mail && sudo rm -f /var/mail/mail
+  - ./runUnittests.sh
+  - ./runAMinerDemo.sh demo/AMiner/demo-config.py
+  - ./runAMinerDemo.sh demo/AMiner/jsonConverterHandler-demo-config.py
+  - echo localhost | sudo tee /etc/hostname
+  - ./runAMinerIntegrationTest.sh aminerIntegrationTest.sh config.py
+  - ./runAMinerIntegrationTest.sh aminerIntegrationTest2.sh config21.py config22.py
+  - ./runCoverageTests.sh
+
+after_script:
   - cd ..
-  - coverage run --source=./aminer -m unittest discover -s unit -p '*Test.py'
-  - touch /tmp/report
-  - echo 'Statement Coverage:' > /tmp/report
-  - coverage report >> /tmp/report
-  - coverage run --source=./aminer --branch -m unittest discover -s unit -p '*Test.py'
-  - echo 'Branch Coverage:' >> /tmp/report
-  - coverage report >> /tmp/report
-  - cat /tmp/report
+  - rm $PWD/aecid-testsuite/aminer

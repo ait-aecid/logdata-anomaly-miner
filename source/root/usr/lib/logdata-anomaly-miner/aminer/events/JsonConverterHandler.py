@@ -82,4 +82,4 @@ class JsonConverterHandler(EventHandlerInterface):
     #print(json_data)
 
     for listener in self.json_event_handlers:
-      listener.receive_event(event_type, event_message, res, {}, log_atom, event_source)
+      listener.receive_event(event_type, event_message, res, json_data, log_atom, event_source)

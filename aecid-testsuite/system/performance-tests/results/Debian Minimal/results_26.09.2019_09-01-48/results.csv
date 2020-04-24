@@ -1,0 +1,10 @@
+5001891 log lines could be handled in 900 seconds.
+The source file contains 112230000 log lines.
+
+machine name, CPU name, #CPUs used, RAM used, persistent memory type
+Acer Aspire 5750g, i7-2630QM, 1, 512MB, SSD
+
+Config File,config_26.09.2019_09-01-48.py
+MD5-Hash Logfile,594d6bdda90609c08bd26914df2d900f
+Test description,High performance test. (./multiplyLogFile.sh 430000 syslog_high_performance-template /tmp/syslog)
+
