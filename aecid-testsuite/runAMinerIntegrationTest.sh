@@ -23,8 +23,10 @@ do
 	cntr=$(($cntr+1))
 done
 
+echo mail
 test -e /var/mail/mail && sudo rm -f /var/mail/mail
 cd ..
+echo "rm"
 sudo rm /tmp/AMinerRemoteLog.txt
 sudo rm /tmp/syslog
 sudo rm /tmp/output
