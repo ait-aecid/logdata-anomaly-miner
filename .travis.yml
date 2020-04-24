@@ -21,6 +21,8 @@ install:
 
 script:
   - cat /etc/hostname
+  - echo localhost > /etc/hostname
+  - cat /etc/hostname
   #- ./runUnittests.sh
   #- ./runAMinerDemo.sh demo/AMiner/demo-config.py
   #- ./runAMinerDemo.sh demo/AMiner/jsonConverterHandler-demo-config.py
