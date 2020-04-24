@@ -23,7 +23,6 @@ do
 	cntr=$(($cntr+1))
 done
 
-echo mail
 test -e /var/mail/mail && sudo rm -f /var/mail/mail
 cd ..
 sudo rm /tmp/AMinerRemoteLog.txt

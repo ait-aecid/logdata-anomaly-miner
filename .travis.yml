@@ -11,7 +11,7 @@ before_install:
   - sed -e "s+{{SOURCEDIR}}+$PWD+g" .playbook.yml > playbook.yml
 
 install:
-  - pip install coverage
+  - pip install --user root coverage
   - sudo ansible-playbook playbook.yml
   - cd aecid-testsuite
   - sudo chmod +x runUnittests.sh
@@ -26,7 +26,7 @@ script:
   - echo localhost | sudo tee /etc/hostname
   - ./runAMinerIntegrationTest.sh aminerIntegrationTest.sh config.py
   - ./runAMinerIntegrationTest.sh aminerIntegrationTest2.sh config21.py config22.py
-  - sudo ./runCoverageTests.sh
+  - ./runCoverageTests.sh
 
 after_script:
   - cd ..
