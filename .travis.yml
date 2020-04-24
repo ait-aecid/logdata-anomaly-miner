@@ -11,7 +11,6 @@ before_install:
   - sed -e "s+{{SOURCEDIR}}+$PWD+g" .playbook.yml > playbook.yml
 
 install:
-  - python3 -m pip3 install coverage
   - sudo ansible-playbook playbook.yml
   - cd aecid-testsuite
   - sudo chmod +x runUnittests.sh
