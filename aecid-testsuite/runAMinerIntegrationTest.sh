@@ -28,5 +28,4 @@ cd ..
 sudo rm /tmp/AMinerRemoteLog.txt
 sudo rm /tmp/syslog
 sudo rm /tmp/output
-sudo rm /tmp/out
 test -e /tmp/auth.log && sudo rm /tmp/auth.log
