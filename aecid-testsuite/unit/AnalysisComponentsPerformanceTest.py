@@ -1,12 +1,12 @@
 import unittest
 from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
 from unit.TestBase import TestBase
-from datetime import datetime
 import time
 from aminer.input.LogAtom import LogAtom
 from aminer.parsing.ParserMatch import ParserMatch
 from aminer.parsing.MatchContext import MatchContext
-from aminer.parsing import DecimalIntegerValueModelElement
+from aminer.parsing import DecimalIntegerValueModelElement, FirstMatchModelElement, DelimitedDataModelElement, \
+    FixedWordlistDataModelElement, AnyByteDataModelElement
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
 from aminer.analysis.AtomFilters import MatchPathFilter, SubhandlerFilter, \
     MatchValueFilter
@@ -32,6 +32,7 @@ from aminer.analysis.TimestampsUnsortedDetector import TimestampsUnsortedDetecto
 from aminer.analysis.Rules import PathExistsMatchRule
 from aminer.analysis.WhitelistViolationDetector import WhitelistViolationDetector
 from _io import StringIO
+from aminer.analysis.NewMatchIdValueComboDetector import NewMatchIdValueComboDetector
 
 
 class AnalysisComponentsPerformanceTest(TestBase):
@@ -68,7 +69,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 subhandler_filter.add_handler(match_path_filter, stop_when_handled_flag=True)
                 i = i + 1
             t = round(time.time(), 3)
-            seconds = time.time();
+            seconds = time.time()
             i = 0
             while int(time.time() - seconds) < self.waiting_time:
                 decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(i % number_of_pathes),
@@ -105,7 +106,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 subhandler_filter.add_handler(match_value_filter, stop_when_handled_flag=True)
                 i = i + 1
             t = round(time.time(), 3)
-            seconds = time.time();
+            seconds = time.time()
             i = 0
             while int(time.time() - seconds) < self.waiting_time:
                 decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(i % number_of_pathes),
@@ -131,7 +132,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             new_match_path_detector = NewMatchPathDetector(self.aminer_config,
                 [self.stream_printer_event_handler], 'Default', True)
             t = round(time.time(), 3)
-            seconds = time.time();
+            seconds = time.time()
             i = 0
             while int(time.time() - seconds) < self.waiting_time:
                 decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(i % number_of_pathes),
@@ -161,7 +162,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(self.aminer_config,
                 path_list, [self.stream_printer_event_handler], 'Default', True, True)
             t = round(time.time(), 3)
-            seconds = time.time();
+            seconds = time.time()
             i = 0
             while int(time.time() - seconds) < self.waiting_time:
                 decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(i % number_of_pathes),
@@ -191,7 +192,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 amplifier * self.waiting_time, [self.stream_printer_event_handler], False, 'Default')
 
             i = 0
-            seconds = time.time();
+            seconds = time.time()
             t = seconds
             while int(time.time() - seconds) < self.waiting_time:
                 p = process_time()
@@ -218,7 +219,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             while i < number_of_pathes:
                 path_list.append(self.integerd + str(i % number_of_pathes))
                 i = i + 1
-            seconds = time.time();
+            seconds = time.time()
             t = time.time()
             match_value_average_change_detector = MatchValueAverageChangeDetector(self.aminer_config,
                 [self.stream_printer_event_handler], None, path_list, 2, t, True, False, 'Default')
@@ -282,7 +283,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             sequence_model_element = SequenceModelElement('integer', parsing_model)
             match_value_stream_writer = MatchValueStreamWriter(self.output_stream, path_list, b';', b'-')
             t = time.time()
-            seconds = time.time();
+            seconds = time.time()
             i = 0
             while int(time.time() - seconds) < self.waiting_time:
                 data = b''
@@ -314,7 +315,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 i = i + 1
             missing_match_path_list_value_detector = MissingMatchPathListValueDetector(self.aminer_config,
                 path_list, [self.stream_printer_event_handler], 'Default', True, 3600, 86400)
-            seconds = time.time();
+            seconds = time.time()
             t = seconds
             i = 0
             while int(time.time() - seconds) < self.waiting_time:
@@ -351,7 +352,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             new_match_path_value_combo_detector = NewMatchPathValueComboDetector(self.aminer_config,
                 path_list, [self.stream_printer_event_handler], 'Default', True, True)
             t = time.time()
-            seconds = time.time();
+            seconds = time.time()
             i = 0
             while int(time.time() - seconds) < self.waiting_time:
                 decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(i % number_of_pathes),
@@ -382,7 +383,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             new_match_path_value_detector = NewMatchPathValueDetector(self.aminer_config, path_list,
                 [self.stream_printer_event_handler], 'Default', True, True)
             t = time.time()
-            seconds = time.time();
+            seconds = time.time()
             i = 0
             while int(time.time() - seconds) < self.waiting_time:
                 decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(i % number_of_pathes),
@@ -407,7 +408,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             time_correlation_detector = TimeCorrelationDetector(self.aminer_config, 2, number_of_rules, 0,
                 [self.stream_printer_event_handler], record_count_before_event=self.waiting_time * 9000)
             t = time.time()
-            seconds = time.time();
+            seconds = time.time()
             i = 0
             while int(time.time() - seconds) < self.waiting_time:
                 decimal_integer_value_me = DecimalIntegerValueModelElement('d',
@@ -439,7 +440,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
 
             time_correlation_violation_detector = TimeCorrelationViolationDetector(
                 self.analysis_context.aminer_config, rules, [self.stream_printer_event_handler])
-            seconds = time.time();
+            seconds = time.time()
             s = seconds
             i = 0
             decimal_integer_value_me = DecimalIntegerValueModelElement('d0',
@@ -490,7 +491,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 [self.stream_printer_event_handler], 'Default', True)
             simple_monotonic_timestamp_adjust = SimpleMonotonicTimestampAdjust([new_match_path_detector])
 
-            seconds = time.time();
+            seconds = time.time()
             i = 0
             while int(time.time() - seconds) < self.waiting_time:
                 decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(i % number_of_pathes),
@@ -518,7 +519,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
         while z < self.iterations:
             timestamps_unsorted_detector = TimestampsUnsortedDetector(self.aminer_config,
                 [self.stream_printer_event_handler])
-            seconds = time.time();
+            seconds = time.time()
             s = seconds
             i = 0
             mini = 100
@@ -558,7 +559,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             whitelist_violation_detector = WhitelistViolationDetector(self.aminer_config, rules,
                 [self.stream_printer_event_handler])
             t = time.time()
-            seconds = time.time();
+            seconds = time.time()
             i = 0
             while int(time.time() - seconds) < self.waiting_time:
                 p = process_time()
@@ -581,6 +582,87 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (whitelist_violation_detector.__class__.__name__,
             avg, results, '%d different PathExistsMatchRules and a moduloFactor of %d.' % (number_of_pathes, modulo_factor))
+
+    def run_new_match_id_value_combo_detector(self, min_allowed_time_diff):
+        log_lines = [
+            b'type=SYSCALL msg=audit(1580367384.000:1): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=PATH msg=audit(1580367385.000:1): item=0 name="one" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL',
+            b'type=SYSCALL msg=audit(1580367386.000:2): arch=c000003e syscall=2 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=PATH msg=audit(1580367387.000:2): item=0 name="two" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL',
+            b'type=SYSCALL msg=audit(1580367388.000:3): arch=c000003e syscall=3 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=PATH msg=audit(1580367389.000:3): item=0 name="three" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL',
+            b'type=SYSCALL msg=audit(1580367388.500:100): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=SYSCALL msg=audit(1580367390.000:4): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=PATH msg=audit(1580367391.000:4): item=0 name="one" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL',
+            b'type=PATH msg=audit(1580367392.000:5): item=0 name="two" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL',
+            b'type=SYSCALL msg=audit(1580367393.000:5): arch=c000003e syscall=2 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=SYSCALL msg=audit(1580367394.000:6): arch=c000003e syscall=4 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=PATH msg=audit(1580367395.000:7): item=0 name="five" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL',
+            b'type=SYSCALL msg=audit(1580367396.000:8): arch=c000003e syscall=6 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=PATH msg=audit(1580367397.000:6): item=0 name="four" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL',
+            b'type=SYSCALL msg=audit(1580367398.000:7): arch=c000003e syscall=5 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=PATH msg=audit(1580367399.000:8): item=0 name="six" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL',
+            b'type=SYSCALL msg=audit(1580367400.000:9): arch=c000003e syscall=2 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=PATH msg=audit(1580367401.000:9): item=0 name="three" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL',
+            b'type=PATH msg=audit(1580367402.000:10): item=0 name="one" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL',
+            b'type=SYSCALL msg=audit(1580367403.000:10): arch=c000003e syscall=3 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)']
+        parsing_model = FirstMatchModelElement('type', [SequenceModelElement('path',
+            [FixedDataModelElement('type', b'type=PATH '), FixedDataModelElement('msg_audit', b'msg=audit('),
+                DelimitedDataModelElement('msg', b':'), FixedDataModelElement('placeholder', b':'),
+                DecimalIntegerValueModelElement('id'), FixedDataModelElement('item_string', b'): item='),
+                DecimalIntegerValueModelElement('item'), FixedDataModelElement('name_string', b' name="'),
+                DelimitedDataModelElement('name', b'"'), FixedDataModelElement('inode_string', b'" inode='),
+                DecimalIntegerValueModelElement('inode'), FixedDataModelElement('dev_string', b' dev='),
+                DelimitedDataModelElement('dev', b' '), FixedDataModelElement('mode_string', b' mode='),
+                DecimalIntegerValueModelElement('mode'), FixedDataModelElement('ouid_string', b' ouid='),
+                DecimalIntegerValueModelElement('ouid'), FixedDataModelElement('ogid_string', b' ogid='),
+                DecimalIntegerValueModelElement('ogid'), FixedDataModelElement('rdev_string', b' rdev='),
+                DelimitedDataModelElement('rdev', b' '), FixedDataModelElement('nametype_string', b' nametype='),
+                FixedWordlistDataModelElement('nametype', [b'NORMAL', b'ERROR'])]), SequenceModelElement('syscall',
+            [FixedDataModelElement('type', b'type=SYSCALL '), FixedDataModelElement('msg_audit', b'msg=audit('),
+                DelimitedDataModelElement('msg', b':'), FixedDataModelElement('placeholder', b':'),
+                DecimalIntegerValueModelElement('id'), FixedDataModelElement('arch_string', b'): arch='),
+                DelimitedDataModelElement('arch', b' '), FixedDataModelElement('syscall_string', b' syscall='),
+                DecimalIntegerValueModelElement('syscall'), FixedDataModelElement('success_string', b' success='),
+                FixedWordlistDataModelElement('success', [b'yes', b'no']),
+                FixedDataModelElement('exit_string', b' exit='), DecimalIntegerValueModelElement('exit'),
+                AnyByteDataModelElement('remainding_data')])])
+
+        results = [None] * self.iterations
+        avg = 0
+        z = 0
+        while z < self.iterations:
+            i = 0
+            new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config,
+                ['parser/type/path/name', 'parser/type/syscall/syscall'], [self.stream_printer_event_handler],
+                id_path_list=['parser/type/path/id', 'parser/type/syscall/id'],
+                min_allowed_time_diff=min_allowed_time_diff, auto_include_flag=False, allow_missing_values_flag=True,
+                persistence_id='audit_type_path', output_log_line=False)
+            t = time.time()
+            seconds = time.time()
+            i = 0
+            while int(time.time() - seconds) < self.waiting_time:
+                p = process_time()
+                r = random.randint(0, len(log_lines)-1)
+                seconds = seconds + process_time() - p
+
+                # this code just creates some data to be able to compare with other analysis components.
+                decimal_integer_value_me = DecimalIntegerValueModelElement('d',
+                    DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+                match_context = MatchContext(str(i % 100).encode())
+                match_element = decimal_integer_value_me.get_match_element('integer', match_context)
+                ########################################################################################
+
+                line = log_lines[r]
+                log_atom = LogAtom(line, ParserMatch(parsing_model.get_match_element('parser', MatchContext(line))), t, self.__class__.__name__)
+                new_match_id_value_combo_detector.receive_atom(log_atom)
+                i = i + 1
+            results[z] = i
+            z = z + 1
+            avg = avg + i
+        avg = avg / self.iterations
+        type(self).result = self.result + self.result_string % (new_match_id_value_combo_detector.__class__.__name__, avg, results,
+        '%.2f seconds min_allowed_time_diff.' % min_allowed_time_diff)
 
     def test01_atom_filters(self):
         self.run_atom_filters_match_path_filter(1)
@@ -669,6 +751,12 @@ class AnalysisComponentsPerformanceTest(TestBase):
         self.run_whitelist_violation_detector(100000, 99)
         self.run_whitelist_violation_detector(100000, 50)
         self.run_whitelist_violation_detector(100000, 1)
+
+    def test15_new_match_id_value_combo_detector(self):
+        self.run_new_match_id_value_combo_detector(0.1)
+        self.run_new_match_id_value_combo_detector(5)
+        self.run_new_match_id_value_combo_detector(20)
+        self.run_new_match_id_value_combo_detector(100)
 
 
 if __name__ == '__main__':

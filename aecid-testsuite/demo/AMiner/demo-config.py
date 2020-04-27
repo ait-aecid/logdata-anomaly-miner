@@ -142,6 +142,48 @@ def build_analysis_pipeline(analysis_context):
   service_children_cron_job_execution.append(FixedDataModelElement('Job', b']: Job `'))
   service_children_cron_job_execution.append(FixedWordlistDataModelElement('CronType', [b'cron.daily', b'cron.hourly', b'cron.monthly', b'cron.weekly']))
   service_children_cron_job_execution.append(FixedDataModelElement('Started', b'\' started'))
+
+  service_children_audit = []
+  service_children_audit.append(SequenceModelElement('path', [
+            FixedDataModelElement('type', b'type=PATH '),
+            FixedDataModelElement('msg_audit', b'msg=audit('),
+            DelimitedDataModelElement('msg', b':'),
+            FixedDataModelElement('placeholder', b':'),
+            DecimalIntegerValueModelElement('id'),
+            FixedDataModelElement('item_string', b'): item='),
+            DecimalIntegerValueModelElement('item'),
+            FixedDataModelElement('name_string', b' name="'),
+            DelimitedDataModelElement('name', b'"'),
+            FixedDataModelElement('inode_string', b'" inode='),
+            DecimalIntegerValueModelElement('inode'),
+            FixedDataModelElement('dev_string', b' dev='),
+            DelimitedDataModelElement('dev', b' '),
+            FixedDataModelElement('mode_string', b' mode='),
+            DecimalIntegerValueModelElement('mode'),
+            FixedDataModelElement('ouid_string', b' ouid='),
+            DecimalIntegerValueModelElement('ouid'),
+            FixedDataModelElement('ogid_string', b' ogid='),
+            DecimalIntegerValueModelElement('ogid'),
+            FixedDataModelElement('rdev_string', b' rdev='),
+            DelimitedDataModelElement('rdev', b' '),
+            FixedDataModelElement('nametype_string', b' nametype='),
+            FixedWordlistDataModelElement('nametype', [b'NORMAL', b'ERROR'])]))
+  service_children_audit.append(SequenceModelElement('syscall', [
+            FixedDataModelElement('type', b'type=SYSCALL '),
+            FixedDataModelElement('msg_audit', b'msg=audit('),
+            DelimitedDataModelElement('msg', b':'),
+            FixedDataModelElement('placeholder', b':'),
+            DecimalIntegerValueModelElement('id'),
+            FixedDataModelElement('arch_string', b'): arch='),
+            DelimitedDataModelElement('arch', b' '),
+            FixedDataModelElement('syscall_string', b' syscall='),
+            DecimalIntegerValueModelElement('syscall'),
+            FixedDataModelElement('success_string', b' success='),
+            FixedWordlistDataModelElement('success', [b'yes', b'no']),
+            FixedDataModelElement('exit_string', b' exit='),
+            DecimalIntegerValueModelElement('exit'),
+            AnyByteDataModelElement('remainding_data')
+    ]))
   
   service_children_parsing_model_element = []
   service_children_parsing_model_element.append(DateTimeModelElement('DateTimeModelElement', b'Current DateTime: %d.%m.%Y %H:%M:%S'))
@@ -170,7 +212,7 @@ def build_analysis_pipeline(analysis_context):
   # The AnyByteDataModelElement must be last, because all bytes are accepted.  
   service_children_parsing_model_element.append(OptionalMatchModelElement('OptionalMatchModelElement', FirstMatchModelElement('FirstMatchModelElement', [FixedDataModelElement('FixedDataModelElement', b'The-searched-element-was-found!'), SequenceModelElement('', [FixedDataModelElement('FixedDME', b'Any:'), AnyByteDataModelElement('AnyByteDataModelElement')])])))
 
-  parsing_model = FirstMatchModelElement('model', [SequenceModelElement('CronAnnouncement', service_children_cron_job_announcement), SequenceModelElement('CronExecution', service_children_cron_job_execution), SequenceModelElement('DailyCron', service_children_cron_job), SequenceModelElement('DiskReport', service_children_disk_report), SequenceModelElement('LoginDetails', service_children_login_details), DecimalIntegerValueModelElement('Random'), SequenceModelElement('RandomTime', service_children_random_time), SequenceModelElement('Sensors', service_children_sensors), SequenceModelElement('IPAddresses', service_children_user_ip_address), FirstMatchModelElement('ParsingME', service_children_parsing_model_element)])
+  parsing_model = FirstMatchModelElement('model', [SequenceModelElement('CronAnnouncement', service_children_cron_job_announcement), SequenceModelElement('CronExecution', service_children_cron_job_execution), SequenceModelElement('DailyCron', service_children_cron_job), SequenceModelElement('DiskReport', service_children_disk_report), SequenceModelElement('LoginDetails', service_children_login_details), DecimalIntegerValueModelElement('Random'), SequenceModelElement('RandomTime', service_children_random_time), SequenceModelElement('Sensors', service_children_sensors), SequenceModelElement('IPAddresses', service_children_user_ip_address), FirstMatchModelElement('type', service_children_audit), FirstMatchModelElement('ParsingME', service_children_parsing_model_element)])
 
 # Some generic imports.
   from aminer.analysis import AtomFilters
@@ -192,7 +234,7 @@ def build_analysis_pipeline(analysis_context):
 # based one is usually sufficient.
   from aminer.input import SimpleByteStreamLineAtomizerFactory
   analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
-      parsing_model, [simple_monotonic_timestamp_adjust], anomaly_event_handlers)
+      parsing_model, [simple_monotonic_timestamp_adjust], anomaly_event_handlers, default_timestamp_path="/model/DailyCron/DTM")
 
 # Just report all unparsed atoms to the event handlers.
   from aminer.input import SimpleUnparsedAtomHandler, VerboseUnparsedAtomHandler
@@ -274,6 +316,11 @@ def build_analysis_pipeline(analysis_context):
   new_match_path_value_combo_detector = NewMatchPathValueComboDetector(analysis_context.aminer_config, ['/model/IPAddresses/Username', '/model/IPAddresses/IP'], anomaly_event_handlers, output_log_line=True)
   analysis_context.register_component(new_match_path_value_combo_detector, component_name="NewMatchPathValueCombo")
   atom_filter.add_handler(new_match_path_value_combo_detector)
+
+  from aminer.analysis.NewMatchIdValueComboDetector import NewMatchIdValueComboDetector
+  new_match_id_value_combo_detector = NewMatchIdValueComboDetector(analysis_context.aminer_config, ['/model/type/path/name', '/model/type/syscall/syscall'], anomaly_event_handlers, id_path_list=['/model/type/path/id', '/model/type/syscall/id'], min_allowed_time_diff=5, auto_include_flag=True, allow_missing_values_flag=True, output_log_line=True)
+  analysis_context.register_component(new_match_id_value_combo_detector, component_name="NewMatchIdValueComboDetector")
+  atom_filter.add_handler(new_match_id_value_combo_detector)
 
   from aminer.analysis.NewMatchPathValueDetector import NewMatchPathValueDetector
   new_match_path_value_detector = NewMatchPathValueDetector(analysis_context.aminer_config, ['/model/DailyCron/JobNumber', '/model/IPAddresses/Username'], anomaly_event_handlers, auto_include_flag=True, output_log_line=True)
