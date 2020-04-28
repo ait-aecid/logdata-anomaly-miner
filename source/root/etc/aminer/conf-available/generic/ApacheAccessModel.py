@@ -20,7 +20,7 @@ def get_model():
     version_model = VariableByteDataModelElement('version', b'0123456789.')
     status_code_model = DecimalIntegerValueModelElement('status')
     size_model = DecimalIntegerValueModelElement('size')
-    user_agent_model = VariableByteDataModelElement('useragent', b'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-/()[]{}!$%&=<?*+ ')
+    user_agent_model = VariableByteDataModelElement('useragent', b'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-/()[]{}!$%&=<?*+;:_ ')
 
     model = SequenceModelElement('accesslog', [
         VariableByteDataModelElement('host', b'-.01234567890abcdefghijklmnopqrstuvwxyz:'),
