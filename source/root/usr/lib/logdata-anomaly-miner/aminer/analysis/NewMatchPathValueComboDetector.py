@@ -13,6 +13,7 @@ from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
+
 class NewMatchPathValueComboDetector(
     AtomHandlerInterface, TimeTriggeredComponentInterface,
     EventSourceInterface):
@@ -90,15 +91,24 @@ class NewMatchPathValueComboDetector(
           self.next_persist_time = time.time() + 600
 
       analysis_component = dict()
+      analysis_component['AffectedLogAtomPaths'] = self.target_path_list
       analysis_component['AffectedLogAtomValues'] = affected_log_atom_values
       event_data['AnalysisComponent'] = analysis_component
+      original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+      if original_log_line_prefix is None:
+        original_log_line_prefix = ''
       if self.output_log_line:
-        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-        if original_log_line_prefix is None:
-          original_log_line_prefix = ''
-        sorted_log_lines = [str(match_value_tuple) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
+        match_paths_values = {}
+        for match_path, match_element in match_dict.items():
+          match_value = match_element.match_object
+          if isinstance(match_value, bytes):
+            match_value = match_value.decode()
+          match_paths_values[match_path] = match_value
+        analysis_component['ParsedLogAtom'] = match_paths_values
+        sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep +
+                            str(match_value_tuple) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
       else:
-        sorted_log_lines = [str(match_value_tuple)]
+        sorted_log_lines = [str(match_value_tuple) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
       for listener in self.anomaly_event_handlers:
         listener.receive_event(
             'Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected',

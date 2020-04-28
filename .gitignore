@@ -1,2 +1,3 @@
 *.pyc
-roles/*
+# ignore ansible-roles
+roles/

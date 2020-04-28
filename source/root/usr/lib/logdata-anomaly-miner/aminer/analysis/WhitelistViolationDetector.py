@@ -5,6 +5,8 @@ import os
 
 from aminer.input import AtomHandlerInterface
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
+from datetime import datetime
+
 
 class WhitelistViolationDetector(AtomHandlerInterface):
   """Objects of this class handle a list of whitelist rules to
@@ -32,15 +34,34 @@ class WhitelistViolationDetector(AtomHandlerInterface):
     for rule in self.whitelist_rules:
       if rule.match(log_atom):
         return True
+    analysis_component = dict()
+    analysis_component['AffectedLogAtomPathes'] = list(log_atom.parser_match.get_match_dictionary())
+    analysis_component['AffectedLogAtomValues'] = [log_atom.raw_data.decode()]
+    original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+    if original_log_line_prefix is None:
+      original_log_line_prefix = ''
     if self.output_log_line:
-      original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-      if original_log_line_prefix is None:
-          original_log_line_prefix = ''
+      match_paths_values = {}
+      for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
+        match_value = match_element.match_object
+        if isinstance(match_value, tuple):
+          l = []
+          for i, val in enumerate(match_value):
+            if isinstance(match_value[i], datetime):
+              l.append(datetime.timestamp(match_value[i]))
+            else:
+              l.append(match_value[i])
+          match_value = l
+        if isinstance(match_value, bytes):
+          match_value = match_value.decode()
+        match_paths_values[match_path] = match_value
+      analysis_component['ParsedLogAtom'] = match_paths_values
       sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep +
                           original_log_line_prefix + repr(log_atom.raw_data)]
     else:
-      sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('')]
+      sorted_log_lines = [original_log_line_prefix + repr(log_atom.raw_data)]
+    event_data['AnalysisComponent'] = analysis_component
     for listener in self.anomaly_event_handlers:
-      listener.receive_event('Analysis.%s' % self.__class__.__name__, \
+      listener.receive_event('Analysis.%s' % self.__class__.__name__,
           'No whitelisting for current atom', sorted_log_lines, event_data, log_atom, self)
     return False
