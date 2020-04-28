@@ -1,3 +1,12 @@
+#########################################################
+#
+#
+# Please note that the yaml-config is experimental and
+# incomplete at the moment. 
+#
+#
+#########################################################
+
 #LearnMode: false # optional
 AMinerUser: 'aminer'  # optional default: aminer
 AMinerGroup: 'aminer' # optional default: aminer
