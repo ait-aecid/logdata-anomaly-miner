@@ -22,6 +22,7 @@ def get_model():
     size_model = DecimalIntegerValueModelElement('size')
     user_agent_model = VariableByteDataModelElement('useragent', b'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-/()[]{}!$%&=<?*+;:_ ')
 
+<<<<<<< HEAD
     model = SequenceModelElement('accesslog', [
         VariableByteDataModelElement('host', b'-.01234567890abcdefghijklmnopqrstuvwxyz:'),
         FixedDataModelElement('sp0', whitespace_str),
@@ -44,3 +45,4 @@ def get_model():
         VariableByteDataModelElement('useragent', b'0123456789abcdefghijklmnopqrstuvwxyz.-/()[]{}!$%&=<?*+'),
         FixedDataModelElement('sp9', b'"'), ])
     return model
+
