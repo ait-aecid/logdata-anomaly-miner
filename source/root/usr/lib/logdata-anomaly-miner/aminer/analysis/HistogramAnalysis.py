@@ -62,7 +62,7 @@ except:
 date_string = "%Y-%m-%d %H:%M:%S"
 
 
-class BinDefinition(object):
+class BinDefinition:
   not_implemented = 'Not implemented'
   """This class defines the bins of the histogram."""
   def __init__(self):
