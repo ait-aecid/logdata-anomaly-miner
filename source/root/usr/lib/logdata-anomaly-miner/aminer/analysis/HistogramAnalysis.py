@@ -56,13 +56,14 @@ binomial_test = None
 try:
   from scipy import stats
   binomial_test = stats.binom_test
+# skipcq: FLK-E722
 except:
   pass
 
 date_string = "%Y-%m-%d %H:%M:%S"
 
 
-class BinDefinition(object):
+class BinDefinition:
   not_implemented = 'Not implemented'
   """This class defines the bins of the histogram."""
   def __init__(self):
@@ -88,6 +89,7 @@ class BinDefinition(object):
     at index 1."""
     raise Exception(self.not_implemented)
 
+  # skipcq: PYL-W0613
   def get_bin_p_value(self, bin_pos, total_values, bin_values):
     """Calculate a p-Value, how likely the observed number of
     elements in this bin is.
@@ -612,3 +614,5 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
 
     self.last_report_time = timestamp
     self.next_report_time = timestamp + self.report_interval
+
+
