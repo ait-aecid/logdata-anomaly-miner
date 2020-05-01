@@ -1,6 +1,7 @@
 """This module defines various interfaces for log atom parsing
 and namespace shortcuts to the ModelElements."""
 
+
 class ModelElementInterface(object):
   """This is the superinterface of all model elements."""
 
@@ -26,6 +27,7 @@ class ModelElementInterface(object):
     the data context to match against.
     @return the match_element or None if model did not match."""
 
+
 from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
 from aminer.parsing.Base64StringModelElement import Base64StringModelElement
 from aminer.parsing.DateTimeModelElement import DateTimeModelElement
@@ -49,3 +51,4 @@ from aminer.parsing.RepeatedElementDataModelElement import RepeatedElementDataMo
 from aminer.parsing.SequenceModelElement import SequenceModelElement
 from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
 from aminer.parsing.WhiteSpaceLimitedDataModelElement import WhiteSpaceLimitedDataModelElement
+
