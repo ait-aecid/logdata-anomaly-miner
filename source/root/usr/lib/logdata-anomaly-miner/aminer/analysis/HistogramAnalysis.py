@@ -56,6 +56,7 @@ binomial_test = None
 try:
   from scipy import stats
   binomial_test = stats.binom_test
+# skipcq: FLK-E722
 except:
   pass
 
