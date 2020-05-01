@@ -297,4 +297,3 @@ class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
     anomaly_event_handler.receive_event(self.analysis_string % self.__class__.__name__,
         'Interval too large between values', message_part, event_data, log_atom, self)
 
-
