@@ -98,4 +98,3 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
     """Immediately write persistence data to storage."""
     PersistencyUtil.store_json(self.persistence_file_name, list(self.known_path_set))
     self.next_persist_time = None
-

@@ -282,4 +282,3 @@ class CorrelationFeature:
     self.creation_time = creation_time
     self.last_trigger_time = 0.0
     self.trigger_count = 0
-

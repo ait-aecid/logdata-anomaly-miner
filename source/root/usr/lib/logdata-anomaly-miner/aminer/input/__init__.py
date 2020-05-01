@@ -72,4 +72,3 @@ from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLin
 from aminer.input.SimpleMultisourceAtomSync import SimpleMultisourceAtomSync
 from aminer.input.SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler
 from aminer.input.VerboseUnparsedAtomHandler import VerboseUnparsedAtomHandler
-

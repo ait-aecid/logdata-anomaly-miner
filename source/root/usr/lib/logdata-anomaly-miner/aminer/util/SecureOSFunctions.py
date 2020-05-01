@@ -119,4 +119,3 @@ def receive_annoted_file_descriptor(receive_socket):
   if isinstance(annotation_data, str):
     annotation_data = annotation_data.encode()
   return(received_fd, type_info, annotation_data)
-

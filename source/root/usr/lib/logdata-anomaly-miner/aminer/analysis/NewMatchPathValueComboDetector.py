@@ -153,4 +153,3 @@ class NewMatchPathValueComboDetector(
     self.known_values_set.add(event_data[1])
     return 'Whitelisted path(es) %s with %s in %s' % (
         ', '.join(self.target_path_list), event_data[1], sorted_log_lines[0])
-

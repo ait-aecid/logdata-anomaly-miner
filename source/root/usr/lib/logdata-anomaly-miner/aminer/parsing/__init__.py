@@ -51,4 +51,3 @@ from aminer.parsing.RepeatedElementDataModelElement import RepeatedElementDataMo
 from aminer.parsing.SequenceModelElement import SequenceModelElement
 from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
 from aminer.parsing.WhiteSpaceLimitedDataModelElement import WhiteSpaceLimitedDataModelElement
-

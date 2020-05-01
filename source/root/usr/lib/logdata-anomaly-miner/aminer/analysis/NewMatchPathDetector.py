@@ -121,4 +121,3 @@ class NewMatchPathDetector(AtomHandlerInterface,
         whitelisted_str += ', '
       whitelisted_str += path_name
     return 'Whitelisted path(es) %s in %s' % (whitelisted_str, sorted_log_lines[0])
-

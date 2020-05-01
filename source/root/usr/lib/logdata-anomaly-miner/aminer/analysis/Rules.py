@@ -512,4 +512,3 @@ class DebugHistoryMatchRule(MatchRule):
   def get_history(self):
     """Get the history object from this debug rule."""
     return self.object_history
-

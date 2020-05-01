@@ -224,4 +224,3 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
                old_bin[3] + stat_data[1], old_bin[4]]
         return res
     return None
-

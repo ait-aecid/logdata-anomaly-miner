@@ -604,4 +604,3 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
 
     self.last_report_time = timestamp
     self.next_report_time = timestamp + self.report_interval
-

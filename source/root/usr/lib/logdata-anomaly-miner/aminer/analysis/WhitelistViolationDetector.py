@@ -64,4 +64,3 @@ class WhitelistViolationDetector(AtomHandlerInterface):
       listener.receive_event('Analysis.%s' % self.__class__.__name__,
           'No whitelisting for current atom', sorted_log_lines, event_data, log_atom, self)
     return False
-
