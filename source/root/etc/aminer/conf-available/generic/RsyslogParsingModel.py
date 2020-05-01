@@ -6,6 +6,7 @@ from aminer.parsing import FirstMatchModelElement
 from aminer.parsing import FixedDataModelElement
 from aminer.parsing import SequenceModelElement
 
+# skipcq: PYL-W0613
 def get_model(user_name_model=None):
   """This function defines how to parse a su session information message
 after any standard logging preamble, e.g. from syslog."""
