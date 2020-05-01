@@ -18,6 +18,7 @@ class DateTimeModelElement(ModelElementInterface):
   in libc strptime, no support to determine the length of the
   parsed string."""
 
+  # skipcq: PYL-W0613
   def __init__(
       self, path_id, date_format, time_zone=None, text_locale=None,
       start_year=None, max_time_jump_seconds=86400):
