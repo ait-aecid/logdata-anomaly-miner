@@ -23,7 +23,7 @@ class JsonConverterHandler(EventHandlerInterface):
     self.event_data = EventData(event_type, event_message, sorted_log_lines, event_data, log_atom, event_source, self.analysis_context)
     json_error = ''
 
-    log_data = dict()
+    log_data = {}
     if isinstance(log_atom.raw_data, bytes):
       log_data['RawLogData'] = [bytes.decode(log_atom.raw_data)]
     else:
@@ -35,8 +35,7 @@ class JsonConverterHandler(EventHandlerInterface):
     if log_atom.parser_match is not None and hasattr(event_source, 'output_log_line') and event_source.output_log_line:
       log_data['AnnotatedMatchElement'] = log_atom.parser_match.match_element.annotate_match('')
 
-    analysis_component = dict()
-    analysis_component['AnalysisComponentIdentifier'] = self.analysis_context.get_id_by_component(event_source)
+    analysis_component = {'AnalysisComponentIdentifier': self.analysis_context.get_id_by_component(event_source)}
     if event_source.__class__.__name__ == 'ExtractedData_class':
       analysis_component['AnalysisComponentType'] = 'DistributionDetector'
     else:
@@ -83,3 +82,4 @@ class JsonConverterHandler(EventHandlerInterface):
 
     for listener in self.json_event_handlers:
       listener.receive_event(event_type, event_message, res, json_data, log_atom, event_source)
+

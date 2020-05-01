@@ -115,7 +115,6 @@ class MissingMatchPathValueDetector(
   def check_timeouts(self, timestamp, log_atom):
     """Check if there was any timeout on a channel, thus triggering
     event dispatching."""
-    event_data = dict()
     self.last_seen_timestamp = max(self.last_seen_timestamp, timestamp)
     if self.last_seen_timestamp > self.next_check_timestamp:
       missing_value_list = []
@@ -163,9 +162,8 @@ class MissingMatchPathValueDetector(
           e['OverdueTime'] = overdue_time
           e['Interval'] = interval
           affected_log_atom_values.append(e)
-        analysis_component = dict()
-        analysis_component['AffectedLogAtomPathes'] = list(log_atom.parser_match.get_match_dictionary())
-        analysis_component['AffectedLogAtomValues'] = affected_log_atom_values
+        analysis_component = {'AffectedLogAtomPathes': list(log_atom.parser_match.get_match_dictionary()),
+          'AffectedLogAtomValues': affected_log_atom_values}
         if self.output_log_line:
           match_paths_values = {}
           for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
@@ -174,7 +172,7 @@ class MissingMatchPathValueDetector(
               match_value = match_value.decode()
             match_paths_values[match_path] = match_value
           analysis_component['ParsedLogAtom'] = match_paths_values
-        event_data['AnalysisComponent'] = analysis_component
+        event_data = {'AnalysisComponent': analysis_component}
         original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
         if original_log_line_prefix is None:
           original_log_line_prefix = ''

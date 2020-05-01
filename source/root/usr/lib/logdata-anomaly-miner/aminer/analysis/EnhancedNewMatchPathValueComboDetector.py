@@ -74,7 +74,6 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
       timestamp = time.time()
     timestamp = round(timestamp, 3)
     match_value_list = []
-    event_data = dict()
     for target_path in self.target_path_list:
       match_element = match_dict.get(target_path, None)
       if match_element is None:
@@ -109,10 +108,9 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     l['NumberOfOccurences'] = values[2]
     affected_log_atom_values.append(l)
 
-    analysis_component = dict()
-    analysis_component['AffectedLogAtomPaths'] = self.target_path_list
-    analysis_component['AffectedLogAtomValues'] = affected_log_atom_values
-    event_data['AnalysisComponent'] = analysis_component
+    analysis_component = {'AffectedLogAtomPaths': self.target_path_list,
+      'AffectedLogAtomValues': affected_log_atom_values}
+    event_data = {'AnalysisComponent': analysis_component}
     if (self.auto_include_flag and self.known_values_dict.get(match_value_tuple, None)[2] is 1) or not self.auto_include_flag:
       for listener in self.anomaly_event_handlers:
         original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
@@ -163,4 +161,5 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         current_timestamp, current_timestamp, 1]
     return 'Whitelisted path(es) %s with %s in %s' % (
         ', '.join(self.target_path_list), event_data[1], sorted_log_lines[0])
+
 

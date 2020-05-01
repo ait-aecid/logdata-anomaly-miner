@@ -68,7 +68,6 @@ class NewMatchPathValueComboDetector(
     values were new or not."""
     match_dict = log_atom.parser_match.get_match_dictionary()
     match_value_list = []
-    event_data = dict()
     for target_path in self.target_path_list:
       match_element = match_dict.get(target_path, None)
       if match_element is None:
@@ -90,10 +89,9 @@ class NewMatchPathValueComboDetector(
         if self.next_persist_time is None:
           self.next_persist_time = time.time() + 600
 
-      analysis_component = dict()
-      analysis_component['AffectedLogAtomPaths'] = self.target_path_list
-      analysis_component['AffectedLogAtomValues'] = affected_log_atom_values
-      event_data['AnalysisComponent'] = analysis_component
+      analysis_component = {'AffectedLogAtomPaths': self.target_path_list,
+        'AffectedLogAtomValues': affected_log_atom_values}
+      event_data = {'AnalysisComponent': analysis_component}
       original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
       if original_log_line_prefix is None:
         original_log_line_prefix = ''
@@ -155,3 +153,4 @@ class NewMatchPathValueComboDetector(
     self.known_values_set.add(event_data[1])
     return 'Whitelisted path(es) %s with %s in %s' % (
         ', '.join(self.target_path_list), event_data[1], sorted_log_lines[0])
+

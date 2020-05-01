@@ -47,7 +47,6 @@ class NewMatchPathDetector(AtomHandlerInterface,
     may decide if it makes sense passing the parsed atom also
     to other handlers."""
     unknown_path_list = []
-    event_data = dict()
     for path in log_atom.parser_match.get_match_dictionary().keys():
       if path not in self.known_path_set:
         unknown_path_list.append(path)
@@ -64,8 +63,7 @@ class NewMatchPathDetector(AtomHandlerInterface,
                             original_log_line_prefix + repr(log_atom.raw_data)]
       else:
         sorted_log_lines = [repr(unknown_path_list) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
-      analysis_component = dict()
-      analysis_component['AffectedLogAtomPaths'] = list(unknown_path_list)
+      analysis_component = {'AffectedLogAtomPaths': list(unknown_path_list)}
       if self.output_log_line:
         match_paths_values = {}
         for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
@@ -74,7 +72,7 @@ class NewMatchPathDetector(AtomHandlerInterface,
             match_value = match_value.decode()
           match_paths_values[match_path] = match_value
         analysis_component['ParsedLogAtom'] = match_paths_values
-      event_data['AnalysisComponent'] = analysis_component
+      event_data = {'AnalysisComponent': analysis_component}
       for listener in self.anomaly_event_handlers:
         listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New path(es) detected',
                                sorted_log_lines, event_data, log_atom, self)
@@ -123,3 +121,4 @@ class NewMatchPathDetector(AtomHandlerInterface,
         whitelisted_str += ', '
       whitelisted_str += path_name
     return 'Whitelisted path(es) %s in %s' % (whitelisted_str, sorted_log_lines[0])
+

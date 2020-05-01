@@ -39,7 +39,6 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
 
   def receive_atom(self, log_atom):
     match_dict = log_atom.parser_match.get_match_dictionary()
-    event_data = dict()
     for target_path in self.target_path_list:
       match = match_dict.get(target_path, None)
       if match is None:
@@ -54,11 +53,8 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
           affected_log_atom_values = [match.match_object.decode()]
         else:
           affected_log_atom_values = [match.match_object]
-        analysis_component = dict()
-        analysis_component['AffectedLogAtomPaths'] = [target_path]
-        analysis_component['AffectedLogAtomValues'] = affected_log_atom_values
-        res = dict()
-        res[target_path] = affected_log_atom_values[0]
+        analysis_component = {'AffectedLogAtomPaths': [target_path], 'AffectedLogAtomValues': affected_log_atom_values}
+        res = {target_path: affected_log_atom_values[0]}
         original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
         if original_log_line_prefix is None:
           original_log_line_prefix = ''
@@ -73,7 +69,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
           sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + str(res) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
         else:
           sorted_log_lines = [str(res) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
-        event_data['AnalysisComponent'] = analysis_component
+        event_data = {'AnalysisComponent': analysis_component}
         for listener in self.anomaly_event_handlers:
           listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New value(s) detected', \
                                  sorted_log_lines, event_data, log_atom, self)
@@ -102,3 +98,4 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
     """Immediately write persistence data to storage."""
     PersistencyUtil.store_json(self.persistence_file_name, list(self.known_path_set))
     self.next_persist_time = None
+

@@ -137,10 +137,8 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
                 if self.next_persist_time is None:
                     self.next_persist_time = time.time() + 600
 
-            event_data = dict()
-            analysis_component = dict()
-            analysis_component['AffectedLogAtomValues'] = list(id_dict_entry.values())
-            event_data['AnalysisComponent'] = analysis_component
+            analysis_component = {'AffectedLogAtomValues': list(id_dict_entry.values())}
+            event_data = {'AnalysisComponent': analysis_component}
             original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
             if original_log_line_prefix is None:
                 original_log_line_prefix = ''
@@ -189,3 +187,4 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
             self.known_values.append(event_data[1])
         return 'Whitelisted path(es) %s with %s in %s' % (
             ', '.join(self.target_path_list), event_data[1], sorted_log_lines[0])
+

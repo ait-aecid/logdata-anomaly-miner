@@ -53,7 +53,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
 #     self.knownPathSet = set(persistenceData)
 
   def receive_atom(self, log_atom):
-    event_data = dict()
+    event_data = {}
     timestamp = log_atom.get_timestamp()
     if timestamp is None:
       timestamp = time.time()
@@ -97,9 +97,8 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
       result = self.total_records * ['']
       result[0] = self.analysis_status_to_string()
 
-      analysis_component = dict()
-      analysis_component['AffectedLogAtomPathes'] = list(log_atom.parser_match.get_match_dictionary())
-      analysis_component['AffectedLogAtomValues'] = [log_atom.raw_data.decode()]
+      analysis_component = {'AffectedLogAtomPathes': list(log_atom.parser_match.get_match_dictionary()),
+        'AffectedLogAtomValues': [log_atom.raw_data.decode()]}
       if self.output_log_line:
         match_paths_values = {}
         for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
@@ -283,3 +282,4 @@ class CorrelationFeature:
     self.creation_time = creation_time
     self.last_trigger_time = 0.0
     self.trigger_count = 0
+
