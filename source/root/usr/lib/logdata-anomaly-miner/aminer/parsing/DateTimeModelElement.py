@@ -284,3 +284,4 @@ class DateTimeModelElement(ModelElementInterface):
     """This method is just required to pass it as function pointer
     to the parsing logic."""
     return float(b'0.' + value_str)
+
