@@ -88,6 +88,7 @@ class BinDefinition(object):
     at index 1."""
     raise Exception(self.not_implemented)
 
+  # skipcq: PYL-W0613
   def get_bin_p_value(self, bin_pos, total_values, bin_values):
     """Calculate a p-Value, how likely the observed number of
     elements in this bin is.
