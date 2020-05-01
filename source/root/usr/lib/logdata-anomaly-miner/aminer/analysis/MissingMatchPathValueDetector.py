@@ -183,11 +183,11 @@ class MissingMatchPathValueDetector(
         else:
           message_part.append(os.linesep + original_log_line_prefix + repr(log_atom.raw_data))
         for listener in self.anomaly_event_handlers:
-          self.send_event_to_handlers(listener, event_data, log_atom, [''.join(message_part)], missing_value_list)
+          self.send_event_to_handlers(listener, event_data, log_atom, [''.join(message_part)])
     return True
 
 
-  def send_event_to_handlers(self, anomaly_event_handler, event_data, log_atom, message_part, missing_value_list):
+  def send_event_to_handlers(self, anomaly_event_handler, event_data, log_atom, message_part):
     anomaly_event_handler.receive_event(self.analysis_string % self.__class__.__name__,
         'Interval too large between values', message_part, event_data, log_atom, self)
 
@@ -293,7 +293,7 @@ class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
     return None
 
 
-  def send_event_to_handlers(self, anomaly_event_handler, event_data, log_atom, message_part, missing_value_list):
+  def send_event_to_handlers(self, anomaly_event_handler, event_data, log_atom, message_part):
     anomaly_event_handler.receive_event(self.analysis_string % self.__class__.__name__,
         'Interval too large between values', message_part, event_data, log_atom, self)
 
