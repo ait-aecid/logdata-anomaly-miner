@@ -140,8 +140,10 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
     r = {}
     r['Type'] = str(rule.__class__.__name__)
     for var in vars(rule):
-      attr = getattr(rule, var)
-      if isinstance(attr, list):
+      attr = getattr(rule, var, None)
+      if attr is None:
+        r[var] = None
+      elif isinstance(attr, list):
         l = []
         for v in attr:
           d = self.rule_to_dict(v)
@@ -149,7 +151,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
           l.append(d)
         r['subRules'] = l
       else:
-        r[var] = getattr(rule, var)
+        r[var] = attr
     return r
 
   def get_time_trigger_class(self):
