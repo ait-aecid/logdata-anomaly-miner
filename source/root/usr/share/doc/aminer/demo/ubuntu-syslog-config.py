@@ -180,7 +180,8 @@ def build_analysis_pipeline(analysis_context):
           '(   cd / && run-parts --report /etc/cron.hourly)'),
       Rules.ModuloTimeMatchRule('/model/syslog/time', 3600, 17*60, 17*60+5)]))
 
-  atom_filter.addHandler(WhitelistViolationDetector(whitelist_rules, anomaly_event_handlers))
+  whitelistViolationDetector = WhitelistViolationDetector(whitelist_rules, anomaly_event_handlers)
+  atom_filter.addHandler(whitelistViolationDetector)
 
 # Include the e-mail notification handler only if the configuration
 # parameter was set.
