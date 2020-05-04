@@ -9,7 +9,7 @@ from aminer.parsing import AnyByteDataModelElement
 from aminer.parsing import FixedWordlistDataModelElement
 
 # skipcq: PYL-W0613
-def get_model(time_model=None):
+def get_model(new_time_model=None):
 
   new_time_model = DatetimeModelElement('time', b'[%d/%b/%Y:%H:%M:%S +0000]')
   host_name_model = VariableByteDataModelElement('host', b'-.01234567890abcdefghijklmnopqrstuvwxyz:')

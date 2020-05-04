@@ -92,7 +92,8 @@ class BinDefinition:
   # skipcq: PYL-W0613
   def get_bin_p_value(self, bin_pos, total_values, bin_values):
     """Calculate a p-Value, how likely the observed number of
-    elements in this bin is.
+    elements in this bin is. This method is used as an interface
+    method, but it also returns a default value.
     @return the value or None when not applicable."""
     return None
 
