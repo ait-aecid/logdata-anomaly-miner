@@ -54,7 +54,7 @@ class AMinerRemoteControlExecutionMethods(object):
         elif property_name == AMinerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE:
             result = self.change_config_property_max_memory(analysis_context, value)
         elif property_name == AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE:
-            result = self.change_config_property_max_cpu_percent_usage(analysis_context, value)
+            result = self.change_config_property_max_cpu_percent_usage(value)
         elif property_name in config_keys_mail_alerting:
             result = self.change_config_property_mail_alerting(analysis_context, property_name, value)
         elif property_name == AMinerConfig.KEY_LOG_PREFIX:
