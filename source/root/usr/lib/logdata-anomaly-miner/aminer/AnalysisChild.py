@@ -336,7 +336,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         if isinstance(fd_handler_object, AnalysisChildRemoteControlHandler):
           try:
             fd_handler_object.do_receive()
-          except Exception as receiveException:
+          except ConnectionError as receiveException:
             print('Unclean termination of remote ' \
                 'control: %s' % str(receiveException), file=sys.stderr)
           if fd_handler_object.is_dead():
@@ -376,7 +376,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                 'control: %s' % str(sendError), file=sys.stderr)
             try:
               fd_handler_object.terminate()
-            except Exception as terminateException:
+            except ConnectionError as terminateException:
               print('Unclean termination of remote ' \
                   'control: %s' % str(terminateException), file=sys.stderr)
           if buffer_flushed_flag:

@@ -225,6 +225,7 @@ class AMinerRemoteControlExecutionMethods(object):
             else:
                 self.REMOTE_CONTROL_RESPONSE += component.whitelist_event("Analysis.%s" % component.__class__.__name__,
                                                                           [component.__class__.__name__], [LogAtom("", None, 1666.0, None), event_data], whitelisting_data)
+        # skipcq: PYL-W0703
         except Exception as e:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
 
@@ -352,11 +353,10 @@ class AMinerRemoteControlExecutionMethods(object):
                         event_type, sorted_log_lines, event_data, whitelisting_data)
                     result_string += 'OK %d: %s\n' % (event_id, message)
                     whitelisted_flag = True
+                except NotImplementedError:
+                    result_string += 'FAIL %d: component does not support whitelisting' % event_id
                 except Exception as wlException:
-                    if isinstance(wlException, NotImplementedError):
-                        result_string += 'FAIL %d: component does not support whitelisting' % event_id
-                    else:
-                        result_string += 'FAIL %d: %s\n' % (event_id, str(wlException))
+                    result_string += 'FAIL %d: %s\n' % (event_id, str(wlException))
             elif event_type == 'Analysis.WhitelistViolationDetector':
                 result_string += 'FAIL %d: No automatic modification of whitelist rules, manual changes required\n' % event_id
                 whitelisted_flag = True
