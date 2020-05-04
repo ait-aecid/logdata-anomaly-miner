@@ -458,6 +458,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
 # to the given histogram are still in all_path_set. If not, a split
 # within the mapping is needed.
       clone_set = all_path_set.copy()
+      mapped_path = None
       for mapped_path in histogram_mapping[0]:
         try:
           clone_set.remove(mapped_path)
