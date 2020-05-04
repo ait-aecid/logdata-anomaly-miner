@@ -118,7 +118,7 @@ class AMinerRemoteControlExecutionMethods(object):
 
     def change_attribute_of_registered_analysis_component(self, analysis_context, component_name, attribute, value):
         attr = getattr(analysis_context.get_component_by_name(component_name), attribute)
-        if type(attr) == type(value):
+        if type(attr) is type(value):
             setattr(analysis_context.get_component_by_name(component_name), attribute, value)
             self.REMOTE_CONTROL_RESPONSE += "'%s.%s' changed from %s to %s successfully." % (component_name,
                                                                                              attribute, repr(attr), value)
