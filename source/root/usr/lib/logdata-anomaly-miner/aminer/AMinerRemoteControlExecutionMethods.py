@@ -101,8 +101,8 @@ class AMinerRemoteControlExecutionMethods(object):
                 stdout, stderr = out.communicate()
 
             if 'dpkg-query: no packages found matching cpulimit.' in stdout.decode():
-                self.REMOTE_CONTROL_RESPONSE = 'FATAL: cpulimit package must be installed, '
-                + 'when using the property %s.' % AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE
+                self.REMOTE_CONTROL_RESPONSE = 'FATAL: cpulimit package must be installed, when using' \
+                                               ' the property %s.' % AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE
                 return 1
             else:
                 with subprocess.Popen(cpulimit_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as out:
