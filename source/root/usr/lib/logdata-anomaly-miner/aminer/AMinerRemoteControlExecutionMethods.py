@@ -117,7 +117,7 @@ class AMinerRemoteControlExecutionMethods(object):
         return 0
 
     def change_attribute_of_registered_analysis_component(self, analysis_context, component_name, attribute, value):
-        attr = getattr(analysis_context.get_component_by_name(component_name), attribute)
+        attr = getattr(analysis_context.get_component_by_name(component_name), attribute, None)
         if type(attr) is type(value):
             setattr(analysis_context.get_component_by_name(component_name), attribute, value)
             self.REMOTE_CONTROL_RESPONSE += "'%s.%s' changed from %s to %s successfully." % (component_name,
@@ -148,7 +148,7 @@ class AMinerRemoteControlExecutionMethods(object):
             self.REMOTE_CONTROL_RESPONSE = "FAILURE: the parameters 'componentName' and 'attribute' must be of type str."
             return
         if hasattr(analysis_context.get_component_by_name(component_name), attribute):
-            attr = getattr(analysis_context.get_component_by_name(component_name), attribute)
+            attr = getattr(analysis_context.get_component_by_name(component_name), attribute, None)
             if hasattr(attr, '__dict__') and self.isinstance_aminer_class(attr):
                 new_attr = self.get_all_vars(attr, '  ')
             elif isinstance(attr, list):
@@ -179,8 +179,8 @@ class AMinerRemoteControlExecutionMethods(object):
     def get_all_vars(self, obj, indent):
         result = ''
         for var in vars(obj):
-            attr = getattr(obj, var)
-            if hasattr(attr, '__dict__') and self.isinstance_aminer_class(attr):
+            attr = getattr(obj, var, None)
+            if attr is not None and hasattr(attr, '__dict__') and self.isinstance_aminer_class(attr):
                 result += indent + "%s = {\n" % var + self.get_all_vars(attr, indent + '  ') + indent + "}\n"
             elif isinstance(attr, list):
                 for l in attr:
