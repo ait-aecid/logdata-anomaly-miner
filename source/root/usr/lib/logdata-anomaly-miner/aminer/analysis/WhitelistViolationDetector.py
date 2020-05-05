@@ -30,13 +30,12 @@ class WhitelistViolationDetector(AtomHandlerInterface):
     match.
     @param log_atom atom with parsed data to check
     @return True when logAtom is whitelisted, False otherwise."""
-    event_data = dict()
+    event_data = {}
     for rule in self.whitelist_rules:
       if rule.match(log_atom):
         return True
-    analysis_component = dict()
-    analysis_component['AffectedLogAtomPathes'] = list(log_atom.parser_match.get_match_dictionary())
-    analysis_component['AffectedLogAtomValues'] = [log_atom.raw_data.decode()]
+    analysis_component = {'AffectedLogAtomPathes': list(log_atom.parser_match.get_match_dictionary()),
+      'AffectedLogAtomValues': [log_atom.raw_data.decode()]}
     original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
     if original_log_line_prefix is None:
       original_log_line_prefix = ''

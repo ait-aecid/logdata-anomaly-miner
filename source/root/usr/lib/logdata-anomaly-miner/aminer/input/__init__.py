@@ -65,6 +65,7 @@ class AtomHandlerInterface(object):
     at each source implementation sending LogAtoms."""
     raise Exception(interface_method_called)
 
+
 from aminer.input.ByteStreamLineAtomizer import ByteStreamLineAtomizer
 from aminer.input.LogAtom import LogAtom
 from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory

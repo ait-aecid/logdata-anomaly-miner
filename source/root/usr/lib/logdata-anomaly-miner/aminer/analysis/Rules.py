@@ -32,7 +32,7 @@ class EventGenerationMatchAction(MatchAction):
     self.event_handlers = event_handlers
 
   def match_action(self, log_atom):
-    event_data = dict()
+    event_data = {}
     for handler in self.event_handlers:
       handler.receive_event(
           self.event_type, self.event_message, [log_atom.parser_match.match_element.annotate_match('')], event_data, log_atom, self)

@@ -172,4 +172,3 @@ events and send them via "sendmail" transport."""
     self.events_collected = 0
     self.current_message = ''
     self.next_alert_time = 0
-

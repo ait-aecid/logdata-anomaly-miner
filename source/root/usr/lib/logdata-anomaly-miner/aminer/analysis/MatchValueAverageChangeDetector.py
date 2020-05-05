@@ -105,8 +105,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
               analysis_summary += os.linesep
               analysis_summary += '  "%s": %s' % (path, analysis_data[0])
             anomaly_scores.append(d)
-        analysis_component = dict()
-        analysis_component['AffectedLogAtomPathes'] = list(value_dict)
+        analysis_component = {'AffectedLogAtomPathes': list(value_dict)}
         if self.output_log_line:
           match_paths_values = {}
           for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
