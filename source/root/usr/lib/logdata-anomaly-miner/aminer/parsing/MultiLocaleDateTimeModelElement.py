@@ -396,7 +396,7 @@ class DateFormatComponent:
     the given is triggered."""
     if (self.format_timezone is not None) and (self.format_timezone != format_timezone):
       raise Exception('Node is already an end node for different timezone')
-    elif self.next_components:
+    if self.next_components:
       raise Exception('Cannot make node with subcomponents an end node')
     self.format_timezone = format_timezone
 

@@ -428,8 +428,8 @@ class AnalysisChild(TimeTriggeredComponentInterface):
       res = None
       if annotation_data.startswith(b'file://'):
         from aminer.input.LogStream import FileLogDataResource
-        res = FileLogDataResource(annotation_data, received_fd, \
-                                       repositioning_data=repositioning_data)
+        res = FileLogDataResource(annotation_data, received_fd,
+                                  repositioning_data=repositioning_data)
       elif annotation_data.startswith(b'unix://'):
         from aminer.input.LogStream import UnixSocketLogDataResource
         res = UnixSocketLogDataResource(annotation_data, received_fd)
