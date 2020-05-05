@@ -156,7 +156,7 @@ def save_config(analysis_context, new_file):
         new_pos = new_pos - 1
       filter_config = old[new_pos:pos]
       pos = filter_config.find(register_component) + len(register_component)
-      filter_config = filter_config[pos:filter_config.find(',',pos)].strip()
+      filter_config = filter_config[pos:filter_config.find(',', pos)].strip()
 
       new_parameters = parameters[2].split(")")
       component_name = new_parameters[1].strip(', ')

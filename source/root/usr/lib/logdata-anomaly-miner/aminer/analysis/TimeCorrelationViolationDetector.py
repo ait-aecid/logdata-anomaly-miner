@@ -272,7 +272,7 @@ class CorrelationRule:
         deleted = True
         check_range = check_range - 1
         b_pos = b_pos + 1
-      if deleted == False:
+      if deleted is False:
         a_pos = a_pos + 1
 # After checking all aEvents before a_pos were cleared, otherwise
 # they violate a correlation rule.
