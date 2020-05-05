@@ -28,7 +28,6 @@ class TimestampsUnsortedDetector(AtomHandlerInterface, EventSourceInterface):
     process the match. Depending on this information, the caller
     may decide if it makes sense passing the parsed atom also
     to other handlers."""
-    event_data = dict()
     if log_atom.get_timestamp() is None:
       return False
     if log_atom.get_timestamp() < self.last_timestamp:
@@ -40,9 +39,8 @@ class TimestampsUnsortedDetector(AtomHandlerInterface, EventSourceInterface):
                             original_log_line_prefix + repr(log_atom.raw_data)]
       else:
         sorted_log_lines = [original_log_line_prefix + repr(log_atom.raw_data)]
-      analysis_component = dict()
-      analysis_component['LastTimestamp'] = self.last_timestamp
-      event_data['AnalysisComponent'] = analysis_component
+      analysis_component = {'LastTimestamp': self.last_timestamp}
+      event_data = {'AnalysisComponent': analysis_component}
       for listener in self.anomaly_event_handlers:
         listener.receive_event('Analysis.%s' % self.__class__.__name__, \
             'Timestamp %s below %s' % (datetime.fromtimestamp(log_atom.get_timestamp()).strftime("%Y-%m-%d %H:%M:%S"),

@@ -58,7 +58,6 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
     """Sends summary to all event handlers."""
     parser_match = log_atom.parser_match
     value_dict = parser_match.get_match_dictionary()
-    event_data = dict()
 
     timestamp_value = log_atom.get_timestamp()
     if self.timestamp_path is not None:
@@ -66,7 +65,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
       if match_value is None:
         return
       timestamp_value = match_value.match_object[1]
-      event_data['MatchValue'] = match_value.match_object[0]
+      event_data = {'MatchValue': match_value.match_object[0]}
 
     analysis_summary = ''
     if self.sync_bins_flag:

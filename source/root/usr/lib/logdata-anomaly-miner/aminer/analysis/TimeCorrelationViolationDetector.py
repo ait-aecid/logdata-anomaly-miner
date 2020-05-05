@@ -81,7 +81,6 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
 # for a long time, that they hold information about correlation
 # impossible to fulfil. Take the newest timestamp of any rule
 # and use it for checking.
-    event_data = dict()
     newest_timestamp = 0.0
     for rule in self.event_correlation_ruleset:
       newest_timestamp = max(newest_timestamp, rule.last_timestamp_seen)
@@ -107,11 +106,8 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
         h.append(repr(item))
       history['History'] = h
       r['correlation_history'] = history
-      analysis_component = dict()
-      analysis_component['Rule'] = r
-      analysis_component['CheckResult'] = check_result
-      analysis_component['NewestTimestamp'] = newest_timestamp
-      event_data['AnalysisComponent'] = analysis_component
+      analysis_component = {'Rule': r, 'CheckResult': check_result, 'NewestTimestamp': newest_timestamp}
+      event_data = {'AnalysisComponent': analysis_component}
       for listener in self.anomaly_event_handlers:
         listener.receive_event('Analysis.%s' % self.__class__.__name__, \
             'Correlation rule "%s" violated' % rule.rule_id, [check_result[0]], \
