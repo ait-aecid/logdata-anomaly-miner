@@ -19,10 +19,9 @@ class LogStreamTest(TestBase):
     
     def setUp(self):
       super().setUp()
-      f = open(self.logfile, "w+")
-      for i in range(150):
-        f.write("%d %s\r\n" % (i+1, "d"*1000))
-      f.close()
+      with open(self.logfile, "w+") as f:
+        for i in range(150):
+          f.write("%d %s\r\n" % (i+1, "d"*1000))
     
     def tearDown(self):
       super().tearDown()
@@ -165,3 +164,4 @@ class LogStreamTest(TestBase):
     
 if __name__ == "__main__":
     unittest.main()
+
