@@ -19,8 +19,7 @@ class DateTimeModelElement(ModelElementInterface):
   parsed string."""
 
   # skipcq: PYL-W0613
-  def __init__(
-      self, path_id, date_format, time_zone=None, text_locale=None,
+  def __init__(self, path_id, date_format, time_zone=None, text_locale=None,
       start_year=None, max_time_jump_seconds=86400):
     """Create a DateTimeModelElement to parse dates using a custom,
     timezone and locale-aware implementation similar to strptime.
