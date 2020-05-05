@@ -253,7 +253,7 @@ class AMinerRemoteControlExecutionMethods(object):
         else:
             history_data = history_handler.get_history()
             result_string = 'FAIL: not found'
-            for event_pos in range(0, len(history_data)):
+            for event_pos in enumerate(history_data):
                 event_id, event_type, event_message, sorted_log_lines, event_data, event_source = history_data[event_pos]
                 if event_id != dump_event_id:
                     continue
