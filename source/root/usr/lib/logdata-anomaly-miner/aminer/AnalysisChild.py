@@ -425,28 +425,28 @@ class AnalysisChild(TimeTriggeredComponentInterface):
       repositioning_data = self.repositioning_data_dict.get(annotation_data, None)
       if repositioning_data != None:
         del self.repositioning_data_dict[annotation_data]
-      resource = None
+      res = None
       if annotation_data.startswith(b'file://'):
         from aminer.input.LogStream import FileLogDataResource
-        resource = FileLogDataResource(annotation_data, received_fd, \
+        res = FileLogDataResource(annotation_data, received_fd, \
                                        repositioning_data=repositioning_data)
       elif annotation_data.startswith(b'unix://'):
         from aminer.input.LogStream import UnixSocketLogDataResource
-        resource = UnixSocketLogDataResource(annotation_data, received_fd)
+        res = UnixSocketLogDataResource(annotation_data, received_fd)
       else:
         raise Exception('Filedescriptor of unknown type received')
 # Make fd nonblocking.
-      fd_flags = fcntl.fcntl(resource.get_file_descriptor(), fcntl.F_GETFL)
-      fcntl.fcntl(resource.get_file_descriptor(), fcntl.F_SETFL, fd_flags | os.O_NONBLOCK)
-      log_stream = self.log_streams_by_name.get(resource.get_resource_name())
+      fd_flags = fcntl.fcntl(res.get_file_descriptor(), fcntl.F_GETFL)
+      fcntl.fcntl(res.get_file_descriptor(), fcntl.F_SETFL, fd_flags | os.O_NONBLOCK)
+      log_stream = self.log_streams_by_name.get(res.get_resource_name())
       if log_stream is None:
         stream_atomizer = self.analysis_context.atomizer_factory.get_atomizer_for_resource(
-            resource.get_resource_name())
-        log_stream = LogStream(resource, stream_atomizer)
-        self.tracked_fds_dict[resource.get_file_descriptor()] = log_stream
-        self.log_streams_by_name[resource.get_resource_name()] = log_stream
+            res.get_resource_name())
+        log_stream = LogStream(res, stream_atomizer)
+        self.tracked_fds_dict[res.get_file_descriptor()] = log_stream
+        self.log_streams_by_name[res.get_resource_name()] = log_stream
       else:
-        log_stream.add_next_resource(resource)
+        log_stream.add_next_resource(res)
     elif received_type_info == b'remotecontrol':
       if self.remote_control_socket != None:
         raise Exception('Received another remote control ' \
