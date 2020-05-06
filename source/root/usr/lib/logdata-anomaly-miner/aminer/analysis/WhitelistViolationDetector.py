@@ -45,7 +45,7 @@ class WhitelistViolationDetector(AtomHandlerInterface):
         match_value = match_element.match_object
         if isinstance(match_value, tuple):
           l = []
-          for i, val in enumerate(match_value):
+          for val in match_value:
             if isinstance(val, datetime):
               l.append(datetime.timestamp(val))
             else:

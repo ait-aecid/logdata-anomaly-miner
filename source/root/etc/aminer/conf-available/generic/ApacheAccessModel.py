@@ -5,7 +5,6 @@ from aminer.parsing import DecimalIntegerValueModelElement
 from aminer.parsing import FixedDataModelElement
 from aminer.parsing import SequenceModelElement
 from aminer.parsing import VariableByteDataModelElement
-from aminer.parsing import AnyByteDataModelElement
 from aminer.parsing import FixedWordlistDataModelElement
 
 

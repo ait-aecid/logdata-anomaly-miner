@@ -1,5 +1,5 @@
 import unittest
-from os.path import sys
+import sys
 sys.path.append('../../')
 from aminer.util.SecureOSFunctions import secure_open_file, \
   send_annotated_file_descriptor, receive_annoted_file_descriptor

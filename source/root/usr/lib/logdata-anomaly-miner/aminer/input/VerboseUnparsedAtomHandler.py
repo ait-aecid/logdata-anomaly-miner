@@ -4,6 +4,7 @@ to the event handlers."""
 from aminer.input import AtomHandlerInterface
 from aminer.parsing import DebugMatchContext
 
+
 class VerboseUnparsedAtomHandler(AtomHandlerInterface):
   """Handlers of this class will forward received unparsed
   atoms to the registered event handlers applying the

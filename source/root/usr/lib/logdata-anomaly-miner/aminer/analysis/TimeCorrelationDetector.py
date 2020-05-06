@@ -12,6 +12,7 @@ from aminer.util import get_log_int
 from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
 
+
 class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
   """This class tries to find time correlation patterns between
   different log atoms. When a possible correlation rule is detected,
@@ -105,7 +106,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
           match_value = match_element.match_object
           if isinstance(match_value, tuple):
             l = []
-            for i, val in enumerate(match_value):
+            for val in match_value:
               if isinstance(val, datetime):
                 l.append(datetime.timestamp(val))
               else:

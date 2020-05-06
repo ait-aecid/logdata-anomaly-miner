@@ -7,6 +7,7 @@ import sys
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing import ModelElementInterface
 
+
 class DebugModelElement(ModelElementInterface):
   """This class defines a model element matching any data of length
   zero at any position. Thus it can never fail to match and can
@@ -14,7 +15,6 @@ class DebugModelElement(ModelElementInterface):
   itself does not alter parsing flow (see e.g. FirstMatchModelElement).
   It will immediately write the current state of the match to
   stderr for inspection."""
-
 
   def __init__(self, element_id):
     self.element_id = element_id

@@ -3,6 +3,7 @@ to the event handlers."""
 
 from aminer.input import AtomHandlerInterface
 
+
 class SimpleUnparsedAtomHandler(AtomHandlerInterface):
   """Handlers of this class will just forward received unparsed
   atoms to the registered event handlers."""

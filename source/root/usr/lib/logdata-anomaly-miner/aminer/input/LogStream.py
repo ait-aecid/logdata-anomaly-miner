@@ -14,6 +14,7 @@ from aminer.util import encode_byte_string_as_string
 
 interface_method_called = 'Interface method called'
 
+
 class LogDataResource(object):
   """This is the superinterface of each logdata resource monitored
   by AMiner. The interface is designed in a way, that instances

@@ -4,6 +4,7 @@ depending on the value of the previous model value."""
 from aminer.parsing import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
 
+
 class ElementValueBranchModelElement(ModelElementInterface):
   """This class defines an element that selects a branch path
   based on a previous model value."""

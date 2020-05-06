@@ -3,6 +3,7 @@
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing import ModelElementInterface
 
+
 class FixedDataModelElement(ModelElementInterface):
   """This class defines a model element of a fixed string. The model
   element is considered a match if the fixed string is found at

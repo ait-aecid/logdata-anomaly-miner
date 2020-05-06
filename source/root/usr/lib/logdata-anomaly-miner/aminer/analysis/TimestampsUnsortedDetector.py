@@ -7,6 +7,7 @@ from aminer.input import AtomHandlerInterface
 from datetime import datetime
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
+
 class TimestampsUnsortedDetector(AtomHandlerInterface, EventSourceInterface):
   """This class creates events when unsorted timestamps are detected.
   This is useful mostly to detect algorithm malfunction or configuration

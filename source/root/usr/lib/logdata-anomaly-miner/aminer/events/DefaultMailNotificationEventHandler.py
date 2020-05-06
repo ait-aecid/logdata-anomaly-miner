@@ -12,6 +12,7 @@ from aminer.util import TimeTriggeredComponentInterface
 from aminer.events import EventHandlerInterface
 from aminer.events.EventData import EventData
 
+
 class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredComponentInterface):
   """This class implements an event record listener, that will pool
 received events, reduce the amount of events below the maximum

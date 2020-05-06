@@ -9,7 +9,7 @@ from aminer.util import LogarithmicBackoffHistory
 from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.analysis import Rules
-from datetime import datetime
+
 
 class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
   """This class creates events when one of the given time correlation

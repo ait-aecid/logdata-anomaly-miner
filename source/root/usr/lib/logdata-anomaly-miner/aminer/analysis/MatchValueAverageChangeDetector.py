@@ -10,6 +10,7 @@ from aminer.input import AtomHandlerInterface
 from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
 
+
 class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
   """This detector calculates the average of a given list of values
   to monitor and reports if the average of the latest diverges

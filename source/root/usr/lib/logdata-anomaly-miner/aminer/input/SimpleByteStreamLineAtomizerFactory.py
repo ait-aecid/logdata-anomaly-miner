@@ -3,6 +3,7 @@
 from aminer.input import AtomizerFactory
 from aminer.input.ByteStreamLineAtomizer import ByteStreamLineAtomizer
 
+
 class SimpleByteStreamLineAtomizerFactory(AtomizerFactory):
   """This factory just creates the same atomizer for each new
   resource. All parsed and unparsed atoms are delivered via two

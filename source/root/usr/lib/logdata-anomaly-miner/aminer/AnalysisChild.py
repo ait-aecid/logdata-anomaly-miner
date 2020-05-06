@@ -22,9 +22,9 @@ from aminer.util import PersistencyUtil
 from aminer.util import SecureOSFunctions
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.util import JsonUtil
-from aminer.input.ByteStreamLineAtomizer import ByteStreamLineAtomizer
 from builtins import str
 from aminer.AMinerRemoteControlExecutionMethods import AMinerRemoteControlExecutionMethods
+
 
 class AnalysisContext(object):
   """This class collects information about the current analysis

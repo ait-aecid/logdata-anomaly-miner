@@ -10,6 +10,7 @@ from aminer.input.LogAtom import LogAtom
 from aminer.parsing.ParserMatch import ParserMatch
 from datetime import datetime
 
+
 class TimeCorrelationDetectorTest(TestBase):
   __expected_string = '%s Correlation report\nTimeCorrelationDetector: "%s" (%d lines)\n  '
   

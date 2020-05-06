@@ -1,14 +1,11 @@
 """This module defines an event handler that converts an event to JSON."""
 
 import json
-import datetime
 import time
-import types
-import base64
 
 from aminer.events import EventHandlerInterface
 from aminer.events.EventData import EventData
-from aminer.input.LogAtom import LogAtom
+
 
 class JsonConverterHandler(EventHandlerInterface):
   """This class implements an event record listener, that will

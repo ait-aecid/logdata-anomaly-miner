@@ -6,6 +6,7 @@ from aminer.input import StreamAtomizer
 from aminer.parsing import MatchContext
 from aminer.parsing import ParserMatch
 
+
 class ByteStreamLineAtomizer(StreamAtomizer):
   """This atomizer consumes binary data from a stream to break
   it into lines, removing the line separator at the end. With

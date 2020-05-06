@@ -1,7 +1,6 @@
-from aminer.input.LogAtom import LogAtom
-import json
 from datetime import datetime
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
+
 
 class EventData(object):
 

@@ -7,7 +7,6 @@ from datetime import datetime
 from aminer.parsing import FixedDataModelElement, MatchContext, ParserMatch
 from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
 from unit.TestBase import TestBase
-from argparse import ArgumentTypeError
 
 
 class NewMatchPathDetectorTest(TestBase):

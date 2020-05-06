@@ -3,6 +3,7 @@ first matching branch is taken."""
 
 from aminer.parsing import ModelElementInterface
 
+
 class FirstMatchModelElement(ModelElementInterface):
   """This class defines a model element to return the match from
   the the first matching child model within a given list."""

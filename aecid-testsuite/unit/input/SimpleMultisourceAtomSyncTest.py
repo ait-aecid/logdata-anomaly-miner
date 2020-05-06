@@ -9,6 +9,7 @@ from time import time, sleep
 from unit.TestBase import TestBase
 from datetime import datetime
 
+
 class SimpleMultisourceAtomSyncTest(TestBase):
     __expected_string = '%s New path(es) detected\n%s: "%s" (%d lines)\n  %s\n%s\n\n'
     

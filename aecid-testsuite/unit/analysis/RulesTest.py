@@ -25,6 +25,8 @@ from datetime import datetime
 NOTE: DebugMatchRule and DebugHistoryMatchRule are intentionally not tested, as there is not much to be tested.
 ParallelMatchRule is also not tested as it is very similar to the OrMatchRule.
 '''
+
+
 class RuleTest(TestBase):
     __expected_string = '%s This message was generated, when the unit were successful.\n%s: "%s" (%d lines)\n  %s\n\n'
     

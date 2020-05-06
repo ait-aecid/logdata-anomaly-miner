@@ -8,6 +8,7 @@ import sys
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing import ModelElementInterface
 
+
 class MultiLocaleDateTimeModelElement(ModelElementInterface):
   """This class defines a model element to parse date or datetime
   values from log sources containing timestamps encoded in different

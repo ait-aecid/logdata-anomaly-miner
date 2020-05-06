@@ -10,6 +10,7 @@ from aminer.input import AtomHandlerInterface
 attr_str = "%s = %s\n"
 component_not_found = 'Event history component not found'
 
+
 class AMinerRemoteControlExecutionMethods(object):
     REMOTE_CONTROL_RESPONSE = ''
 

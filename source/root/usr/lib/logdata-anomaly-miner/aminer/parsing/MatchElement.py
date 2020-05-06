@@ -1,6 +1,7 @@
 """This module provides only the MatchElement class to store results
 from parser element matching process."""
 
+
 class MatchElement(object):
   """This class allows storage and handling of data related to
   a match found by a model element."""

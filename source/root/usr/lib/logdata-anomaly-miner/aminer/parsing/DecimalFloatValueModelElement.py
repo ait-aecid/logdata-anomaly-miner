@@ -4,6 +4,7 @@ as float."""
 from aminer.parsing import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
 
+
 class DecimalFloatValueModelElement(ModelElementInterface):
   """This class defines a model to parse decimal values with optional
   signum, padding or exponent. With padding, the signum has to

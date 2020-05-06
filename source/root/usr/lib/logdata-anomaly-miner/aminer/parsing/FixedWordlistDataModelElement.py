@@ -4,6 +4,7 @@ from a list of words."""
 from aminer.parsing import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
 
+
 class FixedWordlistDataModelElement(ModelElementInterface):
   """This class defines a model element to detect fixed strings
   from a list of words. The match will return the position of
