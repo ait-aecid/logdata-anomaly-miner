@@ -55,10 +55,10 @@ class DelimitedDataModelElementTest(unittest.TestCase):
         self.match_element = self.delimited_data_model_element.get_match_element('match', self.match_context)
         self.assertEqual(self.match_element.get_match_string(), b'error: the command \\"python run.py\\" was not found')
 
-        self.match_context = MatchContext(b'^This is a simple regex string. It costs 10\$.$')
+        self.match_context = MatchContext(b'^This is a simple regex string. It costs 10$.$')
         self.delimited_data_model_element = DelimitedDataModelElement('id', b'$', b'\\')
         self.match_element = self.delimited_data_model_element.get_match_element('match', self.match_context)
-        self.assertEqual(self.match_element.get_match_string(), b'^This is a simple regex string. It costs 10\$.')
+        self.assertEqual(self.match_element.get_match_string(), b'^This is a simple regex string. It costs 10$.')
 
         self.match_context = MatchContext(b'the searched file is .gitignore.')
         self.delimited_data_model_element = DelimitedDataModelElement('id', b'.', b' ')
