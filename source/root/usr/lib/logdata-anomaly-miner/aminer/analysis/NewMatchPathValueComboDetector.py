@@ -57,7 +57,7 @@ class NewMatchPathValueComboDetector(
     else:
 # Set and tuples were stored as list of lists. Transform the inner
 # lists to tuples to allow hash operation needed by set.
-      self.known_values_set = set([tuple(record) for record in persistence_data])
+      self.known_values_set = set(tuple(record) for record in persistence_data)
 
 
   def receive_atom(self, log_atom):
