@@ -273,7 +273,7 @@ class AMinerRemoteControlExecutionMethods(object):
                 else:
                     result_string += '\n  Data: %s' % str(event_data)
 
-                if append_log_lines_flag and (sorted_log_lines != None) and (len(sorted_log_lines) != 0):
+                if append_log_lines_flag and (sorted_log_lines is not None) and (len(sorted_log_lines) != 0):
                     result_string += '\n  Log lines:\n    %s' % '\n    '.join(sorted_log_lines)
                 break
             self.REMOTE_CONTROL_RESPONSE = result_string

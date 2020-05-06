@@ -148,7 +148,7 @@ class NewMatchPathValueComboDetector(
     using given whitelistingData was not possible."""
     if event_type != 'Analysis.%s' % self.__class__.__name__:
       raise Exception('Event not from this source')
-    if whitelisting_data != None:
+    if whitelisting_data is not None:
       raise Exception('Whitelisting data not understood by this detector')
     self.known_values_set.add(event_data[1])
     return 'Whitelisted path(es) %s with %s in %s' % (

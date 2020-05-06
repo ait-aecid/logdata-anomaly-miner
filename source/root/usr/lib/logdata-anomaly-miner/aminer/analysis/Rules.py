@@ -74,7 +74,7 @@ class AndMatchRule(MatchRule):
     for rule in self.sub_rules:
       if not rule.match(log_atom):
         return False
-    if self.match_action != None:
+    if self.match_action is not None:
       self.match_action.match_action(log_atom)
     return True
 
@@ -103,7 +103,7 @@ class OrMatchRule(MatchRule):
     @return True when any subrule matched."""
     for rule in self.sub_rules:
       if rule.match(log_atom):
-        if self.match_action != None:
+        if self.match_action is not None:
           self.match_action.match_action(log_atom)
         return True
     return False
@@ -140,7 +140,7 @@ class ParallelMatchRule(MatchRule):
     for rule in self.sub_rules:
       if rule.match(log_atom):
         match_flag = True
-    if match_flag and (self.match_action != None):
+    if match_flag and (self.match_action is not None):
       self.match_action.match_action(log_atom)
     return match_flag
 
@@ -191,7 +191,7 @@ class ValueDependentDelegatedMatchRule(MatchRule):
     if rule is None:
       return False
     if rule.match(log_atom):
-      if self.match_action != None:
+      if self.match_action is not None:
         self.match_action.match_action(log_atom)
       return True
     return False
@@ -212,7 +212,7 @@ class NegationMatchRule(MatchRule):
   def match(self, log_atom):
     if self.sub_rule.match(log_atom):
       return False
-    if self.match_action != None:
+    if self.match_action is not None:
       self.match_action.match_action(log_atom)
     return True
 
@@ -230,7 +230,7 @@ class PathExistsMatchRule(MatchRule):
 
   def match(self, log_atom):
     if self.path in log_atom.parser_match.get_match_dictionary():
-      if self.match_action != None:
+      if self.match_action is not None:
         self.match_action.match_action(log_atom)
       return True
     return False
@@ -255,8 +255,8 @@ class ValueMatchRule(MatchRule):
         test_value.match_object = test_value.match_object.encode()
       elif not isinstance(self.value, bytes) and isinstance(test_value.match_object, bytes) and self.value is not None:
         self.value = self.value.encode()
-    if (test_value != None) and (test_value.match_object == self.value):
-      if self.match_action != None:
+    if (test_value is not None) and (test_value.match_object == self.value):
+      if self.match_action is not None:
         self.match_action.match_action(log_atom)
       return True
     return False
@@ -279,8 +279,8 @@ class ValueListMatchRule(MatchRule):
 
   def match(self, log_atom):
     test_value = log_atom.parser_match.get_match_dictionary().get(self.path, None)
-    if (test_value != None) and (test_value.match_object in self.value_list):
-      if self.match_action != None:
+    if (test_value is not None) and (test_value.match_object in self.value_list):
+      if self.match_action is not None:
         self.match_action.match_action(log_atom)
       return True
     return False
@@ -305,7 +305,7 @@ class ValueRangeMatchRule(MatchRule):
       return False
     test_value = test_value.match_object
     if (test_value >= self.lower_limit) and (test_value <= self.upper_limit):
-      if self.match_action != None:
+      if self.match_action is not None:
         self.match_action.match_action(log_atom)
       return True
     return False
@@ -331,7 +331,7 @@ class StringRegexMatchRule(MatchRule):
     if ((test_value is None) or
         (self.match_regex.match(test_value.match_string) is None)):
       return False
-    if self.match_action != None:
+    if self.match_action is not None:
       self.match_action.match_action(log_atom)
     return True
 
@@ -372,7 +372,7 @@ class ModuloTimeMatchRule(MatchRule):
       return False
     test_value %= self.seconds_modulo
     if (test_value >= self.lower_limit) and (test_value <= self.upper_limit):
-      if self.match_action != None:
+      if self.match_action is not None:
         self.match_action.match_action(log_atom)
       return True
     return False
@@ -429,7 +429,7 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
       return False
     test_value %= self.seconds_modulo
     if (test_value >= limits[0]) and (test_value <= limits[1]):
-      if self.match_action != None:
+      if self.match_action is not None:
         self.match_action.match_action(log_atom)
       return True
     return False
@@ -454,7 +454,7 @@ class IPv4InRFC1918MatchRule(MatchRule):
     if (((value&0xff000000) == 0xa000000) or
         ((value&0xfff00000) == 0xac100000) or
         ((value&0xffff0000) == 0xc0a80000)):
-      if self.match_action != None:
+      if self.match_action is not None:
         self.match_action.match_action(log_atom)
       return True
     return False
@@ -476,7 +476,7 @@ class DebugMatchRule(MatchRule):
   def match(self, log_atom):
     print('Rules.DebugMatchRule: triggered while ' \
         'handling "%s"' % repr(log_atom.parser_match.match_element.match_string), file=sys.stderr)
-    if self.matchAction != None:
+    if self.matchAction is not None:
       self.matchAction.match_action(log_atom)
     return self.debug_match_result
 
@@ -505,7 +505,7 @@ class DebugHistoryMatchRule(MatchRule):
 
   def match(self, log_atom):
     self.object_history.add_object(log_atom)
-    if self.match_action != None:
+    if self.match_action is not None:
       self.match_action.match_action(log_atom)
     return self.debug_match_result
 

@@ -120,7 +120,7 @@ class LinearNumericBinDefinition(BinDefinition):
     outlier bins if any."""
 # Cache the names here so that multiple histograms using same
 # BinDefinition do not use separate copies of the strings.
-    if self.bin_names != None:
+    if self.bin_names is not None:
       return self.bin_names
     self.bin_names = []
     if self.outlier_bins_flag:
@@ -286,7 +286,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
     self.persistenceFileName = AMinerConfig.build_persistence_file_name(
         aminer_config, 'HistogramAnalysis', persistence_id)
     persistence_data = PersistencyUtil.load_json(self.persistenceFileName)
-    if persistence_data != None:
+    if persistence_data is not None:
       raise Exception('No data reading, def merge yet')
 
 
@@ -539,7 +539,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
   def send_report(self, log_atom, timestamp):
     """Send report to event handlers."""
     report_str = 'Path histogram report '
-    if self.last_report_time != None:
+    if self.last_report_time is not None:
       report_str += 'from %s ' % datetime.fromtimestamp(self.last_report_time).strftime(date_string)
     report_str += 'till %s' % datetime.fromtimestamp(timestamp).strftime(date_string)
     all_path_set = set(self.histogram_data.keys())

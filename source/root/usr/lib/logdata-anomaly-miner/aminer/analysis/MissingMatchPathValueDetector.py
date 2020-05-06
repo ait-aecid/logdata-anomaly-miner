@@ -78,7 +78,7 @@ class MissingMatchPathValueDetector(
     if timestamp is None:
       timestamp = time.time()
     detector_info = self.expected_values_dict.get(value, None)
-    if detector_info != None:
+    if detector_info is not None:
 # Just update the last seen value and switch from non-reporting
 # error state to normal state.
       detector_info[0] = timestamp

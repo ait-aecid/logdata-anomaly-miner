@@ -90,16 +90,16 @@ class AnalysisContext(object):
     the time trigger class supplied by the component and register
     it for the classes specified in the override list. Use an
     empty list to disable registration."""
-    if (component_name != None) and (component_name in self.registered_components_by_name):
+    if (component_name is not None) and (component_name in self.registered_components_by_name):
       raise Exception('Component with same name already registered')
-    if (register_time_trigger_class_override != None) and \
+    if (register_time_trigger_class_override is not None) and \
         (not isinstance(component, TimeTriggeredComponentInterface)):
       raise Exception('Requesting override on component not implementing ' \
           'TimeTriggeredComponentInterface')
 
     self.registered_components[self.next_registry_id] = (component, component_name)
     self.next_registry_id += 1
-    if component_name != None:
+    if component_name is not None:
       self.registered_components_by_name[component_name] = component
     if isinstance(component, TimeTriggeredComponentInterface):
       if register_time_trigger_class_override is None:
@@ -423,7 +423,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         SecureOSFunctions.receive_annoted_file_descriptor(self.master_control_socket)
     if received_type_info == b'logstream':
       repositioning_data = self.repositioning_data_dict.get(annotation_data, None)
-      if repositioning_data != None:
+      if repositioning_data is not None:
         del self.repositioning_data_dict[annotation_data]
       res = None
       if annotation_data.startswith(b'file://'):
@@ -448,7 +448,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
       else:
         log_stream.add_next_resource(res)
     elif received_type_info == b'remotecontrol':
-      if self.remote_control_socket != None:
+      if self.remote_control_socket is not None:
         raise Exception('Received another remote control ' \
             'socket: multiple remote control not (yet?) supported.')
       self.remote_control_socket = socket.fromfd(
@@ -486,7 +486,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
       self.repositioning_data_dict = {}
       for log_stream_name, log_stream in self.log_streams_by_name.items():
         repositioning_data = log_stream.get_repositioning_data()
-        if repositioning_data != None:
+        if repositioning_data is not None:
           self.repositioning_data_dict[log_stream_name] = repositioning_data
       PersistencyUtil.store_json(
           self.persistence_file_name, self.repositioning_data_dict)

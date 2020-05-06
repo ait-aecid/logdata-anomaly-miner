@@ -24,7 +24,7 @@ class FirstMatchModelElement(ModelElementInterface):
     match_data = match_context.match_data
     for child_element in self.children:
       child_match = child_element.get_match_element(current_path, match_context)
-      if child_match != None:
+      if child_match is not None:
         return child_match
       match_context.match_data = match_data
     return None

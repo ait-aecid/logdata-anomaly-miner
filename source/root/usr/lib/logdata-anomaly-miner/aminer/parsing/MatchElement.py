@@ -55,7 +55,7 @@ class MatchElement(object):
     else:
       result = '%s%s: %s' % (indent_str, self.path, repr(self.match_object))
       next_indent = indent_str + '  '
-    if self.children != None:
+    if self.children is not None:
       for child_match in self.children:
         if next_indent is None:
           result += ' '+child_match.annotate_match(None)
@@ -79,7 +79,7 @@ class MatchElement(object):
     """Get a string representation of this match element excluding
     the children"""
     num_children = 0
-    if self.children != None:
+    if self.children is not None:
       num_children = len(self.children)
     return 'MatchElement: path = %s, string = %s, object = %s, children = %d' % (
       self.path, repr(self.match_string), repr(self.match_object), num_children)

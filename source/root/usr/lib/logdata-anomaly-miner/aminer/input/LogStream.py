@@ -115,7 +115,7 @@ class FileLogDataResource(LogDataResource):
 # hash collisions, correct positioning would not matter anyway.
     self.repositioning_digest = hashlib.md5()
 
-    if (log_stream_fd != -1) and (repositioning_data != None):
+    if (log_stream_fd != -1) and (repositioning_data is not None):
       if repositioning_data[0] != self.stat_data.st_ino:
         print('Not attempting to reposition on %s,' \
             'inode number mismatch' % encode_byte_string_as_string(self.log_resource_name),
@@ -182,7 +182,7 @@ class FileLogDataResource(LogDataResource):
       raise Exception('Attempting to open non-regular file %s ' \
           'as file' % encode_byte_string_as_string(self.log_resource_name))
 
-    if (reopen_flag and (self.stat_data != None) and
+    if (reopen_flag and (self.stat_data is not None) and
         (stat_data.st_ino == self.stat_data.st_ino) and
         (stat_data.st_dev == self.stat_data.st_dev)):
 # Reopening was requested, but we would reopen the file already
@@ -272,7 +272,7 @@ class UnixSocketLogDataResource(LogDataResource):
       log_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
       log_socket.connect(self.log_resource_name[7:])
     except socket.error as socketError:
-      if log_socket != None:
+      if log_socket is not None:
         log_socket.close()
       if (socketError.errno == errno.ENOENT) or (socketError.errno == errno.ECONNREFUSED):
         return False
