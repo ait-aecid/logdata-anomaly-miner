@@ -93,7 +93,7 @@ def receive_annoted_file_descriptor(receive_socket):
   @return a tuple containing the received file descriptor, type
   information (see sendAnnotatedFileDescriptor) and the annotation
   information."""
-  message_data, anc_data, flags, remote_address = receive_socket.recvmsg(
+  message_data, anc_data, _flags, _remote_address = receive_socket.recvmsg(
       1<<16, socket.CMSG_LEN(struct.calcsize('i')))
   if len(anc_data) != 1:
     raise Exception(

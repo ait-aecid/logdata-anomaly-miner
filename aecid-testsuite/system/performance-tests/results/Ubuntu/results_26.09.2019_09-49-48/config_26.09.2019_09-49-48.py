@@ -194,7 +194,7 @@ def buildAnalysisPipeline(analysisContext):
 
   from aminer.analysis import Rules
   from aminer.analysis import WhitelistViolationDetector
-  violationAction=Rules.EventGenerationMatchAction('Analysis.GenericViolation',
+  _violationAction=Rules.EventGenerationMatchAction('Analysis.GenericViolation',
       'Violation detected', anomalyEventHandlers)
   whitelistRules=[]
   
