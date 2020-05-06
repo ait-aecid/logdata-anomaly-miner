@@ -13,6 +13,53 @@
             'type': 'string',
             'default': 'aminer'
         },
+        'Core.PersistenceDir' : {
+            'required' : False,
+            'type': 'string',
+            'default': '/tmp/lib/aminer'
+        },
+        'MailAlerting.TargetAddress' : {
+            'required' : False,
+            'type': 'string'
+        },
+        'MailAlerting.FromAddress' : {
+            'required' : False,
+            'type': 'string'
+        },
+        'MailAlerting.SubjectPrefix' : {
+            'required' : False,
+            'type': 'string',
+            'default': 'AMiner Alerts:'
+        },
+        'MailAlerting.AlertGraceTime' : {
+            'required' : False,
+            'type': 'integer',
+            'default': 0
+        },
+        'MailAlerting.EventCollectTime' : {
+            'required' : False,
+            'type': 'integer',
+            'default': 10
+        },
+        'MailAlerting.MinAlertGap' : {
+            'required' : False,
+            'type': 'integer',
+            'default': 600
+        },
+        'MailAlerting.MaxAlertGap' : {
+            'required' : False,
+            'type': 'integer',
+            'default': 600
+        },
+        'MailAlerting.MaxEventsPerMessage' : {
+            'required' : False,
+            'type': 'integer',
+            'default': 1000
+        },
+        'LogPrefix' : {
+            'required' : False,
+            'type': 'string',
+        },
         'LogResourceList' : {
             'required' : True,
             'type': 'list',

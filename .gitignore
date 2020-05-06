@@ -2,3 +2,4 @@
 
 # ignore ansible-roles
 roles/
+playbook.yml
