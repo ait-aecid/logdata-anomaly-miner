@@ -38,7 +38,7 @@ class AMinerRemoteControlExecutionMethods(object):
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: the analysisContext must be of type %s." % AnalysisChild.AnalysisContext.__class__
             return
 
-        if not property_name in analysis_context.aminer_config.config_properties:
+        if property_name not in analysis_context.aminer_config.config_properties:
             self.REMOTE_CONTROL_RESPONSE = "FAILURE: the property '%s' does not exist in the current config!" % property_name
             return
 
