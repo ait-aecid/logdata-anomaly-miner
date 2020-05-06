@@ -118,8 +118,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         analysis_component['MinBinTime'] = self.min_bin_time
         analysis_component['SyncBinsFlag'] = self.sync_bins_flag
         analysis_component['DebugMode'] = self.debug_mode
-
-        event_data['AnalysisComponent'] = analysis_component
+        event_data = {'AnalysisComponent': analysis_component}
 
         if self.next_persist_time is None:
           self.next_persist_time = time.time() + 600
