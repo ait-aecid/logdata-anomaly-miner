@@ -4,7 +4,6 @@ import json
 import time
 
 from aminer.events import EventHandlerInterface
-from aminer.events.EventData import EventData
 
 
 class JsonConverterHandler(EventHandlerInterface):

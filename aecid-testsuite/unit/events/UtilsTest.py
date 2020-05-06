@@ -125,24 +125,24 @@ class UtilsTest(TestBase):
             (4, self.test % self.__class__.__name__, message, [log_atom.raw_data, log_atom.raw_data], None, log_atom.get_parser_match(), self)]:
           fourth += 1
       val = 0.5*0.5*0.5
-      min = size * val * (1 - deviation)
-      max = size * val * (1 + deviation)
-      self.assertTrue(min <= first <= max, msg % ("first", first, min, max))
+      minimum = size * val * (1 - deviation)
+      maximum = size * val * (1 + deviation)
+      self.assertTrue(minimum <= first <= maximum, msg % ("first", first, minimum, maximum))
       
       val = 0.5*0.5*0.5
-      min = size * val * (1 - deviation)
-      max = size * val * (1 + deviation)
-      self.assertTrue(min <= second <= max, msg % ("second", second, min, max))
+      minimum = size * val * (1 - deviation)
+      maximum = size * val * (1 + deviation)
+      self.assertTrue(minimum <= second <= maximum, msg % ("second", second, minimum, maximum))
       
       val = 2*0.5*0.5*0.5
-      min = size * val * (1 - deviation)
-      max = size * val * (1 + deviation)
-      self.assertTrue(min <= third <= max, msg % ("third", third, min, max))
+      minimum = size * val * (1 - deviation)
+      maximum = size * val * (1 + deviation)
+      self.assertTrue(minimum <= third <= maximum, msg % ("third", third, minimum, maximum))
        
       val = 0.5
-      min = size * val * (1 - deviation)
-      max = size * val * (1 + deviation)
-      self.assertTrue(min <= fourth <= max, msg % ("fourth", fourth, min, max))
+      minimum = size * val * (1 - deviation)
+      maximum = size * val * (1 + deviation)
+      self.assertTrue(minimum <= fourth <= maximum, msg % ("fourth", fourth, minimum, maximum))
 
 
 if __name__ == "__main__":

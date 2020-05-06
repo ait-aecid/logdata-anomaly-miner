@@ -42,18 +42,18 @@ class LogStreamTest(TestBase):
       file_log_data_resource.open(False)
       self.assertEqual(file_log_data_resource.buffer, b'')
       
-      len = file_log_data_resource.fill_buffer()
-      self.assertEqual(len, file_log_data_resource.default_buffer_size)
+      length = file_log_data_resource.fill_buffer()
+      self.assertEqual(length, file_log_data_resource.default_buffer_size)
       
-      file_log_data_resource.update_position(len)
+      file_log_data_resource.update_position(length)
       self.assertEqual(file_log_data_resource.buffer, b'')
-      self.assertEqual(self.file_log_data_resource.total_consumed_length, file_log_data_resource.default_buffer_size)
+      self.assertEqual(file_log_data_resource.total_consumed_length, file_log_data_resource.default_buffer_size)
       
       # repeat to see if totalConsumedLength was changed.
-      len = file_log_data_resource.fill_buffer()
-      self.assertEqual(len, file_log_data_resource.default_buffer_size)
+      length = file_log_data_resource.fill_buffer()
+      self.assertEqual(length, file_log_data_resource.default_buffer_size)
       
-      file_log_data_resource.update_position(len)
+      file_log_data_resource.update_position(length)
       self.assertEqual(file_log_data_resource.buffer, b'')
       self.assertEqual(file_log_data_resource.total_consumed_length, 2 * file_log_data_resource.default_buffer_size)
       
@@ -69,11 +69,11 @@ class LogStreamTest(TestBase):
       data = os.read(fd, length)
       md5 = hashlib.md5()
       md5.update(data)
-      hash = md5.digest()
+      hash_digest = md5.digest()
       os.close(fd)
       
       fd = os.open('/tmp/log.txt', os.O_RDONLY)
-      file_log_data_resource = FileLogDataResource(self.file + self.logfile, fd, 65536, [os.fstat(fd).st_ino, length, base64.b64encode(hash)])
+      file_log_data_resource = FileLogDataResource(self.file + self.logfile, fd, 65536, [os.fstat(fd).st_ino, length, base64.b64encode(hash_digest)])
       file_log_data_resource.fill_buffer()
       self.assertTrue(not file_log_data_resource.buffer == data)
       os.close(fd)
@@ -158,7 +158,7 @@ class LogStreamTest(TestBase):
       fileLogDataResource3 = FileLogDataResource(b'file:///var/log/123example.log', -1)
       fileLogDataResource3.open(False)
       log_stream.add_next_resource(fileLogDataResource3)
-      self.assertRaises(OSError, self.log_stream.roll_over)
+      self.assertRaises(OSError, log_stream.roll_over)
 
     
 if __name__ == "__main__":

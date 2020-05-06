@@ -50,10 +50,7 @@ class ByteStreamLineAtomizerTest(TestBase):
     A incomplete, overlong line, with the stream ended, is tested as Input of the Class.
     '''
     def test4normal_incomplete_overlong_line_stream_ended(self):
-      match_context_fixed_dme = MatchContext(self.illegal_access1)
       fixed_dme = FixedDataModelElement('s1', self.illegal_access1)
-      match_element_fixed_dme = fixed_dme.get_match_element("match1", match_context_fixed_dme)
-
       byte_stream_line_atomizer = ByteStreamLineAtomizer(fixed_dme, [],
         [self.stream_printer_event_handler], 300, None)
       self.assertGreater(byte_stream_line_atomizer.consume_data(self.illegal_access1, True), 0)
