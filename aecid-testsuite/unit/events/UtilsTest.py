@@ -140,22 +140,22 @@ class UtilsTest(TestBase):
       val = 0.5*0.5*0.5
       self.min = self.size * val * (1 - self.deviation)
       self.max = self.size * val * (1 + self.deviation)
-      self.assertTrue(first <= self.max and first >= self.min, msg % ("first", first, self.min, self.max))
+      self.assertTrue(self.min <= first <= self.max, msg % ("first", first, self.min, self.max))
       
       val = 0.5*0.5*0.5
       self.min = self.size * val * (1 - self.deviation)
       self.max = self.size * val * (1 + self.deviation)
-      self.assertTrue(second <= self.max and second >= self.min, msg % ("second", second, self.min, self.max))
+      self.assertTrue(self.min <= second <= self.max, msg % ("second", second, self.min, self.max))
       
       val = 2*0.5*0.5*0.5
       self.min = self.size * val * (1 - self.deviation)
       self.max = self.size * val * (1 + self.deviation)
-      self.assertTrue(third <= self.max and third >= self.min, msg % ("third", third, self.min, self.max))
+      self.assertTrue(self.min <= third <= self.max, msg % ("third", third, self.min, self.max))
        
       val = 0.5
       self.min = self.size * val * (1 - self.deviation)
       self.max = self.size * val * (1 + self.deviation)
-      self.assertTrue(fourth <= self.max and fourth >= self.min, msg % ("fourth", fourth, self.min, self.max))
+      self.assertTrue(self.min <= fourth <= self.max, msg % ("fourth", fourth, self.min, self.max))
 
 
 if __name__ == "__main__":

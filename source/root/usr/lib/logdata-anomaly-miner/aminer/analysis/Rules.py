@@ -304,7 +304,7 @@ class ValueRangeMatchRule(MatchRule):
     if test_value is None:
       return False
     test_value = test_value.match_object
-    if (test_value >= self.lower_limit) and (test_value <= self.upper_limit):
+    if self.lower_limit <= test_value <= self.upper_limit:
       if self.match_action is not None:
         self.match_action.match_action(log_atom)
       return True
@@ -367,11 +367,11 @@ class ModuloTimeMatchRule(MatchRule):
       if ((time_match is None)):
         return False
       test_value = time_match.match_object + datetime.datetime.now(self.tzinfo).utcoffset().total_seconds()
-    
+
     if test_value is None:
       return False
     test_value %= self.seconds_modulo
-    if (test_value >= self.lower_limit) and (test_value <= self.upper_limit):
+    if self.lower_limit <= test_value <= self.upper_limit:
       if self.match_action is not None:
         self.match_action.match_action(log_atom)
       return True
@@ -428,7 +428,7 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
     if test_value is None:
       return False
     test_value %= self.seconds_modulo
-    if (test_value >= limits[0]) and (test_value <= limits[1]):
+    if limits[0] <= test_value <= limits[1]:
       if self.match_action is not None:
         self.match_action.match_action(log_atom)
       return True

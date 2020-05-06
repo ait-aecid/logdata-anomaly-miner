@@ -204,7 +204,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
       return True
     delta = (self.latest_parsed_timestamp - parsed_value)
     delta_seconds = (delta.days*86400+delta.seconds+delta.microseconds/1000)
-    return (delta_seconds >= -86400) and (delta_seconds < 86400*30)
+    return -86400 <= delta_seconds < 86400*30
 
 
 

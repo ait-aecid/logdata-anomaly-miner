@@ -297,7 +297,7 @@ class AMinerRemoteControlExecutionMethods(object):
                 may_delete_flag = True
             else:
                 for id_range in id_spec_list:
-                    if (event_id >= id_range[0]) and (event_id <= id_range[1]):
+                    if id_range[0] <= event_id <= id_range[1]:
                         may_delete_flag = True
             if may_delete_flag:
                 history_data[:] = history_data[:event_pos] + history_data[event_pos + 1:]
@@ -340,8 +340,7 @@ class AMinerRemoteControlExecutionMethods(object):
                 found_flag = True
             else:
                 for id_range in id_spec_list:
-                    if ((isinstance(id_range, list)) and (event_id >= id_range[0]) and
-                            (event_id <= id_range[1])):
+                    if isinstance(id_range, list) and (id_range[0] <= event_id <= id_range[1]):
                         found_flag = True
             if not found_flag:
                 event_pos += 1
