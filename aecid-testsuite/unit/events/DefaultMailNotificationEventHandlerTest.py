@@ -26,46 +26,46 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
     '''
     def test1log_multiple_lines_event(self):
       description = "Test1DefaultMailNotificationEventHandler"
-      self.match_context = MatchContext(self.pid)
-      self.fixed_dme = FixedDataModelElement('s1', self.pid)
-      self.match_element = self.fixed_dme.get_match_element("match", self.match_context)
+      match_context = MatchContext(self.pid)
+      fixed_dme = FixedDataModelElement('s1', self.pid)
+      match_element = fixed_dme.get_match_element("match", match_context)
 
-      self.match_context = MatchContext(self.pid)
-      self.fixed_dme2 = FixedDataModelElement('s2', self.pid)
-      self.match_element2 = self.fixed_dme2.get_match_element("match", self.match_context)
+      match_context = MatchContext(self.pid)
+      fixed_dme2 = FixedDataModelElement('s2', self.pid)
+      match_element2 = fixed_dme2.get_match_element("match", match_context)
 
-      self.default_mail_notification_event_handler = DefaultMailNotificationEventHandler(self.analysis_context)
+      default_mail_notification_event_handler = DefaultMailNotificationEventHandler(self.analysis_context)
       self.analysis_context.register_component(self, description)
 
       t = time()
-      self.log_atom = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element), t, self)
-      self.default_mail_notification_event_handler.receive_event(self.test % self.__class__.__name__, \
+      log_atom = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element), t, self)
+      default_mail_notification_event_handler.receive_event(self.test % self.__class__.__name__,
           'New value for pathes %s, %s: %s' % ('match/s1', 'match/s2',
-          repr(self.match_element.match_object)), [self.log_atom.raw_data, self.log_atom.raw_data], None, self.log_atom, self)
+          repr(match_element.match_object)), [log_atom.raw_data, log_atom.raw_data], None, log_atom, self)
 
       t += 600
-      self.log_atom = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element), t, self)
+      log_atom = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element), t, self)
       sleep(10)
-      self.default_mail_notification_event_handler.receive_event(self.test % self.__class__.__name__, \
+      default_mail_notification_event_handler.receive_event(self.test % self.__class__.__name__,
           'New value for pathes %s, %s: %s' % ('match/s1', 'match/s2',
-          repr(self.match_element.match_object)), [self.log_atom.raw_data, self.log_atom.raw_data], None, self.log_atom, self)
+          repr(match_element.match_object)), [log_atom.raw_data, log_atom.raw_data], None, log_atom, self)
       sleep(30)
       result = subprocess.run(self.mail_call, shell=True, stdout=subprocess.PIPE)
 
       self.assertTrue(self.__expected_string % (datetime.fromtimestamp(t-600).strftime(self.datetime_format_string),
-        "" + self.match_element.get_path() + ", " + self.match_element2.get_path(), self.match_element.get_match_object(),
-        self.__class__.__name__, description, 2, self.match_element.get_match_string().decode("utf-8") +
-        "\n  " + self.match_element2.get_match_string().decode("utf-8")) in str(result.stdout, 'utf-8'), msg="%s vs \n %s" % (self.__expected_string %
+        "" + match_element.get_path() + ", " + match_element2.get_path(), match_element.get_match_object(),
+        self.__class__.__name__, description, 2, match_element.get_match_string().decode("utf-8") +
+        "\n  " + match_element2.get_match_string().decode("utf-8")) in str(result.stdout, 'utf-8'), msg="%s vs \n %s" % (self.__expected_string %
         (datetime.fromtimestamp(t).strftime(self.datetime_format_string),
-        self.match_element.get_path(), self.match_element.get_match_object(),
-        self.__class__.__name__, description, 1, self.match_element.get_match_string().decode("utf-8") +
+        match_element.get_path(), match_element.get_match_object(),
+        self.__class__.__name__, description, 1, match_element.get_match_string().decode("utf-8") +
         "\n\n"), str(result.stdout, 'utf-8')))
 
       self.assertTrue(self.__expected_string %
         (datetime.fromtimestamp(t).strftime(self.datetime_format_string),
-        "" + self.match_element.get_path() + ", " + self.match_element2.get_path(), self.match_element.get_match_object(),
-        self.__class__.__name__, description, 2, self.match_element.get_match_string().decode("utf-8") +
-        "\n  " + self.match_element2.get_match_string().decode("utf-8") + "\n\n") in str(result.stdout, 'utf-8'))
+        "" + match_element.get_path() + ", " + match_element2.get_path(), match_element.get_match_object(),
+        self.__class__.__name__, description, 2, match_element.get_match_string().decode("utf-8") +
+        "\n  " + match_element2.get_match_string().decode("utf-8") + "\n\n") in str(result.stdout, 'utf-8'))
     
     '''
     In this test case the functionality of the timer is tested.
@@ -73,53 +73,53 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
     '''
     def test2do_timer(self):
       description = "Test2DefaultMailNotificationEventHandler"
-      self.default_mail_notification_event_handler = DefaultMailNotificationEventHandler(self.analysis_context)
+      default_mail_notification_event_handler = DefaultMailNotificationEventHandler(self.analysis_context)
       self.analysis_context.register_component(self, description)
 
       t = time()
-      self.match_context = MatchContext(self.pid)
-      self.fixed_dme = FixedDataModelElement('s3', self.pid)
-      self.match_element = self.fixed_dme.get_match_element("match", self.match_context)
+      match_context = MatchContext(self.pid)
+      fixed_dme = FixedDataModelElement('s3', self.pid)
+      match_element = fixed_dme.get_match_element("match", match_context)
 
-      self.log_atom = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element), t, self)
-      self.default_mail_notification_event_handler.receive_event(self.test % self.__class__.__name__, \
+      log_atom = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element), t, self)
+      default_mail_notification_event_handler.receive_event(self.test % self.__class__.__name__,
           'New value for pathes %s: %s' % ('match/s3',
-          repr(self.match_element.match_object)), [self.log_atom.raw_data], None, self.log_atom, self)
+          repr(match_element.match_object)), [log_atom.raw_data], None, log_atom, self)
 
       t = 0
-      self.default_mail_notification_event_handler.do_timer(t)
+      default_mail_notification_event_handler.do_timer(t)
       result = subprocess.run(self.mail_call, shell=True, stdout=subprocess.PIPE)
 
       self.assertFalse(self.__expected_string %
         (datetime.fromtimestamp(t).strftime(self.datetime_format_string),
-        self.match_element.get_path(), self.match_element.get_match_object(),
-        self.__class__.__name__, description, 1, self.match_element.get_match_string().decode("utf-8") +
+        match_element.get_path(), match_element.get_match_object(),
+        self.__class__.__name__, description, 1, match_element.get_match_string().decode("utf-8") +
         "\n\n") in str(result.stdout, 'utf-8'))
 
       t = time()
-      self.default_mail_notification_event_handler.next_alert_time = t + 500
-      self.default_mail_notification_event_handler.do_timer(t)
+      default_mail_notification_event_handler.next_alert_time = t + 500
+      default_mail_notification_event_handler.do_timer(t)
 
       sleep(5)
       result = subprocess.run(self.mail_call, shell=True, stdout=subprocess.PIPE)
       self.assertFalse(self.__expected_string %
         (datetime.fromtimestamp(t).strftime(self.datetime_format_string),
-        self.match_element.get_path(), self.match_element.get_match_object(),
-        self.__class__.__name__, description, 1, self.match_element.get_match_string().decode("utf-8") +
+        match_element.get_path(), match_element.get_match_object(),
+        self.__class__.__name__, description, 1, match_element.get_match_string().decode("utf-8") +
         "\n\n") in str(result.stdout, 'utf-8'))
 
-      self.default_mail_notification_event_handler.next_alert_time = t
-      self.default_mail_notification_event_handler.do_timer(t)
+      default_mail_notification_event_handler.next_alert_time = t
+      default_mail_notification_event_handler.do_timer(t)
 
       sleep(30)
       result = subprocess.run(self.mail_call, shell=True, stdout=subprocess.PIPE)
       self.assertTrue(self.__expected_string %
         (datetime.fromtimestamp(t).strftime(self.datetime_format_string),
-        self.match_element.get_path(), self.match_element.get_match_object(),
-        self.__class__.__name__, description, 1, self.match_element.get_match_string().decode("utf-8") +
+        match_element.get_path(), match_element.get_match_object(),
+        self.__class__.__name__, description, 1, match_element.get_match_string().decode("utf-8") +
         "\n\n") in str(result.stdout, 'utf-8'), msg="%s vs \n %s" % (self.__expected_string %
-        (datetime.fromtimestamp(t).strftime(self.datetime_format_string), self.match_element.get_path(), self.match_element.get_match_object(),
-        self.__class__.__name__, description, 1, self.match_element.get_match_string().decode("utf-8") +
+        (datetime.fromtimestamp(t).strftime(self.datetime_format_string), match_element.get_path(), match_element.get_match_object(),
+        self.__class__.__name__, description, 1, match_element.get_match_string().decode("utf-8") +
         "\n\n"), str(result.stdout, 'utf-8')))
 
 

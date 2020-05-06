@@ -18,25 +18,25 @@ class SequenceModelElementTest(unittest.TestCase):
     A normal sequence of matching elements is tested in this example test case
     '''
     def test1sequence_of_matching_elements(self):
-      self.match_context = MatchContext(b'The sequence starts with a number: 25538 Euro')
-      self.assertEqual(self.sequence_model_element.get_match_element('match', self.match_context).get_match_string(), b'The sequence starts with a number: 25538 Euro')
-      self.assertEqual(self.match_context.match_data, b'')
+      match_context = MatchContext(b'The sequence starts with a number: 25538 Euro')
+      self.assertEqual(self.sequence_model_element.get_match_element('match', match_context).get_match_string(), b'The sequence starts with a number: 25538 Euro')
+      self.assertEqual(match_context.match_data, b'')
     
     '''
     A normal sequence of elements, which do not match with the expected sequenceModel is tested.
     '''
     def test2sequence_not_matching(self):
-      self.match_context = MatchContext(b'The sequence starts with a number: 25538 US-Dollar')
-      self.assertEqual(self.sequence_model_element.get_match_element('match', self.match_context), None)
-      self.assertEqual(self.match_context.match_data, b'The sequence starts with a number: 25538 US-Dollar')
+      match_context = MatchContext(b'The sequence starts with a number: 25538 US-Dollar')
+      self.assertEqual(self.sequence_model_element.get_match_element('match', match_context), None)
+      self.assertEqual(match_context.match_data, b'The sequence starts with a number: 25538 US-Dollar')
     
     '''
     This test case unit if the sequenceModel returns None, when the matchContext is too short for a match.
     '''
     def test3match_context_shorter_than_sequence(self):
-      self.match_context = MatchContext(self.sequence_start)
-      self.assertEqual(self.sequence_model_element.get_match_element('match', self.match_context), None)
-      self.assertEqual(self.match_context.match_data, self.sequence_start)
+      match_context = MatchContext(self.sequence_start)
+      self.assertEqual(self.sequence_model_element.get_match_element('match', match_context), None)
+      self.assertEqual(match_context.match_data, self.sequence_start)
 
 
 if __name__ == "__main__":

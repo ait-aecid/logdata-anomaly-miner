@@ -30,10 +30,10 @@ class JsonConverterHandlerTest(TestBase):
     '''
     def test1receive_expected_event(self):
         json_converter_handler = JsonConverterHandler([self.stream_printer_event_handler], self.analysis_context)
-        self.log_atom = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element), self.t, self)
+        log_atom = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element), self.t, self)
         self.analysis_context.register_component(self, self.description)
         event_data = {'AnalysisComponent': {'AffectedParserPaths': ['test/path/1', 'test/path/2']}}
-        json_converter_handler.receive_event(self.test_detector, self.event_message, self.sorted_log_lines, event_data, self.log_atom, self)
+        json_converter_handler.receive_event(self.test_detector, self.event_message, self.sorted_log_lines, event_data, log_atom, self)
         self.assertEqual(self.output_stream.getvalue(), self.expected_string % (datetime.fromtimestamp(self.t).strftime("%Y-%m-%d %H:%M:%S"),
             self.event_message, self.__class__.__name__, self.description, self.__class__.__name__, self.description, self.event_message,
             self.persistence_id, round(self.t, 2), ""))
@@ -43,11 +43,11 @@ class JsonConverterHandlerTest(TestBase):
     '''
     def test2receive_event_with_same_event_data_attributes(self):
         json_converter_handler = JsonConverterHandler([self.stream_printer_event_handler], self.analysis_context)
-        self.log_atom = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element), self.t, self)
+        log_atom = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element), self.t, self)
         self.analysis_context.register_component(self, self.description)
         event_data = {'AnalysisComponent': {'AffectedParserPaths': ['test/path/1', 'test/path/2'], 'Message':'An other event happened too!'}}
         json_converter_handler.receive_event(self.test_detector, self.event_message, self.sorted_log_lines,
-            event_data, self.log_atom, self)
+            event_data, log_atom, self)
         self.assertEqual(self.output_stream.getvalue(),
             self.expected_string % (datetime.fromtimestamp(self.t).strftime("%Y-%m-%d %H:%M:%S"),
             self.event_message, self.__class__.__name__, self.description, self.__class__.__name__, self.description, self.event_message,

@@ -29,24 +29,24 @@ class SyslogWriterEventHandlerTest(TestBase):
     '''
     def test1log_multiple_lines_event(self):
       description = "Test1SyslogWriterEventHandler"
-      self.match_context = MatchContext(self.pid)
-      self.fixed_dme = FixedDataModelElement('s1', self.pid)
-      self.match_element = self.fixed_dme.get_match_element("match", self.match_context)
+      match_context = MatchContext(self.pid)
+      fixed_dme = FixedDataModelElement('s1', self.pid)
+      match_element = fixed_dme.get_match_element("match", match_context)
       
-      self.match_context = MatchContext(self.pid)
-      self.fixed_dme2 = FixedDataModelElement('s2', self.pid)
-      self.match_element2 = self.fixed_dme2.get_match_element("match", self.match_context)
+      match_context = MatchContext(self.pid)
+      fixed_dme2 = FixedDataModelElement('s2', self.pid)
+      match_element2 = fixed_dme2.get_match_element("match", match_context)
       
-      self.syslog_writer_event_handler = SyslogWriterEventHandler(self.analysis_context, 'aminer')
+      syslog_writer_event_handler = SyslogWriterEventHandler(self.analysis_context, 'aminer')
       self.analysis_context.register_component(self, description)
       
-      self.t = time()
-      self.log_atom = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element), self.t, self)
+      t = time()
+      log_atom = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element), t, self)
       
-      self.syslog_writer_event_handler.receive_event(self.test % self.__class__.__name__, \
+      syslog_writer_event_handler.receive_event(self.test % self.__class__.__name__,
           self.new_val % (self.match_s1, self.match_s2, 
-          repr(self.match_element.match_object)), [self.log_atom.raw_data, self.log_atom.raw_data], None, self.log_atom, self)
-      self.string = ''
+          repr(match_element.match_object)), [log_atom.raw_data, log_atom.raw_data], None, log_atom, self)
+      string = ''
       
       sleep(0.2)
       with open("/var/log/syslog") as search:
@@ -54,42 +54,42 @@ class SyslogWriterEventHandlerTest(TestBase):
               line = line.rstrip()  # remove '\n' at end of line
               if 'aminer['+str(os.getpid())+']' in line:
                 line = line.split("]: ")
-                self.string += (line[1]) + '\n'
-      self.found = False
-      self.string = self.string.split('Syslog logger initialized\n')
-      self.expected = self.__expected_string % (datetime.fromtimestamp(self.t).strftime("%Y-%m-%d %H:%M:%S"),
-        self.match_element.get_path(), self.match_element2.get_path(), self.match_element.get_match_object(),
-        self.__class__.__name__, description, 2, self.match_element.get_match_string().decode(),
-        self.match_element2.get_match_string().decode())
+                string += (line[1]) + '\n'
+      found = False
+      string = string.split('Syslog logger initialized\n')
+      expected = self.__expected_string % (datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S"),
+        match_element.get_path(), match_element2.get_path(), match_element.get_match_object(),
+        self.__class__.__name__, description, 2, match_element.get_match_string().decode(),
+        match_element2.get_match_string().decode())
       
-      for log in self.string:
-        if self.expected in log:
-            self.found = True
-      self.assertTrue(self.found)
+      for log in string:
+        if expected in log:
+            found = True
+      self.assertTrue(found)
     
     '''
     In this test case the EventHandler receives no lines from the test class.
     '''
     def test2log_no_line_event(self):
       description = "Test2SyslogWriterEventHandler"
-      self.match_context = MatchContext(self.pid)
-      self.fixed_dme = FixedDataModelElement('s1', self.pid)
-      self.match_element = self.fixed_dme.get_match_element("match", self.match_context)
+      match_context = MatchContext(self.pid)
+      fixed_dme = FixedDataModelElement('s1', self.pid)
+      match_element = fixed_dme.get_match_element("match", match_context)
       
-      self.match_context = MatchContext(self.pid)
-      self.fixed_dme2 = FixedDataModelElement('s2', self.pid)
-      self.match_element2 = self.fixed_dme2.get_match_element("match", self.match_context)
+      match_context = MatchContext(self.pid)
+      fixed_dme2 = FixedDataModelElement('s2', self.pid)
+      match_element2 = fixed_dme2.get_match_element("match", match_context)
       
-      self.syslog_writer_event_handler = SyslogWriterEventHandler(self.analysis_context, 'aminer')
+      syslog_writer_event_handler = SyslogWriterEventHandler(self.analysis_context, 'aminer')
       self.analysis_context.register_component(self, description)
       
-      self.t = time()
-      self.log_atom = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element), self.t, self)
+      t = time()
+      log_atom = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element), t, self)
       
-      self.syslog_writer_event_handler.receive_event(self.test % self.__class__.__name__, \
+      syslog_writer_event_handler.receive_event(self.test % self.__class__.__name__,
           self.new_val % (self.match_s1, self.match_s2, 
-          repr(self.match_element.match_object)), [], None, self.log_atom, self)
-      self.string = ''
+          repr(match_element.match_object)), [], None, log_atom, self)
+      string = ''
       
       sleep(0.2)
       with open("/var/log/syslog") as search:
@@ -97,17 +97,17 @@ class SyslogWriterEventHandlerTest(TestBase):
               line = line.rstrip()  # remove '\n' at end of line
               if 'aminer['+str(os.getpid())+']' in line:
                 line = line.split("]: ")
-                self.string += (line[1]) + '\n'
-      self.found = False
-      self.string = self.string.split('Syslog logger initialized\n')
-      self.expected = self.__expected_string2 % (datetime.fromtimestamp(self.t).strftime("%Y-%m-%d %H:%M:%S"),
-        self.match_element.get_path(), self.match_element2.get_path(), self.match_element.get_match_object(),
+                string += (line[1]) + '\n'
+      found = False
+      string = string.split('Syslog logger initialized\n')
+      expected = self.__expected_string2 % (datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S"),
+        match_element.get_path(), match_element2.get_path(), match_element.get_match_object(),
         self.__class__.__name__, description, 0)
 
-      for log in self.string:
-        if self.expected in log:
-            self.found = True
-      self.assertTrue(self.found)
+      for log in string:
+        if expected in log:
+            found = True
+      self.assertTrue(found)
     
     '''
     In this test case the EventHandler receives no logAtom from the test class and the class
@@ -115,22 +115,18 @@ class SyslogWriterEventHandlerTest(TestBase):
     '''
     def test3event_data_not_log_atom(self):
       description = "Test3SyslogWriterEventHandler"
-      self.match_context = MatchContext(self.pid)
-      self.fixed_dme = FixedDataModelElement('s1', self.pid)
-      self.match_element = self.fixed_dme.get_match_element("match", self.match_context)
-      
-      self.match_context = MatchContext(self.pid)
-      self.fixed_dme2 = FixedDataModelElement('s2', self.pid)
-      self.match_element2 = self.fixed_dme2.get_match_element("match", self.match_context)
+      match_context = MatchContext(self.pid)
+      fixed_dme = FixedDataModelElement('s1', self.pid)
+      match_element = fixed_dme.get_match_element("match", match_context)
       self.analysis_context.register_component(self, description)
       
-      self.syslog_writer_event_handler = SyslogWriterEventHandler(self.analysis_context, 'aminer')
-      self.t = time()
-      self.log_atom = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element), self.t, self)
-      self.assertRaises(Exception, self.syslog_writer_event_handler.receive_event, self.test %
+      syslog_writer_event_handler = SyslogWriterEventHandler(self.analysis_context, 'aminer')
+      t = time()
+      log_atom = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element), t, self)
+      self.assertRaises(Exception, syslog_writer_event_handler.receive_event, self.test %
         self.__class__.__name__, self.new_val % (self.match_s1, self.match_s2,
-        repr(self.match_element.match_object)), [self.log_atom.raw_data, self.log_atom.raw_data],
-        self.log_atom.get_parser_match(), self)
+        repr(match_element.match_object)), [log_atom.raw_data, log_atom.raw_data],
+        log_atom.get_parser_match(), self)
 
 
 if __name__ == "__main__":
