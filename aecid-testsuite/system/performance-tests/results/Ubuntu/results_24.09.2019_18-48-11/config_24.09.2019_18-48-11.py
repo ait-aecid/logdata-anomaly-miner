@@ -161,8 +161,8 @@ def buildAnalysisPipeline(analysisContext):
   
   serviceChildrenParsingModelElement.append(DateTimeModelElement('DateTimeModelElement', b'Current DateTime: %d.%m.%Y %H:%M:%S'))
   
-  serviceChildrenParsingModelElement.append(DecimalFloatValueModelElement('DecimalFloatValueModelElement', valueSignType='optional'))
-  serviceChildrenParsingModelElement.append(DecimalIntegerValueModelElement('DecimalIntegerValueModelElement', valueSignType='optional', valuePadType='blank'))
+  serviceChildrenParsingModelElement.append(DecimalFloatValueModelElement('DecimalFloatValueModelElement', value_sign_type='optional'))
+  serviceChildrenParsingModelElement.append(DecimalIntegerValueModelElement('DecimalIntegerValueModelElement', value_sign_type='optional', value_pad_type='blank'))
   serviceChildrenParsingModelElement.append(SequenceModelElement('', [DelimitedDataModelElement('DelimitedDataModelElement', b';'), FixedDataModelElement('FixedDataModelElement', b';')]))
   
   # ElementValueBranchModelElement

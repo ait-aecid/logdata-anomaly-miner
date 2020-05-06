@@ -377,8 +377,8 @@ class RuleTest(TestBase):
       self.ip_address_data_model_element = IpAddressDataModelElement('IPv4')
       
       self.value_dependent_delegated_match_rule = ValueDependentDelegatedMatchRule([self.match_any, self.match_ipv4],
-          {tuple([self.alphabet, None]):self.string_regex_match_rule,
-           tuple([None, 3232235520]):self.i_pv4_in_rfc1918_match_rule})
+          {(self.alphabet, None):self.string_regex_match_rule,
+           (None, 3232235520):self.i_pv4_in_rfc1918_match_rule})
       self.analysis_context.register_component(self.value_dependent_delegated_match_rule, description + "3")
       
       self.match_context = MatchContext(self.alphabet)

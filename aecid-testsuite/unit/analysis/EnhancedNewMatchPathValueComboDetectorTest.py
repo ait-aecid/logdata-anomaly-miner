@@ -213,7 +213,7 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
 
         self.enhanced_new_match_path_value_combo_detector.receive_atom(self.log_atom_sequence_me)
         self.assertEqual(self.enhanced_new_match_path_value_combo_detector.known_values_dict.get((self.fixed_dme.fixed_data,
-            tuple([self.time, self.time, 1]))), None)
+            (self.time, self.time, 1))), None)
 
 
 if __name__ == "__main__":
