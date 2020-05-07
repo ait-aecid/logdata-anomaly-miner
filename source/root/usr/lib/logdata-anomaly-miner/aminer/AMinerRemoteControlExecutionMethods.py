@@ -49,8 +49,7 @@ class AMinerRemoteControlExecutionMethods(object):
                 property_name, t)
             return
 
-        # skipcq: PYL-R1714
-        if property_name == AMinerConfig.KEY_PERSISTENCE_DIR or property_name == AMinerConfig.KEY_LOG_SOURCES_LIST:
+        if property_name in [AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.KEY_LOG_SOURCES_LIST]:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: the property '%s' can only be changed at " \
                                             "startup in the AMiner root process!" % property_name
         elif property_name == AMinerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE:
