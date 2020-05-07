@@ -1,5 +1,6 @@
 """This module defines a log atom."""
 
+
 class LogAtom:
   """This class defines a log atom used for parsing."""
   def __init__(self, raw_data, parser_match, atom_time, source):

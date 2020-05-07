@@ -6,6 +6,7 @@ import sys
 from aminer.events import EventHandlerInterface
 from aminer.events.EventData import EventData
 
+
 class StreamPrinterEventHandler(EventHandlerInterface):
   """This class implements an event record listener, that will
 just print out data about the event to a stream, by default this

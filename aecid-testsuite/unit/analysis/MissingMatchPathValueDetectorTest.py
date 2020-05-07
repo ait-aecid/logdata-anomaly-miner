@@ -10,6 +10,7 @@ from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueMo
 from unit.TestBase import TestBase
 from datetime import datetime
 
+
 class MissingMatchPathValueDetectorTest(TestBase):
     __expected_string = '%s Interval too large between values\n%s: "%s" (%d lines)\n    %s\n\n'
     __default_interval = 3600

@@ -11,27 +11,26 @@ class FixedDataModelElementTest(unittest.TestCase):
     It assures, that the intended usage of the FixedDataModelElement is working. (MatchElement found)  
     '''
     def test1_valid_input_with_match_element_found(self):
-        self.match_context = MatchContext(self.pid)
-        self.fixed_dme = FixedDataModelElement('s0', self.pid)
-        self.match_element = self.fixed_dme.get_match_element("", self.match_context)
-        self.assertNotEqual(self.match_element, None, "There should exist a MatchElement!")
+        match_context = MatchContext(self.pid)
+        fixed_dme = FixedDataModelElement('s0', self.pid)
+        match_element = fixed_dme.get_match_element("", match_context)
+        self.assertNotEqual(match_element, None, "There should exist a MatchElement!")
     
     '''
     This testmethod is part of the Basis Path Testing / Decision Coverage.
     It assures, that the intended usage of the FixedDataModelElement is working. (MatchElement not found)
     '''
     def test2_valid_input_with_match_element_not_found(self):
-      self.match_context = MatchContext(b'This is some other row in the logs')
-      self.fixed_dme = FixedDataModelElement('s0', self.pid)
-      self.match_element = self.fixed_dme.get_match_element("", self.match_context)
-      self.assertEqual(self.match_element, None, "There should not exist a MatchElement!")
+      match_context = MatchContext(b'This is some other row in the logs')
+      fixed_dme = FixedDataModelElement('s0', self.pid)
+      match_element = fixed_dme.get_match_element("", match_context)
+      self.assertEqual(match_element, None, "There should not exist a MatchElement!")
     
     '''
     This testmethod is part of the Fuzz Testing and it assures, that the data type of the fixedData-input 
     is validated by the constructur.
     ''' 
     def test3_fuzzing_input_no_bytestring(self):
-      self.match_context = MatchContext(self.pid)
       self.assertRaises(Exception, FixedDataModelElement, 's0', self.pid.decode())
     
     '''
@@ -39,10 +38,10 @@ class FixedDataModelElementTest(unittest.TestCase):
     In this case a path is not needed, because FixedDataModelElement has no child elements.
     '''
     def test4_fuzzing_path_is_none(self):
-      self.match_context = MatchContext(self.pid)
-      self.fixed_dme = FixedDataModelElement('s0', self.pid)
-      self.match_element = self.fixed_dme.get_match_element(None, self.match_context)
-      self.assertNotEqual(self.match_element, None, "There should exist a MatchElement!")
+      match_context = MatchContext(self.pid)
+      fixed_dme = FixedDataModelElement('s0', self.pid)
+      match_element = fixed_dme.get_match_element(None, match_context)
+      self.assertNotEqual(match_element, None, "There should exist a MatchElement!")
     
     '''
     This testmethod is part of the Fuzz Testing and it assures, that the matchData-input of MatchContext 

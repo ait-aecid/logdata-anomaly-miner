@@ -10,6 +10,7 @@ from unit.TestBase import TestBase
 from datetime import datetime
 from aminer.parsing.SequenceModelElement import SequenceModelElement
 
+
 class NewMatchPathValueComboDetectorTest(TestBase):
     __expected_string = '%s New value combination(s) detected\n%s: "%s" (%d lines)\n%s\n\n'
     fixed_dme = FixedDataModelElement('s1', b'25537 uid=')

@@ -25,6 +25,8 @@ from datetime import datetime
 NOTE: DebugMatchRule and DebugHistoryMatchRule are intentionally not tested, as there is not much to be tested.
 ParallelMatchRule is also not tested as it is very similar to the OrMatchRule.
 '''
+
+
 class RuleTest(TestBase):
     __expected_string = '%s This message was generated, when the unit were successful.\n%s: "%s" (%d lines)\n  %s\n\n'
     
@@ -179,7 +181,7 @@ class RuleTest(TestBase):
     '''
     def test7string_regex_match_rule(self):
       description = "Test7Rules"
-      self.string_regex_match_rule = StringRegexMatchRule(self.match_any, re.compile('\w'), None)
+      self.string_regex_match_rule = StringRegexMatchRule(self.match_any, re.compile(r'\w'), None)
       self.analysis_context.register_component(self.string_regex_match_rule, description)
       self.any_byte_date_me = AnyByteDataModelElement('any')
             
@@ -245,67 +247,67 @@ class RuleTest(TestBase):
       description = "Test10Rules"
       self.i_pv4_in_rfc1918_match_rule = IPv4InRFC1918MatchRule(self.match_ipv4)
       self.analysis_context.register_component(self.i_pv4_in_rfc1918_match_rule, description)
-      self.ip_address_data_model_element = IpAddressDataModelElement('IPv4');
+      self.ip_address_data_model_element = IpAddressDataModelElement('IPv4')
       
       # private addresses
-      self.match_context = MatchContext(b'192.168.0.0');
-      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context);
+      self.match_context = MatchContext(b'192.168.0.0')
+      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context)
       self.log_atom = LogAtom(self.match_context.match_data, ParserMatch(self.match_element), time(), self.i_pv4_in_rfc1918_match_rule)
       self.assertTrue(self.i_pv4_in_rfc1918_match_rule.match(self.log_atom))
       
-      self.match_context = MatchContext(b'192.168.255.255');
-      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context);
+      self.match_context = MatchContext(b'192.168.255.255')
+      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context)
       self.log_atom = LogAtom(self.match_context.match_data, ParserMatch(self.match_element), time(), self.i_pv4_in_rfc1918_match_rule)
       self.assertTrue(self.i_pv4_in_rfc1918_match_rule.match(self.log_atom))
       
-      self.match_context = MatchContext(b'172.16.0.0');
-      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context);
+      self.match_context = MatchContext(b'172.16.0.0')
+      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context)
       self.log_atom = LogAtom(self.match_context.match_data, ParserMatch(self.match_element), time(), self.i_pv4_in_rfc1918_match_rule)
       self.assertTrue(self.i_pv4_in_rfc1918_match_rule.match(self.log_atom))
       
-      self.match_context = MatchContext(b'172.31.255.255');
-      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context);
+      self.match_context = MatchContext(b'172.31.255.255')
+      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context)
       self.log_atom = LogAtom(self.match_context.match_data, ParserMatch(self.match_element), time(), self.i_pv4_in_rfc1918_match_rule)
       self.assertTrue(self.i_pv4_in_rfc1918_match_rule.match(self.log_atom))
       
-      self.match_context = MatchContext(b'10.0.0.0');
-      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context);
+      self.match_context = MatchContext(b'10.0.0.0')
+      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context)
       self.log_atom = LogAtom(self.match_context.match_data, ParserMatch(self.match_element), time(), self.i_pv4_in_rfc1918_match_rule)
       self.assertTrue(self.i_pv4_in_rfc1918_match_rule.match(self.log_atom))
       
-      self.match_context = MatchContext(b'10.255.255.255');
-      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context);
+      self.match_context = MatchContext(b'10.255.255.255')
+      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context)
       self.log_atom = LogAtom(self.match_context.match_data, ParserMatch(self.match_element), time(), self.i_pv4_in_rfc1918_match_rule)
       self.assertTrue(self.i_pv4_in_rfc1918_match_rule.match(self.log_atom))
       
       # public addresses
-      self.match_context = MatchContext(b'192.167.255.255');
-      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context);
+      self.match_context = MatchContext(b'192.167.255.255')
+      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context)
       self.log_atom = LogAtom(self.match_context.match_data, ParserMatch(self.match_element), time(), self.i_pv4_in_rfc1918_match_rule)
       self.assertTrue(not self.i_pv4_in_rfc1918_match_rule.match(self.log_atom))
       
-      self.match_context = MatchContext(b'192.169.0.0');
-      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context);
+      self.match_context = MatchContext(b'192.169.0.0')
+      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context)
       self.log_atom = LogAtom(self.match_context.match_data, ParserMatch(self.match_element), time(), self.i_pv4_in_rfc1918_match_rule)
       self.assertTrue(not self.i_pv4_in_rfc1918_match_rule.match(self.log_atom))
       
-      self.match_context = MatchContext(b'172.15.255.255');
-      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context);
+      self.match_context = MatchContext(b'172.15.255.255')
+      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context)
       self.log_atom = LogAtom(not self.match_context.match_data, ParserMatch(self.match_element), time(), self.i_pv4_in_rfc1918_match_rule)
       self.assertTrue(not self.i_pv4_in_rfc1918_match_rule.match(self.log_atom))
       
-      self.match_context = MatchContext(b'172.32.0.0');
-      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context);
+      self.match_context = MatchContext(b'172.32.0.0')
+      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context)
       self.log_atom = LogAtom(self.match_context.match_data, ParserMatch(self.match_element), time(), self.i_pv4_in_rfc1918_match_rule)
       self.assertTrue(not self.i_pv4_in_rfc1918_match_rule.match(self.log_atom))
       
-      self.match_context = MatchContext(b'9.255.255.255');
-      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context);
+      self.match_context = MatchContext(b'9.255.255.255')
+      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context)
       self.log_atom = LogAtom(self.match_context.match_data, ParserMatch(self.match_element), time(), self.i_pv4_in_rfc1918_match_rule)
       self.assertTrue(not self.i_pv4_in_rfc1918_match_rule.match(self.log_atom))
       
-      self.match_context = MatchContext(b'11.0.0.0');
-      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context);
+      self.match_context = MatchContext(b'11.0.0.0')
+      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context)
       self.log_atom = LogAtom(self.match_context.match_data, ParserMatch(self.match_element), time(), self.i_pv4_in_rfc1918_match_rule)
       self.assertTrue(not self.i_pv4_in_rfc1918_match_rule.match(self.log_atom))
     
@@ -320,18 +322,18 @@ class RuleTest(TestBase):
       self.analysis_context.register_component(self.i_pv4_in_rfc1918_match_rule, description + "2")
       self.and_match_rule = AndMatchRule([self.path_exists_match_rule, self.i_pv4_in_rfc1918_match_rule])
       self.analysis_context.register_component(self.and_match_rule, description + "3")
-      self.ip_address_data_model_element = IpAddressDataModelElement('IPv4');
+      self.ip_address_data_model_element = IpAddressDataModelElement('IPv4')
       
-      self.match_context = MatchContext(b'192.168.0.0');
-      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context);
+      self.match_context = MatchContext(b'192.168.0.0')
+      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context)
       self.log_atom = LogAtom(self.match_context.match_data, ParserMatch(self.match_element), time(), self.and_match_rule)
       self.assertTrue(self.and_match_rule.match(self.log_atom))
       
       # changing to IPv6
       self.path_exists_match_rule = PathExistsMatchRule('match/IPv6', None)
       self.and_match_rule = AndMatchRule([self.path_exists_match_rule, self.i_pv4_in_rfc1918_match_rule])
-      self.match_context = MatchContext(b'192.168.0.0');
-      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context);
+      self.match_context = MatchContext(b'192.168.0.0')
+      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context)
       self.log_atom = LogAtom(self.match_context.match_data, ParserMatch(self.match_element), time(), self.and_match_rule)
       self.assertTrue(not self.and_match_rule.match(self.log_atom))
     
@@ -346,18 +348,18 @@ class RuleTest(TestBase):
       self.analysis_context.register_component(self.i_pv4_in_rfc1918_match_rule, description + "2")
       self.or_match_rule = OrMatchRule([self.path_exists_match_rule, self.i_pv4_in_rfc1918_match_rule])
       self.analysis_context.register_component(self.or_match_rule, description + "3")
-      self.ip_address_data_model_element = IpAddressDataModelElement('IPv4');
+      self.ip_address_data_model_element = IpAddressDataModelElement('IPv4')
       
-      self.match_context = MatchContext(b'192.168.0.0');
-      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context);
+      self.match_context = MatchContext(b'192.168.0.0')
+      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context)
       self.log_atom = LogAtom(self.match_context.match_data, ParserMatch(self.match_element), time(), self.or_match_rule)
       self.assertTrue(self.or_match_rule.match(self.log_atom))
       
       # changing to IPv6
       self.path_exists_match_rule = PathExistsMatchRule('match/IPv6', None)
       self.or_match_rule = OrMatchRule([self.path_exists_match_rule, self.i_pv4_in_rfc1918_match_rule])
-      self.match_context = MatchContext(b'192.168.0.0');
-      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context);
+      self.match_context = MatchContext(b'192.168.0.0')
+      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context)
       self.log_atom = LogAtom(self.match_context.match_data, ParserMatch(self.match_element), time(), self.or_match_rule)
       self.assertTrue(self.or_match_rule.match(self.log_atom))
     
@@ -366,17 +368,17 @@ class RuleTest(TestBase):
     '''
     def test13value_dependent_delegated_match_rule(self):
       description = "Test13Rules"
-      self.string_regex_match_rule = StringRegexMatchRule(self.match_any, re.compile('\w'), None)
+      self.string_regex_match_rule = StringRegexMatchRule(self.match_any, re.compile(r'\w'), None)
       self.analysis_context.register_component(self.string_regex_match_rule, description)
       self.any_byte_date_me = AnyByteDataModelElement('any')
       
       self.i_pv4_in_rfc1918_match_rule = IPv4InRFC1918MatchRule(self.match_ipv4)
       self.analysis_context.register_component(self.i_pv4_in_rfc1918_match_rule, description + "2")
-      self.ip_address_data_model_element = IpAddressDataModelElement('IPv4');
+      self.ip_address_data_model_element = IpAddressDataModelElement('IPv4')
       
       self.value_dependent_delegated_match_rule = ValueDependentDelegatedMatchRule([self.match_any, self.match_ipv4],
-          {tuple([self.alphabet, None]):self.string_regex_match_rule,
-           tuple([None, 3232235520]):self.i_pv4_in_rfc1918_match_rule})
+          {(self.alphabet, None):self.string_regex_match_rule,
+           (None, 3232235520):self.i_pv4_in_rfc1918_match_rule})
       self.analysis_context.register_component(self.value_dependent_delegated_match_rule, description + "3")
       
       self.match_context = MatchContext(self.alphabet)
@@ -384,8 +386,8 @@ class RuleTest(TestBase):
       self.log_atom = LogAtom(self.match_context.match_data, ParserMatch(self.match_element), 1, self.value_dependent_delegated_match_rule)
       self.assertTrue(self.value_dependent_delegated_match_rule.match(self.log_atom))
       
-      self.match_context = MatchContext(b'192.168.0.0');
-      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context);
+      self.match_context = MatchContext(b'192.168.0.0')
+      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context)
       self.log_atom = LogAtom(self.match_context.match_data, ParserMatch(self.match_element), 1, self.value_dependent_delegated_match_rule)
       self.assertTrue(self.value_dependent_delegated_match_rule.match(self.log_atom))
       
@@ -395,8 +397,8 @@ class RuleTest(TestBase):
       self.log_atom = LogAtom(self.match_context.match_data, ParserMatch(self.match_element), 1, self.value_dependent_delegated_match_rule)
       self.assertTrue(not self.value_dependent_delegated_match_rule.match(self.log_atom))
       
-      self.match_context = MatchContext(b'192.168.0.1');
-      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context);
+      self.match_context = MatchContext(b'192.168.0.1')
+      self.match_element = self.ip_address_data_model_element.get_match_element('match', self.match_context)
       self.log_atom = LogAtom(self.match_context.match_data, ParserMatch(self.match_element), 1, self.value_dependent_delegated_match_rule)
       self.assertTrue(not self.value_dependent_delegated_match_rule.match(self.log_atom))
     

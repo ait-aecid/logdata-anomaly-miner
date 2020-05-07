@@ -10,6 +10,7 @@ from aminer.input import AtomHandlerInterface
 attr_str = "%s = %s\n"
 component_not_found = 'Event history component not found'
 
+
 class AMinerRemoteControlExecutionMethods(object):
     REMOTE_CONTROL_RESPONSE = ''
 
@@ -38,7 +39,7 @@ class AMinerRemoteControlExecutionMethods(object):
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: the analysisContext must be of type %s." % AnalysisChild.AnalysisContext.__class__
             return
 
-        if not property_name in analysis_context.aminer_config.config_properties:
+        if property_name not in analysis_context.aminer_config.config_properties:
             self.REMOTE_CONTROL_RESPONSE = "FAILURE: the property '%s' does not exist in the current config!" % property_name
             return
 
@@ -48,13 +49,13 @@ class AMinerRemoteControlExecutionMethods(object):
                 property_name, t)
             return
 
-        if property_name == AMinerConfig.KEY_PERSISTENCE_DIR or property_name == AMinerConfig.KEY_LOG_SOURCES_LIST:
+        if property_name in [AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.KEY_LOG_SOURCES_LIST]:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: the property '%s' can only be changed at " \
                                             "startup in the AMiner root process!" % property_name
         elif property_name == AMinerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE:
             result = self.change_config_property_max_memory(analysis_context, value)
         elif property_name == AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE:
-            result = self.change_config_property_max_cpu_percent_usage(analysis_context, value)
+            result = self.change_config_property_max_cpu_percent_usage(value)
         elif property_name in config_keys_mail_alerting:
             result = self.change_config_property_mail_alerting(analysis_context, property_name, value)
         elif property_name == AMinerConfig.KEY_LOG_PREFIX:
@@ -101,8 +102,8 @@ class AMinerRemoteControlExecutionMethods(object):
                 stdout, stderr = out.communicate()
 
             if 'dpkg-query: no packages found matching cpulimit.' in stdout.decode():
-                self.REMOTE_CONTROL_RESPONSE = 'FATAL: cpulimit package must be installed, '
-                + 'when using the property %s.' % AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE
+                self.REMOTE_CONTROL_RESPONSE = 'FATAL: cpulimit package must be installed, when using' \
+                                               ' the property %s.' % AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE
                 return 1
             else:
                 with subprocess.Popen(cpulimit_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as out:
@@ -117,8 +118,8 @@ class AMinerRemoteControlExecutionMethods(object):
         return 0
 
     def change_attribute_of_registered_analysis_component(self, analysis_context, component_name, attribute, value):
-        attr = getattr(analysis_context.get_component_by_name(component_name), attribute)
-        if type(attr) == type(value):
+        attr = getattr(analysis_context.get_component_by_name(component_name), attribute, None)
+        if type(attr) is type(value):
             setattr(analysis_context.get_component_by_name(component_name), attribute, value)
             self.REMOTE_CONTROL_RESPONSE += "'%s.%s' changed from %s to %s successfully." % (component_name,
                                                                                              attribute, repr(attr), value)
@@ -148,7 +149,7 @@ class AMinerRemoteControlExecutionMethods(object):
             self.REMOTE_CONTROL_RESPONSE = "FAILURE: the parameters 'componentName' and 'attribute' must be of type str."
             return
         if hasattr(analysis_context.get_component_by_name(component_name), attribute):
-            attr = getattr(analysis_context.get_component_by_name(component_name), attribute)
+            attr = getattr(analysis_context.get_component_by_name(component_name), attribute, None)
             if hasattr(attr, '__dict__') and self.isinstance_aminer_class(attr):
                 new_attr = self.get_all_vars(attr, '  ')
             elif isinstance(attr, list):
@@ -179,8 +180,8 @@ class AMinerRemoteControlExecutionMethods(object):
     def get_all_vars(self, obj, indent):
         result = ''
         for var in vars(obj):
-            attr = getattr(obj, var)
-            if hasattr(attr, '__dict__') and self.isinstance_aminer_class(attr):
+            attr = getattr(obj, var, None)
+            if attr is not None and hasattr(attr, '__dict__') and self.isinstance_aminer_class(attr):
                 result += indent + "%s = {\n" % var + self.get_all_vars(attr, indent + '  ') + indent + "}\n"
             elif isinstance(attr, list):
                 for l in attr:
@@ -225,6 +226,7 @@ class AMinerRemoteControlExecutionMethods(object):
             else:
                 self.REMOTE_CONTROL_RESPONSE += component.whitelist_event("Analysis.%s" % component.__class__.__name__,
                                                                           [component.__class__.__name__], [LogAtom("", None, 1666.0, None), event_data], whitelisting_data)
+        # skipcq: PYL-W0703
         except Exception as e:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
 
@@ -252,7 +254,7 @@ class AMinerRemoteControlExecutionMethods(object):
         else:
             history_data = history_handler.get_history()
             result_string = 'FAIL: not found'
-            for event_pos in range(0, len(history_data)):
+            for event_pos in enumerate(history_data):
                 event_id, event_type, event_message, sorted_log_lines, event_data, event_source = history_data[event_pos]
                 if event_id != dump_event_id:
                     continue
@@ -270,7 +272,7 @@ class AMinerRemoteControlExecutionMethods(object):
                 else:
                     result_string += '\n  Data: %s' % str(event_data)
 
-                if append_log_lines_flag and (sorted_log_lines != None) and (len(sorted_log_lines) != 0):
+                if append_log_lines_flag and (sorted_log_lines is not None) and (len(sorted_log_lines) != 0):
                     result_string += '\n  Log lines:\n    %s' % '\n    '.join(sorted_log_lines)
                 break
             self.REMOTE_CONTROL_RESPONSE = result_string
@@ -294,7 +296,7 @@ class AMinerRemoteControlExecutionMethods(object):
                 may_delete_flag = True
             else:
                 for id_range in id_spec_list:
-                    if (event_id >= id_range[0]) and (event_id <= id_range[1]):
+                    if id_range[0] <= event_id <= id_range[1]:
                         may_delete_flag = True
             if may_delete_flag:
                 history_data[:] = history_data[:event_pos] + history_data[event_pos + 1:]
@@ -337,8 +339,7 @@ class AMinerRemoteControlExecutionMethods(object):
                 found_flag = True
             else:
                 for id_range in id_spec_list:
-                    if ((isinstance(id_range, list)) and (event_id >= id_range[0]) and
-                            (event_id <= id_range[1])):
+                    if isinstance(id_range, list) and (id_range[0] <= event_id <= id_range[1]):
                         found_flag = True
             if not found_flag:
                 event_pos += 1
@@ -352,11 +353,10 @@ class AMinerRemoteControlExecutionMethods(object):
                         event_type, sorted_log_lines, event_data, whitelisting_data)
                     result_string += 'OK %d: %s\n' % (event_id, message)
                     whitelisted_flag = True
+                except NotImplementedError:
+                    result_string += 'FAIL %d: component does not support whitelisting' % event_id
                 except Exception as wlException:
-                    if isinstance(wlException, NotImplementedError):
-                        result_string += 'FAIL %d: component does not support whitelisting' % event_id
-                    else:
-                        result_string += 'FAIL %d: %s\n' % (event_id, str(wlException))
+                    result_string += 'FAIL %d: %s\n' % (event_id, str(wlException))
             elif event_type == 'Analysis.WhitelistViolationDetector':
                 result_string += 'FAIL %d: No automatic modification of whitelist rules, manual changes required\n' % event_id
                 whitelisted_flag = True

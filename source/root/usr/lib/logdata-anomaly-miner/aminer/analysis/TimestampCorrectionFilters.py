@@ -2,7 +2,6 @@
 the timestamp associated with a received parsed atom."""
 
 from aminer.input import AtomHandlerInterface
-import time
 
 
 class SimpleMonotonicTimestampAdjust(AtomHandlerInterface):

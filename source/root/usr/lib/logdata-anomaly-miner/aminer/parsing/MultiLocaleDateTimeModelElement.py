@@ -8,6 +8,7 @@ import sys
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing import ModelElementInterface
 
+
 class MultiLocaleDateTimeModelElement(ModelElementInterface):
   """This class defines a model element to parse date or datetime
   values from log sources containing timestamps encoded in different
@@ -203,7 +204,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
       return True
     delta = (self.latest_parsed_timestamp - parsed_value)
     delta_seconds = (delta.days*86400+delta.seconds+delta.microseconds/1000)
-    return (delta_seconds >= -86400) and (delta_seconds < 86400*30)
+    return -86400 <= delta_seconds < 86400*30
 
 
 
@@ -396,7 +397,7 @@ class DateFormatComponent:
     the given is triggered."""
     if (self.format_timezone is not None) and (self.format_timezone != format_timezone):
       raise Exception('Node is already an end node for different timezone')
-    elif self.next_components:
+    if self.next_components:
       raise Exception('Cannot make node with subcomponents an end node')
     self.format_timezone = format_timezone
 

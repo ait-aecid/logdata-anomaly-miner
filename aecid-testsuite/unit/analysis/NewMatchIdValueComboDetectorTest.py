@@ -7,6 +7,7 @@ from aminer.parsing import FirstMatchModelElement, SequenceModelElement, FixedDa
     MatchContext, ParserMatch
 from unit.TestBase import TestBase
 
+
 class NewMatchIdValueComboDetectorTest(TestBase):
     log_lines = [b'type=SYSCALL msg=audit(1580367384.000:1): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
                  b'type=PATH msg=audit(1580367385.000:1): item=0 name="one" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL',

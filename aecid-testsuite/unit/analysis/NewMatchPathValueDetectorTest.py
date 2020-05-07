@@ -10,6 +10,7 @@ from unit.TestBase import TestBase
 import time
 from datetime import datetime
 
+
 class NewMatchPathValueDetectorTest(TestBase):
     __expected_string = '%s New value(s) detected\n%s: "%s" (%d lines)\n  %s\n\n'
     

@@ -40,7 +40,7 @@ with open('/tmp/results.csv', 'a+', buffering=100) as file:
         cpu = ""
         for i in range(multiprocessing.cpu_count()):
             cpu = cpu + str(cpus[i]) + ','
-        if firstRead == True:
+        if firstRead is True:
             firstRead = False
         else:
             string += "%s,%s,%s,%s%s,%s,%s,%s,%s\n"%(dt, aminerCpu, mem, cpu, vm[0], vm[1], vm[2], vm[3], vm[4])

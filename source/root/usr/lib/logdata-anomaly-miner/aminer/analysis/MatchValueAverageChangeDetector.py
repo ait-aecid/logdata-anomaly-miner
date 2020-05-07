@@ -10,6 +10,7 @@ from aminer.input import AtomHandlerInterface
 from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
 
+
 class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
   """This detector calculates the average of a given list of values
   to monitor and reports if the average of the latest diverges
@@ -58,7 +59,6 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
     """Sends summary to all event handlers."""
     parser_match = log_atom.parser_match
     value_dict = parser_match.get_match_dictionary()
-    event_data = dict()
 
     timestamp_value = log_atom.get_timestamp()
     if self.timestamp_path is not None:
@@ -66,7 +66,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
       if match_value is None:
         return
       timestamp_value = match_value.match_object[1]
-      event_data['MatchValue'] = match_value.match_object[0]
+      event_data = {'MatchValue': match_value.match_object[0]}
 
     analysis_summary = ''
     if self.sync_bins_flag:
@@ -119,8 +119,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         analysis_component['MinBinTime'] = self.min_bin_time
         analysis_component['SyncBinsFlag'] = self.sync_bins_flag
         analysis_component['DebugMode'] = self.debug_mode
-
-        event_data['AnalysisComponent'] = analysis_component
+        event_data = {'AnalysisComponent': analysis_component}
 
         if self.next_persist_time is None:
           self.next_persist_time = time.time() + 600

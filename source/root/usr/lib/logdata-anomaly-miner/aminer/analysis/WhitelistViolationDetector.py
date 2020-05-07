@@ -45,11 +45,11 @@ class WhitelistViolationDetector(AtomHandlerInterface):
         match_value = match_element.match_object
         if isinstance(match_value, tuple):
           l = []
-          for i, val in enumerate(match_value):
-            if isinstance(match_value[i], datetime):
-              l.append(datetime.timestamp(match_value[i]))
+          for val in match_value:
+            if isinstance(val, datetime):
+              l.append(datetime.timestamp(val))
             else:
-              l.append(match_value[i])
+              l.append(val)
           match_value = l
         if isinstance(match_value, bytes):
           match_value = match_value.decode()

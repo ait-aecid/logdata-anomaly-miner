@@ -4,6 +4,7 @@ of model elements that all have to match."""
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing import ModelElementInterface
 
+
 class SequenceModelElement(ModelElementInterface):
   """This class defines an element to find matches that comprise
   matches of all given child model elements."""

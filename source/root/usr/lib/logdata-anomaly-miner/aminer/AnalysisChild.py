@@ -22,9 +22,9 @@ from aminer.util import PersistencyUtil
 from aminer.util import SecureOSFunctions
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.util import JsonUtil
-from aminer.input.ByteStreamLineAtomizer import ByteStreamLineAtomizer
 from builtins import str
 from aminer.AMinerRemoteControlExecutionMethods import AMinerRemoteControlExecutionMethods
+
 
 class AnalysisContext(object):
   """This class collects information about the current analysis
@@ -90,16 +90,16 @@ class AnalysisContext(object):
     the time trigger class supplied by the component and register
     it for the classes specified in the override list. Use an
     empty list to disable registration."""
-    if (component_name != None) and (component_name in self.registered_components_by_name):
+    if (component_name is not None) and (component_name in self.registered_components_by_name):
       raise Exception('Component with same name already registered')
-    if (register_time_trigger_class_override != None) and \
+    if (register_time_trigger_class_override is not None) and \
         (not isinstance(component, TimeTriggeredComponentInterface)):
       raise Exception('Requesting override on component not implementing ' \
           'TimeTriggeredComponentInterface')
 
     self.registered_components[self.next_registry_id] = (component, component_name)
     self.next_registry_id += 1
-    if component_name != None:
+    if component_name is not None:
       self.registered_components_by_name[component_name] = component
     if isinstance(component, TimeTriggeredComponentInterface):
       if register_time_trigger_class_override is None:
@@ -336,7 +336,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         if isinstance(fd_handler_object, AnalysisChildRemoteControlHandler):
           try:
             fd_handler_object.do_receive()
-          except Exception as receiveException:
+          except ConnectionError as receiveException:
             print('Unclean termination of remote ' \
                 'control: %s' % str(receiveException), file=sys.stderr)
           if fd_handler_object.is_dead():
@@ -376,7 +376,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                 'control: %s' % str(sendError), file=sys.stderr)
             try:
               fd_handler_object.terminate()
-            except Exception as terminateException:
+            except ConnectionError as terminateException:
               print('Unclean termination of remote ' \
                   'control: %s' % str(terminateException), file=sys.stderr)
           if buffer_flushed_flag:
@@ -423,32 +423,32 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         SecureOSFunctions.receive_annoted_file_descriptor(self.master_control_socket)
     if received_type_info == b'logstream':
       repositioning_data = self.repositioning_data_dict.get(annotation_data, None)
-      if repositioning_data != None:
+      if repositioning_data is not None:
         del self.repositioning_data_dict[annotation_data]
-      resource = None
+      res = None
       if annotation_data.startswith(b'file://'):
         from aminer.input.LogStream import FileLogDataResource
-        resource = FileLogDataResource(annotation_data, received_fd, \
-                                       repositioning_data=repositioning_data)
+        res = FileLogDataResource(annotation_data, received_fd,
+                                  repositioning_data=repositioning_data)
       elif annotation_data.startswith(b'unix://'):
         from aminer.input.LogStream import UnixSocketLogDataResource
-        resource = UnixSocketLogDataResource(annotation_data, received_fd)
+        res = UnixSocketLogDataResource(annotation_data, received_fd)
       else:
         raise Exception('Filedescriptor of unknown type received')
 # Make fd nonblocking.
-      fd_flags = fcntl.fcntl(resource.get_file_descriptor(), fcntl.F_GETFL)
-      fcntl.fcntl(resource.get_file_descriptor(), fcntl.F_SETFL, fd_flags | os.O_NONBLOCK)
-      log_stream = self.log_streams_by_name.get(resource.get_resource_name())
+      fd_flags = fcntl.fcntl(res.get_file_descriptor(), fcntl.F_GETFL)
+      fcntl.fcntl(res.get_file_descriptor(), fcntl.F_SETFL, fd_flags | os.O_NONBLOCK)
+      log_stream = self.log_streams_by_name.get(res.get_resource_name())
       if log_stream is None:
         stream_atomizer = self.analysis_context.atomizer_factory.get_atomizer_for_resource(
-            resource.get_resource_name())
-        log_stream = LogStream(resource, stream_atomizer)
-        self.tracked_fds_dict[resource.get_file_descriptor()] = log_stream
-        self.log_streams_by_name[resource.get_resource_name()] = log_stream
+            res.get_resource_name())
+        log_stream = LogStream(res, stream_atomizer)
+        self.tracked_fds_dict[res.get_file_descriptor()] = log_stream
+        self.log_streams_by_name[res.get_resource_name()] = log_stream
       else:
-        log_stream.add_next_resource(resource)
+        log_stream.add_next_resource(res)
     elif received_type_info == b'remotecontrol':
-      if self.remote_control_socket != None:
+      if self.remote_control_socket is not None:
         raise Exception('Received another remote control ' \
             'socket: multiple remote control not (yet?) supported.')
       self.remote_control_socket = socket.fromfd(
@@ -486,7 +486,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
       self.repositioning_data_dict = {}
       for log_stream_name, log_stream in self.log_streams_by_name.items():
         repositioning_data = log_stream.get_repositioning_data()
-        if repositioning_data != None:
+        if repositioning_data is not None:
           self.repositioning_data_dict[log_stream_name] = repositioning_data
       PersistencyUtil.store_json(
           self.persistence_file_name, self.repositioning_data_dict)

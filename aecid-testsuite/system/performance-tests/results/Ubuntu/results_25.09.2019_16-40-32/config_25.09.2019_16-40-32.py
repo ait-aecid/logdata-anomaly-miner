@@ -111,11 +111,11 @@ def buildAnalysisPipeline(analysisContext):
 
   from aminer.analysis import NewMatchPathDetector
   newMatchPathDetector = NewMatchPathDetector(
-      analysisContext.aminerConfig, anomalyEventHandlers, autoIncludeFlag=True)
+      analysisContext.aminerConfig, anomalyEventHandlers, auto_include_flag=True)
   analysisContext.registerComponent(newMatchPathDetector, componentName="NewMatchPath")
   atomFilter.addHandler(newMatchPathDetector)
 
   from aminer.analysis.NewMatchPathValueDetector import NewMatchPathValueDetector
-  newMatchPathValueDetector = NewMatchPathValueDetector(analysisContext.aminerConfig, ['/AnyByteDataModelElement'], anomalyEventHandlers, autoIncludeFlag=True)
+  newMatchPathValueDetector = NewMatchPathValueDetector(analysisContext.aminerConfig, ['/AnyByteDataModelElement'], anomalyEventHandlers, auto_include_flag=True)
   analysisContext.registerComponent(newMatchPathValueDetector, componentName="NewMatchPathValue")
   atomFilter.addHandler(newMatchPathValueDetector)

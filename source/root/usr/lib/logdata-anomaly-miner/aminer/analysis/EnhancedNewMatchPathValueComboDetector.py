@@ -55,7 +55,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     """Load the persistency data from storage."""
     self.known_values_dict = {}
     persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
-    if persistence_data != None:
+    if persistence_data is not None:
 # Dictionary and tuples were stored as list of lists. Transform
 # the first lists to tuples to allow hash operation needed by set.
       for value_tuple, extra_data in persistence_data:
@@ -83,7 +83,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
       else:
         match_value_list.append(match_element.match_object)
 
-    if self.tuple_transformation_function != None:
+    if self.tuple_transformation_function is not None:
       match_value_list = self.tuple_transformation_function(match_value_list)
     match_value_tuple = tuple(match_value_list)
 
@@ -154,7 +154,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     using given whitelistingData was not possible."""
     if event_type != 'Analysis.%s' % self.__class__.__name__:
       raise Exception('Event not from this source')
-    if whitelisting_data != None:
+    if whitelisting_data is not None:
       raise Exception('Whitelisting data not understood by this detector')
     current_timestamp = event_data[0].get_timestamp()
     self.known_values_dict[event_data[1]] = [

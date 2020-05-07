@@ -1,5 +1,5 @@
 import unittest
-from os.path import sys
+import sys
 sys.path.append('../../')
 from aminer.util.SecureOSFunctions import secure_open_file, \
   send_annotated_file_descriptor, receive_annoted_file_descriptor
@@ -55,17 +55,17 @@ class SecureOSFunctionsTestLocal(unittest.TestCase):
     A valid annotated file descriptor is to be sent by a socket.
     '''
     def test4sendAnnotatedFileDescriptor(self):
-      self.sock_name = '/tmp/test4unixSocket.sock'
+      sock_name = '/tmp/test4unixSocket.sock'
       data = b'readmeStream' + b'\x00' + b'You should read these README instructions for better understanding.'
       
       proc = subprocess.Popen(['python3', 'unit/util/clientTest4.py'])
       
-      if os.path.exists(self.sock_name):
-        os.remove(self.sock_name)
+      if os.path.exists(sock_name):
+        os.remove(sock_name)
 
       print(self.opening_socket)
       server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-      server.bind(self.sock_name)
+      server.bind(sock_name)
       server.listen(1)
       connection = server.accept()[0]
       self.unix_socket_log_data_resource = UnixSocketLogDataResource(b'unix:///tmp/test4unixSocket.sock', connection.fileno())
@@ -99,17 +99,17 @@ class SecureOSFunctionsTestLocal(unittest.TestCase):
     A valid logstream descriptor is to be sent.
     '''
     def test6send_logstream_descriptor(self):
-      self.sock_name = '/tmp/test6unixSocket.sock'
+      sock_name = '/tmp/test6unixSocket.sock'
       data = b'logstream' + b'\x00' + b'/var/log/syslog'
       
       subprocess.Popen(['python3', 'unit/util/clientTest6.py'])
       
-      if os.path.exists(self.sock_name):
-        os.remove(self.sock_name)
+      if os.path.exists(sock_name):
+        os.remove(sock_name)
 
       print(self.opening_socket)
       server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-      server.bind(self.sock_name)
+      server.bind(sock_name)
       server.listen(1)
       connection = server.accept()[0]
       self.unix_socket_log_data_resource = UnixSocketLogDataResource(b'unix:///tmp/test6unixSocket.sock', connection.fileno())
@@ -131,19 +131,19 @@ class SecureOSFunctionsTestLocal(unittest.TestCase):
     A valid annotated file descriptor is to be received by a socket.
     '''
     def test7receive_annotated_file_descriptor(self):
-      self.sock_name = '/tmp/test6unixSocket.sock'
+      sock_name = '/tmp/test6unixSocket.sock'
       type_info = b'logstream'
       path = b'/var/log/syslog'
       data = (type_info, path)
       
       subprocess.Popen(['python3', 'unit/util/clientTest6.py'])
       
-      if os.path.exists(self.sock_name):
-        os.remove(self.sock_name)
+      if os.path.exists(sock_name):
+        os.remove(sock_name)
 
       print(self.opening_socket)
       server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-      server.bind(self.sock_name)
+      server.bind(sock_name)
       server.listen(1)
       connection = server.accept()[0]
       data_tuple = receive_annoted_file_descriptor(connection)

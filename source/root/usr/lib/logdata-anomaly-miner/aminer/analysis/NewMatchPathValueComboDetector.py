@@ -57,7 +57,7 @@ class NewMatchPathValueComboDetector(
     else:
 # Set and tuples were stored as list of lists. Transform the inner
 # lists to tuples to allow hash operation needed by set.
-      self.known_values_set = set([tuple(record) for record in persistence_data])
+      self.known_values_set = {tuple(record) for record in persistence_data}
 
 
   def receive_atom(self, log_atom):
@@ -148,7 +148,7 @@ class NewMatchPathValueComboDetector(
     using given whitelistingData was not possible."""
     if event_type != 'Analysis.%s' % self.__class__.__name__:
       raise Exception('Event not from this source')
-    if whitelisting_data != None:
+    if whitelisting_data is not None:
       raise Exception('Whitelisting data not understood by this detector')
     self.known_values_set.add(event_data[1])
     return 'Whitelisted path(es) %s with %s in %s' % (
