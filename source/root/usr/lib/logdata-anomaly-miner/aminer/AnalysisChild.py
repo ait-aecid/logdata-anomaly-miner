@@ -83,9 +83,11 @@ class AnalysisContext(object):
     TimeTriggeredComponentInterface will also be added to the
     appropriate lists unless registerTimeTriggerClassOverride
     is specified.
-    @param component_name when not none, the component is also
-    added to the named components. When a component with the same
-    name was already registered, this will cause an error.
+    @param component_name an optional name assigned to the
+    component when registering. When no name is specified,
+    the detector class name plus an identifier will be used.
+    When a component with the same name was already
+    registered, this will cause an error.
     @param register_time_trigger_class_override if not none, ignore
     the time trigger class supplied by the component and register
     it for the classes specified in the override list. Use an
