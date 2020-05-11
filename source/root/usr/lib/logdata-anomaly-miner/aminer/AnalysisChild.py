@@ -83,14 +83,18 @@ class AnalysisContext(object):
     TimeTriggeredComponentInterface will also be added to the
     appropriate lists unless registerTimeTriggerClassOverride
     is specified.
-    @param component_name when not none, the component is also
-    added to the named components. When a component with the same
-    name was already registered, this will cause an error.
+    @param component_name an optional name assigned to the
+    component when registering. When no name is specified,
+    the detector class name plus an identifier will be used.
+    When a component with the same name was already
+    registered, this will cause an error.
     @param register_time_trigger_class_override if not none, ignore
     the time trigger class supplied by the component and register
     it for the classes specified in the override list. Use an
     empty list to disable registration."""
-    if (component_name is not None) and (component_name in self.registered_components_by_name):
+    if component_name == None:
+      component_name = str(component.__class__.__name__) + str(self.next_registry_id)
+    if component_name in self.registered_components_by_name:
       raise Exception('Component with same name already registered')
     if (register_time_trigger_class_override is not None) and \
         (not isinstance(component, TimeTriggeredComponentInterface)):
@@ -99,8 +103,7 @@ class AnalysisContext(object):
 
     self.registered_components[self.next_registry_id] = (component, component_name)
     self.next_registry_id += 1
-    if component_name is not None:
-      self.registered_components_by_name[component_name] = component
+    self.registered_components_by_name[component_name] = component
     if isinstance(component, TimeTriggeredComponentInterface):
       if register_time_trigger_class_override is None:
         self.add_time_triggered_component(component)
