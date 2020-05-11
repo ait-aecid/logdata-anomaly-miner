@@ -9,14 +9,14 @@ from aminer.util import LogarithmicBackoffHistory
 from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.analysis import Rules
-from datetime import datetime
+
 
 class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
   """This class creates events when one of the given time correlation
   rules is violated. This is used to implement checks as depicted
   in http://dx.doi.org/10.1016/j.cose.2014.09.006"""
 
-  def __init__(self, aminer_config, ruleset, anomaly_event_handlers, persistence_id='Default'):
+  def __init__(self, aminer_config, ruleset, anomaly_event_handlers, persistence_id='Default', output_log_line=True):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location.
     @param ruleset a list of MatchRule rules with appropriate
@@ -25,6 +25,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
     self.anomaly_event_handlers = anomaly_event_handlers
     self.next_persist_time = time.time() + 600.0
     self.persistence_id = persistence_id
+    self.output_log_line = output_log_line
 
     event_correlation_set = set()
     for rule in self.event_classification_ruleset:
@@ -80,7 +81,6 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
 # for a long time, that they hold information about correlation
 # impossible to fulfil. Take the newest timestamp of any rule
 # and use it for checking.
-    event_data = dict()
     newest_timestamp = 0.0
     for rule in self.event_correlation_ruleset:
       newest_timestamp = max(newest_timestamp, rule.last_timestamp_seen)
@@ -89,7 +89,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
       check_result = rule.check_status(newest_timestamp)
       if check_result is None:
         continue
-      self.last_log_atom.atomTime = trigger_time
+      self.last_log_atom.set_timestamp(trigger_time)
       r = {}
       r['RuleId'] = rule.rule_id
       r['MinTimeDelta'] = rule.min_time_delta
@@ -106,11 +106,8 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
         h.append(repr(item))
       history['History'] = h
       r['correlation_history'] = history
-      analysis_component = dict()
-      analysis_component['Rule'] = r
-      analysis_component['CheckResult'] = check_result
-      analysis_component['NewestTimestamp'] = newest_timestamp
-      event_data['AnalysisComponent'] = analysis_component
+      analysis_component = {'Rule': r, 'CheckResult': check_result, 'NewestTimestamp': newest_timestamp}
+      event_data = {'AnalysisComponent': analysis_component}
       for listener in self.anomaly_event_handlers:
         listener.receive_event('Analysis.%s' % self.__class__.__name__, \
             'Correlation rule "%s" violated' % rule.rule_id, [check_result[0]], \
@@ -275,7 +272,7 @@ class CorrelationRule:
         deleted = True
         check_range = check_range - 1
         b_pos = b_pos + 1
-      if deleted == False:
+      if deleted is False:
         a_pos = a_pos + 1
 # After checking all aEvents before a_pos were cleared, otherwise
 # they violate a correlation rule.
@@ -313,19 +310,17 @@ class CorrelationRule:
   def prepare_history_entry(self, selector, log_atom):
     """Return a history entry for a parser match."""
     parser_match = log_atom.parser_match
+    timestamp = log_atom.get_timestamp()
+    if timestamp is None:
+      timestamp = time.time()
     length = 4
     if self.artefact_match_parameters is not None:
       length += len(self.artefact_match_parameters)
     result = [None]*length
-    result[0] = log_atom.get_timestamp()
+    result[0] = timestamp
     result[1] = 0
     result[2] = selector
     result[3] = parser_match
-
-    if result[0] is None:
-      result[0] = datetime.fromtimestamp(time.time())
-    if isinstance(result[0], datetime):
-      result[0] = (result[0]-datetime.fromtimestamp(0)).total_seconds()
 
     if result[0] < self.last_timestamp_seen:
       raise Exception('Unsorted!')

@@ -7,6 +7,7 @@ from aminer.input import AtomHandlerInterface
 from datetime import datetime
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
+
 class TimestampsUnsortedDetector(AtomHandlerInterface, EventSourceInterface):
   """This class creates events when unsorted timestamps are detected.
   This is useful mostly to detect algorithm malfunction or configuration
@@ -28,31 +29,28 @@ class TimestampsUnsortedDetector(AtomHandlerInterface, EventSourceInterface):
     process the match. Depending on this information, the caller
     may decide if it makes sense passing the parsed atom also
     to other handlers."""
-    event_data = dict()
-    timestamp = log_atom.get_timestamp()
-    if timestamp is None:
+    if log_atom.get_timestamp() is None:
       return False
-    if timestamp < self.last_timestamp:
+    if log_atom.get_timestamp() < self.last_timestamp:
+      original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+      if original_log_line_prefix is None:
+        original_log_line_prefix = ''
       if self.output_log_line:
-        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-        if original_log_line_prefix is None:
-          original_log_line_prefix = ''
         sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep +
                             original_log_line_prefix + repr(log_atom.raw_data)]
       else:
-        sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('')]
-      analysis_component = dict()
-      analysis_component['LastTimestamp'] = self.last_timestamp
-      event_data['AnalysisComponent'] = analysis_component
+        sorted_log_lines = [original_log_line_prefix + repr(log_atom.raw_data)]
+      analysis_component = {'LastTimestamp': self.last_timestamp}
+      event_data = {'AnalysisComponent': analysis_component}
       for listener in self.anomaly_event_handlers:
         listener.receive_event('Analysis.%s' % self.__class__.__name__, \
-            'Timestamp %s below %s' % (datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S"),
-            datetime.fromtimestamp(self.last_timestamp).strftime("%Y-%m-%d %H:%M:%S")), \
+            'Timestamp %s below %s' % (datetime.fromtimestamp(log_atom.get_timestamp()).strftime("%Y-%m-%d %H:%M:%S"),
+            datetime.fromtimestamp(self.last_timestamp).strftime("%Y-%m-%d %H:%M:%S")),
                                sorted_log_lines, event_data, log_atom, self)
       if self.exit_on_error_flag:
         import sys
         sys.exit(1)
-    self.last_timestamp = timestamp
+    self.last_timestamp = log_atom.get_timestamp()
     return True
 
 

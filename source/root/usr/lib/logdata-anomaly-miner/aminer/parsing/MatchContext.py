@@ -2,6 +2,7 @@
 
 from aminer.parsing.MatchElement import MatchElement
 
+
 class MatchContext(object):
   """This class allows storage of data relevant during the matching
   process, e.g. the root node and the remaining unmatched data.
@@ -39,9 +40,11 @@ class DebugMatchContext(MatchContext):
     """Update the context and store debugging information."""
     if self.last_match_data != self.match_data:
       self.last_match_data = self.match_data
+      if self.debug_info != '':
+        self.debug_info += '  '
       self.debug_info += 'Starting match update on %s\n' % repr(self.match_data)
     if not self.match_data.startswith(match_string):
-      self.debug_info += 'Current data %s does not start with %s\n' % (
+      self.debug_info += '  Current data %s does not start with %s\n' % (
         repr(self.match_data), repr(match_string))
       raise Exception('Illegal state')
     self.match_data = self.match_data[len(match_string):]
@@ -49,13 +52,15 @@ class DebugMatchContext(MatchContext):
     if (self.shortest_unmatched_data is None) or (
             len(self.match_data) < len(self.shortest_unmatched_data)):
       self.shortest_unmatched_data = self.match_data
-    self.debug_info += 'Removed %s, remaining %d bytes\n' % (repr(match_string), len(self.match_data))
+    self.debug_info += '  Removed %s, remaining %d bytes\n' % (repr(match_string), len(self.match_data))
 
   def get_debug_info(self):
     """Get the current debugging information and reset it."""
+    while self.debug_info.find('\n\n') != -1:
+      self.debug_info = self.debug_info.replace('\n\n', '\n')
     result = self.debug_info
     self.debug_info = ''
-    result += 'Shortest unmatched data was %s\n' % repr(self.shortest_unmatched_data)
+    result += '  Shortest unmatched data was %s\n' % repr(self.shortest_unmatched_data)
     return result
 
   def getshortest_unmatched_data(self):

@@ -12,12 +12,12 @@ from aminer.util import PersistencyUtil
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
 
-class NewMatchPathDetector(AtomHandlerInterface, \
+class NewMatchPathDetector(AtomHandlerInterface,
     TimeTriggeredComponentInterface, EventSourceInterface):
   """This class creates events when new data path was found in
   a parsed atom."""
 
-  def __init__(self, aminer_config, anomaly_event_handlers, \
+  def __init__(self, aminer_config, anomaly_event_handlers,
                persistence_id='Default', auto_include_flag=False, output_log_line=True):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location."""
@@ -47,7 +47,6 @@ class NewMatchPathDetector(AtomHandlerInterface, \
     may decide if it makes sense passing the parsed atom also
     to other handlers."""
     unknown_path_list = []
-    event_data = dict()
     for path in log_atom.parser_match.get_match_dictionary().keys():
       if path not in self.known_path_set:
         unknown_path_list.append(path)
@@ -56,17 +55,24 @@ class NewMatchPathDetector(AtomHandlerInterface, \
     if unknown_path_list:
       if self.next_persist_time is None:
         self.next_persist_time = time.time() + 600
+      original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+      if original_log_line_prefix is None:
+        original_log_line_prefix = ''
       if self.output_log_line:
-        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-        if original_log_line_prefix is None:
-          original_log_line_prefix = ''
-        sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep +
+        sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + repr(unknown_path_list) + os.linesep +
                             original_log_line_prefix + repr(log_atom.raw_data)]
       else:
-        sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('')]
-      analysis_component = dict()
-      analysis_component['AffectedParserPaths'] = list(unknown_path_list)
-      event_data['AnalysisComponent'] = analysis_component
+        sorted_log_lines = [repr(unknown_path_list) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
+      analysis_component = {'AffectedLogAtomPaths': list(unknown_path_list)}
+      if self.output_log_line:
+        match_paths_values = {}
+        for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
+          match_value = match_element.match_object
+          if isinstance(match_value, bytes):
+            match_value = match_value.decode()
+          match_paths_values[match_path] = match_value
+        analysis_component['ParsedLogAtom'] = match_paths_values
+      event_data = {'AnalysisComponent': analysis_component}
       for listener in self.anomaly_event_handlers:
         listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New path(es) detected',
                                sorted_log_lines, event_data, log_atom, self)

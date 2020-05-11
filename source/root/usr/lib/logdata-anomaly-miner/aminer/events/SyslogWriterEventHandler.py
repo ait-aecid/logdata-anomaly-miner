@@ -8,6 +8,7 @@ import syslog
 from aminer.events import EventHandlerInterface
 from aminer.events import StreamPrinterEventHandler
 
+
 class SyslogWriterEventHandler(EventHandlerInterface):
   """This class implements an event record listener to forward
   events to the local syslog instance.

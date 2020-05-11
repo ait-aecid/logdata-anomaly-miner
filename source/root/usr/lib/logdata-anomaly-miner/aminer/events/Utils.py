@@ -3,6 +3,7 @@
 from aminer.events import EventHandlerInterface
 from aminer.util import LogarithmicBackoffHistory
 
+
 class VolatileLogarithmicBackoffEventHistory(EventHandlerInterface, LogarithmicBackoffHistory):
   """This class is a volatile filter to keep a history of received
   events, e.g. for analysis by other components or for external

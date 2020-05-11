@@ -10,7 +10,7 @@ import sys
 no_secure_open_warn_once_flag = True
 
 
-def secure_open_file(file_name, flags, trusted_root='/'):
+def secure_open_file(file_name, flags):
   """Secure opening of a file with given flags. This call will
   refuse to open files where any path component is a symlink.
   As operating system does not provide any means to do that, open
@@ -18,9 +18,7 @@ def secure_open_file(file_name, flags, trusted_root='/'):
   It also adds O_NOCTTY to the flags as controlling TTY logics
   as this is just an additional risk and does not make sense for
   opening of log files.
-  @param file_name is the fileName as byte string
-  @param trusted_root Opening this directory is deemed safe by
-  default."""
+  @param file_name is the fileName as byte string"""
 
   if not file_name.startswith(b'/'):
     raise Exception('Secure open on relative path not supported')
@@ -95,7 +93,7 @@ def receive_annoted_file_descriptor(receive_socket):
   @return a tuple containing the received file descriptor, type
   information (see sendAnnotatedFileDescriptor) and the annotation
   information."""
-  message_data, anc_data, flags, remote_address = receive_socket.recvmsg(
+  message_data, anc_data, _flags, _remote_address = receive_socket.recvmsg(
       1<<16, socket.CMSG_LEN(struct.calcsize('i')))
   if len(anc_data) != 1:
     raise Exception(

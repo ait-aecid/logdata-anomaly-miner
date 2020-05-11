@@ -6,6 +6,7 @@ from aminer.input import AtomHandlerInterface
 from aminer.util import TimeTriggeredComponentInterface
 import _io
 
+
 class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterface):
   """This class extracts values from a given match and writes
   them to a stream. This can be used to forward these values to

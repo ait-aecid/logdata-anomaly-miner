@@ -3,6 +3,7 @@
 from aminer.parsing import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
 
+
 class DecimalIntegerValueModelElement(ModelElementInterface):
   """This class defines a model to parse integer values with optional
   signum or padding. If both are present, it is signum has to be

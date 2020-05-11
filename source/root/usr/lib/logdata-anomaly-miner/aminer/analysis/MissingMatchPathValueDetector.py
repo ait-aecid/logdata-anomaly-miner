@@ -11,7 +11,8 @@ from aminer.input import AtomHandlerInterface
 from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
-from datetime import datetime
+import os
+
 
 class MissingMatchPathValueDetector(
     AtomHandlerInterface, TimeTriggeredComponentInterface,
@@ -74,12 +75,10 @@ class MissingMatchPathValueDetector(
     if value is None:
       return False
     timestamp = log_atom.get_timestamp()
-    if isinstance(timestamp, datetime):
-      timestamp = timestamp.timestamp()
     if timestamp is None:
-      timestamp = round(time.time())
+      timestamp = time.time()
     detector_info = self.expected_values_dict.get(value, None)
-    if detector_info != None:
+    if detector_info is not None:
 # Just update the last seen value and switch from non-reporting
 # error state to normal state.
       detector_info[0] = timestamp
@@ -116,7 +115,6 @@ class MissingMatchPathValueDetector(
   def check_timeouts(self, timestamp, log_atom):
     """Check if there was any timeout on a channel, thus triggering
     event dispatching."""
-    event_data = dict()
     self.last_seen_timestamp = max(self.last_seen_timestamp, timestamp)
     if self.last_seen_timestamp > self.next_check_timestamp:
       missing_value_list = []
@@ -164,20 +162,30 @@ class MissingMatchPathValueDetector(
           e['OverdueTime'] = overdue_time
           e['Interval'] = interval
           affected_log_atom_values.append(e)
-        analysis_component = dict()
-        analysis_component['AffectedLogAtomValues'] = affected_log_atom_values
-        event_data['AnalysisComponent'] = analysis_component
+        analysis_component = {'AffectedLogAtomPathes': list(log_atom.parser_match.get_match_dictionary()),
+          'AffectedLogAtomValues': affected_log_atom_values}
         if self.output_log_line:
-          original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-          if original_log_line_prefix is None:
-            original_log_line_prefix = ''
-          message_part.append(original_log_line_prefix + repr(log_atom.raw_data))
+          match_paths_values = {}
+          for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
+            match_value = match_element.match_object
+            if isinstance(match_value, bytes):
+              match_value = match_value.decode()
+            match_paths_values[match_path] = match_value
+          analysis_component['ParsedLogAtom'] = match_paths_values
+        event_data = {'AnalysisComponent': analysis_component}
+        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+        if original_log_line_prefix is None:
+          original_log_line_prefix = ''
+        if self.output_log_line:
+          message_part.append(log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix + repr(log_atom.raw_data))
+        else:
+          message_part.append(os.linesep + original_log_line_prefix + repr(log_atom.raw_data))
         for listener in self.anomaly_event_handlers:
-          self.send_event_to_handlers(listener, event_data, log_atom, [''.join(message_part)], missing_value_list)
+          self.send_event_to_handlers(listener, event_data, log_atom, [''.join(message_part)])
     return True
 
 
-  def send_event_to_handlers(self, anomaly_event_handler, event_data, log_atom, message_part, missing_value_list):
+  def send_event_to_handlers(self, anomaly_event_handler, event_data, log_atom, message_part):
     anomaly_event_handler.receive_event(self.analysis_string % self.__class__.__name__,
         'Interval too large between values', message_part, event_data, log_atom, self)
 
@@ -283,7 +291,6 @@ class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
     return None
 
 
-  def send_event_to_handlers(self, anomaly_event_handler, event_data, log_atom, message_part, missing_value_list):
+  def send_event_to_handlers(self, anomaly_event_handler, event_data, log_atom, message_part):
     anomaly_event_handler.receive_event(self.analysis_string % self.__class__.__name__,
         'Interval too large between values', message_part, event_data, log_atom, self)
-

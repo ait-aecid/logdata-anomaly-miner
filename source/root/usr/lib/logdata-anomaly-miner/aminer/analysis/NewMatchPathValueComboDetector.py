@@ -13,6 +13,7 @@ from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
+
 class NewMatchPathValueComboDetector(
     AtomHandlerInterface, TimeTriggeredComponentInterface,
     EventSourceInterface):
@@ -56,7 +57,7 @@ class NewMatchPathValueComboDetector(
     else:
 # Set and tuples were stored as list of lists. Transform the inner
 # lists to tuples to allow hash operation needed by set.
-      self.known_values_set = set([tuple(record) for record in persistence_data])
+      self.known_values_set = {tuple(record) for record in persistence_data}
 
 
   def receive_atom(self, log_atom):
@@ -67,7 +68,6 @@ class NewMatchPathValueComboDetector(
     values were new or not."""
     match_dict = log_atom.parser_match.get_match_dictionary()
     match_value_list = []
-    event_data = dict()
     for target_path in self.target_path_list:
       match_element = match_dict.get(target_path, None)
       if match_element is None:
@@ -89,16 +89,24 @@ class NewMatchPathValueComboDetector(
         if self.next_persist_time is None:
           self.next_persist_time = time.time() + 600
 
-      analysis_component = dict()
-      analysis_component['AffectedLogAtomValues'] = affected_log_atom_values
-      event_data['AnalysisComponent'] = analysis_component
+      analysis_component = {'AffectedLogAtomPaths': self.target_path_list,
+        'AffectedLogAtomValues': affected_log_atom_values}
+      event_data = {'AnalysisComponent': analysis_component}
+      original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+      if original_log_line_prefix is None:
+        original_log_line_prefix = ''
       if self.output_log_line:
-        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-        if original_log_line_prefix is None:
-          original_log_line_prefix = ''
-        sorted_log_lines = [str(match_value_tuple) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
+        match_paths_values = {}
+        for match_path, match_element in match_dict.items():
+          match_value = match_element.match_object
+          if isinstance(match_value, bytes):
+            match_value = match_value.decode()
+          match_paths_values[match_path] = match_value
+        analysis_component['ParsedLogAtom'] = match_paths_values
+        sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep +
+                            str(match_value_tuple) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
       else:
-        sorted_log_lines = [str(match_value_tuple)]
+        sorted_log_lines = [str(match_value_tuple) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
       for listener in self.anomaly_event_handlers:
         listener.receive_event(
             'Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected',
@@ -140,7 +148,7 @@ class NewMatchPathValueComboDetector(
     using given whitelistingData was not possible."""
     if event_type != 'Analysis.%s' % self.__class__.__name__:
       raise Exception('Event not from this source')
-    if whitelisting_data != None:
+    if whitelisting_data is not None:
       raise Exception('Whitelisting data not understood by this detector')
     self.known_values_set.add(event_data[1])
     return 'Whitelisted path(es) %s with %s in %s' % (

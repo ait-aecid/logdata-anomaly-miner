@@ -27,9 +27,9 @@ class Base64StringModelElement(ModelElementInterface):
       if at_end_flag:
         if ((match_len&0x3) == 0) or (b_val != 0x3d):
           break
-      elif (not ((b_val >= 0x30) and (b_val <= 0x39)) and
-            not ((b_val >= 0x41) and (b_val <= 0x5a)) and
-            not ((b_val >= 0x61) and (b_val <= 0x7a)) and
+      elif (not (0x30 <= b_val <= 0x39) and
+            not (0x41 <= b_val <= 0x5a) and
+            not (0x61 <= b_val <= 0x7a) and
             (b_val not in [0x2b, 0x2f])):
         if (b_val != 0x3d) or ((match_len&0x2) == 0):
           break

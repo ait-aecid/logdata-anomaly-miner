@@ -6,6 +6,7 @@ from aminer.input import StreamAtomizer
 from aminer.parsing import MatchContext
 from aminer.parsing import ParserMatch
 
+
 class ByteStreamLineAtomizer(StreamAtomizer):
   """This atomizer consumes binary data from a stream to break
   it into lines, removing the line separator at the end. With
@@ -51,7 +52,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
 # one more iteration to handle also the flag.
     consumed_length = 0
     while True:
-      if self.last_unconsumed_log_atom != None:
+      if self.last_unconsumed_log_atom is not None:
 # Keep length before dispatching: dispatch will reset the field.
         data_length = len(self.last_unconsumed_log_atom.raw_data)
         if self.dispatch_atom(self.last_unconsumed_log_atom):
@@ -99,15 +100,15 @@ class ByteStreamLineAtomizer(StreamAtomizer):
 # This is a normal line.
       line_data = stream_data[consumed_length:line_end]
       log_atom = LogAtom(line_data, None, None, self)
-      if self.parsing_model != None:
+      if self.parsing_model is not None:
         match_context = MatchContext(line_data)
         match_element = self.parsing_model.get_match_element('', match_context)
-        if (match_element != None) and not match_context.match_data:
+        if (match_element is not None) and not match_context.match_data:
           log_atom.parser_match = ParserMatch(match_element)
-          if self.default_timestamp_path != None:
+          if self.default_timestamp_path is not None:
             ts_match = log_atom.parser_match.get_match_dictionary().get(self.default_timestamp_path, None)
-            if ts_match != None:
-              log_atom.set_timestamp(ts_match.match_object[1])
+            if ts_match is not None:
+              log_atom.set_timestamp(ts_match.match_object)
       if self.dispatch_atom(log_atom):
         consumed_length = line_end+1
         continue

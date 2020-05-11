@@ -10,6 +10,7 @@ from aminer.input import AtomHandlerInterface
 from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
 
+
 class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
   """This detector calculates the average of a given list of values
   to monitor and reports if the average of the latest diverges
@@ -17,7 +18,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
 
   def __init__(self, aminer_config, anomaly_event_handlers, timestamp_path,
                analyze_path_list, min_bin_elements, min_bin_time, sync_bins_flag=True,
-               debug_mode=False, persistence_id='Default'):
+               debug_mode=False, persistence_id='Default', output_log_line=True):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location.
     @param timestamp_path if not None, use this path value for
@@ -40,6 +41,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
     self.debug_mode = debug_mode
     self.next_persist_time = None
     self.persistence_id = persistence_id
+    self.output_log_line = output_log_line
 
     PersistencyUtil.add_persistable_component(self)
     self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, \
@@ -57,7 +59,6 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
     """Sends summary to all event handlers."""
     parser_match = log_atom.parser_match
     value_dict = parser_match.get_match_dictionary()
-    event_data = dict()
 
     timestamp_value = log_atom.get_timestamp()
     if self.timestamp_path is not None:
@@ -65,7 +66,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
       if match_value is None:
         return
       timestamp_value = match_value.match_object[1]
-      event_data['MatchValue'] = match_value.match_object[0]
+      event_data = {'MatchValue': match_value.match_object[0]}
 
     analysis_summary = ''
     if self.sync_bins_flag:
@@ -73,10 +74,10 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
       for (path, stat_data) in self.stat_data:
         match = value_dict.get(path, None)
         if match is None:
-          ready_for_analysis_flag = (ready_for_analysis_flag and self.update(stat_data, \
+          ready_for_analysis_flag = (ready_for_analysis_flag and self.update(stat_data,
             timestamp_value, None))
         else:
-          ready_for_analysis_flag = (ready_for_analysis_flag and self.update(stat_data, \
+          ready_for_analysis_flag = (ready_for_analysis_flag and self.update(stat_data,
             timestamp_value, match.match_object))
 
       if ready_for_analysis_flag:
@@ -104,14 +105,21 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
               analysis_summary += os.linesep
               analysis_summary += '  "%s": %s' % (path, analysis_data[0])
             anomaly_scores.append(d)
-        analysis_component = dict()
+        analysis_component = {'AffectedLogAtomPathes': list(value_dict)}
+        if self.output_log_line:
+          match_paths_values = {}
+          for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
+            match_value = match_element.match_object
+            if isinstance(match_value, bytes):
+              match_value = match_value.decode()
+            match_paths_values[match_path] = match_value
+          analysis_component['ParsedLogAtom'] = match_paths_values
         analysis_component['AnomalyScores'] = anomaly_scores
         analysis_component['MinBinElements'] = self.min_bin_elements
         analysis_component['MinBinTime'] = self.min_bin_time
         analysis_component['SyncBinsFlag'] = self.sync_bins_flag
         analysis_component['DebugMode'] = self.debug_mode
-
-        event_data['AnalysisComponent'] = analysis_component
+        event_data = {'AnalysisComponent': analysis_component}
 
         if self.next_persist_time is None:
           self.next_persist_time = time.time() + 600
@@ -122,9 +130,8 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
       res = [''] * stat_data[2][0]
       res[0] = analysis_summary
       for listener in self.anomaly_event_handlers:
-        listener.receive_event('Analysis.%s' % self.__class__.__name__, \
-            'Statistical data report', res, event_data, log_atom, \
-                               self)
+        listener.receive_event('Analysis.%s' % self.__class__.__name__,
+            'Statistical data report', res, event_data, log_atom, self)
 
 
   def get_time_trigger_class(self):

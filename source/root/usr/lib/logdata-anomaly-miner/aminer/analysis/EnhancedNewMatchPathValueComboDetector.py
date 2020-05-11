@@ -7,8 +7,8 @@ import os
 
 from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
 from aminer.util import PersistencyUtil
-from datetime import datetime
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
+
 
 class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
   """This class creates events when a new value combination for
@@ -55,7 +55,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     """Load the persistency data from storage."""
     self.known_values_dict = {}
     persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
-    if persistence_data != None:
+    if persistence_data is not None:
 # Dictionary and tuples were stored as list of lists. Transform
 # the first lists to tuples to allow hash operation needed by set.
       for value_tuple, extra_data in persistence_data:
@@ -69,8 +69,11 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     against the list of known combinations, no matter if the checked
     values were new or not."""
     match_dict = log_atom.parser_match.get_match_dictionary()
+    timestamp = log_atom.get_timestamp()
+    if timestamp is None:
+      timestamp = time.time()
+    timestamp = round(timestamp, 3)
     match_value_list = []
-    event_data = dict()
     for target_path in self.target_path_list:
       match_element = match_dict.get(target_path, None)
       if match_element is None:
@@ -80,22 +83,15 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
       else:
         match_value_list.append(match_element.match_object)
 
-    if self.tuple_transformation_function != None:
+    if self.tuple_transformation_function is not None:
       match_value_list = self.tuple_transformation_function(match_value_list)
     match_value_tuple = tuple(match_value_list)
 
-    current_timestamp = log_atom.get_timestamp()
-    if current_timestamp is None:
-      current_timestamp = datetime.fromtimestamp(time.time()).strftime(self.date_string)
-    if not isinstance(current_timestamp, datetime) and not isinstance(current_timestamp, str):
-      current_timestamp = datetime.fromtimestamp(current_timestamp).strftime(self.date_string)
-    if isinstance(current_timestamp, datetime):
-      current_timestamp = current_timestamp.strftime(self.date_string)
     if self.known_values_dict.get(match_value_tuple, None) is None:
-      self.known_values_dict[match_value_tuple] = [current_timestamp, current_timestamp, 1]
+      self.known_values_dict[match_value_tuple] = [timestamp, timestamp, 1]
     else:
       extra_data = self.known_values_dict.get(match_value_tuple, None)
-      extra_data[1] = current_timestamp
+      extra_data[1] = timestamp
       extra_data[2] += 1
 
     affected_log_atom_values = []
@@ -112,19 +108,26 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     l['NumberOfOccurences'] = values[2]
     affected_log_atom_values.append(l)
 
-    analysis_component = dict()
-    analysis_component['AffectedLogAtomValues'] = affected_log_atom_values
-    event_data['AnalysisComponent'] = analysis_component
+    analysis_component = {'AffectedLogAtomPaths': self.target_path_list,
+      'AffectedLogAtomValues': affected_log_atom_values}
+    event_data = {'AnalysisComponent': analysis_component}
     if (self.auto_include_flag and self.known_values_dict.get(match_value_tuple, None)[2] is 1) or not self.auto_include_flag:
       for listener in self.anomaly_event_handlers:
         original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
         if original_log_line_prefix is None:
           original_log_line_prefix = ''
         if self.output_log_line:
-          sorted_log_lines = [str(self.known_values_dict) + os.linesep +
-                            original_log_line_prefix + repr(log_atom.raw_data)]
+          match_paths_values = {}
+          for match_path, match_element in match_dict.items():
+            match_value = match_element.match_object
+            if isinstance(match_value, bytes):
+              match_value = match_value.decode()
+            match_paths_values[match_path] = match_value
+          analysis_component['ParsedLogAtom'] = match_paths_values
+          sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + str(self.known_values_dict)
+                              + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
         else:
-          sorted_log_lines = [str(self.known_values_dict)]
+          sorted_log_lines = [str(self.known_values_dict) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
         listener.receive_event(
           'Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected',
           sorted_log_lines, event_data, log_atom, self)
@@ -151,11 +154,10 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     using given whitelistingData was not possible."""
     if event_type != 'Analysis.%s' % self.__class__.__name__:
       raise Exception('Event not from this source')
-    if whitelisting_data != None:
+    if whitelisting_data is not None:
       raise Exception('Whitelisting data not understood by this detector')
-    current_timestamp = datetime.fromtimestamp(event_data[0].get_timestamp()).strftime(self.date_string)
+    current_timestamp = event_data[0].get_timestamp()
     self.known_values_dict[event_data[1]] = [
         current_timestamp, current_timestamp, 1]
     return 'Whitelisted path(es) %s with %s in %s' % (
         ', '.join(self.target_path_list), event_data[1], sorted_log_lines[0])
-

@@ -5,16 +5,28 @@ dist: bionic
 
 before_install:
   - sudo apt-get update -y
-  - sudo apt-get install -y exim4 procps cpulimit ansible mailutils
+  - sudo apt-get install -y exim4 procps cpulimit ansible mailutils python3-pip
   - git clone https://github.com/ait-aecid/aminer-ansible.git roles/aminer
-  - git clone https://github.com/ait-aecid/aecid-testsuite.git 
-  - ln -s $PWD/source/root/usr/lib/logdata-anomaly-miner/aminer aecid-testsuite/aminer
+  - ln -s $PWD/source/root/usr/lib/logdata-anomaly-miner/aminer $PWD/aecid-testsuite/aminer
   - sed -e "s+{{SOURCEDIR}}+$PWD+g" .playbook.yml > playbook.yml
 
 install:
-  - pip3 install coverage
-
-script:
+  - sudo -u root pip3 install coverage
   - sudo ansible-playbook playbook.yml
   - cd aecid-testsuite
-  - sudo python3 -m unittest discover -s unit -p '*Test.py' > /dev/null
+  - sudo chmod +x runUnittests.sh
+  - sudo chmod +x runAMinerDemo.sh
+  - sudo chmod +x runAMinerIntegrationTest.sh
+  - sudo chmod +x runCoverageTests.sh
+
+script:
+  - ./runUnittests.sh
+  - ./runAMinerDemo.sh demo/AMiner/demo-config.py
+  - ./runAMinerDemo.sh demo/AMiner/jsonConverterHandler-demo-config.py
+  - ./runAMinerIntegrationTest.sh aminerIntegrationTest.sh config.py
+  - ./runAMinerIntegrationTest.sh aminerIntegrationTest2.sh config21.py config22.py
+  - ./runCoverageTests.sh
+
+after_script:
+  - cd ..
+  - rm $PWD/aecid-testsuite/aminer
