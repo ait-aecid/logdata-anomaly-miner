@@ -57,7 +57,7 @@ class NewMatchPathValueComboDetector(
     else:
 # Set and tuples were stored as list of lists. Transform the inner
 # lists to tuples to allow hash operation needed by set.
-      self.known_values_set = set([tuple(record) for record in persistence_data])
+      self.known_values_set = {tuple(record) for record in persistence_data}
 
 
   def receive_atom(self, log_atom):
@@ -68,7 +68,6 @@ class NewMatchPathValueComboDetector(
     values were new or not."""
     match_dict = log_atom.parser_match.get_match_dictionary()
     match_value_list = []
-    event_data = dict()
     for target_path in self.target_path_list:
       match_element = match_dict.get(target_path, None)
       if match_element is None:
@@ -90,10 +89,9 @@ class NewMatchPathValueComboDetector(
         if self.next_persist_time is None:
           self.next_persist_time = time.time() + 600
 
-      analysis_component = dict()
-      analysis_component['AffectedLogAtomPaths'] = self.target_path_list
-      analysis_component['AffectedLogAtomValues'] = affected_log_atom_values
-      event_data['AnalysisComponent'] = analysis_component
+      analysis_component = {'AffectedLogAtomPaths': self.target_path_list,
+        'AffectedLogAtomValues': affected_log_atom_values}
+      event_data = {'AnalysisComponent': analysis_component}
       original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
       if original_log_line_prefix is None:
         original_log_line_prefix = ''
@@ -150,7 +148,7 @@ class NewMatchPathValueComboDetector(
     using given whitelistingData was not possible."""
     if event_type != 'Analysis.%s' % self.__class__.__name__:
       raise Exception('Event not from this source')
-    if whitelisting_data != None:
+    if whitelisting_data is not None:
       raise Exception('Whitelisting data not understood by this detector')
     self.known_values_set.add(event_data[1])
     return 'Whitelisted path(es) %s with %s in %s' % (

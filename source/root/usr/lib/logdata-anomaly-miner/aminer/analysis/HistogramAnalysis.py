@@ -56,13 +56,14 @@ binomial_test = None
 try:
   from scipy import stats
   binomial_test = stats.binom_test
+# skipcq: FLK-E722
 except:
   pass
 
 date_string = "%Y-%m-%d %H:%M:%S"
 
 
-class BinDefinition(object):
+class BinDefinition:
   not_implemented = 'Not implemented'
   """This class defines the bins of the histogram."""
   def __init__(self):
@@ -88,9 +89,11 @@ class BinDefinition(object):
     at index 1."""
     raise Exception(self.not_implemented)
 
+  # skipcq: PYL-W0613
   def get_bin_p_value(self, bin_pos, total_values, bin_values):
     """Calculate a p-Value, how likely the observed number of
-    elements in this bin is.
+    elements in this bin is. This method is used as an interface
+    method, but it also returns a default value.
     @return the value or None when not applicable."""
     return None
 
@@ -117,7 +120,7 @@ class LinearNumericBinDefinition(BinDefinition):
     outlier bins if any."""
 # Cache the names here so that multiple histograms using same
 # BinDefinition do not use separate copies of the strings.
-    if self.bin_names != None:
+    if self.bin_names is not None:
       return self.bin_names
     self.bin_names = []
     if self.outlier_bins_flag:
@@ -283,7 +286,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
     self.persistenceFileName = AMinerConfig.build_persistence_file_name(
         aminer_config, 'HistogramAnalysis', persistence_id)
     persistence_data = PersistencyUtil.load_json(self.persistenceFileName)
-    if persistence_data != None:
+    if persistence_data is not None:
       raise Exception('No data reading, def merge yet')
 
 
@@ -337,7 +340,6 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
   def send_report(self, log_atom, timestamp):
     """Sends a report to the event handlers."""
-    event_data = dict()
     report_str = 'Histogram report '
     if self.last_report_time is not None:
       report_str += 'from %s ' % datetime.fromtimestamp(self.last_report_time).strftime(date_string)
@@ -358,17 +360,13 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
       d['BinnedElements'] = data_item.binned_elements
       d['HasOutlierBinsFlag'] = data_item.has_outlier_bins_flag
       d['Bins'] = bins
-      analysis_component = dict()
-      analysis_component['AffectedLogAtomPathes'] = affected_log_atom_pathes
+      analysis_component = {'AffectedLogAtomPathes': affected_log_atom_pathes}
       if self.output_log_line:
-        bin_definition = {}
-        bin_definition['Type'] = str(data_item.bin_definition.__class__.__name__)
-        bin_definition['LowerLimit'] = data_item.bin_definition.lower_limit
-        bin_definition['BinSize'] = data_item.bin_definition.bin_size
-        bin_definition['BinCount'] = data_item.bin_definition.bin_count
-        bin_definition['OutlierBinsFlag'] = data_item.bin_definition.outlier_bins_flag
-        bin_definition['BinNames'] = data_item.bin_definition.bin_names
-        bin_definition['ExpectedBinRatio'] = data_item.bin_definition.expected_bin_ratio
+        bin_definition = {'Type': str(data_item.bin_definition.__class__.__name__),
+          'LowerLimit': data_item.bin_definition.lower_limit, 'BinSize': data_item.bin_definition.bin_size,
+          'BinCount': data_item.bin_definition.bin_count, 'OutlierBinsFlag': data_item.bin_definition.outlier_bins_flag,
+          'BinNames': data_item.bin_definition.bin_names,
+          'ExpectedBinRatio': data_item.bin_definition.expected_bin_ratio}
         if isinstance(data_item.bin_definition, ModuloTimeBinDefinition):
           bin_definition['ModuloValue'] = data_item.bin_definition.modulo_value
           bin_definition['TimeUnit'] = data_item.bin_definition.time_unit
@@ -388,7 +386,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
     analysis_component['HistogramData'] = h
     analysis_component['ReportInterval'] = self.report_interval
     analysis_component['ResetAfterReportFlag'] = self.reset_after_report_flag
-    event_data['AnalysisComponent'] = analysis_component
+    event_data = {'AnalysisComponent': analysis_component}
     if len(res) > 0:
       res[0]  = report_str
       for listener in self.report_event_handlers:
@@ -460,6 +458,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
 # to the given histogram are still in all_path_set. If not, a split
 # within the mapping is needed.
       clone_set = all_path_set.copy()
+      mapped_path = None
       for mapped_path in histogram_mapping[0]:
         try:
           clone_set.remove(mapped_path)
@@ -539,14 +538,12 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
 
   def send_report(self, log_atom, timestamp):
     """Send report to event handlers."""
-    event_data = dict()
     report_str = 'Path histogram report '
-    if self.last_report_time != None:
+    if self.last_report_time is not None:
       report_str += 'from %s ' % datetime.fromtimestamp(self.last_report_time).strftime(date_string)
     report_str += 'till %s' % datetime.fromtimestamp(timestamp).strftime(date_string)
     all_path_set = set(self.histogram_data.keys())
-    analysis_component = dict()
-    analysis_component['AffectedLogAtomPathes'] = list(all_path_set)
+    analysis_component = {'AffectedLogAtomPathes': list(all_path_set)}
     res = []
     h = []
     while all_path_set:
@@ -573,14 +570,11 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
             match_value = match_value.decode()
           match_paths_values[match_path] = match_value
         analysis_component['ParsedLogAtom'] = match_paths_values
-        bin_definition = {}
-        bin_definition['Type'] = str(data_item.bin_definition.__class__.__name__)
-        bin_definition['LowerLimit'] = data_item.bin_definition.lower_limit
-        bin_definition['BinSize'] = data_item.bin_definition.bin_size
-        bin_definition['BinCount'] = data_item.bin_definition.bin_count
-        bin_definition['OutlierBinsFlag'] = data_item.bin_definition.outlier_bins_flag
-        bin_definition['BinNames'] = data_item.bin_definition.bin_names
-        bin_definition['ExpectedBinRatio'] = data_item.bin_definition.expected_bin_ratio
+        bin_definition = {'Type': str(data_item.bin_definition.__class__.__name__),
+          'LowerLimit': data_item.bin_definition.lower_limit, 'BinSize': data_item.bin_definition.bin_size,
+          'BinCount': data_item.bin_definition.bin_count, 'OutlierBinsFlag': data_item.bin_definition.outlier_bins_flag,
+          'BinNames': data_item.bin_definition.bin_names,
+          'ExpectedBinRatio': data_item.bin_definition.expected_bin_ratio}
         if isinstance(data_item.bin_definition, ModuloTimeBinDefinition):
           bin_definition['ModuloValue'] = data_item.bin_definition.modulo_value
           bin_definition['TimeUnit'] = data_item.bin_definition.time_unit
@@ -602,7 +596,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
     analysis_component['HistogramData'] = h
     analysis_component['ReportInterval'] = self.report_interval
     analysis_component['ResetAfterReportFlag'] = self.reset_after_report_flag
-    event_data['AnalysisComponent'] = analysis_component
+    event_data = {'AnalysisComponent': analysis_component}
 
     if self.reset_after_report_flag:
         histogram_mapping[1].reset()

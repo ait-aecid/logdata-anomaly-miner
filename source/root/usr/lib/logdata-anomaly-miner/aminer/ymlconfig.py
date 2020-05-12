@@ -67,6 +67,8 @@ def build_analysis_pipeline(analysis_context):
 
   parserModelDict = dict()
   start = None
+  wscount = 0
+  whitespace_str = b' '
 
   global yamldata
   for item in yamldata['Parser']:
@@ -75,10 +77,16 @@ def build_analysis_pipeline(analysis_context):
           continue
       if item['type'].endswith('ModelElement') and item['id'] != 'START':
           func =  getattr(__import__("aminer.parsing", fromlist=[item['type']]),item['type'])
-          if isinstance(item['args'],list):
-            parserModelDict[item['id']] = func(item['name'],item['args'])
-          else:
-            parserModelDict[item['id']] = func(item['name'],item['args'].encode())
+          try:
+              if isinstance(item['args'],list):
+                # encode string to bytearray
+                for j in range(len(item['args'])):
+                    item['args'][j] = item['args'][j].encode()
+                parserModelDict[item['id']] = func(item['name'],item['args'])
+              else:
+                parserModelDict[item['id']] = func(item['name'],item['args'].encode())
+          except:
+              parserModelDict[item['id']] = func(item['name'])
       else:
           func =  getattr(__import__(item['type']),'get_model')
           parserModelDict[item['id']] = func()
@@ -90,8 +98,14 @@ def build_analysis_pipeline(analysis_context):
     func =  getattr(__import__(start['type']),'get_model')
   try:
     if isinstance(start['args'],list):
-        for i in parserModelDict:
-            argslist.append(parserModelDict[i])
+        for i in start['args']:
+            if i == 'WHITESPACE':
+                from aminer.parsing import FixedDataModelElement
+                sp = 'sp%d' % wscount
+                argslist.append(FixedDataModelElement(sp, whitespace_str))
+                wscount += 1
+            else:
+                argslist.append(parserModelDict[i])
         parsingModel = func(start['name'],argslist)
     else:
         parsingModel = func(start['name'],[parserModelDict[start['args']]])

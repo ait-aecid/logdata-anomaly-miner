@@ -13,49 +13,48 @@ class FirstDataModelElementTest(unittest.TestCase):
     This test case proves the intended functionality of single Matches
     '''
     def test1single_match(self):
-      self.match_context = MatchContext(self.string)
-      self.decimal_integer_value_me = DecimalIntegerValueModelElement(None,
+      match_context = MatchContext(self.string)
+      decimal_integer_value_me = DecimalIntegerValueModelElement(None,
           DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
-      self.fixed_dme = FixedDataModelElement('s0', b'pid=')
-      self.first_match_model_element = FirstMatchModelElement('first', [self.decimal_integer_value_me, self.fixed_dme])
-      self.assertEqual(self.first_match_model_element.get_match_element('first', self.match_context).get_match_string(),
+      fixed_dme = FixedDataModelElement('s0', b'pid=')
+      first_match_model_element = FirstMatchModelElement('first', [decimal_integer_value_me, fixed_dme])
+      self.assertEqual(first_match_model_element.get_match_element('first', match_context).get_match_string(),
         b'25537', self.wrong_match_element)
       
-      self.match_context = MatchContext(b'pid=')
-      self.first_match_model_element = FirstMatchModelElement('first', [self.decimal_integer_value_me, self.fixed_dme])
-      self.assertEqual(self.first_match_model_element.get_match_element('first', self.match_context).get_match_string(),
+      match_context = MatchContext(b'pid=')
+      first_match_model_element = FirstMatchModelElement('first', [decimal_integer_value_me, fixed_dme])
+      self.assertEqual(first_match_model_element.get_match_element('first', match_context).get_match_string(),
         b'pid=', self.wrong_match_element)
     
     def test2no_match(self):
-      self.match_context = MatchContext(b'pid = 25537 uid=2')
-      self.decimal_integer_value_me = DecimalIntegerValueModelElement(None,
+      match_context = MatchContext(b'pid = 25537 uid=2')
+      decimal_integer_value_me = DecimalIntegerValueModelElement(None,
           DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
-      self.fixed_dme = FixedDataModelElement('s0', b'pid=')
-      self.first_match_model_element = FirstMatchModelElement('first', [self.decimal_integer_value_me, self.fixed_dme])
-      self.assertEqual(self.first_match_model_element.get_match_element('first', self.match_context),
+      fixed_dme = FixedDataModelElement('s0', b'pid=')
+      first_match_model_element = FirstMatchModelElement('first', [decimal_integer_value_me, fixed_dme])
+      self.assertEqual(first_match_model_element.get_match_element('first', match_context),
         None, 'No MatchElement was expected')
     
     def test3double_match(self):
-      self.match_context = MatchContext(self.string)
-      self.decimal_integer_value_me = DecimalIntegerValueModelElement(None,
+      match_context = MatchContext(self.string)
+      decimal_integer_value_me = DecimalIntegerValueModelElement(None,
           DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
-      self.fixed_dme = FixedDataModelElement('s0', self.string)
-      self.first_match_model_element = FirstMatchModelElement('first', [self.decimal_integer_value_me, self.fixed_dme])
-      self.assertEqual(self.first_match_model_element.get_match_element('first', self.match_context).get_match_string(),
+      fixed_dme = FixedDataModelElement('s0', self.string)
+      first_match_model_element = FirstMatchModelElement('first', [decimal_integer_value_me, fixed_dme])
+      self.assertEqual(first_match_model_element.get_match_element('first', match_context).get_match_string(),
         b'25537', self.wrong_match_element)
       
-      self.match_context = MatchContext(self.string)
-      self.first_match_model_element = FirstMatchModelElement('first', [self.fixed_dme, self.decimal_integer_value_me])
-      self.assertEqual(self.first_match_model_element.get_match_element('first', self.match_context).get_match_string(),
+      match_context = MatchContext(self.string)
+      first_match_model_element = FirstMatchModelElement('first', [fixed_dme, decimal_integer_value_me])
+      self.assertEqual(first_match_model_element.get_match_element('first', match_context).get_match_string(),
         self.string, self.wrong_match_element)
     
     def test4child_elements(self):
-      self.match_context = MatchContext(self.string)
-      self.decimal_integer_value_me = DecimalIntegerValueModelElement(None,
+      decimal_integer_value_me = DecimalIntegerValueModelElement(None,
           DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
-      self.fixed_dme = FixedDataModelElement('s0', self.string)
-      self.first_match_model_element = FirstMatchModelElement('first', [self.decimal_integer_value_me, self.fixed_dme])
-      self.assertEqual(self.first_match_model_element.get_child_elements(), [self.decimal_integer_value_me, self.fixed_dme], 'ChildElements not as expected')
+      fixed_dme = FixedDataModelElement('s0', self.string)
+      first_match_model_element = FirstMatchModelElement('first', [decimal_integer_value_me, fixed_dme])
+      self.assertEqual(first_match_model_element.get_child_elements(), [decimal_integer_value_me, fixed_dme], 'ChildElements not as expected')
       self.assertRaises(Exception, FirstMatchModelElement('first', []))
 
 

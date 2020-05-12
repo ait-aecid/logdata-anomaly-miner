@@ -5,10 +5,11 @@ from aminer.parsing import DecimalIntegerValueModelElement
 from aminer.parsing import FixedDataModelElement
 from aminer.parsing import SequenceModelElement
 from aminer.parsing import VariableByteDataModelElement
-from aminer.parsing import AnyByteDataModelElement
 from aminer.parsing import FixedWordlistDataModelElement
 
-def get_model(time_model=None):
+
+# skipcq: PYL-W0613
+def get_model(new_time_model=None):
 
   new_time_model = DateTimeModelElement('time', b'[%d/%b/%Y:%H:%M:%S +0000]')
   host_name_model = VariableByteDataModelElement('host', b'-.01234567890abcdefghijklmnopqrstuvwxyz:')

@@ -52,9 +52,9 @@ via syslog after any standard logging preamble, e.g. from syslog."""
 # Must be upper case hex encoded:
         next_value = -1
         for d_byte in data:
-          if (d_byte >= 0x30) and (d_byte <= 0x39):
+          if 0x30 <= d_byte <= 0x39:
             d_byte -= 0x30
-          elif (d_byte >= 0x41) and (d_byte <= 0x46):
+          elif 0x41 <= d_byte <= 0x46:
             d_byte -= 0x37
           else:
             break

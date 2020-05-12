@@ -12,7 +12,6 @@ from aminer.input import AtomHandlerInterface
 from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
-import sys
 
 
 class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
@@ -137,10 +136,8 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
                 if self.next_persist_time is None:
                     self.next_persist_time = time.time() + 600
 
-            event_data = dict()
-            analysis_component = dict()
-            analysis_component['AffectedLogAtomValues'] = list(id_dict_entry.values())
-            event_data['AnalysisComponent'] = analysis_component
+            analysis_component = {'AffectedLogAtomValues': list(id_dict_entry.values())}
+            event_data = {'AnalysisComponent': analysis_component}
             original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
             if original_log_line_prefix is None:
                 original_log_line_prefix = ''
@@ -183,7 +180,7 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
         using given whitelistingData was not possible."""
         if event_type != 'Analysis.%s' % self.__class__.__name__:
             raise Exception('Event not from this source')
-        if whitelisting_data != None:
+        if whitelisting_data is not None:
             raise Exception('Whitelisting data not understood by this detector')
         if event_data[1] not in self.known_values:
             self.known_values.append(event_data[1])

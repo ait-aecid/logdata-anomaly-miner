@@ -30,13 +30,12 @@ class WhitelistViolationDetector(AtomHandlerInterface):
     match.
     @param log_atom atom with parsed data to check
     @return True when logAtom is whitelisted, False otherwise."""
-    event_data = dict()
+    event_data = {}
     for rule in self.whitelist_rules:
       if rule.match(log_atom):
         return True
-    analysis_component = dict()
-    analysis_component['AffectedLogAtomPathes'] = list(log_atom.parser_match.get_match_dictionary())
-    analysis_component['AffectedLogAtomValues'] = [log_atom.raw_data.decode()]
+    analysis_component = {'AffectedLogAtomPathes': list(log_atom.parser_match.get_match_dictionary()),
+      'AffectedLogAtomValues': [log_atom.raw_data.decode()]}
     original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
     if original_log_line_prefix is None:
       original_log_line_prefix = ''
@@ -46,11 +45,11 @@ class WhitelistViolationDetector(AtomHandlerInterface):
         match_value = match_element.match_object
         if isinstance(match_value, tuple):
           l = []
-          for i, val in enumerate(match_value):
-            if isinstance(match_value[i], datetime):
-              l.append(datetime.timestamp(match_value[i]))
+          for val in match_value:
+            if isinstance(val, datetime):
+              l.append(datetime.timestamp(val))
             else:
-              l.append(match_value[i])
+              l.append(val)
           match_value = l
         if isinstance(match_value, bytes):
           match_value = match_value.decode()

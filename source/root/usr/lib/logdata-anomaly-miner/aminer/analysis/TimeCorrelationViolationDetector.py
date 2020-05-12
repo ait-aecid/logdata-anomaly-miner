@@ -9,7 +9,7 @@ from aminer.util import LogarithmicBackoffHistory
 from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.analysis import Rules
-from datetime import datetime
+
 
 class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
   """This class creates events when one of the given time correlation
@@ -81,7 +81,6 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
 # for a long time, that they hold information about correlation
 # impossible to fulfil. Take the newest timestamp of any rule
 # and use it for checking.
-    event_data = dict()
     newest_timestamp = 0.0
     for rule in self.event_correlation_ruleset:
       newest_timestamp = max(newest_timestamp, rule.last_timestamp_seen)
@@ -107,11 +106,8 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
         h.append(repr(item))
       history['History'] = h
       r['correlation_history'] = history
-      analysis_component = dict()
-      analysis_component['Rule'] = r
-      analysis_component['CheckResult'] = check_result
-      analysis_component['NewestTimestamp'] = newest_timestamp
-      event_data['AnalysisComponent'] = analysis_component
+      analysis_component = {'Rule': r, 'CheckResult': check_result, 'NewestTimestamp': newest_timestamp}
+      event_data = {'AnalysisComponent': analysis_component}
       for listener in self.anomaly_event_handlers:
         listener.receive_event('Analysis.%s' % self.__class__.__name__, \
             'Correlation rule "%s" violated' % rule.rule_id, [check_result[0]], \
@@ -276,7 +272,7 @@ class CorrelationRule:
         deleted = True
         check_range = check_range - 1
         b_pos = b_pos + 1
-      if deleted == False:
+      if deleted is False:
         a_pos = a_pos + 1
 # After checking all aEvents before a_pos were cleared, otherwise
 # they violate a correlation rule.

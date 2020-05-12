@@ -4,6 +4,7 @@ streams."""
 import time
 from aminer.input import AtomHandlerInterface
 
+
 class SimpleMultisourceAtomSync(AtomHandlerInterface):
   """This class synchronizes different atom streams by forwarding
   the atoms only from the source delivering the oldest ones. This

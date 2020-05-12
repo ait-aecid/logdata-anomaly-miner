@@ -83,7 +83,7 @@ def buildAnalysisPipeline(analysisContext):
   them."""
 
 # Build the parsing model:
-  from aminer.parsing import FirstMatchModelElement, SequenceModelElement, DecimalFloatValueModelElement, FixedDataModelElement, DelimitedDataModelElement, AnyByteDataModelElement, FixedWordlistDataModelElement, OptionalMatchModelElement, DecimalIntegerValueModelElement, DateTimeModelElement, IpAddressDataModelElement, Base64StringModelElement, ElementValueBranchModelElement, HexStringModelElement, MultiLocaleDateTimeModelElement, OptionalMatchModelElement, RepeatedElementDataModelElement, VariableByteDataModelElement, WhiteSpaceLimitedDataModelElement
+  from aminer.parsing import FirstMatchModelElement, SequenceModelElement, DecimalFloatValueModelElement, FixedDataModelElement, DelimitedDataModelElement, AnyByteDataModelElement, FixedWordlistDataModelElement, DecimalIntegerValueModelElement, DateTimeModelElement, IpAddressDataModelElement, Base64StringModelElement, ElementValueBranchModelElement, HexStringModelElement, MultiLocaleDateTimeModelElement, OptionalMatchModelElement, RepeatedElementDataModelElement, VariableByteDataModelElement, WhiteSpaceLimitedDataModelElement
 
   serviceChildrenDiskReport = []
 
@@ -196,7 +196,7 @@ def buildAnalysisPipeline(analysisContext):
 
   from aminer.analysis import Rules
   from aminer.analysis import WhitelistViolationDetector
-  violationAction=Rules.EventGenerationMatchAction('Analysis.GenericViolation',
+  _violationAction=Rules.EventGenerationMatchAction('Analysis.GenericViolation',
       'Violation detected', anomalyEventHandlers)
   whitelistRules=[]
   
@@ -215,24 +215,24 @@ def buildAnalysisPipeline(analysisContext):
 
   from aminer.analysis import NewMatchPathDetector
   newMatchPathDetector = NewMatchPathDetector(
-      analysisContext.aminerConfig, anomalyEventHandlers, autoIncludeFlag=True)
+      analysisContext.aminerConfig, anomalyEventHandlers, auto_include_flag=True)
   analysisContext.registerComponent(newMatchPathDetector, componentName="NewMatchPath")
   atomFilter.addHandler(newMatchPathDetector)
 
-  def tupleTransformationFunction(matchValueList):
+  def tuple_transformation_function(matchValueList):
     extraData = enhancedNewMatchPathValueComboDetector.knownValuesDict.get(tuple(matchValueList),None)
     if extraData is None:
         return matchValueList
     mod = 10000
     if (extraData[2]+1) % mod == 0:
-	    enhancedNewMatchPathValueComboDetector.autoIncludeFlag=False
+	    enhancedNewMatchPathValueComboDetector.auto_include_flag=False
     else:
-        enhancedNewMatchPathValueComboDetector.autoIncludeFlag=True
+        enhancedNewMatchPathValueComboDetector.auto_include_flag=True
     return matchValueList
 
   from aminer.analysis.EnhancedNewMatchPathValueComboDetector import EnhancedNewMatchPathValueComboDetector
   enhancedNewMatchPathValueComboDetector = EnhancedNewMatchPathValueComboDetector(analysisContext.aminerConfig, 
-		['/model/Daily Cron/UName', '/model/Daily Cron/Job Number'], anomalyEventHandlers, autoIncludeFlag=True, tupleTransformationFunction=tupleTransformationFunction)
+		['/model/Daily Cron/UName', '/model/Daily Cron/Job Number'], anomalyEventHandlers, auto_include_flag=True, tuple_transformation_function=tuple_transformation_function)
   analysisContext.registerComponent(enhancedNewMatchPathValueComboDetector, componentName = "EnhancedNewValueCombo")
   atomFilter.addHandler(enhancedNewMatchPathValueComboDetector)
 
@@ -260,28 +260,28 @@ def buildAnalysisPipeline(analysisContext):
   atomFilter.addHandler(matchValueStreamWriter)
 
   from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
-  newMatchPathValueComboDetector = NewMatchPathValueComboDetector(analysisContext.aminerConfig, ['/model/IP Addresses/Username', '/model/IP Addresses/IP'], anomalyEventHandlers, autoIncludeFlag=True)
+  newMatchPathValueComboDetector = NewMatchPathValueComboDetector(analysisContext.aminerConfig, ['/model/IP Addresses/Username', '/model/IP Addresses/IP'], anomalyEventHandlers, auto_include_flag=True)
   analysisContext.registerComponent(newMatchPathValueComboDetector, componentName="NewMatchPathValueCombo")
   atomFilter.addHandler(newMatchPathValueComboDetector)
 
   from aminer.analysis.NewMatchPathValueDetector import NewMatchPathValueDetector
-  newMatchPathValueDetector = NewMatchPathValueDetector(analysisContext.aminerConfig, ['/model/Daily Cron/Job Number', '/model/IP Addresses/Username'], anomalyEventHandlers, autoIncludeFlag=True)
+  newMatchPathValueDetector = NewMatchPathValueDetector(analysisContext.aminerConfig, ['/model/Daily Cron/Job Number', '/model/IP Addresses/Username'], anomalyEventHandlers, auto_include_flag=True)
   analysisContext.registerComponent(newMatchPathValueDetector, componentName="NewMatchPathValue")
   atomFilter.addHandler(newMatchPathValueDetector)
 
   from aminer.analysis.MissingMatchPathValueDetector import MissingMatchPathValueDetector
   missingMatchPathValueDetector = MissingMatchPathValueDetector(
-	  analysisContext.aminerConfig, '/model/Disk Report/Space', anomalyEventHandlers, autoIncludeFlag=True, defaultInterval=2, realertInterval=5)
+	  analysisContext.aminerConfig, '/model/Disk Report/Space', anomalyEventHandlers, auto_include_flag=True, default_interval=2, realert_interval=5)
   analysisContext.registerComponent(missingMatchPathValueDetector, componentName="MissingMatch")
   atomFilter.addHandler(missingMatchPathValueDetector)
 
   from aminer.analysis.TimeCorrelationDetector import TimeCorrelationDetector
-  timeCorrelationDetector = TimeCorrelationDetector(analysisContext.aminerConfig, 2, 1, 0, anomalyEventHandlers, recordCountBeforeEvent=70000)
+  timeCorrelationDetector = TimeCorrelationDetector(analysisContext.aminerConfig, 2, 1, 0, anomalyEventHandlers, record_count_before_event=70000)
   analysisContext.registerComponent(timeCorrelationDetector, componentName="TimeCorrelationDetector")
   atomFilter.addHandler(timeCorrelationDetector)
 
   from aminer.analysis.TimeCorrelationViolationDetector import TimeCorrelationViolationDetector, CorrelationRule, EventClassSelector
-  cronJobAnnouncement = CorrelationRule('Cron Job Announcement', 5, 6, maxArtefactsAForSingleB=1, artefactMatchParameters=[('/model/Cron Announcement/Job Number','/model/Cron Execution/Job Number')])
+  cronJobAnnouncement = CorrelationRule('Cron Job Announcement', 5, 6, max_artefacts_a_for_single_b=1, artefact_match_parameters=[('/model/Cron Announcement/Job Number','/model/Cron Execution/Job Number')])
   aClassSelector=EventClassSelector('Announcement', [cronJobAnnouncement], None)
   bClassSelector=EventClassSelector('Execution', None, [cronJobAnnouncement])
   rules = []

@@ -2,6 +2,7 @@
 
 from aminer.parsing.MatchElement import MatchElement
 
+
 class MatchContext(object):
   """This class allows storage of data relevant during the matching
   process, e.g. the root node and the remaining unmatched data.

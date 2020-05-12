@@ -118,7 +118,7 @@ def save_config(analysis_context, new_file):
       break
     i = i - 1
 
-  for i in range(0, len(logs)):
+  for i in enumerate(logs):
     if "REMOTECONTROL changeAttributeOfRegisteredAnalysisComponent" in logs[i]:
       logs[i] = logs[i][:logs[i].find('#')]
       arr = logs[i].split(',',3)
@@ -159,14 +159,14 @@ def save_config(analysis_context, new_file):
     if "REMOTECONTROL addHandlerToAtomFilterAndRegisterAnalysisComponent" in logs[i]:
       parameters = logs[i].split(",",2)
 
-      #find the name of the filter variable in the old config.
+      #find the name of the filter_config variable in the old config.
       pos = old.find(parameters[1].strip())
       new_pos = pos
       while old[new_pos] != '\n':
         new_pos = new_pos - 1
-      filter = old[new_pos:pos]
-      pos = filter.find(register_component) + len(register_component)
-      filter = filter[pos:filter.find(',',pos)].strip()
+      filter_config = old[new_pos:pos]
+      pos = filter_config.find(register_component) + len(register_component)
+      filter_config = filter_config[pos:filter_config.find(',', pos)].strip()
 
       new_parameters = parameters[2].split(")")
       component_name = new_parameters[1].strip(', ')
@@ -174,8 +174,8 @@ def save_config(analysis_context, new_file):
       var = "analysisComponent%d"%VAR_ID
       VAR_ID = VAR_ID + 1
       old = old + "\n  %s = %s)"%(var, new_parameters[0].strip())
-      old = old + "\n  %s.registerComponent(%s, componentName=%s)"%(filter, var, component_name)
-      old = old + "\n  %s.addHandler(%s)\n"%(filter, var)
+      old = old + "\n  %s.registerComponent(%s, componentName=%s)"%(filter_config, var, component_name)
+      old = old + "\n  %s.addHandler(%s)\n"%(filter_config, var)
 
   #remove double lines
   old = old.replace('\n\n\n', '\n\n')

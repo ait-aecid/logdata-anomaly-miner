@@ -7,7 +7,6 @@ from aminer.parsing.MatchContext import MatchContext
 from aminer.input.LogAtom import LogAtom
 from aminer.parsing.ParserMatch import ParserMatch
 import time
-from datetime import datetime
 from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
 from unit.TestBase import TestBase
 

@@ -18,8 +18,8 @@ class DateTimeModelElement(ModelElementInterface):
   in libc strptime, no support to determine the length of the
   parsed string."""
 
-  def __init__(
-      self, path_id, date_format, time_zone=None, text_locale=None,
+  # skipcq: PYL-W0613
+  def __init__(self, path_id, date_format, time_zone=None, text_locale=None,
       start_year=None, max_time_jump_seconds=86400):
     """Create a DateTimeModelElement to parse dates using a custom,
     timezone and locale-aware implementation similar to strptime.
@@ -71,7 +71,7 @@ class DateTimeModelElement(ModelElementInterface):
 
   def scan_date_format(self, date_format):
     """Scan the date format."""
-    if self.date_format_parts != None:
+    if self.date_format_parts is not None:
       raise Exception('Cannot rescan date format after initialization')
     date_format_parts = []
     date_format_type_set = set()
@@ -200,8 +200,8 @@ class DateTimeModelElement(ModelElementInterface):
 # Now combine the values and build the final value.
     parsed_date_time = None
     total_seconds = result[7]
-    if total_seconds != None:
-      if result[6] != None:
+    if total_seconds is not None:
+      if result[6] is not None:
         total_seconds += result[6]
 # For epoch second formats, the datetime value usually is not
 # important. So stay with parsed_date_time to none.
@@ -209,7 +209,7 @@ class DateTimeModelElement(ModelElementInterface):
       if not self.format_has_year_flag:
         result[0] = self.start_year
       microseconds = 0
-      if result[6] != None:
+      if result[6] is not None:
         microseconds = int(result[6]*1000000)
       try:
         parsed_date_time = datetime.datetime(
@@ -272,7 +272,7 @@ class DateTimeModelElement(ModelElementInterface):
 
 # We discarded the parsed_date_time microseconds beforehand, use
 # the full float value here instead of the rounded integer.
-      if result[6] != None:
+      if result[6] is not None:
         total_seconds += result[6]
 
     match_context.update(date_str)
