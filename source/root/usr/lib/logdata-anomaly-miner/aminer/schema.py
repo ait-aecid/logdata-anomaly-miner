@@ -1,3 +1,4 @@
+# skipcq: PYL-W0104
 {
         'LearnMode': {
             'required': False,
