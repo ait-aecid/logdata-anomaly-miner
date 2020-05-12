@@ -125,7 +125,7 @@ def build_analysis_pipeline(analysis_context):
 # Now define the AtomizerFactory using the model. A simple line
 # based one is usually sufficient.
   from aminer.input import SimpleByteStreamLineAtomizerFactory
-  if yamldata['Input']['MultiSource'] == True:
+  if yamldata['Input']['MultiSource'] is True:
         from aminer.input import SimpleMultisourceAtomSync
         analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
             parsing_model, [SimpleMultisourceAtomSync([atomFilter], sync_wait_time=5)], 
@@ -136,7 +136,7 @@ def build_analysis_pipeline(analysis_context):
             default_timestamp_path=yamldata['Input']['TimestampPath'])
 
 # Just report all unparsed atoms to the event handlers.
-  if yamldata['Input']['Verbose'] == True:
+  if yamldata['Input']['Verbose'] is True:
     from aminer.input import VerboseUnparsedAtomHandler
     atomFilter.add_handler(VerboseUnparsedAtomHandler(anomaly_event_handlers, parsing_model),       stop_when_handled_flag=True)
   else:
@@ -180,7 +180,7 @@ def build_analysis_pipeline(analysis_context):
           func =  getattr(__import__("aminer.events", fromlist=[item['type']]),item['type'])
           ctx = None
           if item['type'] == 'StreamPrinterEventHandler':
-             if item['json'] == True:
+             if item['json'] is True:
                from aminer.events import JsonConverterHandler
                ctx = JsonConverterHandler([func(analysis_context)], analysis_context)
              else:
@@ -209,7 +209,7 @@ def build_analysis_pipeline(analysis_context):
 #            anomaly_event_handlers.append(JsonConverterHandler(analysis_context.aminer_config, messageQueueEventHandlers,
 #                analysis_context, learningMode))
 #          else:    
-          if ctx == None:
+          if ctx is None:
               ctx = func(analysis_context)
           anomaly_event_handlers.append(ctx)
 
