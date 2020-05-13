@@ -81,6 +81,7 @@ def buildAnalysisPipeline(analysisContext):
   them."""
 
 # Build the parsing model:
+  # skipcq: PYL-W0611
   from aminer.parsing import FirstMatchModelElement, SequenceModelElement, DecimalFloatValueModelElement, FixedDataModelElement, DelimitedDataModelElement, AnyByteDataModelElement, FixedWordlistDataModelElement, DecimalIntegerValueModelElement, DateTimeModelElement, IpAddressDataModelElement, Base64StringModelElement, ElementValueBranchModelElement, HexStringModelElement, MultiLocaleDateTimeModelElement, OptionalMatchModelElement, RepeatedElementDataModelElement, VariableByteDataModelElement, WhiteSpaceLimitedDataModelElement
 
   serviceChildrenDiskReport = []
