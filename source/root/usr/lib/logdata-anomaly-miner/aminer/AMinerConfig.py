@@ -3,7 +3,6 @@ loading and handling functions."""
 
 import os
 import sys
-import importlib
 from importlib import util
 import logging
 
@@ -28,8 +27,8 @@ def load_config(config_file_name):
   global configFN
   configFN = config_file_name
   try:
-    spec = importlib.util.spec_from_file_location('aminer_config', config_file_name)
-    aminer_config = importlib.util.module_from_spec(spec)
+    spec = util.spec_from_file_location('aminer_config', config_file_name)
+    aminer_config = util.module_from_spec(spec)
     spec.loader.exec_module(aminer_config)
 
   except:
