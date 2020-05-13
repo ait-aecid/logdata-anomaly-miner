@@ -333,7 +333,7 @@ class AMinerRemoteControlExecutionMethods(object):
         lookup_count = 0
         event_pos = 0
         while event_pos < len(history_data):
-            event_id, event_type, event_message, sorted_log_lines, event_data, event_source = history_data[event_pos]
+            event_id, event_type, _event_message, sorted_log_lines, event_data, event_source = history_data[event_pos]
             found_flag = False
             if event_id in id_spec_list:
                 found_flag = True

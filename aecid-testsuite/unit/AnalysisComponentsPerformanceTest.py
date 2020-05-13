@@ -650,7 +650,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 decimal_integer_value_me = DecimalIntegerValueModelElement('d',
                     DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i % 100).encode())
-                match_element = decimal_integer_value_me.get_match_element('integer', match_context)
+                _match_element = decimal_integer_value_me.get_match_element('integer', match_context)
                 ########################################################################################
 
                 line = log_lines[r]
