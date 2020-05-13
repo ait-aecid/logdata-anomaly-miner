@@ -136,7 +136,7 @@ def build_analysis_pipeline(analysis_context):
   from aminer.input import SimpleByteStreamLineAtomizerFactory
   analysis_context.atomizerFactory = SimpleByteStreamLineAtomizerFactory(
       parsing_model, [atom_filter], anomaly_event_handlers,
-      defaultTimestampPath='/model/syslog/time')
+      default_timestamp_path='/model/syslog/time')
 
 # Always report the unparsed lines: a part of the parsing model
 # seems to be missing or wrong.
@@ -149,7 +149,7 @@ def build_analysis_pipeline(analysis_context):
 # with new structural properties was parsed.
   from aminer.analysis import NewMatchPathDetector
   new_match_path_detector = NewMatchPathDetector(
-      analysis_context.aminerConfig, anomaly_event_handlers, autoIncludeFlag=True)
+      analysis_context.aminerConfig, anomaly_event_handlers, auto_include_flag=True)
   analysis_context.registerComponent(
       new_match_path_detector, componentName='DefaultMatchPathDetector')
   atom_filter.addHandler(new_match_path_detector)

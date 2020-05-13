@@ -162,7 +162,7 @@ def get_model(user_name_model=None):
       FixedDataModelElement('s1', b'to '),
       DecimalIntegerValueModelElement(
           'newval',
-          valueSignType=DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL)
+          value_sign_type=DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL)
   ]))
 
   type_children.append(SequenceModelElement('session-start', [

@@ -278,13 +278,13 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       FixedDataModelElement('s1', b' oauid='),
       DecimalIntegerValueModelElement(
           'oauid',
-          valueSignType=DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL),
+          value_sign_type=DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL),
       FixedDataModelElement('s2', b' ouid='),
       DecimalIntegerValueModelElement('ouid'),
       FixedDataModelElement('s3', b' oses='),
       DecimalIntegerValueModelElement(
           'oses',
-          valueSignType=DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL),
+          value_sign_type=DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL),
       FixedDataModelElement('s4', b' ocomm='),
       ExecArgumentDataModelElement('ocomm'),
   ])
@@ -332,7 +332,7 @@ via syslog after any standard logging preamble, e.g. from syslog."""
 
   type_branches['SOCKADDR'] = SequenceModelElement('sockaddr', [
       FixedDataModelElement('s0', b' saddr='),
-      HexStringModelElement('sockaddr', upperCase=True),
+      HexStringModelElement('sockaddr', upper_case=True),
   ])
 
   type_branches['SYSCALL'] = SequenceModelElement('syscall', [
@@ -350,7 +350,7 @@ via syslog after any standard logging preamble, e.g. from syslog."""
           FixedDataModelElement('s3', b' exit='),
           DecimalIntegerValueModelElement(
               'exit',
-              valueSignType=DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL),
+              value_sign_type=DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL),
       ])),
       FixedDataModelElement('s4', b' a0='),
       HexStringModelElement('arg0'),
@@ -557,7 +557,7 @@ via syslog after any standard logging preamble, e.g. from syslog."""
                   DecimalIntegerValueModelElement('seq'),
                   FixedDataModelElement('s2', b'):')
               ]),
-              'type', type_branches, defaultBranch=None),
+              'type', type_branches, default_branch=None),
           FixedDataModelElement('queue-full', b'queue is full - dropping event')
       ])
   ])
