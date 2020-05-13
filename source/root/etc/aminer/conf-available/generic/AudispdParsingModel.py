@@ -27,7 +27,8 @@ via syslog after any standard logging preamble, e.g. from syslog."""
     def __init__(self, element_id):
       self.element_id = element_id
 
-    def get_child_elements(self):
+    @staticmethod
+    def get_child_elements():
       """Get the children of this element (none)."""
       return None
 

@@ -5,10 +5,12 @@ and namespace shortcuts to the ModelElements."""
 class ModelElementInterface:
   """This is the superinterface of all model elements."""
 
+  # skipcq: PYL-R0201
   def get_id(self):
     """Get the element ID."""
     raise Exception('Interface method called')
 
+  # skipcq: PYL-R0201
   def get_child_elements(self):
     """Get all possible child model elements of this element.
     If this element implements a branching model element, then

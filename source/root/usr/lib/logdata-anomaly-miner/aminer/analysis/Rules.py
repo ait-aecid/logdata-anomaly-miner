@@ -17,6 +17,7 @@ result_string = '%s(%s)'
 
 class MatchAction:
   """This is the interface of all match actions."""
+  # skipcq: PYL-R0201
   def match_action(self, log_atom):
     """This method is invoked if a rule rule has matched.
     @param log_atom the LogAtom matching the rules."""

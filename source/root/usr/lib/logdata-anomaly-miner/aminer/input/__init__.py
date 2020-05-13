@@ -11,6 +11,7 @@ class AtomizerFactory:
   for new data sources and integrate them into the downstream
   processing pipeline."""
 
+  # skipcq: PYL-R0201
   def get_atomizer_for_resource(self, resource_name):
     """Get an atomizer for a given resource.
     @return a StreamAtomizer object"""
@@ -27,6 +28,7 @@ class StreamAtomizer:
   stream data cannot be handled at the moment to throttle reading
   of the underlying stream."""
 
+  # skipcq: PYL-R0201
   def consume_data(self, stream_data, end_of_stream_flag=False):
     """Consume data from the underlying stream for atomizing.
     Data should only be consumed after splitting of an atom. The
@@ -55,6 +57,7 @@ class AtomHandlerInterface:
   """This is the common interface of all handlers suitable for
   receiving log atoms."""
 
+  # skipcq: PYL-R0201
   def receive_atom(self, log_atom):
     """Receive a log atom from a source.
     @param atomData binary raw atom data

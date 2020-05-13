@@ -67,7 +67,8 @@ class AMinerRemoteControlExecutionMethods():
         if result == 0:
             self.REMOTE_CONTROL_RESPONSE += "'%s' changed to '%s' successfully." % (property_name, value)
 
-    def change_config_property_mail_alerting(self, analysis_context, property_name, value):
+    @staticmethod
+    def change_config_property_mail_alerting(analysis_context, property_name, value):
         analysis_context.aminer_config.config_properties[property_name] = value
         for analysis_component_id in analysis_context.get_registered_component_ids():
             component = analysis_context.get_component_by_id(analysis_component_id)
@@ -105,7 +106,7 @@ class AMinerRemoteControlExecutionMethods():
                 self.REMOTE_CONTROL_RESPONSE = 'FATAL: cpulimit package must be installed, when using' \
                                                ' the property %s.' % AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE
                 return 1
-            
+
             with subprocess.Popen(cpulimit_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as _out:
                 return 0
         except ValueError:
@@ -113,7 +114,8 @@ class AMinerRemoteControlExecutionMethods():
                 AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE)
             return 1
 
-    def change_config_property_log_prefix(self, analysis_context, log_prefix):
+    @staticmethod
+    def change_config_property_log_prefix(analysis_context, log_prefix):
         analysis_context.aminer_config.config_properties[AMinerConfig.KEY_LOG_PREFIX] = str(log_prefix)
         return 0
 
@@ -194,7 +196,8 @@ class AMinerRemoteControlExecutionMethods():
                 result += indent + attr_str % (var, repr(attr))
         return result
 
-    def isinstance_aminer_class(self, obj):
+    @staticmethod
+    def isinstance_aminer_class(obj):
         from aminer.analysis.TimeCorrelationDetector import CorrelationFeature
         from aminer.analysis.TimeCorrelationViolationDetector import CorrelationRule
         class_list = [aminer.analysis.AtomFilters.SubhandlerFilter, aminer.analysis.AtomFilters.MatchPathFilter, aminer.analysis.AtomFilters.MatchValueFilter,

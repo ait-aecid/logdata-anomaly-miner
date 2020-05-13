@@ -10,7 +10,8 @@ from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelE
 
 class ElementValueBranchModelElementTest(unittest.TestCase):
 
-  def test1(self):
+  @staticmethod
+  def test1():
     fixed_data_me1 = FixedDataModelElement("fixed 1", b'match ')
     fixed_data_me2 = FixedDataModelElement("fixed 2", b'fixed String')
     fixed_wordlist_data_model_element = FixedWordlistDataModelElement("wordlist", [b'data: ', b'string: '])

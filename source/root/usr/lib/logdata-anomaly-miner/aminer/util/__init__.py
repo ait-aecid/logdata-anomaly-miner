@@ -58,24 +58,27 @@ def encode_byte_string_as_string(byte_string):
   return encoded
 
 
-class ObjectHistory:
+class ObjectHistory(object):
   """This is the superinterface of all object histories. The idea
   behind that is to use that type of history best suited for a
   purpose considering amount of data, possibility for history
   size limits to be reached, priorization which elements should
   be dropped first."""
 
+  # skipcq: PYL-R0201
   def add_object(self, new_object):
     """Add an object to this history. This method call may evict
     other objects from the history."""
     raise Exception(interface_method_called)
 
+  # skipcq: PYL-R0201
   def get_history(self):
     """Get the whole history list. Make sure to clone the list
     before modification when influences on this object are not
     intended."""
     raise Exception(interface_method_called)
 
+  # skipcq: PYL-R0201
   def clear_history(self):
     """Clean the whole history."""
     raise Exception(interface_method_called)
@@ -90,7 +93,7 @@ class LogarithmicBackoffHistory(ObjectHistory):
   will be moved to the next lower position, before putting the
   new element at the end of the list. With a chance of 1/8, the
   last two elements are moved, ... Thus the list will in average
-  span a time range of 2^maxItems items with growing size of
+  span a time range of 2^maxItems items with growing size of 
   holes towards the earliest element."""
 
   def __init__(self, max_items, initial_list=None):
@@ -121,7 +124,7 @@ class LogarithmicBackoffHistory(ObjectHistory):
     self.history[:] = []
 
 
-class TimeTriggeredComponentInterface:
+class TimeTriggeredComponentInterface(object):
   """This is the common interface of all components that can be
   registered to receive timer interrupts. There might be different
   timelines for triggering, real time and normalized log data
@@ -130,12 +133,14 @@ class TimeTriggeredComponentInterface:
   the component should state, which type of triggering it would
   require."""
 
+  # skipcq: PYL-R0201
   def get_time_trigger_class(self):
     """Get the trigger class this component can be registered
     for. See AnalysisContext class for different trigger classes
     available."""
     raise Exception(interface_method_called)
 
+  # skipcq: PYL-R0201
   def do_timer(self, trigger_time):
     """This method is called to perform trigger actions and to
     determine the time for next invocation. The caller may decide
