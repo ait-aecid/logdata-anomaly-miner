@@ -100,6 +100,7 @@ class BinDefinition:
 
 class LinearNumericBinDefinition(BinDefinition):
   """This class defines the linear numeric bins."""
+  # skipcq: PYL-W0231
   def __init__(self, lower_limit, bin_size, bin_count, outlier_bins_flag=False):
     self.lower_limit = lower_limit
     self.bin_size = bin_size

@@ -70,9 +70,9 @@ class MissingMatchPathValueDetectorTest(TestBase):
       self.assertTrue(missing_match_path_value_detector.receive_atom(log_atom_fixed_dme))
       
       past_time = 3200
-      self.missing_match_path_value_detector = MissingMatchPathValueDetector(self.aminer_config,
+      missing_match_path_value_detector = MissingMatchPathValueDetector(self.aminer_config,
         match_element_fixed_dme.get_path(), [self.stream_printer_event_handler], 'Default', True,
-        self.missing_match_path_value_detector.default_interval - past_time, self.__realert_interval)
+        missing_match_path_value_detector.default_interval - past_time, self.__realert_interval)
       
       log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme),
         time.time() + past_time, missing_match_path_value_detector)

@@ -217,11 +217,11 @@ class RuleTest(TestBase):
       match_context = MatchContext(b'14.02.2019 12:00:00')
       match_element = date_time_model_element.get_match_element(self.model_syslog, match_context)
       log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), time(), date_time_model_element)
-      self.assertTrue(modulo_time_match_rule.match(self.log_atom))
+      self.assertTrue(modulo_time_match_rule.match(log_atom))
       
       match_context = MatchContext(b'15.02.2019 01:00:00')
       match_element = date_time_model_element.get_match_element(self.model_syslog, match_context)
-      self.log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), time(), date_time_model_element)
+      log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), time(), date_time_model_element)
       self.assertTrue(not modulo_time_match_rule.match(log_atom))
     
     '''
@@ -368,8 +368,8 @@ class RuleTest(TestBase):
     '''
     def test13value_dependent_delegated_match_rule(self):
       description = "Test13Rules"
-      self.string_regex_match_rule = StringRegexMatchRule(self.match_any, re.compile(r'\w'), None)
-      self.analysis_context.register_component(self.string_regex_match_rule, description)
+      string_regex_match_rule = StringRegexMatchRule(self.match_any, re.compile(r'\w'), None)
+      self.analysis_context.register_component(string_regex_match_rule, description)
       any_byte_date_me = AnyByteDataModelElement('any')
       
       i_pv4_in_rfc1918_match_rule = IPv4InRFC1918MatchRule(self.match_ipv4)
@@ -377,7 +377,7 @@ class RuleTest(TestBase):
       ip_address_data_model_element = IpAddressDataModelElement('IPv4')
       
       value_dependent_delegated_match_rule = ValueDependentDelegatedMatchRule([self.match_any, self.match_ipv4],
-          {(self.alphabet, None):self.string_regex_match_rule,
+          {(self.alphabet, None):string_regex_match_rule,
            (None, 3232235520):i_pv4_in_rfc1918_match_rule})
       self.analysis_context.register_component(value_dependent_delegated_match_rule, description + "3")
       

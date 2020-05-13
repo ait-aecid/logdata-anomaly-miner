@@ -116,12 +116,12 @@ class NewMatchPathDetectorTest(TestBase):
       new_match_path_detector.do_persist()
       self.reset_output_stream()
       
-      self.otherNewMatchPathDetector = NewMatchPathDetector(self.aminer_config,
+      otherNewMatchPathDetector = NewMatchPathDetector(self.aminer_config,
         [self.stream_printer_event_handler], 'Default', False, output_log_line=False)
-      self.otherLogAtomFixedDME = LogAtom(self.fixed_dme.fixed_data,
-        ParserMatch(self.match_element_fixed_dme), t, self.otherNewMatchPathDetector)
+      otherLogAtomFixedDME = LogAtom(self.fixed_dme.fixed_data,
+        ParserMatch(self.match_element_fixed_dme), t, otherNewMatchPathDetector)
       
-      self.assertTrue(self.otherNewMatchPathDetector.receive_atom(self.otherLogAtomFixedDME))
+      self.assertTrue(otherNewMatchPathDetector.receive_atom(otherLogAtomFixedDME))
       self.assertEqual(self.output_stream.getvalue(), '')
     
     '''
@@ -184,10 +184,10 @@ class NewMatchPathDetectorTest(TestBase):
       log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data,
         ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
       new_match_path_detector.receive_atom(log_atom_fixed_dme)
-      self.new_match_path_value_combo_detector = NewMatchPathValueComboDetector(self.aminer_config, [],
+      new_match_path_value_combo_detector = NewMatchPathValueComboDetector(self.aminer_config, [],
         [self.stream_printer_event_handler], 'Default', True, True)
       self.assertRaises(Exception, new_match_path_detector.whitelist_event, self.analysis %
-        self.new_match_path_value_combo_detector.__class__.__name__,
+        new_match_path_value_combo_detector.__class__.__name__,
         log_atom_fixed_dme.raw_data, self.output_stream.getvalue(), None)
     
     '''

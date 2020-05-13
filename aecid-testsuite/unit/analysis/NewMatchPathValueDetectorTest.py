@@ -124,9 +124,9 @@ class NewMatchPathValueDetectorTest(TestBase):
       other_new_match_path_value_detector = NewMatchPathValueDetector(self.aminer_config, [self.first_f1_s1],
         [self.stream_printer_event_handler], 'Default', True, output_log_line=False)
       self.analysis_context.register_component(new_match_path_value_detector, description + "2")
-      self.other_log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_first_match_me), t, other_new_match_path_value_detector)
+      other_log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_first_match_me), t, other_new_match_path_value_detector)
       
-      other_new_match_path_value_detector.receive_atom(self.other_log_atom_fixed_dme)
+      other_new_match_path_value_detector.receive_atom(other_log_atom_fixed_dme)
       self.assertEqual(self.output_stream.getvalue(), '')
 
     

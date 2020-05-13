@@ -89,9 +89,8 @@ class FileLogDataResource(LogDataResource):
   of this type of resource is, that reopening and repositioning
   of the stream has to be possible."""
 
-  def __init__(
-      self, log_resource_name, log_stream_fd, default_buffer_size=1 << 16,
-      repositioning_data=None):
+  # skipcq: PYL-W0231
+  def __init__(self, log_resource_name, log_stream_fd, default_buffer_size=1 << 16, repositioning_data=None):
     """Create a new file type resource.
     @param log_resource_name the unique name of this source as
     bytes array, has to start with "file://" before the file
@@ -235,9 +234,8 @@ class UnixSocketLogDataResource(LogDataResource):
   resource is, that reopening works only after end of stream of
   was reached."""
 
-  def __init__(
-      self, log_resource_name, log_stream_fd, default_buffer_size=1 << 16,
-      repositioning_data=None):
+  # skipcq: PYL-W0231
+  def __init__(self, log_resource_name, log_stream_fd, default_buffer_size=1 << 16, repositioning_data=None):
     """Create a new unix socket type resource.
     @param log_resource_name the unique name of this source as
     byte array, has to start with "unix://" before the file
