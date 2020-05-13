@@ -187,7 +187,8 @@ class ValueDependentDelegatedMatchRule(MatchRule):
       value_element = match_dict.get(path, None)
       if value_element is None:
         value_list.append(None)
-      else: value_list.append(value_element.match_object)
+      else:
+        value_list.append(value_element.match_object)
     rule = self.rule_lookup_dict.get(tuple(value_list), self.default_rule)
     if rule is None:
       return False

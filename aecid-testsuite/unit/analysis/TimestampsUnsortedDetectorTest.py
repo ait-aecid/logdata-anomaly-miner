@@ -64,7 +64,8 @@ class TimestampsUnsortedDetectorTest(TestBase):
       self.assertEqual(self.output_stream.getvalue(), '')
       
       log_atom.set_timestamp(t - 10000)
-      with self.assertRaises(SystemExit) as cm:timestamp_unsorted_detector.receive_atom(log_atom)
+      with self.assertRaises(SystemExit) as cm:
+        timestamp_unsorted_detector.receive_atom(log_atom)
       self.assertEqual(cm.exception.code, 1)
       self.assertEqual(self.output_stream.getvalue(), self.__expected_string %
         (datetime.fromtimestamp(t-10000).strftime(self.datetime_format_string),

@@ -100,7 +100,8 @@ class LogarithmicBackoffHistory(ObjectHistory):
     self.max_items = max_items
     if initial_list is None:
       initial_list = []
-    else: initial_list = initial_list[:max_items]
+    else: 
+      initial_list = initial_list[:max_items]
     self.history = initial_list
 
   def add_object(self, new_object):
