@@ -80,9 +80,6 @@ def build_analysis_pipeline(analysis_context):
   data. It has also to define an AtomizerFactory to instruct AMiner
   how to process incoming data streams to create log atoms from
   them."""
-  
-  date_format_string = b'%Y-%m-%d %H:%M:%S'
-  cron = b' cron['
 
 # Build the parsing model:
   from aminer.parsing import FirstMatchModelElement, SequenceModelElement, DecimalFloatValueModelElement, FixedDataModelElement, DelimitedDataModelElement, AnyByteDataModelElement, FixedWordlistDataModelElement, OptionalMatchModelElement, DecimalIntegerValueModelElement, DateTimeModelElement, IpAddressDataModelElement, Base64StringModelElement, ElementValueBranchModelElement, HexStringModelElement, MultiLocaleDateTimeModelElement, OptionalMatchModelElement, RepeatedElementDataModelElement, VariableByteDataModelElement, WhiteSpaceLimitedDataModelElement

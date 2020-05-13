@@ -247,7 +247,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         with subprocess.Popen(package_installed_cmd,
            stdout=subprocess.PIPE, 
            stderr=subprocess.STDOUT) as out:
-          stdout,stderr = out.communicate()
+          stdout, _stderr = out.communicate()
         
         if 'dpkg-query: no packages found matching cpulimit' in stdout.decode():
           print('FATAL: cpulimit package must be installed, when using the property %s'
@@ -310,7 +310,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
       read_list = None
       write_list = None
       try:
-        (read_list, write_list, except_list) = select.select(
+        (read_list, write_list, _except_list) = select.select(
             input_select_fd_list, output_select_fd_list, [], 1)
       except select.error as select_error:
 # Interrupting signals, e.g. for shutdown are OK.
@@ -359,7 +359,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 # We received a remote connection, accept it unconditionally.
 # Users should make sure, that they do not exhaust resources by
 # hogging open connections.
-          (control_client_socket, remote_address) = \
+          (control_client_socket, _remote_address) = \
               self.remote_control_socket.accept()
 # Keep track of information received via this remote control socket.
           remote_control_handler = AnalysisChildRemoteControlHandler(

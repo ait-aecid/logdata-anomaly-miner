@@ -99,7 +99,7 @@ class AMinerRemoteControlExecutionMethods(object):
             cpulimit_cmd = ['cpulimit', '-p', pid.decode(), '-l', str(max_cpu_percent_usage)]
 
             with subprocess.Popen(package_installed_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as out:
-                stdout, stderr = out.communicate()
+                stdout, _stderr = out.communicate()
 
             if 'dpkg-query: no packages found matching cpulimit.' in stdout.decode():
                 self.REMOTE_CONTROL_RESPONSE = 'FATAL: cpulimit package must be installed, when using' \
@@ -255,7 +255,7 @@ class AMinerRemoteControlExecutionMethods(object):
             history_data = history_handler.get_history()
             result_string = 'FAIL: not found'
             for event_pos in enumerate(history_data):
-                event_id, event_type, event_message, sorted_log_lines, event_data, event_source = history_data[event_pos]
+                event_id, event_type, event_message, sorted_log_lines, event_data, _event_source = history_data[event_pos]
                 if event_id != dump_event_id:
                     continue
                 append_log_lines_flag = True
@@ -290,7 +290,7 @@ class AMinerRemoteControlExecutionMethods(object):
         delete_count = 0
         event_pos = 0
         while event_pos < len(history_data):
-            event_id, event_type, event_message, sorted_log_lines, event_data, event_source = history_data[event_pos]
+            event_id, _event_type, _event_message, _sorted_log_lines, _event_data, _event_source = history_data[event_pos]
             may_delete_flag = False
             if event_id in event_ids:
                 may_delete_flag = True
@@ -315,7 +315,7 @@ class AMinerRemoteControlExecutionMethods(object):
             if max_event_count is None or max_events < max_event_count:
                 max_event_count = max_events
             result_string = 'OK'
-            for event_id, event_type, event_message, sorted_log_lines, event_data, event_source in history_data[:max_event_count]:
+            for event_id, _event_type, event_message, sorted_log_lines, _event_data, _event_source in history_data[:max_event_count]:
                 result_string += ('\nEvent %d: %s; Log data: %s' % (event_id, event_message, repr(sorted_log_lines)))[:240]
             self.REMOTE_CONTROL_RESPONSE = result_string
 
