@@ -355,6 +355,7 @@ class AMinerRemoteControlExecutionMethods(object):
                     whitelisted_flag = True
                 except NotImplementedError:
                     result_string += 'FAIL %d: component does not support whitelisting' % event_id
+                # skipcq: PYL-W0703
                 except Exception as wlException:
                     result_string += 'FAIL %d: %s\n' % (event_id, str(wlException))
             elif event_type == 'Analysis.WhitelistViolationDetector':

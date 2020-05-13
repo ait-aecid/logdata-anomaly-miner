@@ -282,4 +282,3 @@ def build_analysis_pipeline(analysis_context):
     analysis_context.register_component(
         mail_notification_handler, component_name="MailHandler")
     anomaly_event_handlers.append(mail_notification_handler)
-
