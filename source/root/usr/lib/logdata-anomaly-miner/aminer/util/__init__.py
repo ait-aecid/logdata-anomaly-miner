@@ -58,7 +58,7 @@ def encode_byte_string_as_string(byte_string):
   return encoded
 
 
-class ObjectHistory(object):
+class ObjectHistory:
   """This is the superinterface of all object histories. The idea
   behind that is to use that type of history best suited for a
   purpose considering amount of data, possibility for history
@@ -100,7 +100,7 @@ class LogarithmicBackoffHistory(ObjectHistory):
     self.max_items = max_items
     if initial_list is None:
       initial_list = []
-    else: 
+    else:
       initial_list = initial_list[:max_items]
     self.history = initial_list
 
@@ -125,7 +125,7 @@ class LogarithmicBackoffHistory(ObjectHistory):
     self.history[:] = []
 
 
-class TimeTriggeredComponentInterface(object):
+class TimeTriggeredComponentInterface:
   """This is the common interface of all components that can be
   registered to receive timer interrupts. There might be different
   timelines for triggering, real time and normalized log data
