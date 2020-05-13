@@ -93,7 +93,7 @@ class LogStreamTest(TestBase):
     '''
     def test5unix_socket_log_data_resource(self):
       sockName = b'/tmp/test5unixSocket.sock'
-      # skipcq: BAN-B607
+      # skipcq: BAN-B607, BAN-B603
       proc = subprocess.Popen(['python3', 'unit/input/client.py'])
       
       if os.path.exists(sockName):
