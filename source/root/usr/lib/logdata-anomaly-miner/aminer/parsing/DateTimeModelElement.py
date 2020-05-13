@@ -191,6 +191,7 @@ class DateTimeModelElement(ModelElementInterface):
       else:
         try:
           result[date_format_part[0]] = transform_function(next_data)
+        # skipcq: FLK-E722
         except:
 # Parsing failed, most likely due to wrong format.
           return None
@@ -215,6 +216,7 @@ class DateTimeModelElement(ModelElementInterface):
         parsed_date_time = datetime.datetime(
             result[0], result[1], result[2], result[3], result[4],
             result[5], microseconds, self.time_zone)
+      # skipcq: FLK-E722
       except:
 # The values did not form a valid datetime object, e.g. when the
 # day of month is out of range. The rare case where dates without

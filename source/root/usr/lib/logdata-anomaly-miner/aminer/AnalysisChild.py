@@ -602,6 +602,7 @@ class AnalysisChildRemoteControlHandler:
           json_remote_control_response = json.dumps(methods.REMOTE_CONTROL_RESPONSE)
         else:
           json_remote_control_response = json.dumps(exec_locals.get('remoteControlResponse', None) + methods.REMOTE_CONTROL_RESPONSE)
+      # skipcq: FLK-E722
       except:
         exception_data = traceback.format_exc()
 # This is little dirty but avoids having to pass over remoteControlResponse
