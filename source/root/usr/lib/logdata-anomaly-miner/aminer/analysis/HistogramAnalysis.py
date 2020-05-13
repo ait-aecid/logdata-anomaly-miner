@@ -89,7 +89,7 @@ class BinDefinition:
     at index 1."""
     raise Exception(self.not_implemented)
 
-  # skipcq: PYL-W0613
+  # skipcq: PYL-W0613, PYL-R0201
   def get_bin_p_value(self, bin_pos, total_values, bin_values):
     """Calculate a p-Value, how likely the observed number of
     elements in this bin is. This method is used as an interface
@@ -148,7 +148,7 @@ class LinearNumericBinDefinition(BinDefinition):
       if pos < self.bin_count:
         return pos+1
       return self.bin_count + 1
-    
+
     if value < self.lower_limit:
       return None
     pos = int((value - self.lower_limit) / self.bin_size)

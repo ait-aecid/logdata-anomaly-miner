@@ -42,6 +42,7 @@ class LogDataResource:
     the stream using the given data."""
     raise Exception(interface_method_called)
 
+  # skipcq: PYL-R0201
   def open(self, reopen_flag=False):
     """Open the given resource.
     @param reopen_flag when True, attempt to reopen the same resource
@@ -53,30 +54,36 @@ class LogDataResource:
     opening was not yet possible but should be attempted again."""
     raise Exception(interface_method_called)
 
+  # skipcq: PYL-R0201
   def get_resource_name(self):
     """Get the name of this log resoruce."""
     raise Exception(interface_method_called)
 
+  # skipcq: PYL-R0201
   def get_file_descriptor(self):
     """Get the file descriptor of this open resource."""
     raise Exception(interface_method_called)
 
+  # skipcq: PYL-R0201
   def fill_buffer(self):
     """Fill the buffer data of this resource. The repositioning
     information is not updated, update_position() has to be used.
     @return the number of bytes read or -1 on error or end."""
     raise Exception(interface_method_called)
 
+  # skipcq: PYL-R0201
   def update_position(self, length):
     """Update the positioning information and discard the buffer
     data afterwards."""
     raise Exception(interface_method_called)
 
+  # skipcq: PYL-R0201
   def get_repositioning_data(self):
     """Get the data for repositioning the stream. The returned
     structure has to be JSON serializable."""
     raise Exception(interface_method_called)
 
+  # skipcq: PYL-R0201
   def close(self):
     """Close this logdata resource. Data access methods will not
     work any more afterwards."""
