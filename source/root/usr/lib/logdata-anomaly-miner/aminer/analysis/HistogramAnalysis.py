@@ -147,13 +147,13 @@ class LinearNumericBinDefinition(BinDefinition):
       if pos < self.bin_count:
         return pos+1
       return self.bin_count + 1
-    else:
-      if value < self.lower_limit:
-        return None
-      pos = int((value - self.lower_limit) / self.bin_size)
-      if pos < self.bin_count:
-        return pos
+    
+    if value < self.lower_limit:
       return None
+    pos = int((value - self.lower_limit) / self.bin_size)
+    if pos < self.bin_count:
+      return pos
+    return None
 
   def get_bin_p_value(self, bin_pos, total_values, bin_values):
     """Calculate a p-Value, how likely the observed number of

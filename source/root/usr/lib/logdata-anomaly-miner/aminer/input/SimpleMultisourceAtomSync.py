@@ -43,10 +43,9 @@ class SimpleMultisourceAtomSync(AtomHandlerInterface):
     if self.last_forwarded_source is not None and log_atom.source != self.last_forwarded_source and self.buffer_empty_counter < (2 * len(self.sources_dict.keys())):
       self.buffer_empty_counter += 1
       return False
-    else:
-      self.buffer_empty_counter = 0
-      self.last_forwarded_source = None
 
+    self.buffer_empty_counter = 0
+    self.last_forwarded_source = None
     timestamp = log_atom.atom_time
     if timestamp is None:
       self.forward_atom(log_atom)

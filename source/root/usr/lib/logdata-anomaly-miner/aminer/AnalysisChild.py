@@ -253,10 +253,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
           print('FATAL: cpulimit package must be installed, when using the property %s'
             % AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE, file=sys.stderr)
           return 1
-        else:
-          out = subprocess.Popen(cpulimit_cmd,
-           stdout=subprocess.PIPE, 
-           stderr=subprocess.STDOUT)
+        _out = subprocess.Popen(cpulimit_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
       except ValueError:
         print('FATAL: %s must be an integer, terminating' 
           % AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE, file=sys.stderr)

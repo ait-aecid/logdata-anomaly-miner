@@ -105,9 +105,9 @@ class AMinerRemoteControlExecutionMethods():
                 self.REMOTE_CONTROL_RESPONSE = 'FATAL: cpulimit package must be installed, when using' \
                                                ' the property %s.' % AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE
                 return 1
-            else:
-                with subprocess.Popen(cpulimit_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as out:
-                    return 0
+            
+            with subprocess.Popen(cpulimit_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as _out:
+                return 0
         except ValueError:
             self.REMOTE_CONTROL_RESPONSE = 'FATAL: %s must be an integer, terminating.' % (
                 AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE)
@@ -325,7 +325,7 @@ class AMinerRemoteControlExecutionMethods():
         if history_handler is None:
             self.REMOTE_CONTROL_RESPONSE = component_not_found
             return
-        elif id_spec_list is None or not isinstance(id_spec_list, list):
+        if id_spec_list is None or not isinstance(id_spec_list, list):
             self.REMOTE_CONTROL_RESPONSE = 'Request requires remoteControlData with ID specification list and optional whitelisting information'
             return
         history_data = history_handler.get_history()
