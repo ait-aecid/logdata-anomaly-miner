@@ -5,6 +5,7 @@ import os
 import base64
 import socket
 import hashlib
+# skipcq: BAN-B404
 import subprocess
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
 from aminer.input.ByteStreamLineAtomizer import ByteStreamLineAtomizer

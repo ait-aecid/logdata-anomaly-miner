@@ -7,6 +7,7 @@ import os
 from _io import StringIO
 from aminer.util import SecureOSFunctions
 import socket
+# skipcq: BAN-B404
 import subprocess
 from aminer.input.LogStream import UnixSocketLogDataResource
 

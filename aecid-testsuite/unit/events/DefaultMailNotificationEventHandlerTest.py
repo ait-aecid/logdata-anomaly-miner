@@ -5,6 +5,7 @@ from time import time, sleep
 from aminer.input.LogAtom import LogAtom
 from aminer.parsing.ParserMatch import ParserMatch
 from aminer.events.DefaultMailNotificationEventHandler import DefaultMailNotificationEventHandler
+# skipcq: BAN-B404
 import subprocess
 from unit.TestBase import TestBase
 from datetime import datetime
