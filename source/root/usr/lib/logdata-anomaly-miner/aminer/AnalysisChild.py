@@ -26,7 +26,7 @@ from builtins import str
 from aminer.AMinerRemoteControlExecutionMethods import AMinerRemoteControlExecutionMethods
 
 
-class AnalysisContext():
+class AnalysisContext:
   """This class collects information about the current analysis
   context to access it during analysis or remote management."""
 
@@ -498,7 +498,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
     return delta
 
 
-class AnalysisChildRemoteControlHandler(object):
+class AnalysisChildRemoteControlHandler:
   """This class stores information about one open remote control
   connection. The handler can be in 3 different states:
   * receive request: the control request was not completely received.

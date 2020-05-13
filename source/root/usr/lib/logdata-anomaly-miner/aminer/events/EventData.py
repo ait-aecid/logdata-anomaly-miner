@@ -32,13 +32,13 @@ class EventData:
         message += '%s (%d lines)\n' % (self.event_message, len(self.sorted_log_lines))
       for line in self.sorted_log_lines:
         if isinstance(line, bytes):
-          if line is not b'':
+          if line != b'':
             message += '  '+line.decode("utf-8")+'\n'
         else:
           original_log_line_prefix = self.analysis_context.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
           if original_log_line_prefix is not None and line.startswith(original_log_line_prefix):
             message+= line+'\n'
-          elif line is not '':
+          elif line != '':
             message += '  '+line+'\n'
             
       #uncomment the following line for debugging..
