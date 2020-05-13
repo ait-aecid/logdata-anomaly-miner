@@ -59,10 +59,10 @@ def save_config(analysis_context, new_file):
     find_str = "config_properties['%s'] = "%config_property
     pos = old.find(find_str)
     if pos == -1:
-      msg += "WARNING: %s not found in the old config file."%find_str
+      msg += "WARNING: %s not found in the old config file." % find_str
       logging.basicConfig(filename=LOG_FILE,level=logging.DEBUG, 
           format='%(asctime)s %(levelname)s %(message)s', datefmt='%d.%m.%Y %H:%M:%S')
-      logging.warning("WARNING: %s not found in the old config file."%find_str)
+      logging.warning("WARNING: %s not found in the old config file.", find_str)
     else:
       string = old[pos + len(find_str):]
       old_len = string.find('\n')
