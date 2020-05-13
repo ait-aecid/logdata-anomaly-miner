@@ -58,7 +58,8 @@ class SecureOSFunctionsTestLocal(unittest.TestCase):
     def test4sendAnnotatedFileDescriptor(self):
       sock_name = '/tmp/test4unixSocket.sock'
       data = b'readmeStream' + b'\x00' + b'You should read these README instructions for better understanding.'
-      
+
+      # skipcq: BAN-B607
       proc = subprocess.Popen(['python3', 'unit/util/clientTest4.py'])
       
       if os.path.exists(sock_name):
@@ -102,7 +103,8 @@ class SecureOSFunctionsTestLocal(unittest.TestCase):
     def test6send_logstream_descriptor(self):
       sock_name = '/tmp/test6unixSocket.sock'
       data = b'logstream' + b'\x00' + b'/var/log/syslog'
-      
+
+      # skipcq: BAN-B607
       subprocess.Popen(['python3', 'unit/util/clientTest6.py'])
       
       if os.path.exists(sock_name):
@@ -136,7 +138,8 @@ class SecureOSFunctionsTestLocal(unittest.TestCase):
       type_info = b'logstream'
       path = b'/var/log/syslog'
       data = (type_info, path)
-      
+
+      # skipcq: BAN-B607
       subprocess.Popen(['python3', 'unit/util/clientTest6.py'])
       
       if os.path.exists(sock_name):
