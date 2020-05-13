@@ -2,7 +2,7 @@
 from parser element matching process."""
 
 
-class MatchElement(object):
+class MatchElement:
   """This class allows storage and handling of data related to
   a match found by a model element."""
 

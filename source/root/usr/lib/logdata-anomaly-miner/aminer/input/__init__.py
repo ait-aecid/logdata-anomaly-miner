@@ -6,7 +6,7 @@ namespace references are added here to simplify the code."""
 interface_method_called = 'Interface method called'
 
 
-class AtomizerFactory(object):
+class AtomizerFactory:
   """This is the common interface of all factories to create atomizers
   for new data sources and integrate them into the downstream
   processing pipeline."""
@@ -17,7 +17,7 @@ class AtomizerFactory(object):
     raise Exception(interface_method_called)
 
 
-class StreamAtomizer(object):
+class StreamAtomizer:
   """This is the common interface of all binary stream atomizers.
   Atomizers in general should be good detecting and reporting
   malformed atoms but continue to function by attempting error
@@ -51,7 +51,7 @@ class StreamAtomizer(object):
     raise Exception(interface_method_called)
 
 
-class AtomHandlerInterface(object):
+class AtomHandlerInterface:
   """This is the common interface of all handlers suitable for
   receiving log atoms."""
 

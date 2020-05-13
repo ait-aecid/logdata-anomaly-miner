@@ -15,7 +15,7 @@ from aminer.util import encode_byte_string_as_string
 interface_method_called = 'Interface method called'
 
 
-class LogDataResource(object):
+class LogDataResource:
   """This is the superinterface of each logdata resource monitored
   by AMiner. The interface is designed in a way, that instances
   of same subclass can be used both on AMiner parent process side
@@ -315,7 +315,7 @@ class UnixSocketLogDataResource(LogDataResource):
     self.log_stream_fd = -1
 
 
-class LogStream(object):
+class LogStream:
   """This class defines a continuous stream of logging data from
   a given source. This class also handles rollover from one file
   descriptor to a new one."""

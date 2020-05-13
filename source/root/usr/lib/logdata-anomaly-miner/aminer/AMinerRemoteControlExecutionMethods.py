@@ -11,7 +11,7 @@ attr_str = "%s = %s\n"
 component_not_found = 'Event history component not found'
 
 
-class AMinerRemoteControlExecutionMethods(object):
+class AMinerRemoteControlExecutionMethods():
     REMOTE_CONTROL_RESPONSE = ''
 
     CONFIG_KEY_MAIL_TARGET_ADDRESS = 'MailAlerting.TargetAddress'

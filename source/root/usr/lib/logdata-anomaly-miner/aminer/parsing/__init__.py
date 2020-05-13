@@ -2,7 +2,7 @@
 and namespace shortcuts to the ModelElements."""
 
 
-class ModelElementInterface(object):
+class ModelElementInterface:
   """This is the superinterface of all model elements."""
 
   def get_id(self):

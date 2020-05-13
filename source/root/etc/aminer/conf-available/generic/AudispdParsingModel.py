@@ -21,7 +21,7 @@ def get_model():
   """This function defines how to parse a audispd message logged
 via syslog after any standard logging preamble, e.g. from syslog."""
 
-  class ExecArgumentDataModelElement(object):
+  class ExecArgumentDataModelElement():
     """This is a helper class for parsing the (encoded) exec argument
     strings found within audit logs."""
     def __init__(self, element_id):

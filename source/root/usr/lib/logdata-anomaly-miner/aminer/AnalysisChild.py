@@ -26,7 +26,7 @@ from builtins import str
 from aminer.AMinerRemoteControlExecutionMethods import AMinerRemoteControlExecutionMethods
 
 
-class AnalysisContext(object):
+class AnalysisContext():
   """This class collects information about the current analysis
   context to access it during analysis or remote management."""
 
@@ -452,7 +452,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         log_stream.add_next_resource(res)
     elif received_type_info == b'remotecontrol':
       if self.remote_control_socket is not None:
-        raise Exception('Received another remote control ' \
+        raise Exception('Received another remote control '
             'socket: multiple remote control not (yet?) supported.')
       self.remote_control_socket = socket.fromfd(
           received_fd, socket.AF_UNIX, socket.SOCK_STREAM, 0)

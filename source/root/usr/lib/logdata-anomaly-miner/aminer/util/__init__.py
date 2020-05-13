@@ -58,7 +58,7 @@ def encode_byte_string_as_string(byte_string):
   return encoded
 
 
-class ObjectHistory(object):
+class ObjectHistory:
   """This is the superinterface of all object histories. The idea
   behind that is to use that type of history best suited for a
   purpose considering amount of data, possibility for history
@@ -90,7 +90,7 @@ class LogarithmicBackoffHistory(ObjectHistory):
   will be moved to the next lower position, before putting the
   new element at the end of the list. With a chance of 1/8, the
   last two elements are moved, ... Thus the list will in average
-  span a time range of 2^maxItems items with growing size of 
+  span a time range of 2^maxItems items with growing size of
   holes towards the earliest element."""
 
   def __init__(self, max_items, initial_list=None):
@@ -121,7 +121,7 @@ class LogarithmicBackoffHistory(ObjectHistory):
     self.history[:] = []
 
 
-class TimeTriggeredComponentInterface(object):
+class TimeTriggeredComponentInterface:
   """This is the common interface of all components that can be
   registered to receive timer interrupts. There might be different
   timelines for triggering, real time and normalized log data

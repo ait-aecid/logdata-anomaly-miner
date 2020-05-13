@@ -3,7 +3,7 @@
 from aminer.parsing.MatchElement import MatchElement
 
 
-class MatchContext(object):
+class MatchContext:
   """This class allows storage of data relevant during the matching
   process, e.g. the root node and the remaining unmatched data.
   Then searching for non-atomic matches, e.g. sequences, the context

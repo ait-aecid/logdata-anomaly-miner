@@ -15,7 +15,7 @@ from aminer.analysis.AtomFilters import SubhandlerFilter
 result_string = '%s(%s)'
 
 
-class MatchAction(object):
+class MatchAction:
   """This is the interface of all match actions."""
   def match_action(self, log_atom):
     """This method is invoked if a rule rule has matched.
@@ -48,7 +48,7 @@ class AtomFilterMatchAction(MatchAction, SubhandlerFilter):
     self.receive_atom(log_atom)
 
 
-class MatchRule(object):
+class MatchRule:
   """This is the interface of all match rules."""
   def match(self, log_atom):
     """Check if this rule matches. On match an optional matchAction

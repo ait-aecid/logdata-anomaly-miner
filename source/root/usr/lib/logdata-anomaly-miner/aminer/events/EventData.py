@@ -2,7 +2,7 @@ from datetime import datetime
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
 
-class EventData(object):
+class EventData:
 
     def __init__(self, event_type, event_message, sorted_log_lines, event_data, log_atom, event_source, analysis_context):
       self.event_type = event_type
