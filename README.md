@@ -1,6 +1,6 @@
 # logdata-anomaly-miner [![Build Status](https://travis-ci.org/ait-aecid/logdata-anomaly-miner.svg?branch=master)](https://travis-ci.org/ait-aecid/logdata-anomaly-miner)
 
-This tool allows one to create log analysis pipelines
+This tool allows one to create log analysis pipelines.
 
 # Installation
 
@@ -25,7 +25,7 @@ chmod +x aminer_install.sh
 
 ## Getting started
 
-Here are some resources to read in order to come along with the configuration:
+Here are some resources to read in order to get started with configurations:
 
 * [Getting started](https://github.com/ait-aecid/logdata-anomaly-miner/wiki/Getting-started-(tutorial))
 * [Some available configurations](https://github.com/ait-aecid/logdata-anomaly-miner/tree/master/source/root/etc/aminer/conf-available/generic)
