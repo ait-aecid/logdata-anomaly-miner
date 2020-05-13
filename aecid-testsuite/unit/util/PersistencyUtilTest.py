@@ -44,17 +44,17 @@ class PersistencyUtilTest(TestBase):
     '''
     def test1persist_multiple_objects_of_single_class(self):
       description = "Test1PersistencyUtil"
-      self.new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler],
+      new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler],
         'Default', True)
-      self.analysis_context.register_component(self.new_match_path_detector, description)
+      self.analysis_context.register_component(new_match_path_detector, description)
       
       t = time.time()
       log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_fixed_dme),
-        t, self.new_match_path_detector)
+        t, new_match_path_detector)
       log_atom_decimal_integer_value_me = LogAtom(self.match_context_decimal_integer_value_me.match_data,
-        ParserMatch(self.match_element_decimal_integer_value_me), t, self.new_match_path_detector)
-      self.new_match_path_detector.receive_atom(log_atom_fixed_dme)
-      self.new_match_path_detector.receive_atom(log_atom_decimal_integer_value_me)
+        ParserMatch(self.match_element_decimal_integer_value_me), t, new_match_path_detector)
+      new_match_path_detector.receive_atom(log_atom_fixed_dme)
+      new_match_path_detector.receive_atom(log_atom_decimal_integer_value_me)
       
       other_new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler],
         'otherDetector', True)
@@ -64,9 +64,9 @@ class PersistencyUtilTest(TestBase):
       other_new_match_path_detector.receive_atom(log_atom_fixed_dme)
           
       PersistencyUtil.persist_all()
-      self.assertTrue(PersistencyUtil.load_json(self.new_match_path_detector.persistence_file_name) ==
+      self.assertTrue(PersistencyUtil.load_json(new_match_path_detector.persistence_file_name) ==
         [self.match_element_fixed_dme.get_path(), self.match_element_decimal_integer_value_me.get_path()]
-        or PersistencyUtil.load_json(self.new_match_path_detector.persistence_file_name) ==
+        or PersistencyUtil.load_json(new_match_path_detector.persistence_file_name) ==
         [self.match_element_decimal_integer_value_me.get_path(), self.match_element_fixed_dme.get_path()])
       self.assertEqual(PersistencyUtil.load_json(other_new_match_path_detector.persistence_file_name),
         [self.match_element_fixed_dme.get_path()])
@@ -76,17 +76,17 @@ class PersistencyUtilTest(TestBase):
     '''
     def test2persist_multiple_objects_of_multiple_class(self):
       description = "Test2PersistencyUtil"
-      self.new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler],
+      new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler],
         'Default2', True)
-      self.analysis_context.register_component(self.new_match_path_detector, description)
+      self.analysis_context.register_component(new_match_path_detector, description)
       
       t = time.time()
       log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_fixed_dme),
-        t, self.new_match_path_detector)
+        t, new_match_path_detector)
       log_atom_decimal_integer_value_me = LogAtom(self.match_context_decimal_integer_value_me.match_data,
-        ParserMatch(self.match_element_decimal_integer_value_me), t, self.new_match_path_detector)
-      self.new_match_path_detector.receive_atom(log_atom_fixed_dme)
-      self.new_match_path_detector.receive_atom(log_atom_decimal_integer_value_me)
+        ParserMatch(self.match_element_decimal_integer_value_me), t, new_match_path_detector)
+      new_match_path_detector.receive_atom(log_atom_fixed_dme)
+      new_match_path_detector.receive_atom(log_atom_decimal_integer_value_me)
       
       other_new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler],
         'otherDetector2', True)
@@ -103,9 +103,9 @@ class PersistencyUtilTest(TestBase):
       new_match_path_value_combo_detector.receive_atom(log_atom_sequence_me)
 
       PersistencyUtil.persist_all()
-      self.assertTrue(PersistencyUtil.load_json(self.new_match_path_detector.persistence_file_name) ==
+      self.assertTrue(PersistencyUtil.load_json(new_match_path_detector.persistence_file_name) ==
         [self.match_element_fixed_dme.get_path(), self.match_element_decimal_integer_value_me.get_path()]
-        or PersistencyUtil.load_json(self.new_match_path_detector.persistence_file_name) ==
+        or PersistencyUtil.load_json(new_match_path_detector.persistence_file_name) ==
         [self.match_element_decimal_integer_value_me.get_path(), self.match_element_fixed_dme.get_path()])
       self.assertEqual(PersistencyUtil.load_json(other_new_match_path_detector.persistence_file_name),
         [self.match_element_fixed_dme.get_path()])

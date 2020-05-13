@@ -68,19 +68,19 @@ class SecureOSFunctionsTestLocal(unittest.TestCase):
       server.bind(sock_name)
       server.listen(1)
       connection = server.accept()[0]
-      self.unix_socket_log_data_resource = UnixSocketLogDataResource(b'unix:///tmp/test4unixSocket.sock', connection.fileno())
+      unix_socket_log_data_resource = UnixSocketLogDataResource(b'unix:///tmp/test4unixSocket.sock', connection.fileno())
 
       print(self.listening)
-      self.unix_socket_log_data_resource.fill_buffer()
-      self.assertEqual(self.unix_socket_log_data_resource.buffer, data)
-      print('Data received: %s' % self.unix_socket_log_data_resource.buffer)
+      unix_socket_log_data_resource.fill_buffer()
+      self.assertEqual(unix_socket_log_data_resource.buffer, data)
+      print('Data received: %s' % unix_socket_log_data_resource.buffer)
       
-      self.unix_socket_log_data_resource.update_position(len(self.unix_socket_log_data_resource.buffer))
-      self.assertEqual(self.unix_socket_log_data_resource.total_consumed_length, 80)
-      self.assertEqual(self.unix_socket_log_data_resource.buffer, b'')
+      unix_socket_log_data_resource.update_position(len(unix_socket_log_data_resource.buffer))
+      self.assertEqual(unix_socket_log_data_resource.total_consumed_length, 80)
+      self.assertEqual(unix_socket_log_data_resource.buffer, b'')
       
       print("Shutting down...")
-      self.unix_socket_log_data_resource.close()
+      unix_socket_log_data_resource.close()
       proc.terminate()
       proc.wait()
       print("Done")
@@ -112,19 +112,19 @@ class SecureOSFunctionsTestLocal(unittest.TestCase):
       server.bind(sock_name)
       server.listen(1)
       connection = server.accept()[0]
-      self.unix_socket_log_data_resource = UnixSocketLogDataResource(b'unix:///tmp/test6unixSocket.sock', connection.fileno())
+      unix_socket_log_data_resource = UnixSocketLogDataResource(b'unix:///tmp/test6unixSocket.sock', connection.fileno())
 
       print(self.listening)
-      self.unix_socket_log_data_resource.fill_buffer()
-      self.assertEqual(self.unix_socket_log_data_resource.buffer, data)
-      print('Data received: %s' % self.unix_socket_log_data_resource.buffer)
+      unix_socket_log_data_resource.fill_buffer()
+      self.assertEqual(unix_socket_log_data_resource.buffer, data)
+      print('Data received: %s' % unix_socket_log_data_resource.buffer)
       
-      self.unix_socket_log_data_resource.update_position(len(self.unix_socket_log_data_resource.buffer))
-      self.assertEqual(self.unix_socket_log_data_resource.total_consumed_length, 25)
-      self.assertEqual(self.unix_socket_log_data_resource.buffer, b'')
+      unix_socket_log_data_resource.update_position(len(unix_socket_log_data_resource.buffer))
+      self.assertEqual(unix_socket_log_data_resource.total_consumed_length, 25)
+      self.assertEqual(unix_socket_log_data_resource.buffer, b'')
       
       print("Shutting down...")
-      self.unix_socket_log_data_resource.close()
+      unix_socket_log_data_resource.close()
       print("Done")
     
     '''

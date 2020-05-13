@@ -41,45 +41,45 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
     '''
     def test1_log_atom_not_known(self):
         description = "Test1EnhancedNewMatchPathValueComboDetector"
-        self.enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(self.aminer_config,
+        enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(self.aminer_config,
             [self.first_seq_s1, self.first_seq_d1], [self.stream_printer_event_handler], 'Default', False, False, output_log_line=False)
-        self.analysis_context.register_component(self.enhanced_new_match_path_value_combo_detector, description)
+        self.analysis_context.register_component(enhanced_new_match_path_value_combo_detector, description)
 
         t = round(time.time(), 3)
-        self.log_atom_sequence_me = LogAtom(self.match_element_sequence_me.get_match_string(),
-            ParserMatch(self.match_element_sequence_me), t, self.enhanced_new_match_path_value_combo_detector)
+        log_atom_sequence_me = LogAtom(self.match_element_sequence_me.get_match_string(),
+            ParserMatch(self.match_element_sequence_me), t, enhanced_new_match_path_value_combo_detector)
 
-        self.assertTrue(self.enhanced_new_match_path_value_combo_detector.receive_atom(self.log_atom_sequence_me))
+        self.assertTrue(enhanced_new_match_path_value_combo_detector.receive_atom(log_atom_sequence_me))
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string %
             (datetime.fromtimestamp(t).strftime(self.datetime_format_string),
-            self.enhanced_new_match_path_value_combo_detector.__class__.__name__, description,
+            enhanced_new_match_path_value_combo_detector.__class__.__name__, description,
             1, self.exp_str2 % (t, t)))
         self.reset_output_stream()
 
-        self.log_atom_sequence_me = LogAtom(self.match_element_sequence_me.get_match_string(),
+        log_atom_sequence_me = LogAtom(self.match_element_sequence_me.get_match_string(),
             ParserMatch(self.match_element_sequence_me), t + 2,
-            self.enhanced_new_match_path_value_combo_detector)
+            enhanced_new_match_path_value_combo_detector)
 
         # repeating should produce the same result with new extraData.
-        self.assertTrue(self.enhanced_new_match_path_value_combo_detector.receive_atom(self.log_atom_sequence_me))
+        self.assertTrue(enhanced_new_match_path_value_combo_detector.receive_atom(log_atom_sequence_me))
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string %
             (datetime.fromtimestamp(t + 2).strftime(self.datetime_format_string),
-            self.enhanced_new_match_path_value_combo_detector.__class__.__name__, description,
+            enhanced_new_match_path_value_combo_detector.__class__.__name__, description,
             1, "  {(b'25537 uid=', 2): [%s, %s, 2]}\nb'25537 uid=2'" % (t, t+2)))
         self.reset_output_stream()
 
-        self.enhanced_new_match_path_value_combo_detector2 = EnhancedNewMatchPathValueComboDetector(self.aminer_config,
+        enhanced_new_match_path_value_combo_detector2 = EnhancedNewMatchPathValueComboDetector(self.aminer_config,
             ['second/seq2/d1', 'second/seq2/s2'], [self.stream_printer_event_handler], 'Default', False, False, output_log_line=False)
 
-        self.analysis_context.register_component(self.enhanced_new_match_path_value_combo_detector2, description + "2")
-        self.log_atom_sequence_me2 = LogAtom(self.match_element_sequence_me2.get_match_string(),
-            ParserMatch(self.match_element_sequence_me2), t, self.enhanced_new_match_path_value_combo_detector2)
+        self.analysis_context.register_component(enhanced_new_match_path_value_combo_detector2, description + "2")
+        log_atom_sequence_me2 = LogAtom(self.match_element_sequence_me2.get_match_string(),
+            ParserMatch(self.match_element_sequence_me2), t, enhanced_new_match_path_value_combo_detector2)
 
         # other MatchElement
-        self.assertTrue(self.enhanced_new_match_path_value_combo_detector2.receive_atom(self.log_atom_sequence_me2))
+        self.assertTrue(enhanced_new_match_path_value_combo_detector2.receive_atom(log_atom_sequence_me2))
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string %
             (datetime.fromtimestamp(t).strftime(self.datetime_format_string),
-            self.enhanced_new_match_path_value_combo_detector.__class__.__name__, description + "2",
+            enhanced_new_match_path_value_combo_detector.__class__.__name__, description + "2",
             1, "  {(25537, b' uid=2'): [%s, %s, 1]}\nb'25537 uid=2'" % (t, t)))
 
     '''
@@ -88,43 +88,43 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
     '''
     def test2_log_atom_known(self):
         description = "Test2EnhancedNewMatchPathValueComboDetector"
-        self.enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(self.aminer_config,
+        enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(self.aminer_config,
             [self.first_seq_s1, self.first_seq_d1], [self.stream_printer_event_handler], 'Default', False, True, output_log_line=False)
-        self.analysis_context.register_component(self.enhanced_new_match_path_value_combo_detector, description)
+        self.analysis_context.register_component(enhanced_new_match_path_value_combo_detector, description)
 
         t = round(time.time(), 3)
-        self.log_atom_sequence_me = LogAtom(self.match_element_sequence_me.get_match_string(),
-            ParserMatch(self.match_element_sequence_me), t, self.enhanced_new_match_path_value_combo_detector)
+        log_atom_sequence_me = LogAtom(self.match_element_sequence_me.get_match_string(),
+            ParserMatch(self.match_element_sequence_me), t, enhanced_new_match_path_value_combo_detector)
 
-        self.assertTrue(self.enhanced_new_match_path_value_combo_detector.receive_atom(self.log_atom_sequence_me))
+        self.assertTrue(enhanced_new_match_path_value_combo_detector.receive_atom(log_atom_sequence_me))
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string %
             (datetime.fromtimestamp(t).strftime(self.datetime_format_string),
-            self.enhanced_new_match_path_value_combo_detector.__class__.__name__, description,
+            enhanced_new_match_path_value_combo_detector.__class__.__name__, description,
             1, self.exp_str2 % (t, t)))
         self.reset_output_stream()
 
         t = round(time.time(), 3)
-        self.log_atom_sequence_me = LogAtom(self.match_element_sequence_me.get_match_string(),
+        log_atom_sequence_me = LogAtom(self.match_element_sequence_me.get_match_string(),
             ParserMatch(self.match_element_sequence_me), t,
-            self.enhanced_new_match_path_value_combo_detector)
+            enhanced_new_match_path_value_combo_detector)
 
         # repeating should NOT produce the same result, only persist the new extraData.
-        self.assertTrue(self.enhanced_new_match_path_value_combo_detector.receive_atom(self.log_atom_sequence_me))
+        self.assertTrue(enhanced_new_match_path_value_combo_detector.receive_atom(log_atom_sequence_me))
         self.assertEqual(self.output_stream.getvalue(), '')
         self.reset_output_stream()
 
-        self.enhanced_new_match_path_value_combo_detector2 = EnhancedNewMatchPathValueComboDetector(self.aminer_config,
+        enhanced_new_match_path_value_combo_detector2 = EnhancedNewMatchPathValueComboDetector(self.aminer_config,
             ['second/seq2/d1', 'second/seq2/s2'], [self.stream_printer_event_handler], 'Default', False, False, output_log_line=False)
 
-        self.analysis_context.register_component(self.enhanced_new_match_path_value_combo_detector2, description + "2")
-        self.log_atom_sequence_me2 = LogAtom(self.match_element_sequence_me2.get_match_string(),
-            ParserMatch(self.match_element_sequence_me2), t, self.enhanced_new_match_path_value_combo_detector2)
+        self.analysis_context.register_component(enhanced_new_match_path_value_combo_detector2, description + "2")
+        log_atom_sequence_me2 = LogAtom(self.match_element_sequence_me2.get_match_string(),
+            ParserMatch(self.match_element_sequence_me2), t, enhanced_new_match_path_value_combo_detector2)
 
         # other MatchElement
-        self.assertTrue(self.enhanced_new_match_path_value_combo_detector2.receive_atom(self.log_atom_sequence_me2))
+        self.assertTrue(enhanced_new_match_path_value_combo_detector2.receive_atom(log_atom_sequence_me2))
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string %
             (datetime.fromtimestamp(t).strftime(self.datetime_format_string),
-            self.enhanced_new_match_path_value_combo_detector.__class__.__name__, description + "2",
+            enhanced_new_match_path_value_combo_detector.__class__.__name__, description + "2",
             1, "  {(25537, b' uid=2'): [%s, %s, 1]}\nb'25537 uid=2'" % (t, t)))
 
     '''
@@ -132,42 +132,42 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
     '''
     def test3_log_atom_known_from_persisted_data(self):
         description = "Test3EnhancedNewMatchPathValueComboDetector"
-        self.enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(self.aminer_config,
+        enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(self.aminer_config,
             [self.first_seq_s1, self.first_seq_d1], [self.stream_printer_event_handler], 'Default', False, True, output_log_line=False)
-        self.analysis_context.register_component(self.enhanced_new_match_path_value_combo_detector, description)
+        self.analysis_context.register_component(enhanced_new_match_path_value_combo_detector, description)
 
         t = round(time.time(), 3)
-        self.log_atom_sequence_me = LogAtom(self.match_element_sequence_me.get_match_string(),
-            ParserMatch(self.match_element_sequence_me), t, self.enhanced_new_match_path_value_combo_detector)
+        log_atom_sequence_me = LogAtom(self.match_element_sequence_me.get_match_string(),
+            ParserMatch(self.match_element_sequence_me), t, enhanced_new_match_path_value_combo_detector)
 
-        self.assertTrue(self.enhanced_new_match_path_value_combo_detector.receive_atom(self.log_atom_sequence_me))
+        self.assertTrue(enhanced_new_match_path_value_combo_detector.receive_atom(log_atom_sequence_me))
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string %
             (datetime.fromtimestamp(t).strftime(self.datetime_format_string),
-            self.enhanced_new_match_path_value_combo_detector.__class__.__name__, description, 1, self.exp_str2 % (t, t)))
-        self.enhanced_new_match_path_value_combo_detector.do_persist()
+            enhanced_new_match_path_value_combo_detector.__class__.__name__, description, 1, self.exp_str2 % (t, t)))
+        enhanced_new_match_path_value_combo_detector.do_persist()
         self.reset_output_stream()
 
-        self.other_enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(self.aminer_config,
+        other_enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(self.aminer_config,
             [self.first_seq_s1, self.first_seq_d1], [self.stream_printer_event_handler], 'Default', False, False, output_log_line=False)
-        self.analysis_context.register_component(self.other_enhanced_new_match_path_value_combo_detector, description + "2")
-        self.other_log_atom_sequence_me = LogAtom(self.match_element_sequence_me.get_match_string(),
-            ParserMatch(self.match_element_sequence_me), t + 2, self.other_enhanced_new_match_path_value_combo_detector)
+        self.analysis_context.register_component(other_enhanced_new_match_path_value_combo_detector, description + "2")
+        other_log_atom_sequence_me = LogAtom(self.match_element_sequence_me.get_match_string(),
+            ParserMatch(self.match_element_sequence_me), t + 2, other_enhanced_new_match_path_value_combo_detector)
 
-        self.assertTrue(self.other_enhanced_new_match_path_value_combo_detector.receive_atom(self.other_log_atom_sequence_me))
+        self.assertTrue(other_enhanced_new_match_path_value_combo_detector.receive_atom(other_log_atom_sequence_me))
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string %
             (datetime.fromtimestamp(t + 2).strftime(self.datetime_format_string),
-            self.enhanced_new_match_path_value_combo_detector.__class__.__name__, description + "2",
+            enhanced_new_match_path_value_combo_detector.__class__.__name__, description + "2",
             1, "  {(b'25537 uid=', 2): [%s, %s, 2]}\nb'25537 uid=2'" % (t, t+2)))
         self.reset_output_stream()
 
-        self.other_log_atom_sequence_me = LogAtom(self.match_element_sequence_me.get_match_string(),
+        other_log_atom_sequence_me = LogAtom(self.match_element_sequence_me.get_match_string(),
             ParserMatch(self.match_element_sequence_me), t + 5,
-            self.other_enhanced_new_match_path_value_combo_detector)
+            other_enhanced_new_match_path_value_combo_detector)
 
-        self.assertTrue(self.other_enhanced_new_match_path_value_combo_detector.receive_atom(self.other_log_atom_sequence_me))
+        self.assertTrue(other_enhanced_new_match_path_value_combo_detector.receive_atom(other_log_atom_sequence_me))
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string %
             (datetime.fromtimestamp(t + 5).strftime(self.datetime_format_string),
-            self.enhanced_new_match_path_value_combo_detector.__class__.__name__, description + "2",
+            enhanced_new_match_path_value_combo_detector.__class__.__name__, description + "2",
             1, "  {(b'25537 uid=', 2): [%s, %s, 3]}\nb'25537 uid=2'" % (t, t+5)))
 
     '''
@@ -175,45 +175,45 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
     '''
     def test4_whitelist_event_with_known_and_unknown_paths(self):
         description = "Test4EnhancedNewMatchPathValueComboDetector"
-        self.enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(self.aminer_config,
+        enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(self.aminer_config,
             [self.first_seq_s1, self.first_seq_d1], [self.stream_printer_event_handler], 'Default', False, True, output_log_line=False)
-        self.analysis_context.register_component(self.enhanced_new_match_path_value_combo_detector, description)
+        self.analysis_context.register_component(enhanced_new_match_path_value_combo_detector, description)
 
         t = time.time()
-        self.log_atom_sequence_me = LogAtom(self.match_element_sequence_me.get_match_string(),
+        log_atom_sequence_me = LogAtom(self.match_element_sequence_me.get_match_string(),
             ParserMatch(self.match_element_sequence_me), t,
-            self.enhanced_new_match_path_value_combo_detector)
-        self.assertEqual(self.enhanced_new_match_path_value_combo_detector.whitelist_event('Analysis.%s' %
-            self.enhanced_new_match_path_value_combo_detector.__class__.__name__, [self.log_atom_sequence_me,
-            [self.match_element_sequence_me.get_path()]], [self.log_atom_sequence_me,
+            enhanced_new_match_path_value_combo_detector)
+        self.assertEqual(enhanced_new_match_path_value_combo_detector.whitelist_event('Analysis.%s' %
+            enhanced_new_match_path_value_combo_detector.__class__.__name__, [log_atom_sequence_me,
+            [self.match_element_sequence_me.get_path()]], [log_atom_sequence_me,
             self.match_element_sequence_me.get_path()], None), self.__expected_whitelisting_string %
-            (', '.join(self.enhanced_new_match_path_value_combo_detector.target_path_list),
-            self.match_element_sequence_me.get_path(), self.log_atom_sequence_me))
+            (', '.join(enhanced_new_match_path_value_combo_detector.target_path_list),
+            self.match_element_sequence_me.get_path(), log_atom_sequence_me))
 
-        self.log_atom_sequence_me2 = LogAtom(self.match_element_sequence_me2.get_match_string(),
+        log_atom_sequence_me2 = LogAtom(self.match_element_sequence_me2.get_match_string(),
              ParserMatch(self.match_element_sequence_me2), t,
             self.enhanced_new_match_path_value_combo_detector)
 
-        self.enhanced_new_match_path_value_combo_detector.auto_include_flag = False
-        self.assertEqual(self.enhanced_new_match_path_value_combo_detector.whitelist_event('Analysis.%s' %
-            self.enhanced_new_match_path_value_combo_detector.__class__.__name__, [self.log_atom_sequence_me2,
-            [self.match_element_sequence_me2.get_path()]], [self.log_atom_sequence_me2, self.match_element_sequence_me2.get_path()],
-            None), self.__expected_whitelisting_string % (', '.join(self.enhanced_new_match_path_value_combo_detector.target_path_list),
-            self.match_element_sequence_me2.path, self.log_atom_sequence_me2))
+        enhanced_new_match_path_value_combo_detector.auto_include_flag = False
+        self.assertEqual(enhanced_new_match_path_value_combo_detector.whitelist_event('Analysis.%s' %
+            enhanced_new_match_path_value_combo_detector.__class__.__name__, [log_atom_sequence_me2,
+            [self.match_element_sequence_me2.get_path()]], [log_atom_sequence_me2, self.match_element_sequence_me2.get_path()],
+            None), self.__expected_whitelisting_string % (', '.join(enhanced_new_match_path_value_combo_detector.target_path_list),
+            self.match_element_sequence_me2.path, log_atom_sequence_me2))
 
     '''
     This test case checks the correctness of the metadata informations
     '''
     def test5save_metadata(self):
-        self.enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(self.aminer_config,
+        enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(self.aminer_config,
             ['first/f1/s1'], [self.stream_printer_event_handler], 'Default', False, True, None, output_log_line=False)
-        self.time = 1
-        self.log_atom_sequence_me = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_sequence_me),
-            self.time, self.enhanced_new_match_path_value_combo_detector)
+        t = 1
+        log_atom_sequence_me = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_sequence_me),
+            t, enhanced_new_match_path_value_combo_detector)
 
-        self.enhanced_new_match_path_value_combo_detector.receive_atom(self.log_atom_sequence_me)
-        self.assertEqual(self.enhanced_new_match_path_value_combo_detector.known_values_dict.get((self.fixed_dme.fixed_data,
-            (self.time, self.time, 1))), None)
+        enhanced_new_match_path_value_combo_detector.receive_atom(log_atom_sequence_me)
+        self.assertEqual(enhanced_new_match_path_value_combo_detector.known_values_dict.get((self.fixed_dme.fixed_data,
+            (t, t, 1))), None)
 
 
 if __name__ == "__main__":

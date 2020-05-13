@@ -49,6 +49,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
     """Receive a parsed atom and check all the classification
     rules, that will trigger correlation rule evaluation and event
     triggering on violations."""
+    # skipcq: PYL-W0201
     self.last_log_atom = log_atom
     for rule in self.event_classification_ruleset:
       rule.match(log_atom)

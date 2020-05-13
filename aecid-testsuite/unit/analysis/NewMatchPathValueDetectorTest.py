@@ -37,36 +37,36 @@ class NewMatchPathValueDetectorTest(TestBase):
     '''
     def test1_log_atom_not_known(self):
       description = "Test1NewMatchPathValueDetector"
-      self.new_match_path_value_detector = NewMatchPathValueDetector(self.aminer_config, [self.first_f1_s1],
+      new_match_path_value_detector = NewMatchPathValueDetector(self.aminer_config, [self.first_f1_s1],
         [self.stream_printer_event_handler], 'Default', False, output_log_line=False)
-      self.analysis_context.register_component(self.new_match_path_value_detector, description)
+      self.analysis_context.register_component(new_match_path_value_detector, description)
 
       t = time.time()
-      self.log_atom_sequence_me = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_first_match_me),
-        t, self.new_match_path_value_detector)
-      self.new_match_path_value_detector.receive_atom(self.log_atom_sequence_me)
+      log_atom_sequence_me = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_first_match_me),
+        t, new_match_path_value_detector)
+      new_match_path_value_detector.receive_atom(log_atom_sequence_me)
       self.assertEqual(self.output_stream.getvalue(), self.__expected_string %
         (datetime.fromtimestamp(t).strftime(self.datetime_format_string),
-        self.new_match_path_value_detector.__class__.__name__, description, 1, self.string2))
+        new_match_path_value_detector.__class__.__name__, description, 1, self.string2))
       self.reset_output_stream()
       
       #repeating should produce the same result
-      self.new_match_path_value_detector.receive_atom(self.log_atom_sequence_me)
+      new_match_path_value_detector.receive_atom(log_atom_sequence_me)
       self.assertEqual(self.output_stream.getvalue(), self.__expected_string %
         (datetime.fromtimestamp(t).strftime(self.datetime_format_string),
-        self.new_match_path_value_detector.__class__.__name__, description, 1, self.string2))
+        new_match_path_value_detector.__class__.__name__, description, 1, self.string2))
       self.reset_output_stream()
       
-      self.new_match_path_value_detector2 = NewMatchPathValueDetector(self.aminer_config, ['second/f2/d1'],
+      new_match_path_value_detector2 = NewMatchPathValueDetector(self.aminer_config, ['second/f2/d1'],
         [self.stream_printer_event_handler], 'Default', False, output_log_line=False)
-      self.analysis_context.register_component(self.new_match_path_value_detector2, description + "2")
-      self.log_atom_sequence_me2 = LogAtom(b'25537', ParserMatch(self.match_element_first_match_me2), t, self.new_match_path_value_detector2)
+      self.analysis_context.register_component(new_match_path_value_detector2, description + "2")
+      log_atom_sequence_me2 = LogAtom(b'25537', ParserMatch(self.match_element_first_match_me2), t, new_match_path_value_detector2)
       
       #other MatchElement
-      self.new_match_path_value_detector2.receive_atom(self.log_atom_sequence_me2)
+      new_match_path_value_detector2.receive_atom(log_atom_sequence_me2)
       self.assertEqual(self.output_stream.getvalue(), self.__expected_string %
         (datetime.fromtimestamp(t).strftime(self.datetime_format_string),
-        self.new_match_path_value_detector.__class__.__name__, description + "2", 1, "{'second/f2/d1': 25537}\nb'25537'"))
+        new_match_path_value_detector.__class__.__name__, description + "2", 1, "{'second/f2/d1': 25537}\nb'25537'"))
 
     '''
     This test case checks the functionality of the autoIncludeFlag. 
@@ -74,59 +74,59 @@ class NewMatchPathValueDetectorTest(TestBase):
     '''
     def test2_log_atom_known(self):
       description = "Test2NewMatchPathValueDetector"
-      self.new_match_path_value_detector = NewMatchPathValueDetector(self.aminer_config, [self.first_f1_s1],
+      new_match_path_value_detector = NewMatchPathValueDetector(self.aminer_config, [self.first_f1_s1],
         [self.stream_printer_event_handler], 'Default', True, output_log_line=False)
-      self.analysis_context.register_component(self.new_match_path_value_detector, description)
+      self.analysis_context.register_component(new_match_path_value_detector, description)
       
       t = time.time()
-      self.log_atom_sequence_me = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_first_match_me),
-        t, self.new_match_path_value_detector)
-      self.new_match_path_value_detector.receive_atom(self.log_atom_sequence_me)
+      log_atom_sequence_me = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_first_match_me),
+        t, new_match_path_value_detector)
+      new_match_path_value_detector.receive_atom(log_atom_sequence_me)
       self.assertEqual(self.output_stream.getvalue(), self.__expected_string %
         (datetime.fromtimestamp(t).strftime(self.datetime_format_string),
-        self.new_match_path_value_detector.__class__.__name__, description, 1, self.string2))
+        new_match_path_value_detector.__class__.__name__, description, 1, self.string2))
       self.reset_output_stream()
       
       #repeating should NOT produce the same result
-      self.new_match_path_value_detector.receive_atom(self.log_atom_sequence_me)
+      new_match_path_value_detector.receive_atom(log_atom_sequence_me)
       self.assertEqual(self.output_stream.getvalue(), '')
       self.reset_output_stream()
       
-      self.new_match_path_value_detector2 = NewMatchPathValueDetector(self.aminer_config, ['second/f2/d1'],
+      new_match_path_value_detector2 = NewMatchPathValueDetector(self.aminer_config, ['second/f2/d1'],
         [self.stream_printer_event_handler], 'Default', False, output_log_line=False)
-      self.analysis_context.register_component(self.new_match_path_value_detector2, description + "2")
-      self.log_atom_sequence_me2 = LogAtom(b'25537', ParserMatch(self.match_element_first_match_me2), t, self.new_match_path_value_detector2)
+      self.analysis_context.register_component(new_match_path_value_detector2, description + "2")
+      log_atom_sequence_me2 = LogAtom(b'25537', ParserMatch(self.match_element_first_match_me2), t, new_match_path_value_detector2)
       
       #other MatchElement
-      self.new_match_path_value_detector2.receive_atom(self.log_atom_sequence_me2)
+      new_match_path_value_detector2.receive_atom(log_atom_sequence_me2)
       self.assertEqual(self.output_stream.getvalue(), self.__expected_string %
         (datetime.fromtimestamp(t).strftime(self.datetime_format_string),
-        self.new_match_path_value_detector.__class__.__name__, description + "2", 1, "{'second/f2/d1': 25537}\nb'25537'"))
+        new_match_path_value_detector.__class__.__name__, description + "2", 1, "{'second/f2/d1': 25537}\nb'25537'"))
     
     '''
     The persisting and reading of permitted log lines should be checked with this test.
     '''
     def test3_log_atom_known_from_persisted_data(self):
       description = "Test3NewMatchPathValueDetector"
-      self.new_match_path_value_detector = NewMatchPathValueDetector(self.aminer_config, [self.first_f1_s1],
+      new_match_path_value_detector = NewMatchPathValueDetector(self.aminer_config, [self.first_f1_s1],
         [self.stream_printer_event_handler], 'Default', True, output_log_line=False)
-      self.analysis_context.register_component(self.new_match_path_value_detector, description)
+      self.analysis_context.register_component(new_match_path_value_detector, description)
       
       t = time.time()
-      self.log_atom_sequence_me = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_first_match_me), t, self.new_match_path_value_detector)
-      self.new_match_path_value_detector.receive_atom(self.log_atom_sequence_me)
+      log_atom_sequence_me = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_first_match_me), t, new_match_path_value_detector)
+      new_match_path_value_detector.receive_atom(log_atom_sequence_me)
       self.assertEqual(self.output_stream.getvalue(), self.__expected_string %
         (datetime.fromtimestamp(t).strftime(self.datetime_format_string),
-        self.new_match_path_value_detector.__class__.__name__, description, 1, self.string2))
-      self.new_match_path_value_detector.do_persist()
+        new_match_path_value_detector.__class__.__name__, description, 1, self.string2))
+      new_match_path_value_detector.do_persist()
       self.reset_output_stream()
       
-      self.other_new_match_path_value_detector = NewMatchPathValueDetector(self.aminer_config, [self.first_f1_s1],
+      other_new_match_path_value_detector = NewMatchPathValueDetector(self.aminer_config, [self.first_f1_s1],
         [self.stream_printer_event_handler], 'Default', True, output_log_line=False)
-      self.analysis_context.register_component(self.new_match_path_value_detector, description + "2")
-      self.other_log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_first_match_me), t, self.other_new_match_path_value_detector)
+      self.analysis_context.register_component(new_match_path_value_detector, description + "2")
+      self.other_log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_first_match_me), t, other_new_match_path_value_detector)
       
-      self.other_new_match_path_value_detector.receive_atom(self.other_log_atom_fixed_dme)
+      other_new_match_path_value_detector.receive_atom(self.other_log_atom_fixed_dme)
       self.assertEqual(self.output_stream.getvalue(), '')
 
     

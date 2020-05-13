@@ -41,24 +41,24 @@ class TimeCorrelationDetectorTest(TestBase):
 
     t = time.time()
     for i in range(0, 10):
-      self.logAtomSequenceME = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_first_match_me), t, time_correlation_detector)
-      time_correlation_detector.receive_atom(self.logAtomSequenceME)
+      logAtomSequenceME = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_first_match_me), t, time_correlation_detector)
+      time_correlation_detector.receive_atom(logAtomSequenceME)
     self.assertTrue(self.output_stream.getvalue().startswith(self.__expected_string % (datetime.fromtimestamp(t).strftime(self.datetime_format_string),
       description, 10)))
     self.reset_output_stream()
      
     for i in range(0, 10):
-      self.logAtomSequenceME = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_first_match_me), t + i, time_correlation_detector)
-      time_correlation_detector.receive_atom(self.logAtomSequenceME)
+      logAtomSequenceME = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_first_match_me), t + i, time_correlation_detector)
+      time_correlation_detector.receive_atom(logAtomSequenceME)
     self.assertTrue(self.output_stream.getvalue().startswith(self.__expected_string % (datetime.fromtimestamp(t + 9).strftime(self.datetime_format_string),
       description, 20)))
     self.reset_output_stream()
     
     for i in range(10, 15):
-      self.logAtomSequenceME = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_first_match_me), t + i, time_correlation_detector)
-      time_correlation_detector.receive_atom(self.logAtomSequenceME)
-      self.logAtomSequenceME2 = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_first_match_me2), t + i, time_correlation_detector)
-      time_correlation_detector.receive_atom(self.logAtomSequenceME2)
+      logAtomSequenceME = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_first_match_me), t + i, time_correlation_detector)
+      time_correlation_detector.receive_atom(logAtomSequenceME)
+      logAtomSequenceME2 = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_first_match_me2), t + i, time_correlation_detector)
+      time_correlation_detector.receive_atom(logAtomSequenceME2)
     self.assertTrue(self.output_stream.getvalue().startswith(self.__expected_string % (datetime.fromtimestamp(t + 14).strftime(self.datetime_format_string),
       description, 30)))
 
