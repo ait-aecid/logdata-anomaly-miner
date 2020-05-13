@@ -50,7 +50,7 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
           'New value for pathes %s, %s: %s' % ('match/s1', 'match/s2',
           repr(match_element.match_object)), [log_atom.raw_data, log_atom.raw_data], None, log_atom, self)
       sleep(30)
-      # skipcq: PYL-W1510
+      # skipcq: PYL-W1510, BAN-B602
       result = subprocess.run(self.mail_call, shell=True, stdout=subprocess.PIPE)
 
       self.assertTrue(self.__expected_string % (datetime.fromtimestamp(t-600).strftime(self.datetime_format_string),
@@ -89,7 +89,7 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
 
       t = 0
       default_mail_notification_event_handler.do_timer(t)
-      # skipcq: PYL-W1510
+      # skipcq: PYL-W1510, BAN-B602
       result = subprocess.run(self.mail_call, shell=True, stdout=subprocess.PIPE)
 
       self.assertFalse(self.__expected_string %
@@ -103,7 +103,7 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
       default_mail_notification_event_handler.do_timer(t)
 
       sleep(5)
-      # skipcq: PYL-W1510
+      # skipcq: PYL-W1510, BAN-B602
       result = subprocess.run(self.mail_call, shell=True, stdout=subprocess.PIPE)
       self.assertFalse(self.__expected_string %
         (datetime.fromtimestamp(t).strftime(self.datetime_format_string),
@@ -115,7 +115,7 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
       default_mail_notification_event_handler.do_timer(t)
 
       sleep(30)
-      # skipcq: PYL-W1510
+      # skipcq: PYL-W1510, BAN-B602
       result = subprocess.run(self.mail_call, shell=True, stdout=subprocess.PIPE)
       self.assertTrue(self.__expected_string %
         (datetime.fromtimestamp(t).strftime(self.datetime_format_string),
