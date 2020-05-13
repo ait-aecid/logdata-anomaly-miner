@@ -92,7 +92,7 @@ class AnalysisContext(object):
     the time trigger class supplied by the component and register
     it for the classes specified in the override list. Use an
     empty list to disable registration."""
-    if component_name == None:
+    if component_name is None:
       component_name = str(component.__class__.__name__) + str(self.next_registry_id)
     if component_name in self.registered_components_by_name:
       raise Exception('Component with same name already registered')
