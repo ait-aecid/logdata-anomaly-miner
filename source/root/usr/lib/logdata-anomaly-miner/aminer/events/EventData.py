@@ -41,6 +41,6 @@ class EventData:
           elif line != '':
             message += '  '+line+'\n'
             
-      #uncomment the following line for debugging..
-      #print("%s" % message)
+      # uncomment the following line for debugging..
+      # print("%s" % message)
       return message

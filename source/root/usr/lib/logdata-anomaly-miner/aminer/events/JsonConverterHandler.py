@@ -73,7 +73,7 @@ class JsonConverterHandler(EventHandlerInterface):
     json_data = json.dumps(event_data, indent=2)
     res = [''] * len(sorted_log_lines)
     res[0] = str(json_data)
-    #print(json_data)
+    # print(json_data)
 
     for listener in self.json_event_handlers:
       listener.receive_event(event_type, event_message, res, json_data, log_atom, event_source)

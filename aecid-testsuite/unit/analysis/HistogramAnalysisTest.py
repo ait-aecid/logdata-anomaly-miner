@@ -87,7 +87,7 @@ class HistogramAnalysisTest(TestBase):
       self.assertEqual(histogram_data.binned_elements, 0)
       
       histogram_data.add_value(100000)
-      #100000%86400 = 13600 -> 3
+      # 100000%86400 = 13600 -> 3
       self.assertEqual(histogram_data.bin_data[3], 1)
       self.assertEqual(histogram_data.bin_data[16], 1)
       self.assertEqual(histogram_data.bin_data[17], 2)
@@ -178,7 +178,7 @@ class HistogramAnalysisTest(TestBase):
       histogram_analysis.receive_atom(log_atom)
       self.assertEqual(self.output_stream.getvalue(), '')
       
-      #resetting the outputStream
+      # resetting the outputStream
       start_time = start_time + 3600
       end_time = end_time + 3600
       self.reset_output_stream()
@@ -226,7 +226,7 @@ class HistogramAnalysisTest(TestBase):
         datetime.fromtimestamp(t + diff).strftime(self.datetime_format_string),
         'Property "match/crontab" (2 elements):\n  * [16-17]: 2 (ratio = 1.00e+00, p = 1.74e-03)'))
       
-      #resetting the outputStream
+      # resetting the outputStream
       start_time = start_time + 3600
       end_time = end_time + 3600
       self.reset_output_stream()
@@ -274,7 +274,7 @@ class HistogramAnalysisTest(TestBase):
       path_dependent_histogram_analysis.receive_atom(log_atom)
       self.assertEqual(self.output_stream.getvalue(), '')
           
-      #resetting the outputStream
+      # resetting the outputStream
       start_time = start_time + 3600
       end_time = end_time + 3600
       self.reset_output_stream()
@@ -329,7 +329,7 @@ class HistogramAnalysisTest(TestBase):
         datetime.fromtimestamp(t + diff).strftime(self.datetime_format_string),
         'Path values "match/crontab":\nExample: 662600\n  Property "match/crontab" (2 elements):\n  * [16-17]: 2 (ratio = 1.00e+00, p = 1.74e-03)'))
       
-      #resetting the outputStream
+      # resetting the outputStream
       start_time = start_time + 3600
       end_time = end_time + 3600
       self.output_stream.seek(0)

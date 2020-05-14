@@ -51,14 +51,14 @@ class NewMatchPathDetectorTest(TestBase):
         1, self.match_path_s1, self.pid))
       self.reset_output_stream()
       
-      #repeating should produce the same result
+      # repeating should produce the same result
       self.assertTrue(new_match_path_detector.receive_atom(log_atom_fixed_dme))
       self.assertEqual(self.output_stream.getvalue(), self.__expected_string %
         (datetime.fromtimestamp(t).strftime(self.datetime_format_string), new_match_path_detector.__class__.__name__, description,
         1, self.match_path_s1, self.pid))
       self.reset_output_stream()
       
-      #other MatchElement
+      # other MatchElement
       self.assertTrue(new_match_path_detector.receive_atom(log_atom_decimal_integer_value_me))
       self.assertEqual(self.output_stream.getvalue(), self.__expected_string %
         (datetime.fromtimestamp(t).strftime(self.datetime_format_string), new_match_path_detector.__class__.__name__, description,
@@ -86,12 +86,12 @@ class NewMatchPathDetectorTest(TestBase):
         1, self.match_path_s1, self.pid))
       self.reset_output_stream()
       
-      #repeating should NOT produce the same result
+      # repeating should NOT produce the same result
       self.assertTrue(new_match_path_detector.receive_atom(log_atom_fixed_dme))
       self.assertEqual(self.output_stream.getvalue(), '')
       self.reset_output_stream()
       
-      #other MatchElement
+      # other MatchElement
       self.assertTrue(new_match_path_detector.receive_atom(log_atom_decimal_integer_value_me))
       self.assertEqual(self.output_stream.getvalue(), self.__expected_string %
         (datetime.fromtimestamp(t).strftime(self.datetime_format_string), new_match_path_detector.__class__.__name__, description,

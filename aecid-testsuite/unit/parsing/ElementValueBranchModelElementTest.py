@@ -85,21 +85,21 @@ class ElementValueBranchModelElementTest(unittest.TestCase):
     self.assertEqual(element_value_branch_model_element.get_match_element('match', match_context), None)
     self.assertEqual(match_context.match_data, self.path_to_match)
     
-    #no matchChildren
+    # no matchChildren
     element_value_branch_model_element = ElementValueBranchModelElement("id", self.fixed_data_me3, "wordlist",
       {0:self.decimal_integer_value_model_element, 1:self.fixed_data_me2})
     match_context = MatchContext(self.path_to_match)
     self.assertEqual(element_value_branch_model_element.get_match_element('match', match_context), None)
     self.assertEqual(match_context.match_data, self.path_to_match)
     
-    #no branchModel
+    # no branchModel
     element_value_branch_model_element = ElementValueBranchModelElement("id", self.first_match_me, "wordlist",
       {0:self.decimal_integer_value_model_element})
     match_context = MatchContext(self.string_path_to_match)
     self.assertEqual(element_value_branch_model_element.get_match_element('match', match_context), None)
     self.assertEqual(match_context.match_data, self.string_path_to_match)
     
-    #no branchMatch
+    # no branchMatch
     element_value_branch_model_element = ElementValueBranchModelElement("id", self.first_match_me, "wordlist",
       {0:self.decimal_integer_value_model_element, 1:self.fixed_data_me2})
     match_context = MatchContext(self.string_path_to_match)

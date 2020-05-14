@@ -46,10 +46,10 @@ class SimpleMultisourceAtomSyncTest(TestBase):
       self.assertTrue(not simple_multisource_atom_sync.receive_atom(log_atom1))
       sleep(sync_wait_time + 1)
       
-      #not of the same source, thus must not be accepted.
+      # not of the same source, thus must not be accepted.
       self.assertTrue(not simple_multisource_atom_sync.receive_atom(log_atom2))
       self.assertTrue(simple_multisource_atom_sync.receive_atom(log_atom1))
-      #logAtom1 is handled now, so logAtom2 is accepted.
+      # logAtom1 is handled now, so logAtom2 is accepted.
       self.reset_output_stream()
       self.assertTrue(simple_multisource_atom_sync.receive_atom(log_atom2))
       self.assertEqual(self.output_stream.getvalue(), self.__expected_string %
@@ -106,7 +106,7 @@ class SimpleMultisourceAtomSyncTest(TestBase):
       self.assertTrue(not simple_multisource_atom_sync.receive_atom(log_atom1))
       sleep(sync_wait_time)
       
-      #unsorted, should be accepted
+      # unsorted, should be accepted
       self.reset_output_stream()
       self.assertTrue(simple_multisource_atom_sync.receive_atom(log_atom2))
       self.assertTrue(simple_multisource_atom_sync.receive_atom(log_atom1))
@@ -146,7 +146,7 @@ class SimpleMultisourceAtomSyncTest(TestBase):
       sleep(sync_wait_time + 1)
       
       self.assertTrue(simple_multisource_atom_sync.receive_atom(log_atom1))
-      #logAtom1 is handled now, so newMatchPathDetector1 should be deleted after waiting the syncWaitTime.
+      # logAtom1 is handled now, so newMatchPathDetector1 should be deleted after waiting the syncWaitTime.
       self.assertTrue(not simple_multisource_atom_sync.receive_atom(log_atom2))
       sleep(sync_wait_time + 1)
       self.assertTrue(not simple_multisource_atom_sync.receive_atom(log_atom2))

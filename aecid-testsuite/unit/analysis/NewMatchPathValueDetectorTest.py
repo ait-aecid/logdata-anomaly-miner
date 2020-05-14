@@ -50,7 +50,7 @@ class NewMatchPathValueDetectorTest(TestBase):
         new_match_path_value_detector.__class__.__name__, description, 1, self.string2))
       self.reset_output_stream()
       
-      #repeating should produce the same result
+      # repeating should produce the same result
       new_match_path_value_detector.receive_atom(log_atom_sequence_me)
       self.assertEqual(self.output_stream.getvalue(), self.__expected_string %
         (datetime.fromtimestamp(t).strftime(self.datetime_format_string),
@@ -62,7 +62,7 @@ class NewMatchPathValueDetectorTest(TestBase):
       self.analysis_context.register_component(new_match_path_value_detector2, description + "2")
       log_atom_sequence_me2 = LogAtom(b'25537', ParserMatch(self.match_element_first_match_me2), t, new_match_path_value_detector2)
       
-      #other MatchElement
+      # other MatchElement
       new_match_path_value_detector2.receive_atom(log_atom_sequence_me2)
       self.assertEqual(self.output_stream.getvalue(), self.__expected_string %
         (datetime.fromtimestamp(t).strftime(self.datetime_format_string),
@@ -87,7 +87,7 @@ class NewMatchPathValueDetectorTest(TestBase):
         new_match_path_value_detector.__class__.__name__, description, 1, self.string2))
       self.reset_output_stream()
       
-      #repeating should NOT produce the same result
+      # repeating should NOT produce the same result
       new_match_path_value_detector.receive_atom(log_atom_sequence_me)
       self.assertEqual(self.output_stream.getvalue(), '')
       self.reset_output_stream()
@@ -97,7 +97,7 @@ class NewMatchPathValueDetectorTest(TestBase):
       self.analysis_context.register_component(new_match_path_value_detector2, description + "2")
       log_atom_sequence_me2 = LogAtom(b'25537', ParserMatch(self.match_element_first_match_me2), t, new_match_path_value_detector2)
       
-      #other MatchElement
+      # other MatchElement
       new_match_path_value_detector2.receive_atom(log_atom_sequence_me2)
       self.assertEqual(self.output_stream.getvalue(), self.__expected_string %
         (datetime.fromtimestamp(t).strftime(self.datetime_format_string),

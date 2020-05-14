@@ -12,7 +12,7 @@ class Base64StringModelElementTest(unittest.TestCase):
   In this test case some legit base64 strings are matched with the ModelElement.
   '''
   def test1_legit_base64_strings(self):
-    #string with padding
+    # string with padding
     string = b'This is some string to be encoded.'
     base64_string = base64.b64encode(string)
     match_context = MatchContext(base64_string)
@@ -23,7 +23,7 @@ class Base64StringModelElementTest(unittest.TestCase):
     self.assertEqual(match_element.get_children(), None)
     self.assertEqual(match_context.match_data, b'')
     
-    #string without padding
+    # string without padding
     string = b'This is some string to be encoded without the padding character =.'
     base64_string = base64.b64encode(string)
     match_context = MatchContext(base64_string)
@@ -39,7 +39,7 @@ class Base64StringModelElementTest(unittest.TestCase):
   Also the padding checks of base64 strings is tested.
   '''
   def test2_base64_string_with_wrong_characters(self):
-    #string with padding
+    # string with padding
     string = b'This is some string to be encoded.'
     string_after_padding = b'This+string+is+not+encoded+any+more+'
     base64_string = base64.b64encode(string)
@@ -51,7 +51,7 @@ class Base64StringModelElementTest(unittest.TestCase):
     self.assertEqual(match_element.get_children(), None)
     self.assertEqual(match_context.match_data, string_after_padding + b'!')
     
-    #string without padding
+    # string without padding
     string = b'This is some string to be encoded without the padding character =.'
     base64_string = base64.b64encode(string)
     match_context = MatchContext(base64_string+string_after_padding+b'!')

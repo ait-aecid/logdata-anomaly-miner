@@ -27,7 +27,7 @@ class MatchValueAverageChangeDetectorTest(TestBase):
         [self.stream_printer_event_handler], None, [match_element1.get_path()], 3, start_time, True, False, 'Default')
       self.analysis_context.register_component(match_value_average_change_detector, description)
       
-      #create oldBin
+      # create oldBin
       log_atom = LogAtom(match_element1.get_match_object(), ParserMatch(match_element1),
         start_time, match_value_average_change_detector)
       match_value_average_change_detector.receive_atom(log_atom)
@@ -42,7 +42,7 @@ class MatchValueAverageChangeDetectorTest(TestBase):
         start_time + 2000, match_value_average_change_detector)
       match_value_average_change_detector.receive_atom(log_atom)
       
-      #compare Data
+      # compare Data
       match_element1 = MatchElement(self.cron_job1, "%s" % (start_time + 10000), start_time + 10000, [])
       log_atom = LogAtom(match_element1.get_match_object(), ParserMatch(match_element1),
         start_time + 10000, match_value_average_change_detector)
@@ -67,7 +67,7 @@ class MatchValueAverageChangeDetectorTest(TestBase):
         [self.stream_printer_event_handler], 'time', [match_element1.get_path()], 3, start_time + 86400, True, False, 'Default')
       self.analysis_context.register_component(match_value_average_change_detector, description)
       
-      #create oldBin
+      # create oldBin
       log_atom = LogAtom(match_element1.get_match_object(), ParserMatch(match_element1),
         start_time, match_value_average_change_detector)
       match_value_average_change_detector.receive_atom(log_atom)
@@ -82,7 +82,7 @@ class MatchValueAverageChangeDetectorTest(TestBase):
         start_time + 2000, match_value_average_change_detector)
       match_value_average_change_detector.receive_atom(log_atom)
       
-      #compare Data
+      # compare Data
       match_element1 = MatchElement(self.cron_job1, "%s" % (start_time + 10000), start_time + 10000, [])
       log_atom = LogAtom(match_element1.get_match_object(), ParserMatch(match_element1),
         start_time + 10000, match_value_average_change_detector)
@@ -111,7 +111,7 @@ class MatchValueAverageChangeDetectorTest(TestBase):
         [self.stream_printer_event_handler], 'time', [match_element1.get_path()], 3, start_time, True, False, 'Default')
       self.analysis_context.register_component(match_value_average_change_detector, description)
       
-      #create oldBin
+      # create oldBin
       log_atom = LogAtom(match_element1.get_match_object(), ParserMatch(match_element1),
         start_time, match_value_average_change_detector)
       match_value_average_change_detector.receive_atom(log_atom)
@@ -126,7 +126,7 @@ class MatchValueAverageChangeDetectorTest(TestBase):
         start_time + 2000, match_value_average_change_detector)
       match_value_average_change_detector.receive_atom(log_atom)
       
-      #compare Data
+      # compare Data
       match_element1 = MatchElement(self.cron_job1, "%s" % (start_time + 11000), start_time + 11000, [])
       log_atom = LogAtom(match_element1.get_match_object(), ParserMatch(match_element1),
         start_time + 11000, match_value_average_change_detector)
@@ -156,7 +156,7 @@ class MatchValueAverageChangeDetectorTest(TestBase):
         [self.stream_printer_event_handler], None, [match_element1.get_path()], 3, start_time, True, False, 'Default')
       self.analysis_context.register_component(match_value_average_change_detector, description)
       
-      #create oldBin
+      # create oldBin
       log_atom = LogAtom(match_element1.get_match_object(), ParserMatch(match_element1),
         start_time, match_value_average_change_detector)
       match_value_average_change_detector.receive_atom(log_atom)
@@ -171,7 +171,7 @@ class MatchValueAverageChangeDetectorTest(TestBase):
         start_time + 2000, match_value_average_change_detector)
       match_value_average_change_detector.receive_atom(log_atom)
       
-      #compare Data
+      # compare Data
       match_element1 = MatchElement(self.cron_job1, "%s" % (start_time + 10000), start_time + 10000, [])
       log_atom = LogAtom(match_element1.get_match_object(), ParserMatch(match_element1),
         start_time + 10000, match_value_average_change_detector)
@@ -181,7 +181,7 @@ class MatchValueAverageChangeDetectorTest(TestBase):
       log_atom = LogAtom(match_element1.get_match_object(), ParserMatch(match_element1),
         start_time + 20000, match_value_average_change_detector)
       match_value_average_change_detector.receive_atom(log_atom)
-      
+
       match_element1 = MatchElement(self.cron_job1, "%s" % (start_time + 30000), start_time + 30000, [])
       log_atom = LogAtom(match_element1.get_match_object(), ParserMatch(match_element1),
         start_time + 30000, match_value_average_change_detector)
@@ -203,7 +203,7 @@ class MatchValueAverageChangeDetectorTest(TestBase):
         [self.stream_printer_event_handler], None, [match_element1.get_path(), match_element2.get_path()], 2, start_time, True, False, 'Default')
       self.analysis_context.register_component(match_value_average_change_detector, description)
       
-      #create oldBin
+      # create oldBin
       log_atom = LogAtom(match_element1.get_match_object(), ParserMatch(match_element1),
         start_time, match_value_average_change_detector)
       match_value_average_change_detector.receive_atom(log_atom)
@@ -213,7 +213,7 @@ class MatchValueAverageChangeDetectorTest(TestBase):
         start_time + 1000, match_value_average_change_detector)
       match_value_average_change_detector.receive_atom(log_atom)
       
-      #create oldBin for ME2
+      # create oldBin for ME2
       log_atom = LogAtom(match_element2.get_match_object(), ParserMatch(match_element2),
         start_time, match_value_average_change_detector)
       match_value_average_change_detector.receive_atom(log_atom)
@@ -223,7 +223,7 @@ class MatchValueAverageChangeDetectorTest(TestBase):
         start_time + 1000, match_value_average_change_detector)
       match_value_average_change_detector.receive_atom(log_atom)
       
-      #compare data
+      # compare data
       match_element1 = MatchElement(self.cron_job1, "%s" % (start_time + 10000), start_time + 10000, [])
       log_atom = LogAtom(match_element1.get_match_object(), ParserMatch(match_element1),
         start_time + 10000, match_value_average_change_detector)
@@ -236,7 +236,7 @@ class MatchValueAverageChangeDetectorTest(TestBase):
       
       self.assertEqual(self.output_stream.getvalue(), '')
       
-      #compare data with ME2
+      # compare data with ME2
       match_element2 = MatchElement(self.cron_job2, "%s" % (start_time + 11000), start_time + 11000, [])
       log_atom = LogAtom(match_element2.get_match_object(), ParserMatch(match_element2),
         start_time + 11000, match_value_average_change_detector)

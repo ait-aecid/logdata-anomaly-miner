@@ -149,7 +149,7 @@ def save_config(analysis_context, new_file):
     if "REMOTECONTROL addHandlerToAtomFilterAndRegisterAnalysisComponent" in logs[i]:
       parameters = logs[i].split(",",2)
 
-      #find the name of the filter_config variable in the old config.
+      # find the name of the filter_config variable in the old config.
       pos = old.find(parameters[1].strip())
       new_pos = pos
       while old[new_pos] != '\n':
@@ -167,7 +167,7 @@ def save_config(analysis_context, new_file):
       old = old + "\n  %s.registerComponent(%s, componentName=%s)"%(filter_config, var, component_name)
       old = old + "\n  %s.addHandler(%s)\n"%(filter_config, var)
 
-  #remove double lines
+  # remove double lines
   old = old.replace('\n\n\n', '\n\n')
 
   try:
