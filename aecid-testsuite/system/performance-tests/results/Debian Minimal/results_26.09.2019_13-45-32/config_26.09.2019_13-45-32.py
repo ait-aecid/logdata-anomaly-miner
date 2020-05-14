@@ -195,9 +195,9 @@ def build_analysis_pipeline(analysis_context):
 
   from aminer.analysis import Rules
   from aminer.analysis import WhitelistViolationDetector
-  _violation_action=Rules.EventGenerationMatchAction('Analysis.GenericViolation',
+  _violation_action = Rules.EventGenerationMatchAction('Analysis.GenericViolation',
       'Violation detected', anomaly_event_handlers)
-  whitelist_rules=[]
+  whitelist_rules = []
   
 # This rule list should trigger, when the line does not look like: User root (logged in, logged out) 
 # or User 'username' (logged in, logged out) x minutes ago.
@@ -224,9 +224,9 @@ def build_analysis_pipeline(analysis_context):
         return match_value_list
     mod = 10000
     if (extra_data[2]+1) % mod == 0:
-        enhanced_new_match_path_value_combo_detector.auto_include_flag=False
+        enhanced_new_match_path_value_combo_detector.auto_include_flag = False
     else:
-        enhanced_new_match_path_value_combo_detector.auto_include_flag=True
+        enhanced_new_match_path_value_combo_detector.auto_include_flag = True
     return match_value_list
 
   from aminer.analysis.EnhancedNewMatchPathValueComboDetector import EnhancedNewMatchPathValueComboDetector

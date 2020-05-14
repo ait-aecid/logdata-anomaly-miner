@@ -217,7 +217,7 @@ def build_analysis_pipeline(analysis_context):
   from aminer.analysis.EnhancedNewMatchPathValueComboDetector import EnhancedNewMatchPathValueComboDetector
   enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(analysis_context.aminer_config, 
         ['/model/DailyCron/UName', '/model/DailyCron/JobNumber'], anomaly_event_handlers, auto_include_flag=False, tuple_transformation_function=tuple_transformation_function)
-  analysis_context.register_component(enhanced_new_match_path_value_combo_detector, component_name = "EnhancedNewValueCombo")
+  analysis_context.register_component(enhanced_new_match_path_value_combo_detector, component_name="EnhancedNewValueCombo")
   atom_filters.add_handler(enhanced_new_match_path_value_combo_detector)
 
   from aminer.analysis.HistogramAnalysis import HistogramAnalysis, LinearNumericBinDefinition, ModuloTimeBinDefinition, PathDependentHistogramAnalysis
