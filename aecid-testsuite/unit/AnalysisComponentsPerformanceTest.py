@@ -2,21 +2,19 @@ import unittest
 from aminer.analysis import NewMatchPathDetector, EnhancedNewMatchPathValueComboDetector, MatchValueAverageChangeDetector, \
     MatchValueStreamWriter, MissingMatchPathListValueDetector, NewMatchPathValueComboDetector, NewMatchPathValueDetector, \
     TimeCorrelationDetector, TimestampsUnsortedDetector, Rules, WhitelistViolationDetector, NewMatchIdValueComboDetector
-from aminer.input import LogAtom
-from unit.TestBase import TestBase
-import time
-from aminer.parsing import ParserMatch, MatchContext, MatchElement, DecimalIntegerValueModelElement, FirstMatchModelElement, \
-    DelimitedDataModelElement, FixedWordlistDataModelElement, AnyByteDataModelElement, SequenceModelElement, FixedDataModelElement
-from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
 from aminer.analysis.AtomFilters import MatchPathFilter, SubhandlerFilter, MatchValueFilter
-from aminer.analysis.HistogramAnalysis import ModuloTimeBinDefinition, \
-    HistogramData, HistogramAnalysis
-import random
-from time import process_time
-from aminer.analysis.TimeCorrelationViolationDetector import CorrelationRule, \
-    EventClassSelector, TimeCorrelationViolationDetector
+from aminer.analysis.HistogramAnalysis import ModuloTimeBinDefinition, HistogramData, HistogramAnalysis
+from aminer.analysis.TimeCorrelationViolationDetector import CorrelationRule, EventClassSelector, TimeCorrelationViolationDetector
 from aminer.analysis.TimestampCorrectionFilters import SimpleMonotonicTimestampAdjust
 from aminer.analysis.Rules import PathExistsMatchRule
+from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
+from aminer.input import LogAtom
+from aminer.parsing import ParserMatch, MatchContext, MatchElement, DecimalIntegerValueModelElement, FirstMatchModelElement, \
+    DelimitedDataModelElement, FixedWordlistDataModelElement, AnyByteDataModelElement, SequenceModelElement, FixedDataModelElement
+from unit.TestBase import TestBase
+import time
+import random
+from time import process_time
 from _io import StringIO
 
 

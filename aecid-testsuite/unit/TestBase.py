@@ -3,9 +3,8 @@ import os
 import shutil
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
-from _io import StringIO
-# skipcq: PYL-C0412
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
+from _io import StringIO
 
 
 class TestBase(unittest.TestCase):
