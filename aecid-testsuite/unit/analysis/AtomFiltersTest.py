@@ -145,7 +145,7 @@ class AtomFiltersTest(TestBase):
         ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
 
       match_value_filter = MatchValueFilter(self.match_element_fixed_dme.get_path(),
-        {self.fixed_dme.fixed_data:new_match_path_detector}, None)
+        {self.fixed_dme.fixed_data: new_match_path_detector}, None)
       self.assertTrue(match_value_filter.receive_atom(log_atom_fixed_dme))
     
     '''
@@ -158,11 +158,9 @@ class AtomFiltersTest(TestBase):
       self.analysis_context.register_component(new_match_path_detector, description)
       t = time.time()
       
-      log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data,
-        ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
+      log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
 
-      match_value_filter = MatchValueFilter(self.match_element_fixed_dme.get_path(),
-        {self.fixed_dme.fixed_data:None}, None)
+      match_value_filter = MatchValueFilter(self.match_element_fixed_dme.get_path(), {self.fixed_dme.fixed_data: None}, None)
       self.assertTrue(not match_value_filter.receive_atom(log_atom_fixed_dme))
     
     '''
@@ -176,8 +174,7 @@ class AtomFiltersTest(TestBase):
       t = time.time()
       
       log_atom_fixed_dme = LogAtom(b'24999', ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
-      match_value_filter = MatchValueFilter(self.match_element_fixed_dme.get_path(),
-        {self.fixed_dme.fixed_data:None}, None)
+      match_value_filter = MatchValueFilter(self.match_element_fixed_dme.get_path(), {self.fixed_dme.fixed_data: None}, None)
       self.assertTrue(not match_value_filter.receive_atom(log_atom_fixed_dme))
 
 

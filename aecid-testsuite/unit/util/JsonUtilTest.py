@@ -47,9 +47,9 @@ class JsonUtilTest(TestBase):
       self.assertEqual(decode_object(enc), lis)
       
       
-      dictionary = {'user':'defaultUser', 'password':b'topSecret', 'id':25}
+      dictionary = {'user': 'defaultUser', 'password': b'topSecret', 'id': 25}
       enc = encode_object(dictionary)
-      self.assertEqual(enc, {'string:user':'string:defaultUser', 'string:password':'bytes:topSecret', 'string:id':25})
+      self.assertEqual(enc, {'string:user': 'string:defaultUser', 'string:password': 'bytes:topSecret', 'string:id': 25})
       self.assertEqual(decode_object(enc), dictionary)
     
     '''

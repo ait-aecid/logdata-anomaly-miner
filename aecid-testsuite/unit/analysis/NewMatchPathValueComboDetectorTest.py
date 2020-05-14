@@ -67,7 +67,7 @@ class NewMatchPathValueComboDetectorTest(TestBase):
       self.assertTrue(new_match_path_value_combo_detector2.receive_atom(log_atom_sequence_me2))
       self.assertEqual(self.output_stream.getvalue(), self.__expected_string %
         (datetime.fromtimestamp(t).strftime(self.datetime_format_string),
-        new_match_path_value_combo_detector.__class__.__name__, description + "2",1,
+        new_match_path_value_combo_detector.__class__.__name__, description + "2", 1,
         "  (25537, b' uid=2')\nb'25537 uid=2'"))
 
     '''

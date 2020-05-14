@@ -151,21 +151,21 @@ class SimpleMultisourceAtomSyncTest(TestBase):
       sleep(sync_wait_time + 1)
       self.assertTrue(not simple_multisource_atom_sync.receive_atom(log_atom2))
       self.assertEqual(simple_multisource_atom_sync.sources_dict,
-        {new_match_path_detector1:[log_atom1.get_timestamp(), None],
-        new_match_path_detector2:[log_atom2.get_timestamp(), log_atom2]})
+        {new_match_path_detector1: [log_atom1.get_timestamp(), None],
+        new_match_path_detector2: [log_atom2.get_timestamp(), log_atom2]})
       
       self.assertTrue(simple_multisource_atom_sync.receive_atom(log_atom1))
       self.assertTrue(simple_multisource_atom_sync.receive_atom(log_atom1))
       sleep(sync_wait_time + 1)
       self.assertTrue(simple_multisource_atom_sync.receive_atom(log_atom1))
       self.assertEqual(simple_multisource_atom_sync.sources_dict,
-        {new_match_path_detector1:[log_atom1.get_timestamp(), None],
-        new_match_path_detector2:[log_atom2.get_timestamp(), log_atom2]})
+        {new_match_path_detector1: [log_atom1.get_timestamp(), None],
+        new_match_path_detector2: [log_atom2.get_timestamp(), log_atom2]})
       log_atom1 = LogAtom(match_element.match_object, ParserMatch(match_element), t + 1, new_match_path_detector1)
       self.assertTrue(not simple_multisource_atom_sync.receive_atom(log_atom1))
       self.assertEqual(simple_multisource_atom_sync.sources_dict,
-        {new_match_path_detector1:[log_atom1.get_timestamp() - 1, log_atom1],
-        new_match_path_detector2:[log_atom2.get_timestamp(), log_atom2]})
+        {new_match_path_detector1: [log_atom1.get_timestamp() - 1, log_atom1],
+        new_match_path_detector2: [log_atom2.get_timestamp(), log_atom2]})
       
       log_atom1 = LogAtom(match_element.match_object, ParserMatch(match_element), t - 1, new_match_path_detector1)
       self.assertTrue(simple_multisource_atom_sync.receive_atom(log_atom1))

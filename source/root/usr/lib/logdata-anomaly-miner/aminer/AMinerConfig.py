@@ -60,8 +60,8 @@ def save_config(analysis_context, new_file):
     pos = old.find(find_str)
     if pos == -1:
       msg += "WARNING: %s not found in the old config file." % find_str
-      logging.basicConfig(filename=LOG_FILE,level=logging.DEBUG, 
-          format='%(asctime)s %(levelname)s %(message)s', datefmt='%d.%m.%Y %H:%M:%S')
+      logging.basicConfig(filename=LOG_FILE, level=logging.DEBUG, 
+        format='%(asctime)s %(levelname)s %(message)s', datefmt='%d.%m.%Y %H:%M:%S')
       logging.warning("WARNING: %s not found in the old config file.", find_str)
     else:
       string = old[pos + len(find_str):]
@@ -111,7 +111,7 @@ def save_config(analysis_context, new_file):
   for i in enumerate(logs):
     if "REMOTECONTROL changeAttributeOfRegisteredAnalysisComponent" in logs[i]:
       logs[i] = logs[i][:logs[i].find('#')]
-      arr = logs[i].split(',',3)
+      arr = logs[i].split(',', 3)
       if arr[1].find("'") != -1:
         component_name = arr[1].split("'")[1]
       else:
@@ -147,7 +147,7 @@ def save_config(analysis_context, new_file):
       old = old[:old.find("=", pos)+1] + "%s"%value + old[end:]
 
     if "REMOTECONTROL addHandlerToAtomFilterAndRegisterAnalysisComponent" in logs[i]:
-      parameters = logs[i].split(",",2)
+      parameters = logs[i].split(",", 2)
 
       # find the name of the filter_config variable in the old config.
       pos = old.find(parameters[1].strip())

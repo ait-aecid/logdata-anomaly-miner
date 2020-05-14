@@ -45,7 +45,8 @@ class JsonConverterHandlerTest(TestBase):
         json_converter_handler = JsonConverterHandler([self.stream_printer_event_handler], self.analysis_context)
         log_atom = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element), self.t, self)
         self.analysis_context.register_component(self, self.description)
-        event_data = {'AnalysisComponent': {'AffectedParserPaths': ['test/path/1', 'test/path/2'], 'Message':'An other event happened too!'}}
+        event_data = {'AnalysisComponent': {'AffectedParserPaths': ['test/path/1', 'test/path/2'], 
+            'Message': 'An other event happened too!'}}
         json_converter_handler.receive_event(self.test_detector, self.event_message, self.sorted_log_lines,
             event_data, log_atom, self)
         self.assertEqual(self.output_stream.getvalue(),

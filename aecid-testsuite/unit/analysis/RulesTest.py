@@ -230,7 +230,7 @@ class RuleTest(TestBase):
     def test9value_dependent_modulo_time_match_rule(self):
       description = "Test9Rules"
       value_dependent_modulo_time_match_rule = ValueDependentModuloTimeMatchRule(self.model_syslog_time,
-          86400, [self.model_syslog_time], {1550145600:[43200, 86400]})
+          86400, [self.model_syslog_time], {1550145600: [43200, 86400]})
       self.analysis_context.register_component(value_dependent_modulo_time_match_rule, description)
       date_time_model_element = DateTimeModelElement('time', b'%d.%m.%Y %H:%M:%S')
       
@@ -377,8 +377,7 @@ class RuleTest(TestBase):
       ip_address_data_model_element = IpAddressDataModelElement('IPv4')
       
       value_dependent_delegated_match_rule = ValueDependentDelegatedMatchRule([self.match_any, self.match_ipv4],
-          {(self.alphabet, None):string_regex_match_rule,
-           (None, 3232235520):i_pv4_in_rfc1918_match_rule})
+          {(self.alphabet, None): string_regex_match_rule, (None, 3232235520): i_pv4_in_rfc1918_match_rule})
       self.analysis_context.register_component(value_dependent_delegated_match_rule, description + "3")
       
       match_context = MatchContext(self.alphabet)

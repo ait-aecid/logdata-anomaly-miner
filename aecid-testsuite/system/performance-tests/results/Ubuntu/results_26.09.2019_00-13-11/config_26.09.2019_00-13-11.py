@@ -172,7 +172,7 @@ def build_analysis_pipeline(analysis_context):
   fixed_wordlist_data_model_element = FixedWordlistDataModelElement("wordlist", [b'data: ', b'string: '])
   decimal_integer_value_model_element = DecimalIntegerValueModelElement("decimal")
 
-  service_children_parsing_model_element.append(ElementValueBranchModelElement('ElementValueBranchModelElement', FirstMatchModelElement("first", [SequenceModelElement("seq1", [fixed_data_me1, fixed_wordlist_data_model_element]), SequenceModelElement("seq2", [fixed_data_me1, fixed_wordlist_data_model_element, fixed_data_me2])]), "wordlist", {0:decimal_integer_value_model_element, 1:fixed_data_me2}))
+  service_children_parsing_model_element.append(ElementValueBranchModelElement('ElementValueBranchModelElement', FirstMatchModelElement("first", [SequenceModelElement("seq1", [fixed_data_me1, fixed_wordlist_data_model_element]), SequenceModelElement("seq2", [fixed_data_me1, fixed_wordlist_data_model_element, fixed_data_me2])]), "wordlist", {0: decimal_integer_value_model_element, 1: fixed_data_me2}))
 
   service_children_parsing_model_element.append(HexStringModelElement('HexStringModelElement'))
   service_children_parsing_model_element.append(SequenceModelElement('', [FixedDataModelElement('FixedDataModelElement', b'Gateway IP-Address: '), IpAddressDataModelElement('IpAddressDataModelElement')]))

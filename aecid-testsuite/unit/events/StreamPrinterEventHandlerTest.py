@@ -37,10 +37,9 @@ class StreamPrinterEventHandlerTest(TestBase):
           self.new_val % (self.match_s1, self.match_s2, 
           repr(match_element.match_object)), [log_atom.raw_data, log_atom.raw_data], None, log_atom, self)
       
-      self.assertEqual(self.output_stream.getvalue(), self.__expectedString %
-        (datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S"),
-        match_element.get_path() + ", " + match_element2.get_path(), match_element.get_match_object(),
-        self.__class__.__name__, description, 2,"  " + match_element.get_match_string().decode() + "\n  " + match_element2.get_match_string().decode() + "\n"))
+      self.assertEqual(self.output_stream.getvalue(), self.__expectedString % (datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S"),
+        match_element.get_path() + ", " + match_element2.get_path(), match_element.get_match_object(), self.__class__.__name__, description,
+        2, "  " + match_element.get_match_string().decode() + "\n  " + match_element2.get_match_string().decode() + "\n"))
     
     '''
     In this test case the EventHandler receives no lines from the test class.

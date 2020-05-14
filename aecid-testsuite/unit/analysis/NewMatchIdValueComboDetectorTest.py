@@ -132,8 +132,8 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         log_atoms = []
         t = time.time()
         for line in self.log_lines:
-            log_atoms.append(LogAtom(line, ParserMatch(self.parsing_model.get_match_element('parser',
-                MatchContext(line))), t,self.__class__.__name__))
+            log_atoms.append(LogAtom(line, ParserMatch(self.parsing_model.get_match_element('parser', MatchContext(line))), 
+                t, self.__class__.__name__))
             t = t + min_allowed_time_diff * 0.25
 
         new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config,
@@ -182,7 +182,7 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         for line in self.log_lines:
             t = time.time()
             log_atoms.append(LogAtom(line, ParserMatch(self.parsing_model.get_match_element('parser',
-                MatchContext(line))), t,self.__class__.__name__))
+                MatchContext(line))), t, self.__class__.__name__))
         new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config,
             ['parser/type/path/name', 'parser/type/syscall/syscall'], [self.stream_printer_event_handler],
             id_path_list=['parser/type/path/id', 'parser/type/syscall/id'], min_allowed_time_diff=min_allowed_time_diff,
@@ -223,7 +223,7 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         t = time.time()
         for line in self.log_lines:
             log_atoms.append(LogAtom(line, ParserMatch(self.parsing_model.get_match_element('parser',
-                MatchContext(line))), t,self.__class__.__name__))
+                MatchContext(line))), t, self.__class__.__name__))
             t = t + min_allowed_time_diff * 0.25
 
         new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config,
@@ -298,3 +298,4 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         self.assertEqual(new_match_id_value_combo_detector.known_values,
             [{'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}])
         self.assertEqual(output, self.expected_whitelist_string % (event_data[1], self.log_lines[1]))
+
