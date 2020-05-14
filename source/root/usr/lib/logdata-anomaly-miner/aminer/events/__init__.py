@@ -51,3 +51,4 @@ from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
 from aminer.events.SyslogWriterEventHandler import SyslogWriterEventHandler
 from aminer.events.Utils import VolatileLogarithmicBackoffEventHistory
 from aminer.events.JsonConverterHandler import JsonConverterHandler
+from aminer.events.KafkaEventHandler import KafkaEventHandler
