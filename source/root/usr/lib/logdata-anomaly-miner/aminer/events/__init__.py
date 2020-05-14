@@ -1,8 +1,3 @@
-from aminer.events.DefaultMailNotificationEventHandler import DefaultMailNotificationEventHandler
-from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
-from aminer.events.SyslogWriterEventHandler import SyslogWriterEventHandler
-from aminer.events.Utils import VolatileLogarithmicBackoffEventHistory
-from aminer.events.JsonConverterHandler import JsonConverterHandler
 """This file contains interface definition useful implemented by
 classes in this directory and for use from code outside this
 directory. All classes are defined in separate files, only the
@@ -49,3 +44,13 @@ class EventSourceInterface:
     @throws Exception when whitelisting of this special event
     using given whitelistingData was not possible."""
     raise Exception('Interface method called')
+
+
+# Add also the namespace references to classes defined in this
+# directory.
+
+from aminer.events.DefaultMailNotificationEventHandler import DefaultMailNotificationEventHandler
+from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
+from aminer.events.SyslogWriterEventHandler import SyslogWriterEventHandler
+from aminer.events.Utils import VolatileLogarithmicBackoffEventHistory
+from aminer.events.JsonConverterHandler import JsonConverterHandler
