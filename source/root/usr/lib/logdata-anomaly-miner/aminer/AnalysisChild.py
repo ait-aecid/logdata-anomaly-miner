@@ -58,7 +58,7 @@ class AnalysisContext:
     self.real_time_triggered_components = []
     self.analysis_time_triggered_components = []
     
-    logging.basicConfig(filename=AMinerConfig.LOG_FILE,level=logging.DEBUG, 
+    logging.basicConfig(filename=AMinerConfig.LOG_FILE, level=logging.DEBUG, 
       format='%(asctime)s %(levelname)s %(message)s', datefmt='%d.%m.%Y %H:%M:%S')
     logging.info("AMiner started.")
 
@@ -556,33 +556,34 @@ class AnalysisChildRemoteControlHandler:
           raise Exception('Invalid request data')
         methods = AMinerRemoteControlExecutionMethods()
         import aminer.analysis
-        exec_locals = {'analysisContext':analysis_context, 'remoteControlData':json_request_data[1],
-                      'printCurrentConfig':methods.print_current_config, 'printConfigProperty':methods.print_config_property,
-                      'printAttributeOfRegisteredAnalysisComponent':methods.print_attribute_of_registered_analysis_component, 'changeConfigProperty':methods.change_config_property,
-                      'changeAttributeOfRegisteredAnalysisComponent':methods.change_attribute_of_registered_analysis_component,
-                      'renameRegisteredAnalysisComponent':methods.rename_registered_analysis_component,
-                      'addHandlerToAtomFilterAndRegisterAnalysisComponent':methods.add_handler_to_atom_filter_and_register_analysis_component,
-                      'saveCurrentConfig':methods.save_current_config,
-                      'whitelistEventInComponent':methods.whitelist_event_in_component,
-                      'dumpEventsFromHistory':methods.dump_events_from_history,
-                      'ignoreEventsFromHistory':methods.ignore_events_from_history,
-                      'listEventsFromHistory':methods.list_events_from_history,
-                      'whitelistEventsFromHistory':methods.whitelist_events_from_history,
-                      'HistogramAnalysis':aminer.analysis.HistogramAnalysis,
-                      'MatchValueAverageChangeDetector':aminer.analysis.MatchValueAverageChangeDetector,
-                      'MatchValueStreamWriter':aminer.analysis.MatchValueStreamWriter,
-                      'MissingMatchPathValueDetector':aminer.analysis.MissingMatchPathValueDetector,
-                      'NewMatchPathDetector':aminer.analysis.NewMatchPathDetector,
-                      'NewMatchPathValueComboDetector':aminer.analysis.NewMatchPathValueComboDetector,
-                      'Rules':aminer.analysis.Rules,
-                      'TimeCorrelationDetector':aminer.analysis.TimeCorrelationDetector,
-                      'TimeCorrelationViolationDetector':aminer.analysis.TimeCorrelationViolationDetector,
-                      'TimestampCorrectionFilters':aminer.analysis.TimestampCorrectionFilters,
-                      'TimestampsUnsortedDetector':aminer.analysis.TimestampsUnsortedDetector,
-                      'WhitelistViolationDetector':aminer.analysis.WhitelistViolationDetector
+        exec_locals = {'analysisContext': analysis_context, 'remoteControlData': json_request_data[1],
+                      'printCurrentConfig': methods.print_current_config, 'printConfigProperty': methods.print_config_property,
+                      'printAttributeOfRegisteredAnalysisComponent': methods.print_attribute_of_registered_analysis_component, 
+                      'changeConfigProperty': methods.change_config_property,
+                      'changeAttributeOfRegisteredAnalysisComponent': methods.change_attribute_of_registered_analysis_component,
+                      'renameRegisteredAnalysisComponent': methods.rename_registered_analysis_component,
+                      'addHandlerToAtomFilterAndRegisterAnalysisComponent': methods.add_handler_to_atom_filter_and_register_analysis_component,
+                      'saveCurrentConfig': methods.save_current_config,
+                      'whitelistEventInComponent': methods.whitelist_event_in_component,
+                      'dumpEventsFromHistory': methods.dump_events_from_history,
+                      'ignoreEventsFromHistory': methods.ignore_events_from_history,
+                      'listEventsFromHistory': methods.list_events_from_history,
+                      'whitelistEventsFromHistory': methods.whitelist_events_from_history,
+                      'HistogramAnalysis': aminer.analysis.HistogramAnalysis,
+                      'MatchValueAverageChangeDetector': aminer.analysis.MatchValueAverageChangeDetector,
+                      'MatchValueStreamWriter': aminer.analysis.MatchValueStreamWriter,
+                      'MissingMatchPathValueDetector': aminer.analysis.MissingMatchPathValueDetector,
+                      'NewMatchPathDetector': aminer.analysis.NewMatchPathDetector,
+                      'NewMatchPathValueComboDetector': aminer.analysis.NewMatchPathValueComboDetector,
+                      'Rules': aminer.analysis.Rules,
+                      'TimeCorrelationDetector': aminer.analysis.TimeCorrelationDetector,
+                      'TimeCorrelationViolationDetector': aminer.analysis.TimeCorrelationViolationDetector,
+                      'TimestampCorrectionFilters': aminer.analysis.TimestampCorrectionFilters,
+                      'TimestampsUnsortedDetector': aminer.analysis.TimestampsUnsortedDetector,
+                      'WhitelistViolationDetector': aminer.analysis.WhitelistViolationDetector
                       }
         # write this to the log file!
-        logging.basicConfig(filename=AMinerConfig.LOG_FILE,level=logging.DEBUG, 
+        logging.basicConfig(filename=AMinerConfig.LOG_FILE, level=logging.DEBUG, 
             format='%(asctime)s %(levelname)s %(message)s', datefmt='%d.%m.%Y %H:%M:%S')
         logging.addLevelName(15, "REMOTECONTROL")
         logging.log(15, json_request_data[0].decode())
@@ -648,7 +649,7 @@ class AnalysisChildRemoteControlHandler:
       return None
     request_length = struct.unpack("!I", self.input_buffer[:4])[0]
     if (request_length < 0) or (request_length >= self.max_control_packet_size):
-      raise Exception('Invalid length value 0x%x in malformed request starting with b64:%s' % 
+      raise Exception('Invalid length value 0x%x in malformed request starting with b64:%s' %
                       (request_length, base64.b64encode(self.input_buffer[:60])))
     if request_length > len(self.input_buffer):
       return None

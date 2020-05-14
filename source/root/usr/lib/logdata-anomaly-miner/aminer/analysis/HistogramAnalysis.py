@@ -385,7 +385,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
     analysis_component['ResetAfterReportFlag'] = self.reset_after_report_flag
     event_data = {'AnalysisComponent': analysis_component}
     if len(res) > 0:
-      res[0]  = report_str
+      res[0] = report_str
       for listener in self.report_event_handlers:
         listener.receive_event('Analysis.%s' % self.__class__.__name__,
                             'Histogram report', res, event_data, log_atom, self)

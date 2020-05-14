@@ -202,7 +202,7 @@ def build_analysis_pipeline(analysis_context):
   atom_filter.add_handler(new_match_path_detector)
 
   def tuple_transformation_function(match_value_list):
-    extra_data = enhanced_new_match_path_value_combo_detector.known_values_dict.get(tuple(match_value_list),None)
+    extra_data = enhanced_new_match_path_value_combo_detector.known_values_dict.get(tuple(match_value_list), None)
     if extra_data is not None:
         mod = 10000
         if (extra_data[2]+1) % mod == 0:
@@ -262,7 +262,7 @@ def build_analysis_pipeline(analysis_context):
   atom_filter.add_handler(time_correlation_detector)
 
   from aminer.analysis.TimeCorrelationViolationDetector import TimeCorrelationViolationDetector, CorrelationRule, EventClassSelector
-  cron_job_announcement = CorrelationRule('CronJobAnnouncement', 5, 6, max_artefacts_a_for_single_b=1, artefact_match_parameters=[('/model/CronAnnouncement/JobNumber','/model/CronExecution/JobNumber')])
+  cron_job_announcement = CorrelationRule('CronJobAnnouncement', 5, 6, max_artefacts_a_for_single_b=1, artefact_match_parameters=[('/model/CronAnnouncement/JobNumber', '/model/CronExecution/JobNumber')])
   a_class_selector = EventClassSelector('Announcement', [cron_job_announcement], None)
   b_class_selector = EventClassSelector('Execution', None, [cron_job_announcement])
   rules = []

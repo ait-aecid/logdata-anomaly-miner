@@ -197,7 +197,7 @@ def build_analysis_pipeline(analysis_context):
   fixed_wordlist_data_model_element = FixedWordlistDataModelElement("wordlist", [b'data: ', b'string: '])
   decimal_integer_value_model_element = DecimalIntegerValueModelElement("decimal")
 
-  service_children_parsing_model_element.append(ElementValueBranchModelElement('ElementValueBranchModelElement', FirstMatchModelElement("first", [SequenceModelElement("seq1", [fixed_data_me1, fixed_wordlist_data_model_element]), SequenceModelElement("seq2", [fixed_data_me1, fixed_wordlist_data_model_element, fixed_data_me2])]), "wordlist", {0:decimal_integer_value_model_element, 1:fixed_data_me2}))
+  service_children_parsing_model_element.append(ElementValueBranchModelElement('ElementValueBranchModelElement', FirstMatchModelElement("first", [SequenceModelElement("seq1", [fixed_data_me1, fixed_wordlist_data_model_element]), SequenceModelElement("seq2",  [fixed_data_me1, fixed_wordlist_data_model_element, fixed_data_me2])]), "wordlist", {0: decimal_integer_value_model_element, 1: fixed_data_me2}))
   service_children_parsing_model_element.append(HexStringModelElement('HexStringModelElement'))
   service_children_parsing_model_element.append(SequenceModelElement('', [FixedDataModelElement('FixedDataModelElement', b'Gateway IP-Address: '), IpAddressDataModelElement('IpAddressDataModelElement')]))
   service_children_parsing_model_element.append(MultiLocaleDateTimeModelElement('MultiLocaleDateTimeModelElement', [(b'%b %d %Y', "de_AT.utf8", None)]))
@@ -276,7 +276,7 @@ def build_analysis_pipeline(analysis_context):
   atom_filter.add_handler(new_match_path_detector)
 
   def tuple_transformation_function(match_value_list):
-    extra_data = enhanced_new_match_path_value_combo_detector.known_values_dict.get(tuple(match_value_list),None)
+    extra_data = enhanced_new_match_path_value_combo_detector.known_values_dict.get(tuple(match_value_list), None)
     if extra_data is not None:
         mod = 10
         if (extra_data[2]+1) % mod == 0:
@@ -341,7 +341,7 @@ def build_analysis_pipeline(analysis_context):
   atom_filter.add_handler(time_correlation_detector)
 
   from aminer.analysis.TimeCorrelationViolationDetector import TimeCorrelationViolationDetector, CorrelationRule, EventClassSelector
-  cron_job_announcement = CorrelationRule('CronJobAnnouncement', 5, 6, max_artefacts_a_for_single_b=1, artefact_match_parameters=[('/model/CronAnnouncement/JobNumber','/model/CronExecution/JobNumber')])
+  cron_job_announcement = CorrelationRule('CronJobAnnouncement', 5, 6, max_artefacts_a_for_single_b=1, artefact_match_parameters=[('/model/CronAnnouncement/JobNumber', '/model/CronExecution/JobNumber')])
   a_class_selector = EventClassSelector('Announcement', [cron_job_announcement], None)
   b_class_selector = EventClassSelector('Execution', None, [cron_job_announcement])
   rules = []
@@ -351,5 +351,3 @@ def build_analysis_pipeline(analysis_context):
   time_correlation_violation_detector = TimeCorrelationViolationDetector(analysis_context.aminer_config, rules, anomaly_event_handlers, output_log_line=True)
   analysis_context.register_component(time_correlation_violation_detector, component_name="TimeCorrelationViolationDetector")
   atom_filter.add_handler(time_correlation_violation_detector)
-
-
