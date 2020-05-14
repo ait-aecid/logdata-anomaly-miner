@@ -9,6 +9,7 @@ from aminer.parsing import OptionalMatchModelElement
 from aminer.parsing import SequenceModelElement
 from aminer.parsing import VariableByteDataModelElement
 
+
 def get_model(user_name_model=None):
   """This function defines how to parse a su session information message
 after any standard logging preamble, e.g. from syslog."""

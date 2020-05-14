@@ -17,9 +17,11 @@ from aminer.parsing import SequenceModelElement
 from aminer.parsing import VariableByteDataModelElement
 from aminer.parsing import WhiteSpaceLimitedDataModelElement
 
+
 def get_model():
   """This function defines how to parse a audispd message logged
 via syslog after any standard logging preamble, e.g. from syslog."""
+
 
   class ExecArgumentDataModelElement():
     """This is a helper class for parsing the (encoded) exec argument

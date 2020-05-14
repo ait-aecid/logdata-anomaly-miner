@@ -87,6 +87,7 @@ class AndMatchRule(MatchRule):
       preamble = ' and '
     return result
 
+
 class OrMatchRule(MatchRule):
   """This class provides a rule to match any subRules (logical
   or)"""

@@ -75,6 +75,7 @@ config_properties['Resources.MaxMemoryUsage'] = 64
 
 # Add your ruleset here:
 
+
 def build_analysis_pipeline(analysis_context):
   """Define the function to create pipeline for parsing the log
   data. It has also to define an AtomizerFactory to instruct AMiner

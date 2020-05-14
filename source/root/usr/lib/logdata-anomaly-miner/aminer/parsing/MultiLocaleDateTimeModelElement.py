@@ -197,6 +197,7 @@ COMPONENT_TYPE_SECOND = 5
 COMPONENT_TYPE_MICROSECOND = 6
 COMPONENT_TYPE_LENGTH = 7
 
+
 class DateFormatComponent:
   """This class defines a component in the date format."""
   def __init__(self, component_type, end_separator, component_length,

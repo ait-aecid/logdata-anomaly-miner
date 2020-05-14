@@ -162,7 +162,8 @@ class AMinerRemoteControlExecutionMethods():
                         new_attr = attr_str % (attribute, repr(l))
             self.REMOTE_CONTROL_RESPONSE += "%s.%s = %s" % (component_name, attribute, new_attr)
         else:
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: the component '%s' does not have an attribute named '%s'"%(component_name, attribute)
+            self.REMOTE_CONTROL_RESPONSE += "FAILURE: the component '%s' does not have an attribute named '%s'" % \
+                                            (component_name, attribute)
 
     def print_current_config(self, analysis_context):
         for config_property in analysis_context.aminer_config.config_properties:

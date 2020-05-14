@@ -58,7 +58,7 @@ class AnalysisContext:
     self.real_time_triggered_components = []
     self.analysis_time_triggered_components = []
     
-    logging.basicConfig(filename=AMinerConfig.LOG_FILE, level=logging.DEBUG, 
+    logging.basicConfig(filename=AMinerConfig.LOG_FILE, level=logging.DEBUG,
       format='%(asctime)s %(levelname)s %(message)s', datefmt='%d.%m.%Y %H:%M:%S')
     logging.info("AMiner started.")
 
@@ -149,6 +149,7 @@ class AnalysisContext:
   def build_analysis_pipeline(self):
     """Convenience method to create the pipeline."""
     self.aminer_config.build_analysis_pipeline(self)
+
 
 class AnalysisChild(TimeTriggeredComponentInterface):
   """This class defines the child performing the complete analysis
@@ -558,7 +559,7 @@ class AnalysisChildRemoteControlHandler:
         import aminer.analysis
         exec_locals = {'analysisContext': analysis_context, 'remoteControlData': json_request_data[1],
                       'printCurrentConfig': methods.print_current_config, 'printConfigProperty': methods.print_config_property,
-                      'printAttributeOfRegisteredAnalysisComponent': methods.print_attribute_of_registered_analysis_component, 
+                      'printAttributeOfRegisteredAnalysisComponent': methods.print_attribute_of_registered_analysis_component,
                       'changeConfigProperty': methods.change_config_property,
                       'changeAttributeOfRegisteredAnalysisComponent': methods.change_attribute_of_registered_analysis_component,
                       'renameRegisteredAnalysisComponent': methods.rename_registered_analysis_component,
@@ -583,7 +584,7 @@ class AnalysisChildRemoteControlHandler:
                       'WhitelistViolationDetector': aminer.analysis.WhitelistViolationDetector
                       }
         # write this to the log file!
-        logging.basicConfig(filename=AMinerConfig.LOG_FILE, level=logging.DEBUG, 
+        logging.basicConfig(filename=AMinerConfig.LOG_FILE, level=logging.DEBUG,
             format='%(asctime)s %(levelname)s %(message)s', datefmt='%d.%m.%Y %H:%M:%S')
         logging.addLevelName(15, "REMOTECONTROL")
         logging.log(15, json_request_data[0].decode())
