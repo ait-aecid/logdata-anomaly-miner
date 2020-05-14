@@ -101,8 +101,7 @@ class DecimalFloatValueModelElement(ModelElementInterface):
         return None
 
 # See if there could be any exponent following the number.
-    if ((self.exponentType != DecimalFloatValueModelElement.EXP_TYPE_NONE) and
-        (match_len+1 < len(data)) and (data[match_len] in b'eE')):
+    if (self.exponentType != DecimalFloatValueModelElement.EXP_TYPE_NONE) and (match_len+1 < len(data)) and (data[match_len] in b'eE'):
       match_len += 1
       if data[match_len] in b'+-':
         match_len += 1

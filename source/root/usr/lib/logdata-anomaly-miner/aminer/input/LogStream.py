@@ -149,7 +149,7 @@ class FileLogDataResource(LogDataResource):
             self.total_consumed_length = repositioning_data[1]
             self.repositioning_digest = hash_algo
           else:
-            print('Not attempting to reposition on %s, digest changed' % encode_byte_string_as_string(self.log_resource_name), 
+            print('Not attempting to reposition on %s, digest changed' % encode_byte_string_as_string(self.log_resource_name),
               file=sys.stderr)
             length = -1
         if length != 0:
@@ -183,9 +183,8 @@ class FileLogDataResource(LogDataResource):
       os.close(log_file_fd)
       raise Exception('Attempting to open non-regular file %s as file' % encode_byte_string_as_string(self.log_resource_name))
 
-    if (reopen_flag and (self.stat_data is not None) and
-        (stat_data.st_ino == self.stat_data.st_ino) and
-        (stat_data.st_dev == self.stat_data.st_dev)):
+    if reopen_flag and (self.stat_data is not None) and (stat_data.st_ino == self.stat_data.st_ino) and \
+            (stat_data.st_dev == self.stat_data.st_dev):
 # Reopening was requested, but we would reopen the file already
 # opened, which is of no use.
       os.close(log_file_fd)

@@ -551,9 +551,7 @@ class AnalysisChildRemoteControlHandler:
       try:
         json_request_data = (json.loads(request_data[8:].decode()))
         json_request_data = JsonUtil.decode_object(json_request_data)
-        if (json_request_data is None) or \
-            (not isinstance(json_request_data, list)) or \
-            (len(json_request_data) != 2):
+        if (json_request_data is None) or (not isinstance(json_request_data, list)) or (len(json_request_data) != 2):
           raise Exception('Invalid request data')
         methods = AMinerRemoteControlExecutionMethods()
         import aminer.analysis
@@ -581,8 +579,7 @@ class AnalysisChildRemoteControlHandler:
                       'TimeCorrelationViolationDetector': aminer.analysis.TimeCorrelationViolationDetector,
                       'TimestampCorrectionFilters': aminer.analysis.TimestampCorrectionFilters,
                       'TimestampsUnsortedDetector': aminer.analysis.TimestampsUnsortedDetector,
-                      'WhitelistViolationDetector': aminer.analysis.WhitelistViolationDetector
-                      }
+                      'WhitelistViolationDetector': aminer.analysis.WhitelistViolationDetector}
         # write this to the log file!
         logging.basicConfig(filename=AMinerConfig.LOG_FILE, level=logging.DEBUG,
             format='%(asctime)s %(levelname)s %(message)s', datefmt='%d.%m.%Y %H:%M:%S')

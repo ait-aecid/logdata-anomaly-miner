@@ -331,8 +331,7 @@ class StringRegexMatchRule(MatchRule):
   def match(self, log_atom):
 # Use the class object as marker for nonexisting entries
     test_value = log_atom.parser_match.get_match_dictionary().get(self.path, None)
-    if ((test_value is None) or
-        (self.match_regex.match(test_value.match_string) is None)):
+    if (test_value is None) or (self.match_regex.match(test_value.match_string) is None):
       return False
     if self.match_action is not None:
       self.match_action.match_action(log_atom)
@@ -454,9 +453,7 @@ class IPv4InRFC1918MatchRule(MatchRule):
     if (match_element is None) or not isinstance(match_element.match_object, int):
       return False
     value = match_element.match_object
-    if (((value & 0xff000000) == 0xa000000) or
-        ((value & 0xfff00000) == 0xac100000) or
-        ((value & 0xffff0000) == 0xc0a80000)):
+    if ((value & 0xff000000) == 0xa000000) or ((value & 0xfff00000) == 0xac100000) or ((value & 0xffff0000) == 0xc0a80000):
       if self.match_action is not None:
         self.match_action.match_action(log_atom)
       return True
