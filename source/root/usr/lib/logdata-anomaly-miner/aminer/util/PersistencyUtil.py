@@ -48,11 +48,9 @@ def create_temporary_persistence_file(file_name):
   # FIXME: This should use O_TMPFILE, but not yet available. That would
   # obsolete the loop also.
   # while True:
-  #  fd = openPersistenceFile('%s.tmp-%f' % (fileName, time.time()), \
-  #    os.O_WRONLY|os.O_CREAT|os.O_EXCL)
+  #  fd = openPersistenceFile('%s.tmp-%f' % (fileName, time.time()), os.O_WRONLY|os.O_CREAT|os.O_EXCL)
   #  break
-  fd = open_persistence_file('%s.tmp-%f' % (file_name, time.time()), \
-                             os.O_WRONLY | os.O_CREAT | os.O_EXCL)
+  fd = open_persistence_file('%s.tmp-%f' % (file_name, time.time()), os.O_WRONLY | os.O_CREAT | os.O_EXCL)
   return fd
 
 

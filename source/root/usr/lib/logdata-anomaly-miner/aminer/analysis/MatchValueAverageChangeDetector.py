@@ -44,8 +44,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
     self.output_log_line = output_log_line
 
     PersistencyUtil.add_persistable_component(self)
-    self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, \
-      'MatchValueAverageChangeDetector', persistence_id)
+    self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, 'MatchValueAverageChangeDetector', persistence_id)
     persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
     if persistence_data is None:
       self.stat_data = []
@@ -204,22 +203,19 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
       stat_data[2] = (current_bin[0], current_bin[1], current_bin[2], current_average, current_variance,)
       stat_data[3] = (0, 0.0, 0.0)
       if self.debug_mode:
-        return 'Initial: n = %d, avg = %s, var = %s' % (current_bin[0], \
-                                                        current_average + stat_data[1], current_variance)
+        return 'Initial: n = %d, avg = %s, var = %s' % (current_bin[0], current_average + stat_data[1], current_variance)
     else:
       total_n = old_bin[0]+current_bin[0]
       total_sum = old_bin[1]+current_bin[1]
       total_sum2 = old_bin[2]+current_bin[2]
 
-      stat_data[2] = (total_n, total_sum, total_sum2, total_sum / total_n, \
-                      (total_sum2-(total_sum*total_sum)/total_n) / (total_n-1))
+      stat_data[2] = (total_n, total_sum, total_sum2, total_sum / total_n, (total_sum2-(total_sum*total_sum)/total_n) / (total_n-1))
       stat_data[3] = (0, 0.0, 0.0)
 
       if (current_variance > 2*old_bin[4]) or (abs(current_average-old_bin[3]) > old_bin[4]) \
          or self.debug_mode:
-        res = ['Change: new: n = %d, avg = %s, var = %s; old: n = %d, avg = %s, var = %s' % \
-               (current_bin[0], current_average + stat_data[1], current_variance, old_bin[0], \
-                old_bin[3] + stat_data[1], old_bin[4]), current_bin[0], current_average + stat_data[1], current_variance, old_bin[0], \
-               old_bin[3] + stat_data[1], old_bin[4]]
+        res = ['Change: new: n = %d, avg = %s, var = %s; old: n = %d, avg = %s, var = %s' % (current_bin[0], current_average + stat_data[1],
+          current_variance, old_bin[0], old_bin[3] + stat_data[1], old_bin[4]), current_bin[0], current_average + stat_data[1], 
+          current_variance, old_bin[0], old_bin[3] + stat_data[1], old_bin[4]]
         return res
     return None

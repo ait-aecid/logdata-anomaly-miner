@@ -242,9 +242,8 @@ class MissingMatchPathValueDetector(
     if event_type != self.analysis_string % self.__class__.__name__:
       raise Exception('Event not from this source')
     if not isinstance(whitelisting_data, int):
-      raise Exception('Whitelisting data has to integer with ' \
-          'new interval, -1 to reset to defaults, other negative ' \
-          'value to remove the entry')
+      raise Exception('Whitelisting data has to integer with new interval, -1 to reset to defaults, other negative '
+                      'value to remove the entry')
     new_interval = whitelisting_data
     if new_interval == -1:
       new_interval = self.default_interval

@@ -17,8 +17,7 @@ class SyslogWriterEventHandler(EventHandlerInterface):
   fill up your disks."""
   def __init__(self, analysis_context, instance_name='aminer'):
     self.instanceName = instance_name
-    syslog.openlog('%s[%d]' % (self.instanceName, os.getpid()), \
-        syslog.LOG_INFO, syslog.LOG_DAEMON)
+    syslog.openlog('%s[%d]' % (self.instanceName, os.getpid()), syslog.LOG_INFO, syslog.LOG_DAEMON)
     syslog.syslog(syslog.LOG_INFO, 'Syslog logger initialized')
     self.buffer_stream = io.StringIO()
     self.event_writer = StreamPrinterEventHandler(
@@ -31,8 +30,7 @@ class SyslogWriterEventHandler(EventHandlerInterface):
     to syslog."""
     self.buffer_stream.seek(0)
     self.buffer_stream.truncate(0)
-    self.event_writer.receive_event(event_type, event_message, sorted_log_lines, event_data, \
-                                    log_atom, event_source)
+    self.event_writer.receive_event(event_type, event_message, sorted_log_lines, event_data, log_atom, event_source)
     event_data = self.buffer_stream.getvalue()
     current_event_id = self.event_id
     self.event_id += 1

@@ -56,5 +56,4 @@ class IpAddressDataModelElement(ModelElementInterface):
 
     match_string = data[:match_len]
     match_context.update(match_string)
-    return MatchElement("%s/%s" % (path, self.element_id), \
-                        match_string, extracted_address, None)
+    return MatchElement("%s/%s" % (path, self.element_id), match_string, extracted_address, None)

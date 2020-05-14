@@ -123,12 +123,10 @@ class FileLogDataResource(LogDataResource):
 
     if (log_stream_fd != -1) and (repositioning_data is not None):
       if repositioning_data[0] != self.stat_data.st_ino:
-        print('Not attempting to reposition on %s,' \
-            'inode number mismatch' % encode_byte_string_as_string(self.log_resource_name),
+        print('Not attempting to reposition on %s, inode number mismatch' % encode_byte_string_as_string(self.log_resource_name),
               file=sys.stderr)
       elif repositioning_data[1] > self.stat_data.st_size:
-        print('Not attempting to reposition on %s,' \
-            'file size too small' % encode_byte_string_as_string(self.log_resource_name), file=sys.stderr)
+        print('Not attempting to reposition on %s, file size too small' % encode_byte_string_as_string(self.log_resource_name), file=sys.stderr)
       else:
         hash_algo = hashlib.md5()
         length = repositioning_data[1]
@@ -139,8 +137,7 @@ class FileLogDataResource(LogDataResource):
           else:
             block = os.read(self.log_file_fd, default_buffer_size)
           if not block:
-            print('Not attempting to reposition ' \
-                'on %s, file shrunk while reading' % encode_byte_string_as_string(self.log_resource_name),
+            print('Not attempting to reposition on %s, file shrunk while reading' % encode_byte_string_as_string(self.log_resource_name),
                   file=sys.stderr)
             break
           hash_algo.update(block)
@@ -152,9 +149,8 @@ class FileLogDataResource(LogDataResource):
             self.total_consumed_length = repositioning_data[1]
             self.repositioning_digest = hash_algo
           else:
-            print('Not attempting to reposition ' \
-                'on %s, digest changed' % encode_byte_string_as_string(self.log_resource_name),
-                  file=sys.stderr)
+            print('Not attempting to reposition on %s, digest changed' % encode_byte_string_as_string(self.log_resource_name), 
+              file=sys.stderr)
             length = -1
         if length != 0:
 # Repositioning failed, go back to the beginning of the stream.
@@ -185,8 +181,7 @@ class FileLogDataResource(LogDataResource):
       raise
     if not stat.S_ISREG(stat_data.st_mode):
       os.close(log_file_fd)
-      raise Exception('Attempting to open non-regular file %s ' \
-          'as file' % encode_byte_string_as_string(self.log_resource_name))
+      raise Exception('Attempting to open non-regular file %s as file' % encode_byte_string_as_string(self.log_resource_name))
 
     if (reopen_flag and (self.stat_data is not None) and
         (stat_data.st_ino == self.stat_data.st_ino) and
@@ -407,8 +402,7 @@ class LogStream:
 
 # This is a clear protocol violation (see StreamAtomizer documentaion):
 # When at EOF, 0 is no valid return value.
-      print('FATAL: Procotol violation by %s detected, ' \
-          'flushing data' % self.stream_atomizer.__class__.__name__, file=sys.stderr)
+      print('FATAL: Procotol violation by %s detected, flushing data' % self.stream_atomizer.__class__.__name__, file=sys.stderr)
       consumed_length = len(self.log_data_resource.buffer)
 
 # Everything consumed, so now ready for rollover.

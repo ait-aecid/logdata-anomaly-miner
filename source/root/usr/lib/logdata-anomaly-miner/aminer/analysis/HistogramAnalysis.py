@@ -172,8 +172,7 @@ class ModuloTimeBinDefinition(LinearNumericBinDefinition):
   """This class defines the module time bins."""
   def __init__(self, modulo_value, time_unit, lower_limit, bin_size, bin_count,
                outlier_bins_flag=False):
-    super(ModuloTimeBinDefinition, self).__init__(lower_limit, \
-                                                  bin_size, bin_count, outlier_bins_flag)
+    super(ModuloTimeBinDefinition, self).__init__(lower_limit, bin_size, bin_count, outlier_bins_flag)
     self.modulo_value = modulo_value
     self.time_unit = time_unit
 
@@ -247,12 +246,9 @@ class HistogramData():
         continue
       p_value = self.bin_definition.get_bin_p_value(bin_pos, base_element, count)
       if p_value is None:
-        result += '\n%s* %s: %d (ratio = %.2e)' % (indent, self.bin_names[bin_pos], \
-            count, float(count)/f_elements)
+        result += '\n%s* %s: %d (ratio = %.2e)' % (indent, self.bin_names[bin_pos], count, float(count)/f_elements)
       else:
-        result += '\n%s* %s: %d (ratio = %.2e, p = %.2e)' % (indent, \
-                                                             self.bin_names[bin_pos], count, float(count) / f_elements, \
-                                                             p_value)
+        result += '\n%s* %s: %d (ratio = %.2e, p = %.2e)' % (indent, self.bin_names[bin_pos], count, float(count) / f_elements, p_value)
     return result
 
 
@@ -603,8 +599,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
     if self.reset_after_report_flag:
         histogram_mapping[1].reset()
     for listener in self.report_event_handlers:
-      listener.receive_event('Analysis.%s' % self.__class__.__name__, \
-          'Histogram report', res, event_data, log_atom, self)
+      listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Histogram report', res, event_data, log_atom, self)
 
     self.last_report_time = timestamp
     self.next_report_time = timestamp + self.report_interval

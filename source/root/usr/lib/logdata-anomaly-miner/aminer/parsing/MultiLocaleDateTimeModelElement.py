@@ -138,32 +138,17 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
 # date to the beginning of the year or could change a semiqualified
 # date lagging behind the latest date seen to the end of the following
 # year.
-      parsed_value = datetime.datetime(parsed_fields[COMPONENT_TYPE_YEAR], \
-          parsed_fields[COMPONENT_TYPE_MONTH], \
-          parsed_fields[COMPONENT_TYPE_DAY], \
-          parsed_fields[COMPONENT_TYPE_HOUR], \
-          parsed_fields[COMPONENT_TYPE_MINUTE], \
-          parsed_fields[COMPONENT_TYPE_SECOND], \
-          parsed_fields[COMPONENT_TYPE_MICROSECOND], \
-          time_zone_info)
+      parsed_value = datetime.datetime(parsed_fields[COMPONENT_TYPE_YEAR], parsed_fields[COMPONENT_TYPE_MONTH], 
+          parsed_fields[COMPONENT_TYPE_DAY], parsed_fields[COMPONENT_TYPE_HOUR], parsed_fields[COMPONENT_TYPE_MINUTE],
+          parsed_fields[COMPONENT_TYPE_SECOND], parsed_fields[COMPONENT_TYPE_MICROSECOND], time_zone_info)
       if not self.checkTimestampValueInRange(parsed_value):
-        parsed_value = datetime.datetime(parsed_fields[COMPONENT_TYPE_YEAR]+1, \
-            parsed_fields[COMPONENT_TYPE_MONTH], \
-            parsed_fields[COMPONENT_TYPE_DAY], \
-            parsed_fields[COMPONENT_TYPE_HOUR], \
-            parsed_fields[COMPONENT_TYPE_MINUTE], \
-            parsed_fields[COMPONENT_TYPE_SECOND], \
-            parsed_fields[COMPONENT_TYPE_MICROSECOND], \
-            time_zone_info)
+        parsed_value = datetime.datetime(parsed_fields[COMPONENT_TYPE_YEAR]+1, parsed_fields[COMPONENT_TYPE_MONTH], 
+            parsed_fields[COMPONENT_TYPE_DAY], parsed_fields[COMPONENT_TYPE_HOUR], parsed_fields[COMPONENT_TYPE_MINUTE],
+            parsed_fields[COMPONENT_TYPE_SECOND], parsed_fields[COMPONENT_TYPE_MICROSECOND], time_zone_info)
         if not self.checkTimestampValueInRange(parsed_value):
-          parsed_value = datetime.datetime(parsed_fields[COMPONENT_TYPE_YEAR]-1, \
-              parsed_fields[COMPONENT_TYPE_MONTH], \
-              parsed_fields[COMPONENT_TYPE_DAY], \
-              parsed_fields[COMPONENT_TYPE_HOUR], \
-              parsed_fields[COMPONENT_TYPE_MINUTE], \
-              parsed_fields[COMPONENT_TYPE_SECOND], \
-              parsed_fields[COMPONENT_TYPE_MICROSECOND], \
-              time_zone_info)
+          parsed_value = datetime.datetime(parsed_fields[COMPONENT_TYPE_YEAR]-1, parsed_fields[COMPONENT_TYPE_MONTH],
+              parsed_fields[COMPONENT_TYPE_DAY], parsed_fields[COMPONENT_TYPE_HOUR], parsed_fields[COMPONENT_TYPE_MINUTE],
+              parsed_fields[COMPONENT_TYPE_SECOND], parsed_fields[COMPONENT_TYPE_MICROSECOND], time_zone_info)
           if not self.checkTimestampValueInRange(parsed_value):
             print(delta_string % repr(date_str), file=sys.stderr)
             return None
@@ -347,17 +332,14 @@ class DateFormatComponent:
 
     next_component = self.next_components.get(lookup_key, None)
     if next_component is None:
-      next_component = DateFormatComponent(component_type, end_separator, \
-          component_length, translation_dictionary, self)
+      next_component = DateFormatComponent(component_type, end_separator, component_length, translation_dictionary, self)
       self.next_components[lookup_key] = next_component
     else:
 # Merge needed.
-      next_component.mergeComponentData(component_type, component_length, \
-          translation_dictionary)
+      next_component.mergeComponentData(component_type, component_length, translation_dictionary)
 
     if parse_pos != len(format_string):
-      next_component.add_format(format_string[parse_pos:], format_locale, \
-                                format_timezone)
+      next_component.add_format(format_string[parse_pos:], format_locale, format_timezone)
     else:
 # Import in constructor to avoid failures reading the class in
 # module initialization on setups without pytz.

@@ -127,8 +127,7 @@ events and send them via "sendmail" transport."""
           running_processes.append(process)
           continue
         if process.returncode != 0:
-          print('WARNING: Sending mail terminated with error %d' % process.returncode, \
-                  file=sys.stderr)
+          print('WARNING: Sending mail terminated with error %d' % process.returncode, file=sys.stderr)
       self.running_sendmail_processes = running_processes
 
     if (self.next_alert_time != 0) and (trigger_time >= self.next_alert_time):
@@ -162,8 +161,7 @@ events and send them via "sendmail" transport."""
     sendmail_args.append(self.recipient_address)
 # Start the sendmail process. Use close_fds to avoid leaking of
 # any open file descriptors to the new client.
-    process = subprocess.Popen(sendmail_args, executable=self.sendmail_binary_path, \
-                               stdin=message_tmp_file, close_fds=True)
+    process = subprocess.Popen(sendmail_args, executable=self.sendmail_binary_path, stdin=message_tmp_file, close_fds=True)
 # Just append the process to the list of running processes. It
 # will remain in zombie state until next invocation of list cleanup.
     self.running_sendmail_processes.append(process)

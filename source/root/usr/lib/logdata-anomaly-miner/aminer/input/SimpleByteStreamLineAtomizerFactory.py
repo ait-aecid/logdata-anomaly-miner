@@ -26,5 +26,4 @@ class SimpleByteStreamLineAtomizerFactory(AtomizerFactory):
     @param resource_name the resource name for atomizer selection
     is ignored in this type of factory.
     @return a StreamAtomizer object"""
-    return ByteStreamLineAtomizer(self.parsing_model, self.atom_handler_list, \
-                                  self.event_handler_list, 1 << 16, self.default_timestamp_path)
+    return ByteStreamLineAtomizer(self.parsing_model, self.atom_handler_list, self.event_handler_list, 1 << 16, self.default_timestamp_path)

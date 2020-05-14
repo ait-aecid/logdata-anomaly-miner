@@ -476,8 +476,7 @@ class DebugMatchRule(MatchRule):
     self.matchAction = match_action
 
   def match(self, log_atom):
-    print('Rules.DebugMatchRule: triggered while ' \
-        'handling "%s"' % repr(log_atom.parser_match.match_element.match_string), file=sys.stderr)
+    print('Rules.DebugMatchRule: triggered while handling "%s"' % repr(log_atom.parser_match.match_element.match_string), file=sys.stderr)
     if self.matchAction is not None:
       self.matchAction.match_action(log_atom)
     return self.debug_match_result

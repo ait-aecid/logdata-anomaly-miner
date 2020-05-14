@@ -71,8 +71,8 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
           sorted_log_lines = [str(res) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
         event_data = {'AnalysisComponent': analysis_component}
         for listener in self.anomaly_event_handlers:
-          listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New value(s) detected', \
-                                 sorted_log_lines, event_data, log_atom, self)
+          listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New value(s) detected', 
+            sorted_log_lines, event_data, log_atom, self)
 
 
   def get_time_trigger_class(self):

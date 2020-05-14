@@ -36,6 +36,5 @@ class RepeatedElementDataModelElement(ModelElementInterface):
       match_context.match_data = start_data
       return None
 
-    return MatchElement(current_path, \
-                        start_data[:len(start_data)-len(match_context.match_data)],
+    return MatchElement(current_path, start_data[:len(start_data)-len(match_context.match_data)],
                         start_data[:len(start_data)-len(match_context.match_data)], matches)

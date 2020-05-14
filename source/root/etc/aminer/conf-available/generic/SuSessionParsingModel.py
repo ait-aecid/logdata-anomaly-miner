@@ -15,8 +15,7 @@ after any standard logging preamble, e.g. from syslog."""
 
   if user_name_model is None:
     user_name_model = VariableByteDataModelElement('user', b'0123456789abcdefghijklmnopqrstuvwxyz.-')
-  srcuser_name_model = VariableByteDataModelElement('srcuser', \
-          b'0123456789abcdefghijklmnopqrstuvwxyz.-')
+  srcuser_name_model = VariableByteDataModelElement('srcuser', b'0123456789abcdefghijklmnopqrstuvwxyz.-')
 
   type_children = []
   type_children.append(SequenceModelElement('su-good', [
@@ -38,8 +37,7 @@ after any standard logging preamble, e.g. from syslog."""
       FixedWordlistDataModelElement('change', [b'opened', b'closed']),
       FixedDataModelElement('s1', b' for user '),
       user_name_model,
-      OptionalMatchModelElement('openby', \
-          SequenceModelElement('userinfo', [
+      OptionalMatchModelElement('openby', SequenceModelElement('userinfo', [
               FixedDataModelElement('s0', b' by (uid='),
               DecimalIntegerValueModelElement('uid'),
               FixedDataModelElement('s1', b')')]))

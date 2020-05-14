@@ -93,8 +93,7 @@ class MatchValueFilter(AtomHandlerInterface):
     target_value = log_atom.parser_match.get_match_dictionary().get(self.target_path, None)
     if target_value is not None:
       target_value = target_value.match_object
-    target_handler = self.parsed_atom_handler_dict.get(target_value, \
-      self.default_parsed_atom_handler)
+    target_handler = self.parsed_atom_handler_dict.get(target_value, self.default_parsed_atom_handler)
     if target_handler is None:
       return False
     target_handler.receive_atom(log_atom)

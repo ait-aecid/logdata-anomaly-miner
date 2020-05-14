@@ -35,6 +35,5 @@ class SequenceModelElement(ModelElementInterface):
         return None
       matches += [child_match]
 
-    return MatchElement(current_path, \
-                        start_data[:len(start_data)-len(match_context.match_data)],
+    return MatchElement(current_path, start_data[:len(start_data)-len(match_context.match_data)],
                         start_data[:len(start_data)-len(match_context.match_data)], matches)

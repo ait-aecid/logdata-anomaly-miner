@@ -23,9 +23,7 @@ class OptionalMatchModelElement(ModelElementInterface):
     start_data = match_context.match_data
     match = self.optional_element.get_match_element(current_path, match_context)
     if match is None:
-      return MatchElement("%s/%s" % (path, self.element_id), \
-          '', None, None)
+      return MatchElement("%s/%s" % (path, self.element_id), '', None, None)
 
-    return MatchElement(current_path, \
-                        start_data[:len(start_data)-len(match_context.match_data)],
+    return MatchElement(current_path, start_data[:len(start_data)-len(match_context.match_data)],
                         start_data[:len(start_data)-len(match_context.match_data)], [match])

@@ -43,10 +43,10 @@ class TimestampsUnsortedDetector(AtomHandlerInterface, EventSourceInterface):
       analysis_component = {'LastTimestamp': self.last_timestamp}
       event_data = {'AnalysisComponent': analysis_component}
       for listener in self.anomaly_event_handlers:
-        listener.receive_event('Analysis.%s' % self.__class__.__name__, \
-            'Timestamp %s below %s' % (datetime.fromtimestamp(log_atom.get_timestamp()).strftime("%Y-%m-%d %H:%M:%S"),
+        listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Timestamp %s below %s' % 
+            (datetime.fromtimestamp(log_atom.get_timestamp()).strftime("%Y-%m-%d %H:%M:%S"),
             datetime.fromtimestamp(self.last_timestamp).strftime("%Y-%m-%d %H:%M:%S")),
-                               sorted_log_lines, event_data, log_atom, self)
+            sorted_log_lines, event_data, log_atom, self)
       if self.exit_on_error_flag:
         import sys
         sys.exit(1)

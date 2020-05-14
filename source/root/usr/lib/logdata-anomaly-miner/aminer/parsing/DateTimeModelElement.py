@@ -252,10 +252,8 @@ class DateTimeModelElement(ModelElementInterface):
               parsed_date_time = next_year_date_time
               total_seconds = next_year_total_seconds
               self.last_parsed_seconds = total_seconds
-              print('WARNING: DateTimeModelElement unqualified ' \
-                  'timestamp year wraparound detected from %s to %s' % (
-                      datetime.datetime.fromtimestamp(
-                          self.last_parsed_seconds, self.time_zone).isoformat(),
+              print('WARNING: DateTimeModelElement unqualified timestamp year wraparound detected from %s to %s' % (
+                      datetime.datetime.fromtimestamp(self.last_parsed_seconds, self.time_zone).isoformat(),
                       parsed_date_time.isoformat()), file=sys.stderr)
             else:
               last_year_date_time = parsed_date_time.replace(self.start_year - 1)
@@ -267,9 +265,7 @@ class DateTimeModelElement(ModelElementInterface):
                 self.last_parsed_seconds = total_seconds
               else:
 # None of both seems correct, just report that.
-                print('WARNING: DateTimeModelElement ' \
-                    'time inconsistencies parsing %s, expecting value ' \
-                    'around %d. Check your settings!' % (
+                print('WARNING: DateTimeModelElement time inconsistencies parsing %s, expecting value around %d. Check your settings!' % (
                         repr(date_str), self.last_parsed_seconds), file=sys.stderr)
 
 # We discarded the parsed_date_time microseconds beforehand, use

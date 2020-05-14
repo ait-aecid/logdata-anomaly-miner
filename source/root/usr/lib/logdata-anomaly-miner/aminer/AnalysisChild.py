@@ -65,8 +65,7 @@ class AnalysisContext:
   def add_time_triggered_component(self, component, trigger_class=None):
     """Add a time-triggered component to the registry."""
     if not isinstance(component, TimeTriggeredComponentInterface):
-      raise Exception('Attempting to register component of class ' \
-          '%s not implementing aminer.util.TimeTriggeredComponentInterface' % (
+      raise Exception('Attempting to register component of class %s not implementing aminer.util.TimeTriggeredComponentInterface' % (
               component.__class__.__name__))
     if trigger_class is None:
       trigger_class = component.get_time_trigger_class()
@@ -98,8 +97,7 @@ class AnalysisContext:
       raise Exception('Component with same name already registered')
     if (register_time_trigger_class_override is not None) and \
         (not isinstance(component, TimeTriggeredComponentInterface)):
-      raise Exception('Requesting override on component not implementing ' \
-          'TimeTriggeredComponentInterface')
+      raise Exception('Requesting override on component not implementing TimeTriggeredComponentInterface')
 
     self.registered_components[self.next_registry_id] = (component, component_name)
     self.next_registry_id += 1
@@ -218,8 +216,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 # Locate the real analysis configuration.
     self.analysis_context.build_analysis_pipeline()
     if self.analysis_context.atomizer_factory is None:
-      print('FATAL: build_analysis_pipeline() did ' \
-          'not initialize atomizer_factory, terminating', file=sys.stderr)
+      print('FATAL: build_analysis_pipeline() did not initialize atomizer_factory, terminating', file=sys.stderr)
       return 1
 
     real_time_triggered_components = self.analysis_context.real_time_triggered_components
@@ -337,8 +334,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
           try:
             fd_handler_object.do_receive()
           except ConnectionError as receiveException:
-            print('Unclean termination of remote ' \
-                'control: %s' % str(receiveException), file=sys.stderr)
+            print('Unclean termination of remote control: %s' % str(receiveException), file=sys.stderr)
           if fd_handler_object.is_dead():
             del self.tracked_fds_dict[read_fd]
 # Reading is only attempted when output buffer was already flushed.
@@ -372,13 +368,11 @@ class AnalysisChild(TimeTriggeredComponentInterface):
           try:
             buffer_flushed_flag = fd_handler_object.do_send()
           except OSError as sendError:
-            print('Error sending data via remote ' \
-                'control: %s' % str(sendError), file=sys.stderr)
+            print('Error sending data via remote control: %s' % str(sendError), file=sys.stderr)
             try:
               fd_handler_object.terminate()
             except ConnectionError as terminateException:
-              print('Unclean termination of remote ' \
-                  'control: %s' % str(terminateException), file=sys.stderr)
+              print('Unclean termination of remote control: %s' % str(terminateException), file=sys.stderr)
           if buffer_flushed_flag:
             fd_handler_object.do_process(self.analysis_context)
           if fd_handler_object.is_dead():
@@ -622,8 +616,8 @@ class AnalysisChildRemoteControlHandler:
           test_size = (max_include_size+min_include_size) >> 1
           if test_size == min_include_size:
             break
-          emergency_response_data = json.dumps(['Exception: Response ' \
-              'too large\nPartial response data: %s...' % json_response[:test_size], None])
+          emergency_response_data = json.dumps(['Exception: Response too large\nPartial response data: %s...' %
+                                                json_response[:test_size], None])
           if len(emergency_response_data)+8 > self.max_control_packet_size:
             max_include_size = test_size-1
           else:
@@ -654,8 +648,8 @@ class AnalysisChildRemoteControlHandler:
       return None
     request_length = struct.unpack("!I", self.input_buffer[:4])[0]
     if (request_length < 0) or (request_length >= self.max_control_packet_size):
-      raise Exception('Invalid length value 0x%x in malformed ' \
-          'request starting with b64:%s' % (request_length, base64.b64encode(self.input_buffer[:60])))
+      raise Exception('Invalid length value 0x%x in malformed request starting with b64:%s' % 
+                      (request_length, base64.b64encode(self.input_buffer[:60])))
     if request_length > len(self.input_buffer):
       return None
     request_data = self.input_buffer[:request_length]
@@ -706,8 +700,7 @@ class AnalysisChildRemoteControlHandler:
 
   def put_execute_request(self, remote_control_code, remote_control_data):
     """Add a request to send exception data to the send queue."""
-    remote_control_data = json.dumps([JsonUtil.encode_object(remote_control_code), \
-                                      JsonUtil.encode_object(remote_control_data)])
+    remote_control_data = json.dumps([JsonUtil.encode_object(remote_control_code), JsonUtil.encode_object(remote_control_data)])
     self.put_request(b'EEEE', remote_control_data.encode())
 
   def add_select_fds(self, input_select_fd_list, output_select_fd_list):

@@ -196,8 +196,7 @@ via syslog after any standard logging preamble, e.g. from syslog."""
       DecimalIntegerValueModelElement('auid'),
       FixedDataModelElement('s3', ses),
       DecimalIntegerValueModelElement('ses'),
-      FixedDataModelElement('s4', b' msg=\'op=PAM:setcred acct="root" ' \
-          b'exe="/usr/sbin/sshd" hostname='),
+      FixedDataModelElement('s4', b' msg=\'op=PAM:setcred acct="root" exe="/usr/sbin/sshd" hostname='),
       IpAddressDataModelElement('clientname'),
       FixedDataModelElement('s5', addr),
       IpAddressDataModelElement('clientip'),

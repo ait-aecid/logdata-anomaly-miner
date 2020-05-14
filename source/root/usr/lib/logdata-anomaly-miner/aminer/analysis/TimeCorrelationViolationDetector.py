@@ -110,9 +110,8 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
       analysis_component = {'Rule': r, 'CheckResult': check_result, 'NewestTimestamp': newest_timestamp}
       event_data = {'AnalysisComponent': analysis_component}
       for listener in self.anomaly_event_handlers:
-        listener.receive_event('Analysis.%s' % self.__class__.__name__, \
-            'Correlation rule "%s" violated' % rule.rule_id, [check_result[0]], \
-                               event_data, self.last_log_atom, self)
+        listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Correlation rule "%s" violated' % rule.rule_id,
+          [check_result[0]], event_data, self.last_log_atom, self)
     return 10.0
 
 
@@ -266,7 +265,7 @@ class CorrelationRule:
 # We want to keep a history of good matches to ease diagnosis
 # of correlation failures. Keep information about current line
 # for reference.
-        self.correlation_history.add_object((a_event[3].match_element.match_string, a_event[2].action_id, \
+        self.correlation_history.add_object((a_event[3].match_element.match_string, a_event[2].action_id,
                                              b_event[3].match_element.match_string, b_event[2].action_id))
         del self.history_a_events[a_pos]
         del self.history_b_events[b_pos]

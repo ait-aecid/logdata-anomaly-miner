@@ -42,5 +42,4 @@ class HexStringModelElement(ModelElementInterface):
       return None
     
     match_context.update(match_object)
-    return MatchElement("%s/%s" % (path, self.element_id), \
-                        match_string, match_object, None)
+    return MatchElement("%s/%s" % (path, self.element_id), match_string, match_object, None)
