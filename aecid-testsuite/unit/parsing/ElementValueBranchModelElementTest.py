@@ -78,7 +78,7 @@ class ElementValueBranchModelElementTest(unittest.TestCase):
   In this test case all possible ways of not getting a MatchElement successfully are tested.
   '''
   def test2_match_element_not_found(self):
-    #no modelMatch
+    # no modelMatch
     element_value_branch_model_element = ElementValueBranchModelElement("id", self.first_match_me, "wordlist",
       {0:self.decimal_integer_value_model_element, 1:self.fixed_data_me2})
     match_context = MatchContext(self.path_to_match)

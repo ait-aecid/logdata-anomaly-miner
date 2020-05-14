@@ -1,7 +1,7 @@
 # This is a template for the "aminer" logfile miner tool. Copy
 # it to "config.py" and define your ruleset.
 
-configProperties = {}
+config_properties = {}
 
 # Define the list of log resources to read from: the resources
 # named here do not need to exist when aminer is started. This
@@ -9,17 +9,17 @@ configProperties = {}
 # to be readable by the aminer process! Supported types are:
 # * file://[path]: Read data from file, reopen it after rollover
 # * unix://[path]: Open the path as UNIX local socket for reading
-configProperties['LogResourceList'] = ['file:///tmp/syslog']
+config_properties['LogResourceList'] = ['file:///tmp/syslog']
 
 # Define the uid/gid of the process that runs the calculation
 # after opening the log files:
-configProperties['AMinerUser'] = 'aminer'
-configProperties['AMinerGroup'] = 'aminer'
+config_properties['AMinerUser'] = 'aminer'
+config_properties['AMinerGroup'] = 'aminer'
 
 # Define the path, where aminer will listen for incoming remote
 # control connections. When missing, no remote control socket
 # will be created.
-configProperties['RemoteControlSocket'] = '/var/run/aminer-remote.socket'
+config_properties['RemoteControlSocket'] = '/var/run/aminer-remote.socket'
 
 # Read the analyis from this file. That part of configuration
 # is separated from the main configuration so that it can be loaded
@@ -27,7 +27,7 @@ configProperties['RemoteControlSocket'] = '/var/run/aminer-remote.socket'
 # interpreted relatively to the main configuration file (this
 # file). When empty, this configuration has to contain the configuration
 # for the child also.
-# configProperties['AnalysisConfigFile'] = 'analysis.py'
+# config_properties['AnalysisConfigFile'] = 'analysis.py'
 
 
 # Read and store information to be used between multiple invocations
@@ -35,48 +35,48 @@ configProperties['RemoteControlSocket'] = '/var/run/aminer-remote.socket'
 # to the 'AMinerUser' but not group/world readable. On violation,
 # AMiner will refuse to start. When undefined, '/var/lib/aminer'
 # is used.
-configProperties['Core.PersistenceDir'] = '/tmp/lib/aminer'
+config_properties['Core.PersistenceDir'] = '/tmp/lib/aminer'
 
 # Define a target e-mail address to send alerts to. When undefined,
 # no e-mail notification hooks are added.
-configProperties['MailAlerting.TargetAddress'] = 'root@localhost'
+config_properties['MailAlerting.TargetAddress'] = 'root@localhost'
 # Sender address of e-mail alerts. When undefined, "sendmail"
 # implementation on host will decide, which sender address should
 # be used.
-configProperties['MailAlerting.FromAddress'] = 'root@localhost'
+config_properties['MailAlerting.FromAddress'] = 'root@localhost'
 # Define, which text should be prepended to the standard aminer
 # subject. Defaults to "AMiner Alerts:"
-configProperties['MailAlerting.SubjectPrefix'] = 'AMiner Alerts:'
+config_properties['MailAlerting.SubjectPrefix'] = 'AMiner Alerts:'
 # Define a grace time after startup before aminer will react to
 # an event and send the first alert e-mail. Defaults to 0 (any
 # event can immediately trigger alerting).
-configProperties['MailAlerting.AlertGraceTime'] = 0
+config_properties['MailAlerting.AlertGraceTime'] = 0
 # Define how many seconds to wait after a first event triggered
 # the alerting procedure before really sending out the e-mail.
 # In that timespan, events are collected and will be sent all
 # using a single e-mail. Defaults to 10 seconds.
-configProperties['MailAlerting.EventCollectTime'] = 0
+config_properties['MailAlerting.EventCollectTime'] = 0
 # Define the minimum time between two alert e-mails in seconds
 # to avoid spamming. All events during this timespan are collected
 # and sent out with the next report. Defaults to 600 seconds.
-configProperties['MailAlerting.MinAlertGap'] = 0
+config_properties['MailAlerting.MinAlertGap'] = 0
 # Define the maximum time between two alert e-mails in seconds.
 # When undefined this defaults to "MailAlerting.MinAlertGap".
 # Otherwise this will activate an exponential backoff to reduce
 # messages during permanent error states by increasing the alert
 # gap by 50% when more alert-worthy events were recorded while
 # the previous gap time was not yet elapsed.
-configProperties['MailAlerting.MaxAlertGap'] = 600
+config_properties['MailAlerting.MaxAlertGap'] = 600
 # Define how many events should be included in one alert mail
 # at most. This defaults to 1000
-configProperties['MailAlerting.MaxEventsPerMessage'] = 1000
-configProperties['LogPrefix'] = 'Original log line: '
-configProperties['Resources.MaxCpuPercentUsage'] = 30
-configProperties['Resources.Resources.MaxMemoryUsage'] = 64
+config_properties['MailAlerting.MaxEventsPerMessage'] = 1000
+config_properties['LogPrefix'] = 'Original log line: '
+config_properties['Resources.MaxCpuPercentUsage'] = 30
+config_properties['Resources.Resources.MaxMemoryUsage'] = 64
 
 # Add your ruleset here:
 
-def buildAnalysisPipeline(analysisContext):
+def build_analysis_pipeline(analysis_context):
   """Define the function to create pipeline for parsing the log
   data. It has also to define an AtomizerFactory to instruct AMiner
   how to process incoming data streams to create log atoms from
@@ -86,111 +86,111 @@ def buildAnalysisPipeline(analysisContext):
   # skipcq: PYL-W0611
   from aminer.parsing import FirstMatchModelElement, SequenceModelElement, DecimalFloatValueModelElement, FixedDataModelElement, DelimitedDataModelElement, AnyByteDataModelElement, FixedWordlistDataModelElement, DecimalIntegerValueModelElement, DateTimeModelElement, IpAddressDataModelElement, Base64StringModelElement, ElementValueBranchModelElement, HexStringModelElement, MultiLocaleDateTimeModelElement, OptionalMatchModelElement, RepeatedElementDataModelElement, VariableByteDataModelElement, WhiteSpaceLimitedDataModelElement
 
-  serviceChildrenDiskReport = []
+  service_children_disk_report = []
 
-  serviceChildrenDiskReport.append(FixedDataModelElement('Space', b' Current Disk Data is: Filesystem     Type  Size  Used Avail Use%'))
-  serviceChildrenDiskReport.append(DelimitedDataModelElement('Data', b'%'))
-  serviceChildrenDiskReport.append(AnyByteDataModelElement('Rest'))
-
-
-  serviceChildrenLoginDetails = []
-
-  serviceChildrenLoginDetails.append(FixedDataModelElement('User', b'User '))
-  serviceChildrenLoginDetails.append(DelimitedDataModelElement('Username', b' '))
-  serviceChildrenLoginDetails.append(FixedWordlistDataModelElement('Status', [b' logged in', b' logged out']))
-  serviceChildrenLoginDetails.append(OptionalMatchModelElement('Past Time', SequenceModelElement('Time', [FixedDataModelElement('Blank', b' '), DecimalIntegerValueModelElement('Minutes'), FixedDataModelElement('Ago', b' minutes ago.')])))
+  service_children_disk_report.append(FixedDataModelElement('Space', b' Current Disk Data is: Filesystem     Type  Size  Used Avail Use%'))
+  service_children_disk_report.append(DelimitedDataModelElement('Data', b'%'))
+  service_children_disk_report.append(AnyByteDataModelElement('Rest'))
 
 
-  serviceChildrenCronJob = []
+  service_children_login_details = []
 
-  serviceChildrenCronJob.append(DateTimeModelElement('DTM', b'%Y-%m-%d %H:%M:%S'))
-  serviceChildrenCronJob.append(FixedDataModelElement('UName Space1', b' '))
-  serviceChildrenCronJob.append(DelimitedDataModelElement('UName', b' '))
-  serviceChildrenCronJob.append(FixedDataModelElement('UName Space2', b' '))
-  serviceChildrenCronJob.append(DelimitedDataModelElement('User', b' '))
-  serviceChildrenCronJob.append(FixedDataModelElement('Cron', b' cron['))
-  serviceChildrenCronJob.append(DecimalIntegerValueModelElement('Job Number'))
-  serviceChildrenCronJob.append(FixedDataModelElement('Details', b']: Job `cron.daily` started.'))
+  service_children_login_details.append(FixedDataModelElement('User', b'User '))
+  service_children_login_details.append(DelimitedDataModelElement('Username', b' '))
+  service_children_login_details.append(FixedWordlistDataModelElement('Status', [b' logged in', b' logged out']))
+  service_children_login_details.append(OptionalMatchModelElement('Past Time', SequenceModelElement('Time', [FixedDataModelElement('Blank', b' '), DecimalIntegerValueModelElement('Minutes'), FixedDataModelElement('Ago', b' minutes ago.')])))
 
 
-  serviceChildrenRandomTime = []
+  service_children_cron_job = []
 
-  serviceChildrenRandomTime.append(FixedDataModelElement('Space', b'Random: '))
-  serviceChildrenRandomTime.append(DecimalIntegerValueModelElement('Random'))
-
-
-  serviceChildrenSensors = []
-
-  serviceChildrenSensors.append(SequenceModelElement('CPU Temp', [FixedDataModelElement('Fixed Temp', b'CPU Temp: '), DecimalIntegerValueModelElement('Temp'), FixedDataModelElement('Degrees', b'\xc2\xb0C')]))
-  serviceChildrenSensors.append(FixedDataModelElement('Space1', b', '))
-  serviceChildrenSensors.append(SequenceModelElement('CPU Workload', [FixedDataModelElement('Fixed Workload', b'CPU Workload: '), DecimalIntegerValueModelElement('Workload'), FixedDataModelElement('Percent', b'%')]))
-  serviceChildrenSensors.append(FixedDataModelElement('Space2', b', '))
-  serviceChildrenSensors.append(DateTimeModelElement('DTM', b'%Y-%m-%d %H:%M:%S'))
+  service_children_cron_job.append(DateTimeModelElement('DTM', b'%Y-%m-%d %H:%M:%S'))
+  service_children_cron_job.append(FixedDataModelElement('UName Space1', b' '))
+  service_children_cron_job.append(DelimitedDataModelElement('UName', b' '))
+  service_children_cron_job.append(FixedDataModelElement('UName Space2', b' '))
+  service_children_cron_job.append(DelimitedDataModelElement('User', b' '))
+  service_children_cron_job.append(FixedDataModelElement('Cron', b' cron['))
+  service_children_cron_job.append(DecimalIntegerValueModelElement('Job Number'))
+  service_children_cron_job.append(FixedDataModelElement('Details', b']: Job `cron.daily` started.'))
 
 
-  serviceChildrenUserIpAddress = []
+  service_children_random_time = []
 
-  serviceChildrenUserIpAddress.append(FixedDataModelElement('User', b'User '))
-  serviceChildrenUserIpAddress.append(DelimitedDataModelElement('Username', b' '))
-  serviceChildrenUserIpAddress.append(FixedDataModelElement('Action', b' changed IP address to '))
-  serviceChildrenUserIpAddress.append(IpAddressDataModelElement('IP'))
+  service_children_random_time.append(FixedDataModelElement('Space', b'Random: '))
+  service_children_random_time.append(DecimalIntegerValueModelElement('Random'))
 
 
-  serviceChildrenCronJobAnnouncement = []
+  service_children_sensors = []
 
-  serviceChildrenCronJobAnnouncement.append(DateTimeModelElement('DTM', b'%Y-%m-%d %H:%M:%S'))
-  serviceChildrenCronJobAnnouncement.append(FixedDataModelElement('Space', b' '))
-  serviceChildrenCronJobAnnouncement.append(DelimitedDataModelElement('UName', b' '))
-  serviceChildrenCronJobAnnouncement.append(FixedDataModelElement('Cron', b' cron['))
-  serviceChildrenCronJobAnnouncement.append(DecimalIntegerValueModelElement('Job Number'))
-  serviceChildrenCronJobAnnouncement.append(FixedDataModelElement('Run', b']: Will run job `'))
-  serviceChildrenCronJobAnnouncement.append(FixedWordlistDataModelElement('Cron Type', [b'cron.daily', b'cron.hourly', b'cron.monthly', b'cron.weekly']))
-  serviceChildrenCronJobAnnouncement.append(FixedDataModelElement('Start Time', b'\' in 5 min.'))
+  service_children_sensors.append(SequenceModelElement('CPU Temp', [FixedDataModelElement('Fixed Temp', b'CPU Temp: '), DecimalIntegerValueModelElement('Temp'), FixedDataModelElement('Degrees', b'\xc2\xb0C')]))
+  service_children_sensors.append(FixedDataModelElement('Space1', b', '))
+  service_children_sensors.append(SequenceModelElement('CPU Workload', [FixedDataModelElement('Fixed Workload', b'CPU Workload: '), DecimalIntegerValueModelElement('Workload'), FixedDataModelElement('Percent', b'%')]))
+  service_children_sensors.append(FixedDataModelElement('Space2', b', '))
+  service_children_sensors.append(DateTimeModelElement('DTM', b'%Y-%m-%d %H:%M:%S'))
 
 
-  serviceChildrenCronJobExecution = []
+  service_children_user_ip_address = []
 
-  serviceChildrenCronJobExecution.append(DateTimeModelElement('DTM', b'%Y-%m-%d %H:%M:%S'))
-  serviceChildrenCronJobExecution.append(FixedDataModelElement('Space1', b' '))
-  serviceChildrenCronJobExecution.append(DelimitedDataModelElement('UName', b' '))
-  serviceChildrenCronJobExecution.append(FixedDataModelElement('Cron', b' cron['))
-  serviceChildrenCronJobExecution.append(DecimalIntegerValueModelElement('Job Number'))
-  serviceChildrenCronJobExecution.append(FixedDataModelElement('Job', b']: Job `'))
-  serviceChildrenCronJobExecution.append(FixedWordlistDataModelElement('Cron Type', [b'cron.daily', b'cron.hourly', b'cron.monthly', b'cron.weekly']))
-  serviceChildrenCronJobExecution.append(FixedDataModelElement('Started', b'\' started'))
+  service_children_user_ip_address.append(FixedDataModelElement('User', b'User '))
+  service_children_user_ip_address.append(DelimitedDataModelElement('Username', b' '))
+  service_children_user_ip_address.append(FixedDataModelElement('Action', b' changed IP address to '))
+  service_children_user_ip_address.append(IpAddressDataModelElement('IP'))
+
+
+  service_children_cron_job_announcement = []
+
+  service_children_cron_job_announcement.append(DateTimeModelElement('DTM', b'%Y-%m-%d %H:%M:%S'))
+  service_children_cron_job_announcement.append(FixedDataModelElement('Space', b' '))
+  service_children_cron_job_announcement.append(DelimitedDataModelElement('UName', b' '))
+  service_children_cron_job_announcement.append(FixedDataModelElement('Cron', b' cron['))
+  service_children_cron_job_announcement.append(DecimalIntegerValueModelElement('Job Number'))
+  service_children_cron_job_announcement.append(FixedDataModelElement('Run', b']: Will run job `'))
+  service_children_cron_job_announcement.append(FixedWordlistDataModelElement('Cron Type', [b'cron.daily', b'cron.hourly', b'cron.monthly', b'cron.weekly']))
+  service_children_cron_job_announcement.append(FixedDataModelElement('Start Time', b'\' in 5 min.'))
+
+
+  service_children_cron_job_execution = []
+
+  service_children_cron_job_execution.append(DateTimeModelElement('DTM', b'%Y-%m-%d %H:%M:%S'))
+  service_children_cron_job_execution.append(FixedDataModelElement('Space1', b' '))
+  service_children_cron_job_execution.append(DelimitedDataModelElement('UName', b' '))
+  service_children_cron_job_execution.append(FixedDataModelElement('Cron', b' cron['))
+  service_children_cron_job_execution.append(DecimalIntegerValueModelElement('Job Number'))
+  service_children_cron_job_execution.append(FixedDataModelElement('Job', b']: Job `'))
+  service_children_cron_job_execution.append(FixedWordlistDataModelElement('Cron Type', [b'cron.daily', b'cron.hourly', b'cron.monthly', b'cron.weekly']))
+  service_children_cron_job_execution.append(FixedDataModelElement('Started', b'\' started'))
   
 
-  serviceChildrenParsingModelElement = []
+  service_children_parsing_model_element = []
   
-  serviceChildrenParsingModelElement.append(DateTimeModelElement('DateTimeModelElement', b'Current DateTime: %d.%m.%Y %H:%M:%S'))
+  service_children_parsing_model_element.append(DateTimeModelElement('DateTimeModelElement', b'Current DateTime: %d.%m.%Y %H:%M:%S'))
   
-  serviceChildrenParsingModelElement.append(DecimalFloatValueModelElement('DecimalFloatValueModelElement', value_sign_type='optional'))
-  serviceChildrenParsingModelElement.append(DecimalIntegerValueModelElement('DecimalIntegerValueModelElement', value_sign_type='optional', value_pad_type='blank'))
-  serviceChildrenParsingModelElement.append(SequenceModelElement('', [DelimitedDataModelElement('DelimitedDataModelElement', b';'), FixedDataModelElement('FixedDataModelElement', b';')]))
+  service_children_parsing_model_element.append(DecimalFloatValueModelElement('DecimalFloatValueModelElement', value_sign_type='optional'))
+  service_children_parsing_model_element.append(DecimalIntegerValueModelElement('DecimalIntegerValueModelElement', value_sign_type='optional', value_pad_type='blank'))
+  service_children_parsing_model_element.append(SequenceModelElement('', [DelimitedDataModelElement('DelimitedDataModelElement', b';'), FixedDataModelElement('FixedDataModelElement', b';')]))
   
   # ElementValueBranchModelElement
-  fixedDataME1 = FixedDataModelElement("fixed 1", b'match ')
-  fixedDataME2 = FixedDataModelElement("fixed 2", b'fixed String')
-  fixedWordlistDataModelElement = FixedWordlistDataModelElement("wordlist", [b'data: ', b'string: '])
-  decimalIntegerValueModelElement = DecimalIntegerValueModelElement("decimal")
+  fixed_data_me1 = FixedDataModelElement("fixed 1", b'match ')
+  fixed_data_me2 = FixedDataModelElement("fixed 2", b'fixed String')
+  fixed_wordlist_data_model_element = FixedWordlistDataModelElement("wordlist", [b'data: ', b'string: '])
+  decimal_integer_value_model_element = DecimalIntegerValueModelElement("decimal")
 
-  serviceChildrenParsingModelElement.append(ElementValueBranchModelElement('ElementValueBranchModelElement', FirstMatchModelElement("first", [SequenceModelElement("seq1", [fixedDataME1, fixedWordlistDataModelElement]), SequenceModelElement("seq2", [fixedDataME1, fixedWordlistDataModelElement, fixedDataME2])]), "wordlist", {0:decimalIntegerValueModelElement, 1:fixedDataME2}))
+  service_children_parsing_model_element.append(ElementValueBranchModelElement('ElementValueBranchModelElement', FirstMatchModelElement("first", [SequenceModelElement("seq1", [fixed_data_me1, fixed_wordlist_data_model_element]), SequenceModelElement("seq2", [fixed_data_me1, fixed_wordlist_data_model_element, fixed_data_me2])]), "wordlist", {0:decimal_integer_value_model_element, 1:fixed_data_me2}))
 
-  serviceChildrenParsingModelElement.append(HexStringModelElement('HexStringModelElement'))
-  serviceChildrenParsingModelElement.append(SequenceModelElement('', [FixedDataModelElement('FixedDataModelElement', b'Gateway IP-Address: '), IpAddressDataModelElement('IpAddressDataModelElement')]))
-  serviceChildrenParsingModelElement.append(MultiLocaleDateTimeModelElement('MultiLocaleDateTimeModelElement', [(b'%b %d %Y', "de_AT.utf8", None)]))
-  serviceChildrenParsingModelElement.append(RepeatedElementDataModelElement('RepeatedElementDataModelElement', SequenceModelElement('SequenceModelElement', [FixedDataModelElement('FixedDataModelElement', b'drawn number: '), DecimalIntegerValueModelElement('DecimalIntegerValueModelElement')]), 1))
-  serviceChildrenParsingModelElement.append(VariableByteDataModelElement('VariableByteDataModelElement', b'-@#'))
-  serviceChildrenParsingModelElement.append(SequenceModelElement('', [WhiteSpaceLimitedDataModelElement('WhiteSpaceLimitedDataModelElement'), FixedDataModelElement('', b' ')]))
+  service_children_parsing_model_element.append(HexStringModelElement('HexStringModelElement'))
+  service_children_parsing_model_element.append(SequenceModelElement('', [FixedDataModelElement('FixedDataModelElement', b'Gateway IP-Address: '), IpAddressDataModelElement('IpAddressDataModelElement')]))
+  service_children_parsing_model_element.append(MultiLocaleDateTimeModelElement('MultiLocaleDateTimeModelElement', [(b'%b %d %Y', "de_AT.utf8", None)]))
+  service_children_parsing_model_element.append(RepeatedElementDataModelElement('RepeatedElementDataModelElement', SequenceModelElement('SequenceModelElement', [FixedDataModelElement('FixedDataModelElement', b'drawn number: '), DecimalIntegerValueModelElement('DecimalIntegerValueModelElement')]), 1))
+  service_children_parsing_model_element.append(VariableByteDataModelElement('VariableByteDataModelElement', b'-@#'))
+  service_children_parsing_model_element.append(SequenceModelElement('', [WhiteSpaceLimitedDataModelElement('WhiteSpaceLimitedDataModelElement'), FixedDataModelElement('', b' ')]))
 
   # The Base64StringModelElement must be just before the AnyByteDataModelElement to avoid unexpected Matches.
-  serviceChildrenParsingModelElement.append(Base64StringModelElement('Base64StringModelElement'))
+  service_children_parsing_model_element.append(Base64StringModelElement('Base64StringModelElement'))
 
   # The OptionalMatchModelElement must be paired with a FirstMatchModelElement because it accepts all data and thus no data gets to the AnyByteDataModelElement.
   # The AnyByteDataModelElement must be last, because all bytes are accepted.  
-  serviceChildrenParsingModelElement.append(OptionalMatchModelElement('OptionalMatchModelElement', FirstMatchModelElement('FirstMatchModelElement', [FixedDataModelElement('FixedDataModelElement', b'The-searched-element-was-found!'), AnyByteDataModelElement('AnyByteDataModelElement')])))
+  service_children_parsing_model_element.append(OptionalMatchModelElement('OptionalMatchModelElement', FirstMatchModelElement('FirstMatchModelElement', [FixedDataModelElement('FixedDataModelElement', b'The-searched-element-was-found!'), AnyByteDataModelElement('AnyByteDataModelElement')])))
 
-  parsingModel = FirstMatchModelElement('model', [SequenceModelElement('Cron Announcement', serviceChildrenCronJobAnnouncement), SequenceModelElement('Cron Execution', serviceChildrenCronJobExecution), SequenceModelElement('Daily Cron', serviceChildrenCronJob), SequenceModelElement('Disk Report', serviceChildrenDiskReport), SequenceModelElement('Login Details', serviceChildrenLoginDetails), DecimalIntegerValueModelElement('Random'), SequenceModelElement('Random Time', serviceChildrenRandomTime), SequenceModelElement('Sensors', serviceChildrenSensors), SequenceModelElement('IP Addresses', serviceChildrenUserIpAddress), FirstMatchModelElement('ParsingME', serviceChildrenParsingModelElement)])
+  parsing_model = FirstMatchModelElement('model', [SequenceModelElement('Cron Announcement', service_children_cron_job_announcement), SequenceModelElement('Cron Execution', service_children_cron_job_execution), SequenceModelElement('Daily Cron', service_children_cron_job), SequenceModelElement('Disk Report', service_children_disk_report), SequenceModelElement('Login Details', service_children_login_details), DecimalIntegerValueModelElement('Random'), SequenceModelElement('Random Time', service_children_random_time), SequenceModelElement('Sensors', service_children_sensors), SequenceModelElement('IP Addresses', service_children_user_ip_address), FirstMatchModelElement('ParsingME', service_children_parsing_model_element)])
 
 # Some generic imports.
   from aminer.analysis import AtomFilters
@@ -198,134 +198,134 @@ def buildAnalysisPipeline(analysisContext):
 # Create all global handler lists here and append the real handlers
 # later on.
 # Use this filter to distribute all atoms to the analysis handlers.
-  atomFilter = AtomFilters.SubhandlerFilter(None)
+  atom_filter = AtomFilters.SubhandlerFilter(None)
 
   from aminer.analysis.TimestampCorrectionFilters import SimpleMonotonicTimestampAdjust
-  simpleMonotonicTimestampAdjust = SimpleMonotonicTimestampAdjust([atomFilter])
-  analysisContext.registerComponent(simpleMonotonicTimestampAdjust, componentName="SimpleMonotonicTimestampAdjust")
+  simple_monotonic_timestamp_adjust = SimpleMonotonicTimestampAdjust([atom_filter])
+  analysis_context.register_component(simple_monotonic_timestamp_adjust, component_name="SimpleMonotonicTimestampAdjust")
 
   from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
-  streamPrinterEventHandler = StreamPrinterEventHandler(analysisContext)
+  stream_printer_event_handler = StreamPrinterEventHandler(analysis_context)
   from aminer.events.SyslogWriterEventHandler import SyslogWriterEventHandler
-  syslogWriterEventHandler = SyslogWriterEventHandler(analysisContext)
+  syslog_writer_event_handler = SyslogWriterEventHandler(analysis_context)
   from aminer.events import DefaultMailNotificationEventHandler
-  if DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS in analysisContext.aminerConfig.configProperties:
-    mailNotificationHandler = DefaultMailNotificationEventHandler(analysisContext)
-    analysisContext.registerComponent(
-        mailNotificationHandler, componentName="MailHandler")
-  anomalyEventHandlers = [streamPrinterEventHandler, syslogWriterEventHandler, mailNotificationHandler]
+  if DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS in analysis_context.aminer_config.config_properties:
+    mail_notification_handler = DefaultMailNotificationEventHandler(analysis_context)
+    analysis_context.register_component(
+        mail_notification_handler, component_name="MailHandler")
+  anomaly_event_handlers = [stream_printer_event_handler, syslog_writer_event_handler, mail_notification_handler]
 
 # Now define the AtomizerFactory using the model. A simple line
 # based one is usually sufficient.
   from aminer.input import SimpleByteStreamLineAtomizerFactory
-  analysisContext.atomizerFactory = SimpleByteStreamLineAtomizerFactory(
-      parsingModel, [simpleMonotonicTimestampAdjust], anomalyEventHandlers)
+  analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
+      parsing_model, [simple_monotonic_timestamp_adjust], anomaly_event_handlers)
 
 # Just report all unparsed atoms to the event handlers.
   from aminer.input import SimpleUnparsedAtomHandler
-  simpleUnparsedAtomHandler = SimpleUnparsedAtomHandler(anomalyEventHandlers)
-  atomFilter.addHandler(simpleUnparsedAtomHandler, stopWhenHandledFlag=True)
-  analysisContext.registerComponent(simpleUnparsedAtomHandler, componentName="UnparsedHandler")
+  simple_unparsed_atom_handler = SimpleUnparsedAtomHandler(anomaly_event_handlers)
+  atom_filter.add_handler(simple_unparsed_atom_handler, stop_when_handled_flag=True)
+  analysis_context.register_component(simple_unparsed_atom_handler, component_name="UnparsedHandler")
 
   from aminer.analysis.TimestampsUnsortedDetector import TimestampsUnsortedDetector
-  timestampsUnsortedDetector = TimestampsUnsortedDetector(analysisContext.aminerConfig, anomalyEventHandlers)
-  atomFilter.addHandler(timestampsUnsortedDetector)
-  analysisContext.registerComponent(timestampsUnsortedDetector, componentName="TimestampsUnsortedDetector")
+  timestamps_unsorted_detector = TimestampsUnsortedDetector(analysis_context.aminer_config, anomaly_event_handlers)
+  atom_filter.add_handler(timestamps_unsorted_detector)
+  analysis_context.register_component(timestamps_unsorted_detector, component_name="TimestampsUnsortedDetector")
 
   from aminer.analysis import Rules
   from aminer.analysis import WhitelistViolationDetector
-  _violationAction=Rules.EventGenerationMatchAction('Analysis.GenericViolation',
-      'Violation detected', anomalyEventHandlers)
-  whitelistRules=[]
+  _violation_action=Rules.EventGenerationMatchAction('Analysis.GenericViolation',
+      'Violation detected', anomaly_event_handlers)
+  whitelist_rules=[]
   
 # This rule list should trigger, when the line does not look like: User root (logged in, logged out) 
 # or User 'username' (logged in, logged out) x minutes ago.
-  whitelistRules.append(Rules.OrMatchRule([
+  whitelist_rules.append(Rules.OrMatchRule([
     Rules.AndMatchRule([Rules.PathExistsMatchRule('/model/Login Details/Past Time/Time/Minutes'), 
         Rules.NegationMatchRule(Rules.ValueMatchRule('/model/Login Details/Username', b'root'))]), 
     Rules.AndMatchRule([Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/Login Details/Past Time/Time/Minutes')),
         Rules.PathExistsMatchRule('/model/Login Details')]),
     Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/Login Details'))]))
-  whitelistViolationDetector = WhitelistViolationDetector(analysisContext.aminerConfig, whitelistRules, anomalyEventHandlers)
-  analysisContext.registerComponent(whitelistViolationDetector, componentName="Whitelist")
-  atomFilter.addHandler(whitelistViolationDetector)
+  whitelist_violation_detector = WhitelistViolationDetector(analysis_context.aminer_config, whitelist_rules, anomaly_event_handlers)
+  analysis_context.register_component(whitelist_violation_detector, component_name="Whitelist")
+  atom_filter.add_handler(whitelist_violation_detector)
 
 
   from aminer.analysis import NewMatchPathDetector
-  newMatchPathDetector = NewMatchPathDetector(
-      analysisContext.aminerConfig, anomalyEventHandlers, auto_include_flag=True)
-  analysisContext.registerComponent(newMatchPathDetector, componentName="NewMatchPath")
-  atomFilter.addHandler(newMatchPathDetector)
+  new_match_path_detector = NewMatchPathDetector(
+      analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=True)
+  analysis_context.register_component(new_match_path_detector, component_name="NewMatchPath")
+  atom_filter.add_handler(new_match_path_detector)
 
-  def tuple_transformation_function(matchValueList):
-    extraData = enhancedNewMatchPathValueComboDetector.knownValuesDict.get(tuple(matchValueList),None)
-    if extraData is None:
-        return matchValueList
+  def tuple_transformation_function(match_value_list):
+    extra_data = enhanced_new_match_path_value_combo_detector.known_values_dict.get(tuple(match_value_list),None)
+    if extra_data is None:
+        return match_value_list
     mod = 10000
-    if (extraData[2]+1) % mod == 0:
-        enhancedNewMatchPathValueComboDetector.auto_include_flag=False
+    if (extra_data[2]+1) % mod == 0:
+        enhanced_new_match_path_value_combo_detector.auto_include_flag=False
     else:
-        enhancedNewMatchPathValueComboDetector.auto_include_flag=True
-    return matchValueList
+        enhanced_new_match_path_value_combo_detector.auto_include_flag=True
+    return match_value_list
 
   from aminer.analysis.EnhancedNewMatchPathValueComboDetector import EnhancedNewMatchPathValueComboDetector
-  enhancedNewMatchPathValueComboDetector = EnhancedNewMatchPathValueComboDetector(analysisContext.aminerConfig, 
-        ['/model/Daily Cron/UName', '/model/Daily Cron/Job Number'], anomalyEventHandlers, auto_include_flag=True, tuple_transformation_function=tuple_transformation_function)
-  analysisContext.registerComponent(enhancedNewMatchPathValueComboDetector, componentName = "EnhancedNewValueCombo")
-  atomFilter.addHandler(enhancedNewMatchPathValueComboDetector)
+  enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(analysis_context.aminer_config, 
+        ['/model/Daily Cron/UName', '/model/Daily Cron/Job Number'], anomaly_event_handlers, auto_include_flag=True, tuple_transformation_function=tuple_transformation_function)
+  analysis_context.register_component(enhanced_new_match_path_value_combo_detector, component_name="EnhancedNewValueCombo")
+  atom_filter.add_handler(enhanced_new_match_path_value_combo_detector)
 
   from aminer.analysis.HistogramAnalysis import HistogramAnalysis, LinearNumericBinDefinition, ModuloTimeBinDefinition, PathDependentHistogramAnalysis
-  moduloTimeBinDefinition = ModuloTimeBinDefinition(86400, 3600, 0, 1, 24, True)
-  linearNumericBinDefinition = LinearNumericBinDefinition(50, 5, 20, True)
-  histogramAnalysis = HistogramAnalysis(analysisContext.aminerConfig, [('/model/Random Time/Random', moduloTimeBinDefinition), ('/model/Random', linearNumericBinDefinition)],
-        10, anomalyEventHandlers)
-  analysisContext.registerComponent(histogramAnalysis, componentName="HistogramAnalysis")
-  atomFilter.addHandler(histogramAnalysis)
+  modulo_time_bin_definition = ModuloTimeBinDefinition(86400, 3600, 0, 1, 24, True)
+  linear_numeric_bin_definition = LinearNumericBinDefinition(50, 5, 20, True)
+  histogram_analysis = HistogramAnalysis(analysis_context.aminer_config, [('/model/Random Time/Random', modulo_time_bin_definition), ('/model/Random', linear_numeric_bin_definition)],
+        10, anomaly_event_handlers)
+  analysis_context.register_component(histogram_analysis, component_name="HistogramAnalysis")
+  atom_filter.add_handler(histogram_analysis)
 
-  pathDependentHistogramAnalysis = PathDependentHistogramAnalysis(analysisContext.aminerConfig, '/model/Random Time', moduloTimeBinDefinition, 10, anomalyEventHandlers)
-  analysisContext.registerComponent(pathDependentHistogramAnalysis, componentName="PathDependentHistogramAnalysis")
-  atomFilter.addHandler(pathDependentHistogramAnalysis)
+  path_dependent_histogram_analysis = PathDependentHistogramAnalysis(analysis_context.aminer_config, '/model/Random Time', modulo_time_bin_definition, 10, anomaly_event_handlers)
+  analysis_context.register_component(path_dependent_histogram_analysis, component_name="PathDependentHistogramAnalysis")
+  atom_filter.add_handler(path_dependent_histogram_analysis)
 
   from aminer.analysis.MatchValueAverageChangeDetector import MatchValueAverageChangeDetector
-  matchValueAverageChangeDetector = MatchValueAverageChangeDetector(analysisContext.aminerConfig, anomalyEventHandlers, None, ['/model/Random'], 100, 10)
-  analysisContext.registerComponent(matchValueAverageChangeDetector, componentName="MatchValueAverageChange")
-  atomFilter.addHandler(matchValueAverageChangeDetector)
+  matchValueAverageChangeDetector = MatchValueAverageChangeDetector(analysis_context.aminer_config, anomaly_event_handlers, None, ['/model/Random'], 100, 10)
+  analysis_context.register_component(matchValueAverageChangeDetector, component_name="MatchValueAverageChange")
+  atom_filter.add_handler(matchValueAverageChangeDetector)
 
   import sys
   from aminer.analysis.MatchValueStreamWriter import MatchValueStreamWriter
-  matchValueStreamWriter = MatchValueStreamWriter(sys.stdout, ['/model/Sensors/CPU Temp', '/model/Sensors/CPU Workload', '/model/Sensors/DTM'], b';', b'')
-  analysisContext.registerComponent(matchValueStreamWriter, componentName="MatchValueStreamWriter")
-  atomFilter.addHandler(matchValueStreamWriter)
+  match_value_stream_writer = MatchValueStreamWriter(sys.stdout, ['/model/Sensors/CPU Temp', '/model/Sensors/CPU Workload', '/model/Sensors/DTM'], b';', b'')
+  analysis_context.register_component(match_value_stream_writer, component_name="MatchValueStreamWriter")
+  atom_filter.add_handler(match_value_stream_writer)
 
   from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
-  newMatchPathValueComboDetector = NewMatchPathValueComboDetector(analysisContext.aminerConfig, ['/model/IP Addresses/Username', '/model/IP Addresses/IP'], anomalyEventHandlers, auto_include_flag=True)
-  analysisContext.registerComponent(newMatchPathValueComboDetector, componentName="NewMatchPathValueCombo")
-  atomFilter.addHandler(newMatchPathValueComboDetector)
+  new_match_path_value_combo_detector = NewMatchPathValueComboDetector(analysis_context.aminer_config, ['/model/IP Addresses/Username', '/model/IP Addresses/IP'], anomaly_event_handlers, auto_include_flag=True)
+  analysis_context.register_component(new_match_path_value_combo_detector, component_name="NewMatchPathValueCombo")
+  atom_filter.add_handler(new_match_path_value_combo_detector)
 
   from aminer.analysis.NewMatchPathValueDetector import NewMatchPathValueDetector
-  newMatchPathValueDetector = NewMatchPathValueDetector(analysisContext.aminerConfig, ['/model/Daily Cron/Job Number', '/model/IP Addresses/Username'], anomalyEventHandlers, auto_include_flag=True)
-  analysisContext.registerComponent(newMatchPathValueDetector, componentName="NewMatchPathValue")
-  atomFilter.addHandler(newMatchPathValueDetector)
+  new_match_path_value_detector = NewMatchPathValueDetector(analysis_context.aminer_config, ['/model/Daily Cron/Job Number', '/model/IP Addresses/Username'], anomaly_event_handlers, auto_include_flag=True)
+  analysis_context.register_component(new_match_path_value_detector, component_name="NewMatchPathValue")
+  atom_filter.add_handler(new_match_path_value_detector)
 
   from aminer.analysis.MissingMatchPathValueDetector import MissingMatchPathValueDetector
-  missingMatchPathValueDetector = MissingMatchPathValueDetector(
-      analysisContext.aminerConfig, '/model/Disk Report/Space', anomalyEventHandlers, auto_include_flag=True, default_interval=2, realert_interval=5)
-  analysisContext.registerComponent(missingMatchPathValueDetector, componentName="MissingMatch")
-  atomFilter.addHandler(missingMatchPathValueDetector)
+  missing_match_path_value_detector = MissingMatchPathValueDetector(
+      analysis_context.aminer_config, '/model/Disk Report/Space', anomaly_event_handlers, auto_include_flag=True, default_interval=2, realert_interval=5)
+  analysis_context.register_component(missing_match_path_value_detector, component_name="MissingMatch")
+  atom_filter.add_handler(missing_match_path_value_detector)
 
   from aminer.analysis.TimeCorrelationDetector import TimeCorrelationDetector
-  timeCorrelationDetector = TimeCorrelationDetector(analysisContext.aminerConfig, 2, 1, 0, anomalyEventHandlers, record_count_before_event=70000)
-  analysisContext.registerComponent(timeCorrelationDetector, componentName="TimeCorrelationDetector")
-  atomFilter.addHandler(timeCorrelationDetector)
+  time_correlation_detector = TimeCorrelationDetector(analysis_context.aminer_config, 2, 1, 0, anomaly_event_handlers, record_count_before_event=70000)
+  analysis_context.register_component(time_correlation_detector, component_name="TimeCorrelationDetector")
+  atom_filter.add_handler(time_correlation_detector)
 
   from aminer.analysis.TimeCorrelationViolationDetector import TimeCorrelationViolationDetector, CorrelationRule, EventClassSelector
-  cronJobAnnouncement = CorrelationRule('Cron Job Announcement', 5, 6, max_artefacts_a_for_single_b=1, artefact_match_parameters=[('/model/Cron Announcement/Job Number','/model/Cron Execution/Job Number')])
-  aClassSelector=EventClassSelector('Announcement', [cronJobAnnouncement], None)
-  bClassSelector=EventClassSelector('Execution', None, [cronJobAnnouncement])
+  cron_job_announcement = CorrelationRule('Cron Job Announcement', 5, 6, max_artefacts_a_for_single_b=1, artefact_match_parameters=[('/model/Cron Announcement/Job Number','/model/Cron Execution/Job Number')])
+  a_class_selector = EventClassSelector('Announcement', [cron_job_announcement], None)
+  b_class_selector = EventClassSelector('Execution', None, [cron_job_announcement])
   rules = []
-  rules.append(Rules.PathExistsMatchRule('/model/Cron Announcement/Run', aClassSelector))
-  rules.append(Rules.PathExistsMatchRule('/model/Cron Execution/Job', bClassSelector))
+  rules.append(Rules.PathExistsMatchRule('/model/Cron Announcement/Run', a_class_selector))
+  rules.append(Rules.PathExistsMatchRule('/model/Cron Execution/Job', b_class_selector))
 
-  timeCorrelationViolationDetector = TimeCorrelationViolationDetector(analysisContext.aminerConfig, rules, anomalyEventHandlers)
-  analysisContext.registerComponent(timeCorrelationViolationDetector, componentName="TimeCorrelationViolationDetector")
-  atomFilter.addHandler(timeCorrelationViolationDetector)
+  time_correlation_violation_detector = TimeCorrelationViolationDetector(analysis_context.aminer_config, rules, anomaly_event_handlers)
+  analysis_context.register_component(time_correlation_violation_detector, component_name="TimeCorrelationViolationDetector")
+  atom_filter.add_handler(time_correlation_violation_detector)
