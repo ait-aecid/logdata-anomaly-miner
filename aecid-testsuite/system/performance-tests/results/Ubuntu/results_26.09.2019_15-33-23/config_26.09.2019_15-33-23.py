@@ -202,11 +202,11 @@ def buildAnalysisPipeline(analysisContext):
 # This rule list should trigger, when the line does not look like: User root (logged in, logged out) 
 # or User 'username' (logged in, logged out) x minutes ago.
   whitelistRules.append(Rules.OrMatchRule([
-	Rules.AndMatchRule([Rules.PathExistsMatchRule('/model/Login Details/Past Time/Time/Minutes'), 
-		Rules.NegationMatchRule(Rules.ValueMatchRule('/model/Login Details/Username', b'root'))]), 
-	Rules.AndMatchRule([Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/Login Details/Past Time/Time/Minutes')),
-		Rules.PathExistsMatchRule('/model/Login Details')]),
-	Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/Login Details'))]))
+    Rules.AndMatchRule([Rules.PathExistsMatchRule('/model/Login Details/Past Time/Time/Minutes'), 
+        Rules.NegationMatchRule(Rules.ValueMatchRule('/model/Login Details/Username', b'root'))]), 
+    Rules.AndMatchRule([Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/Login Details/Past Time/Time/Minutes')),
+        Rules.PathExistsMatchRule('/model/Login Details')]),
+    Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/Login Details'))]))
   whitelistViolationDetector = WhitelistViolationDetector(analysisContext.aminerConfig, whitelistRules, anomalyEventHandlers)
   analysisContext.registerComponent(whitelistViolationDetector, componentName="Whitelist")
   atomFilter.addHandler(whitelistViolationDetector)
@@ -224,14 +224,14 @@ def buildAnalysisPipeline(analysisContext):
         return matchValueList
     mod = 10000
     if (extraData[2]+1) % mod == 0:
-	    enhancedNewMatchPathValueComboDetector.auto_include_flag=False
+        enhancedNewMatchPathValueComboDetector.auto_include_flag=False
     else:
         enhancedNewMatchPathValueComboDetector.auto_include_flag=True
     return matchValueList
 
   from aminer.analysis.EnhancedNewMatchPathValueComboDetector import EnhancedNewMatchPathValueComboDetector
   enhancedNewMatchPathValueComboDetector = EnhancedNewMatchPathValueComboDetector(analysisContext.aminerConfig, 
-		['/model/Daily Cron/UName', '/model/Daily Cron/Job Number'], anomalyEventHandlers, auto_include_flag=True, tuple_transformation_function=tuple_transformation_function)
+        ['/model/Daily Cron/UName', '/model/Daily Cron/Job Number'], anomalyEventHandlers, auto_include_flag=True, tuple_transformation_function=tuple_transformation_function)
   analysisContext.registerComponent(enhancedNewMatchPathValueComboDetector, componentName = "EnhancedNewValueCombo")
   atomFilter.addHandler(enhancedNewMatchPathValueComboDetector)
 
@@ -239,7 +239,7 @@ def buildAnalysisPipeline(analysisContext):
   moduloTimeBinDefinition = ModuloTimeBinDefinition(86400, 3600, 0, 1, 24, True)
   linearNumericBinDefinition = LinearNumericBinDefinition(50, 5, 20, True)
   histogramAnalysis = HistogramAnalysis(analysisContext.aminerConfig, [('/model/Random Time/Random', moduloTimeBinDefinition), ('/model/Random', linearNumericBinDefinition)],
-		10, anomalyEventHandlers)
+        10, anomalyEventHandlers)
   analysisContext.registerComponent(histogramAnalysis, componentName="HistogramAnalysis")
   atomFilter.addHandler(histogramAnalysis)
 
@@ -270,7 +270,7 @@ def buildAnalysisPipeline(analysisContext):
 
   from aminer.analysis.MissingMatchPathValueDetector import MissingMatchPathValueDetector
   missingMatchPathValueDetector = MissingMatchPathValueDetector(
-	  analysisContext.aminerConfig, '/model/Disk Report/Space', anomalyEventHandlers, auto_include_flag=True, default_interval=2, realert_interval=5)
+      analysisContext.aminerConfig, '/model/Disk Report/Space', anomalyEventHandlers, auto_include_flag=True, default_interval=2, realert_interval=5)
   analysisContext.registerComponent(missingMatchPathValueDetector, componentName="MissingMatch")
   atomFilter.addHandler(missingMatchPathValueDetector)
 
