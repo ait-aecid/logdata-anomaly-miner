@@ -1,3 +1,9 @@
+from aminer.input.ByteStreamLineAtomizer import ByteStreamLineAtomizer
+from aminer.input.LogAtom import LogAtom
+from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
+from aminer.input.SimpleMultisourceAtomSync import SimpleMultisourceAtomSync
+from aminer.input.SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler
+from aminer.input.VerboseUnparsedAtomHandler import VerboseUnparsedAtomHandler
 """This file contains interface definition useful implemented
 by classes in this directory and for use from code outside this
 directory. All classes are defined in separate files, only the
@@ -67,11 +73,3 @@ class AtomHandlerInterface:
     handlers or to retry later. This behaviour has to be documented
     at each source implementation sending LogAtoms."""
     raise Exception(interface_method_called)
-
-
-from aminer.input.ByteStreamLineAtomizer import ByteStreamLineAtomizer
-from aminer.input.LogAtom import LogAtom
-from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
-from aminer.input.SimpleMultisourceAtomSync import SimpleMultisourceAtomSync
-from aminer.input.SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler
-from aminer.input.VerboseUnparsedAtomHandler import VerboseUnparsedAtomHandler

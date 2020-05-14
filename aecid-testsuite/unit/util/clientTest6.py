@@ -1,11 +1,11 @@
 from time import sleep
 import socket
 import sys
+import os
 sys.path.append('../../')
 sys.path.append('./')
-from aminer.util.SecureOSFunctions import secure_open_file,\
-  send_logstream_descriptor
-import os
+# skipcq: FLK-E402
+from aminer.util.SecureOSFunctions import secure_open_file, send_logstream_descriptor
 
 sock_name = '/tmp/test6unixSocket.sock'
 fd = secure_open_file(b'/var/log/syslog', os.O_RDONLY)

@@ -1,3 +1,8 @@
+from aminer.util import SecureOSFunctions
+import sys
+import os
+
+
 # This demo creates an analysis pipeline to parse typical Ubuntu
 # server logs.
 #
@@ -78,8 +83,6 @@ configProperties['Core.PersistenceDir'] = 'aminer'
 
 # DEMO: INCLUSION OF ALL AMINER ELEMENTS AND ALL PYTHON SITE PACKAGES
 # NOT RECOMMENDED!
-import sys
-import os
 sys.path = sys.path+['/etc/aminer/conf-available/generic', '/usr/lib/python2.7/dist-packages']
 
 # DEMO: DISABLE SECURE OPEN TO ALLOW RELATIVE PATH, SYMLINKS!
@@ -91,7 +94,6 @@ def insecure_demo_open(file_name, flags):
   return os.open(file_name, flags | os.O_NOCTTY)
 
 
-from aminer.util import SecureOSFunctions
 SecureOSFunctions.secureOpenFile = insecure_demo_open
 
 
