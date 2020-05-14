@@ -16,6 +16,8 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
   def __init__(self, aminer_config, target_path_list, report_interval,
                report_event_handlers, reset_after_report_flag=True):
+    """Initialize the ParserCount component.
+    @param aminer"""
     self.targetPathList = target_path_list
     self.reportInterval = report_interval
     self.reportEventHandlers = report_event_handlers
@@ -65,10 +67,14 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
       c = self.countDict[k]
       outputString += '\t' + str(k) + ': ' + str(c) + '\n'
 
-    #for listener in self.reportEventHandlers:
-      #listener.receiveEvent('Analysis.%s' % self.__class__.__name__,
-      #                      'Count report', [], reportStr, self)
-    print(outputString, file=sys.stderr)
+    event_data = {}
+    event_data['StatusInfo'] = self.countDict
+    event_data['FromTime'] = datetime.datetime.utcnow().timestamp() - self.reportInterval
+    event_data['ToTime'] = datetime.datetime.utcnow().timestamp()
+    for listener in self.reportEventHandlers:
+      listener.receive_event('Analysis.%s' % self.__class__.__name__,
+                            'Count report', [outputString], event_data, None, self)
+    #print(outputString, file=sys.stderr)
 
     if self.resetAfterReportFlag:
       for targetPath in self.targetPathList: 
