@@ -1,15 +1,16 @@
 import unittest
 import sys
-sys.path.append('../../')
-from aminer.util.SecureOSFunctions import secure_open_file, \
-  send_annotated_file_descriptor, receive_annoted_file_descriptor
 import os
-from _io import StringIO
-# skipcq: PYL-C0412
-from aminer.util import SecureOSFunctions
 import socket
+from _io import StringIO
 # skipcq: BAN-B404
 import subprocess
+sys.path.append('../../')
+# skipcq: FLK-E402
+from aminer.util.SecureOSFunctions import secure_open_file, send_annotated_file_descriptor, receive_annoted_file_descriptor
+# skipcq: PYL-C0412, FLK-E402
+from aminer.util import SecureOSFunctions
+# skipcq: FLK-E402
 from aminer.input.LogStream import UnixSocketLogDataResource
 
 

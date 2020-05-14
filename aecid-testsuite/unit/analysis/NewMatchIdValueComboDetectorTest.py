@@ -132,7 +132,7 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         log_atoms = []
         t = time.time()
         for line in self.log_lines:
-            log_atoms.append(LogAtom(line, ParserMatch(self.parsing_model.get_match_element('parser', MatchContext(line))), 
+            log_atoms.append(LogAtom(line, ParserMatch(self.parsing_model.get_match_element('parser', MatchContext(line))),
                 t, self.__class__.__name__))
             t = t + min_allowed_time_diff * 0.25
 
@@ -298,4 +298,3 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         self.assertEqual(new_match_id_value_combo_detector.known_values,
             [{'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}])
         self.assertEqual(output, self.expected_whitelist_string % (event_data[1], self.log_lines[1]))
-

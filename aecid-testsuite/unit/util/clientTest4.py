@@ -1,10 +1,11 @@
 from time import sleep
 import socket
 import sys
+import os
 sys.path.append('./')
 sys.path.append('../../')
+# skipcq: FLK-E402
 from aminer.util.SecureOSFunctions import secure_open_file, send_annotated_file_descriptor
-import os
 
 sock_name = '/tmp/test4unixSocket.sock'
 fd = secure_open_file(b'/etc/aminer/conf-enabled/Readme.txt', os.O_RDONLY)

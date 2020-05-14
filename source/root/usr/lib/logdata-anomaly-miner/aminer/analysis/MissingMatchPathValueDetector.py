@@ -135,9 +135,7 @@ class MissingMatchPathValueDetector(
 # No alerting yet, see if alerting is required.
           if value_overdue_time < 0:
             old = self.next_check_timestamp
-            self.next_check_timestamp = min(
-                self.next_check_timestamp,
-              self.last_seen_timestamp - value_overdue_time)
+            self.next_check_timestamp = min(self.next_check_timestamp, self.last_seen_timestamp - value_overdue_time)
             if old > self.next_check_timestamp or self.next_check_timestamp < detector_info[2]:
               continue
         missing_value_list.append([value, value_overdue_time, detector_info[1]])
