@@ -9,6 +9,7 @@ from aminer.parsing import IpAddressDataModelElement
 from aminer.parsing import OptionalMatchModelElement
 from aminer.parsing import SequenceModelElement
 
+
 def get_model():
   """This function defines how to parse a su session information message
 after any standard logging preamble, e.g. from syslog."""

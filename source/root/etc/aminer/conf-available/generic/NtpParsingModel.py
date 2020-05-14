@@ -9,6 +9,7 @@ from aminer.parsing import IpAddressDataModelElement
 from aminer.parsing import SequenceModelElement
 from aminer.parsing import VariableByteDataModelElement
 
+
 def get_model():
   """Get the model."""
   interface_name_model = VariableByteDataModelElement(

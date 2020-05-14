@@ -3,6 +3,7 @@ classes in this directory and for use from code outside this
 directory. All classes are defined in separate files, only the
 namespace references are added here to simplify the code."""
 
+
 class EventHandlerInterface:
   """This is the common interface of all components that can be
   notified on significant log data mining events. To avoid interference

@@ -79,10 +79,12 @@ configProperties['Core.PersistenceDir'] = 'aminer'
 # DEMO: INCLUSION OF ALL AMINER ELEMENTS AND ALL PYTHON SITE PACKAGES
 # NOT RECOMMENDED!
 import sys
+import os
 sys.path = sys.path+['/etc/aminer/conf-available/generic', '/usr/lib/python2.7/dist-packages']
 
 # DEMO: DISABLE SECURE OPEN TO ALLOW RELATIVE PATH, SYMLINKS!
-import os
+
+
 def insecure_demo_open(file_name, flags):
   """Perform a normal open supporting also relative path to override
   more strict secureOpenFile function in test environment."""

@@ -5,6 +5,7 @@ from aminer.parsing import FixedDataModelElement
 from aminer.parsing import SequenceModelElement
 from aminer.parsing import VariableByteDataModelElement
 
+
 def get_model(time_model=None):
   """This function defines the model for parsing a standard syslog
   preamble including timestamp and hostname.

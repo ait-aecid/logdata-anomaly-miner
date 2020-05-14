@@ -10,6 +10,7 @@ from aminer.parsing import OptionalMatchModelElement
 from aminer.parsing import SequenceModelElement
 from aminer.parsing import VariableByteDataModelElement
 
+
 def get_systemd_model():
   """This function defines the parsing model for messages directly
   from systemd."""

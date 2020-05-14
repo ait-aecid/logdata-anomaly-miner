@@ -6,6 +6,7 @@ from aminer.parsing import FirstMatchModelElement
 from aminer.parsing import FixedDataModelElement
 from aminer.parsing import SequenceModelElement
 
+
 def get_model():
   """This function returns the model."""
   type_children = []
