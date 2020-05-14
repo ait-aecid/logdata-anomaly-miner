@@ -88,7 +88,7 @@ sys.path = sys.path+['/etc/aminer/conf-available/generic', '/usr/lib/python2.7/d
 def insecure_demo_open(file_name, flags):
   """Perform a normal open supporting also relative path to override
   more strict secureOpenFile function in test environment."""
-  return os.open(file_name, flags|os.O_NOCTTY)
+  return os.open(file_name, flags | os.O_NOCTTY)
 
 
 from aminer.util import SecureOSFunctions

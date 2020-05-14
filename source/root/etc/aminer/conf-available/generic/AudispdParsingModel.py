@@ -60,9 +60,9 @@ via syslog after any standard logging preamble, e.g. from syslog."""
           else:
             break
           if next_value == -1:
-            next_value = (d_byte<<4)
+            next_value = (d_byte << 4)
           else:
-            match_value += bytearray(((next_value|d_byte),))
+            match_value += bytearray(((next_value | d_byte),))
             next_value = -1
           match_len += 1
         if next_value != -1:

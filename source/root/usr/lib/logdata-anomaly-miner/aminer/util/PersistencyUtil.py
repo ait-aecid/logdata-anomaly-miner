@@ -29,7 +29,7 @@ def open_persistence_file(file_name, flags):
     fd = SecureOSFunctions.secure_open_file(file_name, flags)
     return fd
   except OSError as openOsError:
-    if ((flags&os.O_CREAT) == 0) or (openOsError.errno != errno.ENOENT):
+    if ((flags & os.O_CREAT) == 0) or (openOsError.errno != errno.ENOENT):
       raise openOsError
 
 # Find out, which directory is missing by stating our way up.

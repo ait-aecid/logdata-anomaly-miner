@@ -37,7 +37,7 @@ class IpAddressDataModelElement(ModelElementInterface):
       ip_bits = int(data[match_len-digit_count-1:match_len-1])
       if ip_bits > 0xff:
         return None
-      extracted_address = (extracted_address << 8)|ip_bits
+      extracted_address = (extracted_address << 8) | ip_bits
       digit_count = 0
       number_count += 1
       if number_count == 4:
@@ -52,7 +52,7 @@ class IpAddressDataModelElement(ModelElementInterface):
       ip_bits = int(data[match_len-digit_count:match_len])
       if ip_bits > 0xff:
         return None
-      extracted_address = (extracted_address << 8)|ip_bits
+      extracted_address = (extracted_address << 8) | ip_bits
 
     match_string = data[:match_len]
     match_context.update(match_string)

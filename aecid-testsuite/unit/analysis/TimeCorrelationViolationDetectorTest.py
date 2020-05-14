@@ -171,7 +171,7 @@ class TimeCorrelationViolationDetectorTest(TestBase):
     self.assertEqual(result, [t, 0, self.a_class_selector, p1, 22500])
     result = self.correlation_rule.prepare_history_entry(self.b_class_selector, log_atom2)
     self.assertEqual(result, [t+5, 0, self.b_class_selector, p2, 22500])
-
-
+    
+    
 if __name__ == "__main__":
     unittest.main()

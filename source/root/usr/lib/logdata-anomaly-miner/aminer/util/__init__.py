@@ -14,7 +14,7 @@ def get_log_int(max_bits):
   maxBits-1."""
   rand_bits = random.randint(0, (1 << max_bits) - 1)
   result = 0
-  while (rand_bits&1) != 0:
+  while (rand_bits & 1) != 0:
     result += 1
     rand_bits >>= 1
   return result
