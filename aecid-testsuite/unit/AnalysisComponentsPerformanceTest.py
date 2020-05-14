@@ -547,7 +547,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             while int(time.time() - seconds) < self.waiting_time:
                 p = process_time()
                 r = random.randint(1, 100)
-                if (r >= modulo_factor):
+                if r >= modulo_factor:
                     r = 2
                 else:
                     r = 1

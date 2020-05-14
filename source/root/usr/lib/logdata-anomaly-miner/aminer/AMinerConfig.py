@@ -103,7 +103,7 @@ def save_config(analysis_context, new_file):
   
   i = len(logs) - 1
   while i > 0:
-    if("INFO AMiner started." in logs[i]):
+    if "INFO AMiner started." in logs[i]:
       logs = logs[i:]
       break
     i = i - 1

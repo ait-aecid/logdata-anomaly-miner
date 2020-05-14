@@ -367,7 +367,7 @@ class ModuloTimeMatchRule(MatchRule):
       test_value = log_atom.get_timestamp()
     else:
       time_match = log_atom.parser_match.get_match_dictionary().get(self.path, None)
-      if ((time_match is None)):
+      if time_match is None:
         return False
       test_value = time_match.match_object + datetime.datetime.now(self.tzinfo).utcoffset().total_seconds()
 
