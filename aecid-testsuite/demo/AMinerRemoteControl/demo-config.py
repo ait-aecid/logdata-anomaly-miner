@@ -184,7 +184,7 @@ def build_analysis_pipeline(analysis_context):
 
   from aminer.analysis import Rules
   from aminer.analysis import WhitelistViolationDetector
-  whitelist_rules=[]
+  whitelist_rules = []
   
 # This rule list should trigger, when the line does not look like: User root (logged in, logged out) 
 # or User 'username' (logged in, logged out) x minutes ago.
@@ -209,9 +209,9 @@ def build_analysis_pipeline(analysis_context):
     if extra_data is not None:
         mod = 10000
         if (extra_data[2]+1) % mod == 0:
-            enhanced_new_match_path_value_combo_detector.auto_include_flag=False
+            enhanced_new_match_path_value_combo_detector.auto_include_flag = False
         else:
-            enhanced_new_match_path_value_combo_detector.auto_include_flag=True
+            enhanced_new_match_path_value_combo_detector.auto_include_flag = True
     return match_value_list
 
   from aminer.analysis.EnhancedNewMatchPathValueComboDetector import EnhancedNewMatchPathValueComboDetector
@@ -266,8 +266,8 @@ def build_analysis_pipeline(analysis_context):
 
   from aminer.analysis.TimeCorrelationViolationDetector import TimeCorrelationViolationDetector, CorrelationRule, EventClassSelector
   cron_job_announcement = CorrelationRule('CronJobAnnouncement', 5, 6, max_artefacts_a_for_single_b=1, artefact_match_parameters=[('/model/CronAnnouncement/JobNumber','/model/CronExecution/JobNumber')])
-  a_class_selector=EventClassSelector('Announcement', [cron_job_announcement], None)
-  b_class_selector=EventClassSelector('Execution', None, [cron_job_announcement])
+  a_class_selector = EventClassSelector('Announcement', [cron_job_announcement], None)
+  b_class_selector = EventClassSelector('Execution', None, [cron_job_announcement])
   rules = []
   rules.append(Rules.PathExistsMatchRule('/model/CronAnnouncement/Run', a_class_selector))
   rules.append(Rules.PathExistsMatchRule('/model/CronExecution/Job', b_class_selector))

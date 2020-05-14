@@ -37,7 +37,7 @@ class EventData:
         else:
           original_log_line_prefix = self.analysis_context.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
           if original_log_line_prefix is not None and line.startswith(original_log_line_prefix):
-            message+= line+'\n'
+            message += line + '\n'
           elif line != '':
             message += '  '+line+'\n'
             
