@@ -21,7 +21,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
   
   def __init__(
       self, parsing_model, atom_handler_list, event_handler_list,
-      max_line_length, default_timestamp_path):
+      max_line_length, default_timestamp_paths):
     """Create the atomizer.
     @param event_handler_list when not None, send events to those
     handlers. The list might be empty at invocation and populated
@@ -32,7 +32,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
     self.atom_handler_list = atom_handler_list
     self.event_handler_list = event_handler_list
     self.max_line_length = max_line_length
-    self.default_timestamp_path = default_timestamp_path
+    self.default_timestamp_paths = default_timestamp_paths
 
     self.in_overlong_line_flag = False
 # If consuming of data was already attempted but the downstream
@@ -105,10 +105,11 @@ class ByteStreamLineAtomizer(StreamAtomizer):
         match_element = self.parsing_model.get_match_element('', match_context)
         if (match_element is not None) and not match_context.match_data:
           log_atom.parser_match = ParserMatch(match_element)
-          if self.default_timestamp_path is not None:
-            ts_match = log_atom.parser_match.get_match_dictionary().get(self.default_timestamp_path, None)
+          for default_timestamp_path in self.default_timestamp_paths:
+            ts_match = log_atom.parser_match.get_match_dictionary().get(default_timestamp_path, None)
             if ts_match is not None:
               log_atom.set_timestamp(ts_match.match_object)
+              break
       if self.dispatch_atom(log_atom):
         consumed_length = line_end+1
         continue
