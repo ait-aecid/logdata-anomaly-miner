@@ -190,7 +190,7 @@ def build_analysis_pipeline(analysis_context):
         Rules.NegationMatchRule(Rules.ValueMatchRule('/model/LoginDetails/Username', b'root'))]), 
     Rules.AndMatchRule([Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails/PastTime/Time/Minutes')),
         Rules.PathExistsMatchRule('/model/LoginDetails')]),
-	Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails'))]))
+    Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails'))]))
   whitelist_violation_detector = WhitelistViolationDetector(analysis_context.aminer_config, whitelist_rules, anomaly_event_handlers)
   analysis_context.register_component(whitelist_violation_detector, component_name="Whitelist")
   atom_filter.add_handler(whitelist_violation_detector)

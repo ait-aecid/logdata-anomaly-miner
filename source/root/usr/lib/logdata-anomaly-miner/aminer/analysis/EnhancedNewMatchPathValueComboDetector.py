@@ -95,18 +95,18 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
       extra_data[2] += 1
 
     affected_log_atom_values = []
-    l = {}
+    tmp_list = {}
     match_value_list = []
     for match_value in list(match_value_tuple):
       if isinstance(match_value, bytes):
         match_value = match_value.decode()
       match_value_list.append(match_value)
-    l['MatchValueList'] = match_value_list
+    tmp_list['MatchValueList'] = match_value_list
     values = self.known_values_dict.get(match_value_tuple, None)
-    l['TimeFirstOccurrence'] = values[0]
-    l['TimeLastOccurence'] = values[1]
-    l['NumberOfOccurences'] = values[2]
-    affected_log_atom_values.append(l)
+    tmp_list['TimeFirstOccurrence'] = values[0]
+    tmp_list['TimeLastOccurence'] = values[1]
+    tmp_list['NumberOfOccurences'] = values[2]
+    affected_log_atom_values.append(tmp_list)
 
     analysis_component = {'AffectedLogAtomPaths': self.target_path_list,
       'AffectedLogAtomValues': affected_log_atom_values}

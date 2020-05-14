@@ -105,27 +105,27 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
         for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
           match_value = match_element.match_object
           if isinstance(match_value, tuple):
-            l = []
+            tmp_list = []
             for val in match_value:
               if isinstance(val, datetime):
-                l.append(datetime.timestamp(val))
+                tmp_list.append(datetime.timestamp(val))
               else:
-                l.append(val)
-            match_value = l
+                tmp_list.append(val)
+            match_value = tmp_list
           if isinstance(match_value, bytes):
             match_value = match_value.decode()
           match_paths_values[match_path] = match_value
         analysis_component['ParsedLogAtom'] = match_paths_values
         feature_list = []
         for feature in self.feature_list:
-          l = {}
+          tmp_list = {}
           r = self.rule_to_dict(feature.rule)
-          l['Rule'] = r
-          l['Index'] = feature.index
-          l['CreationTime'] = feature.creation_time
-          l['LastTriggerTime'] = feature.last_trigger_time
-          l['TriggerCount'] = feature.trigger_count
-          feature_list.append(l)
+          tmp_list['Rule'] = r
+          tmp_list['Index'] = feature.index
+          tmp_list['CreationTime'] = feature.creation_time
+          tmp_list['LastTriggerTime'] = feature.last_trigger_time
+          tmp_list['TriggerCount'] = feature.trigger_count
+          feature_list.append(tmp_list)
         analysis_component['FeatureList'] = feature_list
       analysis_component['AnalysisStatus'] = result[0]
       analysis_component['TotalRecords'] = self.total_records
@@ -145,12 +145,12 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
       if attr is None:
         r[var] = None
       elif isinstance(attr, list):
-        l = []
+        tmp_list = []
         for v in attr:
           d = self.rule_to_dict(v)
           d['Type'] = str(v.__class__.__name__)
-          l.append(d)
-        r['subRules'] = l
+          tmp_list.append(d)
+        r['subRules'] = tmp_list
       else:
         r[var] = attr
     return r

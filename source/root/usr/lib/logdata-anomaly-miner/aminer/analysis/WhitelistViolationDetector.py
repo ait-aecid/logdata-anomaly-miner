@@ -44,13 +44,13 @@ class WhitelistViolationDetector(AtomHandlerInterface):
       for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
         match_value = match_element.match_object
         if isinstance(match_value, tuple):
-          l = []
+          tmp_list = []
           for val in match_value:
             if isinstance(val, datetime):
-              l.append(datetime.timestamp(val))
+              tmp_list.append(datetime.timestamp(val))
             else:
-              l.append(val)
-          match_value = l
+              tmp_list.append(val)
+          match_value = tmp_list
         if isinstance(match_value, bytes):
           match_value = match_value.decode()
         match_paths_values[match_path] = match_value
