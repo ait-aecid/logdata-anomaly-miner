@@ -5,6 +5,7 @@ from aminer.util.SecureOSFunctions import secure_open_file, \
   send_annotated_file_descriptor, receive_annoted_file_descriptor
 import os
 from _io import StringIO
+# skipcq: PYL-C0412
 from aminer.util import SecureOSFunctions
 import socket
 # skipcq: BAN-B404

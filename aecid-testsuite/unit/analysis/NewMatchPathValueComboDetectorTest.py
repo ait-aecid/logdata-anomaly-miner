@@ -1,14 +1,10 @@
 import unittest
-from aminer.parsing.MatchContext import MatchContext
-from aminer.parsing.FixedDataModelElement import FixedDataModelElement
-from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing import MatchContext, FixedDataModelElement, DecimalIntegerValueModelElement, ParserMatch, SequenceModelElement
 from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
 from aminer.input.LogAtom import LogAtom
-from aminer.parsing.ParserMatch import ParserMatch
 import time
 from unit.TestBase import TestBase
 from datetime import datetime
-from aminer.parsing.SequenceModelElement import SequenceModelElement
 
 
 class NewMatchPathValueComboDetectorTest(TestBase):
