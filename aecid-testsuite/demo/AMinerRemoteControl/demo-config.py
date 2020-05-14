@@ -189,11 +189,11 @@ def build_analysis_pipeline(analysis_context):
 # This rule list should trigger, when the line does not look like: User root (logged in, logged out) 
 # or User 'username' (logged in, logged out) x minutes ago.
   whitelist_rules.append(Rules.OrMatchRule([
-	Rules.AndMatchRule([Rules.PathExistsMatchRule('/model/LoginDetails/PastTime/Time/Minutes'), 
-		Rules.NegationMatchRule(Rules.ValueMatchRule('/model/LoginDetails/Username', b'root'))]), 
-	Rules.AndMatchRule([Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails/PastTime/Time/Minutes')),
-		Rules.PathExistsMatchRule('/model/LoginDetails')]),
-	Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails'))]))
+    Rules.AndMatchRule([Rules.PathExistsMatchRule('/model/LoginDetails/PastTime/Time/Minutes'), 
+        Rules.NegationMatchRule(Rules.ValueMatchRule('/model/LoginDetails/Username', b'root'))]), 
+    Rules.AndMatchRule([Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails/PastTime/Time/Minutes')),
+        Rules.PathExistsMatchRule('/model/LoginDetails')]),
+    Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails'))]))
   whitelist_violation_detector = WhitelistViolationDetector(analysis_context.aminer_config, whitelist_rules, anomaly_event_handlers)
   analysis_context.register_component(whitelist_violation_detector, component_name="Whitelist")
   atom_filters.add_handler(whitelist_violation_detector)
@@ -216,7 +216,7 @@ def build_analysis_pipeline(analysis_context):
 
   from aminer.analysis.EnhancedNewMatchPathValueComboDetector import EnhancedNewMatchPathValueComboDetector
   enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(analysis_context.aminer_config, 
-		['/model/DailyCron/UName', '/model/DailyCron/JobNumber'], anomaly_event_handlers, auto_include_flag=False, tuple_transformation_function=tuple_transformation_function)
+        ['/model/DailyCron/UName', '/model/DailyCron/JobNumber'], anomaly_event_handlers, auto_include_flag=False, tuple_transformation_function=tuple_transformation_function)
   analysis_context.register_component(enhanced_new_match_path_value_combo_detector, component_name = "EnhancedNewValueCombo")
   atom_filters.add_handler(enhanced_new_match_path_value_combo_detector)
 
@@ -224,7 +224,7 @@ def build_analysis_pipeline(analysis_context):
   modulo_time_bin_definition = ModuloTimeBinDefinition(86400, 3600, 0, 1, 24, True)
   linear_numeric_bin_definition = LinearNumericBinDefinition(50, 5, 20, True)
   histogram_analysis = HistogramAnalysis(analysis_context.aminer_config, [('/model/RandomTime/Random', modulo_time_bin_definition), ('/model/Random', linear_numeric_bin_definition)],
-		10, anomaly_event_handlers)
+        10, anomaly_event_handlers)
   analysis_context.register_component(histogram_analysis, component_name="HistogramAnalysis")
   atom_filters.add_handler(histogram_analysis)
 
@@ -255,7 +255,7 @@ def build_analysis_pipeline(analysis_context):
 
   from aminer.analysis.MissingMatchPathValueDetector import MissingMatchPathValueDetector
   missing_match_path_value_detector = MissingMatchPathValueDetector(
-	  analysis_context.aminer_config, '/model/DiskReport/Space', anomaly_event_handlers, auto_include_flag=False, default_interval=2, realert_interval=5)
+        analysis_context.aminer_config, '/model/DiskReport/Space', anomaly_event_handlers, auto_include_flag=False, default_interval=2, realert_interval=5)
   analysis_context.register_component(missing_match_path_value_detector, component_name="MissingMatch")
   atom_filters.add_handler(missing_match_path_value_detector)
 

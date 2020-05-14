@@ -137,7 +137,7 @@ def build_analysis_pipeline(analysis_context):
 
   from aminer.analysis import NewMatchPathValueComboDetector
   new_match_path_value_combo_detector = NewMatchPathValueComboDetector(
-  	  analysis_context.aminer_config, ['/model/HomePath/Username', '/model/HomePath/Path'] ,anomaly_event_handlers, auto_include_flag=True)
+        analysis_context.aminer_config, ['/model/HomePath/Username', '/model/HomePath/Path'] ,anomaly_event_handlers, auto_include_flag=True)
   analysis_context.register_component(new_match_path_value_combo_detector, component_name="NewValueCombo")
   atom_filter.add_handler(new_match_path_value_combo_detector)
 
