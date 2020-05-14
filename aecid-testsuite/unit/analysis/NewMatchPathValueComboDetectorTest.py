@@ -160,7 +160,7 @@ class NewMatchPathValueComboDetectorTest(TestBase):
       new_match_path_value_combo_detector.auto_include_flag = False
       self.assertEqual(new_match_path_value_combo_detector.whitelist_event('Analysis.%s' % new_match_path_value_combo_detector.__class__.__name__, [log_atom_sequence_me2,
         [self.match_element_sequence_me2.get_path()]], [log_atom_sequence_me2, self.match_element_sequence_me2.get_path()], None),
-        'Whitelisted path(es) %s with %s in %s' % (", ".join(new_match_path_value_combo_detector.target_path_list) , self.match_element_sequence_me2.path, log_atom_sequence_me2))
+        'Whitelisted path(es) %s with %s in %s' % (", ".join(new_match_path_value_combo_detector.target_path_list), self.match_element_sequence_me2.path, log_atom_sequence_me2))
 
 
 if __name__ == "__main__":

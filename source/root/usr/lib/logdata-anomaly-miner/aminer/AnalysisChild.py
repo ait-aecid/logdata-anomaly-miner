@@ -593,7 +593,7 @@ class AnalysisChildRemoteControlHandler:
         logging.addLevelName(15, "REMOTECONTROL")
         logging.log(15, json_request_data[0].decode())
 
-        exec(json_request_data[0], {'__builtins__' : None}, exec_locals)
+        exec(json_request_data[0], {'__builtins__': None}, exec_locals)
         json_remote_control_response = json.dumps(
             exec_locals.get('remoteControlResponse', None))
         if (methods.REMOTE_CONTROL_RESPONSE == ''):
