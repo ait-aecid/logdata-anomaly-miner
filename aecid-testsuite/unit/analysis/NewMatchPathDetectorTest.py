@@ -133,7 +133,6 @@ class NewMatchPathDetectorTest(TestBase):
         [self.stream_printer_event_handler], 'Default', True, output_log_line=False)
       self.assertEqual(new_match_path_detector.get_time_trigger_class(), 1)
     
-    
     '''
     The following test cases should check if the doTimer() method is working properly.
     This includes the updating of nextPersistTime. As it is not updated directly in the method

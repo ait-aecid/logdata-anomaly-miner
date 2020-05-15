@@ -29,7 +29,6 @@ config_properties['AMinerGroup'] = 'aminer'
 # for the child also.
 # config_properties['AnalysisConfigFile'] = 'analysis.py'
 
-
 # Read and store information to be used between multiple invocations
 # of AMiner in this directory. The directory must only be accessible
 # to the 'AMinerUser' but not group/world readable. On violation,

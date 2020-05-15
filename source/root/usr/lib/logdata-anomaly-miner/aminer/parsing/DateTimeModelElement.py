@@ -67,7 +67,6 @@ class DateTimeModelElement(ModelElementInterface):
     self.last_parsed_seconds = 0
     self.epoch_start_time = datetime.datetime.fromtimestamp(0, self.time_zone)
 
-
   def scan_date_format(self, date_format):
     """Scan the date format."""
     if self.date_format_parts is not None:
@@ -126,7 +125,6 @@ class DateTimeModelElement(ModelElementInterface):
     if (7 in date_format_type_set) and (not date_format_type_set.isdisjoint(set(range(0, 6)))):
       raise Exception('Cannot use %%s (seconds since epoch) with other non-second format types')
     self.date_format_parts = date_format_parts
-
 
   def get_child_elements(self):
     """Get all possible child model elements of this element.

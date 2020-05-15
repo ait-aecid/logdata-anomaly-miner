@@ -35,7 +35,6 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
     else:
       self.known_path_set = set(persistence_data)
 
-
   def receive_atom(self, log_atom):
     """Receive on parsed atom and the information about the parser
     match.
@@ -75,7 +74,6 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New path(es) detected',
                                sorted_log_lines, event_data, log_atom, self)
     return True
-
 
   def get_time_trigger_class(self):
     """Get the trigger class this component can be registered

@@ -194,7 +194,6 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 # partially initialized objects inside the registry.
     self.analysis_context.add_time_triggered_component(self)
 
-
   def run_analysis(self, master_fd):
     """This method runs the analysis thread.
     @param master_fd the main communication socket to the parent
@@ -452,7 +451,6 @@ class AnalysisChild(TimeTriggeredComponentInterface):
     else:
       raise Exception('Unhandled type info on received fd: %s' % (
           repr(received_type_info)))
-
 
   def get_time_trigger_class(self):
     """Get the trigger class this component can be registered

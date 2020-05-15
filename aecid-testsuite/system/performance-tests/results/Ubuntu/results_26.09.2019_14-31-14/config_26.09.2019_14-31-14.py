@@ -29,7 +29,6 @@ config_properties['AMinerGroup'] = 'aminer'
 # for the child also.
 # config_properties['AnalysisConfigFile'] = 'analysis.py'
 
-
 # Read and store information to be used between multiple invocations
 # of AMiner in this directory. The directory must only be accessible
 # to the 'AMinerUser' but not group/world readable. On violation,
@@ -86,22 +85,17 @@ def build_analysis_pipeline(analysis_context):
   from aminer.parsing import FirstMatchModelElement, SequenceModelElement, DecimalFloatValueModelElement, FixedDataModelElement, DelimitedDataModelElement, AnyByteDataModelElement, FixedWordlistDataModelElement, DecimalIntegerValueModelElement, DateTimeModelElement, IpAddressDataModelElement, Base64StringModelElement, ElementValueBranchModelElement, HexStringModelElement, MultiLocaleDateTimeModelElement, OptionalMatchModelElement, RepeatedElementDataModelElement, VariableByteDataModelElement, WhiteSpaceLimitedDataModelElement
 
   service_children_disk_report = []
-
   service_children_disk_report.append(FixedDataModelElement('Space', b' Current Disk Data is: Filesystem     Type  Size  Used Avail Use%'))
   service_children_disk_report.append(DelimitedDataModelElement('Data', b'%'))
   service_children_disk_report.append(AnyByteDataModelElement('Rest'))
 
-
   service_children_login_details = []
-
   service_children_login_details.append(FixedDataModelElement('User', b'User '))
   service_children_login_details.append(DelimitedDataModelElement('Username', b' '))
   service_children_login_details.append(FixedWordlistDataModelElement('Status', [b' logged in', b' logged out']))
   service_children_login_details.append(OptionalMatchModelElement('Past Time', SequenceModelElement('Time', [FixedDataModelElement('Blank', b' '), DecimalIntegerValueModelElement('Minutes'), FixedDataModelElement('Ago', b' minutes ago.')])))
 
-
   service_children_cron_job = []
-
   service_children_cron_job.append(DateTimeModelElement('DTM', b'%Y-%m-%d %H:%M:%S'))
   service_children_cron_job.append(FixedDataModelElement('UName Space1', b' '))
   service_children_cron_job.append(DelimitedDataModelElement('UName', b' '))
@@ -111,32 +105,24 @@ def build_analysis_pipeline(analysis_context):
   service_children_cron_job.append(DecimalIntegerValueModelElement('Job Number'))
   service_children_cron_job.append(FixedDataModelElement('Details', b']: Job `cron.daily` started.'))
 
-
   service_children_random_time = []
-
   service_children_random_time.append(FixedDataModelElement('Space', b'Random: '))
   service_children_random_time.append(DecimalIntegerValueModelElement('Random'))
 
-
   service_children_sensors = []
-
   service_children_sensors.append(SequenceModelElement('CPU Temp', [FixedDataModelElement('Fixed Temp', b'CPU Temp: '), DecimalIntegerValueModelElement('Temp'), FixedDataModelElement('Degrees', b'\xc2\xb0C')]))
   service_children_sensors.append(FixedDataModelElement('Space1', b', '))
   service_children_sensors.append(SequenceModelElement('CPU Workload', [FixedDataModelElement('Fixed Workload', b'CPU Workload: '), DecimalIntegerValueModelElement('Workload'), FixedDataModelElement('Percent', b'%')]))
   service_children_sensors.append(FixedDataModelElement('Space2', b', '))
   service_children_sensors.append(DateTimeModelElement('DTM', b'%Y-%m-%d %H:%M:%S'))
 
-
   service_children_user_ip_address = []
-
   service_children_user_ip_address.append(FixedDataModelElement('User', b'User '))
   service_children_user_ip_address.append(DelimitedDataModelElement('Username', b' '))
   service_children_user_ip_address.append(FixedDataModelElement('Action', b' changed IP address to '))
   service_children_user_ip_address.append(IpAddressDataModelElement('IP'))
 
-
   service_children_cron_job_announcement = []
-
   service_children_cron_job_announcement.append(DateTimeModelElement('DTM', b'%Y-%m-%d %H:%M:%S'))
   service_children_cron_job_announcement.append(FixedDataModelElement('Space', b' '))
   service_children_cron_job_announcement.append(DelimitedDataModelElement('UName', b' '))
@@ -146,9 +132,7 @@ def build_analysis_pipeline(analysis_context):
   service_children_cron_job_announcement.append(FixedWordlistDataModelElement('Cron Type', [b'cron.daily', b'cron.hourly', b'cron.monthly', b'cron.weekly']))
   service_children_cron_job_announcement.append(FixedDataModelElement('Start Time', b'\' in 5 min.'))
 
-
   service_children_cron_job_execution = []
-
   service_children_cron_job_execution.append(DateTimeModelElement('DTM', b'%Y-%m-%d %H:%M:%S'))
   service_children_cron_job_execution.append(FixedDataModelElement('Space1', b' '))
   service_children_cron_job_execution.append(DelimitedDataModelElement('UName', b' '))
@@ -157,24 +141,19 @@ def build_analysis_pipeline(analysis_context):
   service_children_cron_job_execution.append(FixedDataModelElement('Job', b']: Job `'))
   service_children_cron_job_execution.append(FixedWordlistDataModelElement('Cron Type', [b'cron.daily', b'cron.hourly', b'cron.monthly', b'cron.weekly']))
   service_children_cron_job_execution.append(FixedDataModelElement('Started', b'\' started'))
-  
 
   service_children_parsing_model_element = []
-  
   service_children_parsing_model_element.append(DateTimeModelElement('DateTimeModelElement', b'Current DateTime: %d.%m.%Y %H:%M:%S'))
-  
   service_children_parsing_model_element.append(DecimalFloatValueModelElement('DecimalFloatValueModelElement', value_sign_type='optional'))
   service_children_parsing_model_element.append(DecimalIntegerValueModelElement('DecimalIntegerValueModelElement', value_sign_type='optional', value_pad_type='blank'))
   service_children_parsing_model_element.append(SequenceModelElement('', [DelimitedDataModelElement('DelimitedDataModelElement', b';'), FixedDataModelElement('FixedDataModelElement', b';')]))
-  
+
   # ElementValueBranchModelElement
   fixed_data_me1 = FixedDataModelElement("fixed 1", b'match ')
   fixed_data_me2 = FixedDataModelElement("fixed 2", b'fixed String')
   fixed_wordlist_data_model_element = FixedWordlistDataModelElement("wordlist", [b'data: ', b'string: '])
   decimal_integer_value_model_element = DecimalIntegerValueModelElement("decimal")
-
   service_children_parsing_model_element.append(ElementValueBranchModelElement('ElementValueBranchModelElement', FirstMatchModelElement("first", [SequenceModelElement("seq1", [fixed_data_me1, fixed_wordlist_data_model_element]), SequenceModelElement("seq2", [fixed_data_me1, fixed_wordlist_data_model_element, fixed_data_me2])]), "wordlist", {0: decimal_integer_value_model_element, 1: fixed_data_me2}))
-
   service_children_parsing_model_element.append(HexStringModelElement('HexStringModelElement'))
   service_children_parsing_model_element.append(SequenceModelElement('', [FixedDataModelElement('FixedDataModelElement', b'Gateway IP-Address: '), IpAddressDataModelElement('IpAddressDataModelElement')]))
   service_children_parsing_model_element.append(MultiLocaleDateTimeModelElement('MultiLocaleDateTimeModelElement', [(b'%b %d %Y', "de_AT.utf8", None)]))
@@ -184,7 +163,6 @@ def build_analysis_pipeline(analysis_context):
 
   # The Base64StringModelElement must be just before the AnyByteDataModelElement to avoid unexpected Matches.
   service_children_parsing_model_element.append(Base64StringModelElement('Base64StringModelElement'))
-
 
   # The OptionalMatchModelElement must be paired with a FirstMatchModelElement because it accepts all data and thus no data gets 
   # to the AnyByteDataModelElement. The AnyByteDataModelElement must be last, because all bytes are accepted.
@@ -237,7 +215,7 @@ def build_analysis_pipeline(analysis_context):
   _violation_action = Rules.EventGenerationMatchAction('Analysis.GenericViolation',
       'Violation detected', anomaly_event_handlers)
   whitelist_rules = []
-  
+
 # This rule list should trigger, when the line does not look like: User root (logged in, logged out) 
 # or User 'username' (logged in, logged out) x minutes ago.
   whitelist_rules.append(Rules.OrMatchRule([
@@ -249,7 +227,6 @@ def build_analysis_pipeline(analysis_context):
   whitelist_violation_detector = WhitelistViolationDetector(analysis_context.aminer_config, whitelist_rules, anomaly_event_handlers)
   analysis_context.register_component(whitelist_violation_detector, component_name="Whitelist")
   atom_filter.add_handler(whitelist_violation_detector)
-
 
   from aminer.analysis import NewMatchPathDetector
   new_match_path_detector = NewMatchPathDetector(
