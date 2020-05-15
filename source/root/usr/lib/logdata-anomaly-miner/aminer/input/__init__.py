@@ -11,7 +11,7 @@ class AtomizerFactory:
     # skipcq: PYL-R0201
     def get_atomizer_for_resource(self, resource_name):
         """Get an atomizer for a given resource.
-    @return a StreamAtomizer object"""
+        @return a StreamAtomizer object"""
         raise Exception(interface_method_called)
 
 

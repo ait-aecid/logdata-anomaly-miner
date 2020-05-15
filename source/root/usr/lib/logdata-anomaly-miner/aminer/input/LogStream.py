@@ -124,7 +124,7 @@ class FileLogDataResource(LogDataResource):
                         self.repositioning_digest = hash_algo
                     else:
                         print('Not attempting to reposition on %s, digest changed' % encode_byte_string_as_string(self.log_resource_name),
-                            file=sys.stderr)
+                              file=sys.stderr)
                         length = -1
                 if length != 0:
                     # Repositioning failed, go back to the beginning of the stream.
