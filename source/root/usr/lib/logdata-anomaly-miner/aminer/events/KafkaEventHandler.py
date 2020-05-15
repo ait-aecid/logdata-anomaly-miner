@@ -26,8 +26,8 @@ class KafkaEventHandler():
       self.producer.send(self.topic, json_dump)
     except KafkaError as err:
       print("Error: " + str(err))
-      producer.close()
-      producer = None
+      self.producer.close()
+      self.producer = None
       return False
     return True
 
