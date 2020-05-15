@@ -137,9 +137,9 @@ class MissingMatchPathValueDetectorTest(TestBase):
         datetime.fromtimestamp(t + past_time).strftime(self.datetime_format_string),
         other_missing_match_path_value_detector.__class__.__name__, description + "2",
         1, self.match1_s1_overdue)) or (self.output_stream.getvalue(), self.__expected_string % (
-        datetime.fromtimestamp(t + past_time + 1).strftime(self.datetime_format_string),
-        other_missing_match_path_value_detector.__class__.__name__, description + "2",
-        1, self.match1_s1_overdue)))
+          datetime.fromtimestamp(t + past_time + 1).strftime(self.datetime_format_string),
+          other_missing_match_path_value_detector.__class__.__name__, description + "2",
+          1, self.match1_s1_overdue)))
       
     '''
     This test case checks, whether a missing value is created by a list without using the autoIncludeFlag. (should not be the case)
@@ -259,9 +259,9 @@ class MissingMatchPathValueDetectorTest(TestBase):
         datetime.fromtimestamp(time.time() + past_time).strftime(self.datetime_format_string),
         missing_match_path_list_value_detector.__class__.__name__, description + "2",
         1, "match1/s1, match2/d1: b' pid=' overdue 400s (interval -400)")) or (self.output_stream.getvalue(), self.__expected_string % (
-        datetime.fromtimestamp(time.time() + past_time + 1).strftime(self.datetime_format_string),
-        missing_match_path_list_value_detector.__class__.__name__, description + "2",
-        1, "match1/s1, match2/d1: b' pid=' overdue 400s (interval -400)")))
+          datetime.fromtimestamp(time.time() + past_time + 1).strftime(self.datetime_format_string),
+          missing_match_path_list_value_detector.__class__.__name__, description + "2",
+          1, "match1/s1, match2/d1: b' pid=' overdue 400s (interval -400)")))
       
     '''
     Persisting lists is tested in this test case.
@@ -300,11 +300,11 @@ class MissingMatchPathValueDetectorTest(TestBase):
       self.assertTrue(other_missing_match_path_list_value_detector.receive_atom(log_atom_fixed_dme))
       self.assertTrue((self.output_stream.getvalue() == self.__expected_string % (
         datetime.fromtimestamp(t + past_time).strftime(self.datetime_format_string),
-        other_missing_match_path_list_value_detector.__class__.__name__, description + "2",
-        1, "match3/s2, match4/d2: b' pid=' overdue 400s (interval -400)")) or (self.output_stream.getvalue(), self.__expected_string % (
-        datetime.fromtimestamp(t + past_time + 1).strftime(self.datetime_format_string),
-        other_missing_match_path_list_value_detector.__class__.__name__, description + "2",
-        1, "match3/s2, match4/d2: b' pid=' overdue 400s (interval -400)")))
+        other_missing_match_path_list_value_detector.__class__.__name__, description + "2", 1,
+        "match3/s2, match4/d2: b' pid=' overdue 400s (interval -400)")) or (self.output_stream.getvalue(), self.__expected_string % (
+          datetime.fromtimestamp(t + past_time + 1).strftime(self.datetime_format_string),
+          other_missing_match_path_list_value_detector.__class__.__name__, description + "2",
+          1, "match3/s2, match4/d2: b' pid=' overdue 400s (interval -400)")))
 
 
 if __name__ == "__main__":
