@@ -136,7 +136,7 @@ def build_analysis_pipeline(analysis_context):
   from aminer.input import SimpleByteStreamLineAtomizerFactory
   analysis_context.atomizerFactory = SimpleByteStreamLineAtomizerFactory(
       parsing_model, [atom_filter], anomaly_event_handlers,
-      defaultTimestampPath='/model/syslog/time')
+      default_timestamp_paths=['/model/syslog/time'])
 
 # Always report the unparsed lines: a part of the parsing model
 # seems to be missing or wrong.

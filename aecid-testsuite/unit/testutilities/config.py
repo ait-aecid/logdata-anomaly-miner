@@ -118,7 +118,7 @@ def build_analysis_pipeline(analysis_context):
 # Now define the AtomizerFactory using the model. A simple line
 # based one is usually sufficient.
   from aminer.input import SimpleByteStreamLineAtomizerFactory
-  analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(parsing_model, [atom_filter], anomaly_event_handlers, default_timestamp_path='')
+  analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(parsing_model, [atom_filter], anomaly_event_handlers, default_timestamp_paths=[''])
 
 # Just report all unparsed atoms to the event handlers.
   from aminer.input import SimpleUnparsedAtomHandler
