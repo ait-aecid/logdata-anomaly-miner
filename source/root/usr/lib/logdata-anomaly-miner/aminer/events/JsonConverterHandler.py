@@ -16,44 +16,49 @@ class JsonConverterHandler(EventHandlerInterface):
   def receive_event(self, event_type, event_message, sorted_log_lines, event_data, log_atom,
                     event_source):
     """Receive information about a detected event."""
-    json_error = ''
-
-    log_data = {}
-    if isinstance(log_atom.raw_data, bytes):
-      log_data['RawLogData'] = [bytes.decode(log_atom.raw_data)]
+    
+    if 'StatusInfo' in event_data:
+      # No anomaly; do nothing on purpose
+      pass
     else:
-      log_data['RawLogData'] = [log_atom.raw_data]
-    if log_atom.get_timestamp() is None:
-      log_atom.set_timestamp(time.time())
-    log_data['Timestamps'] = [round(log_atom.atom_time, 2)]
-    log_data['LogLinesCount'] = len(sorted_log_lines)
-    if log_atom.parser_match is not None and hasattr(event_source, 'output_log_line') and event_source.output_log_line:
-      log_data['AnnotatedMatchElement'] = log_atom.parser_match.match_element.annotate_match('')
+      json_error = ''
 
-    analysis_component = {'AnalysisComponentIdentifier': self.analysis_context.get_id_by_component(event_source)}
-    if event_source.__class__.__name__ == 'ExtractedData_class':
-      analysis_component['AnalysisComponentType'] = 'DistributionDetector'
-    else:
-      analysis_component['AnalysisComponentType'] = str(event_source.__class__.__name__)
-    analysis_component['AnalysisComponentName'] = self.analysis_context.get_name_by_component(event_source)
-    analysis_component['Message'] = event_message
-    analysis_component['PersistenceFileName'] = event_source.persistence_id
-    if hasattr(event_source, 'autoIncludeFlag'):
-      analysis_component['TrainingMode'] = event_source.auto_include_flag
+      log_data = {}
+      if isinstance(log_atom.raw_data, bytes):
+        log_data['RawLogData'] = [bytes.decode(log_atom.raw_data)]
+      else:
+        log_data['RawLogData'] = [log_atom.raw_data]
+      if log_atom.get_timestamp() is None:
+        log_atom.set_timestamp(time.time())
+      log_data['Timestamps'] = [round(log_atom.atom_time, 2)]
+      log_data['LogLinesCount'] = len(sorted_log_lines)
+      if log_atom.parser_match is not None and hasattr(event_source, 'output_log_line') and event_source.output_log_line:
+        log_data['AnnotatedMatchElement'] = log_atom.parser_match.match_element.annotate_match('')
 
-    detector_analysis_component = event_data.get('AnalysisComponent', None)
-    if detector_analysis_component is not None:
-      for key in detector_analysis_component:
-        if key in analysis_component.keys():
-          json_error += "AnalysisComponent attribute '%s' is already in use and can not be overwritten!\n" % key
-          continue
-        analysis_component[key] = detector_analysis_component.get(key, None)
+      analysis_component = {'AnalysisComponentIdentifier': self.analysis_context.get_id_by_component(event_source)}
+      if event_source.__class__.__name__ == 'ExtractedData_class':
+        analysis_component['AnalysisComponentType'] = 'DistributionDetector'
+      else:
+        analysis_component['AnalysisComponentType'] = str(event_source.__class__.__name__)
+      analysis_component['AnalysisComponentName'] = self.analysis_context.get_name_by_component(event_source)
+      analysis_component['Message'] = event_message
+      analysis_component['PersistenceFileName'] = event_source.persistence_id
+      if hasattr(event_source, 'autoIncludeFlag'):
+        analysis_component['TrainingMode'] = event_source.auto_include_flag
 
-    if 'LogData' not in event_data:
-      event_data['LogData'] = log_data
-    event_data['AnalysisComponent'] = analysis_component
-    if json_error != '':
-      event_data['JsonError'] = json_error
+      detector_analysis_component = event_data.get('AnalysisComponent', None)
+      if detector_analysis_component is not None:
+        for key in detector_analysis_component:
+          if key in analysis_component.keys():
+            json_error += "AnalysisComponent attribute '%s' is already in use and can not be overwritten!\n" % key
+            continue
+          analysis_component[key] = detector_analysis_component.get(key, None)
+
+      if 'LogData' not in event_data:
+        event_data['LogData'] = log_data
+      event_data['AnalysisComponent'] = analysis_component
+      if json_error != '':
+        event_data['JsonError'] = json_error
 
     # if eventSource.__class__.__name__ == 'VariableTypeDetector' and len(eventData) >= 4 and isinstance(eventData[3], float):
     #   detector['Confidence'] = float(eventData[3])

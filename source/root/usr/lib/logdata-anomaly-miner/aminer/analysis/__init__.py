@@ -15,6 +15,7 @@ from aminer.analysis.MatchValueAverageChangeDetector import MatchValueAverageCha
 from aminer.analysis.MatchValueStreamWriter import MatchValueStreamWriter
 from aminer.analysis.MissingMatchPathValueDetector import MissingMatchPathValueDetector
 from aminer.analysis.MissingMatchPathValueDetector import MissingMatchPathListValueDetector
+from aminer.analysis.NewMatchIdValueComboDetector import NewMatchIdValueComboDetector
 from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
 from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
 from aminer.analysis.NewMatchPathValueDetector import NewMatchPathValueDetector
@@ -24,3 +25,5 @@ from aminer.analysis.TimeCorrelationViolationDetector import TimeCorrelationViol
 from aminer.analysis.TimestampsUnsortedDetector import TimestampsUnsortedDetector
 # TimestampCorrectionFilters.py
 from aminer.analysis.WhitelistViolationDetector import WhitelistViolationDetector
+# Others
+from aminer.analysis.ParserCount import ParserCount
