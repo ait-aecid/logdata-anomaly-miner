@@ -10,7 +10,7 @@ class SimpleByteStreamLineAtomizerFactory(AtomizerFactory):
   lists of handlers."""
 
   def __init__(self, parsing_model, atom_handler_list, event_handler_list,
-               default_timestamp_paths=[]):
+               default_timestamp_paths=None):
     """Create the factory to forward data and events to the given
     lists for each newly created atomizer.
     @param default_timestamp_paths if not empty list, the value of this
@@ -19,7 +19,10 @@ class SimpleByteStreamLineAtomizerFactory(AtomizerFactory):
     self.parsing_model = parsing_model
     self.atom_handler_list = atom_handler_list
     self.event_handler_list = event_handler_list
-    self.default_timestamp_paths = default_timestamp_paths
+    if default_timestamp_paths is None:
+      self.default_timestamp_paths = []
+    else:
+      self.default_timestamp_paths = default_timestamp_paths
 
   def get_atomizer_for_resource(self, resource_name):
     """Get an atomizer for a given resource.
