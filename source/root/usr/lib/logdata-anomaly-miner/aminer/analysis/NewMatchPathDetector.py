@@ -12,13 +12,11 @@ from aminer.util import PersistencyUtil
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
 
-class NewMatchPathDetector(AtomHandlerInterface,
-    TimeTriggeredComponentInterface, EventSourceInterface):
+class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
   """This class creates events when new data path was found in
   a parsed atom."""
 
-  def __init__(self, aminer_config, anomaly_event_handlers,
-               persistence_id='Default', auto_include_flag=False, output_log_line=True):
+  def __init__(self, aminer_config, anomaly_event_handlers, persistence_id='Default', auto_include_flag=False, output_log_line=True):
     """Initialize the detector. This will also trigger reading
     or creation of persistence storage location."""
     self.anomaly_event_handlers = anomaly_event_handlers

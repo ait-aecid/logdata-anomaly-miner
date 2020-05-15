@@ -76,8 +76,7 @@ class AnalysisContext:
     else:
       raise Exception('Attempting to timer component for unknown class %s' % trigger_class)
 
-  def register_component(
-      self, component, component_name=None, register_time_trigger_class_override=None):
+  def register_component(self, component, component_name=None, register_time_trigger_class_override=None):
     """Register a new component. A component implementing the
     TimeTriggeredComponentInterface will also be added to the
     appropriate lists unless registerTimeTriggerClassOverride
@@ -95,8 +94,7 @@ class AnalysisContext:
       component_name = str(component.__class__.__name__) + str(self.next_registry_id)
     if component_name in self.registered_components_by_name:
       raise Exception('Component with same name already registered')
-    if (register_time_trigger_class_override is not None) and \
-        (not isinstance(component, TimeTriggeredComponentInterface)):
+    if register_time_trigger_class_override is not None and not isinstance(component, TimeTriggeredComponentInterface):
       raise Exception('Requesting override on component not implementing TimeTriggeredComponentInterface')
 
     self.registered_components[self.next_registry_id] = (component, component_name)

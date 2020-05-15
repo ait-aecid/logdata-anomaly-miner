@@ -27,9 +27,7 @@ class LogDataResource:
   streams. An external process may use the file descriptor only
   to wait for input via select."""
 
-  def __init__(
-      self, log_resource_name, log_stream_fd, default_buffer_size=1 << 16,
-      repositioning_data=None):
+  def __init__(self, log_resource_name, log_stream_fd, default_buffer_size=1 << 16, repositioning_data=None):
     """Create a new LogDataResource. Object creation must not
     touch the logStreamFd or read any data, unless repositioningData
     was given. In the later case, the stream has to support seek

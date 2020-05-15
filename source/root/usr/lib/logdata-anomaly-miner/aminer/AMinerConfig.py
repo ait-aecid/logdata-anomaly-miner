@@ -68,8 +68,7 @@ def save_config(analysis_context, new_file):
       old_len = string.find('\n')
       string = string[:old_len]
       prop = analysis_context.aminer_config.config_properties[config_property]
-      if (string[0] == "'" and string[len(string)-1] == "'") or \
-          (string[0] == '"' and string[len(string)-1] == '"'):
+      if (string[0] == "'" and string[len(string)-1] == "'") or (string[0] == '"' and string[len(string)-1] == '"'):
         prop = "'" + prop + "'"
       if "%s" % string != "%s" % prop:
         old = old[:pos+len(find_str)] + "%s" % prop + old[pos+len(find_str)+old_len:]

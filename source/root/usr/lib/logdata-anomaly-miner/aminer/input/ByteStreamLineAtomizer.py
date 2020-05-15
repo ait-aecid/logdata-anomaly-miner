@@ -19,9 +19,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
   
   COUNTER = 0
   
-  def __init__(
-      self, parsing_model, atom_handler_list, event_handler_list,
-      max_line_length, default_timestamp_path):
+  def __init__(self, parsing_model, atom_handler_list, event_handler_list, max_line_length, default_timestamp_path):
     """Create the atomizer.
     @param event_handler_list when not None, send events to those
     handlers. The list might be empty at invocation and populated

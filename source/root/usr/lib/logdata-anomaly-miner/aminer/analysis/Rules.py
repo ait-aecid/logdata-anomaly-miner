@@ -160,9 +160,7 @@ class ValueDependentDelegatedMatchRule(MatchRule):
   depending on values found within the parser_match. The result
   of this rule is the result of the selected delegation rule."""
 
-  def __init__(
-      self, value_path_list, rule_lookup_dict, default_rule=None,
-      match_action=None):
+  def __init__(self, value_path_list, rule_lookup_dict, default_rule=None, match_action=None):
     """Create the rule.
     @param list with value pathes that are used to extract the
     lookup keys for ruleLookupDict. If value lookup fails, None
@@ -386,9 +384,7 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
   from that date modulo the given value are included in a [lower,
   upper] range selected by values from the match."""
 
-  def __init__(
-      self, path, seconds_modulo, value_path_list, limit_lookup_dict,
-      default_limit=None, match_action=None, tzinfo=None):
+  def __init__(self, path, seconds_modulo, value_path_list, limit_lookup_dict, default_limit=None, match_action=None, tzinfo=None):
     """@param path the path to the datetime object to use to evaluate
     the modulo time rules on. When None, the default timestamp associated
     with the match is used.
@@ -488,8 +484,7 @@ class DebugHistoryMatchRule(MatchRule):
   when a match attempt is made. It just adds the evaluated logAtom
   to a ObjectHistory."""
 
-  def __init__(
-      self, object_history=None, debug_match_result=False, match_action=None):
+  def __init__(self, object_history=None, debug_match_result=False, match_action=None):
     """Create a DebugHistoryMatchRule object.
     @param object_history use this ObjectHistory to collect the
     LogAtoms. When None, a default LogarithmicBackoffHistory for

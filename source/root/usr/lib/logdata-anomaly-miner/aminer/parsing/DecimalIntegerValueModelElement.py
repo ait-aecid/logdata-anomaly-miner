@@ -17,8 +17,7 @@ class DecimalIntegerValueModelElement(ModelElementInterface):
   PAD_TYPE_ZERO = 'zero'
   PAD_TYPE_BLANK = 'blank'
 
-  def __init__(
-      self, path_id, value_sign_type=SIGN_TYPE_NONE, value_pad_type=PAD_TYPE_NONE):
+  def __init__(self, path_id, value_sign_type=SIGN_TYPE_NONE, value_pad_type=PAD_TYPE_NONE):
     self.path_id = path_id
     self.start_characters = None
     if value_sign_type == DecimalIntegerValueModelElement.SIGN_TYPE_NONE:

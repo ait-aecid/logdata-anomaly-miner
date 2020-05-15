@@ -108,21 +108,21 @@ class UtilsTest(TestBase):
             message, [log_atom.raw_data, log_atom.raw_data], None, log_atom.get_parser_match(), self)
 
         history = volatile_logarithmic_backoff_event_history.get_history()
-        if history == [(0, self.test %
-            self.__class__.__name__, message, [log_atom.raw_data, log_atom.raw_data], None, log_atom.get_parser_match(), self),
-            (4, self.test % self.__class__.__name__, message, [log_atom.raw_data, log_atom.raw_data], None, log_atom.get_parser_match(), self)]:
+        if history == [(0, self.test %self.__class__.__name__, message, [log_atom.raw_data, log_atom.raw_data], None, 
+                       log_atom.get_parser_match(), self), (4, self.test % self.__class__.__name__, message, 
+                       [log_atom.raw_data, log_atom.raw_data], None, log_atom.get_parser_match(), self)]:
           first += 1
-        elif history == [(1, self.test %
-            self.__class__.__name__, message, [log_atom.raw_data, log_atom.raw_data], None, log_atom.get_parser_match(), self),
-            (4, self.test % self.__class__.__name__, message, [log_atom.raw_data, log_atom.raw_data], None, log_atom.get_parser_match(), self)]:
+        elif history == [(1, self.test % self.__class__.__name__, message, [log_atom.raw_data, log_atom.raw_data], None, 
+                         log_atom.get_parser_match(), self), (4, self.test % self.__class__.__name__, message, 
+                         [log_atom.raw_data, log_atom.raw_data], None, log_atom.get_parser_match(), self)]:
           second += 1
-        elif history == [(2, self.test %
-            self.__class__.__name__, message, [log_atom.raw_data, log_atom.raw_data], None, log_atom.get_parser_match(), self),
-            (4, self.test % self.__class__.__name__, message, [log_atom.raw_data, log_atom.raw_data], None, log_atom.get_parser_match(), self)]:
+        elif history == [(2, self.test % self.__class__.__name__, message, [log_atom.raw_data, log_atom.raw_data], None, 
+                         log_atom.get_parser_match(), self), (4, self.test % self.__class__.__name__, message, 
+                         [log_atom.raw_data, log_atom.raw_data], None, log_atom.get_parser_match(), self)]:
           third += 1
-        elif history == [(3, self.test %
-            self.__class__.__name__, message, [log_atom.raw_data, log_atom.raw_data], None, log_atom.get_parser_match(), self),
-            (4, self.test % self.__class__.__name__, message, [log_atom.raw_data, log_atom.raw_data], None, log_atom.get_parser_match(), self)]:
+        elif history == [(3, self.test % self.__class__.__name__, message, [log_atom.raw_data, log_atom.raw_data], None, 
+                         log_atom.get_parser_match(), self), (4, self.test % self.__class__.__name__, message, 
+                         [log_atom.raw_data, log_atom.raw_data], None, log_atom.get_parser_match(), self)]:
           fourth += 1
       val = 0.5*0.5*0.5
       minimum = size * val * (1 - deviation)

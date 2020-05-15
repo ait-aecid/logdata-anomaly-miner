@@ -219,10 +219,11 @@ class AMinerRemoteControlExecutionMethods():
             return
         if component.__class__.__name__ not in ["EnhancedNewMatchPathValueComboDetector", "MissingMatchPathValueDetector",
             "NewMatchPathDetector", "NewMatchPathValueComboDetector"]:
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: component class '%s' does not support whitelisting! Only "\
-                "the following classes support whitelisting: EnhancedNewMatchPathValueComboDetector, " \
-                "MissingMatchPathValueDetector, NewMatchPathDetector and NewMatchPathValueComboDetector." % component.__class__.__name__
-            return
+                self.REMOTE_CONTROL_RESPONSE += "FAILURE: component class '%s' does not support whitelisting! Only the following classes " \
+                                                "support whitelisting: EnhancedNewMatchPathValueComboDetector, " \
+                                                "MissingMatchPathValueDetector, NewMatchPathDetector and NewMatchPathValueComboDetector." \
+                                                % component.__class__.__name__
+                return
         try:
             if component.__class__.__name__ == "MissingMatchPathValueDetector":
                 self.REMOTE_CONTROL_RESPONSE += component.whitelist_event("Analysis.%s" % component.__class__.__name__,

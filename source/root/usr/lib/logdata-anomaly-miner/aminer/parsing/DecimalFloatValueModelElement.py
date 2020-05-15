@@ -22,9 +22,7 @@ class DecimalFloatValueModelElement(ModelElementInterface):
   EXP_TYPE_OPTIONAL = 'optional'
   EXP_TYPE_MANDATORY = 'mandatory'
 
-  def __init__(
-      self, path_id, value_sign_type=SIGN_TYPE_NONE, value_pad_type=PAD_TYPE_NONE,
-      exponent_type=EXP_TYPE_NONE):
+  def __init__(self, path_id, value_sign_type=SIGN_TYPE_NONE, value_pad_type=PAD_TYPE_NONE, exponent_type=EXP_TYPE_NONE):
     self.path_id = path_id
     self.start_characters = None
     if value_sign_type == DecimalFloatValueModelElement.SIGN_TYPE_NONE:
@@ -47,11 +45,10 @@ class DecimalFloatValueModelElement(ModelElementInterface):
       raise Exception('Invalid valuePadType "%s"' % value_sign_type)
     self.value_pad_type = value_pad_type
 
-    if exponent_type not in [
-        DecimalFloatValueModelElement.EXP_TYPE_NONE,
-        DecimalFloatValueModelElement.EXP_TYPE_OPTIONAL,
-        DecimalFloatValueModelElement.EXP_TYPE_MANDATORY]:
-      raise Exception('Invalid exponentType "%s"' % exponent_type)
+    if exponent_type not in [DecimalFloatValueModelElement.EXP_TYPE_NONE, 
+                             DecimalFloatValueModelElement.EXP_TYPE_OPTIONAL,
+                             DecimalFloatValueModelElement.EXP_TYPE_MANDATORY]:
+        raise Exception('Invalid exponentType "%s"' % exponent_type)
     self.exponentType = exponent_type
 
   def get_child_elements(self):
