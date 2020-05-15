@@ -27,8 +27,8 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
     first_seq_s1 = 'first/seq/s1'
     first_seq_d1 = 'first/seq/d1'
     datetime_format_string = '%Y-%m-%d %H:%M:%S'
-    exp_str = "  first/seq: b'25537 uid=2'\n  " + first_seq_s1 + ": b'25537 uid='\n  " + \
-             first_seq_d1 + ": 2\n{(b'25537 uid=', 2): [%s, %s, 1]}"
+    exp_str = "  first/seq: b'25537 uid=2'\n  " + first_seq_s1 + ": b'25537 uid='\n  " \
+        + first_seq_d1 + ": 2\n{(b'25537 uid=', 2): [%s, %s, 1]}"
     exp_str2 = "  {(b'25537 uid=', 2): [%s, %s, 1]}\nb'25537 uid=2'"
 
     '''

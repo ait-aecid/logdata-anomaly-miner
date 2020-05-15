@@ -111,8 +111,7 @@ class LogarithmicBackoffHistory(ObjectHistory):
       self.history.append(new_object)
     else:
       move_pos = get_log_int(self.max_items - 1)
-      self.history = self.history[:self.max_items - move_pos - 1] + \
-                     self.history[self.max_items - move_pos:] + [new_object]
+      self.history = self.history[:self.max_items - move_pos - 1] + self.history[self.max_items - move_pos:] + [new_object]
 
   def get_history(self):
     """Get the whole history list. Make sure to clone the list

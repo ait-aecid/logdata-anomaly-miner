@@ -168,11 +168,11 @@ class AMinerRemoteControlExecutionMethods():
     def print_current_config(self, analysis_context):
         for config_property in analysis_context.aminer_config.config_properties:
             if isinstance(analysis_context.aminer_config.config_properties[config_property], str):
-                self.REMOTE_CONTROL_RESPONSE += "%s = '%s'\n" % (config_property,
-                                                                 analysis_context.aminer_config.config_properties[config_property])
+                self.REMOTE_CONTROL_RESPONSE += "%s = '%s'\n" % (
+                    config_property, analysis_context.aminer_config.config_properties[config_property])
             else:
-                self.REMOTE_CONTROL_RESPONSE += attr_str % (config_property,
-                                                               analysis_context.aminer_config.config_properties[config_property])
+                self.REMOTE_CONTROL_RESPONSE += attr_str % (
+                    config_property, analysis_context.aminer_config.config_properties[config_property])
         for component_id in analysis_context.get_registered_component_ids():
             self.REMOTE_CONTROL_RESPONSE += "%s {\n" % analysis_context.get_name_by_component(
                 analysis_context.get_component_by_id(component_id))
