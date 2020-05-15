@@ -15,21 +15,16 @@ from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
 
 class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
-    """This class creates events when a new value combination for
-  a given list of match data pathes were found."""
+    """This class creates events when a new value combination for a given list of match data pathes were found."""
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id='Default', allow_missing_values_flag=False,
                  auto_include_flag=False, output_log_line=True):
-        """Initialize the detector. This will also trigger reading
-    or creation of persistence storage location.
-    @param target_path_list the list of values to extract from each
-    match to create the value combination to be checked.
-    @param allow_missing_values_flag when set to True, the detector
-    will also use matches, where one of the pathes from targetPathList
-    does not refer to an existing parsed data object.
-    @param auto_include_flag when set to True, this detector will
-    report a new value only the first time before including it
-    in the known values set automatically."""
+        """Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        @param target_path_list the list of values to extract from each match to create the value combination to be checked.
+        @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the pathes from targetPathList
+        does not refer to an existing parsed data object.
+        @param auto_include_flag when set to True, this detector will report a new value only the first time before including it
+        in the known values set automatically."""
         self.target_path_list = target_path_list
         self.anomaly_event_handlers = anomaly_event_handlers
         self.allow_missing_values_flag = allow_missing_values_flag
@@ -40,25 +35,21 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
 
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         self.next_persist_time = None
+        self.known_values_set = set()
         self.load_persistency_data()
         PersistencyUtil.add_persistable_component(self)
 
     def load_persistency_data(self):
         """Load the persistency data from storage."""
         persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
-        if persistence_data is None:
-            self.known_values_set = set()
-        else:
-            # Set and tuples were stored as list of lists. Transform the inner
-            # lists to tuples to allow hash operation needed by set.
+        if persistence_data is not None:
+            # Set and tuples were stored as list of lists. Transform the inner lists to tuples to allow hash operation needed by set.
             self.known_values_set = {tuple(record) for record in persistence_data}
 
     def receive_atom(self, log_atom):
-        """Receive on parsed atom and the information about the parser
-    match.
-    @return True if a value combination was extracted and checked
-    against the list of known combinations, no matter if the checked
-    values were new or not."""
+        """Receive on parsed atom and the information about the parser match.
+        @return True if a value combination was extracted and checked against the list of known combinations, no matter if the checked
+        values were new or not."""
         match_dict = log_atom.parser_match.get_match_dictionary()
         match_value_list = []
         for target_path in self.target_path_list:
@@ -101,13 +92,12 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
                 sorted_log_lines = [str(match_value_tuple) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
             for listener in self.anomaly_event_handlers:
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected', sorted_log_lines,
-                    event_data, log_atom, self)
+                                       event_data, log_atom, self)
         return True
 
     def get_time_trigger_class(self):
-        """Get the trigger class this component should be registered
-    for. This trigger is used only for persistency, so real-time
-    triggering is needed."""
+        """Get the trigger class this component should be registered for. This trigger is used only for persistency, so real-time
+        triggering is needed."""
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
@@ -127,11 +117,9 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
         self.next_persist_time = None
 
     def whitelist_event(self, event_type, sorted_log_lines, event_data, whitelisting_data):
-        """Whitelist an event generated by this source using the information
-    emitted when generating the event.
-    @return a message with information about whitelisting
-    @throws Exception when whitelisting of this special event
-    using given whitelistingData was not possible."""
+        """Whitelist an event generated by this source using the information emitted when generating the event.
+        @return a message with information about whitelisting
+        @throws Exception when whitelisting of this special event using given whitelistingData was not possible."""
         if event_type != 'Analysis.%s' % self.__class__.__name__:
             raise Exception('Event not from this source')
         if whitelisting_data is not None:

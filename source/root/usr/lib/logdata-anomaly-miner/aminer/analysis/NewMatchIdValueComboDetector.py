@@ -21,21 +21,15 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, id_path_list, min_allowed_time_diff,
             persistence_id='Default', allow_missing_values_flag=False, auto_include_flag=False, output_log_line=True):
-        """Initialize the detector. This will also trigger reading
-        or creation of persistence storage location.
-        @param target_path_list the list of values to extract from each
-        match to create the value combination to be checked.
-        @param id_path_list the list of pathes where id values can be stored
-        in all relevant log event types.
-        @param min_allowed _time_diff the minimum amount of time in seconds
-        after the first appearance of a log atom with a specific id that is
-        waited for other log atoms with the same id to occur. The maximum
-        possible time to keep an incomplete combo is 2*min_allowed_time_diff
-        @param allow_missing_values_flag when set to True, the detector
-        will also use matches, where one of the pathes from targetPathList
+        """Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        @param target_path_list the list of values to extract from each match to create the value combination to be checked.
+        @param id_path_list the list of pathes where id values can be stored in all relevant log event types.
+        @param min_allowed _time_diff the minimum amount of time in seconds after the first appearance of a log atom with a specific id 
+        that is waited for other log atoms with the same id to occur. The maximum possible time to keep an incomplete combo 
+        is 2*min_allowed_time_diff
+        @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the pathes from targetPathList
         does not refer to an existing parsed data object.
-        @param auto_include_flag when set to True, this detector will
-        report a new value only the first time before including it
+        @param auto_include_flag when set to True, this detector will report a new value only the first time before including it
         in the known values set automatically."""
         self.target_path_list = target_path_list
         self.anomaly_event_handlers = anomaly_event_handlers
@@ -47,8 +41,7 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
         self.aminer_config = aminer_config
         self.persistence_id = persistence_id
 
-        self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__,
-            persistence_id)
+        self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         self.next_persist_time = None
         self.load_persistency_data()
         PersistencyUtil.add_persistable_component(self)
@@ -67,10 +60,8 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
                 self.known_values.append(record)
 
     def receive_atom(self, log_atom):
-        """Receive on parsed atom and the information about the parser
-        match.
-        @return True if a value combination was extracted and checked
-        against the list of known combinations, no matter if the checked
+        """Receive on parsed atom and the information about the parser match.
+        @return True if a value combination was extracted and checked against the list of known combinations, no matter if the checked
         values were new or not."""
         match_dict = log_atom.parser_match.get_match_dictionary()
 
@@ -88,9 +79,8 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
             if self.next_shift_time is None:
                 self.next_shift_time = timestamp + self.min_allowed_time_diff
             if timestamp > self.next_shift_time:
-                # Every min_allowed_time_diff seconds, process all combinations from id_dict_old
-                # and then override id_dict_old with id_dict_current. This guarantees that
-                # incomplete combos are hold for at least min_allowed_time_diff seconds before
+                # Every min_allowed_time_diff seconds, process all combinations from id_dict_old and then override id_dict_old with 
+                # id_dict_current. This guarantees that incomplete combos are hold for at least min_allowed_time_diff seconds before
                 # proceeding.
                 self.next_shift_time = timestamp + self.min_allowed_time_diff
                 if self.allow_missing_values_flag:
@@ -142,17 +132,16 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
             if original_log_line_prefix is None:
                 original_log_line_prefix = ''
             if self.output_log_line:
-                sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep +
-                                    repr(id_dict_entry) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
+                sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + repr(
+                    id_dict_entry) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
             else:
                 sorted_log_lines = [repr(id_dict_entry) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
             for listener in self.anomaly_event_handlers:
-                listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected',
-                    sorted_log_lines, event_data, log_atom, self)
+                listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected', sorted_log_lines,
+                                       event_data, log_atom, self)
 
     def get_time_trigger_class(self):
-        """Get the trigger class this component should be registered
-        for. This trigger is used only for persistency, so real-time
+        """Get the trigger class this component should be registered for. This trigger is used only for persistency, so real-time
         triggering is needed."""
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
@@ -173,16 +162,13 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
         self.next_persist_time = None
 
     def whitelist_event(self, event_type, sorted_log_lines, event_data, whitelisting_data):
-        """Whitelist an event generated by this source using the information
-        emitted when generating the event.
+        """Whitelist an event generated by this source using the information emitted when generating the event.
         @return a message with information about whitelisting
-        @throws Exception when whitelisting of this special event
-        using given whitelistingData was not possible."""
+        @throws Exception when whitelisting of this special event using given whitelistingData was not possible."""
         if event_type != 'Analysis.%s' % self.__class__.__name__:
             raise Exception('Event not from this source')
         if whitelisting_data is not None:
             raise Exception('Whitelisting data not understood by this detector')
         if event_data[1] not in self.known_values:
             self.known_values.append(event_data[1])
-        return 'Whitelisted path(es) %s with %s in %s' % (
-            ', '.join(self.target_path_list), event_data[1], sorted_log_lines[0])
+        return 'Whitelisted path(es) %s with %s in %s' % (', '.join(self.target_path_list), event_data[1], sorted_log_lines[0])
