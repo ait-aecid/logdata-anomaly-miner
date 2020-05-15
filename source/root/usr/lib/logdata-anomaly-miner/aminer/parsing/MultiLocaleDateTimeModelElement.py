@@ -101,7 +101,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
             parsed_fields[COMPONENT_TYPE_MINUTE] = 0
         if parsed_fields[COMPONENT_TYPE_SECOND] is None:
             parsed_fields[COMPONENT_TYPE_SECOND] = 0
-            # Around new year, the year correction could change a semiqualified date to the beginning of the year or could change a 
+            # Around new year, the year correction could change a semiqualified date to the beginning of the year or could change a
             # semiqualified date lagging behind the latest date seen to the end of the following year.
             parsed_value = datetime.datetime(
                 parsed_fields[COMPONENT_TYPE_YEAR], parsed_fields[COMPONENT_TYPE_MONTH],
@@ -365,7 +365,7 @@ class DateFormatComponent:
                     if component_value is None:
                         return None
             else:
-                # Without length, we need to got through all the dictionary components and see if the dateString starts with that key. 
+                # Without length, we need to got through all the dictionary components and see if the dateString starts with that key.
                 # As keys were already verified, that no key is starting portion of other key, that does not need to be checked.
                 check_string = date_string[parse_pos:]
                 for key in self.translation_dictionary:
@@ -383,7 +383,7 @@ class DateFormatComponent:
                 end_pos += len(self.end_separator)
 
         else:
-            # Negative componentType means, that this node is just a collector of subcomponents so do not change the parsing position for 
+            # Negative componentType means, that this node is just a collector of subcomponents so do not change the parsing position for
             # the next round.
             end_pos = 0
 

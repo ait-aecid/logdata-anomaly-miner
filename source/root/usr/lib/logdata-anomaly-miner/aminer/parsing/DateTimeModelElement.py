@@ -193,7 +193,7 @@ class DateTimeModelElement(ModelElementInterface):
                 microseconds = int(result[6] * 1000000)
             try:
                 parsed_date_time = datetime.datetime(result[0], result[1], result[2], result[3], result[4], result[5], microseconds,
-                    self.time_zone)
+                                                     self.time_zone)
             # skipcq: FLK-E722
             except:
                 # The values did not form a valid datetime object, e.g. when the day of month is out of range. The rare case where dates
@@ -215,7 +215,8 @@ class DateTimeModelElement(ModelElementInterface):
                     if abs(delta) <= self.max_time_jump_seconds:
                         self.last_parsed_seconds = total_seconds
                     else:
-                        # This might be the first date value for the next year or one from the previous. Test both cases and see, what is more likely.
+                        # This might be the first date value for the next year or one from the previous. 
+                        # Test both cases and see, what is more likely.
                         next_year_date_time = parsed_date_time.replace(self.start_year + 1)
                         delta = next_year_date_time - self.epoch_start_time
                         next_year_total_seconds = (delta.days * 86400 + delta.seconds)
