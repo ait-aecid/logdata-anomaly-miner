@@ -73,12 +73,12 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
                 self.event_collection_start_time = current_time
             self.events_collected += 1
             event_data_obj = EventData(event_type, event_message, sorted_log_lines, event_data, log_atom, event_source,
-                self.analysis_context)
+                                       self.analysis_context)
             self.current_message += event_data_obj.receive_event_string()
 
         if self.next_alert_time == 0:
             if self.last_alert_time != 0:
-                # This is the first event received after sending of a previous notification. If the currentAlertGap has not elapsed, 
+                # This is the first event received after sending of a previous notification. If the currentAlertGap has not elapsed,
                 # increase the gap immediately.
                 self.next_alert_time = self.last_alert_time + self.current_alert_gap
                 if self.next_alert_time < current_time:
