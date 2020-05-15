@@ -49,8 +49,8 @@ class EventSourceInterface:
 # Add also the namespace references to classes defined in this
 # directory.
 
-from aminer.events.DefaultMailNotificationEventHandler import DefaultMailNotificationEventHandler
-from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
-from aminer.events.SyslogWriterEventHandler import SyslogWriterEventHandler
-from aminer.events.Utils import VolatileLogarithmicBackoffEventHistory
-from aminer.events.JsonConverterHandler import JsonConverterHandler
+from aminer.events.DefaultMailNotificationEventHandler import DefaultMailNotificationEventHandler  # skipcq: FLK-E402
+from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler  # skipcq: FLK-E402
+from aminer.events.SyslogWriterEventHandler import SyslogWriterEventHandler  # skipcq: FLK-E402
+from aminer.events.Utils import VolatileLogarithmicBackoffEventHistory  # skipcq: FLK-E402
+from aminer.events.JsonConverterHandler import JsonConverterHandler  # skipcq: FLK-E402

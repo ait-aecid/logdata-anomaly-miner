@@ -69,9 +69,9 @@ class AtomHandlerInterface:
     raise Exception(interface_method_called)
 
 
-from aminer.input.ByteStreamLineAtomizer import ByteStreamLineAtomizer
-from aminer.input.LogAtom import LogAtom
-from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
-from aminer.input.SimpleMultisourceAtomSync import SimpleMultisourceAtomSync
-from aminer.input.SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler
-from aminer.input.VerboseUnparsedAtomHandler import VerboseUnparsedAtomHandler
+from aminer.input.ByteStreamLineAtomizer import ByteStreamLineAtomizer  # skipcq: FLK-E402
+from aminer.input.LogAtom import LogAtom  # skipcq: FLK-E402
+from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory  # skipcq: FLK-E402
+from aminer.input.SimpleMultisourceAtomSync import SimpleMultisourceAtomSync  # skipcq: FLK-E402
+from aminer.input.SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler  # skipcq: FLK-E402
+from aminer.input.VerboseUnparsedAtomHandler import VerboseUnparsedAtomHandler  # skipcq: FLK-E402
