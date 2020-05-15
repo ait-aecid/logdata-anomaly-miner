@@ -30,8 +30,8 @@ class NewMatchPathValueComboDetectorTest(TestBase):
     match_element_sequence_me2 = seq2.get_match_element('second', match_context_sequence_me2)
     
     '''
-    This test case checks the correct processing of unknown log lines, which in reality means that an anomaly has been found. 
-    The output is directed to an output stream and compared for accuracy. The auto_include_flag is False and the output must be repeatable on second run. 
+    This test case checks the correct processing of unknown log lines, which in reality means that an anomaly has been found. The output is 
+    directed to an output stream and compared for accuracy. The auto_include_flag is False and the output must be repeatable on second run. 
     '''
     def test1_log_atom_not_known(self):
       description = "Test1NewMatchPathValueComboDetector"

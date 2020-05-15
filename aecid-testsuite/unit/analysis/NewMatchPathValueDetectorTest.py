@@ -32,8 +32,8 @@ class NewMatchPathValueDetectorTest(TestBase):
     match_element_first_match_me2 = first_match_me2.get_match_element('second', match_context_first_match_me2)
     
     '''
-    This test case checks the correct processing of unknown log lines, which in reality means that an anomaly has been found. 
-    The output is directed to an output stream and compared for accuracy. The autoIncludeFlag is False and the output must be repeatable on second run. 
+    This test case checks the correct processing of unknown log lines, which in reality means that an anomaly has been found. The output is 
+    directed to an output stream and compared for accuracy. The autoIncludeFlag is False and the output must be repeatable on second run. 
     '''
     def test1_log_atom_not_known(self):
       description = "Test1NewMatchPathValueDetector"

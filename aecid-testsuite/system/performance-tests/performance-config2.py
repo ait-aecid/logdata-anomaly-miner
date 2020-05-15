@@ -168,8 +168,8 @@ def build_analysis_pipeline(analysis_context):
   # The Base64StringModelElement must be just before the AnyByteDataModelElement to avoid unexpected Matches.
   service_children_parsing_model_element.append(Base64StringModelElement('Base64StringModelElement'))
 
-  # The OptionalMatchModelElement must be paired with a FirstMatchModelElement because it accepts all data and thus no data gets to the AnyByteDataModelElement.
-  # The AnyByteDataModelElement must be last, because all bytes are accepted.  
+  # The OptionalMatchModelElement must be paired with a FirstMatchModelElement because it accepts all data and thus no data gets 
+  # to the AnyByteDataModelElement. The AnyByteDataModelElement must be last, because all bytes are accepted.
   service_children_parsing_model_element.append(OptionalMatchModelElement('OptionalMatchModelElement', FirstMatchModelElement('FirstMatchModelElement', [FixedDataModelElement('FixedDataModelElement', b'The-searched-element-was-found!'), AnyByteDataModelElement('AnyByteDataModelElement')])))
 
   parsing_model = FirstMatchModelElement('model', [SequenceModelElement('CronAnnouncement', service_children_cron_job_announcement), SequenceModelElement('CronExecution', service_children_cron_job_execution), SequenceModelElement('DailyCron', service_children_cron_job), SequenceModelElement('DiskReport', service_children_disk_report), SequenceModelElement('LoginDetails', service_children_login_details), DecimalIntegerValueModelElement('Random'), SequenceModelElement('RandomTime', service_children_random_time), SequenceModelElement('Sensors', service_children_sensors), SequenceModelElement('IPAddresses', service_children_user_ip_address), FirstMatchModelElement('ParsingME', service_children_parsing_model_element)])

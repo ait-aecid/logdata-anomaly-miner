@@ -31,8 +31,8 @@ class NewMatchPathDetectorTest(TestBase):
         match_context_decimal_integer_value_me)
     
     '''
-    This test case checks the correct processing of unknown log lines, which in reality means that an anomaly has been found. 
-    The output is directed to an output stream and compared for accuracy. The autoIncludeFlag is False and the output must be repeatable on second run. 
+    This test case checks the correct processing of unknown log lines, which in reality means that an anomaly has been found. The output is 
+    directed to an output stream and compared for accuracy. The autoIncludeFlag is False and the output must be repeatable on second run. 
     '''
     def test1_log_atom_not_known(self):
       description = "Test1NewMatchPathDetector"
