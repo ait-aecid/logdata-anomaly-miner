@@ -41,7 +41,7 @@ class EventGenerationMatchAction(MatchAction):
 
 
 class AtomFilterMatchAction(MatchAction, SubhandlerFilter):
-    """This generic match rule forwards all rule matches to a list of AtomHandlerInterface instaces using the 
+    """This generic match rule forwards all rule matches to a list of AtomHandlerInterface instances using the
     analysis.AtomFilters.SubhandlerFilter."""
 
     def __init__(self, subhandler_list, stop_when_handled_flag=False):
@@ -325,7 +325,7 @@ class ModuloTimeMatchRule(MatchRule):
     from that date modulo the given value are included in [lower, upper] range."""
 
     def __init__(self, path, seconds_modulo, lower_limit, upper_limit, match_action=None, tzinfo=None):
-        """@param path the path to the datetime object to use to evaluate the modulo time rules on. When None, the default 
+        """@param path the path to the datetime object to use to evaluate the modulo time rules on. When None, the default
         timestamp associated with the match is used."""
         self.path = path
         self.seconds_modulo = seconds_modulo
@@ -361,7 +361,7 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
     from that date modulo the given value are included in a [lower, upper] range selected by values from the match."""
 
     def __init__(self, path, seconds_modulo, value_path_list, limit_lookup_dict, default_limit=None, match_action=None, tzinfo=None):
-        """@param path the path to the datetime object to use to evaluate the modulo time rules on. When None, the default 
+        """@param path the path to the datetime object to use to evaluate the modulo time rules on. When None, the default
         timestamp associated with the match is used.
         @param default_limit use this default limit when limit lookup failed. Without a default limit, a failed lookup will cause
         the rule not to match."""

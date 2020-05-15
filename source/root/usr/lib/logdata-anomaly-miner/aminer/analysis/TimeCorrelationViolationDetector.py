@@ -176,7 +176,7 @@ class CorrelationRule:
                 b_event_time = b_event[0]
                 delta = b_event_time - a_event_time
                 if delta < self.min_time_delta:
-                    # See if too early, if yes go to next element. As we will not check again any older aEvents in this loop, skip 
+                    # See if too early, if yes go to next element. As we will not check again any older aEvents in this loop, skip
                     # all bEvents up to this position in future runs.
                     if b_pos < len(self.history_b_events):
                         violation_line = a_event[3].match_element.match_string
@@ -232,7 +232,7 @@ class CorrelationRule:
 
                 # We want to keep a history of good matches to ease diagnosis of correlation failures. Keep information about current line
                 # for reference.
-                self.correlation_history.add_object((a_event[3].match_element.match_string, a_event[2].action_id, 
+                self.correlation_history.add_object((a_event[3].match_element.match_string, a_event[2].action_id,
                                                      b_event[3].match_element.match_string, b_event[2].action_id))
                 del self.history_a_events[a_pos]
                 del self.history_b_events[b_pos]
@@ -253,7 +253,7 @@ class CorrelationRule:
                     violation_line = violation_line.decode("utf-8")
                     if num_violations <= max_violations:
                         violation_message += 'FAIL: B-Event for \"%s\" (%s) was not found in time!\n' % (
-                        violation_line, a_event[2].action_id)
+                                             violation_line, a_event[2].action_id)
                     violation_logs.append(violation_line)
                     del self.history_a_events[a_pos]
                     deleted = True

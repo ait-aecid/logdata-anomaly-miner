@@ -15,7 +15,7 @@ from aminer.util import TimeTriggeredComponentInterface
 
 class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """This class tries to find time correlation patterns between different log atoms. When a possible correlation rule is detected,
-    it creates an event including the rules. This is useful to implement checks as depicted 
+    it creates an event including the rules. This is useful to implement checks as depicted
     in http://dx.doi.org/10.1016/j.cose.2014.09.006."""
 
     def __init__(self, aminer_config, parallel_check_count, correlation_test_count, max_fail_count, anomaly_event_handlers,
@@ -56,8 +56,8 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
         if timestamp < self.last_timestamp:
             for listener in self.anomaly_event_handlers:
                 listener.receive_event('Analysis.%s' % self.__class__.__name__,
-                    'Logdata not sorted: last %s, current %s' % (self.last_timestamp, timestamp),
-                    [log_atom.parser_match.match_element.annotate_match('')], event_data, log_atom, self)
+                                       'Logdata not sorted: last %s, current %s' % (self.last_timestamp, timestamp),
+                                       [log_atom.parser_match.match_element.annotate_match('')], event_data, log_atom, self)
             return
         self.last_timestamp = timestamp
 
@@ -148,9 +148,8 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
         return r
 
     def get_time_trigger_class(self):
-        """Get the trigger class this component should be registered
-    for. This trigger is used only for persistency, so real-time
-    triggering is needed."""
+        """Get the trigger class this component should be registered for. This trigger is used only for persistency, so real-time
+        triggering is needed."""
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):

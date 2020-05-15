@@ -20,12 +20,12 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
     the same id value in a specific path."""
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, id_path_list, min_allowed_time_diff,
-            persistence_id='Default', allow_missing_values_flag=False, auto_include_flag=False, output_log_line=True):
+                 persistence_id='Default', allow_missing_values_flag=False, auto_include_flag=False, output_log_line=True):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param target_path_list the list of values to extract from each match to create the value combination to be checked.
         @param id_path_list the list of pathes where id values can be stored in all relevant log event types.
-        @param min_allowed _time_diff the minimum amount of time in seconds after the first appearance of a log atom with a specific id 
-        that is waited for other log atoms with the same id to occur. The maximum possible time to keep an incomplete combo 
+        @param min_allowed_time_diff the minimum amount of time in seconds after the first appearance of a log atom with a specific id
+        that is waited for other log atoms with the same id to occur. The maximum possible time to keep an incomplete combo
         is 2*min_allowed_time_diff
         @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the pathes from targetPathList
         does not refer to an existing parsed data object.
@@ -79,7 +79,7 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
             if self.next_shift_time is None:
                 self.next_shift_time = timestamp + self.min_allowed_time_diff
             if timestamp > self.next_shift_time:
-                # Every min_allowed_time_diff seconds, process all combinations from id_dict_old and then override id_dict_old with 
+                # Every min_allowed_time_diff seconds, process all combinations from id_dict_old and then override id_dict_old with
                 # id_dict_current. This guarantees that incomplete combos are hold for at least min_allowed_time_diff seconds before
                 # proceeding.
                 self.next_shift_time = timestamp + self.min_allowed_time_diff

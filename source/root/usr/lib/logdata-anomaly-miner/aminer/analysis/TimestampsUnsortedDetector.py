@@ -9,7 +9,7 @@ from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
 
 class TimestampsUnsortedDetector(AtomHandlerInterface, EventSourceInterface):
-    """This class creates events when unsorted timestamps are detected. This is useful mostly to detect algorithm malfunction or 
+    """This class creates events when unsorted timestamps are detected. This is useful mostly to detect algorithm malfunction or
     configuration errors, e.g. invalid timezone configuration."""
 
     def __init__(self, aminer_config, anomaly_event_handlers, exit_on_error_flag=False, output_log_line=True):
@@ -24,7 +24,7 @@ class TimestampsUnsortedDetector(AtomHandlerInterface, EventSourceInterface):
         """Receive on parsed atom and the information about the parser match.
         @param log_atom the parsed log atom
         @return True if this handler was really able to handle and process the match. Depending on this information, the caller
-    may decide if it makes sense passing the parsed atom also to other handlers."""
+        may decide if it makes sense passing the parsed atom also to other handlers."""
         if log_atom.get_timestamp() is None:
             return False
         if log_atom.get_timestamp() < self.last_timestamp:
@@ -41,7 +41,8 @@ class TimestampsUnsortedDetector(AtomHandlerInterface, EventSourceInterface):
             for listener in self.anomaly_event_handlers:
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Timestamp %s below %s' % (
                     datetime.fromtimestamp(log_atom.get_timestamp()).strftime("%Y-%m-%d %H:%M:%S"),
-                    datetime.fromtimestamp(self.last_timestamp).strftime("%Y-%m-%d %H:%M:%S")), sorted_log_lines, event_data, log_atom, self)
+                    datetime.fromtimestamp(self.last_timestamp).strftime("%Y-%m-%d %H:%M:%S")), sorted_log_lines, event_data,
+                      log_atom, self)
             if self.exit_on_error_flag:
                 import sys
                 sys.exit(1)

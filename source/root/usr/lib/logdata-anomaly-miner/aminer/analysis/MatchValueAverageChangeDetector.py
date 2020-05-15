@@ -12,9 +12,8 @@ from aminer.util import TimeTriggeredComponentInterface
 
 
 class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
-    """This detector calculates the average of a given list of values
-  to monitor and reports if the average of the latest diverges
-  significantly from the values observed before."""
+    """This detector calculates the average of a given list of values to monitor and reports if the average of the latest diverges
+    significantly from the values observed before."""
 
     def __init__(self, aminer_config, anomaly_event_handlers, timestamp_path, analyze_path_list, min_bin_elements, min_bin_time,
                  sync_bins_flag=True, debug_mode=False, persistence_id='Default', output_log_line=True):
