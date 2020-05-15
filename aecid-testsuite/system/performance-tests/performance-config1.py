@@ -96,7 +96,7 @@ def build_analysis_pipeline(analysis_context):
 
     service_children_login_details = [
         FixedDataModelElement('User', b'User '), DelimitedDataModelElement('Username', b' '),
-        FixedWordlistDataModelElement('Status', [b' logged in', b' logged out']), 
+        FixedWordlistDataModelElement('Status', [b' logged in', b' logged out']),
         OptionalMatchModelElement('PastTime', SequenceModelElement('Time', [
             FixedDataModelElement('Blank', b' '), DecimalIntegerValueModelElement('Minutes'),
             FixedDataModelElement('Ago', b' minutes ago.')]))]
@@ -160,7 +160,7 @@ def build_analysis_pipeline(analysis_context):
     # Now define the AtomizerFactory using the model. A simple line based one is usually sufficient.
     from aminer.input import SimpleByteStreamLineAtomizerFactory
     analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(parsing_model, [simple_monotonic_timestamp_adjust],
-        anomaly_event_handlers)
+                                                                            anomaly_event_handlers)
 
     # Just report all unparsed atoms to the event handlers.
     from aminer.input import SimpleUnparsedAtomHandler
@@ -181,10 +181,10 @@ def build_analysis_pipeline(analysis_context):
         Rules.OrMatchRule([
             Rules.AndMatchRule([
                 Rules.PathExistsMatchRule('/model/LoginDetails/PastTime/Time/Minutes'),
-                Rules.NegationMatchRule(Rules.ValueMatchRule('/model/LoginDetails/Username', b'root'))]), 
+                Rules.NegationMatchRule(Rules.ValueMatchRule('/model/LoginDetails/Username', b'root'))]),
             Rules.AndMatchRule([
                     Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails/PastTime/Time/Minutes')),
-                    Rules.PathExistsMatchRule('/model/LoginDetails')]), 
+                    Rules.PathExistsMatchRule('/model/LoginDetails')]),
             Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails'))])]
 
     whitelist_violation_detector = WhitelistViolationDetector(analysis_context.aminer_config, whitelist_rules, anomaly_event_handlers)
@@ -255,7 +255,7 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis.MissingMatchPathValueDetector import MissingMatchPathValueDetector
     missing_match_path_value_detector = MissingMatchPathValueDetector(
-        analysis_context.aminer_config, '/model/DiskReport/Space', anomaly_event_handlers, auto_include_flag=True, default_interval=2, 
+        analysis_context.aminer_config, '/model/DiskReport/Space', anomaly_event_handlers, auto_include_flag=True, default_interval=2,
         realert_interval=5)
     analysis_context.register_component(missing_match_path_value_detector, component_name="MissingMatch")
     atom_filter.add_handler(missing_match_path_value_detector)

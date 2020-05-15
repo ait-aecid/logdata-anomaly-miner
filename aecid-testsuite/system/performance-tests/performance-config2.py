@@ -229,10 +229,14 @@ def build_analysis_pipeline(analysis_context):
     from aminer.analysis import Rules
     from aminer.analysis import WhitelistViolationDetector
     whitelist_rules = [
-        Rules.OrMatchRule([Rules.AndMatchRule([Rules.PathExistsMatchRule('/model/LoginDetails/PastTime/Time/Minutes'),
-        Rules.NegationMatchRule(Rules.ValueMatchRule('/model/LoginDetails/Username', b'root'))]), Rules.AndMatchRule([
-            Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails/PastTime/Time/Minutes')),
-            Rules.PathExistsMatchRule('/model/LoginDetails')]), Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails'))])]
+        Rules.OrMatchRule([
+            Rules.AndMatchRule([
+                Rules.PathExistsMatchRule('/model/LoginDetails/PastTime/Time/Minutes'),
+                Rules.NegationMatchRule(Rules.ValueMatchRule('/model/LoginDetails/Username', b'root'))]),
+            Rules.AndMatchRule([
+                Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails/PastTime/Time/Minutes')),
+                Rules.PathExistsMatchRule('/model/LoginDetails')]),
+            Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails'))])]
 
     # This rule list should trigger, when the line does not look like: User root (logged in, logged out)
     # or User 'username' (logged in, logged out) x minutes ago.
@@ -317,7 +321,8 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis.TimeCorrelationViolationDetector import TimeCorrelationViolationDetector, CorrelationRule, EventClassSelector
     cron_job_announcement = CorrelationRule('CronJobAnnouncement', 5, 6, max_artefacts_a_for_single_b=1,
-                                            artefact_match_parameters=[('/model/CronAnnouncement/JobNumber', '/model/CronExecution/JobNumber')])
+                                            artefact_match_parameters=[
+                                                ('/model/CronAnnouncement/JobNumber', '/model/CronExecution/JobNumber')])
     a_class_selector = EventClassSelector('Announcement', [cron_job_announcement], None)
     b_class_selector = EventClassSelector('Execution', None, [cron_job_announcement])
     rules = [Rules.PathExistsMatchRule('/model/CronAnnouncement/Run', a_class_selector),

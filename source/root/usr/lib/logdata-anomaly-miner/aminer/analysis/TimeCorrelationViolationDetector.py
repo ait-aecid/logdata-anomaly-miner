@@ -23,6 +23,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
         self.next_persist_time = time.time() + 600.0
         self.persistence_id = persistence_id
         self.output_log_line = output_log_line
+        self.last_log_atom = None
 
         event_correlation_set = set()
         for rule in self.event_classification_ruleset:
@@ -45,7 +46,6 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
     def receive_atom(self, log_atom):
         """Receive a parsed atom and check all the classification rules, that will trigger correlation rule evaluation and event
         triggering on violations."""
-        # skipcq: PYL-W0201
         self.last_log_atom = log_atom
         for rule in self.event_classification_ruleset:
             rule.match(log_atom)
