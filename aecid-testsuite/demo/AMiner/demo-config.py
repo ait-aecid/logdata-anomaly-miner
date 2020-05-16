@@ -97,7 +97,7 @@ def build_analysis_pipeline(analysis_context):
 
     service_children_login_details = [
         FixedDataModelElement('User', b'User '), DelimitedDataModelElement('Username', b' '),
-        FixedWordlistDataModelElement('Status', [b' logged in', b' logged out']), 
+        FixedWordlistDataModelElement('Status', [b' logged in', b' logged out']),
         OptionalMatchModelElement('PastTime', SequenceModelElement('Time', [
             FixedDataModelElement('Blank', b' '), DecimalIntegerValueModelElement('Minutes'),
             FixedDataModelElement('Ago', b' minutes ago.')]))]
@@ -190,7 +190,7 @@ def build_analysis_pipeline(analysis_context):
     # The Base64StringModelElement must be just before the AnyByteDataModelElement to avoid unexpected Matches.
     service_children_parsing_model_element.append(Base64StringModelElement('Base64StringModelElement'))
 
-    # The OptionalMatchModelElement must be paired with a FirstMatchModelElement because it accepts all data and thus no data gets 
+    # The OptionalMatchModelElement must be paired with a FirstMatchModelElement because it accepts all data and thus no data gets
     # to the AnyByteDataModelElement. The AnyByteDataModelElement must be last, because all bytes are accepted.
     service_children_parsing_model_element.append(
         OptionalMatchModelElement('OptionalMatchModelElement', FirstMatchModelElement('FirstMatchModelElement', [
@@ -247,13 +247,13 @@ def build_analysis_pipeline(analysis_context):
         Rules.OrMatchRule([
             Rules.AndMatchRule([
                 Rules.PathExistsMatchRule('/model/LoginDetails/PastTime/Time/Minutes'),
-                Rules.NegationMatchRule(Rules.ValueMatchRule('/model/LoginDetails/Username', b'root'))]), 
+                Rules.NegationMatchRule(Rules.ValueMatchRule('/model/LoginDetails/Username', b'root'))]),
             Rules.AndMatchRule([
                 Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails/PastTime/Time/Minutes')),
-                Rules.PathExistsMatchRule('/model/LoginDetails')]), 
+                Rules.PathExistsMatchRule('/model/LoginDetails')]),
             Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails'))])]
 
-    # This rule list should trigger, when the line does not look like: User root (logged in, logged out) 
+    # This rule list should trigger, when the line does not look like: User root (logged in, logged out)
     # or User 'username' (logged in, logged out) x minutes ago.
     whitelist_violation_detector = WhitelistViolationDetector(analysis_context.aminer_config, whitelist_rules, anomaly_event_handlers,
                                                               output_log_line=True)
@@ -277,8 +277,8 @@ def build_analysis_pipeline(analysis_context):
         return match_value_list
 
     from aminer.analysis.EnhancedNewMatchPathValueComboDetector import EnhancedNewMatchPathValueComboDetector
-    enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(analysis_context.aminer_config,
-        ['/model/DailyCron/UName', '/model/DailyCron/JobNumber'], anomaly_event_handlers, auto_include_flag=True,
+    enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(analysis_context.aminer_config, [
+        '/model/DailyCron/UName', '/model/DailyCron/JobNumber'], anomaly_event_handlers, auto_include_flag=True,
         tuple_transformation_function=tuple_transformation_function, output_log_line=True)
     analysis_context.register_component(enhanced_new_match_path_value_combo_detector, component_names="EnhancedNewValueCombo")
     atom_filter.add_handler(enhanced_new_match_path_value_combo_detector)
@@ -287,8 +287,8 @@ def build_analysis_pipeline(analysis_context):
         PathDependentHistogramAnalysis
     modulo_time_bin_definition = ModuloTimeBinDefinition(86400, 3600, 0, 1, 24, True)
     linear_numeric_bin_definition = LinearNumericBinDefinition(50, 5, 20, True)
-    histogram_analysis = HistogramAnalysis(analysis_context.aminer_config,
-        [('/model/RandomTime/Random', modulo_time_bin_definition), ('/model/Random', linear_numeric_bin_definition)], 10,
+    histogram_analysis = HistogramAnalysis(analysis_context.aminer_config, [
+        ('/model/RandomTime/Random', modulo_time_bin_definition), ('/model/Random', linear_numeric_bin_definition)], 10,
         anomaly_event_handlers, output_log_line=True)
     analysis_context.register_component(histogram_analysis, component_name="HistogramAnalysis")
     atom_filter.add_handler(histogram_analysis)
@@ -333,7 +333,7 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis.MissingMatchPathValueDetector import MissingMatchPathValueDetector
     missing_match_path_value_detector = MissingMatchPathValueDetector(
-        analysis_context.aminer_config, '/model/DiskReport/Space', anomaly_event_handlers, auto_include_flag=True, default_interval=2, 
+        analysis_context.aminer_config, '/model/DiskReport/Space', anomaly_event_handlers, auto_include_flag=True, default_interval=2,
         realert_interval=5, output_log_line=True)
     analysis_context.register_component(missing_match_path_value_detector, component_name="MissingMatch")
     atom_filter.add_handler(missing_match_path_value_detector)

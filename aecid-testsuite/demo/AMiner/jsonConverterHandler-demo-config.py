@@ -97,7 +97,7 @@ def build_analysis_pipeline(analysis_context):
 
     service_children_login_details = [
         FixedDataModelElement('User', b'User '), DelimitedDataModelElement('Username', b' '),
-        FixedWordlistDataModelElement('Status', [b' logged in', b' logged out']), 
+        FixedWordlistDataModelElement('Status', [b' logged in', b' logged out']),
         OptionalMatchModelElement('PastTime', SequenceModelElement('Time', [
             FixedDataModelElement('Blank', b' '), DecimalIntegerValueModelElement('Minutes'),
             FixedDataModelElement('Ago', b' minutes ago.')]))]
@@ -175,8 +175,8 @@ def build_analysis_pipeline(analysis_context):
             SequenceModelElement("seq2", [fixed_data_me1, fixed_wordlist_data_model_element, fixed_data_me2])]), "wordlist",
                                  {0: decimal_integer_value_model_element, 1: fixed_data_me2}))
     service_children_parsing_model_element.append(HexStringModelElement('HexStringModelElement'))
-    service_children_parsing_model_element.append(SequenceModelElement('',
-        [FixedDataModelElement('FixedDataModelElement', b'Gateway IP-Address: '), IpAddressDataModelElement('IpAddressDataModelElement')]))
+    service_children_parsing_model_element.append(SequenceModelElement('', [
+        FixedDataModelElement('FixedDataModelElement', b'Gateway IP-Address: '), IpAddressDataModelElement('IpAddressDataModelElement')]))
     service_children_parsing_model_element.append(
         MultiLocaleDateTimeModelElement('MultiLocaleDateTimeModelElement', [(b'%b %d %Y', "de_AT.utf8", None)]))
     service_children_parsing_model_element.append(
@@ -190,7 +190,7 @@ def build_analysis_pipeline(analysis_context):
     # The Base64StringModelElement must be just before the AnyByteDataModelElement to avoid unexpected Matches.
     service_children_parsing_model_element.append(Base64StringModelElement('Base64StringModelElement'))
 
-    # The OptionalMatchModelElement must be paired with a FirstMatchModelElement because it accepts all data and thus no data gets 
+    # The OptionalMatchModelElement must be paired with a FirstMatchModelElement because it accepts all data and thus no data gets
     # to the AnyByteDataModelElement. The AnyByteDataModelElement must be last, because all bytes are accepted.
     service_children_parsing_model_element.append(
         OptionalMatchModelElement('OptionalMatchModelElement', FirstMatchModelElement('FirstMatchModelElement', [
@@ -226,7 +226,7 @@ def build_analysis_pipeline(analysis_context):
     # Now define the AtomizerFactory using the model. A simple line based one is usually sufficient.
     from aminer.input import SimpleByteStreamLineAtomizerFactory
     analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(parsing_model, [simple_monotonic_timestamp_adjust],
-        anomaly_event_handlers)
+                                                                            anomaly_event_handlers)
 
     # Just report all unparsed atoms to the event handlers.
     from aminer.input import SimpleUnparsedAtomHandler, VerboseUnparsedAtomHandler
@@ -249,13 +249,13 @@ def build_analysis_pipeline(analysis_context):
         Rules.OrMatchRule([
             Rules.AndMatchRule([
                 Rules.PathExistsMatchRule('/model/LoginDetails/PastTime/Time/Minutes'),
-                Rules.NegationMatchRule(Rules.ValueMatchRule('/model/LoginDetails/Username', b'root'))]), 
+                Rules.NegationMatchRule(Rules.ValueMatchRule('/model/LoginDetails/Username', b'root'))]),
             Rules.AndMatchRule([
                 Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails/PastTime/Time/Minutes')),
-                Rules.PathExistsMatchRule('/model/LoginDetails')]), 
+                Rules.PathExistsMatchRule('/model/LoginDetails')]),
             Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails'))])]
 
-    # This rule list should trigger, when the line does not look like: User root (logged in, logged out) 
+    # This rule list should trigger, when the line does not look like: User root (logged in, logged out)
     # or User 'username' (logged in, logged out) x minutes ago.
     whitelist_violation_detector = WhitelistViolationDetector(analysis_context.aminer_config, whitelist_rules, anomaly_event_handlers,
                                                               output_log_line=True)
@@ -315,7 +315,7 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
     new_match_path_value_combo_detector = NewMatchPathValueComboDetector(
-        analysis_context.aminer_config, ['/model/IPAddresses/Username', '/model/IPAddresses/IP'], 
+        analysis_context.aminer_config, ['/model/IPAddresses/Username', '/model/IPAddresses/IP'],
         anomaly_event_handlers, output_log_line=True)
     analysis_context.register_component(new_match_path_value_combo_detector, component_name="NewMatchPathValueCombo")
     atom_filter.add_handler(new_match_path_value_combo_detector)
@@ -323,20 +323,20 @@ def build_analysis_pipeline(analysis_context):
     from aminer.analysis.NewMatchIdValueComboDetector import NewMatchIdValueComboDetector
     new_match_id_value_combo_detector = NewMatchIdValueComboDetector(analysis_context.aminer_config, [
         '/model/type/path/name', '/model/type/syscall/syscall'], anomaly_event_handlers, id_path_list=[
-        '/model/type/path/id', '/model/type/syscall/id'], min_allowed_time_diff=5, auto_include_flag=True, allow_missing_values_flag=True, 
+        '/model/type/path/id', '/model/type/syscall/id'], min_allowed_time_diff=5, auto_include_flag=True, allow_missing_values_flag=True,
         output_log_line=True)
     analysis_context.register_component(new_match_id_value_combo_detector, component_name="NewMatchIdValueComboDetector")
     atom_filter.add_handler(new_match_id_value_combo_detector)
 
     from aminer.analysis.NewMatchPathValueDetector import NewMatchPathValueDetector
-    new_match_path_value_detector = NewMatchPathValueDetector(analysis_context.aminer_config,
-        ['/model/DailyCron/JobNumber', '/model/IPAddresses/Username'], anomaly_event_handlers, auto_include_flag=True, output_log_line=True)
+    new_match_path_value_detector = NewMatchPathValueDetector(analysis_context.aminer_config, [
+        '/model/DailyCron/JobNumber', '/model/IPAddresses/Username'], anomaly_event_handlers, auto_include_flag=True, output_log_line=True)
     analysis_context.register_component(new_match_path_value_detector, component_name="NewMatchPathValue")
     atom_filter.add_handler(new_match_path_value_detector)
 
     from aminer.analysis.MissingMatchPathValueDetector import MissingMatchPathValueDetector
     missing_match_path_value_detector = MissingMatchPathValueDetector(
-        analysis_context.aminer_config, '/model/DiskReport/Space', anomaly_event_handlers, auto_include_flag=True, default_interval=2, 
+        analysis_context.aminer_config, '/model/DiskReport/Space', anomaly_event_handlers, auto_include_flag=True, default_interval=2,
         realert_interval=5, output_log_line=True)
     analysis_context.register_component(missing_match_path_value_detector, component_name="MissingMatch")
     atom_filter.add_handler(missing_match_path_value_detector)

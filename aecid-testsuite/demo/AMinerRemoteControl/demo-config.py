@@ -94,7 +94,7 @@ def build_analysis_pipeline(analysis_context):
 
     service_children_login_details = [
         FixedDataModelElement('User', b'User '), DelimitedDataModelElement('Username', b' '),
-        FixedWordlistDataModelElement('Status', [b' logged in', b' logged out']), 
+        FixedWordlistDataModelElement('Status', [b' logged in', b' logged out']),
         OptionalMatchModelElement('PastTime', SequenceModelElement('Time', [
             FixedDataModelElement('Blank', b' '), DecimalIntegerValueModelElement('Minutes'),
             FixedDataModelElement('Ago', b' minutes ago.')]))]
@@ -181,13 +181,13 @@ def build_analysis_pipeline(analysis_context):
         Rules.OrMatchRule([
             Rules.AndMatchRule([
                 Rules.PathExistsMatchRule('/model/LoginDetails/PastTime/Time/Minutes'),
-                Rules.NegationMatchRule(Rules.ValueMatchRule('/model/LoginDetails/Username', b'root'))]), 
+                Rules.NegationMatchRule(Rules.ValueMatchRule('/model/LoginDetails/Username', b'root'))]),
             Rules.AndMatchRule([
                 Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails/PastTime/Time/Minutes')),
-                Rules.PathExistsMatchRule('/model/LoginDetails')]), 
+                Rules.PathExistsMatchRule('/model/LoginDetails')]),
             Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails'))])]
 
-    # This rule list should trigger, when the line does not look like: User root (logged in, logged out) 
+    # This rule list should trigger, when the line does not look like: User root (logged in, logged out)
     # or User 'username' (logged in, logged out) x minutes ago.
     whitelist_violation_detector = WhitelistViolationDetector(analysis_context.aminer_config, whitelist_rules, anomaly_event_handlers)
     analysis_context.register_component(whitelist_violation_detector, component_name="Whitelist")
@@ -210,7 +210,7 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis.EnhancedNewMatchPathValueComboDetector import EnhancedNewMatchPathValueComboDetector
     enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(
-        analysis_context.aminer_config, ['/model/DailyCron/UName', '/model/DailyCron/JobNumber'], anomaly_event_handlers, 
+        analysis_context.aminer_config, ['/model/DailyCron/UName', '/model/DailyCron/JobNumber'], anomaly_event_handlers,
         auto_include_flag=False, tuple_transformation_function=tuple_transformation_function)
     analysis_context.register_component(enhanced_new_match_path_value_combo_detector, component_name="EnhancedNewValueCombo")
     atom_filters.add_handler(enhanced_new_match_path_value_combo_detector)
@@ -257,7 +257,7 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis.MissingMatchPathValueDetector import MissingMatchPathValueDetector
     missing_match_path_value_detector = MissingMatchPathValueDetector(
-        analysis_context.aminer_config, '/model/DiskReport/Space', anomaly_event_handlers, auto_include_flag=False, default_interval=2, 
+        analysis_context.aminer_config, '/model/DiskReport/Space', anomaly_event_handlers, auto_include_flag=False, default_interval=2,
         realert_interval=5)
     analysis_context.register_component(missing_match_path_value_detector, component_name="MissingMatch")
     atom_filters.add_handler(missing_match_path_value_detector)
