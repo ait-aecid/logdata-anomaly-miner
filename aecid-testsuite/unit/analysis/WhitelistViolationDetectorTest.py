@@ -48,8 +48,8 @@ class WhitelistViolationDetectorTest(TestBase):
 
         self.assertTrue(not whitelist_violation_detector.receive_atom(log_atom))
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
-        datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S"), whitelist_violation_detector.__class__.__name__, description, 1,
-        "b'fixed String'"))
+            datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S"), whitelist_violation_detector.__class__.__name__, description, 1,
+            "b'fixed String'"))
 
 
 if __name__ == "__main__":

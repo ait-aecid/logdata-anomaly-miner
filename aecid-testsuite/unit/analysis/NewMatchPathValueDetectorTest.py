@@ -103,8 +103,8 @@ class NewMatchPathValueDetectorTest(TestBase):
     def test3_log_atom_known_from_persisted_data(self):
         """The persisting and reading of permitted log lines should be checked with this test."""
         description = "Test3NewMatchPathValueDetector"
-        new_match_path_value_detector = NewMatchPathValueDetector(self.aminer_config, [self.first_f1_s1],
-            [self.stream_printer_event_handler], 'Default', True, output_log_line=False)
+        new_match_path_value_detector = NewMatchPathValueDetector(self.aminer_config, [self.first_f1_s1], [
+            self.stream_printer_event_handler], 'Default', True, output_log_line=False)
         self.analysis_context.register_component(new_match_path_value_detector, description)
 
         t = time.time()

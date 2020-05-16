@@ -54,8 +54,8 @@ class NewMatchPathValueComboDetectorTest(TestBase):
             description, 1, self.string2))
         self.reset_output_stream()
 
-        new_match_path_value_combo_detector2 = NewMatchPathValueComboDetector(self.aminer_config, ['second/seq2/d1', 'second/seq2/s2'],
-            [self.stream_printer_event_handler], 'Default', False, False, output_log_line=False)
+        new_match_path_value_combo_detector2 = NewMatchPathValueComboDetector(self.aminer_config, ['second/seq2/d1', 'second/seq2/s2'], [
+            self.stream_printer_event_handler], 'Default', False, False, output_log_line=False)
         self.analysis_context.register_component(new_match_path_value_combo_detector2, description + "2")
 
         log_atom_sequence_me2 = LogAtom(self.match_element_sequence_me2.get_match_string(), ParserMatch(self.match_element_sequence_me2), t,
@@ -133,8 +133,8 @@ class NewMatchPathValueComboDetectorTest(TestBase):
     def test4_whitelist_event_with_known_and_unknown_paths(self):
         """This test case checks in which cases an event is triggered and compares with expected results."""
         description = "Test4NewMatchPathValueComboDetector"
-        new_match_path_value_combo_detector = NewMatchPathValueComboDetector(self.aminer_config, [self.first_seq_s1, self.first_seq_d1],
-            [self.stream_printer_event_handler], 'Default', False, True, output_log_line=False)
+        new_match_path_value_combo_detector = NewMatchPathValueComboDetector(self.aminer_config, [self.first_seq_s1, self.first_seq_d1], [
+            self.stream_printer_event_handler], 'Default', False, True, output_log_line=False)
         self.analysis_context.register_component(new_match_path_value_combo_detector, description)
 
         t = time.time()
@@ -155,7 +155,7 @@ class NewMatchPathValueComboDetectorTest(TestBase):
             new_match_path_value_combo_detector.whitelist_event('Analysis.%s' % new_match_path_value_combo_detector.__class__.__name__, [
                 log_atom_sequence_me2, [self.match_element_sequence_me2.get_path()]], [
                 log_atom_sequence_me2, self.match_element_sequence_me2.get_path()], None), 'Whitelisted path(es) %s with %s in %s' % (
-                ", ".join(new_match_path_value_combo_detector.target_path_list), self.match_element_sequence_me2.path, 
+                ", ".join(new_match_path_value_combo_detector.target_path_list), self.match_element_sequence_me2.path,
                 log_atom_sequence_me2))
 
 

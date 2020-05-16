@@ -27,7 +27,8 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
     first_seq_s1 = 'first/seq/s1'
     first_seq_d1 = 'first/seq/d1'
     datetime_format_string = '%Y-%m-%d %H:%M:%S'
-    exp_str = "  first/seq: b'25537 uid=2'\n  " + first_seq_s1 + ": b'25537 uid='\n  " + first_seq_d1 + ": 2\n{(b'25537 uid=', 2): [%s, %s, 1]}"
+    exp_str = "  first/seq: b'25537 uid=2'\n  " + first_seq_s1 + ": b'25537 uid='\n  " + first_seq_d1 + \
+              ": 2\n{(b'25537 uid=', 2): [%s, %s, 1]}"
     exp_str2 = "  {(b'25537 uid=', 2): [%s, %s, 1]}\nb'25537 uid=2'"
 
     def test1_log_atom_not_known(self):
@@ -75,7 +76,7 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
             "  {(25537, b' uid=2'): [%s, %s, 1]}\nb'25537 uid=2'" % (t, t)))
 
     def test2_log_atom_known(self):
-        """This test case checks the functionality of the auto_include_flag. If the same MatchElement is processed a second time and the 
+        """This test case checks the functionality of the auto_include_flag. If the same MatchElement is processed a second time and the
         auto_include_flag was True, no event must be triggered."""
         description = "Test2EnhancedNewMatchPathValueComboDetector"
         enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(self.aminer_config, [

@@ -61,7 +61,8 @@ class MissingMatchPathValueDetectorTest(TestBase):
 
         past_time = 3200
         missing_match_path_value_detector = MissingMatchPathValueDetector(self.aminer_config, match_element_fixed_dme.get_path(), [
-            self.stream_printer_event_handler], 'Default', True, missing_match_path_value_detector.default_interval - past_time, self.__realert_interval)
+            self.stream_printer_event_handler], 'Default', True, missing_match_path_value_detector.default_interval - past_time,
+            self.__realert_interval)
 
         log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme), time.time() + past_time,
                                      missing_match_path_value_detector)
@@ -181,8 +182,8 @@ class MissingMatchPathValueDetectorTest(TestBase):
         match_element_decimal_integer_value_me = decimal_integer_value_me.get_match_element(
             "match2", match_context_decimal_integer_value_me)
 
-        missing_match_path_list_value_detector = MissingMatchPathListValueDetector(self.aminer_config,
-            [match_element_fixed_dme.get_path(), match_element_decimal_integer_value_me.get_path()], [self.stream_printer_event_handler],
+        missing_match_path_list_value_detector = MissingMatchPathListValueDetector(self.aminer_config, [
+            match_element_fixed_dme.get_path(), match_element_decimal_integer_value_me.get_path()], [self.stream_printer_event_handler],
             'Default', True, self.__default_interval, self.__realert_interval)
         self.analysis_context.register_component(missing_match_path_list_value_detector, description)
         log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme), round(time.time()),
@@ -211,8 +212,8 @@ class MissingMatchPathValueDetectorTest(TestBase):
         match_element_decimal_integer_value_me = decimal_integer_value_me.get_match_element(
             "match2", match_context_decimal_integer_value_me)
 
-        missing_match_path_list_value_detector = MissingMatchPathListValueDetector(self.aminer_config,
-            [match_element_fixed_dme.get_path(), match_element_decimal_integer_value_me.get_path()], [self.stream_printer_event_handler],
+        missing_match_path_list_value_detector = MissingMatchPathListValueDetector(self.aminer_config, [
+            match_element_fixed_dme.get_path(), match_element_decimal_integer_value_me.get_path()], [self.stream_printer_event_handler],
             'Default', True, self.__default_interval, self.__realert_interval)
         self.analysis_context.register_component(missing_match_path_list_value_detector, description)
 

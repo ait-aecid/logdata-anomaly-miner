@@ -148,8 +148,8 @@ class NewMatchIdValueComboDetectorTest(TestBase):
                 LogAtom(line, ParserMatch(self.parsing_model.get_match_element('parser', MatchContext(line))), t, self.__class__.__name__))
             t = t + min_allowed_time_diff * 0.25
 
-        new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config,
-            ['parser/type/path/name', 'parser/type/syscall/syscall'], [self.stream_printer_event_handler],
+        new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config, [
+            'parser/type/path/name', 'parser/type/syscall/syscall'], [self.stream_printer_event_handler],
             id_path_list=['parser/type/path/id', 'parser/type/syscall/id'], min_allowed_time_diff=min_allowed_time_diff,
             auto_include_flag=True, allow_missing_values_flag=True, persistence_id='audit_type_path', output_log_line=False)
         self.analysis_context.register_component(new_match_id_value_combo_detector, description)
@@ -204,8 +204,9 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         """This test case checks if log_atoms are deleted after the maximal allowed time difference with the auto_include_flag=False."""
         description = 'test4newMatchIdValueComboDetectorTest'
         output_stream_empty_results = [True, False, True, False, True, False, True, True, False, True, False, True, True, True, False,
-            False, False, True, False, True, False]
-        id_dict_current_results = [{1: {'parser/type/syscall/syscall': 1}}, {}, {2: {'parser/type/syscall/syscall': 2}}, {},
+                                       False, False, True, False, True, False]
+        id_dict_current_results = [
+            {1: {'parser/type/syscall/syscall': 1}}, {}, {2: {'parser/type/syscall/syscall': 2}}, {},
             {3: {'parser/type/syscall/syscall': 3}}, {}, {100: {'parser/type/syscall/syscall': 1}},
             {100: {'parser/type/syscall/syscall': 1}, 4: {'parser/type/syscall/syscall': 1}}, {100: {'parser/type/syscall/syscall': 1}},
             {5: {'parser/type/path/name': 'two'}, 100: {'parser/type/syscall/syscall': 1}}, {}, {6: {'parser/type/syscall/syscall': 4}},
@@ -251,8 +252,8 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         event_data = [self.log_lines[1], {'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}]
         output = new_match_id_value_combo_detector.whitelist_event('Analysis.%s' % new_match_id_value_combo_detector.__class__.__name__,
                                                                    sorted_log_lines, event_data, None)
-        self.assertEqual(new_match_id_value_combo_detector.known_values,
-            [{'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}])
+        self.assertEqual(new_match_id_value_combo_detector.known_values, [
+            {'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}])
         self.assertEqual(output, self.expected_whitelist_string % (event_data[1], self.log_lines[1]))
 
         sorted_log_lines = [self.log_lines[3]]

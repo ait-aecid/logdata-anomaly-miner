@@ -51,14 +51,14 @@ class NewMatchPathDetectorTest(TestBase):
         self.assertTrue(new_match_path_detector.receive_atom(log_atom_fixed_dme))
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
             datetime.fromtimestamp(t).strftime(self.datetime_format_string), new_match_path_detector.__class__.__name__, description, 1,
-        self.match_path_s1, self.pid))
+            self.match_path_s1, self.pid))
         self.reset_output_stream()
 
         # other MatchElement
         self.assertTrue(new_match_path_detector.receive_atom(log_atom_decimal_integer_value_me))
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
             datetime.fromtimestamp(t).strftime(self.datetime_format_string), new_match_path_detector.__class__.__name__, description, 1,
-        self.match_path_d1, self.uid))
+            self.match_path_d1, self.uid))
 
     def test2_log_atom_known(self):
         """This test case checks the functionality of the autoIncludeFlag. If the same MatchElement is processed a second time and the
@@ -76,7 +76,7 @@ class NewMatchPathDetectorTest(TestBase):
         self.assertTrue(new_match_path_detector.receive_atom(log_atom_fixed_dme))
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
             datetime.fromtimestamp(t).strftime(self.datetime_format_string), new_match_path_detector.__class__.__name__, description, 1,
-        self.match_path_s1, self.pid))
+            self.match_path_s1, self.pid))
         self.reset_output_stream()
 
         # repeating should NOT produce the same result
@@ -94,7 +94,7 @@ class NewMatchPathDetectorTest(TestBase):
         """The persisting and reading of permitted log lines should be checked with this test."""
         description = "Test3NewMatchPathDetector"
         new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', True,
-            output_log_line=False)
+                                                       output_log_line=False)
         self.analysis_context.register_component(new_match_path_detector, description)
         t = round(time.time(), 3)
         log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
@@ -186,7 +186,7 @@ class NewMatchPathDetectorTest(TestBase):
         """This test case checks in which cases an event is triggered and compares with expected results."""
         description = "Test10NewMatchPathDetector"
         new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', True,
-            output_log_line=False)
+                                                       output_log_line=False)
         self.analysis_context.register_component(new_match_path_detector, description)
         t = round(time.time(), 3)
         log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
@@ -198,8 +198,8 @@ class NewMatchPathDetectorTest(TestBase):
         log_atom_decimal_integer_value_me = LogAtom(self.match_context_decimal_integer_value_me.match_data,
                                                     ParserMatch(self.match_element_decimal_integer_value_me), t, new_match_path_detector)
         new_match_path_detector.auto_include_flag = False
-        self.assertEqual(new_match_path_detector.whitelist_event(self.analysis % new_match_path_detector.__class__.__name__,
-            [log_atom_decimal_integer_value_me, [self.match_element_decimal_integer_value_me.get_path()]],
+        self.assertEqual(new_match_path_detector.whitelist_event(self.analysis % new_match_path_detector.__class__.__name__, [
+            log_atom_decimal_integer_value_me, [self.match_element_decimal_integer_value_me.get_path()]],
             [log_atom_decimal_integer_value_me, [self.match_element_decimal_integer_value_me.get_path()]], None),
             'Whitelisted path(es) %s in %s' % (self.match_element_decimal_integer_value_me.path, log_atom_decimal_integer_value_me))
 
