@@ -77,7 +77,7 @@ config_properties['MailAlerting.MaxEventsPerMessage'] = 1000
 
 
 def build_analysis_pipeline(analysis_context):
-    """Define the function to create pipeline for parsing the logdata. It has also to define an AtomizerFactory to instruct py how to 
+    """Define the function to create pipeline for parsing the logdata. It has also to define an AtomizerFactory to instruct py how to
     process incoming data streams to create log atoms from them. """
 
     # Build the parsing model:
@@ -128,8 +128,8 @@ def build_analysis_pipeline(analysis_context):
     atom_filter.add_handler(new_match_path_detector)
 
     from aminer.analysis import NewMatchPathValueComboDetector
-    new_match_path_value_combo_detector = NewMatchPathValueComboDetector(analysis_context.aminerConfig,
-        ['/model/Home Path/Username', '/model/Home Path/Path'], anomaly_event_handlers, auto_include_flag=True)
+    new_match_path_value_combo_detector = NewMatchPathValueComboDetector(analysis_context.aminerConfig, [
+        '/model/Home Path/Username', '/model/Home Path/Path'], anomaly_event_handlers, auto_include_flag=True)
     analysis_context.register_component(new_match_path_value_combo_detector, component_name=None)
     atom_filter.add_handler(new_match_path_value_combo_detector)
 

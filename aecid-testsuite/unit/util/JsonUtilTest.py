@@ -60,13 +60,13 @@ class JsonUtilTest(TestBase):
         self.assertEqual(decode_object(enc), 125)
 
     def test6dump_as_json(self):
-        """This test method serializes an object by encoding it into a JSON-formatted string. Annotation: external classes and methods 
+        """This test method serializes an object by encoding it into a JSON-formatted string. Annotation: external classes and methods
         are not tested and assumed to be working as intend."""
         tup = (b'1', '2', 3, ['4'])
         self.assertEqual(dump_as_json(tup), '["bytes:1", "string:2", 3, ["string:4"]]')
 
     def test7load_json(self):
-        """This test method loads a serialized string and deserializes it by decoding into an object. Annotation: external classes and 
+        """This test method loads a serialized string and deserializes it by decoding into an object. Annotation: external classes and
         methods are not tested and assumed to be working as intend."""
         obj = '["bytes:1", "string:2", 3, ["string:4"]]'
         self.assertEqual(load_json(obj), [b'1', '2', 3, ['4']])

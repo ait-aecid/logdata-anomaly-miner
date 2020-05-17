@@ -57,8 +57,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
             seconds = time.time()
             i = 0
             while int(time.time() - seconds) < self.waiting_time:
-                decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(i % number_of_pathes),
-                    DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+                decimal_integer_value_me = DecimalIntegerValueModelElement(
+                    'd' + str(i % number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                    DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
                 log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, match_path_filter)
@@ -68,9 +69,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
             z = z + 1
             avg = avg + i
         avg = avg / self.iterations
-        type(self).result = self.result + self.result_string % (subhandler_filter.__class__.__name__, avg,
-            results, '%d different %ss with a %s.' % (number_of_pathes, match_path_filter.__class__.__name__,
-            new_match_path_detector.__class__.__name__))
+        type(self).result = self.result + self.result_string % (
+            subhandler_filter.__class__.__name__, avg, results, '%d different %ss with a %s.' % (
+                number_of_pathes, match_path_filter.__class__.__name__, new_match_path_detector.__class__.__name__))
 
     def run_atom_filters_match_value_filter(self, number_of_pathes):
         results = [None] * self.iterations
@@ -94,8 +95,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
             seconds = time.time()
             i = 0
             while int(time.time() - seconds) < self.waiting_time:
-                decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(i % number_of_pathes),
-                    DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+                decimal_integer_value_me = DecimalIntegerValueModelElement(
+                    'd' + str(i % number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                    DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
                 log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, match_value_filter)
@@ -105,9 +107,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
             z = z + 1
             avg = avg + i
         avg = avg / self.iterations
-        type(self).result = self.result + self.result_string % (subhandler_filter.__class__.__name__, avg,
-            results, '%d different %ss with a dictionary of %ss.' % (number_of_pathes,
-            match_value_filter.__class__.__name__, new_match_path_detector.__class__.__name__))
+        type(self).result = self.result + self.result_string % (
+            subhandler_filter.__class__.__name__, avg, results, '%d different %ss with a dictionary of %ss.' % (
+                number_of_pathes, match_value_filter.__class__.__name__, new_match_path_detector.__class__.__name__))
 
     def run_new_match_path_detector(self, number_of_pathes):
         results = [None] * self.iterations
@@ -120,8 +122,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
             seconds = time.time()
             i = 0
             while int(time.time() - seconds) < self.waiting_time:
-                decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(i % number_of_pathes),
-                    DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+                decimal_integer_value_me = DecimalIntegerValueModelElement(
+                    'd' + str(i % number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                    DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
                 log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, new_match_path_detector)
@@ -131,8 +134,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
             z = z + 1
             avg = avg + i
         avg = avg / self.iterations
-        type(self).result = self.result + self.result_string % (new_match_path_detector.__class__.__name__,
-            avg, results, self.different_pathes % number_of_pathes)
+        type(self).result = self.result + self.result_string % (
+            new_match_path_detector.__class__.__name__, avg, results, self.different_pathes % number_of_pathes)
 
     def run_enhanced_new_match_path_value_combo_detector(self, number_of_pathes):
         results = [None] * self.iterations
@@ -144,18 +147,19 @@ class AnalysisComponentsPerformanceTest(TestBase):
             while i < number_of_pathes:
                 path_list.append(self.integerd + str(i % number_of_pathes))
                 i = i + 1
-            enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(self.aminer_config,
-                path_list, [self.stream_printer_event_handler], 'Default', True, True)
+            enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(
+                self.aminer_config, path_list, [self.stream_printer_event_handler], 'Default', True, True)
             t = round(time.time(), 3)
             seconds = time.time()
             i = 0
             while int(time.time() - seconds) < self.waiting_time:
-                decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(i % number_of_pathes),
-                    DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+                decimal_integer_value_me = DecimalIntegerValueModelElement(
+                    'd' + str(i % number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                    DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i % number_of_pathes).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
-                log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t,
-                    enhanced_new_match_path_value_combo_detector)
+                log_atom = LogAtom(
+                    match_element.match_string, ParserMatch(match_element), t, enhanced_new_match_path_value_combo_detector)
                 enhanced_new_match_path_value_combo_detector.receive_atom(log_atom)
                 i = i + 1
             results[z] = i
@@ -173,8 +177,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
         while z < self.iterations:
             modulo_time_bin_definition = ModuloTimeBinDefinition(86400, 86400 / number_of_pathes, 0, 1, number_of_pathes, False)
             histogram_data = HistogramData('match/crontab', modulo_time_bin_definition)
-            histogram_analysis = HistogramAnalysis(self.aminer_config, [(histogram_data.property_path, modulo_time_bin_definition)],
-                amplifier * self.waiting_time, [self.stream_printer_event_handler], False, 'Default')
+            histogram_analysis = HistogramAnalysis(self.aminer_config, [
+                (histogram_data.property_path, modulo_time_bin_definition)], amplifier * self.waiting_time,
+                [self.stream_printer_event_handler], False, 'Default')
 
             i = 0
             seconds = time.time()
@@ -191,8 +196,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
             z = z + 1
             avg = avg + i
         avg = avg / self.iterations
-        type(self).result = self.result + self.result_string % (histogram_analysis.__class__.__name__,
-            avg, results, '%d bin(s) and output after %d elements.' % (number_of_pathes, amplifier * self.waiting_time))
+        type(self).result = self.result + self.result_string % (
+            histogram_analysis.__class__.__name__, avg, results, '%d bin(s) and output after %d elements.' % (
+                number_of_pathes, amplifier * self.waiting_time))
 
     def run_match_value_average_change_detector(self, number_of_pathes):
         results = [None] * self.iterations
@@ -211,23 +217,23 @@ class AnalysisComponentsPerformanceTest(TestBase):
             i = 0
             while i < number_of_pathes:
                 match_element = MatchElement(self.integerd + str(i), '%s' % str(t), t, [])
-                log_atom = LogAtom(match_element.get_match_object(), ParserMatch(match_element), t,
-                    match_value_average_change_detector)
+                log_atom = LogAtom(
+                    match_element.get_match_object(), ParserMatch(match_element), t, match_value_average_change_detector)
                 match_value_average_change_detector.receive_atom(log_atom)
 
                 match_element = MatchElement(self.integerd + str(i), '%s' % str(t + 0.1), t + 0.1, [])
-                log_atom = LogAtom(match_element.get_match_object(), ParserMatch(match_element), t + 0.1,
-                    match_value_average_change_detector)
+                log_atom = LogAtom(
+                    match_element.get_match_object(), ParserMatch(match_element), t + 0.1, match_value_average_change_detector)
                 match_value_average_change_detector.receive_atom(log_atom)
 
                 match_element = MatchElement(self.integerd + str(i), '%s' % str(t + 0.2), t + 0.2, [])
-                log_atom = LogAtom(match_element.get_match_object(), ParserMatch(match_element), t + 0.2,
-                    match_value_average_change_detector)
+                log_atom = LogAtom(
+                    match_element.get_match_object(), ParserMatch(match_element), t + 0.2, match_value_average_change_detector)
                 match_value_average_change_detector.receive_atom(log_atom)
 
                 match_element = MatchElement(self.integerd + str(i), '%s' % str(t + 10), t + 10, [])
-                log_atom = LogAtom(match_element.get_match_object(), ParserMatch(match_element), t + 10,
-                    match_value_average_change_detector)
+                log_atom = LogAtom(
+                    match_element.get_match_object(), ParserMatch(match_element), t + 10, match_value_average_change_detector)
                 match_value_average_change_detector.receive_atom(log_atom)
                 i = i + 1
 
@@ -239,16 +245,16 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 seconds = seconds + p - process_time()
                 delta = 0.15 + r
                 match_element = MatchElement(self.integerd + str(i % number_of_pathes), '%s' % str(t + delta), t + delta, [])
-                log_atom = LogAtom(match_element.get_match_object(), ParserMatch(match_element), t + delta,
-                    match_value_average_change_detector)
+                log_atom = LogAtom(
+                    match_element.get_match_object(), ParserMatch(match_element), t + delta, match_value_average_change_detector)
                 match_value_average_change_detector.receive_atom(log_atom)
                 i = i + 1
             results[z] = i
             z = z + 1
             avg = avg + i
         avg = avg / self.iterations
-        type(self).result = self.result + self.result_string % (match_value_average_change_detector.__class__.__name__,
-            avg, results, self.different_pathes % number_of_pathes)
+        type(self).result = self.result + self.result_string % (
+            match_value_average_change_detector.__class__.__name__, avg, results, self.different_pathes % number_of_pathes)
 
     def run_match_value_stream_writer(self, number_of_pathes):
         results = [None] * self.iterations
@@ -261,8 +267,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
             while i < number_of_pathes / 2:
                 path_list.append('match/integer/d' + str(i % number_of_pathes))
                 path_list.append('match/integer/s' + str(i % number_of_pathes))
-                parsing_model.append(DecimalIntegerValueModelElement('d' + str(i % number_of_pathes),
-                    DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE))
+                parsing_model.append(
+                    DecimalIntegerValueModelElement('d' + str(i % number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                                                    DecimalIntegerValueModelElement.PAD_TYPE_NONE))
                 parsing_model.append(FixedDataModelElement('s' + str(i % number_of_pathes), b' Euro '))
                 i = i + 1
             sequence_model_element = SequenceModelElement('integer', parsing_model)
@@ -285,8 +292,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
             z = z + 1
             avg = avg + i
         avg = avg / self.iterations
-        type(self).result = self.result + self.result_string % (match_value_stream_writer.__class__.__name__,
-            avg, results, self.different_pathes % number_of_pathes)
+        type(self).result = self.result + self.result_string % (
+            match_value_stream_writer.__class__.__name__, avg, results, self.different_pathes % number_of_pathes)
 
     def run_missing_match_path_value_detector(self, number_of_pathes):
         results = [None] * self.iterations
@@ -298,14 +305,15 @@ class AnalysisComponentsPerformanceTest(TestBase):
             while i < number_of_pathes:
                 path_list.append(self.integerd + str(i % number_of_pathes))
                 i = i + 1
-            missing_match_path_list_value_detector = MissingMatchPathListValueDetector(self.aminer_config,
-                path_list, [self.stream_printer_event_handler], 'Default', True, 3600, 86400)
+            missing_match_path_list_value_detector = MissingMatchPathListValueDetector(
+                self.aminer_config, path_list, [self.stream_printer_event_handler], 'Default', True, 3600, 86400)
             seconds = time.time()
             t = seconds
             i = 0
             while int(time.time() - seconds) < self.waiting_time:
-                decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(i % number_of_pathes),
-                    DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+                decimal_integer_value_me = DecimalIntegerValueModelElement(
+                    'd' + str(i % number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                    DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(1).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
                 p = process_time()
@@ -313,8 +321,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 seconds = seconds + process_time() - p
                 delta = int(r / 100)
                 t = t + 4000 * delta
-                log_atom = LogAtom(match_element.match_object, ParserMatch(match_element), t,
-                    missing_match_path_list_value_detector)
+                log_atom = LogAtom(
+                    match_element.match_object, ParserMatch(match_element), t, missing_match_path_list_value_detector)
                 missing_match_path_list_value_detector.receive_atom(log_atom)
                 i = i + 1
             results[z] = i
@@ -334,26 +342,27 @@ class AnalysisComponentsPerformanceTest(TestBase):
             while i < number_of_pathes:
                 path_list.append(self.integerd + str(i % number_of_pathes))
                 i = i + 1
-            new_match_path_value_combo_detector = NewMatchPathValueComboDetector(self.aminer_config,
-                path_list, [self.stream_printer_event_handler], 'Default', True, True)
+            new_match_path_value_combo_detector = NewMatchPathValueComboDetector(
+                self.aminer_config, path_list, [self.stream_printer_event_handler], 'Default', True, True)
             t = time.time()
             seconds = time.time()
             i = 0
             while int(time.time() - seconds) < self.waiting_time:
-                decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(i % number_of_pathes),
-                    DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+                decimal_integer_value_me = DecimalIntegerValueModelElement(
+                    'd' + str(i % number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                    DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i % 100).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
-                log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t,
-                    new_match_path_value_combo_detector)
+                log_atom = LogAtom(
+                    match_element.match_string, ParserMatch(match_element), t, new_match_path_value_combo_detector)
                 new_match_path_value_combo_detector.receive_atom(log_atom)
                 i = i + 1
             results[z] = i
             z = z + 1
             avg = avg + i
         avg = avg / self.iterations
-        type(self).result = self.result + self.result_string % (new_match_path_value_combo_detector.__class__.__name__,
-            avg, results, self.different_attributes % number_of_pathes)
+        type(self).result = self.result + self.result_string % (
+            new_match_path_value_combo_detector.__class__.__name__, avg, results, self.different_attributes % number_of_pathes)
 
     def run_new_match_path_value_detector(self, number_of_pathes):
         results = [None] * self.iterations
@@ -371,8 +380,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
             seconds = time.time()
             i = 0
             while int(time.time() - seconds) < self.waiting_time:
-                decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(i % number_of_pathes),
-                    DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+                decimal_integer_value_me = DecimalIntegerValueModelElement(
+                    'd' + str(i % number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                    DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i % 100).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
                 log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, new_match_path_value_detector)
@@ -382,8 +392,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
             z = z + 1
             avg = avg + i
         avg = avg / self.iterations
-        type(self).result = self.result + self.result_string % (new_match_path_value_detector.__class__.__name__,
-            avg, results, self.different_attributes % number_of_pathes)
+        type(self).result = self.result + self.result_string % (
+            new_match_path_value_detector.__class__.__name__, avg, results, self.different_attributes % number_of_pathes)
 
     def run_time_correlation_detector(self, number_of_rules):
         results = [None] * self.iterations
@@ -396,8 +406,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
             seconds = time.time()
             i = 0
             while int(time.time() - seconds) < self.waiting_time:
-                decimal_integer_value_me = DecimalIntegerValueModelElement('d',
-                    DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+                decimal_integer_value_me = DecimalIntegerValueModelElement(
+                    'd', DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i % 100).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
                 log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, time_correlation_detector)
@@ -407,8 +417,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
             z = z + 1
             avg = avg + i
         avg = avg / self.iterations
-        type(self).result = self.result + self.result_string % (time_correlation_detector.__class__.__name__,
-            avg, results, 'testCount=%d.' % number_of_rules)
+        type(self).result = self.result + self.result_string % (
+            time_correlation_detector.__class__.__name__, avg, results, 'testCount=%d.' % number_of_rules)
 
     def run_time_correlation_violation_detector(self, chance):
         results = [None] * self.iterations
@@ -416,37 +426,33 @@ class AnalysisComponentsPerformanceTest(TestBase):
         z = 0
         while z < self.iterations:
             correlation_rule = CorrelationRule('Correlation', 0, chance, max_artefacts_a_for_single_b=1,
-                artefact_match_parameters=[('/integer/d0', '/integer/d1')])
+                                               artefact_match_parameters=[('/integer/d0', '/integer/d1')])
             a_class_selector = EventClassSelector('Selector1', [correlation_rule], None)
             b_class_selector = EventClassSelector('Selector2', None, [correlation_rule])
-            rules = []
-            rules.append(Rules.PathExistsMatchRule('/integer/d0', a_class_selector))
-            rules.append(Rules.PathExistsMatchRule('/integer/d1', b_class_selector))
+            rules = [Rules.PathExistsMatchRule('/integer/d0', a_class_selector), Rules.PathExistsMatchRule('/integer/d1', b_class_selector)]
 
             time_correlation_violation_detector = TimeCorrelationViolationDetector(
                 self.analysis_context.aminer_config, rules, [self.stream_printer_event_handler])
             seconds = time.time()
             s = seconds
             i = 0
-            decimal_integer_value_me = DecimalIntegerValueModelElement('d0',
-                DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+            decimal_integer_value_me = DecimalIntegerValueModelElement(
+                'd0', DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
             while int(time.time() - seconds) < self.waiting_time:
                 integer = '/integer'
                 p = process_time()
                 r = random.randint(1, 100)
                 seconds = seconds + process_time() - p
-                decimal_integer_value_me1 = DecimalIntegerValueModelElement('d1',
-                    DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+                decimal_integer_value_me1 = DecimalIntegerValueModelElement(
+                    'd1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i).encode())
                 match_element = decimal_integer_value_me.get_match_element(integer, match_context)
-                log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), s,
-                    time_correlation_violation_detector)
+                log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), s, time_correlation_violation_detector)
                 time_correlation_violation_detector.receive_atom(log_atom)
 
                 match_context = MatchContext(str(i).encode())
                 match_element = decimal_integer_value_me1.get_match_element(integer, match_context)
-                log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), s + r / 100,
-                    time_correlation_violation_detector)
+                log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), s + r / 100, time_correlation_violation_detector)
                 time_correlation_violation_detector.receive_atom(log_atom)
                 s = s + r / 100
 
@@ -454,8 +460,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
                     p = process_time()
                     match_context = MatchContext(str(i).encode())
                     match_element = decimal_integer_value_me.get_match_element(integer, match_context)
-                    log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), s,
-                        time_correlation_violation_detector)
+                    log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), s, time_correlation_violation_detector)
                     time_correlation_violation_detector.receive_atom(log_atom)
                     seconds = seconds + process_time() - p
                 time_correlation_violation_detector.do_timer(s)
@@ -464,8 +469,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
             z = z + 1
             avg = avg + i
         avg = avg / self.iterations
-        type(self).result = self.result + self.result_string % (time_correlation_violation_detector.__class__.__name__,
-            avg, results, '%d%% chance of not finding an element' % ((1 - chance) * 100))
+        type(self).result = self.result + self.result_string % (
+            time_correlation_violation_detector.__class__.__name__, avg, results,
+            '%d%% chance of not finding an element' % ((1 - chance) * 100))
 
     def run_timestamp_correction_filters(self, number_of_pathes):
         results = [None] * self.iterations
@@ -479,23 +485,24 @@ class AnalysisComponentsPerformanceTest(TestBase):
             seconds = time.time()
             i = 0
             while int(time.time() - seconds) < self.waiting_time:
-                decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(i % number_of_pathes),
-                    DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+                decimal_integer_value_me = DecimalIntegerValueModelElement(
+                    'd' + str(i % number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                    DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 p = process_time()
                 r = random.randint(1, 1000000)
                 seconds = seconds + process_time() - p
                 match_context = MatchContext(str(i).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
-                log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), seconds - r,
-                    simple_monotonic_timestamp_adjust)
+                log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), seconds - r, simple_monotonic_timestamp_adjust)
                 simple_monotonic_timestamp_adjust.receive_atom(log_atom)
                 i = i + 1
             results[z] = i
             z = z + 1
             avg = avg + i
         avg = avg / self.iterations
-        type(self).result = self.result + self.result_string % (simple_monotonic_timestamp_adjust.__class__.__name__,
-            avg, results, 'a %s and %d different path(es).' % (new_match_path_detector.__class__.__name__, number_of_pathes))
+        type(self).result = self.result + self.result_string % (
+            simple_monotonic_timestamp_adjust.__class__.__name__, avg, results,
+            'a %s and %d different path(es).' % (new_match_path_detector.__class__.__name__, number_of_pathes))
 
     def run_timestamps_unsorted_detector(self, reset_factor):
         results = [None] * self.iterations
@@ -509,15 +516,14 @@ class AnalysisComponentsPerformanceTest(TestBase):
             i = 0
             mini = 100
             while int(time.time() - seconds) < self.waiting_time:
-                decimal_integer_value_me = DecimalIntegerValueModelElement('d',
-                    DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+                decimal_integer_value_me = DecimalIntegerValueModelElement(
+                    'd', DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 p = process_time()
                 r = random.randint(1, 100)
                 seconds = seconds + process_time() - p
                 match_context = MatchContext(str(i).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
-                log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), s + min(r, mini),
-                    timestamps_unsorted_detector)
+                log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), s + min(r, mini), timestamps_unsorted_detector)
                 timestamps_unsorted_detector.receive_atom(log_atom)
                 if mini > r:
                     mini = r
@@ -528,8 +534,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
             z = z + 1
             avg = avg + i
         avg = avg / self.iterations
-        type(self).result = self.result + self.result_string % (timestamps_unsorted_detector.__class__.__name__,
-            avg, results, 'a resetFactor of %f.' % reset_factor)
+        type(self).result = self.result + self.result_string % (
+            timestamps_unsorted_detector.__class__.__name__, avg, results, 'a resetFactor of %f.' % reset_factor)
 
     def run_whitelist_violation_detector(self, number_of_pathes, modulo_factor):
         results = [None] * self.iterations
@@ -541,8 +547,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             while i < number_of_pathes:
                 rules.append(PathExistsMatchRule(self.integerd + str(i % number_of_pathes), None))
                 i = i + 1
-            whitelist_violation_detector = WhitelistViolationDetector(self.aminer_config, rules,
-                [self.stream_printer_event_handler])
+            whitelist_violation_detector = WhitelistViolationDetector(self.aminer_config, rules, [self.stream_printer_event_handler])
             t = time.time()
             seconds = time.time()
             i = 0
@@ -554,8 +559,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 else:
                     r = 1
                 seconds = seconds + process_time() - p
-                decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(i % (number_of_pathes * r)),
-                    DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+                decimal_integer_value_me = DecimalIntegerValueModelElement(
+                    'd' + str(i % (number_of_pathes * r)), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                    DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i % 100).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
                 log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, whitelist_violation_detector)
@@ -565,46 +571,79 @@ class AnalysisComponentsPerformanceTest(TestBase):
             z = z + 1
             avg = avg + i
         avg = avg / self.iterations
-        type(self).result = self.result + self.result_string % (whitelist_violation_detector.__class__.__name__,
-            avg, results, '%d different PathExistsMatchRules and a moduloFactor of %d.' % (number_of_pathes, modulo_factor))
+        type(self).result = self.result + self.result_string % (
+            whitelist_violation_detector.__class__.__name__, avg, results,
+            '%d different PathExistsMatchRules and a moduloFactor of %d.' % (number_of_pathes, modulo_factor))
 
     def run_new_match_id_value_combo_detector(self, min_allowed_time_diff):
         log_lines = [
-            b'type=SYSCALL msg=audit(1580367384.000:1): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-            b'type=PATH msg=audit(1580367385.000:1): item=0 name="one" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL',
-            b'type=SYSCALL msg=audit(1580367386.000:2): arch=c000003e syscall=2 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-            b'type=PATH msg=audit(1580367387.000:2): item=0 name="two" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL',
-            b'type=SYSCALL msg=audit(1580367388.000:3): arch=c000003e syscall=3 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-            b'type=PATH msg=audit(1580367389.000:3): item=0 name="three" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL',
-            b'type=SYSCALL msg=audit(1580367388.500:100): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-            b'type=SYSCALL msg=audit(1580367390.000:4): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-            b'type=PATH msg=audit(1580367391.000:4): item=0 name="one" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL',
-            b'type=PATH msg=audit(1580367392.000:5): item=0 name="two" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL',
-            b'type=SYSCALL msg=audit(1580367393.000:5): arch=c000003e syscall=2 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-            b'type=SYSCALL msg=audit(1580367394.000:6): arch=c000003e syscall=4 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-            b'type=PATH msg=audit(1580367395.000:7): item=0 name="five" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL',
-            b'type=SYSCALL msg=audit(1580367396.000:8): arch=c000003e syscall=6 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-            b'type=PATH msg=audit(1580367397.000:6): item=0 name="four" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL',
-            b'type=SYSCALL msg=audit(1580367398.000:7): arch=c000003e syscall=5 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-            b'type=PATH msg=audit(1580367399.000:8): item=0 name="six" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL',
-            b'type=SYSCALL msg=audit(1580367400.000:9): arch=c000003e syscall=2 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-            b'type=PATH msg=audit(1580367401.000:9): item=0 name="three" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL',
-            b'type=PATH msg=audit(1580367402.000:10): item=0 name="one" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL',
-            b'type=SYSCALL msg=audit(1580367403.000:10): arch=c000003e syscall=3 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)']
-        parsing_model = FirstMatchModelElement('type', [SequenceModelElement('path',
-            [FixedDataModelElement('type', b'type=PATH '), FixedDataModelElement('msg_audit', b'msg=audit('),
-                DelimitedDataModelElement('msg', b':'), FixedDataModelElement('placeholder', b':'),
-                DecimalIntegerValueModelElement('id'), FixedDataModelElement('item_string', b'): item='),
-                DecimalIntegerValueModelElement('item'), FixedDataModelElement('name_string', b' name="'),
-                DelimitedDataModelElement('name', b'"'), FixedDataModelElement('inode_string', b'" inode='),
-                DecimalIntegerValueModelElement('inode'), FixedDataModelElement('dev_string', b' dev='),
-                DelimitedDataModelElement('dev', b' '), FixedDataModelElement('mode_string', b' mode='),
-                DecimalIntegerValueModelElement('mode'), FixedDataModelElement('ouid_string', b' ouid='),
-                DecimalIntegerValueModelElement('ouid'), FixedDataModelElement('ogid_string', b' ogid='),
-                DecimalIntegerValueModelElement('ogid'), FixedDataModelElement('rdev_string', b' rdev='),
-                DelimitedDataModelElement('rdev', b' '), FixedDataModelElement('nametype_string', b' nametype='),
-                FixedWordlistDataModelElement('nametype', [b'NORMAL', b'ERROR'])]), SequenceModelElement('syscall',
-            [FixedDataModelElement('type', b'type=SYSCALL '), FixedDataModelElement('msg_audit', b'msg=audit('),
+            b'type=SYSCALL msg=audit(1580367384.000:1): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f '
+            b'items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) '
+            b'ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=PATH msg=audit(1580367385.000:1): item=0 name="one" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 '
+            b'rdev=00:00 nametype=NORMAL',
+            b'type=SYSCALL msg=audit(1580367386.000:2): arch=c000003e syscall=2 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f '
+            b'items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) '
+            b'ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=PATH msg=audit(1580367387.000:2): item=0 name="two" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
+            b'nametype=NORMAL',
+            b'type=SYSCALL msg=audit(1580367388.000:3): arch=c000003e syscall=3 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f '
+            b'items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) '
+            b'ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=PATH msg=audit(1580367389.000:3): item=0 name="three" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00'
+            b' nametype=NORMAL',
+            b'type=SYSCALL msg=audit(1580367388.500:100): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f '
+            b'items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) '
+            b'ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=SYSCALL msg=audit(1580367390.000:4): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f '
+            b'items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) '
+            b'ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=PATH msg=audit(1580367391.000:4): item=0 name="one" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
+            b'nametype=NORMAL',
+            b'type=PATH msg=audit(1580367392.000:5): item=0 name="two" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
+            b'nametype=NORMAL',
+            b'type=SYSCALL msg=audit(1580367393.000:5): arch=c000003e syscall=2 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f '
+            b'items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) '
+            b'ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=SYSCALL msg=audit(1580367394.000:6): arch=c000003e syscall=4 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f '
+            b'items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) '
+            b'ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=PATH msg=audit(1580367395.000:7): item=0 name="five" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
+            b'nametype=NORMAL',
+            b'type=SYSCALL msg=audit(1580367396.000:8): arch=c000003e syscall=6 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f '
+            b'items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) '
+            b'ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=PATH msg=audit(1580367397.000:6): item=0 name="four" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
+            b'nametype=NORMAL',
+            b'type=SYSCALL msg=audit(1580367398.000:7): arch=c000003e syscall=5 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f '
+            b'items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) '
+            b'ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=PATH msg=audit(1580367399.000:8): item=0 name="six" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
+            b'nametype=NORMAL',
+            b'type=SYSCALL msg=audit(1580367400.000:9): arch=c000003e syscall=2 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f '
+            b'items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) '
+            b'ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=PATH msg=audit(1580367401.000:9): item=0 name="three" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 '
+            b'rdev=00:00 nametype=NORMAL',
+            b'type=PATH msg=audit(1580367402.000:10): item=0 name="one" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 '
+            b'rdev=00:00 nametype=NORMAL',
+            b'type=SYSCALL msg=audit(1580367403.000:10): arch=c000003e syscall=3 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 '
+            b'a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 '
+            b'tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)']
+        parsing_model = FirstMatchModelElement('type', [SequenceModelElement('path', [
+            FixedDataModelElement('type', b'type=PATH '), FixedDataModelElement('msg_audit', b'msg=audit('),
+            DelimitedDataModelElement('msg', b':'), FixedDataModelElement('placeholder', b':'),
+            DecimalIntegerValueModelElement('id'), FixedDataModelElement('item_string', b'): item='),
+            DecimalIntegerValueModelElement('item'), FixedDataModelElement('name_string', b' name="'),
+            DelimitedDataModelElement('name', b'"'), FixedDataModelElement('inode_string', b'" inode='),
+            DecimalIntegerValueModelElement('inode'), FixedDataModelElement('dev_string', b' dev='),
+            DelimitedDataModelElement('dev', b' '), FixedDataModelElement('mode_string', b' mode='),
+            DecimalIntegerValueModelElement('mode'), FixedDataModelElement('ouid_string', b' ouid='),
+            DecimalIntegerValueModelElement('ouid'), FixedDataModelElement('ogid_string', b' ogid='),
+            DecimalIntegerValueModelElement('ogid'), FixedDataModelElement('rdev_string', b' rdev='),
+            DelimitedDataModelElement('rdev', b' '), FixedDataModelElement('nametype_string', b' nametype='),
+            FixedWordlistDataModelElement('nametype', [b'NORMAL', b'ERROR'])]), SequenceModelElement('syscall', [
+                FixedDataModelElement('type', b'type=SYSCALL '), FixedDataModelElement('msg_audit', b'msg=audit('),
                 DelimitedDataModelElement('msg', b':'), FixedDataModelElement('placeholder', b':'),
                 DecimalIntegerValueModelElement('id'), FixedDataModelElement('arch_string', b'): arch='),
                 DelimitedDataModelElement('arch', b' '), FixedDataModelElement('syscall_string', b' syscall='),
@@ -618,11 +657,10 @@ class AnalysisComponentsPerformanceTest(TestBase):
         z = 0
         while z < self.iterations:
             i = 0
-            new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config,
-                ['parser/type/path/name', 'parser/type/syscall/syscall'], [self.stream_printer_event_handler],
-                id_path_list=['parser/type/path/id', 'parser/type/syscall/id'],
-                min_allowed_time_diff=min_allowed_time_diff, auto_include_flag=False, allow_missing_values_flag=True,
-                persistence_id='audit_type_path', output_log_line=False)
+            new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config, [
+                'parser/type/path/name', 'parser/type/syscall/syscall'], [self.stream_printer_event_handler],
+                id_path_list=['parser/type/path/id', 'parser/type/syscall/id'], min_allowed_time_diff=min_allowed_time_diff,
+                auto_include_flag=False, allow_missing_values_flag=True, persistence_id='audit_type_path', output_log_line=False)
             t = time.time()
             seconds = time.time()
             i = 0
@@ -632,8 +670,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 seconds = seconds + process_time() - p
 
                 # this code just creates some data to be able to compare with other analysis components.
-                decimal_integer_value_me = DecimalIntegerValueModelElement('d',
-                    DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+                decimal_integer_value_me = DecimalIntegerValueModelElement(
+                    'd', DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i % 100).encode())
                 _match_element = decimal_integer_value_me.get_match_element('integer', match_context)
                 ########################################################################################
@@ -646,8 +684,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
             z = z + 1
             avg = avg + i
         avg = avg / self.iterations
-        type(self).result = self.result + self.result_string % (new_match_id_value_combo_detector.__class__.__name__, avg, results,
-        '%.2f seconds min_allowed_time_diff.' % min_allowed_time_diff)
+        type(self).result = self.result + self.result_string % (
+            new_match_id_value_combo_detector.__class__.__name__, avg, results, 
+            '%.2f seconds min_allowed_time_diff.' % min_allowed_time_diff)
 
     def test01_atom_filters(self):
         self.run_atom_filters_match_path_filter(1)
