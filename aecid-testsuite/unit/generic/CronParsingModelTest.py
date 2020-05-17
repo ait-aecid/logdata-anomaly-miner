@@ -1,3 +1,4 @@
+# skipcq: FLK-D208
 """package not used!
 import unittest
 from aminer.generic import CronParsingModel

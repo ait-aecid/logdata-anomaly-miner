@@ -20,9 +20,9 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
 
     Internal operation:
     * When creating the object, make sure that there are no ambiguous dateFormats in the list, e.g. one with "day month" and another
-      one with "month day".
+    one with "month day".
     * To avoid decoding of binary input data in all locales before searching for e.g. month names, convert all possible month
-      names to bytes during object creation and just keep the lookup list."""
+    names to bytes during object creation and just keep the lookup list."""
 
     def __init__(self, element_id, date_formats, start_year=None):
         """Create a new MultiLocaleDateTimeModelElement object.

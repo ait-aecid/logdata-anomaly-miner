@@ -13,5 +13,5 @@ name = "test-coverage"
 enabled = true
 
 exclude_patterns = [
-  "aecid-testsuite/system/performance-tests/results/**"
+  "aecid-testsuite/system/performance-tests/results/*/*/*.py"
 ]
