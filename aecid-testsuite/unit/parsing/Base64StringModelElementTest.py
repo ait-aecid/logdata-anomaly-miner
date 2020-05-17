@@ -33,7 +33,7 @@ class Base64StringModelElementTest(unittest.TestCase):
         self.assertEqual(match_context.match_data, b'')
 
     def test2_base64_string_with_wrong_characters(self):
-        """In this test case some base64 strings with not allowed characters are matched with the ModelElement. Also the padding checks 
+        """In this test case some base64 strings with not allowed characters are matched with the ModelElement. Also the padding checks
         of base64 strings is tested. """
         # string with padding
         string = b'This is some string to be encoded.'

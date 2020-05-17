@@ -11,7 +11,7 @@ class IpAddressDataModelElementTest(unittest.TestCase):
     match_element_unexpected = 'No MatchElement was expected.'
 
     def test1real_ip_address(self):
-        """This test case checks the functionality by parsing a real IP-addresses. The boundary values for IP-addresses is 0.0.0.0 - 
+        """This test case checks the functionality by parsing a real IP-addresses. The boundary values for IP-addresses is 0.0.0.0 -
         255.255.255.255"""
         match_context = MatchContext(b'192.168.0.155 followed by some text')
         ip_address_data_model_element = IpAddressDataModelElement('dest')

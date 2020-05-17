@@ -14,8 +14,8 @@ class SimpleByteStreamLineAtomizerFactoryTest(TestBase):
 
         new_match_path_detector2 = NewMatchPathDetector(self.aminer_config, [], 'Default', False)
 
-        simple_byte_stream_line_atomizer_factory = SimpleByteStreamLineAtomizerFactory(any_byte_data_model_element,
-            [new_match_path_detector1, new_match_path_detector2], [self.stream_printer_event_handler], None)
+        simple_byte_stream_line_atomizer_factory = SimpleByteStreamLineAtomizerFactory(any_byte_data_model_element, [
+            new_match_path_detector1, new_match_path_detector2], [self.stream_printer_event_handler], None)
 
         byte_stream_line_atomizer = simple_byte_stream_line_atomizer_factory.get_atomizer_for_resource(None)
         self.assertEqual(byte_stream_line_atomizer.atom_handler_list, [new_match_path_detector1, new_match_path_detector2])

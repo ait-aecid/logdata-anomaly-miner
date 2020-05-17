@@ -70,78 +70,72 @@ config_properties['MailAlerting.MaxAlertGap'] = 600
 # at most. This defaults to 1000
 config_properties['MailAlerting.MaxEventsPerMessage'] = 1000
 
-# config_properties['LogPrefix'] = 'Original log line: '
 
+# config_properties['LogPrefix'] = 'Original log line: '
 
 # Add your ruleset here:
 
+
 def build_analysis_pipeline(analysis_context):
-  """Define the function to create pipeline for parsing the log
-  data. It has also to define an AtomizerFactory to instruct py
-  how to process incoming data streams to create log atoms from
-  them."""
+    """Define the function to create pipeline for parsing the logdata. It has also to define an AtomizerFactory to instruct py how to 
+    process incoming data streams to create log atoms from them. """
 
-# Build the parsing model:
-  from aminer.parsing import FirstMatchModelElement
-  from aminer.parsing import SequenceModelElement
+    # Build the parsing model:
+    from aminer.parsing import FirstMatchModelElement
+    from aminer.parsing import SequenceModelElement
 
-  service_children_disk_upgrade = []
-  from aminer.parsing.DateTimeModelElement import DateTimeModelElement
-  service_children_disk_upgrade.append(DateTimeModelElement('Date', b'%d.%m.%Y %H:%M:%S'))
-  from aminer.parsing import FixedDataModelElement
-  service_children_disk_upgrade.append(FixedDataModelElement('UName', b' ubuntu '))
-  from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
-  service_children_disk_upgrade.append(DelimitedDataModelElement('User', b' '))
-  service_children_disk_upgrade.append(FixedDataModelElement('HD Repair', b' System rebooted for hard disk upgrade'))
+    service_children_disk_upgrade = []
+    from aminer.parsing.DateTimeModelElement import DateTimeModelElement
+    service_children_disk_upgrade.append(DateTimeModelElement('Date', b'%d.%m.%Y %H:%M:%S'))
+    from aminer.parsing import FixedDataModelElement
+    service_children_disk_upgrade.append(FixedDataModelElement('UName', b' ubuntu '))
+    from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
+    service_children_disk_upgrade.append(DelimitedDataModelElement('User', b' '))
+    service_children_disk_upgrade.append(FixedDataModelElement('HD Repair', b' System rebooted for hard disk upgrade'))
 
-  service_children_home_path = []
-  service_children_home_path.append(FixedDataModelElement('Pwd', b'The Path of the home directory shown by pwd of the user '))
-  service_children_home_path.append(DelimitedDataModelElement('Username', b' '))
-  service_children_home_path.append(FixedDataModelElement('Is', b' is: '))
-  from aminer.parsing import AnyByteDataModelElement
-  service_children_home_path.append(AnyByteDataModelElement('Path'))
+    service_children_home_path = [
+      FixedDataModelElement('Pwd', b'The Path of the home directory shown by pwd of the user '),
+      DelimitedDataModelElement('Username', b' '), FixedDataModelElement('Is', b' is: ')]
+    from aminer.parsing import AnyByteDataModelElement
+    service_children_home_path.append(AnyByteDataModelElement('Path'))
 
-  parsing_model = FirstMatchModelElement('model', [SequenceModelElement('Disk Upgrade', service_children_disk_upgrade), SequenceModelElement('Home Path', service_children_home_path)])
+    parsing_model = FirstMatchModelElement('model', [SequenceModelElement('Disk Upgrade', service_children_disk_upgrade),
+                                           SequenceModelElement('Home Path', service_children_home_path)])
 
-# Some generic imports.
-  from aminer.analysis import AtomFilters
+    # Some generic imports.
+    from aminer.analysis import AtomFilters
 
-# Create all global handler lists here and append the real handlers
-# later on.
-# Use this filter to distribute all atoms to the analysis handlers.
-  atom_filter = AtomFilters.SubhandlerFilter(None)
+    # Create all global handler lists here and append the real handlers later on.
+    # Use this filter to distribute all atoms to the analysis handlers.
+    atom_filter = AtomFilters.SubhandlerFilter(None)
 
-  from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
-  stream_printer_event_handler = StreamPrinterEventHandler(None)
-  anomaly_event_handlers = [stream_printer_event_handler]
+    from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
+    stream_printer_event_handler = StreamPrinterEventHandler(None)
+    anomaly_event_handlers = [stream_printer_event_handler]
 
-# Now define the AtomizerFactory using the model. A simple line
-# based one is usually sufficient.
-  from aminer.input import SimpleByteStreamLineAtomizerFactory
-  analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(parsing_model, [atom_filter], anomaly_event_handlers, default_timestamp_path='')
+    # Now define the AtomizerFactory using the model. A simple line based one is usually sufficient.
+    from aminer.input import SimpleByteStreamLineAtomizerFactory
+    analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(parsing_model, [atom_filter], anomaly_event_handlers,
+                                                                            default_timestamp_path='')
 
-# Just report all unparsed atoms to the event handlers.
-  from aminer.input import SimpleUnparsedAtomHandler
-  atom_filter.add_handler(SimpleUnparsedAtomHandler(anomaly_event_handlers), stop_when_handled_flag=True)
+    # Just report all unparsed atoms to the event handlers.
+    from aminer.input import SimpleUnparsedAtomHandler
+    atom_filter.add_handler(SimpleUnparsedAtomHandler(anomaly_event_handlers), stop_when_handled_flag=True)
 
-  from aminer.analysis import NewMatchPathDetector
-  new_match_path_detector = NewMatchPathDetector(
-      analysis_context.aminerConfig, anomaly_event_handlers, auto_include_flag=True)
-  analysis_context.register_component(new_match_path_detector, component_name=None)
-  atom_filter.add_handler(new_match_path_detector)
+    from aminer.analysis import NewMatchPathDetector
+    new_match_path_detector = NewMatchPathDetector(analysis_context.aminerConfig, anomaly_event_handlers, auto_include_flag=True)
+    analysis_context.register_component(new_match_path_detector, component_name=None)
+    atom_filter.add_handler(new_match_path_detector)
 
-  from aminer.analysis import NewMatchPathValueComboDetector
-  new_match_path_value_combo_detector = NewMatchPathValueComboDetector(
-      analysis_context.aminerConfig, ['/model/Home Path/Username', '/model/Home Path/Path'], anomaly_event_handlers, auto_include_flag=True)
-  analysis_context.register_component(new_match_path_value_combo_detector, component_name=None)
-  atom_filter.add_handler(new_match_path_value_combo_detector)
+    from aminer.analysis import NewMatchPathValueComboDetector
+    new_match_path_value_combo_detector = NewMatchPathValueComboDetector(analysis_context.aminerConfig,
+        ['/model/Home Path/Username', '/model/Home Path/Path'], anomaly_event_handlers, auto_include_flag=True)
+    analysis_context.register_component(new_match_path_value_combo_detector, component_name=None)
+    atom_filter.add_handler(new_match_path_value_combo_detector)
 
-# Include the e-mail notification handler only if the configuration
-# parameter was set.
-  from aminer.events import DefaultMailNotificationEventHandler
-  if DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS in analysis_context.aminerConfig.config_properties:
-    mail_notification_handler = DefaultMailNotificationEventHandler(
-        analysis_context.aminerConfig)
-    analysis_context.register_component(
-        mail_notification_handler, component_name=None)
-    anomaly_event_handlers.append(mail_notification_handler)
+    # Include the e-mail notification handler only if the configuration parameter was set.
+    from aminer.events import DefaultMailNotificationEventHandler
+    if DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS in analysis_context.aminerConfig.config_properties:
+        mail_notification_handler = DefaultMailNotificationEventHandler(analysis_context.aminerConfig)
+        analysis_context.register_component(mail_notification_handler, component_name=None)
+        anomaly_event_handlers.append(mail_notification_handler)

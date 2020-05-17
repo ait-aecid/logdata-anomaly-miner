@@ -55,7 +55,7 @@ class LogStreamTest(TestBase):
         file_log_data_resource.close()
 
     def test3file_log_data_resource_log_stream_already_open_repositioning(self):
-        """In this case the logStreamFd is > 0 and repositioningData is not None. The stream should be repositioned to the right 
+        """In this case the logStreamFd is > 0 and repositioningData is not None. The stream should be repositioned to the right
         position."""
         fd = os.open('/tmp/log.txt', os.O_RDONLY)
         length = 65536
@@ -78,7 +78,7 @@ class LogStreamTest(TestBase):
         self.assertRaises(Exception, UnixSocketLogDataResource, b'/tmp/log', -1)
 
     def test5unix_socket_log_data_resource(self):
-        """In this case the log_stream_fd is -1. The next step is to open the stream successfully. Therefor a server socket is set up 
+        """In this case the log_stream_fd is -1. The next step is to open the stream successfully. Therefor a server socket is set up
         listen to data to the server. Afterwards the buffer object is filled with data and the position is updated."""
         sockName = b'/tmp/test5unixSocket.sock'
         # skipcq: BAN-B607, BAN-B603

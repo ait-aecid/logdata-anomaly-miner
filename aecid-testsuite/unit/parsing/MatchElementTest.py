@@ -6,11 +6,11 @@ class MatchElementTest(unittest.TestCase):
 
     def test1_child_elements_with_no_path(self):
         """This test case checks, whether a Exception is raised, when the path is None or empty and children are passed."""
-        self.assertRaises(Exception, MatchElement, None, b'matchString', b'matchString',
-            (MatchElement('child', b'childMatchString', b'childMatchString', [])))
+        self.assertRaises(Exception, MatchElement, None, b'matchString', b'matchString', (
+            MatchElement('child', b'childMatchString', b'childMatchString', [])))
 
-        self.assertRaises(Exception, MatchElement, '', b'matchString', b'matchString',
-            (MatchElement('child', b'childMatchString', b'childMatchString', [])))
+        self.assertRaises(Exception, MatchElement, '', b'matchString', b'matchString', (
+            MatchElement('child', b'childMatchString', b'childMatchString', [])))
 
     def test2annotate_match(self):
         """This test case checks if all possible annotations are created correctly."""

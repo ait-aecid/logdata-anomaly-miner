@@ -4,7 +4,7 @@ from aminer.parsing.MatchContext import MatchContext
 
 
 class AnyByteDataModelElementTest(unittest.TestCase):
-    
+
     def test1get_match_element_valid_input(self):
         """This test case checks if VALID inputs are accepted."""
         match_context = MatchContext(b' some input 123 }')
