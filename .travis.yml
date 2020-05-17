@@ -12,6 +12,7 @@ before_install:
 
 install:
   - sudo -u root pip3 install coverage
+  - sudo -u root pip3 install kafka
   - sudo ansible-playbook playbook.yml
   - cd aecid-testsuite
   - sudo chmod +x runUnittests.sh
