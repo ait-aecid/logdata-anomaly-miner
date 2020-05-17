@@ -11,7 +11,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
     """This atomizer consumes binary data from a stream to break it into lines, removing the line separator at the end. With
     a parsing model, it will also perform line parsing. Failures in atomizing or parsing will cause events to be generated and
     sent to event handler. Data will be consumed only when there was no downstream handler registered
-     (the data will be discarded in that case) or when at least one downstream consumed the data."""
+    (the data will be discarded in that case) or when at least one downstream consumed the data."""
 
     COUNTER = 0
 

@@ -95,8 +95,8 @@ def build_analysis_pipeline(analysis_context):
         FixedDataModelElement('Pwd', b'The Path of the home directory shown by pwd of the user '),
         DelimitedDataModelElement('Username', b' '), FixedDataModelElement('Is', b' is: '), AnyByteDataModelElement('Path')]
 
-    parsing_model = FirstMatchModelElement('model',
-        [SequenceModelElement('DiskUpgrade', service_children_disk_upgrade), SequenceModelElement('HomePath', service_children_home_path)])
+    parsing_model = FirstMatchModelElement('model', [
+        SequenceModelElement('DiskUpgrade', service_children_disk_upgrade), SequenceModelElement('HomePath', service_children_home_path)])
 
     # Some generic imports.
     from aminer.analysis import AtomFilters

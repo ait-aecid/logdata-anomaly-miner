@@ -1,3 +1,8 @@
+from aminer.util import SecureOSFunctions
+import os
+import sys
+
+
 # This demo creates an analysis pipeline to parse typical Ubuntu
 # server logs.
 #
@@ -78,20 +83,17 @@ configProperties['Core.PersistenceDir'] = 'aminer'
 
 # DEMO: INCLUSION OF ALL AMINER ELEMENTS AND ALL PYTHON SITE PACKAGES
 # NOT RECOMMENDED!
-import sys
+
 
 sys.path = sys.path + ['/etc/aminer/conf-available/generic', '/usr/lib/python2.7/dist-packages']
 
 # DEMO: DISABLE SECURE OPEN TO ALLOW RELATIVE PATH, SYMLINKS!
-import os
 
 
 def insecure_demo_open(file_name, flags):
     """Perform a normal open supporting also relative path to override more strict secureOpenFile function in test environment."""
     return os.open(file_name, flags | os.O_NOCTTY)
 
-
-from aminer.util import SecureOSFunctions
 
 SecureOSFunctions.secureOpenFile = insecure_demo_open
 
@@ -141,7 +143,7 @@ def build_analysis_pipeline(analysis_context):
 
     # Report new parsing model path values. Those occurr when a line with new structural properties was parsed.
     from aminer.analysis import NewMatchPathDetector
-    new_match_path_detector = NewMatchPathDetector(analysis_context.aminerConfig, anomaly_event_handlers, autoIncludeFlag=True)
+    new_match_path_detector = NewMatchPathDetector(analysis_context.aminerConfig, anomaly_event_handlers, auto_include_flag=True)
     analysis_context.registerComponent(new_match_path_detector, componentName='DefaultMatchPathDetector')
     atom_filter.addHandler(new_match_path_detector)
 

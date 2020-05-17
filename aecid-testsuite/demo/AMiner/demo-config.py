@@ -190,7 +190,7 @@ def build_analysis_pipeline(analysis_context):
     service_children_parsing_model_element.append(Base64StringModelElement('Base64StringModelElement'))
 
     # The OptionalMatchModelElement must be paired with a FirstMatchModelElement because it accepts all data and thus no data gets to the
-    # AnyByteDataModelElement. The AnyByteDataModelElement must be last, because all bytes are accepted.  
+    # AnyByteDataModelElement. The AnyByteDataModelElement must be last, because all bytes are accepted.
     service_children_parsing_model_element.append(OptionalMatchModelElement(
         'OptionalMatchModelElement', FirstMatchModelElement('FirstMatchModelElement', [
             FixedDataModelElement('FixedDataModelElement', b'The-searched-element-was-found!'), SequenceModelElement('', [
@@ -244,7 +244,7 @@ def build_analysis_pipeline(analysis_context):
     from aminer.analysis import Rules
     from aminer.analysis import WhitelistViolationDetector
 
-    # This rule list should trigger, when the line does not look like: User root (logged in, logged out) 
+    # This rule list should trigger, when the line does not look like: User root (logged in, logged out)
     # or User 'username' (logged in, logged out) x minutes ago.
     whitelist_rules = [
         Rules.OrMatchRule([
