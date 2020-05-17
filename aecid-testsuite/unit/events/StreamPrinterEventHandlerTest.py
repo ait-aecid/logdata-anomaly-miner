@@ -31,9 +31,9 @@ class StreamPrinterEventHandlerTest(TestBase):
         t = time()
         log_atom = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element), t, self)
 
-        self.stream_printer_event_handler.receive_event(self.test % self.__class__.__name__,
-            self.new_val % (self.match_s1, self.match_s2, repr(match_element.match_object)), [log_atom.raw_data, log_atom.raw_data], None,
-            log_atom, self)
+        self.stream_printer_event_handler.receive_event(
+            self.test % self.__class__.__name__, self.new_val % (self.match_s1, self.match_s2, repr(match_element.match_object)),
+            [log_atom.raw_data, log_atom.raw_data], None, log_atom, self)
 
         self.assertEqual(self.output_stream.getvalue(), self.__expectedString % (
             datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S"), match_element.get_path() + ", " + match_element2.get_path(),

@@ -62,7 +62,7 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
                 str(result.stdout, 'utf-8')))
 
         self.assertTrue(self.__expected_string % (
-            datetime.fromtimestamp(t).strftime(self.datetime_format_string), "" + match_element.get_path() + ", " + 
+            datetime.fromtimestamp(t).strftime(self.datetime_format_string), "" + match_element.get_path() + ", " +
             match_element2.get_path(), match_element.get_match_object(), self.__class__.__name__, description, 2,
             match_element.get_match_string().decode("utf-8") + "\n  " + match_element2.get_match_string().decode("utf-8") + "\n\n") in str(
             result.stdout, 'utf-8'))
@@ -90,7 +90,7 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
 
         self.assertFalse(self.__expected_string % (
             datetime.fromtimestamp(t).strftime(self.datetime_format_string), match_element.get_path(), match_element.get_match_object(),
-            self.__class__.__name__, description, 1, match_element.get_match_string().decode("utf-8") + "\n\n") in 
+            self.__class__.__name__, description, 1, match_element.get_match_string().decode("utf-8") + "\n\n") in
             str(result.stdout, 'utf-8'))
 
         t = time()
