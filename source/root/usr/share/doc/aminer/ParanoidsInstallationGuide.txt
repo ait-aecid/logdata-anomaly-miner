@@ -187,7 +187,7 @@ from aminer.input import SimpleByteStreamLineAtomizerFactory
 
 analysisContext.atomizerFactory = SimpleByteStreamLineAtomizerFactory(
       parsingModel, [atomFilter], anomalyEventHandlers,
-      defaultTimestampPath='/model/syslog/time')
+      defaultTimestampPaths=['/model/syslog/time'])
 
 Report all unparsed atoms to the event handlers and add a new match patch
 detector (further information see "Adding detection for new parser pathes" 
@@ -316,8 +316,8 @@ parsingModel = SequenceModelElement('model', [
       syslogPreambleModel,
       AnyByteDataModelElement('logmessage')]) # to parse the remaining log line
 
-Furthermore change the defaultTimestampPath of the AtomizerFactory to 
-'/model/syslog/time'.
+Furthermore change the defaultTimestampPaths of the AtomizerFactory to 
+['/model/syslog/time'].
 
 When starting aminer again, no warning about unparsed data should
 be printed. If still present, the model might not match your line.
