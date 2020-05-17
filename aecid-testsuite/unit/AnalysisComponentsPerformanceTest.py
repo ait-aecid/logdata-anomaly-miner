@@ -45,8 +45,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = 0
         z = 0
         while z < self.iterations:
-            new_match_path_detector = NewMatchPathDetector(self.aminer_config,
-                [self.stream_printer_event_handler], 'Default', True)
+            new_match_path_detector = NewMatchPathDetector(self.aminer_config, [
+                self.stream_printer_event_handler], 'Default', True)
             subhandler_filter = SubhandlerFilter([], stop_when_handled_flag=True)
             i = 0
             while i < number_of_pathes:
@@ -78,8 +78,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = 0
         z = 0
         while z < self.iterations:
-            new_match_path_detector = NewMatchPathDetector(self.aminer_config,
-                [self.stream_printer_event_handler], 'Default', True)
+            new_match_path_detector = NewMatchPathDetector(self.aminer_config, [
+                self.stream_printer_event_handler], 'Default', True)
             subhandler_filter = SubhandlerFilter([], stop_when_handled_flag=True)
             i = 0
             dictionary = {}
@@ -116,8 +116,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = 0
         z = 0
         while z < self.iterations:
-            new_match_path_detector = NewMatchPathDetector(self.aminer_config,
-                [self.stream_printer_event_handler], 'Default', True)
+            new_match_path_detector = NewMatchPathDetector(self.aminer_config, [
+                self.stream_printer_event_handler], 'Default', True)
             t = round(time.time(), 3)
             seconds = time.time()
             i = 0
@@ -212,8 +212,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 i = i + 1
             seconds = time.time()
             t = time.time()
-            match_value_average_change_detector = MatchValueAverageChangeDetector(self.aminer_config,
-                [self.stream_printer_event_handler], None, path_list, 2, t, True, False, 'Default')
+            match_value_average_change_detector = MatchValueAverageChangeDetector(self.aminer_config, [
+                self.stream_printer_event_handler], None, path_list, 2, t, True, False, 'Default')
             i = 0
             while i < number_of_pathes:
                 match_element = MatchElement(self.integerd + str(i), '%s' % str(t), t, [])
@@ -329,8 +329,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
             z = z + 1
             avg = avg + i
         avg = avg / self.iterations
-        type(self).result = self.result + self.result_string % (missing_match_path_list_value_detector.__class__.__name__,
-            avg, results, self.different_pathes % number_of_pathes)
+        type(self).result = self.result + self.result_string % (
+            missing_match_path_list_value_detector.__class__.__name__, avg, results, self.different_pathes % number_of_pathes)
 
     def run_new_match_path_value_combo_detector(self, number_of_pathes):
         results = [None] * self.iterations
@@ -374,8 +374,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
             while i < number_of_pathes:
                 path_list.append(self.integerd + str(i % number_of_pathes))
                 i = i + 1
-            new_match_path_value_detector = NewMatchPathValueDetector(self.aminer_config, path_list,
-                [self.stream_printer_event_handler], 'Default', True, True)
+            new_match_path_value_detector = NewMatchPathValueDetector(self.aminer_config, path_list, [
+                self.stream_printer_event_handler], 'Default', True, True)
             t = time.time()
             seconds = time.time()
             i = 0
@@ -400,8 +400,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = 0
         z = 0
         while z < self.iterations:
-            time_correlation_detector = TimeCorrelationDetector(self.aminer_config, 2, number_of_rules, 0,
-                [self.stream_printer_event_handler], record_count_before_event=self.waiting_time * 9000)
+            time_correlation_detector = TimeCorrelationDetector(self.aminer_config, 2, number_of_rules, 0, [
+                self.stream_printer_event_handler], record_count_before_event=self.waiting_time * 9000)
             t = time.time()
             seconds = time.time()
             i = 0
@@ -478,8 +478,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = 0
         z = 0
         while z < self.iterations:
-            new_match_path_detector = NewMatchPathDetector(self.aminer_config,
-                [self.stream_printer_event_handler], 'Default', True)
+            new_match_path_detector = NewMatchPathDetector(self.aminer_config, [
+                self.stream_printer_event_handler], 'Default', True)
             simple_monotonic_timestamp_adjust = SimpleMonotonicTimestampAdjust([new_match_path_detector])
 
             seconds = time.time()
@@ -509,8 +509,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = 0
         z = 0
         while z < self.iterations:
-            timestamps_unsorted_detector = TimestampsUnsortedDetector(self.aminer_config,
-                [self.stream_printer_event_handler])
+            timestamps_unsorted_detector = TimestampsUnsortedDetector(self.aminer_config, [
+                self.stream_printer_event_handler])
             seconds = time.time()
             s = seconds
             i = 0
@@ -677,7 +677,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 ########################################################################################
 
                 line = log_lines[r]
-                log_atom = LogAtom(line, ParserMatch(parsing_model.get_match_element('parser', MatchContext(line))), t, self.__class__.__name__)
+                log_atom = LogAtom(
+                    line, ParserMatch(parsing_model.get_match_element('parser', MatchContext(line))), t, self.__class__.__name__)
                 new_match_id_value_combo_detector.receive_atom(log_atom)
                 i = i + 1
             results[z] = i
@@ -685,7 +686,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             avg = avg + i
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
-            new_match_id_value_combo_detector.__class__.__name__, avg, results, 
+            new_match_id_value_combo_detector.__class__.__name__, avg, results,
             '%.2f seconds min_allowed_time_diff.' % min_allowed_time_diff)
 
     def test01_atom_filters(self):

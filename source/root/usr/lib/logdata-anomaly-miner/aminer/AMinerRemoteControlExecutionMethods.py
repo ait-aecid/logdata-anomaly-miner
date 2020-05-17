@@ -28,13 +28,10 @@ class AMinerRemoteControlExecutionMethods():
 
     def change_config_property(self, analysis_context, property_name, value):
         result = 0
-        config_keys_mail_alerting = {self.CONFIG_KEY_MAIL_TARGET_ADDRESS,
-                                  self.CONFIG_KEY_MAIL_FROM_ADDRESS,
-                                  self.CONFIG_KEY_MAIL_SUBJECT_PREFIX,
-                                  self.CONFIG_KEY_EVENT_COLLECT_TIME,
-                                  self.CONFIG_KEY_ALERT_MIN_GAP,
-                                  self.CONFIG_KEY_ALERT_MAX_GAP,
-                                  self.CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE}
+        config_keys_mail_alerting = {
+            self.CONFIG_KEY_MAIL_TARGET_ADDRESS, self.CONFIG_KEY_MAIL_FROM_ADDRESS, self.CONFIG_KEY_MAIL_SUBJECT_PREFIX,
+            self.CONFIG_KEY_EVENT_COLLECT_TIME, self.CONFIG_KEY_ALERT_MIN_GAP, self.CONFIG_KEY_ALERT_MAX_GAP,
+            self.CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE}
         if not isinstance(analysis_context, AnalysisChild.AnalysisContext):
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: the analysisContext must be of type %s." % AnalysisChild.AnalysisContext.__class__
             return
@@ -201,9 +198,11 @@ class AMinerRemoteControlExecutionMethods():
     def isinstance_aminer_class(obj):
         from aminer.analysis.TimeCorrelationDetector import CorrelationFeature
         from aminer.analysis.TimeCorrelationViolationDetector import CorrelationRule
-        class_list = [aminer.analysis.AtomFilters.SubhandlerFilter, aminer.analysis.AtomFilters.MatchPathFilter, aminer.analysis.AtomFilters.MatchValueFilter,
-                     aminer.analysis.HistogramAnalysis.BinDefinition, aminer.analysis.HistogramAnalysis.HistogramData, aminer.analysis.Rules.MatchAction,
-                     aminer.analysis.Rules.MatchRule, CorrelationRule, CorrelationFeature, aminer.events.EventHandlerInterface, aminer.util.ObjectHistory]
+        class_list = [
+            aminer.analysis.AtomFilters.SubhandlerFilter, aminer.analysis.AtomFilters.MatchPathFilter,
+            aminer.analysis.AtomFilters.MatchValueFilter, aminer.analysis.HistogramAnalysis.BinDefinition,
+            aminer.analysis.HistogramAnalysis.HistogramData, aminer.analysis.Rules.MatchAction, aminer.analysis.Rules.MatchRule,
+            CorrelationRule, CorrelationFeature, aminer.events.EventHandlerInterface, aminer.util.ObjectHistory]
         for c in class_list:
             if isinstance(obj, c):
                 return True

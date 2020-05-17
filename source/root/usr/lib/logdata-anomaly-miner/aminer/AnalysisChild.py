@@ -217,8 +217,8 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 
                 if 'dpkg-query: no packages found matching cpulimit' in stdout.decode():
                     print(
-                        'FATAL: cpulimit package must be installed, when using the property %s' % AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE,
-                        file=sys.stderr)
+                        'FATAL: cpulimit package must be installed, when using the property %s' %
+                        AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE, file=sys.stderr)
                     return 1
                 _out = subprocess.Popen(cpulimit_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             except ValueError:
@@ -433,25 +433,24 @@ class AnalysisChildRemoteControlHandler:
     * execute: the request is complete and is currently under execution. In that mode all other aminer analysis activity is blocked.
     * respond: send back results from execution.
 
-  All sent and received control packets have following common structure:
-  * Total length in bytes (4 bytes): The maximal length is currently
-    limited to 64k
-  * Type code (4 bytes)
-  * Data
+    All sent and received control packets have following common structure:
+    * Total length in bytes (4 bytes): The maximal length is currently limited to 64k
+    * Type code (4 bytes)
+    * Data
 
-  The handler processes following types:
-  * Execute request ('EEEE'): Data is loaded as json artefact containing a list with two elements. The first one is the
-    Python code to be executed. The second one is available within the execution namespace as 'remoteControlData'.
+    The handler processes following types:
+    * Execute request ('EEEE'): Data is loaded as json artefact containing a list with two elements. The first one is the
+      Python code to be executed. The second one is available within the execution namespace as 'remoteControlData'.
 
-  The handler produces following requests:
-  * Execution response ('RRRR'): The response contains a json artefact with a two element list. The first element is the
-    content of 'remoteControlResponse' from the Python execution namespace. The second one is the exception message and traceback
-    as string if an error has occured.
+    The handler produces following requests:
+    * Execution response ('RRRR'): The response contains a json artefact with a two element list. The first element is the
+      content of 'remoteControlResponse' from the Python execution namespace. The second one is the exception message and traceback
+      as string if an error has occured.
 
-  Method naming:
-  * do...(): Those methods perform an action consuming input or output buffer data.
-  * may...(): Those methods return true if it would make sense to call a do...() method with the same name.
-  * put...(): Those methods put a request on the buffers."""
+    Method naming:
+    * do...(): Those methods perform an action consuming input or output buffer data.
+    * may...(): Those methods return true if it would make sense to call a do...() method with the same name.
+    * put...(): Those methods put a request on the buffers."""
 
     max_control_packet_size = 1 << 32
 
@@ -488,7 +487,8 @@ class AnalysisChildRemoteControlHandler:
                     'changeConfigProperty': methods.change_config_property,
                     'changeAttributeOfRegisteredAnalysisComponent': methods.change_attribute_of_registered_analysis_component,
                     'renameRegisteredAnalysisComponent': methods.rename_registered_analysis_component,
-                    'addHandlerToAtomFilterAndRegisterAnalysisComponent': methods.add_handler_to_atom_filter_and_register_analysis_component,
+                    'addHandlerToAtomFilterAndRegisterAnalysisComponent':
+                        methods.add_handler_to_atom_filter_and_register_analysis_component,
                     'saveCurrentConfig': methods.save_current_config, 'whitelistEventInComponent': methods.whitelist_event_in_component,
                     'dumpEventsFromHistory': methods.dump_events_from_history,
                     'ignoreEventsFromHistory': methods.ignore_events_from_history,
@@ -615,8 +615,7 @@ class AnalysisChildRemoteControlHandler:
         self.put_request(b'EEEE', remote_control_data.encode())
 
     def add_select_fds(self, input_select_fd_list, output_select_fd_list):
-        """Update the file descriptor lists for selecting on read
-    and write file descriptors."""
+        """Update the file descriptor lists for selecting on read and write file descriptors."""
         if self.output_buffer:
             output_select_fd_list.append(self.remote_control_fd)
         else:

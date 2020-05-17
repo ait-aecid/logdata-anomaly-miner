@@ -45,6 +45,7 @@ def build_persistence_file_name(aminer_config, *args):
 
 
 def save_config(analysis_context, new_file):
+    """Save the current configuration to a file by using the AMinerRemoteControl."""
     register_component = 'registerComponent('
     global VAR_ID
     VAR_ID = 0
