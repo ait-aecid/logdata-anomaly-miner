@@ -19,7 +19,7 @@ class TimestampCorrectionFiltersTest(TestBase):
         description = "Test1TimestampCorrectionFilter"
         match_context_fixed_dme = MatchContext(b' pid=')
         fixed_dme = FixedDataModelElement('s1', b' pid=')
-        match_element_fixed_dme = self.fixed_dme.get_match_element("match", match_context_fixed_dme)
+        match_element_fixed_dme = fixed_dme.get_match_element("match", match_context_fixed_dme)
         t = time()
 
         new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False,

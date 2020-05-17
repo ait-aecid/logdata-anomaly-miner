@@ -174,7 +174,7 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
             log_atom_sequence_me))
 
         log_atom_sequence_me2 = LogAtom(self.match_element_sequence_me2.get_match_string(), ParserMatch(self.match_element_sequence_me2), t,
-                                        self.enhanced_new_match_path_value_combo_detector)
+                                        enhanced_new_match_path_value_combo_detector)
 
         enhanced_new_match_path_value_combo_detector.auto_include_flag = False
         self.assertEqual(enhanced_new_match_path_value_combo_detector.whitelist_event(

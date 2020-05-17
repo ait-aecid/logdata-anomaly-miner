@@ -30,13 +30,13 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         in the known values set automatically.
         @param tuple_transformation_function when not None, this function will be invoked on each extracted value combination list to
         transform it. It may modify the list directly or create a new one to return it."""
+        self.known_values_dict = {}
         super(EnhancedNewMatchPathValueComboDetector, self).__init__(aminer_config, target_path_list, anomaly_event_handlers,
                                                                      persistence_id, allow_missing_values_flag, auto_include_flag)
         self.tuple_transformation_function = tuple_transformation_function
         self.output_log_line = output_log_line
         self.aminer_config = aminer_config
         self.date_string = "%Y-%m-%d %H:%M:%S"
-        self.known_values_dict = {}
 
     def load_persistency_data(self):
         """Load the persistency data from storage."""
