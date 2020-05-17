@@ -215,7 +215,7 @@ class DateTimeModelElement(ModelElementInterface):
                     if abs(delta) <= self.max_time_jump_seconds:
                         self.last_parsed_seconds = total_seconds
                     else:
-                        # This might be the first date value for the next year or one from the previous. 
+                        # This might be the first date value for the next year or one from the previous.
                         # Test both cases and see, what is more likely.
                         next_year_date_time = parsed_date_time.replace(self.start_year + 1)
                         delta = next_year_date_time - self.epoch_start_time
