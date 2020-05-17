@@ -156,7 +156,8 @@ def get_model():
     inode_info_model_element = SequenceModelElement('inodeinfo', [
         FixedDataModelElement('s0', b' inode='), DecimalIntegerValueModelElement('inode'), FixedDataModelElement('s1', b' dev='),
         # A special major/minor device element could be better here.
-        VariableByteDataModelElement('dev', b'0123456789abcdef:'), FixedDataModelElement('s2', b' mode='), # FIXME: is octal
+        VariableByteDataModelElement('dev', b'0123456789abcdef:'), FixedDataModelElement('s2', b' mode='),
+        # FIXME: is octal
         DecimalIntegerValueModelElement('mode'), FixedDataModelElement('s3', b' ouid='), DecimalIntegerValueModelElement('ouid'),
         FixedDataModelElement('s4', b' ogid='), DecimalIntegerValueModelElement('ogid'), FixedDataModelElement('s5', b' rdev='),
         # A special major/minor device element could be better here (see above).

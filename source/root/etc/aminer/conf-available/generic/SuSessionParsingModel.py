@@ -26,7 +26,8 @@ def get_model(user_name_model=None):
                 FixedDataModelElement('s0', b'pam_unix(su:session): session '),
                 FixedWordlistDataModelElement('change', [b'opened', b'closed']), FixedDataModelElement('s1', b' for user '),
                 user_name_model, OptionalMatchModelElement('openby', SequenceModelElement('userinfo', [
-                    FixedDataModelElement('s0', b' by (uid='), DecimalIntegerValueModelElement('uid'), FixedDataModelElement('s1', b')')]))])]
+                    FixedDataModelElement('s0', b' by (uid='), DecimalIntegerValueModelElement('uid'),
+                    FixedDataModelElement('s1', b')')]))])]
 
     model = SequenceModelElement('su', [
         FixedDataModelElement('sname', b'su['), DecimalIntegerValueModelElement('pid'), FixedDataModelElement('s0', b']: '),

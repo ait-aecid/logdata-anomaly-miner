@@ -21,8 +21,9 @@ def get_model():
             interface_name_model, FixedDataModelElement('s2', b' '),
             FirstMatchModelElement('address', [IpAddressDataModelElement('ipv4'), DelimitedDataModelElement('ipv6', b' '), ]),
             FixedDataModelElement('s3', b' UDP 123')]), SequenceModelElement('listen-normal', [
-                FixedDataModelElement('s0', b'Listen normally on '), DecimalIntegerValueModelElement('fd'), FixedDataModelElement('s1', b' '),
-                interface_name_model, FixedDataModelElement('s2', b' '), IpAddressDataModelElement('ip'), FirstMatchModelElement('msg', [
+                FixedDataModelElement('s0', b'Listen normally on '), DecimalIntegerValueModelElement('fd'),
+                FixedDataModelElement('s1', b' '), interface_name_model, FixedDataModelElement('s2', b' '),
+                IpAddressDataModelElement('ip'), FirstMatchModelElement('msg', [
                     FixedDataModelElement('port-new', b':123'), FixedDataModelElement('port-old', b' UDP 123')])]),
         SequenceModelElement('listen-routing', [
             FixedDataModelElement('s0', b'Listening on routing socket on fd #'), DecimalIntegerValueModelElement('fd'),

@@ -72,87 +72,71 @@ config_properties['LogPrefix'] = 'Original log line: '
 
 
 def build_analysis_pipeline(analysis_context):
-  """Define the function to create pipeline for parsing the log
-  data. It has also to define an AtomizerFactory to instruct AMiner
-  how to process incoming data streams to create log atoms from
-  them."""
+    """Define the function to create pipeline for parsing the log data. It has also to define an AtomizerFactory to instruct AMiner
+    how to process incoming data streams to create log atoms from them."""
 
-# Build the parsing model:
-  from aminer.parsing import FirstMatchModelElement
-  from aminer.parsing import SequenceModelElement
+    # Build the parsing model:
+    from aminer.parsing import FirstMatchModelElement
+    from aminer.parsing import SequenceModelElement
+    from aminer.parsing.DateTimeModelElement import DateTimeModelElement
+    import datetime
+    from aminer.parsing import FixedDataModelElement
+    from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
+    from aminer.parsing import AnyByteDataModelElement
 
-  service_children_disk_upgrade = []
+    service_children_disk_upgrade = [
+        DateTimeModelElement('DTM', b'%Y-%m-%d %H:%M:%S', datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo),
+        FixedDataModelElement('UNameSpace1', b' '), DelimitedDataModelElement('UName', b' '), FixedDataModelElement('UNameSpace2', b' '),
+        DelimitedDataModelElement('User', b' '), FixedDataModelElement('HDRepair', b' System rebooted for hard disk upgrade')]
 
-  from aminer.parsing.DateTimeModelElement import DateTimeModelElement
-  import datetime
-  service_children_disk_upgrade.append(DateTimeModelElement('DTM', b'%Y-%m-%d %H:%M:%S', datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo))
-  from aminer.parsing import FixedDataModelElement
-  service_children_disk_upgrade.append(FixedDataModelElement('UNameSpace1', b' '))
-  from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
-  service_children_disk_upgrade.append(DelimitedDataModelElement('UName', b' '))
-  service_children_disk_upgrade.append(FixedDataModelElement('UNameSpace2', b' '))
-  service_children_disk_upgrade.append(DelimitedDataModelElement('User', b' '))
-  service_children_disk_upgrade.append(FixedDataModelElement('HDRepair', b' System rebooted for hard disk upgrade'))
+    service_children_home_path = [
+        FixedDataModelElement('Pwd', b'The Path of the home directory shown by pwd of the user '),
+        DelimitedDataModelElement('Username', b' '), FixedDataModelElement('Is', b' is: '), AnyByteDataModelElement('Path')]
 
-  service_children_home_path = []
+    parsing_model = FirstMatchModelElement('model', [
+        SequenceModelElement('DiskUpgrade', service_children_disk_upgrade), SequenceModelElement('HomePath', service_children_home_path)])
 
-  service_children_home_path.append(FixedDataModelElement('Pwd', b'The Path of the home directory shown by pwd of the user '))
-  service_children_home_path.append(DelimitedDataModelElement('Username', b' '))
-  service_children_home_path.append(FixedDataModelElement('Is', b' is: '))
-  from aminer.parsing import AnyByteDataModelElement
-  service_children_home_path.append(AnyByteDataModelElement('Path'))
+    # Some generic imports.
+    from aminer.analysis import AtomFilters
 
-  parsing_model = FirstMatchModelElement('model', [SequenceModelElement('DiskUpgrade', service_children_disk_upgrade), SequenceModelElement('HomePath', service_children_home_path)])
+    # Create all global handler lists here and append the real handlers later on.
+    # Use this filter to distribute all atoms to the analysis handlers.
+    atom_filter = AtomFilters.SubhandlerFilter(None)
 
-# Some generic imports.
-  from aminer.analysis import AtomFilters
+    from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
+    stream_printer_event_handler = StreamPrinterEventHandler(analysis_context)
+    from aminer.events.SyslogWriterEventHandler import SyslogWriterEventHandler
+    syslog_writer_event_handler = SyslogWriterEventHandler(analysis_context)
+    anomaly_event_handlers = [stream_printer_event_handler, syslog_writer_event_handler]
 
-# Create all global handler lists here and append the real handlers
-# later on.
-# Use this filter to distribute all atoms to the analysis handlers.
-  atom_filter = AtomFilters.SubhandlerFilter(None)
+    from aminer.input import SimpleMultisourceAtomSync
+    simple_multisource_atom_sync = SimpleMultisourceAtomSync([atom_filter], 9)
 
-  from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
-  stream_printer_event_handler = StreamPrinterEventHandler(analysis_context)
-  from aminer.events.SyslogWriterEventHandler import SyslogWriterEventHandler
-  syslog_writer_event_handler = SyslogWriterEventHandler(analysis_context)
-  anomaly_event_handlers = [stream_printer_event_handler, syslog_writer_event_handler]
+    # Now define the AtomizerFactory using the model. A simple line based one is usually sufficient.
+    from aminer.input import SimpleByteStreamLineAtomizerFactory
+    analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
+        parsing_model, [simple_multisource_atom_sync], anomaly_event_handlers, default_timestamp_path='model/DiskUpgrade/Date')
 
-  from aminer.input import SimpleMultisourceAtomSync
-  simple_multisource_atom_sync = SimpleMultisourceAtomSync([atom_filter], 9)
+    # Just report all unparsed atoms to the event handlers.
+    from aminer.input import SimpleUnparsedAtomHandler
+    simple_unparsed_atom_handler = SimpleUnparsedAtomHandler(anomaly_event_handlers)
+    atom_filter.add_handler(simple_unparsed_atom_handler, stop_when_handled_flag=True)
+    analysis_context.register_component(simple_unparsed_atom_handler, component_name="UnparsedHandler")
 
-# Now define the AtomizerFactory using the model. A simple line
-# based one is usually sufficient.
-  from aminer.input import SimpleByteStreamLineAtomizerFactory
-  analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
-      parsing_model, [simple_multisource_atom_sync], anomaly_event_handlers,
-      default_timestamp_path='model/DiskUpgrade/Date')
+    from aminer.analysis import NewMatchPathDetector
+    new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=True)
+    analysis_context.register_component(new_match_path_detector, component_name="NewPath")
+    atom_filter.add_handler(new_match_path_detector)
 
-# Just report all unparsed atoms to the event handlers.
-  from aminer.input import SimpleUnparsedAtomHandler
-  simple_unparsed_atom_handler = SimpleUnparsedAtomHandler(anomaly_event_handlers)
-  atom_filter.add_handler(
-      simple_unparsed_atom_handler,
-      stop_when_handled_flag=True)
-  analysis_context.register_component(simple_unparsed_atom_handler, component_name="UnparsedHandler")
+    from aminer.analysis import NewMatchPathValueComboDetector
+    new_match_path_value_combo_detector = NewMatchPathValueComboDetector(analysis_context.aminer_config,
+        ['/model/HomePath/Username', '/model/HomePath/Path'], anomaly_event_handlers, auto_include_flag=True)
+    analysis_context.register_component(new_match_path_value_combo_detector, component_name="NewValueCombo")
+    atom_filter.add_handler(new_match_path_value_combo_detector)
 
-  from aminer.analysis import NewMatchPathDetector
-  new_match_path_detector = NewMatchPathDetector(
-      analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=True)
-  analysis_context.register_component(new_match_path_detector, component_name="NewPath")
-  atom_filter.add_handler(new_match_path_detector)
-
-  from aminer.analysis import NewMatchPathValueComboDetector
-  new_match_path_value_combo_detector = NewMatchPathValueComboDetector(
-        analysis_context.aminer_config, ['/model/HomePath/Username', '/model/HomePath/Path'], anomaly_event_handlers, auto_include_flag=True)
-  analysis_context.register_component(new_match_path_value_combo_detector, component_name="NewValueCombo")
-  atom_filter.add_handler(new_match_path_value_combo_detector)
-
-# Include the e-mail notification handler only if the configuration
-# parameter was set.
-  from aminer.events import DefaultMailNotificationEventHandler
-  if DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS in analysis_context.aminer_config.config_properties:
-    mail_notification_handler = DefaultMailNotificationEventHandler(analysis_context)
-    analysis_context.register_component(
-        mail_notification_handler, component_name="MailHandler")
-    anomaly_event_handlers.append(mail_notification_handler)
+    # Include the e-mail notification handler only if the configuration parameter was set.
+    from aminer.events import DefaultMailNotificationEventHandler
+    if DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS in analysis_context.aminer_config.config_properties:
+        mail_notification_handler = DefaultMailNotificationEventHandler(analysis_context)
+        analysis_context.register_component(mail_notification_handler, component_name="MailHandler")
+        anomaly_event_handlers.append(mail_notification_handler)

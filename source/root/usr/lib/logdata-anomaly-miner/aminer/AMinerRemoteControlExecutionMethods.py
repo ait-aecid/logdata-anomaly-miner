@@ -186,7 +186,8 @@ class AMinerRemoteControlExecutionMethods():
             elif isinstance(attr, list):
                 for l in attr:
                     if hasattr(l, '__dict__') and self.isinstance_aminer_class(l):
-                        result += indent + "%s = [\n" % var + indent + '  ' + l.__class__.__name__ + " {\n" + self.get_all_vars(l, indent + '    ') + indent + '  ' + "}\n" + indent + ']\n'
+                        result += indent + "%s = [\n" % var + indent + '  ' + l.__class__.__name__ + \
+                                  " {\n" + self.get_all_vars(l, indent + '    ') + indent + '  ' + "}\n" + indent + ']\n'
                     else:
                         result += indent + attr_str % (var, repr(attr))
                         break
@@ -227,8 +228,9 @@ class AMinerRemoteControlExecutionMethods():
                 self.REMOTE_CONTROL_RESPONSE += component.whitelist_event("Analysis.%s" % component.__class__.__name__,
                                                                           [component.__class__.__name__], event_data, whitelisting_data)
             else:
-                self.REMOTE_CONTROL_RESPONSE += component.whitelist_event("Analysis.%s" % component.__class__.__name__,
-                                                                          [component.__class__.__name__], [LogAtom("", None, 1666.0, None), event_data], whitelisting_data)
+                self.REMOTE_CONTROL_RESPONSE += component.whitelist_event(
+                    "Analysis.%s" % component.__class__.__name__, [component.__class__.__name__],
+                    [LogAtom("", None, 1666.0, None), event_data], whitelisting_data)
         # skipcq: PYL-W0703
         except Exception as e:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
@@ -329,7 +331,8 @@ class AMinerRemoteControlExecutionMethods():
             self.REMOTE_CONTROL_RESPONSE = component_not_found
             return
         if id_spec_list is None or not isinstance(id_spec_list, list):
-            self.REMOTE_CONTROL_RESPONSE = 'Request requires remoteControlData with ID specification list and optional whitelisting information'
+            self.REMOTE_CONTROL_RESPONSE = \
+                'Request requires remoteControlData with ID specification list and optional whitelisting information'
             return
         history_data = history_handler.get_history()
         result_string = ''

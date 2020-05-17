@@ -29,11 +29,11 @@ def get_model():
                 DecimalIntegerValueModelElement('size'), OptionalMatchModelElement(
                     'idopt', SequenceModelElement('iddata', [FixedDataModelElement('s0', b' id='), AnyByteDataModelElement('id')]))]),
         SequenceModelElement('send-log', [
-            WhiteSpaceLimitedDataModelElement('id'),  # Strange: first address seems to use different separator than
-                # second one.
-                FixedWordlistDataModelElement('s0', [b' => b', b' ->']), DelimitedDataModelElement('env-to', b' R='),
-                FixedDataModelElement('s1', b' R='), WhiteSpaceLimitedDataModelElement('route'), FixedDataModelElement('s2', b' T='),
-                WhiteSpaceLimitedDataModelElement('transport'), AnyByteDataModelElement('unparsed')]),
+            WhiteSpaceLimitedDataModelElement('id'),
+            # Strange: first address seems to use different separator than second one.
+            FixedWordlistDataModelElement('s0', [b' => b', b' ->']), DelimitedDataModelElement('env-to', b' R='),
+            FixedDataModelElement('s1', b' R='), WhiteSpaceLimitedDataModelElement('route'), FixedDataModelElement('s2', b' T='),
+            WhiteSpaceLimitedDataModelElement('transport'), AnyByteDataModelElement('unparsed')]),
         SequenceModelElement('sent', [WhiteSpaceLimitedDataModelElement('id'), FixedDataModelElement('s0', b' Completed')]),
         SequenceModelElement('started', [
             FixedDataModelElement('s0', b' exim '), WhiteSpaceLimitedDataModelElement('version'),
