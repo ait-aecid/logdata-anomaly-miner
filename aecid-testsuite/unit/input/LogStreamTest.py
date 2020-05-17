@@ -116,7 +116,7 @@ class LogStreamTest(TestBase):
         stream_printer_event_handler = StreamPrinterEventHandler(self.analysis_context, self.output_stream)
         any_byte_data_me = AnyByteDataModelElement('a1')
 
-        byte_stream_line_atomizer = ByteStreamLineAtomizer(any_byte_data_me, [], [stream_printer_event_handler], 300, None)
+        byte_stream_line_atomizer = ByteStreamLineAtomizer(any_byte_data_me, [], [stream_printer_event_handler], 300, [])
 
         file_log_data_resource = FileLogDataResource(self.file + self.logfile, -1)
         self.assertEqual(file_log_data_resource.buffer, b'')
