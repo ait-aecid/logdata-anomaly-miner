@@ -31,11 +31,12 @@ def get_model():
                     DelimitedDataModelElement('hostname', b') '),
                     FixedDataModelElement('s1', b') ['),
                     IpAddressDataModelElement('hostip'),
-                    FixedDataModelElement('s2', b']')]),
-                    SequenceModelElement('user', [
-                        FixedDataModelElement('s0', b' U='),
-                        WhiteSpaceLimitedDataModelElement('user')
-                    ])
+                    FixedDataModelElement('s2', b']')
+                ]),
+                SequenceModelElement('user', [
+                    FixedDataModelElement('s0', b' U='),
+                    WhiteSpaceLimitedDataModelElement('user')
+                ])
             ]),
             FixedDataModelElement('s2', b' P='),
             WhiteSpaceLimitedDataModelElement('proto'),
