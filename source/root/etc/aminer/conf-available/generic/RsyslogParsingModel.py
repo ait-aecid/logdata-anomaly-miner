@@ -12,14 +12,28 @@ def get_model():
 
     type_children = [
         SequenceModelElement('gidchange', [
-            FixedDataModelElement('s0', b'rsyslogd\'s groupid changed to '), DecimalIntegerValueModelElement('gid')]),
+            FixedDataModelElement('s0', b'rsyslogd\'s groupid changed to '),
+            DecimalIntegerValueModelElement('gid')
+        ]),
         SequenceModelElement('statechange', [
-            FixedDataModelElement('s0', b'[origin software="rsyslogd" swVersion="'), DelimitedDataModelElement('version', b'"'),
-            FixedDataModelElement('s1', b'" x-pid="'), DecimalIntegerValueModelElement('pid'),
-            FixedDataModelElement('s2', b'" x-info="http://www.rsyslog.com"] '), FirstMatchModelElement('type', [
-                FixedDataModelElement('HUPed', b'rsyslogd was HUPed'), FixedDataModelElement('start', b'start')])]),
+            FixedDataModelElement('s0', b'[origin software="rsyslogd" swVersion="'),
+            DelimitedDataModelElement('version', b'"'),
+            FixedDataModelElement('s1', b'" x-pid="'),
+            DecimalIntegerValueModelElement('pid'),
+            FixedDataModelElement('s2', b'" x-info="http://www.rsyslog.com"] '),
+            FirstMatchModelElement('type', [
+                FixedDataModelElement('HUPed', b'rsyslogd was HUPed'),
+                FixedDataModelElement('start', b'start')
+            ])
+        ]),
         SequenceModelElement('uidchange', [
-            FixedDataModelElement('s0', b'rsyslogd\'s userid changed to '), DecimalIntegerValueModelElement('uid')])]
+            FixedDataModelElement('s0', b'rsyslogd\'s userid changed to '),
+            DecimalIntegerValueModelElement('uid')
+        ])
+    ]
 
-    model = SequenceModelElement('rsyslog', [FixedDataModelElement('sname', b'rsyslogd: '), FirstMatchModelElement('msg', type_children)])
+    model = SequenceModelElement('rsyslog', [
+        FixedDataModelElement('sname', b'rsyslogd: '),
+        FirstMatchModelElement('msg', type_children)
+    ])
     return model

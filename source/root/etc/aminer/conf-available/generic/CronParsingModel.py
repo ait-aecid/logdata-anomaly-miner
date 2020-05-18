@@ -17,18 +17,36 @@ def get_model(user_name_model=None):
     if user_name_model is None:
         user_name_model = VariableByteDataModelElement('user', b'0123456789abcdefghijklmnopqrstuvwxyz.-')
 
-    type_children = [SequenceModelElement('exec', [
-        FixedDataModelElement('s0', b'('), user_name_model, FixedDataModelElement('s1', b') CMD '), AnyByteDataModelElement('command')]),
+    type_children = [
+        SequenceModelElement('exec', [
+            FixedDataModelElement('s0', b'('),
+            user_name_model,
+            FixedDataModelElement('s1', b') CMD '),
+            AnyByteDataModelElement('command')
+        ]),
         SequenceModelElement('pam', [
             FixedDataModelElement('s0', b'pam_unix(cron:session): session '),
-            FixedWordlistDataModelElement('change', [b'opened', b'closed']), FixedDataModelElement('s1', b' for user '), user_name_model,
-            OptionalMatchModelElement('openby', FixedDataModelElement('default', b' by (uid=0)')), ])]
+            FixedWordlistDataModelElement('change', [b'opened', b'closed']),
+            FixedDataModelElement('s1', b' for user '),
+            user_name_model,
+            OptionalMatchModelElement('openby', FixedDataModelElement('default', b' by (uid=0)'))
+        ])
+    ]
 
-    model = FirstMatchModelElement('cron', [SequenceModelElement('std', [
-        FixedDataModelElement('sname', b'CRON['), DecimalIntegerValueModelElement('pid'), FixedDataModelElement('s0', b']: '),
-        FirstMatchModelElement('msgtype', type_children)]), SequenceModelElement('low', [
-            FixedDataModelElement('sname', b'cron['), DecimalIntegerValueModelElement('pid'), FixedDataModelElement('s0', b']: (*system*'),
-            DelimitedDataModelElement('rname', b') RELOAD ('), FixedDataModelElement('s1', b') RELOAD ('),
-            DelimitedDataModelElement('fname', b')'), FixedDataModelElement('s2', b')'), ]), ])
-
+    model = FirstMatchModelElement('cron', [
+        SequenceModelElement('std', [
+            FixedDataModelElement('sname', b'CRON['),
+            DecimalIntegerValueModelElement('pid'),
+            FixedDataModelElement('s0', b']: '),
+            FirstMatchModelElement('msgtype', type_children)
+        ]),
+        SequenceModelElement('low', [
+            FixedDataModelElement('sname', b'cron['),
+            DecimalIntegerValueModelElement('pid'),
+            FixedDataModelElement('s0', b']: (*system*'),
+            DelimitedDataModelElement('rname', b') RELOAD ('),
+            FixedDataModelElement('s1', b') RELOAD ('),
+            DelimitedDataModelElement('fname', b')'),
+            FixedDataModelElement('s2', b')'), ])
+    ])
     return model

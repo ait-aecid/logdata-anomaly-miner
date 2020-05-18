@@ -14,17 +14,28 @@ def get_systemd_model():
     """This function defines the parsing model for messages directly from systemd."""
     type_children = [
         FixedDataModelElement('apt-daily-start', b'Starting Daily apt activities...'),
-        FixedDataModelElement('apt-daily-started', b'Started Daily apt activities.'), SequenceModelElement('apt-daily-timer', [
-            FixedDataModelElement('s0', b'apt-daily.timer: Adding '), OptionalMatchModelElement(
-                'hopt', SequenceModelElement('hblock', [DecimalIntegerValueModelElement('hours'), FixedDataModelElement('s1', b'h '), ])),
-            DecimalIntegerValueModelElement('minutes'), FixedDataModelElement('s2', b'min '), DecimalFloatValueModelElement('seconds'),
-            FixedDataModelElement('s3', b's random time.')]),
+        FixedDataModelElement('apt-daily-started', b'Started Daily apt activities.'),
+        SequenceModelElement('apt-daily-timer', [
+            FixedDataModelElement('s0', b'apt-daily.timer: Adding '),
+            OptionalMatchModelElement('hopt', SequenceModelElement('hblock', [
+                DecimalIntegerValueModelElement('hours'),
+                FixedDataModelElement('s1', b'h ')
+            ])),
+            DecimalIntegerValueModelElement('minutes'),
+            FixedDataModelElement('s2', b'min '),
+            DecimalFloatValueModelElement('seconds'),
+            FixedDataModelElement('s3', b's random time.')
+        ]),
         FixedDataModelElement('tmp-file-cleanup', b'Starting Cleanup of Temporary Directories...'),
-        FixedDataModelElement('tmp-file-cleanup-started', b'Started Cleanup of Temporary Directories.')]
+        FixedDataModelElement('tmp-file-cleanup-started', b'Started Cleanup of Temporary Directories.')
+    ]
 
     model = SequenceModelElement('systemd', [
-        FixedDataModelElement('sname', b'systemd['), DecimalIntegerValueModelElement('pid'), FixedDataModelElement('s0', b']: '),
-        FirstMatchModelElement('msg', type_children)])
+        FixedDataModelElement('sname', b'systemd['),
+        DecimalIntegerValueModelElement('pid'),
+        FixedDataModelElement('s0', b']: '),
+        FirstMatchModelElement('msg', type_children)
+    ])
     return model
 
 
@@ -35,16 +46,26 @@ def get_logind_model(user_name_model=None):
 
     type_children = [
         SequenceModelElement('new session', [
-            FixedDataModelElement('s0', b'New session '), DecimalIntegerValueModelElement('session'),
-            FixedDataModelElement('s1', b' of user '), user_name_model, FixedDataModelElement('s2', b'.')]),
+            FixedDataModelElement('s0', b'New session '),
+            DecimalIntegerValueModelElement('session'),
+            FixedDataModelElement('s1', b' of user '),
+            user_name_model,
+            FixedDataModelElement('s2', b'.')
+        ]),
         SequenceModelElement('removed session', [
-            FixedDataModelElement('s0', b'Removed session '), DecimalIntegerValueModelElement('session'),
-            FixedDataModelElement('s1', b'.')])]
+            FixedDataModelElement('s0', b'Removed session '),
+            DecimalIntegerValueModelElement('session'),
+            FixedDataModelElement('s1', b'.')
+        ])
+    ]
     # FIXME: Will fail on username models including the dot at the end.
 
     model = SequenceModelElement('systemd-logind', [
-        FixedDataModelElement('sname', b'systemd-logind['), DecimalIntegerValueModelElement('pid'), FixedDataModelElement('s0', b']: '),
-        FirstMatchModelElement('msg', type_children)])
+        FixedDataModelElement('sname', b'systemd-logind['),
+        DecimalIntegerValueModelElement('pid'),
+        FixedDataModelElement('s0', b']: '),
+        FirstMatchModelElement('msg', type_children)
+    ])
     return model
 
 
@@ -53,10 +74,16 @@ def get_tmp_files_model():
     type_children = [
         SequenceModelElement('duplicate', [
             FixedDataModelElement('s0', b'[/usr/lib/tmpfiles.d/var.conf:14] Duplicate line for path "'),
-            DelimitedDataModelElement('path', b'", ignoring.'), FixedDataModelElement('s2', b'", ignoring.')])]
+            DelimitedDataModelElement('path', b'", ignoring.'),
+            FixedDataModelElement('s2', b'", ignoring.')
+        ])
+    ]
     # FIXME: Will fail on username models including the dot at the end.
 
     model = SequenceModelElement('systemd-tmpfiles', [
-        FixedDataModelElement('sname', b'systemd-tmpfiles['), DecimalIntegerValueModelElement('pid'), FixedDataModelElement('s0', b']: '),
-        FirstMatchModelElement('msg', type_children)])
+        FixedDataModelElement('sname', b'systemd-tmpfiles['),
+        DecimalIntegerValueModelElement('pid'),
+        FixedDataModelElement('s0', b']: '),
+        FirstMatchModelElement('msg', type_children)
+    ])
     return model

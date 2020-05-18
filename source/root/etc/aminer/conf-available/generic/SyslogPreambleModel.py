@@ -15,5 +15,9 @@ def get_model(time_model=None):
         time_model = DateTimeModelElement('time', b'%b %d %H:%M:%S')
     host_name_model = VariableByteDataModelElement('host', b'-.01234567890abcdefghijklmnopqrstuvwxyz')
     model = SequenceModelElement('syslog', [
-        time_model, FixedDataModelElement('sp0', b' '), host_name_model, FixedDataModelElement('sp1', b' ')])
+        time_model,
+        FixedDataModelElement('sp0', b' '),
+        host_name_model,
+        FixedDataModelElement('sp1', b' ')
+    ])
     return model
