@@ -73,48 +73,45 @@ config_properties['LogPrefix'] = 'Original log line: '
 
 # Add your ruleset here:
 
+
 def build_analysis_pipeline(analysis_context):
-  """Define the function to create pipeline for parsing the log
-  data. It has also to define an AtomizerFactory to instruct AMiner
-  how to process incoming data streams to create log atoms from
-  them."""
+    """Define the function to create pipeline for parsing the log data. It has also to define an AtomizerFactory to instruct AMiner
+    how to process incoming data streams to create log atoms from them."""
 
-# Build the parsing model:
-  from aminer.parsing import AnyByteDataModelElement
+    # Build the parsing model:
+    from aminer.parsing import AnyByteDataModelElement
 
-  parsing_model = AnyByteDataModelElement('AnyByteDataModelElement')
+    parsing_model = AnyByteDataModelElement('AnyByteDataModelElement')
 
-# Some generic imports.
-  from aminer.analysis import AtomFilters
+    # Some generic imports.
+    from aminer.analysis import AtomFilters
 
-# Create all global handler lists here and append the real handlers
-# later on.
-# Use this filter to distribute all atoms to the analysis handlers.
-  atom_filter = AtomFilters.SubhandlerFilter(None)
+    # Create all global handler lists here and append the real handlers later on.
+    # Use this filter to distribute all atoms to the analysis handlers.
+    atom_filter = AtomFilters.SubhandlerFilter(None)
 
-  from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
-  stream_printer_event_handler = StreamPrinterEventHandler(analysis_context)
-  anomaly_event_handlers = [stream_printer_event_handler]
+    from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
+    stream_printer_event_handler = StreamPrinterEventHandler(analysis_context)
+    anomaly_event_handlers = [stream_printer_event_handler]
 
-# Now define the AtomizerFactory using the model. A simple line
-# based one is usually sufficient.
-  from aminer.input import SimpleByteStreamLineAtomizerFactory
-  analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
-      parsing_model, [atom_filter], anomaly_event_handlers)
+    # Now define the AtomizerFactory using the model. A simple line
+    # based one is usually sufficient.
+    from aminer.input import SimpleByteStreamLineAtomizerFactory
+    analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(parsing_model, [atom_filter], anomaly_event_handlers)
 
-# Just report all unparsed atoms to the event handlers.
-  from aminer.input import SimpleUnparsedAtomHandler
-  simple_unparsed_atom_handler = SimpleUnparsedAtomHandler(anomaly_event_handlers)
-  atom_filter.add_handler(simple_unparsed_atom_handler, stop_when_handled_flag=True)
-  analysis_context.register_component(simple_unparsed_atom_handler, component_name="UnparsedHandler")
+    # Just report all unparsed atoms to the event handlers.
+    from aminer.input import SimpleUnparsedAtomHandler
+    simple_unparsed_atom_handler = SimpleUnparsedAtomHandler(anomaly_event_handlers)
+    atom_filter.add_handler(simple_unparsed_atom_handler, stop_when_handled_flag=True)
+    analysis_context.register_component(simple_unparsed_atom_handler, component_name="UnparsedHandler")
 
-  from aminer.analysis import NewMatchPathDetector
-  new_match_path_detector = NewMatchPathDetector(
-      analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=True)
-  analysis_context.register_component(new_match_path_detector, component_name="NewMatchPath")
-  atom_filter.add_handler(new_match_path_detector)
+    from aminer.analysis import NewMatchPathDetector
+    new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=True)
+    analysis_context.register_component(new_match_path_detector, component_name="NewMatchPath")
+    atom_filter.add_handler(new_match_path_detector)
 
-  from aminer.analysis.NewMatchPathValueDetector import NewMatchPathValueDetector
-  new_match_path_value_detector = NewMatchPathValueDetector(analysis_context.aminer_config, ['/AnyByteDataModelElement'], anomaly_event_handlers, auto_include_flag=True)
-  analysis_context.register_component(new_match_path_value_detector, component_name="NewMatchPathValue")
-  atom_filter.add_handler(new_match_path_value_detector)
+    from aminer.analysis.NewMatchPathValueDetector import NewMatchPathValueDetector
+    new_match_path_value_detector = NewMatchPathValueDetector(
+        analysis_context.aminer_config, ['/AnyByteDataModelElement'], anomaly_event_handlers, auto_include_flag=True)
+    analysis_context.register_component(new_match_path_value_detector, component_name="NewMatchPathValue")
+    atom_filter.add_handler(new_match_path_value_detector)

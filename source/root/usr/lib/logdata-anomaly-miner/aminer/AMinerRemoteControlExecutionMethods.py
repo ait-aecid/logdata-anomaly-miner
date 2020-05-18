@@ -11,7 +11,7 @@ attr_str = "%s = %s\n"
 component_not_found = 'Event history component not found'
 
 
-class AMinerRemoteControlExecutionMethods(object):
+class AMinerRemoteControlExecutionMethods():
     REMOTE_CONTROL_RESPONSE = ''
 
     CONFIG_KEY_MAIL_TARGET_ADDRESS = 'MailAlerting.TargetAddress'
@@ -28,13 +28,10 @@ class AMinerRemoteControlExecutionMethods(object):
 
     def change_config_property(self, analysis_context, property_name, value):
         result = 0
-        config_keys_mail_alerting = {self.CONFIG_KEY_MAIL_TARGET_ADDRESS,
-                                  self.CONFIG_KEY_MAIL_FROM_ADDRESS,
-                                  self.CONFIG_KEY_MAIL_SUBJECT_PREFIX,
-                                  self.CONFIG_KEY_EVENT_COLLECT_TIME,
-                                  self.CONFIG_KEY_ALERT_MIN_GAP,
-                                  self.CONFIG_KEY_ALERT_MAX_GAP,
-                                  self.CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE}
+        config_keys_mail_alerting = {
+            self.CONFIG_KEY_MAIL_TARGET_ADDRESS, self.CONFIG_KEY_MAIL_FROM_ADDRESS, self.CONFIG_KEY_MAIL_SUBJECT_PREFIX,
+            self.CONFIG_KEY_EVENT_COLLECT_TIME, self.CONFIG_KEY_ALERT_MIN_GAP, self.CONFIG_KEY_ALERT_MAX_GAP,
+            self.CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE}
         if not isinstance(analysis_context, AnalysisChild.AnalysisContext):
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: the analysisContext must be of type %s." % AnalysisChild.AnalysisContext.__class__
             return
@@ -67,7 +64,8 @@ class AMinerRemoteControlExecutionMethods(object):
         if result == 0:
             self.REMOTE_CONTROL_RESPONSE += "'%s' changed to '%s' successfully." % (property_name, value)
 
-    def change_config_property_mail_alerting(self, analysis_context, property_name, value):
+    @staticmethod
+    def change_config_property_mail_alerting(analysis_context, property_name, value):
         analysis_context.aminer_config.config_properties[property_name] = value
         for analysis_component_id in analysis_context.get_registered_component_ids():
             component = analysis_context.get_component_by_id(analysis_component_id)
@@ -99,21 +97,22 @@ class AMinerRemoteControlExecutionMethods(object):
             cpulimit_cmd = ['cpulimit', '-p', pid.decode(), '-l', str(max_cpu_percent_usage)]
 
             with subprocess.Popen(package_installed_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as out:
-                stdout, stderr = out.communicate()
+                stdout, _stderr = out.communicate()
 
             if 'dpkg-query: no packages found matching cpulimit.' in stdout.decode():
                 self.REMOTE_CONTROL_RESPONSE = 'FATAL: cpulimit package must be installed, when using' \
                                                ' the property %s.' % AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE
                 return 1
-            else:
-                with subprocess.Popen(cpulimit_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as out:
-                    return 0
+
+            with subprocess.Popen(cpulimit_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as _out:
+                return 0
         except ValueError:
             self.REMOTE_CONTROL_RESPONSE = 'FATAL: %s must be an integer, terminating.' % (
                 AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE)
             return 1
 
-    def change_config_property_log_prefix(self, analysis_context, log_prefix):
+    @staticmethod
+    def change_config_property_log_prefix(analysis_context, log_prefix):
         analysis_context.aminer_config.config_properties[AMinerConfig.KEY_LOG_PREFIX] = str(log_prefix)
         return 0
 
@@ -160,16 +159,17 @@ class AMinerRemoteControlExecutionMethods(object):
                         new_attr = attr_str % (attribute, repr(l))
             self.REMOTE_CONTROL_RESPONSE += "%s.%s = %s" % (component_name, attribute, new_attr)
         else:
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: the component '%s' does not have an attribute named '%s'"%(component_name, attribute)
+            self.REMOTE_CONTROL_RESPONSE += "FAILURE: the component '%s' does not have an attribute named '%s'" % \
+                                            (component_name, attribute)
 
     def print_current_config(self, analysis_context):
         for config_property in analysis_context.aminer_config.config_properties:
             if isinstance(analysis_context.aminer_config.config_properties[config_property], str):
-                self.REMOTE_CONTROL_RESPONSE += "%s = '%s'\n" % (config_property,
-                                                                 analysis_context.aminer_config.config_properties[config_property])
+                self.REMOTE_CONTROL_RESPONSE += "%s = '%s'\n" % (
+                    config_property, analysis_context.aminer_config.config_properties[config_property])
             else:
-                self.REMOTE_CONTROL_RESPONSE += attr_str % (config_property,
-                                                               analysis_context.aminer_config.config_properties[config_property])
+                self.REMOTE_CONTROL_RESPONSE += attr_str % (
+                    config_property, analysis_context.aminer_config.config_properties[config_property])
         for component_id in analysis_context.get_registered_component_ids():
             self.REMOTE_CONTROL_RESPONSE += "%s {\n" % analysis_context.get_name_by_component(
                 analysis_context.get_component_by_id(component_id))
@@ -186,7 +186,8 @@ class AMinerRemoteControlExecutionMethods(object):
             elif isinstance(attr, list):
                 for l in attr:
                     if hasattr(l, '__dict__') and self.isinstance_aminer_class(l):
-                        result += indent + "%s = [\n" % var + indent + '  ' + l.__class__.__name__ + " {\n" + self.get_all_vars(l, indent + '    ') + indent + '  ' + "}\n" + indent + ']\n'
+                        result += indent + "%s = [\n" % var + indent + '  ' + l.__class__.__name__ + \
+                                  " {\n" + self.get_all_vars(l, indent + '    ') + indent + '  ' + "}\n" + indent + ']\n'
                     else:
                         result += indent + attr_str % (var, repr(attr))
                         break
@@ -194,12 +195,15 @@ class AMinerRemoteControlExecutionMethods(object):
                 result += indent + attr_str % (var, repr(attr))
         return result
 
-    def isinstance_aminer_class(self, obj):
+    @staticmethod
+    def isinstance_aminer_class(obj):
         from aminer.analysis.TimeCorrelationDetector import CorrelationFeature
         from aminer.analysis.TimeCorrelationViolationDetector import CorrelationRule
-        class_list = [aminer.analysis.AtomFilters.SubhandlerFilter, aminer.analysis.AtomFilters.MatchPathFilter, aminer.analysis.AtomFilters.MatchValueFilter,
-                     aminer.analysis.HistogramAnalysis.BinDefinition, aminer.analysis.HistogramAnalysis.HistogramData, aminer.analysis.Rules.MatchAction,
-                     aminer.analysis.Rules.MatchRule, CorrelationRule, CorrelationFeature, aminer.events.EventHandlerInterface, aminer.util.ObjectHistory]
+        class_list = [
+            aminer.analysis.AtomFilters.SubhandlerFilter, aminer.analysis.AtomFilters.MatchPathFilter,
+            aminer.analysis.AtomFilters.MatchValueFilter, aminer.analysis.HistogramAnalysis.BinDefinition,
+            aminer.analysis.HistogramAnalysis.HistogramData, aminer.analysis.Rules.MatchAction, aminer.analysis.Rules.MatchRule,
+            CorrelationRule, CorrelationFeature, aminer.events.EventHandlerInterface, aminer.util.ObjectHistory]
         for c in class_list:
             if isinstance(obj, c):
                 return True
@@ -214,18 +218,19 @@ class AMinerRemoteControlExecutionMethods(object):
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: component '%s' does not exist!" % component
             return
         if component.__class__.__name__ not in ["EnhancedNewMatchPathValueComboDetector", "MissingMatchPathValueDetector",
-            "NewMatchPathDetector", "NewMatchPathValueComboDetector"]:
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: component class '%s' does not support whitelisting! Only "\
-                "the following classes support whitelisting: EnhancedNewMatchPathValueComboDetector, " \
-                "MissingMatchPathValueDetector, NewMatchPathDetector and NewMatchPathValueComboDetector." % component.__class__.__name__
+                                                "NewMatchPathDetector", "NewMatchPathValueComboDetector"]:
+            self.REMOTE_CONTROL_RESPONSE += "FAILURE: component class '%s' does not support whitelisting! Only the following classes " \
+                                            "support whitelisting: EnhancedNewMatchPathValueComboDetector, MissingMatchPathValueDetector," \
+                                            " NewMatchPathDetector and NewMatchPathValueComboDetector." % component.__class__.__name__
             return
         try:
             if component.__class__.__name__ == "MissingMatchPathValueDetector":
                 self.REMOTE_CONTROL_RESPONSE += component.whitelist_event("Analysis.%s" % component.__class__.__name__,
                                                                           [component.__class__.__name__], event_data, whitelisting_data)
             else:
-                self.REMOTE_CONTROL_RESPONSE += component.whitelist_event("Analysis.%s" % component.__class__.__name__,
-                                                                          [component.__class__.__name__], [LogAtom("", None, 1666.0, None), event_data], whitelisting_data)
+                self.REMOTE_CONTROL_RESPONSE += component.whitelist_event(
+                    "Analysis.%s" % component.__class__.__name__, [component.__class__.__name__],
+                    [LogAtom("", None, 1666.0, None), event_data], whitelisting_data)
         # skipcq: PYL-W0703
         except Exception as e:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
@@ -255,7 +260,7 @@ class AMinerRemoteControlExecutionMethods(object):
             history_data = history_handler.get_history()
             result_string = 'FAIL: not found'
             for event_pos in enumerate(history_data):
-                event_id, event_type, event_message, sorted_log_lines, event_data, event_source = history_data[event_pos]
+                event_id, event_type, event_message, sorted_log_lines, event_data, _event_source = history_data[event_pos]
                 if event_id != dump_event_id:
                     continue
                 append_log_lines_flag = True
@@ -290,7 +295,7 @@ class AMinerRemoteControlExecutionMethods(object):
         delete_count = 0
         event_pos = 0
         while event_pos < len(history_data):
-            event_id, event_type, event_message, sorted_log_lines, event_data, event_source = history_data[event_pos]
+            event_id, _event_type, _event_message, _sorted_log_lines, _event_data, _event_source = history_data[event_pos]
             may_delete_flag = False
             if event_id in event_ids:
                 may_delete_flag = True
@@ -315,7 +320,7 @@ class AMinerRemoteControlExecutionMethods(object):
             if max_event_count is None or max_events < max_event_count:
                 max_event_count = max_events
             result_string = 'OK'
-            for event_id, event_type, event_message, sorted_log_lines, event_data, event_source in history_data[:max_event_count]:
+            for event_id, _event_type, event_message, sorted_log_lines, _event_data, _event_source in history_data[:max_event_count]:
                 result_string += ('\nEvent %d: %s; Log data: %s' % (event_id, event_message, repr(sorted_log_lines)))[:240]
             self.REMOTE_CONTROL_RESPONSE = result_string
 
@@ -325,15 +330,16 @@ class AMinerRemoteControlExecutionMethods(object):
         if history_handler is None:
             self.REMOTE_CONTROL_RESPONSE = component_not_found
             return
-        elif id_spec_list is None or not isinstance(id_spec_list, list):
-            self.REMOTE_CONTROL_RESPONSE = 'Request requires remoteControlData with ID specification list and optional whitelisting information'
+        if id_spec_list is None or not isinstance(id_spec_list, list):
+            self.REMOTE_CONTROL_RESPONSE = \
+                'Request requires remoteControlData with ID specification list and optional whitelisting information'
             return
         history_data = history_handler.get_history()
         result_string = ''
         lookup_count = 0
         event_pos = 0
         while event_pos < len(history_data):
-            event_id, event_type, event_message, sorted_log_lines, event_data, event_source = history_data[event_pos]
+            event_id, event_type, _event_message, sorted_log_lines, event_data, event_source = history_data[event_pos]
             found_flag = False
             if event_id in id_spec_list:
                 found_flag = True
@@ -355,6 +361,7 @@ class AMinerRemoteControlExecutionMethods(object):
                     whitelisted_flag = True
                 except NotImplementedError:
                     result_string += 'FAIL %d: component does not support whitelisting' % event_id
+                # skipcq: PYL-W0703
                 except Exception as wlException:
                     result_string += 'FAIL %d: %s\n' % (event_id, str(wlException))
             elif event_type == 'Analysis.WhitelistViolationDetector':
