@@ -42,7 +42,7 @@ def load_config(config_file_name):
       aminer_config.loadYaml(yaml_config)
   except ValueError as e:
       raise e
-  except:
+  except Exception:
       print('Failed to load configuration from %s' % config_file_name, file=sys.stderr)
       exception_info = sys.exc_info()
       raise Exception(exception_info[0], exception_info[1], exception_info[2])

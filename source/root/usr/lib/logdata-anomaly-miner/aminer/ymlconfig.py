@@ -82,7 +82,7 @@ def build_analysis_pipeline(analysis_context):
           continue
       if item['type'].endswith('ModelElement') and item['id'] != 'START':
           func =  getattr(__import__("aminer.parsing", fromlist=[item['type']]),item['type'])
-          try:
+          if 'args' in item:
               if isinstance(item['args'],list):
                 # encode string to bytearray
                 for j in range(len(item['args'])):
@@ -90,7 +90,7 @@ def build_analysis_pipeline(analysis_context):
                 parserModelDict[item['id']] = func(item['name'],item['args'])
               else:
                 parserModelDict[item['id']] = func(item['name'],item['args'].encode())
-          except:
+          else:
               parserModelDict[item['id']] = func(item['name'])
       else:
           # skipcq: PTC-W0034
@@ -104,7 +104,7 @@ def build_analysis_pipeline(analysis_context):
   else:
     # skipcq: PTC-W0034
     func =  getattr(__import__(start['type']),'get_model')
-  try:
+  if 'args' in start:
     if isinstance(start['args'],list):
         for i in start['args']:
             if i == 'WHITESPACE':
@@ -117,7 +117,7 @@ def build_analysis_pipeline(analysis_context):
         parsing_model = func(start['name'],argslist)
     else:
         parsing_model = func(start['name'],[parserModelDict[start['args']]])
-  except:
+  else:
     parsing_model = func(start['name'])
           
 
@@ -154,9 +154,9 @@ def build_analysis_pipeline(analysis_context):
           stop_when_handled_flag=True)
 
   from aminer.analysis import NewMatchPathDetector
-  try:
+  if 'LearnMode' in yamldata:
       learn = yamldata['LearnMode']
-  except:
+  else:
       learn = True
   nmpd = NewMatchPathDetector(
       analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=learn)
@@ -168,9 +168,9 @@ def build_analysis_pipeline(analysis_context):
           compName = None
       else:
           compName = item['id']
-      try: 
+      if 'LearnMode' in yamldata: 
         learn = yamldata['LearnMode']
-      except:
+      else:
         learn = item['learnMode']
       func =  getattr(__import__("aminer.analysis", fromlist=[item['type']]),item['type'])
       if item['type'] == 'NewMatchPathValueDetector':
