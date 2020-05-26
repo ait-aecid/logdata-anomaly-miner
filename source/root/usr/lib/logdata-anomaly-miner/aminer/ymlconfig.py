@@ -62,10 +62,10 @@ def build_analysis_pipeline(analysis_context):
   import importlib
   import configparser   
   import sys   
-  import json
+#  import json
 #  from pprint import pprint
 
-  parserModelDict = dict()
+  parserModelDict = {}
   start = None
   wscount = 0
   whitespace_str = b' '
@@ -91,7 +91,7 @@ def build_analysis_pipeline(analysis_context):
           func =  getattr(__import__(item['type']),'get_model')
           parserModelDict[item['id']] = func()
 
-  argslist = list()
+  argslist = []
   if start['type'].endswith('ModelElement'):
     func = getattr(__import__("aminer.parsing", fromlist=[start['type']]),start['type'])
   else:
@@ -106,11 +106,11 @@ def build_analysis_pipeline(analysis_context):
                 wscount += 1
             else:
                 argslist.append(parserModelDict[i])
-        parsingModel = func(start['name'],argslist)
+        parsing_model = func(start['name'],argslist)
     else:
-        parsingModel = func(start['name'],[parserModelDict[start['args']]])
+        parsing_model = func(start['name'],[parserModelDict[start['args']]])
   except:
-    parsingModel = func(start['name'])
+    parsing_model = func(start['name'])
           
 
 # Some generic imports.
@@ -120,29 +120,29 @@ def build_analysis_pipeline(analysis_context):
 # later on.
 # Use this filter to distribute all atoms to the analysis handlers.
   atomFilter = AtomFilters.SubhandlerFilter(None)
-  anomalyEventHandlers = []
+  anomaly_event_handlers = []
 
 # Now define the AtomizerFactory using the model. A simple line
 # based one is usually sufficient.
   from aminer.input import SimpleByteStreamLineAtomizerFactory
-  if yamldata['Input']['MultiSource'] == True:
+  if yamldata['Input']['MultiSource'] is True:
         from aminer.input import SimpleMultisourceAtomSync
         analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
             parsing_model, [SimpleMultisourceAtomSync([atomFilter], sync_wait_time=5)], 
             anomaly_event_handlers, default_timestamp_path=yamldata['Input']['TimestampPath'])
   else:
         analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
-            parsingModel, [atomFilter], anomalyEventHandlers,
+            parsing_model, [atomFilter], anomaly_event_handlers,
             default_timestamp_path=yamldata['Input']['TimestampPath'])
 
 # Just report all unparsed atoms to the event handlers.
-  if yamldata['Input']['Verbose'] == True:
+  if yamldata['Input']['Verbose'] is True:
     from aminer.input import VerboseUnparsedAtomHandler
-    atomFilter.add_handler(VerboseUnparsedAtomHandler(anomalyEventHandlers, parsingModel),       stop_when_handled_flag=True)
+    atomFilter.add_handler(VerboseUnparsedAtomHandler(anomaly_event_handlers, parsing_model),       stop_when_handled_flag=True)
   else:
     from aminer.input import SimpleUnparsedAtomHandler
     atomFilter.add_handler(
-          SimpleUnparsedAtomHandler(anomalyEventHandlers),
+          SimpleUnparsedAtomHandler(anomaly_event_handlers),
           stop_when_handled_flag=True)
 
   from aminer.analysis import NewMatchPathDetector
@@ -151,7 +151,7 @@ def build_analysis_pipeline(analysis_context):
   except:
       learn = True
   nmpd = NewMatchPathDetector(
-      analysis_context.aminer_config, anomalyEventHandlers, auto_include_flag=learn)
+      analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=learn)
   analysis_context.register_component(nmpd, component_name=None)
   atomFilter.add_handler(nmpd)
 
@@ -166,11 +166,11 @@ def build_analysis_pipeline(analysis_context):
         learn = item['learnMode']
       func =  getattr(__import__("aminer.analysis", fromlist=[item['type']]),item['type'])
       if item['type'] == 'NewMatchPathValueDetector':
-        tmpAnalyser = func(analysis_context.aminer_config,item['paths'], anomalyEventHandlers, auto_include_flag=learn,persistence_id=item['persistence_id'],output_log_line=item['output_logline'])
+        tmpAnalyser = func(analysis_context.aminer_config,item['paths'], anomaly_event_handlers, auto_include_flag=learn,persistence_id=item['persistence_id'],output_log_line=item['output_logline'])
       elif item['type'] == 'NewMatchPathValueComboDetector':
-        tmpAnalyser = func(analysis_context.aminer_config,item['paths'], anomalyEventHandlers, auto_include_flag=learn,persistence_id=item['persistence_id'],allow_missing_values_flag=item['allow_missing_values'],output_log_line=item['output_logline'])
+        tmpAnalyser = func(analysis_context.aminer_config,item['paths'], anomaly_event_handlers, auto_include_flag=learn,persistence_id=item['persistence_id'],allow_missing_values_flag=item['allow_missing_values'],output_log_line=item['output_logline'])
       else:  
-        tmpAnalyser = func(analysis_context.aminer_config,item['paths'], anomalyEventHandlers, auto_include_flag=learn)
+        tmpAnalyser = func(analysis_context.aminer_config,item['paths'], anomaly_event_handlers, auto_include_flag=learn)
       analysis_context.register_component(tmpAnalyser, component_name=compName)
       atomFilter.add_handler(tmpAnalyser)
 
@@ -180,7 +180,7 @@ def build_analysis_pipeline(analysis_context):
           func =  getattr(__import__("aminer.events", fromlist=[item['type']]),item['type'])
           ctx = None
           if item['type'] == 'StreamPrinterEventHandler':
-             if item['json'] == True:
+             if item['json'] is True:
                from aminer.events import JsonConverterHandler
                ctx = JsonConverterHandler([func(analysis_context)], analysis_context)
              else:
@@ -206,14 +206,14 @@ def build_analysis_pipeline(analysis_context):
 #                pass
 #            kafkaEventHandler = func(analysis_context.aminer_config, item['args'][0], options)
 #            from aminer.events import JsonConverterHandler
-#            anomalyEventHandlers.append(JsonConverterHandler(analysis_context.aminer_config, messageQueueEventHandlers,
+#            anomaly_event_handlers.append(JsonConverterHandler(analysis_context.aminer_config, messageQueueEventHandlers,
 #                analysis_context, learningMode))
 #          else:    
-          if ctx == None:
+          if ctx is None:
               ctx = func(analysis_context)
-          anomalyEventHandlers.append(ctx)
+          anomaly_event_handlers.append(ctx)
 
   except KeyError:
       # Add stdout stream printing for debugging, tuning.
       from aminer.events import StreamPrinterEventHandler
-      anomalyEventHandlers.append(StreamPrinterEventHandler(analysis_context))
+      anomaly_event_handlers.append(StreamPrinterEventHandler(analysis_context))
