@@ -17,15 +17,16 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
     def __init__(self, aminer_config, target_path_list, report_interval, report_event_handlers, reset_after_report_flag=True):
         """Initialize the ParserCount component.
         @param aminer"""
-        self.targetPathList = target_path_list
-        self.reportInterval = report_interval
-        self.reportEventHandlers = report_event_handlers
-        self.resetAfterReportFlag = reset_after_report_flag
+        self.aminer_config = aminer_config
+        self.target_path_list = target_path_list
+        self.report_interval = report_interval
+        self.report_event_handlers = report_event_handlers
+        self.reset_after_report_flag = reset_after_report_flag
         self.initial = True
-        self.countDict = {}
+        self.count_dict = {}
 
-        for targetPath in self.targetPathList:
-            self.countDict[targetPath] = 0
+        for target_path in self.target_path_list:
+            self.count_dict[target_path] = 0
 
     def get_time_trigger_class(self):
         """Get the trigger class this component can be registered for. This detector only needs persisteny triggers in real time."""
@@ -33,11 +34,10 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def receive_atom(self, log_atom):
         match_dict = log_atom.parser_match.get_match_dictionary()
-        matchValueList = []
-        for targetPath in self.targetPathList:
-            matchElement = match_dict.get(targetPath, None)
-            if matchElement is not None:
-                self.countDict[targetPath] += 1
+        for target_path in self.target_path_list:
+            match_element = match_dict.get(target_path, None)
+            if match_element is not None:
+                self.count_dict[target_path] += 1
         return True
 
     def do_timer(self, trigger_time):
@@ -47,28 +47,27 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
             self.initial = False
         else:
             self.send_report()
-        return self.reportInterval
+        return self.report_interval
 
+    # skipcq: PYL-R0201
     def do_persist(self):
         """Immediately write persistence data to storage."""
         return False
 
     def send_report(self):
         """Sends a report to the event handlers."""
-        outputString = 'Parsed paths in the last ' + str(self.reportInterval) + ' seconds:\n'
+        output_string = 'Parsed paths in the last ' + str(self.report_interval) + ' seconds:\n'
 
-        for k in self.countDict:
-            c = self.countDict[k]
-            outputString += '\t' + str(k) + ': ' + str(c) + '\n'
+        for k in self.count_dict:
+            c = self.count_dict[k]
+            output_string += '\t' + str(k) + ': ' + str(c) + '\n'
 
-        event_data = {}
-        event_data['StatusInfo'] = self.countDict
-        event_data['FromTime'] = datetime.datetime.utcnow().timestamp() - self.reportInterval
-        event_data['ToTime'] = datetime.datetime.utcnow().timestamp()
-        for listener in self.reportEventHandlers:
-            listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Count report', [outputString], event_data, None, self)
-        # print(outputString, file=sys.stderr)
+        event_data = {'StatusInfo': self.count_dict, 'FromTime': datetime.datetime.utcnow().timestamp() - self.report_interval,
+                      'ToTime': datetime.datetime.utcnow().timestamp()}
+        for listener in self.report_event_handlers:
+            listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Count report', [output_string], event_data, None, self)
+        # print(output_string, file=sys.stderr)
 
-        if self.resetAfterReportFlag:
-            for targetPath in self.targetPathList:
-                self.countDict[targetPath] = 0
+        if self.reset_after_report_flag:
+            for targetPath in self.target_path_list:
+                self.count_dict[targetPath] = 0

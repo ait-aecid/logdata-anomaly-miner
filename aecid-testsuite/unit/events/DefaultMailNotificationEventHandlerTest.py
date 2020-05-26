@@ -119,6 +119,25 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
                 self.__class__.__name__, description, 1, match_element.get_match_string().decode("utf-8") + "\n\n"),
                 str(result.stdout, 'utf-8')))
 
+    def test3check_email_addresses(self):
+        ac = self.analysis_context
+        ac.aminer_config.config_properties[DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS] = "test123@gmail.com"
+        ac.aminer_config.config_properties[DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_FROM_ADDRESS] = "test123@gmail.com"
+        _ = DefaultMailNotificationEventHandler(ac)
+        ac.aminer_config.config_properties[DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS] = "root@localhost"
+        ac.aminer_config.config_properties[DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_FROM_ADDRESS] = "root@localhost"
+        _ = DefaultMailNotificationEventHandler(ac)
+        ac.aminer_config.config_properties[DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS] = "domain.user1@localhost"
+        self.assertRaises(Exception, DefaultMailNotificationEventHandler, ac)
+        ac.aminer_config.config_properties[DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_FROM_ADDRESS] = "domain.user1@localhost"
+        self.assertRaises(Exception, DefaultMailNotificationEventHandler, ac)
+        ac.aminer_config.config_properties[DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS] = "root@notLocalhost"
+        ac.aminer_config.config_properties[DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_FROM_ADDRESS] = "root@localhost"
+        self.assertRaises(Exception, DefaultMailNotificationEventHandler, ac)
+        ac.aminer_config.config_properties[DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS] = "root@localhost"
+        ac.aminer_config.config_properties[DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_FROM_ADDRESS] = "root@notLocalhost"
+        self.assertRaises(Exception, DefaultMailNotificationEventHandler, ac)
+
 
 if __name__ == "__main__":
     unittest.main()

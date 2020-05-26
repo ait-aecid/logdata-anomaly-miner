@@ -82,7 +82,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
         if parsed_fields[COMPONENT_TYPE_MICROSECOND] is None:
             parsed_fields[COMPONENT_TYPE_MICROSECOND] = 0
 
-        # FIXME: Values without day/month not handled yet
+        # Values without day/month not handled yet
         parsed_value = None
         if parsed_fields[COMPONENT_TYPE_YEAR] is None:
             if self.latest_parsed_timestamp is not None:

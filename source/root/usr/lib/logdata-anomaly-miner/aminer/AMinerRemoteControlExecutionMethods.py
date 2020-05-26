@@ -1,9 +1,9 @@
-"""This module contains methods which can be executed from the
-AMinerRemoteControl class."""
+"""This module contains methods which can be executed from the AMinerRemoteControl class."""
 import aminer
 from aminer import AMinerConfig, AnalysisChild
 import resource
-import subprocess
+import subprocess  # skipcq: BAN-B404
+import shlex
 from aminer.input import LogAtom
 from aminer.input import AtomHandlerInterface
 
@@ -33,7 +33,7 @@ class AMinerRemoteControlExecutionMethods():
             self.CONFIG_KEY_EVENT_COLLECT_TIME, self.CONFIG_KEY_ALERT_MIN_GAP, self.CONFIG_KEY_ALERT_MAX_GAP,
             self.CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE}
         if not isinstance(analysis_context, AnalysisChild.AnalysisContext):
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: the analysisContext must be of type %s." % AnalysisChild.AnalysisContext.__class__
+            self.REMOTE_CONTROL_RESPONSE += "FAILURE: the analysis_context must be of type %s." % AnalysisChild.AnalysisContext.__class__
             return
 
         if property_name not in analysis_context.aminer_config.config_properties:
@@ -88,14 +88,16 @@ class AMinerRemoteControlExecutionMethods():
 
     def change_config_property_max_cpu_percent_usage(self, max_cpu_percent_usage):
         try:
-            max_cpu_percent_usage = int(max_cpu_percent_usage)
+            max_cpu_percent_usage = int(shlex.quote(max_cpu_percent_usage))
             # limit
+            # skipcq: BAN-B603, BAN-B607
             with subprocess.Popen(['pgrep', '-f', 'AMiner'], stdout=subprocess.PIPE, shell=False) as child:
-                response = child.communicate()[0].split()
+                response = shlex.quote(child.communicate()[0].split())
             pid = response[len(response) - 1]
             package_installed_cmd = ['dpkg', '-l', 'cpulimit']
             cpulimit_cmd = ['cpulimit', '-p', pid.decode(), '-l', str(max_cpu_percent_usage)]
 
+            # skipcq: BAN-B603
             with subprocess.Popen(package_installed_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as out:
                 stdout, _stderr = out.communicate()
 
@@ -104,6 +106,7 @@ class AMinerRemoteControlExecutionMethods():
                                                ' the property %s.' % AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE
                 return 1
 
+            # skipcq: BAN-B603
             with subprocess.Popen(cpulimit_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as _out:
                 return 0
         except ValueError:

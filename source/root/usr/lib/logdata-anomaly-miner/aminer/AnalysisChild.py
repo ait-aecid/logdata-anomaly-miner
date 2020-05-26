@@ -12,8 +12,9 @@ import sys
 import time
 import traceback
 import resource
-import subprocess
+import subprocess  # skipcq: BAN-B404
 import logging
+import shlex
 
 from aminer import AMinerConfig
 from aminer.input.LogStream import LogStream
@@ -33,7 +34,7 @@ class AnalysisContext:
 
     def __init__(self, aminer_config):
         self.aminer_config = aminer_config
-        # This is the factory to create atomiziers for incoming data streams and link them to the analysis pipeline.
+        # This is the factory to create atomizers for incoming data streams and link them to the analysis pipeline.
         self.atomizer_factory = None
         # This is the current log processing and analysis time regarding the data stream being analyzed. While None, the analysis time
         # e.g. used to trigger components (see analysisTimeTriggeredComponents), is the same as current system time. For forensic analysis
@@ -206,12 +207,13 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         max_cpu_percent_usage = self.analysis_context.aminer_config.config_properties.get(AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE)
         if max_cpu_percent_usage is not None:
             try:
-                max_cpu_percent_usage = int(max_cpu_percent_usage)
+                max_cpu_percent_usage = int(shlex.quote(max_cpu_percent_usage))
                 # limit
                 pid = os.getpid()
                 package_installed_cmd = ['dpkg', '-l', 'cpulimit']
                 cpulimit_cmd = ['cpulimit', '-p', str(pid), '-l', str(max_cpu_percent_usage)]
 
+                # skipcq: BAN-B603
                 with subprocess.Popen(package_installed_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as out:
                     stdout, _stderr = out.communicate()
 
@@ -220,6 +222,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                         'FATAL: cpulimit package must be installed, when using the property %s' %
                         AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE, file=sys.stderr)
                     return 1
+                # skipcq: BAN-B603
                 _out = subprocess.Popen(cpulimit_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             except ValueError:
                 print('FATAL: %s must be an integer, terminating' % AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE, file=sys.stderr)
@@ -478,10 +481,12 @@ class AnalysisChildRemoteControlHandler:
                 json_request_data = JsonUtil.decode_object(json_request_data)
                 if (json_request_data is None) or (not isinstance(json_request_data, list)) or (len(json_request_data) != 2):
                     raise Exception('Invalid request data')
+                json_request_data[0] = shlex.quote(json_request_data[0])
+                json_request_data[1] = shlex.quote(json_request_data[1])
                 methods = AMinerRemoteControlExecutionMethods()
                 import aminer.analysis
                 exec_locals = {
-                    'analysisContext': analysis_context, 'remoteControlData': json_request_data[1],
+                    'analysis_context': analysis_context, 'remoteControlData': json_request_data[1],
                     'printCurrentConfig': methods.print_current_config, 'printConfigProperty': methods.print_config_property,
                     'printAttributeOfRegisteredAnalysisComponent': methods.print_attribute_of_registered_analysis_component,
                     'changeConfigProperty': methods.change_config_property,
@@ -511,6 +516,7 @@ class AnalysisChildRemoteControlHandler:
                 logging.addLevelName(15, "REMOTECONTROL")
                 logging.log(15, json_request_data[0].decode())
 
+                # skipcq: PYL-W0122
                 exec(json_request_data[0], {'__builtins__': None}, exec_locals)
                 json_remote_control_response = json.dumps(exec_locals.get('remoteControlResponse', None))
                 if methods.REMOTE_CONTROL_RESPONSE == '':

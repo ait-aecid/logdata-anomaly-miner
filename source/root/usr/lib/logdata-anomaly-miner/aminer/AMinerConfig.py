@@ -17,12 +17,12 @@ KEY_RESOURCES_MAX_MEMORY_USAGE = 'Resources.MaxMemoryUsage'
 KEY_RESOURCES_MAX_PERCENT_CPU_USAGE = 'Resources.MaxCpuPercentUsage'
 LOG_FILE = '/tmp/AMinerRemoteLog.txt'
 configFN = None
-VAR_ID = 0
 
 
 def load_config(config_file_name):
     """Load the configuration file using the import module."""
     aminer_config = None
+    # skipcq: PYL-W0603
     global configFN
     configFN = config_file_name
     try:
@@ -47,7 +47,6 @@ def build_persistence_file_name(aminer_config, *args):
 def save_config(analysis_context, new_file):
     """Save the current configuration to a file by using the AMinerRemoteControl."""
     register_component = 'registerComponent('
-    global VAR_ID
     VAR_ID = 0
     msg = ""
     with open(configFN, "r") as file:

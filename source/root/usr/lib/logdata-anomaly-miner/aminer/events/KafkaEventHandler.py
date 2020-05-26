@@ -2,17 +2,15 @@
 
 from kafka import KafkaProducer
 from kafka.errors import KafkaError
-import configparser
 import sys
-import json
-
-from aminer.input.LogAtom import LogAtom
+from aminer.events import EventHandlerInterface
 
 
-class KafkaEventHandler():
+class KafkaEventHandler(EventHandlerInterface):
     """This class implements an event record listener, that will forward Json-objects to a Kafka queue."""
 
     def __init__(self, analysis_context, topic, options):
+        self.analysis_context = analysis_context
         self.producer = KafkaProducer(**options, value_serializer=lambda v: v.encode('utf-8'))
         self.topic = topic
 

@@ -37,7 +37,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, 'TimeCorrelationViolationDetector',
                                                                               persistence_id)
 
-    #    persistenceData = PersistencyUtil.loadJson(self.persistenceFileName)
+    #    persistenceData = PersistencyUtil.loadJson(self.persistence_file_name)
     #   if persistenceData is None:
     #     self.knownPathSet = set()
     #   else:
@@ -96,7 +96,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        # PersistencyUtil.storeJson(self.persistenceFileName, list(self.knownPathSet))
+        # PersistencyUtil.storeJson(self.persistence_file_name, list(self.knownPathSet))
         self.next_persist_time = time.time() + 600.0
 
 
@@ -142,20 +142,20 @@ class CorrelationRule:
     def update_artefact_a(self, selector, log_atom):
         """Append entry to the event history A."""
         history_entry = self.prepare_history_entry(selector, log_atom)
-        # FIXME: Check if event A could be discarded immediately.
+        # Check if event A could be discarded immediately.
         self.history_a_events.append(history_entry)
 
     def update_artefact_b(self, selector, log_atom):
         """Append entry to the event history B."""
         history_entry = self.prepare_history_entry(selector, log_atom)
-        # FIXME: Check if event B could be discarded immediately.
+        # Check if event B could be discarded immediately.
         self.history_b_events.append(history_entry)
 
     def check_status(self, newest_timestamp, max_violations=20):
         """@return None if status is OK. Returns a tuple containing a descriptive message and a list of violating log data lines
         on error."""
 
-        # FIXME: This part of code would be good target to be implemented as native library with optimized algorithm in future.
+        # This part of code would be good target to be implemented as native library with optimized algorithm in future.
         a_pos = 0
         check_range = len(self.history_a_events)
         violation_logs = []
