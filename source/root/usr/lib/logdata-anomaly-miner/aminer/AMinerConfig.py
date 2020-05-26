@@ -23,6 +23,7 @@ VAR_ID = 0
 def load_config(config_file_name):
   """Load the configuration file using the import module."""
   aminer_config = None
+  # skipcq: PYL-W0603
   global configFN
   configFN = config_file_name
   ymlext = ['.YAML','.YML','.yaml','.yml']

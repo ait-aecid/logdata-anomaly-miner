@@ -17,6 +17,8 @@ config_properties['AMinerGroup'] = 'aminer'
 # This method loads the yaml-configfile and overrides defaults if
 # neccessary
 def loadYaml(config_file):
+  # We might be able to remove this and us it like the config_properties
+  # skipcq: PYL-W0603
   global yamldata
 
   import yaml
@@ -71,6 +73,8 @@ def build_analysis_pipeline(analysis_context):
   wscount = 0
   whitespace_str = b' '
 
+  # We might be able to remove this and us it like the config_properties
+  # skipqc: PYL-W0603
   global yamldata
   for item in yamldata['Parser']:
       if item['id'] == 'START':
@@ -98,6 +102,7 @@ def build_analysis_pipeline(analysis_context):
     # skipcq: PTC-W0034
     func = getattr(__import__("aminer.parsing", fromlist=[start['type']]),start['type'])
   else:
+    # skipcq: PTC-W0034
     func =  getattr(__import__(start['type']),'get_model')
   try:
     if isinstance(start['args'],list):
