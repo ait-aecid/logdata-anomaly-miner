@@ -82,7 +82,7 @@ def load_json(file_name):
     try:
         persistence_file_handle = open_persistence_file(file_name, os.O_RDONLY | os.O_NOFOLLOW)
         persistence_data = os.read(persistence_file_handle, os.fstat(persistence_file_handle).st_size)
-        persistence_data = str(persistence_data, 'utf-8')
+        persistence_data = str(persistence_data)
         os.close(persistence_file_handle)
     except OSError as openOsError:
         if openOsError.errno != errno.ENOENT:
@@ -102,6 +102,6 @@ def store_json(file_name, object_data):
     """Store persistency data to file."""
     persistence_data = JsonUtil.dump_as_json(object_data)
     fd = create_temporary_persistence_file(file_name)
-    os.write(fd, bytes(persistence_data, 'utf-8'))
+    os.write(fd, bytes(persistence_data))
     replace_persistence_file(file_name, fd)
     os.close(fd)

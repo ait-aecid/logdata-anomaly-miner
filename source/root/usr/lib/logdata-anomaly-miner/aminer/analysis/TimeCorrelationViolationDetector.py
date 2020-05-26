@@ -181,7 +181,7 @@ class CorrelationRule:
                     if b_pos < len(self.history_b_events):
                         violation_line = a_event[3].match_element.match_string
                         if isinstance(violation_line, bytes):
-                            violation_line = violation_line.decode("utf-8")
+                            violation_line = violation_line.decode()
                             if num_violations <= max_violations:
                                 violation_message += 'FAIL: B-Event for \"%s\" (%s) was found too early!\n' % (
                                                      violation_line, a_event[2].action_id)
@@ -197,7 +197,7 @@ class CorrelationRule:
                 if delta > self.max_time_delta:
                     violation_line = a_event[3].match_element.match_string
                     if isinstance(violation_line, bytes):
-                        violation_line = violation_line.decode("utf-8")
+                        violation_line = violation_line.decode()
                         if num_violations <= max_violations:
                             violation_message += 'FAIL: B-Event for \"%s\" (%s) was not found in time!\n' % (
                                                  violation_line, a_event[2].action_id)
@@ -214,7 +214,7 @@ class CorrelationRule:
                     if a_event[check_pos] != b_event[check_pos]:
                         violation_line = a_event[3].match_element.match_string
                         if isinstance(violation_line, bytes):
-                            violation_line = violation_line.decode("utf-8")
+                            violation_line = violation_line.decode()
                             if num_violations <= max_violations:
                                 violation_message += 'FAIL: \"%s\" (%s) %s is not equal %s\n' % (
                                     violation_line, a_event[2].action_id, a_event[check_pos], b_event[check_pos])
@@ -250,7 +250,7 @@ class CorrelationRule:
             if delta > self.max_time_delta:
                 violation_line = a_event[3].match_element.match_string
                 if isinstance(violation_line, bytes):
-                    violation_line = violation_line.decode("utf-8")
+                    violation_line = violation_line.decode()
                     if num_violations <= max_violations:
                         violation_message += 'FAIL: B-Event for \"%s\" (%s) was not found in time!\n' % (
                                              violation_line, a_event[2].action_id)

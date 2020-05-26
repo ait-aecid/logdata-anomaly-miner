@@ -11,7 +11,7 @@ class KafkaEventHandler(EventHandlerInterface):
 
     def __init__(self, analysis_context, topic, options):
         self.analysis_context = analysis_context
-        self.producer = KafkaProducer(**options, value_serializer=lambda v: v.encode('utf-8'))
+        self.producer = KafkaProducer(**options, value_serializer=lambda v: v.encode())
         self.topic = topic
 
     def receive_event(self, event_type, event_message, sorted_log_lines, event_data, log_atom, event_source):

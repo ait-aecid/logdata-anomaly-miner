@@ -189,7 +189,7 @@ class DateFormatComponent:
     def add_format(self, format_string, format_locale, format_timezone):
         """Add a new format to be parsed."""
         if isinstance(format_string, bytes):
-            format_string = format_string.decode('utf-8')
+            format_string = format_string.decode()
         if format_timezone is None:
             format_timezone = 'UTC'
 

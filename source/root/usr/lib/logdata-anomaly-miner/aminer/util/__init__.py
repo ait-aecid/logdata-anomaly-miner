@@ -25,7 +25,7 @@ def decode_string_as_byte_string(string):
     count = 0
     while count < len(string):
         if string[count] in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!"#$&\'()*+,-./:;<=>?@[]\\^_`{}|~ ':
-            decoded += bytes(string[count], 'utf-8')
+            decoded += bytes(string[count], 'ascii')
             count += 1
         elif string[count] == '%':
             decoded += bytearray((int(string[count + 1:count + 3], 16),))
