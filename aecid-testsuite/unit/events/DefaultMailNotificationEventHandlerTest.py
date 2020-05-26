@@ -56,14 +56,16 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
             datetime.fromtimestamp(t - 600).strftime(self.datetime_format_string), "" + match_element.get_path() + ", " +
             match_element2.get_path(), match_element.get_match_object(), self.__class__.__name__, description, 2,
             match_element.get_match_string().decode() + "\n  " + match_element2.get_match_string().decode()) in
-            str(result.stdout), msg="%s vs \n %s" % (self.__expected_string % (
+            str(result.stdout, 'utf-8'), msg="%s vs \n %s" % (self.__expected_string % (
                 datetime.fromtimestamp(t).strftime(self.datetime_format_string), match_element.get_path(), match_element.get_match_object(),
-                self.__class__.__name__, description, 1, match_element.get_match_string().decode() + "\n\n"), str(result.stdout)))
+                self.__class__.__name__, description, 1, match_element.get_match_string().decode() + "\n\n"), 
+                str(result.stdout, 'utf-8')))
 
         self.assertTrue(self.__expected_string % (
             datetime.fromtimestamp(t).strftime(self.datetime_format_string), "" + match_element.get_path() + ", " +
             match_element2.get_path(), match_element.get_match_object(), self.__class__.__name__, description, 2,
-            match_element.get_match_string().decode() + "\n  " + match_element2.get_match_string().decode() + "\n\n") in str(result.stdout))
+            match_element.get_match_string().decode() + "\n  " + match_element2.get_match_string().decode() + "\n\n") in
+                str(result.stdout, 'utf-8'))
 
     def test2do_timer(self):
         """In this test case the functionality of the timer is tested. The eventCollectTime must not be 0!"""
@@ -88,7 +90,7 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
 
         self.assertFalse(self.__expected_string % (
             datetime.fromtimestamp(t).strftime(self.datetime_format_string), match_element.get_path(), match_element.get_match_object(),
-            self.__class__.__name__, description, 1, match_element.get_match_string().decode() + "\n\n") in str(result.stdout))
+            self.__class__.__name__, description, 1, match_element.get_match_string().decode() + "\n\n") in str(result.stdout, 'utf-8'))
 
         t = time()
         default_mail_notification_event_handler.next_alert_time = t + 500
@@ -99,7 +101,7 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
         result = subprocess.run(self.mail_call, shell=True, stdout=subprocess.PIPE)
         self.assertFalse(self.__expected_string % (
             datetime.fromtimestamp(t).strftime(self.datetime_format_string), match_element.get_path(), match_element.get_match_object(),
-            self.__class__.__name__, description, 1, match_element.get_match_string().decode() + "\n\n") in str(result.stdout))
+            self.__class__.__name__, description, 1, match_element.get_match_string().decode() + "\n\n") in str(result.stdout, 'utf-8'))
 
         default_mail_notification_event_handler.next_alert_time = t
         default_mail_notification_event_handler.do_timer(t)
@@ -112,7 +114,7 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
             self.__class__.__name__, description, 1, match_element.get_match_string().decode() + "\n\n") in
             str(result.stdout), msg="%s vs \n %s" % (self.__expected_string % (
                 datetime.fromtimestamp(t).strftime(self.datetime_format_string), match_element.get_path(), match_element.get_match_object(),
-                self.__class__.__name__, description, 1, match_element.get_match_string().decode() + "\n\n"), str(result.stdout)))
+                self.__class__.__name__, description, 1, match_element.get_match_string().decode() + "\n\n"), str(result.stdout, 'utf-8')))
 
     def test3check_email_addresses(self):
         ac = self.analysis_context
