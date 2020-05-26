@@ -74,7 +74,7 @@ def build_analysis_pipeline(analysis_context):
   whitespace_str = b' '
 
   # We might be able to remove this and us it like the config_properties
-  # skipqc: PYL-W0603
+  # skipcq: PYL-W0603
   global yamldata
   for item in yamldata['Parser']:
       if item['id'] == 'START':
