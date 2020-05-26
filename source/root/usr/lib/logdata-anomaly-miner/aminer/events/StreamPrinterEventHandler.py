@@ -18,9 +18,9 @@ class StreamPrinterEventHandler(EventHandlerInterface):
     def receive_event(self, event_type, event_message, sorted_log_lines, event_data, log_atom, event_source):
         """Receive information about a detected event."""
         event_data_obj = EventData(event_type, event_message, sorted_log_lines, event_data, log_atom, event_source, self.analysis_context)
-        message = event_data_obj.receive_event_string()
+        message = '%s\n' % event_data_obj.receive_event_string()
         if hasattr(self.stream, 'buffer'):
             self.stream.buffer.write(message.encode())
         else:
-            self.stream.write('%s\n' % message)
+            self.stream.write(message)
         self.stream.flush()
