@@ -22,5 +22,5 @@ class StreamPrinterEventHandler(EventHandlerInterface):
         if hasattr(self.stream, 'buffer'):
             self.stream.buffer.write(message.encode())
         else:
-            self.stream.write('%s \n' % message)
+            self.stream.write('%s\n' % message)
         self.stream.flush()
