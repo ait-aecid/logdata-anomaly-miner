@@ -132,11 +132,11 @@ def build_analysis_pipeline(analysis_context):
         from aminer.input import SimpleMultisourceAtomSync
         analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
             parsing_model, [SimpleMultisourceAtomSync([atomFilter], sync_wait_time=5)], 
-            anomaly_event_handlers, default_timestamp_path=yamldata['Input']['TimestampPath'])
+            anomaly_event_handlers, default_timestamp_paths=yamldata['Input']['TimestampPath'])
   else:
         analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
             parsing_model, [atomFilter], anomaly_event_handlers,
-            default_timestamp_path=yamldata['Input']['TimestampPath'])
+            default_timestamp_paths=yamldata['Input']['TimestampPath'])
 
 # Just report all unparsed atoms to the event handlers.
   if yamldata['Input']['Verbose'] is True:
