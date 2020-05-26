@@ -58,7 +58,7 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
             match_element.get_match_string().decode() + "\n  " + match_element2.get_match_string().decode()) in
             str(result.stdout, 'utf-8'), msg="%s vs \n %s" % (self.__expected_string % (
                 datetime.fromtimestamp(t).strftime(self.datetime_format_string), match_element.get_path(), match_element.get_match_object(),
-                self.__class__.__name__, description, 1, match_element.get_match_string().decode() + "\n\n"), 
+                self.__class__.__name__, description, 1, match_element.get_match_string().decode() + "\n\n"),
                 str(result.stdout, 'utf-8')))
 
         self.assertTrue(self.__expected_string % (
@@ -112,7 +112,7 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
         self.assertTrue(self.__expected_string % (
             datetime.fromtimestamp(t).strftime(self.datetime_format_string), match_element.get_path(), match_element.get_match_object(),
             self.__class__.__name__, description, 1, match_element.get_match_string().decode() + "\n\n") in
-            str(result.stdout), msg="%s vs \n %s" % (self.__expected_string % (
+            str(result.stdout, 'utf-8'), msg="%s vs \n %s" % (self.__expected_string % (
                 datetime.fromtimestamp(t).strftime(self.datetime_format_string), match_element.get_path(), match_element.get_match_object(),
                 self.__class__.__name__, description, 1, match_element.get_match_string().decode() + "\n\n"), str(result.stdout, 'utf-8')))
 
