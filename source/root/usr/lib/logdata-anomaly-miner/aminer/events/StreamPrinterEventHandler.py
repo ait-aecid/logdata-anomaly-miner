@@ -19,5 +19,5 @@ class StreamPrinterEventHandler(EventHandlerInterface):
         """Receive information about a detected event."""
         event_data_obj = EventData(event_type, event_message, sorted_log_lines, event_data, log_atom, event_source, self.analysis_context)
         message = event_data_obj.receive_event_string()
-        print('%s' % message, file=self.stream)
+        print(message, file=self.stream)
         self.stream.flush()
