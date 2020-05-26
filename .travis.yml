@@ -5,7 +5,7 @@ dist: bionic
 
 before_install:
   - sudo apt-get update -y
-  - sudo apt-get install -y exim4 procps cpulimit ansible mailutils #python3-pip python3-kafka
+  - sudo apt-get install -y exim4 procps cpulimit ansible mailutils python3-pip #python3-kafka
   - git clone https://github.com/ait-aecid/aminer-ansible.git roles/aminer
   - ln -s $PWD/source/root/usr/lib/logdata-anomaly-miner/aminer $PWD/aecid-testsuite/aminer
   - ln -s $PWD/source/root/etc/aminer/template_config.py $PWD/aecid-testsuite/demo/AMiner/template_config.py
