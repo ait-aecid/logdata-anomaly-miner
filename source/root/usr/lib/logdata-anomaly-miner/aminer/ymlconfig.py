@@ -30,6 +30,7 @@ def loadYaml(config_file):
         raise exception
     
   with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schema.py', 'r') as sma:
+      # skipcq: PYL-W0123
       schema = eval(sma.read())
   sma.close()
 
@@ -88,11 +89,13 @@ def build_analysis_pipeline(analysis_context):
           except:
               parserModelDict[item['id']] = func(item['name'])
       else:
+          # skipcq: PTC-W0034
           func =  getattr(__import__(item['type']),'get_model')
           parserModelDict[item['id']] = func()
 
   argslist = []
   if start['type'].endswith('ModelElement'):
+    # skipcq: PTC-W0034
     func = getattr(__import__("aminer.parsing", fromlist=[start['type']]),start['type'])
   else:
     func =  getattr(__import__(start['type']),'get_model')
