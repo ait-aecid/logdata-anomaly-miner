@@ -1,5 +1,4 @@
 *.pyc
-
 # ignore ansible-roles
 roles/
 playbook.yml
