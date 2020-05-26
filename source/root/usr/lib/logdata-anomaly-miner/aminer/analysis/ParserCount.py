@@ -1,14 +1,9 @@
 """This component counts occurring combinations of values and periodically sends the results as a report."""
 
-import time
 import datetime
-import sys
-
-from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input import AtomHandlerInterface
 from aminer.util import TimeTriggeredComponentInterface
-from aminer.util import PersistencyUtil
 
 
 class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):

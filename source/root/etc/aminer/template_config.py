@@ -35,7 +35,6 @@ def build_analysis_pipeline(analysis_context):
     them."""
 
     # Build the parsing model:
-    from aminer.parsing import FirstMatchModelElement
     from aminer.parsing import SequenceModelElement
 
     import ApacheAccessModel
@@ -76,17 +75,16 @@ def build_analysis_pipeline(analysis_context):
 
     # Check if HTTP-Method for a HTTP-Request has changed
     from aminer.analysis import NewMatchPathValueComboDetector
-    newMatchPathValueComboDetector = NewMatchPathValueComboDetector(analysis_context.aminer_config, [
+    new_match_path_value_combo_detector = NewMatchPathValueComboDetector(analysis_context.aminer_config, [
         "/model/accesslog/request", "/model/accesslog/method"], anomaly_event_handlers, auto_include_flag=learn_mode)
-    analysis_context.register_component(newMatchPathValueComboDetector, component_name=None)
-    atom_filter.add_handler(newMatchPathValueComboDetector)
+    analysis_context.register_component(new_match_path_value_combo_detector, component_name=None)
+    atom_filter.add_handler(new_match_path_value_combo_detector)
 
     # Check if HTTP-Statuscode for a HTTP-Request has changed
-    from aminer.analysis import NewMatchPathValueComboDetector
-    newMatchPathValueComboDetector2 = NewMatchPathValueComboDetector(analysis_context.aminer_config, [
+    new_match_path_value_combo_detector2 = NewMatchPathValueComboDetector(analysis_context.aminer_config, [
         "/model/accesslog/request", "/model/accesslog/status"], anomaly_event_handlers, auto_include_flag=learn_mode)
-    analysis_context.register_component(newMatchPathValueComboDetector2, component_name=None)
-    atom_filter.add_handler(newMatchPathValueComboDetector2)
+    analysis_context.register_component(new_match_path_value_combo_detector2, component_name=None)
+    atom_filter.add_handler(new_match_path_value_combo_detector2)
 
     # Add stdout stream printing for debugging, tuning.
     from aminer.events import StreamPrinterEventHandler
