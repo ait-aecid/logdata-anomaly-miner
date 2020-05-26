@@ -21,9 +21,9 @@ class HexStringModelElementTest(unittest.TestCase):
                 self.assertEqual(match_element, None)
             if ord(char1) == 0x7f:
                 char1 = b'\x00'
-                char2 = bytes(chr(ord(char2) + 1))
+                char2 = bytes(chr(ord(char2) + 1), 'utf-8')
             else:
-                char1 = bytes(chr(ord(char1) + 1))
+                char1 = bytes(chr(ord(char1) + 1), 'utf-8')
 
         allowed_chars = [b'0', b'1', b'2', b'3', b'4', b'5', b'6', b'7', b'8', b'9', b'A', b'B', b'C', b'D', b'E', b'F']
         char1 = b'\x00'
@@ -39,9 +39,9 @@ class HexStringModelElementTest(unittest.TestCase):
                 self.assertEqual(match_element, None)
             if ord(char1) == 0x7f:
                 char1 = b'\x00'
-                char2 = bytes(chr(ord(char2) + 1))
+                char2 = bytes(chr(ord(char2) + 1), 'utf-8')
             else:
-                char1 = bytes(chr(ord(char1) + 1))
+                char1 = bytes(chr(ord(char1) + 1), 'utf-8')
 
 
 if __name__ == "__main__":
