@@ -43,4 +43,4 @@ class EventData:
 
         # uncomment the following line for debugging..
         # print("%s" % message)
-        return message
+        return message.encode("utf-8")

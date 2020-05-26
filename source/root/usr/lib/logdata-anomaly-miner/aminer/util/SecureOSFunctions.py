@@ -52,7 +52,7 @@ def secure_open_file(file_name, flags):
     if no_secure_open_warn_once_flag:
         print('WARNING: SECURITY: No secure open yet due to missing openat in python!', file=sys.stderr)
         no_secure_open_warn_once_flag = False
-    return os.open(file_name, flags | os.O_NOFOLLOW | os.O_NOCTTY, encoding='utf-8')
+    return os.open(file_name, flags | os.O_NOFOLLOW | os.O_NOCTTY)
 
 
 def send_annotated_file_descriptor(send_socket, send_fd, type_info, annotation_data):
