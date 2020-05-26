@@ -15,7 +15,7 @@ install:
   - sudo -u root pip3 install coverage
   - sudo -u root pip3 install kafka
   - sudo ansible-playbook playbook.yml
-  - ln -s $PWD/source/root/etc/aminer/conf-available/generic/ApacheAccessModel.py /usr/lib/logdata-anomaly-miner/ApacheAccessModel.py
+  - ln -s $PWD/source/root/etc/aminer/conf-available/generic/ApacheAccessModel.py /usr/lib/logdata-anomaly-miner/aminer/ApacheAccessModel.py
   - cd aecid-testsuite
   - sudo chmod +x runUnittests.sh
   - sudo chmod +x runAMinerDemo.sh
@@ -34,5 +34,5 @@ script:
 after_script:
   - cd ..
   - rm $PWD/aecid-testsuite/aminer
-  - rm /usr/lib/logdata-anomaly-miner/ApacheAccessModel.py
+  - rm /usr/lib/logdata-anomaly-miner/aminer/ApacheAccessModel.py
   - rm $PWD/aecid-testsuite/demo/AMiner/template_config.py
