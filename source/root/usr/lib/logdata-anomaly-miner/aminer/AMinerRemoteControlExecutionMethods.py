@@ -335,7 +335,7 @@ class AMinerRemoteControlExecutionMethods():
             return
         if id_spec_list is None or not isinstance(id_spec_list, list):
             self.REMOTE_CONTROL_RESPONSE = \
-                'Request requires remoteControlData with ID specification list and optional whitelisting information'
+                'Request requires remote_control_data with ID specification list and optional whitelisting information'
             return
         history_data = history_handler.get_history()
         result_string = ''

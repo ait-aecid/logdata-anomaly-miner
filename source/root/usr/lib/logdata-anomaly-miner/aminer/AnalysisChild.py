@@ -486,19 +486,20 @@ class AnalysisChildRemoteControlHandler:
                 methods = AMinerRemoteControlExecutionMethods()
                 import aminer.analysis
                 exec_locals = {
-                    'analysis_context': analysis_context, 'remoteControlData': json_request_data[1],
-                    'printCurrentConfig': methods.print_current_config, 'printConfigProperty': methods.print_config_property,
-                    'printAttributeOfRegisteredAnalysisComponent': methods.print_attribute_of_registered_analysis_component,
-                    'changeConfigProperty': methods.change_config_property,
-                    'changeAttributeOfRegisteredAnalysisComponent': methods.change_attribute_of_registered_analysis_component,
-                    'renameRegisteredAnalysisComponent': methods.rename_registered_analysis_component,
-                    'addHandlerToAtomFilterAndRegisterAnalysisComponent':
+                    'analysis_context': analysis_context, 'remote_control_data': json_request_data[1],
+                    'print_current_config': methods.print_current_config, 'print_config_property': methods.print_config_property,
+                    'print_attribute_of_registered_analysis_component': methods.print_attribute_of_registered_analysis_component,
+                    'change_config_property': methods.change_config_property,
+                    'change_attribute_of_registered_analysis_component': methods.change_attribute_of_registered_analysis_component,
+                    'rename_registered_analysis_component': methods.rename_registered_analysis_component,
+                    'add_handler_to_atom_filter_and_register_analysis_component':
                         methods.add_handler_to_atom_filter_and_register_analysis_component,
-                    'saveCurrentConfig': methods.save_current_config, 'whitelistEventInComponent': methods.whitelist_event_in_component,
-                    'dumpEventsFromHistory': methods.dump_events_from_history,
-                    'ignoreEventsFromHistory': methods.ignore_events_from_history,
-                    'listEventsFromHistory': methods.list_events_from_history,
-                    'whitelistEventsFromHistory': methods.whitelist_events_from_history,
+                    'save_current_config': methods.save_current_config,
+                    'whitelist_event_in_component': methods.whitelist_event_in_component,
+                    'dump_events_from_history': methods.dump_events_from_history,
+                    'ignore_events_from_history': methods.ignore_events_from_history,
+                    'list_events_from_history': methods.list_events_from_history,
+                    'whitelist_events_from_history': methods.whitelist_events_from_history,
                     'HistogramAnalysis': aminer.analysis.HistogramAnalysis,
                     'MatchValueAverageChangeDetector': aminer.analysis.MatchValueAverageChangeDetector,
                     'MatchValueStreamWriter': aminer.analysis.MatchValueStreamWriter,

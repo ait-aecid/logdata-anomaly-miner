@@ -370,20 +370,20 @@ below), debugging can even occur while AMiner is processing data.
 Remote control code for that purpose could be:
 
   from aminer.parsing import DebugMatchContext
-  matchContext = DebugMatchContext('Your test input here')
+  match_context = DebugMatchContext('Your test input here')
   # Working with registered components is handy...
-  match = analysis_context.registeredComponentsByName['ParsingModel'].getMatchElement('', matchContext)
-  remoteControlResponse = 'Result: %s, debug info %s' % (str(match), matchContext.getDebugInfo())
+  match = analysis_context.registered_components_by_name['ParsingModel'].get_match_element('', match_context)
+  remote_control_response = 'Result: %s, debug info %s' % (str(match), match_context.get_debug_info())
 
 Without remote control change in 
 
 /usr/lib/logdata-anomaly-miner/aminer/input/ByteStreamLineAtomizer.py 
 
-the matchContext and add an appropriate output, e.g.,
+the match_context and add an appropriate output, e.g.,
 
-  matchContext = DebugMatchContext(lineData)
-  matchElement = self.parsing_model.getMatchElement('', matchContext)
-  print('Result: %s, debug info %s' % (str(matchElement), matchContext.getDebugInfo()))
+  match_context = DebugMatchContext(line_data)
+  match_element = self.parsing_model.get_match_element('', match_context)
+  print('Result: %s, debug info %s' % (str(match_element), match_context.get_debug_info()))
 
 Also the import of DebugMatchContext might be required.
 
@@ -488,7 +488,7 @@ and accessible. To have more robust configuration procedures,
 the detectors should be registered as named components. To verify,
 that remote control is working, just execute:
 
-AMinerRemoteControl --ControlSocket /var/run/aminer-remote.socket --Exec 'remoteControlResponse = analysis_context.getRegisteredComponentNames()'
+AMinerRemoteControl --ControlSocket /var/run/aminer-remote.socket --Exec 'remote_control_response = analysis_context.get_registered_component_names()'
 Remote execution response: [u'DefaultNewMatchPathDetector']
 
 The command executed is executed inside the running aminer child
@@ -499,7 +499,7 @@ for invocation is recommended.
 
 * Modify the detector state:
 
-AMinerRemoteControl --ControlSocket /var/run/aminer-remote.socket --Data '["/model/services/rsyslog/msg/statechange/type/HUPed"]' --Exec 'for pathName in remoteControlData: analysis_context.getComponentByName("DefaultNewMatchPathDetector").knownPathSet.add(pathName)' --Exec 'analysis_context.getComponentByName("DefaultNewMatchPathDetector").doPersist()'
+AMinerRemoteControl --ControlSocket /var/run/aminer-remote.socket --Data '["/model/services/rsyslog/msg/statechange/type/HUPed"]' --Exec 'for path_name in remote_control_data: analysis_context.get_component_by_name("DefaultNewMatchPathDetector").known_path_set.add(path_name)' --Exec 'analysis_context.get_component_by_name("DefaultNewMatchPathDetector").do_persist()'
 
 
 Detect missing logs:
@@ -545,15 +545,15 @@ running miner, e.g.
 
 * Change check interval for single value:
 
-AMinerRemoteControl --ControlSocket /var/run/aminer-remote.socket --Exec 'analysis_context.getComponentByName("DefaultMissingMatchPathValueDetector").setCheckValue("buildhost.localdomain", 12*3600)'
+AMinerRemoteControl --ControlSocket /var/run/aminer-remote.socket --Exec 'analysis_context.get_component_by_name("DefaultMissingMatchPathValueDetector").set_check_value("buildhost.localdomain", 12*3600)'
 
 * Remove value from monitoring:
 
-AMinerRemoteControl --ControlSocket /var/run/aminer-remote.socket --Exec 'analysis_context.getComponentByName("DefaultMissingMatchPathValueDetector").removeCheckValue("buildhost.localdomain")'
+AMinerRemoteControl --ControlSocket /var/run/aminer-remote.socket --Exec 'analysis_context.get_component_by_name("DefaultMissingMatchPathValueDetector").remove_check_value("buildhost.localdomain")'
 
 * Force persistency write when your changes were that important:
 
-AMinerRemoteControl --ControlSocket /var/run/aminer-remote.socket --Exec 'analysis_context.getComponentByName("DefaultMissingMatchPathValueDetector").doPersist()'
+AMinerRemoteControl --ControlSocket /var/run/aminer-remote.socket --Exec 'analysis_context.get_component_by_name("DefaultMissingMatchPathValueDetector").do_persist()'
 
 
 Apply whitelisting to parsed entries:
