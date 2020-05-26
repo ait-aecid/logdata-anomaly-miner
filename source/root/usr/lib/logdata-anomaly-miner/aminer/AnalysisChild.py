@@ -207,7 +207,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         max_cpu_percent_usage = self.analysis_context.aminer_config.config_properties.get(AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE)
         if max_cpu_percent_usage is not None:
             try:
-                max_cpu_percent_usage = int(shlex.quote(max_cpu_percent_usage))
+                max_cpu_percent_usage = int(max_cpu_percent_usage)
                 # limit
                 pid = os.getpid()
                 package_installed_cmd = ['dpkg', '-l', 'cpulimit']
