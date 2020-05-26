@@ -28,7 +28,7 @@ def decode_string_as_byte_string(string):
             decoded += bytes(string[count], 'ascii')
             count += 1
         elif string[count] == '%':
-            decoded += bytearray((int(string[count + 1:count + 3], 16),))
+            decoded += bytearray((int(string[count + 1:count + 3], 16)))
             count += 3
         else:
             raise Exception('Invalid encoded character')
