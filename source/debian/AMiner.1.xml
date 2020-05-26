@@ -160,7 +160,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         <term><filename>/etc/aminer/config.py</filename></term>
         <listitem>
           <para>The main configuration file for the AMiner daemon.
-          See /etc/aminer/config.py.template for configuration
+          See /etc/aminer/template_config.py for configuration
           file template, /usr/share/doc/logdata-anomaly-miner/demo for
           examples.</para>
         </listitem>

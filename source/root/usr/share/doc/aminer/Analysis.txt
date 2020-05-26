@@ -112,21 +112,21 @@ a report every week:
 
   from aminer.analysis import HistogramAnalysis
   # Use a time-modulo binning function
-  moduloTimeBinDefinition=HistogramAnalysis.ModuloTimeBinDefinition(
+  modulo_time_bin_definition=HistogramAnalysis.ModuloTimeBinDefinition(
       3600*24, # Modulo values in seconds (1 day)
       3600,    # Division factor to get down to reporting unit (1h)
       0,       # Start of lowest bin
       1,       # Size of bin in reporting units
       24,      # Number of bins
       False)   # Disable outlier bins, not possible with time modulo
-  histogramAnalysis=HistogramAnalysis.HistogramAnalysis(
-      aminerConfig,
-      [('/model/line/time', moduloTimeBinDefinition)],
+  histogram_analysis=HistogramAnalysis.HistogramAnalysis(
+      aminer_config,
+      [('/model/line/time', modulo_time_bin_definition)],
       3600*24*7,  # Reporting interval (weekly)
-      reportEventHandlers,        # Send report to those handlers
-      resetAfterReportFlag=True)  # Zero counters after sending of report
+      report_event_handlers,        # Send report to those handlers
+      reset_after_report_flag=True)  # Zero counters after sending of report
   # Send the appropriate input feed to the component
-  atomFilter.addHandler(histogramAnalysis)
+  atom_filter.add_handler(histogram_analysis)
 
 
 HistogramAnalysis.PathDependentHistogramAnalysis:
@@ -150,22 +150,22 @@ HistogramAnalysis.HistogramAnalysis, see documentation there.
   # Perform path-dependent histogram analysis:
   from aminer.analysis import HistogramAnalysis
   # Use a time-modulo binning function
-  moduloTimeBinDefinition=HistogramAnalysis.ModuloTimeBinDefinition(
+  modulo_time_bin_definition=HistogramAnalysis.ModuloTimeBinDefinition(
       3600*24, # Modulo values in seconds (1 day)
       3600,    # Division factor to get down to reporting unit (1h)
       0,       # Start of lowest bin
       1,       # Size of bin in reporting units
       24,      # Number of bins
       False)   # Disable outlier bins, not possible with time modulo
-  pathDependentHistogramAnalysis=HistogramAnalysis.PathDependentHistogramAnalysis(
-      aminerConfig,
+  path_dependent_histogram_analysis=HistogramAnalysis.PathDependentHistogramAnalysis(
+      aminer_config,
       '/model/line/time',  # The value properties to check
-      moduloTimeBinDefinition,
+      modulo_time_bin_definition,
       3600*24*7,                  # Reporting interval (weekly)
-      reportEventHandlers,        # Send report to those handlers
-      resetAfterReportFlag=True)  # Zero counters after sending of report
+      report_event_handlers,        # Send report to those handlers
+      reset_after_report_flag=True)  # Zero counters after sending of report
   # Send the appropriate input feed to the component
-  atomFilter.addHandler(pathDependentHistogramAnalysis)
+  atom_filter.add_handler(path_dependent_histogram_analysis)
 
 
 WhitelistViolationDetector:
@@ -219,22 +219,22 @@ or source for full documentation:
 # Run a whitelisting over the parsed lines.
   from aminer.analysis import Rules
   from aminer.analysis import WhitelistViolationDetector
-  violationAction=Rules.EventGenerationMatchAction('Analysis.GenericViolation',
-      'Violation detected', anomalyEventHandlers)
-  whitelistRules=[]
+  violation_action=Rules.EventGenerationMatchAction('Analysis.GenericViolation',
+      'Violation detected', anomaly_event_handlers)
+  whitelist_rules=[]
 # Filter out things so bad, that we do not want to accept the
 # risk, that a too broad whitelisting rule will accept the data
 # later on.
-  whitelistRules.append(Rules.ValueMatchRule('/model/services/cron/msgtype/exec/user', 'hacker', violationAction))
+  whitelist_rules.append(Rules.ValueMatchRule('/model/services/cron/msgtype/exec/user', 'hacker', violation_action))
 # Ignore Exim queue run start/stop messages
-  whitelistRules.append(Rules.PathExistsMatchRule('/model/services/exim/msg/queue/pid'))
+  whitelist_rules.append(Rules.PathExistsMatchRule('/model/services/exim/msg/queue/pid'))
 # Add a debugging rule in the middle to see everything not whitelisted
 # up to this point.
-  whitelistRules.append(Rules.DebugMatchRule(False))
+  whitelist_rules.append(Rules.DebugMatchRule(False))
 # Ignore hourly cronjobs, but only when started at expected time
 # and duration is not too long.
-  whitelistRules.append(Rules.AndMatchRule([
+  whitelist_rules.append(Rules.AndMatchRule([
       Rules.ValueMatchRule('/model/services/cron/msgtype/exec/command', '(   cd / && run-parts --report /etc/cron.hourly)'),
       Rules.ModuloTimeMatchRule('/model/syslog/time', 3600, 17*60, 17*60+5)]))
 
-  atomFilter.addHandler(WhitelistViolationDetector(whitelistRules, anomalyEventHandlers))
+  atom_filter.add_handler(WhitelistViolationDetector(whitelist_rules, anomaly_event_handlers))

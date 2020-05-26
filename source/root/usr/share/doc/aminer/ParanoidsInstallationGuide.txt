@@ -40,7 +40,7 @@ touch config.py
 
 Define a dictionary for the configuration properties by adding 
 
-configProperties = {}
+config_properties = {}
 
 to config.py.
 
@@ -51,19 +51,19 @@ process! Supported types are:
  * file://[path]: Read data from file, reopen it after rollover
  * unix://[path]: Open the path as UNIX local socket for reading
 
-configProperties['LogResourceList'] = []
+config_properties['LogResourceList'] = []
 
 Define the uid/gid of the process that runs the calculation after opening
 the log files:
 
-configProperties['AMinerUser'] = 'aminer'
-configProperties['AMinerGroup'] = 'aminer'
+config_properties['AMinerUser'] = 'aminer'
+config_properties['AMinerGroup'] = 'aminer'
 
 Optional: Define the path, where aminer will listen for incoming remote
           control connections. When missing, no remote control socket
 		  will be created.
 		  
-		  configProperties['RemoteControlSocket'] = '/var/run/aminer-remote.socket'
+		  config_properties['RemoteControlSocket'] = '/var/run/aminer-remote.socket'
 		  
 		  Enable the remote control socket: it will allow to adjust
 		  aminer child settings on the fly without reloading of the configuration
@@ -74,7 +74,7 @@ Optional: Define the path, where aminer will listen for incoming remote
 
 Define the child configuration file:
 
-configProperties['AnalysisConfigFile'] = 'analysis.py'
+config_properties['AnalysisConfigFile'] = 'analysis.py'
 
 Read the analyis from this file. That part of configuration is separated
 from the main configuration so that it can be loaded only within the
@@ -88,7 +88,7 @@ whitelisted as an error. Basically you would get your whole syslog echoed
 back, just with an amplification factor applied. In that case change
 the property "LogResourceList" to:
 
-configProperties['LogResourceList'] = ['file:///etc/aminer/test.log']
+config_properties['LogResourceList'] = ['file:///etc/aminer/test.log']
 
 and do:
 
@@ -99,7 +99,7 @@ chmod 0600 /etc/aminer/test.log
 
 touch analysis.py
 
-Add again "configProperties = {}".
+Add again "config_properties = {}".
 
 The AMiner reads and stores information to be used between multiple invocations
 in a persistency directory. The directory must only be accessible to
@@ -107,41 +107,41 @@ the 'AMinerUser' but not group/world readable. On violation, AMiner will
 refuse to start. When undefined, '/var/lib/aminer' is used. Therefore
 optionally add
 
-configProperties['Core.PersistenceDir'] = <path>
+config_properties['Core.PersistenceDir'] = <path>
 
 Optional: You may want to define the "MailAlerting.TargetAddress" parameter
           to receive e-mail alerts and data reports. Therefore add
 		  
-		  configProperties['MailAlerting.TargetAddress'] = 'root@localhost'
+		  config_properties['MailAlerting.TargetAddress'] = 'root@localhost'
 		  
 		  When undefined, no e-mail notification hooks are added. Sender
 		  address of e-mail alerts. When undefined, "sendmail" implementation
 		  on host will decide, which sender address should be used.
 		  
-		  configProperties['MailAlerting.FromAddress'] = 'root@localhost'
+		  config_properties['MailAlerting.FromAddress'] = 'root@localhost'
 		  
 		  Define, which text should be prepended to the standard aminer
 		  subject. Defaults to "AMiner Alerts:"
 		  
-		  configProperties['MailAlerting.SubjectPrefix'] = 'AMiner Alerts:'
+		  config_properties['MailAlerting.SubjectPrefix'] = 'AMiner Alerts:'
 		  
 		  Define a grace time after startup before aminer will react to
 		  an event and send the first alert e-mail. Defaults to 0 (any
 		  event can immediately trigger alerting).
 		  
-		  configProperties['MailAlerting.AlertGraceTime'] = 0
+		  config_properties['MailAlerting.AlertGraceTime'] = 0
 		  
 		  Define how many seconds to wait after a first event triggered
 		  the alerting procedure before really sending out the e-mail.
 		  In that timespan, events are collected and will be sent all 
 		  using a single e-mail. Defaults to 10 seconds.
 		  
-		  configProperties['MailAlerting.EventCollectTime'] = 10
+		  config_properties['MailAlerting.EventCollectTime'] = 10
 		  
 		  Define the minimum time between two alert e-mails in seconds
 		  to avoid spamming. All events during this timespan are collected
 		  and sent out with the next report. Defaults to 600 seconds.
-		  configProperties['MailAlerting.MinAlertGap'] = 600
+		  config_properties['MailAlerting.MinAlertGap'] = 600
 		  
 		  Define the maximum time between two alert e-mails in seconds.
 		  When undefined this defaults to "MailAlerting.MinAlertGap".
@@ -150,14 +150,14 @@ Optional: You may want to define the "MailAlerting.TargetAddress" parameter
 		  gap by 50% when more alert-worthy events were recorded while
 		  the previous gap time was not yet elapsed.
 		  
-		  configProperties['MailAlerting.MaxAlertGap'] = 600
+		  config_properties['MailAlerting.MaxAlertGap'] = 600
 		  
 		  Define how many events should be included in one alert mail
 		  at most. This defaults to 1000
 		  
-		  configProperties['MailAlerting.MaxEventsPerMessage'] = 1000
+		  config_properties['MailAlerting.MaxEventsPerMessage'] = 1000
 
-Now define the analysis pipeline: Define the function buildAnalysisPipeline(analysisContext)
+Now define the analysis pipeline: Define the function build_analysis_pipeline(analysis_context)
 to create pipeline for parsing the log data and applien other features.
 It has also to define an AtomizerFactory to instruct AMiner how to process
 incoming data streams to create log atoms from them.
@@ -168,26 +168,24 @@ and define an empty list of services and an empty parsering:
 from aminer.parsing import FirstMatchModelElement
 from aminer.parsing import SequenceModelElement
 
-serviceChildren = [] 
-
-parsingModel = SequenceModelElement('model', [])
+parsing_model = SequenceModelElement('model', [])
 
 Create all global handler lists and append the real handlers later on.
 Use this filter to distribute all atoms to the analysis handlers.
 
 from aminer.analysis import AtomFilters
 
-atomFilter = AtomFilters.SubhandlerFilter(None)
-anomalyEventHandlers = []
+atom_filter = AtomFilters.SubhandlerFilter(None)
+anomaly_event_handlers = []
 
 Now define the AtomizerFactory using the model. A simple line based one
 is usually sufficient.
 
 from aminer.input import SimpleByteStreamLineAtomizerFactory
 
-analysisContext.atomizerFactory = SimpleByteStreamLineAtomizerFactory(
-      parsingModel, [atomFilter], anomalyEventHandlers,
-      defaultTimestampPaths=['/model/syslog/time'])
+analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
+      parsing_model, [atom_filter], anomaly_event_handlers,
+      default_timestamp_paths=['/model/syslog/time'])
 
 Report all unparsed atoms to the event handlers and add a new match patch
 detector (further information see "Adding detection for new parser pathes" 
@@ -195,35 +193,35 @@ in the remaining file):
 
 from aminer.input import SimpleUnparsedAtomHandler
 
-atomFilter.addHandler(
-      SimpleUnparsedAtomHandler(anomalyEventHandlers),
-      stopWhenHandledFlag=True)
+atom_filter.add_handler(
+      SimpleUnparsedAtomHandler(anomaly_event_handlers),
+      stop_when_handled_flag=True)
 
 from aminer.analysis import NewMatchPathDetector
 
-newMatchPathDetector = NewMatchPathDetector(
-      analysisContext.aminerConfig, anomalyEventHandlers, autoIncludeFlag=True)
-analysisContext.registerComponent(newMatchPathDetector, componentName=None)
-atomFilter.addHandler(newMatchPathDetector)
+new_match_path_detector = NewMatchPathDetector(
+      analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=True)
+analysis_context.register_component(new_match_path_detector, component_name=None)
+atom_filter.add_handler(new_match_path_detector)
 
 Optional: Include the e-mail notification handler only if the configuration
           parameter was set.
 		  
 		  from aminer.events import DefaultMailNotificationEventHandler
 		  
-		  if DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS in analysisContext.aminerConfig.configProperties:
-            mailNotificationHandler = DefaultMailNotificationEventHandler(
-              analysisContext.aminerConfig)
-		    analysisContext.registerComponent(
-              mailNotificationHandler, componentName=None)
-            anomalyEventHandlers.append(mailNotificationHandler)
+		  if DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS in analysis_context.aminer_config.config_properties:
+            mail_notification_handler = DefaultMailNotificationEventHandler(
+              analysis_context.aminer_config)
+		    analysis_context.register_component(
+              mail_notification_handler, component_name=None)
+            anomaly_event_handlers.append(mail_notification_handler)
 
 		  
 During testing the "StreamPrinterEventHandler" is useful to get the aminer
 events printed to stdout. Therefore add:
 
 from aminer.events import StreamPrinterEventHandler
-anomalyEventHandlers.append(StreamPrinterEventHandler(analysisContext.aminerConfig))
+anomaly_event_handlers.append(StreamPrinterEventHandler(analysis_context.aminer_config))
 
 * Allow python code imports:
 
@@ -308,15 +306,15 @@ ln -s /etc/aminer/conf-available/generic/SyslogPreambleModel.py /etc/aminer/conf
 and edit your configuration:
 
 import SyslogPreambleModel
-syslogPreambleModel = SyslogPreambleModel.getModel()
+syslog_preamble_model = SyslogPreambleModel.get_model()
 
 from aminer.parsing import AnyByteDataModelElement
 
-parsingModel = SequenceModelElement('model', [
-      syslogPreambleModel,
+parsing_model = SequenceModelElement('model', [
+      syslog_preamble_model,
       AnyByteDataModelElement('logmessage')]) # to parse the remaining log line
 
-Furthermore change the defaultTimestampPaths of the AtomizerFactory to 
+Furthermore change the default_timestamp_paths of the AtomizerFactory to
 ['/model/syslog/time'].
 
 When starting aminer again, no warning about unparsed data should
@@ -372,20 +370,20 @@ below), debugging can even occur while AMiner is processing data.
 Remote control code for that purpose could be:
 
   from aminer.parsing import DebugMatchContext
-  matchContext = DebugMatchContext('Your test input here')
+  match_context = DebugMatchContext('Your test input here')
   # Working with registered components is handy...
-  match = analysisContext.registeredComponentsByName['ParsingModel'].getMatchElement('', matchContext)
-  remoteControlResponse = 'Result: %s, debug info %s' % (str(match), matchContext.getDebugInfo())
+  match = analysis_context.registered_components_by_name['ParsingModel'].get_match_element('', match_context)
+  remote_control_response = 'Result: %s, debug info %s' % (str(match), match_context.get_debug_info())
 
 Without remote control change in 
 
 /usr/lib/logdata-anomaly-miner/aminer/input/ByteStreamLineAtomizer.py 
 
-the matchContext and add an appropriate output, e.g.,
+the match_context and add an appropriate output, e.g.,
 
-  matchContext = DebugMatchContext(lineData)
-  matchElement = self.parsingModel.getMatchElement('', matchContext)
-  print('Result: %s, debug info %s' % (str(matchElement), matchContext.getDebugInfo()))
+  match_context = DebugMatchContext(line_data)
+  match_element = self.parsing_model.get_match_element('', match_context)
+  print('Result: %s, debug info %s' % (str(match_element), match_context.get_debug_info()))
 
 Also the import of DebugMatchContext might be required.
 
@@ -412,21 +410,21 @@ to a new message type should cause some distrust.
 You may use the configuration defined before, but when really paranoid,
 following changes might be useful:
 
-* Disable autoinclusion: autoIncludeFlag = False
-* Register as named component: componentName = 'DefaultNewMatchPathDetector'
+* Disable autoinclusion: auto_include_flag = False
+* Register as named component: component_name = 'DefaultNewMatchPathDetector'
 
   from aminer.analysis import NewMatchPathDetector
-  newMatchPathDetector = NewMatchPathDetector(
-      analysisContext.aminerConfig, anomalyEventHandlers, autoIncludeFlag=False)
-  analysisContext.registerComponent(
-      newMatchPathDetector, componentName='DefaultNewMatchPathDetector')
-  atomFilter.addHandler(newMatchPathDetector)
+  new_match_path_detector = NewMatchPathDetector(
+      analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=False)
+  analysis_context.register_component(
+      new_match_path_detector, component_name='DefaultNewMatchPathDetector')
+  atom_filter.add_handler(new_match_path_detector)
 
 With automatic inclusion enabled, the detector would complain
 about each new path seen exactly once and then add it to the list
 of accepted pathes. Setting this flag to True during configuration
 phase is very good to shorten the configuration time, but it will
-also work without that. And therefore the "componentName" comes
+also work without that. And therefore the "component_name" comes
 in handy.
 
 As you may have run aminer with autoinclusion enabled already
@@ -446,18 +444,18 @@ host groups, a filter has to be installed to separate the data:
   * Create different NewMatchPathDetector instances with unique
     persistance IDs:
 
-  newMatchPathDetectorA = NewMatchPathDetector(
-      analysisContext.aminerConfig, anomalyEventHandlers,
-      peristenceId='WwwHostsGroup', autoIncludeFlag=False)
+  new_match_path_detector_a = NewMatchPathDetector(
+      analysis_context.aminer_config, anomaly_event_handlers,
+      peristence_id='WwwHostsGroup', auto_include_flag=False)
 
   * Create the filter:
 
   from aminer.analysis import AtomFilters
-  hostnameValueFilter = AtomFilters.MatchValueFilter(
+  hostname_value_filter = AtomFilters.MatchValueFilter(
       '/model/syslog/host',
-      {'host-a': newMatchPathDetectorA, ...},
-      defaultNewMatchPathDetector)
-  atomFilter.addHandler(hostnameValueFilter)
+      {'host-a': new_match_path_detector_a, ...},
+      default_new_match_path_detector)
+  atom_filter.add_handler(hostname_value_filter)
 
 In production, you may want to create all those groups in a loop,
 reading from a list of host/group mappings.
@@ -466,7 +464,7 @@ reading from a list of host/group mappings.
 Using the remote control interface for runtime changes:
 =======================================================
 
-When really running with autoIncludeFlag=False, each unknown path
+When really running with auto_include_flag=False, each unknown path
 would be reported over and over again. On some installations you
 may want to roll out the known path persistency files containing
 simple JSON data and load them when starting aminer. Therefore
@@ -490,7 +488,7 @@ and accessible. To have more robust configuration procedures,
 the detectors should be registered as named components. To verify,
 that remote control is working, just execute:
 
-AMinerRemoteControl --ControlSocket /var/run/aminer-remote.socket --Exec 'remoteControlResponse = analysisContext.getRegisteredComponentNames()'
+AMinerRemoteControl --ControlSocket /var/run/aminer-remote.socket --Exec 'remote_control_response = analysis_context.get_registered_component_names()'
 Remote execution response: [u'DefaultNewMatchPathDetector']
 
 The command executed is executed inside the running aminer child
@@ -501,7 +499,7 @@ for invocation is recommended.
 
 * Modify the detector state:
 
-AMinerRemoteControl --ControlSocket /var/run/aminer-remote.socket --Data '["/model/services/rsyslog/msg/statechange/type/HUPed"]' --Exec 'for pathName in remoteControlData: analysisContext.getComponentByName("DefaultNewMatchPathDetector").knownPathSet.add(pathName)' --Exec 'analysisContext.getComponentByName("DefaultNewMatchPathDetector").doPersist()'
+AMinerRemoteControl --ControlSocket /var/run/aminer-remote.socket --Data '["/model/services/rsyslog/msg/statechange/type/HUPed"]' --Exec 'for path_name in remote_control_data: analysis_context.get_component_by_name("DefaultNewMatchPathDetector").known_path_set.add(path_name)' --Exec 'analysis_context.get_component_by_name("DefaultNewMatchPathDetector").do_persist()'
 
 
 Detect missing logs:
@@ -518,13 +516,13 @@ Here is an example how to detect that hosts stop sending logs
 and to generate alerts:
 
   from aminer.analysis import MissingMatchPathValueDetector
-  missingMatchPathValueDetector = MissingMatchPathValueDetector(
-      analysisContext.aminerConfig, '/model/syslog/host',
-      anomalyEventHandlers, autoIncludeFlag=True, defaultInterval=24*3600)
-  analysisContext.registerComponent(
-      missingMatchPathValueDetector,
-      componentName='DefaultMissingMatchPathValueDetector')
-  atomFilter.addHandler(missingMatchPathValueDetector)
+  missing_match_path_value_detector = MissingMatchPathValueDetector(
+      analysis_context.aminer_config, '/model/syslog/host',
+      anomaly_event_handlers, auto_include_flag=True, default_interval=24*3600)
+  analysis_context.register_component(
+      missing_match_path_value_detector,
+      component_name='DefaultMissingMatchPathValueDetector')
+  atom_filter.add_handler(missing_match_path_value_detector)
 
 The default interval should fit your operational procedures:
 
@@ -541,21 +539,21 @@ The default interval should fit your operational procedures:
   suitable. Just let aminer wait some before alerting to see if
   the problem vanishes without interaction.
 
-By setting the "componentName" in the code example above, you
+By setting the "component_name" in the code example above, you
 again make it easier to perform remote control actions on the
 running miner, e.g.
 
 * Change check interval for single value:
 
-AMinerRemoteControl --ControlSocket /var/run/aminer-remote.socket --Exec 'analysisContext.getComponentByName("DefaultMissingMatchPathValueDetector").setCheckValue("buildhost.localdomain", 12*3600)'
+AMinerRemoteControl --ControlSocket /var/run/aminer-remote.socket --Exec 'analysis_context.get_component_by_name("DefaultMissingMatchPathValueDetector").set_check_value("buildhost.localdomain", 12*3600)'
 
 * Remove value from monitoring:
 
-AMinerRemoteControl --ControlSocket /var/run/aminer-remote.socket --Exec 'analysisContext.getComponentByName("DefaultMissingMatchPathValueDetector").removeCheckValue("buildhost.localdomain")'
+AMinerRemoteControl --ControlSocket /var/run/aminer-remote.socket --Exec 'analysis_context.get_component_by_name("DefaultMissingMatchPathValueDetector").remove_check_value("buildhost.localdomain")'
 
 * Force persistency write when your changes were that important:
 
-AMinerRemoteControl --ControlSocket /var/run/aminer-remote.socket --Exec 'analysisContext.getComponentByName("DefaultMissingMatchPathValueDetector").doPersist()'
+AMinerRemoteControl --ControlSocket /var/run/aminer-remote.socket --Exec 'analysis_context.get_component_by_name("DefaultMissingMatchPathValueDetector").do_persist()'
 
 
 Apply whitelisting to parsed entries:

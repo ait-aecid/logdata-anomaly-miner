@@ -32,11 +32,11 @@ a report every week:
       24,      # Number of bins
       False)   # Disable outlier bins, not possible with time modulo
   histogramAnalysis=HistogramAnalysis.HistogramAnalysis(
-      aminerConfig,
+      aminer_config,
       [('/model/line/time', moduloTimeBinDefinition)],
       3600*24*7,  # Reporting interval (weekly)
-      reportEventHandlers,        # Send report to those handlers
-      resetAfterReportFlag=True)  # Zero counters after sending of report
+      report_event_handlers,        # Send report to those handlers
+      reset_after_report_flag=True)  # Zero counters after sending of report
   # Send the appropriate input feed to the component
   atomFilter.addHandler(histogramAnalysis)
 """
@@ -308,7 +308,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        # PersistencyUtil.storeJson(self.persistenceFileName, list(self.knownPathSet))
+        # PersistencyUtil.storeJson(self.persistence_file_name, list(self.knownPathSet))
         self.next_persist_time = None
 
     def send_report(self, log_atom, timestamp):
@@ -435,7 +435,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
                 match = match_dict.get(mapped_path, None)
                 match_value = match.match_object
                 if isinstance(match.match_object, bytes):
-                    match.match_object = match.match_object.decode("utf-8")
+                    match.match_object = match.match_object.decode()
                 histogram_mapping[1].propertyPath = mapped_path
                 histogram_mapping[1].add_value(match_value)
                 histogram_mapping[2] = log_atom.parser_match
@@ -494,7 +494,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        # PersistencyUtil.storeJson(self.persistenceFileName, list(self.knownPathSet))
+        # PersistencyUtil.storeJson(self.persistence_file_name, list(self.knownPathSet))
         self.next_persist_time = None
 
     def send_report(self, log_atom, timestamp):
@@ -543,7 +543,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
             d['PropertyPath'] = data_item.propertyPath
             report_str += os.linesep + 'Path values "%s":' % '", "'.join(histogram_mapping[0])
             if isinstance(histogram_mapping[2].match_element.match_string, bytes):
-                histogram_mapping[2].match_element.match_string = histogram_mapping[2].match_element.match_string.decode("utf-8")
+                histogram_mapping[2].match_element.match_string = histogram_mapping[2].match_element.match_string.decode()
             report_str += os.linesep + 'Example: %s' % histogram_mapping[2].match_element.match_string
             if len(res) < histogram_mapping[1].total_elements:
                 res = [''] * histogram_mapping[1].total_elements

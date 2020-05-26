@@ -34,7 +34,7 @@ class HexStringModelElement(ModelElementInterface):
 
         match_object = data[:match_len]
         try:
-            match_string = bytes.fromhex(match_object.decode('utf-8'))
+            match_string = bytes.fromhex(match_object.decode())
         except ValueError:
             return None
 
