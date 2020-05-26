@@ -15,7 +15,7 @@ install:
   - sudo -u root pip3 install coverage
   - sudo -u root pip3 install kafka
   - sudo ansible-playbook playbook.yml
-  - ln -s $PWD/source/root/etc/aminer/conf-available/generic/ApacheAccessModel.py /usr/lib/logdata-anomaly-miner/aminer/ApacheAccessModel.py
+  - ln -s $PWD/source/root/etc/aminer/conf-available/generic/ApacheAccessModel.py $PWD/aecid-testsuite/ApacheAccessModel.py
   - cd aecid-testsuite
   - sudo chmod +x runUnittests.sh
   - sudo chmod +x runAMinerDemo.sh
@@ -23,10 +23,11 @@ install:
   - sudo chmod +x runCoverageTests.sh
 
 script:
+  - ./runAMinerDemo.sh demo/AMiner/template_config.py
   - ./runUnittests.sh
   - ./runAMinerDemo.sh demo/AMiner/demo-config.py
   - ./runAMinerDemo.sh demo/AMiner/jsonConverterHandler-demo-config.py
-  - ./runAMinerDemo.sh demo/AMiner/template_config.py
+#  - ./runAMinerDemo.sh demo/AMiner/template_config.py
   - ./runAMinerIntegrationTest.sh aminerIntegrationTest.sh config.py
   - ./runAMinerIntegrationTest.sh aminerIntegrationTest2.sh config21.py config22.py
   - ./runCoverageTests.sh
