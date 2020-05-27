@@ -7,7 +7,7 @@ yamldata = None
 # to be readable by the aminer process! Supported types are:
 # * file://[path]: Read data from file, reopen it after rollover
 # * unix://[path]: Open the path as UNIX local socket for reading
-config_properties['LogResourceList'] = ['file:///var/log/apache2/access.log']
+config_properties['LogResourceList'] = []
 
 # Define the uid/gid of the process that runs the calculation
 # after opening the log files:
