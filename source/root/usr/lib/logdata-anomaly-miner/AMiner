@@ -123,7 +123,11 @@ def main():
 # Minimal import to avoid loading too much within the privileged
 # process.
   from aminer import AMinerConfig
-  aminerConfig = AMinerConfig.load_config(configFileName)
+  try:
+    aminerConfig = AMinerConfig.load_config(configFileName)
+  except ValueError as e:
+    print("Config-Error: %s" % e)
+    sys.exit(1)
 
   if runAnalysisChildFlag:
 # Call analysis process, this function will never return.
