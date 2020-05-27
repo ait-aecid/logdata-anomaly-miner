@@ -17,6 +17,7 @@ install:
   - sudo -H -u root pip3 install kafka
   - pip3 install kafka
   - sudo ansible-playbook playbook.yml
+  - find /usr/local/ -name kafka -exec ln -s {} /etc/aminer/conf-enabled/kafka
   - cd aecid-testsuite
   - sudo chmod +x runUnittests.sh
   - sudo chmod +x runAMinerDemo.sh
