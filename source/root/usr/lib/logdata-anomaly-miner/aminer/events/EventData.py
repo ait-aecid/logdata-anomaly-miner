@@ -33,7 +33,7 @@ class EventData:
         for line in self.sorted_log_lines:
             if isinstance(line, bytes):
                 if line != b'':
-                    message += '  ' + line.decode("utf-8") + '\n'
+                    message += '  ' + line.decode() + '\n'
             else:
                 original_log_line_prefix = self.analysis_context.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
                 if original_log_line_prefix is not None and line.startswith(original_log_line_prefix):

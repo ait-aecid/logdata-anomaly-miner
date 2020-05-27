@@ -58,7 +58,7 @@ def get_logind_model(user_name_model=None):
             FixedDataModelElement('s1', b'.')
         ])
     ]
-    # FIXME: Will fail on username models including the dot at the end.
+    # Will fail on username models including the dot at the end.
 
     model = SequenceModelElement('systemd-logind', [
         FixedDataModelElement('sname', b'systemd-logind['),
@@ -78,7 +78,7 @@ def get_tmp_files_model():
             FixedDataModelElement('s2', b'", ignoring.')
         ])
     ]
-    # FIXME: Will fail on username models including the dot at the end.
+    # Will fail on username models including the dot at the end.
 
     model = SequenceModelElement('systemd-tmpfiles', [
         FixedDataModelElement('sname', b'systemd-tmpfiles['),

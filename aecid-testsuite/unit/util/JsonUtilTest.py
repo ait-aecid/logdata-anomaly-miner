@@ -18,13 +18,13 @@ class JsonUtilTest(TestBase):
         s = b'this is a bytestring to be serialized'
         pre = b'bytes:'
         enc = encode_object(s)
-        self.assertEqual(enc, pre.decode('utf-8') + s.decode('utf-8'))
+        self.assertEqual(enc, pre.decode() + s.decode())
         self.assertEqual(decode_object(s), s)
         self.assertEqual(decode_object(enc), s)
 
         s = bytes.fromhex('001B')
         enc = encode_object(s)
-        self.assertEqual(enc, pre.decode('utf-8') + '%00%1b')
+        self.assertEqual(enc, pre.decode() + '%00%1b')
         self.assertEqual(decode_object(enc), s)
 
     def test3encode_decode_iterables2_json(self):

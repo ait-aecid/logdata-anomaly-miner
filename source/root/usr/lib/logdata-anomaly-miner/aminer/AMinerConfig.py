@@ -18,7 +18,6 @@ KEY_RESOURCES_MAX_MEMORY_USAGE = 'Resources.MaxMemoryUsage'
 KEY_RESOURCES_MAX_PERCENT_CPU_USAGE = 'Resources.MaxCpuPercentUsage'
 LOG_FILE = '/tmp/AMinerRemoteLog.txt'
 configFN = None
-VAR_ID = 0
 
 def load_config(config_file_name):
   """Load the configuration file using the import module."""
@@ -57,8 +56,7 @@ def build_persistence_file_name(aminer_config, *args):
 
 def save_config(analysis_context, new_file):
     """Save the current configuration to a file by using the AMinerRemoteControl."""
-    register_component = 'registerComponent('
-    global VAR_ID
+    register_component = 'register_component('
     VAR_ID = 0
     msg = ""
     with open(configFN, "r") as file:
@@ -89,16 +87,16 @@ def save_config(analysis_context, new_file):
         old_start = 0
         for i in range(0, component_id + 1):
             start = start + 1
-            start = old.find('.registerComponent(', start)
+            start = old.find('.register_component(', start)
         if old_start > start:
             break
         old_start = start
 
-        if old.find('componentName', start) < old.find(')', start):
-            old_component_name_start = old.find('"', old.find('componentName', start))
+        if old.find('component_name', start) < old.find(')', start):
+            old_component_name_start = old.find('"', old.find('component_name', start))
             old_component_name_end = old.find('"', old_component_name_start + 1)
             if old_component_name_start > old.find(')', start) or old_component_name_start == -1:
-                old_component_name_start = old.find("'", old.find('componentName', start))
+                old_component_name_start = old.find("'", old.find('component_name', start))
                 old_component_name_end = old.find("'", old_component_name_start + 1)
             old_len = old_component_name_end - old_component_name_start + 1
             old_component_name = old[old_component_name_start:]
@@ -117,7 +115,7 @@ def save_config(analysis_context, new_file):
         i = i - 1
 
     for i in enumerate(logs):
-        if "REMOTECONTROL changeAttributeOfRegisteredAnalysisComponent" in logs[i]:
+        if "REMOTECONTROL change_attribute_of_registered_analysis_component" in logs[i]:
             logs[i] = logs[i][:logs[i].find('#')]
             arr = logs[i].split(',', 3)
             if arr[1].find("'") != -1:
@@ -130,9 +128,9 @@ def save_config(analysis_context, new_file):
                 attr = arr[2].split('"')[1]
             value = arr[3].strip().split(")")[0]
 
-            pos = old.find('componentName="%s"' % component_name)
+            pos = old.find('component_name="%s"' % component_name)
             if pos == -1:
-                pos = old.find("componentName='%s'" % component_name)
+                pos = old.find("component_name='%s'" % component_name)
             while old[pos] != '\n':
                 pos = pos - 1
             pos = old.find(register_component, pos) + len(register_component)
@@ -154,7 +152,7 @@ def save_config(analysis_context, new_file):
                 end = p1
             old = old[:old.find("=", pos) + 1] + "%s" % value + old[end:]
 
-        if "REMOTECONTROL addHandlerToAtomFilterAndRegisterAnalysisComponent" in logs[i]:
+        if "REMOTECONTROL add_handler_to_atom_filter_and_register_analysis_component" in logs[i]:
             parameters = logs[i].split(",", 2)
 
             # find the name of the filter_config variable in the old config.
@@ -169,11 +167,11 @@ def save_config(analysis_context, new_file):
             new_parameters = parameters[2].split(")")
             component_name = new_parameters[1].strip(', ')
 
-            var = "analysisComponent%d" % VAR_ID
+            var = "analysis_component%d" % VAR_ID
             VAR_ID = VAR_ID + 1
             old = old + "\n  %s = %s)" % (var, new_parameters[0].strip())
-            old = old + "\n  %s.registerComponent(%s, componentName=%s)" % (filter_config, var, component_name)
-            old = old + "\n  %s.addHandler(%s)\n" % (filter_config, var)
+            old = old + "\n  %s.register_component(%s, component_name=%s)" % (filter_config, var, component_name)
+            old = old + "\n  %s.add_handler(%s)\n" % (filter_config, var)
 
     # remove double lines
     old = old.replace('\n\n\n', '\n\n')

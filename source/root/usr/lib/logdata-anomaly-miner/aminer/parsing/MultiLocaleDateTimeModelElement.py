@@ -82,7 +82,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
         if parsed_fields[COMPONENT_TYPE_MICROSECOND] is None:
             parsed_fields[COMPONENT_TYPE_MICROSECOND] = 0
 
-        # FIXME: Values without day/month not handled yet
+        # Values without day/month not handled yet
         parsed_value = None
         if parsed_fields[COMPONENT_TYPE_YEAR] is None:
             if self.latest_parsed_timestamp is not None:
@@ -189,7 +189,7 @@ class DateFormatComponent:
     def add_format(self, format_string, format_locale, format_timezone):
         """Add a new format to be parsed."""
         if isinstance(format_string, bytes):
-            format_string = format_string.decode('utf-8')
+            format_string = format_string.decode()
         if format_timezone is None:
             format_timezone = 'UTC'
 

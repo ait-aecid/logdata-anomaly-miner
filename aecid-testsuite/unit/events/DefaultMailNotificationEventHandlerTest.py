@@ -55,17 +55,17 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
         self.assertTrue(self.__expected_string % (
             datetime.fromtimestamp(t - 600).strftime(self.datetime_format_string), "" + match_element.get_path() + ", " +
             match_element2.get_path(), match_element.get_match_object(), self.__class__.__name__, description, 2,
-            match_element.get_match_string().decode("utf-8") + "\n  " + match_element2.get_match_string().decode("utf-8")) in
+            match_element.get_match_string().decode() + "\n  " + match_element2.get_match_string().decode()) in
             str(result.stdout, 'utf-8'), msg="%s vs \n %s" % (self.__expected_string % (
                 datetime.fromtimestamp(t).strftime(self.datetime_format_string), match_element.get_path(), match_element.get_match_object(),
-                self.__class__.__name__, description, 1, match_element.get_match_string().decode("utf-8") + "\n\n"),
+                self.__class__.__name__, description, 1, match_element.get_match_string().decode() + "\n\n"),
                 str(result.stdout, 'utf-8')))
 
         self.assertTrue(self.__expected_string % (
             datetime.fromtimestamp(t).strftime(self.datetime_format_string), "" + match_element.get_path() + ", " +
             match_element2.get_path(), match_element.get_match_object(), self.__class__.__name__, description, 2,
-            match_element.get_match_string().decode("utf-8") + "\n  " + match_element2.get_match_string().decode("utf-8") + "\n\n") in str(
-            result.stdout, 'utf-8'))
+            match_element.get_match_string().decode() + "\n  " + match_element2.get_match_string().decode() + "\n\n") in
+                str(result.stdout, 'utf-8'))
 
     def test2do_timer(self):
         """In this test case the functionality of the timer is tested. The eventCollectTime must not be 0!"""
@@ -90,8 +90,7 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
 
         self.assertFalse(self.__expected_string % (
             datetime.fromtimestamp(t).strftime(self.datetime_format_string), match_element.get_path(), match_element.get_match_object(),
-            self.__class__.__name__, description, 1, match_element.get_match_string().decode("utf-8") + "\n\n") in
-            str(result.stdout, 'utf-8'))
+            self.__class__.__name__, description, 1, match_element.get_match_string().decode() + "\n\n") in str(result.stdout, 'utf-8'))
 
         t = time()
         default_mail_notification_event_handler.next_alert_time = t + 500
@@ -102,8 +101,7 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
         result = subprocess.run(self.mail_call, shell=True, stdout=subprocess.PIPE)
         self.assertFalse(self.__expected_string % (
             datetime.fromtimestamp(t).strftime(self.datetime_format_string), match_element.get_path(), match_element.get_match_object(),
-            self.__class__.__name__, description, 1, match_element.get_match_string().decode("utf-8") + "\n\n") in
-            str(result.stdout, 'utf-8'))
+            self.__class__.__name__, description, 1, match_element.get_match_string().decode() + "\n\n") in str(result.stdout, 'utf-8'))
 
         default_mail_notification_event_handler.next_alert_time = t
         default_mail_notification_event_handler.do_timer(t)
@@ -113,11 +111,29 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
         result = subprocess.run(self.mail_call, shell=True, stdout=subprocess.PIPE)
         self.assertTrue(self.__expected_string % (
             datetime.fromtimestamp(t).strftime(self.datetime_format_string), match_element.get_path(), match_element.get_match_object(),
-            self.__class__.__name__, description, 1, match_element.get_match_string().decode("utf-8") + "\n\n") in
+            self.__class__.__name__, description, 1, match_element.get_match_string().decode() + "\n\n") in
             str(result.stdout, 'utf-8'), msg="%s vs \n %s" % (self.__expected_string % (
                 datetime.fromtimestamp(t).strftime(self.datetime_format_string), match_element.get_path(), match_element.get_match_object(),
-                self.__class__.__name__, description, 1, match_element.get_match_string().decode("utf-8") + "\n\n"),
-                str(result.stdout, 'utf-8')))
+                self.__class__.__name__, description, 1, match_element.get_match_string().decode() + "\n\n"), str(result.stdout, 'utf-8')))
+
+    def test3check_email_addresses(self):
+        ac = self.analysis_context
+        ac.aminer_config.config_properties[DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS] = "test123@gmail.com"
+        ac.aminer_config.config_properties[DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_FROM_ADDRESS] = "test123@gmail.com"
+        _ = DefaultMailNotificationEventHandler(ac)
+        ac.aminer_config.config_properties[DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS] = "root@localhost"
+        ac.aminer_config.config_properties[DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_FROM_ADDRESS] = "root@localhost"
+        _ = DefaultMailNotificationEventHandler(ac)
+        ac.aminer_config.config_properties[DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS] = "domain.user1@localhost"
+        self.assertRaises(Exception, DefaultMailNotificationEventHandler, ac)
+        ac.aminer_config.config_properties[DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_FROM_ADDRESS] = "domain.user1@localhost"
+        self.assertRaises(Exception, DefaultMailNotificationEventHandler, ac)
+        ac.aminer_config.config_properties[DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS] = "root@notLocalhost"
+        ac.aminer_config.config_properties[DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_FROM_ADDRESS] = "root@localhost"
+        self.assertRaises(Exception, DefaultMailNotificationEventHandler, ac)
+        ac.aminer_config.config_properties[DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS] = "root@localhost"
+        ac.aminer_config.config_properties[DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_FROM_ADDRESS] = "root@notLocalhost"
+        self.assertRaises(Exception, DefaultMailNotificationEventHandler, ac)
 
 
 if __name__ == "__main__":

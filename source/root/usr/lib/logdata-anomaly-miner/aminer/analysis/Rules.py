@@ -250,7 +250,7 @@ class ValueMatchRule(MatchRule):
 
     def __str__(self):
         if isinstance(self.value, bytes):
-            self.value = self.value.decode("utf-8")
+            self.value = self.value.decode()
         return 'value(%s)==%s' % (self.path, self.value)
 
 

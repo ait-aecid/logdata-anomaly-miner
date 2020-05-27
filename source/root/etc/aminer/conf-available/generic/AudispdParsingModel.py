@@ -245,7 +245,7 @@ def get_model():
         # A special major/minor device element could be better here.
         VariableByteDataModelElement('dev', b'0123456789abcdef:'),
         FixedDataModelElement('s2', b' mode='),
-        # FIXME: is octal
+        # is octal
         DecimalIntegerValueModelElement('mode'),
         FixedDataModelElement('s3', b' ouid='),
         DecimalIntegerValueModelElement('ouid'),

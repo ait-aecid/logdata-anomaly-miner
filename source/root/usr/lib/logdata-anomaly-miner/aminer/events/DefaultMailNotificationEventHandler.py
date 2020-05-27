@@ -3,9 +3,11 @@
 import email.mime.text
 import os
 import tempfile
-import subprocess
+import subprocess  # skipcq: BAN-B404
+import shlex
 import sys
 import time
+import re
 
 from aminer.AnalysisChild import AnalysisContext
 from aminer.util import TimeTriggeredComponentInterface
@@ -29,13 +31,19 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
     def __init__(self, analysis_context):
         self.analysis_context = analysis_context
         aminer_config = analysis_context.aminer_config
-        self.recipient_address = aminer_config.config_properties.get(DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS)
+        # @see https://emailregex.com/
+        is_email = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)|^[a-zA-Z0-9]+@localhost$")
+        self.recipient_address = shlex.quote(
+            aminer_config.config_properties.get(DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS))
         if self.recipient_address is None:
             raise Exception('Cannot create e-mail notification listener without target address')
+        self.sender_address = shlex.quote(
+            aminer_config.config_properties.get(DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_FROM_ADDRESS))
+        if not is_email.match(self.recipient_address) or not is_email.match(self.sender_address):
+            raise Exception('MailAlerting.TargetAddress and MailAlerting.FromAddress must be email addresses!')
 
-        self.sender_address = aminer_config.config_properties.get(DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_FROM_ADDRESS)
-        self.subject_prefix = aminer_config.config_properties.get(DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_SUBJECT_PREFIX,
-                                                                  'py Alerts:')
+        self.subject_prefix = shlex.quote(
+            aminer_config.config_properties.get(DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_SUBJECT_PREFIX, 'AMiner Alerts:'))
         self.alert_grace_time_end = aminer_config.config_properties.get(
             DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_ALERT_GRACE_TIME, 0)
         self.event_collect_time = aminer_config.config_properties.get(DefaultMailNotificationEventHandler.CONFIG_KEY_EVENT_COLLECT_TIME, 10)
@@ -146,6 +154,7 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
             sendmail_args += ['-f', self.sender_address]
         sendmail_args.append(self.recipient_address)
         # Start the sendmail process. Use close_fds to avoid leaking of any open file descriptors to the new client.
+        # skipcq: BAN-B603
         process = subprocess.Popen(sendmail_args, executable=self.sendmail_binary_path, stdin=message_tmp_file, close_fds=True)
         # Just append the process to the list of running processes. It will remain in zombie state until next invocation of list cleanup.
         self.running_sendmail_processes.append(process)

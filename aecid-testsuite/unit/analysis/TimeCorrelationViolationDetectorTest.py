@@ -82,7 +82,7 @@ class TimeCorrelationViolationDetectorTest(TestBase):
         time_correlation_violation_detector.receive_atom(log_atom1)
         r = self.correlation_rule.check_status(t + 2)
         self.assertEqual(r[0], 'FAIL: B-Event for "%s" (%s) was not found in time!\n' % (
-            self.match_element1.get_match_string().decode("utf-8"), self.a_class_selector.action_id))
+            self.match_element1.get_match_string().decode(), self.a_class_selector.action_id))
 
     def test3_check_status_before_expected_timespan(self):
         """In this test case the second log line is found too early and an appropriate error message is expected from the
@@ -100,7 +100,7 @@ class TimeCorrelationViolationDetectorTest(TestBase):
         time_correlation_violation_detector.do_timer(time.time())
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string_too_early % (
             datetime.fromtimestamp(t).strftime(self.datetime_format_string), self.correlation_rule.rule_id, description, 1,
-            self.match_element1.get_match_string().decode("utf-8"), self.a_class_selector.action_id))
+            self.match_element1.get_match_string().decode(), self.a_class_selector.action_id))
 
     def test4_check_status_after_expected_timespan(self):
         """In this test case the second log line is found too late and an appropriate error message is expected from the
@@ -118,7 +118,7 @@ class TimeCorrelationViolationDetectorTest(TestBase):
         time_correlation_violation_detector.do_timer(time.time())
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string_too_late % (
             datetime.fromtimestamp(t).strftime(self.datetime_format_string), self.correlation_rule.rule_id, description, 1,
-            self.match_element1.get_match_string().decode("utf-8"), self.a_class_selector.action_id))
+            self.match_element1.get_match_string().decode(), self.a_class_selector.action_id))
 
     def test5_check_status_attributes_not_matching(self):
         """In this test case the second log line has different attributes than expected and an appropriate error message is expected from
@@ -136,7 +136,7 @@ class TimeCorrelationViolationDetectorTest(TestBase):
         time_correlation_violation_detector.do_timer(time.time())
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string_different_attributes % (
             datetime.fromtimestamp(t).strftime(self.datetime_format_string), self.correlation_rule.rule_id, description, 1,
-            self.match_element1.get_match_string().decode("utf-8"), self.a_class_selector.action_id, 22500, 22501))
+            self.match_element1.get_match_string().decode(), self.a_class_selector.action_id, 22500, 22501))
 
     def test6_prepare_history_entry(self):
         """In this test case the prepare_history_entry-method is tested with multiple artefact_match_parameters. Also the case of not

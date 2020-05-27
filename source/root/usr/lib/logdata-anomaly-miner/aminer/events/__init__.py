@@ -39,3 +39,4 @@ from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler  #
 from aminer.events.SyslogWriterEventHandler import SyslogWriterEventHandler  # skipcq: FLK-E402
 from aminer.events.Utils import VolatileLogarithmicBackoffEventHistory  # skipcq: FLK-E402
 from aminer.events.JsonConverterHandler import JsonConverterHandler  # skipcq: FLK-E402
+from aminer.events.KafkaEventHandler import KafkaEventHandler  # skipcq: FLK-E402
