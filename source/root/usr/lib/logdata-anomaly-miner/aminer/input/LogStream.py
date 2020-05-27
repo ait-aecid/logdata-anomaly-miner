@@ -92,6 +92,7 @@ class FileLogDataResource(LogDataResource):
         self.total_consumed_length = 0
         # Create a hash for repositioning. There is no need to be cryptographically secure here: if upstream can manipulate the content,
         # to provoke hash collisions, correct positioning would not matter anyway.
+        # skipcq: PTC-W1003
         self.repositioning_digest = hashlib.md5()
 
         if (log_stream_fd != -1) and (repositioning_data is not None):
@@ -102,6 +103,7 @@ class FileLogDataResource(LogDataResource):
                 print('Not attempting to reposition on %s, file size too small' % encode_byte_string_as_string(self.log_resource_name),
                       file=sys.stderr)
             else:
+                # skipcq: PTC-W1003
                 hash_algo = hashlib.md5()
                 length = repositioning_data[1]
                 while length != 0:

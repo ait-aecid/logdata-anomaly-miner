@@ -233,26 +233,26 @@ Implementation example:
 # Create a correlation rule: As syslog timestamps have only second
 # precision and B usually is some ms after A, accept correlation
 # only in range (0.0, 1.0) seconds.
-  aImpliesBRule=TimeCorrelationViolationDetector.CorrelationRule(
-      'A implies B', 0.0, 1.0, maxArtefactsAForSingleB=1,
-      artefactMatchParameters=None)
+  a_implies_b_rule=TimeCorrelationViolationDetector.CorrelationRule(
+      'A implies B', 0.0, 1.0, max_artefacts_a_for_single_b=1,
+      artefact_match_parameters=None)
 
 # Build event selectors: As one selector may select an event that
 # is input to more than one correlation rule, accept lists as input.
-  aClassSelector=TimeCorrelationViolationDetector.EventClassSelector(
-      'A-Event', [aImpliesBRule], None)
-  bClassSelector=TimeCorrelationViolationDetector.EventClassSelector(
-      'B-Event', None, [aImpliesBRule])
+  a_class_selector=TimeCorrelationViolationDetector.EventClassSelector(
+      'A-Event', [a_implies_b_rule], None)
+  b_class_selector=TimeCorrelationViolationDetector.EventClassSelector(
+      'B-Event', None, [a_implies_b_rule])
 
 # Hook the selectors to the detector rules tree. 
 ...
-  allRules.append(Rules.PathExistsMatchElement('/model/services/A', aClassSelector))
+  all_rules.append(Rules.PathExistsMatchElement('/model/services/A', a_class_selector))
 ...
 # Use the standard WhitelistViolationDetector but with parallel
 # matching to a) perform whitelisting of acceptable log lines
 # and b) forwarding of selected events to the correlation detectors.
-  whitelistViolationDetector=WhitelistViolationDetector.WhitelistViolationDetector(
-      [Rules.ParallelMatchRule(allRules)], anomalyEventHandlers)
+  whitelist_violation_detector=WhitelistViolationDetector.WhitelistViolationDetector(
+      [Rules.ParallelMatchRule(all_rules)], anomalyEventHandlers)
 -------------------------------------------------------------------------------
 
 Artefact output would be:
