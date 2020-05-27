@@ -17,7 +17,7 @@
         'Core.PersistenceDir' : {
             'required' : False,
             'type': 'string',
-            'default': '/tmp/lib/aminer'
+            'default': '/var/lib/aminer'
         },
         'MailAlerting.TargetAddress' : {
             'required' : False,
