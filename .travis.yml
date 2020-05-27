@@ -16,7 +16,7 @@ install:
   - sudo -H -u root pip3 install coverage
   - sudo -H -u root pip3 install kafka
   - sudo ansible-playbook playbook.yml
-  - sudo -H -u aminer pip3 install kafka
+  - ln -s /usr/lib/python3/dist-packages/kafka $PWD/source/root/etc/aminer/conf-enabled/kafka
   - cd aecid-testsuite
   - sudo chmod +x runUnittests.sh
   - sudo chmod +x runAMinerDemo.sh
