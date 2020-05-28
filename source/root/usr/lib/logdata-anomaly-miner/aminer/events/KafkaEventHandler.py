@@ -1,7 +1,5 @@
 """This module defines an event handler that forwards Json-objects to Kafka."""
 
-from kafka import KafkaProducer
-from kafka.errors import KafkaError
 import sys
 from aminer.events import EventHandlerInterface
 
