@@ -1,12 +1,21 @@
-V1.0.1 (2019-07-11):
+V2.0.0 (2020-05-29):
 ====================
 
 * Changes:
-  * Updated and improved ParanoidInstallationGuide
-  * Updated Readme
+  * Updated documentation
   * Added functions getNameByComponent and getIdByComponent to
     AnalysisChild.py
   * Update DefaultMailNotificationEventHandler.py to python3
+  * Extended AMinerRemoteControl
+  * Added support for configuration in yaml format
+  * Refactoring
+  * Added KafkaEventHandler
+  * Added JsonConverterHandler
+  * Added NewMatchIdValueComboDetector
+  * Enabled multiple default timestamp paths
+  * Added debug feature ParserCount
+  * Added unit and integration tests
+  * Added installer script
 * Bugfixes including:
   * Fixed dependencies in Debian packaging
   * Fixed typo in various analysis components
@@ -16,8 +25,6 @@ V1.0.1 (2019-07-11):
     integer including sign and padding character
   * Fixed unnecessary long blocking time in SimpleMultisourceAtomSync
   * Changed minum matchLen in DelimitedDataModelElement to 1 byte
-  * Fixed NewMatchPathValueDetector list of transferred parameters in
-    receiveAtom
   * Fixed timezone offset in ModuloTimeMatchRule
   * Minor bugfixes
 
