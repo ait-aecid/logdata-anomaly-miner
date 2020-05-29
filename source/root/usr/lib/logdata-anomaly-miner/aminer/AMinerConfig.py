@@ -3,6 +3,7 @@
 import os
 import sys
 import importlib
+# skipcq: PYL-W0611
 from importlib import util
 import logging
 

@@ -47,7 +47,7 @@ def secure_open_file(file_name, flags):
     # result = os.openat(dirFd, lastPathPart, flags|os.O_NOFOLLOW|os.O_NOCTTY)
     # os.close(dirFd)
     # return(result)
-
+    # skipcq: PYL-W0603
     global no_secure_open_warn_once_flag
     if no_secure_open_warn_once_flag:
         print('WARNING: SECURITY: No secure open yet due to missing openat in python!', file=sys.stderr)

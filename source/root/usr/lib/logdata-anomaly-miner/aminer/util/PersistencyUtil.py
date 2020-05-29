@@ -53,6 +53,7 @@ no_secure_link_unlink_at_warn_once_flag = True
 
 def replace_persistence_file(file_name, new_file_handle):
     """Replace the named file with the file refered by the handle."""
+    # skipcq: PYL-W0603
     global no_secure_link_unlink_at_warn_once_flag
     if no_secure_link_unlink_at_warn_once_flag:
         print('WARNING: SECURITY: unsafe unlink (unavailable unlinkat/linkat should be used, but \
