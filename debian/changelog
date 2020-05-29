@@ -15,6 +15,7 @@ logdata-anomaly-miner (2.0.0~pre0) bionic; urgency=low
   * Added debug feature ParserCount
   * Added unit and integration tests
   * Added installer script
+  * Added VerboseUnparsedHandler
   Bugfixes including:
   * Fixed dependencies in Debian packaging
   * Fixed typo in various analysis components
