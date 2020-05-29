@@ -34,6 +34,7 @@ _tarVersion=$(head -1  debian/changelog | awk 'match($0, /\(.*\)/) {
 ')
 mkdir -- "${_debDirectory}"
 cp -a -- "${_projectDir}/debian" "${_projectDir}/source/root" "${_debDirectory}"
+cp -a -- "${_projectDir}/README.md" "${_debDirectory}"
 fakeroot -- tar -C ${_debDirectory} -czf "${_tmpRoot}/logdata-anomaly-miner_${_tarVersion}.orig.tar.gz" --transform 's,^./,deb-build/,' .
 gpg -ab "${_tmpRoot}/logdata-anomaly-miner_${_tarVersion}.orig.tar.gz"
 
