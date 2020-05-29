@@ -87,7 +87,7 @@ def build_analysis_pipeline(analysis_context):
             func = getattr(__import__("aminer.parsing", fromlist=[item['type']]), item['type'])
             if 'args' in item:
                 if isinstance(item['args'], list):
-                  # encode string to bytearray
+                    # encode string to bytearray
                     for j in range(len(item['args'])):
                         item['args'][j] = item['args'][j].encode()
                     parserModelDict[item['id']] = func(item['name'], item['args'])
@@ -122,7 +122,6 @@ def build_analysis_pipeline(analysis_context):
             parsing_model = func(start['name'], [parserModelDict[start['args']]])
     else:
         parsing_model = func()
-
 
 # Some generic imports.
     from aminer.analysis import AtomFilters
@@ -197,7 +196,6 @@ def build_analysis_pipeline(analysis_context):
                 item['paths'], anomaly_event_handlers, auto_include_flag=learn)
         analysis_context.register_component(tmpAnalyser, component_name=compName)
         atomFilter.add_handler(tmpAnalyser)
-
 
     try:
         for item in yamldata['EventHandlers']:
