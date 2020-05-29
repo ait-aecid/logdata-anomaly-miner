@@ -1,4 +1,4 @@
-# logdata-anomaly-miner [![Build Status](https://travis-ci.org/ait-aecid/logdata-anomaly-miner.svg?branch=master)](https://travis-ci.org/ait-aecid/logdata-anomaly-miner)
+# logdata-anomaly-miner [![Build Status](https://travis-ci.org/ait-aecid/logdata-anomaly-miner.svg?branch=master)](https://travis-ci.org/ait-aecid/logdata-anomaly-miner) [![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/ait-aecid/logdata-anomaly-miner/?ref=repository-badge)
 
 This tool allows one to create log analysis pipelines.
 
