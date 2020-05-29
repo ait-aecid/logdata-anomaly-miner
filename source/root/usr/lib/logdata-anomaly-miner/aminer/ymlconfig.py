@@ -118,7 +118,7 @@ def build_analysis_pipeline(analysis_context):
     else:
         parsing_model = func(start['name'],[parserModelDict[start['args']]])
   else:
-    parsing_model = func(start['name'])
+    parsing_model = func()
           
 
 # Some generic imports.
