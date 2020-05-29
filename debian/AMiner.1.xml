@@ -130,9 +130,8 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         <term><option>--Config <replaceable>file</replaceable></option></term>
         <listitem>
           <para>Specify the configuration file, otherwise /etc/aminer/config.py
-          is used. See /etc/aminer/config.py.template for configuration
-          file template, /usr/share/doc/logdata-anomaly-miner/demo for
-          examples.</para>
+          is used. See /etc/aminer/template_config.py or /etc/aminer/template_config.yml
+          for configuration file templates and examples.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -160,9 +159,8 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         <term><filename>/etc/aminer/config.py</filename></term>
         <listitem>
           <para>The main configuration file for the AMiner daemon.
-          See /etc/aminer/template_config.py for configuration
-          file template, /usr/share/doc/logdata-anomaly-miner/demo for
-          examples.</para>
+          See /etc/aminer/template_config.py and /etc/aminer/template_config.yml
+          for configuration file templates and examples.</para>
         </listitem>
       </varlistentry>
     </variablelist>
@@ -172,7 +170,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
     <para>
       Report bugs via your distribution's bug tracking system.
       For bugs in the the software trunk, report via
-      at <ulink url="https://bugs.launchpad.net/logdata-anomaly-miner/+filebug"/>.</para>
+      at <ulink url="https://github.com/ait-aecid/logdata-anomaly-miner/issues"/>.</para>
     <para>At startup, AMiner will quite likely print out some
       security warnings to increase transparency. They are here
       just to remind you of the limitations the current implementation.
