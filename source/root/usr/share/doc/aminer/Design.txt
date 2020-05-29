@@ -2,7 +2,7 @@ Preamble:
 =========
 
 This document describes the requirement, design and implementation
-of AMiner. For using it, the general "Readme.txt" may suit your
+of AMiner. For using it, the general "README.md" may suit your
 needs better than this document.
 
 
