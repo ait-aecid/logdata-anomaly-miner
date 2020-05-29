@@ -16,6 +16,7 @@ V2.0.0 (2020-05-29):
   * Added debug feature ParserCount
   * Added unit and integration tests
   * Added installer script
+  * Added VerboseUnparsedHandler
 * Bugfixes including:
   * Fixed dependencies in Debian packaging
   * Fixed typo in various analysis components
