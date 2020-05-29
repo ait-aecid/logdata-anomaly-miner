@@ -1,0 +1,210 @@
+logdata-anomaly-miner (2.0.0~pre0) bionic; urgency=low
+
+  Changes:
+  * Updated documentation
+  * Added functions getNameByComponent and getIdByComponent to
+    AnalysisChild.py
+  * Update DefaultMailNotificationEventHandler.py to python3
+  * Extended AMinerRemoteControl
+  * Added support for configuration in yaml format
+  * Refactoring
+  * Added KafkaEventHandler
+  * Added JsonConverterHandler
+  * Added NewMatchIdValueComboDetector
+  * Enabled multiple default timestamp paths
+  * Added debug feature ParserCount
+  * Added unit and integration tests
+  * Added installer script
+  * Added VerboseUnparsedHandler
+  Bugfixes including:
+  * Fixed dependencies in Debian packaging
+  * Fixed typo in various analysis components
+  * Fixed import of ModelElementInterface in various parsing components
+  * Fixed issues with byte/string comparison
+  * Fixed issue in DecimalIntegerValueModelElement, when parsing
+    integer including sign and padding character
+  * Fixed unnecessary long blocking time in SimpleMultisourceAtomSync
+  * Changed minum matchLen in DelimitedDataModelElement to 1 byte
+  * Fixed timezone offset in ModuloTimeMatchRule
+  * Minor bugfixes
+
+ -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Fri,  29 May 2020 17:00:00 +0000
+
+logdata-anomaly-miner (1.0.0) bionic; urgency=low
+  
+  Changes:
+  * Ported code to Python 3
+  * Code cleanup using pylint
+  * Added util/JsonUtil.py to encode byte strings for storing them as json objects
+  * Added docs/development-procedures.txt which documents development procedures
+  Features:
+  * New MissingMatchPathListValueDetector to detect stream interuption
+  * Added parsing support for kernel IP layer martian package messages
+  * Systemd parsing of apt invocation messages.
+  Bugfixes:
+  * AnalysisChild: handle remote control client connection errors correctly
+  * Various bugfixes
+
+ -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Tue,  2 Oct 2018 17:00:00 +0000
+
+logdata-anomaly-miner (0.0.8) xenial; urgency=low
+
+  New features:
+  * Base64StringModelElement for parsing of base64 strings
+  * DecimalFloatValueModelElement for parsing of floats
+  * AnalysisChild full asynchronous remote control connection
+    handling
+  * MissingMatchPathValueDetector realerting support added
+  * StringRegexMatchRule for matching parsed data using regex
+  * EnhancedNewMatchPathValueComboDetector added for more complex
+    value combination detection providing transformation, annotation,
+    features ...
+  Changes:
+  * Various bugfixes
+  * Code cleanup using pylint
+
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Tue, 30 May 2017 17:00:00 +0000
+
+logdata-anomaly-miner (0.0.7) xenial; urgency=low
+
+  New features:
+  * Datetime parsing reimplemented in DateTimeModelElement to
+    fix various shortcomings of strptime in Python and libc.
+  * ElementValueBranchModelElement added to support conditional
+    branching.
+  * DebugHistoryMatchRule added: keep history of matched LogAtoms.
+  * Unix socket input support: improved logdata reading now also
+    supporting connects to UNIX server sockets for reading.
+  Changes:
+  * Restructured AMinerUtils and utils package.
+
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Mon,  9 Jan 2017 18:00:00 +0000
+
+logdata-anomaly-miner (0.0.6) xenial; urgency=low
+
+  New features:
+  * Added "LogAtom" and "AtomHandlerInterface" to pass data from
+    IO-layer to upper layers consistently.
+  * Added TimestampsUnsortedDetector.py to fail (exit) when data
+    is not properly sorted.
+  * Added SimpleMultisourceAtomSync.py to merge LogAtoms read
+    from parallel streams, e.g. from multiple logfiles.
+
+  Bugfixes:
+  * Logic flaw in logfile rollover handling, selecting on bad fd.
+  * Unassigned, reused variable caused same logfile to be opened
+    more than once.
+
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Fri, 4 Nov 2016 18:00:00 +0000
+
+logdata-anomaly-miner (0.0.5) xenial; urgency=low
+
+  * New features:
+    * Added helper class for parser matching process debugging.
+    * Added interface to ease detector state updates after triggering
+      an event.
+    * Added minimal model for parsing Tomcat start/stop syslog messages.
+    * Added support for logfile reading continuation after shutdown,
+      alternative lowlevel data stream splitting tools (atomizers).
+  * Bugfixes:
+    * Fixed file descriptor leak in PersistencyUtil.py on store.
+
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Tue, 11 Oct 2016 18:00:00 +0000
+
+logdata-anomaly-miner (0.0.4) xenial; urgency=low
+
+  * New features:
+    * NewMatchPathValueComboDetector: Detect new combination of
+      values for list of data pathes, e.g. for link analysis.
+    * ParsedAtomFilterMatchAction: Forward data to specific handlers
+      when rules match.
+    * VolatileLogarithmicBackoffEventHistory: Added unique EventId
+    * Pass event source reference to event handlers to allow query/change
+      of source parameters when handling the event.
+    * Generic logdata parsing model improvements
+    * Added new rule types: ValueDependentDelegatedMatchRule and
+      ValueDependentModuloTimeMatchRule
+  * Bugfixes:
+    * Packaging: unowned directory after purge, see
+      https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=832347
+    * DefaultMailNotificationEventHandler: cleanup of old sendmail
+      process instances not working
+    * EventGenerationMatchAction: wrong method name, class field access
+
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Fri, 26 Aug 2016 15:15:00 +0000
+
+logdata-anomaly-miner (0.0.3) xenial; urgency=low
+
+  * Backport of changes from Debian ITP process review, see
+    https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=813096
+  * Handle rollover from one logfile to the next more graceful.
+  * New features:
+    * Added support for multiple parallel timescales in component
+      trigger timing, e.g. real-time and forensic-time.
+    * Added MissingMatchPathValueDetector to detect when data
+      values were not reported for an extended period of time.
+    * Added VolatileLogarithmicBackoffEventHistory to keep data
+      of limited number of events in memory for automated processing.
+    * AMinerRemoteControl: Added "--ExecFile" parameter to execute
+      commands from file, "--StringResponse" for direct output.
+  * Bugfixes:
+    * debian/postinst: disable service start when not already
+      enabled using standard methods debian/rules and debian/postinst.
+
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Thu, 21 Jul 2016 19:00:00 +0000
+
+logdata-anomaly-miner (0.0.2) xenial; urgency=low
+
+  * Added remote control support, command line tool for sending
+    commands.
+  * Added AnalysisContext as registry for analysis components
+    and access point for remote control.
+  * Added component to write events to syslog (read component
+    documentation for CAVEATs)
+  * Package structure fixes from Debian mentoring procedure
+  * Bugfixes:
+    * ModuloTimeMatchRule: time object path was ignored on error
+    * Indent-formatting repaired, single-line mode added
+
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Thu, 12 May 2016 16:46:00 +0000
+
+logdata-anomaly-miner (0.0.1) xenial; urgency=low
+
+  * Bugfixes
+  * Minor feature improvements (options)
+  * New features:
+    * MultiLocaleDateTimeModelElement: decode timestamps not encoded
+      using local system language or byte encoding.
+    * ParsedAtomFilters: filter received atoms and filter to other handlers
+    * TimestampCorrectionFilters: Correct timestamps from broken
+      sources to have monotonic time.
+
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Thu, 07 Apr 2016 16:50:00 +0000
+
+logdata-anomaly-miner (0.0.0) xenial; urgency=low
+
+  * Initial Release Features:
+    * Common parsing model elements available: fixed strings,
+      numbers, IP addresses, date-time fields, delimited fields,
+      fixed alphabet fields, ...
+    * Common parsing model structural elements: sequences, branches,
+      repeated elements, optional elements.
+    * Stream and file reading, splitting into lines.
+    * Operating system integration: privileged parent process forwarding
+      file descriptors to analysis child.
+    * Reopening of log files using open/fstat loop.
+    * Functionality for state persistence handling between restarts.
+    * Analysis components:
+      * NewMatchPathDetector: generate events when new match path
+        is detected.
+      * HistogramAnalysis: generate complete and path-dependent
+        histograms for given properties.
+      * MatchValueQueueSplitter: split input from e.g. one parser
+        and forward it to different analyzers depending on match
+        values.
+      * WhitelistViolationDetector: ignore log data that is whitelisted
+        at least by single rule (logcheck equivalent behaviour)
+      * TimeCorrelationViolationDetector: check if usually correlated
+        loglines are really found both.
+
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Fri, 4 Mar 2016 18:45:00 +0000

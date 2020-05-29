@@ -6,34 +6,34 @@ from aminer.parsing import FirstMatchModelElement
 from aminer.parsing import FixedDataModelElement
 from aminer.parsing import SequenceModelElement
 
-def getModel(userNameModel=None):
-  """This function defines how to parse a su session information message
-after any standard logging preamble, e.g. from syslog."""
 
-  typeChildren = []
-  typeChildren.append(SequenceModelElement('gidchange', [
-      FixedDataModelElement('s0', b'rsyslogd\'s groupid changed to '),
-      DecimalIntegerValueModelElement('gid')
-  ]))
+def get_model():
+    """This function defines how to parse a su session information message after any standard logging preamble, e.g. from syslog."""
 
-  typeChildren.append(SequenceModelElement('statechange', [
-      FixedDataModelElement('s0', b'[origin software="rsyslogd" swVersion="'),
-      DelimitedDataModelElement('version', b'"'),
-      FixedDataModelElement('s1', b'" x-pid="'),
-      DecimalIntegerValueModelElement('pid'),
-      FixedDataModelElement('s2', b'" x-info="http://www.rsyslog.com"] '),
-      FirstMatchModelElement('type', [
-          FixedDataModelElement('HUPed', b'rsyslogd was HUPed'),
-          FixedDataModelElement('start', b'start')
-      ])
-  ]))
+    type_children = [
+        SequenceModelElement('gidchange', [
+            FixedDataModelElement('s0', b'rsyslogd\'s groupid changed to '),
+            DecimalIntegerValueModelElement('gid')
+        ]),
+        SequenceModelElement('statechange', [
+            FixedDataModelElement('s0', b'[origin software="rsyslogd" swVersion="'),
+            DelimitedDataModelElement('version', b'"'),
+            FixedDataModelElement('s1', b'" x-pid="'),
+            DecimalIntegerValueModelElement('pid'),
+            FixedDataModelElement('s2', b'" x-info="http://www.rsyslog.com"] '),
+            FirstMatchModelElement('type', [
+                FixedDataModelElement('HUPed', b'rsyslogd was HUPed'),
+                FixedDataModelElement('start', b'start')
+            ])
+        ]),
+        SequenceModelElement('uidchange', [
+            FixedDataModelElement('s0', b'rsyslogd\'s userid changed to '),
+            DecimalIntegerValueModelElement('uid')
+        ])
+    ]
 
-  typeChildren.append(SequenceModelElement('uidchange', [
-      FixedDataModelElement('s0', b'rsyslogd\'s userid changed to '),
-      DecimalIntegerValueModelElement('uid')
-  ]))
-
-  model = SequenceModelElement('rsyslog', [
-      FixedDataModelElement('sname', b'rsyslogd: '),
-      FirstMatchModelElement('msg', typeChildren)])
-  return model
+    model = SequenceModelElement('rsyslog', [
+        FixedDataModelElement('sname', b'rsyslogd: '),
+        FirstMatchModelElement('msg', type_children)
+    ])
+    return model

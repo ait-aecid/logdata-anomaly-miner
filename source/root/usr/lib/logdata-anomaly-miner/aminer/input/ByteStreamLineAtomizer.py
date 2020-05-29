@@ -6,139 +6,125 @@ from aminer.input import StreamAtomizer
 from aminer.parsing import MatchContext
 from aminer.parsing import ParserMatch
 
+
 class ByteStreamLineAtomizer(StreamAtomizer):
-  """This atomizer consumes binary data from a stream to break
-  it into lines, removing the line separator at the end. With
-  a parsing model, it will also perform line parsing. Failures
-  in atomizing or parsing will cause events to be generated and
-  sent to event handler.
-  Data will be consumed only when there was no downstream handler
-  registered (the data will be discarded in that case) or when
-  at least one downstream consumed the data."""
+    """This atomizer consumes binary data from a stream to break it into lines, removing the line separator at the end. With
+    a parsing model, it will also perform line parsing. Failures in atomizing or parsing will cause events to be generated and
+    sent to event handler. Data will be consumed only when there was no downstream handler registered
+    (the data will be discarded in that case) or when at least one downstream consumed the data."""
 
-  def __init__(
-      self, parsingModel, atomHandlerList, eventHandlerList,
-      maxLineLength, defaultTimestampPath):
-    """Create the atomizer.
-    @param eventHandlerList when not None, send events to those
-    handlers. The list might be empty at invocation and populated
-    later on.
-    @param maxLineLength the maximal line length including the
-    final line separator."""
-    self.parsingModel = parsingModel
-    self.atomHandlerList = atomHandlerList
-    self.eventHandlerList = eventHandlerList
-    self.maxLineLength = maxLineLength
-    self.defaultTimestampPath = defaultTimestampPath
+    COUNTER = 0
 
-    self.inOverlongLineFlag = False
-# If consuming of data was already attempted but the downstream
-# handlers refused to handle it, keep the data and the parsed
-# object to avoid expensive duplicate parsing operation. The data
-# does not include the line separators any more.
-    self.lastUnconsumedLogAtom = None
+    def __init__(self, parsing_model, atom_handler_list, event_handler_list, max_line_length, default_timestamp_paths):
+        """Create the atomizer.
+        @param event_handler_list when not None, send events to those handlers. The list might be empty at invocation and populated
+        later on.
+        @param max_line_length the maximal line length including the final line separator."""
+        self.parsing_model = parsing_model
+        self.atom_handler_list = atom_handler_list
+        self.event_handler_list = event_handler_list
+        self.max_line_length = max_line_length
+        self.default_timestamp_paths = default_timestamp_paths
 
-  def consumeData(self, streamData, endOfStreamFlag=False):
-    """Consume data from the underlying stream for atomizing.
-    @return the number of consumed bytes, 0 if the atomizer would
-    need more data for a complete atom or -1 when no data was
-    consumed at the moment but data might be consumed later on."""
-# Loop until as much streamData as possible was processed and
-# then return a result. The correct processing of endOfStreamFlag
-# is tricky: by default, even when all data was processed, do
-# one more iteration to handle also the flag.
-    consumedLength = 0
-    while True:
-      if self.lastUnconsumedLogAtom != None:
-# Keep length before dispatching: dispatch will reset the field.
-        dataLength = len(self.lastUnconsumedLogAtom.rawData)
-        if self.dispatchAtom(self.lastUnconsumedLogAtom):
-          consumedLength += dataLength+1
-          continue
-# Nothing consumed, tell upstream to wait if appropriate.
-        if consumedLength == 0:
-          consumedLength = -1
-        break
+        self.in_overlong_line_flag = False
+        # If consuming of data was already attempted but the downstream handlers refused to handle it, keep the data and the parsed
+        # object to avoid expensive duplicate parsing operation. The data does not include the line separators any more.
+        self.last_unconsumed_log_atom = None
 
-      lineEnd = streamData.find(b'\n', consumedLength)
-      if self.inOverlongLineFlag:
-        if lineEnd < 0:
-          consumedLength = len(streamData)
-          if endOfStreamFlag:
-            self.dispatchEvent('Overlong line terminated by end of stream', streamData)
-            self.inOverlongLineFlag = False
-          break
-        consumedLength = lineEnd+1
-        self.inOverlongLineFlag = False
-        continue
+    def consume_data(self, stream_data, end_of_stream_flag=False):
+        """Consume data from the underlying stream for atomizing.
+        @return the number of consumed bytes, 0 if the atomizer would need more data for a complete atom or -1 when no data was
+        consumed at the moment but data might be consumed later on."""
+        # Loop until as much streamData as possible was processed and then return a result. The correct processing of endOfStreamFlag
+        # is tricky: by default, even when all data was processed, do one more iteration to handle also the flag.
+        consumed_length = 0
+        while True:
+            if self.last_unconsumed_log_atom is not None:
+                # Keep length before dispatching: dispatch will reset the field.
+                data_length = len(self.last_unconsumed_log_atom.raw_data)
+                if self.dispatch_atom(self.last_unconsumed_log_atom):
+                    consumed_length += data_length + 1
+                    continue
+                # Nothing consumed, tell upstream to wait if appropriate.
+                if consumed_length == 0:
+                    consumed_length = -1
+                break
 
-# This is the valid start of a normal/incomplete/overlong line.
-      if lineEnd < 0:
-        tailLength = len(streamData)-consumedLength
-        if tailLength > self.maxLineLength:
-          self.dispatchEvent(
-              'Start of overlong line detected', streamData[consumedLength:])
-          self.inOverlongLineFlag = True
-          consumedLength = len(streamData)
-# Stay in loop to handle also endOfStreamFlag!
-          continue
-        if endOfStreamFlag and (tailLength != 0):
-          self.dispatchEvent('Incomplete last line', streamData[consumedLength:])
-          consumedLength = len(streamData)
-        break
+            line_end = stream_data.find(b'\n', consumed_length)
+            if self.in_overlong_line_flag:
+                if line_end < 0:
+                    consumed_length = len(stream_data)
+                    if end_of_stream_flag:
+                        self.dispatch_event('Overlong line terminated by end of stream', stream_data)
+                        self.in_overlong_line_flag = False
+                    break
+                consumed_length = line_end + 1
+                self.in_overlong_line_flag = False
+                continue
 
-# This is at least a complete/overlong line.
-      lineLength = lineEnd+1-consumedLength
-      if lineLength > self.maxLineLength:
-        self.dispatchEvent('Overlong line detected', streamData[consumedLength:lineEnd])
-        consumedLength = lineEnd+1
-        continue
+            # This is the valid start of a normal/incomplete/overlong line.
+            if line_end < 0:
+                tail_length = len(stream_data) - consumed_length
+                if tail_length > self.max_line_length:
+                    self.dispatch_event('Start of overlong line detected', stream_data[consumed_length:])
+                    self.in_overlong_line_flag = True
+                    consumed_length = len(stream_data)
+                    # Stay in loop to handle also endOfStreamFlag!
+                    continue
+                if end_of_stream_flag and (tail_length != 0):
+                    self.dispatch_event('Incomplete last line', stream_data[consumed_length:])
+                    consumed_length = len(stream_data)
+                break
 
-# This is a normal line.
-      lineData = streamData[consumedLength:lineEnd]
-      logAtom = LogAtom(lineData, None, None, self)
-      if self.parsingModel != None:
-        matchContext = MatchContext(lineData)
-        matchElement = self.parsingModel.getMatchElement('', matchContext)
-        if (matchElement != None) and not matchContext.matchData:
-          logAtom.parserMatch = ParserMatch(matchElement)
-          if self.defaultTimestampPath != None:
-            tsMatch = logAtom.parserMatch.getMatchDictionary().get(self.defaultTimestampPath, None)
-            if tsMatch != None:
-              logAtom.setTimestamp(tsMatch.matchObject[1])
-      if self.dispatchAtom(logAtom):
-        consumedLength = lineEnd+1
-        continue
-      if consumedLength == 0:
-# Downstream did not want the data, so tell upstream to block
-# for a while.
-        consumedLength = -1
-      break
-    return consumedLength
+            # This is at least a complete/overlong line.
+            line_length = line_end + 1 - consumed_length
+            if line_length > self.max_line_length:
+                self.dispatch_event('Overlong line detected', stream_data[consumed_length:line_end])
+                consumed_length = line_end + 1
+                continue
 
-  def dispatchAtom(self, logAtom):
-    """Dispatch the data using the appropriate handlers. Also clean
-    or set lastUnconsumed fields depending on outcome of dispatching."""
-    wasConsumedFlag = False
-    if not self.atomHandlerList:
-      wasConsumedFlag = True
-    else:
-      for handler in self.atomHandlerList:
-        if handler.receiveAtom(logAtom):
-          wasConsumedFlag = True
+            # This is a normal line.
+            line_data = stream_data[consumed_length:line_end]
+            log_atom = LogAtom(line_data, None, None, self)
+            if self.parsing_model is not None:
+                match_context = MatchContext(line_data)
+                match_element = self.parsing_model.get_match_element('', match_context)
+                if (match_element is not None) and not match_context.match_data:
+                    log_atom.parser_match = ParserMatch(match_element)
+                    for default_timestamp_path in self.default_timestamp_paths:
+                        ts_match = log_atom.parser_match.get_match_dictionary().get(default_timestamp_path, None)
+                        if ts_match is not None:
+                            log_atom.set_timestamp(ts_match.match_object)
+                            break
+            if self.dispatch_atom(log_atom):
+                consumed_length = line_end + 1
+                continue
+            if consumed_length == 0:
+                # Downstream did not want the data, so tell upstream to block for a while.
+                consumed_length = -1
+            break
+        return consumed_length
 
-    if wasConsumedFlag:
-      self.lastUnconsumedLogAtom = None
-    else:
-      self.lastUnconsumedLogAtom = logAtom
-    return wasConsumedFlag
+    def dispatch_atom(self, log_atom):
+        """Dispatch the data using the appropriate handlers. Also clean or set lastUnconsumed fields depending on outcome of dispatching."""
+        type(self).COUNTER = type(self).COUNTER + 1
+        was_consumed_flag = False
+        if not self.atom_handler_list:
+            was_consumed_flag = True
+        else:
+            for handler in self.atom_handler_list:
+                if handler.receive_atom(log_atom):
+                    was_consumed_flag = True
 
-  def dispatchEvent(self, message, lineData):
-    """Dispatch an event with given message and line data to all
-    event handlers."""
-    if self.eventHandlerList is None:
-      return
-    for handler in self.eventHandlerList:
-      handler.receiveEvent(
-          'Input.%s' % self.__class__.__name__, message, [lineData],
-          None, self)
+        if was_consumed_flag:
+            self.last_unconsumed_log_atom = None
+        else:
+            self.last_unconsumed_log_atom = log_atom
+        return was_consumed_flag
+
+    def dispatch_event(self, message, line_data):
+        """Dispatch an event with given message and line data to all event handlers."""
+        if self.event_handler_list is None:
+            return
+        for handler in self.event_handler_list:
+            handler.receive_event('Input.%s' % self.__class__.__name__, message, [line_data], None, None, self)

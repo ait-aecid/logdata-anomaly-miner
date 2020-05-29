@@ -13,125 +13,116 @@ from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
-class NewMatchPathValueComboDetector(
-    AtomHandlerInterface, TimeTriggeredComponentInterface,
-    EventSourceInterface):
-  """This class creates events when a new value combination for
-  a given list of match data pathes were found."""
 
-  def __init__(
-      self, aminerConfig, targetPathList, anomalyEventHandlers,
-      persistenceId='Default', allowMissingValuesFlag=False,
-      autoIncludeFlag=False, outputLogLine=True):
-    """Initialize the detector. This will also trigger reading
-    or creation of persistence storage location.
-    @param targetPathList the list of values to extract from each
-    match to create the value combination to be checked.
-    @param allowMissingValuesFlag when set to True, the detector
-    will also use matches, where one of the pathes from targetPathList
-    does not refer to an existing parsed data object.
-    @param autoIncludeFlag when set to True, this detector will
-    report a new value only the first time before including it
-    in the known values set automatically."""
-    self.targetPathList = targetPathList
-    self.anomalyEventHandlers = anomalyEventHandlers
-    self.allowMissingValuesFlag = allowMissingValuesFlag
-    self.autoIncludeFlag = autoIncludeFlag
-    self.outputLogLine = outputLogLine
-    self.aminerConfig = aminerConfig
+class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
+    """This class creates events when a new value combination for a given list of match data pathes were found."""
 
-    self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
-        aminerConfig, self.__class__.__name__, persistenceId)
-    self.nextPersistTime = None
-    self.loadPersistencyData()
-    PersistencyUtil.addPersistableComponent(self)
+    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id='Default', allow_missing_values_flag=False,
+                 auto_include_flag=False, output_log_line=True):
+        """Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        @param target_path_list the list of values to extract from each match to create the value combination to be checked.
+        @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the pathes from targetPathList
+        does not refer to an existing parsed data object.
+        @param auto_include_flag when set to True, this detector will report a new value only the first time before including it
+        in the known values set automatically."""
+        self.target_path_list = target_path_list
+        self.anomaly_event_handlers = anomaly_event_handlers
+        self.allow_missing_values_flag = allow_missing_values_flag
+        self.auto_include_flag = auto_include_flag
+        self.output_log_line = output_log_line
+        self.aminer_config = aminer_config
+        self.persistence_id = persistence_id
 
+        self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
+        self.next_persist_time = None
+        self.known_values_set = set()
+        self.load_persistency_data()
+        PersistencyUtil.add_persistable_component(self)
 
-  def loadPersistencyData(self):
-    """Load the persistency data from storage."""
-    persistenceData = PersistencyUtil.loadJson(self.persistenceFileName)
-    if persistenceData is None:
-      self.knownValuesSet = set()
-    else:
-# Set and tuples were stored as list of lists. Transform the inner
-# lists to tuples to allow hash operation needed by set.
-      self.knownValuesSet = set([tuple(record) for record in persistenceData])
+    def load_persistency_data(self):
+        """Load the persistency data from storage."""
+        persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
+        if persistence_data is not None:
+            # Set and tuples were stored as list of lists. Transform the inner lists to tuples to allow hash operation needed by set.
+            self.known_values_set = {tuple(record) for record in persistence_data}
 
+    def receive_atom(self, log_atom):
+        """Receive on parsed atom and the information about the parser match.
+        @return True if a value combination was extracted and checked against the list of known combinations, no matter if the checked
+        values were new or not."""
+        match_dict = log_atom.parser_match.get_match_dictionary()
+        match_value_list = []
+        for target_path in self.target_path_list:
+            match_element = match_dict.get(target_path, None)
+            if match_element is None:
+                if not self.allow_missing_values_flag:
+                    return False
+                match_value_list.append(None)
+            else:
+                match_value_list.append(match_element.match_object)
 
-  def receiveAtom(self, logAtom):
-    """Receive on parsed atom and the information about the parser
-    match.
-    @return True if a value combination was extracted and checked
-    against the list of known combinations, no matter if the checked
-    values were new or not."""
-    matchDict = logAtom.parserMatch.getMatchDictionary()
-    matchValueList = []
-    for targetPath in self.targetPathList:
-      matchElement = matchDict.get(targetPath, None)
-      if matchElement is None:
-        if not self.allowMissingValuesFlag:
-          return False
-        matchValueList.append(None)
-      else:
-        matchValueList.append(matchElement.matchObject)
+        match_value_tuple = tuple(match_value_list)
+        affected_log_atom_values = []
+        for match_value in match_value_list:
+            if isinstance(match_value, bytes):
+                match_value = match_value.decode()
+            affected_log_atom_values.append(match_value)
+        if match_value_tuple not in self.known_values_set:
+            if self.auto_include_flag:
+                self.known_values_set.add(match_value_tuple)
+                if self.next_persist_time is None:
+                    self.next_persist_time = time.time() + 600
 
-    matchValueTuple = tuple(matchValueList)
-    if matchValueTuple not in self.knownValuesSet:
-      if self.autoIncludeFlag:
-        self.knownValuesSet.add(matchValueTuple)
-        if self.nextPersistTime is None:
-          self.nextPersistTime = time.time()+600
-      if self.outputLogLine:
-        originalLogLinePrefix = self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-        if originalLogLinePrefix is None:
-          originalLogLinePrefix = ''
-        sortedLogLines = [str(matchValueTuple)+os.linesep+originalLogLinePrefix+ \
-                repr(logAtom.rawData)]
-      else:
-        sortedLogLines = [str(matchValueTuple)]
-      for listener in self.anomalyEventHandlers:
-        listener.receiveEvent(
-            'Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected',
-            sortedLogLines, logAtom, self)
-    return True
+            analysis_component = {'AffectedLogAtomPaths': self.target_path_list, 'AffectedLogAtomValues': affected_log_atom_values}
+            event_data = {'AnalysisComponent': analysis_component}
+            original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+            if original_log_line_prefix is None:
+                original_log_line_prefix = ''
+            if self.output_log_line:
+                match_paths_values = {}
+                for match_path, match_element in match_dict.items():
+                    match_value = match_element.match_object
+                    if isinstance(match_value, bytes):
+                        match_value = match_value.decode()
+                    match_paths_values[match_path] = match_value
+                analysis_component['ParsedLogAtom'] = match_paths_values
+                sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + str(
+                    match_value_tuple) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
+            else:
+                sorted_log_lines = [str(match_value_tuple) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
+            for listener in self.anomaly_event_handlers:
+                listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected', sorted_log_lines,
+                                       event_data, log_atom, self)
+        return True
 
+    def get_time_trigger_class(self):
+        """Get the trigger class this component should be registered for. This trigger is used only for persistency, so real-time
+        triggering is needed."""
+        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-  def getTimeTriggerClass(self):
-    """Get the trigger class this component should be registered
-    for. This trigger is used only for persistency, so real-time
-    triggering is needed."""
-    return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
+    def do_timer(self, trigger_time):
+        """Check current ruleset should be persisted"""
+        if self.next_persist_time is None:
+            return 600
 
-  def doTimer(self, triggerTime):
-    """Check current ruleset should be persisted"""
-    if self.nextPersistTime is None:
-      return 600
+        delta = self.next_persist_time - trigger_time
+        if delta < 0:
+            self.do_persist()
+            delta = 600
+        return delta
 
-    delta = self.nextPersistTime-triggerTime
-    if delta < 0:
-      self.doPersist()
-      delta = 600
-    return delta
+    def do_persist(self):
+        """Immediately write persistence data to storage."""
+        PersistencyUtil.store_json(self.persistence_file_name, list(self.known_values_set))
+        self.next_persist_time = None
 
-
-  def doPersist(self):
-    """Immediately write persistence data to storage."""
-    PersistencyUtil.storeJson(
-        self.persistenceFileName, list(self.knownValuesSet))
-    self.nextPersistTime = None
-
-
-  def whitelistEvent(
-      self, eventType, sortedLogLines, eventData, whitelistingData):
-    """Whitelist an event generated by this source using the information
-    emitted when generating the event.
-    @return a message with information about whitelisting
-    @throws Exception when whitelisting of this special event
-    using given whitelistingData was not possible."""
-    if eventType != 'Analysis.%s' % self.__class__.__name__:
-      raise Exception('Event not from this source')
-    if whitelistingData != None:
-      raise Exception('Whitelisting data not understood by this detector')
-    self.knownValuesSet.add(eventData[1])
-    return 'Whitelisted path(es) %s with %s in %s' % (
-        ', '.join(self.targetPathList), eventData[1], sortedLogLines[0])
+    def whitelist_event(self, event_type, sorted_log_lines, event_data, whitelisting_data):
+        """Whitelist an event generated by this source using the information emitted when generating the event.
+        @return a message with information about whitelisting
+        @throws Exception when whitelisting of this special event using given whitelistingData was not possible."""
+        if event_type != 'Analysis.%s' % self.__class__.__name__:
+            raise Exception('Event not from this source')
+        if whitelisting_data is not None:
+            raise Exception('Whitelisting data not understood by this detector')
+        self.known_values_set.add(event_data[1])
+        return 'Whitelisted path(es) %s with %s in %s' % (', '.join(self.target_path_list), event_data[1], sorted_log_lines[0])

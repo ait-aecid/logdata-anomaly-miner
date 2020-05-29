@@ -3,27 +3,26 @@
 from aminer.input import AtomizerFactory
 from aminer.input.ByteStreamLineAtomizer import ByteStreamLineAtomizer
 
+
 class SimpleByteStreamLineAtomizerFactory(AtomizerFactory):
-  """This factory just creates the same atomizer for each new
-  resource. All parsed and unparsed atoms are delivered via two
-  lists of handlers."""
+    """This factory just creates the same atomizer for each new resource. All parsed and unparsed atoms are delivered via two
+    lists of handlers."""
 
-  def __init__(self, parsingModel, atomHandlerList, eventHandlerList,
-               defaultTimestampPath=None):
-    """Create the factory to forward data and events to the given
-    lists for each newly created atomizer.
-    @param defaultTimestampPath if not None, the value of this
-    timestamp field is extracted from parsed atoms and stored
-    as default timestamp for that atom."""
-    self.parsingModel = parsingModel
-    self.atomHandlerList = atomHandlerList
-    self.eventHandlerList = eventHandlerList
-    self.defaultTimestampPath = defaultTimestampPath
+    def __init__(self, parsing_model, atom_handler_list, event_handler_list, default_timestamp_paths=None):
+        """Create the factory to forward data and events to the given lists for each newly created atomizer.
+        @param default_timestamp_paths if not empty list, the value of this timestamp field is extracted from parsed atoms and stored
+        as default timestamp for that atom."""
+        self.parsing_model = parsing_model
+        self.atom_handler_list = atom_handler_list
+        self.event_handler_list = event_handler_list
+        if default_timestamp_paths is None:
+            self.default_timestamp_paths = []
+        else:
+            self.default_timestamp_paths = default_timestamp_paths
 
-  def getAtomizerForResource(self, resourceName):
-    """Get an atomizer for a given resource.
-    @param resourceName the resource name for atomizer selection
-    is ignored in this type of factory.
-    @return a StreamAtomizer object"""
-    return ByteStreamLineAtomizer(self.parsingModel, self.atomHandlerList, \
-        self.eventHandlerList, 1 << 16, self.defaultTimestampPath)
+    def get_atomizer_for_resource(self, resource_name):
+        """Get an atomizer for a given resource.
+        @param resource_name the resource name for atomizer selection is ignored in this type of factory.
+        @return a StreamAtomizer object"""
+        return ByteStreamLineAtomizer(self.parsing_model, self.atom_handler_list, self.event_handler_list, 1 << 16,
+                                      self.default_timestamp_paths)

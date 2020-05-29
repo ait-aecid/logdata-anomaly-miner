@@ -40,15 +40,15 @@ def runAnalysisChild(aminerConfig, programName):
   """Runs the Analysis Child"""
   from aminer import AMinerConfig
 # Verify existance and ownership of persistence directory.
-  persistanceDirName = aminerConfig.configProperties.get(
+  persistence_dir_name = aminerConfig.config_properties.get(
       AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
   from aminer.util import SecureOSFunctions
   print('WARNING: SECURITY: Open should use O_PATH, but not yet available in python', \
           file=sys.stderr)
-  if isinstance(persistanceDirName, str):
-    persistanceDirName = persistanceDirName.encode()
-  persistenceDirFd = SecureOSFunctions.secureOpenFile(
-      persistanceDirName, os.O_RDONLY|os.O_DIRECTORY)
+  if isinstance(persistence_dir_name, str):
+    persistence_dir_name = persistence_dir_name.encode()
+  persistenceDirFd = SecureOSFunctions.secure_open_file(
+      persistence_dir_name, os.O_RDONLY|os.O_DIRECTORY)
   statResult = os.fstat(persistenceDirFd)
   import stat
   if ((not stat.S_ISDIR(statResult.st_mode)) or
@@ -57,7 +57,7 @@ def runAnalysisChild(aminerConfig, programName):
     print('FATAL: persistence directory "%s" has ' \
         'to be owned by analysis process (uid %d!=%d, gid %d!=%d) ' \
         'and have access mode 0700 only!' % (
-            persistanceDirName, statResult.st_uid, os.getuid(), statResult.st_gid, os.getgid()),
+        repr(persistence_dir_name), statResult.st_uid, os.getuid(), statResult.st_gid, os.getgid()),
           file=sys.stderr)
     sys.exit(1)
   print('WARNING: SECURITY: No checking for backdoor ' \
@@ -69,10 +69,10 @@ def runAnalysisChild(aminerConfig, programName):
   child = AnalysisChild(programName, aminerConfig)
 # This function call will only return on error or signal induced
 # normal termination.
-  childReturnStatus = child.runAnalysis(3)
+  childReturnStatus = child.run_analysis(3)
   if childReturnStatus == 0:
     sys.exit(0)
-  print('%s: runAnalysis terminated with unexpected status %d' % (
+  print('%s: run_analysis terminated with unexpected status %d' % (
       programName, childReturnStatus), file=sys.stderr)
   sys.exit(1)
 
@@ -123,7 +123,11 @@ def main():
 # Minimal import to avoid loading too much within the privileged
 # process.
   from aminer import AMinerConfig
-  aminerConfig = AMinerConfig.loadConfig(configFileName)
+  try:
+    aminerConfig = AMinerConfig.load_config(configFileName)
+  except ValueError as e:
+    print("Config-Error: %s" % e)
+    sys.exit(1)
 
   if runAnalysisChildFlag:
 # Call analysis process, this function will never return.
@@ -133,8 +137,8 @@ def main():
 # of "config.py" to allow replacement of components via sys.path
 # from within configuration.
   from aminer.util import SecureOSFunctions
-  from aminer.util import decodeStringAsByteString
-  logSourcesList = aminerConfig.configProperties.get(AMinerConfig.KEY_LOG_SOURCES_LIST, None)
+  from aminer.util import decode_string_as_byte_string
+  logSourcesList = aminerConfig.config_properties.get(AMinerConfig.KEY_LOG_SOURCES_LIST, None)
   if (logSourcesList is None) or not logSourcesList:
     print('%s: %s not defined' % (programName, AMinerConfig.KEY_LOG_SOURCES_LIST), file=sys.stderr)
     sys.exit(1)
@@ -143,7 +147,7 @@ def main():
   logDataResourceDict = {}
   for logResourceName in logSourcesList:
 # From here on logResourceName is a byte array.
-    logResourceName = decodeStringAsByteString(logResourceName)
+    logResourceName = decode_string_as_byte_string(logResourceName)
     logResource = None
     if logResourceName.startswith(b'file://'):
       from aminer.input.LogStream import FileLogDataResource
@@ -170,8 +174,8 @@ def main():
         sys.exit(1)
     logDataResourceDict[logResourceName] = logResource
 
-  childUserName = aminerConfig.configProperties.get(AMinerConfig.KEY_AMINER_USER, None)
-  childGroupName = aminerConfig.configProperties.get(AMinerConfig.KEY_AMINER_GROUP, None)
+  childUserName = aminerConfig.config_properties.get(AMinerConfig.KEY_AMINER_USER, None)
+  childGroupName = aminerConfig.config_properties.get(AMinerConfig.KEY_AMINER_GROUP, None)
   childUserId = -1
   childGroupId = -1
   try:
@@ -189,7 +193,7 @@ def main():
 # Create the remote control socket, if any. Do this in privileged
 # mode to allow binding it at arbitrary locations and support restricted
 # permissions of any type for current (privileged) uid.
-  remoteControlSocketName = aminerConfig.configProperties.get(
+  remoteControlSocketName = aminerConfig.config_properties.get(
       AMinerConfig.KEY_REMOTE_CONTROL_SOCKET_PATH, None)
   remoteControlSocket = None
   if remoteControlSocketName != None:
@@ -315,7 +319,7 @@ def main():
       print('INFO: No privilege separation when started as unprivileged user', file=sys.stderr)
 
 # Now resolve the specific analysis configuration file (if any).
-    analysisConfigFileName = aminerConfig.configProperties.get(
+    analysisConfigFileName = aminerConfig.config_properties.get(
         AMinerConfig.KEY_ANALYSIS_CONFIG_FILE, None)
     if analysisConfigFileName is None:
       analysisConfigFileName = configFileName
@@ -338,15 +342,15 @@ def main():
 # Send all log resource information currently available to child
 # process.
   for logResourceName, logResource in logDataResourceDict.items():
-    if (logResource != None) and (logResource.getFileDescriptor() >= 0):
-      SecureOSFunctions.sendLogstreamDescriptor(
-          parentSocket, logResource.getFileDescriptor(), logResourceName)
+    if (logResource != None) and (logResource.get_file_descriptor() >= 0):
+      SecureOSFunctions.send_logstream_descriptor(
+          parentSocket, logResource.get_file_descriptor(), logResourceName)
       logResource.close()
 
 # Send the remote control server socket, if any and close it afterwards.
 # It is not needed any more on parent side.
   if remoteControlSocket != None:
-    SecureOSFunctions.sendAnnotatedFileDescriptor(
+    SecureOSFunctions.send_annotated_file_descriptor(
         parentSocket, remoteControlSocket.fileno(), 'remotecontrol', '')
     remoteControlSocket.close()
 
@@ -383,7 +387,7 @@ def main():
 # resources, where reopening might make sense.
     for logResouceName, logDataResource in logDataResourceDict.items():
       try:
-        if not logDataResource.open(reopenFlag=True):
+        if not logDataResource.open(reopen_flag=True):
           continue
       except OSError as openOsError:
         if openOsError.errno == errno.EACCES:
@@ -396,8 +400,8 @@ def main():
         exitStatus = 2
         continue
 
-      SecureOSFunctions.sendLogstreamDescriptor(
-          parentSocket, logDataResource.getFileDescriptor(), logResouceName)
+      SecureOSFunctions.send_logstream_descriptor(
+          parentSocket, logDataResource.get_file_descriptor(), logResouceName)
       logDataResource.close()
 
     time.sleep(1)

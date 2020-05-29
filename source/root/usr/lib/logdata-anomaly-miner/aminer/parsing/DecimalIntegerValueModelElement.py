@@ -3,82 +3,79 @@
 from aminer.parsing import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
 
+
 class DecimalIntegerValueModelElement(ModelElementInterface):
-  """This class defines a model to parse integer values with optional
-  signum or padding. If both are present, it is signum has to be
-  before the padding characters."""
+    """This class defines a model to parse integer values with optional signum or padding. If both are present, it is signum has to be
+    before the padding characters."""
 
-  SIGN_TYPE_NONE = 'none'
-  SIGN_TYPE_OPTIONAL = 'optional'
-  SIGN_TYPE_MANDATORY = 'mandatory'
+    SIGN_TYPE_NONE = 'none'
+    SIGN_TYPE_OPTIONAL = 'optional'
+    SIGN_TYPE_MANDATORY = 'mandatory'
 
-  PAD_TYPE_NONE = 'none'
-  PAD_TYPE_ZERO = 'zero'
-  PAD_TYPE_BLANK = 'blank'
+    PAD_TYPE_NONE = 'none'
+    PAD_TYPE_ZERO = 'zero'
+    PAD_TYPE_BLANK = 'blank'
 
-  def __init__(
-      self, pathId, valueSignType=SIGN_TYPE_NONE, valuePadType=PAD_TYPE_NONE):
-    self.pathId = pathId
-    self.startCharacters = None
-    if valueSignType == DecimalIntegerValueModelElement.SIGN_TYPE_NONE:
-      self.startCharacters = b'0123456789'
-    elif valueSignType == DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL:
-      self.startCharacters = b'-0123456789'
-    elif valueSignType == DecimalIntegerValueModelElement.SIGN_TYPE_MANDATORY:
-      self.startCharacters = b'+-'
-    else:
-      raise Exception('Invalid valueSignType "%s"' % valueSignType)
+    def __init__(self, path_id, value_sign_type=SIGN_TYPE_NONE, value_pad_type=PAD_TYPE_NONE):
+        self.path_id = path_id
+        self.start_characters = None
+        if value_sign_type == DecimalIntegerValueModelElement.SIGN_TYPE_NONE:
+            self.start_characters = b'0123456789'
+        elif value_sign_type == DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL:
+            self.start_characters = b'-0123456789'
+        elif value_sign_type == DecimalIntegerValueModelElement.SIGN_TYPE_MANDATORY:
+            self.start_characters = b'+-'
+        else:
+            raise Exception('Invalid valueSignType "%s"' % value_sign_type)
 
-    self.padCharacters = b''
-    if valuePadType == DecimalIntegerValueModelElement.PAD_TYPE_NONE:
-      pass
-    elif valuePadType == DecimalIntegerValueModelElement.PAD_TYPE_ZERO:
-      self.padCharacters = b'0'
-    elif valuePadType == DecimalIntegerValueModelElement.PAD_TYPE_BLANK:
-      self.padCharacters = b' '
-    else:
-      raise Exception('Invalid valuePadType "%s"' % valueSignType)
-    self.valuePadType = valuePadType
+        self.pad_characters = b''
+        if value_pad_type == DecimalIntegerValueModelElement.PAD_TYPE_NONE:
+            pass
+        elif value_pad_type == DecimalIntegerValueModelElement.PAD_TYPE_ZERO:
+            self.pad_characters = b'0'
+        elif value_pad_type == DecimalIntegerValueModelElement.PAD_TYPE_BLANK:
+            self.pad_characters = b' '
+        else:
+            raise Exception('Invalid valuePadType "%s"' % value_sign_type)
+        self.value_pad_type = value_pad_type
 
-  def getChildElements(self):
-    """Get all possible child model elements of this element.
-    @return empty list as there are no children of this element."""
-    return []
+    def get_child_elements(self):
+        """Get all possible child model elements of this element.
+        @return empty list as there are no children of this element."""
+        return []
 
-  def getMatchElement(self, path, matchContext):
-    """Find the maximum number of bytes forming a integer number
-    according to the parameters specified.
-    @return a match when at least one byte being a digit was found"""
-    data = matchContext.matchData
+    def get_match_element(self, path, match_context):
+        """Find the maximum number of bytes forming a integer number according to the parameters specified.
+        @return a match when at least one byte being a digit was found"""
+        data = match_context.match_data
 
-    allowedCharacters = self.startCharacters
-    if not data or (data[0] not in allowedCharacters):
-      return None
-    matchLen = 1
+        allowed_characters = self.start_characters
+        if not data or (data[0] not in allowed_characters):
+            return None
+        match_len = 1
 
-    allowedCharacters = self.padCharacters
-    for testByte in data[matchLen:]:
-      if testByte not in allowedCharacters:
-        break
-      matchLen += 1
-    numStartPos = matchLen
-    allowedCharacters = b'0123456789'
-    for testByte in data[matchLen:]:
-      if testByte not in allowedCharacters:
-        break
-      matchLen += 1
+        allowed_characters = self.pad_characters
+        for test_byte in data[match_len:]:
+            if test_byte not in allowed_characters:
+                break
+            match_len += 1
+        num_start_pos = match_len
+        allowed_characters = b'0123456789'
+        for test_byte in data[match_len:]:
+            if test_byte not in allowed_characters:
+                break
+            match_len += 1
 
-    if matchLen == 1:
-      if data[0] not in b'0123456789':
-        return None
-    elif numStartPos == matchLen:
-      return None
+        if match_len == 1:
+            if data[0] not in b'0123456789':
+                return None
+        elif num_start_pos == match_len:
+            return None
 
-    matchString = data[:matchLen]
-    if self.padCharacters == b' ' and matchString[0] in b'+-':
-      matchValue = int(matchString.replace(b' ', b'', 1))
-    else:
-      matchValue = int(matchString)
-    matchContext.update(matchString)
-    return MatchElement(
-        '%s/%s' % (path, self.pathId), matchString, matchValue, None)
+        match_string = data[:match_len]
+        if self.pad_characters == b' ' and match_string[0] in b'+-':
+            match_value = int(match_string.replace(b' ', b'', 1))
+        else:
+            match_value = int(match_string)
+        match_context.update(match_string)
+        return MatchElement('%s/%s' % (path, self.path_id), match_string, match_value, None)

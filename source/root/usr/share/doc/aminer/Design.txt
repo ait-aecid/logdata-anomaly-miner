@@ -2,7 +2,7 @@ Preamble:
 =========
 
 This document describes the requirement, design and implementation
-of AMiner. For using it, the general "Readme.txt" may suit your
+of AMiner. For using it, the general "README.md" may suit your
 needs better than this document.
 
 
@@ -161,7 +161,7 @@ transformation step is configurable, components can be registered
 to receive output from one layer and create input for the next
 one.
 
-  * aminerConfig.buildAnalysisPipeline: This function creates
+  * aminer_config.build_analysis_pipeline: This function creates
     the pipeline for parsing the log data and hands over the list
     of RawAtom handlers (those who will receive new log-atoms)
     and a list of components needing timer interrupts. Thus the

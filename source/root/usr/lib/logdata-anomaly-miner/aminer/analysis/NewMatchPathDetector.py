@@ -12,101 +12,97 @@ from aminer.util import PersistencyUtil
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
 
-class NewMatchPathDetector(AtomHandlerInterface, \
-    TimeTriggeredComponentInterface, EventSourceInterface):
-  """This class creates events when new data path was found in
-  a parsed atom."""
+class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
+    """This class creates events when new data path was found in a parsed atom."""
 
-  def __init__(self, aminerConfig, anomalyEventHandlers, \
-    persistenceId='Default', autoIncludeFlag=False, outputLogLine=True):
-    """Initialize the detector. This will also trigger reading
-    or creation of persistence storage location."""
-    self.anomalyEventHandlers = anomalyEventHandlers
-    self.autoIncludeFlag = autoIncludeFlag
-    self.nextPersistTime = None
-    self.outputLogLine = outputLogLine
-    self.aminerConfig = aminerConfig
+    def __init__(self, aminer_config, anomaly_event_handlers, persistence_id='Default', auto_include_flag=False, output_log_line=True):
+        """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
+        self.anomaly_event_handlers = anomaly_event_handlers
+        self.auto_include_flag = auto_include_flag
+        self.next_persist_time = None
+        self.output_log_line = output_log_line
+        self.aminer_config = aminer_config
+        self.persistence_id = persistence_id
 
-    PersistencyUtil.addPersistableComponent(self)
-    self.persistenceFileName = AMinerConfig.buildPersistenceFileName(
-        aminerConfig, self.__class__.__name__, persistenceId)
-    persistenceData = PersistencyUtil.loadJson(self.persistenceFileName)
-    if persistenceData is None:
-      self.knownPathSet = set()
-    else:
-      self.knownPathSet = set(persistenceData)
+        PersistencyUtil.add_persistable_component(self)
+        self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
+        persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
+        if persistence_data is None:
+            self.known_path_set = set()
+        else:
+            self.known_path_set = set(persistence_data)
 
+    def receive_atom(self, log_atom):
+        """Receive on parsed atom and the information about the parser match.
+        @param log_atom the parsed log atom
+        @return True if this handler was really able to handle and process the match. Depending on this information, the caller
+        may decide if it makes sense passing the parsed atom also to other handlers."""
+        unknown_path_list = []
+        for path in log_atom.parser_match.get_match_dictionary().keys():
+            if path not in self.known_path_set:
+                unknown_path_list.append(path)
+                if self.auto_include_flag:
+                    self.known_path_set.add(path)
+        if unknown_path_list:
+            if self.next_persist_time is None:
+                self.next_persist_time = time.time() + 600
+            original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+            if original_log_line_prefix is None:
+                original_log_line_prefix = ''
+            if self.output_log_line:
+                sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + repr(
+                    unknown_path_list) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
+            else:
+                sorted_log_lines = [repr(unknown_path_list) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
+            analysis_component = {'AffectedLogAtomPaths': list(unknown_path_list)}
+            if self.output_log_line:
+                match_paths_values = {}
+                for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
+                    match_value = match_element.match_object
+                    if isinstance(match_value, bytes):
+                        match_value = match_value.decode()
+                    match_paths_values[match_path] = match_value
+                analysis_component['ParsedLogAtom'] = match_paths_values
+            event_data = {'AnalysisComponent': analysis_component}
+            for listener in self.anomaly_event_handlers:
+                listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New path(es) detected', sorted_log_lines, event_data,
+                                       log_atom, self)
+        return True
 
-  def receiveAtom(self, logAtom):
-    """Receive on parsed atom and the information about the parser
-    match.
-    @param logAtom the parsed log atom
-    @return True if this handler was really able to handle and
-    process the match. Depending on this information, the caller
-    may decide if it makes sense passing the parsed atom also
-    to other handlers."""
-    unknownPathList = []
-    for path in logAtom.parserMatch.getMatchDictionary().keys():
-      if path not in self.knownPathSet:
-        unknownPathList.append(path)
-        if self.autoIncludeFlag:
-          self.knownPathSet.add(path)
-    if unknownPathList:
-      if self.nextPersistTime is None:
-        self.nextPersistTime = time.time()+600
-      if self.outputLogLine:
-        originalLogLinePrefix = self.aminerConfig.configProperties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-        if originalLogLinePrefix is None:
-          originalLogLinePrefix = ''
-        sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')+os.linesep+ \
-          originalLogLinePrefix+repr(logAtom.rawData)]
-      else:
-        sortedLogLines = [logAtom.parserMatch.matchElement.annotateMatch('')]
-      for listener in self.anomalyEventHandlers:
-        listener.receiveEvent('Analysis.%s' % self.__class__.__name__, 'New path(es) detected', \
-            sortedLogLines, logAtom, self)
-    return True
+    def get_time_trigger_class(self):
+        """Get the trigger class this component can be registered for. This detector only needs persisteny triggers in real time."""
+        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
+    def do_timer(self, trigger_time):
+        """Check current ruleset should be persisted"""
+        if self.next_persist_time is None:
+            return 600
 
-  def getTimeTriggerClass(self):
-    """Get the trigger class this component can be registered
-    for. This detector only needs persisteny triggers in real
-    time."""
-    return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
+        delta = self.next_persist_time - trigger_time
+        if delta <= 0:
+            self.do_persist()
+            delta = 600
+        return delta
 
-  def doTimer(self, triggerTime):
-    """Check current ruleset should be persisted"""
-    if self.nextPersistTime is None:
-      return 600
+    def do_persist(self):
+        """Immediately write persistence data to storage."""
+        PersistencyUtil.store_json(self.persistence_file_name, list(self.known_path_set))
+        self.next_persist_time = None
 
-    delta = self.nextPersistTime-triggerTime
-    if delta <= 0:
-      self.doPersist()
-      delta = 600
-    return delta
-
-  def doPersist(self):
-    """Immediately write persistence data to storage."""
-    PersistencyUtil.storeJson(self.persistenceFileName, list(self.knownPathSet))
-    self.nextPersistTime = None
-
-  def whitelistEvent(self, eventType, sortedLogLines, eventData, \
-      whitelistingData):
-    """Whitelist an event generated by this source using the information
-    emitted when generating the event.
-    @return a message with information about whitelisting
-    @throws Exception when whitelisting of this special event
-    using given whitelistingData was not possible."""
-    if eventType != 'Analysis.%s' % self.__class__.__name__:
-      raise Exception('Event not from this source')
-    if whitelistingData is not None:
-      raise Exception('Whitelisting data not understood by this detector')
-    whitelistedStr = ''
-    for pathName in eventData[1]:
-      if pathName in self.knownPathSet:
-        continue
-      self.knownPathSet.add(pathName)
-      if whitelistedStr:
-        whitelistedStr += ', '
-      whitelistedStr += repr(pathName)
-    return 'Whitelisted path(es) %s in %s' % (whitelistedStr, sortedLogLines[0])
+    def whitelist_event(self, event_type, sorted_log_lines, event_data, whitelisting_data):
+        """Whitelist an event generated by this source using the information emitted when generating the event.
+        @return a message with information about whitelisting
+        @throws Exception when whitelisting of this special event using given whitelistingData was not possible."""
+        if event_type != 'Analysis.%s' % self.__class__.__name__:
+            raise Exception('Event not from this source')
+        if whitelisting_data is not None:
+            raise Exception('Whitelisting data not understood by this detector')
+        whitelisted_str = ''
+        for path_name in event_data[1]:
+            if path_name in self.known_path_set:
+                continue
+            self.known_path_set.add(path_name)
+            if whitelisted_str:
+                whitelisted_str += ', '
+            whitelisted_str += path_name
+        return 'Whitelisted path(es) %s in %s' % (whitelisted_str, sorted_log_lines[0])

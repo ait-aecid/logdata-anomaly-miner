@@ -1,0 +1,231 @@
+logdata-anomaly-miner (2.0.0~pre0) bionic; urgency=low
+
+  Changes:
+  * Updated documentation
+  * Added functions getNameByComponent and getIdByComponent to
+    AnalysisChild.py
+  * Update DefaultMailNotificationEventHandler.py to python3
+  * Extended AMinerRemoteControl
+  * Added support for configuration in yaml format
+  * Refactoring
+  * Added KafkaEventHandler
+  * Added JsonConverterHandler
+  * Added NewMatchIdValueComboDetector
+  * Enabled multiple default timestamp paths
+  * Added debug feature ParserCount
+  * Added unit and integration tests
+  * Added installer script
+  * Added VerboseUnparsedHandler
+  Bugfixes including:
+  * Fixed dependencies in Debian packaging
+  * Fixed typo in various analysis components
+  * Fixed import of ModelElementInterface in various parsing components
+  * Fixed issues with byte/string comparison
+  * Fixed issue in DecimalIntegerValueModelElement, when parsing
+    integer including sign and padding character
+  * Fixed unnecessary long blocking time in SimpleMultisourceAtomSync
+  * Changed minum matchLen in DelimitedDataModelElement to 1 byte
+  * Fixed timezone offset in ModuloTimeMatchRule
+  * Minor bugfixes
+
+ -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Fri,  29 May 2020 17:00:00 +0000
+
+logdata-anomaly-miner (1.0.0) bionic; urgency=low
+  
+  Changes:
+  * Ported code to Python 3
+  * Code cleanup using pylint
+  * Added util/JsonUtil.py to encode byte strings for storing them as json objects
+  * Added docs/development-procedures.txt which documents development procedures
+  Features:
+  * New MissingMatchPathListValueDetector to detect stream interuption
+  * Added parsing support for kernel IP layer martian package messages
+  * Systemd parsing of apt invocation messages.
+  Bugfixes:
+  * AnalysisChild: handle remote control client connection errors correctly
+  * Various bugfixes
+
+ -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Tue,  2 Oct 2018 17:00:00 +0000
+
+logdata-anomaly-miner (0.0.8) xenial; urgency=low
+
+  Apart from bugfixes, new parsing and analysis components were added:
+  * Base64StringModelElement
+  * DecimalFloatValueModelElement
+  * StringRegexMatchRule
+  * EnhancedNewMatchPathValueComboDetector
+
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Tue, 30 May 2017 17:00:00 +0000
+
+logdata-anomaly-miner (0.0.7) xenial; urgency=low
+
+  The datetime parsing DateTimeModelElement was reimplemented
+  to fix various shortcomings of strptime in Python and libc.
+  This will require changes in configuration due to API changes,
+  e.g.:
+
+  -time_model=DateTimeModelElement('time', '%b %d %H:%M:%S', 15, False)
+  +time_model=DateTimeModelElement('time', '%b %d %H:%M:%S')
+
+  See /usr/lib/logdata-anomaly-miner/aminer/parsing/DateTimeModelElement.py
+  source code documentation for currently supported datetime format
+  options.
+
+  The code for reading log input was improved to allow also input
+  from UNIX sockets. Thus the configuration was changed to support
+  those modes:
+
+  -config_properties['LogFileList']=['/var/log/auth.log', ...
+  +config_properties['LogResourceList'] = ['file:///var/log/auth.log', ...
+
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Mon, 9 Jan 2017 18:00:00 +0000
+
+logdata-anomaly-miner (0.0.6) xenial; urgency=low
+
+  The input IO-handling was redesigned, thus introducing following
+  API changes. The changes are flaged with (D)eveloper and (U)ser
+  to indicate if only developers of own AMiner addons are affected
+  or also users may need to migrate their configuration.
+
+  * Upper layers receive LogAtom objects instead of log lines,
+    parsing data as separate parameters. Thus also separate paths
+    for forwarding of parsed and unparsed atoms are not required
+    any more. See below for details (D, U):
+
+    * Update any own UnparsedAtomHandler/ParsedAtomHandlerInterface
+      implementations to use new interface "input.AtomHandlerInterface"
+      and access to additional information to new methods and
+      fields (D):
+
+  -from aminer.parsing import ParsedAtomHandlerInterface
+  +from aminer.input import AtomHandlerInterface
+  -class YourHandler(ParsedAtomHandlerInterface, ...
+  +class YourHandler(AtomHandlerInterface,
+  -  def receiveParsedAtom(self, atom_data, parser_match):
+  +  def receive_atom(self, log_atom):
+  -    timestamp=parser_match.get_default_timestamp()
+  +    timestamp=log_atom.get_timestamp()
+  +    parser_match=log_atom.parser_match
+  -    print '%s' % atom_data
+  +    print '%s' % log_atom.rawData
+
+    * With parsed/unparsed atom processing path convergence, naming
+      of other classes does not make sense any more (U):
+
+  -from aminer.analysis import VolatileLogarithmicBackoffParsedAtomHistory
+  +from aminer.util import VolatileLogarithmicBackoffAtomHistory
+  - from aminer.analysis import ParsedAtomFilters
+  + from aminer.analysis import AtomFilters
+  - match_action=Rules.ParsedAtomFilterMatchAction(...
+  + match_action=Rules.AtomFilterMatchAction(...
+
+  - parsed_atom_handlers=[]
+  - unparsed_atom_handlers=[]
+  - analysis_context.atomizer_factory=SimpleByteStreamLineAtomizerFactory(
+  -     parsing_model, parsed_atom_handlers, unparsed_atom_handlers, ...
+  + atom_filter=AtomFilters.SubhandlerFilter(None)
+  + analysis_context.atomizer_factory=SimpleByteStreamLineAtomizerFactory(
+  +     parsing_model, [atom_filter], ...
+
+  For handling of unparsed atoms:
+
+  - unparsed_atom_handlers.append(SimpleUnparsedAtomHandler(anomaly_event_handlers))
+  + atom_filter.add_handler(SimpleUnparsedAtomHandler(anomaly_event_handlers),
+  +     stop_when_handled_flag=True)
+
+  For handling of parsed atoms:
+
+  - parsed_atom_handlers.append(...
+  + atom_filter.add_handler(...
+
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Fri, 4 Nov 2016 18:00:00 +0000
+
+logdata-anomaly-miner (0.0.5) xenial; urgency=low
+
+  Following API changes were introduced:
+
+  * Lower input layers dealing with binary data stream reading,
+    splitting into atoms and forwarding data to the parsing model
+    were redesigned. Following configuration changes are required
+    to adapt "config.py" and probably "analysis.py" to the new
+    API:
+
+    * analysis_context.register_component(): register_as_raw_atom_handler
+      parameter not needed any more, can be removed.
+
+    * SimpleParsingModelRawAtomHandler is not needed any more,
+      that part can be replaced by configuration:
+
+  # Now define the AtomizerFactory using the model. A simple line
+  # based one is usually sufficient.
+    from aminer.input import SimpleByteStreamLineAtomizerFactory
+    analysis_context.atomizer_factory=SimpleByteStreamLineAtomizerFactory(
+        parsing_model, parsed_atom_handlers, unparsed_atom_handlers,
+        anomaly_event_handlers, default_timestamp_paths=['/model/syslog/time'])
+
+    * SimpleUnparsedAtomHandler was moved from "aminer.events"
+      to "aminer.input".
+
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Mon, 11 Oct 2016 18:00:00 +0000
+
+logdata-anomaly-miner (0.0.4) xenial; urgency=low
+
+  Following API changes were introduced:
+
+  * Event handling (general): Change of EventHandlerInterface
+    to include also event_source as last parameter. See
+    /usr/lib/logdata-anomaly-miner/aminer/events/__init__.py
+
+  * VolatileLogarithmicBackoffEventHistory: Added event ID and
+    source to stored tuple to allow unique identification of events.
+    Split result of "getHistory()" to include "eventId, eventType,
+    event_message, sorted_log_lines, event_data, event_source".
+
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Fri, 26 Aug 2016 15:15:00 +0000
+
+logdata-anomaly-miner (0.0.3) xenial; urgency=low
+
+  Following API changes were introduced:
+
+  * To improve readability of configuration files, main parser,
+    analysis and event classes were added to the submodule namespaces.
+    After imports directly from the submodule, e.g.
+    "from aminer.parsing import FixedDataModelElement",
+    the name duplication "FixedDataModelElement.FixedDataModelElement"
+    is not required any more, "FixedDataModelElement" is sufficient.
+    Use "sed -i -e 's/Name.Name/Name/g' [files]" to adapt.
+
+  * Component timing was restructured to allow forensic/realtime
+    triggering. Therefore also clean interface was added, which
+    is now also used to reduce redundant code in component registration.
+    Old way:
+
+    analysis_context.register_component(new_match_path_detector,
+      component_name=None, register_as_raw_atom_handler=False,
+      register_as_time_triggered_handler=True)
+
+    New way:
+
+    analysis_context.register_component(new_match_path_detector,
+      register_as_raw_atom_handler=False)
+
+    For own custom time-triggered components, make sure to implement
+    the "aminer.util.TimeTriggeredComponentInterface". Use any standard
+    component, e.g. "/usr/lib/logdata-anomaly-miner/aminer/analysis/NewMatchPathDetector.py"
+    as example.
+
+  * Introduction of "AnalysisContext" to have common handle for
+    all data required to perform the analysis. Therefore also
+    the signature of "build_analysis_pipeline" in "config.py/analysis.py"
+    has changed from
+
+    def build_analysis_pipeline(aminer_config):
+
+    to
+
+    def build_analysis_pipeline(analysis_context):
+
+    Old references to "aminer_config" within the configuration
+    script have to be replaced by "analysis_context.aminer_config".
+
+ -- Roman Fiedler <roman.fiedler@ait.ac.at>  Thu, 21 Jul 2016 19:00:00 +0000

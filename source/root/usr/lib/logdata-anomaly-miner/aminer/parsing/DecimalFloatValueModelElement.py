@@ -1,124 +1,117 @@
-"""This module defines an model element for decimal number parsing
-as float."""
+"""This module defines an model element for decimal number parsing as float."""
 
 from aminer.parsing import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
 
+
 class DecimalFloatValueModelElement(ModelElementInterface):
-  """This class defines a model to parse decimal values with optional
-  signum, padding or exponent. With padding, the signum has to
-  be found before the padding characters."""
+    """This class defines a model to parse decimal values with optional signum, padding or exponent. With padding, the signum has to
+    be found before the padding characters."""
 
-  SIGN_TYPE_NONE = 'none'
-  SIGN_TYPE_OPTIONAL = 'optional'
-  SIGN_TYPE_MANDATORY = 'mandatory'
+    SIGN_TYPE_NONE = 'none'
+    SIGN_TYPE_OPTIONAL = 'optional'
+    SIGN_TYPE_MANDATORY = 'mandatory'
 
-  PAD_TYPE_NONE = 'none'
-  PAD_TYPE_ZERO = 'zero'
-  PAD_TYPE_BLANK = 'blank'
+    PAD_TYPE_NONE = 'none'
+    PAD_TYPE_ZERO = 'zero'
+    PAD_TYPE_BLANK = 'blank'
 
-  EXP_TYPE_NONE = 'none'
-  EXP_TYPE_OPTIONAL = 'optional'
-  EXP_TYPE_MANDATORY = 'mandatory'
+    EXP_TYPE_NONE = 'none'
+    EXP_TYPE_OPTIONAL = 'optional'
+    EXP_TYPE_MANDATORY = 'mandatory'
 
-  def __init__(
-      self, pathId, valueSignType=SIGN_TYPE_NONE, valuePadType=PAD_TYPE_NONE,
-      exponentType=EXP_TYPE_NONE):
-    self.pathId = pathId
-    self.startCharacters = None
-    if valueSignType == DecimalFloatValueModelElement.SIGN_TYPE_NONE:
-      self.startCharacters = b'0123456789'
-    elif valueSignType == DecimalFloatValueModelElement.SIGN_TYPE_OPTIONAL:
-      self.startCharacters = b'-0123456789'
-    elif valueSignType == DecimalFloatValueModelElement.SIGN_TYPE_MANDATORY:
-      self.startCharacters = b'+-'
-    else:
-      raise Exception('Invalid valueSignType "%s"' % valueSignType)
+    def __init__(self, path_id, value_sign_type=SIGN_TYPE_NONE, value_pad_type=PAD_TYPE_NONE, exponent_type=EXP_TYPE_NONE):
+        self.path_id = path_id
+        self.start_characters = None
+        if value_sign_type == DecimalFloatValueModelElement.SIGN_TYPE_NONE:
+            self.start_characters = b'0123456789'
+        elif value_sign_type == DecimalFloatValueModelElement.SIGN_TYPE_OPTIONAL:
+            self.start_characters = b'-0123456789'
+        elif value_sign_type == DecimalFloatValueModelElement.SIGN_TYPE_MANDATORY:
+            self.start_characters = b'+-'
+        else:
+            raise Exception('Invalid valueSignType "%s"' % value_sign_type)
 
-    self.padCharacters = b''
-    if valuePadType == DecimalFloatValueModelElement.PAD_TYPE_NONE:
-      pass
-    elif valuePadType == DecimalFloatValueModelElement.PAD_TYPE_ZERO:
-      self.padCharacters = b'0'
-    elif valuePadType == DecimalFloatValueModelElement.PAD_TYPE_BLANK:
-      self.padCharacters = b' '
-    else:
-      raise Exception('Invalid valuePadType "%s"' % valueSignType)
-    self.valuePadType = valuePadType
+        self.pad_characters = b''
+        if value_pad_type == DecimalFloatValueModelElement.PAD_TYPE_NONE:
+            pass
+        elif value_pad_type == DecimalFloatValueModelElement.PAD_TYPE_ZERO:
+            self.pad_characters = b'0'
+        elif value_pad_type == DecimalFloatValueModelElement.PAD_TYPE_BLANK:
+            self.pad_characters = b' '
+        else:
+            raise Exception('Invalid valuePadType "%s"' % value_sign_type)
+        self.value_pad_type = value_pad_type
 
-    if exponentType not in [
-        DecimalFloatValueModelElement.EXP_TYPE_NONE,
-        DecimalFloatValueModelElement.EXP_TYPE_OPTIONAL,
-        DecimalFloatValueModelElement.EXP_TYPE_MANDATORY]:
-      raise Exception('Invalid exponentType "%s"' % exponentType)
-    self.exponentType = exponentType
+        if exponent_type not in [DecimalFloatValueModelElement.EXP_TYPE_NONE, DecimalFloatValueModelElement.EXP_TYPE_OPTIONAL,
+                                 DecimalFloatValueModelElement.EXP_TYPE_MANDATORY]:
+            raise Exception('Invalid exponentType "%s"' % exponent_type)
+        self.exponentType = exponent_type
 
-  def getChildElements(self):
-    """Get all possible child model elements of this element.
-    @return empty list as there are no children of this element."""
-    return None
-
-  def getMatchElement(self, path, matchContext):
-    """Find the maximum number of bytes forming a decimal number
-    according to the parameters specified.
-    @return a match when at least one byte being a digit was found"""
-    data = matchContext.matchData
-
-    allowedCharacters = self.startCharacters
-    if not data or (data[0] not in allowedCharacters):
-      return None
-    matchLen = 1
-
-    allowedCharacters = self.padCharacters
-    for testByte in data[matchLen:]:
-      if testByte not in allowedCharacters:
-        break
-      matchLen += 1
-    numStartPos = matchLen
-    allowedCharacters = b'0123456789'
-    for testByte in data[matchLen:]:
-      if testByte not in allowedCharacters:
-        break
-      matchLen += 1
-
-    if matchLen == 1:
-      if data[0] not in b'0123456789':
-        return None
-    elif numStartPos == matchLen:
-      return None
-
-# See if there is decimal part after decimal point.
-    if (matchLen < len(data)) and (chr(data[matchLen]) == '.'):
-      matchLen += 1
-      postPointStart = matchLen
-      for testByte in data[matchLen:]:
-        if testByte not in b'0123456789':
-          break
-        matchLen += 1
-      if matchLen == postPointStart:
-# There has to be at least one digit after the decimal point.
+    def get_child_elements(self):
+        """Get all possible child model elements of this element.
+        @return empty list as there are no children of this element."""
         return None
 
-# See if there could be any exponent following the number.
-    if ((self.exponentType != DecimalFloatValueModelElement.EXP_TYPE_NONE) and
-        (matchLen+1 < len(data)) and (data[matchLen] in b'eE')):
-      matchLen += 1
-      if data[matchLen] in b'+-':
-        matchLen += 1
-      expNumberStart = matchLen
-      for testByte in data[matchLen:]:
-        if testByte not in b'0123456789':
-          break
-        matchLen += 1
-      if matchLen == expNumberStart:
-# No exponent number found.
-        return None
+    def get_match_element(self, path, match_context):
+        """Find the maximum number of bytes forming a decimal number according to the parameters specified.
+        @return a match when at least one byte being a digit was found"""
+        data = match_context.match_data
 
-    matchString = data[:matchLen]
-    if self.padCharacters == b' ' and matchString[0] in b'+-':
-      matchValue = float(matchString.replace(b' ', b'', 1))
-    else:
-      matchValue = float(matchString)
-    matchContext.update(matchString)
-    return MatchElement(
-        '%s/%s' % (path, self.pathId), matchString, matchValue, None)
+        allowed_characters = self.start_characters
+        if not data or (data[0] not in allowed_characters):
+            return None
+        match_len = 1
+
+        allowed_characters = self.pad_characters
+        for test_byte in data[match_len:]:
+            if test_byte not in allowed_characters:
+                break
+            match_len += 1
+        num_start_pos = match_len
+        allowed_characters = b'0123456789'
+        for test_byte in data[match_len:]:
+            if test_byte not in allowed_characters:
+                break
+            match_len += 1
+
+        if match_len == 1:
+            if data[0] not in b'0123456789':
+                return None
+        elif num_start_pos == match_len:
+            return None
+
+        # See if there is decimal part after decimal point.
+        if (match_len < len(data)) and (chr(data[match_len]) == '.'):
+            match_len += 1
+            post_point_start = match_len
+            for test_byte in data[match_len:]:
+                if test_byte not in b'0123456789':
+                    break
+                match_len += 1
+            if match_len == post_point_start:
+                # There has to be at least one digit after the decimal point.
+                return None
+
+        # See if there could be any exponent following the number.
+        if (self.exponentType != DecimalFloatValueModelElement.EXP_TYPE_NONE) and (match_len + 1 < len(data)) and (
+                data[match_len] in b'eE'):
+            match_len += 1
+            if data[match_len] in b'+-':
+                match_len += 1
+            exp_number_start = match_len
+            for test_byte in data[match_len:]:
+                if test_byte not in b'0123456789':
+                    break
+                match_len += 1
+            if match_len == exp_number_start:
+                # No exponent number found.
+                return None
+
+        match_string = data[:match_len]
+        if self.pad_characters == b' ' and match_string[0] in b'+-':
+            match_value = float(match_string.replace(b' ', b'', 1))
+        else:
+            match_value = float(match_string)
+        match_context.update(match_string)
+        return MatchElement('%s/%s' % (path, self.path_id), match_string, match_value, None)
