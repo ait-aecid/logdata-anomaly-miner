@@ -10,8 +10,8 @@ Vcs-Browser: https://git.launchpad.net/logdata-anomaly-miner/tree/
 
 Package: logdata-anomaly-miner
 Architecture: all
-Depends: ${python3:Depends}, python3-tz, ${misc:Depends}
-Suggests: python-scipy
+Depends: ${python3:Depends}, python3-tz, ${misc:Depends}, python3-cerberus, python3-pkg-resources, python3-setuptools
+Suggests: python3-scipy
 Description: This tool allows one to create log analysis pipelines
  to analyze log data streams and detect violations or anomalies
  in it. It can be run from console, as daemon with e-mail alerting
