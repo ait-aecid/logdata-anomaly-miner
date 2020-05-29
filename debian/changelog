@@ -1,16 +1,20 @@
-logdata-anomaly-miner (1.0.1~pre0) bionic; urgency=low
-  
+logdata-anomaly-miner (2.0.0~pre0) bionic; urgency=low
+
   Changes:
-  * Updated and improved ParanoidInstallationGuide
-  * Updated Readme
+  * Updated documentation
   * Added functions getNameByComponent and getIdByComponent to
     AnalysisChild.py
   * Update DefaultMailNotificationEventHandler.py to python3
-  * Add EventData.py to refactor output.
-  * Refactor and harmonize output of all classes.
-  Features:
-  * Added VerboseUnparsedAtomHandler that applies the DebugMatchContext to
-    unparsed log lines
+  * Extended AMinerRemoteControl
+  * Added support for configuration in yaml format
+  * Refactoring
+  * Added KafkaEventHandler
+  * Added JsonConverterHandler
+  * Added NewMatchIdValueComboDetector
+  * Enabled multiple default timestamp paths
+  * Added debug feature ParserCount
+  * Added unit and integration tests
+  * Added installer script
   Bugfixes including:
   * Fixed dependencies in Debian packaging
   * Fixed typo in various analysis components
@@ -20,12 +24,10 @@ logdata-anomaly-miner (1.0.1~pre0) bionic; urgency=low
     integer including sign and padding character
   * Fixed unnecessary long blocking time in SimpleMultisourceAtomSync
   * Changed minum matchLen in DelimitedDataModelElement to 1 byte
-  * Fixed NewMatchPathValueDetector list of transferred parameters in
-    receiveAtom
   * Fixed timezone offset in ModuloTimeMatchRule
   * Minor bugfixes
 
- -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Wed,  3 Dec 2019 17:00:00 +0000
+ -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Fri,  29 May 2020 17:00:00 +0000
 
 logdata-anomaly-miner (1.0.0) bionic; urgency=low
   
