@@ -37,7 +37,6 @@ def loadYaml(config_file):
     sma.close()
 
     v = Validator(schema)
-    # TODO: Error-handling
     if v.validate(yamldata, schema):
         test = v.normalized(yamldata)
         yamldata = test
