@@ -9,6 +9,7 @@ from aminer.analysis.TimestampCorrectionFilters import SimpleMonotonicTimestampA
 from aminer.analysis.Rules import PathExistsMatchRule
 from aminer.analysis.EnhancedNewMatchPathValueComboDetector import EnhancedNewMatchPathValueComboDetector
 from aminer.analysis.NewMatchIdValueComboDetector import NewMatchIdValueComboDetector
+from aminer.analysis.ParserCount import ParserCount
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
 from aminer.input import LogAtom
 from aminer.parsing import ParserMatch, MatchContext, MatchElement, DecimalIntegerValueModelElement, FirstMatchModelElement, \
@@ -693,7 +694,111 @@ class AnalysisComponentsPerformanceTest(TestBase):
             new_match_id_value_combo_detector.__class__.__name__, avg, results,
             '%.2f seconds min_allowed_time_diff.' % min_allowed_time_diff)
 
-    def test01_atom_filters(self):
+    def run_parser_count(self, set_target_path_list, report_after_number_of_elements):
+        log_lines = [
+            b'type=SYSCALL msg=audit(1580367384.000:1): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f '
+            b'items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) '
+            b'ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=PATH msg=audit(1580367385.000:1): item=0 name="one" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 '
+            b'rdev=00:00 nametype=NORMAL',
+            b'type=SYSCALL msg=audit(1580367386.000:2): arch=c000003e syscall=2 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f '
+            b'items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) '
+            b'ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=PATH msg=audit(1580367387.000:2): item=0 name="two" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
+            b'nametype=NORMAL',
+            b'type=SYSCALL msg=audit(1580367388.000:3): arch=c000003e syscall=3 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f '
+            b'items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) '
+            b'ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=PATH msg=audit(1580367389.000:3): item=0 name="three" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00'
+            b' nametype=NORMAL',
+            b'type=SYSCALL msg=audit(1580367388.500:100): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f '
+            b'items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) '
+            b'ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=SYSCALL msg=audit(1580367390.000:4): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f '
+            b'items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) '
+            b'ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=PATH msg=audit(1580367391.000:4): item=0 name="one" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
+            b'nametype=NORMAL',
+            b'type=PATH msg=audit(1580367392.000:5): item=0 name="two" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
+            b'nametype=NORMAL',
+            b'type=SYSCALL msg=audit(1580367393.000:5): arch=c000003e syscall=2 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f '
+            b'items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) '
+            b'ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=SYSCALL msg=audit(1580367394.000:6): arch=c000003e syscall=4 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f '
+            b'items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) '
+            b'ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=PATH msg=audit(1580367395.000:7): item=0 name="five" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
+            b'nametype=NORMAL',
+            b'type=SYSCALL msg=audit(1580367396.000:8): arch=c000003e syscall=6 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f '
+            b'items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) '
+            b'ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=PATH msg=audit(1580367397.000:6): item=0 name="four" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
+            b'nametype=NORMAL',
+            b'type=SYSCALL msg=audit(1580367398.000:7): arch=c000003e syscall=5 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f '
+            b'items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) '
+            b'ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=PATH msg=audit(1580367399.000:8): item=0 name="six" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
+            b'nametype=NORMAL',
+            b'type=SYSCALL msg=audit(1580367400.000:9): arch=c000003e syscall=2 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f '
+            b'items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) '
+            b'ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)',
+            b'type=PATH msg=audit(1580367401.000:9): item=0 name="three" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 '
+            b'rdev=00:00 nametype=NORMAL',
+            b'type=PATH msg=audit(1580367402.000:10): item=0 name="one" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 '
+            b'rdev=00:00 nametype=NORMAL',
+            b'type=SYSCALL msg=audit(1580367403.000:10): arch=c000003e syscall=3 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 '
+            b'a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 '
+            b'tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)']
+        parsing_model = FirstMatchModelElement('type', [SequenceModelElement('path', [
+            FixedDataModelElement('type', b'type=PATH '), FixedDataModelElement('msg_audit', b'msg=audit('),
+            DelimitedDataModelElement('msg', b':'), FixedDataModelElement('placeholder', b':'),
+            DecimalIntegerValueModelElement('id'), FixedDataModelElement('item_string', b'): item='),
+            DecimalIntegerValueModelElement('item'), FixedDataModelElement('name_string', b' name="'),
+            DelimitedDataModelElement('name', b'"'), FixedDataModelElement('inode_string', b'" inode='),
+            DecimalIntegerValueModelElement('inode'), FixedDataModelElement('dev_string', b' dev='),
+            DelimitedDataModelElement('dev', b' '), FixedDataModelElement('mode_string', b' mode='),
+            DecimalIntegerValueModelElement('mode'), FixedDataModelElement('ouid_string', b' ouid='),
+            DecimalIntegerValueModelElement('ouid'), FixedDataModelElement('ogid_string', b' ogid='),
+            DecimalIntegerValueModelElement('ogid'), FixedDataModelElement('rdev_string', b' rdev='),
+            DelimitedDataModelElement('rdev', b' '), FixedDataModelElement('nametype_string', b' nametype='),
+            FixedWordlistDataModelElement('nametype', [b'NORMAL', b'ERROR'])]), SequenceModelElement('syscall', [
+                FixedDataModelElement('type', b'type=SYSCALL '), FixedDataModelElement('msg_audit', b'msg=audit('),
+                DelimitedDataModelElement('msg', b':'), FixedDataModelElement('placeholder', b':'),
+                DecimalIntegerValueModelElement('id'), FixedDataModelElement('arch_string', b'): arch='),
+                DelimitedDataModelElement('arch', b' '), FixedDataModelElement('syscall_string', b' syscall='),
+                DecimalIntegerValueModelElement('syscall'), FixedDataModelElement('success_string', b' success='),
+                FixedWordlistDataModelElement('success', [b'yes', b'no']),
+                FixedDataModelElement('exit_string', b' exit='), DecimalIntegerValueModelElement('exit'),
+                AnyByteDataModelElement('remainding_data')])])
+        results = [None] * self.iterations
+        avg = 0
+        z = 0
+        while z < self.iterations:
+            if set_target_path_list:
+                parser_count = ParserCount(self.aminer_config, ['parser/type/path/name', 'parser/type/syscall/syscall'], [
+                    self.stream_printer_event_handler], report_after_number_of_elements, True)
+            else:
+                parser_count = ParserCount(self.aminer_config, None, [
+                    self.stream_printer_event_handler], report_after_number_of_elements, True)
+            t = time.time()
+            measured_time = 0
+            i = 0
+            while measured_time < self.waiting_time / 10:
+                r = random.randint(0, len(log_lines) - 1)
+                line = log_lines[r]
+                log_atom = LogAtom(line, ParserMatch(parsing_model.get_match_element('parser', MatchContext(line))), t + i,
+                                   self.__class__.__name__)
+                measured_time += timeit.timeit(lambda: parser_count.receive_atom(log_atom), number=1)
+                i = i + 1
+            results[z] = i * 10
+            z = z + 1
+            avg = avg + i * 10
+        avg = avg / self.iterations
+        type(self).result = self.result + self.result_string % (
+            parser_count.__class__.__name__, avg, results,
+            'set_target_path_list: %s, report_after_number_of_elements: %d' % (set_target_path_list, report_after_number_of_elements))
+
+    def test01atom_filters(self):
         self.run_atom_filters_match_path_filter(1)
         self.run_atom_filters_match_path_filter(30)
         self.run_atom_filters_match_path_filter(100)
@@ -702,12 +807,12 @@ class AnalysisComponentsPerformanceTest(TestBase):
         self.run_atom_filters_match_value_filter(30)
         self.run_atom_filters_match_value_filter(100)
 
-    def test02_enhanced_new_match_path_value_combo_detector(self):
+    def test02enhanced_new_match_path_value_combo_detector(self):
         self.run_enhanced_new_match_path_value_combo_detector(1)
         self.run_enhanced_new_match_path_value_combo_detector(30)
         self.run_enhanced_new_match_path_value_combo_detector(100)
 
-    def test03_histogram_analysis(self):
+    def test03histogram_analysis(self):
         self.run_histogram_analysis(1, 100)
         self.run_histogram_analysis(30, 100)
         self.run_histogram_analysis(100, 100)
@@ -723,59 +828,59 @@ class AnalysisComponentsPerformanceTest(TestBase):
         self.run_histogram_analysis(100, 10000)
         self.run_histogram_analysis(10000, 10000)
 
-    def test04_match_value_average_change_detector(self):
+    def test04match_value_average_change_detector(self):
         self.run_match_value_average_change_detector(1)
         self.run_match_value_average_change_detector(30)
         self.run_match_value_average_change_detector(100)
 
-    def test05_match_value_stream_writer(self):
+    def test05match_value_stream_writer(self):
         self.run_match_value_stream_writer(1)
         self.run_match_value_stream_writer(30)
         self.run_match_value_stream_writer(100)
 
-    def test06_missing_match_path_value_detector(self):
+    def test06missing_match_path_value_detector(self):
         self.run_missing_match_path_value_detector(1)
         self.run_missing_match_path_value_detector(30)
         self.run_missing_match_path_value_detector(100)
 
-    def test07_new_match_path_detector(self):
+    def test07new_match_path_detector(self):
         self.run_new_match_path_detector(1)
         self.run_new_match_path_detector(1000)
         self.run_new_match_path_detector(100000)
 
-    def test08_new_match_path_value_combo_detector(self):
+    def test08new_match_path_value_combo_detector(self):
         self.run_new_match_path_value_combo_detector(1)
         self.run_new_match_path_value_combo_detector(30)
         self.run_new_match_path_value_combo_detector(100)
 
-    def test09_new_match_path_value_detector(self):
+    def test09new_match_path_value_detector(self):
         self.run_new_match_path_value_detector(1)
         self.run_new_match_path_value_detector(30)
         self.run_new_match_path_value_detector(100)
 
-    def test10_time_correlation_detector(self):
+    def test10time_correlation_detector(self):
         self.run_time_correlation_detector(1)
         self.run_time_correlation_detector(1000)
         self.run_time_correlation_detector(100000)
 
-    def test11_time_correlation_violation_detector(self):
+    def test11time_correlation_violation_detector(self):
         self.run_time_correlation_violation_detector(0.99)
         self.run_time_correlation_violation_detector(0.95)
         self.run_time_correlation_violation_detector(0.50)
         self.run_time_correlation_violation_detector(0.01)
 
-    def test12_timestamp_correction_filters(self):
+    def test12timestamp_correction_filters(self):
         self.run_timestamp_correction_filters(1)
         self.run_timestamp_correction_filters(1000)
         self.run_timestamp_correction_filters(100000)
 
-    def test13_timestamps_unsorted_detector(self):
+    def test13timestamps_unsorted_detector(self):
         self.run_timestamps_unsorted_detector(0.001)
         self.run_timestamps_unsorted_detector(0.1)
         self.run_timestamps_unsorted_detector(1)
         self.run_timestamps_unsorted_detector(100)
 
-    def test14_whitelist_violation_detector(self):
+    def test14whitelist_violation_detector(self):
         self.run_whitelist_violation_detector(1, 99)
         self.run_whitelist_violation_detector(1, 50)
         self.run_whitelist_violation_detector(1, 1)
@@ -786,11 +891,24 @@ class AnalysisComponentsPerformanceTest(TestBase):
         self.run_whitelist_violation_detector(100000, 50)
         self.run_whitelist_violation_detector(100000, 1)
 
-    def test15_new_match_id_value_combo_detector(self):
+    def test15new_match_id_value_combo_detector(self):
         self.run_new_match_id_value_combo_detector(0.1)
         self.run_new_match_id_value_combo_detector(5)
         self.run_new_match_id_value_combo_detector(20)
         self.run_new_match_id_value_combo_detector(100)
+
+    def test16parser_count(self):
+        # use target_paths
+        self.run_parser_count(True, 60)
+        self.run_parser_count(True, 1000)
+        self.run_parser_count(True, 10000)
+        self.run_parser_count(True, 100000)
+
+        # use no target_paths
+        self.run_parser_count(False, 60)
+        self.run_parser_count(False, 1000)
+        self.run_parser_count(False, 10000)
+        self.run_parser_count(False, 100000)
 
 
 if __name__ == '__main__':
