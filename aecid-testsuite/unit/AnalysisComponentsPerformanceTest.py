@@ -18,6 +18,7 @@ import time
 import random
 from time import process_time
 from _io import StringIO
+import timeit
 
 
 class AnalysisComponentsPerformanceTest(TestBase):
@@ -54,21 +55,29 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 subhandler_filter.add_handler(match_path_filter, stop_when_handled_flag=True)
                 i = i + 1
             t = round(time.time(), 3)
-            seconds = time.time()
-            i = 0
-            while int(time.time() - seconds) < self.waiting_time:
-                decimal_integer_value_me = DecimalIntegerValueModelElement(
-                    'd' + str(i % number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
-                    DecimalIntegerValueModelElement.PAD_TYPE_NONE)
-                match_context = MatchContext(str(i).encode())
-                match_element = decimal_integer_value_me.get_match_element('integer', match_context)
-                log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, match_path_filter)
-                subhandler_filter.receive_atom(log_atom)
-                i = i + 1
-            results[z] = i
+
+            # worst case
+            decimal_integer_value_me = DecimalIntegerValueModelElement(
+                'd' + str(number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+            match_context = MatchContext(str(123456789).encode())
+            match_element = decimal_integer_value_me.get_match_element('integer', match_context)
+            log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, match_path_filter)
+            worst_case = self.waiting_time / (timeit.timeit(lambda: subhandler_filter.receive_atom(log_atom), number=10000) / 10000)
+
+            # best case
+            decimal_integer_value_me = DecimalIntegerValueModelElement(
+                'd' + str(0), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+            match_context = MatchContext(str(123456789).encode())
+            match_element = decimal_integer_value_me.get_match_element('integer', match_context)
+            log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, match_path_filter)
+            best_case = self.waiting_time / (timeit.timeit(lambda: subhandler_filter.receive_atom(log_atom), number=10000) / 10000)
+
+            results[z] = int((worst_case + best_case) / 2)
             z = z + 1
-            avg = avg + i
-        avg = avg / self.iterations
+            avg = avg + (worst_case + best_case) / 2
+        avg = int(avg / self.iterations)
         type(self).result = self.result + self.result_string % (
             subhandler_filter.__class__.__name__, avg, results, '%d different %ss with a %s.' % (
                 number_of_pathes, match_path_filter.__class__.__name__, new_match_path_detector.__class__.__name__))
@@ -92,21 +101,27 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 subhandler_filter.add_handler(match_value_filter, stop_when_handled_flag=True)
                 i = i + 1
             t = round(time.time(), 3)
-            seconds = time.time()
-            i = 0
-            while int(time.time() - seconds) < self.waiting_time:
-                decimal_integer_value_me = DecimalIntegerValueModelElement(
-                    'd' + str(i % number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
-                    DecimalIntegerValueModelElement.PAD_TYPE_NONE)
-                match_context = MatchContext(str(i).encode())
-                match_element = decimal_integer_value_me.get_match_element('integer', match_context)
-                log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, match_value_filter)
-                subhandler_filter.receive_atom(log_atom)
-                i = i + 1
-            results[z] = i
+
+            # worst case
+            decimal_integer_value_me = DecimalIntegerValueModelElement(
+                'd' + str(number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+            match_context = MatchContext(str(123456789).encode())
+            match_element = decimal_integer_value_me.get_match_element('integer', match_context)
+            log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, match_value_filter)
+            worst_case = self.waiting_time / (timeit.timeit(lambda: subhandler_filter.receive_atom(log_atom), number=10000) / 10000)
+
+            # best case
+            decimal_integer_value_me = DecimalIntegerValueModelElement(
+                'd' + str(0), DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+            match_context = MatchContext(str(123456789).encode())
+            match_element = decimal_integer_value_me.get_match_element('integer', match_context)
+            log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, match_value_filter)
+            best_case = self.waiting_time / (timeit.timeit(lambda: subhandler_filter.receive_atom(log_atom), number=10000) / 10000)
+
+            results[z] = int((worst_case + best_case) / 2)
             z = z + 1
-            avg = avg + i
-        avg = avg / self.iterations
+            avg = avg + (worst_case + best_case) / 2
+        avg = int(avg / self.iterations)
         type(self).result = self.result + self.result_string % (
             subhandler_filter.__class__.__name__, avg, results, '%d different %ss with a dictionary of %ss.' % (
                 number_of_pathes, match_value_filter.__class__.__name__, new_match_path_detector.__class__.__name__))
@@ -119,20 +134,21 @@ class AnalysisComponentsPerformanceTest(TestBase):
             new_match_path_detector = NewMatchPathDetector(self.aminer_config, [
                 self.stream_printer_event_handler], 'Default', True)
             t = round(time.time(), 3)
-            seconds = time.time()
+            measured_time = 0
             i = 0
-            while int(time.time() - seconds) < self.waiting_time:
+            while measured_time < self.waiting_time / 10:
                 decimal_integer_value_me = DecimalIntegerValueModelElement(
                     'd' + str(i % number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
                     DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
                 log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, new_match_path_detector)
-                new_match_path_detector.receive_atom(log_atom)
-                i = i + 1
-            results[z] = i
+                measured_time += timeit.timeit(lambda: new_match_path_detector.receive_atom(log_atom), number=1)
+                i += 1
+
+            results[z] = i * 10
             z = z + 1
-            avg = avg + i
+            avg = avg + i * 10
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             new_match_path_detector.__class__.__name__, avg, results, self.different_pathes % number_of_pathes)
@@ -150,21 +166,29 @@ class AnalysisComponentsPerformanceTest(TestBase):
             enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(
                 self.aminer_config, path_list, [self.stream_printer_event_handler], 'Default', True, True)
             t = round(time.time(), 3)
-            seconds = time.time()
-            i = 0
-            while int(time.time() - seconds) < self.waiting_time:
-                decimal_integer_value_me = DecimalIntegerValueModelElement(
-                    'd' + str(i % number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
-                    DecimalIntegerValueModelElement.PAD_TYPE_NONE)
-                match_context = MatchContext(str(i % number_of_pathes).encode())
-                match_element = decimal_integer_value_me.get_match_element('integer', match_context)
-                log_atom = LogAtom(
-                    match_element.match_string, ParserMatch(match_element), t, enhanced_new_match_path_value_combo_detector)
-                enhanced_new_match_path_value_combo_detector.receive_atom(log_atom)
-                i = i + 1
-            results[z] = i
+
+            # worst case
+            decimal_integer_value_me = DecimalIntegerValueModelElement(
+                'd' + str(number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+            match_context = MatchContext(str(123456789).encode())
+            match_element = decimal_integer_value_me.get_match_element('integer', match_context)
+            log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, enhanced_new_match_path_value_combo_detector)
+            worst_case = self.waiting_time / (
+                    timeit.timeit(lambda: enhanced_new_match_path_value_combo_detector.receive_atom(log_atom), number=10000) / 10000)
+
+            # best case
+            decimal_integer_value_me = DecimalIntegerValueModelElement(
+                'd' + str(0), DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+            match_context = MatchContext(str(123456789).encode())
+            match_element = decimal_integer_value_me.get_match_element('integer', match_context)
+            log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, enhanced_new_match_path_value_combo_detector)
+            best_case = self.waiting_time / (
+                    timeit.timeit(lambda: enhanced_new_match_path_value_combo_detector.receive_atom(log_atom), number=10000) / 10000)
+
+            results[z] = int((worst_case + best_case) / 2)
             z = z + 1
-            avg = avg + i
+            avg = avg + (worst_case + best_case) / 2
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             enhanced_new_match_path_value_combo_detector.__class__.__name__,
@@ -177,24 +201,22 @@ class AnalysisComponentsPerformanceTest(TestBase):
         while z < self.iterations:
             modulo_time_bin_definition = ModuloTimeBinDefinition(86400, 86400 / number_of_pathes, 0, 1, number_of_pathes, False)
             histogram_data = HistogramData('match/crontab', modulo_time_bin_definition)
-            histogram_analysis = HistogramAnalysis(self.aminer_config, [
-                (histogram_data.property_path, modulo_time_bin_definition)], amplifier * self.waiting_time,
+            histogram_analysis = HistogramAnalysis(
+                self.aminer_config, [(histogram_data.property_path, modulo_time_bin_definition)], amplifier * self.waiting_time,
                 [self.stream_printer_event_handler], False, 'Default')
 
             i = 0
-            seconds = time.time()
-            t = seconds
-            while int(time.time() - seconds) < self.waiting_time:
-                p = process_time()
+            measured_time = 0
+            t = time.time()
+            while measured_time < self.waiting_time / 10:
                 rand = random.randint(0, 100000)
-                seconds = seconds + process_time() - p
                 match_element = MatchElement('match/crontab', t + rand, t + rand, [])
                 log_atom = LogAtom(histogram_data.bin_data, ParserMatch(match_element), t + i, histogram_analysis)
-                histogram_analysis.receive_atom(log_atom)
+                measured_time += timeit.timeit(lambda: histogram_analysis.receive_atom(log_atom), number=1)
                 i = i + 1
-            results[z] = i
+            results[z] = i * 10
             z = z + 1
-            avg = avg + i
+            avg = avg + i * 10
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             histogram_analysis.__class__.__name__, avg, results, '%d bin(s) and output after %d elements.' % (
@@ -236,22 +258,23 @@ class AnalysisComponentsPerformanceTest(TestBase):
                     match_element.get_match_object(), ParserMatch(match_element), t + 10, match_value_average_change_detector)
                 match_value_average_change_detector.receive_atom(log_atom)
                 i = i + 1
-
-            i = 0
             t = time.time()
-            while int(time.time() - seconds) < self.waiting_time:
-                p = process_time()
-                r = random.randint(0, 1) / 100 * 0.05
-                seconds = seconds + p - process_time()
-                delta = 0.15 + r
-                match_element = MatchElement(self.integerd + str(i % number_of_pathes), '%s' % str(t + delta), t + delta, [])
-                log_atom = LogAtom(
-                    match_element.get_match_object(), ParserMatch(match_element), t + delta, match_value_average_change_detector)
-                match_value_average_change_detector.receive_atom(log_atom)
-                i = i + 1
-            results[z] = i
+
+            # worst case
+            match_element = MatchElement(self.integerd + str(number_of_pathes - 1), '%s' % str(t), t, [])
+            log_atom = LogAtom(match_element.get_match_object(), ParserMatch(match_element), t, match_value_average_change_detector)
+            worst_case = self.waiting_time / (
+                    timeit.timeit(lambda: match_value_average_change_detector.receive_atom(log_atom), number=10000) / 10000)
+
+            # best case
+            match_element = MatchElement(self.integerd + str(0), '%s' % str(t), t, [])
+            log_atom = LogAtom(match_element.get_match_object(), ParserMatch(match_element), t, match_value_average_change_detector)
+            best_case = self.waiting_time / (
+                    timeit.timeit(lambda: match_value_average_change_detector.receive_atom(log_atom), number=10000) / 10000)
+
+            results[z] = int((worst_case + best_case) / 2)
             z = z + 1
-            avg = avg + i
+            avg = avg + (worst_case + best_case) / 2
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             match_value_average_change_detector.__class__.__name__, avg, results, self.different_pathes % number_of_pathes)
@@ -275,22 +298,18 @@ class AnalysisComponentsPerformanceTest(TestBase):
             sequence_model_element = SequenceModelElement('integer', parsing_model)
             match_value_stream_writer = MatchValueStreamWriter(self.output_stream, path_list, b';', b'-')
             t = time.time()
-            seconds = time.time()
-            i = 0
-            while int(time.time() - seconds) < self.waiting_time:
-                data = b''
-                p = process_time()
-                for j in range(1, int(number_of_pathes / 2) + number_of_pathes % 2 + 1):
-                    data = data + str(j).encode() + b' Euro '
-                seconds = seconds + process_time() - p
-                match_context = MatchContext(data)
-                match_element = sequence_model_element.get_match_element('match', match_context)
-                log_atom = LogAtom(match_element.match_object, ParserMatch(match_element), t, match_value_stream_writer)
-                match_value_stream_writer.receive_atom(log_atom)
-                i = i + 1
-            results[z] = i
+
+            data = b''
+            for j in range(1, int(number_of_pathes / 2) + number_of_pathes % 2 + 1):
+                data = data + str(j).encode() + b' Euro '
+            match_context = MatchContext(data)
+            match_element = sequence_model_element.get_match_element('match', match_context)
+            log_atom = LogAtom(match_element.match_object, ParserMatch(match_element), t, match_value_stream_writer)
+
+            results[z] = int(self.waiting_time / (
+                    timeit.timeit(lambda: match_value_stream_writer.receive_atom(log_atom), number=10000) / 10000))
             z = z + 1
-            avg = avg + i
+            avg = avg + results[z - 1]
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             match_value_stream_writer.__class__.__name__, avg, results, self.different_pathes % number_of_pathes)
@@ -307,27 +326,30 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 i = i + 1
             missing_match_path_list_value_detector = MissingMatchPathListValueDetector(
                 self.aminer_config, path_list, [self.stream_printer_event_handler], 'Default', True, 3600, 86400)
-            seconds = time.time()
-            t = seconds
-            i = 0
-            while int(time.time() - seconds) < self.waiting_time:
-                decimal_integer_value_me = DecimalIntegerValueModelElement(
-                    'd' + str(i % number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
-                    DecimalIntegerValueModelElement.PAD_TYPE_NONE)
-                match_context = MatchContext(str(1).encode())
-                match_element = decimal_integer_value_me.get_match_element('integer', match_context)
-                p = process_time()
-                r = random.randint(0, 100)
-                seconds = seconds + process_time() - p
-                delta = int(r / 100)
-                t = t + 4000 * delta
-                log_atom = LogAtom(
-                    match_element.match_object, ParserMatch(match_element), t, missing_match_path_list_value_detector)
-                missing_match_path_list_value_detector.receive_atom(log_atom)
-                i = i + 1
-            results[z] = i
+            t = time.time()
+
+            # worst case
+            decimal_integer_value_me = DecimalIntegerValueModelElement(
+                'd' + str(number_of_pathes - 1), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+            match_context = MatchContext(str(1).encode())
+            match_element = decimal_integer_value_me.get_match_element('integer', match_context)
+            log_atom = LogAtom(match_element.match_object, ParserMatch(match_element), t, missing_match_path_list_value_detector)
+            worst_case = self.waiting_time / (
+                    timeit.timeit(lambda: missing_match_path_list_value_detector.receive_atom(log_atom), number=10000) / 10000)
+
+            # best case
+            decimal_integer_value_me = DecimalIntegerValueModelElement(
+                'd' + str(0), DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+            match_context = MatchContext(str(1).encode())
+            match_element = decimal_integer_value_me.get_match_element('integer', match_context)
+            log_atom = LogAtom(match_element.match_object, ParserMatch(match_element), t, missing_match_path_list_value_detector)
+            best_case = self.waiting_time / (
+                    timeit.timeit(lambda: missing_match_path_list_value_detector.receive_atom(log_atom), number=10000) / 10000)
+
+            results[z] = (worst_case + best_case) / 2
             z = z + 1
-            avg = avg + i
+            avg = avg + (worst_case + best_case) / 2
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             missing_match_path_list_value_detector.__class__.__name__, avg, results, self.different_pathes % number_of_pathes)
@@ -345,21 +367,20 @@ class AnalysisComponentsPerformanceTest(TestBase):
             new_match_path_value_combo_detector = NewMatchPathValueComboDetector(
                 self.aminer_config, path_list, [self.stream_printer_event_handler], 'Default', True, True)
             t = time.time()
-            seconds = time.time()
+            measured_time = 0
             i = 0
-            while int(time.time() - seconds) < self.waiting_time:
+            while measured_time < self.waiting_time / 10:
                 decimal_integer_value_me = DecimalIntegerValueModelElement(
                     'd' + str(i % number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
                     DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i % 100).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
-                log_atom = LogAtom(
-                    match_element.match_string, ParserMatch(match_element), t, new_match_path_value_combo_detector)
-                new_match_path_value_combo_detector.receive_atom(log_atom)
+                log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, new_match_path_value_combo_detector)
+                measured_time += timeit.timeit(lambda: new_match_path_value_combo_detector.receive_atom(log_atom), number=1)
                 i = i + 1
-            results[z] = i
+            results[z] = i * 10
             z = z + 1
-            avg = avg + i
+            avg = avg + i * 10
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             new_match_path_value_combo_detector.__class__.__name__, avg, results, self.different_attributes % number_of_pathes)
@@ -377,20 +398,20 @@ class AnalysisComponentsPerformanceTest(TestBase):
             new_match_path_value_detector = NewMatchPathValueDetector(self.aminer_config, path_list, [
                 self.stream_printer_event_handler], 'Default', True, True)
             t = time.time()
-            seconds = time.time()
+            measured_time = 0
             i = 0
-            while int(time.time() - seconds) < self.waiting_time:
+            while measured_time < self.waiting_time / 10:
                 decimal_integer_value_me = DecimalIntegerValueModelElement(
                     'd' + str(i % number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
                     DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i % 100).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
                 log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, new_match_path_value_detector)
-                new_match_path_value_detector.receive_atom(log_atom)
+                measured_time += timeit.timeit(lambda: new_match_path_value_detector.receive_atom(log_atom), number=1)
                 i = i + 1
-            results[z] = i
+            results[z] = i * 10
             z = z + 1
-            avg = avg + i
+            avg = avg + i * 10
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             new_match_path_value_detector.__class__.__name__, avg, results, self.different_attributes % number_of_pathes)
@@ -403,22 +424,22 @@ class AnalysisComponentsPerformanceTest(TestBase):
             time_correlation_detector = TimeCorrelationDetector(self.aminer_config, 2, number_of_rules, 0, [
                 self.stream_printer_event_handler], record_count_before_event=self.waiting_time * 9000)
             t = time.time()
-            seconds = time.time()
+            measured_time = 0
             i = 0
-            while int(time.time() - seconds) < self.waiting_time:
+            while measured_time < self.waiting_time / 10:
                 decimal_integer_value_me = DecimalIntegerValueModelElement(
                     'd', DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i % 100).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
                 log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, time_correlation_detector)
-                time_correlation_detector.receive_atom(log_atom)
+                measured_time += timeit.timeit(lambda: time_correlation_detector.receive_atom(log_atom), number=1)
                 i = i + 1
-            results[z] = i
+            results[z] = i * 10
             z = z + 1
-            avg = avg + i
+            avg = avg + i * 10
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
-            time_correlation_detector.__class__.__name__, avg, results, 'testCount=%d.' % number_of_rules)
+            time_correlation_detector.__class__.__name__, avg, results, 'test_count=%d.' % number_of_rules)
 
     def run_time_correlation_violation_detector(self, chance):
         results = [None] * self.iterations
@@ -433,41 +454,38 @@ class AnalysisComponentsPerformanceTest(TestBase):
 
             time_correlation_violation_detector = TimeCorrelationViolationDetector(
                 self.analysis_context.aminer_config, rules, [self.stream_printer_event_handler])
-            seconds = time.time()
-            s = seconds
+            s = time.time()
+            measured_time = 0
             i = 0
             decimal_integer_value_me = DecimalIntegerValueModelElement(
                 'd0', DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
-            while int(time.time() - seconds) < self.waiting_time:
+            while measured_time < self.waiting_time / 10:
                 integer = '/integer'
-                p = process_time()
                 r = random.randint(1, 100)
-                seconds = seconds + process_time() - p
                 decimal_integer_value_me1 = DecimalIntegerValueModelElement(
                     'd1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i).encode())
                 match_element = decimal_integer_value_me.get_match_element(integer, match_context)
                 log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), s, time_correlation_violation_detector)
-                time_correlation_violation_detector.receive_atom(log_atom)
+                measured_time += timeit.timeit(lambda: time_correlation_violation_detector.receive_atom(log_atom), number=1)
 
                 match_context = MatchContext(str(i).encode())
                 match_element = decimal_integer_value_me1.get_match_element(integer, match_context)
                 log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), s + r / 100, time_correlation_violation_detector)
-                time_correlation_violation_detector.receive_atom(log_atom)
+                measured_time += timeit.timeit(lambda: time_correlation_violation_detector.receive_atom(log_atom), number=1)
                 s = s + r / 100
 
                 if r / 100 >= chance:
-                    p = process_time()
                     match_context = MatchContext(str(i).encode())
                     match_element = decimal_integer_value_me.get_match_element(integer, match_context)
                     log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), s, time_correlation_violation_detector)
-                    time_correlation_violation_detector.receive_atom(log_atom)
-                    seconds = seconds + process_time() - p
+                    measured_time += timeit.timeit(lambda: time_correlation_violation_detector.receive_atom(log_atom), number=1)
+                    i = i + 1
                 time_correlation_violation_detector.do_timer(s)
-                i = i + 1
-            results[z] = i
+                i = i + 2
+            results[z] = i * 10
             z = z + 1
-            avg = avg + i
+            avg = avg + i * 10
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             time_correlation_violation_detector.__class__.__name__, avg, results,
@@ -484,7 +502,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
 
             seconds = time.time()
             i = 0
-            while int(time.time() - seconds) < self.waiting_time:
+            measured_time = 0
+            while measured_time < self.waiting_time / 10:
                 decimal_integer_value_me = DecimalIntegerValueModelElement(
                     'd' + str(i % number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
                     DecimalIntegerValueModelElement.PAD_TYPE_NONE)
@@ -494,11 +513,11 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 match_context = MatchContext(str(i).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
                 log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), seconds - r, simple_monotonic_timestamp_adjust)
-                simple_monotonic_timestamp_adjust.receive_atom(log_atom)
+                measured_time += timeit.timeit(lambda: simple_monotonic_timestamp_adjust.receive_atom(log_atom), number=1)
                 i = i + 1
-            results[z] = i
+            results[z] = i * 10
             z = z + 1
-            avg = avg + i
+            avg = avg + i * 10
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             simple_monotonic_timestamp_adjust.__class__.__name__, avg, results,
@@ -511,31 +530,29 @@ class AnalysisComponentsPerformanceTest(TestBase):
         while z < self.iterations:
             timestamps_unsorted_detector = TimestampsUnsortedDetector(self.aminer_config, [
                 self.stream_printer_event_handler])
-            seconds = time.time()
-            s = seconds
+            s = time.time()
             i = 0
+            measured_time = 0
             mini = 100
-            while int(time.time() - seconds) < self.waiting_time:
+            while measured_time < self.waiting_time / 10:
                 decimal_integer_value_me = DecimalIntegerValueModelElement(
                     'd', DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
-                p = process_time()
                 r = random.randint(1, 100)
-                seconds = seconds + process_time() - p
                 match_context = MatchContext(str(i).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
                 log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), s + min(r, mini), timestamps_unsorted_detector)
-                timestamps_unsorted_detector.receive_atom(log_atom)
+                measured_time += timeit.timeit(lambda: timestamps_unsorted_detector.receive_atom(log_atom), number=1)
                 if mini > r:
                     mini = r
                 else:
                     mini = mini + reset_factor
                 i = i + 1
-            results[z] = i
+            results[z] = i * 10
             z = z + 1
-            avg = avg + i
+            avg = avg + i * 10
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
-            timestamps_unsorted_detector.__class__.__name__, avg, results, 'a resetFactor of %f.' % reset_factor)
+            timestamps_unsorted_detector.__class__.__name__, avg, results, 'a reset_factor of %f.' % reset_factor)
 
     def run_whitelist_violation_detector(self, number_of_pathes, modulo_factor):
         results = [None] * self.iterations
@@ -549,27 +566,25 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 i = i + 1
             whitelist_violation_detector = WhitelistViolationDetector(self.aminer_config, rules, [self.stream_printer_event_handler])
             t = time.time()
-            seconds = time.time()
             i = 0
-            while int(time.time() - seconds) < self.waiting_time:
-                p = process_time()
+            measured_time = 0
+            while measured_time < self.waiting_time / 10:
                 r = random.randint(1, 100)
                 if r >= modulo_factor:
                     r = 2
                 else:
                     r = 1
-                seconds = seconds + process_time() - p
                 decimal_integer_value_me = DecimalIntegerValueModelElement(
                     'd' + str(i % (number_of_pathes * r)), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
                     DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i % 100).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
                 log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, whitelist_violation_detector)
-                whitelist_violation_detector.receive_atom(log_atom)
+                measured_time += timeit.timeit(lambda: whitelist_violation_detector.receive_atom(log_atom), number=1)
                 i = i + 1
-            results[z] = i
+            results[z] = i * 10
             z = z + 1
-            avg = avg + i
+            avg = avg + i * 10
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             whitelist_violation_detector.__class__.__name__, avg, results,
@@ -656,34 +671,23 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = 0
         z = 0
         while z < self.iterations:
-            i = 0
             new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config, [
                 'parser/type/path/name', 'parser/type/syscall/syscall'], [self.stream_printer_event_handler],
                 id_path_list=['parser/type/path/id', 'parser/type/syscall/id'], min_allowed_time_diff=min_allowed_time_diff,
                 auto_include_flag=False, allow_missing_values_flag=True, persistence_id='audit_type_path', output_log_line=False)
             t = time.time()
-            seconds = time.time()
+            measured_time = 0
             i = 0
-            while int(time.time() - seconds) < self.waiting_time:
-                p = process_time()
+            while measured_time < self.waiting_time / 10:
                 r = random.randint(0, len(log_lines)-1)
-                seconds = seconds + process_time() - p
-
-                # this code just creates some data to be able to compare with other analysis components.
-                decimal_integer_value_me = DecimalIntegerValueModelElement(
-                    'd', DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
-                match_context = MatchContext(str(i % 100).encode())
-                _match_element = decimal_integer_value_me.get_match_element('integer', match_context)
-                ########################################################################################
-
                 line = log_lines[r]
                 log_atom = LogAtom(
-                    line, ParserMatch(parsing_model.get_match_element('parser', MatchContext(line))), t, self.__class__.__name__)
-                new_match_id_value_combo_detector.receive_atom(log_atom)
+                    line, ParserMatch(parsing_model.get_match_element('parser', MatchContext(line))), t + i, self.__class__.__name__)
+                measured_time += timeit.timeit(lambda: new_match_id_value_combo_detector.receive_atom(log_atom), number=1)
                 i = i + 1
-            results[z] = i
+            results[z] = i * 10
             z = z + 1
-            avg = avg + i
+            avg = avg + i * 10
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             new_match_id_value_combo_detector.__class__.__name__, avg, results,
@@ -704,15 +708,20 @@ class AnalysisComponentsPerformanceTest(TestBase):
         self.run_enhanced_new_match_path_value_combo_detector(100)
 
     def test03_histogram_analysis(self):
-        # with reports
-        self.run_histogram_analysis(1, 40000)
-        self.run_histogram_analysis(30, 40000)
-        self.run_histogram_analysis(100, 40000)
+        self.run_histogram_analysis(1, 100)
+        self.run_histogram_analysis(30, 100)
+        self.run_histogram_analysis(100, 100)
+        self.run_histogram_analysis(10000, 100)
 
-        # without reports
-        self.run_histogram_analysis(1, 100000)
-        self.run_histogram_analysis(30, 100000)
-        self.run_histogram_analysis(100, 100000)
+        self.run_histogram_analysis(1, 1000)
+        self.run_histogram_analysis(30, 1000)
+        self.run_histogram_analysis(100, 1000)
+        self.run_histogram_analysis(10000, 1000)
+
+        self.run_histogram_analysis(1, 10000)
+        self.run_histogram_analysis(30, 10000)
+        self.run_histogram_analysis(100, 10000)
+        self.run_histogram_analysis(10000, 10000)
 
     def test04_match_value_average_change_detector(self):
         self.run_match_value_average_change_detector(1)

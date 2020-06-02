@@ -73,6 +73,7 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
         for k in self.count_dict:
             c = self.count_dict[k]
             output_string += '\t' + str(k) + ': ' + str(c) + '\n'
+        output_string = output_string[:-1]
 
         event_data = {'StatusInfo': self.count_dict, 'FromTime': datetime.datetime.utcnow().timestamp() - self.report_interval,
                       'ToTime': datetime.datetime.utcnow().timestamp()}

@@ -481,8 +481,19 @@ class AnalysisChildRemoteControlHandler:
                 json_request_data = JsonUtil.decode_object(json_request_data)
                 if (json_request_data is None) or (not isinstance(json_request_data, list)) or (len(json_request_data) != 2):
                     raise Exception('Invalid request data')
-                json_request_data[0] = shlex.quote(json_request_data[0])
-                json_request_data[1] = shlex.quote(json_request_data[1])
+                if json_request_data[0]:
+                    json_request_data[0] = shlex.quote(json_request_data[0].decode())
+                if json_request_data[1]:
+                    if isinstance(json_request_data[1], list):
+                        new_list = []
+                        for item in json_request_data[1]:
+                            if isinstance(item, str) or isinstance(item, bytes):
+                                new_list.append(shlex.quote(item))
+                            else:
+                                new_list.append(item)
+                        json_request_data[1] = new_list
+                    else:
+                        json_request_data[1] = shlex.quote(json_request_data[1].decode())
                 methods = AMinerRemoteControlExecutionMethods()
                 import aminer.analysis
                 exec_locals = {
@@ -515,7 +526,7 @@ class AnalysisChildRemoteControlHandler:
                 logging.basicConfig(filename=AMinerConfig.LOG_FILE, level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s',
                                     datefmt='%d.%m.%Y %H:%M:%S')
                 logging.addLevelName(15, "REMOTECONTROL")
-                logging.log(15, json_request_data[0].decode())
+                logging.log(15, json_request_data[0])
 
                 # skipcq: PYL-W0122
                 exec(json_request_data[0], {'__builtins__': None}, exec_locals)
