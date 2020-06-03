@@ -37,15 +37,10 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
             if match_element is not None:
                 self.count_dict[target_path] += 1
         if not self.target_path_list:
-            shortest = 1000
-            for key in match_dict:
-                if match_dict[key].path.count('/') < shortest:
-                    shortest = match_dict[key].path.count('/')
-            for key in match_dict:
-                if match_dict[key].path.count('/') == shortest:
-                    if match_dict[key].path not in self.count_dict:
-                        self.count_dict[match_dict[key].path] = 0
-                    self.count_dict[match_dict[key].path] += 1
+            path = match_dict[list(match_dict.keys())[0]].path
+            if path not in self.count_dict:
+                self.count_dict[path] = 0
+            self.count_dict[path] += 1
 
         if self.next_report_time is None:
             self.next_report_time = time.time() + self.report_interval
