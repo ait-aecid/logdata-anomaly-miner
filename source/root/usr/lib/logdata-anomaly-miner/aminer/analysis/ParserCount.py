@@ -37,7 +37,7 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
             if match_element is not None:
                 self.count_dict[target_path] += 1
         if not self.target_path_list:
-            path = match_dict[list(match_dict.keys())[0]].path
+            path = iter(match_dict).__next__()
             if path not in self.count_dict:
                 self.count_dict[path] = 0
             self.count_dict[path] += 1
