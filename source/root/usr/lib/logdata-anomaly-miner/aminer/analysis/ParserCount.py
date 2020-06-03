@@ -56,9 +56,9 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
         if self.next_report_time is None:
             return self.report_interval
         delta = self.next_report_time - trigger_time
-        if delta <= 0:
+        if delta < 0:
             self.send_report()
-            delta = 600
+            delta = self.report_interval
         return delta
 
     # skipcq: PYL-R0201

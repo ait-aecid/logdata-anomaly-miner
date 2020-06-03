@@ -487,7 +487,7 @@ class AnalysisChildRemoteControlHandler:
                     if isinstance(json_request_data[1], list):
                         new_list = []
                         for item in json_request_data[1]:
-                            if isinstance(item, str) or isinstance(item, bytes):
+                            if isinstance(item, (bytes, str)):
                                 new_list.append(shlex.quote(item))
                             else:
                                 new_list.append(item)

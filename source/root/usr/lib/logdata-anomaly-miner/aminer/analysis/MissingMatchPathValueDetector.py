@@ -81,7 +81,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         return True
 
     def get_channel_key(self, log_atom):
-        """Get the key identifying the channel this logAtom is coming from."""
+        """Get the key identifying the channel this log_atom is coming from."""
         match_element = log_atom.parser_match.get_match_dictionary().get(self.target_path, None)
         if match_element is None:
             return None
@@ -182,7 +182,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         if self.next_persist_time is None:
             return 600
         delta = self.next_persist_time - trigger_time
-        if delta <= 0:
+        if delta < 0:
             PersistencyUtil.store_json(self.persistence_file_name, self.expected_values_dict)
             self.next_persist_time = None
             delta = 600
@@ -226,7 +226,7 @@ class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
         self.target_path_list = target_path_list
 
     def get_channel_key(self, log_atom):
-        """Get the key identifying the channel this logAtom is coming from."""
+        """Get the key identifying the channel this log_atom is coming from."""
         for target_path in self.target_path_list:
             match_element = log_atom.parser_match.get_match_dictionary().get(target_path, None)
             if match_element is None:
