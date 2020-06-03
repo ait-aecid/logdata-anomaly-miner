@@ -1,8 +1,8 @@
 curl https://mirror.klaus-uwe.me/apache/kafka/2.5.0/kafka_2.12-2.5.0.tgz --output kafka.tgz
-tar xvf kafka.tgz
+tar xvf kafka.tgz > /dev/null
 rm kafka.tgz
 
-kafka_2.12-2.5.0/bin/zookeeper-server-start.sh config/zookeeper.properties > /dev/null &
+kafka_2.12-2.5.0/bin/zookeeper-server-start.sh kafka_2.12-2.5.0/config/zookeeper.properties > /dev/null &
 sleep 1
 kafka_2.12-2.5.0/bin/kafka-server-start.sh config/server.properties > /dev/null &
 
