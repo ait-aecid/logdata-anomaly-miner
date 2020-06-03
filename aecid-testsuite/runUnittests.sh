@@ -4,7 +4,7 @@ rm kafka.tgz
 
 kafka_2.12-2.5.0/bin/zookeeper-server-start.sh kafka_2.12-2.5.0/config/zookeeper.properties > /dev/null &
 sleep 1
-kafka_2.12-2.5.0/bin/kafka-server-start.sh config/server.properties > /dev/null &
+kafka_2.12-2.5.0/bin/kafka-server-start.sh kafka_2.12-2.5.0/config/server.properties > /dev/null &
 
 sudo python3 -m unittest discover -s unit -p '*Test.py' > /dev/null
 test -e /var/mail/mail && sudo rm -f /var/mail/mail
