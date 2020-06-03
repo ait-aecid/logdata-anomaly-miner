@@ -79,7 +79,7 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             return 600
 
         delta = self.next_persist_time - trigger_time
-        if delta <= 0:
+        if delta < 0:
             self.do_persist()
             delta = 600
         return delta

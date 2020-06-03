@@ -193,6 +193,11 @@ def build_analysis_pipeline(analysis_context):
     analysis_context.register_component(whitelist_violation_detector, component_name="Whitelist")
     atom_filters.add_handler(whitelist_violation_detector)
 
+    from aminer.analysis import ParserCount
+    parser_count = ParserCount(analysis_context.aminer_config, None, anomaly_event_handlers, 10, False)
+    analysis_context.register_component(parser_count, component_name="ParserCount")
+    atom_filters.add_handler(parser_count)
+
     from aminer.analysis import NewMatchPathDetector
     new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=False)
     analysis_context.register_component(new_match_path_detector, component_name="NewMatchPath")
