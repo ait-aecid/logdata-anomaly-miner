@@ -32,7 +32,7 @@ class KafkaEventHandler(EventHandlerInterface):
         try:
             self.producer.send(self.topic, event_data)
         except KafkaError as err:
-            print("Error: " + str(err))
+            print("Error: " + str(err), file=sys.stderr)
             self.producer.close()
             self.producer = None
             return False
