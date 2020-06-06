@@ -80,6 +80,10 @@ class ParserCountTest(TestBase):
         self.assertEqual(parser_count.count_dict, old_count_dict)
         parser_count.reset_after_report_flag = True
         parser_count.send_report()
+        # no changes happened, so no report and no resetting happening
+        self.assertEqual(parser_count.count_dict, old_count_dict)
+        parser_count.count_dict['fixed/m3'] = 18
+        parser_count.send_report()
         old_count_dict['fixed/seq'] = 0
         old_count_dict['fixed/seq/m1'] = 0
         old_count_dict['fixed/seq/m2'] = 0

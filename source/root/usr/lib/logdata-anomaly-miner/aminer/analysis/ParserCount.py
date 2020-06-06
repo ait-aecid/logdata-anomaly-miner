@@ -18,7 +18,9 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.report_interval = report_interval
         self.report_event_handlers = report_event_handlers
         self.reset_after_report_flag = reset_after_report_flag
+        self.past_time = 0
         self.count_dict = {}
+        self.old_count_dict = {}
         self.next_report_time = None
         if self.target_path_list is None:
             self.target_path_list = []
@@ -63,7 +65,10 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def send_report(self):
         """Sends a report to the event handlers."""
-        output_string = 'Parsed paths in the last ' + str(self.report_interval) + ' seconds:\n'
+        self.past_time += self.report_interval
+        if self.count_dict == self.old_count_dict:
+            return
+        output_string = 'Parsed paths in the last ' + str(self.past_time) + ' seconds:\n'
 
         for k in self.count_dict:
             c = self.count_dict[k]
@@ -76,5 +81,7 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
             listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Count report', [output_string], event_data, None, self)
 
         if self.reset_after_report_flag:
+            self.past_time = 0
             for targetPath in self.target_path_list:
                 self.count_dict[targetPath] = 0
+        self.old_count_dict = dict(self.count_dict)
