@@ -66,8 +66,6 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
     def send_report(self):
         """Sends a report to the event handlers."""
         self.past_time += self.report_interval
-        if self.count_dict == self.old_count_dict:
-            return
         output_string = 'Parsed paths in the last ' + str(self.past_time) + ' seconds:\n'
 
         for k in self.count_dict:
@@ -84,4 +82,3 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
             self.past_time = 0
             for targetPath in self.target_path_list:
                 self.count_dict[targetPath] = 0
-        self.old_count_dict = dict(self.count_dict)
