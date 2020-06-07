@@ -25,11 +25,11 @@ install:
 
 script:
   - ./runUnittests.sh
-#  - ./runAMinerDemo.sh demo/AMiner/demo-config.py
-#  - ./runAMinerDemo.sh demo/AMiner/jsonConverterHandler-demo-config.py
-#  - ./runAMinerDemo.sh demo/AMiner/template_config.py
-#  - ./runAMinerIntegrationTest.sh aminerIntegrationTest.sh config.py
-#  - ./runAMinerIntegrationTest.sh aminerIntegrationTest2.sh config21.py config22.py
+  - ./runAMinerDemo.sh demo/AMiner/demo-config.py
+  - ./runAMinerDemo.sh demo/AMiner/jsonConverterHandler-demo-config.py
+  - ./runAMinerDemo.sh demo/AMiner/template_config.py
+  - ./runAMinerIntegrationTest.sh aminerIntegrationTest.sh config.py
+  - ./runAMinerIntegrationTest.sh aminerIntegrationTest2.sh config21.py config22.py
   - ./runCoverageTests.sh
 
 after_script:
