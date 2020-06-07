@@ -1,5 +1,4 @@
 import time
-import sys
 from datetime import datetime
 from kafka import KafkaConsumer
 from aminer.events.JsonConverterHandler import JsonConverterHandler
@@ -43,8 +42,6 @@ class KafkaEventHandlerTest(TestBase):
 
     def test1receive_serialized_data(self):
         """This unittest tests the receive_event method with serialized data from the JsonConverterHandler."""
-        import kafka
-        print(kafka.__version__, file=sys.stderr)
         json_converter_handler = JsonConverterHandler([self.stream_printer_event_handler], self.analysis_context)
         log_atom = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element), self.t, self)
         self.analysis_context.register_component(self, self.description)
@@ -56,6 +53,7 @@ class KafkaEventHandlerTest(TestBase):
         self.assertTrue(kafka_event_handler.receive_event(self.test_detector, self.event_message, self.sorted_log_lines, output, log_atom,
                                                           self))
 
+        time.sleep(1)
         self.assertEqual(self.consumer.__next__().value, self.expected_string % (
             datetime.fromtimestamp(self.t).strftime("%Y-%m-%d %H:%M:%S"), self.event_message, self.__class__.__name__, self.description,
             self.__class__.__name__, self.description, self.event_message, self.persistence_id, round(self.t, 2), ""))
