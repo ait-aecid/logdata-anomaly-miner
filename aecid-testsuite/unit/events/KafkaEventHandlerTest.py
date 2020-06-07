@@ -42,6 +42,8 @@ class KafkaEventHandlerTest(TestBase):
 
     def test1receive_serialized_data(self):
         """This unittest tests the receive_event method with serialized data from the JsonConverterHandler."""
+        import kafka
+        print(kafka.__version__)
         json_converter_handler = JsonConverterHandler([self.stream_printer_event_handler], self.analysis_context)
         log_atom = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element), self.t, self)
         self.analysis_context.register_component(self, self.description)
