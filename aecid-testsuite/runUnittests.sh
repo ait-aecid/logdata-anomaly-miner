@@ -17,3 +17,4 @@ kafka_2.12-2.5.0/bin/kafka-server-stop.sh > /dev/null
 kafka_2.12-2.5.0/bin/zookeeper-server-stop.sh > /dev/null
 sudo rm -r kafka_2.12-2.5.0/
 sudo rm -r /tmp/zookeeper
+sudo rm -r /tmp/kafka-logs
