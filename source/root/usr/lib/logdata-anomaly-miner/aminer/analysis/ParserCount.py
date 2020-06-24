@@ -1,6 +1,18 @@
-"""This component counts occurring combinations of values and periodically sends the results as a report."""
+"""This component counts occurring combinations of values and periodically sends the results as a report.
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with
+this program. If not, see <http://www.gnu.org/licenses/>.
+"""
 
 import datetime
+import time
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input import AtomHandlerInterface
 from aminer.util import TimeTriggeredComponentInterface
@@ -9,7 +21,7 @@ from aminer.util import TimeTriggeredComponentInterface
 class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """This class creates a counter for path value combinations."""
 
-    def __init__(self, aminer_config, target_path_list, report_interval, report_event_handlers, reset_after_report_flag=True):
+    def __init__(self, aminer_config, target_path_list, report_event_handlers, report_interval=60, reset_after_report_flag=True):
         """Initialize the ParserCount component.
         @param aminer"""
         self.aminer_config = aminer_config
@@ -17,8 +29,10 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.report_interval = report_interval
         self.report_event_handlers = report_event_handlers
         self.reset_after_report_flag = reset_after_report_flag
-        self.initial = True
         self.count_dict = {}
+        self.next_report_time = None
+        if self.target_path_list is None:
+            self.target_path_list = []
 
         for target_path in self.target_path_list:
             self.count_dict[target_path] = 0
@@ -33,16 +47,25 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
             match_element = match_dict.get(target_path, None)
             if match_element is not None:
                 self.count_dict[target_path] += 1
+        if not self.target_path_list:
+            path = iter(match_dict).__next__()
+            if path not in self.count_dict:
+                self.count_dict[path] = 0
+            self.count_dict[path] += 1
+
+        if self.next_report_time is None:
+            self.next_report_time = time.time() + self.report_interval
         return True
 
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted"""
-        if self.initial:
-            # Skip reporting at the beginning when nothing is parsed yet.
-            self.initial = False
-        else:
+        if self.next_report_time is None:
+            return self.report_interval
+        delta = self.next_report_time - trigger_time
+        if delta < 0:
             self.send_report()
-        return self.report_interval
+            delta = self.report_interval
+        return delta
 
     # skipcq: PYL-R0201
     def do_persist(self):
@@ -56,12 +79,12 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
         for k in self.count_dict:
             c = self.count_dict[k]
             output_string += '\t' + str(k) + ': ' + str(c) + '\n'
+        output_string = output_string[:-1]
 
         event_data = {'StatusInfo': self.count_dict, 'FromTime': datetime.datetime.utcnow().timestamp() - self.report_interval,
                       'ToTime': datetime.datetime.utcnow().timestamp()}
         for listener in self.report_event_handlers:
             listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Count report', [output_string], event_data, None, self)
-        # print(output_string, file=sys.stderr)
 
         if self.reset_after_report_flag:
             for targetPath in self.target_path_list:

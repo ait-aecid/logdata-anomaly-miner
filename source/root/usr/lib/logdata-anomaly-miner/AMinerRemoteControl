@@ -1,9 +1,34 @@
 #!/usr/bin/python3 -BbbEIsSttW all
+# -*- coding: utf-8 -*-
 
 """This tool allows to connect to a remote control socket, send
 requests and retrieve the responses. To allow remote use of this
 tool, e.g. via SSH forwarding, the remote control address can
-be set on the command line, no configuration is read."""
+be set on the command line, no configuration is read.
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with
+this program. If not, see <http://www.gnu.org/licenses/>.
+"""
+
+__authors__ = ["Markus Wurzenberger", "Max Landauer", "Wolfgang Hotwagner",
+               "Ernst Leierzopf", "Roman Fiedler", "Georg Hoeld"]
+__contact__ = "aecid@ait.ac.at"
+__copyright__ = "Copyright 2020, AIT Austrian Institute of Technology GmbH"
+__credits__ = ["Florian Skopik"]
+__date__ = "2020/06/19"
+__deprecated__ = False
+__email__ = "aecid@ait.ac.at"
+__license__ = "GPLv3"
+__maintainer__ = "Markus Wurzenberger"
+__status__ = "Production"
+__version__ = "2.0.1"
 
 import sys
 # Get rid of the default sys path immediately. Otherwise Python

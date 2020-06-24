@@ -1,4 +1,15 @@
-"""This module contains classes for execution of py child process main analysis loop."""
+"""This module contains classes for execution of py child process main analysis loop.
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with
+this program. If not, see <http://www.gnu.org/licenses/>.
+"""
 
 import base64
 import errno
@@ -481,8 +492,19 @@ class AnalysisChildRemoteControlHandler:
                 json_request_data = JsonUtil.decode_object(json_request_data)
                 if (json_request_data is None) or (not isinstance(json_request_data, list)) or (len(json_request_data) != 2):
                     raise Exception('Invalid request data')
-                json_request_data[0] = shlex.quote(json_request_data[0])
-                json_request_data[1] = shlex.quote(json_request_data[1])
+                if json_request_data[0]:
+                    json_request_data[0] = shlex.quote(json_request_data[0].decode())
+                if json_request_data[1]:
+                    if isinstance(json_request_data[1], list):
+                        new_list = []
+                        for item in json_request_data[1]:
+                            if isinstance(item, (bytes, str)):
+                                new_list.append(shlex.quote(item))
+                            else:
+                                new_list.append(item)
+                        json_request_data[1] = new_list
+                    else:
+                        json_request_data[1] = shlex.quote(json_request_data[1].decode())
                 methods = AMinerRemoteControlExecutionMethods()
                 import aminer.analysis
                 exec_locals = {
@@ -515,7 +537,7 @@ class AnalysisChildRemoteControlHandler:
                 logging.basicConfig(filename=AMinerConfig.LOG_FILE, level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s',
                                     datefmt='%d.%m.%Y %H:%M:%S')
                 logging.addLevelName(15, "REMOTECONTROL")
-                logging.log(15, json_request_data[0].decode())
+                logging.log(15, json_request_data[0])
 
                 # skipcq: PYL-W0122
                 exec(json_request_data[0], {'__builtins__': None}, exec_locals)

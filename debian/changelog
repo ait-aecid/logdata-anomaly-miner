@@ -1,4 +1,16 @@
-logdata-anomaly-miner (2.0.0~pre0) bionic; urgency=low
+logdata-anomaly-miner (2.0.1) unstable; urgency=low
+
+  Changes:
+  * Updated documentation
+  * Updated testcases
+  * Updated demos
+  * Updated debian files
+  * Added copyright headers
+  * Added executable bit to AMiner
+  
+ -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Wed,  24 Jun 2020 17:00:00 +0000
+
+logdata-anomaly-miner (2.0.0) unstable; urgency=low
 
   Changes:
   * Updated documentation
@@ -30,7 +42,7 @@ logdata-anomaly-miner (2.0.0~pre0) bionic; urgency=low
 
  -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Fri,  29 May 2020 17:00:00 +0000
 
-logdata-anomaly-miner (1.0.0) bionic; urgency=low
+logdata-anomaly-miner (1.0.0) unstable; urgency=low
   
   Changes:
   * Ported code to Python 3
@@ -47,7 +59,7 @@ logdata-anomaly-miner (1.0.0) bionic; urgency=low
 
  -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Tue,  2 Oct 2018 17:00:00 +0000
 
-logdata-anomaly-miner (0.0.8) xenial; urgency=low
+logdata-anomaly-miner (0.0.8) unstable; urgency=low
 
   New features:
   * Base64StringModelElement for parsing of base64 strings
@@ -65,7 +77,7 @@ logdata-anomaly-miner (0.0.8) xenial; urgency=low
 
  -- Roman Fiedler <roman.fiedler@ait.ac.at>  Tue, 30 May 2017 17:00:00 +0000
 
-logdata-anomaly-miner (0.0.7) xenial; urgency=low
+logdata-anomaly-miner (0.0.7) unstable; urgency=low
 
   New features:
   * Datetime parsing reimplemented in DateTimeModelElement to
@@ -80,7 +92,7 @@ logdata-anomaly-miner (0.0.7) xenial; urgency=low
 
  -- Roman Fiedler <roman.fiedler@ait.ac.at>  Mon,  9 Jan 2017 18:00:00 +0000
 
-logdata-anomaly-miner (0.0.6) xenial; urgency=low
+logdata-anomaly-miner (0.0.6) unstable; urgency=low
 
   New features:
   * Added "LogAtom" and "AtomHandlerInterface" to pass data from
@@ -97,7 +109,7 @@ logdata-anomaly-miner (0.0.6) xenial; urgency=low
 
  -- Roman Fiedler <roman.fiedler@ait.ac.at>  Fri, 4 Nov 2016 18:00:00 +0000
 
-logdata-anomaly-miner (0.0.5) xenial; urgency=low
+logdata-anomaly-miner (0.0.5) unstable; urgency=low
 
   * New features:
     * Added helper class for parser matching process debugging.
@@ -111,7 +123,7 @@ logdata-anomaly-miner (0.0.5) xenial; urgency=low
 
  -- Roman Fiedler <roman.fiedler@ait.ac.at>  Tue, 11 Oct 2016 18:00:00 +0000
 
-logdata-anomaly-miner (0.0.4) xenial; urgency=low
+logdata-anomaly-miner (0.0.4) unstable; urgency=low
 
   * New features:
     * NewMatchPathValueComboDetector: Detect new combination of
@@ -133,7 +145,7 @@ logdata-anomaly-miner (0.0.4) xenial; urgency=low
 
  -- Roman Fiedler <roman.fiedler@ait.ac.at>  Fri, 26 Aug 2016 15:15:00 +0000
 
-logdata-anomaly-miner (0.0.3) xenial; urgency=low
+logdata-anomaly-miner (0.0.3) unstable; urgency=low
 
   * Backport of changes from Debian ITP process review, see
     https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=813096
@@ -153,7 +165,7 @@ logdata-anomaly-miner (0.0.3) xenial; urgency=low
 
  -- Roman Fiedler <roman.fiedler@ait.ac.at>  Thu, 21 Jul 2016 19:00:00 +0000
 
-logdata-anomaly-miner (0.0.2) xenial; urgency=low
+logdata-anomaly-miner (0.0.2) unstable; urgency=low
 
   * Added remote control support, command line tool for sending
     commands.
@@ -168,7 +180,7 @@ logdata-anomaly-miner (0.0.2) xenial; urgency=low
 
  -- Roman Fiedler <roman.fiedler@ait.ac.at>  Thu, 12 May 2016 16:46:00 +0000
 
-logdata-anomaly-miner (0.0.1) xenial; urgency=low
+logdata-anomaly-miner (0.0.1) unstable; urgency=low
 
   * Bugfixes
   * Minor feature improvements (options)
@@ -181,7 +193,7 @@ logdata-anomaly-miner (0.0.1) xenial; urgency=low
 
  -- Roman Fiedler <roman.fiedler@ait.ac.at>  Thu, 07 Apr 2016 16:50:00 +0000
 
-logdata-anomaly-miner (0.0.0) xenial; urgency=low
+logdata-anomaly-miner (0.0.0) unstable; urgency=low
 
   * Initial Release Features:
     * Common parsing model elements available: fixed strings,
