@@ -1,4 +1,16 @@
-logdata-anomaly-miner (2.0.0~pre0) unstable; urgency=low
+logdata-anomaly-miner (2.0.1) unstable; urgency=low
+
+  Changes:
+  * Updated documentation
+  * Updated testcases
+  * Updated demos
+  * Updated debian files
+  * Added copyright headers
+  * Added executable bit to AMiner
+  
+ -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Wed,  24 Jun 2020 17:00:00 +0000
+
+logdata-anomaly-miner (2.0.0) unstable; urgency=low
 
   Changes:
   * Updated documentation
