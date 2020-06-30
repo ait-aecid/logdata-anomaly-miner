@@ -2,7 +2,7 @@ Source: logdata-anomaly-miner
 Section: admin
 Priority: optional
 Maintainer: Markus Wurzenberger <markus.wurzenberger@ait.ac.at>
-Build-Depends: debhelper-compat (= 13), dh-python, docbook-xsl, docbook-xml, python3-all, xsltproc
+Build-Depends: debhelper-compat (= 13), dh-python, docbook-xsl, docbook-xml, python3, xsltproc
 Standards-Version: 4.5.0
 Homepage: https://aecid.ait.ac.at/
 Vcs-Git: https://github.com/ait-aecid/logdata-anomaly-miner.git
