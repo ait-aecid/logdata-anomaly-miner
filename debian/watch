@@ -1,2 +1,4 @@
-version=3
-https://launchpad.net/logdata-anomaly-miner/+download .*/trunk/[a-z0-9.]+/\+download/logdata-anomaly-miner-([0-9~_.]+).tar.gz
+version=4
+opts="filenamemangle=s%(?:.*?)?V?(\d[\d.]*)\.tar\.gz%logdata-anomaly-miner-$1.tar.gz%" \
+    https://github.com/ait-aecid/logdata-anomaly-miner/tags \
+    (?:.*?/)?V?(\d[\d.]*)\.tar\.gz
