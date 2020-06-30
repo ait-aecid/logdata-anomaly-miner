@@ -1,0 +1,2 @@
+rm_conffile /etc/aminer/config.py.template 2.0.1-1~
+rm_conffile /etc/init/aminer.conf 2.0.1-1~
