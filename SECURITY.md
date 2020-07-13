@@ -19,11 +19,11 @@ In addition, please include the following information along with your report:
 * A description of the technical details of the vulnerabilities. It is very important to let us know how we can reproduce your findings.
 * An explanation who can exploit this vulnerability, and what they gain when doing so -- write an attack scenario. This will help us evaluate your report quickly, especially if the issue is complex.
 * Whether this vulnerability public or known to third parties. If it is, please provide details.
-* Whether we could mention your name in the changelogs
+* Whether we could mention your name in the changelogs.
 
 Once an issue is reported we use the following disclosure process:
 
 * When a report is received, we confirm the issue and determine its severity.
 * If we know of specific third-party services or software based on logdata-anomaly-miner that require mitigation before publication, those projects will be notified.
-* Fixes are prepared for the last minor release of the latest major release
-* Patch releases are published for all fixed released versions
+* Fixes are prepared for the last minor release of the latest major release.
+* Patch releases are published for all fixed released versions.
