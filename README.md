@@ -40,7 +40,7 @@ We're happily taking patches and other contributions. Please see the following l
 
 ## Bugs
 
-If you encounter any bugs, please create an issue on [Github](https://github.com/ait-aecid/logdata-anomaly-miner/issues)
+If you encounter any bugs, please create an issue on [Github](https://github.com/ait-aecid/logdata-anomaly-miner/issues).
 
 ## Security
 
