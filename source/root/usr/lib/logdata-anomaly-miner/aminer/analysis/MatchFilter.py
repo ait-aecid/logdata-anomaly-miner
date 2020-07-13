@@ -1,13 +1,8 @@
 """This module defines a filter for parsed paths and values."""
 
-import time
 import os
 
-from aminer import AMinerConfig
-from aminer.AnalysisChild import AnalysisContext
 from aminer.input import AtomHandlerInterface
-from aminer.util import PersistencyUtil
-from aminer.util import TimeTriggeredComponentInterface
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
 class MatchFilter(AtomHandlerInterface):
@@ -41,10 +36,6 @@ class MatchFilter(AtomHandlerInterface):
         original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
         if original_log_line_prefix is None:
           original_log_line_prefix = ''
-        #if self.output_log_line:
-        #  sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
-        #else:
-        #  sorted_log_lines = [original_log_line_prefix + repr(log_atom.raw_data)]
         analysis_component = {'AffectedLogAtomPaths': list([target_path]),
               'AffectedLogAtomValues': list([affected_log_atom_values])}
         if self.output_log_line:
