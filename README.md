@@ -38,6 +38,14 @@ We're happily taking patches and other contributions. Please see the following l
 * [ How to install a development environment ](https://github.com/ait-aecid/logdata-anomaly-miner/wiki/Installing-a-development-environment)
 * [ Git development workflow ](https://github.com/ait-aecid/logdata-anomaly-miner/wiki/Git-development-workflow)
 
+## Bugs
+
+If you encounter any bugs, please create an issue on [Github](https://github.com/ait-aecid/logdata-anomaly-miner/issues).
+
+## Security
+
+If you discover any security-related issues read the [SECURITY.md](/SECURITY.md) first and report the issues.
+
 ## License
 
 [GPL-3.0](LICENSE)
