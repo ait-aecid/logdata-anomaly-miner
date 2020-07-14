@@ -116,8 +116,8 @@ def help(programName,version=False):
   print("  --Config <config-file>\tpath to the config-file")
   print("  --Foreground          \tdo not fork")
   print("  --RunAnalysis         \tenable/disable analysis")
-  print("  --help                \tprint this help screen")
-  print("  --version             \tprint version-string")
+  print("  --Help                \tprint this help screen")
+  print("  --Version             \tprint version-string")
 
 def runAnalysisChild(aminerConfig, programName):
   """Runs the Analysis Child"""
