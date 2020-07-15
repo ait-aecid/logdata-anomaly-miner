@@ -105,6 +105,8 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
       <arg choice="plain"><option>--Config <replaceable>file</replaceable></option></arg>
       <arg choice="opt"><option>--Foreground</option></arg>
       <arg choice="opt"><option>--RunAnalysis</option></arg>
+      <arg choice="opt"><option>--Help</option></arg>
+      <arg choice="opt"><option>--Version</option></arg>
     </cmdsynopsis>
   </refsynopsisdiv>
   <refsect1 id="description">
@@ -148,6 +150,18 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         <listitem>
           <para>INTERNAL PARAMETER - DO NOT USE. It is just documented
           here for completeness.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>--Help</option></term>
+        <listitem>
+          <para>Prints the help-screen</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>--Version</option></term>
+        <listitem>
+          <para>Prints the version-string</para>
         </listitem>
       </varlistentry>
     </variablelist>
