@@ -1,11 +1,4 @@
-#########################################################
-#
-#
-# Please note that the yaml-config is experimental and
-# incomplete at the moment. 
-#
-#
-#########################################################
+# This schema is invalid, because of the Some_Weird_Option key.
 
 Some_Weird_Option: "test"
 
