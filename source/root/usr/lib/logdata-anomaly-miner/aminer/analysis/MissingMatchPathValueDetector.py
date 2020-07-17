@@ -94,7 +94,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         match_element = log_atom.parser_match.get_match_dictionary().get(self.target_path, None)
         if match_element is None:
             return None
-        return str(match_element.match_object) #avoid type mismatch with string-type in persistency
+        return str(match_element.match_object)
 
     def check_timeouts(self, timestamp, log_atom):
         """Check if there was any timeout on a channel, thus triggering event dispatching."""
@@ -119,7 +119,6 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                         self.next_check_timestamp = min(self.next_check_timestamp, self.last_seen_timestamp - value_overdue_time)
                         if old > self.next_check_timestamp or self.next_check_timestamp < detector_info[2]:
                             continue
-                
                 if value_overdue_time > 0:  # avoid early re-alerting
                     missing_value_list.append([value, value_overdue_time, detector_info[1]])
                     # Set the next alerting time.
