@@ -1,4 +1,6 @@
 *.pyc
+__pycache__
+aecid-testsuite/aminer
 # ignore ansible-roles
 roles/
 playbook.yml
