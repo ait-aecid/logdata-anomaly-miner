@@ -75,7 +75,7 @@
                     'id': {'type': 'string'},
                     'type': {'type': 'string'},
                     'name': {'type': 'string'},
-                    'args': {'type': ['string','list'], 'schema': {'type': 'string'}}
+                    'args': {'type': ['string', 'list'], 'schema': {'type': 'string'}}
                 }
             }
         },
@@ -117,7 +117,7 @@
                     'id': {'type': 'string'},
                     'type': {'type': 'string', 'allowed': ['StreamPrinterEventHandler', 'SyslogWriterEventHandler']},
                     'json': {'type': 'boolean', 'required': False, 'default': False},
-                    'args': {'type': ['string','list'], 'schema': {'type': 'string'}}
+                    'args': {'type': ['string', 'list'], 'schema': {'type': 'string'}}
                 }
             }
         }
