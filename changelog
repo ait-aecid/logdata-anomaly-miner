@@ -1,3 +1,22 @@
+logdata-anomaly-miner (2.0.2) unstable; urgency=low
+
+  Changes:
+  * Added help parameters
+  * Added help-screen
+  * Added version parameter
+  * Adden path and value filter
+  * Change time model of ApacheAccessModel for arbitrary time zones
+  * Update link to documentation
+  * Added SECURITY.md
+  * Refactoring
+  * Updated man-page
+  * Added unit-tests for loadYamlconfig
+  Bugfixes:
+  * Fixed header comment type in schema file
+  * Fix debian files
+
+ -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Wed,  17 Jul 2020 17:00:00 +0000
+
 logdata-anomaly-miner (2.0.1) unstable; urgency=low
 
   Changes:
