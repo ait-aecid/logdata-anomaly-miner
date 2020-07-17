@@ -121,7 +121,6 @@ class YamlConfigTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             aminer_config.loadYaml('unit/data/configfiles/unknown_parser_config.yml')
 
-
 if __name__ == "__main__":
     unittest.main()
 
