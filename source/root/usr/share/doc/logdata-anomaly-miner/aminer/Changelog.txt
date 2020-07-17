@@ -1,3 +1,22 @@
+V2.0.2 (2020-07-17)
+===================
+
+* Changes:
+  * Added help parameters
+  * Added help-screen
+  * Added version parameter
+  * Adden path and value filter
+  * Change time model of ApacheAccessModel for arbitrary time zones
+  * Update link to documentation
+  * Added SECURITY.md
+  * Refactoring
+  * Updated man-page
+  * Added unit-tests for loadYamlconfig
+* Bugfixes:
+  * Fixed header comment type in schema file
+  * Fix debian files
+
+
 V2.0.1 (2020-06-24)
 ===================
 
