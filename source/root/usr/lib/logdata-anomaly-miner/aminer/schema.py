@@ -1,15 +1,3 @@
-# This schema validates the config-files in yaml-format
-
-# This program is free software: you can redistribute it and/or modify it under
-# the terms of the GNU General Public License as published by the Free Software
-# Foundation, either version 3 of the License, or (at your option) any later
-# version.
-# This program is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-# You should have received a copy of the GNU General Public License along with
-# this program. If not, see <http://www.gnu.org/licenses/>.
-
 # skipcq: PYL-W0104
 {
         'LearnMode': {
@@ -107,12 +95,15 @@
                 'type': 'dict',
                  'schema' : {
                      'id': {'type': 'string', 'required': False, 'default': 'None'},
-                     'type' : {'type': 'string', 'allowed': ['NewMatchPathValueDetector','NewMatchPathValueComboDetector']},
+                     'type' : {'type': 'string', 'allowed': ['NewMatchPathValueDetector','NewMatchPathValueComboDetector','MissingMatchPathValueDetector']},
                      'paths' : {'type': 'list', 'schema': {'type': 'string'}},
                      'learnMode' : {'type': 'boolean'},
                      'persistence_id' : {'type': 'string', 'required': False, 'default': 'Default'},
                      'output_logline' : {'type': 'boolean', 'required': False, 'default': True},
-                     'allow_missing_values' : {'type': 'boolean', 'required': False, 'default': False}
+                     'allow_missing_values' : {'type': 'boolean', 'required': False, 'default': False},
+                     'check_interval' : {'type': 'integer', 'required': False, 'default': False},
+		     'realert_interval' : {'type': 'integer', 'required': False, 'default': False},
+                     'path' : {'type': 'string', 'required': False, 'default': False}
                 }
             }
         },
