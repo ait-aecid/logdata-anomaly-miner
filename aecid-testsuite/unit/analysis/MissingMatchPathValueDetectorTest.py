@@ -17,7 +17,7 @@ class MissingMatchPathValueDetectorTest(TestBase):
 
     pid = b' pid='
     datetime_format_string = '%Y-%m-%d %H:%M:%S'
-    match1_s1_overdue = "match1/s1: b' pid=' overdue 400.0s (interval -400)"
+    match1_s1_overdue = "match1/s1: ' pid=' overdue 400.0s (interval -400)"
     string = b'25537 uid=2'
 
     def test1_receive_atom(self):
