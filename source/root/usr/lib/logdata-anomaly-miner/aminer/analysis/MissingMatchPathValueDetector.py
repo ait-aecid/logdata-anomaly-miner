@@ -19,8 +19,6 @@ from aminer.events import EventSourceInterface
 from aminer.input import AtomHandlerInterface
 from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
-from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
-import os
 
 
 class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
