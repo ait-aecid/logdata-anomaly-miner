@@ -207,7 +207,7 @@ def build_analysis_pipeline(analysis_context):
                 anomaly_event_handlers, auto_include_flag=learn,
                 persistence_id=item['persistence_id'],
                 default_interval=item['check_interval'],
-		realert_interval=item['realert_interval'],
+                realert_interval=item['realert_interval'],
                 output_log_line=item['output_logline'])
         elif item['type'] == 'MissingMatchPathListValueDetector':
             tmpAnalyser = func(
@@ -215,7 +215,7 @@ def build_analysis_pipeline(analysis_context):
                 anomaly_event_handlers, auto_include_flag=learn,
                 persistence_id=item['persistence_id'],
                 default_interval=item['check_interval'],
-		realert_interval=item['realert_interval'],
+                realert_interval=item['realert_interval'],
                 output_log_line=item['output_logline'])
         else:
             tmpAnalyser = func(
