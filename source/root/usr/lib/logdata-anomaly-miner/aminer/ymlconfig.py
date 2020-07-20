@@ -207,7 +207,7 @@ def build_analysis_pipeline(analysis_context):
                 anomaly_event_handlers, auto_include_flag=learn,
                 persistence_id=item['persistence_id'],
                 default_interval=item['check_interval'],
-                realert_interval=item['realert_interval'],
+		realert_interval=item['realert_interval'],
                 output_log_line=item['output_logline'])
         elif item['type'] == 'MissingMatchPathListValueDetector':
             tmpAnalyser = func(
@@ -215,8 +215,19 @@ def build_analysis_pipeline(analysis_context):
                 anomaly_event_handlers, auto_include_flag=learn,
                 persistence_id=item['persistence_id'],
                 default_interval=item['check_interval'],
-                realert_interval=item['realert_interval'],
+		realert_interval=item['realert_interval'],
                 output_log_line=item['output_logline'])
+        elif item['type'] == 'TimeCorrelationDetector':
+            tmpAnalyser = func(
+                analysis_context.aminer_config, anomaly_event_handlers,
+                parallel_check_count=item['parallel_check_count'],
+                persistence_id=item['persistence_id'],                
+                record_count_before_event=item['record_count_before_event'],
+                output_log_line=item['output_logline'],
+                use_path_match=item['use_path_match'],
+                use_value_match=item['use_value_match'],
+                min_rule_attributes=item['min_rule_attributes'],
+                max_rule_attributes=item['max_rule_attributes'])
         else:
             tmpAnalyser = func(
                 analysis_context.aminer_config,
