@@ -29,7 +29,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
     it creates an event including the rules. This is useful to implement checks as depicted
     in http://dx.doi.org/10.1016/j.cose.2014.09.006."""
 
-    def __init__(self, aminer_config, anomaly_event_handlers, parallel_check_count, persistence_id='Default',
+    def __init__(self, aminer_config, anomaly_event_handlers, parallel_check_count, persistence_id,
                  record_count_before_event=10000, output_log_line=True, use_path_match=True, use_value_match=True,
                  min_rule_attributes=1, max_rule_attributes=5):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location.
@@ -43,7 +43,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
         self.parallel_check_count = parallel_check_count
         self.anomaly_event_handlers = anomaly_event_handlers
         self.min_rule_attributes = min_rule_attributes
-        self.max_rule_attributes =  max_rule_attributes 
+        self.max_rule_attributes = max_rule_attributes
         self.last_unhandled_match = None
         self.next_persist_time = None
         self.total_records = 0
@@ -203,12 +203,8 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
                     break
                 continue
 
-            key_val_str = key_value;
-            if isinstance(key_value, bytes):
-                key_val_str = key_value.decode()
-
             attribute_count -= 1
-            rule_type = 1;  # default is value_match only if none specified
+            rule_type = 1  # default is value_match only if none specified
             if self.use_path_match and not self.use_value_match:
                 rule_type = 0
             if not self.use_path_match and self.use_value_match:
