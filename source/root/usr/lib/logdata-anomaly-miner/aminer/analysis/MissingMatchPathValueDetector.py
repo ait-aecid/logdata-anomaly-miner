@@ -1,6 +1,5 @@
 """This module provides the MissingMatchPathValueDetector to generate events when expected values were not seen for an extended period
 of time.
-
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
 Foundation, either version 3 of the License, or (at your option) any later
@@ -27,7 +26,6 @@ import os
 class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
     """This class creates events when an expected value is not seen within a given timespan, e.g. because the service was deactivated
     or logging disabled unexpectedly. This is complementary to the function provided by NewMatchPathValueDetector.
-
     For each unique value extracted by targetPath, a tracking record is added to expectedValuesDict. It stores three numbers: the
     timestamp the extracted value was last seen, the maximum allowed gap between observations and the next alerting time when currently
     in error state. When in normal (alerting) state, the value is zero."""
@@ -96,7 +94,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         match_element = log_atom.parser_match.get_match_dictionary().get(self.target_path, None)
         if match_element is None:
             return None
-        return match_element.match_object
+        return str(match_element.match_object)
 
     def check_timeouts(self, timestamp, log_atom):
         """Check if there was any timeout on a channel, thus triggering event dispatching."""
@@ -121,10 +119,11 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                         self.next_check_timestamp = min(self.next_check_timestamp, self.last_seen_timestamp - value_overdue_time)
                         if old > self.next_check_timestamp or self.next_check_timestamp < detector_info[2]:
                             continue
-                missing_value_list.append([value, value_overdue_time, detector_info[1]])
-                # Set the next alerting time.
-                detector_info[2] = self.last_seen_timestamp + self.realert_interval
-                self.expected_values_dict[value] = detector_info
+                if value_overdue_time > 0:  # avoid early re-alerting
+                    missing_value_list.append([value, value_overdue_time, detector_info[1]])
+                    # Set the next alerting time.
+                    detector_info[2] = self.last_seen_timestamp + self.realert_interval
+                    self.expected_values_dict[value] = detector_info
             if missing_value_list:
                 message_part = []
                 affected_log_atom_values = []
@@ -242,7 +241,7 @@ class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
             match_element = log_atom.parser_match.get_match_dictionary().get(target_path, None)
             if match_element is None:
                 continue
-            return match_element.match_object
+            return str(match_element.match_object)
         return None
 
     def send_event_to_handlers(self, anomaly_event_handler, event_data, log_atom, message_part):
