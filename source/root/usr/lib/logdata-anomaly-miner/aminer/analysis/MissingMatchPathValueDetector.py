@@ -109,7 +109,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
             if not self.next_check_timestamp:
                 self.next_check_timestamp = self.last_seen_timestamp + 86400
             for value, detector_info in self.expected_values_dict.items():
-                value_overdue_time = self.last_seen_timestamp - detector_info[0] - detector_info[1]
+                value_overdue_time = int(self.last_seen_timestamp - detector_info[0] - detector_info[1])
                 if detector_info[2] != 0:
                     next_check_delta = detector_info[2] - self.last_seen_timestamp
                     if next_check_delta > 0:
@@ -157,15 +157,6 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                         match_paths_values[match_path] = match_value
                     analysis_component['ParsedLogAtom'] = match_paths_values
                 event_data = {'AnalysisComponent': analysis_component}
-                original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-                if original_log_line_prefix is None:
-                    original_log_line_prefix = ''
-                if self.output_log_line:
-                    message_part.append(
-                        log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix + repr(
-                            log_atom.raw_data))
-                else:
-                    message_part.append(os.linesep + original_log_line_prefix + repr(log_atom.raw_data))
                 for listener in self.anomaly_event_handlers:
                     self.send_event_to_handlers(listener, event_data, log_atom, [''.join(message_part)])
         return True
@@ -245,7 +236,11 @@ class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
             match_element = log_atom.parser_match.get_match_dictionary().get(target_path, None)
             if match_element is None:
                 continue
-            return str(match_element.match_object)
+            if isinstance(match_element.match_object, bytes):
+                affected_log_atom_values = match_element.match_object.decode()
+            else:
+                affected_log_atom_values = match_element.match_object
+            return str(affected_log_atom_values)
         return None
 
     def send_event_to_handlers(self, anomaly_event_handler, event_data, log_atom, message_part):
