@@ -232,11 +232,11 @@ class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
     due to different log formats, the hostname, servicename or any other relevant channel identifier has alternative pathes."""
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id='Default', auto_include_flag=False,
-                 default_interval=3600, realert_interval=86400):
+                 default_interval=3600, realert_interval=86400, output_log_line=True):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param targetPath to extract a source identification value from each logatom."""
         super(MissingMatchPathListValueDetector, self).__init__(aminer_config, None, anomaly_event_handlers, persistence_id,
-                                                                auto_include_flag, default_interval, realert_interval)
+                                                                auto_include_flag, default_interval, realert_interval, output_log_line)
         self.target_path_list = target_path_list
 
     def get_channel_key(self, log_atom):
@@ -245,7 +245,11 @@ class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
             match_element = log_atom.parser_match.get_match_dictionary().get(target_path, None)
             if match_element is None:
                 continue
-            return str(match_element.match_object)
+            if isinstance(match_element.match_object, bytes):
+                affected_log_atom_values = match_element.match_object.decode()
+            else:
+                affected_log_atom_values = match_element.match_object
+            return str(affected_log_atom_values)
         return None
 
     def send_event_to_handlers(self, anomaly_event_handler, event_data, log_atom, message_part):
