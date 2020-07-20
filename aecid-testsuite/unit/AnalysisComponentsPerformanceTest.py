@@ -859,9 +859,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
         self.run_new_match_path_value_detector(100)
 
     def test10time_correlation_detector(self):
-        self.run_time_correlation_detector(1)
+        self.run_time_correlation_detector(10)
+        self.run_time_correlation_detector(100)
         self.run_time_correlation_detector(1000)
-        self.run_time_correlation_detector(100000)
 
     def test11time_correlation_violation_detector(self):
         self.run_time_correlation_violation_detector(0.99)
