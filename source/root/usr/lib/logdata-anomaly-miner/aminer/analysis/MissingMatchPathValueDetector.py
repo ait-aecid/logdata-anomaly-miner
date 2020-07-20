@@ -94,7 +94,11 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         match_element = log_atom.parser_match.get_match_dictionary().get(self.target_path, None)
         if match_element is None:
             return None
-        return str(match_element.match_object)
+        if isinstance(match_element.match_object, bytes):
+            affected_log_atom_values = match_element.match_object.decode()
+        else:
+            affected_log_atom_values = match_element.match_object
+        return str(affected_log_atom_values)
 
     def check_timeouts(self, timestamp, log_atom):
         """Check if there was any timeout on a channel, thus triggering event dispatching."""
