@@ -96,7 +96,8 @@
                  'schema': {
                      'id': {'type': 'string', 'required': False, 'default': 'None'},
                      'type': {'type': 'string', 'allowed': ['NewMatchPathValueDetector', 
-                              'NewMatchPathValueComboDetector', 'MissingMatchPathValueDetector']},
+                              'NewMatchPathValueComboDetector', 'MissingMatchPathValueDetector',
+                              'MissingMatchPathListValueDetector']},
                      'paths': {'type': 'list', 'schema': {'type': 'string'}},
                      'learnMode': {'type': 'boolean'},
                      'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},
