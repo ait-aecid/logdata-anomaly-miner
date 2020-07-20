@@ -106,7 +106,7 @@
                      'check_interval': {'type': 'integer', 'required': False, 'default': 3600},
                      'realert_interval': {'type': 'integer', 'required': False, 'default': 36000},
                      'path': {'type': 'string', 'required': False, 'default': 'Default'},
-                     'parallel_check_count': {'type': 'integer', 'required': False, 'default': 10},
+                     'parallel_check_count': {'type': 'integer', 'required': True, 'default': 10},
                      'record_count_before_event': {'type': 'integer', 'required': False, 'default': 1000},
                      'use_path_match': {'type': 'boolean', 'required': False, 'default': True},
                      'use_value_match': {'type': 'boolean', 'required': False, 'default': True},

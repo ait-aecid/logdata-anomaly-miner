@@ -33,13 +33,13 @@ class TimeCorrelationDetectorTest(TestBase):
         """This test case unit the creation of a report. As the rules are chosen randomly this test can not be very specific in checking
         the actual values of the report."""
         description = "Test1TimeCorrelationDetector"
-        parallel_check_count=2
-        record_count_before_event=10
-        output_logline=True
-        use_path_match=True,
-        use_value_match=True
-        min_rule_attributes=1
-        max_rule_attributes=5
+        parallel_check_count = 2
+        record_count_before_event = 10
+        output_logline = True
+        use_path_match = True
+        use_value_match = True
+        min_rule_attributes = 1
+        max_rule_attributes = 5
         time_correlation_detector = TimeCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], parallel_check_count,
                                                             'Default', record_count_before_event, output_logline, use_path_match,
                                                             use_value_match, min_rule_attributes, max_rule_attributes)
