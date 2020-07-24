@@ -422,9 +422,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = 0
         z = 0
         while z < self.iterations:
-            time_correlation_detector = TimeCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler],
-                                                                number_of_rules, 'Default', self.waiting_time * 9000,
-                                                                True, True, True, 1, 5)
+            time_correlation_detector = TimeCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], number_of_rules,
+                                                                'Default', self.waiting_time * 9000, True, True, True, 1, 5)
             t = time.time()
             measured_time = 0
             i = 0
