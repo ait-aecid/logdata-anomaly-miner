@@ -15,10 +15,10 @@ class EventCorrelationDetectorTest(TestBase):
     alphabet_model = FirstMatchModelElement('first', [])
 
     @classmethod
-    def setUpClass(self):
-        for i in range(len(self.alphabet)):
-            char = bytes([self.alphabet[i]])
-            self.alphabet_model.children.append(FixedDataModelElement(char.decode(), char))
+    def setUpClass(cls):
+        for i in range(len(cls.alphabet)):
+            char = bytes([cls.alphabet[i]])
+            cls.alphabet_model.children.append(FixedDataModelElement(char.decode(), char))
 
     def test1learn_from_clear_examples(self):
         """In this test case perfect examples are used to learn and evaluate rules. The default parameters are used with exception to the

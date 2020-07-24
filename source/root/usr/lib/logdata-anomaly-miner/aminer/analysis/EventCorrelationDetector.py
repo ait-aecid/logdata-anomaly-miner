@@ -24,7 +24,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
     def __init__(self, aminer_config, anomaly_event_handlers, max_hypotheses=1000, hypothesis_max_delta_time=5.0,
                  generation_probability=1.0, generation_factor=1.0, max_observations=500, p0=0.9, alpha=0.05, candidates_size=10,
                  hypotheses_eval_delta_time=120.0, delta_time_to_discard_hypothesis=180.0, check_rules_flag=False,
-                 auto_include_flag=True, whitelisted_paths=[], persistence_id='Default'):
+                 auto_include_flag=True, whitelisted_paths=None, persistence_id='Default'):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
@@ -70,6 +70,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         self.check_rules_flag = check_rules_flag
         self.auto_include_flag = auto_include_flag
         self.whitelisted_paths = whitelisted_paths
+        if self.whitelisted_paths is None:
+            self.whitelisted_paths = []
         self.forward_rule_queue = deque([])
         self.back_rule_queue = deque([])
         self.forward_hypotheses_queue = deque([])
@@ -185,7 +187,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
             # Resolve triggered implication A => B when B occurs.
             if log_event in self.forward_rules_inv:
                 for rule in self.forward_rules_inv[log_event]:
-                    if len(rule.rule_trigger_timestamps) != 0 and rule.rule_trigger_timestamps[0] >= log_atom.atom_time - self.hypothesis_max_delta_time:
+                    if len(rule.rule_trigger_timestamps) != 0 and rule.rule_trigger_timestamps[0] >= log_atom.atom_time - \
+                            self.hypothesis_max_delta_time:
                         # Implication was triggered; append positive evaluation and mark as seen.
                         rule.add_rule_observation(1)
                         rule.rule_trigger_timestamps[0] = 'obs'
@@ -212,7 +215,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                         for listener in self.anomaly_event_handlers:
                             listener.receive_event('analysis.EventCorrelationDetector', 'Correlation rule violated!', [
                                 'Event %s is missing, but should follow event %s' % (
-                                    self.sample_events[rule.implied_event].decode(), self.sample_events[rule.trigger_event].decode())],
+                                    self.sample_events[rule.implied_event], self.sample_events[rule.trigger_event])],
                                 {'rule': rule.get_dictionary_repr()}, log_atom, self)
                     continue
                 break
@@ -226,7 +229,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
             # Resolve triggered implication B <= A when A occurs.
             if log_event in self.back_rules:
                 for rule in self.back_rules[log_event]:
-                    if len(rule.rule_trigger_timestamps) != 0 and rule.rule_trigger_timestamps[0] >= log_atom.atom_time - self.hypothesis_max_delta_time:
+                    if len(rule.rule_trigger_timestamps) != 0 and rule.rule_trigger_timestamps[0] >= log_atom.atom_time - \
+                            self.hypothesis_max_delta_time:
                         rule.add_rule_observation(1)
                         rule.rule_trigger_timestamps[0] = 'obs'
                     else:
@@ -237,8 +241,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                                 listener.receive_event(
                                     'analysis.EventCorrelationDetector', 'Correlation rule violated!', [
                                         'Event %s is missing, but should precede event %s' % (
-                                            self.sample_events[rule.implied_event].decode(),
-                                            self.sample_events[rule.trigger_event].decode())],
+                                            self.sample_events[rule.implied_event], self.sample_events[rule.trigger_event])],
                                     {'rule': rule.get_dictionary_repr()}, log_atom, self)
 
             # Clean up triggered/resolved implications.
