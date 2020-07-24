@@ -91,6 +91,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
 
         PersistencyUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, 'EventCorrelationDetector', persistence_id)
+        self.persistence_id = persistence_id
         persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
 
         if persistence_data is not None:
@@ -641,6 +642,6 @@ class Implication:
         return {'trigger_event': self.trigger_event, 'implied_event': self.implied_event, 'stable': self.stable,
                 'max_observations': self.max_observations, 'min_eval_true': self.min_eval_true,
                 'most_recent_observation_timestamp': self.most_recent_observation_timestamp,
-                'hypothesis_trigger_timestamps': self.hypothesis_trigger_timestamps,
-                'rule_trigger_timestamps': self.rule_trigger_timestamps, 'rule_observations': self.rule_observations,
+                'hypothesis_trigger_timestamps': list(self.hypothesis_trigger_timestamps),
+                'rule_trigger_timestamps': list(self.rule_trigger_timestamps), 'rule_observations': list(self.rule_observations),
                 'hypothesis_observations': self.hypothesis_observations, 'hypothesis_evaluated_true': self.hypothesis_evaluated_true}

@@ -41,7 +41,7 @@ done
 #Comment
 
 #EnhancedNewMatchPathValueComboDetector, NewMatchPathValueDetector
-:<<Comment
+#:<<Comment
 R=`shuf -i 1-3 -n 1`
 for ((i=0; i<R; i++)); do
 	R1=`shuf -i 30-50 -n 1`
@@ -257,7 +257,7 @@ for i in {1..1000}; do
 	fi
 done
 echo "$text" >> /tmp/syslog
-Comment
+#Comment
 
 #stop AMiner
 sleep 3 & wait $!
