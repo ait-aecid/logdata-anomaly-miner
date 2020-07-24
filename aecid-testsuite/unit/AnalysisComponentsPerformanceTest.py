@@ -10,6 +10,7 @@ from aminer.analysis.Rules import PathExistsMatchRule
 from aminer.analysis.EnhancedNewMatchPathValueComboDetector import EnhancedNewMatchPathValueComboDetector
 from aminer.analysis.NewMatchIdValueComboDetector import NewMatchIdValueComboDetector
 from aminer.analysis.ParserCount import ParserCount
+from aminer.analysis.EventCorrelationDetector import EventCorrelationDetector
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
 from aminer.input import LogAtom
 from aminer.parsing import ParserMatch, MatchContext, MatchElement, DecimalIntegerValueModelElement, FirstMatchModelElement, \
@@ -797,6 +798,70 @@ class AnalysisComponentsPerformanceTest(TestBase):
             parser_count.__class__.__name__, avg, results,
             'set_target_path_list: %s, report_after_number_of_elements: %d' % (set_target_path_list, report_after_number_of_elements))
 
+    def run_event_correlation_detector(self, generation, diff, p0, alpha, max_hypotheses, max_observations, candidates_size,
+                                       hypothesis_eval_delta_time, delta_time_to_discard_hypothesis):
+        alphabet = b'abcdefghijklmnopqrstuvwxyz'
+        alphabet_model = FirstMatchModelElement('first', [])
+        for i in range(len(alphabet)):
+            char = bytes([alphabet[i]])
+            alphabet_model.children.append(FixedDataModelElement(char.decode(), char))
+
+        # training phase
+        results = [None] * self.iterations
+        avg = 0
+        z = 0
+        while z < self.iterations:
+            ecd = EventCorrelationDetector(
+                self.aminer_config, [self.stream_printer_event_handler], generation_factor=generation, generation_probability=generation,
+                max_hypotheses=max_hypotheses, max_observations=max_observations, p0=p0, alpha=alpha, candidates_size=candidates_size,
+                hypotheses_eval_delta_time=hypothesis_eval_delta_time, delta_time_to_discard_hypothesis=delta_time_to_discard_hypothesis)
+
+            t = time.time()
+            measured_time = 0
+            i = 0
+            while measured_time < self.waiting_time / 10:
+                char = bytes([alphabet[i % len(alphabet)]])
+                parser_match = ParserMatch(alphabet_model.get_match_element('parser', MatchContext(char)))
+                t += diff
+                measured_time += timeit.timeit(lambda: ecd.receive_atom(LogAtom(char, parser_match, t, self.__class__.__name__)), number=1)
+                i = i + 1
+            results[z] = i * 10
+            z = z + 1
+            avg = avg + i * 10
+        avg = avg / self.iterations
+        type(self).result = self.result + self.result_string % (
+            ecd.__class__.__name__, avg, results,
+            'auto_include_flag: %s, generation: %.2f, diff: %.2f, p0: %.2f, alpha: %.2f, max_hypothesis: %d, max_observations: %d, candid'
+            'ates_size %d, hypothesis_eval_delta_time: %.2f, delta_time_to_discard_hypothesis: %.2f' % (
+                ecd.auto_include_flag, generation, diff, p0, alpha, max_hypotheses, max_observations, candidates_size,
+                hypothesis_eval_delta_time, delta_time_to_discard_hypothesis))
+
+        # check_phase
+        results = [None] * self.iterations
+        avg = 0
+        z = 0
+        while z < self.iterations:
+            ecd.auto_include_flag = False
+            t = time.time()
+            measured_time = 0
+            i = 0
+            while measured_time < self.waiting_time / 10:
+                char = bytes([alphabet[i % len(alphabet)]])
+                parser_match = ParserMatch(alphabet_model.get_match_element('parser', MatchContext(char)))
+                t += diff
+                measured_time += timeit.timeit(lambda: ecd.receive_atom(LogAtom(char, parser_match, t, self.__class__.__name__)), number=1)
+                i = i + 1
+            results[z] = i * 10
+            z = z + 1
+            avg = avg + i * 10
+        avg = avg / self.iterations
+        type(self).result = self.result + self.result_string % (
+            ecd.__class__.__name__, avg, results,
+            'auto_include_flag: %s, generation: %.2f, diff: %.2f, p0: %.2f, alpha: %.2f, max_hypothesis: %d, max_observations: %d, candid'
+            'ates_size %d, hypothesis_eval_delta_time: %.2f, delta_time_to_discard_hypothesis: %.2f' % (
+                ecd.auto_include_flag, generation, diff, p0, alpha, max_hypotheses, max_observations, candidates_size,
+                hypothesis_eval_delta_time, delta_time_to_discard_hypothesis))
+
     def test01atom_filters(self):
         self.run_atom_filters_match_path_filter(1)
         self.run_atom_filters_match_path_filter(30)
@@ -908,6 +973,30 @@ class AnalysisComponentsPerformanceTest(TestBase):
         self.run_parser_count(False, 1000)
         self.run_parser_count(False, 10000)
         self.run_parser_count(False, 100000)
+
+    def test17event_correlation_detector(self):
+        self.run_event_correlation_detector(1.0, 5, 0.9, 0.05, 1000, 500, 5, 120, 180)
+        self.run_event_correlation_detector(0.5, 5, 0.9, 0.05, 1000, 500, 5, 120, 180)
+        self.run_event_correlation_detector(0.1, 5, 0.9, 0.05, 1000, 500, 5, 120, 180)
+        self.run_event_correlation_detector(1.0, 10, 0.9, 0.05, 1000, 500, 5, 120, 180)
+        self.run_event_correlation_detector(1.0, 5, 0.9, 0.05, 1000, 500, 5, 120, 180)
+        self.run_event_correlation_detector(1.0, 1, 0.9, 0.05, 1000, 500, 5, 120, 180)
+        self.run_event_correlation_detector(1.0, 0.1, 0.9, 0.05, 1000, 500, 5, 120, 180)
+        self.run_event_correlation_detector(1.0, 5, 1.0, 0.01, 1000, 500, 5, 120, 180)
+        self.run_event_correlation_detector(1.0, 5, 0.9, 0.05, 1000, 500, 5, 120, 180)
+        self.run_event_correlation_detector(1.0, 5, 0.7, 0.1, 1000, 500, 5, 120, 180)
+        self.run_event_correlation_detector(1.0, 5, 0.9, 0.05, 1000, 500, 5, 120, 180)
+        self.run_event_correlation_detector(1.0, 5, 0.9, 0.05, 2000, 500, 5, 120, 180)
+        self.run_event_correlation_detector(1.0, 5, 0.9, 0.05, 10000, 500, 5, 120, 180)
+        self.run_event_correlation_detector(0.5, 5, 0.9, 0.05, 1000, 500, 5, 120, 180)
+        self.run_event_correlation_detector(0.5, 5, 0.9, 0.05, 1000, 1000, 5, 120, 180)
+        self.run_event_correlation_detector(0.5, 5, 0.9, 0.05, 1000, 2000, 5, 120, 180)
+        self.run_event_correlation_detector(0.5, 5, 0.9, 0.05, 1000, 500, 5, 120, 180)
+        self.run_event_correlation_detector(0.5, 5, 0.9, 0.05, 1000, 500, 10, 120, 180)
+        self.run_event_correlation_detector(0.5, 5, 0.9, 0.05, 1000, 500, 100, 120, 180)
+        self.run_event_correlation_detector(0.5, 5, 0.9, 0.05, 1000, 500, 5, 120, 180)
+        self.run_event_correlation_detector(0.5, 5, 0.9, 0.05, 1000, 500, 5, 60, 90)
+        self.run_event_correlation_detector(0.1, 5, 0.9, 0.05, 1000, 500, 5, 30, 45)
 
 
 if __name__ == '__main__':
