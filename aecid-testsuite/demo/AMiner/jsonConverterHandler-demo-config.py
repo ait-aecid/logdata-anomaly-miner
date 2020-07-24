@@ -347,8 +347,8 @@ def build_analysis_pipeline(analysis_context):
     atom_filter.add_handler(missing_match_path_value_detector)
 
     from aminer.analysis.TimeCorrelationDetector import TimeCorrelationDetector
-    time_correlation_detector = TimeCorrelationDetector(analysis_context.aminer_config, 2, 1, 0, anomaly_event_handlers,
-                                                        record_count_before_event=3000, output_log_line=True)
+    time_correlation_detector = TimeCorrelationDetector(analysis_context.aminer_config, anomaly_event_handlers, 2, 'Default',
+                                                        3000, True, True, True, 1, 5)
     analysis_context.register_component(time_correlation_detector, component_name="TimeCorrelationDetector")
     atom_filter.add_handler(time_correlation_detector)
 

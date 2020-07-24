@@ -421,8 +421,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = 0
         z = 0
         while z < self.iterations:
-            time_correlation_detector = TimeCorrelationDetector(self.aminer_config, 2, number_of_rules, 0, [
-                self.stream_printer_event_handler], record_count_before_event=self.waiting_time * 9000)
+            time_correlation_detector = TimeCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler],
+                                                                number_of_rules, 'Default', self.waiting_time * 9000,
+                                                                True, True, True, 1, 5)
             t = time.time()
             measured_time = 0
             i = 0
@@ -858,9 +859,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
         self.run_new_match_path_value_detector(100)
 
     def test10time_correlation_detector(self):
-        self.run_time_correlation_detector(1)
+        self.run_time_correlation_detector(10)
+        self.run_time_correlation_detector(100)
         self.run_time_correlation_detector(1000)
-        self.run_time_correlation_detector(100000)
 
     def test11time_correlation_violation_detector(self):
         self.run_time_correlation_violation_detector(0.99)

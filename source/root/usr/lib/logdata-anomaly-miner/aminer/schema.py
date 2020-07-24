@@ -97,15 +97,21 @@
                      'id': {'type': 'string', 'required': False, 'default': 'None'},
                      'type': {'type': 'string', 'allowed': ['NewMatchPathValueDetector', 
                               'NewMatchPathValueComboDetector', 'MissingMatchPathValueDetector',
-                              'MissingMatchPathListValueDetector']},
+                              'MissingMatchPathListValueDetector', 'TimeCorrelationDetector']},
                      'paths': {'type': 'list', 'schema': {'type': 'string'}},
                      'learnMode': {'type': 'boolean'},
                      'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},
                      'output_logline': {'type': 'boolean', 'required': False, 'default': True},
                      'allow_missing_values': {'type': 'boolean', 'required': False, 'default': False},
-                     'check_interval': {'type': 'integer', 'required': False, 'default': False},
-                     'realert_interval': {'type': 'integer', 'required': False, 'default': False},
-                     'path': {'type': 'string', 'required': False, 'default': 'Default'}
+                     'check_interval': {'type': 'integer', 'required': False, 'default': 3600},
+                     'realert_interval': {'type': 'integer', 'required': False, 'default': 36000},
+                     'path': {'type': 'string', 'required': False, 'default': 'Default'},
+                     'parallel_check_count': {'type': 'integer', 'required': True, 'default': 10},
+                     'record_count_before_event': {'type': 'integer', 'required': False, 'default': 1000},
+                     'use_path_match': {'type': 'boolean', 'required': False, 'default': True},
+                     'use_value_match': {'type': 'boolean', 'required': False, 'default': True},
+                     'min_rule_attributes': {'type': 'integer', 'required': False, 'default': 1},
+                     'max_rule_attributes': {'type': 'integer', 'required': False, 'default': 5}
                 }
             }
         },
