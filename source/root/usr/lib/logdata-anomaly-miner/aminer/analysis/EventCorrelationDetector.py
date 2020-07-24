@@ -124,6 +124,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     else:
                         self.forward_rules_inv[implied_event] = [rule]
 
+    # skipcq: PYL-R1710
     def get_min_eval_true(self, max_observations, p0, alpha):
         """Compute the critical value (minimal amount of true evaluations) for a hypothesis of form <eventA> implies <eventB> with at least
         probability p0 to be accepted. This method tries to be efficient by
@@ -132,15 +133,15 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         if (max_observations, p0, alpha) in self.min_eval_true_dict:
             return self.min_eval_true_dict[(max_observations, p0, alpha)]
 
-        sum = 0.0
+        sum1 = 0.0
         max_observations_factorial = math.factorial(max_observations)
         i_factorial = 1
         for i in range(max_observations + 1):
             i_factorial = i_factorial * max(i, 1)
             # No float conversion possible for huge numbers; use integer division.
-            sum = sum + max_observations_factorial / (i_factorial * math.factorial(max_observations - i)) * ((1 - p0) ** i) * (
+            sum1 = sum1 + max_observations_factorial / (i_factorial * math.factorial(max_observations - i)) * ((1 - p0) ** i) * (
                       p0 ** (max_observations - i))
-            if sum > (1 - alpha):
+            if sum1 > (1 - alpha):
                 if len(self.min_eval_true_dict) <= self.min_eval_true_dict_max_size:
                     # Store common values for fast retrieval
                     self.min_eval_true_dict[(max_observations, p0, alpha)] = max_observations - i

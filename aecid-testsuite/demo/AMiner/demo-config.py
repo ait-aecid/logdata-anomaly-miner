@@ -198,9 +198,9 @@ def build_analysis_pipeline(analysis_context):
 
     alphabet = b'abcdef'
     service_children_ecd = []
-    for i in range(len(alphabet)):
-        char = bytes([alphabet[i]])
-        service_children_ecd.append(FixedDataModelElement(char.decode(), char))
+    for i, char in enumerate(alphabet):
+        char = bytes([char])
+        alphabet_model.children.append(FixedDataModelElement(char.decode(), char))
 
     parsing_model = FirstMatchModelElement('model', [
         SequenceModelElement('CronAnnouncement', service_children_cron_job_announcement),

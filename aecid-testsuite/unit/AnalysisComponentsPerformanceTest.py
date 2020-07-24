@@ -802,8 +802,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
                                        hypothesis_eval_delta_time, delta_time_to_discard_hypothesis):
         alphabet = b'abcdefghijklmnopqrstuvwxyz'
         alphabet_model = FirstMatchModelElement('first', [])
-        for i in range(len(alphabet)):
-            char = bytes([alphabet[i]])
+        for i, char in enumerate(alphabet):
+            char = bytes([char])
             alphabet_model.children.append(FixedDataModelElement(char.decode(), char))
 
         # training phase
