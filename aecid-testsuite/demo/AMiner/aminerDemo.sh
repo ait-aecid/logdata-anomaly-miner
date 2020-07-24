@@ -30,6 +30,16 @@ fi
 #start AMiner
 bash -c 'AMiner --Foreground --Config '$FILE' & #2> /dev/null & #> /tmp/output &'
 
+#EventCorrelationDetetctor, NewMatchPathDetector
+#:<<Comment
+alphabet='abcdef'
+alphabet_len=$(echo -n $alphabet | wc -m)
+for ((i=0; i<10000; i++)); do
+	echo ${alphabet:$i % $alphabet_len:1} >> /tmp/syslog
+	sleep 0.0001
+done
+#Comment
+
 #EnhancedNewMatchPathValueComboDetector, NewMatchPathValueDetector
 #:<<Comment
 R=`shuf -i 1-3 -n 1`
