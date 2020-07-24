@@ -9,6 +9,7 @@ must be observed within currentTime-queueDeltaTime).
 from collections import deque
 import random
 import math
+import time
 
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
@@ -145,8 +146,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
     def receive_atom(self, log_atom):
         timestamp = log_atom.get_timestamp()
         if timestamp is None:
-            log_atom.atom_time = self.last_timestamp
-            timestamp = self.last_timestamp
+            log_atom.atom_time = time.time()
+            timestamp = log_atom.atom_time
         if timestamp < self.last_timestamp:
             for listener in self.anomaly_event_handlers:
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Logdata not sorted: last %s, current %s' % (
@@ -210,7 +211,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                         for listener in self.anomaly_event_handlers:
                             listener.receive_event('analysis.EventCorrelationDetector', 'Correlation rule violated!', [
                                 'Event %s is missing, but should follow event %s' % (
-                                    str(self.sample_events[rule.implied_event]), str(self.sample_events[rule.trigger_event]))],
+                                    self.sample_events[rule.implied_event].decode(), self.sample_events[rule.trigger_event].decode())],
                                 {'rule': rule.get_dictionary_repr()}, log_atom, self)
                     continue
                 break
@@ -235,7 +236,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                                 listener.receive_event(
                                     'analysis.EventCorrelationDetector', 'Correlation rule violated!', [
                                         'Event %s is missing, but should precede event %s' % (
-                                            str(self.sample_events[rule.implied_event]), str(self.sample_events[rule.trigger_event]))],
+                                            self.sample_events[rule.implied_event].decode(),
+                                            self.sample_events[rule.trigger_event].decode())],
                                     {'rule': rule.get_dictionary_repr()}, log_atom, self)
 
             # Clean up triggered/resolved implications.

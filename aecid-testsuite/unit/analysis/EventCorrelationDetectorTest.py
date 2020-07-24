@@ -79,7 +79,7 @@ class EventCorrelationDetectorTest(TestBase):
         ecd = EventCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True,
                                        generation_probability=0.5, generation_factor=0.5)
         self.analysis_context.register_component(ecd, description + '2')
-        self.run_errored_ecd_test(ecd, 1, 84084, error_rate=0.00003)
+        self.run_errored_ecd_test(ecd, 1, 84084, error_rate=0.00001)
 
         ecd = EventCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True,
                                        generation_probability=0.1, generation_factor=0.1)
