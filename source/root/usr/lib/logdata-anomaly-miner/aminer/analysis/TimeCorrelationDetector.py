@@ -29,7 +29,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
     it creates an event including the rules. This is useful to implement checks as depicted
     in http://dx.doi.org/10.1016/j.cose.2014.09.006."""
 
-    def __init__(self, aminer_config, anomaly_event_handlers, parallel_check_count, persistence_id,
+    def __init__(self, aminer_config, anomaly_event_handlers, parallel_check_count, persistence_id='Default',
                  record_count_before_event=10000, output_log_line=True, use_path_match=True, use_value_match=True,
                  min_rule_attributes=1, max_rule_attributes=5):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location.

@@ -215,7 +215,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                         for listener in self.anomaly_event_handlers:
                             listener.receive_event('analysis.EventCorrelationDetector', 'Correlation rule violated!', [
                                 'Event %s is missing, but should follow event %s' % (
-                                    self.sample_events[rule.implied_event], self.sample_events[rule.trigger_event])],
+                                    repr(self.sample_events[rule.implied_event]), repr(self.sample_events[rule.trigger_event]))],
                                 {'rule': rule.get_dictionary_repr()}, log_atom, self)
                     continue
                 break
@@ -241,7 +241,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                                 listener.receive_event(
                                     'analysis.EventCorrelationDetector', 'Correlation rule violated!', [
                                         'Event %s is missing, but should precede event %s' % (
-                                            self.sample_events[rule.implied_event], self.sample_events[rule.trigger_event])],
+                                            repr(self.sample_events[rule.implied_event]), repr(self.sample_events[rule.trigger_event]))],
                                     {'rule': rule.get_dictionary_repr()}, log_atom, self)
 
             # Clean up triggered/resolved implications.
