@@ -62,11 +62,11 @@ class EventCorrelationDetectorTest(TestBase):
         description = 'test3eventCorrelationDetectorTest'
         ecd = EventCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True)
         self.analysis_context.register_component(ecd, description)
-        self.run_errored_ecd_test(ecd, 5, 15002, error_rate=0.0002)
+        self.run_errored_ecd_test(ecd, 5, 15002, error_rate=0.00001)
 
         ecd = EventCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True)
         self.analysis_context.register_component(ecd, description + '2')
-        self.run_errored_ecd_test(ecd, 1, 144144, error_rate=0.00001)
+        self.run_errored_ecd_test(ecd, 1, 144144, error_rate=0.000001)
 
     def test4learn_from_examples_with_errors_and_smaller_probabilities(self):
         """In this test case examples with errors are used, but still should be learned. The same parameters like in test2 are used."""
@@ -74,7 +74,7 @@ class EventCorrelationDetectorTest(TestBase):
         ecd = EventCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True,
                                        generation_probability=0.5, generation_factor=0.5)
         self.analysis_context.register_component(ecd, description)
-        self.run_errored_ecd_test(ecd, 5, 15002, error_rate=0.0004)
+        self.run_errored_ecd_test(ecd, 5, 15002, error_rate=0.00001)
 
         ecd = EventCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True,
                                        generation_probability=0.5, generation_factor=0.5)
@@ -89,7 +89,7 @@ class EventCorrelationDetectorTest(TestBase):
         ecd = EventCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True,
                                        generation_probability=0.1, generation_factor=0.1)
         self.analysis_context.register_component(ecd, description + '4')
-        self.run_errored_ecd_test(ecd, 1, 120120, error_rate=0.00001)
+        self.run_errored_ecd_test(ecd, 1, 120120, error_rate=0.000001)
 
     def test5learn_safe_assumptions(self):
         """In this test case p0 and alpha are chosen carefully to only find safe assumptions about the implications in the data. Therefor
@@ -161,7 +161,7 @@ class EventCorrelationDetectorTest(TestBase):
             # another LogAtom must be received to check the follow anomalies.
             t += 5 * 3
             ecd.receive_atom(LogAtom(char, parser_match, t, self.__class__.__name__))
-            #print(self.output_stream.getvalue())
+            # print(self.output_stream.getvalue())
 
             # precede anomaly
             for i in range(1, int(5 / diff) + 1, 1):

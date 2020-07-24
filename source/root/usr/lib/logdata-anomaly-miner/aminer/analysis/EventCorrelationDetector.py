@@ -6,7 +6,6 @@ must be observed within currentTime-queueDeltaTime).
 3) Observe for a long time (max_observations) whether the hypothesis holds.
 4) If the hypothesis holds, transform it to a rule. Otherwise, discard the hypothesis."""
 
-from datetime import datetime
 from collections import deque
 import random
 import math
@@ -184,8 +183,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
             # Resolve triggered implication A => B when B occurs.
             if log_event in self.forward_rules_inv:
                 for rule in self.forward_rules_inv[log_event]:
-                    if len(rule.rule_trigger_timestamps) != 0 and not isinstance(rule.rule_trigger_timestamps[0], str) and \
-                            rule.rule_trigger_timestamps[0] >= log_atom.atom_time - self.hypothesis_max_delta_time:
+                    if len(rule.rule_trigger_timestamps) != 0 and rule.rule_trigger_timestamps[0] >= log_atom.atom_time - self.hypothesis_max_delta_time:
                         # Implication was triggered; append positive evaluation and mark as seen.
                         rule.add_rule_observation(1)
                         rule.rule_trigger_timestamps[0] = 'obs'
@@ -226,8 +224,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
             # Resolve triggered implication B <= A when A occurs.
             if log_event in self.back_rules:
                 for rule in self.back_rules[log_event]:
-                    if len(rule.rule_trigger_timestamps) != 0 and not isinstance(rule.rule_trigger_timestamps[0], str) and \
-                            rule.rule_trigger_timestamps[0] >= log_atom.atom_time - self.hypothesis_max_delta_time:
+                    if len(rule.rule_trigger_timestamps) != 0 and rule.rule_trigger_timestamps[0] >= log_atom.atom_time - self.hypothesis_max_delta_time:
                         rule.add_rule_observation(1)
                         rule.rule_trigger_timestamps[0] = 'obs'
                     else:
@@ -272,6 +269,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
 
             # Resolve triggered implication A => B when B occurs.
             if log_event in self.forward_hypotheses_inv:
+                delete_hypotheses = []
                 for implication in self.forward_hypotheses_inv[log_event]:
                     if len(implication.hypothesis_trigger_timestamps) != 0 and (
                             str(implication.hypothesis_trigger_timestamps[0]) == 'obs' or implication.hypothesis_trigger_timestamps[
@@ -298,11 +296,12 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                             self.sum_unstable_unknown_hypotheses = self.sum_unstable_unknown_hypotheses - 1
                             # Remove implication from list of hypotheses.
                             self.forward_hypotheses[implication.trigger_event].remove(implication)
-                            self.forward_hypotheses_inv[implication.implied_event].remove(implication)
+                            delete_hypotheses.append(implication)
                             sorted_log_lines.append(str(implication.trigger_event).split('/')[-1][:-3] + ' -> ' + str(
                                 implication.implied_event).split('/')[-1][:-3])
                             event_data['rule'] = implication.get_dictionary_repr()
-                        break
+                for delete_hypothesis in delete_hypotheses:
+                    self.forward_hypotheses_inv[log_event].remove(delete_hypothesis)
 
             # Clean up triggered/resolved implications.
             while len(self.forward_hypotheses_queue) > 0:
@@ -344,7 +343,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
 
             # Resolve triggered implication B <= A when A occurs.
             if log_event in self.back_hypotheses:
-                unstable_hypotheses = []
+                delete_hypotheses = []
                 for implication in self.back_hypotheses[log_event]:
                     if implication.stable == 0:
                         if len(implication.hypothesis_trigger_timestamps) != 0 and str(
@@ -370,7 +369,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                                 implication.hypothesis_trigger_timestamps.clear()
                                 self.sum_unstable_unknown_hypotheses = self.sum_unstable_unknown_hypotheses - 1
                                 # Remove implication from list of hypotheses.
-                                self.back_hypotheses[implication.trigger_event].remove(implication)
+                                delete_hypotheses.append(implication)
                                 self.back_hypotheses_inv[implication.implied_event].remove(implication)
                                 sorted_log_lines.append(str(implication.implied_event).split('/')[-1][:-3] + ' <- ' + str(
                                     implication.trigger_event).split('/')[-1][:-3])
@@ -379,12 +378,12 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                             implication.add_hypothesis_observation(0, log_atom.atom_time)
                             if implication.compute_hypothesis_stability() == -1:
                                 self.sum_unstable_unknown_hypotheses = self.sum_unstable_unknown_hypotheses - 1
-                                unstable_hypotheses.append(implication)
+                                delete_hypotheses.append(implication)
                                 self.back_hypotheses_inv[implication.implied_event].remove(implication)
                                 if len(self.back_hypotheses_inv[implication.implied_event]) == 0:
                                     del self.back_hypotheses_inv[implication.implied_event]
-                for unstable_hypothesis in unstable_hypotheses:
-                    self.back_hypotheses[log_event].remove(unstable_hypothesis)
+                for delete_hypothesis in delete_hypotheses:
+                    self.back_hypotheses[log_event].remove(delete_hypothesis)
                 if len(self.back_hypotheses[log_event]) == 0:
                     del self.back_hypotheses[log_event]
 
@@ -629,7 +628,7 @@ class Implication:
         ones = 0
         for obs in self.rule_observations:
             ones = ones + obs
-        return (len(self.rule_observations) - ones) <= 0
+        return (len(self.rule_observations) - ones) <= (self.max_observations - self.min_eval_true)
 
     def __repr__(self):
         return str(self.trigger_event[-1]).split('/')[-1] + '->' + str(self.implied_event[-1]).split('/')[-1] + ', eval=' + str(
