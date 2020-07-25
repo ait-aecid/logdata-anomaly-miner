@@ -1,4 +1,4 @@
-cp $1 /tmp/demo-config.py
+#cp $1 /tmp/demo-config.py
 sudo chown aminer:aminer /tmp/demo-config.py
 sudo chown -R aminer:aminer /tmp/lib
 sudo chmod +x demo/AMiner/aminerDemo.sh
