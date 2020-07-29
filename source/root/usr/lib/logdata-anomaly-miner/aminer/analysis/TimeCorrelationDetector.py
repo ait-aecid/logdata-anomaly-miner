@@ -29,24 +29,29 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
     it creates an event including the rules. This is useful to implement checks as depicted
     in http://dx.doi.org/10.1016/j.cose.2014.09.006."""
 
-    def __init__(self, aminer_config, parallel_check_count, correlation_test_count, max_fail_count, anomaly_event_handlers,
-                 persistence_id='Default', record_count_before_event=0x10000, output_log_line=True):
+    def __init__(self, aminer_config, anomaly_event_handlers, parallel_check_count, persistence_id='Default',
+                 record_count_before_event=10000, output_log_line=True, use_path_match=True, use_value_match=True,
+                 min_rule_attributes=1, max_rule_attributes=5):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param parallel_check_count number of rule detection checks to run in parallel.
-        @param correlation_test_count number of unit to perform on a rule under test.
-        @param max_fail_count maximal number of test failures so that rule is still eligible for reporting."""
+        @param record_count_before_event number of events used to calculate statistics (i.e., window size)
+        @param min_rule_attributes minimum number of attributes forming a rule
+        @param max_rule_attributes maximum number of attributes forming a rule
+        @param use_path_match if true rules are build based on path existance
+        @param use_value_match if true rules are built based on actual values"""
         self.last_timestamp = 0.0
         self.parallel_check_count = parallel_check_count
-        self.correlation_test_count = correlation_test_count
-        self.max_fail_count = max_fail_count
         self.anomaly_event_handlers = anomaly_event_handlers
-        self.max_rule_attributes = 5
+        self.min_rule_attributes = min_rule_attributes
+        self.max_rule_attributes = max_rule_attributes
         self.last_unhandled_match = None
         self.next_persist_time = None
         self.total_records = 0
         self.record_count_before_event = record_count_before_event
         self.persistence_id = persistence_id
         self.output_log_line = output_log_line
+        self.use_path_match = use_path_match
+        self.use_value_match = use_value_match
 
         PersistencyUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, 'TimeCorrelationDetector', persistence_id)
@@ -185,7 +190,8 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
         parser_match = log_atom.parser_match
         sub_rules = []
         all_keys = list(parser_match.get_match_dictionary().keys())
-        attribute_count = get_log_int(self.max_rule_attributes) + 1
+        attribute_count = self.min_rule_attributes + get_log_int(self.max_rule_attributes - self.min_rule_attributes)
+
         while attribute_count > 0:
             key_pos = random.randint(0, len(all_keys) - 1)
             key_name = all_keys[key_pos]
@@ -198,7 +204,13 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
                 continue
 
             attribute_count -= 1
-            rule_type = random.randint(0, 1)
+            rule_type = 1  # default is value_match only if none specified
+            if self.use_path_match and not self.use_value_match:
+                rule_type = 0
+            if not self.use_path_match and self.use_value_match:
+                rule_type = 1
+            if self.use_path_match and self.use_value_match:
+                rule_type = random.randint(0, 1)
             if rule_type == 0:
                 sub_rules.append(Rules.PathExistsMatchRule(key_name))
             elif rule_type == 1:

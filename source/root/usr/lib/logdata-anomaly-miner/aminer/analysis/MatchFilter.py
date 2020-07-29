@@ -36,8 +36,7 @@ class MatchFilter(AtomHandlerInterface):
             original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
             if original_log_line_prefix is None:
                 original_log_line_prefix = ''
-            analysis_component = {'AffectedLogAtomPaths': [target_path],
-                'AffectedLogAtomValues': [affected_log_atom_values]}
+            analysis_component = {'AffectedLogAtomPaths': [target_path], 'AffectedLogAtomValues': [str(affected_log_atom_values)]}
             if self.output_log_line:
                 match_paths_values = {}
                 for match_path, match_element in match_dict.items():

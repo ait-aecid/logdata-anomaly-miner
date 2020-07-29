@@ -35,7 +35,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
                  auto_include_flag=False, tuple_transformation_function=None, output_log_line=True):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param target_path_list the list of values to extract from each match to create the value combination to be checked.
-        @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the pathes from targetPathList
+        @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the pathes from target_path_list
         does not refer to an existing parsed data object.
         @param auto_include_flag when set to True, this detector will report a new value only the first time before including it
         in the known values set automatically.
@@ -89,20 +89,18 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
             extra_data[2] += 1
 
         affected_log_atom_values = []
-        tmp_list = {}
-        match_value_list = []
+        metadata = {}
         for match_value in list(match_value_tuple):
             if isinstance(match_value, bytes):
                 match_value = match_value.decode()
-            match_value_list.append(match_value)
-        tmp_list['MatchValueList'] = match_value_list
+            affected_log_atom_values.append(str(match_value))
         values = self.known_values_dict.get(match_value_tuple, None)
-        tmp_list['TimeFirstOccurrence'] = values[0]
-        tmp_list['TimeLastOccurence'] = values[1]
-        tmp_list['NumberOfOccurences'] = values[2]
-        affected_log_atom_values.append(tmp_list)
+        metadata['TimeFirstOccurrence'] = str(values[0])
+        metadata['TimeLastOccurence'] = str(values[1])
+        metadata['NumberOfOccurences'] = str(values[2])
 
-        analysis_component = {'AffectedLogAtomPaths': self.target_path_list, 'AffectedLogAtomValues': affected_log_atom_values}
+        analysis_component = {'AffectedLogAtomPaths': self.target_path_list, 'AffectedLogAtomValues': affected_log_atom_values,
+                              'Metadata': metadata}
         event_data = {'AnalysisComponent': analysis_component}
         if (self.auto_include_flag and self.known_values_dict.get(match_value_tuple, None)[2] == 1) or not self.auto_include_flag:
             for listener in self.anomaly_event_handlers:

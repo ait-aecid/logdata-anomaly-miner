@@ -8,7 +8,7 @@ from _io import StringIO
 
 
 class TestBase(unittest.TestCase):
-    __configFilePath = os.getcwd()+'/unit/testutilities/config.py'
+    __configFilePath = os.getcwd()+'/unit/config/config.py'
 
     def setUp(self):
         self.aminer_config = AMinerConfig.load_config(self.__configFilePath)

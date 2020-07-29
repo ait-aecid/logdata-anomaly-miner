@@ -17,7 +17,7 @@ class MissingMatchPathValueDetectorTest(TestBase):
 
     pid = b' pid='
     datetime_format_string = '%Y-%m-%d %H:%M:%S'
-    match1_s1_overdue = "match1/s1: ' pid=' overdue 400.0s (interval -400)"
+    match1_s1_overdue = "match1/s1: ' pid=' overdue 400s (interval -400)"
     string = b'25537 uid=2'
 
     def test1_receive_atom(self):
@@ -91,11 +91,10 @@ class MissingMatchPathValueDetectorTest(TestBase):
 
         log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme), time.time() + past_time,
                                      missing_match_path_value_detector)
-        self.assertTrue(missing_match_path_value_detector.receive_atom(log_atom_fixed_dme), )
-
-        self.assertTrue(self.output_stream.getvalue() == self.__expected_string % (
+        self.assertTrue(missing_match_path_value_detector.receive_atom(log_atom_fixed_dme))
+        self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
             datetime.fromtimestamp(t + past_time).strftime(self.datetime_format_string),
-            missing_match_path_value_detector.__class__.__name__, description + "2", 1, self.match1_s1_overdue + "\nb' pid='"))
+            missing_match_path_value_detector.__class__.__name__, description + "2", 1, self.match1_s1_overdue))
 
     def test5_missing_value_on_persisted(self):
         """Persisting elements is tested in this test case."""
@@ -125,7 +124,7 @@ class MissingMatchPathValueDetectorTest(TestBase):
         self.assertTrue((self.output_stream.getvalue() == self.__expected_string % (
             datetime.fromtimestamp(t + past_time).strftime(self.datetime_format_string),
             other_missing_match_path_value_detector.__class__.__name__, description + "2", 1, self.match1_s1_overdue)) or (
-                        self.output_stream.getvalue(), self.__expected_string % (
+                        self.output_stream.getvalue() == self.__expected_string % (
                             datetime.fromtimestamp(t + past_time + 1).strftime(self.datetime_format_string),
                             other_missing_match_path_value_detector.__class__.__name__, description + "2", 1, self.match1_s1_overdue)))
 
@@ -234,10 +233,10 @@ class MissingMatchPathValueDetectorTest(TestBase):
         self.assertTrue((self.output_stream.getvalue() == self.__expected_string % (
             datetime.fromtimestamp(time.time() + past_time).strftime(self.datetime_format_string),
             missing_match_path_list_value_detector.__class__.__name__, description + "2", 1,
-            "match1/s1, match2/d1: b' pid=' overdue 400s (interval -400)")) or (self.output_stream.getvalue(), self.__expected_string % (
+            "match1/s1, match2/d1: ' pid=' overdue 400s (interval -400)")) or (self.output_stream.getvalue() == self.__expected_string % (
               datetime.fromtimestamp(time.time() + past_time + 1).strftime(self.datetime_format_string),
               missing_match_path_list_value_detector.__class__.__name__, description + "2", 1,
-              "match1/s1, match2/d1: b' pid=' overdue 400s (interval -400)")))
+              "match1/s1, match2/d1: ' pid=' overdue 400s (interval -400)")))
 
     def test10_missing_value_on_persisted(self):
         """Persisting lists is tested in this test case."""
@@ -275,10 +274,10 @@ class MissingMatchPathValueDetectorTest(TestBase):
         self.assertTrue((self.output_stream.getvalue() == self.__expected_string % (
             datetime.fromtimestamp(t + past_time).strftime(self.datetime_format_string),
             other_missing_match_path_list_value_detector.__class__.__name__, description + "2", 1,
-            "match3/s2, match4/d2: b' pid=' overdue 400s (interval -400)")) or (self.output_stream.getvalue(), self.__expected_string % (
+            "match3/s2, match4/d2: ' pid=' overdue 400s (interval -400)")) or (self.output_stream.getvalue() == self.__expected_string % (
               datetime.fromtimestamp(t + past_time + 1).strftime(self.datetime_format_string),
               other_missing_match_path_list_value_detector.__class__.__name__, description + "2", 1,
-              "match3/s2, match4/d2: b' pid=' overdue 400s (interval -400)")))
+              "match3/s2, match4/d2: ' pid=' overdue 400s (interval -400)")))
 
 
 if __name__ == "__main__":

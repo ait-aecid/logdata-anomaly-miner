@@ -7,6 +7,7 @@ sleep 1
 kafka_2.12-2.5.0/bin/kafka-server-start.sh kafka_2.12-2.5.0/config/server.properties > /dev/null &
 
 sudo python3 -m unittest discover -s unit -p '*Test.py' > /dev/null
+exit_code=$?
 test -e /var/mail/mail && sudo rm -f /var/mail/mail
 sudo rm /tmp/AMinerRemoteLog.txt
 sudo rm /tmp/test4unixSocket.sock
@@ -18,3 +19,4 @@ kafka_2.12-2.5.0/bin/zookeeper-server-stop.sh > /dev/null
 sudo rm -r kafka_2.12-2.5.0/
 sudo rm -r /tmp/zookeeper
 sudo rm -r /tmp/kafka-logs
+exit $exit_code
