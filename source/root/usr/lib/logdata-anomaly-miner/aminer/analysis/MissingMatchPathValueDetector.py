@@ -135,7 +135,6 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                 # on the arrival of tokens following a longer gap
                 elif self.last_seen_timestamp > old_last_seen_timestamp + detector_info[1]:
                     value_overdue_time = self.last_seen_timestamp - old_last_seen_timestamp - detector_info[1]
-                    print("value_overdue_time", value_overdue_time)
                     missing_value_list.append([value, value_overdue_time, detector_info[1]])
                     # Set the next alerting time.
                     detector_info[2] = self.last_seen_timestamp + self.realert_interval
