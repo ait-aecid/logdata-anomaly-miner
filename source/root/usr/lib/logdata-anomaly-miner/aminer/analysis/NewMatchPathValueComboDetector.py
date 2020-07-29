@@ -32,7 +32,7 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
                  auto_include_flag=False, output_log_line=True):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param target_path_list the list of values to extract from each match to create the value combination to be checked.
-        @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the pathes from targetPathList
+        @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the pathes from target_path_list
         does not refer to an existing parsed data object.
         @param auto_include_flag when set to True, this detector will report a new value only the first time before including it
         in the known values set automatically."""
@@ -77,7 +77,7 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
         for match_value in match_value_list:
             if isinstance(match_value, bytes):
                 match_value = match_value.decode()
-            affected_log_atom_values.append(match_value)
+            affected_log_atom_values.append(str(match_value))
         if match_value_tuple not in self.known_values_set:
             if self.auto_include_flag:
                 self.known_values_set.add(match_value_tuple)

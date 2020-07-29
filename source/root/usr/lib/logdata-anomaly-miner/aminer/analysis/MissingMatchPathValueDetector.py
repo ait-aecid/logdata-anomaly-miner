@@ -24,7 +24,7 @@ from aminer.util import TimeTriggeredComponentInterface
 class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
     """This class creates events when an expected value is not seen within a given timespan, e.g. because the service was deactivated
     or logging disabled unexpectedly. This is complementary to the function provided by NewMatchPathValueDetector.
-    For each unique value extracted by targetPath, a tracking record is added to expectedValuesDict. It stores three numbers: the
+    For each unique value extracted by target_path, a tracking record is added to expected_values_dict. It stores three numbers: the
     timestamp the extracted value was last seen, the maximum allowed gap between observations and the next alerting time when currently
     in error state. When in normal (alerting) state, the value is zero."""
 
@@ -140,9 +140,9 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                             target_paths += target_path + ', '
                         e['TargetPathList'] = self.target_path_list
                         message_part.append('  %s: %s overdue %ss (interval %s)' % (target_paths[:-2], repr(value), overdue_time, interval))
-                    e['Value'] = repr(value)
-                    e['OverdueTime'] = overdue_time
-                    e['Interval'] = interval
+                    e['Value'] = str(value)
+                    e['OverdueTime'] = str(overdue_time)
+                    e['Interval'] = str(interval)
                     affected_log_atom_values.append(e)
                 analysis_component = {'AffectedLogAtomPathes': list(log_atom.parser_match.get_match_dictionary()),
                                       'AffectedLogAtomValues': affected_log_atom_values}
@@ -223,7 +223,7 @@ class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id='Default', auto_include_flag=False,
                  default_interval=3600, realert_interval=86400, output_log_line=True):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location.
-        @param targetPath to extract a source identification value from each logatom."""
+        @param target_path to extract a source identification value from each logatom."""
         super(MissingMatchPathListValueDetector, self).__init__(aminer_config, None, anomaly_event_handlers, persistence_id,
                                                                 auto_include_flag, default_interval, realert_interval, output_log_line)
         self.target_path_list = target_path_list

@@ -59,9 +59,12 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                 if isinstance(match.match_object, bytes):
                     affected_log_atom_values = [match.match_object.decode()]
                 else:
-                    affected_log_atom_values = [match.match_object]
+                    affected_log_atom_values = [str(match.match_object)]
                 analysis_component = {'AffectedLogAtomPaths': [target_path], 'AffectedLogAtomValues': affected_log_atom_values}
-                res = {target_path: affected_log_atom_values[0]}
+                if isinstance(match.match_object, bytes):
+                    res = {target_path: match.match_object.decode()}
+                else:
+                    res = {target_path: match.match_object}
                 original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
                 if original_log_line_prefix is None:
                     original_log_line_prefix = ''

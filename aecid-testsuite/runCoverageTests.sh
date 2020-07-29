@@ -7,10 +7,12 @@ sleep 1
 kafka_2.12-2.5.0/bin/kafka-server-start.sh kafka_2.12-2.5.0/config/server.properties > /dev/null &
 
 sudo coverage run --source=./aminer -m unittest discover -s unit -p '*Test.py' > /dev/null
+exit_code1=$?
 touch /tmp/report
 echo 'Statement Coverage:' > /tmp/report
 sudo coverage report >> /tmp/report
 sudo coverage run --source=./aminer --branch -m unittest discover -s unit -p '*Test.py' > /dev/null
+exit_code2=$?
 echo 'Branch Coverage:' >> /tmp/report
 sudo coverage report >> /tmp/report
 cat /tmp/report
@@ -26,3 +28,7 @@ kafka_2.12-2.5.0/bin/zookeeper-server-stop.sh > /dev/null
 sudo rm -r kafka_2.12-2.5.0/
 sudo rm -r /tmp/zookeeper
 sudo rm -r /tmp/kafka-logs
+if [[ "$exit_code1" -ne 0 || "$exit_code2" -ne 0 ]]; then
+	exit 1
+fi
+exit 0
