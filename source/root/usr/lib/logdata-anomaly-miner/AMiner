@@ -29,10 +29,10 @@ import re
 import socket
 import time
 
-__authors__ = ["Markus Wurzenberger", "Max Landauer", "Wolfgang Hotwagner", "Ernst Leierzopf", "Roman Fiedler", "Georg Hoeld"]
+__authors__ = ["Markus Wurzenberger", "Max Landauer", "Wolfgang Hotwagner", "Ernst Leierzopf", "Roman Fiedler", "Georg Hoeld",
+               "Florian Skopik"]
 __contact__ = "aecid@ait.ac.at"
 __copyright__ = "Copyright 2020, AIT Austrian Institute of Technology GmbH"
-__credits__ = ["Florian Skopik"]
 __date__ = "2020/06/19"
 __deprecated__ = False
 __email__ = "aecid@ait.ac.at"

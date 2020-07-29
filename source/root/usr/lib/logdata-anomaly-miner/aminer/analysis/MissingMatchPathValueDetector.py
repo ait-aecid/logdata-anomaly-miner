@@ -100,6 +100,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
 
     def check_timeouts(self, timestamp, log_atom):
         """Check if there was any timeout on a channel, thus triggering event dispatching."""
+        old_last_seen_timestamp = self.last_seen_timestamp
         self.last_seen_timestamp = max(self.last_seen_timestamp, timestamp)
         if self.last_seen_timestamp > self.next_check_timestamp:
             missing_value_list = []
@@ -121,7 +122,17 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                         self.next_check_timestamp = min(self.next_check_timestamp, self.last_seen_timestamp - value_overdue_time)
                         if old > self.next_check_timestamp or self.next_check_timestamp < detector_info[2]:
                             continue
-                if value_overdue_time > 0:  # avoid early re-alerting
+                # avoid early re-alerting
+                if value_overdue_time > 0:
+                    missing_value_list.append([value, value_overdue_time, detector_info[1]])
+                    # Set the next alerting time.
+                    detector_info[2] = self.last_seen_timestamp + self.realert_interval
+                    self.expected_values_dict[value] = detector_info
+                # Workaround:
+                # also check for long gaps between same tokens where the last_seen_timestamp gets updated
+                # on the arrival of tokens following a longer gap
+                elif self.last_seen_timestamp > old_last_seen_timestamp + detector_info[1]:
+                    value_overdue_time = self.last_seen_timestamp - old_last_seen_timestamp - detector_info[1]
                     missing_value_list.append([value, value_overdue_time, detector_info[1]])
                     # Set the next alerting time.
                     detector_info[2] = self.last_seen_timestamp + self.realert_interval
