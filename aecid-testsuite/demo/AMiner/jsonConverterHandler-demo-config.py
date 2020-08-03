@@ -197,6 +197,12 @@ def build_analysis_pipeline(analysis_context):
             FixedDataModelElement('FixedDataModelElement', b'The-searched-element-was-found!'), SequenceModelElement('', [
                 FixedDataModelElement('FixedDME', b'Any:'), AnyByteDataModelElement('AnyByteDataModelElement')])])))
 
+    alphabet = b'abcdef'
+    service_children_ecd = []
+    for _, char in enumerate(alphabet):
+        char = bytes([char])
+        service_children_ecd.append(FixedDataModelElement(char.decode(), char))
+
     parsing_model = FirstMatchModelElement('model', [
         SequenceModelElement('CronAnnouncement', service_children_cron_job_announcement),
         SequenceModelElement('CronExecution', service_children_cron_job_execution),
@@ -204,7 +210,7 @@ def build_analysis_pipeline(analysis_context):
         SequenceModelElement('LoginDetails', service_children_login_details), DecimalIntegerValueModelElement('Random'),
         SequenceModelElement('RandomTime', service_children_random_time), SequenceModelElement('Sensors', service_children_sensors),
         SequenceModelElement('IPAddresses', service_children_user_ip_address), FirstMatchModelElement('type', service_children_audit),
-        FirstMatchModelElement('ParsingME', service_children_parsing_model_element)])
+        FirstMatchModelElement('ECD', service_children_ecd), FirstMatchModelElement('ParsingME', service_children_parsing_model_element)])
 
     # Some generic imports.
     from aminer.analysis import AtomFilters
@@ -266,6 +272,12 @@ def build_analysis_pipeline(analysis_context):
     parser_count = ParserCount(analysis_context.aminer_config, None, anomaly_event_handlers, 10, False)
     analysis_context.register_component(parser_count, component_name="ParserCount")
     atom_filter.add_handler(parser_count)
+
+    from aminer.analysis import EventCorrelationDetector
+    ecd = EventCorrelationDetector(analysis_context.aminer_config, anomaly_event_handlers, check_rules_flag=True,
+                                   hypothesis_max_delta_time=1.0)
+    analysis_context.register_component(ecd, component_name="EventCorrelationDetector")
+    atom_filter.add_handler(ecd)
 
     from aminer.analysis import NewMatchPathDetector
     new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=True,
@@ -347,8 +359,10 @@ def build_analysis_pipeline(analysis_context):
     atom_filter.add_handler(missing_match_path_value_detector)
 
     from aminer.analysis.TimeCorrelationDetector import TimeCorrelationDetector
-    time_correlation_detector = TimeCorrelationDetector(analysis_context.aminer_config, 2, 1, 0, anomaly_event_handlers,
-                                                        record_count_before_event=3000, output_log_line=True)
+    time_correlation_detector = TimeCorrelationDetector(
+        analysis_context.aminer_config, anomaly_event_handlers, 2, min_rule_attributes=1, max_rule_attributes=5,
+        record_count_before_event=10000, output_log_line=True)
+
     analysis_context.register_component(time_correlation_detector, component_name="TimeCorrelationDetector")
     atom_filter.add_handler(time_correlation_detector)
 

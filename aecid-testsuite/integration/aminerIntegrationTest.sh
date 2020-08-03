@@ -33,7 +33,7 @@ echo ""
 FILE=/tmp/config.py
 if ! test -f "$FILE"; then
     echo "$FILE does not exist!"
-	exit
+	exit 1
 fi
 
 #start AMiner
@@ -91,12 +91,12 @@ if [ $? == 0 ]; then
 	else
 		echo ""
 		echo "test failed at checking mails.."
-		exit -1
+		exit 1
 	fi
 else
 	echo ""
 	echo "test failed at checking outputs.."
-	exit -1
+	exit 1
 fi
 
 exit 0
