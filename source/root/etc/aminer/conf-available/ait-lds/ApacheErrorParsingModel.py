@@ -10,7 +10,7 @@ from aminer.parsing import FixedWordlistDataModelElement
 from aminer.parsing import IpAddressDataModelElement
 from aminer.parsing import SequenceModelElement
 
-def getModel():
+def get_model():
 
     """This model defines how to parse Apache Error logs from the AIT-LDS."""
 

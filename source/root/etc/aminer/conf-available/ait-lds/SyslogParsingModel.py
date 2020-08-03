@@ -13,7 +13,7 @@ from aminer.parsing import SequenceModelElement
 from aminer.parsing import VariableByteDataModelElement
 from aminer.parsing import RepeatedElementDataModelElement
 
-def getModel():
+def get_model():
 
     """This model defines how to parse Syslogs from the AIT-LDS."""
 

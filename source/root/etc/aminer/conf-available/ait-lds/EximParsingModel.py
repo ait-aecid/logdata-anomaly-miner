@@ -11,7 +11,7 @@ from aminer.parsing import OptionalMatchModelElement
 from aminer.parsing import SequenceModelElement
 from aminer.parsing import VariableByteDataModelElement
 
-def getModel():
+def get_model():
 
     """This model defines how to parse Exim logs from the AIT-LDS."""
 

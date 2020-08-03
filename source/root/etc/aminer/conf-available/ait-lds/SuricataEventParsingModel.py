@@ -11,7 +11,7 @@ from aminer.parsing import IpAddressDataModelElement
 from aminer.parsing import OptionalMatchModelElement
 from aminer.parsing import SequenceModelElement
 
-def getModel():
+def get_model():
 
     """This model defines how to parse Suricata Event logs from the AIT-LDS."""
 
