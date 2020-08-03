@@ -228,6 +228,23 @@ def build_analysis_pipeline(analysis_context):
                 use_value_match=item['use_value_match'],
                 min_rule_attributes=item['min_rule_attributes'],
                 max_rule_attributes=item['max_rule_attributes'])
+        elif item['type'] == 'EventCorrelationDetector':
+            tmpAnalyser = func(
+                analysis_context.aminer_config, anomaly_event_handlers,
+                max_hypotheses=item['max_hypotheses'],
+                hypothesis_max_delta_time=item['hypothesis_max_delta_time'],
+                generation_probability=item['generation_probability'],
+                generation_factor=item['generation_factor'],
+                max_observations=item['max_observations'],
+                p0=item['p0'],
+                alpha=item['alpha'],
+                candidates_size=item['candidates_size'],
+                hypotheses_eval_delta_time=item['hypotheses_eval_delta_time'],
+                delta_time_to_discard_hypothesis=item['delta_time_to_discard_hypothesis'],
+                check_rules_flag=item['check_rules_flag'],
+                auto_include_flag=item['auto_include_flag'],
+                whitelisted_paths=item['whitelisted_paths'],
+                persistence_id=item['persistence_id'])
         else:
             tmpAnalyser = func(
                 analysis_context.aminer_config,

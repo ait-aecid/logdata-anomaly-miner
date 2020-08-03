@@ -97,7 +97,8 @@
                      'id': {'type': 'string', 'required': False, 'default': 'None'},
                      'type': {'type': 'string', 'allowed': ['NewMatchPathValueDetector', 
                               'NewMatchPathValueComboDetector', 'MissingMatchPathValueDetector',
-                              'MissingMatchPathListValueDetector', 'TimeCorrelationDetector']},
+                              'MissingMatchPathListValueDetector', 'TimeCorrelationDetector',
+                              'EventCorrelationDetector']},
                      'paths': {'type': 'list', 'schema': {'type': 'string'}},
                      'learnMode': {'type': 'boolean'},
                      'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},
@@ -112,6 +113,19 @@
                      'use_value_match': {'type': 'boolean', 'required': False, 'default': True},
                      'min_rule_attributes': {'type': 'integer', 'required': False, 'default': 1},
                      'max_rule_attributes': {'type': 'integer', 'required': False, 'default': 5}
+                     'max_hypotheses': {'type': 'integer', 'required': False, 'default': 1000},
+                     'hypothesis_max_delta_time': {'type': 'float', 'required': False, 'default': 5.0},
+                     'generation_probability': {'type': 'float', 'required': False, 'default': 1.0},
+                     'generation_factor': {'type': 'float', 'required': False, 'default': 1.0},
+                     'max_observations': {'type': 'integer', 'required': False, 'default': 500},
+                     'p0': {'type': 'float', 'required': False, 'default': 0.9},
+                     'alpha': {'type': 'float', 'required': False, 'default': 0.05},
+                     'candidates_size': {'type': 'integer', 'required': False, 'default': 10},
+                     'hypotheses_eval_delta_time': {'type': 'float', 'required': False, 'default': 120.0},
+                     'delta_time_to_descard_hypothesis': {'type': 'float', 'required': False, 'default': 180.0},
+                     'check_rules_flag': {'type': 'boolean', 'required': False, 'default': True},
+                     'auto_include_flag': {'type': 'boolean', 'required': False, 'default': True},
+                     #'whitelisted_paths': {'type': ['string', 'list', 'null'], 'required': False, 'default': None}, # TODO default None value not working
                 }
             }
         },
