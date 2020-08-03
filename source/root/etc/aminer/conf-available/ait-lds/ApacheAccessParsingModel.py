@@ -1,20 +1,18 @@
 """This module defines a generated parser model."""
 
-from aminer.parsing import AnyByteDataModelElement
-from aminer.parsing import Base64StringModelElement
 from aminer.parsing import DateTimeModelElement
 from aminer.parsing import DecimalFloatValueModelElement
 from aminer.parsing import DecimalIntegerValueModelElement
 from aminer.parsing import DelimitedDataModelElement
 from aminer.parsing import FirstMatchModelElement
 from aminer.parsing import FixedDataModelElement
-from aminer.parsing import FixedWordlistDataModelElement
 from aminer.parsing import IpAddressDataModelElement
 from aminer.parsing import OptionalMatchModelElement
 from aminer.parsing import SequenceModelElement
 from aminer.parsing import VariableByteDataModelElement
 
 def getModel():
+
     """This model defines how to parse Apache Access logs from the AIT-LDS."""
 
     alphabet = b'!"#$%&\'()*+,-./0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\\^_`abcdefghijklmnopqrstuvwxyz{|}~=[]'

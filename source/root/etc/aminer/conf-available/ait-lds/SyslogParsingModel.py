@@ -14,15 +14,16 @@ from aminer.parsing import VariableByteDataModelElement
 from aminer.parsing import RepeatedElementDataModelElement
 
 def getModel():
+
     """This model defines how to parse Syslogs from the AIT-LDS."""
-    
+
     alphabet = b'!"#$%&\'()*+,-./0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\\^_`abcdefghijklmnopqrstuvwxyz{|}~=[]'
 
     user_info = SequenceModelElement('user_info', [
                                 FixedDataModelElement('user_str', b'user=<'),
                                 OptionalMatchModelElement('user',
                                     DelimitedDataModelElement('user', b'>')
-                                ),
+                                    ),
                                 FixedDataModelElement('method_str', b'>'),
                                 OptionalMatchModelElement('method',
                                     SequenceModelElement('method', [
@@ -41,7 +42,8 @@ def getModel():
                                         ])
                                     ),
                                 OptionalMatchModelElement('secured',
-                                    FixedDataModelElement('secured_str', b', secured')),
+                                    FixedDataModelElement('secured_str', b', secured')
+                                    ),
                                 FixedDataModelElement('session_str', b', session=<'),
                                 DelimitedDataModelElement('session', b'>'),
                                 FixedDataModelElement('bracket_str', b'>'),
@@ -67,8 +69,8 @@ def getModel():
                                 DecimalIntegerValueModelElement('out')
                                 ]),
                             SequenceModelElement('err_mail', [
-                                FixedDataModelElement('mail_str', b'Error: Failed to autocreate mailbox INBOX: Internal error occurred. ' \
-                                    'Refer to server log for more information. ['),
+                                FixedDataModelElement('mail_str', b'Error: Failed to autocreate mailbox INBOX: Internal error occurred. '
+                                                      b'Refer to server log for more information. ['),
                                 DelimitedDataModelElement('err_time', b']'),
                                 FixedDataModelElement('brack', b']')
                                 ]),
@@ -107,8 +109,8 @@ def getModel():
                                     )
                                 ]),
                             SequenceModelElement('err_mail', [
-                                FixedDataModelElement('mail_str', b'Failed to autocreate mailbox INBOX: Internal error occurred. ' \
-                                    'Refer to server log for more information. ['),
+                                FixedDataModelElement('mail_str', b'Failed to autocreate mailbox INBOX: Internal error occurred. '
+                                                      b'Refer to server log for more information. ['),
                                 DelimitedDataModelElement('err_time', b']'),
                                 FixedDataModelElement('brack', b']')
                                 ]),
@@ -141,8 +143,8 @@ def getModel():
                                 AnyByteDataModelElement('anvil_msg')
                                 ]),
                             SequenceModelElement('auth_responding', [
-                                FixedDataModelElement('auth_responding_str', b'Warning: Auth process not responding, ' \
-                                    'delayed sending initial response (greeting): '),
+                                FixedDataModelElement('auth_responding_str', b'Warning: Auth process not responding, '
+                                                      b'delayed sending initial response (greeting): '),
                                 user_info
                                 ]),
                             ]),
@@ -186,18 +188,22 @@ def getModel():
                                         FixedDataModelElement('brack_mail1', b' <'),
                                         DelimitedDataModelElement('mail', b'>'),
                                         FixedDataModelElement('brack_mail2', b'>')
-                                        ])),
+                                        ])
+                                    ),
                                 RepeatedElementDataModelElement('more_recepients_rep',
                                     SequenceModelElement('more_recepients', [
                                         FixedDataModelElement('comma_str', b', '),
-                                        VariableByteDataModelElement('more_recepients_mail', b'.0123456789@ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz'),
+                                        VariableByteDataModelElement('more_recepients_mail',
+                                                                     b'.0123456789@ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz'),
                                         OptionalMatchModelElement('more_recepients_mail',
                                             SequenceModelElement('more_recepients', [
                                                 FixedDataModelElement('brack_more_recepients1', b' <'),
                                                 DelimitedDataModelElement('more_recepients', b'>'),
                                                 FixedDataModelElement('brack_more_recepients2', b'>')
-                                            ])),
-                                        ])),
+                                                ])
+                                            ),
+                                        ])
+                                    ),
                                 FixedDataModelElement('from_str', b' from '),
                                 DelimitedDataModelElement('user', b' '),
                                 FixedDataModelElement('brack_str1', b' ('),
@@ -259,12 +265,14 @@ def getModel():
                                 DelimitedDataModelElement('function_name1', b'('),
                                 FixedDataModelElement('brack_str1', b'('),
                                 OptionalMatchModelElement('arg1',
-                                    DelimitedDataModelElement('arg1', b')')),
+                                    DelimitedDataModelElement('arg1', b')')
+                                    ),
                                 FixedDataModelElement('failed_str', b') should be compatible with '),
                                 DelimitedDataModelElement('function_name2', b'('),
                                 FixedDataModelElement('brack_str2', b'('),
                                 OptionalMatchModelElement('arg2',
-                                    DelimitedDataModelElement('arg2', b')')),
+                                    DelimitedDataModelElement('arg2', b')')
+                                    ),
                                 FixedDataModelElement('brack_str3', b')'),
                                 ]),
                             FixedDataModelElement('file_str', b'finfo_file(): Empty filename or path'),
@@ -316,7 +324,8 @@ def getModel():
                                 FixedDataModelElement('uid_str', b' by (uid='),
                                 DecimalIntegerValueModelElement('uid'),
                                 FixedDataModelElement('brack_str', b')')
-                                ]))
+                                ])
+                            )
                         ])
                     ])
                 ]),
@@ -327,7 +336,8 @@ def getModel():
                 DelimitedDataModelElement('name', b')'),
                 FixedDataModelElement('session_str', b'): authentication failure; logname='),
                 OptionalMatchModelElement('logname',
-                    DelimitedDataModelElement('logname', b' ')),
+                    DelimitedDataModelElement('logname', b' ')
+                    ),
                 FixedDataModelElement('uid_str', b' uid='),
                 DecimalIntegerValueModelElement('uid'),
                 FixedDataModelElement('euid_str', b' euid='),
@@ -342,7 +352,8 @@ def getModel():
                     SequenceModelElement('user', [
                         FixedDataModelElement('user_str', b'  user='),
                         VariableByteDataModelElement('user', alphabet)
-                        ]))
+                        ])
+                    )
                 ]),
             SequenceModelElement('systemd', [
                 FixedDataModelElement('systemd_str', b' systemd['),
@@ -382,7 +393,9 @@ def getModel():
                     SequenceModelElement('id', [
                         FixedDataModelElement('brack_str', b'['),
                         DecimalIntegerValueModelElement('id'),
-                        FixedDataModelElement('brack_str2', b']')])),
+                        FixedDataModelElement('brack_str2', b']')
+                        ])
+                    ),
                 FixedDataModelElement('col_str', b': '),
                 AnyByteDataModelElement('kernel_msg')
                 ]),

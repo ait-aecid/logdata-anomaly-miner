@@ -11,8 +11,9 @@ from aminer.parsing import IpAddressDataModelElement
 from aminer.parsing import SequenceModelElement
 
 def getModel():
+
     """This model defines how to parse Apache Error logs from the AIT-LDS."""
-    
+
     model = SequenceModelElement('model', [
         FixedDataModelElement('sp1', b'['),
         FixedWordlistDataModelElement('day', [b'Mon', b'Tue', b'Wed', b'Thu', b'Fri', b'Sat', b'Sun']),
@@ -53,8 +54,8 @@ def getModel():
                 FixedDataModelElement('compatible_str', b' on line '),
                 DecimalIntegerValueModelElement('line')]),
             SequenceModelElement('deprecated', [
-                FixedDataModelElement('deprecated_str', b'Deprecated:  Methods with the same name as their class ' \
-                    'will not be constructors in a future version of PHP; '),
+                FixedDataModelElement('deprecated_str', b'Deprecated:  Methods with the same name as their class '
+                                      b'will not be constructors in a future version of PHP; '),
                 DelimitedDataModelElement('class', b' '),
                 FixedDataModelElement('constructor_str', b' has a deprecated constructor in '),
                 DelimitedDataModelElement('path', b' '),

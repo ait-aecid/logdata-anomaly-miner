@@ -12,8 +12,9 @@ from aminer.parsing import OptionalMatchModelElement
 from aminer.parsing import SequenceModelElement
 
 def getModel():
+
     """This model defines how to parse Suricata Event logs from the AIT-LDS."""
-    
+
     conn = SequenceModelElement('conn', [
                 FixedDataModelElement('src_ip_str', b'"src_ip":"'),
                 FirstMatchModelElement('ip', [
@@ -143,15 +144,15 @@ def getModel():
                         FixedDataModelElement('app_proto_str', b',"app_proto":"'),
                         DelimitedDataModelElement('app_proto', b'"'),
                         FixedDataModelElement('quote_str', b'"')
-                    ])
-                ),
+                        ])
+                    ),
                 OptionalMatchModelElement('app_proto_tc',
                     SequenceModelElement('app_proto_tc', [
                         FixedDataModelElement('app_proto_tc_str', b',"app_proto_tc":"'),
                         DelimitedDataModelElement('app_proto_tc', b'"'),
                         FixedDataModelElement('quote_str', b'"')
-                    ])
-                ),
+                        ])
+                    ),
                 SequenceModelElement('flow', [
                     FixedDataModelElement('pkts_toserver_str', b',"flow":{"pkts_toserver":'),
                     DecimalIntegerValueModelElement('pkts_toserver'),
@@ -190,26 +191,29 @@ def getModel():
                                         SequenceModelElement('fin', [
                                             FixedDataModelElement('fin_str', b',"fin":'),
                                             FixedWordlistDataModelElement('fin', [b'true', b'false']),
-                                            ])),
+                                            ])
+                                        ),
                                     OptionalMatchModelElement('rst',
                                         SequenceModelElement('rst', [
                                             FixedDataModelElement('rst_str', b',"rst":'),
                                             FixedWordlistDataModelElement('rst', [b'true', b'false']),
-                                            ])),
+                                            ])
+                                        ),
                                     OptionalMatchModelElement('psh',
                                         SequenceModelElement('psh', [
                                             FixedDataModelElement('psh_str', b',"psh":'),
                                             FixedWordlistDataModelElement('psh', [b'true', b'false']),
-                                            ])),
+                                            ])
+                                        ),
                                     FixedDataModelElement('ack_str', b',"ack":'),
                                     FixedWordlistDataModelElement('ack', [b'true', b'false']),
                                     FixedDataModelElement('tcp_state_str', b',"state":"'),
                                     DelimitedDataModelElement('tcp_state', b'"'),
-                                ])
-                            ),
+                                    ])
+                                ),
                             FixedDataModelElement('tcp_brack_str', b'"}'),
-                        ])
-                    ),
+                            ])
+                        ),
                     FixedDataModelElement('brack_str2', b'}')
                     ]),
                 ]),
@@ -500,8 +504,8 @@ def getModel():
                         SequenceModelElement('sni', [
                             FixedDataModelElement('sni_str', b'","sni":"'),
                             DelimitedDataModelElement('sni', b'"'),
-                        ])
-                    ),
+                            ])
+                        ),
                     FixedDataModelElement('version_str', b'","version":"'),
                     DelimitedDataModelElement('version', b'"'),
                     FixedDataModelElement('notbefore_str', b'","notbefore":"'),
