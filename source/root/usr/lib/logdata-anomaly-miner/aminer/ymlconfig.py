@@ -231,6 +231,7 @@ def build_analysis_pipeline(analysis_context):
         elif item['type'] == 'EventCorrelationDetector':
             tmpAnalyser = func(
                 analysis_context.aminer_config, anomaly_event_handlers,
+                paths=item['paths'],
                 max_hypotheses=item['max_hypotheses'],
                 hypothesis_max_delta_time=item['hypothesis_max_delta_time'],
                 generation_probability=item['generation_probability'],
