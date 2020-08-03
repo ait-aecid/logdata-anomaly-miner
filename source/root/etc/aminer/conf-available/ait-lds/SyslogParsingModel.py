@@ -20,34 +20,34 @@ def getModel():
     alphabet = b'!"#$%&\'()*+,-./0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\\^_`abcdefghijklmnopqrstuvwxyz{|}~=[]'
 
     user_info = SequenceModelElement('user_info', [
-                                FixedDataModelElement('user_str', b'user=<'),
-                                OptionalMatchModelElement('user',
-                                    DelimitedDataModelElement('user', b'>')
-                                    ),
-                                FixedDataModelElement('method_str', b'>'),
-                                OptionalMatchModelElement('method',
-                                    SequenceModelElement('method', [
-                                        FixedDataModelElement('method_str', b', method='),
-                                        DelimitedDataModelElement('method', b','),
-                                        ])
-                                    ),
-                                FixedDataModelElement('rip_str', b', rip='),
-                                IpAddressDataModelElement('rip'),
-                                FixedDataModelElement('lip_str', b', lip='),
-                                IpAddressDataModelElement('lip'),
-                                OptionalMatchModelElement('mpid',
-                                    SequenceModelElement('mpid', [
-                                        FixedDataModelElement('mpid_str', b', mpid='),
-                                        DecimalIntegerValueModelElement('mpid'),
-                                        ])
-                                    ),
-                                OptionalMatchModelElement('secured',
-                                    FixedDataModelElement('secured_str', b', secured')
-                                    ),
-                                FixedDataModelElement('session_str', b', session=<'),
-                                DelimitedDataModelElement('session', b'>'),
-                                FixedDataModelElement('bracket_str', b'>'),
-                                ])
+        FixedDataModelElement('user_str', b'user=<'),
+        OptionalMatchModelElement('user',
+            DelimitedDataModelElement('user', b'>')
+            ),
+        FixedDataModelElement('method_str', b'>'),
+        OptionalMatchModelElement('method',
+            SequenceModelElement('method', [
+                FixedDataModelElement('method_str', b', method='),
+                DelimitedDataModelElement('method', b','),
+                ])
+            ),
+        FixedDataModelElement('rip_str', b', rip='),
+        IpAddressDataModelElement('rip'),
+        FixedDataModelElement('lip_str', b', lip='),
+        IpAddressDataModelElement('lip'),
+        OptionalMatchModelElement('mpid',
+            SequenceModelElement('mpid', [
+                FixedDataModelElement('mpid_str', b', mpid='),
+                DecimalIntegerValueModelElement('mpid'),
+                ])
+            ),
+        OptionalMatchModelElement('secured',
+            FixedDataModelElement('secured_str', b', secured')
+            ),
+        FixedDataModelElement('session_str', b', session=<'),
+        DelimitedDataModelElement('session', b'>'),
+        FixedDataModelElement('bracket_str', b'>'),
+        ])
 
     model = SequenceModelElement('model', [
         DateTimeModelElement('time', b'%b %d %H:%M:%S'),

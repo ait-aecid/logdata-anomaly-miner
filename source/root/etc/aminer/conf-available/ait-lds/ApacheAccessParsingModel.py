@@ -1,7 +1,6 @@
 """This module defines a generated parser model."""
 
 from aminer.parsing import DateTimeModelElement
-from aminer.parsing import DecimalFloatValueModelElement
 from aminer.parsing import DecimalIntegerValueModelElement
 from aminer.parsing import DelimitedDataModelElement
 from aminer.parsing import FirstMatchModelElement
