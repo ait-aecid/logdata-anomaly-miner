@@ -122,7 +122,7 @@
                      'alpha': {'type': 'float', 'required': False, 'default': 0.05},
                      'candidates_size': {'type': 'integer', 'required': False, 'default': 10},
                      'hypotheses_eval_delta_time': {'type': 'float', 'required': False, 'default': 120.0},
-                     'delta_time_to_descard_hypothesis': {'type': 'float', 'required': False, 'default': 180.0},
+                     'delta_time_to_discard_hypothesis': {'type': 'float', 'required': False, 'default': 180.0},
                      'check_rules_flag': {'type': 'boolean', 'required': False, 'default': True},
                      'auto_include_flag': {'type': 'boolean', 'required': False, 'default': True},
                      #'whitelisted_paths': {'type': ['string', 'list', 'null'], 'required': False, 'default': None}, # TODO default None value not working
