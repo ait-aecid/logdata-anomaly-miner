@@ -112,7 +112,7 @@
                      'use_path_match': {'type': 'boolean', 'required': False, 'default': True},
                      'use_value_match': {'type': 'boolean', 'required': False, 'default': True},
                      'min_rule_attributes': {'type': 'integer', 'required': False, 'default': 1},
-                     'max_rule_attributes': {'type': 'integer', 'required': False, 'default': 5}
+                     'max_rule_attributes': {'type': 'integer', 'required': False, 'default': 5},
                      'max_hypotheses': {'type': 'integer', 'required': False, 'default': 1000},
                      'hypothesis_max_delta_time': {'type': 'float', 'required': False, 'default': 5.0},
                      'generation_probability': {'type': 'float', 'required': False, 'default': 1.0},
