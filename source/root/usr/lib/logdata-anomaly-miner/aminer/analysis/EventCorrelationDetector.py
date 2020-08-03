@@ -47,7 +47,6 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         @param whitelisted_paths list of paths that are not considered for correlation, i.e., events that contain one of these paths are
         omitted. The default value is [] as None is not iterable.
         @param persistence_id name of persitency document."""
-        self.last_timestamp = 0.0
         self.anomaly_event_handlers = anomaly_event_handlers
         self.last_unhandled_match = None
         self.next_persist_time = None
@@ -152,12 +151,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         if timestamp is None:
             log_atom.atom_time = time.time()
             timestamp = log_atom.atom_time
-        if timestamp < self.last_timestamp:
-            for listener in self.anomaly_event_handlers:
-                listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Logdata not sorted: last %s, current %s' % (
-                    self.last_timestamp, timestamp), [log_atom.raw_data], {}, log_atom, self)
-            return
-        self.last_timestamp = log_atom.atom_time
+        
         parser_match = log_atom.parser_match
 
         self.total_records += 1
