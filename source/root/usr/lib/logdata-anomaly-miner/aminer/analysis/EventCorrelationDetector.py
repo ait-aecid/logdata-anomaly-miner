@@ -21,7 +21,7 @@ from aminer.util import TimeTriggeredComponentInterface
 class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """This class tries to find time correlation patterns between different log atom events."""
 
-    def __init__(self, aminer_config, anomaly_event_handlers, max_hypotheses=1000, hypothesis_max_delta_time=5.0,
+    def __init__(self, aminer_config, anomaly_event_handlers, paths=None, max_hypotheses=1000, hypothesis_max_delta_time=5.0,
                  generation_probability=1.0, generation_factor=1.0, max_observations=500, p0=0.9, alpha=0.05, candidates_size=10,
                  hypotheses_eval_delta_time=120.0, delta_time_to_discard_hypothesis=180.0, check_rules_flag=False,
                  auto_include_flag=True, whitelisted_paths=None, persistence_id='Default'):
@@ -47,8 +47,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         @param whitelisted_paths list of paths that are not considered for correlation, i.e., events that contain one of these paths are
         omitted. The default value is [] as None is not iterable.
         @param persistence_id name of persitency document."""
-        self.last_timestamp = 0.0
         self.anomaly_event_handlers = anomaly_event_handlers
+        self.paths = paths
         self.last_unhandled_match = None
         self.next_persist_time = None
         self.total_records = 0
@@ -152,12 +152,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         if timestamp is None:
             log_atom.atom_time = time.time()
             timestamp = log_atom.atom_time
-        if timestamp < self.last_timestamp:
-            for listener in self.anomaly_event_handlers:
-                listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Logdata not sorted: last %s, current %s' % (
-                    self.last_timestamp, timestamp), [log_atom.raw_data], {}, log_atom, self)
-            return
-        self.last_timestamp = log_atom.atom_time
+
         parser_match = log_atom.parser_match
 
         self.total_records += 1
@@ -165,13 +160,30 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         event_data = {}
         sorted_log_lines = []
 
-        # Event is defined by the full path of log atom.
-        log_event = tuple(parser_match.get_match_dictionary())
+        if self.paths is None or len(self.paths) == 0:
+            # Event is defined by the full path of log atom.
+            log_event = tuple(parser_match.get_match_dictionary().keys())
 
-        # Skip whitelisted paths.
-        for whitelisted in self.whitelisted_paths:
-            if whitelisted in log_event:
+            # Skip whitelisted paths.
+            for whitelisted in self.whitelisted_paths:
+                if whitelisted in log_event:
+                    return
+        else:
+            # Event is defined by value combos in paths
+            values = []
+            all_values_none = True
+            for path in self.paths:
+                match = parser_match.get_match_dictionary().get(path, None)
+                if isinstance(match.match_object, bytes):
+                    value = match.match_object.decode()
+                else:
+                    value = str(match.match_object)
+                if value is not None:
+                    all_values_none = False
+                values.append(value)
+            if all_values_none is True:
                 return
+            log_event = tuple(values)
 
         # Store last seen sample event to improve output.
         self.sample_events[log_event] = log_atom.raw_data
@@ -188,11 +200,18 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
             # Resolve triggered implication A => B when B occurs.
             if log_event in self.forward_rules_inv:
                 for rule in self.forward_rules_inv[log_event]:
-                    if len(rule.rule_trigger_timestamps) != 0 and rule.rule_trigger_timestamps[0] >= log_atom.atom_time - \
-                            self.hypothesis_max_delta_time:
+                    # Find first non-observed trigger timestamp
+                    trigger_timestamp_index = -1
+                    for trigger_timestamp in rule.rule_trigger_timestamps:
+                        trigger_timestamp_index += 1
+                        if trigger_timestamp != 'obs':
+                            break
+                    if trigger_timestamp_index != -1 and \
+                            rule.rule_trigger_timestamps[trigger_timestamp_index] != 'obs' and \
+                            rule.rule_trigger_timestamps[trigger_timestamp_index] >= log_atom.atom_time - self.hypothesis_max_delta_time:
                         # Implication was triggered; append positive evaluation and mark as seen.
                         rule.add_rule_observation(1)
-                        rule.rule_trigger_timestamps[0] = 'obs'
+                        rule.rule_trigger_timestamps[trigger_timestamp_index] = 'obs'
 
             # Clean up triggered/resolved implications.
             while len(self.forward_rule_queue) > 0:
@@ -230,10 +249,17 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
             # Resolve triggered implication B <= A when A occurs.
             if log_event in self.back_rules:
                 for rule in self.back_rules[log_event]:
-                    if len(rule.rule_trigger_timestamps) != 0 and rule.rule_trigger_timestamps[0] >= log_atom.atom_time - \
-                            self.hypothesis_max_delta_time:
+                    # Find first non-observed trigger timestamp
+                    trigger_timestamp_index = -1
+                    for trigger_timestamp in rule.rule_trigger_timestamps:
+                        trigger_timestamp_index += 1
+                        if trigger_timestamp != 'obs':
+                            break
+                    if trigger_timestamp_index != -1 and \
+                            rule.rule_trigger_timestamps[trigger_timestamp_index] != 'obs' and \
+                            rule.rule_trigger_timestamps[trigger_timestamp_index] >= log_atom.atom_time - self.hypothesis_max_delta_time:
                         rule.add_rule_observation(1)
-                        rule.rule_trigger_timestamps[0] = 'obs'
+                        rule.rule_trigger_timestamps[trigger_timestamp_index] = 'obs'
                     else:
                         rule.add_rule_observation(0)
                         if not rule.evaluate_rule():
@@ -278,12 +304,20 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
             if log_event in self.forward_hypotheses_inv:
                 delete_hypotheses = []
                 for implication in self.forward_hypotheses_inv[log_event]:
-                    if len(implication.hypothesis_trigger_timestamps) != 0 and (
-                            str(implication.hypothesis_trigger_timestamps[0]) == 'obs' or implication.hypothesis_trigger_timestamps[
-                            0] >= log_atom.atom_time - self.hypothesis_max_delta_time) and implication.stable == 0:
+                    # Find first non-observed trigger timestamp
+                    trigger_timestamp_index = -1
+                    for trigger_timestamp in implication.hypothesis_trigger_timestamps:
+                        trigger_timestamp_index += 1
+                        if trigger_timestamp != 'obs':
+                            break
+                    if trigger_timestamp_index != -1 and \
+                            str(implication.hypothesis_trigger_timestamps[trigger_timestamp_index]) != 'obs' and \
+                            implication.hypothesis_trigger_timestamps[trigger_timestamp_index] >= log_atom.atom_time - \
+                            self.hypothesis_max_delta_time and \
+                            implication.stable == 0:
                         implication.add_hypothesis_observation(1, log_atom.atom_time)
                         # Mark this timestamp as observed
-                        implication.hypothesis_trigger_timestamps[0] = 'obs'
+                        implication.hypothesis_trigger_timestamps[trigger_timestamp_index] = 'obs'
                         # Since only true observations occur here, check for instability not necessary.
                         if implication.compute_hypothesis_stability() == 1:
                             # Update p and min_eval_true according to the results in the sample.
@@ -353,11 +387,18 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                 delete_hypotheses = []
                 for implication in self.back_hypotheses[log_event]:
                     if implication.stable == 0:
-                        if len(implication.hypothesis_trigger_timestamps) != 0 and str(
-                                implication.hypothesis_trigger_timestamps[0]) != 'obs' and implication.hypothesis_trigger_timestamps[
-                                0] >= log_atom.atom_time - self.hypothesis_max_delta_time:
+                        # Find first non-observed trigger timestamp
+                        trigger_timestamp_index = -1
+                        for trigger_timestamp in implication.hypothesis_trigger_timestamps:
+                            trigger_timestamp_index += 1
+                            if trigger_timestamp != 'obs':
+                                break
+                        if trigger_timestamp_index != -1 and \
+                                str(implication.hypothesis_trigger_timestamps[trigger_timestamp_index]) != 'obs' and \
+                                implication.hypothesis_trigger_timestamps[trigger_timestamp_index] >= log_atom.atom_time - \
+                                self.hypothesis_max_delta_time:
                             implication.add_hypothesis_observation(1, log_atom.atom_time)
-                            implication.hypothesis_trigger_timestamps[0] = 'obs'
+                            implication.hypothesis_trigger_timestamps[trigger_timestamp_index] = 'obs'
                             # Since only true observations occur here, check for instability not necessary.
                             if implication.compute_hypothesis_stability() == 1:
                                 # Update p and min_eval_true according to the results in the sample.
