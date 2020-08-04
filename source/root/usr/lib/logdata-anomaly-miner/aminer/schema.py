@@ -85,7 +85,7 @@
             'schema': {
                 'Verbose': {'type': 'boolean', 'required': False, 'default': False},
                 'MultiSource': {'type': 'boolean', 'required': False, 'default': False},
-                'TimestampPath': {'type': 'string'}
+                'TimestampPath': {'type': ['string', 'list']}
             }
         },
         'Analysis': {
