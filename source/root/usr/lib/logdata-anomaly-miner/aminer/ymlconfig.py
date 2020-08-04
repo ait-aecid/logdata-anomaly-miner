@@ -228,6 +228,13 @@ def build_analysis_pipeline(analysis_context):
                 use_value_match=item['use_value_match'],
                 min_rule_attributes=item['min_rule_attributes'],
                 max_rule_attributes=item['max_rule_attributes'])
+        elif item['type'] == 'ParserCount':
+            tmpAnalyser = func(
+                analysis_context.aminer_config,
+                item['paths'],
+                report_interval=item['report_interval'],
+                report_event_handlers=anomaly_event_handlers,
+                reset_after_report_flag=item['reset_after_report_flag'])
         else:
             tmpAnalyser = func(
                 analysis_context.aminer_config,
