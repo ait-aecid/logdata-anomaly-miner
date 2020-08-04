@@ -152,7 +152,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         if timestamp is None:
             log_atom.atom_time = time.time()
             timestamp = log_atom.atom_time
-        
+
         parser_match = log_atom.parser_match
 
         self.total_records += 1
@@ -181,7 +181,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                 if value is not None:
                     all_values_none = False
                 values.append(value)
-            if all_values_none == True:
+            if all_values_none is True:
                 return
             log_event = tuple(values)
 
@@ -204,7 +204,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     trigger_timestamp_index = -1
                     for trigger_timestamp in rule.rule_trigger_timestamps:
                         trigger_timestamp_index += 1
-                        if rule.rule_trigger_timestamps[trigger_timestamp_index] != 'obs':
+                        if trigger_timestamp != 'obs':
                             break
                     if trigger_timestamp_index != -1 and \
                             rule.rule_trigger_timestamps[trigger_timestamp_index] != 'obs' and \
@@ -253,7 +253,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     trigger_timestamp_index = -1
                     for trigger_timestamp in rule.rule_trigger_timestamps:
                         trigger_timestamp_index += 1
-                        if rule.rule_trigger_timestamps[trigger_timestamp_index] != 'obs':
+                        if trigger_timestamp != 'obs':
                             break
                     if trigger_timestamp_index != -1 and \
                             rule.rule_trigger_timestamps[trigger_timestamp_index] != 'obs' and \
@@ -308,7 +308,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     trigger_timestamp_index = -1
                     for trigger_timestamp in implication.hypothesis_trigger_timestamps:
                         trigger_timestamp_index += 1
-                        if implication.hypothesis_trigger_timestamps[trigger_timestamp_index] != 'obs':
+                        if trigger_timestamp != 'obs':
                             break
                     if trigger_timestamp_index != -1 and \
                             str(implication.hypothesis_trigger_timestamps[trigger_timestamp_index]) != 'obs' and \
@@ -391,11 +391,12 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                         trigger_timestamp_index = -1
                         for trigger_timestamp in implication.hypothesis_trigger_timestamps:
                             trigger_timestamp_index += 1
-                            if implication.hypothesis_trigger_timestamps[trigger_timestamp_index] != 'obs':
+                            if trigger_timestamp != 'obs':
                                 break
                         if trigger_timestamp_index != -1 and \
                                 str(implication.hypothesis_trigger_timestamps[trigger_timestamp_index]) != 'obs' and \
-                                implication.hypothesis_trigger_timestamps[trigger_timestamp_index] >= log_atom.atom_time - self.hypothesis_max_delta_time:
+                                implication.hypothesis_trigger_timestamps[trigger_timestamp_index] >= log_atom.atom_time - \
+                                self.hypothesis_max_delta_time:
                             implication.add_hypothesis_observation(1, log_atom.atom_time)
                             implication.hypothesis_trigger_timestamps[trigger_timestamp_index] = 'obs'
                             # Since only true observations occur here, check for instability not necessary.
