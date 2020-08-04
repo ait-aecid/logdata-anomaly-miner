@@ -85,7 +85,7 @@
             'schema': {
                 'Verbose': {'type': 'boolean', 'required': False, 'default': False},
                 'MultiSource': {'type': 'boolean', 'required': False, 'default': False},
-                'TimestampPath': {'type': 'string'}
+                'TimestampPath': {'type': ['string', 'list']}
             }
         },
         'Analysis': {
@@ -98,7 +98,7 @@
                      'type': {'type': 'string', 'allowed': ['NewMatchPathValueDetector', 
                               'NewMatchPathValueComboDetector', 'MissingMatchPathValueDetector',
                               'MissingMatchPathListValueDetector', 'TimeCorrelationDetector',
-                              'EventCorrelationDetector']},
+                              'EventCorrelationDetector', 'ParserCount']},
                      'paths': {'type': 'list', 'schema': {'type': 'string'}},
                      'learnMode': {'type': 'boolean'},
                      'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},
@@ -106,6 +106,8 @@
                      'allow_missing_values': {'type': 'boolean', 'required': False, 'default': False},
                      'check_interval': {'type': 'integer', 'required': False, 'default': 3600},
                      'realert_interval': {'type': 'integer', 'required': False, 'default': 36000},
+                     'report_interval': {'type': 'integer', 'required': False, 'default': 10},
+                     'reset_after_report_flag': {'type': 'boolean', 'required': False, 'default': False},
                      'path': {'type': 'string', 'required': False, 'default': 'Default'},
                      'parallel_check_count': {'type': 'integer', 'required': True, 'default': 10},
                      'record_count_before_event': {'type': 'integer', 'required': False, 'default': 1000},

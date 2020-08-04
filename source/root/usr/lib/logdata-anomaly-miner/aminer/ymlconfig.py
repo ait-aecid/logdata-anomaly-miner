@@ -246,6 +246,13 @@ def build_analysis_pipeline(analysis_context):
                 auto_include_flag=item['auto_include_flag'],
                 whitelisted_paths=item['whitelisted_paths'],
                 persistence_id=item['persistence_id'])
+        elif item['type'] == 'ParserCount':
+            tmpAnalyser = func(
+                analysis_context.aminer_config,
+                item['paths'],
+                report_interval=item['report_interval'],
+                report_event_handlers=anomaly_event_handlers,
+                reset_after_report_flag=item['reset_after_report_flag'])
         else:
             tmpAnalyser = func(
                 analysis_context.aminer_config,
