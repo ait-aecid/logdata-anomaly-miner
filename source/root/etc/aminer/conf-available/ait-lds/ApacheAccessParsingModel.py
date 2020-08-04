@@ -5,6 +5,7 @@ from aminer.parsing import DecimalIntegerValueModelElement
 from aminer.parsing import DelimitedDataModelElement
 from aminer.parsing import FirstMatchModelElement
 from aminer.parsing import FixedDataModelElement
+from aminer.parsing import FixedWordlistDataModelElement
 from aminer.parsing import IpAddressDataModelElement
 from aminer.parsing import OptionalMatchModelElement
 from aminer.parsing import SequenceModelElement
@@ -30,18 +31,27 @@ def get_model():
         FixedDataModelElement('sp4', b' +'),
         DecimalIntegerValueModelElement('tz'),
         FixedDataModelElement('sp5', b'] "'),
-        DelimitedDataModelElement('request', b'"', b'\\'),
-        FixedDataModelElement('sp6', b'" '),
+        FirstMatchModelElement('fm', [
+            FixedDataModelElement('dash', b'-'),
+            SequenceModelElement('request', [
+                FixedWordlistDataModelElement('method', [b'GET', b'POST', b'PUT', b'HEAD', b'DELETE', b'CONNECT', b'OPTIONS', b'TRACE', b'PATCH']),
+                FixedDataModelElement('sp6', b' '),
+                DelimitedDataModelElement('request', b' ', b'\\'),
+                FixedDataModelElement('sp7', b' '),
+                DelimitedDataModelElement('version', b'"'),
+                ])
+            ]),
+        FixedDataModelElement('sp8', b'" '),
         DecimalIntegerValueModelElement('status_code'),
-        FixedDataModelElement('sp7', b' '),
+        FixedDataModelElement('sp9', b' '),
         DecimalIntegerValueModelElement('content_size'),
         OptionalMatchModelElement('combined',
             SequenceModelElement('combined', [
-                FixedDataModelElement('sp8', b' "'),
+                FixedDataModelElement('sp10', b' "'),
                 DelimitedDataModelElement('referer', b'"', b'\\'),
-                FixedDataModelElement('sp9', b'" "'),
+                FixedDataModelElement('sp11', b'" "'),
                 DelimitedDataModelElement('user_agent', b'"', b'\\'),
-                FixedDataModelElement('sp10', b'"'),
+                FixedDataModelElement('sp12', b'"'),
                 ])),
         ])
 
