@@ -152,13 +152,10 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         if timestamp is None:
             log_atom.atom_time = time.time()
             timestamp = log_atom.atom_time
-        
+
         parser_match = log_atom.parser_match
 
         self.total_records += 1
-
-        event_data = {}
-        sorted_log_lines = []
 
         if self.paths is None or len(self.paths) == 0:
             # Event is defined by the full path of log atom.
@@ -183,7 +180,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                 if value is not None:
                     all_values_none = False
                 values.append(value)
-            if all_values_none == True:
+            if all_values_none is True:
                 return
             log_event = tuple(values)
 
@@ -235,12 +232,12 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     if not rule.evaluate_rule():
                         for listener in self.anomaly_event_handlers:
                             listener.receive_event('analysis.EventCorrelationDetector', 'Correlation rule violated! '
-                                'Event %s is missing, but should follow event %s' % (
+                                                   'Event %s is missing, but should follow event %s' % (
                                     repr(self.sample_events[rule.implied_event]), repr(self.sample_events[rule.trigger_event])),
                                 [self.sample_events[rule.implied_event], self.sample_events[rule.trigger_event]],
-                                {'RuleInfo': {'Rule': str(rule.trigger_event) + '->' + str(rule.implied_event), 
-                                'Expected': str(rule.min_eval_true) + '/' + str(rule.max_observations),
-                                'Observed': str(sum(rule.rule_observations)) + '/' + str(len(rule.rule_observations))}}, log_atom, self)
+                                {'RuleInfo': {'Rule': str(rule.trigger_event) + '->' + str(rule.implied_event),
+                                              'Expected': str(rule.min_eval_true) + '/' + str(rule.max_observations),
+                                              'Observed': str(sum(rule.rule_observations)) + '/' + str(len(rule.rule_observations))}}, log_atom, self)
                         rule.rule_observations = deque([])
                     continue
                 break
@@ -273,7 +270,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                                     'Event %s is missing, but should precede event %s' % (
                                         repr(self.sample_events[rule.implied_event]), repr(self.sample_events[rule.trigger_event])),
                                     [self.sample_events[rule.implied_event], self.sample_events[rule.trigger_event]],
-                                    {'RuleInfo': {'Rule': str(rule.implied_event) + '<-' + str(rule.trigger_event), 
+                                    {'RuleInfo': {'Rule': str(rule.implied_event) + '<-' + str(rule.trigger_event),
                                     'Expected': str(rule.min_eval_true) + '/' + str(rule.max_observations),
                                     'Observed': str(sum(rule.rule_observations)) + '/' + str(len(rule.rule_observations))}}, log_atom, self)
                             rule.rule_observations = deque([])
@@ -399,7 +396,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                                 break
                         if trigger_timestamp_index != -1 and \
                                 str(implication.hypothesis_trigger_timestamps[trigger_timestamp_index]) != 'obs' and \
-                                implication.hypothesis_trigger_timestamps[trigger_timestamp_index] >= log_atom.atom_time - self.hypothesis_max_delta_time:
+                                implication.hypothesis_trigger_timestamps[trigger_timestamp_index] >= log_atom.atom_time - \
+                                    self.hypothesis_max_delta_time:
                             implication.add_hypothesis_observation(1, log_atom.atom_time)
                             implication.hypothesis_trigger_timestamps[trigger_timestamp_index] = 'obs'
                             # Since only true observations occur here, check for instability not necessary.
