@@ -34,24 +34,22 @@ def get_model():
         FirstMatchModelElement('fm', [
             FixedDataModelElement('dash', b'-'),
             SequenceModelElement('request', [
-                FixedWordlistDataModelElement('method', [b'GET', b'POST', b'PUT', b'HEAD', b'DELETE', b'CONNECT', b'OPTIONS', b'TRACE', b'PATCH']),
+                FixedWordlistDataModelElement('method', [b'GET', b'POST', b'PUT', b'HEAD', b'DELETE', b'CONNECT', b'OPTIONS', b'TRACE', b'PATCH', b'SEARCH', b'INDEX', b'get', b'TRACK', b'PROPFIND', b'DEBUG']),
                 FixedDataModelElement('sp6', b' '),
-                DelimitedDataModelElement('request', b' ', b'\\'),
-                FixedDataModelElement('sp7', b' '),
-                DelimitedDataModelElement('version', b'"'),
+                DelimitedDataModelElement('request', b'"', b'\\'),
                 ])
             ]),
-        FixedDataModelElement('sp8', b'" '),
+        FixedDataModelElement('sp7', b'" '),
         DecimalIntegerValueModelElement('status_code'),
-        FixedDataModelElement('sp9', b' '),
+        FixedDataModelElement('sp8', b' '),
         DecimalIntegerValueModelElement('content_size'),
         OptionalMatchModelElement('combined',
             SequenceModelElement('combined', [
-                FixedDataModelElement('sp10', b' "'),
+                FixedDataModelElement('sp9', b' "'),
                 DelimitedDataModelElement('referer', b'"', b'\\'),
-                FixedDataModelElement('sp11', b'" "'),
+                FixedDataModelElement('sp10', b'" "'),
                 DelimitedDataModelElement('user_agent', b'"', b'\\'),
-                FixedDataModelElement('sp12', b'"'),
+                FixedDataModelElement('sp11', b'"'),
                 ])),
         ])
 
