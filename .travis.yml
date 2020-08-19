@@ -18,6 +18,7 @@ install:
   - sudo pip3 install kafka-python -U
   - sudo ln -s /usr/lib/python3/dist-packages/kafka /etc/aminer/conf-enabled/kafka
   - sudo pip3 install matplotlib
+  - sudo pip3 install -U scipy
   - cd aecid-testsuite
   - sudo chmod +x runUnittests.sh
   - sudo chmod +x runAMinerDemo.sh
