@@ -318,7 +318,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
     def do_persist(self):
         """Immediately write persistence data to storage."""  # No support for empirical distributions !!!
         if self.print_statistics:
-            print('numTrackedVars: %s' % len([i for i in self.event_type_detector.check_variables[0] if i]))
+            if len(self.event_type_detector.check_variables) > 0:
+                print('numTrackedVars: %s' % len([i for i in self.event_type_detector.check_variables[0] if i]))
             print('numChangedVarTypes: %s' % len(self.changed_var_types))
             print('numFailedIndicators: %s' % len(self.failed_indicators_total))
 
