@@ -2,7 +2,6 @@ from aminer.analysis.EventTypeDetector import EventTypeDetector
 from aminer.analysis.VariableTypeDetector import VariableTypeDetector, convert_to_floats, consists_of_ints, consists_of_floats
 from aminer.input import LogAtom
 from aminer.parsing import ParserMatch, MatchElement
-from unit.ContinuousSampleGenerator import generate_sample
 from unit.TestBase import TestBase
 
 from collections import Counter
@@ -155,9 +154,6 @@ class VariableTypeDetectorTest(TestBase):
         beta4_data_list = [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 4]], max(dataset_sizes)*iterations, plot_bool=False)]
         beta5_data_list = [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 5]], max(dataset_sizes)*iterations, plot_bool=False)]
         """
-        # This Variable states if the data sets should be generated. If not True then the deterministic standard test is executed
-        generate_data_sets = False
-
         # Number of execution of the tested function 
         iterations = 20
         # Size of the initial datasample
@@ -165,33 +161,21 @@ class VariableTypeDetectorTest(TestBase):
         # Significance level
         significance_niveaus = [0.05]
 
-        if generate_data_sets:
-            # generate data
-            var_ev = 0
-            var_var = 1
-            uni_data_list = [val[1] for val in generate_sample([], [['uni', var_ev - var_var, var_ev + var_var]], max(dataset_sizes)*iterations, plot_bool=False)]
-            nor_data_list = [val[1] for val in generate_sample([], [['nor', var_ev, var_var, -1000, 1000]], max(dataset_sizes)*iterations, plot_bool=False)]
-            beta1_data_list = [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 1]], max(dataset_sizes)*iterations, plot_bool=False)]
-            beta2_data_list = [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 2]], max(dataset_sizes)*iterations, plot_bool=False)]
-            beta3_data_list = [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 3]], max(dataset_sizes)*iterations, plot_bool=False)]
-            beta4_data_list = [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 4]], max(dataset_sizes)*iterations, plot_bool=False)]
-            beta5_data_list = [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 5]], max(dataset_sizes)*iterations, plot_bool=False)]
-        else:
-            # load data
-            with open('unit/data/vtd_data/uni_data_test3', 'rb') as f:
-                [uni_data_list, uni_result_shapes] = pickle.load(f)
-            with open('unit/data/vtd_data/nor_data_test3', 'rb') as f:
-                [nor_data_list, nor_result_shapes] = pickle.load(f)
-            with open('unit/data/vtd_data/beta1_data_test3', 'rb') as f:
-                [beta1_data_list, beta1_result_shapes] = pickle.load(f)
-            with open('unit/data/vtd_data/beta2_data_test3', 'rb') as f:
-                [beta2_data_list, beta2_result_shapes] = pickle.load(f)
-            with open('unit/data/vtd_data/beta3_data_test3', 'rb') as f:
-                [beta3_data_list, beta3_result_shapes] = pickle.load(f)
-            with open('unit/data/vtd_data/beta4_data_test3', 'rb') as f:
-                [beta4_data_list, beta4_result_shapes] = pickle.load(f)
-            with open('unit/data/vtd_data/beta5_data_test3', 'rb') as f:
-                [beta5_data_list, beta5_result_shapes] = pickle.load(f)
+        # load data
+        with open('unit/data/vtd_data/uni_data_test3', 'rb') as f:
+            [uni_data_list, uni_result_shapes] = pickle.load(f)
+        with open('unit/data/vtd_data/nor_data_test3', 'rb') as f:
+            [nor_data_list, nor_result_shapes] = pickle.load(f)
+        with open('unit/data/vtd_data/beta1_data_test3', 'rb') as f:
+            [beta1_data_list, beta1_result_shapes] = pickle.load(f)
+        with open('unit/data/vtd_data/beta2_data_test3', 'rb') as f:
+            [beta2_data_list, beta2_result_shapes] = pickle.load(f)
+        with open('unit/data/vtd_data/beta3_data_test3', 'rb') as f:
+            [beta3_data_list, beta3_result_shapes] = pickle.load(f)
+        with open('unit/data/vtd_data/beta4_data_test3', 'rb') as f:
+            [beta4_data_list, beta4_result_shapes] = pickle.load(f)
+        with open('unit/data/vtd_data/beta5_data_test3', 'rb') as f:
+            [beta5_data_list, beta5_result_shapes] = pickle.load(f)
 
         for dataset_size in dataset_sizes:
             for significance_niveau in significance_niveaus:
@@ -209,15 +193,8 @@ class VariableTypeDetectorTest(TestBase):
                     else:
                         result_list.append(0)
 
-                if generate_data_sets:
-                    # Save the data set and print the accuracy
-                    f = open('unit/data/vtd_data/uni_data_test3', 'wb+')
-                    pickle.dump([uni_data_list, result_list], f)
-                    self.assertTrue(sum(result_list) / iterations >= 0.5)
-                    print('uni accuracy: %.3f, dataset_size: %d' % (sum(result_list) / iterations, dataset_size))
-                else:
-                    # Test if the result list is correct
-                    self.assertTrue(result_list == uni_result_shapes)
+                # Test if the result list is correct
+                self.assertTrue(result_list == uni_result_shapes)
 
                 result_list = [] # List of the results of the single tests
                 for i in range(iterations):
@@ -229,15 +206,8 @@ class VariableTypeDetectorTest(TestBase):
                     else:
                         result_list.append(0)
 
-                if generate_data_sets:
-                    # Save the data set and print the accuracy
-                    f = open('unit/data/vtd_data/nor_data_test3', 'wb+')
-                    pickle.dump([nor_data_list, result_list], f)
-                    self.assertTrue(sum(result_list) / iterations >= 0.5)
-                    print('nor accuracy: %.3f, dataset_size: %d' % (sum(result_list) / iterations, dataset_size))
-                else:
-                    # Test if the result list is correct
-                    self.assertTrue(result_list == nor_result_shapes)
+                # Test if the result list is correct
+                self.assertTrue(result_list == nor_result_shapes)
 
                 result_list = [] # List of the results of the single tests
                 for i in range(iterations):
@@ -249,15 +219,8 @@ class VariableTypeDetectorTest(TestBase):
                     else:
                         result_list.append(0)
 
-                if generate_data_sets:
-                    # Save the data set and print the accuracy
-                    f = open('unit/data/vtd_data/beta1_data_test3', 'wb+')
-                    pickle.dump([beta1_data_list, result_list], f)
-                    self.assertTrue(sum(result_list) / iterations >= 0.5)
-                    print('beta1 accuracy: %.3f, dataset_size: %d' % (sum(result_list) / iterations, dataset_size))
-                else:
-                    # Test if the result list is correct
-                    self.assertTrue(result_list == beta1_result_shapes)
+                # Test if the result list is correct
+                self.assertTrue(result_list == beta1_result_shapes)
 
                 result_list = [] # List of the results of the single tests
                 for i in range(iterations):
@@ -269,15 +232,8 @@ class VariableTypeDetectorTest(TestBase):
                     else:
                         result_list.append(0)
 
-                if generate_data_sets:
-                    # Save the data set and print the accuracy
-                    f = open('unit/data/vtd_data/beta2_data_test3', 'wb+')
-                    pickle.dump([beta2_data_list, result_list], f)
-                    self.assertTrue(sum(result_list) / iterations >= 0.5)
-                    print('beta2 accuracy: %.3f, dataset_size: %d' % (sum(result_list) / iterations, dataset_size))
-                else:
-                    # Test if the result list is correct
-                    self.assertTrue(result_list == beta2_result_shapes)
+                # Test if the result list is correct
+                self.assertTrue(result_list == beta2_result_shapes)
 
                 result_list = [] # List of the results of the single tests
                 for i in range(iterations):
@@ -289,15 +245,8 @@ class VariableTypeDetectorTest(TestBase):
                     else:
                         result_list.append(0)
 
-                if generate_data_sets:
-                    # Save the data set and print the accuracy
-                    f = open('unit/data/vtd_data/beta3_data_test3', 'wb+')
-                    pickle.dump([beta3_data_list, result_list], f)
-                    self.assertTrue(sum(result_list) / iterations >= 0.5)
-                    print('beta3 accuracy: %.3f, dataset_size: %d' % (sum(result_list) / iterations, dataset_size))
-                else:
-                    # Test if the result list is correct
-                    self.assertTrue(result_list == beta3_result_shapes)
+                # Test if the result list is correct
+                self.assertTrue(result_list == beta3_result_shapes)
 
                 result_list = [] # List of the results of the single tests
                 for i in range(iterations):
@@ -309,15 +258,8 @@ class VariableTypeDetectorTest(TestBase):
                     else:
                         result_list.append(0)
 
-                if generate_data_sets:
-                    # Save the data set and print the accuracy
-                    f = open('unit/data/vtd_data/beta4_data_test3', 'wb+')
-                    pickle.dump([beta4_data_list, result_list], f)
-                    self.assertTrue(sum(result_list) / iterations >= 0.5)
-                    print('beta4 accuracy: %.3f, dataset_size: %d' % (sum(result_list) / iterations, dataset_size))
-                else:
-                    # Test if the result list is correct
-                    self.assertTrue(result_list == beta4_result_shapes)
+                # Test if the result list is correct
+                self.assertTrue(result_list == beta4_result_shapes)
 
                 result_list = [] # List of the results of the single tests
                 for i in range(iterations):
@@ -329,15 +271,8 @@ class VariableTypeDetectorTest(TestBase):
                     else:
                         result_list.append(0)
 
-                if generate_data_sets:
-                    # Save the data set and print the accuracy
-                    f = open('unit/data/vtd_data/beta5_data_test3', 'wb+')
-                    pickle.dump([beta5_data_list, result_list], f)
-                    self.assertTrue(sum(result_list) / iterations >= 0.5)
-                    print('beta5 accuracy: %.3f, dataset_size: %d' % (sum(result_list) / iterations, dataset_size))
-                else:
-                    # Test if the result list is correct
-                    self.assertTrue(result_list == beta5_result_shapes)
+                # Test if the result list is correct
+                self.assertTrue(result_list == beta5_result_shapes)
 
     def test4detect_var_type(self):
         """This unittest tests possible scenarios of the detect_var_type method."""
@@ -484,27 +419,13 @@ class VariableTypeDetectorTest(TestBase):
     def test6receive_atom(self):
         """This unittest tests if atoms are sorted to the right distribution and if the update steps also work properly.
         Therefore the assumption that after 200 values the VTD with the default parameters can change to the right distribution."""
-        generate_data_sets = False
-
-        if generate_data_sets:
-            # generate data
-            uni_data_list = [val[1] for val in generate_sample([], [['uni', -1, 1]], 100, plot_bool=False)]
-            nor_data_list = [val[1] for val in generate_sample([], [['nor', 0, 1, -1000, 1000]], 100, plot_bool=False)]
-            beta1_data_list = [val[1] for val in generate_sample([], [['beta', 0, 1, -1000, 1000, 1]], 100, plot_bool=False)]
-            with open('unit/data/vtd_data/uni_data_test8', 'wb+') as f:
-                pickle.dump(uni_data_list, f)
-            with open('unit/data/vtd_data/nor_data_test8', 'wb+') as f:
-                pickle.dump(nor_data_list, f)
-            with open('unit/data/vtd_data/beta1_data_test8', 'wb+') as f:
-                pickle.dump(beta1_data_list, f)
-        else:
-            # load data
-            with open('unit/data/vtd_data/uni_data_test8', 'rb') as f:
-                uni_data_list = pickle.load(f)
-            with open('unit/data/vtd_data/nor_data_test8', 'rb') as f:
-                nor_data_list = pickle.load(f)
-            with open('unit/data/vtd_data/beta1_data_test8', 'rb') as f:
-                beta1_data_list = pickle.load(f)
+        # load data
+        with open('unit/data/vtd_data/uni_data_test8', 'rb') as f:
+            uni_data_list = pickle.load(f)
+        with open('unit/data/vtd_data/nor_data_test8', 'rb') as f:
+            nor_data_list = pickle.load(f)
+        with open('unit/data/vtd_data/beta1_data_test8', 'rb') as f:
+            beta1_data_list = pickle.load(f)
 
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, options={
@@ -673,8 +594,6 @@ class VariableTypeDetectorTest(TestBase):
         """This unittest tests the s_ks_test method. It uses randomised datasets, which can be printed in the terminal.
         Every distribution has generated 30*300 Datasets and var_ev = 0, var_var = 1. Data was generated with following methods:
         ..."""
-        # This Variable states if the data sets should be generated. If not True then the deterministic standard test is executed
-        generate_data_sets = False
         # Number of execution of the tested function 
         iterations = 20
         # Size of the initial datasample
@@ -684,41 +603,21 @@ class VariableTypeDetectorTest(TestBase):
         # Significance level
         significance_niveaus = [0.05]
 
-        if generate_data_sets:
-            # generate data
-            var_ev = 0
-            var_var = 1
-
-            uni_data_list_ini = [val[1] for val in generate_sample([], [['uni', var_ev - var_var, var_ev + var_var]], max(dataset_sizes_ini)*iterations, plot_bool=False)]
-            uni_data_list_upd = [val[1] for val in generate_sample([], [['uni', var_ev - var_var, var_ev + var_var]], max(dataset_sizes_upd)*iterations, plot_bool=False)]
-            nor_data_list_ini = [val[1] for val in generate_sample([], [['nor', var_ev, var_var, -1000, 1000]], max(dataset_sizes_ini)*iterations, plot_bool=False)]
-            nor_data_list_upd = [val[1] for val in generate_sample([], [['nor', var_ev, var_var, -1000, 1000]], max(dataset_sizes_upd)*iterations, plot_bool=False)]
-            beta1_data_list_ini = [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 1]], max(dataset_sizes_ini)*iterations, plot_bool=False)]
-            beta1_data_list_upd = [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 1]], max(dataset_sizes_upd)*iterations, plot_bool=False)]
-            beta2_data_list_ini = [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 2]], max(dataset_sizes_ini)*iterations, plot_bool=False)]
-            beta2_data_list_upd = [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 2]], max(dataset_sizes_upd)*iterations, plot_bool=False)]
-            beta3_data_list_ini = [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 3]], max(dataset_sizes_ini)*iterations, plot_bool=False)]
-            beta3_data_list_upd = [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 3]], max(dataset_sizes_upd)*iterations, plot_bool=False)]
-            beta4_data_list_ini = [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 4]], max(dataset_sizes_ini)*iterations, plot_bool=False)]
-            beta4_data_list_upd = [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 4]], max(dataset_sizes_upd)*iterations, plot_bool=False)]
-            beta5_data_list_ini = [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 5]], max(dataset_sizes_ini)*iterations, plot_bool=False)]
-            beta5_data_list_upd = [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 5]], max(dataset_sizes_upd)*iterations, plot_bool=False)]
-        else:
-            # load data
-            with open('unit/data/vtd_data/uni_data_test9', 'rb') as f:
-                [uni_data_list_ini, uni_data_list_upd, uni_result_shapes] = pickle.load(f)
-            with open('unit/data/vtd_data/nor_data_test9', 'rb') as f:
-                [nor_data_list_ini, nor_data_list_upd, nor_result_shapes] = pickle.load(f)
-            with open('unit/data/vtd_data/beta1_data_test9', 'rb') as f:
-                [beta1_data_list_ini, beta1_data_list_upd, beta1_result_shapes] = pickle.load(f)
-            with open('unit/data/vtd_data/beta2_data_test9', 'rb') as f:
-                [beta2_data_list_ini, beta2_data_list_upd, beta2_result_shapes] = pickle.load(f)
-            with open('unit/data/vtd_data/beta3_data_test9', 'rb') as f:
-                [beta3_data_list_ini, beta3_data_list_upd, beta3_result_shapes] = pickle.load(f)
-            with open('unit/data/vtd_data/beta4_data_test9', 'rb') as f:
-                [beta4_data_list_ini, beta4_data_list_upd, beta4_result_shapes] = pickle.load(f)
-            with open('unit/data/vtd_data/beta5_data_test9', 'rb') as f:
-                [beta5_data_list_ini, beta5_data_list_upd, beta5_result_shapes] = pickle.load(f)
+        # load data
+        with open('unit/data/vtd_data/uni_data_test9', 'rb') as f:
+            [uni_data_list_ini, uni_data_list_upd, uni_result_shapes] = pickle.load(f)
+        with open('unit/data/vtd_data/nor_data_test9', 'rb') as f:
+            [nor_data_list_ini, nor_data_list_upd, nor_result_shapes] = pickle.load(f)
+        with open('unit/data/vtd_data/beta1_data_test9', 'rb') as f:
+            [beta1_data_list_ini, beta1_data_list_upd, beta1_result_shapes] = pickle.load(f)
+        with open('unit/data/vtd_data/beta2_data_test9', 'rb') as f:
+            [beta2_data_list_ini, beta2_data_list_upd, beta2_result_shapes] = pickle.load(f)
+        with open('unit/data/vtd_data/beta3_data_test9', 'rb') as f:
+            [beta3_data_list_ini, beta3_data_list_upd, beta3_result_shapes] = pickle.load(f)
+        with open('unit/data/vtd_data/beta4_data_test9', 'rb') as f:
+            [beta4_data_list_ini, beta4_data_list_upd, beta4_result_shapes] = pickle.load(f)
+        with open('unit/data/vtd_data/beta5_data_test9', 'rb') as f:
+            [beta5_data_list_ini, beta5_data_list_upd, beta5_result_shapes] = pickle.load(f)
 
         for dataset_size_ini in dataset_sizes_ini:
             for dataset_size_upd in dataset_sizes_upd:
@@ -741,28 +640,14 @@ class VariableTypeDetectorTest(TestBase):
                                     if variable_type_ini[-1][j][0] == 'uni':
                                         variable_type_ini = variable_type_ini[-1][j]
                                         break
-                            else:
-                                if generate_data_sets:
-                                    uni_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini] = \
-                                            [val[1] for val in generate_sample([], [['uni', var_ev - var_var, var_ev + var_var]], dataset_size_ini, plot_bool=False)]
-                                    variable_type_ini = vtd.detect_continuous_shape(uni_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
-                                else:
-                                    variable_type_ini = vtd.detect_continuous_shape(
-                                            [val[1] for val in generate_sample([], [['uni', var_ev - var_var, var_ev + var_var]], dataset_size_ini, plot_bool=False)])
 
                         # Test and save the result of the sKS-Test
                         etd.values = [[uni_data_list_upd[i * dataset_size_upd:(i + 1) * dataset_size_upd]]]
                         vtd.var_type = [[variable_type_ini]]
                         result_list.append(vtd.s_ks_test(0, 0, True)[0])
 
-                    if generate_data_sets:
-                        f = open('unit/data/vtd_data/uni_data_test9', 'wb+')
-                        pickle.dump([uni_data_list_ini, uni_data_list_upd, result_list], f)
-                        self.assertTrue(sum(result_list) >= iterations * 0.5, sum(result_list))
-                        print('uni accuracy: %.3f, dataset_size_ini: %d, dataset_size_upd: %d' % (sum(result_list) / iterations, dataset_size_ini, dataset_size_upd))
-                    else:
-                        # Test if the result list is correct
-                        self.assertTrue(result_list == uni_result_shapes)
+                    # Test if the result list is correct
+                    self.assertTrue(result_list == uni_result_shapes)
 
                     result_list = [] # List of the results of the single tests
                     for i in range(iterations):
@@ -778,28 +663,14 @@ class VariableTypeDetectorTest(TestBase):
                                     if variable_type_ini[-1][j][0] == 'nor':
                                         variable_type_ini = variable_type_ini[-1][j]
                                         break
-                            else:
-                                if generate_data_sets:
-                                    nor_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini] = \
-                                            [val[1] for val in generate_sample([], [['nor', var_ev, var_var, -1000, 1000]], dataset_size_ini, plot_bool=False)]
-                                    variable_type_ini = vtd.detect_continuous_shape(nor_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
-                                else:
-                                    variable_type_ini = vtd.detect_continuous_shape(
-                                            [val[1] for val in generate_sample([], [['nor', var_ev, var_var, -1000, 1000]], dataset_size_ini, plot_bool=False)])
 
                         # Test and save the result of the sKS-Test
                         etd.values = [[nor_data_list_upd[i * dataset_size_upd:(i + 1) * dataset_size_upd]]]
                         vtd.var_type = [[variable_type_ini]]
                         result_list.append(vtd.s_ks_test(0, 0, True)[0])
 
-                    if generate_data_sets:
-                        f = open('unit/data/vtd_data/nor_data_test9', 'wb+')
-                        pickle.dump([nor_data_list_ini, nor_data_list_upd, result_list], f)
-                        self.assertTrue(sum(result_list) >= iterations * 0.5, sum(result_list))
-                        print('nor accuracy: %.3f, dataset_size_ini: %d, dataset_size_upd: %d' % (sum(result_list) / iterations, dataset_size_ini, dataset_size_upd))
-                    else:
-                        # Test if the result list is correct
-                        self.assertTrue(result_list == nor_result_shapes)
+                    # Test if the result list is correct
+                    self.assertTrue(result_list == nor_result_shapes)
 
                     result_list = [] # List of the results of the single tests
                     for i in range(iterations):
@@ -815,28 +686,14 @@ class VariableTypeDetectorTest(TestBase):
                                     if variable_type_ini[-1][j][0] == 'beta' and variable_type_ini[-1][j][-1] == 1:
                                         variable_type_ini = variable_type_ini[-1][j]
                                         break
-                            else:
-                                if generate_data_sets:
-                                    beta1_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini] = \
-                                            [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 1]], dataset_size_ini, plot_bool=False)]
-                                    variable_type_ini = vtd.detect_continuous_shape(beta1_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
-                                else:
-                                    variable_type_ini = vtd.detect_continuous_shape(
-                                            [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 1]], dataset_size_ini, plot_bool=False)])
                         
                         # Test and save the result of the sKS-Test
                         etd.values = [[beta1_data_list_upd[i * dataset_size_upd:(i + 1) * dataset_size_upd]]]
                         vtd.var_type = [[variable_type_ini]]
                         result_list.append(vtd.s_ks_test(0, 0, True)[0])
 
-                    if generate_data_sets:
-                        f = open('unit/data/vtd_data/beta1_data_test9', 'wb+')
-                        pickle.dump([beta1_data_list_ini, beta1_data_list_upd, result_list], f)
-                        self.assertTrue(sum(result_list) >= iterations * 0.5, sum(result_list))
-                        print('beta1 accuracy: %.3f, dataset_size_ini: %d, dataset_size_upd: %d' % (sum(result_list) / iterations, dataset_size_ini, dataset_size_upd))
-                    else:
-                        # Test if the result list is correct
-                        self.assertTrue(result_list == beta1_result_shapes)
+                    # Test if the result list is correct
+                    self.assertTrue(result_list == beta1_result_shapes)
 
                     result_list = [] # List of the results of the single tests
                     for i in range(iterations):
@@ -852,28 +709,14 @@ class VariableTypeDetectorTest(TestBase):
                                     if variable_type_ini[-1][j][0] == 'beta' and variable_type_ini[-1][j][-1] == 2:
                                         variable_type_ini = variable_type_ini[-1][j]
                                         break
-                            else:
-                                if generate_data_sets:
-                                    beta2_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini] = \
-                                            [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 2]], dataset_size_ini, plot_bool=False)]
-                                    variable_type_ini = vtd.detect_continuous_shape(beta2_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
-                                else:
-                                    variable_type_ini = vtd.detect_continuous_shape(
-                                            [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 2]], dataset_size_ini, plot_bool=False)])
                         
                         # Test and save the result of the sKS-Test
                         etd.values = [[beta2_data_list_upd[i * dataset_size_upd:(i + 1) * dataset_size_upd]]]
                         vtd.var_type = [[variable_type_ini]]
                         result_list.append(vtd.s_ks_test(0, 0, True)[0])
 
-                    if generate_data_sets:
-                        f = open('unit/data/vtd_data/beta2_data_test9', 'wb+')
-                        pickle.dump([beta2_data_list_ini, beta2_data_list_upd, result_list], f)
-                        self.assertTrue(sum(result_list) >= iterations * 0.5, sum(result_list))
-                        print('beta2 accuracy: %.3f, dataset_size_ini: %d, dataset_size_upd: %d' % (sum(result_list) / iterations, dataset_size_ini, dataset_size_upd))
-                    else:
-                        # Test if the result list is correct
-                        self.assertTrue(result_list == beta2_result_shapes)
+                    # Test if the result list is correct
+                    self.assertTrue(result_list == beta2_result_shapes)
 
                     result_list = [] # List of the results of the single tests
                     for i in range(iterations):
@@ -889,28 +732,14 @@ class VariableTypeDetectorTest(TestBase):
                                     if variable_type_ini[-1][j][0] == 'beta' and variable_type_ini[-1][j][-1] == 3:
                                         variable_type_ini = variable_type_ini[-1][j]
                                         break
-                            else:
-                                if generate_data_sets:
-                                    beta3_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini] = \
-                                            [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 3]], dataset_size_ini, plot_bool=False)]
-                                    variable_type_ini = vtd.detect_continuous_shape(beta3_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
-                                else:
-                                    variable_type_ini = vtd.detect_continuous_shape(
-                                            [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 3]], dataset_size_ini, plot_bool=False)])
                         
                         # Test and save the result of the sKS-Test
                         etd.values = [[beta3_data_list_upd[i * dataset_size_upd:(i + 1) * dataset_size_upd]]]
                         vtd.var_type = [[variable_type_ini]]
                         result_list.append(vtd.s_ks_test(0, 0, True)[0])
 
-                    if generate_data_sets:
-                        f = open('unit/data/vtd_data/beta3_data_test9', 'wb+')
-                        pickle.dump([beta3_data_list_ini, beta3_data_list_upd, result_list], f)
-                        self.assertTrue(sum(result_list) >= iterations * 0.5, sum(result_list))
-                        print('beta3 accuracy: %.3f, dataset_size_ini: %d, dataset_size_upd: %d' % (sum(result_list) / iterations, dataset_size_ini, dataset_size_upd))
-                    else:
-                        # Test if the result list is correct
-                        self.assertTrue(result_list == beta3_result_shapes)
+                    # Test if the result list is correct
+                    self.assertTrue(result_list == beta3_result_shapes)
 
                     result_list = [] # List of the results of the single tests
                     for i in range(iterations):
@@ -926,28 +755,14 @@ class VariableTypeDetectorTest(TestBase):
                                     if variable_type_ini[-1][j][0] == 'beta' and variable_type_ini[-1][j][-1] == 4:
                                         variable_type_ini = variable_type_ini[-1][j]
                                         break
-                            else:
-                                if generate_data_sets:
-                                    beta4_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini] = \
-                                            [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 4]], dataset_size_ini, plot_bool=False)]
-                                    variable_type_ini = vtd.detect_continuous_shape(beta4_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
-                                else:
-                                    variable_type_ini = vtd.detect_continuous_shape(
-                                            [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 4]], dataset_size_ini, plot_bool=False)])
                         
                         # Test and save the result of the sKS-Test
                         etd.values = [[beta4_data_list_upd[i * dataset_size_upd:(i + 1) * dataset_size_upd]]]
                         vtd.var_type = [[variable_type_ini]]
                         result_list.append(vtd.s_ks_test(0, 0, True)[0])
 
-                    if generate_data_sets:
-                        f = open('unit/data/vtd_data/beta4_data_test9', 'wb+')
-                        pickle.dump([beta4_data_list_ini, beta4_data_list_upd, result_list], f)
-                        self.assertTrue(sum(result_list) >= iterations * 0.5, sum(result_list))
-                        print('beta4 accuracy: %.3f, dataset_size_ini: %d, dataset_size_upd: %d' % (sum(result_list) / iterations, dataset_size_ini, dataset_size_upd))
-                    else:
-                        # Test if the result list is correct
-                        self.assertTrue(result_list == beta4_result_shapes)
+                    # Test if the result list is correct
+                    self.assertTrue(result_list == beta4_result_shapes)
 
                     result_list = [] # List of the results of the single tests
                     for i in range(iterations):
@@ -963,25 +778,11 @@ class VariableTypeDetectorTest(TestBase):
                                     if variable_type_ini[-1][j][0] == 'beta' and variable_type_ini[-1][j][-1] == 5:
                                         variable_type_ini = variable_type_ini[-1][j]
                                         break
-                            else:
-                                if generate_data_sets:
-                                    beta5_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini] = \
-                                            [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 5]], dataset_size_ini, plot_bool=False)]
-                                    variable_type_ini = vtd.detect_continuous_shape(beta5_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
-                                else:
-                                    variable_type_ini = vtd.detect_continuous_shape(
-                                            [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 5]], dataset_size_ini, plot_bool=False)])
                         
                         # Test and save the result of the sKS-Test
                         etd.values = [[beta5_data_list_upd[i * dataset_size_upd:(i + 1) * dataset_size_upd]]]
                         vtd.var_type = [[variable_type_ini]]
                         result_list.append(vtd.s_ks_test(0, 0, True)[0])
 
-                    if generate_data_sets:
-                        f = open('unit/data/vtd_data/beta5_data_test9', 'wb+')
-                        pickle.dump([beta5_data_list_ini, beta5_data_list_upd, result_list], f)
-                        self.assertTrue(sum(result_list) >= iterations * 0.5, sum(result_list))
-                        print('beta5 accuracy: %.3f, dataset_size_ini: %d, dataset_size_upd: %d' % (sum(result_list) / iterations, dataset_size_ini, dataset_size_upd))
-                    else:
-                        # Test if the result list is correct
-                        self.assertTrue(result_list == beta5_result_shapes)
+                    # Test if the result list is correct
+                    self.assertTrue(result_list == beta5_result_shapes)
