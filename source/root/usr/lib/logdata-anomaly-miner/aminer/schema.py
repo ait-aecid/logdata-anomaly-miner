@@ -73,6 +73,7 @@
                 'type': 'dict',
                  'schema': {
                     'id': {'type': 'string'},
+                    'start': {'type': 'boolean', 'default': False},
                     'type': {'type': 'string'},
                     'name': {'type': 'string'},
                     'args': {'type': ['string', 'list'], 'schema': {'type': 'string'}}
