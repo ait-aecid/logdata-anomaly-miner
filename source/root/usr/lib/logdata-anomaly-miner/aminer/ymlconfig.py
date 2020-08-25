@@ -91,10 +91,10 @@ def build_analysis_pipeline(analysis_context):
     # skipcq: PYL-W0603
     global yamldata
     for item in yamldata['Parser']:
-        if item['id'] == 'START':
+        if item['start'] == True:
             start = item
             continue
-        if item['type'].endswith('ModelElement') and item['id'] != 'START':
+        if item['type'].endswith('ModelElement') and item['start'] != True:
             func = getattr(__import__("aminer.parsing", fromlist=[item['type']]), item['type'])
             if 'args' in item:
                 if isinstance(item['args'], list):
