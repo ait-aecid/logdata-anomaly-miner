@@ -913,13 +913,6 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         # Test for normal distribution
         # Getting the expected value and sigma
         [EV, sigma] = norm.fit(values)
-        # the lower and upper indices for the cutting off of the tails
-        lower_ind = 0
-        upper_ind = len(self.distribution_data['nor']) - 1
-        # Standardised minimum. Used for getting the indices for cutting of tails
-        tmp_min = (Min - EV) / sigma
-        # Standardised maximum
-        tmp_max = (Max - EV) / sigma
 
         # KS-test of the standardised values and the distribution
         if self.options['KS_Alpha'] in self.crit_dist_ini and self.options['numMinAppearance'] in self.crit_dist_ini[self.options['KS_Alpha']]:
@@ -1394,7 +1387,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             sigma = self.var_type[event_index][var_index][2]
             Min = self.var_type[event_index][var_index][3]
             Max = self.var_type[event_index][var_index][4]
-            indices = self.s_ks_get_distr_ind(event_index, self.distribution_data['nor'], EV, sigma, Min, Max, log_atom)
+            indices = self.s_ks_get_distr_ind(self.distribution_data['nor'])
 
             # Generate the quantiles for the var_type with the standardised quantiles
             self.distr_val[event_index][var_index] = self.distribution_data['nor'][indices] * sigma + EV
@@ -1406,7 +1399,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             Min = self.var_type[event_index][var_index][3]
             Max = self.var_type[event_index][var_index][4]
 
-            indices = self.s_ks_get_distr_ind(event_index, self.distribution_data['spec'], EV, sigma, Min, Max, log_atom)
+            indices = self.s_ks_get_distr_ind(self.distribution_data['spec'])
 
             # Generate the quantiles for the var_type with the standardised quantiles
             self.distr_val[event_index][var_index] = self.distribution_data['spec'][indices] * sigma + EV
@@ -1420,7 +1413,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             Max = self.var_type[event_index][var_index][4]
 
             indices = self.s_ks_get_distr_ind(
-                event_index, self.distribution_data['beta' + str(self.var_type[event_index][var_index][5])], EV, sigma, Min, Max, log_atom)
+                self.distribution_data['beta' + str(self.var_type[event_index][var_index][5])])
 
             # Generate the quantiles for the var_type with the standardised quantiles
             self.distr_val[event_index][var_index] = self.distribution_data['beta' + str(self.var_type[event_index][var_index][5])][
@@ -1445,14 +1438,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             self.distr_val[event_index][var_index].sort()
             return
 
-    def s_ks_get_distr_ind(self, event_index, tmp_sample, EV, sigma, Min, Max, log_atom):
+    def s_ks_get_distr_ind(self, tmp_sample):
         """Generates the needed sKS_NumValues indices of tmp_sample for the sliding KS-test"""
-        # Standardised minimum. Used for getting the indices for cutting of tails
-        tmp_min = (Min - EV) / sigma
-        # Standardised maximum
-        tmp_max = (Max - EV) / sigma
-
-        indices = []  # List of the returned indices
         indices = 0 + np.array(range(2 * self.options['sKS_NumValues'])) / (2 * self.options['sKS_NumValues'] - 1) * (
                     len(tmp_sample) - 1)
         indices = indices.astype(int)
@@ -1519,8 +1506,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 # Mu and sigma of the desired distribution
                 [mu, sigma] = [5 / (5 + 2), pow(5 * 2 / (5 + 2 + 1), 1 / 2) / (5 + 2)]
                 max_dist = kstest(self.event_type_detector.values[event_index][var_index][-self.options['sKS_NumValues']:], 'beta', args=(
-                    5, 2, self.var_type[event_index][var_index][1] - mu * self.var_type[event_index][var_index][2] / sigma,
-                    self.var_type[event_index][var_index][2] / sigma))[0]
+                        5, 2, self.var_type[event_index][var_index][1] - mu * self.var_type[event_index][var_index][2] / sigma,
+                        self.var_type[event_index][var_index][2] / sigma))[0]
                 if first_distr:
                     if max_dist > crit_distance:
                         return [False, max_dist]
@@ -1575,11 +1562,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 if max_dist > crit_distance:
                     return [False, max_dist]
                 return [True, max_dist]
-            else:
-                if max_dist > crit_distance:
-                    return [False, 1.0]
-                return [True, 0.0]
-
+            if max_dist > crit_distance:
+                return [False, 1.0]
+            return [True, 0.0]
         return [True, 0.0]
 
     def d_test(self, event_index, var_index):

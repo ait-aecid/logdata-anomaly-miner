@@ -354,7 +354,7 @@ class VariableTypeDetectorTest(TestBase):
             self.assertTrue(etd.receive_atom(log_atom))
         result = vtd.detect_var_type(0, 0)
         # this means that the uniformal distribution must be detected.
-        self.assertNotEqual('uni' == result[0] or 'uni' in [distr[0] for distr in result[-1]], result)
+        self.assertNotEqual(result[0] == 'uni' or 'uni' in [distr[0] for distr in result[-1]], result)
 
         # test 'divThres' option for the continuous distribution
         vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, options={
@@ -454,7 +454,7 @@ class VariableTypeDetectorTest(TestBase):
             vtd.receive_atom(log_atom)
         result = vtd.var_type[0][0]
         posdistr = vtd.possible_var_type[0][0]
-        self.assertTrue('uni' == result[0] or 'uni' in [distr[0] for distr in posdistr])
+        self.assertTrue(result[0] == 'uni' or 'uni' in [distr[0] for distr in posdistr])
 
         # uni -> others
         for i in range(50):
@@ -527,7 +527,7 @@ class VariableTypeDetectorTest(TestBase):
             vtd.receive_atom(log_atom)
         result = vtd.var_type[0][0]
         posdistr = vtd.possible_var_type[0][0]
-        self.assertTrue('nor' == result[0] or 'nor' in [distr[0] for distr in posdistr])
+        self.assertTrue(result[0] == 'nor' or 'nor' in [distr[0] for distr in posdistr])
 
         # nor -> beta1
         for beta1_data in beta1_data_list:
@@ -536,7 +536,7 @@ class VariableTypeDetectorTest(TestBase):
             vtd.receive_atom(log_atom)
         result = vtd.var_type[0][0]
         posdistr = vtd.possible_var_type[0][0]
-        self.assertTrue(('beta' == result[0] and result[-1] == 1) or 'beta1' in [distr[0]+str(distr[-1]) for distr in posdistr])
+        self.assertTrue((result[0] == 'beta' and result[-1] == 1) or 'beta1' in [distr[0]+str(distr[-1]) for distr in posdistr])
 
         # reset all
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
@@ -635,7 +635,7 @@ class VariableTypeDetectorTest(TestBase):
                                 if type(variable_type_ini[-1]) == list:
                                     variable_type_ini = variable_type_ini[:-1]
                                 break
-                            elif 'uni' in [distr[0] for distr in variable_type_ini[-1]]:
+                            if 'uni' in [distr[0] for distr in variable_type_ini[-1]]:
                                 for j in range(len(variable_type_ini[-1])):
                                     if variable_type_ini[-1][j][0] == 'uni':
                                         variable_type_ini = variable_type_ini[-1][j]
@@ -658,7 +658,7 @@ class VariableTypeDetectorTest(TestBase):
                                 if type(variable_type_ini[-1]) == list:
                                     variable_type_ini = variable_type_ini[:-1]
                                 break
-                            elif 'nor' in [distr[0] for distr in variable_type_ini[-1]]:
+                            if 'nor' in [distr[0] for distr in variable_type_ini[-1]]:
                                 for j in range(len(variable_type_ini[-1])):
                                     if variable_type_ini[-1][j][0] == 'nor':
                                         variable_type_ini = variable_type_ini[-1][j]
@@ -681,7 +681,7 @@ class VariableTypeDetectorTest(TestBase):
                                 if type(variable_type_ini[-1]) == list:
                                     variable_type_ini = variable_type_ini[:-1]
                                 break
-                            elif 'beta1' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
+                            if 'beta1' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
                                 for j in range(len(variable_type_ini[-1])):
                                     if variable_type_ini[-1][j][0] == 'beta' and variable_type_ini[-1][j][-1] == 1:
                                         variable_type_ini = variable_type_ini[-1][j]
@@ -704,7 +704,7 @@ class VariableTypeDetectorTest(TestBase):
                                 if type(variable_type_ini[-1]) == list:
                                     variable_type_ini = variable_type_ini[:-1]
                                 break
-                            elif 'beta2' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
+                            if 'beta2' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
                                 for j in range(len(variable_type_ini[-1])):
                                     if variable_type_ini[-1][j][0] == 'beta' and variable_type_ini[-1][j][-1] == 2:
                                         variable_type_ini = variable_type_ini[-1][j]
@@ -727,7 +727,7 @@ class VariableTypeDetectorTest(TestBase):
                                 if type(variable_type_ini[-1]) == list:
                                     variable_type_ini = variable_type_ini[:-1]
                                 break
-                            elif 'beta3' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
+                            if 'beta3' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
                                 for j in range(len(variable_type_ini[-1])):
                                     if variable_type_ini[-1][j][0] == 'beta' and variable_type_ini[-1][j][-1] == 3:
                                         variable_type_ini = variable_type_ini[-1][j]
@@ -750,7 +750,7 @@ class VariableTypeDetectorTest(TestBase):
                                 if type(variable_type_ini[-1]) == list:
                                     variable_type_ini = variable_type_ini[:-1]
                                 break
-                            elif 'beta4' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
+                            if 'beta4' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
                                 for j in range(len(variable_type_ini[-1])):
                                     if variable_type_ini[-1][j][0] == 'beta' and variable_type_ini[-1][j][-1] == 4:
                                         variable_type_ini = variable_type_ini[-1][j]
@@ -773,7 +773,7 @@ class VariableTypeDetectorTest(TestBase):
                                 if type(variable_type_ini[-1]) == list:
                                     variable_type_ini = variable_type_ini[:-1]
                                 break
-                            elif 'beta5' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
+                            if 'beta5' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
                                 for j in range(len(variable_type_ini[-1])):
                                     if variable_type_ini[-1][j][0] == 'beta' and variable_type_ini[-1][j][-1] == 5:
                                         variable_type_ini = variable_type_ini[-1][j]

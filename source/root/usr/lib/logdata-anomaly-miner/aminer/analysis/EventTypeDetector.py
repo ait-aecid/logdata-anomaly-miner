@@ -214,7 +214,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, E
 
             # Initial the lists for the values
             if self.options['saveValues']:
-                self.init_values(log_atom, current_index)
+                self.init_values(current_index)
                 self.check_variables.append([True for _ in range(len(self.variable_key_list[current_index]))])
             self.num_eventlines.append(0)
 
@@ -297,9 +297,8 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, E
         """Adds the given Module to the following module list"""
         self.following_modules.append(following_module)
 
-    def init_values(self, log_atom, current_index):
+    def init_values(self, current_index):
         """Initializes the variable_key_list and the list for the values"""
-
         # Initialises the value_list
         if not self.values:
             self.values = [[[] for _ in range(len(self.variable_key_list[current_index]))]]
