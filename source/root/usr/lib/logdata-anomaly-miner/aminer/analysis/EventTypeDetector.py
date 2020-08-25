@@ -144,7 +144,8 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, E
                         if self.time_trigger[1][indices[i]] == -1:
                             if debug_mode:
                                 print('Init')
-                                print('Totalnumber of read in Lines: %s, List to the numbers per Event: %s'%(self.total_records, self.num_eventlines))
+                                print('Totalnumber of read in Lines: %s, List to the numbers per Event: %s' % (
+                                    self.total_records, self.num_eventlines))
 
                             # Get the timewindow lengths
                             time_list = self.following_modules[0].function_Init(self.num_eventlines)
@@ -167,14 +168,17 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, E
                         else:
                             if debug_mode:
                                 print('Upd')
-                                print('Totalnumber of read in Lines: %s, List to the numbers per Event: %s'%(self.total_records, self.num_eventlines))
-                            self.following_modules[0].function_Upd(self.time_trigger[1][indices[i]], self.num_eventlines[self.time_trigger[1][indices[i]]]-self.num_eventlines_TSA_ref[self.time_trigger[1][indices[i]]])
+                                print('Totalnumber of read in Lines: %s, List to the numbers per Event: %s' % (
+                                    self.total_records, self.num_eventlines))
+                            self.following_modules[0].function_Upd(self.time_trigger[1][indices[i]], self.num_eventlines[self.time_trigger[
+                                1][indices[i]]]-self.num_eventlines_TSA_ref[self.time_trigger[1][indices[i]]])
                             self.time_trigger[0][indices[i]] = time.time() + self.time_trigger[2][indices[i]]
-                            self.num_eventlines_TSA_ref[self.time_trigger[1][indices[i]]] = self.num_eventlines[self.time_trigger[1][indices[i]]]
+                            self.num_eventlines_TSA_ref[self.time_trigger[1][indices[i]]] = self.num_eventlines[self.time_trigger[1][
+                                indices[i]]]
             if debug_mode:
                 print(self.time_trigger[0])
 
-        self.log_atom = log_atom # !!!
+        self.log_atom = log_atom
         valid_log_atom = False
         if self.path_list:
             for path in self.path_list:
