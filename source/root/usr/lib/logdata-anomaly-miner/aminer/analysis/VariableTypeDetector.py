@@ -337,7 +337,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             print(self.failed_indicators)
             # Prints eventIndices, which caused indicators to fail
             if len(self.failed_indicators) > 0:
-                print([self.failed_indicators[0][i] for i in range(len(self.failed_indicators[0])) if len(self.failed_indicators[0][i]) > 0])
+                print([self.failed_indicators[0][i] for i in range(len(self.failed_indicators[0])) if len(self.failed_indicators[0][
+                    i]) > 0])
 
             print('indicatorsNumPerEvent')
             # Prints eventIndices, which caused indicators to fail
@@ -1449,9 +1450,10 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         distribution = self.var_type[event_index][var_index][0]
         if distribution == 'beta':
             distribution += str(self.var_type[event_index][var_index][-1])
-        if self.options['sKS_Alpha'] in self.crit_dist_upd and self.options['numMinAppearance'] in self.crit_dist_upd[self.options['sKS_Alpha']] and \
-                self.options['sKS_NumValues'] in self.crit_dist_upd[self.options['sKS_Alpha']][self.options['numMinAppearance']] and \
-                distribution in self.crit_dist_upd[self.options['sKS_Alpha']][self.options['numMinAppearance']][self.options['sKS_NumValues']]:
+        if self.options['sKS_Alpha'] in self.crit_dist_upd and self.options['numMinAppearance'] in self.crit_dist_upd[self.options[
+            'sKS_Alpha']] and self.options['sKS_NumValues'] in self.crit_dist_upd[self.options['sKS_Alpha']][self.options[
+            'numMinAppearance']] and distribution in self.crit_dist_upd[self.options['sKS_Alpha']][self.options['numMinAppearance']][
+            self.options['sKS_NumValues']]:
             crit_distance = \
                 self.crit_dist_upd[self.options['sKS_Alpha']][self.options['numMinAppearance']][self.options['sKS_NumValues']][distribution]
         else:
@@ -1462,7 +1464,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if self.var_type[event_index][var_index][0] == 'uni':
             max_dist = kstest(
                 self.event_type_detector.values[event_index][var_index][-self.options['sKS_NumValues']:], 'uniform',
-                args=(self.var_type[event_index][var_index][1], self.var_type[event_index][var_index][2]-self.var_type[event_index][var_index][1]))[0]
+                args=(self.var_type[event_index][var_index][1], self.var_type[event_index][var_index][2]-self.var_type[event_index][
+                    var_index][1]))[0]
             if first_distr:
                 if max_dist > crit_distance:
                     return [False, max_dist]
@@ -1551,7 +1554,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
         # sKS-test
         else:
-            max_dist = ks_2samp(self.distr_val[event_index][var_index], self.event_type_detector.values[event_index][var_index][-self.options['sKS_NumValues']:])[0]
+            max_dist = ks_2samp(self.distr_val[event_index][var_index], self.event_type_detector.values[event_index][var_index][
+                -self.options['sKS_NumValues']:])[0]
             if first_distr:
                 if max_dist > crit_distance:
                     return [False, max_dist]
@@ -1997,4 +2001,3 @@ def consists_of_ints(list_in):
         if item != int(item):
             return False
     return True
-
