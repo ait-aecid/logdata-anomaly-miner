@@ -146,13 +146,20 @@ class VariableTypeDetectorTest(TestBase):
         significance_niveaus = [0.05]
         var_ev = 0
         var_var = 1
-        uni_data_list = [val[1] for val in generate_sample([], [['uni', var_ev - var_var, var_ev + var_var]], max(dataset_sizes)*iterations, plot_bool=False)]
-        nor_data_list = [val[1] for val in generate_sample([], [['nor', var_ev, var_var, -1000, 1000]], max(dataset_sizes)*iterations, plot_bool=False)]
-        beta1_data_list = [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 1]], max(dataset_sizes)*iterations, plot_bool=False)]
-        beta2_data_list = [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 2]], max(dataset_sizes)*iterations, plot_bool=False)]
-        beta3_data_list = [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 3]], max(dataset_sizes)*iterations, plot_bool=False)]
-        beta4_data_list = [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 4]], max(dataset_sizes)*iterations, plot_bool=False)]
-        beta5_data_list = [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 5]], max(dataset_sizes)*iterations, plot_bool=False)]
+        uni_data_list = [val[1] for val in generate_sample([], [['uni', var_ev - var_var, var_ev + var_var]],
+                         max(dataset_sizes)*iterations, plot_bool=False)]
+        nor_data_list = [val[1] for val in generate_sample([], [['nor', var_ev, var_var, -1000, 1000]],
+                         max(dataset_sizes)*iterations, plot_bool=False)]
+        beta1_data_list = [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 1]],
+                           max(dataset_sizes)*iterations, plot_bool=False)]
+        beta2_data_list = [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 2]],
+                           max(dataset_sizes)*iterations, plot_bool=False)]
+        beta3_data_list = [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 3]],
+                           max(dataset_sizes)*iterations, plot_bool=False)]
+        beta4_data_list = [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 4]],
+                           max(dataset_sizes)*iterations, plot_bool=False)]
+        beta5_data_list = [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 5]],
+                           max(dataset_sizes)*iterations, plot_bool=False)]
         """
         # Number of execution of the tested function 
         iterations = 20
@@ -214,7 +221,8 @@ class VariableTypeDetectorTest(TestBase):
                     distribution_list = vtd.detect_continuous_shape(beta1_data_list[i * dataset_size:(i + 1) * dataset_size])
                     
                     # Add if the seached distribution is present in the found distributions
-                    if (distribution_list[0] == 'beta' and distribution_list[-1] == 1) or 'beta1' in [distr[0]+str(distr[-1]) for distr in distribution_list[-1]]:
+                    if (distribution_list[0] == 'beta' and distribution_list[-1] == 1) or 'beta1' in [
+                            distr[0]+str(distr[-1]) for distr in distribution_list[-1]]:
                         result_list.append(1)
                     else:
                         result_list.append(0)
@@ -227,7 +235,8 @@ class VariableTypeDetectorTest(TestBase):
                     distribution_list = vtd.detect_continuous_shape(beta2_data_list[i * dataset_size:(i + 1) * dataset_size])
 
                     # Add if the seached distribution is present in the found distributions
-                    if (distribution_list[0] == 'beta' and distribution_list[-1] == 2) or 'beta2' in [distr[0]+str(distr[-1]) for distr in distribution_list[-1]]:
+                    if (distribution_list[0] == 'beta' and distribution_list[-1] == 2) or 'beta2' in [
+                            distr[0]+str(distr[-1]) for distr in distribution_list[-1]]:
                         result_list.append(1)
                     else:
                         result_list.append(0)
@@ -240,7 +249,8 @@ class VariableTypeDetectorTest(TestBase):
                     distribution_list = vtd.detect_continuous_shape(beta3_data_list[i * dataset_size:(i + 1) * dataset_size])
                     
                     # Add if the seached distribution is present in the found distributions
-                    if (distribution_list[0] == 'beta' and distribution_list[-1] == 3) or 'beta3' in [distr[0]+str(distr[-1]) for distr in distribution_list[-1]]:
+                    if (distribution_list[0] == 'beta' and distribution_list[-1] == 3) or 'beta3' in [
+                            distr[0]+str(distr[-1]) for distr in distribution_list[-1]]:
                         result_list.append(1)
                     else:
                         result_list.append(0)
@@ -253,7 +263,8 @@ class VariableTypeDetectorTest(TestBase):
                     distribution_list = vtd.detect_continuous_shape(beta4_data_list[i * dataset_size:(i + 1) * dataset_size])
                     
                     # Add if the seached distribution is present in the found distributions
-                    if (distribution_list[0] == 'beta' and distribution_list[-1] == 4) or 'beta4' in [distr[0]+str(distr[-1]) for distr in distribution_list[-1]]:
+                    if (distribution_list[0] == 'beta' and distribution_list[-1] == 4) or 'beta4' in [
+                            distr[0]+str(distr[-1]) for distr in distribution_list[-1]]:
                         result_list.append(1)
                     else:
                         result_list.append(0)
@@ -266,7 +277,8 @@ class VariableTypeDetectorTest(TestBase):
                     distribution_list = vtd.detect_continuous_shape(beta5_data_list[i * dataset_size:(i + 1) * dataset_size])
                     
                     # Add if the seached distribution is present in the found distributions
-                    if (distribution_list[0] == 'beta' and distribution_list[-1] == 5) or 'beta5' in [distr[0]+str(distr[-1]) for distr in distribution_list[-1]]:
+                    if (distribution_list[0] == 'beta' and distribution_list[-1] == 5) or 'beta5' in [
+                            distr[0]+str(distr[-1]) for distr in distribution_list[-1]]:
                         result_list.append(1)
                     else:
                         result_list.append(0)
@@ -632,7 +644,7 @@ class VariableTypeDetectorTest(TestBase):
                         variable_type_ini = vtd.detect_continuous_shape(uni_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
                         while True:
                             if variable_type_ini[0] == 'uni':
-                                if type(variable_type_ini[-1]) == list:
+                                if isinstance(variable_type_ini[-1], list):
                                     variable_type_ini = variable_type_ini[:-1]
                                 break
                             if 'uni' in [distr[0] for distr in variable_type_ini[-1]]:
@@ -655,7 +667,7 @@ class VariableTypeDetectorTest(TestBase):
                         variable_type_ini = vtd.detect_continuous_shape(nor_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
                         while True:
                             if variable_type_ini[0] == 'nor':
-                                if type(variable_type_ini[-1]) == list:
+                                if isinstance(variable_type_ini[-1], list):
                                     variable_type_ini = variable_type_ini[:-1]
                                 break
                             if 'nor' in [distr[0] for distr in variable_type_ini[-1]]:
@@ -677,8 +689,9 @@ class VariableTypeDetectorTest(TestBase):
                         # Create the initial distribution, which has to pass the initial test
                         variable_type_ini = vtd.detect_continuous_shape(beta1_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
                         while True:
-                            if variable_type_ini[0] == 'beta' and (variable_type_ini[-1] == 1 or (type(variable_type_ini[-1]) == list and variable_type_ini[-2] == 1)):
-                                if type(variable_type_ini[-1]) == list:
+                            if variable_type_ini[0] == 'beta' and (variable_type_ini[-1] == 1 or (
+                                    isinstance(variable_type_ini[-1], list) and variable_type_ini[-2] == 1)):
+                                if isinstance(variable_type_ini[-1], list):
                                     variable_type_ini = variable_type_ini[:-1]
                                 break
                             if 'beta1' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
@@ -700,8 +713,9 @@ class VariableTypeDetectorTest(TestBase):
                         # Create the initial distribution, which has to pass the initial test
                         variable_type_ini = vtd.detect_continuous_shape(beta2_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
                         while True:
-                            if variable_type_ini[0] == 'beta' and (variable_type_ini[-1] == 2 or (type(variable_type_ini[-1]) == list and variable_type_ini[-2] == 2)):
-                                if type(variable_type_ini[-1]) == list:
+                            if variable_type_ini[0] == 'beta' and (variable_type_ini[-1] == 2 or (
+                                    isinstance(variable_type_ini[-1], list) and variable_type_ini[-2] == 2)):
+                                if isinstance(variable_type_ini[-1], list):
                                     variable_type_ini = variable_type_ini[:-1]
                                 break
                             if 'beta2' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
@@ -723,8 +737,9 @@ class VariableTypeDetectorTest(TestBase):
                         # Create the initial distribution, which has to pass the initial test
                         variable_type_ini = vtd.detect_continuous_shape(beta3_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
                         while True:
-                            if variable_type_ini[0] == 'beta' and (variable_type_ini[-1] == 3 or (type(variable_type_ini[-1]) == list and variable_type_ini[-2] == 3)):
-                                if type(variable_type_ini[-1]) == list:
+                            if variable_type_ini[0] == 'beta' and (variable_type_ini[-1] == 3 or (
+                                    isinstance(variable_type_ini[-1], list)and variable_type_ini[-2] == 3)):
+                                if isinstance(variable_type_ini[-1], list):
                                     variable_type_ini = variable_type_ini[:-1]
                                 break
                             if 'beta3' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
@@ -746,8 +761,9 @@ class VariableTypeDetectorTest(TestBase):
                         # Create the initial distribution, which has to pass the initial test
                         variable_type_ini = vtd.detect_continuous_shape(beta4_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
                         while True:
-                            if variable_type_ini[0] == 'beta' and (variable_type_ini[-1] == 4 or (type(variable_type_ini[-1]) == list and variable_type_ini[-2] == 4)):
-                                if type(variable_type_ini[-1]) == list:
+                            if variable_type_ini[0] == 'beta' and (variable_type_ini[-1] == 4 or (
+                                    isinstance(variable_type_ini[-1], list)  and variable_type_ini[-2] == 4)):
+                                if isinstance(variable_type_ini[-1], list):
                                     variable_type_ini = variable_type_ini[:-1]
                                 break
                             if 'beta4' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
@@ -769,8 +785,9 @@ class VariableTypeDetectorTest(TestBase):
                         # Create the initial distribution, which has to pass the initial test
                         variable_type_ini = vtd.detect_continuous_shape(beta5_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
                         while True:
-                            if variable_type_ini[0] == 'beta' and (variable_type_ini[-1] == 5 or (type(variable_type_ini[-1]) == list and variable_type_ini[-2] == 5)):
-                                if type(variable_type_ini[-1]) == list:
+                            if variable_type_ini[0] == 'beta' and (variable_type_ini[-1] == 5 or (
+                                    isinstance(variable_type_ini[-1], list) and variable_type_ini[-2] == 5)):
+                                if isinstance(variable_type_ini[-1], list):
                                     variable_type_ini = variable_type_ini[:-1]
                                 break
                             if 'beta5' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:

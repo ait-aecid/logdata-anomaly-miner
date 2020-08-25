@@ -138,7 +138,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, E
             # Exectute the functions for the TSA
             if self.options['trackTimeForTSA']:
                 for i in range(len(indices) - 1, -1, -1):
-                    if type(self.time_trigger[1][indices[i]]) == int:
+                    if isinstance(self.time_trigger[1][indices[i]], int):
                         # Trigger for an initalisation
                         if self.time_trigger[1][indices[i]] == -1:
                             if debug_mode:
