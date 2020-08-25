@@ -106,7 +106,8 @@ Parser:
           name: 'apache'
           args: 'apache'
 
-        - id: 'START'
+        - id: 'startModel'
+          start: True
           type: SequenceModelElement
           name: 'model'
           args: apacheModel
