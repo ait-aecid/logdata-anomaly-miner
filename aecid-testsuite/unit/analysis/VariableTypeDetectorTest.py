@@ -762,7 +762,7 @@ class VariableTypeDetectorTest(TestBase):
                         variable_type_ini = vtd.detect_continuous_shape(beta4_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
                         while True:
                             if variable_type_ini[0] == 'beta' and (variable_type_ini[-1] == 4 or (
-                                    isinstance(variable_type_ini[-1], list)  and variable_type_ini[-2] == 4)):
+                                    isinstance(variable_type_ini[-1], list) and variable_type_ini[-2] == 4)):
                                 if isinstance(variable_type_ini[-1], list):
                                     variable_type_ini = variable_type_ini[:-1]
                                 break

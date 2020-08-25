@@ -330,7 +330,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, E
                     self.values[current_index][var_index].append(
                         float(log_atom.parser_match.get_match_dictionary()[var_key].match_object))
             # Add the strings as values
-            except:
+            except:  # skipcq: FLK-E722
                 if isinstance(log_atom.parser_match.get_match_dictionary()[var_key].match_string, bytearray):
                     self.values[current_index][var_index].append(
                         repr(bytes(log_atom.parser_match.get_match_dictionary()[var_key].match_string))[2:-1])
@@ -376,4 +376,3 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, E
         event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.total_records}
         for listener in self.anomaly_event_handlers:
             listener.receive_event('Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, log_atom, self)
-
