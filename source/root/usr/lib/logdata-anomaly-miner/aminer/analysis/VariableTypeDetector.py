@@ -420,7 +420,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     if self.var_type[event_index][var_index][0] in self.distr_list:
                         self.bt_results[event_index][var_index] = [1] * self.options['sKS_BT_Num']
                         if self.var_type[event_index][var_index][0] != 'emp':
-                            self.s_ks_get_quantiles(event_index, var_index, log_atom)
+                            self.s_ks_get_quantiles(event_index, var_index)
                     elif self.var_type[event_index][var_index][0] == 'd':
                         self.d_init_bt(event_index, var_index)
 
@@ -442,14 +442,14 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     if tmp_var_type[0] == 'emp':
                         self.var_type[event_index][var_index] = tmp_var_type
                         self.bt_results[event_index][var_index] = [1] * self.options['sKS_BT_Num']
-                        self.s_ks_get_quantiles(event_index, var_index, log_atom)
+                        self.s_ks_get_quantiles(event_index, var_index)
 
                     # VarType is a continuous distribution
                     elif tmp_var_type[0] in self.distr_list:
                         self.var_type[event_index][var_index] = tmp_var_type[:-1]
                         self.possible_var_type[event_index][var_index] = tmp_var_type[-1]
                         self.bt_results[event_index][var_index] = [1] * self.options['sKS_BT_Num']
-                        self.s_ks_get_quantiles(event_index, var_index, log_atom)
+                        self.s_ks_get_quantiles(event_index, var_index)
 
                     else:
                         self.var_type[event_index][var_index] = tmp_var_type
@@ -470,14 +470,14 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     if tmp_var_type[0] == 'emp':
                         self.var_type[event_index][var_index] = tmp_var_type
                         self.bt_results[event_index][var_index] = [1] * self.options['sKS_BT_Num']
-                        self.s_ks_get_quantiles(event_index, var_index, log_atom)
+                        self.s_ks_get_quantiles(event_index, var_index)
 
                     # VarType is a continuous distribution
                     elif tmp_var_type[0] in self.distr_list:
                         self.var_type[event_index][var_index] = tmp_var_type[:-1]
                         self.possible_var_type[event_index][var_index] = tmp_var_type[-1]
                         self.bt_results[event_index][var_index] = [1] * self.options['sKS_BT_Num']
-                        self.s_ks_get_quantiles(event_index, var_index, log_atom)
+                        self.s_ks_get_quantiles(event_index, var_index)
 
                     else:
                         self.var_type[event_index][var_index] = tmp_var_type
@@ -1078,7 +1078,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     # Initialises the distributionvalues and bucketnumbers
                     self.var_type[event_index][var_index] = self.possible_var_type[event_index][var_index][0]
                     self.possible_var_type[event_index][var_index] = self.possible_var_type[event_index][var_index][1:]
-                    self.s_ks_get_quantiles(event_index, var_index, log_atom)
+                    self.s_ks_get_quantiles(event_index, var_index)
                     self.bt_results[event_index][var_index] = [1] * self.options['sKS_BT_Num']
                     s_ks_result = self.s_ks_test(event_index, var_index, first_distr)
 
@@ -1322,14 +1322,14 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 if vt_new[0] == 'emp':
                     self.var_type[event_index][var_index] = vt_new
                     self.bt_results[event_index][var_index] = [1] * self.options['sKS_BT_Num']
-                    self.s_ks_get_quantiles(event_index, var_index, log_atom)
+                    self.s_ks_get_quantiles(event_index, var_index)
 
                 # VarType is a continuous distribution
                 elif vt_new[0] in self.distr_list:
                     self.var_type[event_index][var_index] = vt_new[:-1]
                     self.possible_var_type[event_index][var_index] = vt_new[-1]
                     self.bt_results[event_index][var_index] = [1] * self.options['sKS_BT_Num']
-                    self.s_ks_get_quantiles(event_index, var_index, log_atom)
+                    self.s_ks_get_quantiles(event_index, var_index)
 
                 # VarType is discrete
                 elif vt_new[0] == 'd':
@@ -1348,11 +1348,10 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         analysis_component = {'AffectedLogAtomPaths': [log_atom.parser_match.get_match_dictionary().keys()]}
         event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records}
         for listener in self.anomaly_event_handlers:
-            listener.receive_event(
-                'Analysis.%s' % self.__class__.__name__, 'New type detected %s!' % self.var_type[event_index][var_index][0], 
-                    sorted_log_lines, event_data, log_atom, self)
+            listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New type detected %s!' % self.var_type[event_index][
+                var_index][0], sorted_log_lines, event_data, log_atom, self)
 
-    def s_ks_get_quantiles(self, event_index, var_index, log_atom):
+    def s_ks_get_quantiles(self, event_index, var_index):
         """Generates the needed quantiles of the distribution for the sliding KS-test"""
         if self.var_type[event_index][var_index][0] == 'emp':
             # Get a list of almost equidistant indices
@@ -1493,8 +1492,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if self.var_type[event_index][var_index][0] == 'beta':
             if self.var_type[event_index][var_index][5] == 1:
                 max_dist = kstest(self.event_type_detector.values[event_index][var_index][-self.options['sKS_NumValues']:], 'beta', args=(
-                    0.5, 0.5, self.var_type[event_index][var_index][3],
-                            self.var_type[event_index][var_index][4] - self.var_type[event_index][var_index][3]))[0]
+                    0.5, 0.5, self.var_type[event_index][var_index][3], self.var_type[event_index][var_index][4] - self.var_type[
+                        event_index][var_index][3]))[0]
                 if first_distr:
                     if max_dist > crit_distance:
                         return [False, max_dist]

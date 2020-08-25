@@ -47,9 +47,9 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, E
         # List of paths, which variables are being tracked. All other paths will not get tracked. If None all paths are being tracked.
         self.path_list = path_list
         self.check_variables = []
-        self.log_atom = None # !!!
-        # List ot the time trigger. The first list states the times when something should be triggered,
-        # the second list states the indices of the eventtyps, or a list of the evnettype, a path and a value which should be counted (-1 for an initialisation)
+        self.log_atom = None
+        # List ot the time trigger. The first list states the times when something should be triggered, the second list states the indices
+        # of the eventtyps, or a list of the evnettype, a path and a value which should be counted (-1 for an initialisation)
         # the third list states, the length of the time window (-1 for a one time trigger)
         self.time_trigger = [[], [], []]
         # Reference containing the number of lines of the events for the TSA

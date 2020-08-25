@@ -183,7 +183,7 @@ class VariableTypeDetectorTest(TestBase):
                 vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, options={
                     'numMinAppearance': dataset_size, 'divThres': 0.5, 'testInt': True, 'simThres': 0.3, 'KS_Alpha': significance_niveau})
                 
-                result_list = [] # List of the results of the single tests
+                result_list = []  # List of the results of the single tests
                 for i in range(iterations):
                     distribution_list = vtd.detect_continuous_shape(uni_data_list[i * dataset_size:(i + 1) * dataset_size])
 
@@ -196,7 +196,7 @@ class VariableTypeDetectorTest(TestBase):
                 # Test if the result list is correct
                 self.assertTrue(result_list == uni_result_shapes)
 
-                result_list = [] # List of the results of the single tests
+                result_list = []  # List of the results of the single tests
                 for i in range(iterations):
                     distribution_list = vtd.detect_continuous_shape(nor_data_list[i * dataset_size:(i + 1) * dataset_size])
 
@@ -209,7 +209,7 @@ class VariableTypeDetectorTest(TestBase):
                 # Test if the result list is correct
                 self.assertTrue(result_list == nor_result_shapes)
 
-                result_list = [] # List of the results of the single tests
+                result_list = []  # List of the results of the single tests
                 for i in range(iterations):
                     distribution_list = vtd.detect_continuous_shape(beta1_data_list[i * dataset_size:(i + 1) * dataset_size])
                     
@@ -222,7 +222,7 @@ class VariableTypeDetectorTest(TestBase):
                 # Test if the result list is correct
                 self.assertTrue(result_list == beta1_result_shapes)
 
-                result_list = [] # List of the results of the single tests
+                result_list = []  # List of the results of the single tests
                 for i in range(iterations):
                     distribution_list = vtd.detect_continuous_shape(beta2_data_list[i * dataset_size:(i + 1) * dataset_size])
 
@@ -235,7 +235,7 @@ class VariableTypeDetectorTest(TestBase):
                 # Test if the result list is correct
                 self.assertTrue(result_list == beta2_result_shapes)
 
-                result_list = [] # List of the results of the single tests
+                result_list = []  # List of the results of the single tests
                 for i in range(iterations):
                     distribution_list = vtd.detect_continuous_shape(beta3_data_list[i * dataset_size:(i + 1) * dataset_size])
                     
@@ -248,7 +248,7 @@ class VariableTypeDetectorTest(TestBase):
                 # Test if the result list is correct
                 self.assertTrue(result_list == beta3_result_shapes)
 
-                result_list = [] # List of the results of the single tests
+                result_list = []  # List of the results of the single tests
                 for i in range(iterations):
                     distribution_list = vtd.detect_continuous_shape(beta4_data_list[i * dataset_size:(i + 1) * dataset_size])
                     
@@ -261,7 +261,7 @@ class VariableTypeDetectorTest(TestBase):
                 # Test if the result list is correct
                 self.assertTrue(result_list == beta4_result_shapes)
 
-                result_list = [] # List of the results of the single tests
+                result_list = []  # List of the results of the single tests
                 for i in range(iterations):
                     distribution_list = vtd.detect_continuous_shape(beta5_data_list[i * dataset_size:(i + 1) * dataset_size])
                     
@@ -626,7 +626,7 @@ class VariableTypeDetectorTest(TestBase):
                     vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, options={
                         'numMinAppearance': dataset_size_ini, 'numUpdate': dataset_sizes_upd, 'KS_Alpha': significance_niveau})
 
-                    result_list = [] # List of the results of the single tests
+                    result_list = []  # List of the results of the single tests
                     for i in range(iterations):
                         # Create the initial distribution, which has to pass the initial test
                         variable_type_ini = vtd.detect_continuous_shape(uni_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
@@ -649,7 +649,7 @@ class VariableTypeDetectorTest(TestBase):
                     # Test if the result list is correct
                     self.assertTrue(result_list == uni_result_shapes)
 
-                    result_list = [] # List of the results of the single tests
+                    result_list = []  # List of the results of the single tests
                     for i in range(iterations):
                         # Create the initial distribution, which has to pass the initial test
                         variable_type_ini = vtd.detect_continuous_shape(nor_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
@@ -672,7 +672,7 @@ class VariableTypeDetectorTest(TestBase):
                     # Test if the result list is correct
                     self.assertTrue(result_list == nor_result_shapes)
 
-                    result_list = [] # List of the results of the single tests
+                    result_list = []  # List of the results of the single tests
                     for i in range(iterations):
                         # Create the initial distribution, which has to pass the initial test
                         variable_type_ini = vtd.detect_continuous_shape(beta1_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
@@ -695,7 +695,7 @@ class VariableTypeDetectorTest(TestBase):
                     # Test if the result list is correct
                     self.assertTrue(result_list == beta1_result_shapes)
 
-                    result_list = [] # List of the results of the single tests
+                    result_list = []  # List of the results of the single tests
                     for i in range(iterations):
                         # Create the initial distribution, which has to pass the initial test
                         variable_type_ini = vtd.detect_continuous_shape(beta2_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
@@ -718,7 +718,7 @@ class VariableTypeDetectorTest(TestBase):
                     # Test if the result list is correct
                     self.assertTrue(result_list == beta2_result_shapes)
 
-                    result_list = [] # List of the results of the single tests
+                    result_list = []  # List of the results of the single tests
                     for i in range(iterations):
                         # Create the initial distribution, which has to pass the initial test
                         variable_type_ini = vtd.detect_continuous_shape(beta3_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
@@ -741,7 +741,7 @@ class VariableTypeDetectorTest(TestBase):
                     # Test if the result list is correct
                     self.assertTrue(result_list == beta3_result_shapes)
 
-                    result_list = [] # List of the results of the single tests
+                    result_list = []  # List of the results of the single tests
                     for i in range(iterations):
                         # Create the initial distribution, which has to pass the initial test
                         variable_type_ini = vtd.detect_continuous_shape(beta4_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
@@ -764,7 +764,7 @@ class VariableTypeDetectorTest(TestBase):
                     # Test if the result list is correct
                     self.assertTrue(result_list == beta4_result_shapes)
 
-                    result_list = [] # List of the results of the single tests
+                    result_list = []  # List of the results of the single tests
                     for i in range(iterations):
                         # Create the initial distribution, which has to pass the initial test
                         variable_type_ini = vtd.detect_continuous_shape(beta5_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
