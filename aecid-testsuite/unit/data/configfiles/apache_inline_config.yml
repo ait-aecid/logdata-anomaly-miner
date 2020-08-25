@@ -87,7 +87,7 @@ Parser:
           name: 'sq6'
           args: '"'
 
-        - id: 'START'
+        - id: 'startModel'
           start: True
           type: SequenceModelElement
           name: 'accesslog'
