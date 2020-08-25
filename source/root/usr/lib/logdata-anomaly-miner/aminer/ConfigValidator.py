@@ -1,4 +1,5 @@
 from cerberus import Validator
+<<<<<<< HEAD
 from cerberus import TypeDefinition
 
 class ParserModelType:
