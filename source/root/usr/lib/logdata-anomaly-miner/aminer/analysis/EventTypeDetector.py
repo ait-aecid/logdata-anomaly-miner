@@ -1,4 +1,4 @@
-"""This module can assignes every parsed log line a eventtype and can be used for profiling purposes. It supports the modules
+"""This module can assigns every parsed log line a eventtype and can be used for profiling purposes. It supports the modules
 VariableTypeDetector and VariableCorrelationDetector."""
 import cProfile
 import sys
@@ -18,7 +18,6 @@ from aminer.util import PersistencyUtil
 # x) Adapt the Persitency
 # x) Restructure the TSA part
 # x) Implement the time trigger for the ECD -> Max
-
 
 
 class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):

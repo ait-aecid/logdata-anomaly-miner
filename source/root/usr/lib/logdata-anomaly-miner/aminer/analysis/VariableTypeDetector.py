@@ -521,7 +521,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         # Index of the variableType in the list  # [others, static, [discrete, number of appended steps], asc, desc,
                         # unique, normal, uniform, beta, special]
                         type_index = self.var_type_history_list_order.index(self.var_type[event_index][var_index][0])
-                    except:
+                    except:  # skipcq: FLK-E722
                         type_index = -1
 
                     for tmp_type_index in range(len(self.var_type_history_list[event_index][var_index])):
@@ -565,7 +565,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         # Index of the variableType in the list  # [others, static, [discrete, number of appended steps], asc, desc,
                         # unique, normal, uniform, beta, special]
                         type_index = self.var_type_history_list_order.index(self.var_type[event_index][var_index][0])
-                    except:
+                    except:  # skipcq: FLK-E722
                         type_index = -1
 
                     for tmp_type_index in range(len(self.var_type_history_list[event_index][var_index])):
@@ -705,7 +705,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                                         self.var_type_history_list[event_index][var_index][type_index][i] = \
                                             self.var_type_history_list[event_index][var_index][type_index][i][
                                             -max(self.options['numCheckVarTypeVT'], self.options['numVarTypeHistRef']):]
-                                except:
+                                except:  # skipcq: FLK-E722
                                     self.var_type_history_list[event_index][var_index][type_index] = \
                                         self.var_type_history_list[event_index][var_index][type_index][
                                         -max(self.options['numCheckVarTypeVT'], self.options['numVarTypeHistRef']):]
@@ -1682,7 +1682,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     # Index of the variableType in the list  # [others, static, [discrete, number of appendece steps], asc, desc, unique,
                     # normal, uniform, beta, special]
                     type_index = self.var_type_history_list_order.index(self.var_type[event_index][var_index][0])
-                except:
+                except:  # skipcq: FLK-E722
                     type_index = -1
 
                 for tmp_type_index in range(len(self.var_type_history_list[event_index][var_index])):
@@ -1948,10 +1948,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         analysis_component = {'AffectedLogAtomPaths': [log_atom.parser_match.get_match_dictionary().keys()]}
         event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records}
         for listener in self.anomaly_event_handlers:
-            listener.receive_event(
-                'Analysis.%s' % self.__class__.__name__, 
-                'Warning: %s after the %s-th analysed line' % (message, self.event_type_detector.num_eventlines[event_index]), 
-                sorted_log_lines, event_data, log_atom, self)
+            listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Warning: %s after the %s-th analysed line' % (
+                message, self.event_type_detector.num_eventlines[event_index]), sorted_log_lines, event_data, log_atom, self)
 
     def print(self, event_index, message, log_atom, confidence=None, indicator=None):
         """Prints the message"""
@@ -1983,7 +1981,7 @@ def convert_to_floats(list_in):
     for item in list_in:
         try:
             num_list.append(float(item))
-        except:
+        except:  # skipcq: FLK-E722
             return False
     return num_list
 
