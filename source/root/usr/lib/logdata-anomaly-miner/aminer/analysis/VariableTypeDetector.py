@@ -902,9 +902,10 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         # Test for uniform distribution
         Min = min(values)
         Max = max(values)
-        if self.options['KS_Alpha'] in self.crit_dist_ini and self.options['numMinAppearance'] in self.crit_dist_ini[self.options['KS_Alpha']]:
-            significance.append(self.options['KS_Alpha'] * self.crit_dist_ini[self.options['KS_Alpha']][self.options['numMinAppearance']]['uni'] / 
-                                kstest(values, 'uniform', args=(Min, Max - Min))[0])
+        if self.options['KS_Alpha'] in self.crit_dist_ini and self.options['numMinAppearance'] in self.crit_dist_ini[self.options[
+                'KS_Alpha']]:
+            significance.append(self.options['KS_Alpha'] * self.crit_dist_ini[self.options['KS_Alpha']][self.options['numMinAppearance']][
+                'uni'] / kstest(values, 'uniform', args=(Min, Max - Min))[0])
             distribution.append(['uni', Min, Max])
         else:
             significance.append(kstest(values, 'uniform', args=(Min, Max - Min))[1])
@@ -915,67 +916,65 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         [EV, sigma] = norm.fit(values)
 
         # KS-test of the standardised values and the distribution
-        if self.options['KS_Alpha'] in self.crit_dist_ini and self.options['numMinAppearance'] in self.crit_dist_ini[self.options['KS_Alpha']]:
-            significance.append(self.options['KS_Alpha'] * self.crit_dist_ini[self.options['KS_Alpha']][self.options['numMinAppearance']]['nor'] / 
-                                kstest((values - EV) / sigma,'norm')[0])
+        if self.options['KS_Alpha'] in self.crit_dist_ini and self.options['numMinAppearance'] in self.crit_dist_ini[self.options[
+                'KS_Alpha']]:
+            significance.append(self.options['KS_Alpha'] * self.crit_dist_ini[self.options['KS_Alpha']][self.options['numMinAppearance']][
+                'nor'] / kstest((values - EV) / sigma, 'norm')[0])
             distribution.append(['nor', EV, sigma, Min, Max])
         else:
-            significance.append(kstest((values - EV) / sigma,'norm')[1])
+            significance.append(kstest((values - EV) / sigma, 'norm')[1])
             distribution.append(['nor', EV, sigma, Min, Max])
 
         # Test for beta distribution
         EV_tmp = (Min + Max) / 2
         sigma_tmp = (Max - Min) / 2.869067247151828
 
-        if self.options['KS_Alpha'] in self.crit_dist_ini and self.options['numMinAppearance'] in self.crit_dist_ini[self.options['KS_Alpha']]:
-            significance.append(self.options['KS_Alpha'] * self.crit_dist_ini[self.options['KS_Alpha']][self.options['numMinAppearance']]['beta1'] / 
-                                kstest((values-Min)/(Max-Min),'beta', args=(0.5, 0.5))[0])
+        if self.options['KS_Alpha'] in self.crit_dist_ini and self.options['numMinAppearance'] in self.crit_dist_ini[self.options[
+                'KS_Alpha']]:
+            significance.append(self.options['KS_Alpha'] * self.crit_dist_ini[self.options['KS_Alpha']][self.options['numMinAppearance']][
+                'beta1'] / kstest((values-Min)/(Max-Min), 'beta', args=(0.5, 0.5))[0])
             distribution.append(['beta', EV_tmp, sigma_tmp, Min, Max, 1])
         else:
-            significance.append(kstest((values-Min)/(Max-Min),'beta', args=(0.5, 0.5))[1])
+            significance.append(kstest((values-Min)/(Max-Min), 'beta', args=(0.5, 0.5))[1])
             distribution.append(['beta', EV_tmp, sigma_tmp, Min, Max, 1])
 
         # KS-test of the standardised values and the distribution
         if self.options['KS_Alpha'] in self.crit_dist_ini and self.options['numMinAppearance'] in self.crit_dist_ini[
                 self.options['KS_Alpha']]:
             # Beta 2
-            significance.append(
-                            self.options['KS_Alpha'] * self.crit_dist_ini[self.options['KS_Alpha']][self.options['numMinAppearance']]['beta2'] / 
-                            kstest((values-EV)/sigma*pow(5*2/(5+2+1),1/2)/(5+2)+5/(5+2),'beta', args=(5, 2))[0])
+            significance.append(self.options['KS_Alpha'] * self.crit_dist_ini[self.options['KS_Alpha']][self.options['numMinAppearance']][
+                'beta2'] / kstest((values-EV)/sigma*pow(5*2/(5+2+1), 1/2)/(5+2)+5/(5+2), 'beta', args=(5, 2))[0])
             distribution.append(['beta', EV, sigma, Min, Max, 2])
 
             # Beta 3
-            significance.append(
-                            self.options['KS_Alpha'] * self.crit_dist_ini[self.options['KS_Alpha']][self.options['numMinAppearance']]['beta2'] / 
-                            kstest((values-EV)/sigma*pow(5*2/(5+2+1),1/2)/(5+2)+2/(5+2),'beta', args=(2, 5))[0])
+            significance.append(self.options['KS_Alpha'] * self.crit_dist_ini[self.options['KS_Alpha']][self.options['numMinAppearance']][
+                'beta2'] / kstest((values-EV)/sigma*pow(5*2/(5+2+1), 1/2)/(5+2)+2/(5+2), 'beta', args=(2, 5))[0])
             distribution.append(['beta', EV, sigma, Min, Max, 3])
 
             # Beta 4
-            significance.append(
-                            self.options['KS_Alpha'] * self.crit_dist_ini[self.options['KS_Alpha']][self.options['numMinAppearance']]['beta4'] / 
-                            kstest((values-EV)/sigma*pow(1*5/(1+5+1),1/2)/(1+5)+1/(1+5),'beta', args=(1, 5))[0])
+            significance.append(self.options['KS_Alpha'] * self.crit_dist_ini[self.options['KS_Alpha']][self.options['numMinAppearance']][
+                'beta4'] / kstest((values-EV)/sigma*pow(1*5/(1+5+1), 1/2)/(1+5)+1/(1+5), 'beta', args=(1, 5))[0])
             distribution.append(['beta', EV, sigma, Min, Max, 4])
 
             # Beta 5
-            significance.append(
-                            self.options['KS_Alpha'] * self.crit_dist_ini[self.options['KS_Alpha']][self.options['numMinAppearance']]['beta4'] / 
-                            kstest((values-EV)/sigma*pow(1*5/(1+5+1),1/2)/(1+5)+5/(1+5),'beta', args=(5, 1))[0])
+            significance.append(self.options['KS_Alpha'] * self.crit_dist_ini[self.options['KS_Alpha']][self.options['numMinAppearance']][
+                'beta4'] / kstest((values-EV)/sigma*pow(1*5/(1+5+1), 1/2)/(1+5)+5/(1+5), 'beta', args=(5, 1))[0])
             distribution.append(['beta', EV, sigma, Min, Max, 5])
         else:
             # Beta 2
-            significance.append(kstest((values-EV)/sigma*pow(5*2/(5+2+1),1/2)/(5+2)+5/(5+2),'beta', args=(5, 2))[1])
+            significance.append(kstest((values-EV)/sigma*pow(5*2/(5+2+1), 1/2)/(5+2)+5/(5+2), 'beta', args=(5, 2))[1])
             distribution.append(['beta', EV, sigma, Min, Max, 2])
 
             # Beta 3
-            significance.append(kstest((values-EV)/sigma*pow(5*2/(5+2+1),1/2)/(5+2)+2/(5+2),'beta', args=(2, 5))[1])
+            significance.append(kstest((values-EV)/sigma*pow(5*2/(5+2+1), 1/2)/(5+2)+2/(5+2), 'beta', args=(2, 5))[1])
             distribution.append(['beta', EV, sigma, Min, Max, 3])
 
             # Beta 4
-            significance.append(kstest((values-EV)/sigma*pow(1*5/(1+5+1),1/2)/(1+5)+1/(1+5),'beta', args=(1, 5))[1])
+            significance.append(kstest((values-EV)/sigma*pow(1*5/(1+5+1), 1/2)/(1+5)+1/(1+5), 'beta', args=(1, 5))[1])
             distribution.append(['beta', EV, sigma, Min, Max, 4])
 
             # Beta 5
-            significance.append(kstest((values-EV)/sigma*pow(1*5/(1+5+1),1/2)/(1+5)+5/(1+5),'beta', args=(5, 1))[1])
+            significance.append(kstest((values-EV)/sigma*pow(1*5/(1+5+1), 1/2)/(1+5)+5/(1+5), 'beta', args=(5, 1))[1])
             distribution.append(['beta', EV, sigma, Min, Max, 5])
 
         # Maximal distance for the self generated or mixed distributions
@@ -990,26 +989,22 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             proportion = ((EV - Min) / (Max - Min) - 5 / 6) / (-4 / 6)
             tmp_index = [int(round(i / proportion)) for i in range(int(round(1000 * proportion)))]
 
-            if self.options['KS_Alpha'] in self.crit_dist_ini and self.options['numMinAppearance'] in self.crit_dist_ini[self.options['KS_Alpha']]:
-                significance.append(ks_2samp(
-                    [self.distribution_data['betam1'][i] for i in tmp_index] + [
-                        self.distribution_data['betam2'][i] for i in range(1000) if i not in tmp_index],
-                    (values - Min) / (Max - Min))[0] / max_dist * dist_penalty)
+            if self.options['KS_Alpha'] in self.crit_dist_ini and self.options['numMinAppearance'] in self.crit_dist_ini[self.options[
+                    'KS_Alpha']]:
+                significance.append(ks_2samp([self.distribution_data['betam1'][i] for i in tmp_index] + [self.distribution_data['betam2'][
+                    i] for i in range(1000) if i not in tmp_index], (values - Min) / (Max - Min))[0] / max_dist * dist_penalty)
                 distribution.append(['betam', Min, Max - Min, Min, Max, proportion])
             else:
-                significance.append(ks_2samp(
-                    [self.distribution_data['betam1'][i] for i in tmp_index] + [
-                        self.distribution_data['betam2'][i] for i in range(1000) if i not in tmp_index],
-                    (values - Min) / (Max - Min))[1])
+                significance.append(ks_2samp([self.distribution_data['betam1'][i] for i in tmp_index] + [self.distribution_data['betam2'][
+                    i] for i in range(1000) if i not in tmp_index], (values - Min) / (Max - Min))[1])
                 distribution.append(['betam', Min, Max - Min, Min, Max, proportion])
 
         # Test for alternative distribution
-        
 
         # KS-test of the standardised values and the distribution
-        if self.options['KS_Alpha'] in self.crit_dist_ini and self.options['numMinAppearance'] in self.crit_dist_ini[self.options['KS_Alpha']]:
-            significance.append(
-                ks_2samp(self.distribution_data['spec'], (values - EV) / sigma)[0] / max_dist * dist_penalty)
+        if self.options['KS_Alpha'] in self.crit_dist_ini and self.options['numMinAppearance'] in self.crit_dist_ini[self.options[
+                'KS_Alpha']]:
+            significance.append(ks_2samp(self.distribution_data['spec'], (values - EV) / sigma)[0] / max_dist * dist_penalty)
             distribution.append(['spec', EV, sigma, Min, Max, 0])
 
             significance.append(
