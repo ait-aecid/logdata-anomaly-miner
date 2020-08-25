@@ -1,6 +1,6 @@
 import time
 import unittest
-from aminer.analysis import EventTypeDetector
+from aminer.analysis.EventTypeDetector import EventTypeDetector
 from aminer.input import LogAtom
 from aminer.parsing import FirstMatchModelElement, SequenceModelElement, FixedDataModelElement, DelimitedDataModelElement, \
     DecimalIntegerValueModelElement, FixedWordlistDataModelElement, AnyByteDataModelElement, ParserMatch, MatchContext, MatchElement

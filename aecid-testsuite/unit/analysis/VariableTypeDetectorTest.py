@@ -161,7 +161,7 @@ class VariableTypeDetectorTest(TestBase):
         beta5_data_list = [val[1] for val in generate_sample([], [['beta', var_ev, var_var, -1000, 1000, 5]],
                            max(dataset_sizes)*iterations, plot_bool=False)]
         """
-        # Number of execution of the tested function 
+        # Number of execution of the tested function
         iterations = 20
         # Size of the initial datasample
         dataset_sizes = [100]
@@ -189,7 +189,7 @@ class VariableTypeDetectorTest(TestBase):
                 etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
                 vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, options={
                     'numMinAppearance': dataset_size, 'divThres': 0.5, 'testInt': True, 'simThres': 0.3, 'KS_Alpha': significance_niveau})
-                
+
                 result_list = []  # List of the results of the single tests
                 for i in range(iterations):
                     distribution_list = vtd.detect_continuous_shape(uni_data_list[i * dataset_size:(i + 1) * dataset_size])
@@ -219,7 +219,7 @@ class VariableTypeDetectorTest(TestBase):
                 result_list = []  # List of the results of the single tests
                 for i in range(iterations):
                     distribution_list = vtd.detect_continuous_shape(beta1_data_list[i * dataset_size:(i + 1) * dataset_size])
-                    
+
                     # Add if the seached distribution is present in the found distributions
                     if (distribution_list[0] == 'beta' and distribution_list[-1] == 1) or 'beta1' in [
                             distr[0]+str(distr[-1]) for distr in distribution_list[-1]]:
@@ -247,7 +247,7 @@ class VariableTypeDetectorTest(TestBase):
                 result_list = []  # List of the results of the single tests
                 for i in range(iterations):
                     distribution_list = vtd.detect_continuous_shape(beta3_data_list[i * dataset_size:(i + 1) * dataset_size])
-                    
+
                     # Add if the seached distribution is present in the found distributions
                     if (distribution_list[0] == 'beta' and distribution_list[-1] == 3) or 'beta3' in [
                             distr[0]+str(distr[-1]) for distr in distribution_list[-1]]:
@@ -261,7 +261,7 @@ class VariableTypeDetectorTest(TestBase):
                 result_list = []  # List of the results of the single tests
                 for i in range(iterations):
                     distribution_list = vtd.detect_continuous_shape(beta4_data_list[i * dataset_size:(i + 1) * dataset_size])
-                    
+
                     # Add if the seached distribution is present in the found distributions
                     if (distribution_list[0] == 'beta' and distribution_list[-1] == 4) or 'beta4' in [
                             distr[0]+str(distr[-1]) for distr in distribution_list[-1]]:
@@ -275,7 +275,7 @@ class VariableTypeDetectorTest(TestBase):
                 result_list = []  # List of the results of the single tests
                 for i in range(iterations):
                     distribution_list = vtd.detect_continuous_shape(beta5_data_list[i * dataset_size:(i + 1) * dataset_size])
-                    
+
                     # Add if the seached distribution is present in the found distributions
                     if (distribution_list[0] == 'beta' and distribution_list[-1] == 5) or 'beta5' in [
                             distr[0]+str(distr[-1]) for distr in distribution_list[-1]]:
@@ -606,7 +606,7 @@ class VariableTypeDetectorTest(TestBase):
         """This unittest tests the s_ks_test method. It uses randomised datasets, which can be printed in the terminal.
         Every distribution has generated 30*300 Datasets and var_ev = 0, var_var = 1. Data was generated with following methods:
         ..."""
-        # Number of execution of the tested function 
+        # Number of execution of the tested function
         iterations = 20
         # Size of the initial datasample
         dataset_sizes_ini = [100]
@@ -687,7 +687,8 @@ class VariableTypeDetectorTest(TestBase):
                     result_list = []  # List of the results of the single tests
                     for i in range(iterations):
                         # Create the initial distribution, which has to pass the initial test
-                        variable_type_ini = vtd.detect_continuous_shape(beta1_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
+                        variable_type_ini = vtd.detect_continuous_shape(beta1_data_list_ini[
+                            i * dataset_size_ini:(i + 1) * dataset_size_ini])
                         while True:
                             if variable_type_ini[0] == 'beta' and (variable_type_ini[-1] == 1 or (
                                     isinstance(variable_type_ini[-1], list) and variable_type_ini[-2] == 1)):
@@ -699,7 +700,7 @@ class VariableTypeDetectorTest(TestBase):
                                     if variable_type_ini[-1][j][0] == 'beta' and variable_type_ini[-1][j][-1] == 1:
                                         variable_type_ini = variable_type_ini[-1][j]
                                         break
-                        
+
                         # Test and save the result of the sKS-Test
                         etd.values = [[beta1_data_list_upd[i * dataset_size_upd:(i + 1) * dataset_size_upd]]]
                         vtd.var_type = [[variable_type_ini]]
@@ -711,7 +712,8 @@ class VariableTypeDetectorTest(TestBase):
                     result_list = []  # List of the results of the single tests
                     for i in range(iterations):
                         # Create the initial distribution, which has to pass the initial test
-                        variable_type_ini = vtd.detect_continuous_shape(beta2_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
+                        variable_type_ini = vtd.detect_continuous_shape(beta2_data_list_ini[
+                            i * dataset_size_ini:(i + 1) * dataset_size_ini])
                         while True:
                             if variable_type_ini[0] == 'beta' and (variable_type_ini[-1] == 2 or (
                                     isinstance(variable_type_ini[-1], list) and variable_type_ini[-2] == 2)):
@@ -723,7 +725,7 @@ class VariableTypeDetectorTest(TestBase):
                                     if variable_type_ini[-1][j][0] == 'beta' and variable_type_ini[-1][j][-1] == 2:
                                         variable_type_ini = variable_type_ini[-1][j]
                                         break
-                        
+
                         # Test and save the result of the sKS-Test
                         etd.values = [[beta2_data_list_upd[i * dataset_size_upd:(i + 1) * dataset_size_upd]]]
                         vtd.var_type = [[variable_type_ini]]
@@ -735,7 +737,8 @@ class VariableTypeDetectorTest(TestBase):
                     result_list = []  # List of the results of the single tests
                     for i in range(iterations):
                         # Create the initial distribution, which has to pass the initial test
-                        variable_type_ini = vtd.detect_continuous_shape(beta3_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
+                        variable_type_ini = vtd.detect_continuous_shape(beta3_data_list_ini[
+                            i * dataset_size_ini:(i + 1) * dataset_size_ini])
                         while True:
                             if variable_type_ini[0] == 'beta' and (variable_type_ini[-1] == 3 or (
                                     isinstance(variable_type_ini[-1], list)and variable_type_ini[-2] == 3)):
@@ -747,7 +750,7 @@ class VariableTypeDetectorTest(TestBase):
                                     if variable_type_ini[-1][j][0] == 'beta' and variable_type_ini[-1][j][-1] == 3:
                                         variable_type_ini = variable_type_ini[-1][j]
                                         break
-                        
+
                         # Test and save the result of the sKS-Test
                         etd.values = [[beta3_data_list_upd[i * dataset_size_upd:(i + 1) * dataset_size_upd]]]
                         vtd.var_type = [[variable_type_ini]]
@@ -759,7 +762,8 @@ class VariableTypeDetectorTest(TestBase):
                     result_list = []  # List of the results of the single tests
                     for i in range(iterations):
                         # Create the initial distribution, which has to pass the initial test
-                        variable_type_ini = vtd.detect_continuous_shape(beta4_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
+                        variable_type_ini = vtd.detect_continuous_shape(beta4_data_list_ini[
+                            i * dataset_size_ini:(i + 1) * dataset_size_ini])
                         while True:
                             if variable_type_ini[0] == 'beta' and (variable_type_ini[-1] == 4 or (
                                     isinstance(variable_type_ini[-1], list) and variable_type_ini[-2] == 4)):
@@ -771,7 +775,7 @@ class VariableTypeDetectorTest(TestBase):
                                     if variable_type_ini[-1][j][0] == 'beta' and variable_type_ini[-1][j][-1] == 4:
                                         variable_type_ini = variable_type_ini[-1][j]
                                         break
-                        
+
                         # Test and save the result of the sKS-Test
                         etd.values = [[beta4_data_list_upd[i * dataset_size_upd:(i + 1) * dataset_size_upd]]]
                         vtd.var_type = [[variable_type_ini]]
@@ -783,7 +787,8 @@ class VariableTypeDetectorTest(TestBase):
                     result_list = []  # List of the results of the single tests
                     for i in range(iterations):
                         # Create the initial distribution, which has to pass the initial test
-                        variable_type_ini = vtd.detect_continuous_shape(beta5_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
+                        variable_type_ini = vtd.detect_continuous_shape(beta5_data_list_ini[
+                            i * dataset_size_ini:(i + 1) * dataset_size_ini])
                         while True:
                             if variable_type_ini[0] == 'beta' and (variable_type_ini[-1] == 5 or (
                                     isinstance(variable_type_ini[-1], list) and variable_type_ini[-2] == 5)):
@@ -795,7 +800,7 @@ class VariableTypeDetectorTest(TestBase):
                                     if variable_type_ini[-1][j][0] == 'beta' and variable_type_ini[-1][j][-1] == 5:
                                         variable_type_ini = variable_type_ini[-1][j]
                                         break
-                        
+
                         # Test and save the result of the sKS-Test
                         etd.values = [[beta5_data_list_upd[i * dataset_size_upd:(i + 1) * dataset_size_upd]]]
                         vtd.var_type = [[variable_type_ini]]
@@ -803,4 +808,3 @@ class VariableTypeDetectorTest(TestBase):
 
                     # Test if the result list is correct
                     self.assertTrue(result_list == beta5_result_shapes)
-

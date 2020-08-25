@@ -162,7 +162,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, E
                             del self.time_trigger[2][indices[i]]
                             if debug_mode:
                                 print(self.time_trigger)
-                        
+
                         # Trigger for an reoccuring time window
                         else:
                             if debug_mode:

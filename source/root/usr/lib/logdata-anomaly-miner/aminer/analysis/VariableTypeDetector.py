@@ -213,7 +213,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             'xxx': {'xxx': {'uni': 0.1, 'nor': 0.1, 'beta1': 0.1, 'beta2': 0.1, 'beta4': 0.1}}
         }
 
-        # List of the maximal distances to the significance niveau 'KS_Alpha', the samplesize 'numMinAppearance' in the initialisation and 
+        # List of the maximal distances to the significance niveau 'KS_Alpha', the samplesize 'numMinAppearance' in the initialisation and
         # the samplesize 'numUpdate' in the update step and the single distributions in the sKS-tests in the update steps
         self.crit_dist_upd = {
             0.05: {
@@ -1459,7 +1459,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         else:
             crit_distance = ((num_distr_val + self.options['sKS_NumValues']) * (np.log(2 / self.options['sKS_Alpha'])) / (
                 2 * num_distr_val * self.options['sKS_NumValues'])) ** (1 / 2)
-        
+
         # scipy KS-test for normal distribution
         if self.var_type[event_index][var_index][0] == 'uni':
             max_dist = kstest(
@@ -1938,9 +1938,10 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records}
         for listener in self.anomaly_event_handlers:
             listener.receive_event(
-                'Analysis.%s' % self.__class__.__name__, 'VariableType of path %s would reject the type %s after the %s-'
-                                                         'th analysed line' % ( self.event_type_detector.variable_key_list[event_index][
-                    var_index], vt[0], self.event_type_detector.num_eventlines[event_index]), sorted_log_lines, event_data, log_atom, self)
+                'Analysis.%s' % self.__class__.__name__,
+                'VariableType of path %s would reject the type %s after the %s-th analysed line' % (
+                    self.event_type_detector.variable_key_list[event_index][var_index], vt[0], self.event_type_detector.num_eventlines[
+                        event_index]), sorted_log_lines, event_data, log_atom, self)
 
     def print_warning(self, event_index, message, log_atom):
         """prints a warning"""
