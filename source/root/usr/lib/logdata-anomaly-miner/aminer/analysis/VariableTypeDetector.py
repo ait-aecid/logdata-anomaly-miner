@@ -1903,7 +1903,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 'Analysis.%s' % self.__class__.__name__, 'VariableType of path %s changed from %s to %s after the %s-th analysed line' % (
                         self.event_type_detector.variable_key_list[event_index][var_index], vt_old[0], vt_new[0],
                         self.event_type_detector.num_eventlines[event_index]), sorted_log_lines, event_data, log_atom, self)
-        
+
         '''if confidence is None:
             for listener in self.anomaly_event_handlers:
                 listener.receive_event(
