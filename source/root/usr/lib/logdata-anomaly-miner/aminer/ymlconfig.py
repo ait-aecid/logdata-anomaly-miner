@@ -34,7 +34,7 @@ def loadYaml(config_file):
     global yamldata
 
     import yaml
-    from cerberus import Validator
+    from aminer.ConfigValidator import ConfigValidator
     import os
     with open(config_file) as yamlfile:
         try:
@@ -48,7 +48,7 @@ def loadYaml(config_file):
         schema = eval(sma.read())
     sma.close()
 
-    v = Validator(schema)
+    v = ConfigValidator(schema)
     if v.validate(yamldata, schema):
         test = v.normalized(yamldata)
         yamldata = test
@@ -91,10 +91,10 @@ def build_analysis_pipeline(analysis_context):
     # skipcq: PYL-W0603
     global yamldata
     for item in yamldata['Parser']:
-        if item['start'] == True:
+        if 'start' in item and item['start'] == True:
             start = item
             continue
-        if item['type'].endswith('ModelElement') and item['start'] != True:
+        if item['type'].endswith('ModelElement'):
             func = getattr(__import__("aminer.parsing", fromlist=[item['type']]), item['type'])
             if 'args' in item:
                 if isinstance(item['args'], list):

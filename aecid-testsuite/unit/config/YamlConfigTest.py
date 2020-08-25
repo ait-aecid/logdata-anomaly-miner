@@ -88,6 +88,24 @@ class YamlConfigTest(unittest.TestCase):
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[18], VariableByteDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[19], FixedDataModelElement))
         self.assertEqual(context.atomizer_factory.parsing_model.element_id, 'accesslog')
+        
+    """ This test checks if the aminer fails without a start-tag for the first parser-model """
+    def test_analysis_fail_without_parser_start(self):
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        with self.assertRaises(ValueError):
+            aminer_config.loadYaml('unit/data/configfiles/missing_parserstart_config.yml')
+
+    """ This test checks if the aminer fails without a start-tag for the first parser-model """
+    def test_analysis_fail_with_double_parser_start(self):
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        with self.assertRaises(ValueError):
+            aminer_config.loadYaml('unit/data/configfiles/double_parserstart_config.yml')
+
+
 
 
 if __name__ == "__main__":

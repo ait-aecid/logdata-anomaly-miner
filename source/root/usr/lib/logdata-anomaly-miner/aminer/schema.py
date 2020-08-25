@@ -69,11 +69,12 @@
         'Parser': {
             'required': True,
             'type': 'list',
+            'has_start': True,
             'schema': {
                 'type': 'dict',
                  'schema': {
                     'id': {'type': 'string'},
-                    'start': {'type': 'boolean', 'default': False},
+                    'start': {'type': 'boolean'},
                     'type': {'type': 'string'},
                     'name': {'type': 'string'},
                     'args': {'type': ['string', 'list'], 'schema': {'type': 'string'}}
