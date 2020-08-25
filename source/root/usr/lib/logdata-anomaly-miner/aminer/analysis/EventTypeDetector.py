@@ -376,3 +376,4 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, E
         event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.total_records}
         for listener in self.anomaly_event_handlers:
             listener.receive_event('Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, log_atom, self)
+

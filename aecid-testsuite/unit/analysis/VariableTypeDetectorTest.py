@@ -786,3 +786,4 @@ class VariableTypeDetectorTest(TestBase):
 
                     # Test if the result list is correct
                     self.assertTrue(result_list == beta5_result_shapes)
+
