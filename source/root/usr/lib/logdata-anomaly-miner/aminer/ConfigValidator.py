@@ -18,15 +18,32 @@ class ParserModelType:
     def __str__(self):
         return self.name
 
+class AnalysisType:
+    name = None
+    func = None
+
+    def __init__(self,name):
+        self.name = name
+        self.func = getattr(__import__("aminer.analysis", fromlist=[name]), name)
+
+    def __str__(self):
+        return self.name
+
 parser_type = TypeDefinition('parsermodel', (ParserModelType,str), ())
+analysis_type = TypeDefinition('analysistype', (AnalysisType,str), ())
 
 class ConfigValidator(Validator):
     types_mapping = Validator.types_mapping.copy()
     types_mapping['parsermodel'] = parser_type
+    types_mapping['analysistype'] = analysis_type
 
     def _normalize_coerce_toparsermodel(self,value):
         if isinstance(value, str):
             return ParserModelType(value)
+
+    def _normalize_coerce_toanalysistype(self,value):
+        if isinstance(value, str):
+            return AnalysisType(value)
 
     def _validate_has_start(self, has_start, field, value):
         seen_start = False
