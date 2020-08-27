@@ -75,7 +75,7 @@
                  'schema': {
                     'id': {'type': 'string'},
                     'start': {'type': 'boolean'},
-                    'type': {'type': 'string'},
+                    'type': {'type': 'parsermodel', 'coerce': 'toparsermodel'},
                     'name': {'type': 'string'},
                     'args': {'type': ['string', 'list'], 'schema': {'type': 'string'}}
                 }
