@@ -79,8 +79,6 @@ def build_analysis_pipeline(analysis_context):
     import configparser
     # skipcq: PYL-W0611
     import sys
-#  import json
-#  from pprint import pprint
 
     parserModelDict = {}
     start = None
@@ -91,33 +89,24 @@ def build_analysis_pipeline(analysis_context):
     # skipcq: PYL-W0603
     global yamldata
     for item in yamldata['Parser']:
-        if 'start' in item and item['start'] == True:
+        if 'start' in item and item['start'] is True:
             start = item
             continue
-        if item['type'].endswith('ModelElement'):
-            func = getattr(__import__("aminer.parsing", fromlist=[item['type']]), item['type'])
+        if item['type'].ismodel:
             if 'args' in item:
                 if isinstance(item['args'], list):
                     # encode string to bytearray
                     for j in range(len(item['args'])):
                         item['args'][j] = item['args'][j].encode()
-                    parserModelDict[item['id']] = func(item['name'], item['args'])
+                    parserModelDict[item['id']] = item['type'].func(item['name'], item['args'])
                 else:
-                    parserModelDict[item['id']] = func(item['name'], item['args'].encode())
+                    parserModelDict[item['id']] = item['type'].func(item['name'], item['args'].encode())
             else:
-                parserModelDict[item['id']] = func(item['name'])
+                parserModelDict[item['id']] = item['type'].func(item['name'])
         else:
-            # skipcq: PTC-W0034
-            func = getattr(__import__(item['type']), 'get_model')
-            parserModelDict[item['id']] = func()
+            parserModelDict[item['id']] = item['type'].func()
 
     argslist = []
-    if start['type'].endswith('ModelElement'):
-        # skipcq: PTC-W0034
-        func = getattr(__import__("aminer.parsing", fromlist=[start['type']]), start['type'])
-    else:
-        # skipcq: PTC-W0034
-        func = getattr(__import__(start['type']), 'get_model')
     if 'args' in start:
         if isinstance(start['args'], list):
             for i in start['args']:
@@ -128,11 +117,11 @@ def build_analysis_pipeline(analysis_context):
                     wscount += 1
                 else:
                     argslist.append(parserModelDict[i])
-            parsing_model = func(start['name'], argslist)
+            parsing_model = start['type'].func(start['name'], argslist)
         else:
-            parsing_model = func(start['name'], [parserModelDict[start['args']]])
+            parsing_model = start['type'].func(start['name'], [parserModelDict[start['args']]])
     else:
-        parsing_model = func()
+        parsing_model = start['type'].func()
 
 # Some generic imports.
     from aminer.analysis import AtomFilters

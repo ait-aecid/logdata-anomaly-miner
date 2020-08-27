@@ -1,8 +1,16 @@
 import unittest
 import importlib
 import yaml
+import sys
+import json
+import shlex
+import configparser
+import uu
+import resource
 
 class YamlConfigTest(unittest.TestCase):
+    def setUp(self):
+        sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
 
     """ Loads a yaml file into the variable aminer_config.yamldata """
     def test_load_generic_yaml_file(self):
@@ -105,7 +113,13 @@ class YamlConfigTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             aminer_config.loadYaml('unit/data/configfiles/double_parserstart_config.yml')
 
-
+    """ This test checks if the config-schema-validator raises an error if an unknown parser is configured  """
+    def test_analysis_fail_with_unknown_parser_start(self):
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        with self.assertRaises(ValueError):
+            aminer_config.loadYaml('unit/data/configfiles/unknown_parser_config.yml')
 
 
 if __name__ == "__main__":
