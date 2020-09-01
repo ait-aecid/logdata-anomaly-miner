@@ -278,6 +278,12 @@ def build_analysis_pipeline(analysis_context):
     analysis_context.register_component(ecd, component_name="EventCorrelationDetector")
     atom_filter.add_handler(ecd)
 
+    from aminer.analysis import MatchFilter
+    match_filter = MatchFilter(analysis_context.aminer_config, ['/model/Random'], anomaly_event_handlers, target_value_list=[
+        1,10,100], output_log_line=True)
+    analysis_context.register_component(match_filter, component_name="MatchFilter")
+    atom_filter.add_handler(match_filter)
+
     from aminer.analysis import NewMatchPathDetector
     new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=True,
                                                    output_log_line=True)
