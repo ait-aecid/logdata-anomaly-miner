@@ -11,6 +11,7 @@ from aminer.analysis.EnhancedNewMatchPathValueComboDetector import EnhancedNewMa
 from aminer.analysis.NewMatchIdValueComboDetector import NewMatchIdValueComboDetector
 from aminer.analysis.ParserCount import ParserCount
 from aminer.analysis.EventCorrelationDetector import EventCorrelationDetector
+from aminer.analysis.MatchFilter import MatchFilter
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
 from aminer.input import LogAtom
 from aminer.parsing import ParserMatch, MatchContext, MatchElement, DecimalIntegerValueModelElement, FirstMatchModelElement, \
@@ -862,6 +863,39 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 ecd.auto_include_flag, generation, diff, p0, alpha, max_hypotheses, max_observations, candidates_size,
                 hypothesis_eval_delta_time, delta_time_to_discard_hypothesis))
 
+    def run_match_filter(self, number_of_pathes):
+        results = [None] * self.iterations
+        avg = 0
+        z = 0
+        while z < self.iterations:
+            new_match_path_detector = NewMatchPathDetector(self.aminer_config, [
+                self.stream_printer_event_handler], 'Default', True)
+            match_filter = MatchFilter(self.aminer_config, ['d' + str(i) for i in range(number_of_pathes)], [
+                self.stream_printer_event_handler])
+
+            seconds = time.time()
+            i = 0
+            measured_time = 0
+            while measured_time < self.waiting_time / 10:
+                decimal_integer_value_me = DecimalIntegerValueModelElement(
+                    'd' + str(i % number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                    DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+                p = process_time()
+                r = random.randint(1, 1000000)
+                seconds = seconds + process_time() - p
+                match_context = MatchContext(str(i).encode())
+                match_element = decimal_integer_value_me.get_match_element('integer', match_context)
+                log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), seconds - r, match_filter)
+                measured_time += timeit.timeit(lambda: match_filter.receive_atom(log_atom), number=1)
+                i = i + 1
+            results[z] = i * 10
+            z = z + 1
+            avg = avg + i * 10
+        avg = avg / self.iterations
+        type(self).result = self.result + self.result_string % (
+            match_filter.__class__.__name__, avg, results,
+            'a %s and %d different path(es).' % (new_match_path_detector.__class__.__name__, number_of_pathes))
+
     def test01atom_filters(self):
         self.run_atom_filters_match_path_filter(1)
         self.run_atom_filters_match_path_filter(30)
@@ -997,6 +1031,11 @@ class AnalysisComponentsPerformanceTest(TestBase):
         self.run_event_correlation_detector(1.0, 5, 0.9, 0.05, 1000, 500, 5, 120, 180)
         self.run_event_correlation_detector(1.0, 5, 0.9, 0.05, 1000, 500, 5, 60, 90)
         self.run_event_correlation_detector(1.0, 5, 0.9, 0.05, 1000, 500, 5, 30, 45)
+
+    def test18match_filter(self):
+        self.run_match_filter(1)
+        self.run_match_filter(1000)
+        self.run_match_filter(100000)
 
 
 if __name__ == '__main__':

@@ -64,7 +64,6 @@ class MatchFilterTest(TestBase):
         """This test checks if an event is not triggered, when the path is in the target_path_list and the value is not in the
         target_value_list."""
         description = "Test4MatchFilterTest"
-        description = "Test3MatchFilterTest"
         decimal_integer_me = DecimalIntegerValueModelElement('integer')
         match_filter = MatchFilter(self.aminer_config, ['/integer'], [self.stream_printer_event_handler], target_value_list=list(
             range(501)))
