@@ -4,7 +4,6 @@ import time
 from unit.TestBase import TestBase
 from aminer.analysis.MatchFilter import MatchFilter
 from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
-from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
 from aminer.input.LogAtom import LogAtom
 from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.ParserMatch import ParserMatch
@@ -21,7 +20,7 @@ class MatchFilterTest(TestBase):
         match_filter = MatchFilter(self.aminer_config, ['/integer'], [self.stream_printer_event_handler])
         self.analysis_context.register_component(match_filter, description)
         t = time.time()
-        for i in range(1000):
+        for _ in range(1000):
             val = random.randint(0, 1000)
             log_atom = LogAtom(val, ParserMatch(decimal_integer_me.get_match_element('', MatchContext(str(val).encode('utf-8')))), t,
                                match_filter)
@@ -37,7 +36,7 @@ class MatchFilterTest(TestBase):
         match_filter = MatchFilter(self.aminer_config, ['/strings'], [self.stream_printer_event_handler])
         self.analysis_context.register_component(match_filter, description)
         t = time.time()
-        for i in range(1000):
+        for _ in range(1000):
             val = random.randint(0, 1000)
             log_atom = LogAtom(val, ParserMatch(decimal_integer_me.get_match_element('', MatchContext(str(val).encode('utf-8')))), t,
                                match_filter)
@@ -48,11 +47,11 @@ class MatchFilterTest(TestBase):
         """This test checks if an event is triggered, when the path is in the target_path_list and the value is in the target_value_list."""
         description = "Test3MatchFilterTest"
         decimal_integer_me = DecimalIntegerValueModelElement('integer')
-        match_filter = MatchFilter(self.aminer_config, ['/integer'], [self.stream_printer_event_handler], target_value_list=[
-            i for i in range(1001)])
+        match_filter = MatchFilter(self.aminer_config, ['/integer'], [self.stream_printer_event_handler], target_value_list=list(
+            range(1001)))
         self.analysis_context.register_component(match_filter, description)
         t = time.time()
-        for i in range(1000):
+        for _ in range(1000):
             val = random.randint(0, 1000)
             log_atom = LogAtom(val, ParserMatch(decimal_integer_me.get_match_element('', MatchContext(str(val).encode('utf-8')))), t,
                                match_filter)
@@ -67,11 +66,11 @@ class MatchFilterTest(TestBase):
         description = "Test4MatchFilterTest"
         description = "Test3MatchFilterTest"
         decimal_integer_me = DecimalIntegerValueModelElement('integer')
-        match_filter = MatchFilter(self.aminer_config, ['/integer'], [self.stream_printer_event_handler], target_value_list=[
-            i for i in range(501)])
+        match_filter = MatchFilter(self.aminer_config, ['/integer'], [self.stream_printer_event_handler], target_value_list=list(
+            range(501)))
         self.analysis_context.register_component(match_filter, description)
         t = time.time()
-        for i in range(1000):
+        for _ in range(1000):
             val = random.randint(0, 1000)
             log_atom = LogAtom(val, ParserMatch(decimal_integer_me.get_match_element('', MatchContext(str(val).encode('utf-8')))), t,
                                match_filter)
