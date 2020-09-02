@@ -18,7 +18,7 @@ install:
   - sudo pip3 install kafka-python -U
   - sudo ln -s /usr/lib/python3/dist-packages/kafka /etc/aminer/conf-enabled/kafka
   - sudo pip3 install python-dateutil
-  - sudo ln -s /usr/lib/python3/dist-packages/dateutil /etc/aminer/conf-enabled/dateutil
+  - sudo ln -s /usr/lib/python3/dist-packages/dateutil /usr/lib/python3.7/dateutil
   - cd aecid-testsuite
   - sudo chmod +x runUnittests.sh
   - sudo chmod +x runAMinerDemo.sh
