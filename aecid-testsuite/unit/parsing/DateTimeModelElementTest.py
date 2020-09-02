@@ -48,7 +48,7 @@ class DateTimeModelElementTest(unittest.TestCase):
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1486471200)
         self.assertEqual(match_context.match_data, self.__expected_match_context)
 
-        match_context = MatchContext(b'07/Feb:00:00:02 +0000] "GET /login.php HTTP/1.1" 200 2532 "-" "Mozilla/5.0 (X11; Ubuntu; '
+        match_context = MatchContext(b'07/Feb:11:40:00 +0000] "GET /login.php HTTP/1.1" 200 2532 "-" "Mozilla/5.0 (X11; Ubuntu; '
                                      b'Linux x86_64; rv:73.0) Gecko/20100101 Firefox/73.0')
         date_time_model_element = DateTimeModelElement('path', b'%d/%b:%H:%M:%S %z', None, None, 2017)
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1486467600)
@@ -90,9 +90,9 @@ class DateTimeModelElementTest(unittest.TestCase):
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1518007200)
         self.assertEqual(match_context.match_data, self.__expected_match_context)
 
-        match_context = MatchContext(b'07/Feb/2017:00:00:02 +0000] "GET /login.php HTTP/1.1" 200 2532 "-" "Mozilla/5.0 (X11; Ubuntu; '
-                                     b'Linux x86_64; rv:73.0) Gecko/20100101 Firefox/73.0')
-        date_time_model_element = DateTimeModelElement('path', b'%d/%b:%H:%M:%S %z', None, None, 2017)
+        match_context = MatchContext(b'07/Feb/2017:11:40:0 +0000] "GET /login.php HTTP/1.1" 200 2532 "-" "Mozilla/5.0 (X11; Ubuntu; '
+                                     b'Linux x86_64; rv:730.0) Gecko/20100101 Firefox/73.0')
+        date_time_model_element = DateTimeModelElement('path', b'%d/%b/%Y:%H:%M:%S %z', None, None, 2017)
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1486467600)
         self.assertEqual(match_context.match_data, b'] "GET /login.php HTTP/1.1" 200 2532 "-" "Mozilla/5.0 (X11; Ubuntu; '
                                                    b'Linux x86_64; rv:73.0) Gecko/20100101 Firefox/73.0')
