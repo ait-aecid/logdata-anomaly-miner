@@ -153,6 +153,7 @@ class DateTimeModelElement(ModelElementInterface):
                 try:
                     parse(match_context.match_data[:self.tz_specifier_format_length])
                     break
+                # skipcq: FLK-E722
                 except:
                     self.tz_specifier_format_length -= 1
                     if self.tz_specifier_format_length <= 0:
