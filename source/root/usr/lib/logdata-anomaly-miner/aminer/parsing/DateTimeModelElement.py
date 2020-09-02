@@ -147,8 +147,9 @@ class DateTimeModelElement(ModelElementInterface):
         parse_pos = 0
         # Year, month, day, hour, minute, second, fraction, gmt-seconds:
         result = [None, None, None, None, None, None, None, None]
-        if self.format_has_tz_specifier and self.tz_specifier_format_length == -1:  # or self.date_format == b'%z':
+        if self.format_has_tz_specifier and self.tz_specifier_format_length == -1:
             self.tz_specifier_format_length = len(match_context.match_data)
+            # try to find the longest matching date
             while True:
                 try:
                     parse(match_context.match_data[:self.tz_specifier_format_length])
@@ -283,8 +284,10 @@ class DateTimeModelElement(ModelElementInterface):
             remaining_data = match_context.match_data[:self.tz_specifier_format_length-parse_pos]
             match_context.update(remaining_data)
             if self.tz_specifier_offset is None:
+                # initialize tz_specifier variables. The first values are expected to match the time_zone argument.
                 self.tz_specifier_offset = 0
                 self.tz_specifier_offset_str = remaining_data
+            # check if the remaining_data has changed
             elif remaining_data != self.tz_specifier_offset_str:
                 sign = 1
                 data = remaining_data.split(b'+')
@@ -293,12 +296,14 @@ class DateTimeModelElement(ModelElementInterface):
                     sign = -1
                     if len(data) == 1:
                         data = None
+                # only add offset if a + or - sign is used.
                 if data is not None:
                     old_data = self.tz_specifier_offset_str.split(b'+')
                     if len(old_data) == 1:
                         old_data = remaining_data.split(b'-')
                     self.tz_specifier_offset = (int(data[1]) - int(old_data[1]))*sign
                     self.tz_specifier_offset_str = remaining_data
+                # if no + or - sign is found no offset is added.
                 else:
                     self.tz_specifier_offset = 0
                     self.tz_specifier_offset_str = remaining_data
