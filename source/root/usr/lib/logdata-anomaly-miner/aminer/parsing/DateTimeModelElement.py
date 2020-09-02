@@ -286,16 +286,18 @@ class DateTimeModelElement(ModelElementInterface):
                 self.tz_specifier_offset = 0
                 self.tz_specifier_offset_str = remaining_data
             elif remaining_data != self.tz_specifier_offset_str:
+                sign = 1
                 data = remaining_data.split(b'+')
                 if len(data) == 1:
                     data = remaining_data.split(b'-')
+                    sign = -1
                     if len(data) == 1:
                         data = None
                 if data is not None:
                     old_data = self.tz_specifier_offset_str.split(b'+')
                     if len(old_data) == 1:
                         old_data = remaining_data.split(b'-')
-                    self.tz_specifier_offset = int(data[1]) - int(old_data[1])
+                    self.tz_specifier_offset = (int(data[1]) - int(old_data[1]))*sign
                     self.tz_specifier_offset_str = remaining_data
                 else:
                     self.tz_specifier_offset = 0

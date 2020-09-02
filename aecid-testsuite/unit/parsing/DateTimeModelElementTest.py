@@ -45,8 +45,6 @@ class DateTimeModelElementTest(unittest.TestCase):
         match_context = MatchContext(b'07.02.2018 11:40:00: it still works')
         date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y %H:%M:%S', None, None, startYear)
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1518003600)
-        date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y %H:%M:%S', None, None, startYear)
-        self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1517996400)
         match_context = MatchContext(b'07.02.2018 11:40:00 UTC+0000: it still works')
         date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y %H:%M:%S %z', None, None, startYear)
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1518003600)
