@@ -22,85 +22,85 @@ class DateTimeModelElementTest(unittest.TestCase):
         match_context = MatchContext(b'07.02 11:40:00: it still works')
         date_time_model_element = DateTimeModelElement('path', b'%d.%m %H:%M:%S', None, None, 2017)
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1486467600)
-        self.assertEqual(match_context, self.__expected_match_context)
+        self.assertEqual(match_context.match_data, self.__expected_match_context)
 
         match_context = MatchContext(b'07.02 11:40:00 UTC+0000: it still works')
         date_time_model_element = DateTimeModelElement('path', b'%d.%m %H:%M:%S %z', None, None, 2017)
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1486467600)
-        self.assertEqual(match_context, self.__expected_match_context)
+        self.assertEqual(match_context.match_data, self.__expected_match_context)
         match_context = MatchContext(b'07.02 11:40:00 UTC+0001: it still works')
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1486471200)
-        self.assertEqual(match_context, self.__expected_match_context)
+        self.assertEqual(match_context.match_data, self.__expected_match_context)
 
         match_context = MatchContext(b'07.02 11:40:00 UTC+0000: it still works')
         date_time_model_element = DateTimeModelElement('path', b'%d.%m %H:%M:%S %z', None, None, 2017)
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1486467600)
-        self.assertEqual(match_context, self.__expected_match_context)
+        self.assertEqual(match_context.match_data, self.__expected_match_context)
         match_context = MatchContext(b'07.02 11:40:00 UTC-0001: it still works')
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1486464000)
-        self.assertEqual(match_context, self.__expected_match_context)
+        self.assertEqual(match_context.match_data, self.__expected_match_context)
 
         match_context = MatchContext(b'07.02 11:40:00 CET+1: it still works')
         date_time_model_element = DateTimeModelElement('path', b'%d.%m %H:%M:%S %z', None, None, 2017)
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1486467600)
-        self.assertEqual(match_context, self.__expected_match_context)
+        self.assertEqual(match_context.match_data, self.__expected_match_context)
         match_context = MatchContext(b'07.02 11:40:00 CET+2: it still works')
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1486471200)
-        self.assertEqual(match_context, self.__expected_match_context)
+        self.assertEqual(match_context.match_data, self.__expected_match_context)
 
         match_context = MatchContext(b'07/Feb:00:00:02 +0000] "GET /login.php HTTP/1.1" 200 2532 "-" "Mozilla/5.0 (X11; Ubuntu; '
                                      b'Linux x86_64; rv:73.0) Gecko/20100101 Firefox/73.0')
         date_time_model_element = DateTimeModelElement('path', b'%d/%b:%H:%M:%S %z', None, None, 2017)
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1486467600)
-        self.assertEqual(match_context, b'] "GET /login.php HTTP/1.1" 200 2532 "-" "Mozilla/5.0 (X11; Ubuntu; '
-                                        b'Linux x86_64; rv:73.0) Gecko/20100101 Firefox/73.0')
+        self.assertEqual(match_context.match_data, b'] "GET /login.php HTTP/1.1" 200 2532 "-" "Mozilla/5.0 (X11; Ubuntu; '
+                                                   b'Linux x86_64; rv:73.0) Gecko/20100101 Firefox/73.0')
 
         match_context = MatchContext(b'07.02 11:40:00 UTC: it still works')
         date_time_model_element = DateTimeModelElement('path', b'%d.%m %H:%M:%S %z', None, None, 2017)
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1486467600)
-        self.assertEqual(match_context, self.__expected_match_context)
+        self.assertEqual(match_context.match_data, self.__expected_match_context)
 
     def test3_new_year_with_start_year_value(self):
         startYear = 2017
         match_context = MatchContext(b'07.02.2018 11:40:00: it still works')
         date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y %H:%M:%S', None, None, startYear)
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1518003600)
-        self.assertEqual(match_context, self.__expected_match_context)
+        self.assertEqual(match_context.match_data, self.__expected_match_context)
         match_context = MatchContext(b'07.02.2018 11:40:00 UTC+0000: it still works')
         date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y %H:%M:%S %z', None, None, startYear)
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1518003600)
-        self.assertEqual(match_context, self.__expected_match_context)
+        self.assertEqual(match_context.match_data, self.__expected_match_context)
         match_context = MatchContext(b'07.02.2018 11:40:00 UTC+0001: it still works')
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1518007200)
-        self.assertEqual(match_context, self.__expected_match_context)
+        self.assertEqual(match_context.match_data, self.__expected_match_context)
 
         match_context = MatchContext(b'07.02.2018 11:40:00 UTC+0000: it still works')
         date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y %H:%M:%S %z', None, None, startYear)
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1518003600)
-        self.assertEqual(match_context, self.__expected_match_context)
+        self.assertEqual(match_context.match_data, self.__expected_match_context)
         match_context = MatchContext(b'07.02.2018 11:40:00 UTC-0001: it still works')
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1518000000)
-        self.assertEqual(match_context, self.__expected_match_context)
+        self.assertEqual(match_context.match_data, self.__expected_match_context)
 
         match_context = MatchContext(b'07.02.2018 11:40:00 CET+1: it still works')
         date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y %H:%M:%S %z', None, None, startYear)
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1518003600)
-        self.assertEqual(match_context, self.__expected_match_context)
+        self.assertEqual(match_context.match_data, self.__expected_match_context)
         match_context = MatchContext(b'07.02.2018 11:40:00 UTC+2: it still works')
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1518007200)
-        self.assertEqual(match_context, self.__expected_match_context)
+        self.assertEqual(match_context.match_data, self.__expected_match_context)
 
         match_context = MatchContext(b'07/Feb/2017:00:00:02 +0000] "GET /login.php HTTP/1.1" 200 2532 "-" "Mozilla/5.0 (X11; Ubuntu; '
                                      b'Linux x86_64; rv:73.0) Gecko/20100101 Firefox/73.0')
         date_time_model_element = DateTimeModelElement('path', b'%d/%b:%H:%M:%S %z', None, None, 2017)
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1486467600)
-        self.assertEqual(match_context, b'] "GET /login.php HTTP/1.1" 200 2532 "-" "Mozilla/5.0 (X11; Ubuntu; '
-                                        b'Linux x86_64; rv:73.0) Gecko/20100101 Firefox/73.0')
+        self.assertEqual(match_context.match_data, b'] "GET /login.php HTTP/1.1" 200 2532 "-" "Mozilla/5.0 (X11; Ubuntu; '
+                                                   b'Linux x86_64; rv:73.0) Gecko/20100101 Firefox/73.0')
 
         match_context = MatchContext(b'07.02.2018 11:40:00 UTC: it still works')
         date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y %H:%M:%S %z', None, None, startYear)
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1518003600)
-        self.assertEqual(match_context, self.__expected_match_context)
+        self.assertEqual(match_context.match_data, self.__expected_match_context)
 
     def test4_default_timezone(self):
         """This test case checks if the default Timezone is utc."""
@@ -108,12 +108,12 @@ class DateTimeModelElementTest(unittest.TestCase):
         date_time_model_element = DateTimeModelElement(
             'path', b'%d.%m.%Y %H:%M:%S', datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo)
         date1 = date_time_model_element.get_match_element('match1', match_context).get_match_object()
-        self.assertEqual(match_context, b'')
+        self.assertEqual(match_context.match_data, b'')
 
         match_context = MatchContext(b'07.02.2018 11:40:00')
         date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y %H:%M:%S')
         date2 = date_time_model_element.get_match_element('match1', match_context).get_match_object()
-        self.assertEqual(match_context, b'')
+        self.assertEqual(match_context.match_data, b'')
         self.assertEqual(date1 - date2, 0)
 
 
