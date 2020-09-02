@@ -281,6 +281,20 @@ class DateTimeModelElement(ModelElementInterface):
 
         match_context.update(date_str)
         if self.format_has_tz_specifier:
+            if self.tz_specifier_format_length < parse_pos:
+                if b'+' in match_context.match_data or b'-' in match_context.match_data:
+                    sign = 1
+                    data = match_context.match_data.split(b'+')
+                    if len(data) == 1:
+                        data = match_context.match_data.split(b'-')
+                        sign = -1
+                    for i in range(1, 5):
+                        if not match_context.match_data[i:i+1].decode('utf-8').isdigit():
+                            i -= 1
+                            break
+                    self.tz_specifier_format_length = len(data[0]) + i + 1
+                    parse_pos = 0
+
             remaining_data = match_context.match_data[:self.tz_specifier_format_length-parse_pos]
             match_context.update(remaining_data)
             if self.tz_specifier_offset is None:
