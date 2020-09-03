@@ -116,6 +116,15 @@ class DateTimeModelElementTest(unittest.TestCase):
         self.assertEqual(match_context.match_data, b'')
         self.assertEqual(date1 - date2, 0)
 
+    def test5_unclean_format_string(self):
+        """This test case checks if unclean format_strings can be used."""
+        match_context = MatchContext(b'Test 07.02.2018 11:40:00 UTC+0000: it still works')
+        date_time_model_element = DateTimeModelElement('path', b'Test %d.%m.%Y %H:%M:%S %z', datetime.timezone.utc, None, 2017)
+        self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1518003600)
+        self.assertEqual(match_context.match_data, self.__expected_match_context)
+        match_context = MatchContext(b'Test 07.02.2018 11:40:00 UTC-0001: it still works')
+        self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1518000000)
+        self.assertEqual(match_context.match_data, self.__expected_match_context)
 
 if __name__ == "__main__":
     unittest.main()

@@ -147,18 +147,6 @@ class DateTimeModelElement(ModelElementInterface):
         parse_pos = 0
         # Year, month, day, hour, minute, second, fraction, gmt-seconds:
         result = [None, None, None, None, None, None, None, None]
-        if self.format_has_tz_specifier and self.tz_specifier_format_length == -1:
-            self.tz_specifier_format_length = len(match_context.match_data)
-            # try to find the longest matching date
-            while True:
-                try:
-                    parse(match_context.match_data[:self.tz_specifier_format_length])
-                    break
-                # skipcq: FLK-E722
-                except:
-                    self.tz_specifier_format_length -= 1
-                    if self.tz_specifier_format_length <= 0:
-                        raise Exception("The date_format could not be found.")
         for part_pos in range(len(self.date_format_parts)):
             date_format_part = self.date_format_parts[part_pos]
             if isinstance(date_format_part, bytes):
@@ -279,15 +267,34 @@ class DateTimeModelElement(ModelElementInterface):
             if result[6] is not None:
                 total_seconds += result[6]
 
+        if self.format_has_tz_specifier and self.tz_specifier_format_length == -1:
+            start = 0
+            while start < parse_pos:
+                try:
+                    parse(match_context.match_data[start:parse_pos])
+                    break
+                # skipcq: FLK-E722
+                except:
+                    start += 1
+            self.tz_specifier_format_length = len(match_context.match_data)
+            # try to find the longest matching date
+            while True:
+                try:
+                    parse(match_context.match_data[start:self.tz_specifier_format_length])
+                    break
+                # skipcq: FLK-E722
+                except:
+                    self.tz_specifier_format_length -= 1
+                    if self.tz_specifier_format_length <= 0:
+                        raise Exception("The date_format could not be found.")
+
         match_context.update(date_str)
         if self.format_has_tz_specifier:
             if self.tz_specifier_format_length < parse_pos:
                 if b'+' in match_context.match_data or b'-' in match_context.match_data:
-                    sign = 1
                     data = match_context.match_data.split(b'+')
                     if len(data) == 1:
                         data = match_context.match_data.split(b'-')
-                        sign = -1
                     for i in range(1, 5):
                         if not match_context.match_data[i:i+1].decode('utf-8').isdigit():
                             i -= 1
