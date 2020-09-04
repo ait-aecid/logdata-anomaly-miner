@@ -76,7 +76,7 @@ def build_analysis_pipeline(analysis_context):
     # skipcq: PYL-W0611
     import importlib
     # skipcq: PYL-W0611
-    import configparser
+    # import configparser
     # skipcq: PYL-W0611
     import sys
 
