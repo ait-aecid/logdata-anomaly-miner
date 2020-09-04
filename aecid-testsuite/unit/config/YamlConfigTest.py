@@ -2,11 +2,19 @@ import unittest
 import importlib
 import yaml
 import sys
+<<<<<<< HEAD
 # import json
 # import shlex
 # import configparser
 # import uu
 # import resource
+=======
+import json
+import shlex
+import configparser
+import uu
+import resource
+>>>>>>> 28b31266c39d3dbdb8d400976459f495fc3c872c
 
 class YamlConfigTest(unittest.TestCase):
     def setUp(self):
