@@ -25,7 +25,6 @@ import traceback
 import resource
 import subprocess  # skipcq: BAN-B404
 import logging
-import shlex
 
 from aminer import AMinerConfig
 from aminer.input.LogStream import LogStream
@@ -33,7 +32,6 @@ from aminer.util import PersistencyUtil
 from aminer.util import SecureOSFunctions
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.util import JsonUtil
-from builtins import str
 from aminer.AMinerRemoteControlExecutionMethods import AMinerRemoteControlExecutionMethods
 
 
@@ -493,18 +491,18 @@ class AnalysisChildRemoteControlHandler:
                 if (json_request_data is None) or (not isinstance(json_request_data, list)) or (len(json_request_data) != 2):
                     raise Exception('Invalid request data')
                 if json_request_data[0]:
-                    json_request_data[0] = shlex.quote(json_request_data[0].decode())
+                    json_request_data[0] = json_request_data[0].decode()
                 if json_request_data[1]:
                     if isinstance(json_request_data[1], list):
                         new_list = []
                         for item in json_request_data[1]:
-                            if isinstance(item, (bytes, str)):
-                                new_list.append(shlex.quote(item))
+                            if isinstance(item, bytes):
+                                new_list.append(item.decode())
                             else:
                                 new_list.append(item)
                         json_request_data[1] = new_list
                     else:
-                        json_request_data[1] = shlex.quote(json_request_data[1].decode())
+                        json_request_data[1] = json_request_data[1].decode()
                 methods = AMinerRemoteControlExecutionMethods()
                 import aminer.analysis
                 exec_locals = {

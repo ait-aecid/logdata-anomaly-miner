@@ -126,7 +126,7 @@ def save_config(analysis_context, new_file):
             break
         i = i - 1
 
-    for i in enumerate(logs):
+    for i in range(len(logs)):
         if "REMOTECONTROL change_attribute_of_registered_analysis_component" in logs[i]:
             logs[i] = logs[i][:logs[i].find('#')]
             arr = logs[i].split(',', 3)
