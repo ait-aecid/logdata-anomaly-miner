@@ -18,7 +18,7 @@ import shlex
 from aminer.input import LogAtom
 from aminer.input import AtomHandlerInterface
 
-attr_str = "%s = %s\n"
+attr_str = "%s: %s\n"
 component_not_found = 'Event history component not found'
 
 
@@ -163,16 +163,18 @@ class AMinerRemoteControlExecutionMethods():
             return
         if hasattr(analysis_context.get_component_by_name(component_name), attribute):
             attr = getattr(analysis_context.get_component_by_name(component_name), attribute, None)
+            if isinstance(attr, set):
+                attr = list(attr)
             if hasattr(attr, '__dict__') and self.isinstance_aminer_class(attr):
                 new_attr = self.get_all_vars(attr, '  ')
-                self.REMOTE_CONTROL_RESPONSE += "%s.%s = %s" % (component_name, attribute, new_attr)
+                self.REMOTE_CONTROL_RESPONSE += "%s.%s: %s" % (component_name, attribute, new_attr)
             elif isinstance(attr, list):
-                self.REMOTE_CONTROL_RESPONSE += "%s.%s = [" % (component_name, attribute)
+                self.REMOTE_CONTROL_RESPONSE += "%s.%s: [" % (component_name, attribute)
                 for l in attr:
                     if hasattr(l, '__dict__') and self.isinstance_aminer_class(l):
                         new_attr = "\n[\n  " + l.__class__.__name__ + "  {\n" + self.get_all_vars(l, '  ') + "  }\n]"
                     else:
-                        new_attr = repr(l)
+                        new_attr = str(l)
                     self.REMOTE_CONTROL_RESPONSE += "%s, " % new_attr
                 self.REMOTE_CONTROL_RESPONSE.replace(", ", "")
                 self.REMOTE_CONTROL_RESPONSE += "]"
@@ -183,7 +185,7 @@ class AMinerRemoteControlExecutionMethods():
     def print_current_config(self, analysis_context):
         for config_property in analysis_context.aminer_config.config_properties:
             if isinstance(analysis_context.aminer_config.config_properties[config_property], str):
-                self.REMOTE_CONTROL_RESPONSE += "%s = '%s'\n" % (
+                self.REMOTE_CONTROL_RESPONSE += "%s: '%s'\n" % (
                     config_property, analysis_context.aminer_config.config_properties[config_property])
             else:
                 self.REMOTE_CONTROL_RESPONSE += attr_str % (
@@ -199,12 +201,14 @@ class AMinerRemoteControlExecutionMethods():
         result = ''
         for var in vars(obj):
             attr = getattr(obj, var, None)
+            if attr is not None and isinstance(attr, set):
+                attr = list(attr)
             if attr is not None and hasattr(attr, '__dict__') and self.isinstance_aminer_class(attr):
-                result += indent + "%s = {\n" % var + self.get_all_vars(attr, indent + '  ') + indent + "}\n"
+                result += indent + "%s: {\n" % var + self.get_all_vars(attr, indent + '  ') + indent + "}\n"
             elif isinstance(attr, list):
                 for l in attr:
                     if hasattr(l, '__dict__') and self.isinstance_aminer_class(l):
-                        result += indent + "%s = [\n" % var + indent + '  ' + l.__class__.__name__ + \
+                        result += indent + "%s: [\n" % var + indent + '  ' + l.__class__.__name__ + \
                                   " {\n" + self.get_all_vars(l, indent + '    ') + indent + '  ' + "}\n" + indent + ']\n'
                     else:
                         result += indent + attr_str % (var, repr(attr))
