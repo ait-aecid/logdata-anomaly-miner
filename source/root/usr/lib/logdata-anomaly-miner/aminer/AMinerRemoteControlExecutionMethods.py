@@ -154,7 +154,7 @@ class AMinerRemoteControlExecutionMethods():
                     old_component_name, new_component_name)
 
     def print_config_property(self, analysis_context, property_name):
-        self.REMOTE_CONTROL_RESPONSE = property_name + " : " + str(
+        self.REMOTE_CONTROL_RESPONSE = property_name + ": " + str(
             analysis_context.aminer_config.config_properties[property_name])
 
     def print_attribute_of_registered_analysis_component(self, analysis_context, component_name, attribute):
