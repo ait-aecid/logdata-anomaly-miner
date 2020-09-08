@@ -18,11 +18,11 @@ import shlex
 from aminer.input import LogAtom
 from aminer.input import AtomHandlerInterface
 
-attr_str = "%s: %s\n"
+attr_str = '"%s": %s,\n'
 component_not_found = 'Event history component not found'
 
 
-class AMinerRemoteControlExecutionMethods():
+class AMinerRemoteControlExecutionMethods:
     REMOTE_CONTROL_RESPONSE = ''
 
     CONFIG_KEY_MAIL_TARGET_ADDRESS = 'MailAlerting.TargetAddress'
@@ -176,7 +176,6 @@ class AMinerRemoteControlExecutionMethods():
                     else:
                         new_attr = str(l)
                     self.REMOTE_CONTROL_RESPONSE += "%s, " % new_attr
-                self.REMOTE_CONTROL_RESPONSE.replace(", ", "")
                 self.REMOTE_CONTROL_RESPONSE += "]"
         else:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: the component '%s' does not have an attribute named '%s'" % \
@@ -185,17 +184,19 @@ class AMinerRemoteControlExecutionMethods():
     def print_current_config(self, analysis_context):
         for config_property in analysis_context.aminer_config.config_properties:
             if isinstance(analysis_context.aminer_config.config_properties[config_property], str):
-                self.REMOTE_CONTROL_RESPONSE += "%s: '%s'\n" % (
+                self.REMOTE_CONTROL_RESPONSE += "\"%s\": \"%s\",\n" % (
                     config_property, analysis_context.aminer_config.config_properties[config_property])
             else:
                 self.REMOTE_CONTROL_RESPONSE += attr_str % (
                     config_property, analysis_context.aminer_config.config_properties[config_property])
         for component_id in analysis_context.get_registered_component_ids():
-            self.REMOTE_CONTROL_RESPONSE += "%s {\n" % analysis_context.get_name_by_component(
+            self.REMOTE_CONTROL_RESPONSE += '"%s": {\n' % analysis_context.get_name_by_component(
                 analysis_context.get_component_by_id(component_id))
             component = analysis_context.get_component_by_id(component_id)
             self.REMOTE_CONTROL_RESPONSE += self.get_all_vars(component, '  ')
-            self.REMOTE_CONTROL_RESPONSE += "}\n\n"
+            self.REMOTE_CONTROL_RESPONSE += "},\n\n"
+        self.REMOTE_CONTROL_RESPONSE = self.REMOTE_CONTROL_RESPONSE.replace('"False"', 'false').replace('"True"', 'true').\
+            replace('"None"', 'null').replace("'", '"').rstrip(',\n\n\n') + '\n\n'
 
     def get_all_vars(self, obj, indent):
         result = ''
@@ -204,18 +205,42 @@ class AMinerRemoteControlExecutionMethods():
             if attr is not None and isinstance(attr, set):
                 attr = list(attr)
             if attr is not None and hasattr(attr, '__dict__') and self.isinstance_aminer_class(attr):
-                result += indent + "%s: {\n" % var + self.get_all_vars(attr, indent + '  ') + indent + "}\n"
+                result += indent + '"%s": {\n' % var + self.get_all_vars(attr, indent + '  ') + indent + "},\n"
             elif isinstance(attr, list):
                 for l in attr:
                     if hasattr(l, '__dict__') and self.isinstance_aminer_class(l):
-                        result += indent + "%s: [\n" % var + indent + '  ' + l.__class__.__name__ + \
-                                  " {\n" + self.get_all_vars(l, indent + '    ') + indent + '  ' + "}\n" + indent + ']\n'
+                        result += indent + "\"%s\": {\n" % var + indent + '  "' + l.__class__.__name__ + \
+                                  "\": {\n" + self.get_all_vars(l, indent + '    ') + indent + '  ' + "}\n" + indent + '},\n'
                     else:
-                        result += indent + attr_str % (var, repr(attr))
+                        rep = repr(attr)
+                        if rep.startswith("'") and rep.endswith("'") and rep.count("'") == 2:
+                            rep = rep.replace('\'', '"')
+                        elif rep.strip('"').startswith("'") and rep.strip('"').endswith("'") and rep.strip('"').count("'") == 2:
+                            rep = rep.strip('"').replace('\'', '"')
+                        else:
+                            rep = rep.strip('"').replace("'", '\\"')
+                        if not rep.startswith("\"") and not rep.isdecimal() and rep != "{}":
+                            try:
+                                float(rep)
+                            except:  # skipcq: FLK-E722
+                                rep = '"%s"' % rep
+                        result += indent + attr_str % (var, rep)
                         break
             else:
-                result += indent + attr_str % (var, repr(attr))
-        return result
+                rep = repr(attr)
+                if rep.startswith("'") and rep.endswith("'") and rep.count("'") == 2:
+                    rep = rep.replace('\'', '"')
+                elif rep.strip('"').startswith("'") and rep.strip('"').endswith("'") and rep.strip('"').count("'") == 2:
+                    rep = rep.strip('"').replace('\'', '"')
+                else:
+                    rep = rep.strip('"').replace("'", '\\"')
+                if not rep.startswith('"') and not rep.isdecimal() and rep != "{}":
+                    try:
+                        float(rep)
+                    except:  # skipcq: FLK-E722
+                        rep = '"%s"' % rep
+                result += indent + attr_str % (var, rep)
+        return result.rstrip(',\n') + '\n'
 
     @staticmethod
     def isinstance_aminer_class(obj):
