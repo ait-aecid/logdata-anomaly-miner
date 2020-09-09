@@ -210,8 +210,8 @@ class AMinerRemoteControlExecutionMethods:
             component = analysis_context.get_component_by_id(component_id)
             self.REMOTE_CONTROL_RESPONSE += self.get_all_vars(component, '  ')
             self.REMOTE_CONTROL_RESPONSE += "},\n\n"
-        self.REMOTE_CONTROL_RESPONSE = self.REMOTE_CONTROL_RESPONSE.replace('"False"', 'false').replace('"True"', 'true').\
-            replace('"None"', 'null').replace("'", '"').rstrip(',\n\n\n') + '\n\n'
+        self.REMOTE_CONTROL_RESPONSE = self.REMOTE_CONTROL_RESPONSE.replace("'", '"').replace('"False"', 'false').replace(
+            '"True"', 'true').replace('"None"', 'null').replace('\\"', "'").rstrip(',\n\n\n') + '\n\n'
 
     def get_all_vars(self, obj, indent):
         result = ''
@@ -227,8 +227,10 @@ class AMinerRemoteControlExecutionMethods:
                         result += indent + "\"%s\": {\n" % var + indent + '  "' + l.__class__.__name__ + \
                                   "\": {\n" + self.get_all_vars(l, indent + '    ') + indent + '  ' + "}\n" + indent + '},\n'
                     else:
-                        if type(attr) in (list, dict, set, int, str, float, type(AMinerConfig)):
-                            rep = repr(attr)
+                        if type(attr) in (int, str, float, bool, type(AMinerConfig), type(None)):
+                            rep = str(attr)
+                        elif type(attr) in (list, dict, set, tuple):
+                            rep = '"%s"' % repr_recursive(attr)
                         else:
                             rep = attr.__class__.__name__
                         if rep.startswith("'") and rep.endswith("'") and rep.count("'") == 2:
@@ -245,8 +247,10 @@ class AMinerRemoteControlExecutionMethods:
                         result += indent + attr_str % (var, rep)
                         break
             else:
-                if type(attr) in (list, dict, set, int, str, float, type(AMinerConfig)):
-                    rep = repr(attr)
+                if type(attr) in (int, str, float, bool, type(AMinerConfig), type(None)):
+                    rep = str(attr)
+                elif type(attr) in (list, dict, set, tuple):
+                    rep = '"%s"' % repr_recursive(attr)
                 else:
                     rep = attr.__class__.__name__
                 if rep.startswith("'") and rep.endswith("'") and rep.count("'") == 2:
@@ -447,3 +451,29 @@ class AMinerRemoteControlExecutionMethods:
         if lookup_count == 0:
             result_string = 'FAIL: Not a single event ID from specification found'
         self.REMOTE_CONTROL_RESPONSE = result_string
+
+
+def repr_recursive(attr):
+    if attr is None:
+        return None
+    elif type(attr) in (bool, type(AMinerConfig)):
+        rep = str(attr)
+    elif type(attr) in (int, str, float):
+        rep = attr
+    elif type(attr) in (list, set, tuple, dict):
+        if isinstance(attr, list):
+            for i, a in enumerate(attr):
+                attr[i] = repr_recursive(a)
+            rep = attr
+        elif isinstance(attr, tuple) or isinstance(attr, set):
+            attr_list = []
+            for a in attr:
+                attr_list.append(repr_recursive(a))
+            rep = tuple(attr_list)
+        elif isinstance(attr, dict):
+            for key in attr.keys():
+                attr[key] = repr_recursive(key)
+            rep = attr
+    else:
+        rep = attr.__class__.__name__
+    return rep
