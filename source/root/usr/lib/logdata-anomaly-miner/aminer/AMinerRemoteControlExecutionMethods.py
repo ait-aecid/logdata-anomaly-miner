@@ -457,10 +457,11 @@ class AMinerRemoteControlExecutionMethods:
         self.REMOTE_CONTROL_RESPONSE = result_string
 
 
+# skipcq: FLK-D103
 def repr_recursive(attr):
     if attr is None:
         return None
-    elif type(attr) in (bool, type(AMinerConfig)):
+    if type(attr) in (bool, type(AMinerConfig)):
         rep = str(attr)
     elif type(attr) in (int, str, float):
         rep = attr
@@ -469,7 +470,7 @@ def repr_recursive(attr):
             for i, a in enumerate(attr):
                 attr[i] = repr_recursive(a)
             rep = attr
-        elif isinstance(attr, tuple) or isinstance(attr, set):
+        elif isinstance(attr, (tuple, set)):
             attr_list = []
             for a in attr:
                 attr_list.append(repr_recursive(a))
