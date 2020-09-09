@@ -227,8 +227,6 @@ class AMinerRemoteControlExecutionMethods:
                             rep = repr(attr)
                         else:
                             rep = attr.__class__.__name__
-                        import sys
-                        print("repr1", rep, file=sys.stderr)
                         if rep.startswith("'") and rep.endswith("'") and rep.count("'") == 2:
                             rep = rep.replace('\'', '"')
                         elif rep.strip('"').startswith("'") and rep.strip('"').endswith("'") and rep.strip('"').count("'") == 2:
@@ -247,8 +245,6 @@ class AMinerRemoteControlExecutionMethods:
                     rep = repr(attr)
                 else:
                     rep = attr.__class__.__name__
-                import sys
-                print("repr2", rep, file=sys.stderr)
                 if rep.startswith("'") and rep.endswith("'") and rep.count("'") == 2:
                     rep = rep.replace('\'', '"')
                 elif rep.strip('"').startswith("'") and rep.strip('"').endswith("'") and rep.strip('"').count("'") == 2:
