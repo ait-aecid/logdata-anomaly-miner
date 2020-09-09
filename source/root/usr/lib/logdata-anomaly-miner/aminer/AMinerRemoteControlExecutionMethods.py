@@ -223,7 +223,12 @@ class AMinerRemoteControlExecutionMethods:
                         result += indent + "\"%s\": {\n" % var + indent + '  "' + l.__class__.__name__ + \
                                   "\": {\n" + self.get_all_vars(l, indent + '    ') + indent + '  ' + "}\n" + indent + '},\n'
                     else:
-                        rep = repr(attr)
+                        if type(attr) in (list, dict, set, int, str, float, type(AMinerConfig)):
+                            rep = repr(attr)
+                        else:
+                            rep = attr.__class__.__name__
+                        import sys
+                        print("repr1", rep, file=sys.stderr)
                         if rep.startswith("'") and rep.endswith("'") and rep.count("'") == 2:
                             rep = rep.replace('\'', '"')
                         elif rep.strip('"').startswith("'") and rep.strip('"').endswith("'") and rep.strip('"').count("'") == 2:
@@ -238,7 +243,12 @@ class AMinerRemoteControlExecutionMethods:
                         result += indent + attr_str % (var, rep)
                         break
             else:
-                rep = repr(attr)
+                if type(attr) in (list, dict, set, int, str, float, type(AMinerConfig)):
+                    rep = repr(attr)
+                else:
+                    rep = attr.__class__.__name__
+                import sys
+                print("repr2", rep, file=sys.stderr)
                 if rep.startswith("'") and rep.endswith("'") and rep.count("'") == 2:
                     rep = rep.replace('\'', '"')
                 elif rep.strip('"').startswith("'") and rep.strip('"').endswith("'") and rep.strip('"').count("'") == 2:
