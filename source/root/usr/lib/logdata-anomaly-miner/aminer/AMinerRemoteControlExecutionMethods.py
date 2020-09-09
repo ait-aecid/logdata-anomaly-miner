@@ -154,8 +154,19 @@ class AMinerRemoteControlExecutionMethods:
                     old_component_name, new_component_name)
 
     def print_config_property(self, analysis_context, property_name):
-        self.REMOTE_CONTROL_RESPONSE = property_name + ": " + str(
-            analysis_context.aminer_config.config_properties[property_name])
+        val = analysis_context.aminer_config.config_properties[property_name]
+        if isinstance(val, list):
+            val = str(val).replace('"False"', 'false').replace('"True"', 'true').replace('"None"', 'null').strip(' ').replace("'", '"')
+        else:
+            val = str(val).replace('"False"', 'false').replace('"True"', 'true').replace('"None"', 'null').strip(' ')
+            if val.isdigit():
+                val = int(val)
+            elif '.' in val:
+                try:
+                    val = float(val)
+                except:  # skipcq: FLK-E722
+                    pass
+        self.REMOTE_CONTROL_RESPONSE = "\"%s\": %s" % (property_name, val)
 
     def print_attribute_of_registered_analysis_component(self, analysis_context, component_name, attribute):
         if type(component_name) is not str or type(attribute) is not str:
