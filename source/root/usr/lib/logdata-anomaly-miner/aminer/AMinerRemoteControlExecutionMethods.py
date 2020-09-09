@@ -229,6 +229,8 @@ class AMinerRemoteControlExecutionMethods:
                     else:
                         if type(attr) in (int, str, float, bool, type(AMinerConfig), type(None)):
                             rep = str(attr)
+                        elif isinstance(attr, bytes):
+                            rep = attr.decode()
                         elif type(attr) in (list, dict, set, tuple):
                             rep = '"%s"' % repr_recursive(attr)
                         else:
@@ -249,6 +251,8 @@ class AMinerRemoteControlExecutionMethods:
             else:
                 if type(attr) in (int, str, float, bool, type(AMinerConfig), type(None)):
                     rep = str(attr)
+                elif isinstance(attr, bytes):
+                    rep = attr.decode()
                 elif type(attr) in (list, dict, set, tuple):
                     rep = '"%s"' % repr_recursive(attr)
                 else:
