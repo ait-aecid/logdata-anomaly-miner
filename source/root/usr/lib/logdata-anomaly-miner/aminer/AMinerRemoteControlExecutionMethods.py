@@ -24,6 +24,7 @@ component_not_found = 'Event history component not found'
 
 class AMinerRemoteControlExecutionMethods:
     REMOTE_CONTROL_RESPONSE = ''
+    ERROR_MESSAGE_RESOURCE_NOT_FOUND = '"Resource \\"%s\\" could not be found."'
 
     CONFIG_KEY_MAIL_TARGET_ADDRESS = 'MailAlerting.TargetAddress'
     CONFIG_KEY_MAIL_FROM_ADDRESS = 'MailAlerting.FromAddress'
@@ -154,6 +155,9 @@ class AMinerRemoteControlExecutionMethods:
                     old_component_name, new_component_name)
 
     def print_config_property(self, analysis_context, property_name):
+        if property_name not in analysis_context.aminer_config.config_properties:
+            self.REMOTE_CONTROL_RESPONSE = self.ERROR_MESSAGE_RESOURCE_NOT_FOUND % property_name
+            return
         val = analysis_context.aminer_config.config_properties[property_name]
         if isinstance(val, list):
             val = str(val).replace('"False"', 'false').replace('"True"', 'true').replace('"None"', 'null').strip(' ').replace("'", '"')
