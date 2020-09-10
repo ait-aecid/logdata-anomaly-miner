@@ -170,7 +170,7 @@ class AMinerRemoteControlExecutionMethods:
                     val = float(val)
                 except:  # skipcq: FLK-E722
                     pass
-        self.REMOTE_CONTROL_RESPONSE = "\"%s\": %s" % (property_name, val)
+        self.REMOTE_CONTROL_RESPONSE = '"%s": %s' % (property_name, val)
 
     def print_attribute_of_registered_analysis_component(self, analysis_context, component_name, attribute):
         if type(component_name) is not str or type(attribute) is not str:
@@ -199,7 +199,7 @@ class AMinerRemoteControlExecutionMethods:
     def print_current_config(self, analysis_context):
         for config_property in analysis_context.aminer_config.config_properties:
             if isinstance(analysis_context.aminer_config.config_properties[config_property], str):
-                self.REMOTE_CONTROL_RESPONSE += "\"%s\": \"%s\",\n" % (
+                self.REMOTE_CONTROL_RESPONSE += '"%s": "%s",\n' % (
                     config_property, analysis_context.aminer_config.config_properties[config_property])
             else:
                 self.REMOTE_CONTROL_RESPONSE += attr_str % (
@@ -224,8 +224,8 @@ class AMinerRemoteControlExecutionMethods:
             elif isinstance(attr, list):
                 for l in attr:
                     if hasattr(l, '__dict__') and self.isinstance_aminer_class(l):
-                        result += indent + "\"%s\": {\n" % var + indent + '  "' + l.__class__.__name__ + \
-                                  "\": {\n" + self.get_all_vars(l, indent + '    ') + indent + '  ' + "}\n" + indent + '},\n'
+                        result += indent + '"%s": {\n' % var + indent + '  "' + l.__class__.__name__ + \
+                                  '": {\n' + self.get_all_vars(l, indent + '    ') + indent + '  ' + "}\n" + indent + '},\n'
                     else:
                         rep = reformat_attr(attr)
                         result += indent + attr_str % (var, rep)
@@ -465,13 +465,13 @@ def reformat_attr(attr):
         rep = attr.__class__.__name__
 
     if rep.startswith("'") and rep.endswith("'") and rep.count("'") == 2:
-        rep = rep.replace('\'', '"')
+        rep = rep.replace("'", '"')
     elif rep.strip('"').startswith("'") and rep.strip('"').endswith("'") and rep.strip('"').count("'") == 2:
-        rep = rep.strip('"').replace('\'', '"')
+        rep = rep.strip('"').replace("'", '"')
     else:
         rep = rep.strip('"').replace("'", '\\"')
     if not isinstance(attr, (list, dict)):
-        if not rep.startswith("\"") and not rep.isdecimal():
+        if not rep.startswith('"') and not rep.isdecimal():
             try:
                 float(rep)
             except:  # skipcq: FLK-E722
