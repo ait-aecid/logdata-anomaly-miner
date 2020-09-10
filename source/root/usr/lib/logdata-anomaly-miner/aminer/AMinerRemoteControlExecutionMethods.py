@@ -227,47 +227,11 @@ class AMinerRemoteControlExecutionMethods:
                         result += indent + "\"%s\": {\n" % var + indent + '  "' + l.__class__.__name__ + \
                                   "\": {\n" + self.get_all_vars(l, indent + '    ') + indent + '  ' + "}\n" + indent + '},\n'
                     else:
-                        if type(attr) in (int, str, float, bool, type(AMinerConfig), type(None)):
-                            rep = str(attr)
-                        elif isinstance(attr, bytes):
-                            rep = attr.decode()
-                        elif type(attr) in (list, dict, set, tuple):
-                            rep = '"%s"' % repr_recursive(attr)
-                        else:
-                            rep = attr.__class__.__name__
-                        if rep.startswith("'") and rep.endswith("'") and rep.count("'") == 2:
-                            rep = rep.replace('\'', '"')
-                        elif rep.strip('"').startswith("'") and rep.strip('"').endswith("'") and rep.strip('"').count("'") == 2:
-                            rep = rep.strip('"').replace('\'', '"')
-                        else:
-                            rep = rep.strip('"').replace("'", '\\"')
-                        if not rep.startswith("\"") and not rep.isdecimal() and rep != "{}":
-                            try:
-                                float(rep)
-                            except:  # skipcq: FLK-E722
-                                rep = '"%s"' % rep
+                        rep = reformat_attr(attr)
                         result += indent + attr_str % (var, rep)
                         break
             else:
-                if type(attr) in (int, str, float, bool, type(AMinerConfig), type(None)):
-                    rep = str(attr)
-                elif isinstance(attr, bytes):
-                    rep = attr.decode()
-                elif type(attr) in (list, dict, set, tuple):
-                    rep = '"%s"' % repr_recursive(attr)
-                else:
-                    rep = attr.__class__.__name__
-                if rep.startswith("'") and rep.endswith("'") and rep.count("'") == 2:
-                    rep = rep.replace('\'', '"')
-                elif rep.strip('"').startswith("'") and rep.strip('"').endswith("'") and rep.strip('"').count("'") == 2:
-                    rep = rep.strip('"').replace('\'', '"')
-                else:
-                    rep = rep.strip('"').replace("'", '\\"')
-                if not rep.startswith('"') and not rep.isdecimal() and rep != "{}":
-                    try:
-                        float(rep)
-                    except:  # skipcq: FLK-E722
-                        rep = '"%s"' % rep
+                rep = reformat_attr(attr)
                 result += indent + attr_str % (var, rep)
         return result.rstrip(',\n') + '\n'
 
@@ -465,20 +429,51 @@ def repr_recursive(attr):
         rep = str(attr)
     elif type(attr) in (int, str, float):
         rep = attr
-    elif type(attr) in (list, set, tuple, dict):
-        if isinstance(attr, list):
-            for i, a in enumerate(attr):
-                attr[i] = repr_recursive(a)
-            rep = attr
-        elif isinstance(attr, (tuple, set)):
-            attr_list = []
-            for a in attr:
-                attr_list.append(repr_recursive(a))
-            rep = tuple(attr_list)
-        elif isinstance(attr, dict):
-            for key in attr.keys():
-                attr[key] = repr_recursive(key)
-            rep = attr
+    elif isinstance(attr, bytes):
+        rep = attr.decode()
+    elif isinstance(attr, list):
+        for i, a in enumerate(attr):
+            attr[i] = repr_recursive(a)
+        rep = str(attr).replace('\\"', "'").replace("'", '"').replace('"False"', 'false').replace(
+            '"True"', 'true').replace('"None"', 'null')
+    elif isinstance(attr, (tuple, set)):
+        attr_list = []
+        for a in attr:
+            attr_list.append(repr_recursive(a))
+        rep = str(tuple(attr_list)).replace("'", '"').replace('"False"', 'false').replace(
+            '"True"', 'true').replace('"None"', 'null').replace('"', '\\"')
+    elif isinstance(attr, dict):
+        new_attr = {}
+        for key in attr.keys():
+            new_attr[str(key)] = repr_recursive(key).replace('\\"', "'")
+        rep = str(new_attr)
     else:
         rep = attr.__class__.__name__
+    return rep
+
+
+def reformat_attr(attr):
+    if type(attr) in (int, str, float, bool, type(AMinerConfig), type(None)):
+        rep = str(attr)
+    elif isinstance(attr, bytes):
+        rep = attr.decode()
+    elif isinstance(attr, (list, dict)):
+        rep = repr_recursive(attr)
+    elif type(attr) in (set, tuple):
+        rep = repr_recursive(attr)
+    else:
+        rep = attr.__class__.__name__
+
+    if rep.startswith("'") and rep.endswith("'") and rep.count("'") == 2:
+        rep = rep.replace('\'', '"')
+    elif rep.strip('"').startswith("'") and rep.strip('"').endswith("'") and rep.strip('"').count("'") == 2:
+        rep = rep.strip('"').replace('\'', '"')
+    else:
+        rep = rep.strip('"').replace("'", '\\"')
+    if not isinstance(attr, (list, dict)):
+        if not rep.startswith("\"") and not rep.isdecimal():
+            try:
+                float(rep)
+            except:  # skipcq: FLK-E722
+                rep = '"%s"' % rep
     return rep
