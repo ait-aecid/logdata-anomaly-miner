@@ -217,7 +217,7 @@ class AMinerRemoteControlExecutionMethods:
         result = ''
         for var in vars(obj):
             attr = getattr(obj, var, None)
-            if attr is not None and isinstance(attr, set):
+            if attr is not None and isinstance(attr, (tuple, set)):
                 attr = list(attr)
             if attr is not None and hasattr(attr, '__dict__') and self.isinstance_aminer_class(attr):
                 result += indent + '"%s": {\n' % var + self.get_all_vars(attr, indent + '  ') + indent + "},\n"
@@ -425,28 +425,24 @@ class AMinerRemoteControlExecutionMethods:
 def repr_recursive(attr):
     if attr is None:
         return None
-    if type(attr) in (bool, type(AMinerConfig)):
+    if isinstance(attr, (bool, type(AMinerConfig))):
         rep = str(attr)
-    elif type(attr) in (int, str, float):
+    elif isinstance(attr, (int, str, float)):
         rep = attr
     elif isinstance(attr, bytes):
         rep = attr.decode()
-    elif isinstance(attr, list):
+    elif isinstance(attr, (list, tuple, set)):
+        if isinstance(attr, (tuple, set)):
+            attr = list(attr)
         for i, a in enumerate(attr):
             attr[i] = repr_recursive(a)
-        rep = str(attr).replace('\\"', "'").replace("'", '"').replace('"False"', 'false').replace(
+        rep = str(attr).replace('\\"', "'").replace("'[", "[").replace("]'", "]").replace("'", '"').replace('"False"', 'false').replace(
             '"True"', 'true').replace('"None"', 'null')
-    elif isinstance(attr, (tuple, set)):
-        attr_list = []
-        for a in attr:
-            attr_list.append(repr_recursive(a))
-        rep = str(tuple(attr_list)).replace("'", '"').replace('"False"', 'false').replace(
-            '"True"', 'true').replace('"None"', 'null').replace('"', '\\"')
     elif isinstance(attr, dict):
         new_attr = {}
         for key in attr.keys():
             new_attr[str(key)] = repr_recursive(key).replace('\\"', "'")
-        rep = str(new_attr)
+        rep = str(new_attr).replace("'[", "[").replace("]'", "]")
     else:
         rep = attr.__class__.__name__
     return rep
@@ -457,9 +453,7 @@ def reformat_attr(attr):
         rep = str(attr)
     elif isinstance(attr, bytes):
         rep = attr.decode()
-    elif isinstance(attr, (list, dict)):
-        rep = repr_recursive(attr)
-    elif type(attr) in (set, tuple):
+    elif isinstance(attr, (list, dict, set, tuple)):
         rep = repr_recursive(attr)
     else:
         rep = attr.__class__.__name__
@@ -470,7 +464,7 @@ def reformat_attr(attr):
         rep = rep.strip('"').replace("'", '"')
     else:
         rep = rep.strip('"').replace("'", '\\"')
-    if not isinstance(attr, (list, dict)):
+    if not isinstance(attr, (list, dict, tuple, set)):
         if not rep.startswith('"') and not rep.isdecimal():
             try:
                 float(rep)
