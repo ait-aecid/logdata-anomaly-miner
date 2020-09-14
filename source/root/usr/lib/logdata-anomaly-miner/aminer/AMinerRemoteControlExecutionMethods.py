@@ -49,7 +49,7 @@ class AMinerRemoteControlExecutionMethods:
             return
 
         if property_name not in analysis_context.aminer_config.config_properties:
-            self.REMOTE_CONTROL_RESPONSE = "FAILURE: the property '%s' does not exist in the current config!" % property_name
+            self.REMOTE_CONTROL_RESPONSE += "FAILURE: the property '%s' does not exist in the current config!" % property_name
             return
 
         t = type(analysis_context.aminer_config.config_properties[property_name])
@@ -175,10 +175,10 @@ class AMinerRemoteControlExecutionMethods:
 
     def print_attribute_of_registered_analysis_component(self, analysis_context, component_name, attribute):
         if type(component_name) is not str or type(attribute) is not str:
-            self.REMOTE_CONTROL_RESPONSE = "FAILURE: the parameters 'component_name' and 'attribute' must be of type str."
+            self.REMOTE_CONTROL_RESPONSE += "FAILURE: the parameters 'component_name' and 'attribute' must be of type str."
             return
         if analysis_context.get_component_by_name(component_name) is None:
-            self.REMOTE_CONTROL_RESPONSE = "FAILURE: the component '%s' does not exist." % component_name
+            self.REMOTE_CONTROL_RESPONSE += "FAILURE: the component '%s' does not exist." % component_name
             return
         if hasattr(analysis_context.get_component_by_name(component_name), attribute):
             attr = getattr(analysis_context.get_component_by_name(component_name), attribute, None)
@@ -186,18 +186,30 @@ class AMinerRemoteControlExecutionMethods:
                 attr = list(attr)
             if hasattr(attr, '__dict__') and self.isinstance_aminer_class(attr):
                 new_attr = self.get_all_vars(attr, '  ')
-                self.REMOTE_CONTROL_RESPONSE += "%s.%s: %s" % (component_name, attribute, new_attr)
+                if isinstance(new_attr, str):
+                    new_attr = '"%s"' % new_attr
+                self.REMOTE_CONTROL_RESPONSE += '"%s.%s": %s' % (component_name, attribute, new_attr)
             elif isinstance(attr, list):
-                self.REMOTE_CONTROL_RESPONSE += "%s.%s: [" % (component_name, attribute)
+                self.REMOTE_CONTROL_RESPONSE += '"%s.%s": [' % (component_name, attribute)
                 for l in attr:
                     if hasattr(l, '__dict__') and self.isinstance_aminer_class(l):
                         new_attr = "\n[\n  " + l.__class__.__name__ + "  {\n" + self.get_all_vars(l, '  ') + "  }\n]"
                     else:
-                        new_attr = str(l)
+                        if isinstance(l, str):
+                            new_attr = '"%s"' % l
+                        else:
+                            new_attr = str(l)
                     self.REMOTE_CONTROL_RESPONSE += "%s, " % new_attr
+                self.REMOTE_CONTROL_RESPONSE = self.REMOTE_CONTROL_RESPONSE.rstrip(", ")
                 self.REMOTE_CONTROL_RESPONSE += "]"
+            else:
+                if attr is None or isinstance(attr, (str, bool)):
+                    attr = '"%s"' % attr
+                self.REMOTE_CONTROL_RESPONSE += '"%s.%s": %s' % (component_name, attribute, attr)
+            self.REMOTE_CONTROL_RESPONSE = self.REMOTE_CONTROL_RESPONSE.replace('"False"', 'false').replace('"True"', 'true').replace(
+                '"None"', 'null')
         else:
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: the component '%s' does not have an attribute named '%s'" % \
+            self.REMOTE_CONTROL_RESPONSE += "FAILURE: the component '%s' does not have an attribute named '%s'." % \
                                             (component_name, attribute)
 
     def print_current_config(self, analysis_context):
