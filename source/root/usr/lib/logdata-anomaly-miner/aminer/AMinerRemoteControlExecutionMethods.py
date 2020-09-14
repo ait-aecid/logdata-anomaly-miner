@@ -61,6 +61,7 @@ class AMinerRemoteControlExecutionMethods:
         if property_name in [AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.KEY_LOG_SOURCES_LIST]:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: the property '%s' can only be changed at " \
                                             "startup in the AMiner root process!" % property_name
+            return
         elif property_name == AMinerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE:
             result = self.change_config_property_max_memory(analysis_context, value)
         elif property_name == AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE:
