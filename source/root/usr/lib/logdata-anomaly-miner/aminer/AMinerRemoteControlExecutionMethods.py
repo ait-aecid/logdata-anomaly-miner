@@ -177,6 +177,9 @@ class AMinerRemoteControlExecutionMethods:
         if type(component_name) is not str or type(attribute) is not str:
             self.REMOTE_CONTROL_RESPONSE = "FAILURE: the parameters 'component_name' and 'attribute' must be of type str."
             return
+        if analysis_context.get_component_by_name(component_name) is None:
+            self.REMOTE_CONTROL_RESPONSE = "FAILURE: the component '%s' does not exist." % component_name
+            return
         if hasattr(analysis_context.get_component_by_name(component_name), attribute):
             attr = getattr(analysis_context.get_component_by_name(component_name), attribute, None)
             if isinstance(attr, set):
