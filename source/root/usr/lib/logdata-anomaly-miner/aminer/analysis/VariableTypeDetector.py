@@ -306,8 +306,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 },
                 200: {
                     10: {
-                        'uni': 0., 'nor': 0., 'beta1': 0., 'beta2': 0.,
-                        'beta4': 0.
+                        'uni': 0.410835132966, 'nor': 0.414898738295, 'beta1': 0.409362652164, 'beta2': 0.414348695514,
+                        'beta4': 0.415373856218
                     },
                     20: {
                         'uni': 0.295201058546, 'nor': 0.302089827989, 'beta1': 0.293929961808, 'beta2': 0.300712032791,
@@ -322,12 +322,12 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         'beta4': 0.148929976922
                     },
                     150: {
-                        'uni': 0., 'nor': 0., 'beta1': 0., 'beta2': 0.,
-                        'beta4': 0.
+                        'uni': 0.110563850619, 'nor': 0.128436220554, 'beta1': 0.109709133843, 'beta2': 0.125945549651,
+                        'beta4': 0.127627426039
                     },
                     200: {
-                        'uni': 0., 'nor': 0., 'beta1': 0., 'beta2': 0.,
-                        'beta4': 0.
+                        'uni': 0.096008472884, 'nor': 0.116217345787, 'beta1': 0.0950905899576, 'beta2': 0.113333585524,
+                        'beta4': 0.115641208528
                     }
                 }
             }
