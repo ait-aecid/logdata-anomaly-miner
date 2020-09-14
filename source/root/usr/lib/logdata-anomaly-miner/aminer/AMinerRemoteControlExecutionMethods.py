@@ -62,7 +62,7 @@ class AMinerRemoteControlExecutionMethods:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: the property '%s' can only be changed at " \
                                             "startup in the AMiner root process!" % property_name
             return
-        elif property_name == AMinerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE:
+        if property_name == AMinerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE:
             result = self.change_config_property_max_memory(analysis_context, value)
         elif property_name == AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE:
             result = self.change_config_property_max_cpu_percent_usage(value)
@@ -449,6 +449,7 @@ def repr_recursive(attr):
     return rep
 
 
+# skipcq: FLK-D103
 def reformat_attr(attr):
     if type(attr) in (int, str, float, bool, type(AMinerConfig), type(None)):
         rep = str(attr)
