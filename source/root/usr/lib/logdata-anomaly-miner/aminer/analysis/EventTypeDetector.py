@@ -14,12 +14,6 @@ from aminer.input import AtomHandlerInterface
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.util import PersistencyUtil
 
-# ToDo:
-# x) Restructure the TSA part
-# x) Implement the time trigger for the ECD -> Max
-# x) Implement the ANN part
-
-
 class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
     """This class keeps track of the found eventtypes and the values of each variable"""
 
