@@ -148,7 +148,7 @@ class AMinerRemoteControlExecutionMethods:
         else:
             component = analysis_context.get_component_by_name(old_component_name)
             if component is None:
-                self.REMOTE_CONTROL_RESPONSE += "FAILURE: component '%s' does not exist!" % old_component_name
+                self.REMOTE_CONTROL_RESPONSE += "FAILURE: the component '%s' does not exist." % old_component_name
             else:
                 analysis_context.registered_components_by_name[old_component_name] = None
                 analysis_context.registered_components_by_name[new_component_name] = component
