@@ -704,7 +704,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 if ((isinstance(self.num_updates_until_var_reduction, bool) and self.num_updates_until_var_reduction is False) or (
                         self.event_type_detector.num_eventlines[event_index] - self.num_init) /
                         self.num_update >= self.num_updates_until_var_reduction - 1) and (not isinstance(self.num_var_type_considered_ind, bool)) and (
-                        not isinstance(self.num_var_type_hist_ref, bool)) and self.var_type_history_list_reference[event_index] != [] and (
+                        not isinstance(self.num_var_type_hist_ref, bool)) and len(self.var_type_history_list_reference) > event_index and (
+                        self.var_type_history_list_reference[event_index] != []) and (
                         ((self.event_type_detector.num_eventlines[event_index] - self.num_init) / self.num_update
                         - self.num_var_type_hist_ref) % self.num_var_type_considered_ind) == 0:
 
