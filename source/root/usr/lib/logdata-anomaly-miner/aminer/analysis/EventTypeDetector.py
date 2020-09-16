@@ -93,11 +93,6 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, E
     def receive_atom(self, log_atom):
         """Receives an parsed atom and keeps track of the event types and the values of the variables of them"""
 
-        # Output for the 'End'-line # !!!
-        if '/firstmatch0/End' in log_atom.parser_match.get_match_dictionary():
-            self.do_persist()
-            self.failfunction()
-
         # Get the current time
         if self.track_time_for_TSA:
             if log_atom.atom_time != None:
