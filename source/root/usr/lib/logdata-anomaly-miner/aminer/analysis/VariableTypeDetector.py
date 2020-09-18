@@ -362,7 +362,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
 
         # Imports the persistency
-        if (persistence_data is not None):
+        if persistence_data is not None:
             self.load_persistence_data(persistence_data)
 
     def receive_atom(self, log_atom):
@@ -431,8 +431,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         self.next_persist_time = None
 
         if self.save_statistics:
-            PersistencyUtil.store_json(self.statistics_file_name,
-                    [self.failed_indicators_total, self.failed_indicators_values, self.failed_indicators_paths, self.failed_indicators])
+            PersistencyUtil.store_json(self.statistics_file_name, [
+                self.failed_indicators_total, self.failed_indicators_values, self.failed_indicators_paths, self.failed_indicators])
 
     def load_persistence_data(self, persistence_data):
         """Extracts the persistency data and appends various lists to create a consistent state"""
@@ -497,7 +497,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         self.var_type[event_index][var_index] = tmp_var_type[:-1]
                         self.alternative_distribution_types[event_index][var_index] = tmp_var_type[-1]
                         self.bt_results[event_index][var_index] = [1] * self.num_s_ks_bt
-                        if self.var_type[event_index][var_index][0] == 'betam' or  self.var_type[event_index][var_index][0] == 'spec':
+                        if self.var_type[event_index][var_index][0] == 'betam' or self.var_type[event_index][var_index][0] == 'spec':
                             self.s_ks_get_quantiles(event_index, var_index)
 
                     # Initializes the binomialtest for the discrete type
@@ -701,11 +701,11 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             else:
                 if ((isinstance(self.num_updates_until_var_reduction, bool) and self.num_updates_until_var_reduction is False) or (
                         self.event_type_detector.num_eventlines[event_index] - self.num_init) /
-                        self.num_update >= self.num_updates_until_var_reduction - 1) and (not isinstance(self.num_var_type_considered_ind, bool)) and (
-                        not isinstance(self.num_var_type_hist_ref, bool)) and len(self.var_type_history_list_reference) > event_index and (
-                        self.var_type_history_list_reference[event_index] != []) and (
+                        self.num_update >= self.num_updates_until_var_reduction - 1) and (not isinstance(
+                        self.num_var_type_considered_ind, bool)) and (not isinstance(self.num_var_type_hist_ref, bool)) and len(
+                    self.var_type_history_list_reference) > event_index and (self.var_type_history_list_reference[event_index] != []) and (
                         ((self.event_type_detector.num_eventlines[event_index] - self.num_init) / self.num_update
-                        - self.num_var_type_hist_ref) % self.num_var_type_considered_ind) == 0:
+                            - self.num_var_type_hist_ref) % self.num_var_type_considered_ind) == 0:
 
                     # Shorten the var_type_history_list
                     if len(self.var_type_history_list[event_index]) > 0 and len(self.var_type_history_list[event_index][0]) > 0 and len(
@@ -714,7 +714,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         for var_index in range(len(self.var_type_history_list[event_index])):
                             for type_index in range(len(self.var_type_history_list[event_index][var_index])):
                                 # Differentiation between the entries, which are lists (e.g. discrete) and values
-                                if type(self.var_type_history_list[event_index][var_index][type_index][i]) == list:
+                                if type(self.var_type_history_list[event_index][var_index][type_index][i]) is list:
                                     for i in range(len(self.var_type_history_list[event_index][var_index][type_index])):
                                         self.var_type_history_list[event_index][var_index][type_index][i] = \
                                             self.var_type_history_list[event_index][var_index][type_index][i][

@@ -122,10 +122,11 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, E
                     if self.etd_time_trigger[1][indices[i]] == -1 and self.etd_time_trigger[2][indices[i]] == -1:
 
                         # Save the number of occured eventtypes for the initialization of the TSA
-                        if self.num_eventlines_TSA_ref == [] or len(self.num_eventlines_TSA_ref[0]) < self.num_subdivision_waiting_time_for_TSA:
+                        if self.num_eventlines_TSA_ref == [] or len(
+                                self.num_eventlines_TSA_ref[0]) < self.num_subdivision_waiting_time_for_TSA:
 
                             # Initialize the lists of self.num_eventlines_TSA_ref if not already initialized
-                            if self.num_eventlines_TSA_ref == []:
+                            if not self.num_eventlines_TSA_ref:
                                 self.num_eventlines_TSA_ref = [[num] for num in self.num_eventlines]
                             else:
                                 # Expand the lists of self.num_eventlines_TSA_ref
@@ -143,7 +144,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, E
                         # Initialize the trigger for the timewindows
                         else:
                             # Initialize the lists of self.num_eventlines_TSA_ref if not already initialized
-                            if self.num_eventlines_TSA_ref == []:
+                            if not self.num_eventlines_TSA_ref:
                                 self.num_eventlines_TSA_ref = [[num] for num in self.num_eventlines]
                             else:
                                 # Expand the lists of self.num_eventlines_TSA_ref
@@ -154,8 +155,9 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, E
                                     self.num_eventlines_TSA_ref[j].append(self.num_eventlines[j]-sum(self.num_eventlines_TSA_ref[j]))
 
                             # Get the timewindow lengths
-                            time_list = self.following_modules[next(j for j in range(len(self.following_modules)) if 
-                                self.following_modules[j].__class__.__name__ == 'TestDetector')].function_Init(self.num_eventlines_TSA_ref)
+                            time_list = self.following_modules[next(j for j in range(len(
+                                self.following_modules)) if self.following_modules[j].__class__.__name__ == 'TestDetector')].function_Init(
+                                self.num_eventlines_TSA_ref)
                             self.num_eventlines_TSA_ref = copy.copy(self.num_eventlines)
 
                             # Add the new triggers
@@ -166,12 +168,13 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, E
                                     self.etd_time_trigger[2].append(time_list[j])
 
                                 while current_time >= self.etd_time_trigger[0][-1]:
-                                    self.following_modules[next(j for j in range(len(self.following_modules)) if 
-                                        self.following_modules[j].__class__.__name__ == 'TestDetector')].function_Upd(self.etd_time_trigger[1][-1], 
-                                        self.num_eventlines[self.etd_time_trigger[1][-1]]-self.num_eventlines_TSA_ref[self.etd_time_trigger[1][-1]])
+                                    self.following_modules[next(j for j in range(len(
+                                        self.following_modules)) if self.following_modules[j].__class__.__name__ == 'TestDetector')].\
+                                        function_Upd(self.etd_time_trigger[1][-1], self.num_eventlines[self.etd_time_trigger[1][
+                                            -1]]-self.num_eventlines_TSA_ref[self.etd_time_trigger[1][-1]])
                                     self.etd_time_trigger[0][-1] = self.etd_time_trigger[0][-1] + self.etd_time_trigger[2][-1]
-                                    self.num_eventlines_TSA_ref[self.etd_time_trigger[1][-1]] = self.num_eventlines[self.etd_time_trigger[1][
-                                        -1]]
+                                    self.num_eventlines_TSA_ref[self.etd_time_trigger[1][-1]] = self.num_eventlines[self.etd_time_trigger[
+                                        1][-1]]
 
                             # Delete the initialization trigger
                             del self.etd_time_trigger[0][indices[i]]
@@ -181,12 +184,13 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, E
                     # Trigger for an reoccuring time window
                     else:
                         while current_time >= self.etd_time_trigger[0][indices[i]]:
-                            self.following_modules[next(j for j in range(len(self.following_modules)) if 
-                                self.following_modules[j].__class__.__name__ == 'TestDetector')].function_Upd(self.etd_time_trigger[1][indices[i]], 
-                                self.num_eventlines[self.etd_time_trigger[1][indices[i]]]-self.num_eventlines_TSA_ref[self.etd_time_trigger[1][indices[i]]])
+                            self.following_modules[next(j for j in range(len(self.following_modules)) if self.following_modules[
+                                j].__class__.__name__ == 'TestDetector')].function_Upd(self.etd_time_trigger[1][indices[
+                                    i]], self.num_eventlines[self.etd_time_trigger[1][indices[i]]]-self.num_eventlines_TSA_ref[
+                                    self.etd_time_trigger[1][indices[i]]])
                             self.etd_time_trigger[0][indices[i]] += self.etd_time_trigger[2][indices[i]]
-                            self.num_eventlines_TSA_ref[self.etd_time_trigger[1][indices[i]]] = self.num_eventlines[self.etd_time_trigger[1][
-                                indices[i]]]
+                            self.num_eventlines_TSA_ref[self.etd_time_trigger[1][indices[i]]] = self.num_eventlines[self.etd_time_trigger[
+                                1][indices[i]]]
 
         valid_log_atom = False
         if self.path_list:

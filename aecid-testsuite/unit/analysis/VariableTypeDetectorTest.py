@@ -6,7 +6,7 @@ from unit.TestBase import TestBase
 
 import time
 import copy
-import pickle
+import pickle  # skipcq: BAN-B403
 import random
 
 
