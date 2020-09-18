@@ -104,6 +104,8 @@ class EventTypeDetectorTest(TestBase):
         of paths and variable_key_list should not be used."""
         event_type_detector = EventTypeDetector(
             self.aminer_config, [self.stream_printer_event_handler], path_list=['parser/type/path/nametype'])
+        results = [True, False, True, False, True, False, True, True, False, False, True, True, False, True, False, True, False, True,
+                   False, False, True]
         log_atoms = []
         for line in self.log_lines:
             t = time.time()
@@ -112,7 +114,8 @@ class EventTypeDetectorTest(TestBase):
         for i, log_atom in enumerate(log_atoms):
             old_vals = (event_type_detector.num_events, event_type_detector.num_eventlines,
                         event_type_detector.total_records, event_type_detector.longest_path)
-            if output_stream_empty_results[i]:
+            self.assertEqual(event_type_detector.receive_atom(log_atom), not results[i], i)
+            if results[i]:
                 self.assertEqual(old_vals, (
                     event_type_detector.num_events, event_type_detector.num_eventlines,
                     event_type_detector.total_records, event_type_detector.longest_path))
@@ -163,7 +166,7 @@ class EventTypeDetectorTest(TestBase):
         event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         t = time.time()
         val_list = [[[]]]
-        for i in range(1, event_type_detector.options['maxNumVals'] + 1, 1):
+        for i in range(1, event_type_detector.max_num_vals + 1, 1):
             log_atom = LogAtom(str(i).encode(), ParserMatch(MatchElement('path', str(i), i, None)), t, self.__class__.__name__)
             val_list[0][0].append(float(i))
             self.assertTrue(event_type_detector.receive_atom(log_atom))
@@ -172,7 +175,7 @@ class EventTypeDetectorTest(TestBase):
         log_atom = LogAtom(str(i).encode(), ParserMatch(MatchElement('path', str(i), i, None)), t, self.__class__.__name__)
         val_list[0][0].append(float(i))
         self.assertTrue(event_type_detector.receive_atom(log_atom))
-        self.assertEqual(event_type_detector.values, [[val_list[0][0][-(event_type_detector.options['minNumVals']):]]])
+        self.assertEqual(event_type_detector.values, [[val_list[0][0][-event_type_detector.min_num_vals:]]])
 
     def test6persist_and_load_data(self):
         """This unittest checks the functionality of the persistence by persisting and reloading values."""
