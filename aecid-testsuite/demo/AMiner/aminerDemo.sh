@@ -53,7 +53,7 @@ for ((i=0; i<R; i++)); do
 done
 #Comment
 
-#HistogramAnalysis
+#HistogramAnalysis, MatchFilter
 #:<<Comment
 echo "Generating data for the LinearNumericBinDefinition histogram report.."
 startTime=`date +%s`
