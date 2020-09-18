@@ -102,8 +102,8 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, E
             for i in range(len(self.etd_time_trigger[0])):
                 if self.etd_time_trigger[0][i] == -1:
                     for j in range(self.num_subdivision_waiting_time_for_TSA):
-                        self.etd_time_trigger[0].append(current_time + self.waiting_time_for_TSA*(j+1)/
-                            (self.num_subdivision_waiting_time_for_TSA+1))
+                        self.etd_time_trigger[0].append(current_time + self.waiting_time_for_TSA*(j+1)/(
+                                self.num_subdivision_waiting_time_for_TSA+1))
                         self.etd_time_trigger[1].append(-1)
                         self.etd_time_trigger[2].append(-1)
 

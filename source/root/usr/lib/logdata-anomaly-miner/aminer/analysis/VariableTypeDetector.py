@@ -513,7 +513,6 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     else:
                         self.var_type[event_index][var_index] = tmp_var_type
 
-
             # Test only the variables with paths in the path_list
             else:
                 for var_index in self.variable_path_num[event_index]:
@@ -624,7 +623,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     exceeded_thresh = False
                     for type_index in range(1, len(self.var_type_history_list[event_index][var_index])):
                         # Continuous Distribution
-                        if type_index == 6: # continuously distributed variable type
+                        if type_index == 6:  # continuously distributed variable type
                             num_app = len([1 for x in self.var_type_history_list[event_index][var_index][type_index][1] if x != 0])
                             if num_app / self.num_updates_until_var_reduction >= self.var_reduction_thres:
                                 exceeded_thresh = True
@@ -683,18 +682,17 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     for type_index in range(len(self.var_type_history_list[event_index][var_index])):
                         if len(self.var_type_history_list[event_index][var_index][type_index]) >= 1 and isinstance(
                                 self.var_type_history_list[event_index][var_index][type_index][0], list):
-                            if type_index == 6: # continuously distributed variable type
+                            if type_index == 6:  # continuously distributed variable type
                                 self.var_type_history_list_reference[event_index][var_index].append([sum(
                                         self.var_type_history_list[event_index][var_index][type_index][0][-self.num_var_type_hist_ref:]) /
                                         max(len([1 for x in self.var_type_history_list[event_index][var_index][type_index][0][
-                                        -self.num_var_type_hist_ref:] if x != 0]), 1), sum(
+                                            -self.num_var_type_hist_ref:] if x != 0]), 1), sum(
                                         self.var_type_history_list[event_index][var_index][type_index][1][-self.num_var_type_hist_ref:]) /
                                         max(len([1 for x in self.var_type_history_list[event_index][var_index][type_index][1][
-                                        -self.num_var_type_hist_ref:] if x != 0]), 1)])
+                                            -self.num_var_type_hist_ref:] if x != 0]), 1)])
                             else:
-                                self.var_type_history_list_reference[event_index][var_index].append(
-                                        [sum(x[-self.num_var_type_hist_ref:]) for x in
-                                        self.var_type_history_list[event_index][var_index][type_index]])
+                                self.var_type_history_list_reference[event_index][var_index].append([sum(x[
+                                    -self.num_var_type_hist_ref:]) for x in self.var_type_history_list[event_index][var_index][type_index]])
                         else:
                             self.var_type_history_list_reference[event_index][var_index].append(
                                     sum(self.var_type_history_list[event_index][var_index][type_index][-self.num_var_type_hist_ref:]))
@@ -746,11 +744,11 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
                         # Multiply the single values of the indicator with their corresponding weights
                         # Number of the log line which corresponds to the first indicator, which is taken into account
-                        first_line_num = self.event_type_detector.num_eventlines[event_index] - self.num_update * self.num_var_type_considered_ind \
-                            * (self.num_ind_for_weights + self.num_skipped_ind_for_weights)
+                        first_line_num = self.event_type_detector.num_eventlines[event_index] - self.num_update *\
+                            self.num_var_type_considered_ind * (self.num_ind_for_weights + self.num_skipped_ind_for_weights)
                         # Number of the log line which corresponds to the last indicator, which is taken into account
-                        last_line_num = self.event_type_detector.num_eventlines[event_index] - self.num_update * self.num_var_type_considered_ind \
-                            * self.num_skipped_ind_for_weights
+                        last_line_num = self.event_type_detector.num_eventlines[event_index] - self.num_update *\
+                            self.num_var_type_considered_ind * self.num_skipped_ind_for_weights
 
                         for var_index in indices_failed_tests:
                             lower_ind = False  # Index of the lower bound of the considered values of the failed_indicator list
@@ -809,18 +807,18 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         for type_index in range(len(self.var_type_history_list[event_index][var_index])):
                             if len(self.var_type_history_list[event_index][var_index][type_index]) >= 1 and isinstance(
                                     self.var_type_history_list[event_index][var_index][type_index][0], list):
-                                if type_index == 6: # continuously distributed variable type
+                                if type_index == 6:  # continuously distributed variable type
                                     self.var_type_history_list_reference[event_index][var_index].append([sum(
-                                            self.var_type_history_list[event_index][var_index][type_index][0][-self.num_var_type_hist_ref:]) /
-                                            max(len([1 for x in self.var_type_history_list[event_index][var_index][type_index][0][
-                                            -self.num_var_type_hist_ref:] if x != 0]), 1),
-                                            sum(self.var_type_history_list[event_index][var_index][type_index][1][-self.num_var_type_hist_ref:]) /
-                                            max(len([1 for x in self.var_type_history_list[event_index][var_index][type_index][1][
-                                            -self.num_var_type_hist_ref:] if x != 0]), 1)])
+                                            self.var_type_history_list[event_index][var_index][type_index][0][
+                                                -self.num_var_type_hist_ref:]) / max(len([1 for x in self.var_type_history_list[
+                                                    event_index][var_index][type_index][0][-self.num_var_type_hist_ref:] if x != 0]), 1),
+                                            sum(self.var_type_history_list[event_index][var_index][type_index][1][
+                                                -self.num_var_type_hist_ref:]) / max(len([1 for x in self.var_type_history_list[
+                                                    event_index][var_index][type_index][1][-self.num_var_type_hist_ref:] if x != 0]), 1)])
                                 else:
                                     self.var_type_history_list_reference[event_index][var_index].append(
                                             [sum(x[-self.num_var_type_hist_ref:]) for x in
-                                            self.var_type_history_list[event_index][var_index][type_index]])
+                                                self.var_type_history_list[event_index][var_index][type_index]])
                             else:
                                 self.var_type_history_list_reference[event_index][var_index].append(sum(
                                         self.var_type_history_list[event_index][var_index][type_index][-self.num_var_type_hist_ref:]))
@@ -1697,33 +1695,30 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     break
                 # Differentiation of the entries, which are lists (e.g. discrete, continuously distributed)
                 if type_index in [2, 6]:
-                    if type_index == 6: # continuously distributed variable type
+                    if type_index == 6:  # continuously distributed variable type
                         if self.var_type_history_list_reference[event_index][var_index][type_index] == 0:
                             diff_list.append(len([
                                     1 for x in self.var_type_history_list[event_index][var_index][type_index][1][
-                                    -self.num_var_type_considered_ind:] if x != 0]) / len_cur)
+                                        -self.num_var_type_considered_ind:] if x != 0]) / len_cur)
                         else:
                             var_type_ev = sum(self.var_type_history_list[event_index][var_index][type_index][0][
-                                    -self.num_var_type_considered_ind:]) / max(len(
-                                    [1 for x in self.var_type_history_list[event_index][var_index][type_index][0][
-                                        -self.num_var_type_considered_ind:] if x != 0]), 1)
+                                    -self.num_var_type_considered_ind:]) / max(len([
+                                        1 for x in self.var_type_history_list[event_index][var_index][type_index][0][
+                                            -self.num_var_type_considered_ind:] if x != 0]), 1)
                             var_type_sd = sum(self.var_type_history_list[event_index][var_index][type_index][1][
-                                    -self.num_var_type_considered_ind:]) / max(len(
-                                    [1 for x in self.var_type_history_list[event_index][var_index][type_index][1][
-                                    -self.num_var_type_considered_ind:] if x != 0]), 1)
+                                    -self.num_var_type_considered_ind:]) / max(len([
+                                        1 for x in self.var_type_history_list[event_index][var_index][type_index][1][
+                                            -self.num_var_type_considered_ind:] if x != 0]), 1)
 
                             # Formula to include the impact of the mean, standard deviation and changes of the distribution
                             if max(self.var_type_history_list_reference[event_index][var_index][type_index][1], var_type_sd) > 0:
-                                diff_list.append((
-                                    min(1, abs(
-                                            (self.var_type_history_list_reference[event_index][var_index][type_index][0] - var_type_ev) / max(
-                                            abs(self.var_type_history_list_reference[event_index][var_index][type_index][0]),
-                                            abs(var_type_ev))) / 3 + abs(
-                                            (self.var_type_history_list_reference[event_index][var_index][type_index][1] - var_type_sd) / max(
-                                            abs(self.var_type_history_list_reference[event_index][var_index][type_index][1]),
-                                            abs(var_type_sd))) / 3 + 1 / 3) * len([
-                                            x for x in self.var_type_history_list[event_index][var_index][type_index][1][
-                                            -self.num_var_type_considered_ind:] if x != 0])) / len_cur)
+                                diff_list.append((min(1, abs((self.var_type_history_list_reference[event_index][var_index][
+                                    type_index][0] - var_type_ev) / max(abs(self.var_type_history_list_reference[event_index][var_index][
+                                        type_index][0]), abs(var_type_ev))) / 3 + abs((self.var_type_history_list_reference[event_index][
+                                            var_index][type_index][1] - var_type_sd) / max(abs(self.var_type_history_list_reference[
+                                                event_index][var_index][type_index][1]), abs(var_type_sd))) / 3 + 1 / 3) * len([
+                                                    x for x in self.var_type_history_list[event_index][var_index][type_index][1][
+                                                        -self.num_var_type_considered_ind:] if x != 0])) / len_cur)
                             else:
                                 diff_list.append(0)
                     else:
