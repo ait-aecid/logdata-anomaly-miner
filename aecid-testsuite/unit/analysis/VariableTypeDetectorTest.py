@@ -4,7 +4,6 @@ from aminer.input import LogAtom
 from aminer.parsing import ParserMatch, MatchElement
 from unit.TestBase import TestBase
 
-from collections import Counter
 import time
 import copy
 import pickle

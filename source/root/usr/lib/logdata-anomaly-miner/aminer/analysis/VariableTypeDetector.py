@@ -17,14 +17,14 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
     """This class tests each variable of the event_types for the implemented variable types. This module needs to run after the
     EventTypeDetector is initialized"""
 
-    def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id='Default', path_list=None,
-        ks_alpha=0.05, s_ks_alpha=0.05, s_ks_bt_alpha=0.05, d_alpha=0.1, d_bt_alpha=0.1, div_thres=0.3, sim_thres=0.1, indicator_thres=0.4,
-        num_init=100, num_update=50, num_update_unq=200, num_s_ks_values=50, num_s_ks_bt=30, num_d_bt=30, num_pause_discrete=5,
-        num_pause_others=2, test_ks_int=True, update_var_type_bool=True, num_stop_update=False,
-        silence_output_without_confidence=False, silence_output_except_indicator=True, num_var_type_hist_ref=10, num_update_var_type_hist_ref=10,
-        num_var_type_considered_ind=10, num_stat_stop_update=200, num_updates_until_var_reduction=20, var_reduction_thres=0.6, num_skipped_ind_for_weights=1,
-        num_ind_for_weights=100, used_multinomial_test='Chi', use_empiric_distr=True, save_statistics=True
-        ):
+    def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id='Default', path_list=None, ks_alpha=0.05,
+                 s_ks_alpha=0.05, s_ks_bt_alpha=0.05, d_alpha=0.1, d_bt_alpha=0.1, div_thres=0.3, sim_thres=0.1, indicator_thres=0.4,
+                 num_init=100, num_update=50, num_update_unq=200, num_s_ks_values=50, num_s_ks_bt=30, num_d_bt=30, num_pause_discrete=5,
+                 num_pause_others=2, test_ks_int=True, update_var_type_bool=True, num_stop_update=False,
+                 silence_output_without_confidence=False, silence_output_except_indicator=True, num_var_type_hist_ref=10,
+                 num_update_var_type_hist_ref=10,  num_var_type_considered_ind=10, num_stat_stop_update=200,
+                 num_updates_until_var_reduction=20, var_reduction_thres=0.6, num_skipped_ind_for_weights=1, num_ind_for_weights=100,
+                 used_multinomial_test='Chi', use_empiric_distr=True, save_statistics=True):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
 
         self.next_persist_time = None
@@ -1427,7 +1427,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             return [True, 0.0]
 
         # scipy KS-test for normal distribution
-        elif self.var_type[event_index][var_index][0] == 'nor':
+        if self.var_type[event_index][var_index][0] == 'nor':
             max_val = kstest(self.event_type_detector.values[event_index][var_index][-self.num_s_ks_values:], 'norm', args=(
                 self.var_type[event_index][var_index][1], self.var_type[event_index][var_index][2]))[0]
             if first_distr:
@@ -1439,7 +1439,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             return [True, 0.0]
 
         # scipy KS-test for beta distributions
-        elif self.var_type[event_index][var_index][0] == 'beta':
+        if self.var_type[event_index][var_index][0] == 'beta':
             if self.var_type[event_index][var_index][5] == 1:
                 max_val = kstest(self.event_type_detector.values[event_index][var_index][-self.num_s_ks_values:], 'beta', args=(
                     0.5, 0.5, self.var_type[event_index][var_index][3], self.var_type[event_index][var_index][4] - self.var_type[
@@ -1755,7 +1755,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 indicator_list.append(sum(diff_list))
         return indicator_list
 
-    def bt_min_successes(self, num_bt, p, alpha):
+    def bt_min_successes(self, num_bt, p, alpha):  # skipcq: PYL-R0201
         """Calculates the minimal number of successes for the BT with significance alpha, where p is the probability of success and num_bt
         is the number of observed tests"""
 
