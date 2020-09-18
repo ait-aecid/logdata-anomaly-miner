@@ -179,7 +179,6 @@ class EventTypeDetectorTest(TestBase):
 
     def test6persist_and_load_data(self):
         """This unittest checks the functionality of the persistence by persisting and reloading values."""
-        description = 'test6eventTypeDetectorTest'
         event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         t = time.time()
         log_atom = LogAtom(b'22.2', ParserMatch(MatchElement('path', '22.2', 22.2, None)), t, self.__class__.__name__)

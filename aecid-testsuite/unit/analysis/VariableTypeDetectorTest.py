@@ -359,7 +359,7 @@ class VariableTypeDetectorTest(TestBase):
             self.assertTrue(etd.receive_atom(log_atom))
             vtd.receive_atom(log_atom)
         result = vtd.var_type[0][0]
-        posdistr = vtd.possible_var_type[0][0]
+        posdistr = vtd.alternative_distribution_types[0][0]
         self.assertTrue(result[0] == 'uni' or 'uni' in [distr[0] for distr in posdistr])
 
         # uni -> others
@@ -432,7 +432,7 @@ class VariableTypeDetectorTest(TestBase):
             self.assertTrue(etd.receive_atom(log_atom))
             vtd.receive_atom(log_atom)
         result = vtd.var_type[0][0]
-        posdistr = vtd.possible_var_type[0][0]
+        posdistr = vtd.alternative_distribution_types[0][0]
         self.assertTrue(result[0] == 'nor' or 'nor' in [distr[0] for distr in posdistr])
 
         # nor -> beta1
@@ -441,7 +441,7 @@ class VariableTypeDetectorTest(TestBase):
             self.assertTrue(etd.receive_atom(log_atom))
             vtd.receive_atom(log_atom)
         result = vtd.var_type[0][0]
-        posdistr = vtd.possible_var_type[0][0]
+        posdistr = vtd.alternative_distribution_types[0][0]
         self.assertTrue((result[0] == 'beta' and result[-1] == 1) or 'beta1' in [distr[0]+str(distr[-1]) for distr in posdistr])
 
         # reset all
@@ -626,7 +626,7 @@ class VariableTypeDetectorTest(TestBase):
                         result_list.append(vtd.s_ks_test(0, 0, True)[0])
 
                     # Test if the result list is correct
-                    self.assertTrue(result_list == beta2_result_shapes)
+                    self.assertTrue(result_list == beta2_result_shapes, "%s\n%s" % (result_list, beta2_result_shapes))
 
                     result_list = []  # List of the results of the single tests
                     for i in range(iterations):
