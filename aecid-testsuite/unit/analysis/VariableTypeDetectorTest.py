@@ -81,8 +81,8 @@ class VariableTypeDetectorTest(TestBase):
         for dataset_size in dataset_sizes:
             for significance_niveau in significance_niveaus:
                 etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-                vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, options={
-                    'numMinAppearance': dataset_size, 'divThres': 0.5, 'testInt': True, 'simThres': 0.3, 'KS_Alpha': significance_niveau})
+                vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=dataset_size,
+                                           div_thres=0.5, test_ks_int=True, sim_thres=0.3, ks_alpha=significance_niveau)
 
                 result_list = []  # List of the results of the single tests
                 for i in range(iterations):
@@ -183,7 +183,7 @@ class VariableTypeDetectorTest(TestBase):
     def test4detect_var_type(self):
         """This unittest tests possible scenarios of the detect_var_type method."""
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, options={'numMinAppearance': 100})
+        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=100)
         t = time.time()
         # test the 'static' path of detect_var_type
         stat_data = b'5.3.0-55-generic'
@@ -196,7 +196,7 @@ class VariableTypeDetectorTest(TestBase):
 
         # reset etd and vtd for clear results.
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, options={'numMinAppearance': 100})
+        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=100)
 
         # test ascending with float values
         for i in range(100):
@@ -208,7 +208,7 @@ class VariableTypeDetectorTest(TestBase):
 
         # reset etd and vtd for clear results.
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, options={'numMinAppearance': 100})
+        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=100)
 
         # test ascending with integer values
         for i in range(100):
@@ -220,7 +220,7 @@ class VariableTypeDetectorTest(TestBase):
 
         # reset etd and vtd for clear results.
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, options={'numMinAppearance': 100})
+        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=100)
 
         # test descending with float values
         for i in range(100, 0, -1):
@@ -232,7 +232,7 @@ class VariableTypeDetectorTest(TestBase):
 
         # reset etd and vtd for clear results.
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, options={'numMinAppearance': 100})
+        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=100)
 
         # test descending with integer values
         for i in range(100, 0, -1):
@@ -244,10 +244,10 @@ class VariableTypeDetectorTest(TestBase):
 
         # reset etd and vtd for clear results.
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, options={
-            'numMinAppearance': 100, 'divThres': 0.3, 'testInt': True})
+        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=100, div_thres=0.3,
+                                   test_ks_int=True)
 
-        # test 'numMinAppearance' and 'divThres' options
+        # test 'num_init' and 'div_thres'
         # prevent results from becoming asc or desc
         stat_data = bytes(str(99), 'utf-8')
         log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
@@ -263,20 +263,20 @@ class VariableTypeDetectorTest(TestBase):
         self.assertNotEqual(result[0] == 'uni' or 'uni' in [distr[0] for distr in result[-1]], result)
 
         # test 'divThres' option for the continuous distribution
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, options={
-            'numMinAppearance': 100, 'divThres': 1.0, 'testInt': True})
+        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=100, div_thres=1.0,
+                                   test_ks_int=True)
         result = vtd.detect_var_type(0, 0)
         self.assertEqual(['unq', values], result)
 
         # test 'testInt' option for the continuous distribution
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, options={
-            'numMinAppearance': 100, 'divThres': 0.3, 'testInt': False})
+        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=100, div_thres=0.3,
+                                   test_ks_int=False)
         result = vtd.detect_var_type(0, 0)
         self.assertEqual(['unq', values], result)
 
         # test 'simThres' option to result in 'others'
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, options={
-            'numMinAppearance': 100, 'divThres': 0.5, 'testInt': False, 'simThres': 0.5})
+        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=100, div_thres=0.5,
+                                   test_ks_int=False, sim_thres=0.5)
         values = []
         for i in range(100):
             stat_data = bytes(str((i % 50) * 0.1), 'utf-8')
@@ -288,8 +288,8 @@ class VariableTypeDetectorTest(TestBase):
         self.assertEqual(['others', 0], result)
 
         # test discrete result
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, options={
-            'numMinAppearance': 100, 'divThres': 0.5, 'testInt': False, 'simThres': 0.3})
+        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=100, div_thres=0.5,
+                                   test_ks_int=False, sim_thres=0.3)
         values = []
         for i in range(100):
             stat_data = bytes(str((i % 50) * 0.1), 'utf-8')
@@ -334,8 +334,8 @@ class VariableTypeDetectorTest(TestBase):
             beta1_data_list = pickle.load(f)  # skipcq: BAN-B301
 
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, options={
-            'numMinAppearance': 100, 'numUpdate': 50, 'simThres': 0.3, 'divThres': 0.8, 'numPauseOthers': 0})
+        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=100, num_update=50, div_thres=0.8,
+                                   sim_thres=0.3, num_pause_others=0)
         t = time.time()
         stat_data = b'True'
         log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
@@ -382,8 +382,8 @@ class VariableTypeDetectorTest(TestBase):
 
         # reset all
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, options={
-            'numMinAppearance': 100, 'numUpdate': 50, 'simThres': 0.3, 'divThres': 0.3, 'numPauseOthers': 0})
+        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=100, num_update=50, div_thres=0.3,
+                                   sim_thres=0.3, num_pause_others=0)
         t = time.time()
         stat_data = b'True'
         log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
@@ -414,8 +414,8 @@ class VariableTypeDetectorTest(TestBase):
 
         # reset all
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, options={
-            'numMinAppearance': 100, 'numUpdate': 50, 'simThres': 0.3, 'divThres': 0.3, 'numPauseOthers': 0})
+        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=100, num_update=50, div_thres=0.3,
+                                   sim_thres=0.3, num_pause_others=0)
         t = time.time()
         stat_data = b'True'
         log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
@@ -446,8 +446,8 @@ class VariableTypeDetectorTest(TestBase):
 
         # reset all
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, options={
-            'numMinAppearance': 100, 'numUpdate': 50, 'simThres': 0.3, 'divThres': 0.3, 'numPauseOthers': 0})
+        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=100, num_update=50, div_thres=0.3,
+                                   sim_thres=0.3, num_pause_others=0)
         t = time.time()
         stat_data = b'True'
         log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
@@ -459,7 +459,7 @@ class VariableTypeDetectorTest(TestBase):
         self.assertEqual(['stat', [stat_data.decode()], True], result)
 
         # static -> unq
-        vtd.options['testInt'] = False
+        vtd.test_ks_int = False
         unq_data_list = [bytes(str(i), 'utf-8') for i in range(100)]
         random.shuffle(unq_data_list)
         for unq_data in unq_data_list:
@@ -471,8 +471,8 @@ class VariableTypeDetectorTest(TestBase):
 
     def run_update_data(self, data_list):
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, options={
-            'numMinAppearance': 100, 'sKS_NumValues': 50, 'numUpdate': 50})
+        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=100, num_update=50,
+                                   num_s_ks_values=50)
         t = time.time()
         # initialize vtd buckets
         for i in range(100):
@@ -486,7 +486,7 @@ class VariableTypeDetectorTest(TestBase):
             log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
             self.assertTrue(etd.receive_atom(log_atom))
             vtd.receive_atom(log_atom)
-            if i % (vtd.options['numUpdate']) == 0 and i != 0:
+            if i % vtd.num_update == 0 and i != 0:
                 if vtd.var_type[0][0] != ['others', 0] and vtd.bucket_num != [[[]]]:
                     self.assertNotEqual(vtd.bucket_num, old_bucket_num)
                     # missing tests for the correct calculation of the bucket_num's
@@ -529,8 +529,8 @@ class VariableTypeDetectorTest(TestBase):
             for dataset_size_upd in dataset_sizes_upd:
                 for significance_niveau in significance_niveaus:
                     etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-                    vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, options={
-                        'numMinAppearance': dataset_size_ini, 'numUpdate': dataset_sizes_upd, 'KS_Alpha': significance_niveau})
+                    vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=dataset_size_ini,
+                                               num_update=dataset_size_upd, ks_alpha=significance_niveau)
 
                     result_list = []  # List of the results of the single tests
                     for i in range(iterations):

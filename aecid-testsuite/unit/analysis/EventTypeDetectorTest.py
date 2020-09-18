@@ -89,12 +89,7 @@ class EventTypeDetectorTest(TestBase):
     def test1receive_atoms_with_default_values(self):
         """In this test case multiple log_atoms are received with default values of the EventTypeDetector. path_list is empty and all
         paths are learned dynamically in variable_key_list."""
-        description = 'test1eventTypeDetectorTest'
-        event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], options={
-            'generateSimpleOutput': True, 'outputAfterNumberOfLines': 1}, output_log_line=False)
-        self.analysis_context.register_component(event_type_detector, description)
-        output_stream_empty_results = [False, False, False, False, False, False, False, False, False, False, False, False, False, False,
-                                       False, False, False, False, False, False, False]
+        event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         log_atoms = []
         for line in self.log_lines:
             t = time.time()
@@ -102,20 +97,13 @@ class EventTypeDetectorTest(TestBase):
                 LogAtom(line, ParserMatch(self.parsing_model.get_match_element('parser', MatchContext(line))), t, self.__class__.__name__))
         for i, log_atom in enumerate(log_atoms):
             self.assertTrue(event_type_detector.receive_atom(log_atom))
-            self.assertEqual(self.output_stream.getvalue() == "", output_stream_empty_results[i], log_atom.raw_data)
             self.assertEqual(event_type_detector.total_records, i + 1)
-            self.reset_output_stream()
 
     def test2receive_atoms_with_defined_path_list(self):
         """In this test case multiple log_atoms are received with default values of the EventTypeDetector. path_list is set to a static list
         of paths and variable_key_list should not be used."""
-        description = 'test2eventTypeDetectorTest'
         event_type_detector = EventTypeDetector(
-            self.aminer_config, [self.stream_printer_event_handler], options={'generateSimpleOutput': True, 'outputAfterNumberOfLines': 1},
-            path_list=['parser/type/path/nametype'], output_log_line=True)
-        self.analysis_context.register_component(event_type_detector, description)
-        output_stream_empty_results = [True, False, True, False, True, False, True, True, False, False, True, True, False, True, False,
-                                       True, False, True, False, False, True]
+            self.aminer_config, [self.stream_printer_event_handler], path_list=['parser/type/path/nametype'])
         log_atoms = []
         for line in self.log_lines:
             t = time.time()
@@ -124,20 +112,14 @@ class EventTypeDetectorTest(TestBase):
         for i, log_atom in enumerate(log_atoms):
             old_vals = (event_type_detector.num_events, event_type_detector.num_eventlines,
                         event_type_detector.total_records, event_type_detector.longest_path)
-            self.assertEqual(event_type_detector.receive_atom(log_atom), not output_stream_empty_results[i], i)
             if output_stream_empty_results[i]:
                 self.assertEqual(old_vals, (
                     event_type_detector.num_events, event_type_detector.num_eventlines,
                     event_type_detector.total_records, event_type_detector.longest_path))
-            self.assertEqual(self.output_stream.getvalue() == "", output_stream_empty_results[i], log_atom.raw_data)
-            self.reset_output_stream()
 
     def test3append_values_float(self):
         """This unittest checks the append_values method with raw_match_object being a float value."""
-        description = 'test3eventTypeDetectorTest'
-        event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler],
-                                                options={'generateSimpleOutput': True, 'outputAfterNumberOfLines': 1}, output_log_line=True)
-        self.analysis_context.register_component(event_type_detector, description)
+        event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         # initialize all values.
         t = time.time()
         log_atom = LogAtom(b'22.2', ParserMatch(MatchElement('path', '22.2', 22.2, None)), t, self.__class__.__name__)
@@ -160,10 +142,7 @@ class EventTypeDetectorTest(TestBase):
     def test4append_values_bytestring(self):
         """This unittest checks the append_values method with raw_match_object being a bytestring. This should trigger a ValueError and
         append the match_string."""
-        description = 'test4eventTypeDetectorTest'
-        event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler],
-                                                options={'generateSimpleOutput': True, 'outputAfterNumberOfLines': 1}, output_log_line=True)
-        self.analysis_context.register_component(event_type_detector, description)
+        event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         # initialize all values.
         t = time.time()
         log_atom = LogAtom(b'This is a string', ParserMatch(
@@ -181,10 +160,7 @@ class EventTypeDetectorTest(TestBase):
 
     def test5check_value_reduction(self):
         """This unittest checks the functionality of reducing the values when the maxNumVals threshold is reached."""
-        description = 'test5eventTypeDetectorTest'
-        event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler],
-                                                options={'generateSimpleOutput': True, 'outputAfterNumberOfLines': 1}, output_log_line=True)
-        self.analysis_context.register_component(event_type_detector, description)
+        event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         t = time.time()
         val_list = [[[]]]
         for i in range(1, event_type_detector.options['maxNumVals'] + 1, 1):
@@ -201,15 +177,12 @@ class EventTypeDetectorTest(TestBase):
     def test6persist_and_load_data(self):
         """This unittest checks the functionality of the persistence by persisting and reloading values."""
         description = 'test6eventTypeDetectorTest'
-        event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], options={
-            'generateSimpleOutput': True, 'loadPersistenceData': False, 'writePersistenceData': True}, output_log_line=True)
-        self.analysis_context.register_component(event_type_detector, description)
+        event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         t = time.time()
         log_atom = LogAtom(b'22.2', ParserMatch(MatchElement('path', '22.2', 22.2, None)), t, self.__class__.__name__)
         event_type_detector.receive_atom(log_atom)
         event_type_detector.do_persist()
-        event_type_detector_loaded = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], options={
-            'generateSimpleOutput': True, 'loadPersistenceData': True, 'writePersistenceData': True}, output_log_line=True)
+        event_type_detector_loaded = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         self.assertEqual(event_type_detector.variable_key_list, event_type_detector_loaded.variable_key_list)
         self.assertEqual(event_type_detector.values, event_type_detector_loaded.values)
         self.assertEqual(event_type_detector.longest_path, event_type_detector_loaded.longest_path)
