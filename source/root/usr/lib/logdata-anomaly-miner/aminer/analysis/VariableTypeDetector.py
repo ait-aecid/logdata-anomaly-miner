@@ -1077,7 +1077,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 if len(self.alternative_distribution_types[event_index][var_index]) != 0:  # There is at least one alternative distribution
                     # Initializes the distributionvalues and bucketnumbers
                     self.var_type[event_index][var_index] = self.alternative_distribution_types[event_index][var_index][0]
-                    self.alternative_distribution_types[event_index][var_index] = self.alternative_distribution_types[event_index][var_index][1:]
+                    self.alternative_distribution_types[event_index][var_index] = self.alternative_distribution_types[event_index][
+                        var_index][1:]
                     self.bt_results[event_index][var_index] = [1] * self.num_s_ks_bt
                     if self.var_type[event_index][var_index][0] == 'betam' or self.var_type[event_index][var_index][0] == 'spec':
                         self.s_ks_get_quantiles(event_index, var_index)
@@ -1737,12 +1738,12 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
                 else:
                     if self.var_type_history_list_reference[event_index][var_index][type_index] == 0:
-                        diff_list.append(sum(
-                                self.var_type_history_list[event_index][var_index][type_index][-self.num_var_type_considered_ind:]) / len_cur)
+                        diff_list.append(sum(self.var_type_history_list[event_index][var_index][type_index][
+                            -self.num_var_type_considered_ind:]) / len_cur)
                     else:
-                        diff_list.append(max(0, (sum(
-                                self.var_type_history_list[event_index][var_index][type_index][-self.num_var_type_considered_ind:]) / len_cur -
-                                self.var_type_history_list_reference[event_index][var_index][type_index] / len_ref)) / 2)
+                        diff_list.append(max(0, (sum(self.var_type_history_list[event_index][var_index][type_index][
+                            -self.num_var_type_considered_ind:]) / len_cur - self.var_type_history_list_reference[event_index][var_index][
+                                type_index] / len_ref)) / 2)
 
             if len(diff_list) == 0:
                 indicator_list.append(0)
