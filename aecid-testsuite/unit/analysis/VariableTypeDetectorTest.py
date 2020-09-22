@@ -333,21 +333,24 @@ class VariableTypeDetectorTest(TestBase):
         with open('unit/data/vtd_data/beta1_data_test6', 'rb') as f:
             beta1_data_list = pickle.load(f)  # skipcq: BAN-B301
 
+        init = 100
+        update = 50
+
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=100, num_update=50, div_thres=0.8,
-                                   sim_thres=0.3, num_pause_others=0)
+        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=init, num_update=update,
+                                   div_thres=0.8, sim_thres=0.3, num_pause_others=0)
         t = time.time()
         stat_data = b'True'
         log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
         # initialize data
-        for i in range(100):
+        for i in range(init):
             self.assertTrue(etd.receive_atom(log_atom))
             vtd.receive_atom(log_atom)
         result = vtd.var_type[0][0]
         self.assertEqual(['stat', [stat_data.decode()], True], result)
 
         # static -> static
-        for i in range(50):
+        for i in range(update):
             self.assertTrue(etd.receive_atom(log_atom))
             vtd.receive_atom(log_atom)
         result = vtd.var_type[0][0]
@@ -363,7 +366,7 @@ class VariableTypeDetectorTest(TestBase):
         self.assertTrue(result[0] == 'uni' or 'uni' in [distr[0] for distr in posdistr])
 
         # uni -> others
-        for i in range(50):
+        for i in range(update):
             stat_data = bytes(str((i % 75) * 0.1), 'utf-8')
             log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
             self.assertTrue(etd.receive_atom(log_atom))
@@ -372,7 +375,7 @@ class VariableTypeDetectorTest(TestBase):
         self.assertEqual(['others', 0], result)
 
         # others -> d
-        for i in range(50):
+        for i in range(update):
             stat_data = bytes(str((i % 10) * 0.1), 'utf-8')
             log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
             self.assertTrue(etd.receive_atom(log_atom))
@@ -382,20 +385,34 @@ class VariableTypeDetectorTest(TestBase):
 
         # reset all
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=100, num_update=50, div_thres=0.3,
-                                   sim_thres=0.3, num_pause_others=0)
+        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=init, num_update=update,
+                                   div_thres=0.3, sim_thres=0.3, num_pause_others=0)
+
+        # initialize with d
+        for i in range(init):
+            stat_data = bytes(str((i % 10) * 0.1), 'utf-8')
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            self.assertTrue(etd.receive_atom(log_atom))
+            vtd.receive_atom(log_atom)
+        result = vtd.var_type[0][0]
+        self.assertEqual('d', result[0])
+
+        # reset all
+        etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
+        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=init, num_update=update,
+                                   div_thres=0.3, sim_thres=0.3, num_pause_others=0)
         t = time.time()
         stat_data = b'True'
         log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
         # initialize data
-        for i in range(100):
+        for i in range(init):
             self.assertTrue(etd.receive_atom(log_atom))
             vtd.receive_atom(log_atom)
         result = vtd.var_type[0][0]
         self.assertEqual(['stat', [stat_data.decode()], True], result)
 
         # static -> asc
-        for i in range(100):
+        for i in range(init):
             stat_data = bytes(str(i * 0.1), 'utf-8')
             log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
             self.assertTrue(etd.receive_atom(log_atom))
@@ -404,7 +421,7 @@ class VariableTypeDetectorTest(TestBase):
         self.assertEqual(['asc', 'float'], result)
 
         # asc -> desc
-        for i in range(100, 0, -1):
+        for i in range(init, 0, -1):
             stat_data = bytes(str(i * 0.1), 'utf-8')
             log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
             self.assertTrue(etd.receive_atom(log_atom))
@@ -420,7 +437,7 @@ class VariableTypeDetectorTest(TestBase):
         stat_data = b'True'
         log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
         # initialize data
-        for i in range(100):
+        for i in range(init):
             self.assertTrue(etd.receive_atom(log_atom))
             vtd.receive_atom(log_atom)
         result = vtd.var_type[0][0]
@@ -452,7 +469,7 @@ class VariableTypeDetectorTest(TestBase):
         stat_data = b'True'
         log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
         # initialize data
-        for i in range(100):
+        for i in range(init):
             self.assertTrue(etd.receive_atom(log_atom))
             vtd.receive_atom(log_atom)
         result = vtd.var_type[0][0]
@@ -460,7 +477,7 @@ class VariableTypeDetectorTest(TestBase):
 
         # static -> unq
         vtd.test_ks_int = False
-        unq_data_list = [bytes(str(i), 'utf-8') for i in range(100)]
+        unq_data_list = [bytes(str(i), 'utf-8') for i in range(init)]
         random.shuffle(unq_data_list)
         for unq_data in unq_data_list:
             log_atom = LogAtom(unq_data, ParserMatch(MatchElement('', unq_data, unq_data, None)), t, self.__class__.__name__)
@@ -498,8 +515,7 @@ class VariableTypeDetectorTest(TestBase):
 
     def test7update_continuous_VT_random_data(self):
         """This unittest tests the s_ks_test method. It uses randomised datasets, which can be printed in the terminal.
-        Every distribution has generated 30*300 Datasets and var_ev = 0, var_var = 1. Data was generated with following methods:
-        ..."""
+        Every distribution has generated 30*300 Datasets and var_ev = 0, var_var = 1."""
         # Number of execution of the tested function
         iterations = 20
         # Size of the initial datasample
