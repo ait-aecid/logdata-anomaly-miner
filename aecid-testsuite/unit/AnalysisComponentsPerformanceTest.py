@@ -23,7 +23,7 @@ import random
 from time import process_time
 from _io import StringIO
 import timeit
-import pickle
+import pickle  # skipcq: BAN-B403
 
 
 class AnalysisComponentsPerformanceTest(TestBase):
@@ -906,19 +906,19 @@ class AnalysisComponentsPerformanceTest(TestBase):
         with open('unit/data/vtd_data/beta1_data_test6', 'rb') as f:
             beta1_data_list = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/uni_data_test7', 'rb') as f:
-            [uni_data_list_ini, uni_data_list_upd, uni_result_shapes] = pickle.load(f)  # skipcq: BAN-B301
+            [uni_data_list_ini, uni_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/nor_data_test7', 'rb') as f:
-            [nor_data_list_ini, nor_data_list_upd, nor_result_shapes] = pickle.load(f)  # skipcq: BAN-B301
+            [nor_data_list_ini, nor_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta1_data_test7', 'rb') as f:
-            [beta1_data_list_ini, beta1_data_list_upd, beta1_result_shapes] = pickle.load(f)  # skipcq: BAN-B301
+            [beta1_data_list_ini, beta1_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta2_data_test7', 'rb') as f:
-            [beta2_data_list_ini, beta2_data_list_upd, beta2_result_shapes] = pickle.load(f)  # skipcq: BAN-B301
+            [beta2_data_list_ini, beta2_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta3_data_test7', 'rb') as f:
-            [beta3_data_list_ini, beta3_data_list_upd, beta3_result_shapes] = pickle.load(f)  # skipcq: BAN-B301
+            [beta3_data_list_ini, beta3_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta4_data_test7', 'rb') as f:
-            [beta4_data_list_ini, beta4_data_list_upd, beta4_result_shapes] = pickle.load(f)  # skipcq: BAN-B301
+            [beta4_data_list_ini, beta4_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta5_data_test7', 'rb') as f:
-            [beta5_data_list_ini, beta5_data_list_upd, beta5_result_shapes] = pickle.load(f)  # skipcq: BAN-B301
+            [beta5_data_list_ini, beta5_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
 
         data = uni_data_list + nor_data_list + beta1_data_list + uni_data_list_ini + uni_data_list_upd + nor_data_list_ini +\
             nor_data_list_upd + beta1_data_list_ini + beta1_data_list_upd + beta2_data_list_ini + beta2_data_list_upd + beta3_data_list_ini\
