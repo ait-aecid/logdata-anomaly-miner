@@ -397,6 +397,12 @@ class VariableTypeDetectorTest(TestBase):
         result = vtd.var_type[0][0]
         self.assertEqual('d', result[0])
 
+        
+
+        # discrete to others
+
+        
+
         # reset all
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=init, num_update=update,

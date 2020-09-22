@@ -143,10 +143,6 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         # Order of the var_type_history_list [others, static, [discrete, number of appended steps], asc, desc, unique, EV of continuous
         # distributions]
         self.var_type_history_list_order = ['others', 'stat', 'd', 'asc', 'desc', 'unq', 'contEV']
-        # Number of minimal successes in the last num_s_ks_bt sKS-tests
-        self.s_ks_bt_min_success = 0
-        # Number of minimal successes in the last num_d_bt discrete-tests
-        self.d_bt_min_success = 0
         # List of the distributions for which the sKS test is implemented
         self.distr_list = ['nor', 'uni', 'spec', 'beta', 'betam', 'emp']
         # List of the numbers of log lines of this eventType, when an indicator failed
