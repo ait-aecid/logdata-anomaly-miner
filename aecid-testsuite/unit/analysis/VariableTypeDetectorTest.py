@@ -333,191 +333,224 @@ class VariableTypeDetectorTest(TestBase):
         with open('unit/data/vtd_data/beta1_data_test6', 'rb') as f:
             beta1_data_list = pickle.load(f)  # skipcq: BAN-B301
 
-        init = 100
-        update = 50
+        uni_data_list = uni_data_list*10
+        nor_data_list = nor_data_list*10
+        beta1_data_list = beta1_data_list*10
+        vtd_arguments = [(100, 50), (110, 55), (90, 45), (80, 40), (70, 35)]
 
-        etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=init, num_update=update,
-                                   div_thres=0.8, sim_thres=0.3, num_pause_others=0)
-        t = time.time()
-        stat_data = b'True'
-        log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
-        # initialize data
-        for i in range(init):
-            self.assertTrue(etd.receive_atom(log_atom))
-            vtd.receive_atom(log_atom)
-        result = vtd.var_type[0][0]
-        self.assertEqual(['stat', [stat_data.decode()], True], result)
-
-        # static -> static
-        for i in range(update):
-            self.assertTrue(etd.receive_atom(log_atom))
-            vtd.receive_atom(log_atom)
-        result = vtd.var_type[0][0]
-        self.assertEqual(['stat', [stat_data.decode()], True], result)
-
-        # static -> uni
-        for uni_data in uni_data_list:
-            log_atom = LogAtom(uni_data, ParserMatch(MatchElement('', uni_data, str(uni_data), None)), t, self.__class__.__name__)
-            self.assertTrue(etd.receive_atom(log_atom))
-            vtd.receive_atom(log_atom)
-        result = vtd.var_type[0][0]
-        posdistr = vtd.alternative_distribution_types[0][0]
-        self.assertTrue(result[0] == 'uni' or 'uni' in [distr[0] for distr in posdistr])
-
-        # uni -> others
-        for i in range(update):
-            stat_data = bytes(str((i % 75) * 0.1), 'utf-8')
+        for init, update in vtd_arguments:
+            etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
+            vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=init, num_update=update,
+                                       div_thres=0.8, sim_thres=0.3, num_pause_others=0)
+            t = time.time()
+            stat_data = b'True'
             log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
-            self.assertTrue(etd.receive_atom(log_atom))
-            vtd.receive_atom(log_atom)
-        result = vtd.var_type[0][0]
-        self.assertEqual(['others', 0], result)
+            # initialize data
+            for i in range(init):
+                self.assertTrue(etd.receive_atom(log_atom))
+                vtd.receive_atom(log_atom)
+            result = vtd.var_type[0][0]
+            self.assertEqual(['stat', [stat_data.decode()], True], result)
 
-        # others -> d
-        for i in range(update):
-            stat_data = bytes(str((i % 10) * 0.1), 'utf-8')
+            # static -> static
+            for i in range(update):
+                self.assertTrue(etd.receive_atom(log_atom))
+                vtd.receive_atom(log_atom)
+            result = vtd.var_type[0][0]
+            self.assertEqual(['stat', [stat_data.decode()], True], result)
+
+            # static -> uni
+            for uni_data in uni_data_list[:init]:
+                log_atom = LogAtom(uni_data, ParserMatch(MatchElement('', uni_data, str(uni_data), None)), t, self.__class__.__name__)
+                self.assertTrue(etd.receive_atom(log_atom))
+                vtd.receive_atom(log_atom)
+            result = vtd.var_type[0][0]
+            posdistr = vtd.alternative_distribution_types[0][0]
+            self.assertTrue(result[0] == 'uni' or 'uni' in [distr[0] for distr in posdistr], result)
+
+            # uni -> others
+            for i in range(update):
+                stat_data = bytes(str((i % 75) * 0.1), 'utf-8')
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
+                                   self.__class__.__name__)
+                self.assertTrue(etd.receive_atom(log_atom))
+                vtd.receive_atom(log_atom)
+            result = vtd.var_type[0][0]
+            self.assertEqual(['others', 0], result)
+
+            # others -> d
+            for i in range(update):
+                stat_data = bytes(str((i % 10) * 0.1), 'utf-8')
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
+                                   self.__class__.__name__)
+                self.assertTrue(etd.receive_atom(log_atom))
+                vtd.receive_atom(log_atom)
+            result = vtd.var_type[0][0]
+            self.assertEqual('d', result[0])
+
+            # reset all
+            etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
+            vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=init, num_update=update,
+                                       div_thres=0.3, sim_thres=0.5, num_pause_others=0, num_d_bt=30)
+
+            # initialize with d
+            for i in range(init):
+                stat_data = bytes(str((i % 10) * 0.1), 'utf-8')
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
+                                   self.__class__.__name__)
+                self.assertTrue(etd.receive_atom(log_atom))
+                vtd.receive_atom(log_atom)
+            result = vtd.var_type[0][0]
+            self.assertEqual('d', result[0])
+
+            # discrete to others with new values
+            for uni_data in uni_data_list[:init]:
+                log_atom = LogAtom(uni_data, ParserMatch(MatchElement('', uni_data, str(uni_data), None)), t, self.__class__.__name__)
+                self.assertTrue(etd.receive_atom(log_atom))
+                vtd.receive_atom(log_atom)
+            result = vtd.var_type[0][0]
+            self.assertEqual(['others', 0], result)
+
+            # reset all
+            etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
+            vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=init, num_update=update,
+                                       div_thres=0.3, sim_thres=0.5, num_pause_others=0, num_d_bt=20)
+
+            # initialize with d
+            for i in range(init):
+                stat_data = bytes(str((i % 10) * 0.1), 'utf-8')
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
+                                   self.__class__.__name__)
+                self.assertTrue(etd.receive_atom(log_atom))
+                vtd.receive_atom(log_atom)
+            result = vtd.var_type[0][0]
+            self.assertEqual('d', result[0])
+
+            # discrete to others without new values, low num_d_bt
+            for i in range(update):
+                stat_data = bytes(str((i % 10) * 0.1), 'utf-8')
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
+                                   self.__class__.__name__)
+                self.assertTrue(etd.receive_atom(log_atom))
+                vtd.receive_atom(log_atom)
+            result = vtd.var_type[0][0]
+            self.assertEqual(['others', 0], result)
+
+            # reset all
+            etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
+            vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=init, num_update=update,
+                div_thres=0.3, sim_thres=0.5, num_pause_others=0, num_d_bt=100)
+
+            # initialize with d
+            for i in range(init):
+                stat_data = bytes(str((i % 10) * 0.1), 'utf-8')
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
+                                   self.__class__.__name__)
+                self.assertTrue(etd.receive_atom(log_atom))
+                vtd.receive_atom(log_atom)
+            result = vtd.var_type[0][0]
+            self.assertEqual('d', result[0])
+
+            # discrete to others without new values, high num_d_bt
+            for i in range(update):
+                stat_data = bytes(str((i % 10) * 0.1), 'utf-8')
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
+                                   self.__class__.__name__)
+                self.assertTrue(etd.receive_atom(log_atom))
+                vtd.receive_atom(log_atom)
+            result = vtd.var_type[0][0]
+            self.assertNotEqual(['others', 0], result)
+
+            # reset all
+            etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
+            vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=init, num_update=update,
+                                       div_thres=0.3, sim_thres=0.3, num_pause_others=0)
+            t = time.time()
+            stat_data = b'True'
             log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
-            self.assertTrue(etd.receive_atom(log_atom))
-            vtd.receive_atom(log_atom)
-        result = vtd.var_type[0][0]
-        self.assertEqual('d', result[0])
+            # initialize data
+            for i in range(init):
+                self.assertTrue(etd.receive_atom(log_atom))
+                vtd.receive_atom(log_atom)
+            result = vtd.var_type[0][0]
+            self.assertEqual(['stat', [stat_data.decode()], True], result)
 
-        # reset all
-        etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=init, num_update=update,
-                                   div_thres=0.3, sim_thres=0.3, num_pause_others=0)
+            # static -> asc
+            for i in range(init):
+                stat_data = bytes(str(i * 0.1), 'utf-8')
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
+                                   self.__class__.__name__)
+                self.assertTrue(etd.receive_atom(log_atom))
+                vtd.receive_atom(log_atom)
+            result = vtd.var_type[0][0]
+            self.assertEqual(['asc', 'float'], result)
 
-        # initialize with d
-        for i in range(init):
-            stat_data = bytes(str((i % 10) * 0.1), 'utf-8')
+            # asc -> desc
+            for i in range(init, 0, -1):
+                stat_data = bytes(str(i * 0.1), 'utf-8')
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
+                                   self.__class__.__name__)
+                self.assertTrue(etd.receive_atom(log_atom))
+                vtd.receive_atom(log_atom)
+            result = vtd.var_type[0][0]
+            self.assertEqual(['desc', 'float'], result)
+
+            # reset all
+            etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
+            vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=init, num_update=update,
+                                       div_thres=0.3, sim_thres=0.3, num_pause_others=0)
+            t = time.time()
+            stat_data = b'True'
             log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
-            self.assertTrue(etd.receive_atom(log_atom))
-            vtd.receive_atom(log_atom)
-        result = vtd.var_type[0][0]
-        self.assertEqual('d', result[0])
+            # initialize data
+            for i in range(init):
+                self.assertTrue(etd.receive_atom(log_atom))
+                vtd.receive_atom(log_atom)
+            result = vtd.var_type[0][0]
+            self.assertEqual(['stat', [stat_data.decode()], True], result)
 
-        
+            # static -> nor
+            for nor_data in nor_data_list[:init]:
+                log_atom = LogAtom(nor_data, ParserMatch(MatchElement('', nor_data, str(nor_data), None)), t, self.__class__.__name__)
+                self.assertTrue(etd.receive_atom(log_atom))
+                vtd.receive_atom(log_atom)
+            result = vtd.var_type[0][0]
+            posdistr = vtd.alternative_distribution_types[0][0]
+            self.assertTrue(result[0] == 'nor' or 'nor' in [distr[0] for distr in posdistr], result)
 
-        # discrete to others
+            # nor -> beta1
+            for beta1_data in beta1_data_list[:init]:
+                log_atom = LogAtom(beta1_data, ParserMatch(MatchElement('', beta1_data, str(beta1_data), None)), t, self.__class__.__name__)
+                self.assertTrue(etd.receive_atom(log_atom))
+                vtd.receive_atom(log_atom)
+            result = vtd.var_type[0][0]
+            posdistr = vtd.alternative_distribution_types[0][0]
+            self.assertTrue((result[0] == 'beta' and result[-1] == 1) or 'beta1' in [distr[0]+str(distr[-1]) for distr in posdistr], result)
 
-        
-
-        # reset all
-        etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=init, num_update=update,
-                                   div_thres=0.3, sim_thres=0.3, num_pause_others=0)
-        t = time.time()
-        stat_data = b'True'
-        log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
-        # initialize data
-        for i in range(init):
-            self.assertTrue(etd.receive_atom(log_atom))
-            vtd.receive_atom(log_atom)
-        result = vtd.var_type[0][0]
-        self.assertEqual(['stat', [stat_data.decode()], True], result)
-
-        # static -> asc
-        for i in range(init):
-            stat_data = bytes(str(i * 0.1), 'utf-8')
+            # reset all
+            etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
+            vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=init, num_update=update,
+                                       div_thres=0.3, sim_thres=0.3, num_pause_others=0)
+            t = time.time()
+            stat_data = b'True'
             log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
-            self.assertTrue(etd.receive_atom(log_atom))
-            vtd.receive_atom(log_atom)
-        result = vtd.var_type[0][0]
-        self.assertEqual(['asc', 'float'], result)
+            # initialize data
+            for i in range(init):
+                self.assertTrue(etd.receive_atom(log_atom))
+                vtd.receive_atom(log_atom)
+            result = vtd.var_type[0][0]
+            self.assertEqual(['stat', [stat_data.decode()], True], result)
 
-        # asc -> desc
-        for i in range(init, 0, -1):
-            stat_data = bytes(str(i * 0.1), 'utf-8')
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
-            self.assertTrue(etd.receive_atom(log_atom))
-            vtd.receive_atom(log_atom)
-        result = vtd.var_type[0][0]
-        self.assertEqual(['desc', 'float'], result)
-
-        # reset all
-        etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=100, num_update=50, div_thres=0.3,
-                                   sim_thres=0.3, num_pause_others=0)
-        t = time.time()
-        stat_data = b'True'
-        log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
-        # initialize data
-        for i in range(init):
-            self.assertTrue(etd.receive_atom(log_atom))
-            vtd.receive_atom(log_atom)
-        result = vtd.var_type[0][0]
-        self.assertEqual(['stat', [stat_data.decode()], True], result)
-
-        # static -> nor
-        for nor_data in nor_data_list:
-            log_atom = LogAtom(nor_data, ParserMatch(MatchElement('', nor_data, str(nor_data), None)), t, self.__class__.__name__)
-            self.assertTrue(etd.receive_atom(log_atom))
-            vtd.receive_atom(log_atom)
-        result = vtd.var_type[0][0]
-        posdistr = vtd.alternative_distribution_types[0][0]
-        self.assertTrue(result[0] == 'nor' or 'nor' in [distr[0] for distr in posdistr])
-
-        # nor -> beta1
-        for beta1_data in beta1_data_list:
-            log_atom = LogAtom(beta1_data, ParserMatch(MatchElement('', beta1_data, str(beta1_data), None)), t, self.__class__.__name__)
-            self.assertTrue(etd.receive_atom(log_atom))
-            vtd.receive_atom(log_atom)
-        result = vtd.var_type[0][0]
-        posdistr = vtd.alternative_distribution_types[0][0]
-        self.assertTrue((result[0] == 'beta' and result[-1] == 1) or 'beta1' in [distr[0]+str(distr[-1]) for distr in posdistr])
-
-        # reset all
-        etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=100, num_update=50, div_thres=0.3,
-                                   sim_thres=0.3, num_pause_others=0)
-        t = time.time()
-        stat_data = b'True'
-        log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
-        # initialize data
-        for i in range(init):
-            self.assertTrue(etd.receive_atom(log_atom))
-            vtd.receive_atom(log_atom)
-        result = vtd.var_type[0][0]
-        self.assertEqual(['stat', [stat_data.decode()], True], result)
-
-        # static -> unq
-        vtd.test_ks_int = False
-        unq_data_list = [bytes(str(i), 'utf-8') for i in range(init)]
-        random.shuffle(unq_data_list)
-        for unq_data in unq_data_list:
-            log_atom = LogAtom(unq_data, ParserMatch(MatchElement('', unq_data, unq_data, None)), t, self.__class__.__name__)
-            self.assertTrue(etd.receive_atom(log_atom))
-            vtd.receive_atom(log_atom)
-        result = vtd.var_type[0][0]
-        self.assertEqual('unq', result[0])
-
-    def run_update_data(self, data_list):
-        etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=100, num_update=50,
-                                   num_s_ks_values=50)
-        t = time.time()
-        # initialize vtd buckets
-        for i in range(100):
-            stat_data = bytes(str(data_list[i]), 'utf-8')
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
-            self.assertTrue(etd.receive_atom(log_atom))
-            vtd.receive_atom(log_atom)
-        old_bucket_num = copy.deepcopy(vtd.bucket_num)
-        for i in range(1, 1000, 1):
-            stat_data = bytes(str(data_list[i]), 'utf-8')
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
-            self.assertTrue(etd.receive_atom(log_atom))
-            vtd.receive_atom(log_atom)
-            if i % vtd.num_update == 0 and i != 0:
-                if vtd.var_type[0][0] != ['others', 0] and vtd.bucket_num != [[[]]]:
-                    self.assertNotEqual(vtd.bucket_num, old_bucket_num)
-                    # missing tests for the correct calculation of the bucket_num's
-
-                    ###############################################################
-                old_bucket_num = copy.deepcopy(vtd.bucket_num)
-            else:
-                self.assertEqual(vtd.bucket_num, old_bucket_num)
+            # static -> unq
+            vtd.test_ks_int = False
+            unq_data_list = [bytes(str(i), 'utf-8') for i in range(init)]
+            random.shuffle(unq_data_list)
+            for unq_data in unq_data_list:
+                log_atom = LogAtom(unq_data, ParserMatch(MatchElement('', unq_data, unq_data, None)), t, self.__class__.__name__)
+                self.assertTrue(etd.receive_atom(log_atom))
+                vtd.receive_atom(log_atom)
+            result = vtd.var_type[0][0]
+            self.assertEqual('unq', result[0])
 
     def test7update_continuous_VT_random_data(self):
         """This unittest tests the s_ks_test method. It uses randomised datasets, which can be printed in the terminal.
