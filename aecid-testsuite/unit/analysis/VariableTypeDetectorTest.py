@@ -5,7 +5,6 @@ from aminer.parsing import ParserMatch, MatchElement
 from unit.TestBase import TestBase
 
 import time
-import copy
 import pickle  # skipcq: BAN-B403
 import random
 
@@ -439,7 +438,7 @@ class VariableTypeDetectorTest(TestBase):
             # reset all
             etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
             vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=init, num_update=update,
-                div_thres=0.3, sim_thres=0.5, num_pause_others=0, num_d_bt=100)
+                                       div_thres=0.3, sim_thres=0.5, num_pause_others=0, num_d_bt=100)
 
             # initialize with d
             for i in range(init):
@@ -526,7 +525,7 @@ class VariableTypeDetectorTest(TestBase):
             result = vtd.var_type[0][0]
             posdistr = vtd.alternative_distribution_types[0][0]
             self.assertTrue((result[0] == 'beta' and result[-1] == 1) or 'beta1' in [distr[0]+str(distr[-1]) for distr in posdistr],
-                             (init, update, result))
+                            (init, update, result))
 
             # reset all
             etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
