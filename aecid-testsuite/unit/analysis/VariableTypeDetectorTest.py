@@ -5,6 +5,7 @@ from aminer.parsing import ParserMatch, MatchElement
 from unit.TestBase import TestBase
 
 import time
+import copy
 import pickle  # skipcq: BAN-B403
 import random
 
@@ -349,14 +350,14 @@ class VariableTypeDetectorTest(TestBase):
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
-            self.assertEqual(['stat', [stat_data.decode()], True], result)
+            self.assertEqual(['stat', [stat_data.decode()], True], result, (init, update, result))
 
             # static -> static
             for i in range(update):
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
-            self.assertEqual(['stat', [stat_data.decode()], True], result)
+            self.assertEqual(['stat', [stat_data.decode()], True], result, (init, update, result))
 
             # static -> uni
             for uni_data in uni_data_list[:init]:
@@ -365,7 +366,7 @@ class VariableTypeDetectorTest(TestBase):
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
             posdistr = vtd.alternative_distribution_types[0][0]
-            self.assertTrue(result[0] == 'uni' or 'uni' in [distr[0] for distr in posdistr], result)
+            self.assertTrue(result[0] == 'uni' or 'uni' in [distr[0] for distr in posdistr], (init, update, result))
 
             # uni -> others
             for i in range(update):
@@ -375,7 +376,7 @@ class VariableTypeDetectorTest(TestBase):
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
-            self.assertEqual(['others', 0], result)
+            self.assertEqual(['others', 0], result, (init, update, result))
 
             # others -> d
             for i in range(update):
@@ -385,7 +386,7 @@ class VariableTypeDetectorTest(TestBase):
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
-            self.assertEqual('d', result[0])
+            self.assertEqual('d', result[0], (init, update, result))
 
             # reset all
             etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
@@ -400,7 +401,7 @@ class VariableTypeDetectorTest(TestBase):
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
-            self.assertEqual('d', result[0])
+            self.assertEqual('d', result[0], (init, update, result))
 
             # discrete to others with new values
             for uni_data in uni_data_list[:init]:
@@ -408,7 +409,7 @@ class VariableTypeDetectorTest(TestBase):
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
-            self.assertEqual(['others', 0], result)
+            self.assertEqual(['others', 0], result, (init, update, result))
 
             # reset all
             etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
@@ -423,7 +424,7 @@ class VariableTypeDetectorTest(TestBase):
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
-            self.assertEqual('d', result[0])
+            self.assertEqual('d', result[0], (init, update, result))
 
             # discrete to others without new values, low num_d_bt
             for i in range(update):
@@ -433,12 +434,12 @@ class VariableTypeDetectorTest(TestBase):
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
-            self.assertEqual(['others', 0], result)
+            self.assertEqual(['others', 0], result, (init, update, result))
 
             # reset all
             etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
             vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=init, num_update=update,
-                                       div_thres=0.3, sim_thres=0.5, num_pause_others=0, num_d_bt=100)
+                div_thres=0.3, sim_thres=0.5, num_pause_others=0, num_d_bt=100)
 
             # initialize with d
             for i in range(init):
@@ -448,7 +449,7 @@ class VariableTypeDetectorTest(TestBase):
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
-            self.assertEqual('d', result[0])
+            self.assertEqual('d', result[0], (init, update, result))
 
             # discrete to others without new values, high num_d_bt
             for i in range(update):
@@ -458,7 +459,7 @@ class VariableTypeDetectorTest(TestBase):
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
-            self.assertNotEqual(['others', 0], result)
+            self.assertNotEqual(['others', 0], result, (init, update, result))
 
             # reset all
             etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
@@ -472,7 +473,7 @@ class VariableTypeDetectorTest(TestBase):
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
-            self.assertEqual(['stat', [stat_data.decode()], True], result)
+            self.assertEqual(['stat', [stat_data.decode()], True], result, (init, update, result))
 
             # static -> asc
             for i in range(init):
@@ -482,7 +483,7 @@ class VariableTypeDetectorTest(TestBase):
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
-            self.assertEqual(['asc', 'float'], result)
+            self.assertEqual(['asc', 'float'], result, (init, update, result))
 
             # asc -> desc
             for i in range(init, 0, -1):
@@ -492,7 +493,7 @@ class VariableTypeDetectorTest(TestBase):
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
-            self.assertEqual(['desc', 'float'], result)
+            self.assertEqual(['desc', 'float'], result, (init, update, result))
 
             # reset all
             etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
@@ -506,7 +507,7 @@ class VariableTypeDetectorTest(TestBase):
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
-            self.assertEqual(['stat', [stat_data.decode()], True], result)
+            self.assertEqual(['stat', [stat_data.decode()], True], result, (init, update, result))
 
             # static -> nor
             for nor_data in nor_data_list[:init]:
@@ -515,7 +516,7 @@ class VariableTypeDetectorTest(TestBase):
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
             posdistr = vtd.alternative_distribution_types[0][0]
-            self.assertTrue(result[0] == 'nor' or 'nor' in [distr[0] for distr in posdistr], result)
+            self.assertTrue(result[0] == 'nor' or 'nor' in [distr[0] for distr in posdistr], (init, update, result))
 
             # nor -> beta1
             for beta1_data in beta1_data_list[:init]:
@@ -524,7 +525,8 @@ class VariableTypeDetectorTest(TestBase):
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
             posdistr = vtd.alternative_distribution_types[0][0]
-            self.assertTrue((result[0] == 'beta' and result[-1] == 1) or 'beta1' in [distr[0]+str(distr[-1]) for distr in posdistr], result)
+            self.assertTrue((result[0] == 'beta' and result[-1] == 1) or 'beta1' in [distr[0]+str(distr[-1]) for distr in posdistr],
+                             (init, update, result))
 
             # reset all
             etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
@@ -538,7 +540,7 @@ class VariableTypeDetectorTest(TestBase):
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
-            self.assertEqual(['stat', [stat_data.decode()], True], result)
+            self.assertEqual(['stat', [stat_data.decode()], True], result, (init, update, result))
 
             # static -> unq
             vtd.test_ks_int = False
@@ -549,7 +551,7 @@ class VariableTypeDetectorTest(TestBase):
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
-            self.assertEqual('unq', result[0])
+            self.assertEqual('unq', result[0], (init, update, result))
 
     def test7update_continuous_VT_random_data(self):
         """This unittest tests the s_ks_test method. It uses randomised datasets, which can be printed in the terminal.
