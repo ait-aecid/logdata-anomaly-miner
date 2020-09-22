@@ -17,8 +17,7 @@ install:
   - sudo ansible-playbook playbook.yml
   - sudo pip3 install kafka-python -U
   - sudo ln -s /usr/lib/python3/dist-packages/kafka /etc/aminer/conf-enabled/kafka
-  - sudo pip3 install --force-reinstall scipy==1.4.1
-  - sudo pip3 install --force-reinstall numpy==1.17.4
+  - sudo pip3 install -U scipy
   - sudo pip3 install python-dateutil
   - sudo ln -s /usr/lib/python3/dist-packages/dateutil /etc/aminer/conf-enabled/dateutil
   - sudo pip3 install six
