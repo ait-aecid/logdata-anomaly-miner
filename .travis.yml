@@ -23,8 +23,7 @@ install:
   - sudo pip3 install six
   - sudo ln -s /usr/lib/python3/dist-packages/six.py /etc/aminer/conf-enabled/
   - sudo ln -s /usr/lib/python3.6/site-packages/numpy /etc/aminer/conf-enabled/
-  - sudo pip3 install scipy
-  - sudo ln -s /usr/lib/python3/dist-packages/scipy /etc/aminer/conf-enabled/
+  - sudo ln -s /usr/lib/python3.6/site-packages/scipy /etc/aminer/conf-enabled/
   - cd aecid-testsuite
   - sudo chmod +x runUnittests.sh
   - sudo chmod +x runAMinerDemo.sh

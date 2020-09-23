@@ -1787,16 +1787,20 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             return
         message = 'Initial detection of varTypes in lines like %s:' % repr(log_atom.raw_data)
         tmp_string = ''
+        type_info = {}
 
         for var_index in range(self.length[event_index]):
             if self.var_type[event_index][var_index]:
                 if self.var_type[event_index][var_index][0] == 'unq':
                     tmp_string += "  Path '%s': ['unq']\n" % (self.event_type_detector.variable_key_list[event_index][var_index])
+                    type_info[self.event_type_detector.variable_key_list[event_index][var_index]] = ['unq']
                 elif self.var_type[event_index][var_index][0] == 'd':
                     tmp_string += "  Path '%s': ['d']\n" % (self.event_type_detector.variable_key_list[event_index][var_index])
+                    type_info[self.event_type_detector.variable_key_list[event_index][var_index]] = ['d']
                 else:
                     tmp_string += "  Path '%s': %s\n" % (
                         self.event_type_detector.variable_key_list[event_index][var_index], self.var_type[event_index][var_index])
+                    type_info[self.event_type_detector.variable_key_list[event_index][var_index]] = self.var_type[event_index][var_index]
         tmp_string = tmp_string.lstrip('  ')
 
         original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
@@ -1808,7 +1812,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             sorted_log_lines = [tmp_string + repr(log_atom.raw_data)]
 
         analysis_component = {'AffectedLogAtomPaths': [list(log_atom.parser_match.get_match_dictionary().keys())]}
-        event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records}
+        event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
+                      'TypeInfo': type_info}
         for listener in self.anomaly_event_handlers:
             listener.receive_event(
                 'Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, log_atom, self)
@@ -1833,7 +1838,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             sorted_log_lines = [self.event_type_detector.longest_path[event_index] + os.linesep + repr(log_atom.raw_data)]
 
         analysis_component = {'AffectedLogAtomPaths': [list(log_atom.parser_match.get_match_dictionary().keys())]}
-        event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records}
+        event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
+                      'TypeInfo': {'from': vt_old[0], 'to': vt_new[0], 'lines': self.event_type_detector.num_eventlines[event_index]}}
         for listener in self.anomaly_event_handlers:
             listener.receive_event(
                 'Analysis.%s' % self.__class__.__name__,
@@ -1856,7 +1862,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             sorted_log_lines = [self.event_type_detector.longest_path[event_index] + os.linesep + repr(log_atom.raw_data)]
 
         analysis_component = {'AffectedLogAtomPaths': [list(log_atom.parser_match.get_match_dictionary().keys())]}
-        event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records}
+        event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
+                      'TypeInfo': {'reject': vt[0], 'lines': self.event_type_detector.num_eventlines[event_index]}}
         for listener in self.anomaly_event_handlers:
             listener.receive_event(
                 'Analysis.%s' % self.__class__.__name__,
@@ -1872,7 +1879,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
         sorted_log_lines = [self.event_type_detector.longest_path[event_index] + os.linesep + log_atom.raw_data.decode()]
         analysis_component = {'AffectedLogAtomPaths': [list(log_atom.parser_match.get_match_dictionary().keys())]}
-        event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records}
+        event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
+                      'Confidence': confidence, 'Indicator': indicator}
         for listener in self.anomaly_event_handlers:
             listener.receive_event('Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, log_atom, self)
 
