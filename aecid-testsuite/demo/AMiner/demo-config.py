@@ -272,6 +272,16 @@ def build_analysis_pipeline(analysis_context):
     analysis_context.register_component(parser_count, component_name="ParserCount")
     atom_filter.add_handler(parser_count)
 
+    from aminer.analysis.EventTypeDetector import EventTypeDetector
+    etd = EventTypeDetector(analysis_context.aminer_config, anomaly_event_handlers)
+    analysis_context.register_component(etd, component_name="EventTypeDetector")
+    atom_filter.add_handler(etd)
+
+    from aminer.analysis.VariableTypeDetector import VariableTypeDetector
+    vtd = VariableTypeDetector(analysis_context.aminer_config, anomaly_event_handlers, etd, silence_output_except_indicator=False)
+    analysis_context.register_component(vtd, component_name="VariableTypeDetector")
+    atom_filter.add_handler(vtd)
+
     from aminer.analysis import EventCorrelationDetector
     ecd = EventCorrelationDetector(analysis_context.aminer_config, anomaly_event_handlers, check_rules_flag=True,
                                    hypothesis_max_delta_time=1.0)

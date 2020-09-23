@@ -11,6 +11,7 @@ from aminer.events import EventSourceInterface
 from aminer.input import AtomHandlerInterface
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.util import PersistencyUtil
+from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
 
 class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
@@ -24,11 +25,12 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                  silence_output_without_confidence=False, silence_output_except_indicator=True, num_var_type_hist_ref=10,
                  num_update_var_type_hist_ref=10,  num_var_type_considered_ind=10, num_stat_stop_update=200,
                  num_updates_until_var_reduction=20, var_reduction_thres=0.6, num_skipped_ind_for_weights=1, num_ind_for_weights=100,
-                 used_multinomial_test='Chi', use_empiric_distr=True, save_statistics=True):
+                 used_multinomial_test='Chi', use_empiric_distr=True, save_statistics=True, output_log_line=True):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
 
         self.next_persist_time = None
         self.anomaly_event_handlers = anomaly_event_handlers
+        self.aminer_config = aminer_config
 
         # General options
         # Used to track the indicators and changed variable types
@@ -86,6 +88,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         self.silence_output_without_confidence = silence_output_without_confidence
         # Silences the all messages which are not related with the calculated indicator
         self.silence_output_except_indicator = silence_output_except_indicator
+        self.output_log_line = output_log_line
         # States how long the reference for the varTypeHist is. The reference is used in the evaluation.
         self.num_var_type_hist_ref = num_var_type_hist_ref
         # Number of updatesteps before the varTypeHistRef is being updated
@@ -353,6 +356,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 }
 
         # Loads the persistency
+        self.persistence_id = persistence_id
         PersistencyUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
@@ -786,7 +790,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                             tmp_string += 'Indicator of a change in system behaviour: %s. Paths to the corresponding variables: %s' % (
                                 np.arctan(2 * indicator) / np.pi * 2, [
                                     self.event_type_detector.variable_key_list[event_index][var_index]
-                                    for var_index in indices_failed_tests]) + '\n'
+                                    for var_index in indices_failed_tests])
 
                         self.print(event_index, tmp_string, log_atom, np.arctan(2 * indicator) / np.pi * 2, indicator=True)
 
@@ -1781,24 +1785,33 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         """prints the initial variableTypes"""
         if self.silence_output_without_confidence or self.silence_output_except_indicator:
             return
-        tmp_string = 'Initial detection of varTypes in lines like %s:\n' % str(repr(log_atom.raw_data))
+        message = 'Initial detection of varTypes in lines like %s:' % repr(log_atom.raw_data)
+        tmp_string = ''
 
         for var_index in range(self.length[event_index]):
             if self.var_type[event_index][var_index]:
                 if self.var_type[event_index][var_index][0] == 'unq':
-                    tmp_string += "Path %s: ['unq']\n" % (self.event_type_detector.variable_key_list[event_index][var_index])
+                    tmp_string += "  Path '%s': ['unq']\n" % (self.event_type_detector.variable_key_list[event_index][var_index])
                 elif self.var_type[event_index][var_index][0] == 'd':
-                    tmp_string += "Path %s: ['d']\n" % (self.event_type_detector.variable_key_list[event_index][var_index])
-                elif self.var_type[event_index][var_index][0] != 'stat':
-                    tmp_string += 'Path %s: %s\n' % (
+                    tmp_string += "  Path '%s': ['d']\n" % (self.event_type_detector.variable_key_list[event_index][var_index])
+                else:
+                    tmp_string += "  Path '%s': %s\n" % (
                         self.event_type_detector.variable_key_list[event_index][var_index], self.var_type[event_index][var_index])
+        tmp_string = tmp_string.lstrip('  ')
 
-        sorted_log_lines = [self.event_type_detector.longest_path[event_index] + os.linesep + log_atom.raw_data.decode()]
-        analysis_component = {'AffectedLogAtomPaths': [log_atom.parser_match.get_match_dictionary().keys()]}
+        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+        if original_log_line_prefix is None:
+            original_log_line_prefix = ''
+        if self.output_log_line:
+            sorted_log_lines = [tmp_string + original_log_line_prefix + repr(log_atom.raw_data)]
+        else:
+            sorted_log_lines = [tmp_string + repr(log_atom.raw_data)]
+
+        analysis_component = {'AffectedLogAtomPaths': [list(log_atom.parser_match.get_match_dictionary().keys())]}
         event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records}
         for listener in self.anomaly_event_handlers:
             listener.receive_event(
-                'Analysis.%s' % self.__class__.__name__, tmp_string, sorted_log_lines, event_data, log_atom, self)
+                'Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, log_atom, self)
 
     def print_changed_var_type(self, event_index, vt_old, vt_new, var_index, log_atom, confidence=None):
         """prints the changed variableTypes"""
@@ -1810,27 +1823,44 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if (self.silence_output_without_confidence and confidence is None) or self.silence_output_except_indicator:
             return
 
-        sorted_log_lines = [self.event_type_detector.longest_path[event_index] + os.linesep + log_atom.raw_data.decode()]
-        analysis_component = {'AffectedLogAtomPaths': [log_atom.parser_match.get_match_dictionary().keys()]}
+        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+        if original_log_line_prefix is None:
+            original_log_line_prefix = ''
+        if self.output_log_line:
+            sorted_log_lines = [self.event_type_detector.longest_path[event_index] + os.linesep + original_log_line_prefix + repr(
+                log_atom.raw_data)]
+        else:
+            sorted_log_lines = [self.event_type_detector.longest_path[event_index] + os.linesep + repr(log_atom.raw_data)]
+
+        analysis_component = {'AffectedLogAtomPaths': [list(log_atom.parser_match.get_match_dictionary().keys())]}
         event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records}
         for listener in self.anomaly_event_handlers:
             listener.receive_event(
-                'Analysis.%s' % self.__class__.__name__, 'VariableType of path %s changed from %s to %s after the %s-th analysed line' % (
-                        self.event_type_detector.variable_key_list[event_index][var_index], vt_old[0], vt_new[0],
-                        self.event_type_detector.num_eventlines[event_index]), sorted_log_lines, event_data, log_atom, self)
+                'Analysis.%s' % self.__class__.__name__,
+                "VariableType of path '%s' changed from '%s' to '%s' after the %s-th analysed line" % (
+                    self.event_type_detector.variable_key_list[event_index][var_index], vt_old[0], vt_new[0],
+                    self.event_type_detector.num_eventlines[event_index]), sorted_log_lines, event_data, log_atom, self)
 
     def print_reject_var_type(self, event_index, vt, var_index, log_atom):
         """prints the changed variableTypes"""
         if self.silence_output_without_confidence or self.silence_output_except_indicator:
             return
 
-        sorted_log_lines = [self.event_type_detector.longest_path[event_index] + os.linesep + log_atom.raw_data.decode()]
-        analysis_component = {'AffectedLogAtomPaths': [log_atom.parser_match.get_match_dictionary().keys()]}
+        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+        if original_log_line_prefix is None:
+            original_log_line_prefix = ''
+        if self.output_log_line:
+            sorted_log_lines = [
+                self.event_type_detector.longest_path[event_index] + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
+        else:
+            sorted_log_lines = [self.event_type_detector.longest_path[event_index] + os.linesep + repr(log_atom.raw_data)]
+
+        analysis_component = {'AffectedLogAtomPaths': [list(log_atom.parser_match.get_match_dictionary().keys())]}
         event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records}
         for listener in self.anomaly_event_handlers:
             listener.receive_event(
                 'Analysis.%s' % self.__class__.__name__,
-                'VariableType of path %s would reject the type %s after the %s-th analysed line' % (
+                "VariableType of path '%s' would reject the type '%s' after the %s-th analysed line" % (
                     self.event_type_detector.variable_key_list[event_index][var_index], vt[0], self.event_type_detector.num_eventlines[
                         event_index]), sorted_log_lines, event_data, log_atom, self)
 
@@ -1841,7 +1871,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             return
 
         sorted_log_lines = [self.event_type_detector.longest_path[event_index] + os.linesep + log_atom.raw_data.decode()]
-        analysis_component = {'AffectedLogAtomPaths': [log_atom.parser_match.get_match_dictionary().keys()]}
+        analysis_component = {'AffectedLogAtomPaths': [list(log_atom.parser_match.get_match_dictionary().keys())]}
         event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records}
         for listener in self.anomaly_event_handlers:
             listener.receive_event('Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, log_atom, self)
