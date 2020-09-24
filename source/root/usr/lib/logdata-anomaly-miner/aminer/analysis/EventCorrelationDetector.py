@@ -246,6 +246,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                         else:
                             sorted_log_lines = [tmp_string + repr(log_atom.raw_data)]
                         for listener in self.anomaly_event_handlers:
+                            if rule.implied_event not in self.sample_events.keys() or rule.trigger_event not in self.sample_events.keys():
+                                break
                             listener.receive_event(
                                 'analysis.EventCorrelationDetector',
                                 'Correlation rule violated! Event %s is missing, but should follow event %s' % (
@@ -294,6 +296,9 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                             else:
                                 sorted_log_lines = [tmp_string + repr(log_atom.raw_data)]
                             for listener in self.anomaly_event_handlers:
+                                if rule.implied_event not in self.sample_events.keys()\
+                                        or rule.trigger_event not in self.sample_events.keys():
+                                    break
                                 listener.receive_event(
                                     'analysis.EventCorrelationDetector',
                                     'Correlation rule violated! Event %s is missing, but should precede event %s' % (
