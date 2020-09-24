@@ -150,6 +150,7 @@ def main():
     run_in_foreground_flag = False
     run_analysis_child_flag = False
     clear_persistence_flag = False
+    remove_persistence_dirs = None
 
     arg_pos = 1
     while arg_pos < len(sys.argv):
@@ -168,6 +169,10 @@ def main():
             continue
         if arg_name == '--Clear':
             clear_persistence_flag = True
+            continue
+        if arg_name == '--Remove':
+            remove_persistence_dirs = sys.argv[arg_pos]
+            arg_pos += 1
             continue
         if arg_name in ('--print_help', '--Help', '-h'):
             print_help(program_name)
@@ -193,17 +198,44 @@ def main():
         sys.exit(1)
 
     if clear_persistence_flag:
+        if remove_persistence_dirs is not None:
+            print('The --Config and --Remove arguments must not be used together!', file=sys.stderr)
+            sys.exit(1)
         import shutil
         persistence_dir_name = aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
         for filename in os.listdir(persistence_dir_name):
             file_path = os.path.join(persistence_dir_name, filename)
             try:
-                if os.path.isfile(file_path) or os.path.islink(file_path):
-                    os.unlink(file_path)
-                elif os.path.isdir(file_path):
-                    shutil.rmtree(file_path)
+                if not os.path.isdir(file_path):
+                    print('The AMiner persistence directory should not contain any files. Stopping..', file=sys.stderr)
+                    sys.exit(1)
+                shutil.rmtree(file_path)
             except Exception as e:
-                print('Failed to delete %s. Reason: %s' % (file_path, e))
+                print('Failed to delete %s. Reason: %s' % (file_path, e), file=sys.stderr)
+
+    if remove_persistence_dirs is not None:
+        import shutil
+        persistence_dir_name = aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
+        if remove_persistence_dirs.startswith('[') and remove_persistence_dirs.endswith(']'):
+            remove_persistence_dirs = remove_persistence_dirs.rstrip(']').lstrip('[').split(',')
+        else:
+            remove_persistence_dirs = [remove_persistence_dirs]
+        if isinstance(remove_persistence_dirs, list):
+            for filename in remove_persistence_dirs:
+                file_path = os.path.join(persistence_dir_name, filename)
+                try:
+                    if not os.path.exists(file_path):
+                        print('Persistence directory %s not found!' % file_path, file=sys.stderr)
+                        continue
+                    if not os.path.isdir(file_path):
+                        print('The AMiner persistence directory should not contain any files. Stopping..', file=sys.stderr)
+                        sys.exit(1)
+                    shutil.rmtree(file_path)
+                except Exception as e:
+                    print('Failed to delete %s. Reason: %s' % (file_path, e), file=sys.stderr)
+        else:
+            print('--Remove does need another argument of the type string or list.', file=sys.stderr)
+            sys.exit(1)
 
     if run_analysis_child_flag:
         # Call analysis process, this function will never return.

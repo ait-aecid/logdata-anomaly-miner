@@ -153,6 +153,22 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         </listitem>
       </varlistentry>
       <varlistentry>
+        <term><option>--Clear</option></term>
+        <listitem>
+          <para>With this parameter all persisted data in config_properties['Core.PersistenceDir']
+          is deleted. USE THIS PARAMETER CAREFULLY. IT DELETES ALL
+          SUB-DIRECTORIES OF THE PERSISTENCE DIRECTORY.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>--Remove <replaceable>directories</replaceable></option></term>
+        <listitem>
+          <para>Remove persisted data of one or multiple Detectors.</para>
+          <para><option>Example 1: </option>--Remove NewMatchPathDetector</para>
+          <para><option>Example 2: </option>--Remove [NewMatchPathDetector,EventCorrelationDetector]</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
         <term><option>--Help</option></term>
         <listitem>
           <para>Prints the help-screen</para>
