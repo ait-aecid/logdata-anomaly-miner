@@ -9,8 +9,12 @@ import sys
 # import resource
 
 class YamlConfigTest(unittest.TestCase):
+    sysp = sys.path
+
     def setUp(self):
         sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
+    def tearDown(self):
+        sys.path = self.sysp
 
     """ Loads a yaml file into the variable aminer_config.yamldata """
     def test_load_generic_yaml_file(self):
