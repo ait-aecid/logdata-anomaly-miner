@@ -46,6 +46,10 @@ class ConfigValidator(Validator):
             return AnalysisType(value)
 
     def _validate_has_start(self, has_start, field, value):
+        """ Test if there is a key named 'has_start'.
+        The rule's arguments are validated against this schema:
+        {'type': 'boolean'}
+        """
         seen_start = False
         for var in value:
             if "start" in var and var['start'] is True:
