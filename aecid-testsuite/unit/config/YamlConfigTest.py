@@ -58,12 +58,12 @@ class YamlConfigTest(unittest.TestCase):
         from aminer.AnalysisChild import AnalysisContext
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        """ the following lines help to debug the context for defining the testcases """
-        from pprint import pprint 
+        """ the following lines help to debug the context for defining the testcases
+        from pprint import pprint
         pprint(vars(context))
         pprint(vars(context.atomizer_factory))
         pprint(vars(context.atomizer_factory.parsing_model))
-        pprint(vars(context.atomizer_factory.atom_handler_list[0]))
+        pprint(vars(context.atomizer_factory.atom_handler_list[0])) """
         from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
         from aminer.analysis.NewMatchPathValueDetector import NewMatchPathValueDetector
         from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
@@ -101,7 +101,7 @@ class YamlConfigTest(unittest.TestCase):
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[18], VariableByteDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[19], FixedDataModelElement))
         self.assertEqual(context.atomizer_factory.parsing_model.element_id, 'accesslog')
-        
+
     """ This test checks if the aminer fails without a start-tag for the first parser-model """
     def test_analysis_fail_without_parser_start(self):
         spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
