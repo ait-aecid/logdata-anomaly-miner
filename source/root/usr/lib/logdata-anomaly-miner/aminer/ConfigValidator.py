@@ -46,10 +46,12 @@ class ConfigValidator(Validator):
     def _normalize_coerce_toparsermodel(self, value):
         if isinstance(value, str):
             return ParserModelType(value)
+        return None
 
     def _normalize_coerce_toanalysistype(self, value):
         if isinstance(value, str):
             return AnalysisType(value)
+        return None
 
     def _validate_has_start(self, has_start, field, value):
         """ Test if there is a key named 'has_start'.
