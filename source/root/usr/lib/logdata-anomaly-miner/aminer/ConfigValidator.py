@@ -43,12 +43,12 @@ class ConfigValidator(Validator):
     types_mapping['parsermodel'] = parser_type
     types_mapping['analysistype'] = analysis_type
 
-    def _normalize_coerce_toparsermodel(self, value):
+    def _normalize_coerce_toparsermodel(value):
         if isinstance(value, str):
             return ParserModelType(value)
         return None
 
-    def _normalize_coerce_toanalysistype(self, value):
+    def _normalize_coerce_toanalysistype(value):
         if isinstance(value, str):
             return AnalysisType(value)
         return None
