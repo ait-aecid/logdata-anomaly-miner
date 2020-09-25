@@ -1,6 +1,7 @@
 from cerberus import Validator
 from cerberus import TypeDefinition
 
+
 class ParserModelType:
     name = None
     ismodel = False
@@ -20,6 +21,7 @@ class ParserModelType:
     def __str__(self):
         return self.name
 
+
 class AnalysisType:
     name = None
     func = None
@@ -31,8 +33,10 @@ class AnalysisType:
     def __str__(self):
         return self.name
 
+
 parser_type = TypeDefinition('parsermodel', (ParserModelType, str), ())
 analysis_type = TypeDefinition('analysistype', (AnalysisType, str), ())
+
 
 class ConfigValidator(Validator):
     types_mapping = Validator.types_mapping.copy()
