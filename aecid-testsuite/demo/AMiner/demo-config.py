@@ -178,6 +178,7 @@ def build_analysis_pipeline(analysis_context):
         FixedDataModelElement('FixedDataModelElement', b'Gateway IP-Address: '), IpAddressDataModelElement('IpAddressDataModelElement')]))
     import locale
     loc = locale.getlocale()
+    print('%s.%s' % (loc), loc)
     service_children_parsing_model_element.append(
         MultiLocaleDateTimeModelElement('MultiLocaleDateTimeModelElement', [(b'%b %d %Y', '%s.%s' % (loc), None)]))
     service_children_parsing_model_element.append(
