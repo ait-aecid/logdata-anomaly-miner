@@ -246,12 +246,16 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                         else:
                             sorted_log_lines = [tmp_string + repr(log_atom.raw_data)]
                         for listener in self.anomaly_event_handlers:
-                            if rule.implied_event not in self.sample_events.keys() or rule.trigger_event not in self.sample_events.keys():
-                                break
+                            implied_event = None
+                            trigger_event = None
+                            if rule.implied_event in self.sample_events.keys():
+                                implied_event = self.sample_events[rule.implied_event]
+                            if rule.trigger_event in self.sample_events.keys():
+                                trigger_event = self.sample_events[rule.trigger_event]
                             listener.receive_event(
                                 'analysis.EventCorrelationDetector',
                                 'Correlation rule violated! Event %s is missing, but should follow event %s' % (
-                                    repr(self.sample_events[rule.implied_event]), repr(self.sample_events[rule.trigger_event])),
+                                    repr(implied_event), repr(trigger_event)),
                                 sorted_log_lines,
                                 {'RuleInfo': {'Rule': str(rule.trigger_event) + '->' + str(rule.implied_event),
                                               'Expected': str(rule.min_eval_true) + '/' + str(rule.max_observations),
@@ -296,13 +300,16 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                             else:
                                 sorted_log_lines = [tmp_string + repr(log_atom.raw_data)]
                             for listener in self.anomaly_event_handlers:
-                                if rule.implied_event not in self.sample_events.keys()\
-                                        or rule.trigger_event not in self.sample_events.keys():
-                                    break
+                                implied_event = None
+                                trigger_event = None
+                                if rule.implied_event in self.sample_events.keys():
+                                    implied_event = self.sample_events[rule.implied_event]
+                                if rule.trigger_event in self.sample_events.keys():
+                                    trigger_event = self.sample_events[rule.trigger_event]
                                 listener.receive_event(
                                     'analysis.EventCorrelationDetector',
                                     'Correlation rule violated! Event %s is missing, but should precede event %s' % (
-                                        repr(self.sample_events[rule.implied_event]), repr(self.sample_events[rule.trigger_event])),
+                                        repr(implied_event), repr(trigger_event)),
                                     sorted_log_lines,
                                     {'RuleInfo': {'Rule': str(rule.implied_event) + '<-' + str(rule.trigger_event),
                                                   'Expected': str(rule.min_eval_true) + '/' + str(rule.max_observations),
