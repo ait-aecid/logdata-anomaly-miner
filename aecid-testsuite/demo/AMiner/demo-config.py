@@ -179,7 +179,7 @@ def build_analysis_pipeline(analysis_context):
     import locale
     loc = locale.getlocale()
     if loc == (None, None):
-        loc = ('de_AT', 'utf8')
+        loc = ('en_US', 'utf8')
     service_children_parsing_model_element.append(
         MultiLocaleDateTimeModelElement('MultiLocaleDateTimeModelElement', [(b'%b %d %Y', '%s.%s' % (loc), None)]))
     service_children_parsing_model_element.append(
