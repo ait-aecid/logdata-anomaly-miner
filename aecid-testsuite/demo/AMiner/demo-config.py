@@ -177,9 +177,9 @@ def build_analysis_pipeline(analysis_context):
     service_children_parsing_model_element.append(SequenceModelElement('', [
         FixedDataModelElement('FixedDataModelElement', b'Gateway IP-Address: '), IpAddressDataModelElement('IpAddressDataModelElement')]))
     import locale
-    import sys
     loc = locale.getlocale()
-    print('%s.%s' % (loc), loc, file=sys.stderr)
+    if loc == (None, None):
+        loc = ('de_AT', 'utf8')
     service_children_parsing_model_element.append(
         MultiLocaleDateTimeModelElement('MultiLocaleDateTimeModelElement', [(b'%b %d %Y', '%s.%s' % (loc), None)]))
     service_children_parsing_model_element.append(
