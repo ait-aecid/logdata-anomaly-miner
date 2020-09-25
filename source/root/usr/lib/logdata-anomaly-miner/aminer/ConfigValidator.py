@@ -6,13 +6,15 @@ class ParserModelType:
     ismodel = False
     func = None
 
-    def __init__(self,name):
+    def __init__(self, name):
         self.name = name
         if name.endswith('ModelElement'):
             self.ismodel = True
             self.func = getattr(__import__("aminer.parsing", fromlist=[name]), name)
         else:
             self.ismodel = False
+            # we need this import:
+            # skipcq: PTC-W0034
             self.func = getattr(__import__(name), 'get_model')
 
     def __str__(self):
@@ -22,26 +24,26 @@ class AnalysisType:
     name = None
     func = None
 
-    def __init__(self,name):
+    def __init__(self, name):
         self.name = name
         self.func = getattr(__import__("aminer.analysis", fromlist=[name]), name)
 
     def __str__(self):
         return self.name
 
-parser_type = TypeDefinition('parsermodel', (ParserModelType,str), ())
-analysis_type = TypeDefinition('analysistype', (AnalysisType,str), ())
+parser_type = TypeDefinition('parsermodel', (ParserModelType, str), ())
+analysis_type = TypeDefinition('analysistype', (AnalysisType, str), ())
 
 class ConfigValidator(Validator):
     types_mapping = Validator.types_mapping.copy()
     types_mapping['parsermodel'] = parser_type
     types_mapping['analysistype'] = analysis_type
 
-    def _normalize_coerce_toparsermodel(self,value):
+    def _normalize_coerce_toparsermodel(self, value):
         if isinstance(value, str):
             return ParserModelType(value)
 
-    def _normalize_coerce_toanalysistype(self,value):
+    def _normalize_coerce_toanalysistype(self, value):
         if isinstance(value, str):
             return AnalysisType(value)
 
