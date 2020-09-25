@@ -176,8 +176,12 @@ def build_analysis_pipeline(analysis_context):
     service_children_parsing_model_element.append(HexStringModelElement('HexStringModelElement'))
     service_children_parsing_model_element.append(SequenceModelElement('', [
         FixedDataModelElement('FixedDataModelElement', b'Gateway IP-Address: '), IpAddressDataModelElement('IpAddressDataModelElement')]))
+    import locale
+    loc = locale.getlocale()
+    if loc == (None, None):
+        loc = ('en_US', 'utf8')
     service_children_parsing_model_element.append(
-        MultiLocaleDateTimeModelElement('MultiLocaleDateTimeModelElement', [(b'%b %d %Y', "de_AT.utf8", None)]))
+        MultiLocaleDateTimeModelElement('MultiLocaleDateTimeModelElement', [(b'%b %d %Y', '%s.%s' % (loc), None)]))
     service_children_parsing_model_element.append(
         RepeatedElementDataModelElement('RepeatedElementDataModelElement', SequenceModelElement('SequenceModelElement', [
             FixedDataModelElement('FixedDataModelElement', b'drawn number: '),
@@ -277,6 +281,12 @@ def build_analysis_pipeline(analysis_context):
                                    hypothesis_max_delta_time=1.0)
     analysis_context.register_component(ecd, component_name="EventCorrelationDetector")
     atom_filter.add_handler(ecd)
+
+    from aminer.analysis import MatchFilter
+    match_filter = MatchFilter(analysis_context.aminer_config, ['/model/Random'], anomaly_event_handlers, target_value_list=[
+        1,10,100], output_log_line=True)
+    analysis_context.register_component(match_filter, component_name="MatchFilter")
+    atom_filter.add_handler(match_filter)
 
     from aminer.analysis import NewMatchPathDetector
     new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=True,
