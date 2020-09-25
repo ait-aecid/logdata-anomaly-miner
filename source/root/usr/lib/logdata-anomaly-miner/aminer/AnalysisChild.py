@@ -110,7 +110,7 @@ class AnalysisContext:
     def get_component_by_id(self, id_string):
         """Get a component by ID.
         @return None if not found."""
-        component_info = self.registered_components.get(id_string, None)
+        component_info = self.registered_components.get(id_string)
         if component_info is None:
             return None
         return component_info[0]
@@ -122,7 +122,7 @@ class AnalysisContext:
     def get_component_by_name(self, name):
         """Get a component by name.
         @return None if not found."""
-        return self.registered_components_by_name.get(name, None)
+        return self.registered_components_by_name.get(name)
 
     def get_name_by_component(self, component):
         """Get the name of a component.
@@ -544,14 +544,14 @@ class AnalysisChildRemoteControlHandler:
 
                 # skipcq: PYL-W0122
                 exec(json_request_data[0], {'__builtins__': None}, exec_locals)
-                json_remote_control_response = json.dumps(exec_locals.get('remoteControlResponse', None))
+                json_remote_control_response = json.dumps(exec_locals.get('remoteControlResponse'))
                 if methods.REMOTE_CONTROL_RESPONSE == '':
                     methods.REMOTE_CONTROL_RESPONSE = None
-                if exec_locals.get('remoteControlResponse', None) is None:
+                if exec_locals.get('remoteControlResponse') is None:
                     json_remote_control_response = json.dumps(methods.REMOTE_CONTROL_RESPONSE)
                 else:
                     json_remote_control_response = json.dumps(
-                        exec_locals.get('remoteControlResponse', None) + methods.REMOTE_CONTROL_RESPONSE)
+                        exec_locals.get('remoteControlResponse') + methods.REMOTE_CONTROL_RESPONSE)
             # skipcq: FLK-E722
             except:
                 exception_data = traceback.format_exc()
