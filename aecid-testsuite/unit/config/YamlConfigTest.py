@@ -13,6 +13,7 @@ class YamlConfigTest(unittest.TestCase):
 
     def setUp(self):
         sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
+
     def tearDown(self):
         sys.path = self.sysp
 
