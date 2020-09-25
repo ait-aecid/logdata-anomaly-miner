@@ -69,11 +69,13 @@
         'Parser': {
             'required': True,
             'type': 'list',
+            'has_start': True,
             'schema': {
                 'type': 'dict',
                  'schema': {
                     'id': {'type': 'string'},
-                    'type': {'type': 'string'},
+                    'start': {'type': 'boolean'},
+                    'type': {'type': 'parsermodel', 'coerce': 'toparsermodel'},
                     'name': {'type': 'string'},
                     'args': {'type': ['string', 'list'], 'schema': {'type': 'string'}}
                 }

@@ -15,6 +15,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import datetime
 import sys
 import time
+from dateutil.parser import parse
 
 from aminer.parsing import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
@@ -40,6 +41,7 @@ class DateTimeModelElement(ModelElementInterface):
             * %S: seconds
             * %s: seconds since the epoch (1970-01-01)
             * %Y: 4 digit year number
+            * %z: detect and parse timezone strings like UTC, CET, +0001, etc. automatically.
         Common formats are:
             * '%b %d %H:%M:%S' e.g. for 'Nov 19 05:08:43'
         @param time_zone the timezone for parsing the values or UTC when None.
@@ -55,6 +57,10 @@ class DateTimeModelElement(ModelElementInterface):
             self.time_zone = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
         # Make sure that dateFormat is valid and extract the relevant parts from it.
         self.format_has_year_flag = False
+        self.format_has_tz_specifier = False
+        self.tz_specifier_offset = None
+        self.tz_specifier_offset_str = None
+        self.tz_specifier_format_length = -1
         self.date_format_parts = None
         self.scan_date_format(date_format)
 
@@ -107,6 +113,10 @@ class DateTimeModelElement(ModelElementInterface):
                 elif param_type_code == b'Y':
                     self.format_has_year_flag = True
                     new_element = (0, 4, int)
+                elif param_type_code == b'z':
+                    self.format_has_tz_specifier = True
+                    scan_pos = next_param_pos
+                    continue
                 else:
                     raise Exception('Unknown dateformat specifier %s' % repr(param_type_code))
             if isinstance(new_element, bytes):
@@ -137,7 +147,7 @@ class DateTimeModelElement(ModelElementInterface):
         parse_pos = 0
         # Year, month, day, hour, minute, second, fraction, gmt-seconds:
         result = [None, None, None, None, None, None, None, None]
-        for part_pos in range(0, len(self.date_format_parts)):
+        for part_pos in range(len(self.date_format_parts)):
             date_format_part = self.date_format_parts[part_pos]
             if isinstance(date_format_part, bytes):
                 if not match_context.match_data[parse_pos:].startswith(date_format_part):
@@ -257,7 +267,68 @@ class DateTimeModelElement(ModelElementInterface):
             if result[6] is not None:
                 total_seconds += result[6]
 
+        if self.format_has_tz_specifier and self.tz_specifier_format_length == -1:
+            start = 0
+            while start < parse_pos:
+                try:
+                    parse(match_context.match_data[start:parse_pos])
+                    break
+                # skipcq: FLK-E722
+                except:
+                    start += 1
+            self.tz_specifier_format_length = len(match_context.match_data)
+            # try to find the longest matching date
+            while True:
+                try:
+                    parse(match_context.match_data[start:self.tz_specifier_format_length])
+                    break
+                # skipcq: FLK-E722
+                except:
+                    self.tz_specifier_format_length -= 1
+                    if self.tz_specifier_format_length <= 0:
+                        raise Exception("The date_format could not be found.")
+
         match_context.update(date_str)
+        if self.format_has_tz_specifier:
+            if self.tz_specifier_format_length < parse_pos:
+                if b'+' in match_context.match_data or b'-' in match_context.match_data:
+                    data = match_context.match_data.split(b'+')
+                    if len(data) == 1:
+                        data = match_context.match_data.split(b'-')
+                    for i in range(1, 5):
+                        if not match_context.match_data[i:i+1].decode('utf-8').isdigit():
+                            i -= 1
+                            break
+                    self.tz_specifier_format_length = len(data[0]) + i + 1
+                    parse_pos = 0
+
+            remaining_data = match_context.match_data[:self.tz_specifier_format_length-parse_pos]
+            match_context.update(remaining_data)
+            if self.tz_specifier_offset is None:
+                # initialize tz_specifier variables. The first values are expected to match the time_zone argument.
+                self.tz_specifier_offset = 0
+                self.tz_specifier_offset_str = remaining_data
+            # check if the remaining_data has changed
+            elif remaining_data != self.tz_specifier_offset_str:
+                sign = 1
+                data = remaining_data.split(b'+')
+                if len(data) == 1:
+                    data = remaining_data.split(b'-')
+                    sign = -1
+                    if len(data) == 1:
+                        data = None
+                # only add offset if a + or - sign is used.
+                if data is not None:
+                    old_data = self.tz_specifier_offset_str.split(b'+')
+                    if len(old_data) == 1:
+                        old_data = remaining_data.split(b'-')
+                    self.tz_specifier_offset = (int(data[1]) - int(old_data[1]))*sign
+                    self.tz_specifier_offset_str = remaining_data
+                # if no + or - sign is found no offset is added.
+                else:
+                    self.tz_specifier_offset = 0
+                    self.tz_specifier_offset_str = remaining_data
+            return MatchElement("%s/%s" % (path, self.path_id), date_str+remaining_data, total_seconds+self.tz_specifier_offset*3600, None)
         return MatchElement("%s/%s" % (path, self.path_id), date_str, total_seconds, None)
 
     @staticmethod

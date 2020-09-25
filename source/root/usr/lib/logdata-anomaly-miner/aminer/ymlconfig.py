@@ -34,7 +34,7 @@ def loadYaml(config_file):
     global yamldata
 
     import yaml
-    from cerberus import Validator
+    from aminer.ConfigValidator import ConfigValidator
     import os
     with open(config_file) as yamlfile:
         try:
@@ -48,7 +48,7 @@ def loadYaml(config_file):
         schema = eval(sma.read())
     sma.close()
 
-    v = Validator(schema)
+    v = ConfigValidator(schema)
     if v.validate(yamldata, schema):
         test = v.normalized(yamldata)
         yamldata = test
@@ -76,11 +76,9 @@ def build_analysis_pipeline(analysis_context):
     # skipcq: PYL-W0611
     import importlib
     # skipcq: PYL-W0611
-    import configparser
+    # import configparser
     # skipcq: PYL-W0611
     import sys
-#  import json
-#  from pprint import pprint
 
     parserModelDict = {}
     start = None
@@ -91,33 +89,24 @@ def build_analysis_pipeline(analysis_context):
     # skipcq: PYL-W0603
     global yamldata
     for item in yamldata['Parser']:
-        if item['id'] == 'START':
+        if 'start' in item and item['start'] is True:
             start = item
             continue
-        if item['type'].endswith('ModelElement') and item['id'] != 'START':
-            func = getattr(__import__("aminer.parsing", fromlist=[item['type']]), item['type'])
+        if item['type'].ismodel:
             if 'args' in item:
                 if isinstance(item['args'], list):
                     # encode string to bytearray
                     for j in range(len(item['args'])):
                         item['args'][j] = item['args'][j].encode()
-                    parserModelDict[item['id']] = func(item['name'], item['args'])
+                    parserModelDict[item['id']] = item['type'].func(item['name'], item['args'])
                 else:
-                    parserModelDict[item['id']] = func(item['name'], item['args'].encode())
+                    parserModelDict[item['id']] = item['type'].func(item['name'], item['args'].encode())
             else:
-                parserModelDict[item['id']] = func(item['name'])
+                parserModelDict[item['id']] = item['type'].func(item['name'])
         else:
-            # skipcq: PTC-W0034
-            func = getattr(__import__(item['type']), 'get_model')
-            parserModelDict[item['id']] = func()
+            parserModelDict[item['id']] = item['type'].func()
 
     argslist = []
-    if start['type'].endswith('ModelElement'):
-        # skipcq: PTC-W0034
-        func = getattr(__import__("aminer.parsing", fromlist=[start['type']]), start['type'])
-    else:
-        # skipcq: PTC-W0034
-        func = getattr(__import__(start['type']), 'get_model')
     if 'args' in start:
         if isinstance(start['args'], list):
             for i in start['args']:
@@ -128,11 +117,11 @@ def build_analysis_pipeline(analysis_context):
                     wscount += 1
                 else:
                     argslist.append(parserModelDict[i])
-            parsing_model = func(start['name'], argslist)
+            parsing_model = start['type'].func(start['name'], argslist)
         else:
-            parsing_model = func(start['name'], [parserModelDict[start['args']]])
+            parsing_model = start['type'].func(start['name'], [parserModelDict[start['args']]])
     else:
-        parsing_model = func()
+        parsing_model = start['type'].func()
 
 # Some generic imports.
     from aminer.analysis import AtomFilters
@@ -228,24 +217,6 @@ def build_analysis_pipeline(analysis_context):
                 use_value_match=item['use_value_match'],
                 min_rule_attributes=item['min_rule_attributes'],
                 max_rule_attributes=item['max_rule_attributes'])
-        elif item['type'] == 'EventCorrelationDetector':
-            tmpAnalyser = func(
-                analysis_context.aminer_config, anomaly_event_handlers,
-                paths=item['paths'],
-                max_hypotheses=item['max_hypotheses'],
-                hypothesis_max_delta_time=item['hypothesis_max_delta_time'],
-                generation_probability=item['generation_probability'],
-                generation_factor=item['generation_factor'],
-                max_observations=item['max_observations'],
-                p0=item['p0'],
-                alpha=item['alpha'],
-                candidates_size=item['candidates_size'],
-                hypotheses_eval_delta_time=item['hypotheses_eval_delta_time'],
-                delta_time_to_discard_hypothesis=item['delta_time_to_discard_hypothesis'],
-                check_rules_flag=item['check_rules_flag'],
-                auto_include_flag=item['auto_include_flag'],
-                whitelisted_paths=item['whitelisted_paths'],
-                persistence_id=item['persistence_id'])
         elif item['type'] == 'ParserCount':
             tmpAnalyser = func(
                 analysis_context.aminer_config,
