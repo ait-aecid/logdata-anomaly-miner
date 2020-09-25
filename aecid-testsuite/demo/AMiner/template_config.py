@@ -1,0 +1,1 @@
+/home/hoti/logdata-anomaly-miner/source/root/etc/aminer/template_config.py
