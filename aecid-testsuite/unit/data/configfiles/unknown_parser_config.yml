@@ -102,11 +102,11 @@ LogResourceList:
 #               - apacheModel
 Parser:
         - id: 'apacheModel'
-          type: ApacheAccessModel
+          type: UnknownModel
           name: 'apache'
           args: 'apache'
 
-        - id: 'startModel'
+        - id: 'START'
           start: True
           type: SequenceModelElement
           name: 'model'
