@@ -43,11 +43,17 @@ class ConfigValidator(Validator):
     types_mapping['parsermodel'] = parser_type
     types_mapping['analysistype'] = analysis_type
 
+    # we skip the following issue, otherwise an
+    # "must have self"-issue will pop up
+    # skipcq: PYL-R0201
     def _normalize_coerce_toparsermodel(self, value):
         if isinstance(value, str):
             return ParserModelType(value)
         return None
 
+    # we skip the following issue, otherwise an
+    # "must have self"-issue will pop up
+    # skipcq: PYL-R0201
     def _normalize_coerce_toanalysistype(self, value):
         if isinstance(value, str):
             return AnalysisType(value)
