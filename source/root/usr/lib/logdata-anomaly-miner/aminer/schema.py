@@ -91,8 +91,9 @@
             }
         },
         'Analysis': {
-            'required' : True,
+            'required': False,
             'type': 'list',
+            'nullable': True,
             'schema': {
                 'type': 'dict',
                  'schema': {
