@@ -142,7 +142,6 @@ class YamlConfigTest(unittest.TestCase):
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         aminer_config.loadYaml('unit/data/configfiles/apache_inline_config_undefined_analysis_components.yml')
-        from aminer.AnalysisChild import AnalysisContext
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
         self.run_empty_analysis_components_tests(context)
