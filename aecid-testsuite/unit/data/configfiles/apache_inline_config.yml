@@ -158,6 +158,11 @@ Analysis:
           min_bin_elements: 100
           min_bin_time: 10
           output_logline: true
+        - type: "MatchValueStreamWriter"
+          stream: "sys.stdout"
+          paths: ["/model/Sensors/CPUTemp", "/model/Sensors/CPUWorkload", "/model/Sensors/DTM"]
+          separator: b";"
+          missing_value_string: b""
 
 EventHandlers:
         - id: "stpe"

@@ -103,7 +103,7 @@
                         'MissingMatchPathListValueDetector', 'TimeCorrelationDetector', 'ParserCount', 'EventCorrelationDetector',
                         'NewMatchIdValueComboDetector', 'LinearNumericBinDefinition', 'ModuloTimeBinDefinition', 'HistogramAnalysis',
                         'PathDependentHistogramAnalysis', 'EnhancedNewMatchPathValueComboDetector', 'MatchFilter',
-                        'MatchValueAverageChangeDetector']},
+                        'MatchValueAverageChangeDetector', 'MatchValueStreamWriter']},
                     'paths': {'type': 'list', 'schema': {'type': 'string'}},
                     'learnMode': {'type': 'boolean'},
                     'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},
@@ -146,12 +146,17 @@
                     'histogram_defs': {'type': 'list', 'schema': {'type': 'list', 'schema': {'type': 'string'}}},
                     'bin_definition': {'type': 'string'},
                     'tuple_transformation_function': {'type': 'string'},
-                    'value_list': {'type': 'list', 'schema': {'type': ['boolean', 'binary', 'float', 'integer', 'string']}},
+                    'value_list': {'type': 'list', 'schema': {'type': ['boolean', 'float', 'integer', 'string']}},
                     'timestamp_path': {'type': 'string'},
                     'min_bin_elements': {'type': 'integer'},
                     'min_bin_time': {'type': 'integer'},
                     'sync_bins_flag': {'type': 'boolean', 'required': False, 'default': True},
-                    'debug_mode': {'type': 'boolean', 'required': False, 'default': False}
+                    'debug_mode': {'type': 'boolean', 'required': False, 'default': False},
+                    # skipcq: PYL-W0511
+                    # TODO check which streams should be allowed
+                    'stream': {'type': 'string', 'allowed': ['sys.stdout', 'sys.stderr']},
+                    'separator': {'type': 'string'},
+                    'missing_value_string': {'type': 'string'}
                 }
             }
         },

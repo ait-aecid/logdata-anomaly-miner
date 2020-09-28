@@ -334,6 +334,15 @@ def build_analysis_pipeline(analysis_context):
                     debug_mode=item['debug_mode'],
                     persistence_id=item['persistence_id'],
                     output_log_line=item['output_logline'])
+            elif item['type'] == 'MatchValueStreamWriter':
+                stream = sys.stdout
+                if item['stream'] == 'sys.stderr':
+                    stream = sys.stderr
+                tmpAnalyser = func(
+                    stream,
+                    item['paths'],
+                    item['separator'].encode(),
+                    item['missing_value_string'].encode())
             else:
                 tmpAnalyser = func(
                     analysis_context.aminer_config,
