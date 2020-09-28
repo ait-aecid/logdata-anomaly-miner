@@ -169,6 +169,14 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         </listitem>
       </varlistentry>
       <varlistentry>
+        <term><option>--FromBegin</option></term>
+        <listitem>
+          <para>With this parameter all live data in 
+          config_properties['Core.PersistenceDir']/AnalysisChild/RepositioningData
+          is deleted.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
         <term><option>--Help</option></term>
         <listitem>
           <para>Prints the help-screen</para>
