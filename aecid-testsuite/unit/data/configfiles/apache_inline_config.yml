@@ -148,6 +148,10 @@ Analysis:
           paths: ["/model/DailyCron/UName", "/model/DailyCron/JobNumber"]
           tuple_transformation_function: "demo"
           output_logline: true
+        - type: "MatchFilter"
+          paths: ["/model/Random"]
+          value_list: [1, 10, 100]
+          output_logline: true
 
 EventHandlers:
         - id: "stpe"

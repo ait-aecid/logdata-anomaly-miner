@@ -315,6 +315,13 @@ def build_analysis_pipeline(analysis_context):
                     auto_include_flag=learn,
                     tuple_transformation_function=tuple_transformation_function,
                     output_log_line=item['output_logline'])
+            elif item['type'] == 'MatchFilter':
+                tmpAnalyser = func(
+                    analysis_context.aminer_config,
+                    item['paths'],
+                    anomaly_event_handlers,
+                    target_value_list=item['value_list'],
+                    output_log_line=item['output_logline'])
             else:
                 tmpAnalyser = func(
                     analysis_context.aminer_config,
