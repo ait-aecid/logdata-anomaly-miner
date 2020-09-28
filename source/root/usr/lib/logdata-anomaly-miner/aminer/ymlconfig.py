@@ -302,6 +302,19 @@ def build_analysis_pipeline(analysis_context):
                     reset_after_report_flag=item['reset_after_report_flag'],
                     persistence_id=item['persistence_id'],
                     output_log_line=item['output_logline'])
+            elif item['type'] == 'EnhancedNewMatchPathValueComboDetector':
+                tuple_transformation_function = None
+                if item['tuple_transformation_function'] == 'demo':
+                    tuple_transformation_function = tuple_transformation_function_demo_print_every_10th_value
+                tmpAnalyser = func(
+                    analysis_context.aminer_config,
+                    item['paths'],
+                    anomaly_event_handlers,
+                    persistence_id=item['persistence_id'],
+                    allow_missing_values_flag=item['allow_missing_values'],
+                    auto_include_flag=learn,
+                    tuple_transformation_function=tuple_transformation_function,
+                    output_log_line=item['output_logline'])
             else:
                 tmpAnalyser = func(
                     analysis_context.aminer_config,
@@ -352,3 +365,14 @@ def build_analysis_pipeline(analysis_context):
         # Add stdout stream printing for debugging, tuning.
         from aminer.events import StreamPrinterEventHandler
         anomaly_event_handlers.append(StreamPrinterEventHandler(analysis_context))
+
+
+def tuple_transformation_function_demo_print_every_10th_value(self, match_value_list):
+    extra_data = self.known_values_dict.get(tuple(match_value_list), None)
+    if extra_data is not None:
+        mod = 10
+        if (extra_data[2] + 1) % mod == 0:
+            self.auto_include_flag = False
+        else:
+            self.auto_include_flag = True
+    return match_value_list
