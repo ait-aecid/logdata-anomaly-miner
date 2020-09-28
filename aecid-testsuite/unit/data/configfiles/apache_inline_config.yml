@@ -152,6 +152,12 @@ Analysis:
           paths: ["/model/Random"]
           value_list: [1, 10, 100]
           output_logline: true
+        - type: "MatchValueAverageChangeDetector"
+          timestamp_path: None
+          paths: ["/model/Random"]
+          min_bin_elements: 100
+          min_bin_time: 10
+          output_logline: true
 
 EventHandlers:
         - id: "stpe"

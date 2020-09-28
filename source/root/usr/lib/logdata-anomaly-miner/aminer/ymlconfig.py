@@ -322,6 +322,18 @@ def build_analysis_pipeline(analysis_context):
                     anomaly_event_handlers,
                     target_value_list=item['value_list'],
                     output_log_line=item['output_logline'])
+            elif item['type'] == 'MatchValueAverageChangeDetector':
+                tmpAnalyser = func(
+                    analysis_context.aminer_config,
+                    anomaly_event_handlers,
+                    item['timestamp_path'],
+                    item['paths'],
+                    item['min_bin_elements'],
+                    item['min_bin_time'],
+                    sync_bins_flag=item['sync_bins_flag'],
+                    debug_mode=item['debug_mode'],
+                    persistence_id=item['persistence_id'],
+                    output_log_line=item['output_logline'])
             else:
                 tmpAnalyser = func(
                     analysis_context.aminer_config,
