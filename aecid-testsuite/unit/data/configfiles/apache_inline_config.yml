@@ -161,8 +161,8 @@ Analysis:
         - type: "MatchValueStreamWriter"
           stream: "sys.stdout"
           paths: ["/model/Sensors/CPUTemp", "/model/Sensors/CPUWorkload", "/model/Sensors/DTM"]
-          separator: b";"
-          missing_value_string: b""
+          separator: ";"
+          missing_value_string: ""
 
 EventHandlers:
         - id: "stpe"
