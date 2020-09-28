@@ -192,13 +192,12 @@ class ModuloTimeBinDefinition(LinearNumericBinDefinition):
         return super(ModuloTimeBinDefinition, self).get_bin(time_value)
 
 
-class HistogramData():
+class HistogramData:
     """This class defines the properties of one histogram to create and performs the accounting and reporting. When the Python scipy
     package is available, reports will also include probability score created using binomial testing."""
 
     def __init__(self, property_path, bin_definition):
-        """Create the histogram data structures.
-        @param lower_limit the lowest value included in the first bin."""
+        """Create the histogram data structures."""
         self.property_path = property_path
         self.bin_definition = bin_definition
         self.bin_names = bin_definition.get_bin_names()
@@ -212,14 +211,14 @@ class HistogramData():
         bin_pos = self.bin_definition.get_bin(value)
         self.bin_data[bin_pos] += 1
         self.total_elements += 1
-        if (self.has_outlier_bins_flag) and (bin_pos != 0) and (bin_pos + 1 != len(self.bin_names)):
+        if self.has_outlier_bins_flag and bin_pos != 0 and bin_pos + 1 != len(self.bin_names):
             self.binned_elements += 1
 
     def reset(self):
         """Remove all values from this histogram."""
         self.total_elements = 0
         self.binned_elements = 0
-        self.bin_data = [0] * (len(self.bin_data))
+        self.bin_data = [0] * len(self.bin_data)
 
     def clone(self):
         """Clone this object so that calls to addValue do not influence the old object any more. This behavior is a mixture of shallow
@@ -327,10 +326,10 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
         if self.last_report_time is not None:
             report_str += 'from %s ' % datetime.fromtimestamp(self.last_report_time).strftime(date_string)
         report_str += 'till %s' % datetime.fromtimestamp(timestamp).strftime(date_string)
-        affected_log_atom_pathes = []
-        analysis_component = {'AffectedLogAtomPathes': affected_log_atom_pathes}
+        affected_log_atom_paths = []
+        analysis_component = {'AffectedLogAtomPathes': affected_log_atom_paths}
         for histogramData in self.histogram_data:
-            affected_log_atom_pathes.append(histogramData.property_path)
+            affected_log_atom_paths.append(histogramData.property_path)
         res = []
         h = []
         for data_item in self.histogram_data:
@@ -421,7 +420,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
 
         all_path_set = set(match_dict.keys())
         unmapped_path = []
-        missing_pathes = set()
+        missing_paths = set()
         while all_path_set:
             path = all_path_set.pop()
             histogram_mapping = self.histogram_data.get(path, None)
@@ -439,8 +438,8 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
                 # skipcq: FLK-E722
                 except:
                     if mapped_path != path:
-                        missing_pathes.add(mapped_path)
-            if not missing_pathes:
+                        missing_paths.add(mapped_path)
+            if not missing_paths:
                 # Everything OK, just add the value to the mapping.
                 match = match_dict.get(mapped_path, None)
                 match_value = match.match_object
@@ -458,12 +457,12 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
                 match_value = match.match_object
                 histogram_mapping[1].propertyPath = mapped_path
                 new_histogram.add_value(match_value)
-                new_path_set = histogram_mapping[0] - missing_pathes
+                new_path_set = histogram_mapping[0] - missing_paths
                 new_histogram_mapping = [new_path_set, new_histogram, log_atom.parser_match]
                 for mapped_path in new_path_set:
                     self.histogram_data[mapped_path] = new_histogram_mapping
-                histogram_mapping[0] = missing_pathes
-                missing_pathes = set()
+                histogram_mapping[0] = missing_paths
+                missing_paths = set()
 
         if unmapped_path:
             histogram = HistogramData(self.property_path, self.bin_definition)
@@ -514,7 +513,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
             report_str += 'from %s ' % datetime.fromtimestamp(self.last_report_time).strftime(date_string)
         report_str += 'till %s' % datetime.fromtimestamp(timestamp).strftime(date_string)
         all_path_set = set(self.histogram_data.keys())
-        analysis_component = {'AffectedLogAtomPathes': list(all_path_set)}
+        analysis_component = {'AffectedLogAtomPaths': list(all_path_set)}
         res = []
         h = []
         while all_path_set:
@@ -563,7 +562,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
                 res[0] = report_str
             all_path_set.discard(path)
             h.append(d)
-        analysis_component['MissingPathes'] = list(histogram_mapping[0])
+        analysis_component['MissingPaths'] = list(histogram_mapping[0])
         analysis_component['HistogramData'] = h
         analysis_component['ReportInterval'] = self.report_interval
         analysis_component['ResetAfterReportFlag'] = self.reset_after_report_flag

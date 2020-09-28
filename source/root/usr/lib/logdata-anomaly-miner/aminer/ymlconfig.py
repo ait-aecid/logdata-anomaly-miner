@@ -167,6 +167,7 @@ def build_analysis_pipeline(analysis_context):
     atomFilter.add_handler(nmpd)
 
     if 'Analysis' in yamldata and yamldata['Analysis'] is not None:
+        analysis_dict = {}
         for item in yamldata['Analysis']:
             if item['id'] == 'None':
                 compName = None
@@ -252,6 +253,54 @@ def build_analysis_pipeline(analysis_context):
                     auto_include_flag=learn,
                     persistence_id=item['persistence_id'],
                     allow_missing_values_flag=item['allow_missing_values'],
+                    output_log_line=item['output_logline'])
+            elif item['type'] == 'LinearNumericBinDefinition':
+                if compName is None:
+                    raise ValueError('The %s must have an id!' % item['type'])
+                analysis_dict[compName] = func(
+                    item['lower_limit'],
+                    item['bin_size'],
+                    item['bin_count'],
+                    item['outlier_bins_flag'])
+                continue
+            elif item['type'] == 'ModuloTimeBinDefinition':
+                if compName is None:
+                    raise ValueError('The %s must have an id!' % item['type'])
+                analysis_dict[compName] = func(
+                    item['modulo_value'],
+                    item['time_unit'],
+                    item['lower_limit'],
+                    item['bin_size'],
+                    item['bin_count'],
+                    item['outlier_bins_flag'])
+                continue
+            elif item['type'] == 'HistogramAnalysis':
+                histogram_defs = []
+                for histogram_def in item['histogram_defs']:
+                    if len(histogram_def) != 2:
+                        raise ValueError('Every item of the histogram_defs must have an size of 2!')
+                    if histogram_def[1] not in analysis_dict:
+                        raise ValueError('%s first must be defined before used.' % histogram_def[1])
+                    histogram_defs.append([histogram_def[0], analysis_dict[histogram_def[1]]])
+                tmpAnalyser = func(
+                    analysis_context.aminer_config,
+                    histogram_defs,
+                    item['report_interval'],
+                    anomaly_event_handlers,
+                    reset_after_report_flag=item['reset_after_report_flag'],
+                    persistence_id=item['persistence_id'],
+                    output_log_line=item['output_logline'])
+            elif item['type'] == 'PathDependentHistogramAnalysis':
+                if item['bin_definition'] not in analysis_dict:
+                    raise ValueError('%s first must be defined before used.' % item['bin_definition'])
+                tmpAnalyser = func(
+                    analysis_context.aminer_config,
+                    item['path'],
+                    analysis_dict[item['bin_definition']],
+                    item['report_interval'],
+                    anomaly_event_handlers,
+                    reset_after_report_flag=item['reset_after_report_flag'],
+                    persistence_id=item['persistence_id'],
                     output_log_line=item['output_logline'])
             else:
                 tmpAnalyser = func(

@@ -68,6 +68,7 @@ class YamlConfigTest(unittest.TestCase):
         from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
         from aminer.analysis.NewMatchPathValueDetector import NewMatchPathValueDetector
         from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
+        from aminer.analysis.HistogramAnalysis import HistogramAnalysis, PathDependentHistogramAnalysis
         from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
         from aminer.parsing.SequenceModelElement import SequenceModelElement
         from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
@@ -78,6 +79,8 @@ class YamlConfigTest(unittest.TestCase):
         self.assertTrue(isinstance(context.real_time_triggered_components[0], NewMatchPathDetector))
         self.assertTrue(isinstance(context.real_time_triggered_components[1], NewMatchPathValueDetector))
         self.assertTrue(isinstance(context.real_time_triggered_components[2], NewMatchPathValueComboDetector))
+        self.assertTrue(isinstance(context.real_time_triggered_components[3], HistogramAnalysis))
+        self.assertTrue(isinstance(context.real_time_triggered_components[4], PathDependentHistogramAnalysis))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
         self.assertEqual(context.atomizer_factory.default_timestamp_paths, '/accesslog/time')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model, SequenceModelElement))

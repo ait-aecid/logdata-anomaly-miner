@@ -121,6 +121,29 @@ Analysis:
           paths: ["/accesslog/status"]
         - type: "NewMatchPathValueComboDetector"
           paths: ["/accesslog/method","/accesslog/request","/accesslog/useragent"]
+        - type: "LinearNumericBinDefinition"
+          id: "linear_numeric_bin_definition"
+          lower_limit: 50
+          bin_size: 5
+          bin_count: 20
+          outlier_bins_flag: true
+        - type: "ModuloTimeBinDefinition"
+          id: "modulo_time_bin_definition"
+          modulo_value: 86400
+          time_unit: 3600
+          lower_limit: 0
+          bin_size: 1
+          bin_count: 24
+          outlier_bins_flag: true
+        - type: "HistogramAnalysis"
+          histogram_defs: [["/model/RandomTime/Random", "linear_numeric_bin_definition"]]
+          report_interval: 10
+          output_logline: true
+        - type: "PathDependentHistogramAnalysis"
+          path: "/model/RandomTime"
+          bin_definition: "modulo_time_bin_definition"
+          report_interval: 10
+          output_logline: true
 
 EventHandlers:
         - id: "stpe"
