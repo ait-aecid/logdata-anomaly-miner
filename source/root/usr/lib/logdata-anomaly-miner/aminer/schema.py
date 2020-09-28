@@ -131,7 +131,9 @@
                     'delta_time_to_discard_hypothesis': {'type': 'float', 'required': False, 'default': 180.0},
                     'check_rules_flag': {'type': 'boolean', 'required': False, 'default': True},
                     'auto_include_flag': {'type': 'boolean', 'required': False, 'default': True},
-                    # 'whitelisted_paths': {'type': ['string', 'list', 'null'], 'required': False, 'default': None}, # TODO default None value not working
+                    # skipcq: PYL-W0511
+                    # TODO default None value not working
+                    # 'whitelisted_paths': {'type': ['string', 'list', 'null'], 'required': False, 'default': None},
                     'id_path_list': {'type': 'list', 'required': False, 'default': []},
                     'min_allowed_time_diff': {'type': 'float', 'required': False, 'default': 5.0},
                     'lower_limit': {'type': 'integer'},
