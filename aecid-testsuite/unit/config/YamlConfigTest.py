@@ -89,6 +89,7 @@ class YamlConfigTest(unittest.TestCase):
         self.assertTrue(isinstance(context.registered_components[6][0], MatchFilter))
         self.assertTrue(isinstance(context.registered_components[7][0], MatchValueAverageChangeDetector))
         self.assertTrue(isinstance(context.registered_components[8][0], MatchValueStreamWriter))
+        self.assertTrue(isinstance(context.registered_components[9][0], NewMatchPathDetector))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
         self.assertEqual(context.atomizer_factory.default_timestamp_paths, '/accesslog/time')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model, SequenceModelElement))

@@ -343,6 +343,13 @@ def build_analysis_pipeline(analysis_context):
                     item['paths'],
                     item['separator'].encode(),
                     item['missing_value_string'].encode())
+            elif item['type'] == 'NewMatchPathDetector':
+                tmpAnalyser = func(
+                    analysis_context.aminer_config,
+                    anomaly_event_handlers,
+                    persistence_id=item['persistence_id'],
+                    auto_include_flag=learn,
+                    output_log_line=item['output_logline'])
             else:
                 tmpAnalyser = func(
                     analysis_context.aminer_config,

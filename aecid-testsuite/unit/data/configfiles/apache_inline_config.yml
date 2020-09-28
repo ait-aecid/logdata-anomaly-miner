@@ -163,6 +163,8 @@ Analysis:
           paths: ["/model/Sensors/CPUTemp", "/model/Sensors/CPUWorkload", "/model/Sensors/DTM"]
           separator: ";"
           missing_value_string: ""
+        - type: "NewMatchPathDetector"
+          id: "new_match_path_detector"
 
 EventHandlers:
         - id: "stpe"

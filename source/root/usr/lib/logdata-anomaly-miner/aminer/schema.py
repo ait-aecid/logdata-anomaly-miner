@@ -103,7 +103,7 @@
                         'MissingMatchPathListValueDetector', 'TimeCorrelationDetector', 'ParserCount', 'EventCorrelationDetector',
                         'NewMatchIdValueComboDetector', 'LinearNumericBinDefinition', 'ModuloTimeBinDefinition', 'HistogramAnalysis',
                         'PathDependentHistogramAnalysis', 'EnhancedNewMatchPathValueComboDetector', 'MatchFilter',
-                        'MatchValueAverageChangeDetector', 'MatchValueStreamWriter']},
+                        'MatchValueAverageChangeDetector', 'MatchValueStreamWriter', 'NewMatchPathDetector']},
                     'paths': {'type': 'list', 'schema': {'type': 'string'}},
                     'learnMode': {'type': 'boolean'},
                     'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},
