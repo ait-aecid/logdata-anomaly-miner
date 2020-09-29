@@ -188,6 +188,37 @@ def build_analysis_pipeline(analysis_context):
                     item['paths'], anomaly_event_handlers, auto_include_flag=learn,
                     persistence_id=item['persistence_id'],
                     output_log_line=learn)
+            elif item['type'] == 'MatchPathFilter':
+                parsed_atom_handler_lookup_list = []
+                for atom_handler in item['parsed_atom_handler_lookup_list']:
+                    if atom_handler[1] is not None:
+                        if analysis_context.get_component_by_id(atom_handler[1]) is None:
+                            raise ValueError('The atom handler %s does not exist!' % atom_handler[1])
+                        atom_handler[1] = analysis_context.get_component_by_id(atom_handler[1])
+                    parsed_atom_handler_lookup_list.append(tuple(i for i in atom_handler))
+                default_parsed_atom_handler = item['default_parsed_atom_handler']
+                if default_parsed_atom_handler is not None:
+                    if analysis_context.get_component_by_id(default_parsed_atom_handler) is None:
+                        raise ValueError('The atom handler %s does not exist!' % default_parsed_atom_handler)
+                    default_parsed_atom_handler = analysis_context.get_component_by_id(default_parsed_atom_handler)
+                tmp_analyser = func(
+                    parsed_atom_handler_lookup_list,
+                    default_parsed_atom_handler=default_parsed_atom_handler)
+            elif item['type'] == 'MatchValueFilter':
+                parsed_atom_handler_dict = {}
+                for atom_handler in item['parsed_atom_handler_dict']:
+                    if analysis_context.get_component_by_id(atom_handler) is None:
+                        raise ValueError('The atom handler %s does not exist!' % atom_handler)
+                    parsed_atom_handler_dict[atom_handler] = analysis_context.get_component_by_id(atom_handler)
+                default_parsed_atom_handler = item['default_parsed_atom_handler']
+                if default_parsed_atom_handler is not None:
+                    if analysis_context.get_component_by_id(default_parsed_atom_handler) is None:
+                        raise ValueError('The atom handler %s does not exist!' % default_parsed_atom_handler)
+                    default_parsed_atom_handler = analysis_context.get_component_by_id(default_parsed_atom_handler)
+                tmp_analyser = func(
+                    item['path'],
+                    parsed_atom_handler_dict,
+                    default_parsed_atom_handler=default_parsed_atom_handler)
             elif item['type'] == 'NewMatchPathValueComboDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config, item['paths'],

@@ -109,7 +109,7 @@
                         'StringRegexMatchRule', 'ModuloTimeMatchRule', 'ValueDependentModuloTimeMatchRule', 'IPv4InRFC1918MatchRule',
                         'DebugMatchRule', 'DebugHistoryMatchRule', 'CorrelationRule', 'EventClassSelector',
                         'TimeCorrelationViolationDetector', 'SimpleMonotonicTimestampAdjust', 'TimestampsUnsortedDetector',
-                        'WhitelistViolationDetector']},
+                        'WhitelistViolationDetector', 'MatchPathFilter', 'MatchValueFilter']},
                     'paths': {'type': 'list', 'schema': {'type': 'string'}},
                     'learn_mode': {'type': 'boolean'},
                     'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},
@@ -188,7 +188,11 @@
                     'artefact_b_rules': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                     'ruleset': {'type': 'list', 'schema': {'type': 'string'}},
                     'exit_on_error_flag': {'type': 'boolean', 'required': False, 'default': False},
-                    'whitelist_rules': {'type': 'list', 'schema': {'type': 'string'}}
+                    'whitelist_rules': {'type': 'list', 'schema': {'type': 'string'}},
+                    'parsed_atom_handler_lookup_list': {
+                        'type': 'list', 'schema': {'type': 'list', 'schema': {'type': 'string', 'nullable': True}}},
+                    'default_parsed_atom_handler': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
+                    'parsed_atom_handler_dict': {'type': 'dict', 'schema': {'id': {'type': 'string'}, 'type': {'type': 'string'}}}
                 }
             }
         },
