@@ -172,6 +172,9 @@ def main():
             clear_persistence_flag = True
             continue
         if arg_name == '--Remove':
+            if '.' in sys.argv[arg_pos] or '/' in sys.argv[arg_pos]:
+                print('The remove path %s must not contain any . or /' % sys.argv[arg_pos], file=sys.stderr)
+                sys.exit(1)
             remove_persistence_dirs.append(sys.argv[arg_pos])
             arg_pos += 1
             continue
@@ -203,7 +206,7 @@ def main():
 
     if clear_persistence_flag:
         if remove_persistence_dirs:
-            print('The --Config and --Remove arguments must not be used together!', file=sys.stderr)
+            print('The --Clear and --Remove arguments must not be used together!', file=sys.stderr)
             sys.exit(1)
         import shutil
         persistence_dir_name = aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
@@ -211,8 +214,8 @@ def main():
             file_path = os.path.join(persistence_dir_name, filename)
             try:
                 if not os.path.isdir(file_path):
-                    print('The AMiner persistence directory should not contain any files. Stopping..', file=sys.stderr)
-                    sys.exit(1)
+                    print('The AMiner persistence directory should not contain any files.', file=sys.stderr)
+                    continue
                 shutil.rmtree(file_path)
             except Exception as e:
                 print('Failed to delete %s. Reason: %s' % (file_path, e), file=sys.stderr)
@@ -224,11 +227,10 @@ def main():
             file_path = os.path.join(persistence_dir_name, filename)
             try:
                 if not os.path.exists(file_path):
-                    print('Persistence directory %s not found!' % file_path, file=sys.stderr)
                     continue
                 if not os.path.isdir(file_path):
-                    print('The AMiner persistence directory should not contain any files. Stopping..', file=sys.stderr)
-                    sys.exit(1)
+                    print('The AMiner persistence directory should not contain any files.', file=sys.stderr)
+                    continue
                 shutil.rmtree(file_path)
             except Exception as e:
                 print('Failed to delete %s. Reason: %s' % (file_path, e), file=sys.stderr)
