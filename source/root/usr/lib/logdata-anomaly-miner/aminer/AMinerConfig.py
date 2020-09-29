@@ -31,6 +31,7 @@ KEY_RESOURCES_MAX_PERCENT_CPU_USAGE = 'Resources.MaxCpuPercentUsage'
 LOG_FILE = '/tmp/AMinerRemoteLog.txt'
 configFN = None
 
+
 def load_config(config_file_name):
   """Load the configuration file using the import module."""
   aminer_config = None
@@ -50,7 +51,7 @@ def load_config(config_file_name):
     spec.loader.exec_module(aminer_config)
     if extension in ymlext:
   # skipcq: FLK-E722
-      aminer_config.loadYaml(yaml_config)
+      aminer_config.load_yaml(yaml_config)
   except ValueError as e:
       raise e
   except Exception:

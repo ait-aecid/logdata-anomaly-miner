@@ -112,9 +112,9 @@ Parser:
           args: apacheModel
 
 Input:
-        Verbose: True # optional
-        MultiSource: False # optional
-        TimestampPath: "/model/accesslog/time"
+        verbose: True # optional
+        multi_source: False # optional
+        timestamp_path: "/model/accesslog/time"
 
 
 Analysis:
@@ -122,18 +122,18 @@ Analysis:
           paths: ["/model/accesslog/status"]
           persistence_id: 'accesslog_status' # optional default: Default
           output_log_line: false # optional default: true
-          learnMode: true
+          learn_mode: true
 
         - type: "NewMatchPathValueComboDetector"
           paths: ["/model/accesslog/request","/model/accesslog/method"]
-          learnMode: true
+          learn_mode: true
           persistence_id: 'accesslog_request' # optional default: Default
           output_log_line: false # optional default: true
           allow_missing_values: false # optional default: false
 
         - type: "NewMatchPathValueComboDetector"
           paths: ["/model/accesslog/request","/model/accesslog/status"]
-          learnMode: true
+          learn_mode: true
 
 EventHandlers:
         - id: "stpe"

@@ -113,8 +113,8 @@ Parser:
                   - user_agent_model
                   - sq6
 Input:
-        TimestampPath: "/accesslog/time"
-        Verbose: false # use this to debug your parser-model
+        timestamp_path: "/accesslog/time"
+        verbose: false # use this to debug your parser-model
 
 EventHandlers:
         - id: "stpe"

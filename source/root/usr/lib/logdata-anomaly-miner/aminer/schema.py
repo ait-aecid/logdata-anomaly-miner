@@ -85,9 +85,9 @@
             'required': True,
             'type': 'dict',
             'schema': {
-                'Verbose': {'type': 'boolean', 'required': False, 'default': False},
-                'MultiSource': {'type': 'boolean', 'required': False, 'default': False},
-                'TimestampPath': {'type': ['string', 'list']}
+                'verbose': {'type': 'boolean', 'required': False, 'default': False},
+                'multi_source': {'type': 'boolean', 'required': False, 'default': False},
+                'timestamp_path': {'type': ['string', 'list']}
             }
         },
         'Analysis': {
@@ -111,7 +111,7 @@
                         'TimeCorrelationViolationDetector', 'SimpleMonotonicTimestampAdjust', 'TimestampsUnsortedDetector',
                         'WhitelistViolationDetector']},
                     'paths': {'type': 'list', 'schema': {'type': 'string'}},
-                    'learnMode': {'type': 'boolean'},
+                    'learn_mode': {'type': 'boolean'},
                     'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},
                     'output_log_line': {'type': 'boolean', 'required': False, 'default': True},
                     'allow_missing_values': {'type': 'boolean', 'required': False, 'default': False},

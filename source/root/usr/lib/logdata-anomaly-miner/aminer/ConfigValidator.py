@@ -4,16 +4,16 @@ from cerberus import TypeDefinition
 
 class ParserModelType:
     name = None
-    ismodel = False
+    is_model = False
     func = None
 
     def __init__(self, name):
         self.name = name
         if name.endswith('ModelElement'):
-            self.ismodel = True
+            self.is_model = True
             self.func = getattr(__import__("aminer.parsing", fromlist=[name]), name)
         else:
-            self.ismodel = False
+            self.is_model = False
             # we need this import:
             # skipcq: PTC-W0034
             self.func = getattr(__import__(name), 'get_model')
