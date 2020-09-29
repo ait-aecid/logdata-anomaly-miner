@@ -485,7 +485,7 @@ class AMinerRemoteControlExecutionMethods:
         self.REMOTE_CONTROL_RESPONSE = result_string
 
 
-def repr_recursive(attr):
+def _repr_recursive(attr):
     """This method returns a valid JSON representation of an config attribute with the types list, dict, set or tuple.
     @param attr the attribute to be represented."""
     if attr is None:
@@ -513,7 +513,7 @@ def repr_recursive(attr):
     return rep
 
 
-def reformat_attr(attr):
+def _reformat_attr(attr):
     """This method returns a valid JSON representation of an config attribute with any type. If the type is list, dict, set or tuple
     repr_recursive is called.
     @param attr the attribute to be represented."""
