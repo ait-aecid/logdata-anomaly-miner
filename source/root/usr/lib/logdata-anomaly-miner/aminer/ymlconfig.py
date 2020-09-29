@@ -170,6 +170,7 @@ def build_analysis_pipeline(analysis_context):
         analysis_dict = {}
         match_action_dict = {}
         match_rules_dict = {}
+        correlation_rules = {}
         for item in yamldata['Analysis']:
             if item['id'] == 'None':
                 compName = None
@@ -459,9 +460,41 @@ def build_analysis_pipeline(analysis_context):
                     tmpAnalyser = func(
                         debug_match_result=item['debug_mode'],
                         match_action=match_action)
-
                 match_rules_dict[compName] = tmpAnalyser
                 continue
+            elif item['type'] == 'CorrelationRule':
+                artefact_match_parameters = []
+                for match_parameters in item['artefact_match_parameters']:
+                    artefact_match_parameters.append(tuple(i for i in match_parameters))
+                tmpAnalyser = func(
+                    item['rule_id'],
+                    item['min_time_delta'],
+                    item['max_time_delta'],
+                    item['max_artefacts_a_for_single_b'],
+                    artefact_match_parameters=artefact_match_parameters)
+                correlation_rules[item['rule_id']] = tmpAnalyser
+                continue
+            elif item['type'] == 'EventClassSelector':
+                if item['artefact_a_rules'] is None and item['artefact_b_rules'] is None:
+                    raise ValueError('At least one of the EventClassSelector\'s rules must not be None!')
+                tmpAnalyser = func(
+                    item['action_id'],
+                    item['artefact_a_rules'],
+                    item['artefact_b_rules'])
+                match_action_dict[item['action_id']] = tmpAnalyser
+                continue
+            elif item['type'] == 'TimeCorrelationViolationDetector':
+                ruleset = []
+                for rule in item['ruleset']:
+                    if rule not in match_rules_dict:
+                        raise ValueError('The match rule %s does not exist!' % rule)
+                    ruleset.append(match_rules_dict[rule])
+                tmpAnalyser = func(
+                    analysis_context.aminer_config,
+                    ruleset,
+                    anomaly_event_handlers,
+                    persistence_id=item['persistence_id'],
+                    output_log_line=item['output_logline'])
             else:
                 tmpAnalyser = func(
                     analysis_context.aminer_config,

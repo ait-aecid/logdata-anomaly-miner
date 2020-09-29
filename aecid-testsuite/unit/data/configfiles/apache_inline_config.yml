@@ -190,6 +190,29 @@ Analysis:
         - type: "OrMatchRule"
           id: "or_match_rule"
           sub_rules: ["and_match_rule1", "and_match_rule2", "negation_match_rule2"]
+        - type: "CorrelationRule"
+          rule_id: "correlation_rule"
+          min_time_delta: 5
+          max_time_delta: 6
+          max_artefacts_a_for_single_b: 1
+          artefact_match_parameters: [["/model/CronAnnouncement/JobNumber", "/model/CronExecution/JobNumber"]]
+        - type: "EventClassSelector"
+          action_id: "a_class_selector"
+          artefact_a_rules: ["correlation_rule"]
+        - type: "EventClassSelector"
+          action_id: "b_class_selector"
+          artefact_b_rules: ["correlation_rule"]
+        - type: "PathExistsMatchRule"
+          id: "path_exists_match_rule3"
+          path: "/model/CronAnnouncement/Run"
+          match_action: "a_class_selector"
+        - type: "PathExistsMatchRule"
+          id: "path_exists_match_rule4"
+          path: "/model/CronExecution/Job"
+          match_action: "b_class_selector"
+        - type: "TimeCorrelationViolationDetector"
+          id: "time_correlation_violation_detector"
+          ruleset: ["path_exists_match_rule3", "path_exists_match_rule4"]
 
 
 EventHandlers:

@@ -97,7 +97,7 @@
             'schema': {
                 'type': 'dict',
                 'schema': {
-                    'id': {'type': 'string', 'required': False, 'default': 'None'},
+                    'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
                     'type': {'type': 'string', 'allowed': [
                         'NewMatchPathValueDetector', 'NewMatchPathValueComboDetector', 'MissingMatchPathValueDetector',
                         'MissingMatchPathListValueDetector', 'TimeCorrelationDetector', 'ParserCount', 'EventCorrelationDetector',
@@ -107,7 +107,8 @@
                         'AtomFilterMatchAction', 'AndMatchRule', 'OrMatchRule', 'ParallelMatchRule', 'ValueDependentDelegatedMatchRule',
                         'NegationMatchRule', 'PathExistsMatchRule', 'ValueMatchRule', 'ValueListMatchRule', 'ValueRangeMatchRule',
                         'StringRegexMatchRule', 'ModuloTimeMatchRule', 'ValueDependentModuloTimeMatchRule', 'IPv4InRFC1918MatchRule',
-                        'DebugMatchRule', 'DebugHistoryMatchRule']},
+                        'DebugMatchRule', 'DebugHistoryMatchRule', 'CorrelationRule', 'EventClassSelector',
+                        'TimeCorrelationViolationDetector']},
                     'paths': {'type': 'list', 'schema': {'type': 'string'}},
                     'learnMode': {'type': 'boolean'},
                     'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},
@@ -175,6 +176,16 @@
                     'limit_lookup_dict': {
                         'type': 'dict', 'schema': {'id': {'type': 'string'}, 'type': {'type': 'list', 'schema': {'type': 'integer'}}}},
                     'default_limit': {'type': 'list', 'schema': {'type': 'integer'}, 'required': False, 'nullable': True, 'default': None},
+                    'rule_id': {'type': 'string'},
+                    'min_time_delta': {'type': 'integer'},
+                    'max_time_delta': {'type': 'integer'},
+                    'max_artefacts_a_for_single_b': {'type': 'integer'},
+                    'artefact_match_parameters': {'type': 'list', 'schema': {'type': 'list', 'schema': {'type': 'string'}},
+                                                  'required': False, 'nullable': True, 'default': None},
+                    'action_id': {'type': 'string'},
+                    'artefact_a_rules': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
+                    'artefact_b_rules': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
+                    'ruleset': {'type': 'list', 'schema': {'type': 'string'}},
                     'whitelist_rules': {'type': 'list', 'schema': {'type': 'string'}}
                 }
             }
