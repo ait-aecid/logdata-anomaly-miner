@@ -229,4 +229,6 @@ EventHandlers:
           type: "StreamPrinterEventHandler"
         - id: "syslog_writer_event_handler"
           type: "SyslogWriterEventHandler"
+        - id: "default_mail_notification_handler"
+          type: "DefaultMailNotificationEventHandler"
 
