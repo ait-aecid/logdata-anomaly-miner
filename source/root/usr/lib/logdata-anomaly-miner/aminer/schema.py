@@ -108,7 +108,7 @@
                         'NegationMatchRule', 'PathExistsMatchRule', 'ValueMatchRule', 'ValueListMatchRule', 'ValueRangeMatchRule',
                         'StringRegexMatchRule', 'ModuloTimeMatchRule', 'ValueDependentModuloTimeMatchRule', 'IPv4InRFC1918MatchRule',
                         'DebugMatchRule', 'DebugHistoryMatchRule', 'CorrelationRule', 'EventClassSelector',
-                        'TimeCorrelationViolationDetector']},
+                        'TimeCorrelationViolationDetector', 'SimpleMonotonicTimestampAdjust']},
                     'paths': {'type': 'list', 'schema': {'type': 'string'}},
                     'learnMode': {'type': 'boolean'},
                     'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},

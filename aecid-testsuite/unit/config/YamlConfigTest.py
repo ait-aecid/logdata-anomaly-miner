@@ -74,6 +74,7 @@ class YamlConfigTest(unittest.TestCase):
         from aminer.analysis.MatchValueAverageChangeDetector import MatchValueAverageChangeDetector
         from aminer.analysis.MatchValueStreamWriter import MatchValueStreamWriter
         from aminer.analysis.TimeCorrelationViolationDetector import TimeCorrelationViolationDetector
+        from aminer.analysis.TimestampCorrectionFilters import SimpleMonotonicTimestampAdjust
         from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
         from aminer.parsing.SequenceModelElement import SequenceModelElement
         from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
@@ -92,6 +93,7 @@ class YamlConfigTest(unittest.TestCase):
         self.assertTrue(isinstance(context.registered_components[8][0], MatchValueStreamWriter))
         self.assertTrue(isinstance(context.registered_components[9][0], NewMatchPathDetector))
         self.assertTrue(isinstance(context.registered_components[10][0], TimeCorrelationViolationDetector))
+        self.assertTrue(isinstance(context.registered_components[11][0], SimpleMonotonicTimestampAdjust))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
         self.assertEqual(context.atomizer_factory.default_timestamp_paths, '/accesslog/time')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model, SequenceModelElement))

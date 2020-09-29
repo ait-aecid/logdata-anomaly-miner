@@ -30,5 +30,6 @@ from aminer.analysis.Rules import AndMatchRule, OrMatchRule, AtomFilterMatchActi
 from aminer.analysis.TimeCorrelationDetector import TimeCorrelationDetector  # skipcq: FLK-E402
 # skipcq: FLK-E402
 from aminer.analysis.TimeCorrelationViolationDetector import TimeCorrelationViolationDetector, CorrelationRule, EventClassSelector
+from aminer.analysis.TimestampCorrectionFilters import SimpleMonotonicTimestampAdjust  # skipcq: FLK-E402
 from aminer.analysis.TimestampsUnsortedDetector import TimestampsUnsortedDetector  # skipcq: FLK-E402
 from aminer.analysis.WhitelistViolationDetector import WhitelistViolationDetector  # skipcq: FLK-E402

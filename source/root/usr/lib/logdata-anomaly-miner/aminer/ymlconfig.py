@@ -495,6 +495,10 @@ def build_analysis_pipeline(analysis_context):
                     anomaly_event_handlers,
                     persistence_id=item['persistence_id'],
                     output_log_line=item['output_logline'])
+            elif item['type'] == 'SimpleMonotonicTimestampAdjust':
+                tmpAnalyser = func(
+                    [atomFilter],
+                    stop_when_handled_flag=item['stop_when_handled_flag'])
             else:
                 tmpAnalyser = func(
                     analysis_context.aminer_config,

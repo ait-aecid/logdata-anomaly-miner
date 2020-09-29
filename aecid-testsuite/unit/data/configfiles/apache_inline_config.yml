@@ -213,6 +213,8 @@ Analysis:
         - type: "TimeCorrelationViolationDetector"
           id: "time_correlation_violation_detector"
           ruleset: ["path_exists_match_rule3", "path_exists_match_rule4"]
+        - type: "SimpleMonotonicTimestampAdjust"
+          id: "simple_monotonic_timestamp_adjust"
 
 
 EventHandlers:
