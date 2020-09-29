@@ -561,37 +561,15 @@ def build_analysis_pipeline(analysis_context):
         for item in yaml_data['EventHandlers']:
             func = getattr(__import__("aminer.events", fromlist=[item['type']]), item['type'])
             ctx = None
-            if item['type'] == 'StreamPrinterEventHandler':
-                if item['json'] is True:
-                    from aminer.events import JsonConverterHandler
-                    ctx = JsonConverterHandler([func(analysis_context)], analysis_context)
-                else:
-                    ctx = func(analysis_context)
-#           if item['type'] == 'KafkaEventHandler':
-#             try:
-#               item['args'][0]
-#             except:
-#               raise ValueError("Kafka-Topic not defined")
-#             try:
-#               kafkaconfig = item['args'][1]
-#             except:
-#               kafkaconfig = '/etc/aminer/kafka-client.conf'
-#             config = configparser.ConfigParser()
-#             config.read(kafkaconfig)
-#             options = dict(config.items("DEFAULT"))
-#             for key, val in options.items():
-#               try:
-#                 if key == "sasl_plain_username":
-#                   continue
-#                 options[key] = int(val)
-#               except:
-#                 pass
-#             kafkaEventHandler = func(analysis_context.aminer_config, item['args'][0], options)
-#             from aminer.events import JsonConverterHandler
-#             anomaly_event_handlers.append(
-#                 JsonConverterHandler(analysis_context.aminer_config, messageQueueEventHandlers,
-#                 analysis_context, learningMode))
-#           else:
+            if item['type'] in ('StreamPrinterEventHandler', 'DefaultMailNotificationEventHandler'):
+                ctx = func(analysis_context)
+            if item['type'] == 'SyslogWriterEventHandler':
+                ctx = func(analysis_context, item['instance_name'])
+            if item['type'] == 'KafkaEventHandler':
+                ctx = func(analysis_context, item['topic'], item['options'])
+            if item['json'] is True:
+                from aminer.events import JsonConverterHandler
+                ctx = JsonConverterHandler([ctx], analysis_context)
             if ctx is None:
                 ctx = func(analysis_context)
             anomaly_event_handlers.append(ctx)

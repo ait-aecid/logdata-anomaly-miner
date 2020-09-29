@@ -78,6 +78,8 @@ class YamlConfigTest(unittest.TestCase):
         from aminer.analysis.TimestampsUnsortedDetector import TimestampsUnsortedDetector
         from aminer.analysis.WhitelistViolationDetector import WhitelistViolationDetector
         from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
+        from aminer.events.SyslogWriterEventHandler import SyslogWriterEventHandler
+        from aminer.events.DefaultMailNotificationEventHandler import DefaultMailNotificationEventHandler
         from aminer.parsing.SequenceModelElement import SequenceModelElement
         from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
         from aminer.parsing.FixedDataModelElement import FixedDataModelElement
@@ -99,6 +101,8 @@ class YamlConfigTest(unittest.TestCase):
         self.assertTrue(isinstance(context.registered_components[12][0], SimpleMonotonicTimestampAdjust))
         self.assertTrue(isinstance(context.registered_components[13][0], WhitelistViolationDetector))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
+        self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[1], SyslogWriterEventHandler))
+        self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[2], DefaultMailNotificationEventHandler))
         self.assertEqual(context.atomizer_factory.default_timestamp_paths, '/accesslog/time')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model, SequenceModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[0], VariableByteDataModelElement))

@@ -205,7 +205,9 @@
                     'id': {'type': 'string'},
                     'type': {'type': 'string', 'allowed': ['StreamPrinterEventHandler', 'SyslogWriterEventHandler']},
                     'json': {'type': 'boolean', 'required': False, 'default': False},
-                    'args': {'type': ['string', 'list'], 'schema': {'type': 'string'}}
+                    'instance_name': {'type': 'string', 'required': False, 'default': 'aminer'},
+                    'topic': {'type': 'string'},
+                    'options': {'type': 'dict', 'schema': {'id': {'type': 'string'}, 'type': {'type': ['string', 'list', 'integer']}}}
                 }
             }
         }

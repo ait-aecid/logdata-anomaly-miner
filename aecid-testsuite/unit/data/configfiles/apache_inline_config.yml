@@ -227,4 +227,6 @@ Analysis:
 EventHandlers:
         - id: "stpe"
           type: "StreamPrinterEventHandler"
+        - id: "syslog_writer_event_handler"
+          type: "SyslogWriterEventHandler"
 
