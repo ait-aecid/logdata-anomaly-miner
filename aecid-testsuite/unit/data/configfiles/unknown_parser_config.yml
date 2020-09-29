@@ -122,14 +122,14 @@ Analysis:
         - type: "NewMatchPathValueDetector"
           paths: ["/model/accesslog/status"]
           persistence_id: 'accesslog_status' # optional default: Default
-          output_logline: false # optional default: true
+          output_log_line: false # optional default: true
           learnMode: true
 
         - type: "NewMatchPathValueComboDetector"
           paths: ["/model/accesslog/request","/model/accesslog/method"]
           learnMode: true
           persistence_id: 'accesslog_request' # optional default: Default
-          output_logline: false # optional default: true
+          output_log_line: false # optional default: true
           allow_missing_values: false # optional default: false
 
         - type: "NewMatchPathValueComboDetector"

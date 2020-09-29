@@ -108,11 +108,12 @@
                         'NegationMatchRule', 'PathExistsMatchRule', 'ValueMatchRule', 'ValueListMatchRule', 'ValueRangeMatchRule',
                         'StringRegexMatchRule', 'ModuloTimeMatchRule', 'ValueDependentModuloTimeMatchRule', 'IPv4InRFC1918MatchRule',
                         'DebugMatchRule', 'DebugHistoryMatchRule', 'CorrelationRule', 'EventClassSelector',
-                        'TimeCorrelationViolationDetector', 'SimpleMonotonicTimestampAdjust']},
+                        'TimeCorrelationViolationDetector', 'SimpleMonotonicTimestampAdjust', 'TimestampsUnsortedDetector',
+                        'WhitelistViolationDetector']},
                     'paths': {'type': 'list', 'schema': {'type': 'string'}},
                     'learnMode': {'type': 'boolean'},
                     'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},
-                    'output_logline': {'type': 'boolean', 'required': False, 'default': True},
+                    'output_log_line': {'type': 'boolean', 'required': False, 'default': True},
                     'allow_missing_values': {'type': 'boolean', 'required': False, 'default': False},
                     'check_interval': {'type': 'integer', 'required': False, 'default': 3600},
                     'realert_interval': {'type': 'integer', 'required': False, 'default': 36000},
@@ -186,6 +187,7 @@
                     'artefact_a_rules': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                     'artefact_b_rules': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                     'ruleset': {'type': 'list', 'schema': {'type': 'string'}},
+                    'exit_on_error_flag': {'type': 'boolean', 'required': False, 'default': False},
                     'whitelist_rules': {'type': 'list', 'schema': {'type': 'string'}}
                 }
             }

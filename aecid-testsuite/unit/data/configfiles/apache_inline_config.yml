@@ -117,9 +117,13 @@ Input:
         Verbose: false # use this to debug your parser-model
 
 Analysis:
+        - type: "TimestampsUnsortedDetector"
+          id: "timestamps_unsorted_detector"
         - type: "NewMatchPathValueDetector"
+          id: "new_match_path_value_detector"
           paths: ["/accesslog/status"]
         - type: "NewMatchPathValueComboDetector"
+          id: "new_match_path_value_combo_detector"
           paths: ["/accesslog/method","/accesslog/request","/accesslog/useragent"]
         - type: "LinearNumericBinDefinition"
           id: "linear_numeric_bin_definition"
@@ -138,26 +142,26 @@ Analysis:
         - type: "HistogramAnalysis"
           histogram_defs: [["/model/RandomTime/Random", "linear_numeric_bin_definition"]]
           report_interval: 10
-          output_logline: true
+          output_log_line: true
         - type: "PathDependentHistogramAnalysis"
           path: "/model/RandomTime"
           bin_definition: "modulo_time_bin_definition"
           report_interval: 10
-          output_logline: true
+          output_log_line: true
         - type: "EnhancedNewMatchPathValueComboDetector"
           paths: ["/model/DailyCron/UName", "/model/DailyCron/JobNumber"]
           tuple_transformation_function: "demo"
-          output_logline: true
+          output_log_line: true
         - type: "MatchFilter"
           paths: ["/model/Random"]
           value_list: [1, 10, 100]
-          output_logline: true
+          output_log_line: true
         - type: "MatchValueAverageChangeDetector"
           timestamp_path: None
           paths: ["/model/Random"]
           min_bin_elements: 100
           min_bin_time: 10
-          output_logline: true
+          output_log_line: true
         - type: "MatchValueStreamWriter"
           stream: "sys.stdout"
           paths: ["/model/Sensors/CPUTemp", "/model/Sensors/CPUWorkload", "/model/Sensors/DTM"]
@@ -215,6 +219,9 @@ Analysis:
           ruleset: ["path_exists_match_rule3", "path_exists_match_rule4"]
         - type: "SimpleMonotonicTimestampAdjust"
           id: "simple_monotonic_timestamp_adjust"
+        - type: "WhitelistViolationDetector"
+          id: "whitelist_violation_detector"
+          whitelist_rules: ["or_match_rule"]
 
 
 EventHandlers:
