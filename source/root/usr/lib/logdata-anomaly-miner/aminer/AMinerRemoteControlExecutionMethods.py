@@ -485,8 +485,9 @@ class AMinerRemoteControlExecutionMethods:
         self.REMOTE_CONTROL_RESPONSE = result_string
 
 
-# skipcq: FLK-D103
 def repr_recursive(attr):
+    """This method returns a valid JSON representation of an config attribute with the types list, dict, set or tuple.
+    @param attr the attribute to be represented."""
     if attr is None:
         return None
     if isinstance(attr, (bool, type(AMinerConfig))):
@@ -512,8 +513,10 @@ def repr_recursive(attr):
     return rep
 
 
-# skipcq: FLK-D103
 def reformat_attr(attr):
+    """This method returns a valid JSON representation of an config attribute with any type. If the type is list, dict, set or tuple
+    repr_recursive is called.
+    @param attr the attribute to be represented."""
     if type(attr) in (int, str, float, bool, type(AMinerConfig), type(None)):
         rep = str(attr)
     elif isinstance(attr, bytes):
