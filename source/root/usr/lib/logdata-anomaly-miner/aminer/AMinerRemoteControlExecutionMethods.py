@@ -133,6 +133,11 @@ class AMinerRemoteControlExecutionMethods:
         return 0
 
     def change_attribute_of_registered_analysis_component(self, analysis_context, component_name, attribute, value):
+        """Changes a specific attribute of a registered component.
+        @param analysis_context the analysis context of the AMiner.
+        @param component_name the name to be registered in the analysis_context.
+        @param attribute the name of the attribute to be printed.
+        @param value the new value of the attribute."""
         attr = getattr(analysis_context.get_component_by_name(component_name), attribute, None)
         if type(attr) is type(value):
             setattr(analysis_context.get_component_by_name(component_name), attribute, value)
@@ -143,6 +148,10 @@ class AMinerRemoteControlExecutionMethods:
                                                                                                attribute, type(attr))
 
     def rename_registered_analysis_component(self, analysis_context, old_component_name, new_component_name):
+        """Renames an analysis by removing and readding it to the analysis_context.
+        @param analysis_context the analysis context of the AMiner.
+        @param old_component_name the current name of the component.
+        @param new_component_name the new name of the component."""
         if type(old_component_name) is not str or type(new_component_name) is not str:
             self.REMOTE_CONTROL_RESPONSE = "FAILURE: the parameters 'oldComponentName' and 'newComponentName' must be of type str."
         else:
@@ -156,6 +165,9 @@ class AMinerRemoteControlExecutionMethods:
                     old_component_name, new_component_name)
 
     def print_config_property(self, analysis_context, property_name):
+        """Prints a specific config property.
+        @param analysis_context the analysis context of the AMiner.
+        @param property_name the name of the property to be printed."""
         if property_name not in analysis_context.aminer_config.config_properties:
             self.REMOTE_CONTROL_RESPONSE = self.ERROR_MESSAGE_RESOURCE_NOT_FOUND % property_name
             return
@@ -174,6 +186,10 @@ class AMinerRemoteControlExecutionMethods:
         self.REMOTE_CONTROL_RESPONSE = '"%s": %s' % (property_name, val)
 
     def print_attribute_of_registered_analysis_component(self, analysis_context, component_name, attribute):
+        """Prints a specific attribute of a registered component.
+        @param analysis_context the analysis context of the AMiner.
+        @param component_name the name to be registered in the analysis_context.
+        @param attribute the name of the attribute to be printed."""
         if type(component_name) is not str or type(attribute) is not str:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: the parameters 'component_name' and 'attribute' must be of type str."
             return
@@ -213,6 +229,8 @@ class AMinerRemoteControlExecutionMethods:
                                             (component_name, attribute)
 
     def print_current_config(self, analysis_context):
+        """Prints the entire AMiner config to the stdout.
+        @param analysis_context the analysis context of the AMiner."""
         for config_property in analysis_context.aminer_config.config_properties:
             if isinstance(analysis_context.aminer_config.config_properties[config_property], str):
                 self.REMOTE_CONTROL_RESPONSE += '"%s": "%s",\n' % (
@@ -266,9 +284,17 @@ class AMinerRemoteControlExecutionMethods:
         return False
 
     def save_current_config(self, analysis_context, destination_file):
+        """Saves the current live config into a file.
+        @param analysis_context the analysis context of the AMiner.
+        @param destination_file the path to the file in which the config is saved."""
         self.REMOTE_CONTROL_RESPONSE = AMinerConfig.save_config(analysis_context, destination_file)
 
     def whitelist_event_in_component(self, analysis_context, component_name, event_data, whitelisting_data=None):
+        """Whitelists one or multiple specific events from the history in the component it occurred in.
+        @param analysis_context the analysis context of the AMiner.
+        @param component_name the name to be registered in the analysis_context.
+        @param event_data the event_data for the whitelist_event method.
+        @param whitelisting_data this data is passed on into the whitelist_event method."""
         component = analysis_context.get_component_by_name(component_name)
         if component is None:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: component '%s' does not exist!" % component
@@ -292,9 +318,14 @@ class AMinerRemoteControlExecutionMethods:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
 
     def add_handler_to_atom_filter_and_register_analysis_component(self, analysis_context, atom_handler, component, component_name):
+        """Add a new component to the analysis_context.
+        @param analysis_context the analysis context of the AMiner.
+        @param atom_handler the registered name of the atom_handler component to add the new component to.
+        @param component the component to be added.
+        @param component_name the name to be registered in the analysis_context."""
         atom_filter = analysis_context.get_component_by_name(atom_handler)
         if atom_filter is None:
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: atomHandler '%s' does not exist!" % atom_handler
+            self.REMOTE_CONTROL_RESPONSE += "FAILURE: atom_handler '%s' does not exist!" % atom_handler
             return
         if analysis_context.get_component_by_name(component_name) is not None:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: component with same name already registered! (%s)" % component_name
@@ -308,6 +339,10 @@ class AMinerRemoteControlExecutionMethods:
             component_name, atom_handler)
 
     def dump_events_from_history(self, analysis_context, history_component_name, dump_event_id):
+        """Detailed print of a specific event from the history.
+        @param analysis_context the analysis context of the AMiner.
+        @param history_component_name the registered name of the history component.
+        @param dump_event_id a numeric id of the events to be printed."""
         self.REMOTE_CONTROL_RESPONSE = None
         history_handler = analysis_context.get_component_by_name(history_component_name)
         if history_handler is None:
@@ -339,6 +374,10 @@ class AMinerRemoteControlExecutionMethods:
             self.REMOTE_CONTROL_RESPONSE = result_string
 
     def ignore_events_from_history(self, analysis_context, history_component_name, event_ids):
+        """Ignore one or multiple specific events from the history. These ignores do not affect the components itself.
+        @param analysis_context the analysis context of the AMiner.
+        @param history_component_name the registered name of the history component.
+        @param event_ids a list of numeric ids of the events to be ignored."""
         history_handler = analysis_context.get_component_by_name(history_component_name)
         if history_handler is None:
             self.REMOTE_CONTROL_RESPONSE = component_not_found
@@ -367,6 +406,10 @@ class AMinerRemoteControlExecutionMethods:
         self.REMOTE_CONTROL_RESPONSE = 'OK\n%d elements ignored' % delete_count
 
     def list_events_from_history(self, analysis_context, history_component_name, max_event_count=None):
+        """List the latest events of a specific history component.
+        @param analysis_context the analysis context of the AMiner.
+        @param history_component_name the registered name of the history component.
+        @param max_event_count the number of the newest events to be listed."""
         history_handler = analysis_context.get_component_by_name(history_component_name)
         if history_handler is None:
             self.REMOTE_CONTROL_RESPONSE = component_not_found
@@ -381,6 +424,11 @@ class AMinerRemoteControlExecutionMethods:
             self.REMOTE_CONTROL_RESPONSE = result_string
 
     def whitelist_events_from_history(self, analysis_context, history_component_name, id_spec_list, whitelisting_data=None):
+        """Whitelists one or multiple specific events from the history in the component it occurred in.
+        @param analysis_context the analysis context of the AMiner.
+        @param history_component_name the registered name of the history component.
+        @param id_spec_list a list of numeric ids of the events to be whitelisted.
+        @param whitelisting_data this data is passed on into the whitelist_event method."""
         from aminer.events import EventSourceInterface
         history_handler = analysis_context.get_component_by_name(history_component_name)
         if history_handler is None:
