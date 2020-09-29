@@ -261,11 +261,11 @@ class AMinerRemoteControlExecutionMethods:
                         result += indent + '"%s": {\n' % var + indent + '  "' + l.__class__.__name__ + \
                                   '": {\n' + self.get_all_vars(l, indent + '    ') + indent + '  ' + "}\n" + indent + '},\n'
                     else:
-                        rep = reformat_attr(attr)
+                        rep = _reformat_attr(attr)
                         result += indent + attr_str % (var, rep)
                         break
             else:
-                rep = reformat_attr(attr)
+                rep = _reformat_attr(attr)
                 result += indent + attr_str % (var, rep)
         return result.rstrip(',\n') + '\n'
 
@@ -500,13 +500,13 @@ def _repr_recursive(attr):
         if isinstance(attr, (tuple, set)):
             attr = list(attr)
         for i, a in enumerate(attr):
-            attr[i] = repr_recursive(a)
+            attr[i] = _repr_recursive(a)
         rep = str(attr).replace('\\"', "'").replace("'[", "[").replace("]'", "]").replace("'", '"').replace('"False"', 'false').replace(
             '"True"', 'true').replace('"None"', 'null')
     elif isinstance(attr, dict):
         new_attr = {}
         for key in attr.keys():
-            new_attr[str(key)] = repr_recursive(key).replace('\\"', "'")
+            new_attr[str(key)] = _repr_recursive(key).replace('\\"', "'")
         rep = str(new_attr).replace("'[", "[").replace("]'", "]")
     else:
         rep = attr.__class__.__name__
@@ -515,14 +515,14 @@ def _repr_recursive(attr):
 
 def _reformat_attr(attr):
     """This method returns a valid JSON representation of an config attribute with any type. If the type is list, dict, set or tuple
-    repr_recursive is called.
+    _repr_recursive is called.
     @param attr the attribute to be represented."""
     if type(attr) in (int, str, float, bool, type(AMinerConfig), type(None)):
         rep = str(attr)
     elif isinstance(attr, bytes):
         rep = attr.decode()
     elif isinstance(attr, (list, dict, set, tuple)):
-        rep = repr_recursive(attr)
+        rep = _repr_recursive(attr)
     else:
         rep = attr.__class__.__name__
 
