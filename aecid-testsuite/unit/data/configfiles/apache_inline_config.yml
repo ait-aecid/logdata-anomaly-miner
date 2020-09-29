@@ -165,6 +165,32 @@ Analysis:
           missing_value_string: ""
         - type: "NewMatchPathDetector"
           id: "new_match_path_detector"
+        - type: "PathExistsMatchRule"
+          id: "path_exists_match_rule1"
+          path: "/model/LoginDetails/PastTime/Time/Minutes"
+        - type: "PathExistsMatchRule"
+          id: "path_exists_match_rule2"
+          path: "/model/LoginDetails"
+        - type: "ValueMatchRule"
+          id: "value_match_rule"
+          path: "/model/LoginDetails/Username"
+          value: "root"
+        - type: "NegationMatchRule"
+          id: "negation_match_rule1"
+          sub_rule: "value_match_rule"
+        - type: "NegationMatchRule"
+          id: "negation_match_rule2"
+          sub_rule: "path_exists_match_rule2"
+        - type: "AndMatchRule"
+          id: "and_match_rule1"
+          sub_rules: ["path_exists_match_rule1", "negation_match_rule1"]
+        - type: "AndMatchRule"
+          id: "and_match_rule2"
+          sub_rules: ["negation_match_rule1", "path_exists_match_rule2"]
+        - type: "OrMatchRule"
+          id: "or_match_rule"
+          sub_rules: ["and_match_rule1", "and_match_rule2", "negation_match_rule2"]
+
 
 EventHandlers:
         - id: "stpe"

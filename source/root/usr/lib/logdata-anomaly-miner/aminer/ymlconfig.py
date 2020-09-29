@@ -168,6 +168,8 @@ def build_analysis_pipeline(analysis_context):
 
     if 'Analysis' in yamldata and yamldata['Analysis'] is not None:
         analysis_dict = {}
+        match_action_dict = {}
+        match_rules_dict = {}
         for item in yamldata['Analysis']:
             if item['id'] == 'None':
                 compName = None
@@ -350,6 +352,116 @@ def build_analysis_pipeline(analysis_context):
                     persistence_id=item['persistence_id'],
                     auto_include_flag=learn,
                     output_log_line=item['output_logline'])
+            elif 'MatchAction' in item['type']:
+                if compName is None:
+                    raise ValueError('The %s must have an id!' % item['type'])
+                if item['type'] == 'EventGenerationMatchAction':
+                    tmpAnalyser = func(
+                        item['event_type'],
+                        item['event_message'],
+                        anomaly_event_handlers)
+                elif item['type'] == 'AtomFilterMatchAction':
+                    tmpAnalyser = func(
+                        atomFilter,
+                        stop_when_handled_flag=item['stop_when_handled_flag'])
+                match_action_dict[compName] = tmpAnalyser
+                continue
+            elif 'MatchRule' in item['type']:
+                if compName is None:
+                    raise ValueError('The %s must have an id!' % item['type'])
+                match_action = None
+                if item['match_action'] is not None:
+                    if item['match_action'] not in match_action_dict:
+                        raise ValueError('The match action %s does not exist!' % item['match_action'])
+                    match_action = match_action_dict[item['match_action']]
+                if item['type'] in ('AndMatchRule', 'OrMatchRule', 'ParallelMatchRule'):
+                    sub_rules = []
+                    for sub_rule in item['sub_rules']:
+                        if sub_rule not in match_rules_dict:
+                            raise ValueError('The sub match rule %s does not exist!' % sub_rule)
+                        sub_rules.append(match_rules_dict[sub_rule])
+                    tmpAnalyser = func(
+                        sub_rules,
+                        match_action=match_action)
+                if item['type'] == 'ValueDependentDelegatedMatchRule':
+                    rule_lookup_dict = {}
+                    for rule in item['rule_lookup_dict']:
+                        if rule not in match_rules_dict:
+                            raise ValueError('The match rule %s does not exist!' % rule)
+                        rule_lookup_dict[rule] = match_rules_dict[rule]
+                    tmpAnalyser = func(
+                        item['paths'],
+                        rule_lookup_dict,
+                        default_rule=item['default_rule'],
+                        match_action=match_action)
+                if item['type'] == 'NegationMatchRule':
+                    if item['sub_rule'] not in match_rules_dict:
+                        raise ValueError('The match rule %s does not exist!' % item['sub_rule'])
+                    sub_rule = match_rules_dict[item['sub_rule']]
+                    tmpAnalyser = func(
+                        sub_rule,
+                        match_action=match_action)
+                if item['type'] in ('PathExistsMatchRule', 'IPv4InRFC1918MatchRule'):
+                    tmpAnalyser = func(
+                        item['path'],
+                        match_action=match_action)
+                if item['type'] == 'ValueMatchRule':
+                    if isinstance(item['value'], str):
+                        item['value'] = item['value'].encode()
+                    tmpAnalyser = func(
+                        item['path'],
+                        item['value'],
+                        match_action=match_action)
+                if item['type'] == 'ValueListMatchRule':
+                    value_list = []
+                    for val in item['value_list']:
+                        if isinstance(val, str):
+                            val = val.encode()
+                        value_list.append(val)
+                    tmpAnalyser = func(
+                        item['path'],
+                        value_list,
+                        match_action=match_action)
+                if item['type'] == 'ValueRangeMatchRule':
+                    tmpAnalyser = func(
+                        item['path'],
+                        item['lower_limit'],
+                        item['upper_limit'],
+                        match_action)
+                if item['type'] == 'StringRegexMatchRule':
+                    tmpAnalyser = func(
+                        item['path'],
+                        item['regex'],
+                        match_action=match_action)
+                if item['type'] == 'ModuloTimeMatchRule':
+                    # tzinfo parameter cannot be used yet..
+                    tmpAnalyser = func(
+                        item['path'],
+                        item['seconds_modulo'],
+                        item['lower_limit'],
+                        item['upper_limit'],
+                        match_action=match_action)
+                if item['type'] == 'ValueDependentModuloTimeMatchRule':
+                    # tzinfo parameter cannot be used yet..
+                    tmpAnalyser = func(
+                        item['path'],
+                        item['seconds_modulo'],
+                        item['paths'],
+                        item['limit_lookup_dict'],
+                        default_limit=item['default_limit'],
+                        match_action=match_action)
+                if item['type'] == 'DebugMatchRule':
+                    tmpAnalyser = func(
+                        debug_match_result=item['debug_mode'],
+                        match_action=match_action)
+                if item['type'] == 'DebugHistoryMatchRule':
+                    # object_history is not supported yet..
+                    tmpAnalyser = func(
+                        debug_match_result=item['debug_mode'],
+                        match_action=match_action)
+
+                match_rules_dict[compName] = tmpAnalyser
+                continue
             else:
                 tmpAnalyser = func(
                     analysis_context.aminer_config,

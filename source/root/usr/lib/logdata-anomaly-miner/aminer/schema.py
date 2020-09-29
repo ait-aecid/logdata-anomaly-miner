@@ -103,7 +103,11 @@
                         'MissingMatchPathListValueDetector', 'TimeCorrelationDetector', 'ParserCount', 'EventCorrelationDetector',
                         'NewMatchIdValueComboDetector', 'LinearNumericBinDefinition', 'ModuloTimeBinDefinition', 'HistogramAnalysis',
                         'PathDependentHistogramAnalysis', 'EnhancedNewMatchPathValueComboDetector', 'MatchFilter',
-                        'MatchValueAverageChangeDetector', 'MatchValueStreamWriter', 'NewMatchPathDetector']},
+                        'MatchValueAverageChangeDetector', 'MatchValueStreamWriter', 'NewMatchPathDetector', 'EventGenerationMatchAction',
+                        'AtomFilterMatchAction', 'AndMatchRule', 'OrMatchRule', 'ParallelMatchRule', 'ValueDependentDelegatedMatchRule',
+                        'NegationMatchRule', 'PathExistsMatchRule', 'ValueMatchRule', 'ValueListMatchRule', 'ValueRangeMatchRule',
+                        'StringRegexMatchRule', 'ModuloTimeMatchRule', 'ValueDependentModuloTimeMatchRule', 'IPv4InRFC1918MatchRule',
+                        'DebugMatchRule', 'DebugHistoryMatchRule']},
                     'paths': {'type': 'list', 'schema': {'type': 'string'}},
                     'learnMode': {'type': 'boolean'},
                     'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},
@@ -132,12 +136,12 @@
                     'delta_time_to_discard_hypothesis': {'type': 'float', 'required': False, 'default': 180.0},
                     'check_rules_flag': {'type': 'boolean', 'required': False, 'default': True},
                     'auto_include_flag': {'type': 'boolean', 'required': False, 'default': True},
-                    # skipcq: PYL-W0511
-                    # TODO default None value not working
-                    # 'whitelisted_paths': {'type': ['string', 'list', 'null'], 'required': False, 'default': None},
+                    'whitelisted_paths': {
+                        'type': 'list', 'schema': {'type': 'string'}, 'required': False, 'nullable': True, 'default': None},
                     'id_path_list': {'type': 'list', 'required': False, 'default': []},
                     'min_allowed_time_diff': {'type': 'float', 'required': False, 'default': 5.0},
-                    'lower_limit': {'type': 'integer'},
+                    'lower_limit': {'type': ['integer', 'float']},
+                    'upper_limit': {'type': ['integer', 'float']},
                     'bin_size': {'type': 'integer'},
                     'bin_count': {'type': 'integer'},
                     'outlier_bins_flag': {'type': 'boolean', 'required': False, 'default': False},
@@ -156,7 +160,22 @@
                     # TODO check which streams should be allowed
                     'stream': {'type': 'string', 'allowed': ['sys.stdout', 'sys.stderr']},
                     'separator': {'type': 'string'},
-                    'missing_value_string': {'type': 'string'}
+                    'missing_value_string': {'type': 'string'},
+                    'event_type': {'type': 'string'},
+                    'event_message': {'type': 'string'},
+                    'stop_when_handled_flag': {'type': 'boolean', 'required': False, 'default': False},
+                    'sub_rules': {'type': 'list', 'schema': {'type': 'string'}},
+                    'sub_rule': {'type': 'string'},
+                    'match_action': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
+                    'rule_lookup_dict': {'type': 'dict', 'schema': {'id': {'type': 'string'}, 'type': {'type': 'string'}}},
+                    'default_rule': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
+                    'value': {'type': ['boolean', 'float', 'integer', 'string']},
+                    'regex': {'type': 'string'},
+                    'seconds_modulo': {'type': 'integer'},
+                    'limit_lookup_dict': {
+                        'type': 'dict', 'schema': {'id': {'type': 'string'}, 'type': {'type': 'list', 'schema': {'type': 'integer'}}}},
+                    'default_limit': {'type': 'list', 'schema': {'type': 'integer'}, 'required': False, 'nullable': True, 'default': None},
+                    'whitelist_rules': {'type': 'list', 'schema': {'type': 'string'}}
                 }
             }
         },
