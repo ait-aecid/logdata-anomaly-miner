@@ -21,11 +21,13 @@
         },
         'MailAlerting.TargetAddress': {
             'required': False,
-            'type': 'string'
+            'type': 'string',
+            'default': 'root@localhost'
         },
         'MailAlerting.FromAddress': {
             'required': False,
-            'type': 'string'
+            'type': 'string',
+            'default': 'root@localhost'
         },
         'MailAlerting.SubjectPrefix': {
             'required': False,
@@ -203,7 +205,8 @@
                 'type': 'dict',
                 'schema': {
                     'id': {'type': 'string'},
-                    'type': {'type': 'string', 'allowed': ['StreamPrinterEventHandler', 'SyslogWriterEventHandler']},
+                    'type': {'type': 'string', 'allowed': [
+                        'StreamPrinterEventHandler', 'SyslogWriterEventHandler', 'DefaultMailNotificationEventHandler']},
                     'json': {'type': 'boolean', 'required': False, 'default': False},
                     'instance_name': {'type': 'string', 'required': False, 'default': 'aminer'},
                     'topic': {'type': 'string'},
