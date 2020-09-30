@@ -217,7 +217,7 @@ def main():
                     print('The AMiner persistence directory should not contain any files.', file=sys.stderr)
                     continue
                 shutil.rmtree(file_path)
-            except Exception as e:
+            except OSError as e:
                 print('Failed to delete %s. Reason: %s' % (file_path, e), file=sys.stderr)
 
     if remove_persistence_dirs:
@@ -232,7 +232,7 @@ def main():
                     print('The AMiner persistence directory should not contain any files.', file=sys.stderr)
                     continue
                 shutil.rmtree(file_path)
-            except Exception as e:
+            except OSError as e:
                 print('Failed to delete %s. Reason: %s' % (file_path, e), file=sys.stderr)
 
     if from_begin_flag:
