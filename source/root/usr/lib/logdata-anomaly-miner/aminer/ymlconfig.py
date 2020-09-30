@@ -135,18 +135,18 @@ def build_analysis_pipeline(analysis_context):
 # Now define the AtomizerFactory using the model. A simple line
 # based one is usually sufficient.
     from aminer.input import SimpleByteStreamLineAtomizerFactory
-    if yaml_data['Input']['multi_source'] is True:
+    if yaml_data['Input']['MultiSource'] is True:
         from aminer.input import SimpleMultisourceAtomSync
         analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
             parsing_model, [SimpleMultisourceAtomSync([atom_filter], sync_wait_time=5)],
-            anomaly_event_handlers, default_timestamp_paths=yaml_data['Input']['timestamp_path'])
+            anomaly_event_handlers, default_timestamp_paths=yaml_data['Input']['TimestampPath'])
     else:
         analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
             parsing_model, [atom_filter], anomaly_event_handlers,
-            default_timestamp_paths=yaml_data['Input']['timestamp_path'])
+            default_timestamp_paths=yaml_data['Input']['TimestampPath'])
 
 # Just report all unparsed atoms to the event handlers.
-    if yaml_data['Input']['verbose'] is True:
+    if yaml_data['Input']['Verbose'] is True:
         from aminer.input import VerboseUnparsedAtomHandler
         atom_filter.add_handler(
             VerboseUnparsedAtomHandler(anomaly_event_handlers, parsing_model),
@@ -158,8 +158,8 @@ def build_analysis_pipeline(analysis_context):
             stop_when_handled_flag=True)
 
     from aminer.analysis import NewMatchPathDetector
-    if 'learn_mode' in yaml_data:
-        learn = yaml_data['learn_mode']
+    if 'learnMode' in yaml_data:
+        learn = yaml_data['learnMode']
     else:
         learn = True
     nmpd = NewMatchPathDetector(
@@ -177,8 +177,8 @@ def build_analysis_pipeline(analysis_context):
                 comp_name = None
             else:
                 comp_name = item['id']
-            if 'learn_mode' in yaml_data:
-                learn = yaml_data['learn_mode']
+            if 'learnMode' in yaml_data:
+                learn = yaml_data['learnMode']
             else:
                 learn = item['output_log_line']
             func = getattr(__import__("aminer.analysis", fromlist=[item['type']]), item['type'])
