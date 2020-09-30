@@ -149,6 +149,9 @@ def main():
     config_file_name = '/etc/aminer/config.py'
     run_in_foreground_flag = False
     run_analysis_child_flag = False
+    clear_persistence_flag = False
+    remove_persistence_dirs = []
+    from_begin_flag = False
 
     arg_pos = 1
     while arg_pos < len(sys.argv):
@@ -164,6 +167,19 @@ def main():
             continue
         if arg_name == '--RunAnalysis':
             run_analysis_child_flag = True
+            continue
+        if arg_name == '--Clear':
+            clear_persistence_flag = True
+            continue
+        if arg_name == '--Remove':
+            if '.' in sys.argv[arg_pos] or '/' in sys.argv[arg_pos]:
+                print('The remove path %s must not contain any . or /' % sys.argv[arg_pos], file=sys.stderr)
+                sys.exit(1)
+            remove_persistence_dirs.append(sys.argv[arg_pos])
+            arg_pos += 1
+            continue
+        if arg_name == '--FromBegin':
+            from_begin_flag = True
             continue
         if arg_name in ('--print_help', '--Help', '-h'):
             print_help(program_name)
@@ -188,6 +204,43 @@ def main():
         print("Config-Error: %s" % e)
         sys.exit(1)
 
+    if clear_persistence_flag:
+        if remove_persistence_dirs:
+            print('The --Clear and --Remove arguments must not be used together!', file=sys.stderr)
+            sys.exit(1)
+        import shutil
+        persistence_dir_name = aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
+        for filename in os.listdir(persistence_dir_name):
+            file_path = os.path.join(persistence_dir_name, filename)
+            try:
+                if not os.path.isdir(file_path):
+                    print('The AMiner persistence directory should not contain any files.', file=sys.stderr)
+                    continue
+                shutil.rmtree(file_path)
+            except OSError as e:
+                print('Failed to delete %s. Reason: %s' % (file_path, e), file=sys.stderr)
+
+    if remove_persistence_dirs:
+        import shutil
+        persistence_dir_name = aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
+        for filename in remove_persistence_dirs:
+            file_path = os.path.join(persistence_dir_name, filename)
+            try:
+                if not os.path.exists(file_path):
+                    continue
+                if not os.path.isdir(file_path):
+                    print('The AMiner persistence directory should not contain any files.', file=sys.stderr)
+                    continue
+                shutil.rmtree(file_path)
+            except OSError as e:
+                print('Failed to delete %s. Reason: %s' % (file_path, e), file=sys.stderr)
+
+    if from_begin_flag:
+        repositioning_data_path = os.path.join(aminer_config.config_properties.get(
+            AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR), 'AnalysisChild', 'RepositioningData')
+        if os.path.exists(repositioning_data_path):
+            os.remove(repositioning_data_path)
+
     if run_analysis_child_flag:
         # Call analysis process, this function will never return.
         run_analysis_child(aminer_config, program_name)
@@ -196,7 +249,7 @@ def main():
     # from within configuration.
     from aminer.util import SecureOSFunctions
     from aminer.util import decode_string_as_byte_string
-    log_sources_list = aminer_config.config_properties.get(AMinerConfig.KEY_LOG_SOURCES_LIST, None)
+    log_sources_list = aminer_config.config_properties.get(AMinerConfig.KEY_LOG_SOURCES_LIST)
     if (log_sources_list is None) or not log_sources_list:
         print('%s: %s not defined' % (program_name, AMinerConfig.KEY_LOG_SOURCES_LIST), file=sys.stderr)
         sys.exit(1)
@@ -256,7 +309,7 @@ def main():
                 print('Failed to clean up old remote control socket at %s' % remote_control_socket_name, file=sys.stderr)
                 sys.exit(1)
         # Create the local socket: there is no easy way to create it with correct permissions, hence a fork is needed, setting umask,
-        # bind the socket. It is also recomended to create the socket in a directory having the correct permissions already.
+        # bind the socket. It is also recommended to create the socket in a directory having the correct permissions already.
         remote_control_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         remote_control_socket.setblocking(False)
         bind_child_pid = os.fork()
