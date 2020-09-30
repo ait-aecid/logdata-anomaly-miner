@@ -180,7 +180,7 @@ def build_analysis_pipeline(analysis_context):
             if 'learnMode' in yaml_data:
                 learn = yaml_data['learnMode']
             else:
-                learn = item['output_log_line']
+                learn = item['output_logline']
             func = getattr(__import__("aminer.analysis", fromlist=[item['type']]), item['type'])
             if item['type'] == 'NewMatchPathValueDetector':
                 tmp_analyser = func(

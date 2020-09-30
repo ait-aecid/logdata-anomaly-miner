@@ -75,7 +75,7 @@ config_properties['MailAlerting.MaxAlertGap'] = 600
 config_properties['MailAlerting.MaxEventsPerMessage'] = 1000
 config_properties['LogPrefix'] = 'Original log line: '
 config_properties['Resources.MaxCpuPercentUsage'] = 30
-config_properties['Resources.MaxMemoryUsage'] = 64
+config_properties['Resources.MaxMemoryUsage'] = 128
 
 # Add your ruleset here:
 

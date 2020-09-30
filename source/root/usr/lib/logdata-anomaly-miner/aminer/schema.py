@@ -115,7 +115,7 @@
                     'paths': {'type': 'list', 'schema': {'type': 'string'}},
                     'learnMode': {'type': 'boolean'},
                     'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},
-                    'output_log_line': {'type': 'boolean', 'required': False, 'default': True},
+                    'output_logline': {'type': 'boolean', 'required': False, 'default': True},
                     'allow_missing_values': {'type': 'boolean', 'required': False, 'default': False},
                     'check_interval': {'type': 'integer', 'required': False, 'default': 3600},
                     'realert_interval': {'type': 'integer', 'required': False, 'default': 36000},
