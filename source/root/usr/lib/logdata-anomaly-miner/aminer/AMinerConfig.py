@@ -31,33 +31,34 @@ KEY_RESOURCES_MAX_PERCENT_CPU_USAGE = 'Resources.MaxCpuPercentUsage'
 LOG_FILE = '/tmp/AMinerRemoteLog.txt'
 configFN = None
 
-def load_config(config_file_name):
-  """Load the configuration file using the import module."""
-  aminer_config = None
-  # skipcq: PYL-W0603
-  global configFN
-  configFN = config_file_name
-  ymlext = ['.YAML','.YML','.yaml','.yml']
-  extension = os.path.splitext(config_file_name)[1]
-  yaml_config = None
 
-  if extension in ymlext:
-    yaml_config = config_file_name
-    config_file_name = os.path.dirname(os.path.abspath(__file__)) + '/' + 'ymlconfig.py'
-  try:
-    spec = importlib.util.spec_from_file_location('aminer_config', config_file_name)
-    aminer_config = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(aminer_config)
+def load_config(config_file_name):
+    """Load the configuration file using the import module."""
+    aminer_config = None
+    # skipcq: PYL-W0603
+    global configFN
+    configFN = config_file_name
+    ymlext = ['.YAML', '.YML', '.yaml', '.yml']
+    extension = os.path.splitext(config_file_name)[1]
+    yaml_config = None
+
     if extension in ymlext:
-  # skipcq: FLK-E722
-      aminer_config.loadYaml(yaml_config)
-  except ValueError as e:
-      raise e
-  except Exception:
-      print('Failed to load configuration from %s' % config_file_name, file=sys.stderr)
-      exception_info = sys.exc_info()
-      raise Exception(exception_info[0], exception_info[1], exception_info[2])
-  return aminer_config
+        yaml_config = config_file_name
+        config_file_name = os.path.dirname(os.path.abspath(__file__)) + '/' + 'ymlconfig.py'
+    try:
+        spec = importlib.util.spec_from_file_location('aminer_config', config_file_name)
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        if extension in ymlext:
+            # skipcq: FLK-E722
+            aminer_config.loadYaml(yaml_config)
+    except ValueError as e:
+        raise e
+    except Exception:
+        print('Failed to load configuration from %s' % config_file_name, file=sys.stderr)
+        exception_info = sys.exc_info()
+        raise Exception(exception_info[0], exception_info[1], exception_info[2])
+    return aminer_config
 
 
 def build_persistence_file_name(aminer_config, *args):
@@ -126,7 +127,7 @@ def save_config(analysis_context, new_file):
             break
         i = i - 1
 
-    for i in enumerate(logs):
+    for i in range(len(logs)):
         if "REMOTECONTROL change_attribute_of_registered_analysis_component" in logs[i]:
             logs[i] = logs[i][:logs[i].find('#')]
             arr = logs[i].split(',', 3)
