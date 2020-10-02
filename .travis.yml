@@ -6,7 +6,7 @@ dist: bionic
 before_install:
   - sudo apt-get update -y
   - sudo apt-get install -y exim4 procps cpulimit ansible mailutils python3-pip python3-kafka python3-dateutil
-  - git clone https://github.com/ait-aecid/aminer-ansible.git roles/aminer
+  - git clone --depth 1 --branch v2.0.3 https://github.com/ait-aecid/aminer-ansible.git roles/aminer
   - cp $PWD/source/root/etc/aminer/conf-available/generic/ApacheAccessModel.py $PWD/source/root/etc/aminer/conf-enabled/ApacheAccessModel.py
   - ln -s $PWD/source/root/usr/lib/logdata-anomaly-miner/aminer $PWD/aecid-testsuite/aminer
   - ln -s $PWD/source/root/etc/aminer/template_config.py $PWD/aecid-testsuite/demo/AMiner/template_config.py
@@ -17,10 +17,6 @@ install:
   - sudo ansible-playbook playbook.yml
   - sudo pip3 install kafka-python -U
   - sudo ln -s /usr/lib/python3/dist-packages/kafka /etc/aminer/conf-enabled/kafka
-  - sudo pip3 install python-dateutil
-  - sudo ln -s /usr/lib/python3/dist-packages/dateutil /etc/aminer/conf-enabled/dateutil
-  - sudo pip3 install six
-  - sudo ln -s /usr/lib/python3/dist-packages/six.py /etc/aminer/conf-enabled/six.py
   - cd aecid-testsuite
   - sudo chmod +x runUnittests.sh
   - sudo chmod +x runAMinerDemo.sh
