@@ -369,14 +369,82 @@ Parser:
            - nametype_string
            - nametype
 
-       - id:
-         type:
-         name:
-         args:
+       - id: typeSyscall
+         type: FixedDataModelElement
+         name: 'type'
+         args: 'type=SYSCALL '
 
-       - id:
-         type:
-         name:
+       - id: arch_string
+         type: FixedDataModelElement
+         name: 'arch_string'
+         args: '): arch='
+
+       - id: arch
+         type: DelimitedDataModelElement
+         name: 'arch'
+         args: ' '
+
+       - id: syscall_string
+         type: FixedDataModelElement
+         name: 'syscall_string'
+         args: ' syscall='
+
+       - id: syscall1
+         type: DecimalIntegerValueModelElement
+         name: 'syscall'
+
+       - id: success_string
+         type: FixedDataModelElement
+         name: 'success_string'
+         args: ' success='
+
+       - id: success
+         type: FixedWordlistDataModelElement
+         name: 'success'
+         args:
+           - 'yes'
+           - 'no'
+
+       - id: exit_string
+         type: FixedDataModelElement
+         name: 'exit_string'
+         args: ' exit='
+
+       - id: exit
+         type: DecimalIntegerValueModelElement
+         name: 'exit'
+
+       - id: remainding_data
+         type: AnyByteDataModelElement
+         name: 'remainding_data'
+
+       - id: syscall
+         type: SequenceModelElement
+         name: 'syscall'
+         args:
+           - typeSyscall
+           - msgAudit
+           - msg
+           - placeholder
+           - id
+           - arch_string
+           - arch
+           - syscall_string
+           - syscall1
+           - success_string
+           - success
+           - exit_string
+           - exit
+           - remainding_data
+
+       - id: dateTimeModelElement
+         type: DateTimeModelElement
+         name: 'DateTimeModelElement'
+         args: 'Current DateTime: %d.%m.%Y %H:%M:%S'
+
+       - id: decimalFloatValueModelElement
+         type: DecimalFloatValueModelElement
+         name: 'DecimalFloatValueModelElement'
          args:
 
        - id:
