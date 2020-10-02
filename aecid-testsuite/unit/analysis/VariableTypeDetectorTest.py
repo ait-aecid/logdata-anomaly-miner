@@ -426,7 +426,7 @@ class VariableTypeDetectorTest(TestBase):
 
             # discrete to others without new values, low num_d_bt
             for i in range(update):
-                stat_data = bytes(str((i % 10) * 0.1), 'utf-8')
+                stat_data = bytes(str((i % 3) * 0.1), 'utf-8')
                 log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
                                    self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
@@ -451,7 +451,7 @@ class VariableTypeDetectorTest(TestBase):
 
             # discrete to others without new values, high num_d_bt
             for i in range(update):
-                stat_data = bytes(str((i % 10) * 0.1), 'utf-8')
+                stat_data = bytes(str((i % 3) * 0.1), 'utf-8')
                 log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
                                    self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))

@@ -1188,7 +1188,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             # Check if the values should be considered others or if the BT failed
             if (len(set(new_values + self.var_type[event_index][var_index][1])) >= (
                     self.num_update + self.var_type[event_index][var_index][3]) * (1 - self.sim_thres)) or (sum(
-                        self.bt_results[event_index][var_index][0]) <= self.d_bt_min_success):
+                        self.bt_results[event_index][var_index][0]) < self.d_bt_min_success):
 
                 # Do not update variableType
                 if not self.update_var_type_bool:
