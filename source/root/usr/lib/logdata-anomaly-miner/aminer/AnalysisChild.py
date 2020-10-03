@@ -25,7 +25,6 @@ import traceback
 import resource
 import subprocess  # skipcq: BAN-B404
 import logging
-import shlex
 
 from aminer import AMinerConfig
 from aminer.input.LogStream import LogStream
@@ -33,7 +32,6 @@ from aminer.util import PersistencyUtil
 from aminer.util import SecureOSFunctions
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.util import JsonUtil
-from builtins import str
 from aminer.AMinerRemoteControlExecutionMethods import AMinerRemoteControlExecutionMethods
 
 
@@ -112,7 +110,7 @@ class AnalysisContext:
     def get_component_by_id(self, id_string):
         """Get a component by ID.
         @return None if not found."""
-        component_info = self.registered_components.get(id_string, None)
+        component_info = self.registered_components.get(id_string)
         if component_info is None:
             return None
         return component_info[0]
@@ -124,7 +122,7 @@ class AnalysisContext:
     def get_component_by_name(self, name):
         """Get a component by name.
         @return None if not found."""
-        return self.registered_components_by_name.get(name, None)
+        return self.registered_components_by_name.get(name)
 
     def get_name_by_component(self, component):
         """Get the name of a component.
@@ -493,18 +491,18 @@ class AnalysisChildRemoteControlHandler:
                 if (json_request_data is None) or (not isinstance(json_request_data, list)) or (len(json_request_data) != 2):
                     raise Exception('Invalid request data')
                 if json_request_data[0]:
-                    json_request_data[0] = shlex.quote(json_request_data[0].decode())
+                    json_request_data[0] = json_request_data[0].decode()
                 if json_request_data[1]:
                     if isinstance(json_request_data[1], list):
                         new_list = []
                         for item in json_request_data[1]:
-                            if isinstance(item, (bytes, str)):
-                                new_list.append(shlex.quote(item))
+                            if isinstance(item, bytes):
+                                new_list.append(item.decode())
                             else:
                                 new_list.append(item)
                         json_request_data[1] = new_list
                     else:
-                        json_request_data[1] = shlex.quote(json_request_data[1].decode())
+                        json_request_data[1] = json_request_data[1].decode()
                 methods = AMinerRemoteControlExecutionMethods()
                 import aminer.analysis
                 exec_locals = {
@@ -522,12 +520,17 @@ class AnalysisChildRemoteControlHandler:
                     'ignore_events_from_history': methods.ignore_events_from_history,
                     'list_events_from_history': methods.list_events_from_history,
                     'whitelist_events_from_history': methods.whitelist_events_from_history,
+                    'EnhancedNewMatchPathValueComboDetector': aminer.analysis.EnhancedNewMatchPathValueComboDetector,
+                    'EventCorrelationDetector': aminer.analysis.EventCorrelationDetector,
                     'HistogramAnalysis': aminer.analysis.HistogramAnalysis,
+                    'MatchFilter': aminer.analysis.MatchFilter,
                     'MatchValueAverageChangeDetector': aminer.analysis.MatchValueAverageChangeDetector,
                     'MatchValueStreamWriter': aminer.analysis.MatchValueStreamWriter,
                     'MissingMatchPathValueDetector': aminer.analysis.MissingMatchPathValueDetector,
                     'NewMatchPathDetector': aminer.analysis.NewMatchPathDetector,
-                    'NewMatchPathValueComboDetector': aminer.analysis.NewMatchPathValueComboDetector, 'Rules': aminer.analysis.Rules,
+                    'NewMatchPathValueComboDetector': aminer.analysis.NewMatchPathValueComboDetector,
+                    'ParserCount': aminer.analysis.ParserCount,
+                    'Rules': aminer.analysis.Rules,
                     'TimeCorrelationDetector': aminer.analysis.TimeCorrelationDetector,
                     'TimeCorrelationViolationDetector': aminer.analysis.TimeCorrelationViolationDetector,
                     'TimestampCorrectionFilters': aminer.analysis.TimestampCorrectionFilters,
@@ -541,14 +544,14 @@ class AnalysisChildRemoteControlHandler:
 
                 # skipcq: PYL-W0122
                 exec(json_request_data[0], {'__builtins__': None}, exec_locals)
-                json_remote_control_response = json.dumps(exec_locals.get('remoteControlResponse', None))
+                json_remote_control_response = json.dumps(exec_locals.get('remoteControlResponse'))
                 if methods.REMOTE_CONTROL_RESPONSE == '':
                     methods.REMOTE_CONTROL_RESPONSE = None
-                if exec_locals.get('remoteControlResponse', None) is None:
+                if exec_locals.get('remoteControlResponse') is None:
                     json_remote_control_response = json.dumps(methods.REMOTE_CONTROL_RESPONSE)
                 else:
                     json_remote_control_response = json.dumps(
-                        exec_locals.get('remoteControlResponse', None) + methods.REMOTE_CONTROL_RESPONSE)
+                        exec_locals.get('remoteControlResponse') + methods.REMOTE_CONTROL_RESPONSE)
             # skipcq: FLK-E722
             except:
                 exception_data = traceback.format_exc()
