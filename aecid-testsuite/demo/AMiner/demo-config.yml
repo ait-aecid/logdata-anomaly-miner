@@ -445,6 +445,258 @@ Parser:
        - id: decimalFloatValueModelElement
          type: DecimalFloatValueModelElement
          name: 'DecimalFloatValueModelElement'
+         args: 'optional'
+
+       - id: decimalIntegerValueModelElement
+         type: DecimalIntegerValueModelElement
+         name: 'DecimalIntegerValueModelElement'
+         args:
+           - 'optional'
+           - 'blank'
+
+       - id: delimitedDataModelElement
+         type: DelimitedDataModelElement
+         name: 'DelimitedDataModelElement'
+         args: ';'
+
+       - id: fixedDataModelElement
+         type: FixedDataModelElement
+         name: 'FixedDataModelElement'
+         args: ';'
+
+       - id: se
+         type: SequenceModelElement
+         name: ''
+         args:
+           - delimitedDataModelElement
+           - fixedDataModelElement
+
+       - id: fixed1
+         type: FixedDataModelElement
+         name: 'fixed1'
+         args: 'match '
+
+       - id: fixed2
+         type: FixedDataModelElement
+         name: 'fixed2'
+         args: 'fixed String'
+
+       - id: wordlist
+         type: FixedWordlistDataModelElement
+         name: 'wordlist'
+         args:
+           - 'data: '
+           - 'string: '
+
+       - id: decimal
+         type: DecimalIntegerValueModelElement
+         name: 'decimal'
+
+       - id: seq1
+         type: SequenceModelElement
+         name: 'seq1'
+         args:
+           - fixed1
+           - wordlist
+
+       - id: seq2
+         type: SequenceModelElement
+         name: 'seq2'
+         args:
+           - fixed1
+           - wordlist
+           - fixed2
+
+       - id: first
+         type: FirstMatchModelElement
+         name: 'first'
+         args:
+           - seq1
+           - seq2
+
+       - id: elementValueBranchModelElement
+         type: ElementValueBranchModelElement
+         name: 'ElementValueBranchModelElement'
+         args: 'wordlist'
+         branch_model_dict: {0: decimal, 1: fixed2}
+
+       - id: hexStringModelElement
+         type: HexStringModelElement
+         name: 'HexStringModelElement'
+
+       - id: fixedDataModelElement
+         type: FixedDataModelElement
+         name: 'FixedDataModelElement'
+         args: 'Gateway IP-Address: '
+
+       - id: ipAddressDataModelElement
+         type: IpAddressDataModelElement
+         name: 'IpAddressDataModelElement'
+
+       - id: se2
+         type: SequenceModelElement
+         name: ''
+         args:
+           - fixedDataModelElement
+           - ipAddressDataModelElement
+
+       - id: multiLocaleDateTimeModelElement
+         type: MultiLocaleDateTimeModelElement
+         name: 'MultiLocaleDateTimeModelElement'
+         date_formats:
+           en_us:
+             - '%b %d %Y'
+             - 'en_US.utf8'
+             - None
+
+       - id: fixedDataModelElementDrawnNumber
+         type: FixedDataModelElement
+         name: 'FixedDataModelElement'
+         args: 'drawn number: '
+
+       - id: decimalIntegerValueModelElement1
+         type: DecimalIntegerValueModelElement
+         name: 'DecimalIntegerValueModelElement'
+
+       - id: sequenceModelElement
+         type: SequenceModelElement
+         name: 'SequenceModelElement'
+         args:
+           - fixedDataModelElementDrawnNumber
+           - decimalIntegerValueModelElement1
+
+       - id: repeatedElementDataModelElement
+         type: RepeatedElementDataModelElement
+         name: 'RepeatedElementDataModelElement'
+         args:
+           - sequenceModelElement
+           - 1
+
+       - id: variableByteDataModelElement
+         type: VariableByteDataModelElement
+         name: 'VariableByteDataModelElement'
+         args: '-@#'
+
+       - id: whiteSpaceLimitedDataModelElement
+         type: WhiteSpaceLimitedDataModelElement
+         name: 'WhiteSpaceLimitedDataModelElement'
+
+       - id: fixed
+         type: FixedDataModelElement
+         name: ''
+         args: ' '
+
+       - id: seq3
+         type: SequenceModelElement
+         name: ''
+         args:
+           - whiteSpaceLimitedDataModelElement
+           - fixed
+
+       - id: base64StringModelElement
+         type: Base64StringModelElement
+         name: 'Base64StringModelElement'
+
+       - id: fixed3
+         type: FixedDataModelElement
+         name: 'FixedDataModelElement'
+         args: 'The-searched-element-was-found!'
+
+       - id: fixedDME
+         type: FixedDataModelElement
+         name: 'fixedDME'
+         args: 'Any:'
+
+       - id: any
+         type: AnyByteDataModelElement
+         name: 'AnyByteDataModelElement'
+
+       - id: seq4
+         type: SequenceModelElement
+         name: ''
+         args:
+           - fixedDME
+           - any
+
+       - id: firstMatchModelElement
+         type: FirstMatchModelElement
+         name: 'FirstMatchModelElement'
+         args:
+           - fixed3
+           - seq4
+
+       - id: a
+         type: FixedDataModelElement
+         name: 'a'
+         args: 'a'
+
+       - id: b
+         type: FixedDataModelElement
+         name: 'b'
+         args: 'b'
+
+       - id: c
+         type: FixedDataModelElement
+         name: 'c'
+         args: 'c'
+
+       - id: d
+         type: FixedDataModelElement
+         name: 'd'
+         args: 'd'
+
+       - id: e
+         type: FixedDataModelElement
+         name: 'e'
+         args: 'e'
+
+       - id: f
+         type: FixedDataModelElement
+         name: 'f'
+         args: 'f'
+
+       - id: cronAnnouncement
+         type: SequenceModelElement
+         name: 'CronAnnouncement'
+         args:
+           - dtm
+		   - fixedSpace
+		   - uName
+		   - cron
+		   - jobNumber
+		   - run
+		   - cronType
+		   - startTime
+
+       - id: cronExecution
+         type: SequenceModelElement
+         name: 'CronExecution'
+         args:
+           - dtm
+		   - emptySpace1
+		   - uName
+		   - cron
+		   - jobNumber
+		   - job
+		   - cronType
+		   - started
+
+       - id: dailyCron
+         type: SequenceModelElement
+         name: 'DailyCron'
+         args:
+           - dtm
+		   - uNameSpace1
+		   - uName
+		   - uNameSpace2
+		   - delimitedUser
+		   - cron
+		   - jobNumber
+		   - details
+
+       - id: diskReport
+         type: SequenceModelElement
+         name: 'DiskReport'
          args:
 
        - id:
@@ -476,6 +728,18 @@ Parser:
          type:
          name:
          args:
+
+       - id:
+         type:
+         name:
+         args:
+
+       - id:
+         type:
+         name:
+         args:
+
+
 
 
 
