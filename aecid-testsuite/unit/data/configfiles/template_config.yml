@@ -7,7 +7,7 @@
 #
 #########################################################
 
-#LearnMode: false # optional
+#LearnMode: False # optional
 AMinerUser: 'aminer'  # optional default: aminer
 AMinerGroup: 'aminer' # optional default: aminer
 
@@ -119,27 +119,27 @@ Input:
 
 
 Analysis:
-        - type: "NewMatchPathValueDetector"
+        - type: NewMatchPathValueDetector
           paths: ["/model/accesslog/status"]
           persistence_id: 'accesslog_status' # optional default: Default
-          output_logline: false # optional default: true
-          learnMode: true
+          output_logline: False # optional default: True
+          learnMode: True
 
-        - type: "NewMatchPathValueComboDetector"
+        - type: NewMatchPathValueComboDetector
           paths: ["/model/accesslog/request","/model/accesslog/method"]
-          learnMode: true
+          learnMode: True
           persistence_id: 'accesslog_request' # optional default: Default
-          output_logline: false # optional default: true
-          allow_missing_values: false # optional default: false
+          output_logline: False # optional default: True
+          allow_missing_values: False # optional default: False
 
-        - type: "NewMatchPathValueComboDetector"
+        - type: NewMatchPathValueComboDetector
           paths: ["/model/accesslog/request","/model/accesslog/status"]
-          learnMode: true
+          learnMode: True
 
 EventHandlers:
-        - id: "stpe"
-          json: true # optional default: false
-          type: "StreamPrinterEventHandler"
+        - id: stpe
+          json: True # optional default: False
+          type: StreamPrinterEventHandler
 
-        - id: "syslog"
-          type: "SyslogWriterEventHandler"
+        - id: "yslog
+          type: SyslogWriterEventHandler

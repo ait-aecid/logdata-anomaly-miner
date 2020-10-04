@@ -1,4 +1,4 @@
-LearnMode: true # optional
+LearnMode: True # optional
 Core.PersistenceDir: '/var/tmp/test2/aminer'
 
 LogResourceList:
@@ -114,11 +114,11 @@ Parser:
                   - sq6
 Input:
         TimestampPath: "/accesslog/time"
-        Verbose: false # use this to debug your parser-model
+        Verbose: False # use this to debug your parser-model
 
 Analysis: null
 
 EventHandlers:
-        - id: "stpe"
-          type: "StreamPrinterEventHandler"
+        - id: stpe
+          type: StreamPrinterEventHandler
 

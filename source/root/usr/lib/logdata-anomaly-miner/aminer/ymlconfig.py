@@ -98,7 +98,29 @@ def build_analysis_pipeline(analysis_context):
                     # encode string to bytearray
                     for j in range(len(item['args'])):
                         item['args'][j] = item['args'][j].encode()
-                    parser_model_dict[item['id']] = item['type'].func(item['name'], item['args'])
+                    if item['type'] == 'ElementValueBranchModelElement':
+                        branch_model_dict = {}
+                        for key in item['branch_model_dict']:
+                            model = item['branch_model_dict'][key]
+                            if parser_model_dict.get(model) is None:
+                                raise ValueError('The parser model %s does not exist!' % model)
+                            branch_model_dict[key] = parser_model_dict.get(model)
+                        parser_model_dict[item['id']] = item['type'].func(item['name'], item['args'], branch_model_dict)
+                    elif item['type'] == 'MultiLocaleDateTimeModelElement':
+                        date_formats = []
+                        for date_format in item['date_formats']:
+                            if len(date_format) != 3:
+                                raise ValueError('The date_format must have a size of 3!')
+                            date_formats.append(tuple(i for i in date_format))
+                        parser_model_dict[item['id']] = item['type'].func(item['name'], date_formats, item['args'])
+                    elif item['type'] == 'RepeatedElementDataModelElement':
+                        model = item['args'][0]
+                        if parser_model_dict.get(model) is None:
+                            raise ValueError('The parser model %s does not exist!' % model)
+                        item['args'][0] = parser_model_dict.get(model)
+                        parser_model_dict[item['id']] = item['type'].func(item['name'], item['args'])
+                    else:
+                        parser_model_dict[item['id']] = item['type'].func(item['name'], item['args'])
                 else:
                     parser_model_dict[item['id']] = item['type'].func(item['name'], item['args'].encode())
             else:
@@ -257,12 +279,13 @@ def build_analysis_pipeline(analysis_context):
                 tmp_analyser = func(
                     analysis_context.aminer_config,
                     item['paths'],
+                    anomaly_event_handlers,
                     report_interval=item['report_interval'],
-                    report_event_handlers=anomaly_event_handlers,
                     reset_after_report_flag=item['reset_after_report_flag'])
             elif item['type'] == 'EventCorrelationDetector':
                 tmp_analyser = func(
-                    analysis_context.aminer_config, anomaly_event_handlers,
+                    analysis_context.aminer_config,
+                    anomaly_event_handlers,
                     paths=item['paths'],
                     max_hypotheses=item['max_hypotheses'],
                     hypothesis_max_delta_time=item['hypothesis_max_delta_time'],
@@ -276,7 +299,7 @@ def build_analysis_pipeline(analysis_context):
                     delta_time_to_discard_hypothesis=item['delta_time_to_discard_hypothesis'],
                     check_rules_flag=item['check_rules_flag'],
                     auto_include_flag=item['auto_include_flag'],
-                    # whitelisted_paths=item['whitelisted_paths'],
+                    whitelisted_paths=item['whitelisted_paths'],
                     persistence_id=item['persistence_id'])
             elif item['type'] == 'NewMatchIdValueComboDetector':
                 tmp_analyser = func(

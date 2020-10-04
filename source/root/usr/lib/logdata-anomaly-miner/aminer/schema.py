@@ -79,7 +79,11 @@
                     'start': {'type': 'boolean'},
                     'type': {'type': 'parsermodel', 'coerce': 'toparsermodel'},
                     'name': {'type': 'string'},
-                    'args': {'type': ['string', 'list'], 'schema': {'type': 'string'}}
+                    'args': {'type': ['string', 'list'], 'schema': {'type': ['string', 'integer']}},
+                    'branch_model_dict': {'type': 'dict', 'schema': {'id': {'type': ['boolean', 'float', 'integer', 'string']},
+                                          'type': {'type': 'string'}}},
+                    'date_formats': {'type': 'dict', 'schema': {'id': {'type': 'string'}, 'type': {'type': 'list', 'schema': {
+                        'type': 'string', 'nullable': True}}}}
                 }
             }
         },
@@ -112,7 +116,7 @@
                         'DebugMatchRule', 'DebugHistoryMatchRule', 'CorrelationRule', 'EventClassSelector',
                         'TimeCorrelationViolationDetector', 'SimpleMonotonicTimestampAdjust', 'TimestampsUnsortedDetector',
                         'WhitelistViolationDetector', 'MatchPathFilter', 'MatchValueFilter']},
-                    'paths': {'type': 'list', 'schema': {'type': 'string'}},
+                    'paths': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                     'learnMode': {'type': 'boolean'},
                     'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},
                     'output_logline': {'type': 'boolean', 'required': False, 'default': True},
