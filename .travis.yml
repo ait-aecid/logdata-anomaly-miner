@@ -18,8 +18,6 @@ install:
   - sudo pip3 install kafka-python -U
   - sudo ln -s /usr/lib/python3/dist-packages/kafka /etc/aminer/conf-enabled/
   - sudo pip3 install -U scipy
-  - sudo pip3 install six
-  - sudo ln -s /usr/lib/python3/dist-packages/six.py /etc/aminer/conf-enabled/
   - sudo ln -s /usr/lib/python3.6/site-packages/numpy /etc/aminer/conf-enabled/
   - sudo ln -s /usr/lib/python3.6/site-packages/scipy /etc/aminer/conf-enabled/
   - cd aecid-testsuite
