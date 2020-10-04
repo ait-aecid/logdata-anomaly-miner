@@ -195,6 +195,7 @@ class EventCorrelationDetectorTest(TestBase):
 
     def run_ecd_test(self, ecd, log_atoms):
         diff = log_atoms[1].atom_time - log_atoms[0].atom_time
+        log_atom = None
         for log_atom in log_atoms:
             ecd.receive_atom(log_atom)
         sorted_forward_rules = dict(sorted(ecd.forward_rules.items()))
