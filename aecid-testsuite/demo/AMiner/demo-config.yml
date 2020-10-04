@@ -586,7 +586,7 @@ Parser:
          name: ''
          args: ' '
 
-       - id: seq3
+       - id: se3
          type: SequenceModelElement
          name: ''
          args:
@@ -624,6 +624,11 @@ Parser:
          args:
            - fixed3
            - seq4
+
+       - id: optionalMatchModelElement
+         type: OptionalMatchModelElement
+         name: 'OptionalMatchModelElement'
+         args: firstMatchModelElement
 
        - id: a
          type: FixedDataModelElement
@@ -699,82 +704,105 @@ Parser:
          name: 'DiskReport'
          args:
 
-       - id:
-         type:
-         name:
+       - id: loginDetails
+         type: SequenceModelElement
+         name: 'LoginDetails'
          args:
+           - user
+           - username
+           - status
+           - pastTime
 
-       - id:
-         type:
-         name:
+       - id: randomTime
+         type: SequenceModelElement
+         name: 'RandomTime'
          args:
+           - spaceRandom
+           - random
 
-       - id:
-         type:
-         name:
+       - id: sensors
+         type: SequenceModelElement
+         name: 'Sensors'
          args:
+           - cpuTemp
+           - space1
+           - cpuWorkload
+           - space2
+           - dtm
 
-       - id:
-         type:
-         name:
+       - id: ipAddresses
+         type: SequenceModelElement
+         name: 'IPAddresses'
          args:
+           - user
+           - username
+           - action
+           - ip
 
-       - id:
-         type:
-         name:
+       - id: type
+         type: FirstMatchModelElement
+         name: 'type'
          args:
+           - path
+           - syscall
 
-       - id:
-         type:
-         name:
+       - id: ecd
+         type: FirstMatchModelElement
+         name: 'ECD'
          args:
+           - a
+           - b
+           - c
+           - d
+           - e
+           - f
 
-       - id:
-         type:
-         name:
+       - id: parsingME
+         type: FirstMatchModelElement
+         name: 'ParsingME'
          args:
+           - dateTimeModelElement
+           - decimalFloatValueModelElement
+           - decimalIntegerValueModelElement
+           - se
+           - elementValueBranchModelElement
+           - hexStringModelElement
+           - se2
+           - multiLocaleDateTimeModelElement
+           - repeatedElementDataModelElement
+           - variableByteDataModelElement
+           - se3
+           - base64StringModelElement
+           - optionalMatchModelElement
 
-       - id:
-         type:
-         name:
+       - id: model
+         start: True
+         type: FirstMatchModelElement
+         name: 'model'
          args:
+           - cronAnnouncement
+           - cronExecution
+           - dailyCron
+           - diskReport
+           - loginDetails
+           - random
+           - randomTime
+           - sensors
+           - ipAddresses
+           - type
+           - ecd
+           - parsingME
 
-
-
-
-
-
-
-        - id: 'startModel'
-          start: True
-          type: SequenceModelElement
-          name: 'accesslog'
-          args:
-                  - host_name_model
-                  - WHITESPACE
-                  - identity_model
-                  - WHITESPACE
-                  - user_name_model
-                  - WHITESPACE
-                  - new_time_model
-                  - sq3
-                  - request_method_model
-                  - WHITESPACE
-                  - request_model
-                  - http1
-                  - version_model
-                  - sq4
-                  - status_code_model
-                  - WHITESPACE
-                  - size_model
-                  - sq5
-                  - user_agent_model
-                  - sq6
 Input:
-        TimestampPath: "/accesslog/time"
+        TimestampPath: "/model/DailyCron/DTM"
         Verbose: false # use this to debug your parser-model
 
 Analysis:
+        - type: TimestampsUnsortedDetector
+          id:
+
+
+
         - type: "TimestampsUnsortedDetector"
           id: "timestamps_unsorted_detector"
         - type: "NewMatchPathValueDetector"
