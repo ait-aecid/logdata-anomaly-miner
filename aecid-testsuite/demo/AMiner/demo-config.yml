@@ -22,10 +22,10 @@ MailAlerting.MaxEventsPerMessage: 1000
 LogPrefix: 'Original log line: '
 
 Parser:
-        - id: space
-          type: FixedDataModelElement
-          name: 'Space'
-          args: ' Current Disk Data is: Filesystem     Type  Size  Used Avail Use%'
+       - id: space
+         type: FixedDataModelElement
+         name: 'Space'
+         args: ' Current Disk Data is: Filesystem     Type  Size  Used Avail Use%'
 
        - id: data
          type: DelimitedDataModelElement
@@ -228,7 +228,7 @@ Parser:
        - id: started
          type: FixedDataModelElement
          name: 'Started'
-         args: "\' started"
+         args: "\\' started"
 
        - id: typePath
          type: FixedDataModelElement
@@ -445,14 +445,13 @@ Parser:
        - id: decimalFloatValueModelElement
          type: DecimalFloatValueModelElement
          name: 'DecimalFloatValueModelElement'
-         args: 'optional'
+         value_sign_type: 'optional'
 
        - id: decimalIntegerValueModelElement
          type: DecimalIntegerValueModelElement
          name: 'DecimalIntegerValueModelElement'
-         args:
-           - 'optional'
-           - 'blank'
+         value_sign_type: 'optional'
+         value_pad_type: 'blank'
 
        - id: delimitedDataModelElement
          type: DelimitedDataModelElement
@@ -517,8 +516,14 @@ Parser:
        - id: elementValueBranchModelElement
          type: ElementValueBranchModelElement
          name: 'ElementValueBranchModelElement'
-         args: 'wordlist'
-         branch_model_dict: {0: decimal, 1: fixed2}
+         args:
+           - first
+           - 'wordlist'
+         branch_model_dict:
+           - id: 0
+             model: decimal
+           - id: 1
+             model: fixed2
 
        - id: hexStringModelElement
          type: HexStringModelElement
@@ -544,10 +549,10 @@ Parser:
          type: MultiLocaleDateTimeModelElement
          name: 'MultiLocaleDateTimeModelElement'
          date_formats:
-           en_us:
+           - format:
              - '%b %d %Y'
              - 'en_US.utf8'
-             - None
+             - null
 
        - id: fixedDataModelElementDrawnNumber
          type: FixedDataModelElement
@@ -665,39 +670,39 @@ Parser:
          name: 'CronAnnouncement'
          args:
            - dtm
-		   - fixedSpace
-		   - uName
-		   - cron
-		   - jobNumber
-		   - run
-		   - cronType
-		   - startTime
+           - fixedSpace
+           - uName
+           - cron
+           - jobNumber
+           - run
+           - cronType
+           - startTime
 
        - id: cronExecution
          type: SequenceModelElement
          name: 'CronExecution'
          args:
            - dtm
-		   - emptySpace1
-		   - uName
-		   - cron
-		   - jobNumber
-		   - job
-		   - cronType
-		   - started
+           - emptySpace1
+           - uName
+           - cron
+           - jobNumber
+           - job
+           - cronType
+           - started
 
        - id: dailyCron
          type: SequenceModelElement
          name: 'DailyCron'
          args:
            - dtm
-		   - uNameSpace1
-		   - uName
-		   - uNameSpace2
-		   - delimitedUser
-		   - cron
-		   - jobNumber
-		   - details
+           - uNameSpace1
+           - uName
+           - uNameSpace2
+           - delimitedUser
+           - cron
+           - jobNumber
+           - details
 
        - id: diskReport
          type: SequenceModelElement
@@ -911,7 +916,7 @@ Analysis:
             - "/model/type/path/id"
             - "/model/type/syscall/id"
           min_allowed_time_diff: 5
-          allow_missing_values_flag: True
+          allow_missing_values: True
         - type: NewMatchPathValueDetector
           id: NewMatchPathValue
           paths:
@@ -937,25 +942,25 @@ Analysis:
         - type: EventClassSelector
           action_id: a_class_selector
           artefact_a_rules:
-            - "correlation_rule"
+            - correlation_rule
         - type: EventClassSelector
           action_id: b_class_selector
           artefact_b_rules:
-            - "correlation_rule"
+            - correlation_rule
         - type: PathExistsMatchRule
           id: path_exists_match_rule3
           path: "/model/CronAnnouncement/Run"
-          match_action: "a_class_selector"
+          match_action: a_class_selector
         - type: PathExistsMatchRule
           id: path_exists_match_rule4
           path: "/model/CronExecution/Job"
-          match_action: "b_class_selector"
+          match_action: b_class_selector
         - type: TimeCorrelationViolationDetector
           id: TimeCorrelationViolationDetector
           ruleset:
-            - "path_exists_match_rule3"
-            - "path_exists_match_rule4"
+            - path_exists_match_rule3
+            - path_exists_match_rule4
 
 EventHandlers:
-        - id: "stpe"
-          type: "StreamPrinterEventHandler"
+        - id: stpe
+          type: StreamPrinterEventHandler
