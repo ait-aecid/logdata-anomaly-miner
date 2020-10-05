@@ -818,16 +818,24 @@ Analysis:
           sub_rule: "path_exists_match_rule2"
         - type: AndMatchRule
           id: and_match_rule1
-          sub_rules: [ "path_exists_match_rule1", "negation_match_rule1" ]
+          sub_rules:
+            - "path_exists_match_rule1"
+            - "negation_match_rule1"
         - type: AndMatchRule
           id: and_match_rule2
-          sub_rules: [ "negation_match_rule1", "path_exists_match_rule2" ]
+          sub_rules:
+            - "negation_match_rule1"
+            - "path_exists_match_rule2"
         - type: OrMatchRule
           id: or_match_rule
-          sub_rules: [ "and_match_rule1", "and_match_rule2", "negation_match_rule2" ]
+          sub_rules:
+            - "and_match_rule1"
+            - "and_match_rule2"
+            - "negation_match_rule2"
         - type: WhitelistViolationDetector
           id: Whitelist
-          whitelist_rules: [ "or_match_rule" ]
+          whitelist_rules:
+            - "or_match_rule"
         - type: ParserCount
           id: ParserCount
           report_interval: 10
@@ -836,11 +844,118 @@ Analysis:
           id: EventCorrelationDetector
           check_rules_flag: True
           hypothesis_max_delta_time: 1.0
+        - type: MatchFilter
+          id: MatchFilter
+          paths:
+            - "/model/Random"
+          value_list:
+            - 1
+            - 10
+            - 100
+        - type: EnhancedNewMatchPathValueComboDetector
+          id: EnhancedNewValueCombo
+          paths:
+            - "/model/DailyCron/UName"
+            - "/model/DailyCron/JobNumber"
+          tuple_transformation_function: "demo"
+        - type: LinearNumericBinDefinition
+          id: linear_numeric_bin_definition
+          lower_limit: 50
+          bin_size: 5
+          bin_count: 20
+          outlier_bins_flag: True
+        - type: ModuloTimeBinDefinition
+          id: modulo_time_bin_definition
+          modulo_value: 86400
+          time_unit: 3600
+          lower_limit: 0
+          bin_size: 1
+          bin_count: 24
+          outlier_bins_flag: True
+        - type: HistogramAnalysis
+          id: HistogramAnalysis
+          histogram_defs: [["/model/RandomTime/Random", "linear_numeric_bin_definition"]]
+          report_interval: 10
+        - type: PathDependentHistogramAnalysis
+          id: PathDependentHistogramAnalysis
+          path: "/model/RandomTime"
+          bin_definition: "modulo_time_bin_definition"
+          report_interval: 10
+        - type: MatchValueAverageChangeDetector
+          id: MatchValueAverageChangeDetector
+          timestamp_path: None
+          paths:
+            - "/model/Random"
+          min_bin_elements: 100
+          min_bin_time: 10
+        - type: MatchValueStreamWriter
+          id: MatchValueStreamWriter
+          stream: "sys.stdout"
+          paths:
+            - "/model/Sensors/CPUTemp"
+            - "/model/Sensors/CPUWorkload"
+            - "/model/Sensors/DTM"
+          separator: ";"
+          missing_value_string: ""
+        - type: NewMatchPathValueComboDetector
+          id: NewMatchPathValueCombo
+          paths:
+            - "/model/IPAddresses/Username"
+            - "/model/IPAddresses/IP"
+        - type: NewMatchIdValueComboDetector
+          id: NewMatchIdValueComboDetector
+          paths:
+            - "/model/type/path/name"
+            - "/model/type/syscall/syscall"
+          id_path_list:
+            - "/model/type/path/id"
+            - "/model/type/syscall/id"
+          min_allowed_time_diff: 5
+          allow_missing_values_flag: True
+        - type: NewMatchPathValueDetector
+          id: NewMatchPathValue
+          paths:
+            - "/model/DailyCron/JobNumber"
+            - "/model/IPAddresses/Username"
+        - type: MissingMatchPathValueDetector
+          id: MissingMatch
+          path: "/model/DiskReport/Space"
+          check_interval: 2
+          realert_interval: 5
+        - type: TimeCorrelationDetector
+          id: TimeCorrelationDetector
+          parallel_check_count: 2
+          min_rule_attributes: 1
+          max_rule_attributes: 5
+          record_count_before_event: 10000
+        - type: CorrelationRule
+          rule_id: correlation_rule
+          min_time_delta: 5
+          max_time_delta: 6
+          max_artefacts_a_for_single_b: 1
+          artefact_match_parameters: [["/model/CronAnnouncement/JobNumber", "/model/CronExecution/JobNumber"]]
+        - type: EventClassSelector
+          action_id: a_class_selector
+          artefact_a_rules:
+            - "correlation_rule"
+        - type: EventClassSelector
+          action_id: b_class_selector
+          artefact_b_rules:
+            - "correlation_rule"
+        - type: PathExistsMatchRule
+          id: path_exists_match_rule3
+          path: "/model/CronAnnouncement/Run"
+          match_action: "a_class_selector"
+        - type: PathExistsMatchRule
+          id: path_exists_match_rule4
+          path: "/model/CronExecution/Job"
+          match_action: "b_class_selector"
+        - type: TimeCorrelationViolationDetector
+          id: TimeCorrelationViolationDetector
+          ruleset:
+            - "path_exists_match_rule3"
+            - "path_exists_match_rule4"
 
 EventHandlers:
         - id: "stpe"
           type: "StreamPrinterEventHandler"
-        - id: "syslog_writer_event_handler"
-          type: "SyslogWriterEventHandler"
-        - id: "default_mail_notification_handler"
-          type: "DefaultMailNotificationEventHandler"
