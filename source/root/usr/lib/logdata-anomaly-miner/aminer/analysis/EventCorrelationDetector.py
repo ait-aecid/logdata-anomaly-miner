@@ -725,3 +725,7 @@ class Implication:
                 'hypothesis_trigger_timestamps': list(self.hypothesis_trigger_timestamps),
                 'rule_trigger_timestamps': list(self.rule_trigger_timestamps), 'rule_observations': list(self.rule_observations),
                 'hypothesis_observations': self.hypothesis_observations, 'hypothesis_evaluated_true': self.hypothesis_evaluated_true}
+
+
+def set_random_seed(seed):
+    random.seed(seed)
