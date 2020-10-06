@@ -1,5 +1,5 @@
 import unittest
-from aminer.analysis.EventCorrelationDetector import EventCorrelationDetector
+from aminer.analysis.EventCorrelationDetector import EventCorrelationDetector, set_random_seed
 from aminer.input.LogAtom import LogAtom
 from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.ParserMatch import ParserMatch
@@ -26,6 +26,7 @@ class EventCorrelationDetectorTest(TestBase):
         cls.errored_data_diff1 = cls.generate_errored_data(cls, 100000, 1, error_rate)
         cls.errored_data_diff5_low_error_rate = cls.generate_errored_data(cls, 100000, 5, error_rate / 2.5)
         cls.errored_data_diff1_low_error_rate = cls.generate_errored_data(cls, 100000, 1, error_rate / 2.5)
+        set_random_seed(42)
 
     def test1learn_from_clear_examples(self):
         """In this test case perfect examples are used to learn and evaluate rules. The default parameters are used."""
