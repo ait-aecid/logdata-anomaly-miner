@@ -12,6 +12,7 @@ before_install:
 
 install:
   - sudo apt-get update -y
+  - sudo apt-get install -y ansible
   - sudo ansible-playbook playbook.yml
   - sudo pip3 install coverage
   - sudo apt-get install -y exim4 procps cpulimit ansible mailutils python3-pip python3-kafka python3-dateutil
