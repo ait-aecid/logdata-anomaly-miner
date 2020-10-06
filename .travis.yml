@@ -16,9 +16,12 @@ install:
   - sudo pip3 install coverage
   - sudo ansible-playbook playbook.yml
   - sudo pip3 install kafka-python -U
-  - sudo ln -s /usr/lib/python3/dist-packages/kafka /etc/aminer/conf-enabled/kafka
   - sudo pip3 install cerberus
   - sudo ln -s /usr/lib/python3/dist-packages/cerberus /etc/aminer/conf-enabled/
+  - sudo ln -s /usr/lib/python3/dist-packages/kafka /etc/aminer/conf-enabled/
+  - sudo pip3 install -U scipy
+  - sudo ln -s /usr/lib/python3.6/site-packages/numpy /etc/aminer/conf-enabled/
+  - sudo ln -s /usr/lib/python3.6/site-packages/scipy /etc/aminer/conf-enabled/
   - cd aecid-testsuite
   - sudo chmod +x runUnittests.sh
   - sudo chmod +x runAMinerDemo.sh
