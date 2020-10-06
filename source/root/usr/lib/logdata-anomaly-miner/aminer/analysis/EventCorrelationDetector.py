@@ -16,6 +16,7 @@ from aminer.AnalysisChild import AnalysisContext
 from aminer.input import AtomHandlerInterface
 from aminer.util import PersistencyUtil
 from aminer.util import TimeTriggeredComponentInterface
+from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
 
 class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
@@ -24,7 +25,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
     def __init__(self, aminer_config, anomaly_event_handlers, paths=None, max_hypotheses=1000, hypothesis_max_delta_time=5.0,
                  generation_probability=1.0, generation_factor=1.0, max_observations=500, p0=0.9, alpha=0.05, candidates_size=10,
                  hypotheses_eval_delta_time=120.0, delta_time_to_discard_hypothesis=180.0, check_rules_flag=False,
-                 auto_include_flag=True, whitelisted_paths=None, persistence_id='Default'):
+                 auto_include_flag=True, whitelisted_paths=None, persistence_id='Default', output_log_line=True):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
@@ -90,6 +91,9 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         # Compute the initial minimum amount of positive evaluations for hypotheses to become rules.
         # For rules, this value can be different and will be computed based on the sample observations.
         self.min_eval_true = self.get_min_eval_true(self.max_observations, self.p0, self.alpha)
+
+        self.aminer_config = aminer_config
+        self.output_log_line = output_log_line
 
         PersistencyUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, 'EventCorrelationDetector', persistence_id)
@@ -172,7 +176,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
             for path in self.paths:
                 match = parser_match.get_match_dictionary().get(path, None)
                 if match is None:
-                    return
+                    continue
                 if isinstance(match.match_object, bytes):
                     value = match.match_object.decode()
                 else:
@@ -230,14 +234,33 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     rule.rule_trigger_timestamps.popleft()
                     self.forward_rule_queue.popleft()
                     if not rule.evaluate_rule():
+                        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+                        if original_log_line_prefix is None:
+                            original_log_line_prefix = ''
+                        tmp_string = 'Rule: %s -> %s\n  Expected: %s/%s\n  Observed: %s/%s' % (
+                                        str(rule.trigger_event), str(rule.implied_event), str(rule.min_eval_true),
+                                        str(rule.max_observations), str(sum(rule.rule_observations)),
+                                        str(len(rule.rule_observations)))
+                        if self.output_log_line:
+                            sorted_log_lines = [tmp_string + '\n' + original_log_line_prefix + repr(log_atom.raw_data)]
+                        else:
+                            sorted_log_lines = [tmp_string + repr(log_atom.raw_data)]
                         for listener in self.anomaly_event_handlers:
-                            listener.receive_event('analysis.EventCorrelationDetector', 'Correlation rule violated! '
-                                                   'Event %s is missing, but should follow event %s' % (
-                                    repr(self.sample_events[rule.implied_event]), repr(self.sample_events[rule.trigger_event])),
-                                [self.sample_events[rule.implied_event], self.sample_events[rule.trigger_event]],
+                            implied_event = None
+                            trigger_event = None
+                            if rule.implied_event in self.sample_events.keys():
+                                implied_event = self.sample_events[rule.implied_event]
+                            if rule.trigger_event in self.sample_events.keys():
+                                trigger_event = self.sample_events[rule.trigger_event]
+                            listener.receive_event(
+                                'analysis.EventCorrelationDetector',
+                                'Correlation rule violated! Event %s is missing, but should follow event %s' % (
+                                    repr(implied_event), repr(trigger_event)),
+                                sorted_log_lines,
                                 {'RuleInfo': {'Rule': str(rule.trigger_event) + '->' + str(rule.implied_event),
                                               'Expected': str(rule.min_eval_true) + '/' + str(rule.max_observations),
-                                              'Observed': str(sum(rule.rule_observations)) + '/' + str(len(rule.rule_observations))}}, log_atom, self)
+                                              'Observed': str(sum(rule.rule_observations)) + '/' + str(len(rule.rule_observations))}},
+                                log_atom, self)
                         rule.rule_observations = deque([])
                     continue
                 break
@@ -265,14 +288,33 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     else:
                         rule.add_rule_observation(0)
                         if not rule.evaluate_rule():
+                            original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+                            if original_log_line_prefix is None:
+                                original_log_line_prefix = ''
+                            tmp_string = 'Rule: %s <- %s\n  Expected: %s/%s\n  Observed: %s/%s' % (
+                                            str(rule.implied_event), str(rule.trigger_event), str(rule.min_eval_true),
+                                            str(rule.max_observations), str(sum(rule.rule_observations)),
+                                            str(len(rule.rule_observations)))
+                            if self.output_log_line:
+                                sorted_log_lines = [tmp_string + '\n' + original_log_line_prefix + repr(log_atom.raw_data)]
+                            else:
+                                sorted_log_lines = [tmp_string + repr(log_atom.raw_data)]
                             for listener in self.anomaly_event_handlers:
-                                listener.receive_event('analysis.EventCorrelationDetector', 'Correlation rule violated! '
-                                    'Event %s is missing, but should precede event %s' % (
-                                        repr(self.sample_events[rule.implied_event]), repr(self.sample_events[rule.trigger_event])),
-                                    [self.sample_events[rule.implied_event], self.sample_events[rule.trigger_event]],
+                                implied_event = None
+                                trigger_event = None
+                                if rule.implied_event in self.sample_events.keys():
+                                    implied_event = self.sample_events[rule.implied_event]
+                                if rule.trigger_event in self.sample_events.keys():
+                                    trigger_event = self.sample_events[rule.trigger_event]
+                                listener.receive_event(
+                                    'analysis.EventCorrelationDetector',
+                                    'Correlation rule violated! Event %s is missing, but should precede event %s' % (
+                                        repr(implied_event), repr(trigger_event)),
+                                    sorted_log_lines,
                                     {'RuleInfo': {'Rule': str(rule.implied_event) + '<-' + str(rule.trigger_event),
-                                    'Expected': str(rule.min_eval_true) + '/' + str(rule.max_observations),
-                                    'Observed': str(sum(rule.rule_observations)) + '/' + str(len(rule.rule_observations))}}, log_atom, self)
+                                                  'Expected': str(rule.min_eval_true) + '/' + str(rule.max_observations),
+                                                  'Observed': str(sum(rule.rule_observations)) + '/' + str(len(rule.rule_observations))}},
+                                    log_atom, self)
                             rule.rule_observations = deque([])
 
             # Clean up triggered/resolved implications.
@@ -397,7 +439,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                         if trigger_timestamp_index != -1 and \
                                 str(implication.hypothesis_trigger_timestamps[trigger_timestamp_index]) != 'obs' and \
                                 implication.hypothesis_trigger_timestamps[trigger_timestamp_index] >= log_atom.atom_time - \
-                                    self.hypothesis_max_delta_time:
+                                self.hypothesis_max_delta_time:
                             implication.add_hypothesis_observation(1, log_atom.atom_time)
                             implication.hypothesis_trigger_timestamps[trigger_timestamp_index] = 'obs'
                             # Since only true observations occur here, check for instability not necessary.
