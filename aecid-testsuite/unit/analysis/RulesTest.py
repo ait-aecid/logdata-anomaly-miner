@@ -17,7 +17,7 @@ from aminer.parsing.DateTimeModelElement import DateTimeModelElement
 from time import time
 from aminer.parsing.IpAddressDataModelElement import IpAddressDataModelElement
 from unit.TestBase import TestBase
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class RuleTest(TestBase):
@@ -179,7 +179,7 @@ class RuleTest(TestBase):
         description = "Test8Rules"
         modulo_time_match_rule = ModuloTimeMatchRule(self.model_syslog_time, 86400, 43200, 86400, None)
         self.analysis_context.register_component(modulo_time_match_rule, description)
-        date_time_model_element = DateTimeModelElement('time', b'%d.%m.%Y %H:%M:%S')
+        date_time_model_element = DateTimeModelElement('time', b'%d.%m.%Y %H:%M:%S', timezone.utc)
 
         match_context = MatchContext(b'14.02.2019 13:00:00')
         match_element = date_time_model_element.get_match_element(self.model_syslog, match_context)
@@ -207,7 +207,7 @@ class RuleTest(TestBase):
         value_dependent_modulo_time_match_rule = ValueDependentModuloTimeMatchRule(self.model_syslog_time, 86400, [self.model_syslog_time],
                                                                                    {1550145600: [43200, 86400]})
         self.analysis_context.register_component(value_dependent_modulo_time_match_rule, description)
-        date_time_model_element = DateTimeModelElement('time', b'%d.%m.%Y %H:%M:%S')
+        date_time_model_element = DateTimeModelElement('time', b'%d.%m.%Y %H:%M:%S', timezone.utc)
 
         match_context = MatchContext(b'14.02.2019 12:00:00')
         match_element = date_time_model_element.get_match_element(self.model_syslog, match_context)
