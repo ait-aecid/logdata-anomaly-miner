@@ -420,6 +420,7 @@ def build_analysis_pipeline(analysis_context):
                     auto_include_flag=learn,
                     tuple_transformation_function=tuple_transformation_function,
                     output_log_line=learn)
+                # skipcq: PYL-W0603
                 global enhanced_new_match_path_value_combo_detector_reference
                 enhanced_new_match_path_value_combo_detector_reference = tmp_analyser
             elif item['type'] == 'MatchFilter':
