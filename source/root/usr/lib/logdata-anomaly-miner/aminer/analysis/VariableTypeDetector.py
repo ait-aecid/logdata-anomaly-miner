@@ -11,24 +11,26 @@ from aminer.events import EventSourceInterface
 from aminer.input import AtomHandlerInterface
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.util import PersistencyUtil
+from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
 
 class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
     """This class tests each variable of the event_types for the implemented variable types. This module needs to run after the
     EventTypeDetector is initialized"""
 
-    def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id='Default', path_list=None,
-        ks_alpha=0.05, s_ks_alpha=0.05, s_ks_bt_alpha=0.05, d_alpha=0.1, d_bt_alpha=0.1, div_thres=0.3, sim_thres=0.1, indicator_thres=0.4,
-        num_init=100, num_update=50, num_update_unq=200, num_s_ks_values=50, num_s_ks_bt=30, num_d_bt=30, num_pause_discrete=5,
-        num_pause_others=2, test_ks_int=True, update_var_type_bool=True, num_stop_update=False,
-        silence_output_without_confidence=False, silence_output_except_indicator=True, num_var_type_hist_ref=10, num_update_var_type_hist_ref=10,
-        num_var_type_considered_ind=10, num_stat_stop_update=200, num_updates_until_var_reduction=20, var_reduction_thres=0.6, num_skipped_ind_for_weights=1,
-        num_ind_for_weights=100, used_multinomial_test='Chi', use_empiric_distr=True, save_statistics=True
-        ):
+    def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id='Default', path_list=None, ks_alpha=0.05,
+                 s_ks_alpha=0.05, s_ks_bt_alpha=0.05, d_alpha=0.1, d_bt_alpha=0.1, div_thres=0.3, sim_thres=0.1, indicator_thres=0.4,
+                 num_init=100, num_update=50, num_update_unq=200, num_s_ks_values=50, num_s_ks_bt=30, num_d_bt=30, num_pause_discrete=5,
+                 num_pause_others=2, test_ks_int=True, update_var_type_bool=True, num_stop_update=False,
+                 silence_output_without_confidence=False, silence_output_except_indicator=True, num_var_type_hist_ref=10,
+                 num_update_var_type_hist_ref=10,  num_var_type_considered_ind=10, num_stat_stop_update=200,
+                 num_updates_until_var_reduction=20, var_reduction_thres=0.6, num_skipped_ind_for_weights=1, num_ind_for_weights=100,
+                 used_multinomial_test='Chi', use_empiric_distr=True, save_statistics=True, output_log_line=True):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
 
         self.next_persist_time = None
         self.anomaly_event_handlers = anomaly_event_handlers
+        self.aminer_config = aminer_config
 
         # General options
         # Used to track the indicators and changed variable types
@@ -86,6 +88,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         self.silence_output_without_confidence = silence_output_without_confidence
         # Silences the all messages which are not related with the calculated indicator
         self.silence_output_except_indicator = silence_output_except_indicator
+        self.output_log_line = output_log_line
         # States how long the reference for the varTypeHist is. The reference is used in the evaluation.
         self.num_var_type_hist_ref = num_var_type_hist_ref
         # Number of updatesteps before the varTypeHistRef is being updated
@@ -143,10 +146,6 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         # Order of the var_type_history_list [others, static, [discrete, number of appended steps], asc, desc, unique, EV of continuous
         # distributions]
         self.var_type_history_list_order = ['others', 'stat', 'd', 'asc', 'desc', 'unq', 'contEV']
-        # Number of minimal successes in the last num_s_ks_bt sKS-tests
-        self.s_ks_bt_min_success = 0
-        # Number of minimal successes in the last num_d_bt discrete-tests
-        self.d_bt_min_success = 0
         # List of the distributions for which the sKS test is implemented
         self.distr_list = ['nor', 'uni', 'spec', 'beta', 'betam', 'emp']
         # List of the numbers of log lines of this eventType, when an indicator failed
@@ -357,12 +356,13 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 }
 
         # Loads the persistency
+        self.persistence_id = persistence_id
         PersistencyUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
 
         # Imports the persistency
-        if (persistence_data is not None):
+        if persistence_data is not None:
             self.load_persistence_data(persistence_data)
 
     def receive_atom(self, log_atom):
@@ -431,8 +431,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         self.next_persist_time = None
 
         if self.save_statistics:
-            PersistencyUtil.store_json(self.statistics_file_name,
-                    [self.failed_indicators_total, self.failed_indicators_values, self.failed_indicators_paths, self.failed_indicators])
+            PersistencyUtil.store_json(self.statistics_file_name, [
+                self.failed_indicators_total, self.failed_indicators_values, self.failed_indicators_paths, self.failed_indicators])
 
     def load_persistence_data(self, persistence_data):
         """Extracts the persistency data and appends various lists to create a consistent state"""
@@ -497,7 +497,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         self.var_type[event_index][var_index] = tmp_var_type[:-1]
                         self.alternative_distribution_types[event_index][var_index] = tmp_var_type[-1]
                         self.bt_results[event_index][var_index] = [1] * self.num_s_ks_bt
-                        if self.var_type[event_index][var_index][0] == 'betam' or  self.var_type[event_index][var_index][0] == 'spec':
+                        if self.var_type[event_index][var_index][0] == 'betam' or self.var_type[event_index][var_index][0] == 'spec':
                             self.s_ks_get_quantiles(event_index, var_index)
 
                     # Initializes the binomialtest for the discrete type
@@ -512,7 +512,6 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
                     else:
                         self.var_type[event_index][var_index] = tmp_var_type
-
 
             # Test only the variables with paths in the path_list
             else:
@@ -624,7 +623,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     exceeded_thresh = False
                     for type_index in range(1, len(self.var_type_history_list[event_index][var_index])):
                         # Continuous Distribution
-                        if type_index == 6: # continuously distributed variable type
+                        if type_index == 6:  # continuously distributed variable type
                             num_app = len([1 for x in self.var_type_history_list[event_index][var_index][type_index][1] if x != 0])
                             if num_app / self.num_updates_until_var_reduction >= self.var_reduction_thres:
                                 exceeded_thresh = True
@@ -683,18 +682,17 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     for type_index in range(len(self.var_type_history_list[event_index][var_index])):
                         if len(self.var_type_history_list[event_index][var_index][type_index]) >= 1 and isinstance(
                                 self.var_type_history_list[event_index][var_index][type_index][0], list):
-                            if type_index == 6: # continuously distributed variable type
+                            if type_index == 6:  # continuously distributed variable type
                                 self.var_type_history_list_reference[event_index][var_index].append([sum(
                                         self.var_type_history_list[event_index][var_index][type_index][0][-self.num_var_type_hist_ref:]) /
                                         max(len([1 for x in self.var_type_history_list[event_index][var_index][type_index][0][
-                                        -self.num_var_type_hist_ref:] if x != 0]), 1), sum(
+                                            -self.num_var_type_hist_ref:] if x != 0]), 1), sum(
                                         self.var_type_history_list[event_index][var_index][type_index][1][-self.num_var_type_hist_ref:]) /
                                         max(len([1 for x in self.var_type_history_list[event_index][var_index][type_index][1][
-                                        -self.num_var_type_hist_ref:] if x != 0]), 1)])
+                                            -self.num_var_type_hist_ref:] if x != 0]), 1)])
                             else:
-                                self.var_type_history_list_reference[event_index][var_index].append(
-                                        [sum(x[-self.num_var_type_hist_ref:]) for x in
-                                        self.var_type_history_list[event_index][var_index][type_index]])
+                                self.var_type_history_list_reference[event_index][var_index].append([sum(x[
+                                    -self.num_var_type_hist_ref:]) for x in self.var_type_history_list[event_index][var_index][type_index]])
                         else:
                             self.var_type_history_list_reference[event_index][var_index].append(
                                     sum(self.var_type_history_list[event_index][var_index][type_index][-self.num_var_type_hist_ref:]))
@@ -703,11 +701,11 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             else:
                 if ((isinstance(self.num_updates_until_var_reduction, bool) and self.num_updates_until_var_reduction is False) or (
                         self.event_type_detector.num_eventlines[event_index] - self.num_init) /
-                        self.num_update >= self.num_updates_until_var_reduction - 1) and (not isinstance(self.num_var_type_considered_ind, bool)) and (
-                        not isinstance(self.num_var_type_hist_ref, bool)) and len(self.var_type_history_list_reference) > event_index and (
-                        self.var_type_history_list_reference[event_index] != []) and (
+                        self.num_update >= self.num_updates_until_var_reduction - 1) and (not isinstance(
+                        self.num_var_type_considered_ind, bool)) and (not isinstance(self.num_var_type_hist_ref, bool)) and len(
+                    self.var_type_history_list_reference) > event_index and (self.var_type_history_list_reference[event_index] != []) and (
                         ((self.event_type_detector.num_eventlines[event_index] - self.num_init) / self.num_update
-                        - self.num_var_type_hist_ref) % self.num_var_type_considered_ind) == 0:
+                            - self.num_var_type_hist_ref) % self.num_var_type_considered_ind) == 0:
 
                     # Shorten the var_type_history_list
                     if len(self.var_type_history_list[event_index]) > 0 and len(self.var_type_history_list[event_index][0]) > 0 and len(
@@ -716,7 +714,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         for var_index in range(len(self.var_type_history_list[event_index])):
                             for type_index in range(len(self.var_type_history_list[event_index][var_index])):
                                 # Differentiation between the entries, which are lists (e.g. discrete) and values
-                                if type(self.var_type_history_list[event_index][var_index][type_index][i]) == list:
+                                if type(self.var_type_history_list[event_index][var_index][type_index][i]) is list:
                                     for i in range(len(self.var_type_history_list[event_index][var_index][type_index])):
                                         self.var_type_history_list[event_index][var_index][type_index][i] = \
                                             self.var_type_history_list[event_index][var_index][type_index][i][
@@ -746,11 +744,11 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
                         # Multiply the single values of the indicator with their corresponding weights
                         # Number of the log line which corresponds to the first indicator, which is taken into account
-                        first_line_num = self.event_type_detector.num_eventlines[event_index] - self.num_update * self.num_var_type_considered_ind \
-                            * (self.num_ind_for_weights + self.num_skipped_ind_for_weights)
+                        first_line_num = self.event_type_detector.num_eventlines[event_index] - self.num_update *\
+                            self.num_var_type_considered_ind * (self.num_ind_for_weights + self.num_skipped_ind_for_weights)
                         # Number of the log line which corresponds to the last indicator, which is taken into account
-                        last_line_num = self.event_type_detector.num_eventlines[event_index] - self.num_update * self.num_var_type_considered_ind \
-                            * self.num_skipped_ind_for_weights
+                        last_line_num = self.event_type_detector.num_eventlines[event_index] - self.num_update *\
+                            self.num_var_type_considered_ind * self.num_skipped_ind_for_weights
 
                         for var_index in indices_failed_tests:
                             lower_ind = False  # Index of the lower bound of the considered values of the failed_indicator list
@@ -792,7 +790,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                             tmp_string += 'Indicator of a change in system behaviour: %s. Paths to the corresponding variables: %s' % (
                                 np.arctan(2 * indicator) / np.pi * 2, [
                                     self.event_type_detector.variable_key_list[event_index][var_index]
-                                    for var_index in indices_failed_tests]) + '\n'
+                                    for var_index in indices_failed_tests])
 
                         self.print(event_index, tmp_string, log_atom, np.arctan(2 * indicator) / np.pi * 2, indicator=True)
 
@@ -809,18 +807,18 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         for type_index in range(len(self.var_type_history_list[event_index][var_index])):
                             if len(self.var_type_history_list[event_index][var_index][type_index]) >= 1 and isinstance(
                                     self.var_type_history_list[event_index][var_index][type_index][0], list):
-                                if type_index == 6: # continuously distributed variable type
+                                if type_index == 6:  # continuously distributed variable type
                                     self.var_type_history_list_reference[event_index][var_index].append([sum(
-                                            self.var_type_history_list[event_index][var_index][type_index][0][-self.num_var_type_hist_ref:]) /
-                                            max(len([1 for x in self.var_type_history_list[event_index][var_index][type_index][0][
-                                            -self.num_var_type_hist_ref:] if x != 0]), 1),
-                                            sum(self.var_type_history_list[event_index][var_index][type_index][1][-self.num_var_type_hist_ref:]) /
-                                            max(len([1 for x in self.var_type_history_list[event_index][var_index][type_index][1][
-                                            -self.num_var_type_hist_ref:] if x != 0]), 1)])
+                                            self.var_type_history_list[event_index][var_index][type_index][0][
+                                                -self.num_var_type_hist_ref:]) / max(len([1 for x in self.var_type_history_list[
+                                                    event_index][var_index][type_index][0][-self.num_var_type_hist_ref:] if x != 0]), 1),
+                                            sum(self.var_type_history_list[event_index][var_index][type_index][1][
+                                                -self.num_var_type_hist_ref:]) / max(len([1 for x in self.var_type_history_list[
+                                                    event_index][var_index][type_index][1][-self.num_var_type_hist_ref:] if x != 0]), 1)])
                                 else:
                                     self.var_type_history_list_reference[event_index][var_index].append(
                                             [sum(x[-self.num_var_type_hist_ref:]) for x in
-                                            self.var_type_history_list[event_index][var_index][type_index]])
+                                                self.var_type_history_list[event_index][var_index][type_index]])
                             else:
                                 self.var_type_history_list_reference[event_index][var_index].append(sum(
                                         self.var_type_history_list[event_index][var_index][type_index][-self.num_var_type_hist_ref:]))
@@ -1079,7 +1077,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 if len(self.alternative_distribution_types[event_index][var_index]) != 0:  # There is at least one alternative distribution
                     # Initializes the distributionvalues and bucketnumbers
                     self.var_type[event_index][var_index] = self.alternative_distribution_types[event_index][var_index][0]
-                    self.alternative_distribution_types[event_index][var_index] = self.alternative_distribution_types[event_index][var_index][1:]
+                    self.alternative_distribution_types[event_index][var_index] = self.alternative_distribution_types[event_index][
+                        var_index][1:]
                     self.bt_results[event_index][var_index] = [1] * self.num_s_ks_bt
                     if self.var_type[event_index][var_index][0] == 'betam' or self.var_type[event_index][var_index][0] == 'spec':
                         self.s_ks_get_quantiles(event_index, var_index)
@@ -1186,7 +1185,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             # No new values have appeared, so the normal test for discrete variables is used
             self.d_test(event_index, var_index)
 
-            # Check if the values should be considdered others or if the BT failed
+            # Check if the values should be considered others or if the BT failed
             if (len(set(new_values + self.var_type[event_index][var_index][1])) >= (
                     self.num_update + self.var_type[event_index][var_index][3]) * (1 - self.sim_thres)) or (sum(
                         self.bt_results[event_index][var_index][0]) < self.d_bt_min_success):
@@ -1427,7 +1426,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             return [True, 0.0]
 
         # scipy KS-test for normal distribution
-        elif self.var_type[event_index][var_index][0] == 'nor':
+        if self.var_type[event_index][var_index][0] == 'nor':
             max_val = kstest(self.event_type_detector.values[event_index][var_index][-self.num_s_ks_values:], 'norm', args=(
                 self.var_type[event_index][var_index][1], self.var_type[event_index][var_index][2]))[0]
             if first_distr:
@@ -1439,7 +1438,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             return [True, 0.0]
 
         # scipy KS-test for beta distributions
-        elif self.var_type[event_index][var_index][0] == 'beta':
+        if self.var_type[event_index][var_index][0] == 'beta':
             if self.var_type[event_index][var_index][5] == 1:
                 max_val = kstest(self.event_type_detector.values[event_index][var_index][-self.num_s_ks_values:], 'beta', args=(
                     0.5, 0.5, self.var_type[event_index][var_index][3], self.var_type[event_index][var_index][4] - self.var_type[
@@ -1697,33 +1696,30 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     break
                 # Differentiation of the entries, which are lists (e.g. discrete, continuously distributed)
                 if type_index in [2, 6]:
-                    if type_index == 6: # continuously distributed variable type
+                    if type_index == 6:  # continuously distributed variable type
                         if self.var_type_history_list_reference[event_index][var_index][type_index] == 0:
                             diff_list.append(len([
                                     1 for x in self.var_type_history_list[event_index][var_index][type_index][1][
-                                    -self.num_var_type_considered_ind:] if x != 0]) / len_cur)
+                                        -self.num_var_type_considered_ind:] if x != 0]) / len_cur)
                         else:
                             var_type_ev = sum(self.var_type_history_list[event_index][var_index][type_index][0][
-                                    -self.num_var_type_considered_ind:]) / max(len(
-                                    [1 for x in self.var_type_history_list[event_index][var_index][type_index][0][
-                                        -self.num_var_type_considered_ind:] if x != 0]), 1)
+                                    -self.num_var_type_considered_ind:]) / max(len([
+                                        1 for x in self.var_type_history_list[event_index][var_index][type_index][0][
+                                            -self.num_var_type_considered_ind:] if x != 0]), 1)
                             var_type_sd = sum(self.var_type_history_list[event_index][var_index][type_index][1][
-                                    -self.num_var_type_considered_ind:]) / max(len(
-                                    [1 for x in self.var_type_history_list[event_index][var_index][type_index][1][
-                                    -self.num_var_type_considered_ind:] if x != 0]), 1)
+                                    -self.num_var_type_considered_ind:]) / max(len([
+                                        1 for x in self.var_type_history_list[event_index][var_index][type_index][1][
+                                            -self.num_var_type_considered_ind:] if x != 0]), 1)
 
                             # Formula to include the impact of the mean, standard deviation and changes of the distribution
                             if max(self.var_type_history_list_reference[event_index][var_index][type_index][1], var_type_sd) > 0:
-                                diff_list.append((
-                                    min(1, abs(
-                                            (self.var_type_history_list_reference[event_index][var_index][type_index][0] - var_type_ev) / max(
-                                            abs(self.var_type_history_list_reference[event_index][var_index][type_index][0]),
-                                            abs(var_type_ev))) / 3 + abs(
-                                            (self.var_type_history_list_reference[event_index][var_index][type_index][1] - var_type_sd) / max(
-                                            abs(self.var_type_history_list_reference[event_index][var_index][type_index][1]),
-                                            abs(var_type_sd))) / 3 + 1 / 3) * len([
-                                            x for x in self.var_type_history_list[event_index][var_index][type_index][1][
-                                            -self.num_var_type_considered_ind:] if x != 0])) / len_cur)
+                                diff_list.append((min(1, abs((self.var_type_history_list_reference[event_index][var_index][
+                                    type_index][0] - var_type_ev) / max(abs(self.var_type_history_list_reference[event_index][var_index][
+                                        type_index][0]), abs(var_type_ev))) / 3 + abs((self.var_type_history_list_reference[event_index][
+                                            var_index][type_index][1] - var_type_sd) / max(abs(self.var_type_history_list_reference[
+                                                event_index][var_index][type_index][1]), abs(var_type_sd))) / 3 + 1 / 3) * len([
+                                                    x for x in self.var_type_history_list[event_index][var_index][type_index][1][
+                                                        -self.num_var_type_considered_ind:] if x != 0])) / len_cur)
                             else:
                                 diff_list.append(0)
                     else:
@@ -1742,12 +1738,12 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
                 else:
                     if self.var_type_history_list_reference[event_index][var_index][type_index] == 0:
-                        diff_list.append(sum(
-                                self.var_type_history_list[event_index][var_index][type_index][-self.num_var_type_considered_ind:]) / len_cur)
+                        diff_list.append(sum(self.var_type_history_list[event_index][var_index][type_index][
+                            -self.num_var_type_considered_ind:]) / len_cur)
                     else:
-                        diff_list.append(max(0, (sum(
-                                self.var_type_history_list[event_index][var_index][type_index][-self.num_var_type_considered_ind:]) / len_cur -
-                                self.var_type_history_list_reference[event_index][var_index][type_index] / len_ref)) / 2)
+                        diff_list.append(max(0, (sum(self.var_type_history_list[event_index][var_index][type_index][
+                            -self.num_var_type_considered_ind:]) / len_cur - self.var_type_history_list_reference[event_index][var_index][
+                                type_index] / len_ref)) / 2)
 
             if len(diff_list) == 0:
                 indicator_list.append(0)
@@ -1755,7 +1751,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 indicator_list.append(sum(diff_list))
         return indicator_list
 
-    def bt_min_successes(self, num_bt, p, alpha):
+    def bt_min_successes(self, num_bt, p, alpha):  # skipcq: PYL-R0201
         """Calculates the minimal number of successes for the BT with significance alpha, where p is the probability of success and num_bt
         is the number of observed tests"""
 
@@ -1789,24 +1785,38 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         """prints the initial variableTypes"""
         if self.silence_output_without_confidence or self.silence_output_except_indicator:
             return
-        tmp_string = 'Initial detection of varTypes in lines like %s:\n' % str(repr(log_atom.raw_data))
+        message = 'Initial detection of varTypes in lines like %s:' % repr(log_atom.raw_data)
+        tmp_string = ''
+        type_info = {}
 
         for var_index in range(self.length[event_index]):
             if self.var_type[event_index][var_index]:
                 if self.var_type[event_index][var_index][0] == 'unq':
-                    tmp_string += "Path %s: ['unq']\n" % (self.event_type_detector.variable_key_list[event_index][var_index])
+                    tmp_string += "  Path '%s': ['unq']\n" % (self.event_type_detector.variable_key_list[event_index][var_index])
+                    type_info[self.event_type_detector.variable_key_list[event_index][var_index]] = ['unq']
                 elif self.var_type[event_index][var_index][0] == 'd':
-                    tmp_string += "Path %s: ['d']\n" % (self.event_type_detector.variable_key_list[event_index][var_index])
-                elif self.var_type[event_index][var_index][0] != 'stat':
-                    tmp_string += 'Path %s: %s\n' % (
+                    tmp_string += "  Path '%s': ['d']\n" % (self.event_type_detector.variable_key_list[event_index][var_index])
+                    type_info[self.event_type_detector.variable_key_list[event_index][var_index]] = ['d']
+                else:
+                    tmp_string += "  Path '%s': %s\n" % (
                         self.event_type_detector.variable_key_list[event_index][var_index], self.var_type[event_index][var_index])
+                    type_info[self.event_type_detector.variable_key_list[event_index][var_index]] = self.var_type[event_index][var_index]
+        tmp_string = tmp_string.lstrip('  ')
 
-        sorted_log_lines = [self.event_type_detector.longest_path[event_index] + os.linesep + log_atom.raw_data.decode()]
-        analysis_component = {'AffectedLogAtomPaths': [log_atom.parser_match.get_match_dictionary().keys()]}
-        event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records}
+        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+        if original_log_line_prefix is None:
+            original_log_line_prefix = ''
+        if self.output_log_line:
+            sorted_log_lines = [tmp_string + original_log_line_prefix + repr(log_atom.raw_data)]
+        else:
+            sorted_log_lines = [tmp_string + repr(log_atom.raw_data)]
+
+        analysis_component = {'AffectedLogAtomPaths': [list(log_atom.parser_match.get_match_dictionary().keys())]}
+        event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
+                      'TypeInfo': type_info}
         for listener in self.anomaly_event_handlers:
             listener.receive_event(
-                'Analysis.%s' % self.__class__.__name__, tmp_string, sorted_log_lines, event_data, log_atom, self)
+                'Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, log_atom, self)
 
     def print_changed_var_type(self, event_index, vt_old, vt_new, var_index, log_atom, confidence=None):
         """prints the changed variableTypes"""
@@ -1818,27 +1828,46 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if (self.silence_output_without_confidence and confidence is None) or self.silence_output_except_indicator:
             return
 
-        sorted_log_lines = [self.event_type_detector.longest_path[event_index] + os.linesep + log_atom.raw_data.decode()]
-        analysis_component = {'AffectedLogAtomPaths': [log_atom.parser_match.get_match_dictionary().keys()]}
-        event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records}
+        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+        if original_log_line_prefix is None:
+            original_log_line_prefix = ''
+        if self.output_log_line:
+            sorted_log_lines = [self.event_type_detector.longest_path[event_index] + os.linesep + original_log_line_prefix + repr(
+                log_atom.raw_data)]
+        else:
+            sorted_log_lines = [self.event_type_detector.longest_path[event_index] + os.linesep + repr(log_atom.raw_data)]
+
+        analysis_component = {'AffectedLogAtomPaths': [list(log_atom.parser_match.get_match_dictionary().keys())]}
+        event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
+                      'TypeInfo': {'from': vt_old[0], 'to': vt_new[0], 'lines': self.event_type_detector.num_eventlines[event_index]}}
         for listener in self.anomaly_event_handlers:
             listener.receive_event(
-                'Analysis.%s' % self.__class__.__name__, 'VariableType of path %s changed from %s to %s after the %s-th analysed line' % (
-                        self.event_type_detector.variable_key_list[event_index][var_index], vt_old[0], vt_new[0],
-                        self.event_type_detector.num_eventlines[event_index]), sorted_log_lines, event_data, log_atom, self)
+                'Analysis.%s' % self.__class__.__name__,
+                "VariableType of path '%s' changed from '%s' to '%s' after the %s-th analysed line" % (
+                    self.event_type_detector.variable_key_list[event_index][var_index], vt_old[0], vt_new[0],
+                    self.event_type_detector.num_eventlines[event_index]), sorted_log_lines, event_data, log_atom, self)
 
     def print_reject_var_type(self, event_index, vt, var_index, log_atom):
         """prints the changed variableTypes"""
         if self.silence_output_without_confidence or self.silence_output_except_indicator:
             return
 
-        sorted_log_lines = [self.event_type_detector.longest_path[event_index] + os.linesep + log_atom.raw_data.decode()]
-        analysis_component = {'AffectedLogAtomPaths': [log_atom.parser_match.get_match_dictionary().keys()]}
-        event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records}
+        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+        if original_log_line_prefix is None:
+            original_log_line_prefix = ''
+        if self.output_log_line:
+            sorted_log_lines = [
+                self.event_type_detector.longest_path[event_index] + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
+        else:
+            sorted_log_lines = [self.event_type_detector.longest_path[event_index] + os.linesep + repr(log_atom.raw_data)]
+
+        analysis_component = {'AffectedLogAtomPaths': [list(log_atom.parser_match.get_match_dictionary().keys())]}
+        event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
+                      'TypeInfo': {'reject': vt[0], 'lines': self.event_type_detector.num_eventlines[event_index]}}
         for listener in self.anomaly_event_handlers:
             listener.receive_event(
                 'Analysis.%s' % self.__class__.__name__,
-                'VariableType of path %s would reject the type %s after the %s-th analysed line' % (
+                "VariableType of path '%s' would reject the type '%s' after the %s-th analysed line" % (
                     self.event_type_detector.variable_key_list[event_index][var_index], vt[0], self.event_type_detector.num_eventlines[
                         event_index]), sorted_log_lines, event_data, log_atom, self)
 
@@ -1849,8 +1878,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             return
 
         sorted_log_lines = [self.event_type_detector.longest_path[event_index] + os.linesep + log_atom.raw_data.decode()]
-        analysis_component = {'AffectedLogAtomPaths': [log_atom.parser_match.get_match_dictionary().keys()]}
-        event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records}
+        analysis_component = {'AffectedLogAtomPaths': [list(log_atom.parser_match.get_match_dictionary().keys())]}
+        event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
+                      'Confidence': confidence, 'Indicator': indicator}
         for listener in self.anomaly_event_handlers:
             listener.receive_event('Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, log_atom, self)
 
