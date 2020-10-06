@@ -123,7 +123,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, E
 
                         # Save the number of occured eventtypes for the initialization of the TSA
                         if self.num_eventlines_TSA_ref == [] or len(
-                                self.num_eventlines_TSA_ref[0]) < self.num_sections_waiting_time_for_TSA+1:
+                                self.num_eventlines_TSA_ref[0]) < self.num_sections_waiting_time_for_TSA-1:
 
                             # Initialize the lists of self.num_eventlines_TSA_ref if not already initialized
                             if not self.num_eventlines_TSA_ref:
