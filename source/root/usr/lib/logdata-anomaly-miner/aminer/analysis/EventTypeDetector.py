@@ -16,7 +16,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, E
 
     def __init__(self, aminer_config, anomaly_event_handlers, persistence_id='Default', path_list=None, min_num_vals=1000,
                  max_num_vals=1500, save_values=True, track_time_for_TSA=False, waiting_time_for_TSA=300,
-                 num_subdivision_waiting_time_for_TSA=9):
+                 num_sections_waiting_time_for_TSA=10):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
 
         self.next_persist_time = time.time() + 600.0
@@ -61,7 +61,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, E
         # Time in seconds, until the time windows are being initialized
         self.waiting_time_for_TSA = waiting_time_for_TSA
         # Number of subdivisions of the initialization window. The length of the input-list of the function_Init-funtion is numSubd+1
-        self.num_subdivision_waiting_time_for_TSA = num_subdivision_waiting_time_for_TSA
+        self.num_sections_waiting_time_for_TSA = num_sections_waiting_time_for_TSA
 
         # Loads the persistency
         PersistencyUtil.add_persistable_component(self)
@@ -101,9 +101,9 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, E
         if self.track_time_for_TSA and -1 in self.etd_time_trigger[0]:
             for i in range(len(self.etd_time_trigger[0])):
                 if self.etd_time_trigger[0][i] == -1:
-                    for j in range(self.num_subdivision_waiting_time_for_TSA):
+                    for j in range(self.num_sections_waiting_time_for_TSA-1):
                         self.etd_time_trigger[0].append(current_time + self.waiting_time_for_TSA*(j+1)/(
-                                self.num_subdivision_waiting_time_for_TSA+1))
+                                self.num_sections_waiting_time_for_TSA))
                         self.etd_time_trigger[1].append(-1)
                         self.etd_time_trigger[2].append(-1)
 
@@ -123,7 +123,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, E
 
                         # Save the number of occured eventtypes for the initialization of the TSA
                         if self.num_eventlines_TSA_ref == [] or len(
-                                self.num_eventlines_TSA_ref[0]) < self.num_subdivision_waiting_time_for_TSA:
+                                self.num_eventlines_TSA_ref[0]) < self.num_sections_waiting_time_for_TSA+1:
 
                             # Initialize the lists of self.num_eventlines_TSA_ref if not already initialized
                             if not self.num_eventlines_TSA_ref:
