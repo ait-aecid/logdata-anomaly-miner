@@ -141,5 +141,5 @@ EventHandlers:
           json: True # optional default: False
           type: StreamPrinterEventHandler
 
-        - id: "yslog
+        - id: syslog
           type: SyslogWriterEventHandler
