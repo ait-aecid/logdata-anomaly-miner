@@ -254,29 +254,29 @@ def build_analysis_pipeline(analysis_context):
                 parsed_atom_handler_lookup_list = []
                 for atom_handler in item['parsed_atom_handler_lookup_list']:
                     if atom_handler[1] is not None:
-                        if analysis_context.get_component_by_id(atom_handler[1]) is None:
+                        if analysis_context.get_component_by_name(atom_handler[1]) is None:
                             raise ValueError('The atom handler %s does not exist!' % atom_handler[1])
-                        atom_handler[1] = analysis_context.get_component_by_id(atom_handler[1])
+                        atom_handler[1] = analysis_context.get_component_by_name(atom_handler[1])
                     parsed_atom_handler_lookup_list.append(tuple(i for i in atom_handler))
                 default_parsed_atom_handler = item['default_parsed_atom_handler']
                 if default_parsed_atom_handler is not None:
-                    if analysis_context.get_component_by_id(default_parsed_atom_handler) is None:
+                    if analysis_context.get_component_by_name(default_parsed_atom_handler) is None:
                         raise ValueError('The atom handler %s does not exist!' % default_parsed_atom_handler)
-                    default_parsed_atom_handler = analysis_context.get_component_by_id(default_parsed_atom_handler)
+                    default_parsed_atom_handler = analysis_context.get_component_by_name(default_parsed_atom_handler)
                 tmp_analyser = func(
                     parsed_atom_handler_lookup_list,
                     default_parsed_atom_handler=default_parsed_atom_handler)
             elif item['type'] == 'MatchValueFilter':
                 parsed_atom_handler_dict = {}
                 for atom_handler in item['parsed_atom_handler_dict']:
-                    if analysis_context.get_component_by_id(atom_handler) is None:
+                    if analysis_context.get_component_by_name(atom_handler) is None:
                         raise ValueError('The atom handler %s does not exist!' % atom_handler)
-                    parsed_atom_handler_dict[atom_handler] = analysis_context.get_component_by_id(atom_handler)
+                    parsed_atom_handler_dict[atom_handler] = analysis_context.get_component_by_name(atom_handler)
                 default_parsed_atom_handler = item['default_parsed_atom_handler']
                 if default_parsed_atom_handler is not None:
-                    if analysis_context.get_component_by_id(default_parsed_atom_handler) is None:
+                    if analysis_context.get_component_by_name(default_parsed_atom_handler) is None:
                         raise ValueError('The atom handler %s does not exist!' % default_parsed_atom_handler)
-                    default_parsed_atom_handler = analysis_context.get_component_by_id(default_parsed_atom_handler)
+                    default_parsed_atom_handler = analysis_context.get_component_by_name(default_parsed_atom_handler)
                 tmp_analyser = func(
                     item['path'],
                     parsed_atom_handler_dict,
@@ -635,6 +635,61 @@ def build_analysis_pipeline(analysis_context):
                     whitelist_rules,
                     anomaly_event_handlers,
                     output_log_line=learn)
+            elif item['type'] == 'EventTypeDetector':
+                tmp_analyser = func(
+                    analysis_context.aminer_config,
+                    anomaly_event_handlers,
+                    persistence_id=item['persistence_id'],
+                    path_list=item['paths'],
+                    min_num_vals=item['min_num_vals'],
+                    max_num_vals=item['max_num_vals'],
+                    save_values=item['save_values'],
+                    track_time_for_TSA=item['track_time_for_TSA'],
+                    waiting_time_for_TSA=item['waiting_time_for_TSA'],
+                    num_sections_waiting_time_for_TSA=item['num_sections_waiting_time_for_TSA'])
+            elif item['type'] == 'VariableTypeDetector':
+                etd = analysis_context.get_component_by_name(item['event_type_detector'])
+                if etd is None:
+                    raise ValueError('The defined EventTypeDetector %s does not exists!' % item['event_type_detector'])
+                tmp_analyser = func(
+                    analysis_context.aminer_config,
+                    anomaly_event_handlers,
+                    etd,
+                    persistence_id=item['persistence_id'],
+                    path_list=item['paths'],
+                    ks_alpha=item['ks_alpha'],
+                    s_ks_alpha=item['s_ks_alpha'],
+                    s_ks_bt_alpha=item['s_ks_bt_alpha'],
+                    d_alpha=item['d_alpha'],
+                    d_bt_alpha=item['d_bt_alpha'],
+                    div_thres=item['div_thres'],
+                    sim_thres=item['sim_thres'],
+                    indicator_thres=item['indicator_thres'],
+                    num_init=item['num_init'],
+                    num_update=item['num_update'],
+                    num_update_unq=item['num_update_unq'],
+                    num_s_ks_values=item['num_s_ks_values'],
+                    num_s_ks_bt=item['num_s_ks_bt'],
+                    num_d_bt=item['num_d_bt'],
+                    num_pause_discrete=item['num_pause_discrete'],
+                    num_pause_others=item['num_pause_others'],
+                    test_ks_int=item['test_ks_int'],
+                    update_var_type_bool=item['update_var_type_bool'],
+                    num_stop_update=item['num_stop_update'],
+                    silence_output_without_confidence=item['silence_output_without_confidence'],
+                    silence_output_except_indicator=item['silence_output_except_indicator'],
+                    num_var_type_hist_ref=item['num_var_type_hist_ref'],
+                    num_update_var_type_hist_ref=item['num_update_var_type_hist_ref'],
+                    num_var_type_considered_ind=item['num_var_type_considered_ind'],
+                    num_stat_stop_update=item['num_stat_stop_update'],
+                    num_updates_until_var_reduction=item['num_updates_until_var_reduction'],
+                    var_reduction_thres=item['var_reduction_thres'],
+                    num_skipped_ind_for_weights=item['num_skipped_ind_for_weights'],
+                    num_ind_for_weights=item['num_ind_for_weights'],
+                    used_multinomial_test=item['used_multinomial_test'],
+                    use_empiric_distr=item['use_empiric_distr'],
+                    save_statistics=item['save_statistics'],
+                    output_log_line=item['output_logline'])
             else:
                 tmp_analyser = func(
                     analysis_context.aminer_config,

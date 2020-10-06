@@ -848,6 +848,12 @@ Analysis:
           id: ParserCount
           report_interval: 10
           reset_after_report_flag: False
+        - type: EventTypeDetector
+          id: EventTypeDetector
+        - type: VariableTypeDetector
+          id: VariableTypeDetector
+          event_type_detector: EventTypeDetector
+          silence_output_except_indicator: False
         - type: EventCorrelationDetector
           id: EventCorrelationDetector
           check_rules_flag: True

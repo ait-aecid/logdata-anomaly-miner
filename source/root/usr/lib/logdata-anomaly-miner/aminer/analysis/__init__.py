@@ -10,6 +10,7 @@ CONFIG_KEY_LOG_LINE_PREFIX = 'LogPrefix'
 from aminer.analysis.AtomFilters import MatchPathFilter, MatchValueFilter, SubhandlerFilter  # skipcq: FLK-E402
 from aminer.analysis.EnhancedNewMatchPathValueComboDetector import EnhancedNewMatchPathValueComboDetector  # skipcq: FLK-E402
 from aminer.analysis.EventCorrelationDetector import EventCorrelationDetector  # skipcq: FLK-E402
+from aminer.analysis.EventTypeDetector import EventTypeDetector  # skipcq: FLK-E402
 # skipcq: FLK-E402
 from aminer.analysis.HistogramAnalysis import HistogramAnalysis, LinearNumericBinDefinition, ModuloTimeBinDefinition,\
     PathDependentHistogramAnalysis
@@ -33,4 +34,5 @@ from aminer.analysis.TimeCorrelationDetector import TimeCorrelationDetector  # s
 from aminer.analysis.TimeCorrelationViolationDetector import TimeCorrelationViolationDetector, CorrelationRule, EventClassSelector
 from aminer.analysis.TimestampCorrectionFilters import SimpleMonotonicTimestampAdjust  # skipcq: FLK-E402
 from aminer.analysis.TimestampsUnsortedDetector import TimestampsUnsortedDetector  # skipcq: FLK-E402
+from aminer.analysis.VariableTypeDetector import VariableTypeDetector  # skipcq: FLK-E402
 from aminer.analysis.WhitelistViolationDetector import WhitelistViolationDetector  # skipcq: FLK-E402
