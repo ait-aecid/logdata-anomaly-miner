@@ -4,8 +4,6 @@ python:
 dist: bionic
 
 before_install:
-  - sudo apt-get update -y
-  - sudo apt-get install -y exim4 procps cpulimit ansible mailutils python3-pip python3-kafka python3-dateutil
   - git clone --depth 1 --branch v2.0.3 https://github.com/ait-aecid/aminer-ansible.git roles/aminer
   - cp $PWD/source/root/etc/aminer/conf-available/generic/ApacheAccessModel.py $PWD/source/root/etc/aminer/conf-enabled/ApacheAccessModel.py
   - ln -s $PWD/source/root/usr/lib/logdata-anomaly-miner/aminer $PWD/aecid-testsuite/aminer
@@ -13,8 +11,10 @@ before_install:
   - sed -e "s+{{SOURCEDIR}}+$PWD+g" .playbook.yml > playbook.yml
 
 install:
-  - sudo pip3 install coverage
+  - sudo apt-get update -y
   - sudo ansible-playbook playbook.yml
+  - sudo pip3 install coverage
+  - sudo apt-get install -y exim4 procps cpulimit ansible mailutils python3-pip python3-kafka python3-dateutil
   - sudo pip3 install kafka-python -U
   - sudo ln -s /usr/lib/python3/dist-packages/kafka /etc/aminer/conf-enabled/
   - sudo pip3 install -U scipy
