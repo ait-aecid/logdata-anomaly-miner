@@ -9,7 +9,7 @@ Parser:
           type: VariableByteDataModelElement
           name: 'host'
           args: '-.01234567890abcdefghijklmnopqrstuvwxyz:'
-        
+
         - id: identity_model
           type: VariableByteDataModelElement
           name: 'ident'
@@ -229,11 +229,4 @@ Analysis:
           id: WhitelistViolationDetector
           whitelist_rules: ["or_match_rule"]
 
-EventHandlers:
-        - id: stpe
-          type: StreamPrinterEventHandler
-        - id: syslog_writer_event_handler
-          type: SyslogWriterEventHandler
-        - id: default_mail_notification_handler
-          type: DefaultMailNotificationEventHandler
-
+EventHandlers: null

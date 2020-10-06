@@ -126,7 +126,6 @@ class YamlConfigTest(unittest.TestCase):
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[18], VariableByteDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[19], FixedDataModelElement))
         self.assertEqual(context.atomizer_factory.parsing_model.element_id, 'accesslog')
-        raise Exception("unfinished test..")
 
     def test6_analysis_fail_without_parser_start(self):
         """This test checks if the aminer fails without a start-tag for the first parser-model."""
@@ -161,7 +160,7 @@ class YamlConfigTest(unittest.TestCase):
         from aminer.AnalysisChild import AnalysisContext
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        self.run_empty_analysis_components_tests(context)
+        self.run_empty_components_tests(context)
 
         spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
@@ -169,7 +168,7 @@ class YamlConfigTest(unittest.TestCase):
         aminer_config.load_yaml('unit/data/configfiles/apache_inline_config_undefined_analysis_components.yml')
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        self.run_empty_analysis_components_tests(context)
+        self.run_empty_components_tests(context)
 
     def test10_analysis_fail_with_unknown_analysis_component(self):
         """This test checks if the config-schema-validator raises an error if an unknown analysis component is configured."""
@@ -177,7 +176,7 @@ class YamlConfigTest(unittest.TestCase):
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         with self.assertRaises(ValueError):
-            aminer_config.load_yaml('unit/data/configfiles/unknown_analysis_config.yml')
+            aminer_config.load_yaml('unit/data/configfiles/unknown_analysis_component.yml')
 
     def test11_analysis_fail_with_unknown_event_handler(self):
         """This test checks if the config-schema-validator raises an error if an unknown event handler is configured."""
@@ -185,7 +184,7 @@ class YamlConfigTest(unittest.TestCase):
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         with self.assertRaises(ValueError):
-            aminer_config.load_yaml('unit/data/configfiles/unknown_event_handler_config.yml')
+            aminer_config.load_yaml('unit/data/configfiles/unknown_event_handler.yml')
 
     def test12_analysis_pipeline_working_config_without_event_handler_components(self):
         """This test checks if the config can be loaded without any event handler components. This also tests if the
@@ -197,7 +196,7 @@ class YamlConfigTest(unittest.TestCase):
         from aminer.AnalysisChild import AnalysisContext
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        self.run_empty_analysis_components_tests(context)
+        self.run_empty_components_tests(context)
 
         spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
@@ -205,11 +204,28 @@ class YamlConfigTest(unittest.TestCase):
         aminer_config.load_yaml('unit/data/configfiles/apache_inline_config_undefined_event_handlers.yml')
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        self.run_empty_analysis_components_tests(context)
+        self.run_empty_components_tests(context)
 
     def test13_analysis_pipeline_working_with_json(self):
         """This test checks if JsonConverterHandler is working properly."""
-        raise Exception("not implemented yet..")
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        aminer_config.load_yaml('unit/data/configfiles/json_config.yml')
+        from aminer.AnalysisChild import AnalysisContext
+        context = AnalysisContext(aminer_config)
+        context.build_analysis_pipeline()
+        from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
+        from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
+        from aminer.events.JsonConverterHandler import JsonConverterHandler
+        from aminer.parsing.SequenceModelElement import SequenceModelElement
+        from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
+        self.assertTrue(isinstance(context.registered_components[0][0], NewMatchPathDetector))
+        self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], JsonConverterHandler))
+        self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0].json_event_handlers[0], StreamPrinterEventHandler))
+        self.assertEqual(context.atomizer_factory.default_timestamp_paths, '/accesslog/time')
+        self.assertTrue(isinstance(context.atomizer_factory.parsing_model, SequenceModelElement))
+        self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[0], VariableByteDataModelElement))
 
     def test14_analysis_pipeline_working_with_learnMode(self):
         """This test checks if learnMode is working properly."""
@@ -231,7 +247,7 @@ class YamlConfigTest(unittest.TestCase):
         """This test checks if the yaml demo config is the same as the python version."""
         raise Exception("not implemented yet..")
 
-    def run_empty_analysis_components_tests(self, context):
+    def run_empty_components_tests(self, context):
         """ the following lines help to debug the context for defining the testcases
         from pprint import pprint
         pprint(vars(context))

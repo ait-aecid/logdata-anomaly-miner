@@ -700,21 +700,24 @@ def build_analysis_pipeline(analysis_context):
             atom_filter.add_handler(tmp_analyser)
 
     try:
-        for item in yaml_data['EventHandlers']:
-            func = getattr(__import__("aminer.events", fromlist=[item['type']]), item['type'])
-            ctx = None
-            if item['type'] in ('StreamPrinterEventHandler', 'DefaultMailNotificationEventHandler'):
-                ctx = func(analysis_context)
-            if item['type'] == 'SyslogWriterEventHandler':
-                ctx = func(analysis_context, item['instance_name'])
-            if item['type'] == 'KafkaEventHandler':
-                ctx = func(analysis_context, item['topic'], item['options'])
-            if item['json'] is True:
-                from aminer.events import JsonConverterHandler
-                ctx = JsonConverterHandler([ctx], analysis_context)
-            if ctx is None:
-                ctx = func(analysis_context)
-            anomaly_event_handlers.append(ctx)
+        if 'EventHandlers' in yaml_data and yaml_data['EventHandlers'] is not None:
+            for item in yaml_data['EventHandlers']:
+                func = getattr(__import__("aminer.events", fromlist=[item['type']]), item['type'])
+                ctx = None
+                if item['type'] in ('StreamPrinterEventHandler', 'DefaultMailNotificationEventHandler'):
+                    ctx = func(analysis_context)
+                if item['type'] == 'SyslogWriterEventHandler':
+                    ctx = func(analysis_context, item['instance_name'])
+                if item['type'] == 'KafkaEventHandler':
+                    ctx = func(analysis_context, item['topic'], item['options'])
+                if item['json'] is True:
+                    from aminer.events import JsonConverterHandler
+                    ctx = JsonConverterHandler([ctx], analysis_context)
+                if ctx is None:
+                    ctx = func(analysis_context)
+                anomaly_event_handlers.append(ctx)
+        else:
+            raise KeyError()
 
     except KeyError:
         # Add stdout stream printing for debugging, tuning.

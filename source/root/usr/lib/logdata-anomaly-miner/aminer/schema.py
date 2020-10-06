@@ -247,6 +247,8 @@
         'EventHandlers': {
             'required': False,
             'type': 'list',
+            'nullable': True,
+            'default': None,
             'schema': {
                 'type': 'dict',
                 'schema': {
