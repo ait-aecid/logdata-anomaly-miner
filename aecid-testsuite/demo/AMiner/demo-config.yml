@@ -708,6 +708,9 @@ Parser:
          type: SequenceModelElement
          name: 'DiskReport'
          args:
+           - space
+           - data
+           - rest
 
        - id: loginDetails
          type: SequenceModelElement

@@ -12,6 +12,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 config_properties = {}
 yaml_data = None
+enhanced_new_match_path_value_combo_detector_reference = None
 
 # Define the list of log resources to read from: the resources
 # named here do not need to exist when aminer is started. This
@@ -115,7 +116,7 @@ def build_analysis_pipeline(analysis_context):
                     if parser_model_dict.get(model) is None:
                         raise ValueError('The parser model %s does not exist!' % model)
                     branch_model_dict[key] = parser_model_dict.get(model)
-                parser_model_dict[item['id']] = item['type'].func(item['name'], value_model, item['args'][1], branch_model_dict)
+                parser_model_dict[item['id']] = item['type'].func(item['name'], value_model, item['args'][1].decode(), branch_model_dict)
             elif item['type'].name == 'MultiLocaleDateTimeModelElement':
                 date_formats = []
                 for date_format in item['date_formats']:
@@ -131,16 +132,32 @@ def build_analysis_pipeline(analysis_context):
                 if parser_model_dict.get(model) is None:
                     raise ValueError('The parser model %s does not exist!' % model)
                 item['args'][0] = parser_model_dict.get(model)
-                if 'args' in item:
-                    parser_model_dict[item['id']] = item['type'].func(item['name'], item['args'])
-                else:
-                    parser_model_dict[item['id']] = item['type'].func(item['name'])
+                parser_model_dict[item['id']] = item['type'].func(item['name'], item['args'][0])
+                if len(item['args']) == 2:
+                    parser_model_dict[item['id']] = item['type'].func(item['name'], item['args'][0], item['args'][1])
+                elif len(item['args']) == 3:
+                    parser_model_dict[item['id']] = item['type'].func(item['name'], item['args'][0], item['args'][1], item['args'][2])
+                elif len(item['args']) > 3:
+                    raise ValueError('The RepeatedElementDataModelElement does not have more than 3 arguments.')
             elif item['type'].name == 'DecimalFloatValueModelElement':
                 parser_model_dict[item['id']] = item['type'].func(
                     item['name'], item['value_sign_type'], item['value_pad_type'], item['exponent_type'])
             elif item['type'].name == 'DecimalIntegerValueModelElement':
                 parser_model_dict[item['id']] = item['type'].func(
                     item['name'], item['value_sign_type'], item['value_pad_type'])
+            elif item['type'].name in ('FirstMatchModelElement', 'SequenceModelElement'):
+                children = []
+                for child in item['args']:
+                    child = parser_model_dict.get(child.decode())
+                    if child is None:
+                        raise ValueError('The parser model %s does not exist!' % child)
+                    children.append(child)
+                parser_model_dict[item['id']] = item['type'].func(item['name'], children)
+            elif item['type'].name == 'OptionalMatchModelElement':
+                optional_element = parser_model_dict.get(item['args'].decode())
+                if optional_element is None:
+                    raise ValueError('The parser model %s does not exist!' % optional_element)
+                parser_model_dict[item['id']] = item['type'].func(item['name'], optional_element)
             else:
                 if 'args' in item:
                     parser_model_dict[item['id']] = item['type'].func(item['name'], item['args'])
@@ -403,6 +420,8 @@ def build_analysis_pipeline(analysis_context):
                     auto_include_flag=learn,
                     tuple_transformation_function=tuple_transformation_function,
                     output_log_line=learn)
+                global enhanced_new_match_path_value_combo_detector_reference
+                enhanced_new_match_path_value_combo_detector_reference = tmp_analyser
             elif item['type'] == 'MatchFilter':
                 tmp_analyser = func(
                     analysis_context.aminer_config,
@@ -587,9 +606,7 @@ def build_analysis_pipeline(analysis_context):
                 for rule in item['ruleset']:
                     if rule not in match_rules_dict:
                         raise ValueError('The match rule %s does not exist!' % rule)
-                    print(match_rules_dict[rule])
                     ruleset.append(match_rules_dict[rule])
-                print(ruleset)
                 tmp_analyser = func(
                     analysis_context.aminer_config,
                     ruleset,
@@ -649,12 +666,12 @@ def build_analysis_pipeline(analysis_context):
         anomaly_event_handlers.append(StreamPrinterEventHandler(analysis_context))
 
 
-def tuple_transformation_function_demo_print_every_10th_value(self, match_value_list):
-    extra_data = self.known_values_dict.get(tuple(match_value_list), None)
+def tuple_transformation_function_demo_print_every_10th_value(match_value_list):
+    extra_data = enhanced_new_match_path_value_combo_detector_reference.known_values_dict.get(tuple(match_value_list), None)
     if extra_data is not None:
         mod = 10
         if (extra_data[2] + 1) % mod == 0:
-            self.auto_include_flag = False
+            enhanced_new_match_path_value_combo_detector_reference.auto_include_flag = False
         else:
-            self.auto_include_flag = True
+            enhanced_new_match_path_value_combo_detector_reference.auto_include_flag = True
     return match_value_list
