@@ -23,8 +23,11 @@ echo ""
 
 FILE=/tmp/demo-config.py
 if ! test -f "$FILE"; then
-    echo "$FILE does not exist!"
-	exit 1
+    FILE=/tmp/demo-config.yml
+    if ! test -f "$FILE"; then
+        echo "$FILE does not exist!"
+	    exit 1
+	fi
 fi
 
 #start AMiner
