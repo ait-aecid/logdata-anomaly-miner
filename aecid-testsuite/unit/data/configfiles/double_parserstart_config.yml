@@ -124,18 +124,18 @@ Analysis:
           paths: ["/model/accesslog/status"]
           persistence_id: 'accesslog_status' # optional default: Default
           output_logline: False # optional default: True
-          learnMode: True
+          auto_include_flag: True
 
         - type: NewMatchPathValueComboDetector
           paths: ["/model/accesslog/request","/model/accesslog/method"]
-          learnMode: True
+          auto_include_flag: True
           persistence_id: 'accesslog_request' # optional default: Default
           output_logline: False # optional default: True
           allow_missing_values: False # optional default: False
 
         - type: NewMatchPathValueComboDetector
           paths: ["/model/accesslog/request","/model/accesslog/status"]
-          learnMode: True
+          auto_include_flag: True
 
 EventHandlers:
         - id: stpe
