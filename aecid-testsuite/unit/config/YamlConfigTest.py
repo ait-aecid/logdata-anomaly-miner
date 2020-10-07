@@ -321,6 +321,41 @@ class YamlConfigTest(unittest.TestCase):
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[2].value_model, FixedDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[2].branch_model_dict['host'], FixedDataModelElement))
 
+        # change OptionalModelElement to unknown_model
+        aminer_config.yaml_data['Parser'][1]['args'] = b'unknown_model'
+        context = AnalysisContext(aminer_config)
+        self.assertRaises(ValueError, context.build_analysis_pipeline)
+        aminer_config.load_yaml('unit/data/configfiles/parser_child_elements_config.yml')
+
+        # change RepeatedElementDataModelElement to unknown_model
+        aminer_config.yaml_data['Parser'][2]['args'][0] = b'unknown_model'
+        context = AnalysisContext(aminer_config)
+        self.assertRaises(ValueError, context.build_analysis_pipeline)
+        aminer_config.load_yaml('unit/data/configfiles/parser_child_elements_config.yml')
+
+        # change SequenceModelElement to unknown_model
+        aminer_config.yaml_data['Parser'][3]['args'][1] = b'unknown_model'
+        context = AnalysisContext(aminer_config)
+        self.assertRaises(ValueError, context.build_analysis_pipeline)
+        aminer_config.load_yaml('unit/data/configfiles/parser_child_elements_config.yml')
+
+        # change ElementValueBranchModelElement to unknown_model
+        aminer_config.yaml_data['Parser'][4]['args'][0] = b'unknown_model'
+        context = AnalysisContext(aminer_config)
+        self.assertRaises(ValueError, context.build_analysis_pipeline)
+        aminer_config.load_yaml('unit/data/configfiles/parser_child_elements_config.yml')
+
+        aminer_config.yaml_data['Parser'][4]['branch_model_dict'][0]['model'] = b'unknown_model'
+        context = AnalysisContext(aminer_config)
+        self.assertRaises(ValueError, context.build_analysis_pipeline)
+        aminer_config.load_yaml('unit/data/configfiles/parser_child_elements_config.yml')
+
+        # change FirstMatchModelElement to unknown_model
+        aminer_config.yaml_data['Parser'][5]['args'][1] = b'unknown_model'
+        context = AnalysisContext(aminer_config)
+        self.assertRaises(ValueError, context.build_analysis_pipeline)
+        aminer_config.load_yaml('unit/data/configfiles/parser_child_elements_config.yml')
+
     def test17_demo_config_working_as_expected(self):
         """This test checks if the yaml demo config loads properly."""
         raise Exception("not implemented yet..")

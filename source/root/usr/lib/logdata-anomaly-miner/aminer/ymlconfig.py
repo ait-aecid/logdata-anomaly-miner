@@ -176,7 +176,10 @@ def build_analysis_pipeline(analysis_context):
                     args_list.append(FixedDataModelElement(sp, whitespace_str))
                     ws_count += 1
                 else:
-                    args_list.append(parser_model_dict[i])
+                    model = parser_model_dict.get(i)
+                    if model is None:
+                        raise ValueError('The parser model %s does not exist!' % model)
+                    args_list.append(model)
             parsing_model = start['type'].func(start['name'], args_list)
         else:
             parsing_model = start['type'].func(start['name'], [parser_model_dict[start['args']]])
