@@ -3,6 +3,7 @@ import importlib
 import yaml
 import sys
 from aminer.AnalysisChild import AnalysisContext
+from aminer.analysis.AtomFilters import SubhandlerFilter
 from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
 from aminer.analysis.NewMatchPathValueDetector import NewMatchPathValueDetector
 from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
@@ -19,17 +20,14 @@ from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
 from aminer.events.SyslogWriterEventHandler import SyslogWriterEventHandler
 from aminer.events.DefaultMailNotificationEventHandler import DefaultMailNotificationEventHandler
 from aminer.events.JsonConverterHandler import JsonConverterHandler
+from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
+from aminer.input.SimpleMultisourceAtomSync import SimpleMultisourceAtomSync
 from aminer.parsing.SequenceModelElement import SequenceModelElement
 from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
 from aminer.parsing.FixedDataModelElement import FixedDataModelElement
 from aminer.parsing.DateTimeModelElement import DateTimeModelElement
 from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
 from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
-# import json
-# import shlex
-# import configparser
-# import uu
-# import resource
 
 
 class YamlConfigTest(unittest.TestCase):
@@ -104,7 +102,7 @@ class YamlConfigTest(unittest.TestCase):
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[1], SyslogWriterEventHandler))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[2], DefaultMailNotificationEventHandler))
-        self.assertEqual(context.atomizer_factory.default_timestamp_paths, '/accesslog/time')
+        self.assertEqual(context.atomizer_factory.default_timestamp_paths, ['/accesslog/time'])
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model, SequenceModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[0], VariableByteDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[1], FixedDataModelElement))
@@ -216,7 +214,7 @@ class YamlConfigTest(unittest.TestCase):
         self.assertTrue(isinstance(context.registered_components[0][0], NewMatchPathDetector))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], JsonConverterHandler))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0].json_event_handlers[0], StreamPrinterEventHandler))
-        self.assertEqual(context.atomizer_factory.default_timestamp_paths, '/accesslog/time')
+        self.assertEqual(context.atomizer_factory.default_timestamp_paths, ['/accesslog/time'])
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model, SequenceModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[0], VariableByteDataModelElement))
 
@@ -232,7 +230,7 @@ class YamlConfigTest(unittest.TestCase):
         self.assertTrue(isinstance(context.registered_components[1][0], NewMatchPathValueDetector))
         self.assertTrue(isinstance(context.registered_components[2][0], NewMatchPathValueComboDetector))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
-        self.assertEqual(context.atomizer_factory.default_timestamp_paths, '/accesslog/time')
+        self.assertEqual(context.atomizer_factory.default_timestamp_paths, ['/accesslog/time'])
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model, SequenceModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[0], VariableByteDataModelElement))
 
@@ -242,7 +240,6 @@ class YamlConfigTest(unittest.TestCase):
 
         # learnMode: False should ignore all auto_include_flag arguments.
         aminer_config.yaml_data['LearnMode'] = False
-        aminer_config.config_properties['LearnMode'] = False
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
         for key in context.registered_components:
@@ -250,7 +247,6 @@ class YamlConfigTest(unittest.TestCase):
 
         # unset learnMode: use auto_include_flag arguments
         del aminer_config.yaml_data['LearnMode']
-        del aminer_config.config_properties['LearnMode']
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
         self.assertTrue(context.registered_components[0][0].auto_include_flag)
@@ -268,7 +264,32 @@ class YamlConfigTest(unittest.TestCase):
 
     def test15_analysis_pipeline_working_with_input_parameters(self):
         """This test checks if the SimpleMultisourceAtomSync and SimpleByteStreamLineAtomizerFactory are working properly."""
-        raise Exception("not implemented yet..")
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        aminer_config.load_yaml('unit/data/configfiles/multiSource_config.yml')
+        context = AnalysisContext(aminer_config)
+        context.build_analysis_pipeline()
+        self.assertTrue(isinstance(context.registered_components[0][0], NewMatchPathDetector))
+        self.assertTrue(isinstance(context.registered_components[1][0], NewMatchPathValueDetector))
+        self.assertTrue(isinstance(context.registered_components[2][0], NewMatchPathValueComboDetector))
+        self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
+        self.assertEqual(context.atomizer_factory.default_timestamp_paths, ['/model/accesslog/time'])
+        self.assertTrue(isinstance(context.atomizer_factory.parsing_model, SequenceModelElement))
+        self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[0], VariableByteDataModelElement))
+
+        # test with MultiSource: True. Expects a SimpleByteStreamLineAtomizerFactory with a SimpleMultisourceAtomSync.
+        self.assertTrue(isinstance(context.atomizer_factory, SimpleByteStreamLineAtomizerFactory))
+        self.assertTrue(isinstance(context.atomizer_factory.atom_handler_list[0], SimpleMultisourceAtomSync))
+        self.assertEqual(context.atomizer_factory.default_timestamp_paths, [aminer_config.yaml_data['Input']['TimestampPath']])
+
+        # test with MultiSource: False. Expects a SimpleByteStreamLineAtomizerFactory with a AtomFilters.SubhandlerFilter.
+        aminer_config.yaml_data['Input']['MultiSource'] = False
+        context = AnalysisContext(aminer_config)
+        context.build_analysis_pipeline()
+        self.assertTrue(isinstance(context.atomizer_factory, SimpleByteStreamLineAtomizerFactory))
+        self.assertTrue(isinstance(context.atomizer_factory.atom_handler_list[0], SubhandlerFilter))
+        self.assertEqual(context.atomizer_factory.default_timestamp_paths, [aminer_config.yaml_data['Input']['TimestampPath']])
 
     def test16_parsermodeltype_parameter_for_another_parsermodel_type(self):
         """This test checks if all ModelElements with child elements are working properly."""
@@ -299,7 +320,7 @@ class YamlConfigTest(unittest.TestCase):
         from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
         self.assertTrue(isinstance(context.registered_components[0][0], NewMatchPathDetector))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
-        self.assertEqual(context.atomizer_factory.default_timestamp_paths, '/accesslog/time')
+        self.assertEqual(context.atomizer_factory.default_timestamp_paths, ['/accesslog/time'])
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model, SequenceModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[0], VariableByteDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[1], FixedDataModelElement))

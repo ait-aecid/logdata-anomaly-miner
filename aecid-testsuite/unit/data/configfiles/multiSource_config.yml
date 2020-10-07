@@ -1,0 +1,37 @@
+LearnMode: True # optional
+Core.PersistenceDir: '/var/tmp/test2/aminer'
+
+LogResourceList:
+        - 'file:///var/tmp/test2/log/access.log'
+
+Parser:
+        - id: host_name_model
+          type: VariableByteDataModelElement
+          name: 'host'
+          args: '-.01234567890abcdefghijklmnopqrstuvwxyz:'
+
+        - id: 'startModel'
+          start: True
+          type: SequenceModelElement
+          name: 'accesslog'
+          args:
+              - host_name_model
+
+Input:
+        Verbose: True # optional
+        MultiSource: True # optional
+        TimestampPath: "/model/accesslog/time"
+
+Analysis:
+        - type: NewMatchPathValueDetector
+          id: NewMatchPathValueDetector
+          paths: ["/accesslog/status"]
+          auto_include_flag: True
+        - type: NewMatchPathValueComboDetector
+          id: NewMatchPathValueComboDetector
+          paths: ["/accesslog/method","/accesslog/request","/accesslog/useragent"]
+          auto_include_flag: False
+
+EventHandlers:
+        - id: stpe
+          type: StreamPrinterEventHandler
