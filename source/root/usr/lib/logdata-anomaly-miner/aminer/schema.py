@@ -120,7 +120,6 @@
                         'TimeCorrelationViolationDetector', 'SimpleMonotonicTimestampAdjust', 'TimestampsUnsortedDetector',
                         'WhitelistViolationDetector', 'MatchPathFilter', 'MatchValueFilter', 'EventTypeDetector', 'VariableTypeDetector']},
                     'paths': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
-                    'learnMode': {'type': 'boolean'},
                     'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},
                     'output_logline': {'type': 'boolean', 'required': False, 'default': True},
                     'allow_missing_values': {'type': 'boolean', 'required': False, 'default': False},

@@ -218,8 +218,8 @@ def build_analysis_pipeline(analysis_context):
             stop_when_handled_flag=True)
 
     from aminer.analysis import NewMatchPathDetector
-    if 'learnMode' in yaml_data:
-        learn = yaml_data['learnMode']
+    if 'LearnMode' in yaml_data:
+        learn = yaml_data['LearnMode']
     else:
         learn = True
     nmpd = NewMatchPathDetector(
@@ -237,10 +237,10 @@ def build_analysis_pipeline(analysis_context):
                 comp_name = None
             else:
                 comp_name = item['id']
-            if 'learnMode' in yaml_data:
-                learn = yaml_data['learnMode']
+            if 'LearnMode' in yaml_data:
+                learn = yaml_data['LearnMode']
             else:
-                learn = item['output_logline']
+                learn = item['auto_include_flag']
             func = getattr(__import__("aminer.analysis", fromlist=[item['type']]), item['type'])
             if item['type'] == 'NewMatchPathValueDetector':
                 tmp_analyser = func(
@@ -249,7 +249,7 @@ def build_analysis_pipeline(analysis_context):
                     anomaly_event_handlers,
                     auto_include_flag=learn,
                     persistence_id=item['persistence_id'],
-                    output_log_line=learn)
+                    output_log_line=item['output_logline'])
             elif item['type'] == 'MatchPathFilter':
                 parsed_atom_handler_lookup_list = []
                 for atom_handler in item['parsed_atom_handler_lookup_list']:
@@ -289,7 +289,7 @@ def build_analysis_pipeline(analysis_context):
                     auto_include_flag=learn,
                     persistence_id=item['persistence_id'],
                     allow_missing_values_flag=item['allow_missing_values'],
-                    output_log_line=learn)
+                    output_log_line=item['output_logline'])
             elif item['type'] == 'MissingMatchPathValueDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config,
@@ -299,7 +299,7 @@ def build_analysis_pipeline(analysis_context):
                     persistence_id=item['persistence_id'],
                     default_interval=item['check_interval'],
                     realert_interval=item['realert_interval'],
-                    output_log_line=learn)
+                    output_log_line=item['output_logline'])
             elif item['type'] == 'MissingMatchPathListValueDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config,
@@ -309,7 +309,7 @@ def build_analysis_pipeline(analysis_context):
                     persistence_id=item['persistence_id'],
                     default_interval=item['check_interval'],
                     realert_interval=item['realert_interval'],
-                    output_log_line=learn)
+                    output_log_line=item['output_logline'])
             elif item['type'] == 'TimeCorrelationDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config,
@@ -317,7 +317,7 @@ def build_analysis_pipeline(analysis_context):
                     item['parallel_check_count'],
                     persistence_id=item['persistence_id'],
                     record_count_before_event=item['record_count_before_event'],
-                    output_log_line=learn,
+                    output_log_line=item['output_logline'],
                     use_path_match=item['use_path_match'],
                     use_value_match=item['use_value_match'],
                     min_rule_attributes=item['min_rule_attributes'],
@@ -358,7 +358,7 @@ def build_analysis_pipeline(analysis_context):
                     auto_include_flag=learn,
                     persistence_id=item['persistence_id'],
                     allow_missing_values_flag=item['allow_missing_values'],
-                    output_log_line=learn)
+                    output_log_line=item['output_logline'])
             elif item['type'] == 'LinearNumericBinDefinition':
                 if comp_name is None:
                     raise ValueError('The %s must have an id!' % item['type'])
@@ -394,7 +394,7 @@ def build_analysis_pipeline(analysis_context):
                     anomaly_event_handlers,
                     reset_after_report_flag=item['reset_after_report_flag'],
                     persistence_id=item['persistence_id'],
-                    output_log_line=learn)
+                    output_log_line=item['output_logline'])
             elif item['type'] == 'PathDependentHistogramAnalysis':
                 if item['bin_definition'] not in analysis_dict:
                     raise ValueError('%s first must be defined before used.' % item['bin_definition'])
@@ -406,7 +406,7 @@ def build_analysis_pipeline(analysis_context):
                     anomaly_event_handlers,
                     reset_after_report_flag=item['reset_after_report_flag'],
                     persistence_id=item['persistence_id'],
-                    output_log_line=learn)
+                    output_log_line=item['output_logline'])
             elif item['type'] == 'EnhancedNewMatchPathValueComboDetector':
                 tuple_transformation_function = None
                 if item['tuple_transformation_function'] == 'demo':
@@ -419,7 +419,7 @@ def build_analysis_pipeline(analysis_context):
                     allow_missing_values_flag=item['allow_missing_values'],
                     auto_include_flag=learn,
                     tuple_transformation_function=tuple_transformation_function,
-                    output_log_line=learn)
+                    output_log_line=item['output_logline'])
                 # skipcq: PYL-W0603
                 global enhanced_new_match_path_value_combo_detector_reference
                 enhanced_new_match_path_value_combo_detector_reference = tmp_analyser
@@ -429,7 +429,7 @@ def build_analysis_pipeline(analysis_context):
                     item['paths'],
                     anomaly_event_handlers,
                     target_value_list=item['value_list'],
-                    output_log_line=learn)
+                    output_log_line=item['output_logline'])
             elif item['type'] == 'MatchValueAverageChangeDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config,
@@ -441,7 +441,7 @@ def build_analysis_pipeline(analysis_context):
                     sync_bins_flag=item['sync_bins_flag'],
                     debug_mode=item['debug_mode'],
                     persistence_id=item['persistence_id'],
-                    output_log_line=learn)
+                    output_log_line=item['output_logline'])
             elif item['type'] == 'MatchValueStreamWriter':
                 stream = sys.stdout
                 if item['stream'] == 'sys.stderr':
@@ -457,7 +457,7 @@ def build_analysis_pipeline(analysis_context):
                     anomaly_event_handlers,
                     persistence_id=item['persistence_id'],
                     auto_include_flag=learn,
-                    output_log_line=learn)
+                    output_log_line=item['output_logline'])
             elif 'MatchAction' in item['type']:
                 if comp_name is None:
                     raise ValueError('The %s must have an id!' % item['type'])
@@ -613,7 +613,7 @@ def build_analysis_pipeline(analysis_context):
                     ruleset,
                     anomaly_event_handlers,
                     persistence_id=item['persistence_id'],
-                    output_log_line=learn)
+                    output_log_line=item['output_logline'])
             elif item['type'] == 'SimpleMonotonicTimestampAdjust':
                 tmp_analyser = func(
                     [atom_filter],
@@ -623,7 +623,7 @@ def build_analysis_pipeline(analysis_context):
                     analysis_context.aminer_config,
                     anomaly_event_handlers,
                     exit_on_error_flag=item['exit_on_error_flag'],
-                    output_log_line=learn)
+                    output_log_line=item['output_logline'])
             elif item['type'] == 'WhitelistViolationDetector':
                 whitelist_rules = []
                 for rule in item['whitelist_rules']:
@@ -634,7 +634,7 @@ def build_analysis_pipeline(analysis_context):
                     analysis_context.aminer_config,
                     whitelist_rules,
                     anomaly_event_handlers,
-                    output_log_line=learn)
+                    output_log_line=item['output_logline'])
             elif item['type'] == 'EventTypeDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config,

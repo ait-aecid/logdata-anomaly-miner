@@ -2,6 +2,29 @@ import unittest
 import importlib
 import yaml
 import sys
+from aminer.AnalysisChild import AnalysisContext
+from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
+from aminer.analysis.NewMatchPathValueDetector import NewMatchPathValueDetector
+from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
+from aminer.analysis.HistogramAnalysis import HistogramAnalysis, PathDependentHistogramAnalysis
+from aminer.analysis.EnhancedNewMatchPathValueComboDetector import EnhancedNewMatchPathValueComboDetector
+from aminer.analysis.MatchFilter import MatchFilter
+from aminer.analysis.MatchValueAverageChangeDetector import MatchValueAverageChangeDetector
+from aminer.analysis.MatchValueStreamWriter import MatchValueStreamWriter
+from aminer.analysis.TimeCorrelationViolationDetector import TimeCorrelationViolationDetector
+from aminer.analysis.TimestampCorrectionFilters import SimpleMonotonicTimestampAdjust
+from aminer.analysis.TimestampsUnsortedDetector import TimestampsUnsortedDetector
+from aminer.analysis.WhitelistViolationDetector import WhitelistViolationDetector
+from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
+from aminer.events.SyslogWriterEventHandler import SyslogWriterEventHandler
+from aminer.events.DefaultMailNotificationEventHandler import DefaultMailNotificationEventHandler
+from aminer.events.JsonConverterHandler import JsonConverterHandler
+from aminer.parsing.SequenceModelElement import SequenceModelElement
+from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
+from aminer.parsing.FixedDataModelElement import FixedDataModelElement
+from aminer.parsing.DateTimeModelElement import DateTimeModelElement
+from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
 # import json
 # import shlex
 # import configparser
@@ -56,7 +79,6 @@ class YamlConfigTest(unittest.TestCase):
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         aminer_config.load_yaml('unit/data/configfiles/apache_inline_config.yml')
-        from aminer.AnalysisChild import AnalysisContext
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
         """ the following lines help to debug the context for defining the testcases
@@ -65,27 +87,6 @@ class YamlConfigTest(unittest.TestCase):
         pprint(vars(context.atomizer_factory))
         pprint(vars(context.atomizer_factory.parsing_model))
         pprint(vars(context.atomizer_factory.atom_handler_list[0])) """
-        from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
-        from aminer.analysis.NewMatchPathValueDetector import NewMatchPathValueDetector
-        from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
-        from aminer.analysis.HistogramAnalysis import HistogramAnalysis, PathDependentHistogramAnalysis
-        from aminer.analysis.EnhancedNewMatchPathValueComboDetector import EnhancedNewMatchPathValueComboDetector
-        from aminer.analysis.MatchFilter import MatchFilter
-        from aminer.analysis.MatchValueAverageChangeDetector import MatchValueAverageChangeDetector
-        from aminer.analysis.MatchValueStreamWriter import MatchValueStreamWriter
-        from aminer.analysis.TimeCorrelationViolationDetector import TimeCorrelationViolationDetector
-        from aminer.analysis.TimestampCorrectionFilters import SimpleMonotonicTimestampAdjust
-        from aminer.analysis.TimestampsUnsortedDetector import TimestampsUnsortedDetector
-        from aminer.analysis.WhitelistViolationDetector import WhitelistViolationDetector
-        from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
-        from aminer.events.SyslogWriterEventHandler import SyslogWriterEventHandler
-        from aminer.events.DefaultMailNotificationEventHandler import DefaultMailNotificationEventHandler
-        from aminer.parsing.SequenceModelElement import SequenceModelElement
-        from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
-        from aminer.parsing.FixedDataModelElement import FixedDataModelElement
-        from aminer.parsing.DateTimeModelElement import DateTimeModelElement
-        from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
-        from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
         self.assertTrue(isinstance(context.registered_components[0][0], NewMatchPathDetector))
         self.assertTrue(isinstance(context.registered_components[1][0], TimestampsUnsortedDetector))
         self.assertTrue(isinstance(context.registered_components[2][0], NewMatchPathValueDetector))
@@ -157,7 +158,6 @@ class YamlConfigTest(unittest.TestCase):
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         aminer_config.load_yaml('unit/data/configfiles/apache_inline_config_null_analysis_components.yml')
-        from aminer.AnalysisChild import AnalysisContext
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
         self.run_empty_components_tests(context)
@@ -193,7 +193,6 @@ class YamlConfigTest(unittest.TestCase):
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         aminer_config.load_yaml('unit/data/configfiles/apache_inline_config_null_event_handlers.yml')
-        from aminer.AnalysisChild import AnalysisContext
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
         self.run_empty_components_tests(context)
@@ -212,14 +211,8 @@ class YamlConfigTest(unittest.TestCase):
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         aminer_config.load_yaml('unit/data/configfiles/json_config.yml')
-        from aminer.AnalysisChild import AnalysisContext
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
-        from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
-        from aminer.events.JsonConverterHandler import JsonConverterHandler
-        from aminer.parsing.SequenceModelElement import SequenceModelElement
-        from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
         self.assertTrue(isinstance(context.registered_components[0][0], NewMatchPathDetector))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], JsonConverterHandler))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0].json_event_handlers[0], StreamPrinterEventHandler))
@@ -229,7 +222,49 @@ class YamlConfigTest(unittest.TestCase):
 
     def test14_analysis_pipeline_working_with_learnMode(self):
         """This test checks if learnMode is working properly."""
-        raise Exception("not implemented yet..")
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        aminer_config.load_yaml('unit/data/configfiles/learnMode_config.yml')
+        context = AnalysisContext(aminer_config)
+        context.build_analysis_pipeline()
+        self.assertTrue(isinstance(context.registered_components[0][0], NewMatchPathDetector))
+        self.assertTrue(isinstance(context.registered_components[1][0], NewMatchPathValueDetector))
+        self.assertTrue(isinstance(context.registered_components[2][0], NewMatchPathValueComboDetector))
+        self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
+        self.assertEqual(context.atomizer_factory.default_timestamp_paths, '/accesslog/time')
+        self.assertTrue(isinstance(context.atomizer_factory.parsing_model, SequenceModelElement))
+        self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[0], VariableByteDataModelElement))
+
+        # learnMode: True should ignore all auto_include_flag arguments.
+        for key in context.registered_components:
+            self.assertTrue(context.registered_components[key][0].auto_include_flag)
+
+        # learnMode: False should ignore all auto_include_flag arguments.
+        aminer_config.yaml_data['LearnMode'] = False
+        aminer_config.config_properties['LearnMode'] = False
+        context = AnalysisContext(aminer_config)
+        context.build_analysis_pipeline()
+        for key in context.registered_components:
+            self.assertFalse(context.registered_components[key][0].auto_include_flag)
+
+        # unset learnMode: use auto_include_flag arguments
+        del aminer_config.yaml_data['LearnMode']
+        del aminer_config.config_properties['LearnMode']
+        context = AnalysisContext(aminer_config)
+        context.build_analysis_pipeline()
+        self.assertTrue(context.registered_components[0][0].auto_include_flag)
+        self.assertTrue(context.registered_components[1][0].auto_include_flag)
+        self.assertFalse(context.registered_components[2][0].auto_include_flag)
+
+        # unset learnMode and set auto_include_flag to default arguments: by default True should be used.
+        for component in aminer_config.yaml_data['Analysis']:
+            component['auto_include_flag'] = True
+        context = AnalysisContext(aminer_config)
+        context.build_analysis_pipeline()
+        self.assertTrue(context.registered_components[0][0].auto_include_flag)
+        self.assertTrue(context.registered_components[1][0].auto_include_flag)
+        self.assertTrue(context.registered_components[2][0].auto_include_flag)
 
     def test15_analysis_pipeline_working_with_input_parameters(self):
         """This test checks if the SimpleMultisourceAtomSync and SimpleByteStreamLineAtomizerFactory are working properly."""
