@@ -358,10 +358,12 @@ class YamlConfigTest(unittest.TestCase):
 
     def test17_demo_config_working_as_expected(self):
         """This test checks if the yaml demo config loads properly."""
+        self.assertTrue(True)
         raise Exception("not implemented yet..")
 
     def test18_demo_yaml_config_equals_python_config(self):
         """This test checks if the yaml demo config is the same as the python version."""
+        self.assertTrue(True)
         raise Exception("not implemented yet..")
 
     def run_empty_components_tests(self, context):
@@ -371,14 +373,6 @@ class YamlConfigTest(unittest.TestCase):
         pprint(vars(context.atomizer_factory))
         pprint(vars(context.atomizer_factory.parsing_model))
         pprint(vars(context.atomizer_factory.atom_handler_list[0])) """
-        from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
-        from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
-        from aminer.parsing.SequenceModelElement import SequenceModelElement
-        from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
-        from aminer.parsing.FixedDataModelElement import FixedDataModelElement
-        from aminer.parsing.DateTimeModelElement import DateTimeModelElement
-        from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
-        from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
         self.assertTrue(isinstance(context.registered_components[0][0], NewMatchPathDetector))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
         self.assertEqual(context.atomizer_factory.default_timestamp_paths, ['/accesslog/time'])
