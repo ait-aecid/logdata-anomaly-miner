@@ -22,12 +22,16 @@ from aminer.events.DefaultMailNotificationEventHandler import DefaultMailNotific
 from aminer.events.JsonConverterHandler import JsonConverterHandler
 from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
 from aminer.input.SimpleMultisourceAtomSync import SimpleMultisourceAtomSync
+from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
 from aminer.parsing.SequenceModelElement import SequenceModelElement
 from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
 from aminer.parsing.FixedDataModelElement import FixedDataModelElement
 from aminer.parsing.DateTimeModelElement import DateTimeModelElement
 from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
 from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.RepeatedElementDataModelElement import RepeatedElementDataModelElement
+from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
+from aminer.parsing.ElementValueBranchModelElement import ElementValueBranchModelElement
 
 
 class YamlConfigTest(unittest.TestCase):
@@ -293,7 +297,29 @@ class YamlConfigTest(unittest.TestCase):
 
     def test16_parsermodeltype_parameter_for_another_parsermodel_type(self):
         """This test checks if all ModelElements with child elements are working properly."""
-        raise Exception("not implemented yet..")
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        aminer_config.load_yaml('unit/data/configfiles/parser_child_elements_config.yml')
+        context = AnalysisContext(aminer_config)
+        context.build_analysis_pipeline()
+        self.assertTrue(isinstance(context.registered_components[0][0], NewMatchPathDetector))
+        self.assertTrue(isinstance(context.registered_components[1][0], NewMatchPathValueDetector))
+        self.assertTrue(isinstance(context.registered_components[2][0], NewMatchPathValueComboDetector))
+        self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
+        self.assertEqual(context.atomizer_factory.default_timestamp_paths, ['/model/accesslog/time'])
+        self.assertTrue(isinstance(context.atomizer_factory.parsing_model, FirstMatchModelElement))
+        self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[0], SequenceModelElement))
+        self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[0].children[0], FixedDataModelElement))
+        self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[0].children[1], RepeatedElementDataModelElement))
+        self.assertTrue(isinstance(
+            context.atomizer_factory.parsing_model.children[0].children[1].repeated_element, OptionalMatchModelElement))
+        self.assertTrue(isinstance(
+            context.atomizer_factory.parsing_model.children[0].children[1].repeated_element.optional_element, FixedDataModelElement))
+        self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[1], FixedDataModelElement))
+        self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[2], ElementValueBranchModelElement))
+        self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[2].value_model, FixedDataModelElement))
+        self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[2].branch_model_dict['host'], FixedDataModelElement))
 
     def test17_demo_config_working_as_expected(self):
         """This test checks if the yaml demo config loads properly."""

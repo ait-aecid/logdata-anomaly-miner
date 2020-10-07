@@ -1,0 +1,68 @@
+LearnMode: True # optional
+Core.PersistenceDir: '/var/tmp/test2/aminer'
+
+LogResourceList:
+        - 'file:///var/tmp/test2/log/access.log'
+
+Parser:
+        - id: host_name_model
+          type: FixedDataModelElement
+          name: 'host'
+          args: 'host'
+
+        - id: optional
+          type: OptionalMatchModelElement
+          name: 'optional'
+          args: host_name_model
+
+        - id: repeated
+          type: RepeatedElementDataModelElement
+          name: 'repeated'
+          args:
+              - optional
+              - 1
+
+        - id: sequence
+          type: SequenceModelElement
+          name: 'sequence'
+          args:
+              - host_name_model
+              - repeated
+
+        - id: element_value_branch
+          type: ElementValueBranchModelElement
+          name: 'element_value_branch'
+          args:
+              - host_name_model
+              - 'host'
+          branch_model_dict:
+              - id: 'host'
+                model: host_name_model
+
+        - id: first
+          start: True
+          type: FirstMatchModelElement
+          name: 'first'
+          args:
+              - sequence
+              - host_name_model
+              - element_value_branch
+
+Input:
+        Verbose: True # optional
+        MultiSource: False # optional
+        TimestampPath: "/model/accesslog/time"
+
+Analysis:
+        - type: NewMatchPathValueDetector
+          id: NewMatchPathValueDetector
+          paths: ["/accesslog/status"]
+          auto_include_flag: True
+        - type: NewMatchPathValueComboDetector
+          id: NewMatchPathValueComboDetector
+          paths: ["/accesslog/method","/accesslog/request","/accesslog/useragent"]
+          auto_include_flag: False
+
+EventHandlers:
+        - id: stpe
+          type: StreamPrinterEventHandler
