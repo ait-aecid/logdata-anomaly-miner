@@ -705,7 +705,6 @@ def build_analysis_pipeline(analysis_context):
     try:
         if 'EventHandlers' in yaml_data and yaml_data['EventHandlers'] is not None:
             for item in yaml_data['EventHandlers']:
-                # func = getattr(__import__("aminer.events", fromlist=[item['type']]), item['type'])
                 func = item['type'].func
                 ctx = None
                 if item['type'].name in ('StreamPrinterEventHandler', 'DefaultMailNotificationEventHandler'):
