@@ -244,8 +244,9 @@ def build_analysis_pipeline(analysis_context):
                 learn = yaml_data['LearnMode']
             else:
                 learn = item['auto_include_flag']
-            func = getattr(__import__("aminer.analysis", fromlist=[item['type']]), item['type'])
-            if item['type'] == 'NewMatchPathValueDetector':
+            # func = getattr(__import__("aminer.analysis", fromlist=[item['type']]), item['type'])
+            func = item['type'].func
+            if item['type'].name == 'NewMatchPathValueDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config,
                     item['paths'],
@@ -253,7 +254,7 @@ def build_analysis_pipeline(analysis_context):
                     auto_include_flag=learn,
                     persistence_id=item['persistence_id'],
                     output_log_line=item['output_logline'])
-            elif item['type'] == 'MatchPathFilter':
+            elif item['type'].name == 'MatchPathFilter':
                 parsed_atom_handler_lookup_list = []
                 for atom_handler in item['parsed_atom_handler_lookup_list']:
                     if atom_handler[1] is not None:
@@ -269,7 +270,7 @@ def build_analysis_pipeline(analysis_context):
                 tmp_analyser = func(
                     parsed_atom_handler_lookup_list,
                     default_parsed_atom_handler=default_parsed_atom_handler)
-            elif item['type'] == 'MatchValueFilter':
+            elif item['type'].name == 'MatchValueFilter':
                 parsed_atom_handler_dict = {}
                 for atom_handler in item['parsed_atom_handler_dict']:
                     if analysis_context.get_component_by_name(atom_handler) is None:
@@ -284,7 +285,7 @@ def build_analysis_pipeline(analysis_context):
                     item['path'],
                     parsed_atom_handler_dict,
                     default_parsed_atom_handler=default_parsed_atom_handler)
-            elif item['type'] == 'NewMatchPathValueComboDetector':
+            elif item['type'].name == 'NewMatchPathValueComboDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config,
                     item['paths'],
@@ -293,7 +294,7 @@ def build_analysis_pipeline(analysis_context):
                     persistence_id=item['persistence_id'],
                     allow_missing_values_flag=item['allow_missing_values'],
                     output_log_line=item['output_logline'])
-            elif item['type'] == 'MissingMatchPathValueDetector':
+            elif item['type'].name == 'MissingMatchPathValueDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config,
                     item['path'],
@@ -303,7 +304,7 @@ def build_analysis_pipeline(analysis_context):
                     default_interval=item['check_interval'],
                     realert_interval=item['realert_interval'],
                     output_log_line=item['output_logline'])
-            elif item['type'] == 'MissingMatchPathListValueDetector':
+            elif item['type'].name == 'MissingMatchPathListValueDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config,
                     item['path'],
@@ -313,7 +314,7 @@ def build_analysis_pipeline(analysis_context):
                     default_interval=item['check_interval'],
                     realert_interval=item['realert_interval'],
                     output_log_line=item['output_logline'])
-            elif item['type'] == 'TimeCorrelationDetector':
+            elif item['type'].name == 'TimeCorrelationDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config,
                     anomaly_event_handlers,
@@ -325,14 +326,14 @@ def build_analysis_pipeline(analysis_context):
                     use_value_match=item['use_value_match'],
                     min_rule_attributes=item['min_rule_attributes'],
                     max_rule_attributes=item['max_rule_attributes'])
-            elif item['type'] == 'ParserCount':
+            elif item['type'].name == 'ParserCount':
                 tmp_analyser = func(
                     analysis_context.aminer_config,
                     item['paths'],
                     anomaly_event_handlers,
                     report_interval=item['report_interval'],
                     reset_after_report_flag=item['reset_after_report_flag'])
-            elif item['type'] == 'EventCorrelationDetector':
+            elif item['type'].name == 'EventCorrelationDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config,
                     anomaly_event_handlers,
@@ -351,7 +352,7 @@ def build_analysis_pipeline(analysis_context):
                     auto_include_flag=item['auto_include_flag'],
                     whitelisted_paths=item['whitelisted_paths'],
                     persistence_id=item['persistence_id'])
-            elif item['type'] == 'NewMatchIdValueComboDetector':
+            elif item['type'].name == 'NewMatchIdValueComboDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config,
                     item['paths'],
@@ -362,18 +363,18 @@ def build_analysis_pipeline(analysis_context):
                     persistence_id=item['persistence_id'],
                     allow_missing_values_flag=item['allow_missing_values'],
                     output_log_line=item['output_logline'])
-            elif item['type'] == 'LinearNumericBinDefinition':
+            elif item['type'].name == 'LinearNumericBinDefinition':
                 if comp_name is None:
-                    raise ValueError('The %s must have an id!' % item['type'])
+                    raise ValueError('The %s must have an id!' % item['type'].name)
                 analysis_dict[comp_name] = func(
                     item['lower_limit'],
                     item['bin_size'],
                     item['bin_count'],
                     item['outlier_bins_flag'])
                 continue
-            elif item['type'] == 'ModuloTimeBinDefinition':
+            elif item['type'].name == 'ModuloTimeBinDefinition':
                 if comp_name is None:
-                    raise ValueError('The %s must have an id!' % item['type'])
+                    raise ValueError('The %s must have an id!' % item['type'].name)
                 analysis_dict[comp_name] = func(
                     item['modulo_value'],
                     item['time_unit'],
@@ -382,7 +383,7 @@ def build_analysis_pipeline(analysis_context):
                     item['bin_count'],
                     item['outlier_bins_flag'])
                 continue
-            elif item['type'] == 'HistogramAnalysis':
+            elif item['type'].name == 'HistogramAnalysis':
                 histogram_defs = []
                 for histogram_def in item['histogram_defs']:
                     if len(histogram_def) != 2:
@@ -398,7 +399,7 @@ def build_analysis_pipeline(analysis_context):
                     reset_after_report_flag=item['reset_after_report_flag'],
                     persistence_id=item['persistence_id'],
                     output_log_line=item['output_logline'])
-            elif item['type'] == 'PathDependentHistogramAnalysis':
+            elif item['type'].name == 'PathDependentHistogramAnalysis':
                 if item['bin_definition'] not in analysis_dict:
                     raise ValueError('%s first must be defined before used.' % item['bin_definition'])
                 tmp_analyser = func(
@@ -410,7 +411,7 @@ def build_analysis_pipeline(analysis_context):
                     reset_after_report_flag=item['reset_after_report_flag'],
                     persistence_id=item['persistence_id'],
                     output_log_line=item['output_logline'])
-            elif item['type'] == 'EnhancedNewMatchPathValueComboDetector':
+            elif item['type'].name == 'EnhancedNewMatchPathValueComboDetector':
                 tuple_transformation_function = None
                 if item['tuple_transformation_function'] == 'demo':
                     tuple_transformation_function = tuple_transformation_function_demo_print_every_10th_value
@@ -426,14 +427,14 @@ def build_analysis_pipeline(analysis_context):
                 # skipcq: PYL-W0603
                 global enhanced_new_match_path_value_combo_detector_reference
                 enhanced_new_match_path_value_combo_detector_reference = tmp_analyser
-            elif item['type'] == 'MatchFilter':
+            elif item['type'].name == 'MatchFilter':
                 tmp_analyser = func(
                     analysis_context.aminer_config,
                     item['paths'],
                     anomaly_event_handlers,
                     target_value_list=item['value_list'],
                     output_log_line=item['output_logline'])
-            elif item['type'] == 'MatchValueAverageChangeDetector':
+            elif item['type'].name == 'MatchValueAverageChangeDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config,
                     anomaly_event_handlers,
@@ -445,7 +446,7 @@ def build_analysis_pipeline(analysis_context):
                     debug_mode=item['debug_mode'],
                     persistence_id=item['persistence_id'],
                     output_log_line=item['output_logline'])
-            elif item['type'] == 'MatchValueStreamWriter':
+            elif item['type'].name == 'MatchValueStreamWriter':
                 stream = sys.stdout
                 if item['stream'] == 'sys.stderr':
                     stream = sys.stderr
@@ -454,36 +455,36 @@ def build_analysis_pipeline(analysis_context):
                     item['paths'],
                     item['separator'].encode(),
                     item['missing_value_string'].encode())
-            elif item['type'] == 'NewMatchPathDetector':
+            elif item['type'].name == 'NewMatchPathDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config,
                     anomaly_event_handlers,
                     persistence_id=item['persistence_id'],
                     auto_include_flag=learn,
                     output_log_line=item['output_logline'])
-            elif 'MatchAction' in item['type']:
+            elif 'MatchAction' in item['type'].name:
                 if comp_name is None:
-                    raise ValueError('The %s must have an id!' % item['type'])
-                if item['type'] == 'EventGenerationMatchAction':
+                    raise ValueError('The %s must have an id!' % item['type'].name)
+                if item['type'].name == 'EventGenerationMatchAction':
                     tmp_analyser = func(
                         item['event_type'],
                         item['event_message'],
                         anomaly_event_handlers)
-                elif item['type'] == 'AtomFilterMatchAction':
+                elif item['type'].name == 'AtomFilterMatchAction':
                     tmp_analyser = func(
                         atom_filter,
                         stop_when_handled_flag=item['stop_when_handled_flag'])
                 match_action_dict[comp_name] = tmp_analyser
                 continue
-            elif 'MatchRule' in item['type']:
+            elif 'MatchRule' in item['type'].name:
                 if comp_name is None:
-                    raise ValueError('The %s must have an id!' % item['type'])
+                    raise ValueError('The %s must have an id!' % item['type'].name)
                 match_action = None
                 if item['match_action'] is not None:
                     if item['match_action'] not in match_action_dict:
                         raise ValueError('The match action %s does not exist!' % item['match_action'])
                     match_action = match_action_dict[item['match_action']]
-                if item['type'] in ('AndMatchRule', 'OrMatchRule', 'ParallelMatchRule'):
+                if item['type'].name in ('AndMatchRule', 'OrMatchRule', 'ParallelMatchRule'):
                     sub_rules = []
                     for sub_rule in item['sub_rules']:
                         if sub_rule not in match_rules_dict:
@@ -492,7 +493,7 @@ def build_analysis_pipeline(analysis_context):
                     tmp_analyser = func(
                         sub_rules,
                         match_action=match_action)
-                if item['type'] == 'ValueDependentDelegatedMatchRule':
+                if item['type'].name == 'ValueDependentDelegatedMatchRule':
                     rule_lookup_dict = {}
                     for rule in item['rule_lookup_dict']:
                         if rule not in match_rules_dict:
@@ -503,25 +504,25 @@ def build_analysis_pipeline(analysis_context):
                         rule_lookup_dict,
                         default_rule=item['default_rule'],
                         match_action=match_action)
-                if item['type'] == 'NegationMatchRule':
+                if item['type'].name == 'NegationMatchRule':
                     if item['sub_rule'] not in match_rules_dict:
                         raise ValueError('The match rule %s does not exist!' % item['sub_rule'])
                     sub_rule = match_rules_dict[item['sub_rule']]
                     tmp_analyser = func(
                         sub_rule,
                         match_action=match_action)
-                if item['type'] in ('PathExistsMatchRule', 'IPv4InRFC1918MatchRule'):
+                if item['type'].name in ('PathExistsMatchRule', 'IPv4InRFC1918MatchRule'):
                     tmp_analyser = func(
                         item['path'],
                         match_action=match_action)
-                if item['type'] == 'ValueMatchRule':
+                if item['type'].name == 'ValueMatchRule':
                     if isinstance(item['value'], str):
                         item['value'] = item['value'].encode()
                     tmp_analyser = func(
                         item['path'],
                         item['value'],
                         match_action=match_action)
-                if item['type'] == 'ValueListMatchRule':
+                if item['type'].name == 'ValueListMatchRule':
                     value_list = []
                     for val in item['value_list']:
                         if isinstance(val, str):
@@ -531,18 +532,18 @@ def build_analysis_pipeline(analysis_context):
                         item['path'],
                         value_list,
                         match_action=match_action)
-                if item['type'] == 'ValueRangeMatchRule':
+                if item['type'].name == 'ValueRangeMatchRule':
                     tmp_analyser = func(
                         item['path'],
                         item['lower_limit'],
                         item['upper_limit'],
                         match_action)
-                if item['type'] == 'StringRegexMatchRule':
+                if item['type'].name == 'StringRegexMatchRule':
                     tmp_analyser = func(
                         item['path'],
                         item['regex'],
                         match_action=match_action)
-                if item['type'] == 'ModuloTimeMatchRule':
+                if item['type'].name == 'ModuloTimeMatchRule':
                     # tzinfo parameter cannot be used yet..
                     tmp_analyser = func(
                         item['path'],
@@ -550,7 +551,7 @@ def build_analysis_pipeline(analysis_context):
                         item['lower_limit'],
                         item['upper_limit'],
                         match_action=match_action)
-                if item['type'] == 'ValueDependentModuloTimeMatchRule':
+                if item['type'].name == 'ValueDependentModuloTimeMatchRule':
                     # tzinfo parameter cannot be used yet..
                     tmp_analyser = func(
                         item['path'],
@@ -559,18 +560,18 @@ def build_analysis_pipeline(analysis_context):
                         item['limit_lookup_dict'],
                         default_limit=item['default_limit'],
                         match_action=match_action)
-                if item['type'] == 'DebugMatchRule':
+                if item['type'].name == 'DebugMatchRule':
                     tmp_analyser = func(
                         debug_match_result=item['debug_mode'],
                         match_action=match_action)
-                if item['type'] == 'DebugHistoryMatchRule':
+                if item['type'].name == 'DebugHistoryMatchRule':
                     # object_history is not supported yet..
                     tmp_analyser = func(
                         debug_match_result=item['debug_mode'],
                         match_action=match_action)
                 match_rules_dict[comp_name] = tmp_analyser
                 continue
-            elif item['type'] == 'CorrelationRule':
+            elif item['type'].name == 'CorrelationRule':
                 artefact_match_parameters = []
                 for match_parameters in item['artefact_match_parameters']:
                     artefact_match_parameters.append(tuple(i for i in match_parameters))
@@ -582,7 +583,7 @@ def build_analysis_pipeline(analysis_context):
                     artefact_match_parameters=artefact_match_parameters)
                 correlation_rules[item['rule_id']] = tmp_analyser
                 continue
-            elif item['type'] == 'EventClassSelector':
+            elif item['type'].name == 'EventClassSelector':
                 if item['artefact_a_rules'] is None and item['artefact_b_rules'] is None:
                     raise ValueError('At least one of the EventClassSelector\'s rules must not be None!')
                 artefact_a_rules = None
@@ -605,7 +606,7 @@ def build_analysis_pipeline(analysis_context):
                     artefact_b_rules)
                 match_action_dict[item['action_id']] = tmp_analyser
                 continue
-            elif item['type'] == 'TimeCorrelationViolationDetector':
+            elif item['type'].name == 'TimeCorrelationViolationDetector':
                 ruleset = []
                 for rule in item['ruleset']:
                     if rule not in match_rules_dict:
@@ -617,17 +618,17 @@ def build_analysis_pipeline(analysis_context):
                     anomaly_event_handlers,
                     persistence_id=item['persistence_id'],
                     output_log_line=item['output_logline'])
-            elif item['type'] == 'SimpleMonotonicTimestampAdjust':
+            elif item['type'].name == 'SimpleMonotonicTimestampAdjust':
                 tmp_analyser = func(
                     [atom_filter],
                     stop_when_handled_flag=item['stop_when_handled_flag'])
-            elif item['type'] == 'TimestampsUnsortedDetector':
+            elif item['type'].name == 'TimestampsUnsortedDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config,
                     anomaly_event_handlers,
                     exit_on_error_flag=item['exit_on_error_flag'],
                     output_log_line=item['output_logline'])
-            elif item['type'] == 'WhitelistViolationDetector':
+            elif item['type'].name == 'WhitelistViolationDetector':
                 whitelist_rules = []
                 for rule in item['whitelist_rules']:
                     if rule not in match_rules_dict:
@@ -638,7 +639,7 @@ def build_analysis_pipeline(analysis_context):
                     whitelist_rules,
                     anomaly_event_handlers,
                     output_log_line=item['output_logline'])
-            elif item['type'] == 'EventTypeDetector':
+            elif item['type'].name == 'EventTypeDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config,
                     anomaly_event_handlers,
@@ -650,7 +651,7 @@ def build_analysis_pipeline(analysis_context):
                     track_time_for_TSA=item['track_time_for_TSA'],
                     waiting_time_for_TSA=item['waiting_time_for_TSA'],
                     num_sections_waiting_time_for_TSA=item['num_sections_waiting_time_for_TSA'])
-            elif item['type'] == 'VariableTypeDetector':
+            elif item['type'].name == 'VariableTypeDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
                     raise ValueError('The defined EventTypeDetector %s does not exists!' % item['event_type_detector'])
