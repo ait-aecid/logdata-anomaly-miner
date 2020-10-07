@@ -2,6 +2,7 @@ import unittest
 import importlib
 import yaml
 import sys
+import aminer.AMinerConfig as AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.analysis.AtomFilters import SubhandlerFilter
 from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
@@ -356,15 +357,59 @@ class YamlConfigTest(unittest.TestCase):
         self.assertRaises(ValueError, context.build_analysis_pipeline)
         aminer_config.load_yaml('unit/data/configfiles/parser_child_elements_config.yml')
 
-    def test17_demo_config_working_as_expected(self):
-        """This test checks if the yaml demo config loads properly."""
-        self.assertTrue(True)
-        raise Exception("not implemented yet..")
-
-    def test18_demo_yaml_config_equals_python_config(self):
+    def test17_demo_yaml_config_equals_python_config(self):
         """This test checks if the yaml demo config is the same as the python version."""
-        self.assertTrue(True)
-        raise Exception("not implemented yet..")
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        aminer_config.load_yaml('demo/AMiner/demo-config.yml')
+        yml_context = AnalysisContext(aminer_config)
+        yml_context.build_analysis_pipeline()
+
+        aminer_config = AMinerConfig.load_config('demo/AMiner/demo-config.py')
+        py_context = AnalysisContext(aminer_config)
+        py_context.build_analysis_pipeline()
+
+        import copy
+        yml_config_properties = copy.deepcopy(yml_context.aminer_config.config_properties)
+        del yml_config_properties['Parser']
+        del yml_config_properties['Input']
+        del yml_config_properties['Analysis']
+        del yml_config_properties['EventHandlers']
+
+        # remove SimpleUnparsedAtomHandler, VerboseUnparsedAtomHandler and NewMatchPathDetector as they are added by the ymlconfig.
+        py_registered_components = copy.copy(py_context.registered_components)
+        del py_registered_components[0]
+        del py_registered_components[1]
+        del py_registered_components[2]
+        del py_registered_components[10]
+        yml_registered_components = copy.copy(yml_context.registered_components)
+        del yml_registered_components[0]
+        tmp = {}
+        keys = list(py_registered_components.keys())
+        for i in range(1, len(py_registered_components)+1):
+            tmp[i] = py_registered_components[keys[i-1]]
+        py_registered_components = tmp
+        py_registered_components_by_name = copy.copy(py_context.registered_components_by_name)
+        del py_registered_components_by_name['SimpleUnparsedHandler']
+        del py_registered_components_by_name['VerboseUnparsedHandler']
+        del py_registered_components_by_name['NewMatchPath']
+        del py_registered_components_by_name['SimpleMonotonicTimestampAdjust']
+        yml_registered_components_by_name = copy.copy(yml_context.registered_components_by_name)
+        del yml_registered_components_by_name['NewMatchPathDetector0']
+
+        self.assertEqual(yml_config_properties, py_context.aminer_config.config_properties)
+        # there actually is no easy way to compare AMiner components as they do not implement the __eq__ method.
+        self.assertEqual(len(yml_registered_components), len(py_registered_components))
+        for i in range(1, len(yml_registered_components)):
+            self.assertEqual(type(yml_registered_components[i]), type(py_registered_components[i]))
+        self.assertEqual(yml_registered_components_by_name.keys(), py_registered_components_by_name.keys())
+        for name in yml_registered_components_by_name.keys():
+            self.assertEqual(type(yml_registered_components_by_name[name]), type(py_registered_components_by_name[name]))
+        self.assertEqual(len(yml_context.real_time_triggered_components), len(py_context.real_time_triggered_components))
+        # the atom_handler_list is not equal as the python version uses a SimpleMonotonicTimestampAdjust.
+        self.assertEqual(yml_context.atomizer_factory.default_timestamp_paths, py_context.atomizer_factory.default_timestamp_paths)
+        self.assertEqual(type(yml_context.atomizer_factory.event_handler_list), type(py_context.atomizer_factory.event_handler_list))
 
     def run_empty_components_tests(self, context):
         """ the following lines help to debug the context for defining the testcases

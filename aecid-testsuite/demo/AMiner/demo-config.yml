@@ -896,7 +896,7 @@ Analysis:
           bin_definition: "modulo_time_bin_definition"
           report_interval: 10
         - type: MatchValueAverageChangeDetector
-          id: MatchValueAverageChangeDetector
+          id: MatchValueAverageChange
           timestamp_path: None
           paths:
             - "/model/Random"
