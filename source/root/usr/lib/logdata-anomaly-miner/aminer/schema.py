@@ -241,8 +241,7 @@
                 'type': 'dict',
                 'schema': {
                     'id': {'type': 'string'},
-                    'type': {'type': 'string', 'allowed': [
-                        'StreamPrinterEventHandler', 'SyslogWriterEventHandler', 'DefaultMailNotificationEventHandler']},
+                    'type': {'type': 'eventhandlertype', 'coerce': 'toeventhandlertype'},
                     'json': {'type': 'boolean', 'required': False, 'default': False},
                     'instance_name': {'type': 'string', 'required': False, 'default': 'aminer'},
                     'topic': {'type': 'string'},

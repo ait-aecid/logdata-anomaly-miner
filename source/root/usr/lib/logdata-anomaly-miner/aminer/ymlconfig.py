@@ -244,7 +244,6 @@ def build_analysis_pipeline(analysis_context):
                 learn = yaml_data['LearnMode']
             else:
                 learn = item['auto_include_flag']
-            # func = getattr(__import__("aminer.analysis", fromlist=[item['type']]), item['type'])
             func = item['type'].func
             if item['type'].name == 'NewMatchPathValueDetector':
                 tmp_analyser = func(
@@ -706,13 +705,14 @@ def build_analysis_pipeline(analysis_context):
     try:
         if 'EventHandlers' in yaml_data and yaml_data['EventHandlers'] is not None:
             for item in yaml_data['EventHandlers']:
-                func = getattr(__import__("aminer.events", fromlist=[item['type']]), item['type'])
+                # func = getattr(__import__("aminer.events", fromlist=[item['type']]), item['type'])
+                func = item['type'].func
                 ctx = None
-                if item['type'] in ('StreamPrinterEventHandler', 'DefaultMailNotificationEventHandler'):
+                if item['type'].name in ('StreamPrinterEventHandler', 'DefaultMailNotificationEventHandler'):
                     ctx = func(analysis_context)
-                if item['type'] == 'SyslogWriterEventHandler':
+                if item['type'].name == 'SyslogWriterEventHandler':
                     ctx = func(analysis_context, item['instance_name'])
-                if item['type'] == 'KafkaEventHandler':
+                if item['type'].name == 'KafkaEventHandler':
                     ctx = func(analysis_context, item['topic'], item['options'])
                 if item['json'] is True:
                     from aminer.events import JsonConverterHandler

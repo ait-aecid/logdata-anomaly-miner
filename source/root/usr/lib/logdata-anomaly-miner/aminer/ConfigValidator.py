@@ -34,14 +34,28 @@ class AnalysisType:
         return self.name
 
 
+class EventHandlerType:
+    name = None
+    func = None
+
+    def __init__(self, name):
+        self.name = name
+        self.func = getattr(__import__("aminer.events", fromlist=[name]), name)
+
+    def __str__(self):
+        return self.name
+
+
 parser_type = TypeDefinition('parsermodel', (ParserModelType, str), ())
 analysis_type = TypeDefinition('analysistype', (AnalysisType, str), ())
+event_handler_type = TypeDefinition('eventhandlertype', (EventHandlerType, str), ())
 
 
 class ConfigValidator(Validator):
     types_mapping = Validator.types_mapping.copy()
     types_mapping['parsermodel'] = parser_type
     types_mapping['analysistype'] = analysis_type
+    types_mapping['eventhandlertype'] = event_handler_type
 
     # we skip the following issue, otherwise an
     # "must have self"-issue will pop up
@@ -57,6 +71,14 @@ class ConfigValidator(Validator):
     def _normalize_coerce_toanalysistype(self, value):
         if isinstance(value, str):
             return AnalysisType(value)
+        return None
+
+    # we skip the following issue, otherwise an
+    # "must have self"-issue will pop up
+    # skipcq: PYL-R0201
+    def _normalize_coerce_toeventhandlertype(self, value):
+        if isinstance(value, str):
+            return EventHandlerType(value)
         return None
 
     def _validate_has_start(self, has_start, field, value):
