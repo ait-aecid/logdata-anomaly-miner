@@ -657,10 +657,10 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         if len(self.var_type_history_list_reference) > event_index and len(
                                 self.var_type_history_list_reference[event_index]) > var_index:
                             self.var_type_history_list_reference[event_index][var_index] = []
+                        affected_path = self.event_type_detector.variable_key_list[event_index][var_index]
                         self.print(
                             event_index, 'Stopped tracking the variable with Path:\n%s\nbecause of irregular variable types.' %
-                            self.event_type_detector.variable_key_list[event_index][var_index], log_atom,
-                            confidence=1 / (1 + np.exp(-4 / tmp_max)) / 0.9820137900379085)
+                            affected_path, log_atom, affected_path, confidence=1 / (1 + np.exp(-4 / tmp_max)) / 0.9820137900379085)
                         # 1 / (1 + np.exp(-4 / tmp_max)) / 0.9820137900379085 is the scaled sigmoidfunction.
                         # 1 / (1 + np.exp(-4)) = 0.9820137900379085
 
@@ -786,13 +786,13 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                             self.failed_indicators_paths.append(self.event_type_detector.longest_path[event_index])
 
                         tmp_string = ''
+                        affected_paths = [self.event_type_detector.variable_key_list[event_index][var_index] for var_index in
+                                          indices_failed_tests]
                         if self.var_type_history_list:
                             tmp_string += 'Indicator of a change in system behaviour: %s. Paths to the corresponding variables: %s' % (
-                                np.arctan(2 * indicator) / np.pi * 2, [
-                                    self.event_type_detector.variable_key_list[event_index][var_index]
-                                    for var_index in indices_failed_tests])
+                                np.arctan(2 * indicator) / np.pi * 2, affected_paths)
 
-                        self.print(event_index, tmp_string, log_atom, np.arctan(2 * indicator) / np.pi * 2, indicator=True)
+                        self.print(event_index, tmp_string, log_atom, affected_paths, np.arctan(2 * indicator) / np.pi * 2, indicator=True)
 
                 # Update the var_type_history_list_reference
                 if self.update_var_type_bool and (not isinstance(self.num_var_type_hist_ref, bool)) and (
@@ -1238,9 +1238,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                             var_index:
                         self.var_type_history_list_reference[event_index][var_index] = []
 
+                    affected_path = self.event_type_detector.variable_key_list[event_index][var_index]
                     self.print(event_index, 'Stopped tracking the variable with Path:\n%s\nbecause of its static values.' %
-                                            self.event_type_detector.variable_key_list[event_index][var_index], log_atom,
-                               confidence=1 - 1 / self.num_stat_stop_update)
+                        affected_path, log_atom, affected_path, confidence=1 - 1 / self.num_stat_stop_update)
                 return
 
             # Do not update variableType
@@ -1807,11 +1807,12 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if original_log_line_prefix is None:
             original_log_line_prefix = ''
         if self.output_log_line:
-            sorted_log_lines = [tmp_string + original_log_line_prefix + repr(log_atom.raw_data)]
+            sorted_log_lines = [tmp_string + original_log_line_prefix + log_atom.raw_data.decode()]
+            analysis_component = {'AffectedLogAtomPaths': list(log_atom.parser_match.get_match_dictionary().keys())}
         else:
-            sorted_log_lines = [tmp_string + repr(log_atom.raw_data)]
+            sorted_log_lines = [tmp_string + log_atom.raw_data.decode()]
+            analysis_component = {'AffectedLogAtomPaths': [self.event_type_detector.variable_key_list[event_index][var_index]]}
 
-        analysis_component = {'AffectedLogAtomPaths': [list(log_atom.parser_match.get_match_dictionary().keys())]}
         event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
                       'TypeInfo': type_info}
         for listener in self.anomaly_event_handlers:
@@ -1832,12 +1833,17 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if original_log_line_prefix is None:
             original_log_line_prefix = ''
         if self.output_log_line:
-            sorted_log_lines = [self.event_type_detector.longest_path[event_index] + os.linesep + original_log_line_prefix + repr(
-                log_atom.raw_data)]
+            tmp_str = ''
+            for x in list(log_atom.parser_match.get_match_dictionary().keys()):
+                tmp_str += '  ' + x + os.linesep
+            tmp_str = tmp_str.lstrip('  ')
+            sorted_log_lines = [tmp_str + original_log_line_prefix + log_atom.raw_data.decode()]
+            analysis_component = {'AffectedLogAtomPaths': list(log_atom.parser_match.get_match_dictionary().keys())}
         else:
-            sorted_log_lines = [self.event_type_detector.longest_path[event_index] + os.linesep + repr(log_atom.raw_data)]
+            sorted_log_lines = [
+                '  ' + self.event_type_detector.variable_key_list[event_index][var_index] + os.linesep + log_atom.raw_data.decode()]
+            analysis_component = {'AffectedLogAtomPaths': [self.event_type_detector.variable_key_list[event_index][var_index]]}
 
-        analysis_component = {'AffectedLogAtomPaths': [list(log_atom.parser_match.get_match_dictionary().keys())]}
         event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
                       'TypeInfo': {'from': vt_old[0], 'to': vt_new[0], 'lines': self.event_type_detector.num_eventlines[event_index]}}
         for listener in self.anomaly_event_handlers:
@@ -1856,12 +1862,17 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if original_log_line_prefix is None:
             original_log_line_prefix = ''
         if self.output_log_line:
-            sorted_log_lines = [
-                self.event_type_detector.longest_path[event_index] + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
+            tmp_str = ''
+            for x in list(log_atom.parser_match.get_match_dictionary().keys()):
+                tmp_str += '  ' + x + os.linesep
+            tmp_str = tmp_str.lstrip('  ')
+            sorted_log_lines = [tmp_str + original_log_line_prefix + log_atom.raw_data.decode()]
+            analysis_component = {'AffectedLogAtomPaths': list(log_atom.parser_match.get_match_dictionary().keys())}
         else:
-            sorted_log_lines = [self.event_type_detector.longest_path[event_index] + os.linesep + repr(log_atom.raw_data)]
+            sorted_log_lines = [
+                '  ' + self.event_type_detector.variable_key_list[event_index][var_index] + os.linesep + log_atom.raw_data.decode()]
+            analysis_component = {'AffectedLogAtomPaths': [self.event_type_detector.variable_key_list[event_index][var_index]]}
 
-        analysis_component = {'AffectedLogAtomPaths': [list(log_atom.parser_match.get_match_dictionary().keys())]}
         event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
                       'TypeInfo': {'reject': vt[0], 'lines': self.event_type_detector.num_eventlines[event_index]}}
         for listener in self.anomaly_event_handlers:
@@ -1871,14 +1882,32 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     self.event_type_detector.variable_key_list[event_index][var_index], vt[0], self.event_type_detector.num_eventlines[
                         event_index]), sorted_log_lines, event_data, log_atom, self)
 
-    def print(self, event_index, message, log_atom, confidence=None, indicator=None):
+    def print(self, event_index, message, log_atom, affected_path, confidence=None, indicator=None):
         """Prints the message"""
+        if isinstance(affected_path, str):
+            affected_path = [affected_path]
         if (self.silence_output_without_confidence and confidence is None) or (
                 self.silence_output_except_indicator and indicator is None):
             return
 
-        sorted_log_lines = [self.event_type_detector.longest_path[event_index] + os.linesep + log_atom.raw_data.decode()]
-        analysis_component = {'AffectedLogAtomPaths': [list(log_atom.parser_match.get_match_dictionary().keys())]}
+        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+        if original_log_line_prefix is None:
+            original_log_line_prefix = ''
+        if self.output_log_line:
+            tmp_str = ''
+            for x in list(log_atom.parser_match.get_match_dictionary().keys()):
+                tmp_str += '  ' + x + os.linesep
+            tmp_str = tmp_str.lstrip('  ')
+            sorted_log_lines = [tmp_str + original_log_line_prefix + log_atom.raw_data.decode()]
+            analysis_component = {'AffectedLogAtomPaths': list(log_atom.parser_match.get_match_dictionary().keys())}
+        else:
+            tmp_str = ''
+            for x in affected_path:
+                tmp_str += '  ' + x + os.linesep
+            tmp_str = tmp_str.lstrip('  ')
+            sorted_log_lines = [tmp_str + log_atom.raw_data.decode()]
+            analysis_component = {'AffectedLogAtomPaths': affected_path}
+
         event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
                       'Confidence': confidence, 'Indicator': indicator}
         for listener in self.anomaly_event_handlers:
