@@ -854,6 +854,7 @@ Analysis:
           id: VariableTypeDetector
           event_type_detector: EventTypeDetector
           silence_output_except_indicator: False
+          output_logline: False
         - type: EventCorrelationDetector
           id: EventCorrelationDetector
           check_rules_flag: True
