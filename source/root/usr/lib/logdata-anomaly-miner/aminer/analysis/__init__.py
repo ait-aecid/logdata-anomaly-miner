@@ -8,6 +8,8 @@ Add also the namespace references to classes defined in this directory."""
 CONFIG_KEY_LOG_LINE_PREFIX = 'LogPrefix'
 
 from aminer.analysis.EventCorrelationDetector import EventCorrelationDetector  # skipcq: FLK-E402
+from aminer.analysis.EventTypeDetector import EventTypeDetector  # skipcq: FLK-E402
+from aminer.analysis.VariableTypeDetector import VariableTypeDetector  # skipcq: FLK-E402
 from aminer.analysis.MatchFilter import MatchFilter  # skipcq: FLK-E402
 from aminer.analysis.MatchValueAverageChangeDetector import MatchValueAverageChangeDetector  # skipcq: FLK-E402
 from aminer.analysis.MatchValueStreamWriter import MatchValueStreamWriter  # skipcq: FLK-E402

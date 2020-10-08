@@ -3,6 +3,7 @@ from aminer.analysis import NewMatchPathDetector, MatchValueAverageChangeDetecto
     MissingMatchPathListValueDetector, NewMatchPathValueComboDetector, NewMatchPathValueDetector, TimeCorrelationDetector, \
     TimestampsUnsortedDetector, Rules, WhitelistViolationDetector
 from aminer.analysis.AtomFilters import MatchPathFilter, SubhandlerFilter, MatchValueFilter
+from aminer.analysis.EventTypeDetector import EventTypeDetector
 from aminer.analysis.HistogramAnalysis import ModuloTimeBinDefinition, HistogramData, HistogramAnalysis
 from aminer.analysis.TimeCorrelationViolationDetector import CorrelationRule, EventClassSelector, TimeCorrelationViolationDetector
 from aminer.analysis.TimestampCorrectionFilters import SimpleMonotonicTimestampAdjust
@@ -12,6 +13,7 @@ from aminer.analysis.NewMatchIdValueComboDetector import NewMatchIdValueComboDet
 from aminer.analysis.ParserCount import ParserCount
 from aminer.analysis.EventCorrelationDetector import EventCorrelationDetector
 from aminer.analysis.MatchFilter import MatchFilter
+from aminer.analysis.VariableTypeDetector import VariableTypeDetector
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
 from aminer.input import LogAtom
 from aminer.parsing import ParserMatch, MatchContext, MatchElement, DecimalIntegerValueModelElement, FirstMatchModelElement, \
@@ -22,6 +24,7 @@ import random
 from time import process_time
 from _io import StringIO
 import timeit
+import pickle  # skipcq: BAN-B403
 
 
 class AnalysisComponentsPerformanceTest(TestBase):
@@ -30,7 +33,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
     iterations = 2
     waiting_time = 1
     integerd = 'integer/d'
-    different_pathes = '%d different path(es).'
+    different_paths = '%d different path(es).'
     different_attributes = '%d different attribute(s).'
 
     @classmethod
@@ -44,7 +47,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
         self.output_stream = StringIO()
         self.stream_printer_event_handler = StreamPrinterEventHandler(self.analysis_context, self.output_stream)
 
-    def run_atom_filters_match_path_filter(self, number_of_pathes):
+    def run_atom_filters_match_path_filter(self, number_of_paths):
         results = [None] * self.iterations
         avg = 0
         z = 0
@@ -53,7 +56,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 self.stream_printer_event_handler], 'Default', True)
             subhandler_filter = SubhandlerFilter([], stop_when_handled_flag=True)
             i = 0
-            while i < number_of_pathes:
+            while i < number_of_paths:
                 match_path_filter = MatchPathFilter([(self.integerd + str(i), new_match_path_detector)], None)
                 subhandler_filter.add_handler(match_path_filter, stop_when_handled_flag=True)
                 i = i + 1
@@ -61,7 +64,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
 
             # worst case
             decimal_integer_value_me = DecimalIntegerValueModelElement(
-                'd' + str(number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                'd' + str(number_of_paths), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
                 DecimalIntegerValueModelElement.PAD_TYPE_NONE)
             match_context = MatchContext(str(123456789).encode())
             match_element = decimal_integer_value_me.get_match_element('integer', match_context)
@@ -83,9 +86,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = int(avg / self.iterations)
         type(self).result = self.result + self.result_string % (
             subhandler_filter.__class__.__name__, avg, results, '%d different %ss with a %s.' % (
-                number_of_pathes, match_path_filter.__class__.__name__, new_match_path_detector.__class__.__name__))
+                number_of_paths, match_path_filter.__class__.__name__, new_match_path_detector.__class__.__name__))
 
-    def run_atom_filters_match_value_filter(self, number_of_pathes):
+    def run_atom_filters_match_value_filter(self, number_of_paths):
         results = [None] * self.iterations
         avg = 0
         z = 0
@@ -99,15 +102,15 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 dictionary[i] = new_match_path_detector
                 i = i + 1
             i = 0
-            while i < number_of_pathes:
-                match_value_filter = MatchValueFilter(self.integerd + str(i % number_of_pathes), dictionary, None)
+            while i < number_of_paths:
+                match_value_filter = MatchValueFilter(self.integerd + str(i % number_of_paths), dictionary, None)
                 subhandler_filter.add_handler(match_value_filter, stop_when_handled_flag=True)
                 i = i + 1
             t = round(time.time(), 3)
 
             # worst case
             decimal_integer_value_me = DecimalIntegerValueModelElement(
-                'd' + str(number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+                'd' + str(number_of_paths), DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
             match_context = MatchContext(str(123456789).encode())
             match_element = decimal_integer_value_me.get_match_element('integer', match_context)
             log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, match_value_filter)
@@ -127,9 +130,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = int(avg / self.iterations)
         type(self).result = self.result + self.result_string % (
             subhandler_filter.__class__.__name__, avg, results, '%d different %ss with a dictionary of %ss.' % (
-                number_of_pathes, match_value_filter.__class__.__name__, new_match_path_detector.__class__.__name__))
+                number_of_paths, match_value_filter.__class__.__name__, new_match_path_detector.__class__.__name__))
 
-    def run_new_match_path_detector(self, number_of_pathes):
+    def run_new_match_path_detector(self, number_of_paths):
         results = [None] * self.iterations
         avg = 0
         z = 0
@@ -141,7 +144,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             i = 0
             while measured_time < self.waiting_time / 10:
                 decimal_integer_value_me = DecimalIntegerValueModelElement(
-                    'd' + str(i % number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                    'd' + str(i % number_of_paths), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
                     DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
@@ -154,17 +157,17 @@ class AnalysisComponentsPerformanceTest(TestBase):
             avg = avg + i * 10
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
-            new_match_path_detector.__class__.__name__, avg, results, self.different_pathes % number_of_pathes)
+            new_match_path_detector.__class__.__name__, avg, results, self.different_paths % number_of_paths)
 
-    def run_enhanced_new_match_path_value_combo_detector(self, number_of_pathes):
+    def run_enhanced_new_match_path_value_combo_detector(self, number_of_paths):
         results = [None] * self.iterations
         avg = 0
         z = 0
         while z < self.iterations:
             i = 0
             path_list = []
-            while i < number_of_pathes:
-                path_list.append(self.integerd + str(i % number_of_pathes))
+            while i < number_of_paths:
+                path_list.append(self.integerd + str(i % number_of_paths))
                 i = i + 1
             enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(
                 self.aminer_config, path_list, [self.stream_printer_event_handler], 'Default', True, True)
@@ -172,7 +175,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
 
             # worst case
             decimal_integer_value_me = DecimalIntegerValueModelElement(
-                'd' + str(number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                'd' + str(number_of_paths), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
                 DecimalIntegerValueModelElement.PAD_TYPE_NONE)
             match_context = MatchContext(str(123456789).encode())
             match_element = decimal_integer_value_me.get_match_element('integer', match_context)
@@ -195,14 +198,14 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             enhanced_new_match_path_value_combo_detector.__class__.__name__,
-            avg, results, self.different_attributes % number_of_pathes)
+            avg, results, self.different_attributes % number_of_paths)
 
-    def run_histogram_analysis(self, number_of_pathes, amplifier):
+    def run_histogram_analysis(self, number_of_paths, amplifier):
         results = [None] * self.iterations
         avg = 0
         z = 0
         while z < self.iterations:
-            modulo_time_bin_definition = ModuloTimeBinDefinition(86400, 86400 / number_of_pathes, 0, 1, number_of_pathes, False)
+            modulo_time_bin_definition = ModuloTimeBinDefinition(86400, 86400 / number_of_paths, 0, 1, number_of_paths, False)
             histogram_data = HistogramData('match/crontab', modulo_time_bin_definition)
             histogram_analysis = HistogramAnalysis(
                 self.aminer_config, [(histogram_data.property_path, modulo_time_bin_definition)], amplifier * self.waiting_time,
@@ -223,23 +226,23 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             histogram_analysis.__class__.__name__, avg, results, '%d bin(s) and output after %d elements.' % (
-                number_of_pathes, amplifier * self.waiting_time))
+                number_of_paths, amplifier * self.waiting_time))
 
-    def run_match_value_average_change_detector(self, number_of_pathes):
+    def run_match_value_average_change_detector(self, number_of_paths):
         results = [None] * self.iterations
         avg = 0
         z = 0
         while z < self.iterations:
             i = 0
             path_list = []
-            while i < number_of_pathes:
-                path_list.append(self.integerd + str(i % number_of_pathes))
+            while i < number_of_paths:
+                path_list.append(self.integerd + str(i % number_of_paths))
                 i = i + 1
             t = time.time()
             match_value_average_change_detector = MatchValueAverageChangeDetector(self.aminer_config, [
                 self.stream_printer_event_handler], None, path_list, 2, t, True, False, 'Default')
             i = 0
-            while i < number_of_pathes:
+            while i < number_of_paths:
                 match_element = MatchElement(self.integerd + str(i), '%s' % str(t), t, [])
                 log_atom = LogAtom(
                     match_element.get_match_object(), ParserMatch(match_element), t, match_value_average_change_detector)
@@ -263,7 +266,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             t = time.time()
 
             # worst case
-            match_element = MatchElement(self.integerd + str(number_of_pathes - 1), '%s' % str(t), t, [])
+            match_element = MatchElement(self.integerd + str(number_of_paths - 1), '%s' % str(t), t, [])
             log_atom = LogAtom(match_element.get_match_object(), ParserMatch(match_element), t, match_value_average_change_detector)
             worst_case = self.waiting_time / (
                     timeit.timeit(lambda: match_value_average_change_detector.receive_atom(log_atom), number=10000) / 10000)
@@ -279,9 +282,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
             avg = avg + (worst_case + best_case) / 2
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
-            match_value_average_change_detector.__class__.__name__, avg, results, self.different_pathes % number_of_pathes)
+            match_value_average_change_detector.__class__.__name__, avg, results, self.different_paths % number_of_paths)
 
-    def run_match_value_stream_writer(self, number_of_pathes):
+    def run_match_value_stream_writer(self, number_of_paths):
         results = [None] * self.iterations
         avg = 0
         z = 0
@@ -289,20 +292,20 @@ class AnalysisComponentsPerformanceTest(TestBase):
             i = 0
             path_list = []
             parsing_model = []
-            while i < number_of_pathes / 2:
-                path_list.append('match/integer/d' + str(i % number_of_pathes))
-                path_list.append('match/integer/s' + str(i % number_of_pathes))
+            while i < number_of_paths / 2:
+                path_list.append('match/integer/d' + str(i % number_of_paths))
+                path_list.append('match/integer/s' + str(i % number_of_paths))
                 parsing_model.append(
-                    DecimalIntegerValueModelElement('d' + str(i % number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                    DecimalIntegerValueModelElement('d' + str(i % number_of_paths), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
                                                     DecimalIntegerValueModelElement.PAD_TYPE_NONE))
-                parsing_model.append(FixedDataModelElement('s' + str(i % number_of_pathes), b' Euro '))
+                parsing_model.append(FixedDataModelElement('s' + str(i % number_of_paths), b' Euro '))
                 i = i + 1
             sequence_model_element = SequenceModelElement('integer', parsing_model)
             match_value_stream_writer = MatchValueStreamWriter(self.output_stream, path_list, b';', b'-')
             t = time.time()
 
             data = b''
-            for j in range(1, int(number_of_pathes / 2) + number_of_pathes % 2 + 1):
+            for j in range(1, int(number_of_paths / 2) + number_of_paths % 2 + 1):
                 data = data + str(j).encode() + b' Euro '
             match_context = MatchContext(data)
             match_element = sequence_model_element.get_match_element('match', match_context)
@@ -314,17 +317,17 @@ class AnalysisComponentsPerformanceTest(TestBase):
             avg = avg + results[z - 1]
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
-            match_value_stream_writer.__class__.__name__, avg, results, self.different_pathes % number_of_pathes)
+            match_value_stream_writer.__class__.__name__, avg, results, self.different_paths % number_of_paths)
 
-    def run_missing_match_path_value_detector(self, number_of_pathes):
+    def run_missing_match_path_value_detector(self, number_of_paths):
         results = [None] * self.iterations
         avg = 0
         z = 0
         while z < self.iterations:
             i = 0
             path_list = []
-            while i < number_of_pathes:
-                path_list.append(self.integerd + str(i % number_of_pathes))
+            while i < number_of_paths:
+                path_list.append(self.integerd + str(i % number_of_paths))
                 i = i + 1
             missing_match_path_list_value_detector = MissingMatchPathListValueDetector(
                 self.aminer_config, path_list, [self.stream_printer_event_handler], 'Default', True, 3600, 86400)
@@ -332,7 +335,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
 
             # worst case
             decimal_integer_value_me = DecimalIntegerValueModelElement(
-                'd' + str(number_of_pathes - 1), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                'd' + str(number_of_paths - 1), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
                 DecimalIntegerValueModelElement.PAD_TYPE_NONE)
             match_context = MatchContext(str(1).encode())
             match_element = decimal_integer_value_me.get_match_element('integer', match_context)
@@ -354,17 +357,17 @@ class AnalysisComponentsPerformanceTest(TestBase):
             avg = avg + (worst_case + best_case) / 2
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
-            missing_match_path_list_value_detector.__class__.__name__, avg, results, self.different_pathes % number_of_pathes)
+            missing_match_path_list_value_detector.__class__.__name__, avg, results, self.different_paths % number_of_paths)
 
-    def run_new_match_path_value_combo_detector(self, number_of_pathes):
+    def run_new_match_path_value_combo_detector(self, number_of_paths):
         results = [None] * self.iterations
         avg = 0
         z = 0
         while z < self.iterations:
             i = 0
             path_list = []
-            while i < number_of_pathes:
-                path_list.append(self.integerd + str(i % number_of_pathes))
+            while i < number_of_paths:
+                path_list.append(self.integerd + str(i % number_of_paths))
                 i = i + 1
             new_match_path_value_combo_detector = NewMatchPathValueComboDetector(
                 self.aminer_config, path_list, [self.stream_printer_event_handler], 'Default', True, True)
@@ -373,7 +376,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             i = 0
             while measured_time < self.waiting_time / 10:
                 decimal_integer_value_me = DecimalIntegerValueModelElement(
-                    'd' + str(i % number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                    'd' + str(i % number_of_paths), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
                     DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i % 100).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
@@ -385,17 +388,17 @@ class AnalysisComponentsPerformanceTest(TestBase):
             avg = avg + i * 10
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
-            new_match_path_value_combo_detector.__class__.__name__, avg, results, self.different_attributes % number_of_pathes)
+            new_match_path_value_combo_detector.__class__.__name__, avg, results, self.different_attributes % number_of_paths)
 
-    def run_new_match_path_value_detector(self, number_of_pathes):
+    def run_new_match_path_value_detector(self, number_of_paths):
         results = [None] * self.iterations
         avg = 0
         z = 0
         while z < self.iterations:
             i = 0
             path_list = []
-            while i < number_of_pathes:
-                path_list.append(self.integerd + str(i % number_of_pathes))
+            while i < number_of_paths:
+                path_list.append(self.integerd + str(i % number_of_paths))
                 i = i + 1
             new_match_path_value_detector = NewMatchPathValueDetector(self.aminer_config, path_list, [
                 self.stream_printer_event_handler], 'Default', True, True)
@@ -404,7 +407,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             i = 0
             while measured_time < self.waiting_time / 10:
                 decimal_integer_value_me = DecimalIntegerValueModelElement(
-                    'd' + str(i % number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                    'd' + str(i % number_of_paths), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
                     DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i % 100).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
@@ -416,7 +419,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             avg = avg + i * 10
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
-            new_match_path_value_detector.__class__.__name__, avg, results, self.different_attributes % number_of_pathes)
+            new_match_path_value_detector.__class__.__name__, avg, results, self.different_attributes % number_of_paths)
 
     def run_time_correlation_detector(self, number_of_rules):
         results = [None] * self.iterations
@@ -493,7 +496,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             time_correlation_violation_detector.__class__.__name__, avg, results,
             '%d%% chance of not finding an element' % ((1 - chance) * 100))
 
-    def run_timestamp_correction_filters(self, number_of_pathes):
+    def run_timestamp_correction_filters(self, number_of_paths):
         results = [None] * self.iterations
         avg = 0
         z = 0
@@ -507,7 +510,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             measured_time = 0
             while measured_time < self.waiting_time / 10:
                 decimal_integer_value_me = DecimalIntegerValueModelElement(
-                    'd' + str(i % number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                    'd' + str(i % number_of_paths), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
                     DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 p = process_time()
                 r = random.randint(1, 1000000)
@@ -523,7 +526,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             simple_monotonic_timestamp_adjust.__class__.__name__, avg, results,
-            'a %s and %d different path(es).' % (new_match_path_detector.__class__.__name__, number_of_pathes))
+            'a %s and %d different path(es).' % (new_match_path_detector.__class__.__name__, number_of_paths))
 
     def run_timestamps_unsorted_detector(self, reset_factor):
         results = [None] * self.iterations
@@ -556,15 +559,15 @@ class AnalysisComponentsPerformanceTest(TestBase):
         type(self).result = self.result + self.result_string % (
             timestamps_unsorted_detector.__class__.__name__, avg, results, 'a reset_factor of %f.' % reset_factor)
 
-    def run_whitelist_violation_detector(self, number_of_pathes, modulo_factor):
+    def run_whitelist_violation_detector(self, number_of_paths, modulo_factor):
         results = [None] * self.iterations
         avg = 0
         z = 0
         while z < self.iterations:
             i = 0
             rules = []
-            while i < number_of_pathes:
-                rules.append(PathExistsMatchRule(self.integerd + str(i % number_of_pathes), None))
+            while i < number_of_paths:
+                rules.append(PathExistsMatchRule(self.integerd + str(i % number_of_paths), None))
                 i = i + 1
             whitelist_violation_detector = WhitelistViolationDetector(self.aminer_config, rules, [self.stream_printer_event_handler])
             t = time.time()
@@ -577,7 +580,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 else:
                     r = 1
                 decimal_integer_value_me = DecimalIntegerValueModelElement(
-                    'd' + str(i % (number_of_pathes * r)), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                    'd' + str(i % (number_of_paths * r)), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
                     DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i % 100).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
@@ -590,7 +593,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             whitelist_violation_detector.__class__.__name__, avg, results,
-            '%d different PathExistsMatchRules and a moduloFactor of %d.' % (number_of_pathes, modulo_factor))
+            '%d different PathExistsMatchRules and a moduloFactor of %d.' % (number_of_paths, modulo_factor))
 
     def run_new_match_id_value_combo_detector(self, min_allowed_time_diff):
         log_lines = [
@@ -863,14 +866,14 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 ecd.auto_include_flag, generation, diff, p0, alpha, max_hypotheses, max_observations, candidates_size,
                 hypothesis_eval_delta_time, delta_time_to_discard_hypothesis))
 
-    def run_match_filter(self, number_of_pathes):
+    def run_match_filter(self, number_of_paths):
         results = [None] * self.iterations
         avg = 0
         z = 0
         while z < self.iterations:
             new_match_path_detector = NewMatchPathDetector(self.aminer_config, [
                 self.stream_printer_event_handler], 'Default', True)
-            match_filter = MatchFilter(self.aminer_config, ['d' + str(i) for i in range(number_of_pathes)], [
+            match_filter = MatchFilter(self.aminer_config, ['d' + str(i) for i in range(number_of_paths)], [
                 self.stream_printer_event_handler])
 
             seconds = time.time()
@@ -878,7 +881,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             measured_time = 0
             while measured_time < self.waiting_time / 10:
                 decimal_integer_value_me = DecimalIntegerValueModelElement(
-                    'd' + str(i % number_of_pathes), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                    'd' + str(i % number_of_paths), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
                     DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 p = process_time()
                 r = random.randint(1, 1000000)
@@ -894,7 +897,125 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             match_filter.__class__.__name__, avg, results,
-            'a %s and %d different path(es).' % (new_match_path_detector.__class__.__name__, number_of_pathes))
+            'a %s and %d different path(es).' % (new_match_path_detector.__class__.__name__, number_of_paths))
+
+    def run_event_type_detector(self, number_of_paths):
+        with open('unit/data/vtd_data/uni_data_test6', 'rb') as f:
+            uni_data_list = pickle.load(f)  # skipcq: BAN-B301
+        with open('unit/data/vtd_data/nor_data_test6', 'rb') as f:
+            nor_data_list = pickle.load(f)  # skipcq: BAN-B301
+        with open('unit/data/vtd_data/beta1_data_test6', 'rb') as f:
+            beta1_data_list = pickle.load(f)  # skipcq: BAN-B301
+        with open('unit/data/vtd_data/uni_data_test7', 'rb') as f:
+            [uni_data_list_ini, uni_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+        with open('unit/data/vtd_data/nor_data_test7', 'rb') as f:
+            [nor_data_list_ini, nor_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+        with open('unit/data/vtd_data/beta1_data_test7', 'rb') as f:
+            [beta1_data_list_ini, beta1_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+        with open('unit/data/vtd_data/beta2_data_test7', 'rb') as f:
+            [beta2_data_list_ini, beta2_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+        with open('unit/data/vtd_data/beta3_data_test7', 'rb') as f:
+            [beta3_data_list_ini, beta3_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+        with open('unit/data/vtd_data/beta4_data_test7', 'rb') as f:
+            [beta4_data_list_ini, beta4_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+        with open('unit/data/vtd_data/beta5_data_test7', 'rb') as f:
+            [beta5_data_list_ini, beta5_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+
+        data = uni_data_list + nor_data_list + beta1_data_list + uni_data_list_ini + uni_data_list_upd + nor_data_list_ini +\
+            nor_data_list_upd + beta1_data_list_ini + beta1_data_list_upd + beta2_data_list_ini + beta2_data_list_upd + beta3_data_list_ini\
+            + beta3_data_list_upd + beta4_data_list_ini + beta4_data_list_upd + beta5_data_list_ini + beta5_data_list_upd
+        results = [None] * self.iterations
+        avg = 0
+        z = 0
+        while z < self.iterations:
+            path_list = None
+            if number_of_paths is not None and number_of_paths != 1000000:
+                path_list = ['/integer/d' + str(i) for i in range(number_of_paths)]
+            else:
+                number_of_paths = 1000000
+            event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], path_list=path_list)
+
+            seconds = time.time()
+            i = 0
+            measured_time = 0
+            while measured_time < self.waiting_time / 10:
+                any_byte_data_me = AnyByteDataModelElement('d' + str(i % number_of_paths))
+                p = process_time()
+                r = random.randint(1, 1000000)
+                seconds = seconds + process_time() - p
+                match_context = MatchContext(str(data[i % len(data)]).encode())
+                match_element = any_byte_data_me.get_match_element('/integer', match_context)
+                log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), seconds - r, event_type_detector)
+                measured_time += timeit.timeit(lambda: event_type_detector.receive_atom(log_atom), number=1)
+                i = i + 1
+            results[z] = i * 10
+            z = z + 1
+            avg = avg + i * 10
+        avg = avg / self.iterations
+        if number_of_paths == 1000000:
+            number_of_paths = 'all'
+        type(self).result = self.result + self.result_string % (
+            event_type_detector.__class__.__name__, avg, results, '%s different path(es).' % (str(number_of_paths)))
+
+    def run_variable_type_detector(self, number_of_paths):
+        with open('unit/data/vtd_data/uni_data_test6', 'rb') as f:
+            uni_data_list = pickle.load(f)  # skipcq: BAN-B301
+        with open('unit/data/vtd_data/nor_data_test6', 'rb') as f:
+            nor_data_list = pickle.load(f)  # skipcq: BAN-B301
+        with open('unit/data/vtd_data/beta1_data_test6', 'rb') as f:
+            beta1_data_list = pickle.load(f)  # skipcq: BAN-B301
+        with open('unit/data/vtd_data/uni_data_test7', 'rb') as f:
+            [uni_data_list_ini, uni_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+        with open('unit/data/vtd_data/nor_data_test7', 'rb') as f:
+            [nor_data_list_ini, nor_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+        with open('unit/data/vtd_data/beta1_data_test7', 'rb') as f:
+            [beta1_data_list_ini, beta1_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+        with open('unit/data/vtd_data/beta2_data_test7', 'rb') as f:
+            [beta2_data_list_ini, beta2_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+        with open('unit/data/vtd_data/beta3_data_test7', 'rb') as f:
+            [beta3_data_list_ini, beta3_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+        with open('unit/data/vtd_data/beta4_data_test7', 'rb') as f:
+            [beta4_data_list_ini, beta4_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+        with open('unit/data/vtd_data/beta5_data_test7', 'rb') as f:
+            [beta5_data_list_ini, beta5_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+
+        data = uni_data_list + nor_data_list + beta1_data_list + uni_data_list_ini + uni_data_list_upd + nor_data_list_ini +\
+            nor_data_list_upd + beta1_data_list_ini + beta1_data_list_upd + beta2_data_list_ini + beta2_data_list_upd + beta3_data_list_ini\
+            + beta3_data_list_upd + beta4_data_list_ini + beta4_data_list_upd + beta5_data_list_ini + beta5_data_list_upd
+        results = [None] * self.iterations
+        avg = 0
+        z = 0
+        while z < self.iterations:
+            path_list = None
+            if number_of_paths is not None and number_of_paths != 1000000:
+                path_list = ['/integer/d' + str(i) for i in range(number_of_paths)]
+            else:
+                number_of_paths = 1000000
+            event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], path_list=path_list)
+            variable_type_detector = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], event_type_detector,
+                                                          path_list=path_list)
+            seconds = time.time()
+            i = 0
+            measured_time = 0
+            while measured_time < self.waiting_time / 10:
+                any_byte_data_me = AnyByteDataModelElement('d' + str(i % number_of_paths))
+                p = process_time()
+                r = random.randint(1, 1000000)
+                seconds = seconds + process_time() - p
+                match_context = MatchContext(str(data[i % len(data)]).encode())
+                match_element = any_byte_data_me.get_match_element('/integer', match_context)
+                log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), seconds - r, event_type_detector)
+                self.assertTrue(event_type_detector.receive_atom(log_atom))
+                measured_time += timeit.timeit(lambda: variable_type_detector.receive_atom(log_atom), number=1)
+                i = i + 1
+            results[z] = i * 10
+            z = z + 1
+            avg = avg + i * 10
+        avg = avg / self.iterations
+        if number_of_paths == 1000000:
+            number_of_paths = 'all'
+        type(self).result = self.result + self.result_string % (
+            variable_type_detector.__class__.__name__, avg, results, '%s different path(es).' % (str(number_of_paths)))
 
     def test01atom_filters(self):
         self.run_atom_filters_match_path_filter(1)
@@ -1036,6 +1157,18 @@ class AnalysisComponentsPerformanceTest(TestBase):
         self.run_match_filter(1)
         self.run_match_filter(1000)
         self.run_match_filter(100000)
+
+    def test19event_type_detector(self):
+        self.run_event_type_detector(None)
+        self.run_event_type_detector(1)
+        self.run_event_type_detector(10)
+        self.run_event_type_detector(100)
+
+    def test20variable_type_detector(self):
+        self.run_variable_type_detector(None)
+        self.run_variable_type_detector(1)
+        self.run_variable_type_detector(10)
+        self.run_variable_type_detector(100)
 
 
 if __name__ == '__main__':
