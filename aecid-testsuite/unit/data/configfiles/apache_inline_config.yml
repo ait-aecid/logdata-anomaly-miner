@@ -113,8 +113,8 @@ Parser:
                   - user_agent_model
                   - sq6
 Input:
-        TimestampPath: "/accesslog/time"
-        Verbose: False # use this to debug your parser-model
+        timestamp_paths: ["/accesslog/time"]
+        verbose: False # use this to debug your parser-model
 
 Analysis:
         - type: TimestampsUnsortedDetector
@@ -236,4 +236,3 @@ EventHandlers:
           type: SyslogWriterEventHandler
         - id: default_mail_notification_handler
           type: DefaultMailNotificationEventHandler
-

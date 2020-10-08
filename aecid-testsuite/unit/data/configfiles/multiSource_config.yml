@@ -18,9 +18,9 @@ Parser:
               - host_name_model
 
 Input:
-        Verbose: True # optional
-        MultiSource: True # optional
-        TimestampPath: "/model/accesslog/time"
+        verbose: True # optional
+        multi_source: True # optional
+        timestamp_paths: "/model/accesslog/time"
 
 Analysis:
         - type: NewMatchPathValueDetector

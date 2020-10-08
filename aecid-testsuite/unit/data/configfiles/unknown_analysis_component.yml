@@ -36,10 +36,9 @@ Parser:
                - reqMethodModel
 
 Input:
-        Verbose: True # optional
-        MultiSource: False # optional
-        TimestampPath: "/model/accesslog/time"
-
+        verbose: True # optional
+        multi_source: False # optional
+        timestamp_paths: "/model/accesslog/time"
 
 Analysis:
         - type: NewMatchPathValueDetector

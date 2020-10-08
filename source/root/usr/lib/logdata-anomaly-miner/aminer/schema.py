@@ -94,9 +94,9 @@
             'required': True,
             'type': 'dict',
             'schema': {
-                'Verbose': {'type': 'boolean', 'required': False, 'default': False},
-                'MultiSource': {'type': 'boolean', 'required': False, 'default': False},
-                'TimestampPath': {'type': ['string', 'list']}
+                'verbose': {'type': 'boolean', 'required': False, 'default': False},
+                'multi_source': {'type': 'boolean', 'required': False, 'default': False},
+                'timestamp_paths': {'type': ['string', 'list']}
             }
         },
         'Analysis': {
