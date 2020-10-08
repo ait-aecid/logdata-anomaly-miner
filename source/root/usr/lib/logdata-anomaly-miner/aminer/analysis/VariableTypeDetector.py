@@ -659,7 +659,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                             self.var_type_history_list_reference[event_index][var_index] = []
                         affected_path = self.event_type_detector.variable_key_list[event_index][var_index]
                         self.print(
-                            event_index, 'Stopped tracking the variable with Path:\n%s\nbecause of irregular variable types.' %
+                            'Stopped tracking the variable with Path:\n%s\nbecause of irregular variable types.' %
                             affected_path, log_atom, affected_path, confidence=1 / (1 + np.exp(-4 / tmp_max)) / 0.9820137900379085)
                         # 1 / (1 + np.exp(-4 / tmp_max)) / 0.9820137900379085 is the scaled sigmoidfunction.
                         # 1 / (1 + np.exp(-4)) = 0.9820137900379085
@@ -792,7 +792,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                             tmp_string += 'Indicator of a change in system behaviour: %s. Paths to the corresponding variables: %s' % (
                                 np.arctan(2 * indicator) / np.pi * 2, affected_paths)
 
-                        self.print(event_index, tmp_string, log_atom, affected_paths, np.arctan(2 * indicator) / np.pi * 2, indicator=True)
+                        self.print(tmp_string, log_atom, affected_paths, np.arctan(2 * indicator) / np.pi * 2, indicator=True)
 
                 # Update the var_type_history_list_reference
                 if self.update_var_type_bool and (not isinstance(self.num_var_type_hist_ref, bool)) and (
@@ -1239,8 +1239,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         self.var_type_history_list_reference[event_index][var_index] = []
 
                     affected_path = self.event_type_detector.variable_key_list[event_index][var_index]
-                    self.print(event_index, 'Stopped tracking the variable with Path:\n%s\nbecause of its static values.' %
-                        affected_path, log_atom, affected_path, confidence=1 - 1 / self.num_stat_stop_update)
+                    self.print('Stopped tracking the variable with Path:\n%s\nbecause of its static values.' %
+                               affected_path, log_atom, affected_path, confidence=1 - 1 / self.num_stat_stop_update)
                 return
 
             # Do not update variableType
@@ -1882,7 +1882,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     self.event_type_detector.variable_key_list[event_index][var_index], vt[0], self.event_type_detector.num_eventlines[
                         event_index]), sorted_log_lines, event_data, log_atom, self)
 
-    def print(self, event_index, message, log_atom, affected_path, confidence=None, indicator=None):
+    def print(self, message, log_atom, affected_path, confidence=None, indicator=None):
         """Prints the message"""
         if isinstance(affected_path, str):
             affected_path = [affected_path]
