@@ -1104,7 +1104,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             return
 
         # Test and update for ascending values
-        if self.var_type[event_index][var_index][0] == 'asc':
+        elif self.var_type[event_index][var_index][0] == 'asc':
             # Searches for a not ascending sequence in the values
             for j in range(-self.num_update, 0):
                 if self.event_type_detector.values[event_index][var_index][j - 1] >\
@@ -1119,7 +1119,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     self.print_changed_var_type(event_index, VT_old, ['others'], var_index, log_atom)
                     return
 
-        if self.var_type[event_index][var_index][0] == 'desc':  # Test and update for descending values
+        elif self.var_type[event_index][var_index][0] == 'desc':  # Test and update for descending values
             for j in range(-self.num_update, 0):  # Searches for a not ascending sequence in the values
                 if self.event_type_detector.values[event_index][var_index][j - 1] <\
                         self.event_type_detector.values[event_index][var_index][j]:
@@ -1131,7 +1131,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     self.print_changed_var_type(event_index, VT_old, ['others'], var_index, log_atom)
                     return
 
-        if self.var_type[event_index][var_index][0] == 'd':  # Test and update for values of the discrete type
+        elif self.var_type[event_index][var_index][0] == 'd':  # Test and update for values of the discrete type
             # Checks if new values have appeared
             if len(set(new_values + self.var_type[event_index][var_index][1])) > len(self.var_type[event_index][var_index][1]):
                 # New values have appeared
@@ -1225,7 +1225,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 return
 
         # Test and update for static variables
-        if self.var_type[event_index][var_index][0] == 'stat':
+        elif self.var_type[event_index][var_index][0] == 'stat':
             # Check if still static
             if all(new_values[i] == self.event_type_detector.values[event_index][var_index][0] for i in range(self.num_update)):
                 if self.var_type[event_index][var_index][2] and self.num_stat_stop_update is True and \
@@ -1271,7 +1271,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             return
 
         # Test and update for unique values
-        if self.var_type[event_index][var_index][0] == 'unq':
+        elif self.var_type[event_index][var_index][0] == 'unq':
             # Checks if the new values are not unique
             if len(set(self.event_type_detector.values[event_index][var_index][-self.num_update:])) != self.num_update:
                 if not self.update_var_type_bool:  # Do not update variableType
@@ -1299,7 +1299,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             return
 
         # Update for var type others
-        if self.var_type[event_index][var_index][0] == 'others':
+        elif self.var_type[event_index][var_index][0] == 'others':
             # Do not update variableType
             if not self.update_var_type_bool:
                 return
