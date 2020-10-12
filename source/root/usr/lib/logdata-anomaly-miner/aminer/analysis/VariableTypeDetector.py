@@ -1909,7 +1909,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             analysis_component = {'AffectedLogAtomPaths': affected_path}
 
         event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
-                      'Confidence': confidence, 'Indicator': indicator}
+                      'TypeInfo': {'Confidence': confidence, 'Indicator': indicator}}
         for listener in self.anomaly_event_handlers:
             listener.receive_event('Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, log_atom, self)
 
