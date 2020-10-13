@@ -8,6 +8,8 @@ before_install:
   - cp $PWD/source/root/etc/aminer/conf-available/generic/ApacheAccessModel.py $PWD/source/root/etc/aminer/conf-enabled/ApacheAccessModel.py
   - ln -s $PWD/source/root/usr/lib/logdata-anomaly-miner/aminer $PWD/aecid-testsuite/aminer
   - ln -s $PWD/source/root/etc/aminer/template_config.py $PWD/aecid-testsuite/demo/AMiner/template_config.py
+  - ls roles
+  - ls roles/aminer
   - sed -e "s+{{SOURCEDIR}}+$PWD+g" .playbook.yml > playbook.yml
 
 install:
@@ -16,11 +18,6 @@ install:
   - sudo ansible-playbook playbook.yml
   - sudo pip3 install coverage
   - sudo apt-get install -y exim4 procps cpulimit mailutils
-  - sudo pip3 install kafka-python -U
-  - sudo ln -s /usr/lib/python3/dist-packages/kafka /etc/aminer/conf-enabled/
-  - sudo pip3 install -U scipy
-  - sudo ln -s /usr/lib/python3.6/site-packages/numpy /etc/aminer/conf-enabled/
-  - sudo ln -s /usr/lib/python3.6/site-packages/scipy /etc/aminer/conf-enabled/
   - cd aecid-testsuite
   - sudo chmod +x runUnittests.sh
   - sudo chmod +x runAMinerDemo.sh
