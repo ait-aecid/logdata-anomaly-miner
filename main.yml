@@ -98,10 +98,9 @@
 
 
 - name: Link kafka
-  file:
-    src: /usr/lib/python3/dist-packages/kafka
-    dest: /etc/aminer/conf-enabled/kafka
-    state: link
+  shell:
+    cmd: find /usr/local/ -name kafka -exec ln -s {} /etc/aminer/conf-enabled/kafka \;
+    creates: /etc/aminer/conf-enabled/kafka
 
 - name: Link scipy
   file:
