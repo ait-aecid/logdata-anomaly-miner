@@ -80,10 +80,39 @@
     name: cerberus
     executable: pip3
 
+- name: Install python3-kafka
+  pip:
+    name: kafka-python
+    executable: pip3
+
+- name: Install scipy
+  pip:
+    name: kafka-python
+    executable: pip3
+    state: latest
+
 - name: Link cerberus
-  shell:
+  file:
     src: /usr/lib/python3/dist-packages/cerberus
     dest: /etc/aminer/conf-enabled/cerberus
+    state: link
+
+- name: Link kafka
+  file:
+    src: /usr/lib/python3/dist-packages/kafka
+    dest: /etc/aminer/conf-enabled/kafka
+    state: link
+
+- name: Link scipy
+  file:
+    src: /usr/lib/python3/dist-packages/scipy
+    dest: /etc/aminer/conf-enabled/scipy
+    state: link
+
+- name: Link numpy
+  file:
+    src: /usr/lib/python3/dist-packages/numpy
+    dest: /etc/aminer/conf-enabled/numpy
     state: link
 
 - name: link python3-pkg_resources
