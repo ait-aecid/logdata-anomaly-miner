@@ -50,9 +50,9 @@ fi
 
 #start AMiner
 if [[ $sudoInstalled == 0 ]]; then
-	sudo -H -u aminer bash -c 'AMiner --Foreground --Config /tmp/config21.py > /tmp/output &'
+	sudo -H -u aminer bash -c 'aminer --Foreground --Config /tmp/config21.py > /tmp/output &'
 else
-	runuser -u aminer -- AMiner --Foreground --Config $FILE > /tmp/output &
+	runuser -u aminer -- aminer --Foreground --Config $FILE > /tmp/output &
 fi
 
 time=`date +%s`

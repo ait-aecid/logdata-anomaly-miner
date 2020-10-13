@@ -38,9 +38,9 @@ fi
 
 #start AMiner
 if [[ $sudoInstalled == 0 ]]; then
-	sudo -H -u aminer bash -c 'AMiner --Foreground --Config '$FILE' > /tmp/output &'
+	sudo -H -u aminer bash -c 'aminer --Foreground --Config '$FILE' > /tmp/output &'
 else
-	runuser -u aminer -- AMiner --Foreground --Config $FILE > /tmp/output &
+	runuser -u aminer -- aminer --Foreground --Config $FILE > /tmp/output &
 fi
 
 time=`date +%s`

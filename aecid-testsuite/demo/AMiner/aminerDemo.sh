@@ -28,7 +28,7 @@ if ! test -f "$FILE"; then
 fi
 
 #start AMiner
-bash -c 'AMiner --Foreground --Config '$FILE' & #2> /dev/null & #> /tmp/output &'
+bash -c 'aminer --Foreground --Config '$FILE' & #2> /dev/null & #> /tmp/output &'
 
 #EventCorrelationDetetctor, NewMatchPathDetector
 #:<<Comment
