@@ -92,10 +92,10 @@
     state: latest
 
 - name: Link cerberus
-  file:
-    src: /usr/lib/python3/dist-packages/cerberus
-    dest: /etc/aminer/conf-enabled/cerberus
-    state: link
+  shell:
+    cmd: find /usr/local/ -name cerberus -exec ln -s {} /etc/aminer/conf-enabled/cerberus \;
+    creates: /etc/aminer/conf-enabled/cerberus
+
 
 - name: Link kafka
   file:
