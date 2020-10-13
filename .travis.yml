@@ -11,13 +11,13 @@ before_install:
   - sed -e "s+{{SOURCEDIR}}+$PWD+g" .playbook.yml > playbook.yml
   
   - cp $PWD/main.yml roles/aminer/tasks/main.yml
+  - cp $PWD/Debian.yml roles/aminer/vars/Debian.yml
 
 install:
   - sudo apt-get update -y
   - sudo apt-get install -y ansible
   - sudo ansible-playbook playbook.yml
   - sudo pip3 install coverage
-  - sudo apt-get install -y exim4 procps cpulimit mailutils
   - cd aecid-testsuite
   - sudo chmod +x runUnittests.sh
   - sudo chmod +x runAMinerDemo.sh
