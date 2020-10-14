@@ -94,11 +94,14 @@ def print_help(program_name, version=False):
         return
     print("\nusage: %s [options]" % program_name)
     print("options:")
-    print("  --Config <config-file>\tpath to the config-file")
-    print("  --Foreground          \tdo not fork")
-    print("  --RunAnalysis         \tenable/disable analysis")
-    print("  --Help                \tprint this print_help screen")
-    print("  --Version             \tprint version-string")
+    print("  -c, --Config <config-file>          \tpath to the config-file")
+    print("  -d, --Daemon                        \trun as a daemon process")
+    print("  -r, --RunAnalysis                   \tenable/disable analysis")
+    print("  -R, --Remove <persistence-directory>\tremoves a specific persistence directory")
+    print("  -C, --Clear                         \tremoves all persistence directories")
+    print("  -f, --FromBegin                     \tremoves RepositioningData before starting the AMiner")
+    print("  -h, --Help                          \tprint this print_help screen")
+    print("  -v, --Version                       \tprint version-string")
 
 
 def run_analysis_child(aminer_config, program_name):
@@ -147,7 +150,7 @@ def main():
     os.close(stdin_fd)
 
     config_file_name = '/etc/aminer/config.py'
-    run_in_foreground_flag = False
+    run_in_foreground_flag = True
     run_analysis_child_flag = False
     clear_persistence_flag = False
     remove_persistence_dirs = []
@@ -158,33 +161,36 @@ def main():
         arg_name = sys.argv[arg_pos]
         arg_pos += 1
 
-        if arg_name == '--Config':
+        if arg_name in ('--Config', '--config', '-c'):
             config_file_name = sys.argv[arg_pos]
             arg_pos += 1
             continue
-        if arg_name == '--Foreground':
-            run_in_foreground_flag = True
+        if arg_name in ('--Foreground', '--foreground') and not run_in_foreground_flag:
+            print('The AMiner process can not be run as Daemon and in Foreground simultaneously! Stopping..', file=sys.stderr)
+            sys.exit(1)
+        if arg_name in ('--Daemon', '--daemon', '-d'):
+            run_in_foreground_flag = False
             continue
-        if arg_name == '--RunAnalysis':
+        if arg_name in ('--RunAnalysis', '--runAnalysis', '--runanalysis', '-r'):
             run_analysis_child_flag = True
             continue
-        if arg_name == '--Clear':
+        if arg_name in ('--Clear', '--clear', '-C'):
             clear_persistence_flag = True
             continue
-        if arg_name == '--Remove':
+        if arg_name in ('--Remove', '--remove', '-R'):
             if '.' in sys.argv[arg_pos] or '/' in sys.argv[arg_pos]:
                 print('The remove path %s must not contain any . or /' % sys.argv[arg_pos], file=sys.stderr)
                 sys.exit(1)
             remove_persistence_dirs.append(sys.argv[arg_pos])
             arg_pos += 1
             continue
-        if arg_name == '--FromBegin':
+        if arg_name in ('--FromBegin', '--fromBegin', '--frombegin', '-f'):
             from_begin_flag = True
             continue
-        if arg_name in ('--print_help', '--Help', '-h'):
+        if arg_name in ('--print_help', '--Help', '--help', '-h'):
             print_help(program_name)
             sys.exit(1)
-        if arg_name in ('--version', '--Version'):
+        if arg_name in ('--version', '--Version', '-v'):
             print_help(program_name, True)
             sys.exit(1)
 
