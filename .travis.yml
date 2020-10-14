@@ -20,6 +20,7 @@ install:
   - sudo apt-get update -y
   - sudo apt-get install -y ansible
   - sudo ansible-playbook playbook.yml
+  - sudo apt-get install -y exim4 procps cpulimit mailutils
   - sudo pip3 install coverage
   - cd aecid-testsuite
   - sudo chmod +x runUnittests.sh

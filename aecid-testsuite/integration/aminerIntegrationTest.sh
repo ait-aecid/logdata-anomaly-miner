@@ -38,9 +38,9 @@ fi
 
 #start AMiner
 if [[ $sudoInstalled == 0 ]]; then
-	sudo -H -u aminer bash -c 'AMiner --Foreground --Config '$FILE' > /tmp/output &'
+	sudo -H -u aminer bash -c 'aminer --Foreground --Config '$FILE' > /tmp/output &'
 else
-	runuser -u aminer -- AMiner --Foreground --Config $FILE > /tmp/output &
+	runuser -u aminer -- aminer --Foreground --Config $FILE > /tmp/output &
 fi
 
 time=`date +%s`
@@ -72,10 +72,10 @@ echo 'The Path of the home directory shown by pwd of the user guest is: /home/gu
 #stop AMiner
 sleep 3 & wait $!
 if [[ $sudoInstalled == 0 ]]; then
-	sudo pkill -f AMiner
+	sudo pkill -x -f aminer
 	KILL_PID=$!
 else
-	pkill -f AMiner
+	pkill -x -f aminer
 	KILL_PID=$!
 fi
 sleep 3
