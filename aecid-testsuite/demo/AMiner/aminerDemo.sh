@@ -204,7 +204,7 @@ sleep 10
 
 #Comment
 
-# WhitelistRules, WhitelistViolationDetector
+# PasslistRules, PasslistViolationDetector
 #:<<Comment
 echo "User username logged in" >> /tmp/syslog
 echo "User root logged in" >> /tmp/syslog
