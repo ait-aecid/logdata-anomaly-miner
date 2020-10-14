@@ -21,7 +21,7 @@ class NewMatchPathValueDetectorTest(TestBase):
 
     fixed_dme = FixedDataModelElement('s1', string)
     decimal_integer_value_me = DecimalIntegerValueModelElement('d1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
-                                                            DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+                                                               DecimalIntegerValueModelElement.PAD_TYPE_NONE)
 
     match_context_first_match_me = MatchContext(string)
     first_match_me = FirstMatchModelElement('f1', [fixed_dme, decimal_integer_value_me])

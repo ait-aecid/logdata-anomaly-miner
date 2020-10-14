@@ -308,7 +308,7 @@ class AMinerRemoteControlExecutionMethods:
         try:
             if component.__class__.__name__ == "MissingMatchPathValueDetector":
                 self.REMOTE_CONTROL_RESPONSE += component.passlist_event("Analysis.%s" % component.__class__.__name__,
-                                                                          [component.__class__.__name__], event_data, passlisting_data)
+                                                                         [component.__class__.__name__], event_data, passlisting_data)
             else:
                 self.REMOTE_CONTROL_RESPONSE += component.passlist_event(
                     "Analysis.%s" % component.__class__.__name__, [component.__class__.__name__],

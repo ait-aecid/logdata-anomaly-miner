@@ -124,8 +124,8 @@ class NewMatchPathValueComboDetectorTest(TestBase):
         other_new_match_path_value_combo_detector = NewMatchPathValueComboDetector(self.aminer_config, [
             self.first_seq_s1, self.first_seq_d1], [self.stream_printer_event_handler], 'Default', False, True, output_log_line=False)
         self.analysis_context.register_component(other_new_match_path_value_combo_detector, description + "2")
-        other_log_atom_fixed_dme = LogAtom(self.match_element_sequence_me.get_match_string(), ParserMatch(self.match_element_sequence_me), t,
-                                       other_new_match_path_value_combo_detector)
+        other_log_atom_fixed_dme = LogAtom(self.match_element_sequence_me.get_match_string(), ParserMatch(self.match_element_sequence_me),
+                                           t, other_new_match_path_value_combo_detector)
 
         self.assertTrue(other_new_match_path_value_combo_detector.receive_atom(other_log_atom_fixed_dme))
         self.assertEqual(self.output_stream.getvalue(), '')

@@ -268,7 +268,7 @@ def build_analysis_pipeline(analysis_context):
     # This rule list should trigger, when the line does not look like: User root (logged in, logged out)
     # or User 'username' (logged in, logged out) x minutes ago.
     passlist_violation_detector = PasslistViolationDetector(analysis_context.aminer_config, passlist_rules, anomaly_event_handlers,
-                                                              output_log_line=True)
+                                                            output_log_line=True)
     analysis_context.register_component(passlist_violation_detector, component_name="Passlist")
     atom_filter.add_handler(passlist_violation_detector)
 

@@ -81,10 +81,10 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
             match_value_list = self.tuple_transformation_function(match_value_list)
         match_value_tuple = tuple(match_value_list)
 
-        if self.known_values_dict.get(match_value_tuple, None) is None:
+        if self.known_values_dict.get(match_value_tuple) is None:
             self.known_values_dict[match_value_tuple] = [timestamp, timestamp, 1]
         else:
-            extra_data = self.known_values_dict.get(match_value_tuple, None)
+            extra_data = self.known_values_dict.get(match_value_tuple)
             extra_data[1] = timestamp
             extra_data[2] += 1
 
@@ -94,7 +94,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
             if isinstance(match_value, bytes):
                 match_value = match_value.decode()
             affected_log_atom_values.append(str(match_value))
-        values = self.known_values_dict.get(match_value_tuple, None)
+        values = self.known_values_dict.get(match_value_tuple)
         metadata['TimeFirstOccurrence'] = str(values[0])
         metadata['TimeLastOccurence'] = str(values[1])
         metadata['NumberOfOccurences'] = str(values[2])
@@ -102,7 +102,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         analysis_component = {'AffectedLogAtomPaths': self.target_path_list, 'AffectedLogAtomValues': affected_log_atom_values,
                               'Metadata': metadata}
         event_data = {'AnalysisComponent': analysis_component}
-        if (self.auto_include_flag and self.known_values_dict.get(match_value_tuple, None)[2] == 1) or not self.auto_include_flag:
+        if (self.auto_include_flag and self.known_values_dict.get(match_value_tuple)[2] == 1) or not self.auto_include_flag:
             for listener in self.anomaly_event_handlers:
                 original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
                 if original_log_line_prefix is None:

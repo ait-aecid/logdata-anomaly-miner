@@ -251,7 +251,7 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         sorted_log_lines = [self.log_lines[1]]
         event_data = [self.log_lines[1], {'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}]
         output = new_match_id_value_combo_detector.passlist_event('Analysis.%s' % new_match_id_value_combo_detector.__class__.__name__,
-                                                                   sorted_log_lines, event_data, None)
+                                                                  sorted_log_lines, event_data, None)
         self.assertEqual(new_match_id_value_combo_detector.known_values, [
             {'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}])
         self.assertEqual(output, self.expected_passlist_string % (event_data[1], self.log_lines[1]))
@@ -259,7 +259,7 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         sorted_log_lines = [self.log_lines[3]]
         event_data = [self.log_lines[3], {'parser/type/syscall/syscall': 2, 'parser/type/path/name': 'two'}]
         output = new_match_id_value_combo_detector.passlist_event('Analysis.%s' % new_match_id_value_combo_detector.__class__.__name__,
-                                                                   sorted_log_lines, event_data, None)
+                                                                  sorted_log_lines, event_data, None)
         self.assertEqual(new_match_id_value_combo_detector.known_values, [
             {'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'},
             {'parser/type/syscall/syscall': 2, 'parser/type/path/name': 'two'}])
@@ -278,7 +278,7 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         sorted_log_lines = [self.log_lines[1]]
         event_data = [self.log_lines[1], {'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}]
         output = new_match_id_value_combo_detector.passlist_event('Analysis.%s' % new_match_id_value_combo_detector.__class__.__name__,
-                                                                   sorted_log_lines, event_data, None)
+                                                                  sorted_log_lines, event_data, None)
         self.assertEqual(new_match_id_value_combo_detector.known_values,
                          [{'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}])
         self.assertEqual(output, self.expected_passlist_string % (event_data[1], self.log_lines[1]))
@@ -286,7 +286,7 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         sorted_log_lines = [self.log_lines[1]]
         event_data = [self.log_lines[1], {'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}]
         output = new_match_id_value_combo_detector.passlist_event('Analysis.%s' % new_match_id_value_combo_detector.__class__.__name__,
-                                                                   sorted_log_lines, event_data, None)
+                                                                  sorted_log_lines, event_data, None)
         self.assertEqual(new_match_id_value_combo_detector.known_values,
                          [{'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}])
         self.assertEqual(output, self.expected_passlist_string % (event_data[1], self.log_lines[1]))
