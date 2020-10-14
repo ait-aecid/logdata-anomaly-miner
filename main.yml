@@ -92,6 +92,12 @@
     executable: pip3
     state: latest
 
+- name: Install python3-scipy
+  pip:
+    name: scipy
+    executable: pip3
+    state: latest
+
 - name: Link python3-cerberus
   file:
     src: /usr/lib/python3.6/site-packages/cerberus
@@ -106,13 +112,13 @@
 
 - name: Link scipy
   file:
-    src: /usr/lib/python3/dist-packages/scipy
+    src: /usr/lib/python3.6/site-packages/scipy
     dest: /etc/aminer/conf-enabled/scipy
     state: link
 
 - name: Link numpy
   file:
-    src: /usr/lib/python3/dist-packages/numpy
+    src: /usr/lib/python3.6/site-packages/numpy
     dest: /etc/aminer/conf-enabled/numpy
     state: link
 
