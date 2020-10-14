@@ -10,17 +10,17 @@ before_install:
   - ln -s $PWD/source/root/etc/aminer/template_config.py $PWD/aecid-testsuite/demo/AMiner/template_config.py
   - sed -e "s+{{SOURCEDIR}}+$PWD+g" .playbook.yml > playbook.yml
 
+  # This and the files need to be removed!!!!!
+  ######################################################
+  - cp $PWD/main.yml roles/aminer/tasks/main.yml
+  - cp $PWD/Debian.yml roles/aminer/vars/Debian.yml
+  ######################################################
+
 install:
   - sudo apt-get update -y
   - sudo apt-get install -y ansible
   - sudo ansible-playbook playbook.yml
   - sudo pip3 install coverage
-  - sudo apt-get install -y exim4 procps cpulimit mailutils
-  - sudo pip3 install kafka-python -U
-  - sudo ln -s /usr/lib/python3/dist-packages/kafka /etc/aminer/conf-enabled/
-  - sudo pip3 install -U scipy
-  - sudo ln -s /usr/lib/python3.6/site-packages/numpy /etc/aminer/conf-enabled/
-  - sudo ln -s /usr/lib/python3.6/site-packages/scipy /etc/aminer/conf-enabled/
   - cd aecid-testsuite
   - sudo chmod +x runUnittests.sh
   - sudo chmod +x runAMinerDemo.sh

@@ -1,0 +1,17 @@
+aminer_packages:
+        - python3
+        - python3-pip
+        - python3-tz
+        - python3-scipy
+        - python3-pkg-resources
+        - python3-setuptools
+        - python3-dateutil
+        - python3-six
+        - xsltproc
+        - docbook-xsl
+        - gzip
+        - exim4
+        - procps
+        - cpulimit
+        - mailutils
+aminer_usershell: /usr/sbin/nologin

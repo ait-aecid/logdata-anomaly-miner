@@ -1,0 +1,160 @@
+- name: Include OS specific variables
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution }}.yml"
+    - "{{ ansible_os_family }}.yml"
+
+- name: Install Packages
+  package:
+    name: "{{aminer_packages}}"
+    state: latest
+
+- name: Install Tools
+  package:
+    name: "{{aminer_tools}}"
+    state: latest
+
+
+- name: Git clone OpenSource-Aminer
+  git:
+    repo: "{{aminer_gitrepo}}"
+    dest: "{{aminer_repopath}}"
+  when: aminer_gitrepo != False
+
+- name: Synchronize Aminer-etc
+  synchronize:
+    group: no
+    owner: no
+    src: "{{aminer_repopath}}/source/root/etc/aminer/"
+    dest: "/etc/aminer/"
+
+- name: Synchronize Aminer-systemd-service
+  synchronize:
+    group: no
+    owner: no
+    src: "{{aminer_repopath}}/source/root/lib/systemd/system/aminer.service"
+    dest: "{{aminer_systemdloc}}"
+
+- name: Synchronize Aminer-libdir
+  synchronize:
+    group: no
+    owner: no
+    src: "{{aminer_repopath}}/source/root/usr/lib/logdata-anomaly-miner/"
+    dest: "/usr/lib/logdata-anomaly-miner/"
+
+- name: Synchronize Aminer-docs
+  synchronize:
+    group: no
+    owner: no
+    src: "{{aminer_repopath}}/source/root/usr/share/doc/"
+    dest: "/usr/share/doc/"
+
+- name: Create aminer-user
+  user:
+    name: "{{aminer_user}}"
+    shell: "{{aminer_usershell}}"
+
+- name: Create var-dir
+  file:
+    path: "{{aminer_vardir}}"
+    owner: "{{aminer_user}}"
+    group: "{{aminer_group}}"
+    mode: "0700"
+    state: "directory"
+
+- name: Create Aminer-Link
+  file:
+    src: "/usr/lib/logdata-anomaly-miner/aminer.py"
+    dest: "/usr/bin/aminer"
+    state: "link"
+ 
+- name: Set aminer permissions
+  file:
+    path: "/usr/lib/logdata-anomaly-miner/aminer.py"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Install python3-cerberus
+  pip:
+    name: cerberus
+    executable: pip3
+
+- name: Install python3-kafka
+  pip:
+    name: kafka-python
+    executable: pip3
+
+- name: Install scipy
+  pip:
+    name: kafka-python
+    executable: pip3
+    state: latest
+
+- name: Link cerberus
+  shell:
+    cmd: find /usr/local/ -name cerberus -exec ln -s {} /etc/aminer/conf-enabled/cerberus \;
+    creates: /etc/aminer/conf-enabled/cerberus
+
+
+- name: Link kafka
+  shell:
+    cmd: find /usr/local/ -name kafka -exec ln -s {} /etc/aminer/conf-enabled/kafka \;
+    creates: /etc/aminer/conf-enabled/kafka
+
+- name: Link scipy
+  file:
+    src: /usr/lib/python3/dist-packages/scipy
+    dest: /etc/aminer/conf-enabled/scipy
+    state: link
+
+- name: Link numpy
+  file:
+    src: /usr/lib/python3/dist-packages/numpy
+    dest: /etc/aminer/conf-enabled/numpy
+    state: link
+
+- name: link python3-pkg_resources
+  file:
+    src: /usr/lib/python3/dist-packages/pkg_resources/
+    dest: /etc/aminer/conf-enabled/pkg_resources
+    state: link
+
+- name: link python3-yaml
+  file:
+    src: /usr/lib/python3/dist-packages/yaml
+    dest: /etc/aminer/conf-enabled/yaml
+    state: link
+
+- name: link python3-tz
+  file:
+    src: /usr/lib/python3/dist-packages/pytz
+    dest: /etc/aminer/conf-enabled/pytz
+    state: link
+
+- name: link python3-dateutil
+  file:
+    src: /usr/lib/python3/dist-packages/dateutil
+    dest: /etc/aminer/conf-enabled/dateutil
+    state: link
+
+- name: link python3-six
+  file:
+    src: /usr/lib/python3/dist-packages/six.py
+    dest: /etc/aminer/conf-enabled/six.py
+    state: link
+
+- name: create man-page for AMiner
+  shell:
+    cmd: xsltproc --output /usr/share/man/man1/aminer.1  -''-nonet -''-param man.charmap.use.subset "0" -''-param make.year.ranges "1" -''-param make.single.year.ranges "1" /usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl {{aminer_repopath}}/debian/aminer.1.xml && gzip /usr/share/man/man1/aminer.1
+    creates: /usr/share/man/man1/aminer.1.gz
+
+- name: create man-page for aminerRemoteControl
+  shell:
+    cmd: xsltproc --output /usr/share/man/man1/aminerRemoteControl.1  -''-nonet -''-param man.charmap.use.subset "0" -''-param make.year.ranges "1" -''-param make.single.year.ranges "1" /usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl {{aminer_repopath}}/debian/aminerRemoteControl.1.xml && gzip /usr/share/man/man1/aminerRemoteControl.1
+    creates: /usr/share/man/man1/aminerRemoteControl.1.gz
+
+
+- name: Run RedHat Tasks
+  include: RedHat.yml
+  when: ansible_os_family == 'RedHat'
