@@ -124,13 +124,13 @@ class NewMatchPathValueComboDetectorTest(TestBase):
         other_new_match_path_value_combo_detector = NewMatchPathValueComboDetector(self.aminer_config, [
             self.first_seq_s1, self.first_seq_d1], [self.stream_printer_event_handler], 'Default', False, True, output_log_line=False)
         self.analysis_context.register_component(other_new_match_path_value_combo_detector, description + "2")
-        otherLogAtomFixedDME = LogAtom(self.match_element_sequence_me.get_match_string(), ParserMatch(self.match_element_sequence_me), t,
+        other_log_atom_fixed_dme = LogAtom(self.match_element_sequence_me.get_match_string(), ParserMatch(self.match_element_sequence_me), t,
                                        other_new_match_path_value_combo_detector)
 
-        self.assertTrue(other_new_match_path_value_combo_detector.receive_atom(otherLogAtomFixedDME))
+        self.assertTrue(other_new_match_path_value_combo_detector.receive_atom(other_log_atom_fixed_dme))
         self.assertEqual(self.output_stream.getvalue(), '')
 
-    def test4_whitelist_event_with_known_and_unknown_paths(self):
+    def test4_passlist_event_with_known_and_unknown_paths(self):
         """This test case checks in which cases an event is triggered and compares with expected results."""
         description = "Test4NewMatchPathValueComboDetector"
         new_match_path_value_combo_detector = NewMatchPathValueComboDetector(self.aminer_config, [self.first_seq_s1, self.first_seq_d1], [
@@ -142,9 +142,9 @@ class NewMatchPathValueComboDetectorTest(TestBase):
                                        new_match_path_value_combo_detector)
         new_match_path_value_combo_detector.receive_atom(log_atom_sequence_me)
         self.assertEqual(
-            new_match_path_value_combo_detector.whitelist_event('Analysis.%s' % new_match_path_value_combo_detector.__class__.__name__, [
+            new_match_path_value_combo_detector.passlist_event('Analysis.%s' % new_match_path_value_combo_detector.__class__.__name__, [
                 log_atom_sequence_me, [self.match_element_sequence_me.get_path()]],
-                [log_atom_sequence_me, self.match_element_sequence_me.get_path()], None), 'Whitelisted path(es) %s with %s in %s' % (
+                [log_atom_sequence_me, self.match_element_sequence_me.get_path()], None), 'Passlisted path(es) %s with %s in %s' % (
                 ", ".join(new_match_path_value_combo_detector.target_path_list), self.match_element_sequence_me.get_path(),
                 log_atom_sequence_me))
 
@@ -152,9 +152,9 @@ class NewMatchPathValueComboDetectorTest(TestBase):
                                         new_match_path_value_combo_detector)
         new_match_path_value_combo_detector.auto_include_flag = False
         self.assertEqual(
-            new_match_path_value_combo_detector.whitelist_event('Analysis.%s' % new_match_path_value_combo_detector.__class__.__name__, [
+            new_match_path_value_combo_detector.passlist_event('Analysis.%s' % new_match_path_value_combo_detector.__class__.__name__, [
                 log_atom_sequence_me2, [self.match_element_sequence_me2.get_path()]], [
-                log_atom_sequence_me2, self.match_element_sequence_me2.get_path()], None), 'Whitelisted path(es) %s with %s in %s' % (
+                log_atom_sequence_me2, self.match_element_sequence_me2.get_path()], None), 'Passlisted path(es) %s with %s in %s' % (
                 ", ".join(new_match_path_value_combo_detector.target_path_list), self.match_element_sequence_me2.path,
                 log_atom_sequence_me2))
 
