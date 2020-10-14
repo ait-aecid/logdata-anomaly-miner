@@ -23,4 +23,4 @@ from aminer.analysis.ParserCount import ParserCount  # skipcq: FLK-E402
 from aminer.analysis.TimeCorrelationDetector import TimeCorrelationDetector  # skipcq: FLK-E402
 from aminer.analysis.TimeCorrelationViolationDetector import TimeCorrelationViolationDetector  # skipcq: FLK-E402
 from aminer.analysis.TimestampsUnsortedDetector import TimestampsUnsortedDetector  # skipcq: FLK-E402
-from aminer.analysis.WhitelistViolationDetector import WhitelistViolationDetector  # skipcq: FLK-E402
+from aminer.analysis.PasslistViolationDetector import PasslistViolationDetector  # skipcq: FLK-E402

@@ -240,7 +240,7 @@ def build_analysis_pipeline(analysis_context):
                     delta_time_to_discard_hypothesis=item['delta_time_to_discard_hypothesis'],
                     check_rules_flag=item['check_rules_flag'],
                     auto_include_flag=item['auto_include_flag'],
-                    # whitelisted_paths=item['whitelisted_paths'],
+                    # passlisted_paths=item['passlisted_paths'],
                     persistence_id=item['persistence_id'])
             elif item['type'] == 'NewMatchIdValueComboDetector':
                 tmpAnalyser = func(
