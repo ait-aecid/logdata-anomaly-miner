@@ -57,7 +57,7 @@ echo ""
 python3 generateSystemLogdata.py $((waitingTime+10)) 2> /tmp/error.log &
 
 #start AMiner
-sudo -H -u aminer bash -c 'AMiner --Foreground --Config '$FILE' & #2> /dev/null & #> /tmp/output &'
+sudo -H -u aminer bash -c 'aminer --Foreground --Config '$FILE' & #2> /dev/null & #> /tmp/output &'
 
 sleep $waitingTime
 
@@ -65,7 +65,7 @@ touch $RESULTS_PATH
 sudo chown -R aminer:aminer $RESULTS_PATH
 #stop AMiner and python3
 sleep 3 & wait $!
-sudo pkill -f AMiner
+sudo pkill -f aminer
 KILL_PID=$!
 sleep 3
 wait $KILL_PID
