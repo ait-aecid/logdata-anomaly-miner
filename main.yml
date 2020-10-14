@@ -87,11 +87,15 @@
     executable: pip3
     state: latest
 
-- name: link python3-cerberus
-  file:
-    src: /usr/lib/python3/dist-packages/cerberus
-    dest: /etc/aminer/conf-enabled/cerberus
-    state: link
+- name: Install python3-cerberus
+  pip:
+    name: cerberus
+    executable: pip3
+
+- name: Link python3-cerberus
+  shell:
+    cmd: find /usr/local/ -name cerberus -exec ln -s {} /etc/aminer/conf-enabled/cerberus \;
+    creates: /etc/aminer/conf-enabled/cerberus
 
 - name: Link kafka
   shell:
