@@ -93,14 +93,16 @@
     state: latest
 
 - name: Link python3-cerberus
-  shell:
-    cmd: find /usr/local/ -name cerberus -exec ln -s {} /etc/aminer/conf-enabled/cerberus \;
-    creates: /etc/aminer/conf-enabled/cerberus
+  file:
+    src: /usr/lib/python3.6/site-packages/cerberus
+    dest: /etc/aminer/conf-enabled/cerberus
+    state: link
 
 - name: Link kafka
-  shell:
-    cmd: find /usr/local/ -name kafka -exec ln -s {} /etc/aminer/conf-enabled/kafka \;
-    creates: /etc/aminer/conf-enabled/kafka
+  file:
+    src: /usr/lib/python3.6/site-packages/kafka
+    dest: /etc/aminer/conf-enabled/kafka
+    state: link
 
 - name: Link scipy
   file:
