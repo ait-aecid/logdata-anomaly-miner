@@ -8,15 +8,29 @@
 #
 # execute demo.sh as aminer:
 #    sudo -u aminer /pfad/zum/demo.sh
-# 
+#
 
-AMINER_PERSISTENCE_PATH=/tmp/lib/aminer/*
-mkdir /tmp/lib 2> /dev/null
-mkdir /tmp/lib/aminer 2> /dev/null
-# chown -R $USER:$USER /tmp/lib/aminer 2> /dev/null
-rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
-# chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
-rm /tmp/syslog 2> /dev/null
+sudoInstalled=`dpkg -s sudo | grep Status 2> /dev/null`
+if [[ $sudoInstalled == "Status: install ok installed" ]]; then
+	sudoInstalled=0
+else
+	sudoInstalled=1
+fi
+
+if [[ $sudoInstalled == 0 ]]; then
+	sudo mkdir /tmp/lib 2> /dev/null
+	sudo mkdir /tmp/lib/aminer 2> /dev/null
+	sudo chown -R $USER:$USER /tmp/lib/aminer 2> /dev/null
+	sudo rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
+	sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
+	sudo rm /tmp/syslog 2> /dev/null
+else
+	mkdir /tmp/lib 2> /dev/null
+	mkdir /tmp/lib/aminer 2> /dev/null
+	rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
+	chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
+	rm /tmp/syslog 2> /dev/null
+fi
 
 echo "Demo started.."
 echo ""
@@ -28,7 +42,11 @@ if ! test -f "$FILE"; then
 fi
 
 #start AMiner
-bash -c 'aminer --Foreground --Config '$FILE' & #2> /dev/null & #> /tmp/output &'
+if [[ $sudoInstalled == 0 ]]; then
+	sudo -H -u aminer bash -c 'aminer --Foreground --Config '$FILE' &'
+else
+	runuser -u aminer -- aminer --Foreground --Config $FILE &
+fi
 
 #EventCorrelationDetetctor, NewMatchPathDetector
 #:<<Comment
