@@ -28,7 +28,7 @@ if ! test -f "$FILE"; then
 fi
 
 #start AMiner
-bash -c 'AMiner --Foreground --Config '$FILE' & #2> /dev/null & #> /tmp/output &'
+bash -c 'aminer --Foreground --Config '$FILE' & #2> /dev/null & #> /tmp/output &'
 
 #EventCorrelationDetetctor, NewMatchPathDetector
 #:<<Comment
@@ -261,7 +261,7 @@ echo "$text" >> /tmp/syslog
 
 #stop AMiner
 sleep 3 & wait $!
-pkill AMiner
+pkill -x -f aminer
 KILL_PID=$!
 sleep 3
 wait $KILL_PID
