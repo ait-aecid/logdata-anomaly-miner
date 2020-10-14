@@ -7,11 +7,9 @@ aminer_packages:
         - python3-setuptools
         - python3-dateutil
         - python3-six
+        - python3-cerberus
+        - python3-scipy
         - xsltproc
         - docbook-xsl
         - gzip
-        - exim4
-        - procps
-        - cpulimit
-        - mailutils
 aminer_usershell: /usr/sbin/nologin
