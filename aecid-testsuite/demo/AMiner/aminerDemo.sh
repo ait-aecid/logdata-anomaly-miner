@@ -261,7 +261,7 @@ echo "$text" >> /tmp/syslog
 
 #stop AMiner
 sleep 3 & wait $!
-pkill -x -f aminer
+pkill -x aminer
 KILL_PID=$!
 sleep 3
 wait $KILL_PID

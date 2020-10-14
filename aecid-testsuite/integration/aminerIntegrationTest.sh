@@ -72,7 +72,7 @@ echo 'The Path of the home directory shown by pwd of the user guest is: /home/gu
 #stop AMiner
 sleep 3 & wait $!
 if [[ $sudoInstalled == 0 ]]; then
-	sudo pkill -x -f aminer
+	sudo pkill -x aminer
 	KILL_PID=$!
 else
 	pkill -x -f aminer

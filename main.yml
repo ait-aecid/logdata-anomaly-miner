@@ -81,16 +81,16 @@
     group: root
     mode: 0755
 
+- name: Install python3-cerberus
+  pip:
+    name: cerberus
+    executable: pip3
+
 - name: Install python3-kafka
   pip:
     name: kafka-python
     executable: pip3
     state: latest
-
-- name: Install python3-cerberus
-  pip:
-    name: cerberus
-    executable: pip3
 
 - name: Link python3-cerberus
   shell:
