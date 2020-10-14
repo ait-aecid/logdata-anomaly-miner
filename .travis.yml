@@ -10,18 +10,10 @@ before_install:
   - ln -s $PWD/source/root/etc/aminer/template_config.py $PWD/aecid-testsuite/demo/AMiner/template_config.py
   - sed -e "s+{{SOURCEDIR}}+$PWD+g" .playbook.yml > playbook.yml
 
-  # This and the files need to be removed!!!!!
-  ######################################################
-  - cp $PWD/main.yml roles/aminer/tasks/main.yml
-  - cp $PWD/Debian.yml roles/aminer/vars/Debian.yml
-  ######################################################
-
 install:
   - sudo apt-get update -y
   - sudo apt-get install -y ansible
   - sudo ansible-playbook playbook.yml
-  - sudo find /usr/ -name scipy
-  - sudo find /usr/ -name numpy
   - sudo apt-get install -y exim4 procps cpulimit mailutils
   - sudo pip3 install coverage
   - cd aecid-testsuite
@@ -31,7 +23,7 @@ install:
   - sudo chmod +x runCoverageTests.sh
 
 script:
-  #- ./runUnittests.sh
+  - ./runUnittests.sh
   - ./runAMinerDemo.sh demo/AMiner/demo-config.py
   - ./runAMinerDemo.sh demo/AMiner/jsonConverterHandler-demo-config.py
   - ./runAMinerDemo.sh demo/AMiner/template_config.py
