@@ -22,6 +22,8 @@ install:
   - sudo ansible-playbook playbook.yml
   - sudo apt-get install -y exim4 procps cpulimit mailutils
   - sudo pip3 install -U scipy
+  - sudo rm /etc/aminer/conf-enabled/scipy
+  - sudo ln -s /usr/lib/python3.6/site-packages/scipy /etc/aminer/conf-enabled/
   - sudo pip3 install coverage
   - cd aecid-testsuite
   - sudo chmod +x runUnittests.sh
