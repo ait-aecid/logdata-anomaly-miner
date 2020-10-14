@@ -1,7 +1,7 @@
 import unittest
 from aminer.analysis import NewMatchPathDetector, MatchValueAverageChangeDetector, MatchValueStreamWriter, \
     MissingMatchPathListValueDetector, NewMatchPathValueComboDetector, NewMatchPathValueDetector, TimeCorrelationDetector, \
-    TimestampsUnsortedDetector, Rules, WhitelistViolationDetector
+    TimestampsUnsortedDetector, Rules, PasslistViolationDetector
 from aminer.analysis.AtomFilters import MatchPathFilter, SubhandlerFilter, MatchValueFilter
 from aminer.analysis.EventTypeDetector import EventTypeDetector
 from aminer.analysis.HistogramAnalysis import ModuloTimeBinDefinition, HistogramData, HistogramAnalysis
@@ -559,7 +559,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
         type(self).result = self.result + self.result_string % (
             timestamps_unsorted_detector.__class__.__name__, avg, results, 'a reset_factor of %f.' % reset_factor)
 
-    def run_whitelist_violation_detector(self, number_of_paths, modulo_factor):
+    def run_passlist_violation_detector(self, number_of_paths, modulo_factor):
         results = [None] * self.iterations
         avg = 0
         z = 0
@@ -569,7 +569,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             while i < number_of_paths:
                 rules.append(PathExistsMatchRule(self.integerd + str(i % number_of_paths), None))
                 i = i + 1
-            whitelist_violation_detector = WhitelistViolationDetector(self.aminer_config, rules, [self.stream_printer_event_handler])
+            passlist_violation_detector = PasslistViolationDetector(self.aminer_config, rules, [self.stream_printer_event_handler])
             t = time.time()
             i = 0
             measured_time = 0
@@ -584,15 +584,15 @@ class AnalysisComponentsPerformanceTest(TestBase):
                     DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i % 100).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
-                log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, whitelist_violation_detector)
-                measured_time += timeit.timeit(lambda: whitelist_violation_detector.receive_atom(log_atom), number=1)
+                log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, passlist_violation_detector)
+                measured_time += timeit.timeit(lambda: passlist_violation_detector.receive_atom(log_atom), number=1)
                 i = i + 1
             results[z] = i * 10
             z = z + 1
             avg = avg + i * 10
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
-            whitelist_violation_detector.__class__.__name__, avg, results,
+            passlist_violation_detector.__class__.__name__, avg, results,
             '%d different PathExistsMatchRules and a moduloFactor of %d.' % (number_of_paths, modulo_factor))
 
     def run_new_match_id_value_combo_detector(self, min_allowed_time_diff):
@@ -1099,16 +1099,16 @@ class AnalysisComponentsPerformanceTest(TestBase):
         self.run_timestamps_unsorted_detector(1)
         self.run_timestamps_unsorted_detector(100)
 
-    def test14whitelist_violation_detector(self):
-        self.run_whitelist_violation_detector(1, 99)
-        self.run_whitelist_violation_detector(1, 50)
-        self.run_whitelist_violation_detector(1, 1)
-        self.run_whitelist_violation_detector(1000, 99)
-        self.run_whitelist_violation_detector(1000, 50)
-        self.run_whitelist_violation_detector(1000, 1)
-        self.run_whitelist_violation_detector(100000, 99)
-        self.run_whitelist_violation_detector(100000, 50)
-        self.run_whitelist_violation_detector(100000, 1)
+    def test14passlist_violation_detector(self):
+        self.run_passlist_violation_detector(1, 99)
+        self.run_passlist_violation_detector(1, 50)
+        self.run_passlist_violation_detector(1, 1)
+        self.run_passlist_violation_detector(1000, 99)
+        self.run_passlist_violation_detector(1000, 50)
+        self.run_passlist_violation_detector(1000, 1)
+        self.run_passlist_violation_detector(100000, 99)
+        self.run_passlist_violation_detector(100000, 50)
+        self.run_passlist_violation_detector(100000, 1)
 
     def test15new_match_id_value_combo_detector(self):
         self.run_new_match_id_value_combo_detector(0.1)
