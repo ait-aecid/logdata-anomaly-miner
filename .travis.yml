@@ -20,6 +20,8 @@ install:
   - sudo apt-get update -y
   - sudo apt-get install -y ansible
   - sudo ansible-playbook playbook.yml
+  - sudo find /usr/local/ -name scipy -exec echo {}
+  - sudo find /usr/local/ -name numpy -exec echo {}
   - sudo apt-get install -y exim4 procps cpulimit mailutils
   - sudo pip3 install coverage
   - cd aecid-testsuite
