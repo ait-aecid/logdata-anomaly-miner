@@ -69,4 +69,4 @@ sudo AMinerRemoteControl --Exec "change_attribute_of_registered_analysis_compone
 sudo AMinerRemoteControl --Exec "change_attribute_of_registered_analysis_component(analysis_context,'Whitelist','whitelist_rules',[Rules.OrMatchRule([Rules.AndMatchRule([Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails/PastTime/Time/Minutes')),Rules.PathExistsMatchRule('/model/LoginDetails')]),Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails'))])])"
 
 # Adds a new path to the known_path_set
-sudo AMinerRemoteControl --Exec "whitelist_event_in_component(analysis_context,'NewMatchPathDet',[None,['/new/path1','/new/path2'])" --StringResponse
+sudo AMinerRemoteControl --Exec "whitelist_event_in_component(analysis_context,'NewMatchPathDet',['/new/path1','/new/path2'])" --StringResponse
