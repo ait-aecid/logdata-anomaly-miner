@@ -67,3 +67,6 @@ sudo AMinerRemoteControl --Exec "change_attribute_of_registered_analysis_compone
 
 # In the last step we remove all special rules and only allow User 'username' (logged in, logged out) x minutes ago.
 sudo AMinerRemoteControl --Exec "change_attribute_of_registered_analysis_component(analysis_context,'Whitelist','whitelist_rules',[Rules.OrMatchRule([Rules.AndMatchRule([Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails/PastTime/Time/Minutes')),Rules.PathExistsMatchRule('/model/LoginDetails')]),Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails'))])])"
+
+# Adds a new path to the known_path_set
+sudo AMinerRemoteControl --Exec "whitelist_event_in_component(analysis_context,'NewMatchPathDet',[None,['/new/path1','/new/path2'])" --StringResponse
