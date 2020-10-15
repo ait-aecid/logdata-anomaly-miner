@@ -283,7 +283,8 @@ def build_analysis_pipeline(analysis_context):
     atom_filter.add_handler(etd)
 
     from aminer.analysis.VariableTypeDetector import VariableTypeDetector
-    vtd = VariableTypeDetector(analysis_context.aminer_config, anomaly_event_handlers, etd, silence_output_except_indicator=False)
+    vtd = VariableTypeDetector(analysis_context.aminer_config, anomaly_event_handlers, etd, silence_output_except_indicator=False,
+                               output_log_line=False)
     analysis_context.register_component(vtd, component_name="VariableTypeDetector")
     atom_filter.add_handler(vtd)
 
