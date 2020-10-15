@@ -74,8 +74,6 @@ config_properties['MailAlerting.MaxAlertGap'] = 600
 # at most. This defaults to 1000
 config_properties['MailAlerting.MaxEventsPerMessage'] = 1000
 config_properties['LogPrefix'] = 'Original log line: '
-config_properties['Resources.MaxCpuPercentUsage'] = 30
-config_properties['Resources.MaxMemoryUsage'] = 64
 
 # Add your ruleset here:
 
