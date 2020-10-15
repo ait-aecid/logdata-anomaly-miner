@@ -63,7 +63,7 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         b'ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 '
         b'comm="apache2" exe="/usr/sbin/apache2" key=(null)']
 
-    expected_passlist_string = "Passlisted path(es) parser/type/path/name, parser/type/syscall/syscall with %s in %s"
+    expected_allowlist_string = "Allowlisted path(es) parser/type/path/name, parser/type/syscall/syscall with %s in %s"
 
     parsing_model = FirstMatchModelElement('type', [SequenceModelElement('path', [
         FixedDataModelElement('type', b'type=PATH '), FixedDataModelElement('msg_audit', b'msg=audit('),
@@ -238,8 +238,8 @@ class NewMatchIdValueComboDetectorTest(TestBase):
             self.assertEqual(new_match_id_value_combo_detector.known_values, [])
             self.reset_output_stream()
 
-    def test5passlist_unknown_target_path(self):
-        """This test case checks if a unknown target path can be added to the known_values with the passlist_event method."""
+    def test5allowlist_unknown_target_path(self):
+        """This test case checks if a unknown target path can be added to the known_values with the allowlist_event method."""
         description = 'test5newMatchIdValueComboDetectorTest'
         min_allowed_time_diff = 5
         new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config, [
@@ -250,23 +250,23 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         self.assertEqual(new_match_id_value_combo_detector.known_values, [])
         sorted_log_lines = [self.log_lines[1]]
         event_data = [self.log_lines[1], {'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}]
-        output = new_match_id_value_combo_detector.passlist_event('Analysis.%s' % new_match_id_value_combo_detector.__class__.__name__,
+        output = new_match_id_value_combo_detector.allowlist_event('Analysis.%s' % new_match_id_value_combo_detector.__class__.__name__,
                                                                   sorted_log_lines, event_data, None)
         self.assertEqual(new_match_id_value_combo_detector.known_values, [
             {'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}])
-        self.assertEqual(output, self.expected_passlist_string % (event_data[1], self.log_lines[1]))
+        self.assertEqual(output, self.expected_allowlist_string % (event_data[1], self.log_lines[1]))
 
         sorted_log_lines = [self.log_lines[3]]
         event_data = [self.log_lines[3], {'parser/type/syscall/syscall': 2, 'parser/type/path/name': 'two'}]
-        output = new_match_id_value_combo_detector.passlist_event('Analysis.%s' % new_match_id_value_combo_detector.__class__.__name__,
+        output = new_match_id_value_combo_detector.allowlist_event('Analysis.%s' % new_match_id_value_combo_detector.__class__.__name__,
                                                                   sorted_log_lines, event_data, None)
         self.assertEqual(new_match_id_value_combo_detector.known_values, [
             {'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'},
             {'parser/type/syscall/syscall': 2, 'parser/type/path/name': 'two'}])
-        self.assertEqual(output, self.expected_passlist_string % (event_data[1], self.log_lines[3]))
+        self.assertEqual(output, self.expected_allowlist_string % (event_data[1], self.log_lines[3]))
 
-    def test6passlist_known_target_path(self):
-        """This test case checks if a known target path is not added twice to the known_values with the passlist_event method."""
+    def test6allowlist_known_target_path(self):
+        """This test case checks if a known target path is not added twice to the known_values with the allowlist_event method."""
         description = 'test6newMatchIdValueComboDetectorTest'
         min_allowed_time_diff = 5
         new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config, [
@@ -277,16 +277,16 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         self.assertEqual(new_match_id_value_combo_detector.known_values, [])
         sorted_log_lines = [self.log_lines[1]]
         event_data = [self.log_lines[1], {'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}]
-        output = new_match_id_value_combo_detector.passlist_event('Analysis.%s' % new_match_id_value_combo_detector.__class__.__name__,
+        output = new_match_id_value_combo_detector.allowlist_event('Analysis.%s' % new_match_id_value_combo_detector.__class__.__name__,
                                                                   sorted_log_lines, event_data, None)
         self.assertEqual(new_match_id_value_combo_detector.known_values,
                          [{'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}])
-        self.assertEqual(output, self.expected_passlist_string % (event_data[1], self.log_lines[1]))
+        self.assertEqual(output, self.expected_allowlist_string % (event_data[1], self.log_lines[1]))
 
         sorted_log_lines = [self.log_lines[1]]
         event_data = [self.log_lines[1], {'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}]
-        output = new_match_id_value_combo_detector.passlist_event('Analysis.%s' % new_match_id_value_combo_detector.__class__.__name__,
+        output = new_match_id_value_combo_detector.allowlist_event('Analysis.%s' % new_match_id_value_combo_detector.__class__.__name__,
                                                                   sorted_log_lines, event_data, None)
         self.assertEqual(new_match_id_value_combo_detector.known_values,
                          [{'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}])
-        self.assertEqual(output, self.expected_passlist_string % (event_data[1], self.log_lines[1]))
+        self.assertEqual(output, self.expected_allowlist_string % (event_data[1], self.log_lines[1]))

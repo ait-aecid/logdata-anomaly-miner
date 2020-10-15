@@ -40,7 +40,7 @@ In order to execute test classes the current path must be the *logdata-anomaly-m
           ├── RulesTest.py
           ├── TimestampCorrectionFiltersTest.py
           ├── TimestampsUnsortedDetectorTest.py
-          ├── PasslistViolationDetectorTest.py
+          ├── AllowlistViolationDetectorTest.py
      ├── events
           ├── __init__.py
           ├── DefaultMailNotificationEventHandlerTest.py
@@ -180,7 +180,7 @@ The **second config (performance-config1.py)** is very similar to the demo-confi
 #### Analysis
 * SimpleMonotonicTimestampAdjust
 * TimestampsUnsortedDetector
-* PasslistViolationDetector
+* AllowlistViolationDetector
 		/model/Login Details/Past Time/Time/Minutes exists and
 		/model/Login Details/Username != root
 **or**

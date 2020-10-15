@@ -515,11 +515,11 @@ class AnalysisChildRemoteControlHandler:
                     'add_handler_to_atom_filter_and_register_analysis_component':
                         methods.add_handler_to_atom_filter_and_register_analysis_component,
                     'save_current_config': methods.save_current_config,
-                    'passlist_event_in_component': methods.passlist_event_in_component,
+                    'allowlist_event_in_component': methods.allowlist_event_in_component,
                     'dump_events_from_history': methods.dump_events_from_history,
                     'ignore_events_from_history': methods.ignore_events_from_history,
                     'list_events_from_history': methods.list_events_from_history,
-                    'passlist_events_from_history': methods.passlist_events_from_history,
+                    'allowlist_events_from_history': methods.allowlist_events_from_history,
                     'EnhancedNewMatchPathValueComboDetector': aminer.analysis.EnhancedNewMatchPathValueComboDetector,
                     'EventCorrelationDetector': aminer.analysis.EventCorrelationDetector,
                     'HistogramAnalysis': aminer.analysis.HistogramAnalysis,
@@ -535,7 +535,7 @@ class AnalysisChildRemoteControlHandler:
                     'TimeCorrelationViolationDetector': aminer.analysis.TimeCorrelationViolationDetector,
                     'TimestampCorrectionFilters': aminer.analysis.TimestampCorrectionFilters,
                     'TimestampsUnsortedDetector': aminer.analysis.TimestampsUnsortedDetector,
-                    'PasslistViolationDetector': aminer.analysis.PasslistViolationDetector}
+                    'AllowlistViolationDetector': aminer.analysis.AllowlistViolationDetector}
                 # write this to the log file!
                 logging.basicConfig(filename=AMinerConfig.LOG_FILE, level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s',
                                     datefmt='%d.%m.%Y %H:%M:%S')

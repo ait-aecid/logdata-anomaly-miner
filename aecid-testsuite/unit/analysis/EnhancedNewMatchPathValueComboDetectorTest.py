@@ -9,7 +9,7 @@ from datetime import datetime
 
 class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
     __expected_string = '%s New value combination(s) detected\n%s: "%s" (%d lines)\n%s\n\n'
-    __expected_passlisting_string = 'Passlisted path(es) %s with %s in %s'
+    __expected_allowlisting_string = 'Allowlisted path(es) %s with %s in %s'
     fixed_dme = FixedDataModelElement('s1', b'25537 uid=')
     fixed_dme2 = FixedDataModelElement('s2', b' uid=2')
 
@@ -156,7 +156,7 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
             enhanced_new_match_path_value_combo_detector.__class__.__name__, description + "2", 1,
             "  {(b'25537 uid=', 2): [%s, %s, 3]}\nb'25537 uid=2'" % (t, t + 5)))
 
-    def test4_passlist_event_with_known_and_unknown_paths(self):
+    def test4_allowlist_event_with_known_and_unknown_paths(self):
         """This test case checks in which cases an event is triggered and compares with expected results."""
         description = "Test4EnhancedNewMatchPathValueComboDetector"
         enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(self.aminer_config, [
@@ -166,10 +166,10 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
         t = time.time()
         log_atom_sequence_me = LogAtom(self.match_element_sequence_me.get_match_string(), ParserMatch(self.match_element_sequence_me), t,
                                        enhanced_new_match_path_value_combo_detector)
-        self.assertEqual(enhanced_new_match_path_value_combo_detector.passlist_event(
+        self.assertEqual(enhanced_new_match_path_value_combo_detector.allowlist_event(
             'Analysis.%s' % enhanced_new_match_path_value_combo_detector.__class__.__name__,
             [log_atom_sequence_me, [self.match_element_sequence_me.get_path()]],
-            [log_atom_sequence_me, self.match_element_sequence_me.get_path()], None), self.__expected_passlisting_string % (
+            [log_atom_sequence_me, self.match_element_sequence_me.get_path()], None), self.__expected_allowlisting_string % (
             ', '.join(enhanced_new_match_path_value_combo_detector.target_path_list), self.match_element_sequence_me.get_path(),
             log_atom_sequence_me))
 
@@ -177,10 +177,10 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
                                         enhanced_new_match_path_value_combo_detector)
 
         enhanced_new_match_path_value_combo_detector.auto_include_flag = False
-        self.assertEqual(enhanced_new_match_path_value_combo_detector.passlist_event(
+        self.assertEqual(enhanced_new_match_path_value_combo_detector.allowlist_event(
             'Analysis.%s' % enhanced_new_match_path_value_combo_detector.__class__.__name__,
             [log_atom_sequence_me2, [self.match_element_sequence_me2.get_path()]],
-            [log_atom_sequence_me2, self.match_element_sequence_me2.get_path()], None), self.__expected_passlisting_string % (
+            [log_atom_sequence_me2, self.match_element_sequence_me2.get_path()], None), self.__expected_allowlisting_string % (
             ', '.join(enhanced_new_match_path_value_combo_detector.target_path_list), self.match_element_sequence_me2.path,
             log_atom_sequence_me2))
 

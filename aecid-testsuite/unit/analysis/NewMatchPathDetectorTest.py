@@ -155,7 +155,7 @@ class NewMatchPathDetectorTest(TestBase):
     #   self.assertEqual(self.new_match_path_detector.do_timer(200), 600)
     #   self.assertEqual(self.new_match_path_detector.do_timer(100), 500)
 
-    def test8_passlist_event_type_exception(self):
+    def test8_allowlist_event_type_exception(self):
         """This test case checks whether an exception is thrown when entering an event of another class."""
         description = "Test8NewMatchPathDetector"
         new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', True,
@@ -167,11 +167,11 @@ class NewMatchPathDetectorTest(TestBase):
         new_match_path_value_combo_detector = NewMatchPathValueComboDetector(self.aminer_config, [], [self.stream_printer_event_handler],
                                                                              'Default', True, True)
         self.assertRaises(
-            Exception, new_match_path_detector.passlist_event, self.analysis % new_match_path_value_combo_detector.__class__.__name__,
+            Exception, new_match_path_detector.allowlist_event, self.analysis % new_match_path_value_combo_detector.__class__.__name__,
             log_atom_fixed_dme.raw_data, self.output_stream.getvalue(), None)
 
-    def test9_passlist_event_passlisting_data_exception(self):
-        """The NewMatchPathDetector can not handle passlisting data and therefore an exception is expected."""
+    def test9_allowlist_event_allowlisting_data_exception(self):
+        """The NewMatchPathDetector can not handle allowlisting data and therefore an exception is expected."""
         description = "Test9NewMatchPathDetector"
         new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', True,
                                                        output_log_line=False)
@@ -179,10 +179,10 @@ class NewMatchPathDetectorTest(TestBase):
         t = round(time.time(), 3)
         log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
         new_match_path_detector.receive_atom(log_atom_fixed_dme)
-        self.assertRaises(Exception, new_match_path_detector.passlist_event, self.analysis % new_match_path_detector.__class__.__name__,
+        self.assertRaises(Exception, new_match_path_detector.allowlist_event, self.analysis % new_match_path_detector.__class__.__name__,
                           log_atom_fixed_dme.raw_data, self.output_stream.getvalue(), ['random', 'Data'])
 
-    def test10_passlist_event_with_known_and_unknown_paths(self):
+    def test10_allowlist_event_with_known_and_unknown_paths(self):
         """This test case checks in which cases an event is triggered and compares with expected results."""
         description = "Test10NewMatchPathDetector"
         new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', True,
@@ -191,17 +191,17 @@ class NewMatchPathDetectorTest(TestBase):
         t = round(time.time(), 3)
         log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
         new_match_path_detector.receive_atom(log_atom_fixed_dme)
-        self.assertEqual(new_match_path_detector.passlist_event(self.analysis % new_match_path_detector.__class__.__name__, [
+        self.assertEqual(new_match_path_detector.allowlist_event(self.analysis % new_match_path_detector.__class__.__name__, [
             log_atom_fixed_dme, [self.match_element_fixed_dme.get_path()]],
-            [log_atom_fixed_dme, [self.match_element_fixed_dme.get_path()]], None), 'Passlisted path(es)  in %s' % log_atom_fixed_dme)
+            [log_atom_fixed_dme, [self.match_element_fixed_dme.get_path()]], None), 'Allowlisted path(es)  in %s' % log_atom_fixed_dme)
 
         log_atom_decimal_integer_value_me = LogAtom(self.match_context_decimal_integer_value_me.match_data,
                                                     ParserMatch(self.match_element_decimal_integer_value_me), t, new_match_path_detector)
         new_match_path_detector.auto_include_flag = False
-        self.assertEqual(new_match_path_detector.passlist_event(self.analysis % new_match_path_detector.__class__.__name__, [
+        self.assertEqual(new_match_path_detector.allowlist_event(self.analysis % new_match_path_detector.__class__.__name__, [
             log_atom_decimal_integer_value_me, [self.match_element_decimal_integer_value_me.get_path()]],
             [log_atom_decimal_integer_value_me, [self.match_element_decimal_integer_value_me.get_path()]], None),
-            'Passlisted path(es) %s in %s' % (self.match_element_decimal_integer_value_me.path, log_atom_decimal_integer_value_me))
+            'Allowlisted path(es) %s in %s' % (self.match_element_decimal_integer_value_me.path, log_atom_decimal_integer_value_me))
 
     # '''
     # This test case checks what happens when no EventHandler is used in the parameters. Requires type check (not yet implemented).

@@ -229,7 +229,7 @@ Initial Release Features:
     for given properties.
   * MatchValueQueueSplitter: split input from e.g. one parser
     and forward it to different analyzers depending on match values.
-  * PasslistViolationDetector: ignore log data that is passlisted
+  * AllowlistViolationDetector: ignore log data that is allowlisted
     at least by single rule (logcheck equivalent behaviour)
   * TimeCorrelationViolationDetector: check if usually correlated
     loglines are really found both.

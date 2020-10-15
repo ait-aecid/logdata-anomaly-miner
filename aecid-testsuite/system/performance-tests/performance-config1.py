@@ -174,10 +174,10 @@ def build_analysis_pipeline(analysis_context):
     analysis_context.register_component(timestamps_unsorted_detector, component_name="TimestampsUnsortedDetector")
 
     from aminer.analysis import Rules
-    from aminer.analysis import PasslistViolationDetector
+    from aminer.analysis import AllowlistViolationDetector
     # This rule list should trigger, when the line does not look like: User root (logged in, logged out)
     # or User 'username' (logged in, logged out) x minutes ago.
-    passlist_rules = [
+    allowlist_rules = [
         Rules.OrMatchRule([
             Rules.AndMatchRule([
                 Rules.PathExistsMatchRule('/model/LoginDetails/PastTime/Time/Minutes'),
@@ -187,9 +187,9 @@ def build_analysis_pipeline(analysis_context):
                     Rules.PathExistsMatchRule('/model/LoginDetails')]),
             Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails'))])]
 
-    passlist_violation_detector = PasslistViolationDetector(analysis_context.aminer_config, passlist_rules, anomaly_event_handlers)
-    analysis_context.register_component(passlist_violation_detector, component_name="Passlist")
-    atom_filter.add_handler(passlist_violation_detector)
+    allowlist_violation_detector = AllowlistViolationDetector(analysis_context.aminer_config, allowlist_rules, anomaly_event_handlers)
+    analysis_context.register_component(allowlist_violation_detector, component_name="Allowlist")
+    atom_filter.add_handler(allowlist_violation_detector)
 
     from aminer.analysis import NewMatchPathDetector
     new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=True)
