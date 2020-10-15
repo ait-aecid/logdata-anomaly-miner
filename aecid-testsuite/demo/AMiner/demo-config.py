@@ -267,7 +267,7 @@ def build_analysis_pipeline(analysis_context):
             Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails'))])]
 
     allowlist_violation_detector = AllowlistViolationDetector(analysis_context.aminer_config, allowlist_rules, anomaly_event_handlers,
-                                                            output_log_line=True)
+                                                              output_log_line=True)
     analysis_context.register_component(allowlist_violation_detector, component_name="Allowlist")
     atom_filter.add_handler(allowlist_violation_detector)
 
