@@ -548,6 +548,7 @@ class AnalysisChildRemoteControlHandler:
                 logging.addLevelName(15, "REMOTECONTROL")
                 logging.log(15, json_request_data[0])
 
+                # skipcq: PYL-W0603
                 global suspended_flag
                 if json_request_data[0] in ('suspend_aminer()', 'suspend_aminer', 'suspend'):
                     suspended_flag = True
