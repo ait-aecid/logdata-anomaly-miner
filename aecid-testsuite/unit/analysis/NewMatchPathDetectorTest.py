@@ -192,16 +192,16 @@ class NewMatchPathDetectorTest(TestBase):
         log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
         new_match_path_detector.receive_atom(log_atom_fixed_dme)
         self.assertEqual(new_match_path_detector.whitelist_event(self.analysis % new_match_path_detector.__class__.__name__, [
-            log_atom_fixed_dme, [self.match_element_fixed_dme.get_path()]],
-            [log_atom_fixed_dme, [self.match_element_fixed_dme.get_path()]], None), 'Whitelisted path(es)  in %s' % log_atom_fixed_dme)
+            log_atom_fixed_dme, self.match_element_fixed_dme.get_path()],
+            [log_atom_fixed_dme, self.match_element_fixed_dme.get_path()], None), 'Whitelisted path  in %s' % log_atom_fixed_dme)
 
         log_atom_decimal_integer_value_me = LogAtom(self.match_context_decimal_integer_value_me.match_data,
                                                     ParserMatch(self.match_element_decimal_integer_value_me), t, new_match_path_detector)
         new_match_path_detector.auto_include_flag = False
         self.assertEqual(new_match_path_detector.whitelist_event(self.analysis % new_match_path_detector.__class__.__name__, [
-            log_atom_decimal_integer_value_me, [self.match_element_decimal_integer_value_me.get_path()]],
-            [log_atom_decimal_integer_value_me, [self.match_element_decimal_integer_value_me.get_path()]], None),
-            'Whitelisted path(es) %s in %s' % (self.match_element_decimal_integer_value_me.path, log_atom_decimal_integer_value_me))
+            log_atom_decimal_integer_value_me, self.match_element_decimal_integer_value_me.get_path()],
+            [log_atom_decimal_integer_value_me, self.match_element_decimal_integer_value_me.get_path()], None),
+            'Whitelisted path %s in %s' % (self.match_element_decimal_integer_value_me.path, log_atom_decimal_integer_value_me))
 
     # '''
     # This test case checks what happens when no EventHandler is used in the parameters. Requires type check (not yet implemented).

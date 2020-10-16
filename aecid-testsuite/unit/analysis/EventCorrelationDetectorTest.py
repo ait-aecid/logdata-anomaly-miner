@@ -149,14 +149,14 @@ class EventCorrelationDetectorTest(TestBase):
 
         # unknown path
         ecd.allowlist_event(self.analysis % ecd.__class__.__name__, [
-            log_atom_fixed_dme, [self.match_element_fixed_dme.get_path()]], [
-            log_atom_fixed_dme, [self.match_element_fixed_dme.get_path()]], None)
+            log_atom_fixed_dme, self.match_element_fixed_dme.get_path()], [
+            log_atom_fixed_dme, self.match_element_fixed_dme.get_path()], None)
         self.assertEqual(['s1'], ecd.allowlisted_paths)
 
         # known path
         ecd.allowlist_event(self.analysis % ecd.__class__.__name__, [
-            log_atom_fixed_dme, [self.match_element_fixed_dme.get_path()]], [
-            log_atom_fixed_dme, [self.match_element_fixed_dme.get_path()]], None)
+            log_atom_fixed_dme, self.match_element_fixed_dme.get_path()], [
+            log_atom_fixed_dme, self.match_element_fixed_dme.get_path()], None)
         self.assertEqual(['s1'], ecd.allowlisted_paths)
 
     def check_rules(self, sorted_back_rules, sorted_forward_rules, diff):
