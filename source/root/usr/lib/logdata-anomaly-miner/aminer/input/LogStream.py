@@ -46,7 +46,6 @@ class LogDataResource(metaclass=abc.ABCMeta):
         @raise Exception if valid logStreamFd was already provided, is still open and reopenFlag is False.
         @raise OSError when opening failed with unexpected error.
         @return True if the resource was really opened or False if opening was not yet possible but should be attempted again."""
-        raise Exception(interface_method_called)
 
     @abc.abstractmethod
     def get_resource_name(self):
@@ -55,28 +54,23 @@ class LogDataResource(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def get_file_descriptor(self):
         """Get the file descriptor of this open resource."""
-        raise Exception(interface_method_called)
 
     @abc.abstractmethod
     def fill_buffer(self):
         """Fill the buffer data of this resource. The repositioning information is not updated, update_position() has to be used.
         @return the number of bytes read or -1 on error or end."""
-        raise Exception(interface_method_called)
 
     @abc.abstractmethod
     def update_position(self, length):
         """Update the positioning information and discard the buffer data afterwards."""
-        raise Exception(interface_method_called)
 
     @abc.abstractmethod
     def get_repositioning_data(self):
         """Get the data for repositioning the stream. The returned structure has to be JSON serializable."""
-        raise Exception(interface_method_called)
 
     @abc.abstractmethod
     def close(self):
         """Close this logdata resource. Data access methods will not work any more afterwards."""
-        raise Exception(interface_method_called)
 
 
 class FileLogDataResource(LogDataResource):

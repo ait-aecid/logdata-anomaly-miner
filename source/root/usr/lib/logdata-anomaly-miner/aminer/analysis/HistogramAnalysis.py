@@ -425,7 +425,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
         missing_pathes = set()
         while all_path_set:
             path = all_path_set.pop()
-            histogram_mapping = self.histogram_data.get(path, None)
+            histogram_mapping = self.histogram_data.get(path)
             if histogram_mapping is None:
                 unmapped_path.append(path)
                 continue
