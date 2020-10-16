@@ -289,7 +289,7 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis import EventCorrelationDetector
     ecd = EventCorrelationDetector(analysis_context.aminer_config, anomaly_event_handlers, check_rules_flag=True,
-                                   hypothesis_max_delta_time=1.0)
+                                   hypothesis_max_delta_time=1.0, auto_include_flag=True)
     analysis_context.register_component(ecd, component_name="EventCorrelationDetector")
     atom_filter.add_handler(ecd)
 
@@ -353,7 +353,7 @@ def build_analysis_pipeline(analysis_context):
     from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
     new_match_path_value_combo_detector = NewMatchPathValueComboDetector(
         analysis_context.aminer_config, ['/model/IPAddresses/Username', '/model/IPAddresses/IP'], anomaly_event_handlers,
-        output_log_line=True)
+        output_log_line=True, auto_include_flag=True)
     analysis_context.register_component(new_match_path_value_combo_detector, component_name="NewMatchPathValueCombo")
     atom_filter.add_handler(new_match_path_value_combo_detector)
 

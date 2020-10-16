@@ -134,7 +134,7 @@
                     'hypotheses_eval_delta_time': {'type': 'float', 'required': False, 'default': 120.0},
                     'delta_time_to_discard_hypothesis': {'type': 'float', 'required': False, 'default': 180.0},
                     'check_rules_flag': {'type': 'boolean', 'required': False, 'default': True},
-                    'auto_include_flag': {'type': 'boolean', 'required': False, 'default': True},
+                    'auto_include_flag': {'type': 'boolean', 'required': False, 'default': False},
                     'whitelisted_paths': {
                         'type': 'list', 'schema': {'type': 'string'}, 'required': False, 'nullable': True, 'default': None},
                     'id_path_list': {'type': 'list', 'required': False, 'default': []},
