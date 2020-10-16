@@ -11,7 +11,6 @@ class AtomizerFactory(metaclass=abc.ABCMeta):
     def get_atomizer_for_resource(self, resource_name):
         """Get an atomizer for a given resource.
         @return a StreamAtomizer object"""
-        pass
 
 
 class StreamAtomizer(metaclass=abc.ABCMeta):
@@ -33,7 +32,6 @@ class StreamAtomizer(metaclass=abc.ABCMeta):
         @return the number of consumed bytes, 0 if the atomizer would need more data for a complete atom or -1 when no data was
         consumed at the moment but data might be consumed later on. The only situation where 0 is not an allowed return value
         is when endOfStreamFlag is set and streamData not empty."""
-        pass
 
 
 class AtomHandlerInterface(metaclass=abc.ABCMeta):
@@ -46,4 +44,3 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         @return True if this handler was really able to handle and process the atom. Depending on this information, the caller
         may decide if it makes sense passing the atom also to other handlers or to retry later. This behaviour has to be documented
         at each source implementation sending LogAtoms."""
-        pass

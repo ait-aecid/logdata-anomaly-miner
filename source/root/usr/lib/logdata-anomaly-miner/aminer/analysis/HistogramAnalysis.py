@@ -53,6 +53,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import time
 import os
+import abc
 from datetime import datetime
 
 from aminer import AMinerConfig
@@ -73,29 +74,31 @@ except:
 date_string = "%Y-%m-%d %H:%M:%S"
 
 
-class BinDefinition:
-    not_implemented = 'Not implemented'
+class BinDefinition(metaclass=abc.ABCMeta):
     """This class defines the bins of the histogram."""
 
+    @abc.abstractmethod
     def __init__(self):
-        raise Exception(self.not_implemented)
+        """initiate the BinDefinition."""
 
+    @abc.abstractmethod
     def has_outlier_bins(self):
         """Report if this binning works with outlier bins, that are bins for all values outside the normal binning range. If not,
         outliers are discarded. When true, the outlier bins are the first and last bin."""
-        raise Exception(self.not_implemented)
 
+    @abc.abstractmethod
     def get_bin_names(self):
         """Get the names of the bins for reporting, including the outlier bins if any."""
         raise Exception(self.not_implemented)
 
+    @abc.abstractmethod
     def get_bin(self, value):
         """Get the number of the bin this value should belong to.
         @return the bin number or None if the value is an outlier and outlier bins were not requested. With outliers, bin 0
         is the bin with outliers below limit, first normal bin is at index 1."""
         raise Exception(self.not_implemented)
 
-    # skipcq: PYL-W0613, PYL-R0201
+    @abc.abstractmethod
     def get_bin_p_value(self, bin_pos, total_values, bin_values):
         """Calculate a p-Value, how likely the observed number of
         elements in this bin is. This method is used as an interface method, but it also returns a default value.
@@ -106,7 +109,6 @@ class BinDefinition:
 class LinearNumericBinDefinition(BinDefinition):
     """This class defines the linear numeric bins."""
 
-    # skipcq: PYL-W0231
     def __init__(self, lower_limit, bin_size, bin_count, outlier_bins_flag=False):
         self.lower_limit = lower_limit
         self.bin_size = bin_size
@@ -318,7 +320,6 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        # PersistencyUtil.storeJson(self.persistence_file_name, list(self.knownPathSet))
         self.next_persist_time = None
 
     def send_report(self, log_atom, timestamp):
@@ -504,7 +505,6 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        # PersistencyUtil.storeJson(self.persistence_file_name, list(self.knownPathSet))
         self.next_persist_time = None
 
     def send_report(self, log_atom, timestamp):
