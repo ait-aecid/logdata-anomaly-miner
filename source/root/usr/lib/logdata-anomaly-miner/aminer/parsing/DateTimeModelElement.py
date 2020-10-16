@@ -27,7 +27,6 @@ class DateTimeModelElement(ModelElementInterface):
     (seconds since epoch) format in Python strptime, no %f support in libc strptime, no support to determine the length of the
     parsed string."""
 
-    # skipcq: PYL-W0613
     def __init__(self, path_id, date_format, time_zone=None, text_locale=None, start_year=None, max_time_jump_seconds=86400):
         """Create a DateTimeModelElement to parse dates using a custom, timezone and locale-aware implementation similar to strptime.
         @param date_format, is a byte string that represents the date format for parsing, see Python strptime specification for
@@ -133,6 +132,10 @@ class DateTimeModelElement(ModelElementInterface):
         if (7 in date_format_type_set) and (not date_format_type_set.isdisjoint(set(range(0, 6)))):
             raise Exception('Cannot use %%s (seconds since epoch) with other non-second format types')
         self.date_format_parts = date_format_parts
+
+    def get_id(self):
+        """Get the element ID."""
+        return self.path_id
 
     def get_child_elements(self):
         """Get all possible child model elements of this element.
