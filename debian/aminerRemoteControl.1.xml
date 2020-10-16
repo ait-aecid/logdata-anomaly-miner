@@ -571,6 +571,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
           </term>
           <listitem>
             <para><replaceable>Value</replaceable>: &apos;Allowed RAM usage in Megabytes 
+            (Integer: 32-maxSystemRAM)&apos;</para>
             <para><replaceable>Example</replaceable>: aminerRemoteControl --Exec 
             &quot;change_config_property(analysis_context, &apos;Resources.MaxMemoryUsage&apos;, -1)&quot;</para>
             <para>This property limits the maximal possible RAM in MB which the AMiner process can use. 
