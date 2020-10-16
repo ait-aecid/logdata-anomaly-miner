@@ -16,6 +16,7 @@ import socket
 import traceback
 import sys
 
+
 __authors__ = ["Markus Wurzenberger", "Max Landauer", "Wolfgang Hotwagner", "Ernst Leierzopf", "Roman Fiedler", "Georg Hoeld",
                "Florian Skopik"]
 __contact__ = "aecid@ait.ac.at"
