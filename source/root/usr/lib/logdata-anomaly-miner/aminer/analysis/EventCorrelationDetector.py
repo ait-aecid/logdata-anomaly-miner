@@ -25,7 +25,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
     def __init__(self, aminer_config, anomaly_event_handlers, paths=None, max_hypotheses=1000, hypothesis_max_delta_time=5.0,
                  generation_probability=1.0, generation_factor=1.0, max_observations=500, p0=0.9, alpha=0.05, candidates_size=10,
                  hypotheses_eval_delta_time=120.0, delta_time_to_discard_hypothesis=180.0, check_rules_flag=False,
-                 auto_include_flag=True, allowlisted_paths=None, persistence_id='Default', output_log_line=True):
+                 auto_include_flag=False, allowlisted_paths=None, persistence_id='Default', output_log_line=True):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
