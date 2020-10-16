@@ -138,6 +138,27 @@ class EventCorrelationDetectorTest(TestBase):
         self.analysis_context.register_component(ecd, description + '4')
         self.run_ecd_test(ecd, self.errored_data_diff1[:10000])
 
+    def test7allowlist_paths(self):
+        description = 'test7eventCorrelationDetectorTest'
+        ecd = EventCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, p0=0.7, alpha=0.1)
+        self.analysis_context.register_component(ecd, description)
+        self.assertEqual([], ecd.allowlisted_paths)
+
+        fixed_dme = FixedDataModelElement('s1', b' pid=')
+        log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(self.match_element_fixed_dme), t, ecd)
+
+        # unknown path
+        ecd.allowlist_event(self.analysis % new_match_path_detector.__class__.__name__, [
+            log_atom_fixed_dme, [self.match_element_fixed_dme.get_path()]],
+            [log_atom_fixed_dme, [self.match_element_fixed_dme.get_path()]], None)
+        self.assertEqual(['s1'], ecd.allowlisted_paths)
+
+        # known path
+        ecd.allowlist_event(self.analysis % new_match_path_detector.__class__.__name__,
+            [log_atom_fixed_dme, [self.match_element_fixed_dme.get_path()]],
+            [log_atom_fixed_dme, [self.match_element_fixed_dme.get_path()]], None)
+        self.assertEqual(['s1'], ecd.allowlisted_paths)
+
     def check_rules(self, sorted_back_rules, sorted_forward_rules, diff):
         for path in sorted_forward_rules:
             self.assertEqual(len(sorted_forward_rules[path]), 5 / diff)
