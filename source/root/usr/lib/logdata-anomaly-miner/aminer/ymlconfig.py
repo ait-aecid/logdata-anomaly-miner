@@ -737,7 +737,8 @@ def build_analysis_pipeline(analysis_context):
                 #     kafka_event_handler = func(analysis_context.aminer_config, item['args'][0], options)
                 #     from aminer.events import JsonConverterHandler
                 #     anomaly_event_handlers.append(
-                #         JsonConverterHandler(analysis_context.aminer_config, message_queue_event_handlers, analysis_context, learning_mode))
+                #         JsonConverterHandler(analysis_context.aminer_config, message_queue_event_handlers,
+                #                              analysis_context, learning_mode))
                 # else:
                 if ctx is None:
                     ctx = func(analysis_context)
