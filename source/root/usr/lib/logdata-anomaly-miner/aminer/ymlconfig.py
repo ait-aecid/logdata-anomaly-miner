@@ -715,11 +715,35 @@ def build_analysis_pipeline(analysis_context):
                     ctx = func(analysis_context, item['instance_name'])
                 if item['type'].name == 'KafkaEventHandler':
                     ctx = func(analysis_context, item['topic'], item['options'])
+                # if item['type'] == 'KafkaEventHandler':
+                #     try:
+                #         item['args'][0]
+                #     except:
+                #         raise ValueError("Kafka-Topic not defined")
+                #     try:
+                #         kafka_config = item['args'][1]
+                #     except:
+                #         kafka_config = '/etc/aminer/kafka-client.conf'
+                #     config = configparser.ConfigParser()
+                #     config.read(kafka_config)
+                #     options = dict(config.items("DEFAULT"))
+                #     for key, val in options.items():
+                #         try:
+                #             if key == "sasl_plain_username":
+                #                 continue
+                #             options[key] = int(val)
+                #         except:
+                #             pass
+                #     kafka_event_handler = func(analysis_context.aminer_config, item['args'][0], options)
+                #     from aminer.events import JsonConverterHandler
+                #     anomaly_event_handlers.append(
+                #         JsonConverterHandler(analysis_context.aminer_config, message_queue_event_handlers, analysis_context, learning_mode))
+                # else:
+                if ctx is None:
+                    ctx = func(analysis_context)
                 if item['json'] is True:
                     from aminer.events import JsonConverterHandler
                     ctx = JsonConverterHandler([ctx], analysis_context)
-                if ctx is None:
-                    ctx = func(analysis_context)
                 anomaly_event_handlers.append(ctx)
         else:
             raise KeyError()
