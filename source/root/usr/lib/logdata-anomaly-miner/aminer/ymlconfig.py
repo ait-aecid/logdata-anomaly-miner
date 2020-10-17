@@ -245,7 +245,7 @@ def build_analysis_pipeline(analysis_context):
             if 'LearnMode' in yaml_data:
                 learn = yaml_data['LearnMode']
             else:
-                learn = item['auto_include_flag']
+                learn = item['learn_mode']
             func = item['type'].func
             if item['type'].name == 'NewMatchPathValueDetector':
                 tmp_analyser = func(
@@ -350,7 +350,7 @@ def build_analysis_pipeline(analysis_context):
                     hypotheses_eval_delta_time=item['hypotheses_eval_delta_time'],
                     delta_time_to_discard_hypothesis=item['delta_time_to_discard_hypothesis'],
                     check_rules_flag=item['check_rules_flag'],
-                    auto_include_flag=item['auto_include_flag'],
+                    auto_include_flag=learn,
                     whitelisted_paths=item['whitelisted_paths'],
                     persistence_id=item['persistence_id'])
             elif item['type'].name == 'NewMatchIdValueComboDetector':

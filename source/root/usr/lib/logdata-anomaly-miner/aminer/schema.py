@@ -111,6 +111,7 @@
                     'paths': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                     'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},
                     'output_logline': {'type': 'boolean', 'required': False, 'default': True},
+                    'learn_mode': {'type': 'boolean', 'required': False, 'default': False},
                     'allow_missing_values': {'type': 'boolean', 'required': False, 'default': False},
                     'check_interval': {'type': 'integer', 'required': False, 'default': 3600},
                     'realert_interval': {'type': 'integer', 'required': False, 'default': 36000},
@@ -134,7 +135,6 @@
                     'hypotheses_eval_delta_time': {'type': 'float', 'required': False, 'default': 120.0},
                     'delta_time_to_discard_hypothesis': {'type': 'float', 'required': False, 'default': 180.0},
                     'check_rules_flag': {'type': 'boolean', 'required': False, 'default': True},
-                    'auto_include_flag': {'type': 'boolean', 'required': False, 'default': False},
                     'whitelisted_paths': {
                         'type': 'list', 'schema': {'type': 'string'}, 'required': False, 'nullable': True, 'default': None},
                     'id_path_list': {'type': 'list', 'required': False, 'default': []},

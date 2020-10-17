@@ -24,11 +24,11 @@ Analysis:
         - type: NewMatchPathValueDetector
           id: NewMatchPathValueDetector
           paths: ["/accesslog/status"]
-          auto_include_flag: True
+          learn_mode: True
         - type: NewMatchPathValueComboDetector
           id: NewMatchPathValueComboDetector
           paths: ["/accesslog/method","/accesslog/request","/accesslog/useragent"]
-          auto_include_flag: False
+          learn_mode: False
 
 EventHandlers:
         - id: stpe
