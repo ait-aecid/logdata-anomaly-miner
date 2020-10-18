@@ -235,31 +235,31 @@ class YamlConfigTest(unittest.TestCase):
 
         # learnMode: True should ignore all learn_mode arguments.
         for key in context.registered_components:
-            self.assertTrue(context.registered_components[key][0].learn_mode)
+            self.assertTrue(context.registered_components[key][0].auto_include_flag)
 
         # learnMode: False should ignore all learn_mode arguments.
         aminer_config.yaml_data['LearnMode'] = False
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
         for key in context.registered_components:
-            self.assertFalse(context.registered_components[key][0].learn_mode)
+            self.assertFalse(context.registered_components[key][0].auto_include_flag)
 
         # unset learnMode: use learn_mode arguments
         del aminer_config.yaml_data['LearnMode']
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        self.assertTrue(context.registered_components[0][0].learn_mode)
-        self.assertTrue(context.registered_components[1][0].learn_mode)
-        self.assertFalse(context.registered_components[2][0].learn_mode)
+        self.assertTrue(context.registered_components[0][0].auto_include_flag)
+        self.assertTrue(context.registered_components[1][0].auto_include_flag)
+        self.assertFalse(context.registered_components[2][0].auto_include_flag)
 
         # unset learnMode and set learn_mode to default arguments: by default True should be used.
         for component in aminer_config.yaml_data['Analysis']:
             component['learn_mode'] = True
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        self.assertTrue(context.registered_components[0][0].learn_mode)
-        self.assertTrue(context.registered_components[1][0].learn_mode)
-        self.assertTrue(context.registered_components[2][0].learn_mode)
+        self.assertTrue(context.registered_components[0][0].auto_include_flag)
+        self.assertTrue(context.registered_components[1][0].auto_include_flag)
+        self.assertTrue(context.registered_components[2][0].auto_include_flag)
 
     def test15_analysis_pipeline_working_with_input_parameters(self):
         """This test checks if the SimpleMultisourceAtomSync and SimpleByteStreamLineAtomizerFactory are working properly."""

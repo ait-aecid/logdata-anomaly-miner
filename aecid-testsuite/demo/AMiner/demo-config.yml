@@ -859,7 +859,7 @@ Analysis:
           id: EventCorrelationDetector
           check_rules_flag: True
           hypothesis_max_delta_time: 1.0
-          auto_include_flag: True
+          learn_mode: True
         - type: MatchFilter
           id: MatchFilter
           paths:
@@ -874,7 +874,7 @@ Analysis:
             - "/model/DailyCron/UName"
             - "/model/DailyCron/JobNumber"
           tuple_transformation_function: "demo"
-          auto_include_flag: True
+          learn_mode: True
         - type: LinearNumericBinDefinition
           id: linear_numeric_bin_definition
           lower_limit: 50
@@ -919,7 +919,7 @@ Analysis:
           paths:
             - "/model/IPAddresses/Username"
             - "/model/IPAddresses/IP"
-          auto_include_flag: True
+          learn_mode: True
         - type: NewMatchIdValueComboDetector
           id: NewMatchIdValueComboDetector
           paths:
@@ -930,19 +930,19 @@ Analysis:
             - "/model/type/syscall/id"
           min_allowed_time_diff: 5
           allow_missing_values: True
-          auto_include_flag: True
+          learn_mode: True
         - type: NewMatchPathValueDetector
           id: NewMatchPathValue
           paths:
             - "/model/DailyCron/JobNumber"
             - "/model/IPAddresses/Username"
-          auto_include_flag: True
+          learn_mode: True
         - type: MissingMatchPathValueDetector
           id: MissingMatch
           path: "/model/DiskReport/Space"
           check_interval: 2
           realert_interval: 5
-          auto_include_flag: True
+          learn_mode: True
         - type: TimeCorrelationDetector
           id: TimeCorrelationDetector
           parallel_check_count: 2
