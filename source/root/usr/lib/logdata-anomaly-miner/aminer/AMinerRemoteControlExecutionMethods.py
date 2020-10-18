@@ -17,6 +17,7 @@ import subprocess  # skipcq: BAN-B404
 import shlex
 from aminer.input import LogAtom
 from aminer.input import AtomHandlerInterface
+from aminer.util import PersistencyUtil
 
 attr_str = '"%s": %s,\n'
 component_not_found = 'Event history component not found'
@@ -288,6 +289,11 @@ class AMinerRemoteControlExecutionMethods:
         @param analysis_context the analysis context of the AMiner.
         @param destination_file the path to the file in which the config is saved."""
         self.REMOTE_CONTROL_RESPONSE = AMinerConfig.save_config(analysis_context, destination_file)
+
+    def persist_all(self):
+        """Persists all data by calling PersistencyUtil.persist_all()"""
+        PersistencyUtil.persist_all()
+        self.REMOTE_CONTROL_RESPONSE = 'OK'
 
     def whitelist_event_in_component(self, analysis_context, component_name, event_data, whitelisting_data=None):
         """Whitelists one or multiple specific events from the history in the component it occurred in.

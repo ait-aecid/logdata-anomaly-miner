@@ -25,6 +25,8 @@ import traceback
 import resource
 import subprocess  # skipcq: BAN-B404
 import logging
+from datetime import datetime
+import shutil
 
 from aminer import AMinerConfig
 from aminer.input.LogStream import LogStream
@@ -249,6 +251,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         # Always start when number is None.
         next_real_time_trigger_time = None
         next_analysis_time_trigger_time = None
+        next_backup_time_trigger_time = None
 
         delayed_return_status = 0
         while self.run_analysis_loop_flag:
@@ -367,6 +370,19 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                     next_trigger_request = component.do_timer(real_time)
                     next_trigger_offset = min(next_trigger_offset, next_trigger_request)
                 next_analysis_time_trigger_time = analysis_time + next_trigger_offset
+
+            # backup the persistence data.
+            backup_time = time.time()
+            backup_time_str = datetime.fromtimestamp(backup_time).strftime('%Y-%m-%d-%H-%M-%S')
+            persistence_dir = self.analysis_context.aminer_config.config_properties['Core.PersistenceDir']
+            persistence_dir = persistence_dir.rstrip('/')
+            backup_path = persistence_dir + '_backup'
+            backup_path_with_date = os.path.join(backup_path, backup_time_str)
+            if next_backup_time_trigger_time is None or backup_time >= next_backup_time_trigger_time:
+                next_trigger_offset = 3600 * 24
+                if next_backup_time_trigger_time is not None:
+                    shutil.copytree(persistence_dir, backup_path_with_date)
+                next_backup_time_trigger_time = backup_time + next_trigger_offset
 
         # Analysis loop is only left on shutdown. Try to persist everything and leave.
         PersistencyUtil.persist_all()
@@ -520,6 +536,7 @@ class AnalysisChildRemoteControlHandler:
                     'ignore_events_from_history': methods.ignore_events_from_history,
                     'list_events_from_history': methods.list_events_from_history,
                     'whitelist_events_from_history': methods.whitelist_events_from_history,
+                    'persist_all': methods.persist_all,
                     'EnhancedNewMatchPathValueComboDetector': aminer.analysis.EnhancedNewMatchPathValueComboDetector,
                     'EventCorrelationDetector': aminer.analysis.EventCorrelationDetector,
                     'HistogramAnalysis': aminer.analysis.HistogramAnalysis,
