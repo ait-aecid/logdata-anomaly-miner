@@ -376,12 +376,12 @@ class AnalysisChild(TimeTriggeredComponentInterface):
             backup_time_str = datetime.fromtimestamp(backup_time).strftime('%Y-%m-%d-%H-%M-%S')
             persistence_dir = self.analysis_context.aminer_config.config_properties['Core.PersistenceDir']
             persistence_dir = persistence_dir.rstrip('/')
-            backup_path = persistence_dir + '_backup'
+            backup_path = persistence_dir + '/backup/'
             backup_path_with_date = os.path.join(backup_path, backup_time_str)
             if next_backup_time_trigger_time is None or backup_time >= next_backup_time_trigger_time:
                 next_trigger_offset = 3600 * 24
                 if next_backup_time_trigger_time is not None:
-                    shutil.copytree(persistence_dir, backup_path_with_date)
+                    shutil.copytree(persistence_dir, backup_path_with_date, ignore=shutil.ignore_patterns('backup*'))
                 next_backup_time_trigger_time = backup_time + next_trigger_offset
 
         # Analysis loop is only left on shutdown. Try to persist everything and leave.
