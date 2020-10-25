@@ -8,7 +8,7 @@ from aminer.AnalysisChild import AnalysisContext
 from aminer.events import EventSourceInterface
 from aminer.input import AtomHandlerInterface
 from aminer.util import TimeTriggeredComponentInterface
-from aminer.util import PersistencyUtil
+from aminer.util import PersistenceUtil
 
 
 class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
@@ -63,12 +63,12 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, E
         # Number of subdivisions of the initialization window. The length of the input-list of the function_Init-funtion is numSubd+1
         self.num_sections_waiting_time_for_TSA = num_sections_waiting_time_for_TSA
 
-        # Loads the persistency
-        PersistencyUtil.add_persistable_component(self)
+        # Loads the persistence
+        PersistenceUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
-        persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
 
-        # Imports the persistency
+        # Imports the persistence
         if persistence_data is not None:
             for key in persistence_data[0]:
                 self.found_keys.append(set(key))
@@ -258,7 +258,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, E
         return True
 
     def get_time_trigger_class(self):
-        """Get the trigger class this component can be registered for. This detector only needs persistency triggers in real time."""
+        """Get the trigger class this component can be registered for. This detector only needs persistence triggers in real time."""
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
@@ -284,7 +284,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, E
         tmp_list.append(self.num_eventlines)
         tmp_list.append(self.etd_time_trigger)
         tmp_list.append(self.num_eventlines_TSA_ref)
-        PersistencyUtil.store_json(self.persistence_file_name, tmp_list)
+        PersistenceUtil.store_json(self.persistence_file_name, tmp_list)
 
         for following_module in self.following_modules:
             following_module.do_persist()

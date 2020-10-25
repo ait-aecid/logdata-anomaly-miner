@@ -14,7 +14,7 @@ import time
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input import AtomHandlerInterface
-from aminer.util import PersistencyUtil
+from aminer.util import PersistenceUtil
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
@@ -95,10 +95,10 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         self.aminer_config = aminer_config
         self.output_log_line = output_log_line
 
-        PersistencyUtil.add_persistable_component(self)
+        PersistenceUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, 'EventCorrelationDetector', persistence_id)
         self.persistence_id = persistence_id
-        persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
 
         if persistence_data is not None:
             for record in persistence_data:
@@ -625,7 +625,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     self.hypothesis_candidates.append((log_event, log_atom.atom_time))
 
     def get_time_trigger_class(self):
-        """Get the trigger class this component should be registered for. This trigger is used only for persistency, so real-time
+        """Get the trigger class this component should be registered for. This trigger is used only for persistence, so real-time
         triggering is needed."""
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
@@ -646,7 +646,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     known_path_set.add(
                         ('forward', tuple(event_a), tuple(implication.implied_event), implication.max_observations,
                          implication.min_eval_true))
-            PersistencyUtil.store_json(self.persistence_file_name, list(known_path_set))
+            PersistenceUtil.store_json(self.persistence_file_name, list(known_path_set))
             self.next_persist_time = None
             delta = 600
         return delta
@@ -662,7 +662,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
             for implication in self.forward_rules[event_a]:
                 known_path_set.add(
                     ('forward', tuple(event_a), tuple(implication.implied_event), implication.max_observations, implication.min_eval_true))
-        PersistencyUtil.store_json(self.persistence_file_name, list(known_path_set))
+        PersistenceUtil.store_json(self.persistence_file_name, list(known_path_set))
         self.next_persist_time = None
 
 

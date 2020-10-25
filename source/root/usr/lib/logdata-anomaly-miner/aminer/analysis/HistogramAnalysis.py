@@ -58,7 +58,7 @@ from datetime import datetime
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input import AtomHandlerInterface
-from aminer.util import PersistencyUtil
+from aminer.util import PersistenceUtil
 from aminer.util import TimeTriggeredComponentInterface
 
 binomial_test = None
@@ -271,9 +271,9 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.next_persist_time = None
         self.output_log_line = output_log_line
 
-        PersistencyUtil.add_persistable_component(self)
+        PersistenceUtil.add_persistable_component(self)
         self.persistenceFileName = AMinerConfig.build_persistence_file_name(aminer_config, 'HistogramAnalysis', persistence_id)
-        persistence_data = PersistencyUtil.load_json(self.persistenceFileName)
+        persistence_data = PersistenceUtil.load_json(self.persistenceFileName)
         if persistence_data is not None:
             raise Exception('No data reading, def merge yet')
 
@@ -301,7 +301,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
             self.next_persist_time = time.time() + 600
 
     def get_time_trigger_class(self):
-        """Get the trigger class this component should be registered for. This trigger is used only for persistency, so real-time
+        """Get the trigger class this component should be registered for. This trigger is used only for persistence, so real-time
         triggering is needed."""
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
@@ -318,7 +318,6 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        # PersistencyUtil.storeJson(self.persistence_file_name, list(self.knownPathSet))
         self.next_persist_time = None
 
     def send_report(self, log_atom, timestamp):
@@ -405,10 +404,10 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
         self.next_persist_time = None
         self.output_log_line = output_log_line
 
-        PersistencyUtil.add_persistable_component(self)
+        PersistenceUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, 'PathDependentHistogramAnalysis',
                                                                               persistence_id)
-        persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is not None:
             raise Exception('No data reading, def merge yet')
 
@@ -487,7 +486,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
             self.next_persist_time = time.time() + 600
 
     def get_time_trigger_class(self):
-        """Get the trigger class this component should be registered for. This trigger is used only for persistency, so real-time
+        """Get the trigger class this component should be registered for. This trigger is used only for persistence, so real-time
         triggering is needed."""
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
@@ -504,7 +503,6 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        # PersistencyUtil.storeJson(self.persistence_file_name, list(self.knownPathSet))
         self.next_persist_time = None
 
     def send_report(self, log_atom, timestamp):

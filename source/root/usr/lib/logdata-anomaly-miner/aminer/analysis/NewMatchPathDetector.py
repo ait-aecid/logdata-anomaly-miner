@@ -19,7 +19,7 @@ from aminer.AnalysisChild import AnalysisContext
 from aminer.events import EventSourceInterface
 from aminer.input import AtomHandlerInterface
 from aminer.util import TimeTriggeredComponentInterface
-from aminer.util import PersistencyUtil
+from aminer.util import PersistenceUtil
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
 
@@ -35,9 +35,9 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         self.aminer_config = aminer_config
         self.persistence_id = persistence_id
 
-        PersistencyUtil.add_persistable_component(self)
+        PersistenceUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
-        persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is None:
             self.known_path_set = set()
         else:
@@ -97,7 +97,7 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        PersistencyUtil.store_json(self.persistence_file_name, list(self.known_path_set))
+        PersistenceUtil.store_json(self.persistence_file_name, list(self.known_path_set))
         self.next_persist_time = None
 
     def whitelist_event(self, event_type, sorted_log_lines, event_data, whitelisting_data):

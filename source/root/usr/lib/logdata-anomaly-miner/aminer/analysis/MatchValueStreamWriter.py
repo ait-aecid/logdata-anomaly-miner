@@ -54,7 +54,7 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 self.stream.write(b'\n')
 
     def get_time_trigger_class(self):
-        """Get the trigger class this component should be registered for. This trigger is used only for persistency, so real-time
+        """Get the trigger class this component should be registered for. This trigger is used only for persistence, so real-time
         triggering is needed."""
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 

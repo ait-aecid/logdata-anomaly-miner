@@ -17,7 +17,7 @@ import time
 import os
 
 from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
-from aminer.util import PersistencyUtil
+from aminer.util import PersistenceUtil
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
 
@@ -49,9 +49,9 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         self.aminer_config = aminer_config
         self.date_string = "%Y-%m-%d %H:%M:%S"
 
-    def load_persistency_data(self):
-        """Load the persistency data from storage."""
-        persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
+    def load_persistence_data(self):
+        """Load the persistence data from storage."""
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is not None:
             # Dictionary and tuples were stored as list of lists. Transform
             # the first lists to tuples to allow hash operation needed by set.
@@ -128,10 +128,10 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        persistency_data = []
+        persistence_data = []
         for dict_record in self.known_values_dict.items():
-            persistency_data.append(dict_record)
-        PersistencyUtil.store_json(self.persistence_file_name, persistency_data)
+            persistence_data.append(dict_record)
+        PersistenceUtil.store_json(self.persistence_file_name, persistence_data)
         self.next_persist_time = None
 
     def whitelist_event(self, event_type, sorted_log_lines, event_data, whitelisting_data):

@@ -20,7 +20,7 @@ from aminer.AnalysisChild import AnalysisContext
 from aminer.analysis import Rules
 from aminer.input import AtomHandlerInterface
 from aminer.util import get_log_int
-from aminer.util import PersistencyUtil
+from aminer.util import PersistenceUtil
 from aminer.util import TimeTriggeredComponentInterface
 
 
@@ -53,9 +53,9 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
         self.use_path_match = use_path_match
         self.use_value_match = use_value_match
 
-        PersistencyUtil.add_persistable_component(self)
+        PersistenceUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, 'TimeCorrelationDetector', persistence_id)
-        persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is None:
             self.feature_list = []
             self.event_count_table = [0] * parallel_check_count * parallel_check_count * 2
@@ -164,7 +164,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
         return r
 
     def get_time_trigger_class(self):
-        """Get the trigger class this component should be registered for. This trigger is used only for persistency, so real-time
+        """Get the trigger class this component should be registered for. This trigger is used only for persistence, so real-time
         triggering is needed."""
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
@@ -175,14 +175,14 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
 
         delta = self.next_persist_time - trigger_time
         if delta < 0:
-            # PersistencyUtil.storeJson(self.persistenceFileName, list(self.knownPathSet))
+            # PersistenceUtil.storeJson(self.persistenceFileName, list(self.knownPathSet))
             self.next_persist_time = None
             delta = 600
         return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        # PersistencyUtil.storeJson(self.persistenceFileName, list(self.knownPathSet))
+        # PersistenceUtil.storeJson(self.persistenceFileName, list(self.knownPathSet))
         self.next_persist_time = None
 
     def create_random_rule(self, log_atom):

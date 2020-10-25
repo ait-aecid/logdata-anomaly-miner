@@ -28,7 +28,7 @@ import logging
 
 from aminer import AMinerConfig
 from aminer.input.LogStream import LogStream
-from aminer.util import PersistencyUtil
+from aminer.util import PersistenceUtil
 from aminer.util import SecureOSFunctions
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.util import JsonUtil
@@ -239,7 +239,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 
         # Load continuation data for last known log streams. The loaded data has to be a dictionary with repositioning information for
         # each stream. The data is used only when creating the first stream with that name.
-        self.repositioning_data_dict = PersistencyUtil.load_json(self.persistence_file_name)
+        self.repositioning_data_dict = PersistenceUtil.load_json(self.persistence_file_name)
         if self.repositioning_data_dict is None:
             self.repositioning_data_dict = {}
 
@@ -369,7 +369,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                 next_analysis_time_trigger_time = analysis_time + next_trigger_offset
 
         # Analysis loop is only left on shutdown. Try to persist everything and leave.
-        PersistencyUtil.persist_all()
+        PersistenceUtil.persist_all()
         return delayed_return_status
 
     def handle_master_control_socket_receive(self):
@@ -432,7 +432,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                 repositioning_data = log_stream.get_repositioning_data()
                 if repositioning_data is not None:
                     self.repositioning_data_dict[log_stream_name] = repositioning_data
-            PersistencyUtil.store_json(self.persistence_file_name, self.repositioning_data_dict)
+            PersistenceUtil.store_json(self.persistence_file_name, self.repositioning_data_dict)
             delta = 600
             self.next_persist_time = trigger_time + delta
         return delta
