@@ -13,6 +13,7 @@ import random
 class EventCorrelationDetectorTest(TestBase):
     alphabet = b'abcdefghijklmnopqrstuvwxyz'
     alphabet_model = FirstMatchModelElement('first', [])
+    match_element_fixed_dme = fixed_dme.get_match_element("", match_context_fixed_dme)
 
     @classmethod
     def setUpClass(cls):
