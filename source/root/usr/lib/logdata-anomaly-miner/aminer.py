@@ -95,7 +95,11 @@ def print_help(program_name, version=False):
     print("\nusage: %s [options]" % program_name)
     print("options:")
     print("  -c, --Config <config-file>          \tpath to the config-file")
-    print("  -d, --Daemon                        \trun as a daemon process")
+    print("  -D  --Daemon                        \trun as a daemon process")
+    print("  -s  --Stat <stat-level>             \tset the stat level. Possible stat-levels are 0 for no statistics, 1 for normal statistic"
+          " level and 2 or v for vebose statistics.")
+    print("  -d  --Debug <debug-level>           \tset the debug level. Possible debug-levels are 0 for no debugging, 1 for normal output"
+          " (WARNING and above), 2 or v for verbose level and above and 3 or vv for printing all debug information.")
     print("  -r, --RunAnalysis                   \tenable/disable analysis")
     print("  -R, --Remove <persistence-directory>\tremoves a specific persistence directory")
     print("  -C, --Clear                         \tremoves all persistence directories")
@@ -155,6 +159,8 @@ def main():
     clear_persistence_flag = False
     remove_persistence_dirs = []
     from_begin_flag = False
+    stat_level = 1
+    debug_level = 1
 
     arg_pos = 1
     while arg_pos < len(sys.argv):
@@ -171,9 +177,31 @@ def main():
                 sys.exit(1)
             run_in_foreground_flag = True
             continue
-        if arg_name in ('--Daemon', '--daemon', '-d'):
+        if arg_name in ('--Daemon', '--daemon', '-D'):
             run_in_foreground_flag = False
             continue
+        if arg_name in ('--Stat', '--stat', '-s'):
+            stat_level = sys.argv[arg_pos]
+            arg_pos += 1
+            if stat_level not in (0, 1, 2, 'v', 'q', 'quiet'):
+                print('There is no stat level', stat_level, file=sys.stderr)
+                sys.exit(1)
+            if stat_level == 'v':
+                stat_level = 2
+            elif stat_level in ('q', 'quiet'):
+                stat_level = 0
+        if arg_name in ('--Debug', '--debug', '-d'):
+            debug_level = sys.argv[arg_pos]
+            arg_pos += 1
+            if debug_level not in (0, 1, 2, 3, 'v', 'vv', 'q', 'quiet'):
+                print('There is no debug level', debug_level, file=sys.stderr)
+                sys.exit(1)
+            if debug_level == 'v':
+                debug_level = 2
+            elif debug_level == 'vv':
+                debug_level = 3
+            elif debug_level in ('q', 'quiet'):
+                debug_level = 0
         if arg_name in ('--RunAnalysis', '--runAnalysis', '--runanalysis', '-r'):
             run_analysis_child_flag = True
             continue
@@ -212,6 +240,9 @@ def main():
     except ValueError as e:
         print("Config-Error: %s" % e)
         sys.exit(1)
+
+    aminer_config.STAT_LEVEL = stat_level
+    aminer_config.DEBUG_LEVEL = debug_level
 
     if clear_persistence_flag:
         if remove_persistence_dirs:

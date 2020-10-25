@@ -30,6 +30,8 @@ KEY_RESOURCES_MAX_MEMORY_USAGE = 'Resources.MaxMemoryUsage'
 KEY_RESOURCES_MAX_PERCENT_CPU_USAGE = 'Resources.MaxCpuPercentUsage'
 LOG_FILE = '/tmp/AMinerRemoteLog.txt'
 configFN = None
+STAT_LEVEL = 1
+DEBUG_LEVEL = 1
 
 
 def load_config(config_file_name):
