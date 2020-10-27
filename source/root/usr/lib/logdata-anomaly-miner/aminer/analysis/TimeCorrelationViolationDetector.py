@@ -48,12 +48,6 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, 'TimeCorrelationViolationDetector',
                                                                               persistence_id)
 
-    #    persistenceData = PersistenceUtil.loadJson(self.persistence_file_name)
-    #   if persistenceData is None:
-    #     self.knownPathSet = set()
-    #   else:
-    #     self.knownPathSet = set(persistenceData)
-
     def receive_atom(self, log_atom):
         """Receive a parsed atom and check all the classification rules, that will trigger correlation rule evaluation and event
         triggering on violations."""
@@ -107,7 +101,6 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        # PersistenceUtil.storeJson(self.persistence_file_name, list(self.knownPathSet))
         self.next_persist_time = time.time() + 600.0
 
 

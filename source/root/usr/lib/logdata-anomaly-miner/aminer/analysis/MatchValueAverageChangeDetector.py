@@ -54,9 +54,6 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             for path in analyze_path_list:
                 self.stat_data.append((path, [],))
 
-    #   else:
-    #     self.knownPathSet = set(persistenceData)
-
     def receive_atom(self, log_atom):
         """Sends summary to all event handlers."""
         parser_match = log_atom.parser_match

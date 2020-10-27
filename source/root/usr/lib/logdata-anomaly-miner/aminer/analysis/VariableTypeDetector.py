@@ -7,14 +7,13 @@ import os
 
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
-from aminer.events import EventSourceInterface
 from aminer.input import AtomHandlerInterface
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.util import PersistenceUtil
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
 
-class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
+class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """This class tests each variable of the event_types for the implemented variable types. This module needs to run after the
     EventTypeDetector is initialized"""
 

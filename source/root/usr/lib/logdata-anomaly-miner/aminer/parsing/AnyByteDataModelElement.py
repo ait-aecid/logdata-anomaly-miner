@@ -21,6 +21,10 @@ class AnyByteDataModelElement(ModelElementInterface):
     def __init__(self, element_id):
         self.element_id = element_id
 
+    def get_id(self):
+        """Get the element ID."""
+        return self.element_id
+
     def get_child_elements(self):
         """Get all possible child model elements of this element.
         @return None as there are no children of this element."""

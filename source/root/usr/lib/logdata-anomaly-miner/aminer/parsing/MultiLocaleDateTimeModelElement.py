@@ -70,6 +70,10 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
         if locale.getlocale() != default_locale:
             locale.resetlocale()
 
+    def get_id(self):
+        """Get the element ID."""
+        return self.element_id
+
     def get_child_elements(self):
         """Get all possible child model elements of this element.
         @return empty list as there are no children of this element."""
@@ -296,7 +300,7 @@ class DateFormatComponent:
         if end_separator is not None:
             end_separator = end_separator.encode()
 
-        next_component = self.next_components.get(lookup_key, None)
+        next_component = self.next_components.get(lookup_key)
         if next_component is None:
             next_component = DateFormatComponent(component_type, end_separator, component_length, translation_dictionary, self)
             self.next_components[lookup_key] = next_component

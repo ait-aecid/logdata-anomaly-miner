@@ -18,74 +18,65 @@ import os
 import socket
 import stat
 import sys
+import abc
 
 from aminer.util import SecureOSFunctions
 from aminer.util import encode_byte_string_as_string
 
-interface_method_called = 'Interface method called'
 
-
-class LogDataResource:
+class LogDataResource(metaclass=abc.ABCMeta):
     """This is the superinterface of each logdata resource monitored by AMiner. The interface is designed in a way, that instances
     of same subclass can be used both on AMiner parent process side for keeping track of the resources and forwarding the file descriptors
     to the child, but also on child side for the same purpose. The only difference is, that on child side, the stream reading and
     read continuation features are used also. After creation on child side, this is the sole place for reading and closing the
     streams. An external process may use the file descriptor only to wait for input via select."""
 
+    @abc.abstractmethod
     def __init__(self, log_resource_name, log_stream_fd, default_buffer_size=1 << 16, repositioning_data=None):
         """Create a new LogDataResource. Object creation must not touch the logStreamFd or read any data, unless repositioning_data
         was given. In the later case, the stream has to support seek operation to reread data.
         @param log_resource_name the unique encoded name of this source as byte array.
         @param log_stream_fd the stream for reading the resource or -1 if not yet opened.
         @param repositioning_data if not None, attemt to position the the stream using the given data."""
-        raise Exception(interface_method_called)
 
-    # skipcq: PYL-R0201
+    @abc.abstractmethod
     def open(self, reopen_flag=False):
         """Open the given resource.
         @param reopen_flag when True, attempt to reopen the same resource and check if it differs from the previously opened one.
         @raise Exception if valid logStreamFd was already provided, is still open and reopenFlag is False.
         @raise OSError when opening failed with unexpected error.
         @return True if the resource was really opened or False if opening was not yet possible but should be attempted again."""
-        raise Exception(interface_method_called)
 
-    # skipcq: PYL-R0201
+    @abc.abstractmethod
     def get_resource_name(self):
         """Get the name of this log resoruce."""
-        raise Exception(interface_method_called)
 
-    # skipcq: PYL-R0201
+    @abc.abstractmethod
     def get_file_descriptor(self):
         """Get the file descriptor of this open resource."""
-        raise Exception(interface_method_called)
 
-    # skipcq: PYL-R0201
+    @abc.abstractmethod
     def fill_buffer(self):
         """Fill the buffer data of this resource. The repositioning information is not updated, update_position() has to be used.
         @return the number of bytes read or -1 on error or end."""
-        raise Exception(interface_method_called)
 
-    # skipcq: PYL-R0201
+    @abc.abstractmethod
     def update_position(self, length):
         """Update the positioning information and discard the buffer data afterwards."""
-        raise Exception(interface_method_called)
 
-    # skipcq: PYL-R0201
+    @abc.abstractmethod
     def get_repositioning_data(self):
         """Get the data for repositioning the stream. The returned structure has to be JSON serializable."""
-        raise Exception(interface_method_called)
 
-    # skipcq: PYL-R0201
+    @abc.abstractmethod
     def close(self):
         """Close this logdata resource. Data access methods will not work any more afterwards."""
-        raise Exception(interface_method_called)
 
 
 class FileLogDataResource(LogDataResource):
     """This class defines a single log data resource using an underlying file accessible via the file descriptor. The characteristics
     of this type of resource is, that reopening and repositioning of the stream has to be possible."""
 
-    # skipcq: PYL-W0231
     def __init__(self, log_resource_name, log_stream_fd, default_buffer_size=1 << 16, repositioning_data=None):
         """Create a new file type resource.
         @param log_resource_name the unique name of this source as bytes array, has to start with "file://" before the file path.
