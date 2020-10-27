@@ -88,7 +88,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         elif self.auto_include_flag:
             self.expected_values_dict[value] = [timestamp, self.default_interval, 0]
             self.next_check_timestamp = min(self.next_check_timestamp, timestamp + self.default_interval)
-            self.log_new_learned_values += 1
+            self.log_learned_values += 1
             self.log_new_learned_values.append(value)
 
         # Always enforce persistency syncs from time to time, the timestamps in the records change even when no new hosts are added.
@@ -246,7 +246,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         elif STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
                 "'%s' could handle %d out of %d log atoms successfully and learned %d new values in the last 60"
-                " minutes.\nFollowing new values were learned: %s" % (
+                " minutes. Following new values were learned: %s" % (
                     component_name, self.log_success, self.log_total, self.log_learned_values, self.log_new_learned_values))
         self.log_success = 0
         self.log_total = 0

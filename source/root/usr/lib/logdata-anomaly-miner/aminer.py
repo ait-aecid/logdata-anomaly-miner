@@ -183,25 +183,31 @@ def main():
         if arg_name in ('--Stat', '--stat', '-s'):
             stat_level = sys.argv[arg_pos]
             arg_pos += 1
-            if stat_level not in (0, 1, 2, 'v', 'q', 'quiet'):
+            if stat_level not in ('0', '1', '2', 'v', 'q', 'quiet'):
                 print('There is no stat level', stat_level, file=sys.stderr)
                 sys.exit(1)
-            if stat_level == 'v':
+            if stat_level in ('0', '1', '2'):
+                stat_level = int(stat_level)
+            elif stat_level == 'v':
                 stat_level = 2
             elif stat_level in ('q', 'quiet'):
                 stat_level = 0
+            continue
         if arg_name in ('--Debug', '--debug', '-d'):
             debug_level = sys.argv[arg_pos]
             arg_pos += 1
-            if debug_level not in (0, 1, 2, 3, 'v', 'vv', 'q', 'quiet'):
+            if debug_level not in ('0', '1', '2', '3', 'v', 'vv', 'q', 'quiet'):
                 print('There is no debug level', debug_level, file=sys.stderr)
                 sys.exit(1)
-            if debug_level == 'v':
+            if debug_level in ('0', '1', '2', '3'):
+                debug_level = int(debug_level)
+            elif debug_level == 'v':
                 debug_level = 2
             elif debug_level == 'vv':
                 debug_level = 3
             elif debug_level in ('q', 'quiet'):
                 debug_level = 0
+            continue
         if arg_name in ('--RunAnalysis', '--runAnalysis', '--runanalysis', '-r'):
             run_analysis_child_flag = True
             continue
@@ -241,8 +247,8 @@ def main():
         print("Config-Error: %s" % e)
         sys.exit(1)
 
-    aminer_config.STAT_LEVEL = stat_level
-    aminer_config.DEBUG_LEVEL = debug_level
+    AMinerConfig.STAT_LEVEL = stat_level
+    AMinerConfig.DEBUG_LEVEL = debug_level
 
     if clear_persistence_flag:
         if remove_persistence_dirs:
@@ -457,7 +463,8 @@ def main():
         # Now execute the very same program again, but user might have moved or renamed it meanwhile. This would be problematic with
         # SUID-binaries (which we do not yet support). Do NOT just fork but also exec to avoid child circumventing
         # parent's ALSR due to cloned kernel VMA.
-        execArgs = ['AMinerChild', '--RunAnalysis', '--Config', analysis_config_file_name]
+        execArgs = ['AMinerChild', '--RunAnalysis', '--Config', analysis_config_file_name, '--Stat', str(stat_level), '--Debug',
+                    str(debug_level)]
         os.execve(sys.argv[0], execArgs, {})  # skipcq: BAN-B606
         print('%s: Failed to execute child process', file=sys.stderr)
         sys.stderr.flush()

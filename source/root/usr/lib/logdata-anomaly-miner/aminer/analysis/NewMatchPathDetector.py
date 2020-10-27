@@ -139,7 +139,7 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         elif STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
                 "'%s' could handle %d out of %d log atoms successfully and learned %d new paths in the last 60"
-                " minutes.\nFollowing new value combinations were learned: %s" % (
+                " minutes. Following new paths were learned: %s" % (
                     component_name, self.log_success, self.log_total, self.log_learned_paths, self.log_new_learned_paths))
         self.log_success = 0
         self.log_total = 0

@@ -695,7 +695,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         elif STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
                 "'%s' could handle %d out of %d log atoms successfully and learned %d new forward rules and %d new back rules in the last "
-                "60 minutes.\nFollowing new forward rules were learned: %d\nFollowing new back rules were learned: %d" % (
+                "60 minutes. Following new forward rules were learned: %d. Following new back rules were learned: %d" % (
                     component_name, self.log_success, self.log_total, self.log_forward_rules_learned, self.log_back_rules_learned,
                     self.log_forward_rules_learned, self.log_back_rules_learned))
         self.log_success = 0

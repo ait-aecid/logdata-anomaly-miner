@@ -37,9 +37,11 @@ class WhitelistViolationDetector(AtomHandlerInterface):
         """Receive on parsed atom and the information about the parser match.
         @param log_atom atom with parsed data to check
         @return True when logAtom is whitelisted, False otherwise."""
+        self.log_total += 1
         event_data = {}
         for rule in self.whitelist_rules:
             if rule.match(log_atom):
+                self.log_success += 1
                 return True
         analysis_component = {'AffectedLogAtomPathes': list(log_atom.parser_match.get_match_dictionary()),
                               'AffectedLogAtomValues': [log_atom.raw_data.decode()]}
@@ -71,3 +73,8 @@ class WhitelistViolationDetector(AtomHandlerInterface):
             listener.receive_event('Analysis.%s' % self.__class__.__name__, 'No whitelisting for current atom', sorted_log_lines,
                                    event_data, log_atom, self)
         return False
+
+    def log_statistics(self, component_name):
+        super().log_statistics(component_name)
+        for i, rule in enumerate(self.whitelist_rules):
+            rule.log_statistics(component_name + '.' + rule.__class__.__name__ + str(i))

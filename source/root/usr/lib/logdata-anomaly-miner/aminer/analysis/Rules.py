@@ -76,10 +76,21 @@ class MatchRule(metaclass=abc.ABCMeta):
     def log_statistics(self, rule_id):
         """log statistics of an MatchRule. Override this method for more sophisticated statistics output of the MatchRule."""
         if STAT_LEVEL > 0:
-            logging.getLogger(STAT_LOG_NAME).info("Rule %s could handle %d out of %d log atoms successfully in the last 60"
+            logging.getLogger(STAT_LOG_NAME).info("Rule '%s' could handle %d out of %d log atoms successfully in the last 60"
                                                   " minutes." % (rule_id, self.log_success, self.log_total))
         self.log_success = 0
         self.log_total = 0
+        if hasattr(self, 'sub_rules'):
+            for i, rule in enumerate(self.sub_rules):
+                rule.log_statistics(rule_id + '.' + rule.__class__.__name__ + str(i))
+        if hasattr(self, 'rule_lookup_dict'):
+            for i, rule_key in enumerate(self.rule_lookup_dict):
+                rule = self.rule_lookup_dict[rule_key]
+                rule.log_statistics(rule_id + '.' + rule.__class__.__name__ + str(i))
+        if hasattr(self, 'default_rule'):
+            self.default_rule.log_statistics(rule_id + '.default_rule.' + self.default_rule.__class__.__name__)
+        if hasattr(self, 'sub_rule'):
+            self.sub_rule.log_statistics(rule_id + '.' + self.sub_rule.__class__.__name__)
 
 
 class AndMatchRule(MatchRule):

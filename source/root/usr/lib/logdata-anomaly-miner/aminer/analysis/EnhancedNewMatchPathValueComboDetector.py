@@ -166,7 +166,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         elif STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
                 "'%s' could handle %d out of %d log atoms successfully and learned %d new value combinations in the last 60"
-                " minutes.\nFollowing new value combinations were learned: %s" % (
+                " minutes. Following new value combinations were learned: %s" % (
                     component_name, self.log_success, self.log_total, self.log_learned_path_value_combos, self.log_new_learned_values))
         self.log_success = 0
         self.log_total = 0
