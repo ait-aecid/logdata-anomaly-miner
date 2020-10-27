@@ -13,8 +13,10 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import time
 import os
+import logging
 
 from aminer import AMinerConfig
+from aminer.AMinerConfig import STAT_LEVEL, STAT_LOG_NAME
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input import AtomHandlerInterface
 from aminer.util import PersistencyUtil
@@ -36,6 +38,11 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         self.aminer_config = aminer_config
         self.persistence_id = persistence_id
 
+        self.log_success = 0
+        self.log_total = 0
+        self.log_learned_path_values = 0
+        self.log_new_learned_values = []
+
         PersistencyUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
@@ -45,6 +52,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
             self.known_path_set = set(persistence_data)
 
     def receive_atom(self, log_atom):
+        self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
         for target_path in self.target_path_list:
             match = match_dict.get(target_path, None)
@@ -53,6 +61,8 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
             if match.match_object not in self.known_path_set:
                 if self.auto_include_flag:
                     self.known_path_set.add(match.match_object)
+                    self.log_learned_path_values += 1
+                    self.log_new_learned_values.append(match.match_object)
                     if self.next_persist_time is None:
                         self.next_persist_time = time.time() + 600
 
@@ -84,6 +94,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                 for listener in self.anomaly_event_handlers:
                     listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New value(s) detected', sorted_log_lines, event_data,
                                            log_atom, self)
+                self.log_success += 1
 
     def get_time_trigger_class(self):
         """Get the trigger class this component should be registered for. This trigger is used only for persistency, so real-time
@@ -106,3 +117,20 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         """Immediately write persistence data to storage."""
         PersistencyUtil.store_json(self.persistence_file_name, list(self.known_path_set))
         self.next_persist_time = None
+
+    def log_statistics(self, component_name):
+        """log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
+        @param component_name the name of the component which is printed in the log line."""
+        if STAT_LEVEL == 1:
+            logging.getLogger(STAT_LOG_NAME).info(
+                "'%s' could handle %d out of %d log atoms successfully and learned %d new value combinations in the last 60"
+                " minutes." % (component_name, self.log_success, self.log_total, self.log_learned_path_values))
+        elif STAT_LEVEL == 2:
+            logging.getLogger(STAT_LOG_NAME).info(
+                "'%s' could handle %d out of %d log atoms successfully and learned %d new value combinations in the last 60"
+                " minutes.\nFollowing new value combinations were learned: %s" % (
+                    component_name, self.log_success, self.log_total, self.log_learned_path_values, self.log_new_learned_values))
+        self.log_success = 0
+        self.log_total = 0
+        self.log_learned_path_values = 0
+        self.log_new_learned_values = []

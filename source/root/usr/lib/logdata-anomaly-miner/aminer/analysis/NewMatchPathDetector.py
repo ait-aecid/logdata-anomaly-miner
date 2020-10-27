@@ -13,8 +13,10 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import time
 import os
+import logging
 
 from aminer import AMinerConfig
+from aminer.AMinerConfig import STAT_LEVEL, STAT_LOG_NAME
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events import EventSourceInterface
 from aminer.input import AtomHandlerInterface
@@ -35,6 +37,11 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         self.aminer_config = aminer_config
         self.persistence_id = persistence_id
 
+        self.log_success = 0
+        self.log_total = 0
+        self.log_learned_paths = 0
+        self.log_new_learned_paths = []
+
         PersistencyUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
@@ -48,12 +55,15 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         @param log_atom the parsed log atom
         @return True if this handler was really able to handle and process the match. Depending on this information, the caller
         may decide if it makes sense passing the parsed atom also to other handlers."""
+        self.log_total += 1
         unknown_path_list = []
         for path in log_atom.parser_match.get_match_dictionary().keys():
             if path not in self.known_path_set:
                 unknown_path_list.append(path)
                 if self.auto_include_flag:
                     self.known_path_set.add(path)
+                    self.log_learned_paths += 1
+                    self.log_new_learned_paths.append(path)
         if unknown_path_list:
             if self.next_persist_time is None:
                 self.next_persist_time = time.time() + 600
@@ -78,6 +88,7 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             for listener in self.anomaly_event_handlers:
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New path(es) detected', sorted_log_lines, event_data,
                                        log_atom, self)
+        self.log_success += 1
         return True
 
     def get_time_trigger_class(self):
@@ -117,3 +128,20 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 whitelisted_str += ', '
             whitelisted_str += path_name
         return 'Whitelisted path(es) %s in %s' % (whitelisted_str, sorted_log_lines[0])
+
+    def log_statistics(self, component_name):
+        """log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
+        @param component_name the name of the component which is printed in the log line."""
+        if STAT_LEVEL == 1:
+            logging.getLogger(STAT_LOG_NAME).info(
+                "'%s' could handle %d out of %d log atoms successfully and learned %d new paths in the last 60"
+                " minutes." % (component_name, self.log_success, self.log_total, self.log_learned_paths))
+        elif STAT_LEVEL == 2:
+            logging.getLogger(STAT_LOG_NAME).info(
+                "'%s' could handle %d out of %d log atoms successfully and learned %d new paths in the last 60"
+                " minutes.\nFollowing new value combinations were learned: %s" % (
+                    component_name, self.log_success, self.log_total, self.log_learned_paths, self.log_new_learned_paths))
+        self.log_success = 0
+        self.log_total = 0
+        self.log_learned_paths = 0
+        self.log_new_learned_paths = []

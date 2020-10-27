@@ -15,8 +15,10 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import time
 import os
+import logging
 
 from aminer import AMinerConfig
+from aminer.AMinerConfig import STAT_LEVEL, STAT_LOG_NAME
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events import EventSourceInterface
 from aminer.input import AtomHandlerInterface
@@ -52,6 +54,11 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
         self.aminer_config = aminer_config
         self.persistence_id = persistence_id
 
+        self.log_success = 0
+        self.log_total = 0
+        self.log_learned_path_value_combos = 0
+        self.log_new_learned_values = []
+
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         self.next_persist_time = None
         self.load_persistency_data()
@@ -74,6 +81,7 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
         """Receive on parsed atom and the information about the parser match.
         @return True if a value combination was extracted and checked against the list of known combinations, no matter if the checked
         values were new or not."""
+        self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
 
         id_match_element = None
@@ -126,7 +134,7 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
             # Found value for all target paths. No need to wait more.
             self.process_id_dict_entry(id_dict[id_match_object], log_atom)
             del id_dict[id_match_object]
-
+        self.log_success += 1
         return True
 
     def process_id_dict_entry(self, id_dict_entry, log_atom):
@@ -134,6 +142,8 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
             # Combo is unknown, process and raise anomaly
             if self.auto_include_flag:
                 self.known_values.append(id_dict_entry)
+                self.log_learned_path_value_combos += 1
+                self.log_new_learned_values.append(id_dict_entry)
                 if self.next_persist_time is None:
                     self.next_persist_time = time.time() + 600
 
@@ -183,3 +193,20 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
         if event_data[1] not in self.known_values:
             self.known_values.append(event_data[1])
         return 'Whitelisted path(es) %s with %s in %s' % (', '.join(self.target_path_list), event_data[1], sorted_log_lines[0])
+
+    def log_statistics(self, component_name):
+        """log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
+        @param component_name the name of the component which is printed in the log line."""
+        if STAT_LEVEL == 1:
+            logging.getLogger(STAT_LOG_NAME).info(
+                "'%s' could handle %d out of %d log atoms successfully and learned %d new value combinations in the last 60"
+                " minutes." % (component_name, self.log_success, self.log_total, self.log_learned_path_value_combos))
+        elif STAT_LEVEL == 2:
+            logging.getLogger(STAT_LOG_NAME).info(
+                "'%s' could handle %d out of %d log atoms successfully and learned %d new value combinations in the last 60"
+                " minutes.\nFollowing new value combinations were learned: %s" % (
+                    component_name, self.log_success, self.log_total, self.log_learned_path_value_combos, self.log_new_learned_values))
+        self.log_success = 0
+        self.log_total = 0
+        self.log_learned_path_value_combos = 0
+        self.log_new_learned_values = []

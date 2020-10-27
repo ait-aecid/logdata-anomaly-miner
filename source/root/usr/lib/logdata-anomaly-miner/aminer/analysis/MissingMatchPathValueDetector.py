@@ -12,8 +12,10 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import time
+import logging
 
 from aminer import AMinerConfig
+from aminer.AMinerConfig import STAT_LEVEL, STAT_LOG_NAME
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events import EventSourceInterface
 from aminer.input import AtomHandlerInterface
@@ -46,6 +48,11 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         self.aminer_config = aminer_config
         self.persistence_id = persistence_id
 
+        self.log_success = 0
+        self.log_total = 0
+        self.log_learned_values = 0
+        self.log_new_learned_values = []
+
         PersistencyUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
@@ -61,6 +68,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         @return True if this handler was really able to handle and process the atom. Depending on this information, the caller
         may decide if it makes sense passing the atom also to other handlers or to retry later. This behaviour has to be documented
         at each source implementation sending LogAtoms."""
+        self.log_total += 1
         value = self.get_channel_key(log_atom)
         if value is None:
             return False
@@ -80,11 +88,14 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         elif self.auto_include_flag:
             self.expected_values_dict[value] = [timestamp, self.default_interval, 0]
             self.next_check_timestamp = min(self.next_check_timestamp, timestamp + self.default_interval)
+            self.log_new_learned_values += 1
+            self.log_new_learned_values.append(value)
 
         # Always enforce persistency syncs from time to time, the timestamps in the records change even when no new hosts are added.
         if self.next_persist_time is None:
             self.next_persist_time = time.time() + 600
         self.check_timeouts(timestamp, log_atom)
+        self.log_success += 1
         return True
 
     def get_channel_key(self, log_atom):
@@ -224,6 +235,23 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
             else:
                 self.set_check_value(key_name, new_interval)
         return 'Updated %d entries' % len(event_data)
+
+    def log_statistics(self, component_name):
+        """log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
+        @param component_name the name of the component which is printed in the log line."""
+        if STAT_LEVEL == 1:
+            logging.getLogger(STAT_LOG_NAME).info(
+                "'%s' could handle %d out of %d log atoms successfully and learned %d new values in the last 60"
+                " minutes." % (component_name, self.log_success, self.log_total, self.log_learned_values))
+        elif STAT_LEVEL == 2:
+            logging.getLogger(STAT_LOG_NAME).info(
+                "'%s' could handle %d out of %d log atoms successfully and learned %d new values in the last 60"
+                " minutes.\nFollowing new values were learned: %s" % (
+                    component_name, self.log_success, self.log_total, self.log_learned_values, self.log_new_learned_values))
+        self.log_success = 0
+        self.log_total = 0
+        self.log_learned_values = 0
+        self.log_new_learned_values = []
 
 
 class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):

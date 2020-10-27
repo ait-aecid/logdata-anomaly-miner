@@ -51,9 +51,11 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
     def receive_atom(self, log_atom):
         """Receive a parsed atom and check all the classification rules, that will trigger correlation rule evaluation and event
         triggering on violations."""
+        self.log_total += 1
         self.last_log_atom = log_atom
         for rule in self.event_classification_ruleset:
             rule.match(log_atom)
+        self.log_success += 1
 
     def get_time_trigger_class(self):
         """Get the trigger class this component should be registered for. This trigger is used mainly for persistency, so real-time
@@ -102,6 +104,11 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
     def do_persist(self):
         """Immediately write persistence data to storage."""
         self.next_persist_time = time.time() + 600.0
+
+    def log_statistics(self, component_name):
+        super().log_statistics(component_name)
+        for i, rule in enumerate(self.event_classification_ruleset):
+            rule.log_statistics(component_name + '.' + rule.__class__.__name__ + str(i))
 
 
 class EventClassSelector(Rules.MatchAction):

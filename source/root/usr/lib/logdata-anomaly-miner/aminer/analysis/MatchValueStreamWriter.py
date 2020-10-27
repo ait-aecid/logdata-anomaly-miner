@@ -31,6 +31,7 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
 
     def receive_atom(self, log_atom):
         """Forward match value information to the stream."""
+        self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
         add_sep_flag = False
         contains_data = False
@@ -52,6 +53,7 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
             else:
                 self.stream.write(result)
                 self.stream.write(b'\n')
+            self.log_success += 1
 
     def get_time_trigger_class(self):
         """Get the trigger class this component should be registered for. This trigger is used only for persistency, so real-time

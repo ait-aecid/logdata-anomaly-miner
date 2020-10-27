@@ -62,6 +62,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
             self.event_delta_table = [0] * parallel_check_count * parallel_check_count * 2
 
     def receive_atom(self, log_atom):
+        self.log_total += 1
         event_data = {}
         timestamp = log_atom.get_timestamp()
         if timestamp is None:
@@ -142,6 +143,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
             for listener in self.anomaly_event_handlers:
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Correlation report', result, event_data, log_atom, self)
             self.reset_statistics()
+        self.log_success += 1
 
     def rule_to_dict(self, rule):
         r = {'Type': str(rule.__class__.__name__)}

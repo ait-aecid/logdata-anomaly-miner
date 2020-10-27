@@ -42,11 +42,14 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def receive_atom(self, log_atom):
+        self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
+        success_flag = False
         for target_path in self.target_path_list:
             match_element = match_dict.get(target_path, None)
             if match_element is not None:
                 self.count_dict[target_path] += 1
+                success_flag = True
         if not self.target_path_list:
             path = iter(match_dict).__next__()
             if path not in self.count_dict:
@@ -55,6 +58,8 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
         if self.next_report_time is None:
             self.next_report_time = time.time() + self.report_interval
+        if success_flag:
+            self.log_success += 1
         return True
 
     def do_timer(self, trigger_time):
