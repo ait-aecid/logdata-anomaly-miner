@@ -261,8 +261,6 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         next_real_time_trigger_time = None
         next_analysis_time_trigger_time = None
         next_statistics_log_time = time.time() + 3600
-        # TODO: remove this test setting
-        next_statistics_log_time = time.time() + 165
 
         delayed_return_status = 0
         while self.run_analysis_loop_flag:
