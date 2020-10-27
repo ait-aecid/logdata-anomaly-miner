@@ -22,6 +22,10 @@ class SequenceModelElement(ModelElementInterface):
         self.element_id = element_id
         self.children = children
 
+    def get_id(self):
+        """Get the element ID."""
+        return self.element_id
+
     def get_child_elements(self):
         """Return all model elements of the sequence."""
         return self.children

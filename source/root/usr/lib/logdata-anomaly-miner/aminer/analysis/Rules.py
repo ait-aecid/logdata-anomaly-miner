@@ -17,6 +17,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import datetime
 import sys
+import abc
 
 from aminer.util import LogarithmicBackoffHistory
 from aminer.util import ObjectHistory
@@ -26,14 +27,13 @@ from aminer.analysis.AtomFilters import SubhandlerFilter
 result_string = '%s(%s)'
 
 
-class MatchAction:
+class MatchAction(metaclass=abc.ABCMeta):
     """This is the interface of all match actions."""
 
-    # skipcq: PYL-R0201
+    @abc.abstractmethod
     def match_action(self, log_atom):
         """This method is invoked if a rule rule has matched.
         @param log_atom the LogAtom matching the rules."""
-        raise Exception('Interface called')
 
 
 class EventGenerationMatchAction(MatchAction):
@@ -62,12 +62,12 @@ class AtomFilterMatchAction(MatchAction, SubhandlerFilter):
         self.receive_atom(log_atom)
 
 
-class MatchRule:
+class MatchRule(metaclass=abc.ABCMeta):
     """This is the interface of all match rules."""
 
+    @abc.abstractmethod
     def match(self, log_atom):
         """Check if this rule matches. On match an optional matchAction could be triggered."""
-        raise Exception('Interface called on %s' % self)
 
 
 class AndMatchRule(MatchRule):

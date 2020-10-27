@@ -24,6 +24,10 @@ class Base64StringModelElement(ModelElementInterface):
     def __init__(self, path_id):
         self.path_id = path_id
 
+    def get_id(self):
+        """Get the element ID."""
+        return self.path_id
+
     def get_child_elements(self):
         return None
 
