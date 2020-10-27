@@ -60,9 +60,20 @@ class AnalysisContext:
         self.real_time_triggered_components = []
         self.analysis_time_triggered_components = []
 
-        logging.basicConfig(filename=AMinerConfig.LOG_FILE, level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s',
-                            datefmt='%d.%m.%Y %H:%M:%S')
-        logging.info("AMiner started.")
+        rc_logger = logging.getLogger(AMinerConfig.REMOTE_CONTROL_LOG_NAME)
+        rc_logger.setLevel(logging.DEBUG)
+        rc_file_handler = logging.FileHandler(AMinerConfig.REMOTE_CONTROL_LOG_FILE)
+        rc_file_handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(levelname)s %(message)s', datefmt='%d.%m.%Y %H:%M:%S'))
+        rc_logger.addHandler(rc_file_handler)
+        logging.addLevelName(15, "REMOTECONTROL")
+        rc_logger.log(logging.INFO, 'AMiner started.')
+
+        persistence_dir = self.aminer_config.config_properties['Core.PersistenceDir']
+        stat_logger = logging.getLogger(AMinerConfig.STAT_LOG_NAME)
+        stat_logger.setLevel(logging.INFO)
+        stat_file_handler = logging.FileHandler(os.path.join(persistence_dir, 'statistics.log'))
+        stat_file_handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(message)s', datefmt='%d.%m.%Y %H:%M:%S'))
+        stat_logger.addHandler(stat_file_handler)
 
     def add_time_triggered_component(self, component, trigger_class=None):
         """Add a time-triggered component to the registry."""
@@ -249,6 +260,9 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         # Always start when number is None.
         next_real_time_trigger_time = None
         next_analysis_time_trigger_time = None
+        next_statistics_log_time = time.time() + 3600
+        # TODO: remove this test setting
+        next_statistics_log_time = time.time() + 80
 
         delayed_return_status = 0
         while self.run_analysis_loop_flag:
@@ -356,6 +370,13 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                     next_trigger_request = component.do_timer(real_time)
                     next_trigger_offset = min(next_trigger_offset, next_trigger_request)
                 next_real_time_trigger_time = real_time + next_trigger_offset
+
+            if real_time >= next_statistics_log_time:
+                next_statistics_log_time = real_time + 3600
+                # log the statistics for every component.
+                for component_name in self.analysis_context.registered_components_by_name:
+                    component = self.analysis_context.registered_components_by_name[component_name]
+                    component.log_statistics(component_name)
 
             # Handle the analysis time events. The analysis time will be different when an analysis time component is registered.
             analysis_time = self.analysis_context.analysis_time
@@ -536,11 +557,9 @@ class AnalysisChildRemoteControlHandler:
                     'TimestampCorrectionFilters': aminer.analysis.TimestampCorrectionFilters,
                     'TimestampsUnsortedDetector': aminer.analysis.TimestampsUnsortedDetector,
                     'WhitelistViolationDetector': aminer.analysis.WhitelistViolationDetector}
-                # write this to the log file!
-                logging.basicConfig(filename=AMinerConfig.LOG_FILE, level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s',
-                                    datefmt='%d.%m.%Y %H:%M:%S')
-                logging.addLevelName(15, "REMOTECONTROL")
-                logging.log(15, json_request_data[0])
+
+                logger = logging.getLogger(AMinerConfig.REMOTE_CONTROL_LOG_NAME)
+                logger.log(15, json_request_data[0])
 
                 # skipcq: PYL-W0122
                 exec(json_request_data[0], {'__builtins__': None}, exec_locals)

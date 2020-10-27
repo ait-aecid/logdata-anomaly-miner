@@ -40,10 +40,12 @@ class SubhandlerFilter(AtomHandlerInterface):
         """Pass the atom to the subhandlers.
         @return false when no subhandler was able to handle the atom."""
         result = False
+        self.log_total += 1
         for handler, stop_when_handled_flag in self.subhandler_list:
             handler_result = handler.receive_atom(log_atom)
             if handler_result is True:
                 result = True
+                self.log_success += 1
                 if stop_when_handled_flag:
                     break
         return result
@@ -64,6 +66,7 @@ class MatchPathFilter(AtomHandlerInterface):
     def receive_atom(self, log_atom):
         """Receive an atom and pass it to the subhandlers.
         @return False when logAtom did not contain match data or was not forwarded to any handler, True otherwise."""
+        self.log_total += 1
         if log_atom.parser_match is None:
             return False
         match_dict = log_atom.parser_match.get_match_dictionary()
@@ -71,10 +74,12 @@ class MatchPathFilter(AtomHandlerInterface):
             if path_name in match_dict:
                 if target_handler is not None:
                     target_handler.receive_atom(log_atom)
+                self.log_success += 1
                 return True
         if self.default_parsed_atom_handler is None:
             return False
         self.default_parsed_atom_handler.receive_atom(log_atom)
+        self.log_success += 1
         return True
 
 
@@ -90,6 +95,7 @@ class MatchValueFilter(AtomHandlerInterface):
         self.default_parsed_atom_handler = default_parsed_atom_handler
 
     def receive_atom(self, log_atom):
+        self.log_total += 1
         if log_atom.parser_match is None:
             return False
         target_value = log_atom.parser_match.get_match_dictionary().get(self.target_path, None)
@@ -99,4 +105,5 @@ class MatchValueFilter(AtomHandlerInterface):
         if target_handler is None:
             return False
         target_handler.receive_atom(log_atom)
+        self.log_success += 1
         return True

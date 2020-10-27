@@ -95,6 +95,13 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         self.aminer_config = aminer_config
         self.output_log_line = output_log_line
 
+        self.log_success = 0
+        self.log_total = 0
+        self.log_forward_rules_learned = 0
+        self.log_back_rules_learned = 0
+        self.log_new_forward_rules = []
+        self.log_new_back_rules = []
+
         PersistencyUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, 'EventCorrelationDetector', persistence_id)
         self.persistence_id = persistence_id
@@ -152,6 +159,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                 return max_observations - i
 
     def receive_atom(self, log_atom):
+        self.log_total += 1
         timestamp = log_atom.get_timestamp()
         if timestamp is None:
             log_atom.atom_time = time.time()
@@ -372,8 +380,12 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                             # Add hypothesis to rules.
                             if implication.trigger_event in self.forward_rules:
                                 self.forward_rules[implication.trigger_event].append(implication)
+                                self.log_forward_rules_learned += 1
+                                self.log_new_forward_rules.append(implication)
                             else:
                                 self.forward_rules[implication.trigger_event] = [implication]
+                                self.log_forward_rules_learned += 1
+                                self.log_new_forward_rules.append(implication)
                             if implication.implied_event in self.forward_rules_inv:
                                 self.forward_rules_inv[implication.implied_event].append(implication)
                             else:
@@ -450,8 +462,12 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                                 # Add hypothesis to rules.
                                 if implication.trigger_event in self.back_rules:
                                     self.back_rules[implication.trigger_event].append(implication)
+                                    self.log_back_rules_learned += 1
+                                    self.log_new_back_rules.append(implication)
                                 else:
                                     self.back_rules[implication.trigger_event] = [implication]
+                                    self.log_back_rules_learned += 1
+                                    self.log_new_back_rules.append(implication)
                                 if implication.implied_event in self.back_rules_inv:
                                     self.back_rules_inv[implication.implied_event].append(implication)
                                 else:
@@ -623,6 +639,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
             if len(self.hypothesis_candidates) < self.candidates_size:
                 if random.uniform(0.0, 1.0) < self.generation_probability:
                     self.hypothesis_candidates.append((log_event, log_atom.atom_time))
+        self.log_success += 1
 
     def get_time_trigger_class(self):
         """Get the trigger class this component should be registered for. This trigger is used only for persistency, so real-time
@@ -664,6 +681,27 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     ('forward', tuple(event_a), tuple(implication.implied_event), implication.max_observations, implication.min_eval_true))
         PersistencyUtil.store_json(self.persistence_file_name, list(known_path_set))
         self.next_persist_time = None
+
+   def log_statistics(self, component_name):
+        """log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
+        @param component_name the name of the component which is printed in the log line."""
+        if STAT_LEVEL == 1:
+            logging.getLogger(STAT_LOG_NAME).info(
+                "'%s' could handle %d out of %d log atoms successfully and learned %d new forward rules and %d new back rules in the last "
+                "60 minutes." % (
+                    component_name, self.log_success, self.log_total, self.log_forward_rules_learned, self.log_back_rules_learned))
+        elif STAT_LEVEL == 2:
+            logging.getLogger(STAT_LOG_NAME).info(
+                "'%s' could handle %d out of %d log atoms successfully and learned %d new forward rules and %d new back rules in the last "
+                "60 minutes.\nFollowing new forward rules were learned: %d\nFollowing new back rules were learned: %d" % (
+                    component_name, self.log_success, self.log_total, self.log_forward_rules_learned, self.log_back_rules_learned,
+                    self.log_forward_rules_learned, self.log_back_rules_learned))
+        self.log_success = 0
+        self.log_total = 0
+        self.log_forward_rules_learned = 0
+        self.log_back_rules_learned = 0
+        self.log_new_forward_rules = []
+        self.log_new_back_rules = []
 
 
 class Implication:

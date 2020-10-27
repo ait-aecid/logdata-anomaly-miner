@@ -15,10 +15,12 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import time
 import os
+import logging
 
 from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
 from aminer.util import PersistencyUtil
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
+from aminer.AMinerConfig import STAT_LEVEL, STAT_LOG_NAME
 
 
 class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
@@ -48,6 +50,10 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         self.output_log_line = output_log_line
         self.aminer_config = aminer_config
         self.date_string = "%Y-%m-%d %H:%M:%S"
+        self.log_success = 0
+        self.log_total = 0
+        self.log_learned_path_value_combos = 0
+        self.log_new_learned_values = []
 
     def load_persistency_data(self):
         """Load the persistency data from storage."""
@@ -62,6 +68,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         """Receive on parsed atom and the information about the parser match.
         @return True if a value combination was extracted and checked against the list of known combinations, no matter if the checked
         values were new or not."""
+        self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
         timestamp = log_atom.get_timestamp()
         if timestamp is None:
@@ -83,6 +90,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
 
         if self.known_values_dict.get(match_value_tuple, None) is None:
             self.known_values_dict[match_value_tuple] = [timestamp, timestamp, 1]
+            self.log_new_learned_values.append(match_value_tuple)
         else:
             extra_data = self.known_values_dict.get(match_value_tuple, None)
             extra_data[1] = timestamp
@@ -103,6 +111,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
                               'Metadata': metadata}
         event_data = {'AnalysisComponent': analysis_component}
         if (self.auto_include_flag and self.known_values_dict.get(match_value_tuple, None)[2] == 1) or not self.auto_include_flag:
+            self.log_learned_path_value_combos += 1
             for listener in self.anomaly_event_handlers:
                 original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
                 if original_log_line_prefix is None:
@@ -124,6 +133,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         if self.auto_include_flag:
             if self.next_persist_time is None:
                 self.next_persist_time = time.time() + 600
+        self.log_success += 1
         return True
 
     def do_persist(self):
@@ -145,3 +155,20 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         current_timestamp = event_data[0].get_timestamp()
         self.known_values_dict[event_data[1]] = [current_timestamp, current_timestamp, 1]
         return 'Whitelisted path(es) %s with %s in %s' % (', '.join(self.target_path_list), event_data[1], sorted_log_lines[0])
+
+    def log_statistics(self, component_name):
+        """log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
+        @param component_name the name of the component which is printed in the log line."""
+        if STAT_LEVEL == 1:
+            logging.getLogger(STAT_LOG_NAME).info(
+                "'%s' could handle %d out of %d log atoms successfully and learned %d new value combinations in the last 60"
+                " minutes." % (component_name, self.log_success, self.log_total, self.log_learned_path_value_combos))
+        elif STAT_LEVEL == 2:
+            logging.getLogger(STAT_LOG_NAME).info(
+                "'%s' could handle %d out of %d log atoms successfully and learned %d new value combinations in the last 60"
+                " minutes.\nFollowing new value combinations were learned: %s" % (
+                    component_name, self.log_success, self.log_total, self.log_learned_path_value_combos, self.log_new_learned_values))
+        self.log_success = 0
+        self.log_total = 0
+        self.log_learned_path_value_combos = 0
+        self.log_new_learned_values = []

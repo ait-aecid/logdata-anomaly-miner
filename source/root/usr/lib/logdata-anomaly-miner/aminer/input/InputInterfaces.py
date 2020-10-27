@@ -1,6 +1,8 @@
 """This file contains interface definition useful implemented by classes in this directory and for use from code outside this
 directory. All classes are defined in separate files, only the namespace references are added here to simplify the code."""
 import abc
+import logging
+from aminer.AMinerConfig import STAT_LEVEL, STAT_LOG_NAME, DEBUG_LEVEL, DEBUG_LOG_NAME
 
 
 class AtomizerFactory(metaclass=abc.ABCMeta):
@@ -36,6 +38,8 @@ class StreamAtomizer(metaclass=abc.ABCMeta):
 
 class AtomHandlerInterface(metaclass=abc.ABCMeta):
     """This is the common interface of all handlers suitable for receiving log atoms."""
+    log_success = 0
+    log_total = 0
 
     @abc.abstractmethod
     def receive_atom(self, log_atom):
@@ -44,3 +48,12 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         @return True if this handler was really able to handle and process the atom. Depending on this information, the caller
         may decide if it makes sense passing the atom also to other handlers or to retry later. This behaviour has to be documented
         at each source implementation sending LogAtoms."""
+
+    def log_statistics(self, component_name):
+        """log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
+        @param component_name the name of the component which is printed in the log line."""
+        if STAT_LEVEL > 0:
+            logging.getLogger(STAT_LOG_NAME).info("'%s' could handle %d out of %d log atoms successfully in the last 60"
+                                                  " minutes." % (component_name, self.log_success, self.log_total))
+        self.log_success = 0
+        self.log_total = 0
