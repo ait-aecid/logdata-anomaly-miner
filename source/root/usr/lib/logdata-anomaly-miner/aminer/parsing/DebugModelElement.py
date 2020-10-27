@@ -28,6 +28,10 @@ class DebugModelElement(ModelElementInterface):
         # To avoid having those elements hidden in production configuration, write a line every time the class is instantiated.
         print('DebugModelElement %s added' % element_id, file=sys.stderr)
 
+    def get_id(self):
+        """Get the element ID."""
+        return self.element_id
+
     def get_child_elements(self):
         """Get all possible child model elements of this element.
         @return empty list as there are no children of this element."""

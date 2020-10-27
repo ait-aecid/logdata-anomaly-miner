@@ -134,6 +134,10 @@ class DateTimeModelElement(ModelElementInterface):
             raise Exception('Cannot use %%s (seconds since epoch) with other non-second format types')
         self.date_format_parts = date_format_parts
 
+    def get_id(self):
+        """Get the element ID."""
+        return self.path_id
+
     def get_child_elements(self):
         """Get all possible child model elements of this element.
         @return None as no children are allowed."""
