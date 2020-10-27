@@ -280,6 +280,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
             raise Exception('No data reading, def merge yet')
 
     def receive_atom(self, log_atom):
+        self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
         data_updated_flag = False
         for data_item in self.histogram_data:
@@ -287,6 +288,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
             if match is None:
                 continue
             data_updated_flag = True
+            self.log_success += 1
             data_item.add_value(match.match_object)
 
         timestamp = log_atom.get_timestamp()
@@ -447,7 +449,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
                 match_value = match.match_object
                 if isinstance(match.match_object, bytes):
                     match.match_object = match.match_object.decode()
-                histogram_mapping[1].propertyPath = mapped_path
+                histogram_mapping[1].property_path = mapped_path
                 histogram_mapping[1].add_value(match_value)
                 histogram_mapping[2] = log_atom.parser_match
             else:
@@ -457,7 +459,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
                 new_histogram = histogram_mapping[1].clone()
                 match = match_dict.get(mapped_path, None)
                 match_value = match.match_object
-                histogram_mapping[1].propertyPath = mapped_path
+                histogram_mapping[1].property_path = mapped_path
                 new_histogram.add_value(match_value)
                 new_path_set = histogram_mapping[0] - missing_pathes
                 new_histogram_mapping = [new_path_set, new_histogram, log_atom.parser_match]
@@ -550,7 +552,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
                     bin_definition['ModuloValue'] = data_item.bin_definition.modulo_value
                     bin_definition['TimeUnit'] = data_item.bin_definition.time_unit
                 d['BinDefinition'] = bin_definition
-            d['PropertyPath'] = data_item.propertyPath
+            d['PropertyPath'] = data_item.property_path
             report_str += os.linesep + 'Path values "%s":' % '", "'.join(histogram_mapping[0])
             if isinstance(histogram_mapping[2].match_element.match_string, bytes):
                 histogram_mapping[2].match_element.match_string = histogram_mapping[2].match_element.match_string.decode()

@@ -88,7 +88,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def receive_atom(self, log_atom):
         """Receives an parsed atom and keeps track of the event types and the values of the variables of them"""
-
+        self.log_total += 1
         # Get the current time
         if self.track_time_for_TSA:
             if log_atom.atom_time is not None:
@@ -253,7 +253,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             # Appends the values to the event type
             self.append_values(log_atom, current_index)
         self.num_eventlines[current_index] += 1
-
+        self.log_success += 1
         return True
 
     def get_time_trigger_class(self):

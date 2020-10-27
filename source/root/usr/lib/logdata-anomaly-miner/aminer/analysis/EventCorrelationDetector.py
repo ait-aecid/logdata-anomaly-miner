@@ -682,7 +682,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         PersistencyUtil.store_json(self.persistence_file_name, list(known_path_set))
         self.next_persist_time = None
 
-   def log_statistics(self, component_name):
+    def log_statistics(self, component_name):
         """log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
         @param component_name the name of the component which is printed in the log line."""
         if STAT_LEVEL == 1:
