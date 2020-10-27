@@ -20,6 +20,7 @@ class MatchFilter(AtomHandlerInterface):
 
     def receive_atom(self, log_atom):
         """Forward all log atoms that involve specified path and optionally value."""
+        self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
         for target_path in self.target_path_list:
             match = match_dict.get(target_path, None)
@@ -52,3 +53,4 @@ class MatchFilter(AtomHandlerInterface):
             for listener in self.anomaly_event_handlers:
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Log Atom Filtered',
                                        sorted_log_lines, event_data, log_atom, self)
+            self.log_success += 1

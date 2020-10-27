@@ -416,6 +416,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
             raise Exception('No data reading, def merge yet')
 
     def receive_atom(self, log_atom):
+        self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
         match = match_dict.get(self.property_path, None)
         if match is None:
@@ -488,6 +489,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
 
         if self.next_persist_time is None:
             self.next_persist_time = time.time() + 600
+        self.log_success += 1
 
     def get_time_trigger_class(self):
         """Get the trigger class this component should be registered for. This trigger is used only for persistency, so real-time
