@@ -290,13 +290,13 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             following_module.do_persist()
 
         self.next_persist_time = time.time() + 600.0
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.' % self.__class__.__name__)
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def add_following_modules(self, following_module):
         """Adds the given Module to the following module list"""
         self.following_modules.append(following_module)
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s added following module %s.' % (
-            self.__class__.__name__, str(following_module)))
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug(
+            '%s added following module %s.', self.__class__.__name__, str(following_module))
 
     def init_values(self, current_index):
         """Initializes the variable_key_list and the list for the values"""

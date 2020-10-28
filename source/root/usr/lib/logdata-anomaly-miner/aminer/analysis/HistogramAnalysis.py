@@ -324,7 +324,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
     def do_persist(self):
         """Immediately write persistence data to storage."""
         self.next_persist_time = None
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.' % self.__class__.__name__)
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def send_report(self, log_atom, timestamp):
         """Sends a report to the event handlers."""
@@ -385,7 +385,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
         self.last_report_time = timestamp
         self.next_report_time = timestamp + self.report_interval
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s sent report.' % self.__class__.__name__)
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s sent report.', self.__class__.__name__)
 
 
 class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
@@ -515,7 +515,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
     def do_persist(self):
         """Immediately write persistence data to storage."""
         self.next_persist_time = None
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.' % self.__class__.__name__)
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def send_report(self, log_atom, timestamp):
         """Send report to event handlers."""
@@ -586,4 +586,4 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
 
         self.last_report_time = timestamp
         self.next_report_time = timestamp + self.report_interval
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s sent report.' % self.__class__.__name__)
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s sent report.', self.__class__.__name__)

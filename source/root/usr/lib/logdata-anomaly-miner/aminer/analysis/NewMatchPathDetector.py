@@ -49,7 +49,7 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             self.known_path_set = set()
         else:
             self.known_path_set = set(persistence_data)
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.' % self.__class__.__name__)
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     def receive_atom(self, log_atom):
         """Receive on parsed atom and the information about the parser match.
@@ -137,12 +137,12 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
                 "'%s' processed %d out of %d log atoms successfully and learned %d new paths in the last 60"
-                " minutes." % (component_name, self.log_success, self.log_total, self.log_learned_paths))
+                " minutes.", component_name, self.log_success, self.log_total, self.log_learned_paths)
         elif STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
                 "'%s' processed %d out of %d log atoms successfully and learned %d new paths in the last 60"
-                " minutes. Following new paths were learned: %s" % (
-                    component_name, self.log_success, self.log_total, self.log_learned_paths, self.log_new_learned_paths))
+                " minutes. Following new paths were learned: %s", component_name, self.log_success, self.log_total, self.log_learned_paths,
+                self.log_new_learned_paths)
         self.log_success = 0
         self.log_total = 0
         self.log_learned_paths = 0

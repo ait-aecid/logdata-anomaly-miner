@@ -136,7 +136,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                         self.forward_rules_inv[implied_event].append(rule)
                     else:
                         self.forward_rules_inv[implied_event] = [rule]
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.' % self.__class__.__name__)
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     # skipcq: PYL-R1710
     def get_min_eval_true(self, max_observations, p0, alpha):
@@ -673,22 +673,21 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     ('forward', tuple(event_a), tuple(implication.implied_event), implication.max_observations, implication.min_eval_true))
         PersistencyUtil.store_json(self.persistence_file_name, list(known_path_set))
         self.next_persist_time = None
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.' % self.__class__.__name__)
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def log_statistics(self, component_name):
         """log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
         @param component_name the name of the component which is printed in the log line."""
         if STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' processed %d out of %d log atoms successfully and learned %d new forward rules and %d new back rules in the last "
-                "60 minutes." % (
-                    component_name, self.log_success, self.log_total, self.log_forward_rules_learned, self.log_back_rules_learned))
+                "'%s' processed %d out of %d log atoms successfully and learned %d new forward rules and %d new back rules in the last 60 "
+                "minutes.", component_name, self.log_success, self.log_total, self.log_forward_rules_learned, self.log_back_rules_learned)
         elif STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
                 "'%s' processed %d out of %d log atoms successfully and learned %d new forward rules and %d new back rules in the last "
-                "60 minutes. Following new forward rules were learned: %d. Following new back rules were learned: %d" % (
-                    component_name, self.log_success, self.log_total, self.log_forward_rules_learned, self.log_back_rules_learned,
-                    self.log_forward_rules_learned, self.log_back_rules_learned))
+                "60 minutes. Following new forward rules were learned: %d. Following new back rules were learned: %d", component_name,
+                self.log_success, self.log_total, self.log_forward_rules_learned, self.log_back_rules_learned,
+                self.log_forward_rules_learned, self.log_back_rules_learned)
         self.log_success = 0
         self.log_total = 0
         self.log_forward_rules_learned = 0
