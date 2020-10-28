@@ -11,6 +11,8 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
+import logging
+from aminer import AMinerConfig
 from aminer.parsing import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
 
@@ -29,7 +31,9 @@ class FixedWordlistDataModelElement(ModelElementInterface):
         for test_pos, ref_word in enumerate(wordlist):
             for test_word in wordlist[test_pos + 1:]:
                 if test_word.startswith(ref_word):
-                    raise Exception('Word %s would be shadowed by word %s at lower position' % (repr(test_word), repr(ref_word)))
+                    msg = 'Word %s would be shadowed by word %s at lower position' % (repr(test_word), repr(ref_word))
+                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                    raise Exception(msg)
 
     def get_id(self):
         """Get the element ID."""

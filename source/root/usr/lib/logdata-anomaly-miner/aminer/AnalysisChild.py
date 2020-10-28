@@ -105,7 +105,8 @@ class AnalysisContext:
             msg = 'Attempting to timer component for unknown class %s' % trigger_class
             logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('Called %s for the component %s' % ('add_time_triggered_component', component))
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug(
+            'Called %s for the component %s', 'add_time_triggered_component', str(component))
 
     def register_component(self, component, component_name=None, register_time_trigger_class_override=None):
         """Register a new component. A component implementing the TimeTriggeredComponentInterface will also be added to the
@@ -135,8 +136,8 @@ class AnalysisContext:
             else:
                 for trigger_class in register_time_trigger_class_override:
                     self.add_time_triggered_component(component, trigger_class)
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug("Registered component %s with the id %d and component_name '%s'." % (
-            component, self.next_registry_id - 1, component_name))
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug(
+            "Registered component %s with the id %d and component_name '%s'.", str(component), self.next_registry_id - 1, component_name)
 
     def get_registered_component_ids(self):
         """Get a list of currently known component IDs."""
@@ -249,7 +250,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
             try:
                 max_memory_mb = int(max_memory_mb)
                 resource.setrlimit(resource.RLIMIT_AS, (max_memory_mb * 1024 * 1024, resource.RLIM_INFINITY))
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('set max memory limit to %d MB.' % max_memory_mb)
+                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('set max memory limit to %d MB.', max_memory_mb)
             except ValueError:
                 msg = '%s must be an integer, terminating' % AMinerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE
                 print('FATAL: ' + msg, file=sys.stderr)
@@ -277,7 +278,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                     return 1
                 # skipcq: BAN-B603
                 _out = subprocess.Popen(cpulimit_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('set max cpu limit to %d%%.' % max_cpu_percent_usage)
+                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('set max cpu limit to %d%%.', max_cpu_percent_usage)
             except ValueError:
                 msg = '%s must be an integer, terminating' % AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE
                 print('FATAL: ' + msg, file=sys.stderr)
@@ -362,7 +363,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                         logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
                         print(msg, file=sys.stderr)
                     if fd_handler_object.is_dead():
-                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('Deleting fd %s from tracked_fds_dict.' % str(read_fd))
+                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('Deleting fd %s from tracked_fds_dict.', str(read_fd))
                         del self.tracked_fds_dict[read_fd]
                     # Reading is only attempted when output buffer was already flushed. Try processing the next request to fill the output
                     # buffer for next round.

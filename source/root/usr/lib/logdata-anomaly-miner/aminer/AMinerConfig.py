@@ -88,7 +88,7 @@ def save_config(analysis_context, new_file):
         pos = old.find(find_str)
         if pos == -1:
             msg += "WARNING: %s not found in the old config file." % find_str
-            rc_logger = logging.getLogger(AMinerConfig.REMOTE_CONTROL_LOG_NAME)
+            rc_logger = logging.getLogger(REMOTE_CONTROL_LOG_NAME)
             rc_logger.warning("WARNING: %s not found in the old config file.", find_str)
         else:
             string = old[pos + len(find_str):]

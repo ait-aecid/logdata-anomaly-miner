@@ -1,3 +1,7 @@
+import logging
+from aminer import AMinerConfig
+
+
 def decode_string_as_byte_string(string):
     """Decodes a string produced by the encode function encodeByteStringAsString(byteString) below.
     @return string."""
@@ -11,7 +15,9 @@ def decode_string_as_byte_string(string):
             decoded += bytearray((int(string[count + 1:count + 3], 16),))
             count += 3
         else:
-            raise Exception('Invalid encoded character')
+            msg = 'Invalid encoded character'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
     return decoded
 
 

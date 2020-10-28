@@ -14,7 +14,9 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import datetime
 import locale
 import sys
+import logging
 
+from aminer import AMinerConfig
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing import ModelElementInterface
 
@@ -133,7 +135,9 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
                         parsed_fields[COMPONENT_TYPE_DAY], parsed_fields[COMPONENT_TYPE_HOUR], parsed_fields[COMPONENT_TYPE_MINUTE],
                         parsed_fields[COMPONENT_TYPE_SECOND], parsed_fields[COMPONENT_TYPE_MICROSECOND], time_zone_info)
                     if not self.checkTimestampValueInRange(parsed_value):
-                        print(delta_string % repr(date_str), file=sys.stderr)
+                        msg = delta_string % repr(date_str)
+                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error('%s: %s', self.__class__.__name__, msg)
+                        print(msg, file=sys.stderr)
                         return None
 
             self.checkTimestampValueInRange(parsed_value)
@@ -141,7 +145,9 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
                 delta = (parsed_value - self.latest_parsed_timestamp)
                 delta_seconds = (delta.days * 86400 + delta.seconds + delta.microseconds / 1000)
                 if (delta_seconds < -86400) or (delta_seconds > 86400 * 30):
-                    print(delta_string % repr(date_str), file=sys.stderr)
+                    msg = delta_string % repr(date_str)
+                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error('%s: %s', self.__class__.__name__, msg)
+                    print(msg, file=sys.stderr)
                     return None
 
         else:
@@ -150,7 +156,9 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
                 parsed_fields[COMPONENT_TYPE_DAY], parsed_fields[COMPONENT_TYPE_HOUR], parsed_fields[COMPONENT_TYPE_MINUTE],
                 parsed_fields[COMPONENT_TYPE_SECOND], parsed_fields[COMPONENT_TYPE_MICROSECOND], time_zone_info)
             if not self.checkTimestampValueInRange(parsed_value):
-                print(delta_string % repr(date_str), file=sys.stderr)
+                msg = delta_string % repr(date_str)
+                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error('%s: %s', self.__class__.__name__, msg)
+                print(msg, file=sys.stderr)
                 return None
 
         self.total_seconds_start_time = datetime.datetime(1970, 1, 1, tzinfo=parsed_value.tzinfo)
@@ -191,10 +199,14 @@ class DateFormatComponent:
         into a number by plain lookup. When None, the component will be treated as normal number."""
         self.component_type = component_type
         if (end_separator is not None) and not end_separator:
-            raise Exception('Invalid zero-length separator string')
+            msg = 'Invalid zero-length separator string'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         self.end_separator = end_separator
         if (end_separator is None) and (component_length == 0) and (translation_dictionary is None):
-            raise Exception('Invalid parameters to determine the length of the field')
+            msg = 'Invalid parameters to determine the length of the field'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         self.component_length = component_length
         self.translation_dictionary = translation_dictionary
         self.parent_component = parent_component
@@ -209,10 +221,13 @@ class DateFormatComponent:
             format_timezone = 'UTC'
 
         if format_string[0] != '%':
-            raise Exception('Format string has to start with "%", strip away all static data outside \
-        this formatter before starting to parse')
+            msg = 'Format string has to start with "%", strip away all static data outside this formatter before starting to parse'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         if self.format_timezone is not None:
-            raise Exception('Current node is already an end node, no format adding any more')
+            msg = 'Current node is already an end node, no format adding any more'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
 
         parse_pos = 1
         component_type = -1
@@ -230,10 +245,14 @@ class DateFormatComponent:
                 new_value = datetime.datetime(1970, month_num, 1).strftime('%' + format_string[parse_pos - 1])
                 for old_value in translation_dictionary:
                     if (old_value.startswith(new_value)) or (new_value.startswith(old_value)):
-                        raise Exception('Strange locale with month names too similar')
+                        msg = 'Strange locale with month names too similar'
+                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                        raise Exception(msg)
                 translation_dictionary[new_value] = month_num
             if len(translation_dictionary) != 12:
-                raise Exception('Internal error: less than 12 month a year')
+                msg = 'Internal error: less than 12 month a year'
+                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                raise Exception(msg)
         elif format_string[parse_pos] == 'd':
             # Day number
             parse_pos += 1
@@ -270,7 +289,9 @@ class DateFormatComponent:
             component_type = COMPONENT_TYPE_MICROSECOND
             component_length = 6
         else:
-            raise Exception('Unsupported date format code "%s"' % format_string[parse_pos])
+            msg = 'Unsupported date format code "%s"' % format_string[parse_pos]
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
 
         end_pos = format_string.find('%', parse_pos)
         end_separator = None
@@ -288,7 +309,9 @@ class DateFormatComponent:
         check_component = self
         while check_component is not None:
             if check_component.component_type == component_type:
-                raise Exception('Current format defines component of type %d twice' % component_type)
+                msg = 'Current format defines component of type %d twice' % component_type
+                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                raise Exception(msg)
             check_component = check_component.parent_component
 
         lookup_key = None
@@ -318,9 +341,13 @@ class DateFormatComponent:
     def merge_component_data(self, component_type, component_length, translation_dictionary):
         """Merge data of given component type, length and lookup information into the current dataset."""
         if (self.component_type != component_type) or (self.component_length != component_length):
-            raise Exception('Cannot merge data with different type or length')
+            msg = 'Cannot merge data with different type or length'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         if (self.translation_dictionary is not None) != (translation_dictionary is not None):
-            raise Exception('Cannot merge digit and translated data')
+            msg = 'Cannot merge digit and translated data'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         if translation_dictionary is None:
             # Without dictionary, we are done here: length and type are matching.
             return
@@ -328,22 +355,29 @@ class DateFormatComponent:
         for key in translation_dictionary:
             for old_key in self.translation_dictionary:
                 if key.startswith(old_key) or old_key.startswith(key) and key != old_key:
-                    raise Exception('Translation strings from different locales too similar for \
-            unambiguous parsing')
+                    msg = 'Translation strings from different locales too similar for unambiguous parsing'
+                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                    raise Exception(msg)
             value = translation_dictionary.get(key)
             current_value = self.translation_dictionary.get(key, None)
             if current_value is None:
                 self.translation_dictionary[key] = value
             elif current_value != value:
-                raise Exception('Conflict in translation dictionary for %s: %s vs %s' % (key, value, current_value))
+                msg = 'Conflict in translation dictionary for %s: %s vs %s' % (key, value, current_value)
+                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                raise Exception(msg)
 
     def make_end_node(self, format_timezone):
         """Make this DateFormatComponent an end node. When reached during parsing, calculation of the timestamp value within
         the given is triggered."""
         if (self.format_timezone is not None) and (self.format_timezone != format_timezone):
-            raise Exception('Node is already an end node for different timezone')
+            msg = 'Node is already an end node for different timezone'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         if self.next_components:
-            raise Exception('Cannot make node with subcomponents an end node')
+            msg = 'Cannot make node with subcomponents an end node'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         self.format_timezone = format_timezone
 
     def parse(self, date_string, parse_pos):

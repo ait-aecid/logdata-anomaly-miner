@@ -15,7 +15,9 @@ import errno
 import os
 import sys
 import time
+import logging
 
+from aminer import AMinerConfig
 from aminer.util import SecureOSFunctions
 from aminer.util import JsonUtil
 
@@ -38,6 +40,7 @@ def open_persistence_file(file_name, flags):
         return fd
     except OSError as openOsError:
         if ((flags & os.O_CREAT) == 0) or (openOsError.errno != errno.ENOENT):
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(openOsError)
             raise openOsError
 
     # Find out, which directory is missing by stating our way up.
@@ -67,13 +70,15 @@ def replace_persistence_file(file_name, new_file_handle):
     # skipcq: PYL-W0603
     global no_secure_link_unlink_at_warn_once_flag
     if no_secure_link_unlink_at_warn_once_flag:
-        print('WARNING: SECURITY: unsafe unlink (unavailable unlinkat/linkat should be used, but \
-      not available in python)', file=sys.stderr)
+        msg = 'SECURITY: unsafe unlink (unavailable unlinkat/linkat should be used, but not available in python)'
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
+        print('WARNING: ' + msg, file=sys.stderr)
         no_secure_link_unlink_at_warn_once_flag = False
     try:
         os.unlink(file_name)
     except OSError as openOsError:
         if openOsError.errno != errno.ENOENT:
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(openOsError)
             raise openOsError
 
     tmp_file_name = os.readlink('/proc/self/fd/%d' % new_file_handle)
@@ -98,6 +103,7 @@ def load_json(file_name):
         os.close(persistence_file_handle)
     except OSError as openOsError:
         if openOsError.errno != errno.ENOENT:
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(openOsError)
             raise openOsError
         return None
 
@@ -105,8 +111,9 @@ def load_json(file_name):
     try:
         result = JsonUtil.load_json(persistence_data)
     except ValueError as valueError:
-        raise Exception('Corrupted data in %s' % file_name, valueError)
-
+        msg = 'Corrupted data in %s' % file_name, valueError
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+        raise Exception(msg)
     return result
 
 

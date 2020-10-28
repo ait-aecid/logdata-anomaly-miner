@@ -198,7 +198,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
     def remove_check_value(self, value):
         """Remove checks for given value."""
         del self.expected_values_dict[value]
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s removed check value %s.', (self.__class__.__name__, str(value)))
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s removed check value %s.', self.__class__.__name__, str(value))
 
     def get_time_trigger_class(self):
         """Get the trigger class this component can be registered for. This detector only needs persisteny triggers in real time."""
