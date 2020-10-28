@@ -43,6 +43,7 @@ __status__ = "Production"
 __version__ = "2.0.1"
 
 import sys
+import logging
 
 # As site packages are not included, define from where we need to execute code before loading it.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
@@ -112,6 +113,8 @@ def run_analysis_child(aminer_config, program_name):
     """Runs the Analysis Child"""
     from aminer import AMinerConfig
     # Verify existance and ownership of persistence directory.
+    logging.getLogger(AMinerConfig.REMOTE_CONTROL_LOG_NAME).info('aminer started.')
+    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info('aminer started.')
     persistence_dir_name = aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
     from aminer.util import SecureOSFunctions
     print('WARNING: SECURITY: Open should use O_PATH, but not yet available in python', file=sys.stderr)
@@ -138,6 +141,39 @@ def run_analysis_child(aminer_config, program_name):
         sys.exit(0)
     print('%s: run_analysis terminated with unexpected status %d' % (program_name, child_return_status), file=sys.stderr)
     sys.exit(1)
+
+
+def initialize_loggers(aminer_config):
+    from aminer import AMinerConfig
+    datefmt = '%d/%b/%Y:%H:%M:%S %z'
+
+    rc_logger = logging.getLogger(AMinerConfig.REMOTE_CONTROL_LOG_NAME)
+    rc_logger.setLevel(logging.DEBUG)
+    rc_file_handler = logging.FileHandler(AMinerConfig.REMOTE_CONTROL_LOG_FILE)
+    rc_file_handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(levelname)s %(message)s', datefmt=datefmt))
+    rc_logger.addHandler(rc_file_handler)
+    logging.addLevelName(15, "REMOTECONTROL")
+
+    persistence_dir = aminer_config.config_properties['Core.PersistenceDir']
+    stat_logger = logging.getLogger(AMinerConfig.STAT_LOG_NAME)
+    stat_logger.setLevel(logging.INFO)
+    if os.path.exists(persistence_dir):
+        stat_file_handler = logging.FileHandler(os.path.join(persistence_dir, 'statistics.log'))
+    else:
+        stat_file_handler = logging.FileHandler('/tmp/statistics.log')
+    stat_file_handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(message)s', datefmt=datefmt))
+    stat_logger.addHandler(stat_file_handler)
+
+    debug_logger = logging.getLogger(AMinerConfig.DEBUG_LOG_NAME)
+    if AMinerConfig.DEBUG_LEVEL == 0:
+        debug_logger.setLevel(logging.ERROR)
+    elif AMinerConfig.DEBUG_LEVEL == 1:
+        debug_logger.setLevel(logging.INFO)
+    else:
+        debug_logger.setLevel(logging.DEBUG)
+    debug_file_handler = logging.FileHandler(AMinerConfig.DEBUG_LOG_FILE)
+    debug_file_handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(levelname)s %(message)s', datefmt=datefmt))
+    debug_logger.addHandler(debug_file_handler)
 
 
 def main():
@@ -247,6 +283,8 @@ def main():
 
     AMinerConfig.STAT_LEVEL = stat_level
     AMinerConfig.DEBUG_LEVEL = debug_level
+
+    initialize_loggers(aminer_config)
 
     if clear_persistence_flag:
         if remove_persistence_dirs:

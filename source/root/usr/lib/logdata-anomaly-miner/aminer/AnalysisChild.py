@@ -59,37 +59,6 @@ class AnalysisContext:
         # Keep lists of components that should receive timer interrupts when real time or analysis time has elapsed.
         self.real_time_triggered_components = []
         self.analysis_time_triggered_components = []
-        datefmt = '%d/%b/%Y:%H:%M:%S %z'
-
-        rc_logger = logging.getLogger(AMinerConfig.REMOTE_CONTROL_LOG_NAME)
-        rc_logger.setLevel(logging.DEBUG)
-        rc_file_handler = logging.FileHandler(AMinerConfig.REMOTE_CONTROL_LOG_FILE)
-        rc_file_handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(levelname)s %(message)s', datefmt=datefmt))
-        rc_logger.addHandler(rc_file_handler)
-        logging.addLevelName(15, "REMOTECONTROL")
-        rc_logger.info('aminer started.')
-
-        persistence_dir = self.aminer_config.config_properties['Core.PersistenceDir']
-        stat_logger = logging.getLogger(AMinerConfig.STAT_LOG_NAME)
-        stat_logger.setLevel(logging.INFO)
-        if os.path.exists(persistence_dir):
-            stat_file_handler = logging.FileHandler(os.path.join(persistence_dir, 'statistics.log'))
-        else:
-            stat_file_handler = logging.FileHandler('/tmp/statistics.log')
-        stat_file_handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(message)s', datefmt=datefmt))
-        stat_logger.addHandler(stat_file_handler)
-
-        debug_logger = logging.getLogger(AMinerConfig.DEBUG_LOG_NAME)
-        if AMinerConfig.DEBUG_LEVEL == 0:
-            debug_logger.setLevel(logging.ERROR)
-        elif AMinerConfig.DEBUG_LEVEL == 1:
-            debug_logger.setLevel(logging.INFO)
-        else:
-            debug_logger.setLevel(logging.DEBUG)
-        debug_file_handler = logging.FileHandler(AMinerConfig.DEBUG_LOG_FILE)
-        debug_file_handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(levelname)s %(message)s', datefmt=datefmt))
-        debug_logger.addHandler(debug_file_handler)
-        debug_logger.info('aminer started.')
 
     def add_time_triggered_component(self, component, trigger_class=None):
         """Add a time-triggered component to the registry."""
