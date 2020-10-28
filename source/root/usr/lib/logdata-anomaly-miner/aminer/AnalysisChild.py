@@ -72,7 +72,10 @@ class AnalysisContext:
         persistence_dir = self.aminer_config.config_properties['Core.PersistenceDir']
         stat_logger = logging.getLogger(AMinerConfig.STAT_LOG_NAME)
         stat_logger.setLevel(logging.INFO)
-        stat_file_handler = logging.FileHandler(os.path.join(persistence_dir, 'statistics.log'))
+        if os.path.exists(persistence_dir):
+            stat_file_handler = logging.FileHandler(os.path.join(persistence_dir, 'statistics.log'))
+        else:
+            stat_file_handler = logging.FileHandler('/tmp/statistics.log')
         stat_file_handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(message)s', datefmt=datefmt))
         stat_logger.addHandler(stat_file_handler)
 
