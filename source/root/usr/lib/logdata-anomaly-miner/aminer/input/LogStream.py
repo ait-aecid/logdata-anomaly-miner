@@ -19,7 +19,9 @@ import socket
 import stat
 import sys
 import abc
+import logging
 
+from aminer import AMinerConfig
 from aminer.util import SecureOSFunctions
 from aminer.util import encode_byte_string_as_string
 
@@ -83,7 +85,9 @@ class FileLogDataResource(LogDataResource):
         @param log_stream_fd the stream for reading the resource or -1 if not yet opened.
         @param repositioning_data if not None, attempt to position the stream using the given data."""
         if not log_resource_name.startswith(b'file://'):
-            raise Exception('Attempting to create different type resource as file')
+            msg = 'Attempting to create different type resource as file'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         self.log_resource_name = log_resource_name
         self.log_file_fd = log_stream_fd
         self.stat_data = None
@@ -99,11 +103,13 @@ class FileLogDataResource(LogDataResource):
 
         if (log_stream_fd != -1) and (repositioning_data is not None):
             if repositioning_data[0] != self.stat_data.st_ino:
-                print('Not attempting to reposition on %s, inode number mismatch' % encode_byte_string_as_string(self.log_resource_name),
-                      file=sys.stderr)
+                msg = 'Not attempting to reposition on %s, inode number mismatch' % encode_byte_string_as_string(self.log_resource_name)
+                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
+                print(msg, file=sys.stderr)
             elif repositioning_data[1] > self.stat_data.st_size:
-                print('Not attempting to reposition on %s, file size too small' % encode_byte_string_as_string(self.log_resource_name),
-                      file=sys.stderr)
+                msg = 'Not attempting to reposition on %s, file size too small' % encode_byte_string_as_string(self.log_resource_name)
+                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
+                print(msg, file=sys.stderr)
             else:
                 # skipcq: PTC-W1003
                 hash_algo = hashlib.md5()
@@ -115,8 +121,10 @@ class FileLogDataResource(LogDataResource):
                     else:
                         block = os.read(self.log_file_fd, default_buffer_size)
                     if not block:
-                        print('Not attempting to reposition on %s, file shrunk while reading' % encode_byte_string_as_string(
-                            self.log_resource_name), file=sys.stderr)
+                        msg = 'Not attempting to reposition on %s, file shrunk while reading' % encode_byte_string_as_string(
+                            self.log_resource_name)
+                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
+                        print(msg, file=sys.stderr)
                         break
                     hash_algo.update(block)
                     length -= len(block)
@@ -127,8 +135,9 @@ class FileLogDataResource(LogDataResource):
                         self.total_consumed_length = repositioning_data[1]
                         self.repositioning_digest = hash_algo
                     else:
-                        print('Not attempting to reposition on %s, digest changed' % encode_byte_string_as_string(self.log_resource_name),
-                              file=sys.stderr)
+                        msg = 'Not attempting to reposition on %s, digest changed' % encode_byte_string_as_string(self.log_resource_name)
+                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
+                        print(msg, file=sys.stderr)
                         length = -1
                 if length != 0:
                     # Repositioning failed, go back to the beginning of the stream.
@@ -141,13 +150,17 @@ class FileLogDataResource(LogDataResource):
         @raise OSError when opening failed with unexpected error.
         @return True if the resource was really opened or False if opening was not yet possible but should be attempted again."""
         if not reopen_flag and (self.log_file_fd != -1):
-            raise Exception('Cannot reopen stream still open when not instructed to do so')
+            msg = 'Cannot reopen stream still open when not instructed to do so'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         log_file_fd = -1
         stat_data = None
         try:
             log_file_fd = SecureOSFunctions.secure_open_file(self.log_resource_name[7:], os.O_RDONLY)
             stat_data = os.fstat(log_file_fd)
         except OSError as openOsError:
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error('OSError occurred in FileLogDataResource.open(). Error message: %s' % 
+                                                                 openOsError.msg)
             if log_file_fd != -1:
                 os.close(log_file_fd)
             if openOsError.errno == errno.ENOENT:
@@ -155,7 +168,9 @@ class FileLogDataResource(LogDataResource):
             raise
         if not stat.S_ISREG(stat_data.st_mode):
             os.close(log_file_fd)
-            raise Exception('Attempting to open non-regular file %s as file' % encode_byte_string_as_string(self.log_resource_name))
+            msg = 'Attempting to open non-regular file %s as file' % encode_byte_string_as_string(self.log_resource_name)
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
 
         if reopen_flag and (self.stat_data is not None) and (stat_data.st_ino == self.stat_data.st_ino) and (
                 stat_data.st_dev == self.stat_data.st_dev):
@@ -208,7 +223,9 @@ class UnixSocketLogDataResource(LogDataResource):
         @param log_stream_fd the stream for reading the resource or -1 if not yet opened.
         @param repositioning_data has to be None for this type of resource."""
         if not log_resource_name.startswith(b'unix://'):
-            raise Exception('Attempting to create different type resource as unix')
+            msg = 'Attempting to create different type resource as unix'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         self.log_resource_name = log_resource_name
         self.log_stream_fd = log_stream_fd
         self.buffer = b''
@@ -225,12 +242,16 @@ class UnixSocketLogDataResource(LogDataResource):
             if self.log_stream_fd != -1:
                 return False
         elif self.log_stream_fd != -1:
-            raise Exception('Cannot reopen stream still open when not instructed to do so')
+            msg = 'Cannot reopen stream still open when not instructed to do so'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         log_socket = None
         try:
             log_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             log_socket.connect(self.log_resource_name[7:])
         except socket.error as socketError:
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error('OSError occurred in UnixSocketLogDataResource.open(). Error message: %s'
+                                                                 % socketError.msg)
             if log_socket is not None:
                 log_socket.close()
             if (socketError.errno == errno.ENOENT) or (socketError.errno == errno.ECONNREFUSED):
@@ -344,7 +365,9 @@ class LogStream:
                 return self.log_data_resource.get_file_descriptor()
 
             # This is a clear protocol violation (see StreamAtomizer documentation): When at EOF, 0 is no valid return value.
-            print('FATAL: Procotol violation by %s detected, flushing data' % self.stream_atomizer.__class__.__name__, file=sys.stderr)
+            msg = 'Procotol violation by %s detected, flushing data' % self.stream_atomizer.__class__.__name__
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).critical(msg)
+            print('FATAL: ' + msg, file=sys.stderr)
             consumed_length = len(self.log_data_resource.buffer)
 
         # Everything consumed, so now ready for rollover.

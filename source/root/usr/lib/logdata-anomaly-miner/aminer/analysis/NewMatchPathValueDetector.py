@@ -50,6 +50,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
             self.known_path_set = set()
         else:
             self.known_path_set = set(persistence_data)
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.' % self.__class__.__name__)
 
     def receive_atom(self, log_atom):
         self.log_total += 1
@@ -117,6 +118,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         """Immediately write persistence data to storage."""
         PersistencyUtil.store_json(self.persistence_file_name, list(self.known_path_set))
         self.next_persist_time = None
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.' % self.__class__.__name__)
 
     def log_statistics(self, component_name):
         """log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.

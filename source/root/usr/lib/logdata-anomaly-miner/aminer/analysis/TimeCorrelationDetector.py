@@ -14,6 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 from datetime import datetime
 import random
 import time
+import logging
 
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
@@ -60,6 +61,8 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
             self.feature_list = []
             self.event_count_table = [0] * parallel_check_count * parallel_check_count * 2
             self.event_delta_table = [0] * parallel_check_count * parallel_check_count * 2
+        else:
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.' % self.__class__.__name__)
 
     def receive_atom(self, log_atom):
         self.log_total += 1
@@ -143,6 +146,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
             for listener in self.anomaly_event_handlers:
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Correlation report', result, event_data, log_atom, self)
             self.reset_statistics()
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s ran analysis.' % self.__class__.__name__)
         self.log_success += 1
 
     def rule_to_dict(self, rule):
@@ -181,6 +185,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
     def do_persist(self):
         """Immediately write persistence data to storage."""
         self.next_persist_time = None
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.' % self.__class__.__name__)
 
     def create_random_rule(self, log_atom):
         """Create a random existing path rule or value match rule."""

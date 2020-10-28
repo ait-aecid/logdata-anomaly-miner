@@ -27,7 +27,9 @@ class SubhandlerFilter(AtomHandlerInterface):
         else:
             if (not isinstance(subhandler_list, list)) or \
                     (not all(isinstance(handler, AtomHandlerInterface) for handler in subhandler_list)):
-                raise Exception('Only subclasses of AtomHandlerInterface allowed in subhandlerList')
+                msg = 'Only subclasses of AtomHandlerInterface allowed in subhandlerList'
+                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                raise Exception(msg)
             self.subhandler_list = [None] * len(subhandler_list)
             for handler_pos, handler_element in enumerate(subhandler_list):
                 self.subhandler_list[handler_pos] = (handler_element, stop_when_handled_flag)

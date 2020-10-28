@@ -523,7 +523,9 @@ class DebugHistoryMatchRule(MatchRule):
         if object_history is None:
             object_history = LogarithmicBackoffHistory(10)
         elif not isinstance(object_history, ObjectHistory):
-            raise Exception('objectHistory is not an instance of ObjectHistory')
+            msg = 'object_history is not an instance of ObjectHistory'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         self.object_history = object_history
         self.debug_match_result = debug_match_result
         self.match_action = match_action

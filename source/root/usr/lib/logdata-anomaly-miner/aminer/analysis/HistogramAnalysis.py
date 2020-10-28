@@ -54,6 +54,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import time
 import os
 import abc
+import logging
 from datetime import datetime
 
 from aminer import AMinerConfig
@@ -89,14 +90,12 @@ class BinDefinition(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def get_bin_names(self):
         """Get the names of the bins for reporting, including the outlier bins if any."""
-        raise Exception(self.not_implemented)
 
     @abc.abstractmethod
     def get_bin(self, value):
         """Get the number of the bin this value should belong to.
         @return the bin number or None if the value is an outlier and outlier bins were not requested. With outliers, bin 0
         is the bin with outliers below limit, first normal bin is at index 1."""
-        raise Exception(self.not_implemented)
 
     @abc.abstractmethod
     def get_bin_p_value(self, bin_pos, total_values, bin_values):
@@ -277,7 +276,9 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.persistenceFileName = AMinerConfig.build_persistence_file_name(aminer_config, 'HistogramAnalysis', persistence_id)
         persistence_data = PersistencyUtil.load_json(self.persistenceFileName)
         if persistence_data is not None:
-            raise Exception('No data reading, def merge yet')
+            msg = 'No data reading, def merge yet'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
 
     def receive_atom(self, log_atom):
         self.log_total += 1
@@ -323,6 +324,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
     def do_persist(self):
         """Immediately write persistence data to storage."""
         self.next_persist_time = None
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.' % self.__class__.__name__)
 
     def send_report(self, log_atom, timestamp):
         """Sends a report to the event handlers."""
@@ -383,6 +385,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
         self.last_report_time = timestamp
         self.next_report_time = timestamp + self.report_interval
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s sent report.' % self.__class__.__name__)
 
 
 class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
@@ -413,7 +416,9 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
                                                                               persistence_id)
         persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
         if persistence_data is not None:
-            raise Exception('No data reading, def merge yet')
+            msg = 'No data reading, def merge yet'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
 
     def receive_atom(self, log_atom):
         self.log_total += 1
@@ -510,6 +515,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
     def do_persist(self):
         """Immediately write persistence data to storage."""
         self.next_persist_time = None
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.' % self.__class__.__name__)
 
     def send_report(self, log_atom, timestamp):
         """Send report to event handlers."""
@@ -580,3 +586,4 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
 
         self.last_report_time = timestamp
         self.next_report_time = timestamp + self.report_interval
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s sent report.' % self.__class__.__name__)

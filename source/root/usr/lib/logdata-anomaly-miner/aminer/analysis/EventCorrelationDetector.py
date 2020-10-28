@@ -136,6 +136,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                         self.forward_rules_inv[implied_event].append(rule)
                     else:
                         self.forward_rules_inv[implied_event] = [rule]
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.' % self.__class__.__name__)
 
     # skipcq: PYL-R1710
     def get_min_eval_true(self, max_observations, p0, alpha):
@@ -655,18 +656,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
 
         delta = self.next_persist_time - trigger_time
         if delta < 0:
-            known_path_set = set()
-            for event_a in self.back_rules:
-                for implication in self.back_rules[event_a]:
-                    known_path_set.add(
-                        ('back', tuple(event_a), tuple(implication.implied_event), implication.max_observations, implication.min_eval_true))
-            for event_a in self.forward_rules:
-                for implication in self.forward_rules[event_a]:
-                    known_path_set.add(
-                        ('forward', tuple(event_a), tuple(implication.implied_event), implication.max_observations,
-                         implication.min_eval_true))
-            PersistencyUtil.store_json(self.persistence_file_name, list(known_path_set))
-            self.next_persist_time = None
+            self.do_persist()
             delta = 600
         return delta
 
@@ -683,6 +673,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     ('forward', tuple(event_a), tuple(implication.implied_event), implication.max_observations, implication.min_eval_true))
         PersistencyUtil.store_json(self.persistence_file_name, list(known_path_set))
         self.next_persist_time = None
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.' % self.__class__.__name__)
 
     def log_statistics(self, component_name):
         """log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.

@@ -13,6 +13,8 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import datetime
 import time
+import logging
+from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input import AtomHandlerInterface
 from aminer.util import TimeTriggeredComponentInterface
@@ -94,3 +96,4 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
         if self.reset_after_report_flag:
             for targetPath in self.target_path_list:
                 self.count_dict[targetPath] = 0
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s sent report.' % self.__class__.__name__)

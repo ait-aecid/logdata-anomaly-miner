@@ -12,6 +12,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import time
+import logging
 
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
@@ -104,6 +105,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
     def do_persist(self):
         """Immediately write persistence data to storage."""
         self.next_persist_time = time.time() + 600.0
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.' % self.__class__.__name__)
 
     def log_statistics(self, component_name):
         super().log_statistics(component_name)
@@ -299,7 +301,9 @@ class CorrelationRule:
         result[3] = parser_match
 
         if result[0] < self.last_timestamp_seen:
-            raise Exception('Unsorted!')
+            msg = 'Timestamps unsorted!'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         self.last_timestamp_seen = result[0]
 
         if self.artefact_match_parameters is not None:
