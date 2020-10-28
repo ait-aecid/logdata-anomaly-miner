@@ -57,7 +57,3 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                                                   " minutes." % (component_name, self.log_success, self.log_total))
         self.log_success = 0
         self.log_total = 0
-
-    def log_debug(self, msg, level):
-        """logs debug messages if the needed DEBUG_LEVEL is set. 0 means no debug at all. 1 means normal debug with logging.INFO and
-        above. 2 means verbose debug output with all levels allowed (logging.DEBUG and above)"""

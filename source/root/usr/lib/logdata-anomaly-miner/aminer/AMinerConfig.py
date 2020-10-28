@@ -29,13 +29,13 @@ KEY_LOG_PREFIX = 'LogPrefix'
 KEY_RESOURCES_MAX_MEMORY_USAGE = 'Resources.MaxMemoryUsage'
 KEY_RESOURCES_MAX_PERCENT_CPU_USAGE = 'Resources.MaxCpuPercentUsage'
 REMOTE_CONTROL_LOG_NAME = 'REMOTE_CONTROL'
-REMOTE_CONTROL_LOG_FILE = '/tmp/AMinerRemoteLog.txt'
+REMOTE_CONTROL_LOG_FILE = '/tmp/aminerRemoteLog.txt'
 configFN = None
 STAT_LEVEL = 1
 STAT_LOG_NAME = 'STAT'
 DEBUG_LEVEL = 1
 DEBUG_LOG_NAME = 'DEBUG'
-DEBUG_LOG_FILE = '/tmp/aminer_debug.log'
+DEBUG_LOG_FILE = '/tmp/aminer.log'
 KEY_LOG_STAT_PERIOD = 'Log.StatisticsPeriod'
 DEFAULT_STAT_PERIOD = 3600
 
