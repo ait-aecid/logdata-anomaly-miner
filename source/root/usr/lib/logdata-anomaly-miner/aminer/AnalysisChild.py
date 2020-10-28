@@ -59,11 +59,12 @@ class AnalysisContext:
         # Keep lists of components that should receive timer interrupts when real time or analysis time has elapsed.
         self.real_time_triggered_components = []
         self.analysis_time_triggered_components = []
+        datefmt = aminer_config.config_properties.get(AMinerConfig.KEY_LOG_DATEFORMAT, AMinerConfig.DEFAULT_LOG_DATEFORMAT)
 
         rc_logger = logging.getLogger(AMinerConfig.REMOTE_CONTROL_LOG_NAME)
         rc_logger.setLevel(logging.DEBUG)
         rc_file_handler = logging.FileHandler(AMinerConfig.REMOTE_CONTROL_LOG_FILE)
-        rc_file_handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(levelname)s %(message)s', datefmt='%d/%b/%Y:%H:%M:%S %z'))
+        rc_file_handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(levelname)s %(message)s', datefmt=datefmt))
         rc_logger.addHandler(rc_file_handler)
         logging.addLevelName(15, "REMOTECONTROL")
         rc_logger.log(logging.INFO, 'AMiner started.')
@@ -72,14 +73,28 @@ class AnalysisContext:
         stat_logger = logging.getLogger(AMinerConfig.STAT_LOG_NAME)
         stat_logger.setLevel(logging.INFO)
         stat_file_handler = logging.FileHandler(os.path.join(persistence_dir, 'statistics.log'))
-        stat_file_handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(message)s', datefmt='%d/%b/%Y:%H:%M:%S %z'))
+        stat_file_handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(message)s', datefmt=datefmt))
         stat_logger.addHandler(stat_file_handler)
+
+        debug_logger = logging.getLogger(AMinerConfig.DEBUG_LOG_NAME)
+        if AMinerConfig.DEBUG_LEVEL == 0:
+            debug_logger.setLevel(logging.ERROR)
+        elif AMinerConfig.DEBUG_LEVEL == 1:
+            debug_logger.setLevel(logging.INFO)
+        else:
+            debug_logger.setLevel(logging.DEBUG)
+        debug_file_handler = logging.FileHandler(AMinerConfig.DEBUG_LOG_FILE)
+        debug_file_handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(levelname)s %(message)s', datefmt=datefmt))
+        debug_logger.addHandler(debug_file_handler)
+        debug_logger.log(logging.INFO, 'AMiner started.')
 
     def add_time_triggered_component(self, component, trigger_class=None):
         """Add a time-triggered component to the registry."""
         if not isinstance(component, TimeTriggeredComponentInterface):
-            raise Exception('Attempting to register component of class %s not implementing aminer.util.TimeTriggeredComponentInterface' % (
-                component.__class__.__name__))
+            msg = 'Attempting to register component of class %s not implementing aminer.util.TimeTriggeredComponentInterface' % (
+                  component.__class__.__name__)
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         if trigger_class is None:
             trigger_class = component.get_time_trigger_class()
         if trigger_class == AnalysisContext.TIME_TRIGGER_CLASS_REALTIME:
@@ -87,7 +102,9 @@ class AnalysisContext:
         elif trigger_class == AnalysisContext.TIME_TRIGGER_CLASS_ANALYSISTIME:
             self.analysis_time_triggered_components.append(component)
         else:
-            raise Exception('Attempting to timer component for unknown class %s' % trigger_class)
+            msg = 'Attempting to timer component for unknown class %s' % trigger_class
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
 
     def register_component(self, component, component_name=None, register_time_trigger_class_override=None):
         """Register a new component. A component implementing the TimeTriggeredComponentInterface will also be added to the

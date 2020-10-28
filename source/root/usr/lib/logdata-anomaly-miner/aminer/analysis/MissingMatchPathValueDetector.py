@@ -241,11 +241,11 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         @param component_name the name of the component which is printed in the log line."""
         if STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' could handle %d out of %d log atoms successfully and learned %d new values in the last 60"
+                "'%s' processed %d out of %d log atoms successfully and learned %d new values in the last 60"
                 " minutes." % (component_name, self.log_success, self.log_total, self.log_learned_values))
         elif STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' could handle %d out of %d log atoms successfully and learned %d new values in the last 60"
+                "'%s' processed %d out of %d log atoms successfully and learned %d new values in the last 60"
                 " minutes. Following new values were learned: %s" % (
                     component_name, self.log_success, self.log_total, self.log_learned_values, self.log_new_learned_values))
         self.log_success = 0

@@ -76,7 +76,7 @@ class MatchRule(metaclass=abc.ABCMeta):
     def log_statistics(self, rule_id):
         """log statistics of an MatchRule. Override this method for more sophisticated statistics output of the MatchRule."""
         if STAT_LEVEL > 0:
-            logging.getLogger(STAT_LOG_NAME).info("Rule '%s' could handle %d out of %d log atoms successfully in the last 60"
+            logging.getLogger(STAT_LOG_NAME).info("Rule '%s' processed %d out of %d log atoms successfully in the last 60"
                                                   " minutes." % (rule_id, self.log_success, self.log_total))
         self.log_success = 0
         self.log_total = 0
