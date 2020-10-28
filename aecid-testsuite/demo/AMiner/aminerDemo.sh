@@ -43,7 +43,7 @@ fi
 
 #start AMiner
 if [[ $sudoInstalled == 0 ]]; then
-	sudo -H -u aminer bash -c 'aminer --Debug 0 --Config '$FILE' &'
+	sudo -H -u aminer bash -c 'aminer --Config '$FILE' &'
 else
 	runuser -u aminer -- aminer --Config $FILE &
 fi
