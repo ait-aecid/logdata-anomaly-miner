@@ -53,7 +53,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         """log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
         @param component_name the name of the component which is printed in the log line."""
         if STAT_LEVEL > 0:
-            logging.getLogger(STAT_LOG_NAME).info("'%s' could process %d out of %d log atoms successfully in the last 60"
+            logging.getLogger(STAT_LOG_NAME).info("'%s' processed %d out of %d log atoms successfully in the last 60"
                                                   " minutes." % (component_name, self.log_success, self.log_total))
         self.log_success = 0
         self.log_total = 0

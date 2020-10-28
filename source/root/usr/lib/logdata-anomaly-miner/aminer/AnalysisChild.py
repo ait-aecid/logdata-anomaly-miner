@@ -59,7 +59,7 @@ class AnalysisContext:
         # Keep lists of components that should receive timer interrupts when real time or analysis time has elapsed.
         self.real_time_triggered_components = []
         self.analysis_time_triggered_components = []
-        datefmt = aminer_config.config_properties.get(AMinerConfig.KEY_LOG_DATEFORMAT, AMinerConfig.DEFAULT_LOG_DATEFORMAT)
+        datefmt = '%d/%b/%Y:%H:%M:%S %z'
 
         rc_logger = logging.getLogger(AMinerConfig.REMOTE_CONTROL_LOG_NAME)
         rc_logger.setLevel(logging.DEBUG)
@@ -277,7 +277,9 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         # Always start when number is None.
         next_real_time_trigger_time = None
         next_analysis_time_trigger_time = None
-        next_statistics_log_time = time.time() + 3600
+        log_stat_period = self.analysis_context.aminer_config.config_properties.get(
+            AMinerConfig.KEY_LOG_STAT_PERIOD, AMinerConfig.DEFAULT_STAT_PERIOD)
+        next_statistics_log_time = time.time() + log_stat_period
 
         delayed_return_status = 0
         while self.run_analysis_loop_flag:
@@ -387,7 +389,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                 next_real_time_trigger_time = real_time + next_trigger_offset
 
             if real_time >= next_statistics_log_time:
-                next_statistics_log_time = real_time + 3600
+                next_statistics_log_time = real_time + log_stat_period
                 # log the statistics for every component.
                 for component_name in self.analysis_context.registered_components_by_name:
                     component = self.analysis_context.registered_components_by_name[component_name]

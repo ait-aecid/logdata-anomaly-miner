@@ -36,8 +36,8 @@ STAT_LOG_NAME = 'STAT'
 DEBUG_LEVEL = 1
 DEBUG_LOG_NAME = 'DEBUG'
 DEBUG_LOG_FILE = '/tmp/aminer_debug.log'
-KEY_LOG_DATEFORMAT = 'Log.Dateformat'
-DEFAULT_LOG_DATEFORMAT = '%d/%b/%Y:%H:%M:%S %z'
+KEY_LOG_STAT_PERIOD = 'Log.StatisticsPeriod'
+DEFAULT_STAT_PERIOD = 3600
 
 
 def load_config(config_file_name):
