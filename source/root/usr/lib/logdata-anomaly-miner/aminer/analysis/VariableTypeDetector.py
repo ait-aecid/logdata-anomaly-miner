@@ -607,7 +607,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         # Imports the persistency
         if persistence_data is not None:
             self.load_persistence_data(persistence_data)
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.' % self.__class__.__name__)
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     def receive_atom(self, log_atom):
         """Receive an parsed atom and the information about the parser match. Initializes Variables for new eventTypes
@@ -677,7 +677,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if self.save_statistics:
             PersistencyUtil.store_json(self.statistics_file_name, [
                 self.failed_indicators_total, self.failed_indicators_values, self.failed_indicators_paths, self.failed_indicators])
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.' % self.__class__.__name__)
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def load_persistence_data(self, persistence_data):
         """Extracts the persistency data and appends various lists to create a consistent state"""
@@ -727,7 +727,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if self.event_type_detector.num_eventlines[event_index] == self.num_init and self.var_type[event_index][0] == []:
             # Test all variables
 
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s started initial detection of var types.' % self.__class__.__name__)
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s started initial detection of var types.', self.__class__.__name__)
             if self.path_list is None:
                 for var_index in range(self.length[event_index]):
                     tmp_var_type = self.detect_var_type(event_index, var_index)
@@ -800,7 +800,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         elif self.event_type_detector.num_eventlines[event_index] > self.num_init and (
                 self.event_type_detector.num_eventlines[event_index] - self.num_init) % self.num_update == 0:
 
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s started update phase of var types.' % self.__class__.__name__)
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s started update phase of var types.', self.__class__.__name__)
             # Checks if the updates of the varTypes should be stopped
             if self.update_var_type_bool and (not isinstance(self.num_stop_update, bool)) and (
                     self.event_type_detector.total_records >= self.num_stop_update):
@@ -2168,13 +2168,12 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
                 "'%s' processed %d out of %d log atoms successfully and learned %d new variable types and updated %d variable types "
-                "in the last 60 minutes." % (
-                    component_name, self.log_success, self.log_total, self.log_new_learned, self.log_updated))
+                "in the last 60 minutes.", component_name, self.log_success, self.log_total, self.log_new_learned, self.log_updated)
         elif STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
                 "'%s' processed %d out of %d log atoms successfully and learned %d new variable types and updated %d variable types "
-                "in the last 60 minutes. Following new variable types were learned: %s" % (
-                    component_name, self.log_success, self.log_total, self.log_new_learned, self.log_updated, self.log_new_learned_values))
+                "in the last 60 minutes. Following new variable types were learned: %s", component_name, self.log_success, self.log_total,
+                self.log_new_learned, self.log_updated, self.log_new_learned_values)
         self.log_success = 0
         self.log_total = 0
         self.log_new_learned = 0

@@ -159,7 +159,7 @@ class FileLogDataResource(LogDataResource):
             log_file_fd = SecureOSFunctions.secure_open_file(self.log_resource_name[7:], os.O_RDONLY)
             stat_data = os.fstat(log_file_fd)
         except OSError as openOsError:
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error('OSError occurred in FileLogDataResource.open(). Error message: %s' % 
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error('OSError occurred in FileLogDataResource.open(). Error message: %s',
                                                                  openOsError.msg)
             if log_file_fd != -1:
                 os.close(log_file_fd)
@@ -250,8 +250,8 @@ class UnixSocketLogDataResource(LogDataResource):
             log_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             log_socket.connect(self.log_resource_name[7:])
         except socket.error as socketError:
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error('OSError occurred in UnixSocketLogDataResource.open(). Error message: %s'
-                                                                 % socketError.msg)
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error('OSError occurred in UnixSocketLogDataResource.open(). Error message: %s',
+                                                                 socketError.msg)
             if log_socket is not None:
                 log_socket.close()
             if (socketError.errno == errno.ENOENT) or (socketError.errno == errno.ECONNREFUSED):

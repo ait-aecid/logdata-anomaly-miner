@@ -50,7 +50,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
             self.known_path_set = set()
         else:
             self.known_path_set = set(persistence_data)
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.' % self.__class__.__name__)
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     def receive_atom(self, log_atom):
         self.log_total += 1
@@ -118,7 +118,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         """Immediately write persistence data to storage."""
         PersistencyUtil.store_json(self.persistence_file_name, list(self.known_path_set))
         self.next_persist_time = None
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.' % self.__class__.__name__)
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def log_statistics(self, component_name):
         """log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
@@ -126,12 +126,12 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         if STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
                 "'%s' processed %d out of %d log atoms successfully and learned %d new value combinations in the last 60"
-                " minutes." % (component_name, self.log_success, self.log_total, self.log_learned_path_values))
+                " minutes.", component_name, self.log_success, self.log_total, self.log_learned_path_values)
         elif STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
                 "'%s' processed %d out of %d log atoms successfully and learned %d new value combinations in the last 60"
-                " minutes. Following new value combinations were learned: %s" % (
-                    component_name, self.log_success, self.log_total, self.log_learned_path_values, self.log_new_learned_values))
+                " minutes. Following new value combinations were learned: %s", component_name, self.log_success, self.log_total,
+                self.log_learned_path_values, self.log_new_learned_values)
         self.log_success = 0
         self.log_total = 0
         self.log_learned_path_values = 0

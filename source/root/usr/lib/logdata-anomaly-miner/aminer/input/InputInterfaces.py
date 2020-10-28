@@ -2,7 +2,7 @@
 directory. All classes are defined in separate files, only the namespace references are added here to simplify the code."""
 import abc
 import logging
-from aminer.AMinerConfig import STAT_LEVEL, STAT_LOG_NAME, DEBUG_LEVEL, DEBUG_LOG_NAME
+from aminer.AMinerConfig import STAT_LEVEL, STAT_LOG_NAME
 
 
 class AtomizerFactory(metaclass=abc.ABCMeta):
@@ -54,6 +54,6 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         @param component_name the name of the component which is printed in the log line."""
         if STAT_LEVEL > 0:
             logging.getLogger(STAT_LOG_NAME).info("'%s' processed %d out of %d log atoms successfully in the last 60"
-                                                  " minutes." % (component_name, self.log_success, self.log_total))
+                                                  " minutes.", component_name, self.log_success, self.log_total)
         self.log_success = 0
         self.log_total = 0

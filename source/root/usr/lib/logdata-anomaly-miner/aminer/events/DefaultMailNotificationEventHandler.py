@@ -21,6 +21,7 @@ import time
 import re
 import logging
 
+from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.events import EventHandlerInterface
@@ -184,4 +185,4 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
         self.events_collected = 0
         self.current_message = ''
         self.next_alert_time = 0
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s sent notification.' % self.__class__.__name__)
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s sent notification.', self.__class__.__name__)

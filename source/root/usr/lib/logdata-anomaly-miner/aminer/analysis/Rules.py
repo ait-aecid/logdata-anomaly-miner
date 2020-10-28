@@ -24,6 +24,7 @@ from aminer.util import LogarithmicBackoffHistory
 from aminer.util import ObjectHistory
 
 from aminer.analysis.AtomFilters import SubhandlerFilter
+from aminer import AMinerConfig
 from aminer.AMinerConfig import STAT_LEVEL, STAT_LOG_NAME
 
 result_string = '%s(%s)'
@@ -77,7 +78,7 @@ class MatchRule(metaclass=abc.ABCMeta):
         """log statistics of an MatchRule. Override this method for more sophisticated statistics output of the MatchRule."""
         if STAT_LEVEL > 0:
             logging.getLogger(STAT_LOG_NAME).info("Rule '%s' processed %d out of %d log atoms successfully in the last 60"
-                                                  " minutes." % (rule_id, self.log_success, self.log_total))
+                                                  " minutes.", rule_id, self.log_success, self.log_total)
         self.log_success = 0
         self.log_total = 0
         if hasattr(self, 'sub_rules'):
