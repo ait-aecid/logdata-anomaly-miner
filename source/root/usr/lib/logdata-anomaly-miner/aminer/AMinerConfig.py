@@ -85,9 +85,8 @@ def save_config(analysis_context, new_file):
         pos = old.find(find_str)
         if pos == -1:
             msg += "WARNING: %s not found in the old config file." % find_str
-            logging.basicConfig(filename=LOG_FILE, level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s',
-                                datefmt='%d.%m.%Y %H:%M:%S')
-            logging.warning("WARNING: %s not found in the old config file.", find_str)
+            rc_logger = logging.getLogger(AMinerConfig.REMOTE_CONTROL_LOG_NAME)
+            rc_logger.warning("WARNING: %s not found in the old config file.", find_str)
         else:
             string = old[pos + len(find_str):]
             old_len = string.find('\n')
@@ -122,7 +121,7 @@ def save_config(analysis_context, new_file):
             if old_component_name != '"%s"' % name:
                 old = old[:old_component_name_start] + '"%s"' % name + old[old_component_name_end + 1:]
 
-    with open(LOG_FILE, "r") as logFile:
+    with open(REMOTE_CONTROL_LOG_FILE, "r") as logFile:
         logs = logFile.readlines()
 
     i = len(logs) - 1
