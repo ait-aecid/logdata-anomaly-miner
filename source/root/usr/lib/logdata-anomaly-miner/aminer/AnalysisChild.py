@@ -537,6 +537,7 @@ class AnalysisChildRemoteControlHandler:
                     'list_events_from_history': methods.list_events_from_history,
                     'whitelist_events_from_history': methods.whitelist_events_from_history,
                     'persist_all': methods.persist_all,
+                    'list_backups': methods.list_backups,
                     'EnhancedNewMatchPathValueComboDetector': aminer.analysis.EnhancedNewMatchPathValueComboDetector,
                     'EventCorrelationDetector': aminer.analysis.EventCorrelationDetector,
                     'HistogramAnalysis': aminer.analysis.HistogramAnalysis,

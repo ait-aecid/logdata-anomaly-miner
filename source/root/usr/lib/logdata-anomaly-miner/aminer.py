@@ -43,6 +43,7 @@ __status__ = "Production"
 __version__ = "2.0.1"
 
 import sys
+import shutil
 
 # As site packages are not included, define from where we need to execute code before loading it.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
@@ -136,6 +137,30 @@ def run_analysis_child(aminer_config, program_name):
     sys.exit(1)
 
 
+def clear_persistence(persistence_dir_name):
+    for filename in os.listdir(persistence_dir_name):
+        if filename == 'backup':
+            continue
+        file_path = os.path.join(persistence_dir_name, filename)
+        try:
+            if not os.path.isdir(file_path):
+                print('The AMiner persistence directory should not contain any files.', file=sys.stderr)
+                continue
+            shutil.rmtree(file_path)
+        except OSError as e:
+            print('Failed to delete %s. Reason: %s' % (file_path, e), file=sys.stderr)
+
+
+def copytree(src, dst, symlinks=False, ignore=None):
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            shutil.copytree(s, d, symlinks, ignore)
+        else:
+            shutil.copy2(s, d)
+
+
 def main():
     """AMiner main function"""
     # Extract program name, but only when sure to contain no problematic characters.
@@ -155,6 +180,7 @@ def main():
     clear_persistence_flag = False
     remove_persistence_dirs = []
     from_begin_flag = False
+    restore_relative_persistence_path = None
 
     arg_pos = 1
     while arg_pos < len(sys.argv):
@@ -187,6 +213,13 @@ def main():
             remove_persistence_dirs.append(sys.argv[arg_pos])
             arg_pos += 1
             continue
+        if arg_name in ('--Restore', '--restore'):
+            if '.' in sys.argv[arg_pos] or '/' in sys.argv[arg_pos]:
+                print('The remove path %s must not contain any . or /' % sys.argv[arg_pos], file=sys.stderr)
+                sys.exit(1)
+            restore_relative_persistence_path = sys.argv[arg_pos]
+            arg_pos += 1
+            continue
         if arg_name in ('--FromBegin', '--fromBegin', '--frombegin', '-f'):
             from_begin_flag = True
             continue
@@ -212,28 +245,21 @@ def main():
     except ValueError as e:
         print("Config-Error: %s" % e)
         sys.exit(1)
+    persistence_dir = aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
+
+    if restore_relative_persistence_path is not None and (clear_persistence_flag or remove_persistence_dirs):
+        print('The --Restore parameter removes all persistence files. Do not use this parameter with --Clear or --Remove!', sys.stderr)
+        sys.exit(1)
 
     if clear_persistence_flag:
         if remove_persistence_dirs:
             print('The --Clear and --Remove arguments must not be used together!', file=sys.stderr)
             sys.exit(1)
-        import shutil
-        persistence_dir_name = aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
-        for filename in os.listdir(persistence_dir_name):
-            file_path = os.path.join(persistence_dir_name, filename)
-            try:
-                if not os.path.isdir(file_path):
-                    print('The AMiner persistence directory should not contain any files.', file=sys.stderr)
-                    continue
-                shutil.rmtree(file_path)
-            except OSError as e:
-                print('Failed to delete %s. Reason: %s' % (file_path, e), file=sys.stderr)
+        clear_persistence(persistence_dir)
 
     if remove_persistence_dirs:
-        import shutil
-        persistence_dir_name = aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
         for filename in remove_persistence_dirs:
-            file_path = os.path.join(persistence_dir_name, filename)
+            file_path = os.path.join(persistence_dir, filename)
             try:
                 if not os.path.exists(file_path):
                     continue
@@ -243,6 +269,20 @@ def main():
                 shutil.rmtree(file_path)
             except OSError as e:
                 print('Failed to delete %s. Reason: %s' % (file_path, e), file=sys.stderr)
+
+    if restore_relative_persistence_path is not None:
+        absolute_persistence_path = os.path.join(persistence_dir, 'backup', restore_relative_persistence_path)
+        if not os.path.exists(absolute_persistence_path):
+            print('%s does not exist. Continuing without restoring persistence.', sys.stderr)
+        else:
+            clear_persistence(persistence_dir)
+            copytree(absolute_persistence_path, persistence_dir)
+            aminer_user = aminer_config.config_properties.get(AMinerConfig.KEY_AMINER_USER)
+            aminer_grp = aminer_config.config_properties.get(AMinerConfig.KEY_AMINER_GROUP)
+            for dirpath, dirnames, filenames in os.walk(persistence_dir):
+                shutil.chown(dirpath, aminer_user, aminer_grp)
+                for filename in filenames:
+                    shutil.chown(os.path.join(dirpath, filename), aminer_user, aminer_grp)
 
     if from_begin_flag:
         repositioning_data_path = os.path.join(aminer_config.config_properties.get(

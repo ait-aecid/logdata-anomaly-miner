@@ -70,3 +70,6 @@ sudo AMinerRemoteControl --Exec "change_attribute_of_registered_analysis_compone
 
 # Persist all data.
 sudo aminerRemoteControl --Exec "persist_all()"
+
+# List all backups.
+sudo aminerRemoteControl --Exec "list_backups(analysis_context)"

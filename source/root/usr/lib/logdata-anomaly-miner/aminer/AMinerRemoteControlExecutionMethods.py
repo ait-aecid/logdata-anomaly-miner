@@ -15,6 +15,7 @@ from aminer import AMinerConfig, AnalysisChild
 import resource
 import subprocess  # skipcq: BAN-B404
 import shlex
+import os
 from aminer.input import LogAtom
 from aminer.input import AtomHandlerInterface
 from aminer.util import PersistencyUtil
@@ -294,6 +295,15 @@ class AMinerRemoteControlExecutionMethods:
         """Persists all data by calling PersistencyUtil.persist_all()"""
         PersistencyUtil.persist_all()
         self.REMOTE_CONTROL_RESPONSE = 'OK'
+
+    def list_backups(self, analysis_context):
+        """Lists all available backups from the persistence directory."""
+        persistence_dir = analysis_context.aminer_config.config_properties.get(
+            AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
+        for dirpath, dirnames, filenames in os.walk(os.path.join(persistence_dir, 'backup')):
+            self.REMOTE_CONTROL_RESPONSE = '"backups": %s' % dirnames
+            break
+        self.REMOTE_CONTROL_RESPONSE = self.REMOTE_CONTROL_RESPONSE.replace("'", '"')
 
     def whitelist_event_in_component(self, analysis_context, component_name, event_data, whitelisting_data=None):
         """Whitelists one or multiple specific events from the history in the component it occurred in.
