@@ -21,7 +21,7 @@ class TestBase(unittest.TestCase):
             shutil.rmtree(persistence_file_name)
         if not os.path.exists(persistence_file_name):
             os.makedirs(persistence_file_name)
-        logging.disable()
+        logging.disable(logging.CRITICAL)
 
     def tearDown(self):
         self.aminer_config = AMinerConfig.load_config(self.__configFilePath)
