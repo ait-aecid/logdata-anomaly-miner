@@ -6,16 +6,13 @@ from _io import StringIO
 # skipcq: BAN-B404
 import subprocess
 
-sys.path.append('../../')
-# skipcq: FLK-E402
 from aminer.util.SecureOSFunctions import secure_open_file, send_annotated_file_descriptor, receive_annoted_file_descriptor
-# skipcq: PYL-C0412, FLK-E402
 from aminer.util import SecureOSFunctions
-# skipcq: FLK-E402
 from aminer.input.LogStream import UnixSocketLogDataResource
+from unit.TestBase import TestBase
 
 
-class SecureOSFunctionsTestLocal(unittest.TestCase):
+class SecureOSFunctionsTestLocal(TestBase):
     """This test class must be run locally due to import problems"""
 
     opening_socket = 'Opening socket...'
@@ -57,27 +54,27 @@ class SecureOSFunctionsTestLocal(unittest.TestCase):
         if os.path.exists(sock_name):
             os.remove(sock_name)
 
-        print(self.opening_socket)
+        # print(self.opening_socket)
         server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         server.bind(sock_name)
         server.listen(1)
         connection = server.accept()[0]
         unix_socket_log_data_resource = UnixSocketLogDataResource(b'unix:///tmp/test4unixSocket.sock', connection.fileno())
 
-        print(self.listening)
+        # print(self.listening)
         unix_socket_log_data_resource.fill_buffer()
         self.assertEqual(unix_socket_log_data_resource.buffer, data)
-        print('Data received: %s' % unix_socket_log_data_resource.buffer)
+        # print('Data received: %s' % unix_socket_log_data_resource.buffer)
 
         unix_socket_log_data_resource.update_position(len(unix_socket_log_data_resource.buffer))
         self.assertEqual(unix_socket_log_data_resource.total_consumed_length, 80)
         self.assertEqual(unix_socket_log_data_resource.buffer, b'')
 
-        print("Shutting down...")
+        # print("Shutting down...")
         unix_socket_log_data_resource.close()
         proc.terminate()
         proc.wait()
-        print("Done")
+        # print("Done")
 
     def test5send_annotated_file_descriptor_invalid_parameters(self):
         """An invalid access is to be performed by using a closed socket."""
@@ -98,25 +95,25 @@ class SecureOSFunctionsTestLocal(unittest.TestCase):
         if os.path.exists(sock_name):
             os.remove(sock_name)
 
-        print(self.opening_socket)
+        # print(self.opening_socket)
         server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         server.bind(sock_name)
         server.listen(1)
         connection = server.accept()[0]
         unix_socket_log_data_resource = UnixSocketLogDataResource(b'unix:///tmp/test6unixSocket.sock', connection.fileno())
 
-        print(self.listening)
+        # print(self.listening)
         unix_socket_log_data_resource.fill_buffer()
         self.assertEqual(unix_socket_log_data_resource.buffer, data)
-        print('Data received: %s' % unix_socket_log_data_resource.buffer)
+        # print('Data received: %s' % unix_socket_log_data_resource.buffer)
 
         unix_socket_log_data_resource.update_position(len(unix_socket_log_data_resource.buffer))
         self.assertEqual(unix_socket_log_data_resource.total_consumed_length, 25)
         self.assertEqual(unix_socket_log_data_resource.buffer, b'')
 
-        print("Shutting down...")
+        # print("Shutting down...")
         unix_socket_log_data_resource.close()
-        print("Done")
+        # print("Done")
 
     def test7receive_annotated_file_descriptor(self):
         """A valid annotated file descriptor is to be received by a socket."""
@@ -131,19 +128,19 @@ class SecureOSFunctionsTestLocal(unittest.TestCase):
         if os.path.exists(sock_name):
             os.remove(sock_name)
 
-        print(self.opening_socket)
+        # print(self.opening_socket)
         server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         server.bind(sock_name)
         server.listen(1)
         connection = server.accept()[0]
         data_tuple = receive_annoted_file_descriptor(connection)
 
-        print(self.listening)
+        # print(self.listening)
         self.assertEqual(data_tuple[1], data[0])
         self.assertEqual(data_tuple[2], data[1])
-        print('Data received: (%i, %s, %s)' % data_tuple)
+        # print('Data received: (%i, %s, %s)' % data_tuple)
         self.assertEqual(len(data_tuple[1]) + len(data_tuple[2]), 24)
-        print("Done")
+        # print("Done")
 
 
 if __name__ == "__main__":

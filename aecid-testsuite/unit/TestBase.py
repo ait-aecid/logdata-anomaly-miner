@@ -1,6 +1,7 @@
 import unittest
 import os
 import shutil
+import logging
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
@@ -20,6 +21,7 @@ class TestBase(unittest.TestCase):
             shutil.rmtree(persistence_file_name)
         if not os.path.exists(persistence_file_name):
             os.makedirs(persistence_file_name)
+        logging.disable()
 
     def tearDown(self):
         self.aminer_config = AMinerConfig.load_config(self.__configFilePath)
@@ -28,6 +30,7 @@ class TestBase(unittest.TestCase):
             shutil.rmtree(persistence_file_name)
         if not os.path.exists(persistence_file_name):
             os.makedirs(persistence_file_name)
+        logging.disable(logging.NOTSET)
 
     def reset_output_stream(self):
         self.output_stream.seek(0)
