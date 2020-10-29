@@ -17,12 +17,14 @@ install:
   - sudo apt-get install -y exim4 procps cpulimit mailutils
   - sudo pip3 install coverage
   - cd aecid-testsuite
+  - sudo chmod +x runSuspendModeTest.sh
   - sudo chmod +x runUnittests.sh
   - sudo chmod +x runAMinerDemo.sh
   - sudo chmod +x runAMinerIntegrationTest.sh
   - sudo chmod +x runCoverageTests.sh
 
 script:
+  - ./runSuspendModeTest.sh
   - ./runUnittests.sh
   - ./runAMinerDemo.sh demo/AMiner/demo-config.py
   - ./runAMinerDemo.sh demo/AMiner/jsonConverterHandler-demo-config.py

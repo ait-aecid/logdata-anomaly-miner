@@ -16,8 +16,6 @@ import socket
 import traceback
 import sys
 
-from aminer.AnalysisChild import AnalysisChildRemoteControlHandler
-
 __authors__ = ["Markus Wurzenberger", "Max Landauer", "Wolfgang Hotwagner", "Ernst Leierzopf", "Roman Fiedler", "Georg Hoeld",
                "Florian Skopik"]
 __contact__ = "aecid@ait.ac.at"
@@ -33,6 +31,8 @@ __version__ = "2.0.1"
 # Get rid of the default sys path immediately. Otherwise Python also attempts to load the following imports from e.g. directory
 # where this binary resides.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner']
+# skipcq: FLK-E402
+from aminer.AnalysisChild import AnalysisChildRemoteControlHandler
 
 remote_control_socket_name = None
 remote_control_data = None

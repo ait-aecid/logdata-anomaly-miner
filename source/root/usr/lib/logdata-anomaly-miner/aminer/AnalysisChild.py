@@ -271,12 +271,13 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                     input_select_fd_list.append(fd_handler_object.fileno())
 
             # Loop over the list in reverse order to avoid skipping elements in remove.
-            for log_stream in reversed(blocked_log_streams):
-                current_stream_fd = log_stream.handle_stream()
-                if current_stream_fd >= 0:
-                    self.tracked_fds_dict[current_stream_fd] = log_stream
-                    input_select_fd_list.append(current_stream_fd)
-                    blocked_log_streams.remove(log_stream)
+            if not suspended_flag:
+                for log_stream in reversed(blocked_log_streams):
+                    current_stream_fd = log_stream.handle_stream()
+                    if current_stream_fd >= 0:
+                        self.tracked_fds_dict[current_stream_fd] = log_stream
+                        input_select_fd_list.append(current_stream_fd)
+                        blocked_log_streams.remove(log_stream)
 
             read_list = None
             write_list = None
@@ -319,8 +320,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                     continue
 
                 if fd_handler_object == self.master_control_socket:
-                    if not suspended_flag:
-                        self.handle_master_control_socket_receive()
+                    self.handle_master_control_socket_receive()
                     continue
 
                 if fd_handler_object == self.remote_control_socket:
@@ -357,9 +357,8 @@ class AnalysisChild(TimeTriggeredComponentInterface):
             if next_real_time_trigger_time is None or real_time >= next_real_time_trigger_time:
                 next_trigger_offset = 3600
                 for component in real_time_triggered_components:
-                    if not suspended_flag:
-                        next_trigger_request = component.do_timer(real_time)
-                        next_trigger_offset = min(next_trigger_offset, next_trigger_request)
+                    next_trigger_request = component.do_timer(real_time)
+                    next_trigger_offset = min(next_trigger_offset, next_trigger_request)
                 next_real_time_trigger_time = real_time + next_trigger_offset
 
             # Handle the analysis time events. The analysis time will be different when an analysis time component is registered.
@@ -369,9 +368,8 @@ class AnalysisChild(TimeTriggeredComponentInterface):
             if next_analysis_time_trigger_time is None or analysis_time >= next_analysis_time_trigger_time:
                 next_trigger_offset = 3600
                 for component in analysis_time_triggered_components:
-                    if not suspended_flag:
-                        next_trigger_request = component.do_timer(real_time)
-                        next_trigger_offset = min(next_trigger_offset, next_trigger_request)
+                    next_trigger_request = component.do_timer(real_time)
+                    next_trigger_offset = min(next_trigger_offset, next_trigger_request)
                 next_analysis_time_trigger_time = analysis_time + next_trigger_offset
 
         # Analysis loop is only left on shutdown. Try to persist everything and leave.
