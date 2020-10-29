@@ -296,7 +296,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         """Adds the given Module to the following module list"""
         self.following_modules.append(following_module)
         logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug(
-            '%s added following module %s.', self.__class__.__name__, str(following_module))
+            '%s added following module %s.', self.__class__.__name__, following_module.__class__.__name__)
 
     def init_values(self, current_index):
         """Initializes the variable_key_list and the list for the values"""

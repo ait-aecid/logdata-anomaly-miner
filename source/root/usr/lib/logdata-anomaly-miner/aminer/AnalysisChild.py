@@ -78,7 +78,7 @@ class AnalysisContext:
             logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug(
-            'Called %s for the component %s', 'add_time_triggered_component', str(component))
+            'Called %s for the component %s', 'add_time_triggered_component', component.__class__.__name__)
 
     def register_component(self, component, component_name=None, register_time_trigger_class_override=None):
         """Register a new component. A component implementing the TimeTriggeredComponentInterface will also be added to the
@@ -109,7 +109,8 @@ class AnalysisContext:
                 for trigger_class in register_time_trigger_class_override:
                     self.add_time_triggered_component(component, trigger_class)
         logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug(
-            "Registered component %s with the id %d and component_name '%s'.", str(component), self.next_registry_id - 1, component_name)
+            "Registered component %s with the id %d and component_name '%s'.", component.__class__.__name__, self.next_registry_id - 1,
+            component_name)
 
     def get_registered_component_ids(self):
         """Get a list of currently known component IDs."""

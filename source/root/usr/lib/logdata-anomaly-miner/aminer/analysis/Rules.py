@@ -323,7 +323,7 @@ class ValueListMatchRule(MatchRule):
         return False
 
     def __str__(self):
-        return 'value(%s) in %s' % (self.path, ' '.join(self.value_list))
+        return 'value(%s) in %s' % (' '.join([str(value) for value in self.value_list]), self.path)
 
 
 class ValueRangeMatchRule(MatchRule):

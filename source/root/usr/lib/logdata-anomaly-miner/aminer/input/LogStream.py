@@ -160,7 +160,7 @@ class FileLogDataResource(LogDataResource):
             stat_data = os.fstat(log_file_fd)
         except OSError as openOsError:
             logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error('OSError occurred in FileLogDataResource.open(). Error message: %s',
-                                                                 openOsError.msg)
+                                                                 openOsError)
             if log_file_fd != -1:
                 os.close(log_file_fd)
             if openOsError.errno == errno.ENOENT:
