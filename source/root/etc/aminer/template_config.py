@@ -1,5 +1,6 @@
 # This is a template for the "aminer" logdata-anomaly-miner tool. Copy
-# it to "config.py" and define your ruleset.
+# it to "config.py" and define your ruleset. For more examples of component
+# usage see aecid-testsuite/demo/AMiner/demo-config.py.
 
 config_properties = {}
 
