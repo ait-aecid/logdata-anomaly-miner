@@ -34,7 +34,7 @@ if [[ $md5_result == "$SUSPEND_FILE: OK" ]]; then
 fi
 
 md5sum $SUSPEND_FILE > $SUSPEND_FILE_MD5 2> /dev/null
-sudo ./aminerRemoteControl --Exec "suspend" #> /dev/null
+sudo ./aminerRemoteControl --Exec "suspend" > /dev/null
 echo test_logline2 >> /tmp/syslog
 md5_result=`md5sum -c $SUSPEND_FILE_MD5 2> /dev/null`
 if [[ $md5_result != "$SUSPEND_FILE: OK" ]]; then
@@ -42,7 +42,7 @@ if [[ $md5_result != "$SUSPEND_FILE: OK" ]]; then
 	exit_code=1
 fi
 
-sudo ./aminerRemoteControl --Exec "activate" #> /dev/null
+sudo ./aminerRemoteControl --Exec "activate" > /dev/null
 
 if [[ $md5_result == "/tmp/syslog: OK" ]]; then
 	echo 'The aminer should have produced outputs, but md5sum does not indicate any changes. (2)'
