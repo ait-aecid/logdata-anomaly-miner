@@ -35,6 +35,7 @@ config_properties['AMinerGroup'] = 'aminer'
 # AMiner will refuse to start. When undefined, '/var/lib/aminer'
 # is used.
 config_properties['Core.PersistenceDir'] = '/tmp/lib/aminer'
+config_properties['Core.PersistencePeriod'] = 600
 
 # Define a target e-mail address to send alerts to. When undefined,
 # no e-mail notification hooks are added.

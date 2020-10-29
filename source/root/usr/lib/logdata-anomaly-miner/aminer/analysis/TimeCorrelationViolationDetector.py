@@ -29,9 +29,11 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
     def __init__(self, aminer_config, ruleset, anomaly_event_handlers, persistence_id='Default', output_log_line=True):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param ruleset a list of MatchRule rules with appropriate CorrelationRules attached as actions."""
+        self.aminer_config = aminer_config
         self.event_classification_ruleset = ruleset
         self.anomaly_event_handlers = anomaly_event_handlers
-        self.next_persist_time = time.time() + 600.0
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
+            AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
         self.persistence_id = persistence_id
         self.output_log_line = output_log_line
         self.last_log_atom = None
@@ -108,7 +110,8 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
     def do_persist(self):
         """Immediately write persistence data to storage."""
         # PersistencyUtil.storeJson(self.persistence_file_name, list(self.knownPathSet))
-        self.next_persist_time = time.time() + 600.0
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
+            AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
 
 
 class EventClassSelector(Rules.MatchAction):

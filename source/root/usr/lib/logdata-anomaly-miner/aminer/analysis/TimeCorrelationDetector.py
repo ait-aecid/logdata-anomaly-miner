@@ -52,6 +52,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
         self.output_log_line = output_log_line
         self.use_path_match = use_path_match
         self.use_value_match = use_value_match
+        self.aminer_config = aminer_config
 
         PersistencyUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, 'TimeCorrelationDetector', persistence_id)
@@ -103,7 +104,8 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
         if not features_found_list:
             self.last_unhandled_match = log_atom
         elif self.next_persist_time is None:
-            self.next_persist_time = time.time() + 600
+            self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
+                AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
 
         if (self.total_records % self.record_count_before_event) == 0:
             result = self.total_records * ['']
@@ -171,13 +173,13 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted"""
         if self.next_persist_time is None:
-            return 600
+            return self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
         if delta < 0:
             # PersistencyUtil.storeJson(self.persistenceFileName, list(self.knownPathSet))
             self.next_persist_time = None
-            delta = 600
+            delta = self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
         return delta
 
     def do_persist(self):

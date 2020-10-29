@@ -16,6 +16,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import time
 import os
 
+from aminer import AMinerConfig
 from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
 from aminer.util import PersistencyUtil
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
@@ -123,7 +124,8 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
                                        event_data, log_atom, self)
         if self.auto_include_flag:
             if self.next_persist_time is None:
-                self.next_persist_time = time.time() + 600
+                self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
+                    AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
         return True
 
     def do_persist(self):

@@ -270,6 +270,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.persistence_id = persistence_id
         self.next_persist_time = None
         self.output_log_line = output_log_line
+        self.aminer_config = aminer_config
 
         PersistencyUtil.add_persistable_component(self)
         self.persistenceFileName = AMinerConfig.build_persistence_file_name(aminer_config, 'HistogramAnalysis', persistence_id)
@@ -298,7 +299,8 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 self.send_report(log_atom, timestamp)
 
         if self.next_persist_time is None and data_updated_flag:
-            self.next_persist_time = time.time() + 600
+            self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
+                AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
 
     def get_time_trigger_class(self):
         """Get the trigger class this component should be registered for. This trigger is used only for persistency, so real-time
@@ -308,12 +310,12 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted"""
         if self.next_persist_time is None:
-            return 600
+            return self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
         if delta < 0:
             self.do_persist()
-            delta = 600
+            delta = self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
         return delta
 
     def do_persist(self):
@@ -404,6 +406,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
         self.persistence_id = persistence_id
         self.next_persist_time = None
         self.output_log_line = output_log_line
+        self.aminer_config = aminer_config
 
         PersistencyUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, 'PathDependentHistogramAnalysis',
@@ -484,7 +487,8 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
                 self.send_report(log_atom, timestamp)
 
         if self.next_persist_time is None:
-            self.next_persist_time = time.time() + 600
+            self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
+                AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
 
     def get_time_trigger_class(self):
         """Get the trigger class this component should be registered for. This trigger is used only for persistency, so real-time
@@ -494,12 +498,12 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted"""
         if self.next_persist_time is None:
-            return 600
+            return self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
         if delta < 0:
             self.do_persist()
-            delta = 600
+            delta = self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
         return delta
 
     def do_persist(self):

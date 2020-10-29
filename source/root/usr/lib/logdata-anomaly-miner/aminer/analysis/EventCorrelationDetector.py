@@ -632,7 +632,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted"""
         if self.next_persist_time is None:
-            return 600
+            return self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
         if delta < 0:
@@ -648,7 +648,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                          implication.min_eval_true))
             PersistencyUtil.store_json(self.persistence_file_name, list(known_path_set))
             self.next_persist_time = None
-            delta = 600
+            delta = self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
         return delta
 
     def do_persist(self):

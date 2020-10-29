@@ -197,7 +197,7 @@ def build_analysis_pipeline(analysis_context):
     atom_filters.add_handler(parser_count)
 
     from aminer.analysis import NewMatchPathDetector
-    new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=False)
+    new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=True)
     analysis_context.register_component(new_match_path_detector, component_name="NewMatchPath")
     atom_filters.add_handler(new_match_path_detector)
 

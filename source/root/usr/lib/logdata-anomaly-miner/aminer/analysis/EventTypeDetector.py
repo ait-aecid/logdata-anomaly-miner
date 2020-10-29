@@ -264,12 +264,12 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, E
     def do_timer(self, trigger_time):
         """Checks if current ruleset should be persisted"""
         if self.next_persist_time is None:
-            return 600
+            return self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
         if delta <= 0:
             self.do_persist()
-            delta = 600
+            delta = self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
         return delta
 
     def do_persist(self):
@@ -289,7 +289,8 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, E
         for following_module in self.following_modules:
             following_module.do_persist()
 
-        self.next_persist_time = time.time() + 600.0
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
+            AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
 
     def add_following_modules(self, following_module):
         """Adds the given Module to the following module list"""
