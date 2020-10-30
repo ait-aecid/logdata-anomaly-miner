@@ -10,6 +10,7 @@ import random
 
 
 class VariableTypeDetectorTest(TestBase):
+    """Unittests for the VariableTypeDetector."""
 
     def test1convert_to_floats(self):
         """This unittest tests possible inputs of the convert_to_floats function."""
@@ -52,8 +53,10 @@ class VariableTypeDetectorTest(TestBase):
         self.assertFalse(consists_of_ints(string_int_list))
 
     def test3detect_continuous_shape_fixed_data(self):
-        """This unittest tests possible continuously distributed variables raising from the detect_continous_shape method. It uses fix data
-        sets. Every distribution has generated 20*100 Datasets and var_ev = 0, var_var = 1. Data was generated with following methods:"""
+        """
+        This unittest tests possible continuously distributed variables raising from the detect_continous_shape method.
+        It uses fix data sets. Every distribution has generated 20*100 Datasets and var_ev = 0, var_var = 1.
+        """
         # Number of execution of the tested function
         iterations = 20
         # Size of the initial datasample
@@ -321,8 +324,10 @@ class VariableTypeDetectorTest(TestBase):
         self.assertFalse(consists_of_floats(data_list))
 
     def test6receive_atom(self):
-        """This unittest tests if atoms are sorted to the right distribution and if the update steps also work properly.
-        Therefore the assumption that after 200 values the VTD with the default parameters can change to the right distribution."""
+        """
+        This unittest tests if atoms are sorted to the right distribution and if the update steps also work properly.
+        Therefore the assumption that after 200 values the VTD with the default parameters can change to the right distribution.
+        """
         # load data
         with open('unit/data/vtd_data/uni_data_test6', 'rb') as f:
             uni_data_list = pickle.load(f)  # skipcq: BAN-B301
@@ -552,8 +557,10 @@ class VariableTypeDetectorTest(TestBase):
             self.assertEqual('unq', result[0], (init, update, result))
 
     def test7update_continuous_VT(self):
-        """This unittest tests the s_ks_test method. It uses randomised datasets, which can be printed in the terminal.
-        Every distribution has generated 30*300 Datasets and var_ev = 0, var_var = 1."""
+        """
+        This unittest tests the s_ks_test method. It uses randomised datasets, which can be printed in the terminal.
+        Every distribution has generated 30*300 Datasets and var_ev = 0, var_var = 1.
+        """
         # Number of execution of the tested function
         iterations = 20
         # Size of the initial datasample

@@ -1,4 +1,4 @@
-"""This module defines a parser model for exim"""
+"""This module defines a parser model for exim."""
 
 from aminer.parsing import AnyByteDataModelElement
 from aminer.parsing import DecimalIntegerValueModelElement
@@ -13,8 +13,7 @@ from aminer.parsing import WhiteSpaceLimitedDataModelElement
 
 
 def get_model():
-    """This function defines how to parse a su session information message after any standard logging preamble, e.g. from syslog."""
-
+    """Return a model to parse a su session information message after any standard logging preamble, e.g. from syslog."""
     type_children = [
         SequenceModelElement('queue', [
             FixedWordlistDataModelElement('type', [b'Start', b'End']),

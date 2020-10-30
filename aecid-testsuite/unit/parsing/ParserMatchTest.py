@@ -4,6 +4,7 @@ from aminer.parsing.MatchElement import MatchElement
 
 
 class ParserMatchTest(unittest.TestCase):
+    """Unittests for the ParserMatch."""
 
     def test1get_match_dictionary(self):
         """This test case checks if all elements are found in the dictionary."""

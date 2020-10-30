@@ -13,20 +13,19 @@ from aminer.parsing import SequenceModelElement
 from aminer.parsing import VariableByteDataModelElement
 from aminer.parsing import RepeatedElementDataModelElement
 
+
 def get_model():
-
-    """This model defines how to parse Syslogs from the AIT-LDS."""
-
+    """Return a model to parse Syslogs from the AIT-LDS."""
     alphabet = b'!"#$%&\'()*+,-./0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\\^_`abcdefghijklmnopqrstuvwxyz{|}~=[]'
 
     user_info = SequenceModelElement('user_info', [
         FixedDataModelElement('user_str', b'user=<'),
-        OptionalMatchModelElement('user',
-            DelimitedDataModelElement('user', b'>')
+        OptionalMatchModelElement(
+            'user', DelimitedDataModelElement('user', b'>')
             ),
         FixedDataModelElement('method_str', b'>'),
-        OptionalMatchModelElement('method',
-            SequenceModelElement('method', [
+        OptionalMatchModelElement(
+            'method', SequenceModelElement('method', [
                 FixedDataModelElement('method_str', b', method='),
                 DelimitedDataModelElement('method', b','),
                 ])
@@ -35,14 +34,14 @@ def get_model():
         IpAddressDataModelElement('rip'),
         FixedDataModelElement('lip_str', b', lip='),
         IpAddressDataModelElement('lip'),
-        OptionalMatchModelElement('mpid',
-            SequenceModelElement('mpid', [
+        OptionalMatchModelElement(
+            'mpid', SequenceModelElement('mpid', [
                 FixedDataModelElement('mpid_str', b', mpid='),
                 DecimalIntegerValueModelElement('mpid'),
                 ])
             ),
-        OptionalMatchModelElement('secured',
-            FixedDataModelElement('secured_str', b', secured')
+        OptionalMatchModelElement(
+            'secured', FixedDataModelElement('secured_str', b', secured')
             ),
         FixedDataModelElement('session_str', b', session=<'),
         DelimitedDataModelElement('session', b'>'),
@@ -98,8 +97,8 @@ def get_model():
                                 FixedDataModelElement('mode_str', b' mode='),
                                 DelimitedDataModelElement('mode', b')'),
                                 FixedDataModelElement('brack_str5', b')'),
-                                OptionalMatchModelElement('set',
-                                    SequenceModelElement('set', [
+                                OptionalMatchModelElement(
+                                    'set', SequenceModelElement('set', [
                                         FixedDataModelElement('set_str', b' (set'),
                                         DelimitedDataModelElement('param', b'='),
                                         FixedDataModelElement('equal_str', b'='),
@@ -183,20 +182,20 @@ def get_model():
                             SequenceModelElement('message_sent', [
                                 FixedDataModelElement('message_sent_str', b'Message sent to '),
                                 VariableByteDataModelElement('user', b'.0123456789@ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz'),
-                                OptionalMatchModelElement('mail',
-                                    SequenceModelElement('mail', [
+                                OptionalMatchModelElement(
+                                    'mail', SequenceModelElement('mail', [
                                         FixedDataModelElement('brack_mail1', b' <'),
                                         DelimitedDataModelElement('mail', b'>'),
                                         FixedDataModelElement('brack_mail2', b'>')
                                         ])
                                     ),
-                                RepeatedElementDataModelElement('more_recepients_rep',
-                                    SequenceModelElement('more_recepients', [
+                                RepeatedElementDataModelElement(
+                                    'more_recepients_rep', SequenceModelElement('more_recepients', [
                                         FixedDataModelElement('comma_str', b', '),
                                         VariableByteDataModelElement('more_recepients_mail',
                                                                      b'.0123456789@ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz'),
-                                        OptionalMatchModelElement('more_recepients_mail',
-                                            SequenceModelElement('more_recepients', [
+                                        OptionalMatchModelElement(
+                                            'more_recepients_mail', SequenceModelElement('more_recepients', [
                                                 FixedDataModelElement('brack_more_recepients1', b' <'),
                                                 DelimitedDataModelElement('more_recepients', b'>'),
                                                 FixedDataModelElement('brack_more_recepients2', b'>')
@@ -264,14 +263,14 @@ def get_model():
                                 FixedDataModelElement('declaration_str', b'Declaration of '),
                                 DelimitedDataModelElement('function_name1', b'('),
                                 FixedDataModelElement('brack_str1', b'('),
-                                OptionalMatchModelElement('arg1',
-                                    DelimitedDataModelElement('arg1', b')')
+                                OptionalMatchModelElement(
+                                    'arg1', DelimitedDataModelElement('arg1', b')')
                                     ),
                                 FixedDataModelElement('failed_str', b') should be compatible with '),
                                 DelimitedDataModelElement('function_name2', b'('),
                                 FixedDataModelElement('brack_str2', b'('),
-                                OptionalMatchModelElement('arg2',
-                                    DelimitedDataModelElement('arg2', b')')
+                                OptionalMatchModelElement(
+                                    'arg2', DelimitedDataModelElement('arg2', b')')
                                     ),
                                 FixedDataModelElement('brack_str3', b')'),
                                 ]),
@@ -319,8 +318,8 @@ def get_model():
                         FixedWordlistDataModelElement('status', [b'opened', b'closed']),
                         FixedDataModelElement('user_str', b' for user '),
                         VariableByteDataModelElement('user', alphabet),
-                        OptionalMatchModelElement('uid',
-                            SequenceModelElement('uid', [
+                        OptionalMatchModelElement(
+                            'uid', SequenceModelElement('uid', [
                                 FixedDataModelElement('uid_str', b' by (uid='),
                                 DecimalIntegerValueModelElement('uid'),
                                 FixedDataModelElement('brack_str', b')')
@@ -335,8 +334,8 @@ def get_model():
                 FixedDataModelElement('brack_str', b'('),
                 DelimitedDataModelElement('name', b')'),
                 FixedDataModelElement('session_str', b'): authentication failure; logname='),
-                OptionalMatchModelElement('logname',
-                    DelimitedDataModelElement('logname', b' ')
+                OptionalMatchModelElement(
+                    'logname', DelimitedDataModelElement('logname', b' ')
                     ),
                 FixedDataModelElement('uid_str', b' uid='),
                 DecimalIntegerValueModelElement('uid'),
@@ -348,8 +347,8 @@ def get_model():
                 DelimitedDataModelElement('ruser', b' '),
                 FixedDataModelElement('rhost_str', b' rhost='),
                 IpAddressDataModelElement('rhost'),
-                OptionalMatchModelElement('user',
-                    SequenceModelElement('user', [
+                OptionalMatchModelElement(
+                    'user', SequenceModelElement('user', [
                         FixedDataModelElement('user_str', b'  user='),
                         VariableByteDataModelElement('user', alphabet)
                         ])
@@ -389,8 +388,8 @@ def get_model():
                 ]),
             SequenceModelElement('kernel', [
                 FixedDataModelElement('kernel_str', b' kernel'),
-                OptionalMatchModelElement('id',
-                    SequenceModelElement('id', [
+                OptionalMatchModelElement(
+                    'id', SequenceModelElement('id', [
                         FixedDataModelElement('brack_str', b'['),
                         DecimalIntegerValueModelElement('id'),
                         FixedDataModelElement('brack_str2', b']')

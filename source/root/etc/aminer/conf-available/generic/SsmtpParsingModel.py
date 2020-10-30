@@ -8,7 +8,7 @@ from aminer.parsing import SequenceModelElement
 
 
 def get_model():
-    """This function returns the model."""
+    """Return the model."""
     type_children = [
         SequenceModelElement('sent', [
             FixedDataModelElement('s0', b'Sent mail for '),

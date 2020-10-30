@@ -9,6 +9,8 @@ from unit.TestBase import TestBase
 
 
 class KafkaEventHandlerTest(TestBase):
+    """Unittests for the KafkaEventHandler."""
+
     output_log_line = True
     kafka_topic = 'test_topic'
     kafka_group = 'test_group'
@@ -32,12 +34,14 @@ class KafkaEventHandlerTest(TestBase):
 
     @classmethod
     def setUpClass(cls):
+        """Start a KafkaConsumer."""
         cls.consumer = KafkaConsumer(
             cls.kafka_topic, bootstrap_servers=['localhost:9092'], enable_auto_commit=True, consumer_timeout_ms=10000,
             group_id=cls.kafka_group, value_deserializer=lambda x: x.decode(), api_version=(2, 0, 1), auto_offset_reset='earliest')
 
     @classmethod
     def tearDownClass(cls):
+        """Shutdown the KafkaConsumer."""
         cls.consumer.close()
 
     def test1receive_serialized_data(self):
@@ -58,7 +62,7 @@ class KafkaEventHandlerTest(TestBase):
             self.__class__.__name__, self.description, self.event_message, self.persistence_id, round(self.t, 2), ""))
 
     def test2receive_non_serialized_data(self):
-        """This unittest tests the receive_event method with not serialized data"""
+        """This unittest tests the receive_event method with not serialized data."""
         log_atom = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element), self.t, self)
         self.analysis_context.register_component(self, self.description)
         event_data = {'AnalysisComponent': {'AffectedParserPaths': ['test/path/1', 'test/path/2']}}

@@ -4,6 +4,8 @@ from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueMo
 
 
 class DecimalIntegerValueModelElementTest(unittest.TestCase):
+    """Unittests for the DecimalIntegerValueModelElement."""
+
     positive_string = b'25537 uid=2'
     negative_string = b'-25537 uid=2'
     zero_number = b'00025537 uid=2'
@@ -13,8 +15,10 @@ class DecimalIntegerValueModelElementTest(unittest.TestCase):
     match_element_should_not_exist = 'There should not exist a MatchElement!'
 
     def test1positive_number_none_padding(self):
-        """This testcase represents the equivalence class of positive numbers in combination with no padding. It unit the correctness of
-        the Path usage for all positive integers without padding."""
+        """
+        This testcase represents the equivalence class of positive numbers in combination with no padding.
+        It tests the correctness of the Path usage for all positive integers without padding.
+        """
         match_context = MatchContext(self.positive_string)
         decimal_integer_value_me = DecimalIntegerValueModelElement(
             None, DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
@@ -24,8 +28,10 @@ class DecimalIntegerValueModelElementTest(unittest.TestCase):
         self.assertEqual(match_element.get_match_object(), 25537, self.match_element_unexpected_value)
 
     def test2positive_number_none_padding_no_match(self):
-        """This testcase represents the equivalence class of positive numbers in combination with no padding. It unit the correctness of
-        the Path usage for all positive integers without padding, when no match is found. """
+        """
+        This testcase represents the equivalence class of positive numbers in combination with no padding.
+        It tests the correctness of the Path usage for all positive integers without padding, when no match is found.
+        """
         match_context = MatchContext(b' 25537 uid=2')
         decimal_integer_value_me = DecimalIntegerValueModelElement(
             None, DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
@@ -33,8 +39,10 @@ class DecimalIntegerValueModelElementTest(unittest.TestCase):
         self.assertEqual(match_element, None, self.match_element_should_not_exist)
 
     def test3negative_number_none_padding(self):
-        """This testcase represents the equivalence class of negative numbers in combination with no padding. It unit the correctness of
-        the Path usage for all negative integers without padding."""
+        """
+        This testcase represents the equivalence class of negative numbers in combination with no padding.
+        It tests the correctness of the Path usage for all negative integers without padding.
+        """
         match_context = MatchContext(self.negative_string)
         decimal_integer_value_me = DecimalIntegerValueModelElement(
             None, DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
@@ -44,8 +52,10 @@ class DecimalIntegerValueModelElementTest(unittest.TestCase):
         self.assertEqual(match_element.get_match_object(), -25537, self.match_element_unexpected_value)
 
     def test4negative_number_none_padding_no_match(self):
-        """This testcase represents the equivalence class of negative numbers in combination with no padding. It unit the correctness of
-        the Path usage for all negative integers without padding, when no match is found."""
+        """
+        This testcase represents the equivalence class of negative numbers in combination with no padding.
+        It tests the correctness of the Path usage for all negative integers without padding, when no match is found.
+        """
         match_context = MatchContext(b'- 25537 uid=2')
         decimal_integer_value_me = DecimalIntegerValueModelElement(
             None, DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
@@ -53,8 +63,10 @@ class DecimalIntegerValueModelElementTest(unittest.TestCase):
         self.assertEqual(match_element, None, self.match_element_should_not_exist)
 
     def test5sign_type_mandatory_none_padding(self):
-        """This testcase represents the equivalence class of all numbers with a mandatory sign in combination with no padding. It unit
-        the correctness of the Path usage for all integers with a mandatory sign without padding."""
+        """
+        This testcase represents the equivalence class of all numbers with a mandatory sign in combination with no padding.
+        It tests the correctness of the Path usage for all integers with a mandatory sign without padding.
+        """
         match_context = MatchContext(self.negative_string)
         decimal_integer_value_me = DecimalIntegerValueModelElement(
             None, DecimalIntegerValueModelElement.SIGN_TYPE_MANDATORY, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
@@ -70,8 +82,10 @@ class DecimalIntegerValueModelElementTest(unittest.TestCase):
         self.assertEqual(match_element.get_match_object(), 25537, self.match_element_unexpected_value)
 
     def test6sign_type_mandatory_none_padding_no_match(self):
-        """This testcase represents the equivalence class of all numbers with a mandatory sign in combination with no padding. It unit
-        the correctness of the Path usage for all integers with a mandatory sign without padding, when no match is found."""
+        """
+        This testcase represents the equivalence class of all numbers with a mandatory sign in combination with no padding.
+        It tests the correctness of the Path usage for all integers with a mandatory sign without padding, when no match is found.
+        """
         match_context = MatchContext(self.positive_string)
         decimal_integer_value_me = DecimalIntegerValueModelElement(
             None, DecimalIntegerValueModelElement.SIGN_TYPE_MANDATORY, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
@@ -79,8 +93,7 @@ class DecimalIntegerValueModelElementTest(unittest.TestCase):
         self.assertEqual(match_element, None, self.match_element_should_not_exist)
 
     def test7positive_number_zero_padding(self):
-        """In this testcase the positive Integer equivalence class in combination with the zero padding, which represents the padding
-        equivalence class, is tested."""
+        """In this testcase the positive Integer equivalence class in combination with the zero padding is tested."""
         match_context = MatchContext(self.zero_number)
         decimal_integer_value_me = DecimalIntegerValueModelElement(
             None, DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_ZERO)
@@ -96,8 +109,7 @@ class DecimalIntegerValueModelElementTest(unittest.TestCase):
         self.assertEqual(match_element.get_match_object(), 25537, self.match_element_unexpected_value)
 
     def test8positive_number_zero_padding_no_match(self):
-        """In this testcase the positive Integer equivalence class in combination with the zero padding, which represents the padding
-        equivalence class, is tested with no match expected."""
+        """In this testcase the positive Integer equivalence class in combination with the zero padding is tested with no match expected."""
         match_context = MatchContext(b' 00025537 uid=2')
         decimal_integer_value_me = DecimalIntegerValueModelElement(
             None, DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_ZERO)
@@ -105,8 +117,7 @@ class DecimalIntegerValueModelElementTest(unittest.TestCase):
         self.assertEqual(match_element, None, self.match_element_should_not_exist)
 
     def test9negative_number_blank_padding(self):
-        """In this testcase the negative Integer equivalence class in combination with the blank character padding, which represents the
-        padding equivalence class, is tested."""
+        """In this testcase the negative Integer equivalence class in combination with the blank character padding is tested."""
         match_context = MatchContext(b'- 25537 uid=2')
         decimal_integer_value_me = DecimalIntegerValueModelElement(
             None, DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL, DecimalIntegerValueModelElement.PAD_TYPE_BLANK)
@@ -122,8 +133,10 @@ class DecimalIntegerValueModelElementTest(unittest.TestCase):
         self.assertEqual(match_element.get_match_object(), -25537, self.match_element_unexpected_value)
 
     def test10negative_number_blank_padding_no_match(self):
-        """In this testcase the negative Integer equivalence class in combination with the blank character padding, which represents the
-        padding equivalence class, is tested with no match expected."""
+        """
+        In this testcase the negative Integer equivalence class in combination with the blank character padding is tested.
+        No match expected.
+        """
         match_context = MatchContext(b' -25537 uid=2')
         decimal_integer_value_me = DecimalIntegerValueModelElement(
             None, DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL, DecimalIntegerValueModelElement.PAD_TYPE_BLANK)
@@ -131,8 +144,7 @@ class DecimalIntegerValueModelElementTest(unittest.TestCase):
         self.assertEqual(match_element, None, self.match_element_should_not_exist)
 
     def test11mandatory_zero_padding(self):
-        """In this testcase the mandatory sign equivalence class in combination with the zero padding, which represents the padding
-        equivalence class, is tested."""
+        """In this testcase the mandatory sign equivalence class in combination with the zero padding is tested."""
         match_context = MatchContext(b'+00025537 uid=2')
         decimal_integer_value_me = DecimalIntegerValueModelElement(
             None, DecimalIntegerValueModelElement.SIGN_TYPE_MANDATORY, DecimalIntegerValueModelElement.PAD_TYPE_ZERO)
@@ -154,8 +166,7 @@ class DecimalIntegerValueModelElementTest(unittest.TestCase):
         self.assertEqual(match_element.get_match_object(), 25537, self.match_element_unexpected_value)
 
     def test12mandatory_zero_padding_no_match(self):
-        """In this testcase the mandatory sign equivalence class in combination with the zero padding, which represents the padding
-        equivalence class, is tested with no match expected."""
+        """In this testcase the mandatory sign equivalence class in combination with the zero padding is tested with no match expected."""
         match_context = MatchContext(self.zero_number)
         decimal_integer_value_me = DecimalIntegerValueModelElement(
             None, DecimalIntegerValueModelElement.SIGN_TYPE_MANDATORY, DecimalIntegerValueModelElement.PAD_TYPE_ZERO)
@@ -197,6 +208,7 @@ class DecimalIntegerValueModelElementTest(unittest.TestCase):
         """An exception must be raised, when the padding type does not exist."""
         self.assertRaises(Exception, DecimalIntegerValueModelElement, None, DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL, 'tab')
 
+    # skipcq: PYL-W0105
     '''
     def test17NoBytestringInput(self):
         """An exception must be raised, when the input is no bytestring. Another possiblity is to convert the string into a bytestring."""

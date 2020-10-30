@@ -11,8 +11,9 @@ from datetime import datetime
 
 
 class TimestampsUnsortedDetectorTest(TestBase):
-    __expected_string = '%s Timestamp %s below %s\n%s: "%s" (%d lines)\n  %s\n\n'
+    """Unittests for the TimestampsUnsortedDetector."""
 
+    __expected_string = '%s Timestamp %s below %s\n%s: "%s" (%d lines)\n  %s\n\n'
     pid = b' pid='
     datetime_format_string = '%Y-%m-%d %H:%M:%S'
 

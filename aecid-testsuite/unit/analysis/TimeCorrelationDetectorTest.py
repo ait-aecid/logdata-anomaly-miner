@@ -12,6 +12,8 @@ from datetime import datetime
 
 
 class TimeCorrelationDetectorTest(TestBase):
+    """Unittests for the TimeCorrlelationDetectorTest."""
+
     __expected_string = '%s Correlation report\nTimeCorrelationDetector: "%s" (%d lines)\n  '
 
     string = b'25537 uid=2'
@@ -30,8 +32,10 @@ class TimeCorrelationDetectorTest(TestBase):
     match_element_first_match_me2 = first_match_me2.get_match_element('second', match_context_first_match_me2)
 
     def test1_normal_report(self):
-        """This test case unit the creation of a report. As the rules are chosen randomly this test can not be very specific in checking
-        the actual values of the report."""
+        """
+        This test case unit the creation of a report.
+        As the rules are chosen randomly this test can not be very specific in checking he actual values of the report.
+        """
         description = "Test1TimeCorrelationDetector"
         parallel_check_count = 2
         record_count_before_event = 10
