@@ -31,6 +31,10 @@ class FixedWordlistDataModelElement(ModelElementInterface):
                 if test_word.startswith(ref_word):
                     raise Exception('Word %s would be shadowed by word %s at lower position' % (repr(test_word), repr(ref_word)))
 
+    def get_id(self):
+        """Get the element ID."""
+        return self.path_id
+
     def get_child_elements(self):
         """Get all possible child model elements of this element.
         @return None as there are no children of this element."""

@@ -36,6 +36,8 @@ from aminer.parsing.ElementValueBranchModelElement import ElementValueBranchMode
 
 
 class YamlConfigTest(unittest.TestCase):
+    """Unittests for the YamlConfig."""
+
     sysp = sys.path
 
     def setUp(self):

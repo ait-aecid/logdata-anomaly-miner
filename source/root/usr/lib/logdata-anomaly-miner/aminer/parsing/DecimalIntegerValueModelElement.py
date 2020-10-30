@@ -50,6 +50,10 @@ class DecimalIntegerValueModelElement(ModelElementInterface):
             raise Exception('Invalid valuePadType "%s"' % value_sign_type)
         self.value_pad_type = value_pad_type
 
+    def get_id(self):
+        """Get the element ID."""
+        return self.path_id
+
     def get_child_elements(self):
         """Get all possible child model elements of this element.
         @return empty list as there are no children of this element."""

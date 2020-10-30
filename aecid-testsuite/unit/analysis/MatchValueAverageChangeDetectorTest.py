@@ -9,6 +9,8 @@ import time
 
 
 class MatchValueAverageChangeDetectorTest(TestBase):
+    """Unittests for the MatchValueAverageChangeDetector."""
+
     __expected_string = '%s Statistical data report\n%s: "%s" (%d lines)\n  "cron/job1": Change: new: n = 3, avg = %s, ' \
                         'var = 100000000.0; old: n = 3, avg = %s, var = 1000000.0\n\n'
     __expected_string2 = '%s Statistical data report\n%s: "%s" (%d lines)\n  "cron/job1": Change: new: n = 2, avg = %s, ' \

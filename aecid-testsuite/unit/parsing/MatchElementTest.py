@@ -3,6 +3,7 @@ from aminer.parsing.MatchElement import MatchElement
 
 
 class MatchElementTest(unittest.TestCase):
+    """Unittests for the MatchElement."""
 
     def test1_child_elements_with_no_path(self):
         """This test case checks, whether a Exception is raised, when the path is None or empty and children are passed."""
