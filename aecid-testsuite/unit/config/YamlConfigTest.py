@@ -39,9 +39,11 @@ class YamlConfigTest(unittest.TestCase):
     sysp = sys.path
 
     def setUp(self):
+        """Add the aminer syspath."""
         sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
 
     def tearDown(self):
+        """Reset the syspath."""
         sys.path = self.sysp
 
     def test1_load_generic_yaml_file(self):
@@ -84,12 +86,6 @@ class YamlConfigTest(unittest.TestCase):
         aminer_config.load_yaml('unit/data/configfiles/multiple_components.yml')
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        """ the following lines help to debug the context for defining the testcases
-        from pprint import pprint
-        pprint(vars(context))
-        pprint(vars(context.atomizer_factory))
-        pprint(vars(context.atomizer_factory.parsing_model))
-        pprint(vars(context.atomizer_factory.atom_handler_list[0])) """
         self.assertTrue(isinstance(context.registered_components[0][0], NewMatchPathDetector))
         self.assertTrue(isinstance(context.registered_components[1][0], TimestampsUnsortedDetector))
         self.assertTrue(isinstance(context.registered_components[2][0], NewMatchPathValueDetector))
@@ -406,12 +402,7 @@ class YamlConfigTest(unittest.TestCase):
         self.assertEqual(type(yml_context.atomizer_factory.event_handler_list), type(py_context.atomizer_factory.event_handler_list))
 
     def run_empty_components_tests(self, context):
-        """ the following lines help to debug the context for defining the testcases
-        from pprint import pprint
-        pprint(vars(context))
-        pprint(vars(context.atomizer_factory))
-        pprint(vars(context.atomizer_factory.parsing_model))
-        pprint(vars(context.atomizer_factory.atom_handler_list[0])) """
+        """Run the empty components tests."""
         self.assertTrue(isinstance(context.registered_components[0][0], NewMatchPathDetector))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
         self.assertEqual(context.atomizer_factory.default_timestamp_paths, ['/accesslog/time'])
