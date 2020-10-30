@@ -4,6 +4,8 @@ from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelEle
 
 
 class VariableByteDataModelElementTest(unittest.TestCase):
+    """Unittests for the VariableByteDataModelElement."""
+
     alphabet = b'abcdefghijklmnopqrstuvwxyz '
 
     def test1match_data_in_alphabet(self):

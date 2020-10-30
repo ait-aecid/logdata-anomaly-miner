@@ -7,6 +7,8 @@ from aminer.parsing.SequenceModelElement import SequenceModelElement
 
 
 class SequenceModelElementTest(unittest.TestCase):
+    """Unittests for the SequenceModelElement."""
+
     sequence_start = b'The sequence starts with a number: '
     fixed_data_model_element = FixedDataModelElement('fixed', sequence_start)
     decimal_integer_value_model_element = DecimalIntegerValueModelElement(
@@ -16,7 +18,7 @@ class SequenceModelElementTest(unittest.TestCase):
         'sequence', [fixed_data_model_element, decimal_integer_value_model_element, fixed_wordlist_data_model_element])
 
     def test1sequence_of_matching_elements(self):
-        """A normal sequence of matching elements is tested in this example test case"""
+        """A normal sequence of matching elements is tested in this example test case."""
         match_context = MatchContext(b'The sequence starts with a number: 25538 Euro')
         self.assertEqual(self.sequence_model_element.get_match_element(
             'match', match_context).get_match_string(), b'The sequence starts with a number: 25538 Euro')

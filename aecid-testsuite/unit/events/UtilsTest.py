@@ -9,6 +9,8 @@ from unit.TestBase import TestBase
 
 
 class UtilsTest(TestBase):
+    """Unittests for the Utils."""
+
     pid = b' pid='
     test = 'Test.%s'
     match_s1 = 'match/s1'

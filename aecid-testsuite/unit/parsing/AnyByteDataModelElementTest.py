@@ -4,6 +4,7 @@ from aminer.parsing.MatchContext import MatchContext
 
 
 class AnyByteDataModelElementTest(unittest.TestCase):
+    """Unittests for the AnyByteDataModelElement."""
 
     def test1get_match_element_valid_input(self):
         """This test case checks if VALID inputs are accepted."""

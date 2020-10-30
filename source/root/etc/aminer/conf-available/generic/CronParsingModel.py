@@ -12,8 +12,7 @@ from aminer.parsing import VariableByteDataModelElement
 
 
 def get_model(user_name_model=None):
-    """This function defines how to parse a cron message logged via syslog after any standard logging preamble, e.g. from syslog."""
-
+    """Return a model to parse a cron message logged via syslog after any standard logging preamble, e.g. from syslog."""
     if user_name_model is None:
         user_name_model = VariableByteDataModelElement('user', b'0123456789abcdefghijklmnopqrstuvwxyz.-')
 

@@ -1,4 +1,4 @@
-""" This module defines a parser for tomcat"""
+"""This module defines a parser for tomcat."""
 
 from aminer.parsing import AnyByteDataModelElement
 from aminer.parsing import DecimalIntegerValueModelElement
@@ -8,7 +8,7 @@ from aminer.parsing import SequenceModelElement
 
 
 def get_model():
-    """This method returns the model."""
+    """Return the model."""
     type_children = [
         FixedDataModelElement('start', b' * Starting Tomcat servlet engine tomcat7'),
         FixedDataModelElement('stop', b' * Stopping Tomcat servlet engine tomcat7'),

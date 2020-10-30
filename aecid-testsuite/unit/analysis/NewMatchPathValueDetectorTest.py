@@ -12,6 +12,8 @@ from datetime import datetime
 
 
 class NewMatchPathValueDetectorTest(TestBase):
+    """Unittests for the NewMatchPathValueDetector."""
+
     __expected_string = '%s New value(s) detected\n%s: "%s" (%d lines)\n  %s\n\n'
 
     datetime_format_string = '%Y-%m-%d %H:%M:%S'
@@ -32,9 +34,11 @@ class NewMatchPathValueDetectorTest(TestBase):
     match_element_first_match_me2 = first_match_me2.get_match_element('second', match_context_first_match_me2)
 
     def test1_log_atom_not_known(self):
-        """This test case checks the correct processing of unknown log lines, which in reality means that an anomaly has been found. The
-        output is directed to an output stream and compared for accuracy. The auto_include_flag is False and the output must be repeatable
-        on second run."""
+        """
+        This test case checks the correct processing of unknown log lines, which in reality means that an anomaly has been found.
+        The output is directed to an output stream and compared for accuracy. The auto_include_flag is False and the output must be
+        repeatable on second run.
+        """
         description = "Test1NewMatchPathValueDetector"
         new_match_path_value_detector = NewMatchPathValueDetector(self.aminer_config, [self.first_f1_s1], [
             self.stream_printer_event_handler], 'Default', False, output_log_line=False)
@@ -68,8 +72,10 @@ class NewMatchPathValueDetectorTest(TestBase):
             description + "2", 1, "{'second/f2/d1': 25537}\nb'25537'"))
 
     def test2_log_atom_known(self):
-        """This test case checks the functionality of the auto_include_flag. If the same MatchElement is processed a second time and the
-        auto_include_flag was True, no event must be triggered."""
+        """
+        This test case checks the functionality of the auto_include_flag.
+        If the same MatchElement is processed a second time and the auto_include_flag was True, no event must be triggered.
+        """
         description = "Test2NewMatchPathValueDetector"
         new_match_path_value_detector = NewMatchPathValueDetector(self.aminer_config, [self.first_f1_s1], [
             self.stream_printer_event_handler], 'Default', True, output_log_line=False)

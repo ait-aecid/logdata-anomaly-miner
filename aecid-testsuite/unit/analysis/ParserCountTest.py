@@ -7,6 +7,8 @@ import time
 
 
 class ParserCountTest(TestBase):
+    """Unittests for the ParserCount."""
+
     match_context_m1 = MatchContext(b'First string')
     match_context_m2 = MatchContext(b' to match.')
     match_context_m3 = MatchContext(b'some completely other string to match.')
