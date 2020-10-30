@@ -10,8 +10,7 @@ from aminer.parsing import SequenceModelElement
 
 
 def get_model():
-    """This function defines how to parse messages from kernel logging."""
-
+    """Return a model to parse messages from kernel logging."""
     type_children = [
         SequenceModelElement('ipv4-martian', [
             FixedDataModelElement('s0', b'IPv4: martian '),

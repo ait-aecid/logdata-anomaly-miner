@@ -8,7 +8,7 @@ from aminer.parsing import SequenceModelElement
 
 
 def get_model():
-    """This method returns the model."""
+    """Return the model."""
     type_children = [
         FixedDataModelElement('warn-no-openat', b'WARNING: SECURITY: No secure open yet due to missing openat in python!'),
         FixedDataModelElement('warn-no-OPATH', b'WARNING: SECURITY: Open should use O_PATH, but not yet available in python'),
