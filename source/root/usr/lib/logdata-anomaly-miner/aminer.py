@@ -278,6 +278,8 @@ def main():
         else:
             print('Unsupported schema in %s: %s' % (AMinerConfig.KEY_LOG_SOURCES_LIST, repr(log_resource_name)), file=sys.stderr)
             sys.exit(1)
+        if not os.path.exists(log_resource_name[7:].decode()):
+            print("WARNING: file or socket '%s' does not exist (yet)!" % log_resource_name[7:].decode(), file=sys.stderr)
 
         try:
             log_resource.open()
