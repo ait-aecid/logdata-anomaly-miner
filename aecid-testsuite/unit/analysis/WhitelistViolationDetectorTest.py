@@ -11,7 +11,9 @@ import time
 
 
 class AllowlistViolationDetectorTest(TestBase):
-    __expected_string = '%s No allowlisting for current atom\n%s: "%s" (%d lines)\n  %s\n\n'
+    """Unittests for the AllowlistViolationDetector."""
+
+    __expected_string = '%s No whitelisting for current atom\n%s: "%s" (%d lines)\n  %s\n\n'
     fixed_string = b'fixed String'
 
     def test1match_found(self):

@@ -13,26 +13,32 @@ from unit.TestBase import TestBase
 
 
 class LogStreamTest(TestBase):
+    """Unittests for the LogStream."""
+
     logfile = b'/tmp/log.txt'
     file = b'file://'
 
     def setUp(self):
+        """Set up the logfile."""
         super().setUp()
         with open(self.logfile, "w+") as f:
             for i in range(150):
                 f.write("%d %s\r\n" % (i + 1, "d" * 1000))
 
     def tearDown(self):
+        """Remove the logfile."""
         super().tearDown()
         os.remove(self.logfile)
 
     def test1file_log_data_resource_no_file(self):
-        """In this case the log_resource_name does not start with b'file://'"""
+        """In this case the log_resource_name does not start with b'file://'."""
         self.assertRaises(Exception, FileLogDataResource, b'/var/log/syslog', -1)
 
     def test2file_log_data_resource_log_stream_closed_no_repositioning(self):
-        """In this case the log_stream_fd is -1 and repositioning_data is None. The next step is to open the stream successfully.
-        Afterwards the buffer object is filled with data and the position is updated."""
+        """
+        In this case the log_stream_fd is -1 and repositioning_data is None.
+        The next step is to open the stream successfully. Afterwards the buffer object is filled with data and the position is updated.
+        """
         file_log_data_resource = FileLogDataResource(self.file + self.logfile, -1)
         file_log_data_resource.open(False)
         self.assertEqual(file_log_data_resource.buffer, b'')
@@ -55,8 +61,10 @@ class LogStreamTest(TestBase):
         file_log_data_resource.close()
 
     def test3file_log_data_resource_log_stream_already_open_repositioning(self):
-        """In this case the logStreamFd is > 0 and repositioningData is not None. The stream should be repositioned to the right
-        position."""
+        """
+        In this case the logStreamFd is > 0 and repositioningData is not None.
+        The stream should be repositioned to the right position.
+        """
         fd = os.open('/tmp/log.txt', os.O_RDONLY)
         length = 65536
         data = os.read(fd, length)
@@ -74,12 +82,15 @@ class LogStreamTest(TestBase):
         os.close(fd)
 
     def test4unix_socket_log_data_resource_no_unix_socket(self):
-        """In this case the log_resource_name does not start with b'unix://'"""
+        """In this case the log_resource_name does not start with b'unix://'."""
         self.assertRaises(Exception, UnixSocketLogDataResource, b'/tmp/log', -1)
 
     def test5unix_socket_log_data_resource(self):
-        """In this case the log_stream_fd is -1. The next step is to open the stream successfully. Therefor a server socket is set up
-        listen to data to the server. Afterwards the buffer object is filled with data and the position is updated."""
+        """
+        In this case the log_stream_fd is -1. The next step is to open the stream successfully.
+        Therefor a server socket is set up listen to data to the server. Afterwards the buffer object is filled with data and the position
+        is updated.
+        """
         sockName = b'/tmp/test5unixSocket.sock'
         # skipcq: BAN-B607, BAN-B603
         proc = subprocess.Popen(['python3', 'unit/input/client.py'])
@@ -111,8 +122,10 @@ class LogStreamTest(TestBase):
         print("Done")
 
     def test6_log_stream_handle_streams(self):
-        """This unit case verifies the functionality of the LogStream class. Different FileLogDataResources are added to the stream. The
-        handling of not existing sources is also tested."""
+        """
+        This unit case verifies the functionality of the LogStream class. Different FileLogDataResources are added to the stream.
+        The handling of not existing sources is also tested.
+        """
         stream_printer_event_handler = StreamPrinterEventHandler(self.analysis_context, self.output_stream)
         any_byte_data_me = AnyByteDataModelElement('a1')
 

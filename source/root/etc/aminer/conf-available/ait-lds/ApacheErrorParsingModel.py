@@ -10,10 +10,9 @@ from aminer.parsing import FixedWordlistDataModelElement
 from aminer.parsing import IpAddressDataModelElement
 from aminer.parsing import SequenceModelElement
 
+
 def get_model():
-
-    """This model defines how to parse Apache Error logs from the AIT-LDS."""
-
+    """Return a model to parse Apache Error logs from the AIT-LDS."""
     model = SequenceModelElement('model', [
         FixedDataModelElement('sp1', b'['),
         FixedWordlistDataModelElement('day', [b'Mon', b'Tue', b'Wed', b'Thu', b'Fri', b'Sat', b'Sun']),

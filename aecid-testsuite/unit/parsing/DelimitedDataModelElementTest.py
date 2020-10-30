@@ -4,6 +4,8 @@ from aminer.parsing.MatchContext import MatchContext
 
 
 class DelimitedDataModelElementTest(unittest.TestCase):
+    """Unittests for the DelimitedDataModelElement."""
+
     match_context_string = b'this is a match context'
 
     def test1delimeter_single_char(self):

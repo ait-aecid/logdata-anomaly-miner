@@ -10,6 +10,8 @@ from datetime import datetime
 
 
 class MatchFilterTest(TestBase):
+    """Unittests for the MatchFilter."""
+
     __expected_string = '%s Log Atom Filtered\nMatchFilter: "%s" (1 lines)\n  /integer: %d\n%d\n\n'
 
     def test1_receive_atom_trigger_event(self):
@@ -57,8 +59,10 @@ class MatchFilterTest(TestBase):
             self.reset_output_stream()
 
     def test4_receive_atom_with_no_target_value(self):
-        """This test checks if an event is not triggered, when the path is in the target_path_list and the value is not in the
-        target_value_list."""
+        """
+        This test checks if an event is not triggered.
+        The path is in the target_path_list and the value is not in the target_value_list.
+        """
         description = "Test4MatchFilterTest"
         decimal_integer_me = DecimalIntegerValueModelElement('integer')
         match_filter = MatchFilter(self.aminer_config, ['/integer'], [self.stream_printer_event_handler], target_value_list=list(

@@ -5,6 +5,8 @@ from aminer.parsing.RepeatedElementDataModelElement import RepeatedElementDataMo
 
 
 class RepeatedElementDataModelElementTest(unittest.TestCase):
+    """Unittests for the RepeatedElementDataModelElement."""
+
     fixed_log_line = b'fixed log line. '
 
     def test1_standard_input_values(self):

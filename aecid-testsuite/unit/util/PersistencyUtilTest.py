@@ -13,7 +13,7 @@ from unit.TestBase import TestBase
 
 
 class PersistencyUtilTest(TestBase):
-    __expected_string = 'New path(es) %s  (1 lines)\n  %s\n  [%s, [\'%s\']]\n\n'
+    """Unittests for the PersistenceUtil class."""
 
     string = b'25537 uid=2'
 

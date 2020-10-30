@@ -11,10 +11,9 @@ from aminer.parsing import IpAddressDataModelElement
 from aminer.parsing import OptionalMatchModelElement
 from aminer.parsing import SequenceModelElement
 
+
 def get_model():
-
-    """This model defines how to parse Suricata Event logs from the AIT-LDS."""
-
+    """Return a model to parse Suricata Event logs from the AIT-LDS."""
     conn = SequenceModelElement('conn', [
                 FixedDataModelElement('src_ip_str', b'"src_ip":"'),
                 FirstMatchModelElement('ip', [
@@ -51,13 +50,13 @@ def get_model():
                 DelimitedDataModelElement('url', b'"', escape=b'\\'),
                 FixedDataModelElement('http_user_agent_str', b'","http_user_agent":"'),
                 DelimitedDataModelElement('http_user_agent', b'"'),
-                OptionalMatchModelElement('content_type',
-                    SequenceModelElement('content_type', [
+                OptionalMatchModelElement(
+                    'content_type', SequenceModelElement('content_type', [
                         FixedDataModelElement('http_content_type_str', b'","http_content_type":"'),
                         DelimitedDataModelElement('http_content_type', b'"'),
                         ])),
-                OptionalMatchModelElement('http_refer',
-                    SequenceModelElement('http_refer', [
+                OptionalMatchModelElement(
+                    'http_refer', SequenceModelElement('http_refer', [
                         FixedDataModelElement('http_refer_str', b'","http_refer":"'),
                         DelimitedDataModelElement('http_refer', b'"'),
                         ])),
@@ -66,13 +65,13 @@ def get_model():
                 FixedDataModelElement('protocol_str', b'","protocol":"'),
                 DelimitedDataModelElement('protocol', b'"'),
                 FixedDataModelElement('quote_str', b'"'),
-                OptionalMatchModelElement('status',
-                    SequenceModelElement('status', [
+                OptionalMatchModelElement(
+                    'status', SequenceModelElement('status', [
                         FixedDataModelElement('status_str', b',"status":'),
                         DecimalIntegerValueModelElement('status'),
                         ])),
-                OptionalMatchModelElement('redirect',
-                    SequenceModelElement('redirect', [
+                OptionalMatchModelElement(
+                    'redirect', SequenceModelElement('redirect', [
                         FixedDataModelElement('redirect_str', b',"redirect":"'),
                         DelimitedDataModelElement('redirect', b'"'),
                         FixedDataModelElement('quote_str', b'"')
@@ -88,13 +87,13 @@ def get_model():
         FixedDataModelElement('plus_sign', b'+'),
         DecimalIntegerValueModelElement('tz'),
         FixedDataModelElement('comma_str', b'",'),
-        OptionalMatchModelElement('flow_id',
-            SequenceModelElement('flow_id', [
+        OptionalMatchModelElement(
+            'flow_id', SequenceModelElement('flow_id', [
                 FixedDataModelElement('flow_id_str', b'"flow_id":'),
                 DecimalIntegerValueModelElement('flow_id'),
                 FixedDataModelElement('comma_str', b',')])),
-        OptionalMatchModelElement('in_iface',
-            SequenceModelElement('in_iface', [
+        OptionalMatchModelElement(
+            'in_iface', SequenceModelElement('in_iface', [
                 FixedDataModelElement('in_iface_str', b'"in_iface":"'),
                 DelimitedDataModelElement('in_iface', b'"'),
                 FixedDataModelElement('comma_str', b'",')])),
@@ -108,28 +107,26 @@ def get_model():
                     DelimitedDataModelElement('type', b'"'),
                     FixedDataModelElement('id_str', b'","id":'),
                     DecimalIntegerValueModelElement('id'),
-                    OptionalMatchModelElement('rcode',
-                        SequenceModelElement('rcode', [
+                    OptionalMatchModelElement(
+                        'rcode', SequenceModelElement('rcode', [
                             FixedDataModelElement('rcode_str', b',"rcode":"'),
                             DelimitedDataModelElement('rcode', b'"'),
                             FixedDataModelElement('quote_str', b'"')])),
                     FixedDataModelElement('rrname_str', b',"rrname":"'),
                     DelimitedDataModelElement('rrname', b'"'),
-                    OptionalMatchModelElement('rrtype',
-                        SequenceModelElement('rrtype', [
+                    OptionalMatchModelElement('rrtype', SequenceModelElement('rrtype', [
                             FixedDataModelElement('rrtype_str', b'","rrtype":"'),
                             DelimitedDataModelElement('rrtype', b'"')])),
                     FixedDataModelElement('quote', b'"'),
-                    OptionalMatchModelElement('tx_id',
-                        SequenceModelElement('tx_id', [
+                    OptionalMatchModelElement(
+                        'tx_id', SequenceModelElement('tx_id', [
                             FixedDataModelElement('tx_id_str', b',"tx_id":'),
                             DecimalIntegerValueModelElement('tx_id')])),
-                    OptionalMatchModelElement('ttl',
-                        SequenceModelElement('ttl', [
+                    OptionalMatchModelElement('ttl', SequenceModelElement('ttl', [
                             FixedDataModelElement('ttl_str', b',"ttl":'),
                             DecimalIntegerValueModelElement('ttl')])),
-                    OptionalMatchModelElement('rdata',
-                        SequenceModelElement('rdata', [
+                    OptionalMatchModelElement(
+                        'rdata', SequenceModelElement('rdata', [
                             FixedDataModelElement('rdata_str', b',"rdata":"'),
                             DelimitedDataModelElement('rdata', b'"'),
                             FixedDataModelElement('quote_str', b'"')])),
@@ -139,15 +136,15 @@ def get_model():
             SequenceModelElement('flow', [
                 FixedDataModelElement('flow_str', b'flow",'),
                 conn,
-                OptionalMatchModelElement('app_proto',
-                    SequenceModelElement('app_proto', [
+                OptionalMatchModelElement(
+                    'app_proto', SequenceModelElement('app_proto', [
                         FixedDataModelElement('app_proto_str', b',"app_proto":"'),
                         DelimitedDataModelElement('app_proto', b'"'),
                         FixedDataModelElement('quote_str', b'"')
                         ])
                     ),
-                OptionalMatchModelElement('app_proto_tc',
-                    SequenceModelElement('app_proto_tc', [
+                OptionalMatchModelElement(
+                    'app_proto_tc', SequenceModelElement('app_proto_tc', [
                         FixedDataModelElement('app_proto_tc_str', b',"app_proto_tc":"'),
                         DelimitedDataModelElement('app_proto_tc', b'"'),
                         FixedDataModelElement('quote_str', b'"')
@@ -175,32 +172,32 @@ def get_model():
                     FixedDataModelElement('alerted_str', b'","alerted":'),
                     FixedWordlistDataModelElement('alerted', [b'true', b'false']),
                     FixedDataModelElement('brack_str1', b'}'),
-                    OptionalMatchModelElement('tcp',
-                        SequenceModelElement('tcp', [
+                    OptionalMatchModelElement(
+                        'tcp', SequenceModelElement('tcp', [
                             FixedDataModelElement('tcp_flags_str', b',"tcp":{"tcp_flags":"'),
                             HexStringModelElement('tcp_flags'),
                             FixedDataModelElement('tcp_flags_ts_str', b'","tcp_flags_ts":"'),
                             HexStringModelElement('tcp_flags_ts'),
                             FixedDataModelElement('tcp_flags_tc_str', b'","tcp_flags_tc":"'),
                             HexStringModelElement('tcp_flags_tc'),
-                            OptionalMatchModelElement('flags',
-                                SequenceModelElement('flags', [
+                            OptionalMatchModelElement(
+                                'flags', SequenceModelElement('flags', [
                                     FixedDataModelElement('syn_str', b'","syn":'),
                                     FixedWordlistDataModelElement('syn', [b'true', b'false']),
-                                    OptionalMatchModelElement('fin',
-                                        SequenceModelElement('fin', [
+                                    OptionalMatchModelElement(
+                                        'fin', SequenceModelElement('fin', [
                                             FixedDataModelElement('fin_str', b',"fin":'),
                                             FixedWordlistDataModelElement('fin', [b'true', b'false']),
                                             ])
                                         ),
-                                    OptionalMatchModelElement('rst',
-                                        SequenceModelElement('rst', [
+                                    OptionalMatchModelElement(
+                                        'rst', SequenceModelElement('rst', [
                                             FixedDataModelElement('rst_str', b',"rst":'),
                                             FixedWordlistDataModelElement('rst', [b'true', b'false']),
                                             ])
                                         ),
-                                    OptionalMatchModelElement('psh',
-                                        SequenceModelElement('psh', [
+                                    OptionalMatchModelElement(
+                                        'psh', SequenceModelElement('psh', [
                                             FixedDataModelElement('psh_str', b',"psh":'),
                                             FixedWordlistDataModelElement('psh', [b'true', b'false']),
                                             ])
@@ -233,8 +230,8 @@ def get_model():
                 DelimitedDataModelElement('app_proto', b'"'),
                 SequenceModelElement('fileinfo', [
                     FixedDataModelElement('fileinfo_str', b'","fileinfo":{'),
-                    OptionalMatchModelElement('filename',
-                        SequenceModelElement('filename', [
+                    OptionalMatchModelElement(
+                        'filename', SequenceModelElement('filename', [
                             FixedDataModelElement('filename_str', b'"filename":"'),
                             DelimitedDataModelElement('filename', b'"'),
                             FixedDataModelElement('quote_str', b'",')
@@ -500,8 +497,8 @@ def get_model():
                     DelimitedDataModelElement('issuerdn', b'"'),
                     FixedDataModelElement('fingerprint_str', b'","fingerprint":"'),
                     DelimitedDataModelElement('fingerprint', b'"'),
-                    OptionalMatchModelElement('sni',
-                        SequenceModelElement('sni', [
+                    OptionalMatchModelElement(
+                        'sni', SequenceModelElement('sni', [
                             FixedDataModelElement('sni_str', b'","sni":"'),
                             DelimitedDataModelElement('sni', b'"'),
                             ])
@@ -518,8 +515,8 @@ def get_model():
             SequenceModelElement('alert', [
                 FixedDataModelElement('alert_str', b'alert",'),
                 conn,
-                OptionalMatchModelElement('tx_id',
-                    SequenceModelElement('tx_id', [
+                OptionalMatchModelElement(
+                    'tx_id', SequenceModelElement('tx_id', [
                         FixedDataModelElement('tx_id', b',"tx_id":'),
                         DecimalIntegerValueModelElement('tx_id'),
                         ])),

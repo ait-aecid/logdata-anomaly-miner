@@ -8,9 +8,12 @@ from _io import StringIO
 
 
 class TestBase(unittest.TestCase):
+    """This is the base class for all unittests."""
+
     __configFilePath = os.getcwd()+'/unit/config/config.py'
 
     def setUp(self):
+        """Set up all needed variables and remove persisted data."""
         self.aminer_config = AMinerConfig.load_config(self.__configFilePath)
         self.analysis_context = AnalysisContext(self.aminer_config)
         self.output_stream = StringIO()
@@ -22,6 +25,7 @@ class TestBase(unittest.TestCase):
             os.makedirs(persistence_file_name)
 
     def tearDown(self):
+        """Delete all persisted data after the tests."""
         self.aminer_config = AMinerConfig.load_config(self.__configFilePath)
         persistence_file_name = AMinerConfig.build_persistence_file_name(self.aminer_config)
         if os.path.exists(persistence_file_name):
@@ -30,6 +34,7 @@ class TestBase(unittest.TestCase):
             os.makedirs(persistence_file_name)
 
     def reset_output_stream(self):
+        """Reset the output stream."""
         self.output_stream.seek(0)
         self.output_stream.truncate(0)
 
