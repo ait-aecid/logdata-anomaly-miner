@@ -1,9 +1,7 @@
 """This module contains multiple History classes used by the aminer."""
 import random
+import abc
 from aminer.input import AtomHandlerInterface
-
-
-interface_method_called = 'Interface method called'
 
 
 def get_log_int(max_bits):
@@ -16,26 +14,23 @@ def get_log_int(max_bits):
     return result
 
 
-class ObjectHistory:
+class ObjectHistory(metaclass=abc.ABCMeta):
     """This is the superinterface of all object histories. The idea behind that is to use that type of history best suited for a
     purpose considering amount of data, possibility for history size limits to be reached, priorization which elements should
     be dropped first."""
 
-    # skipcq: PYL-R0201
+    @abc.abstractmethod
     def add_object(self, new_object):
         """Add an object to this history. This method call may evict other objects from the history."""
-        raise Exception(interface_method_called)
 
-    # skipcq: PYL-R0201
+    @abc.abstractmethod
     def get_history(self):
         """Get the whole history list. Make sure to clone the list before modification when influences on this object are not
         intended."""
-        raise Exception(interface_method_called)
 
-    # skipcq: PYL-R0201
+    @abc.abstractmethod
     def clear_history(self):
         """Clean the whole history."""
-        raise Exception(interface_method_called)
 
 
 class LogarithmicBackoffHistory(ObjectHistory):

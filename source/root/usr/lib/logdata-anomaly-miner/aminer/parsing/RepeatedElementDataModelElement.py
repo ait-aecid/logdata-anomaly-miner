@@ -25,6 +25,10 @@ class RepeatedElementDataModelElement(ModelElementInterface):
         self.min_repeat = min_repeat
         self.max_repeat = max_repeat
 
+    def get_id(self):
+        """Get the element ID."""
+        return self.element_id
+
     def get_child_elements(self):
         """Return a list of all children model elements."""
         return [self.repeated_element]

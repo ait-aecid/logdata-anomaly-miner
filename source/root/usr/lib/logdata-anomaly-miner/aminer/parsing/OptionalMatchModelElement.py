@@ -23,6 +23,10 @@ class OptionalMatchModelElement(ModelElementInterface):
         self.element_id = element_id
         self.optional_element = optional_element
 
+    def get_id(self):
+        """Get the element ID."""
+        return self.element_id
+
     def get_child_elements(self):
         """Return all optional elements."""
         return [self.optional_element]
