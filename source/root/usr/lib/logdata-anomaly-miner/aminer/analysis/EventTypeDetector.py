@@ -5,13 +5,12 @@ import copy
 
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
-from aminer.events import EventSourceInterface
 from aminer.input import AtomHandlerInterface
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.util import PersistencyUtil
 
 
-class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
+class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """This class keeps track of the found eventtypes and the values of each variable"""
 
     def __init__(self, aminer_config, anomaly_event_handlers, persistence_id='Default', path_list=None, min_num_vals=1000,

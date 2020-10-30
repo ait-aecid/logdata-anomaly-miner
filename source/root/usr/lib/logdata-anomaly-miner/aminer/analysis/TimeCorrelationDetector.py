@@ -62,9 +62,6 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
             self.event_count_table = [0] * parallel_check_count * parallel_check_count * 2
             self.event_delta_table = [0] * parallel_check_count * parallel_check_count * 2
 
-    #   else:
-    #     self.knownPathSet = set(persistenceData)
-
     def receive_atom(self, log_atom):
         event_data = {}
         timestamp = log_atom.get_timestamp()
@@ -177,14 +174,12 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
 
         delta = self.next_persist_time - trigger_time
         if delta < 0:
-            # PersistencyUtil.storeJson(self.persistenceFileName, list(self.knownPathSet))
             self.next_persist_time = None
             delta = self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
         return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        # PersistencyUtil.storeJson(self.persistenceFileName, list(self.knownPathSet))
         self.next_persist_time = None
 
     def create_random_rule(self, log_atom):

@@ -98,8 +98,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
 
         delta = self.next_persist_time - trigger_time
         if delta < 0:
-            PersistencyUtil.store_json(self.persistence_file_name, list(self.known_path_set))
-            self.next_persist_time = None
+            self.do_persist()
             delta = 600
         return delta
 
