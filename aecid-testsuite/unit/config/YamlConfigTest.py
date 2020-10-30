@@ -15,9 +15,11 @@ class YamlConfigTest(unittest.TestCase):
     sysp = sys.path
 
     def setUp(self):
+        """Add the aminer syspath."""
         sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
 
     def tearDown(self):
+        """Reset the syspath."""
         sys.path = self.sysp
 
     def test_load_generic_yaml_file(self):
