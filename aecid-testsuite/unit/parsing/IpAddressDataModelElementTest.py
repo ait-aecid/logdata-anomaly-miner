@@ -4,6 +4,8 @@ from aminer.parsing.IpAddressDataModelElement import IpAddressDataModelElement
 
 
 class IpAddressDataModelElementTest(unittest.TestCase):
+    """Unittests for the IpAddressDataModelElement."""
+
     wrong_ip_address = 'wrong ip address.'
     ip_address_bytes_wrong = 'ip address bytes are wrong.'
     match_context_unexpected = 'match context is not as expected.'
@@ -11,8 +13,10 @@ class IpAddressDataModelElementTest(unittest.TestCase):
     match_element_unexpected = 'No MatchElement was expected.'
 
     def test1real_ip_address(self):
-        """This test case checks the functionality by parsing a real IP-addresses. The boundary values for IP-addresses is 0.0.0.0 -
-        255.255.255.255"""
+        """
+        This test case checks the functionality by parsing a real IP-addresses.
+        The boundary values for IP-addresses is 0.0.0.0 - 255.255.255.255
+        """
         match_context = MatchContext(b'192.168.0.155 followed by some text')
         ip_address_data_model_element = IpAddressDataModelElement('dest')
         match_element = ip_address_data_model_element.get_match_element(None, match_context)

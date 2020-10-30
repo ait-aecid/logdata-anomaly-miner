@@ -11,6 +11,8 @@ from unit.TestBase import TestBase
 
 
 class AtomFiltersTest(TestBase):
+    """Unittests for the AtomFilters."""
+
     match_context_fixed_dme = MatchContext(b'25000')
     fixed_dme = FixedDataModelElement('s1', b'25000')
     match_element_fixed_dme = fixed_dme.get_match_element("fixed", match_context_fixed_dme)
@@ -115,7 +117,7 @@ class AtomFiltersTest(TestBase):
         self.assertTrue(match_value_filter.receive_atom(log_atom_fixed_dme))
 
     def test8match_value_filter_receive_atom_target_value_found_handler_not_found(self):
-        """A target_value was found, but no handler can handle it. DefaultParsedAtomHandler = None"""
+        """A target_value was found, but no handler can handle it. DefaultParsedAtomHandler = None."""
         description = "Test8AtomFilters"
         new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False)
         self.analysis_context.register_component(new_match_path_detector, description)

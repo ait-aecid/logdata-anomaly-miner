@@ -11,10 +11,9 @@ from aminer.parsing import OptionalMatchModelElement
 from aminer.parsing import SequenceModelElement
 from aminer.parsing import VariableByteDataModelElement
 
+
 def get_model():
-
-    """This model defines how to parse Exim logs from the AIT-LDS."""
-
+    """Return a model to parse Exim logs from the AIT-LDS."""
     alphabet = b'!"#$%&\'()*+,-./0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\\^_`abcdefghijklmnopqrstuvwxyz{|}~=[]'
 
     model = SequenceModelElement('model', [
@@ -78,8 +77,8 @@ def get_model():
                                 DelimitedDataModelElement('p', b' '),
                                 FixedDataModelElement('s_str', b' S='),
                                 DecimalIntegerValueModelElement('s'),
-                                OptionalMatchModelElement('id',
-                                    SequenceModelElement('id', [
+                                OptionalMatchModelElement(
+                                    'id', SequenceModelElement('id', [
                                         FixedDataModelElement('id_str', b' id='),
                                         AnyByteDataModelElement('id')
                                         ])
@@ -91,8 +90,8 @@ def get_model():
                         FixedDataModelElement('in', b' => '),
                         DelimitedDataModelElement('name', b' '),
                         FixedDataModelElement('sp1', b' '),
-                        OptionalMatchModelElement('mail_opt',
-                            SequenceModelElement('mail', [
+                        OptionalMatchModelElement(
+                            'mail_opt', SequenceModelElement('mail', [
                                 FixedDataModelElement('brack1', b'('),
                                 DelimitedDataModelElement('brack_mail', b')'),
                                 FixedDataModelElement('brack2', b') '),

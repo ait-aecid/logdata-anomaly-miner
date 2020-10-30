@@ -8,6 +8,8 @@ from unit.TestBase import TestBase
 
 
 class JsonConverterHandlerTest(TestBase):
+    """Unittests for the JsonConverterHandler."""
+
     output_log_line = True
     match_context = MatchContext(b' pid=')
     fixed_dme = FixedDataModelElement('s1', b' pid=')

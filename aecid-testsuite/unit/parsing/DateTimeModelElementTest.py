@@ -5,6 +5,8 @@ import datetime
 
 
 class DateTimeModelElementTest(unittest.TestCase):
+    """Unittests for the DateTimeModelElement."""
+
     __expected_match_context = b': it still works'
 
     def test1date_formats_exceptions(self):
@@ -61,13 +63,14 @@ class DateTimeModelElementTest(unittest.TestCase):
         self.assertEqual(match_context.match_data, self.__expected_match_context)
 
     def test3_new_year_with_start_year_value(self):
-        startYear = 2017
+        """This test case checks if a new year is learned successfully with the start year being set."""
+        start_year = 2017
         match_context = MatchContext(b'07.02.2018 11:40:00: it still works')
-        date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y %H:%M:%S', datetime.timezone.utc, None, startYear)
+        date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y %H:%M:%S', datetime.timezone.utc, None, start_year)
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1518003600)
         self.assertEqual(match_context.match_data, self.__expected_match_context)
         match_context = MatchContext(b'07.02.2018 11:40:00 UTC+0000: it still works')
-        date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y %H:%M:%S %z', datetime.timezone.utc, None, startYear)
+        date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y %H:%M:%S %z', datetime.timezone.utc, None, start_year)
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1518003600)
         self.assertEqual(match_context.match_data, self.__expected_match_context)
         match_context = MatchContext(b'07.02.2018 11:40:00 UTC+0001: it still works')
@@ -75,7 +78,7 @@ class DateTimeModelElementTest(unittest.TestCase):
         self.assertEqual(match_context.match_data, self.__expected_match_context)
 
         match_context = MatchContext(b'07.02.2018 11:40:00 UTC+0000: it still works')
-        date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y %H:%M:%S %z', datetime.timezone.utc, None, startYear)
+        date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y %H:%M:%S %z', datetime.timezone.utc, None, start_year)
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1518003600)
         self.assertEqual(match_context.match_data, self.__expected_match_context)
         match_context = MatchContext(b'07.02.2018 11:40:00 UTC-0001: it still works')
@@ -83,7 +86,7 @@ class DateTimeModelElementTest(unittest.TestCase):
         self.assertEqual(match_context.match_data, self.__expected_match_context)
 
         match_context = MatchContext(b'07.02.2018 11:40:00 CET+1: it still works')
-        date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y %H:%M:%S %z', datetime.timezone.utc, None, startYear)
+        date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y %H:%M:%S %z', datetime.timezone.utc, None, start_year)
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1518003600)
         self.assertEqual(match_context.match_data, self.__expected_match_context)
         match_context = MatchContext(b'07.02.2018 11:40:00 UTC+2: it still works')
@@ -98,7 +101,7 @@ class DateTimeModelElementTest(unittest.TestCase):
                                                    b'Linux x86_64; rv:73.0) Gecko/20100101 Firefox/73.0')
 
         match_context = MatchContext(b'07.02.2018 11:40:00 UTC: it still works')
-        date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y %H:%M:%S %z', datetime.timezone.utc, None, startYear)
+        date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y %H:%M:%S %z', datetime.timezone.utc, None, start_year)
         self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1518003600)
         self.assertEqual(match_context.match_data, self.__expected_match_context)
 

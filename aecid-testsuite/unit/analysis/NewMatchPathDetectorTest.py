@@ -10,6 +10,8 @@ from unit.TestBase import TestBase
 
 
 class NewMatchPathDetectorTest(TestBase):
+    """Unittests for the NewMatchPathDetector."""
+
     __expected_string = '%s New path(es) detected\n%s: "%s" (%d lines)\n  %s\n%s\n\n'
     match_path_s1 = "['/s1']"
     match_path_d1 = "['/d1']"
@@ -29,9 +31,11 @@ class NewMatchPathDetectorTest(TestBase):
     match_element_decimal_integer_value_me = decimal_integer_value_me.get_match_element("", match_context_decimal_integer_value_me)
 
     def test1_log_atom_not_known(self):
-        """This test case checks the correct processing of unknown log lines, which in reality means that an anomaly has been found. The
-        output is directed to an output stream and compared for accuracy. The auto_include_flag is False and the output must be repeatable
-        on second run."""
+        """
+        This test case checks the correct processing of unknown log lines, which in reality means that an anomaly has been found.
+        The output is directed to an output stream and compared for accuracy. The auto_include_flag is False and the output must be
+        repeatable on second run.
+        """
         description = "Test1NewMatchPathDetector"
         new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False,
                                                        output_log_line=False)
@@ -61,8 +65,10 @@ class NewMatchPathDetectorTest(TestBase):
             self.match_path_d1, self.uid))
 
     def test2_log_atom_known(self):
-        """This test case checks the functionality of the autoIncludeFlag. If the same MatchElement is processed a second time and the
-        auto_include_flag was True, no event must be triggered."""
+        """
+        This test case checks the functionality of the auto_include_flag.
+        If the same MatchElement is processed a second time and the auto_include_flag was True, no event must be triggered.
+        """
         description = "Test2NewMatchPathDetector"
         new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', True,
                                                        output_log_line=False)
@@ -114,46 +120,43 @@ class NewMatchPathDetectorTest(TestBase):
         self.assertEqual(self.output_stream.getvalue(), '')
 
     def test4GetTimeTriggerClass(self):
-        """The known paths are to be periodically stored after a certain time. This requires a synchronization class. The return of the
-        correct class is to be checked in this test case."""
+        """
+        The known paths are to be periodically stored after a certain time. This requires a synchronization class.
+        The return of the correct class is to be checked in this test case.
+        """
         new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', True,
                                                        output_log_line=False)
         self.assertEqual(new_match_path_detector.get_time_trigger_class(), 1)
 
+    # skipcq: PYL-W0105
     """The following test cases should check if the doTimer() method is working properly.This includes the updating of nextPersistTime.
     As it is not updated directly in the method this test cases are not correct. Due to that they are commented."""
-    # '''
-    # During initialization, the next time is not determined (the value is initialized with None).
-    # In this case, the persistence is expected to occur after 600 milliseconds.
-    # '''
     # def test5_do_timer_next_persist_time_none(self):
-    #   self.new_match_path_detector = NewMatchPathDetector(self.aminer_config,
-    #     [self.stream_printer_event_handler], 'Default', True, output_log_line=False)
-    #   self.assertEqual(self.new_match_path_detector.do_timer(200), 600)
-    #   self.assertEqual(self.new_match_path_detector.do_timer(400), 600)
-    #   self.assertEqual(self.new_match_path_detector.do_timer(10000), 600)
+    #     """During initialization, the next time is not determined (the value is initialized with None). In this case, the persistence is
+    #     expected to occur after 600 milliseconds."""
+    #     self.new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', True,
+    #                                                         output_log_line=False)
+    #     self.assertEqual(self.new_match_path_detector.do_timer(200), 600)
+    #     self.assertEqual(self.new_match_path_detector.do_timer(400), 600)
+    #     self.assertEqual(self.new_match_path_detector.do_timer(10000), 600)
     #
-    # '''
-    # If the NextPersistTime is less than or equal to zero, the data must be saved.
-    # '''
     # def test6_do_timer_delta_smaller_or_equal_zero(self):
-    #   self.new_match_path_detector = NewMatchPathDetector(self.aminer_config,
-    #     [self.stream_printer_event_handler], 'Default', True, output_log_line=False)
-    #   self.new_match_path_detector.nextPersistTime = 400
-    #   self.assertEqual(self.new_match_path_detector.do_timer(400), 600)
-    #   self.assertEqual(self.new_match_path_detector.do_timer(1000), 600)
+    #     """If the NextPersistTime is less than or equal to zero, the data must be saved."""
+    #     self.new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', True,
+    #                                                         output_log_line=False)
+    #     self.new_match_path_detector.nextPersistTime = 400
+    #     self.assertEqual(self.new_match_path_detector.do_timer(400), 600)
+    #     self.assertEqual(self.new_match_path_detector.do_timer(1000), 600)
     #
-    # '''
-    # If the delta does not fall below the limit value, only the delta value should be returned.
-    # '''
     # def test7_do_timer_delta_greater_zero(self):
-    #   #this test fails due to the missing update of the nextPersistTime variable in the doTimer method
-    #   self.new_match_path_detector = NewMatchPathDetector(self.aminer_config,
-    #     [self.stream_printer_event_handler], 'Default', True, output_log_line=False)
-    #   self.new_match_path_detector.nextPersistTime = 400
-    #   self.assertEqual(self.new_match_path_detector.do_timer(200), 200)
-    #   self.assertEqual(self.new_match_path_detector.do_timer(200), 600)
-    #   self.assertEqual(self.new_match_path_detector.do_timer(100), 500)
+    #     """If the delta does not fall below the limit value, only the delta value should be returned."""
+    #     # this test fails due to the missing update of the nextPersistTime variable in the doTimer method
+    #     self.new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', True,
+    #                                                         output_log_line=False)
+    #     self.new_match_path_detector.nextPersistTime = 400
+    #     self.assertEqual(self.new_match_path_detector.do_timer(200), 200)
+    #     self.assertEqual(self.new_match_path_detector.do_timer(200), 600)
+    #     self.assertEqual(self.new_match_path_detector.do_timer(100), 500)
 
     def test8_whitelist_event_type_exception(self):
         """This test case checks whether an exception is thrown when entering an event of another class."""

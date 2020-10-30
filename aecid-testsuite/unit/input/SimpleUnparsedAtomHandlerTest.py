@@ -10,6 +10,8 @@ from unit.TestBase import TestBase
 
 
 class SimpleUnparsedAtomHandlerTest(TestBase):
+    """Unittests for the SimpleUnparsedAtomHandler."""
+
     calculation = b'256 * 2 = 512'
 
     def test1_atom_is_unparsed(self):
