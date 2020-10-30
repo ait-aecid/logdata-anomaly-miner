@@ -213,30 +213,6 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                 print('FATAL: %s must be an integer, terminating' % AMinerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE, file=sys.stderr)
                 return 1
 
-        max_cpu_percent_usage = self.analysis_context.aminer_config.config_properties.get(AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE)
-        if max_cpu_percent_usage is not None:
-            try:
-                max_cpu_percent_usage = int(max_cpu_percent_usage)
-                # limit
-                pid = os.getpid()
-                package_installed_cmd = ['dpkg', '-l', 'cpulimit']
-                cpulimit_cmd = ['cpulimit', '-p', str(pid), '-l', str(max_cpu_percent_usage)]
-
-                # skipcq: BAN-B603
-                with subprocess.Popen(package_installed_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as out:
-                    stdout, _stderr = out.communicate()
-
-                if 'dpkg-query: no packages found matching cpulimit' in stdout.decode():
-                    print(
-                        'FATAL: cpulimit package must be installed, when using the property %s' %
-                        AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE, file=sys.stderr)
-                    return 1
-                # skipcq: BAN-B603
-                _out = subprocess.Popen(cpulimit_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            except ValueError:
-                print('FATAL: %s must be an integer, terminating' % AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE, file=sys.stderr)
-                return 1
-
         # Load continuation data for last known log streams. The loaded data has to be a dictionary with repositioning information for
         # each stream. The data is used only when creating the first stream with that name.
         self.repositioning_data_dict = PersistencyUtil.load_json(self.persistence_file_name)

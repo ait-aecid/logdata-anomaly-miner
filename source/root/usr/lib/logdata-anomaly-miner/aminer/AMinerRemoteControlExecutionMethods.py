@@ -13,7 +13,6 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import aminer
 from aminer import AMinerConfig, AnalysisChild
 import resource
-import subprocess  # skipcq: BAN-B404
 import shlex
 from aminer.input import LogAtom
 from aminer.input import AtomHandlerInterface
@@ -64,8 +63,6 @@ class AMinerRemoteControlExecutionMethods:
             return
         if property_name == AMinerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE:
             result = self.change_config_property_max_memory(analysis_context, value)
-        elif property_name == AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE:
-            result = self.change_config_property_max_cpu_percent_usage(value)
         elif property_name in config_keys_mail_alerting:
             result = self.change_config_property_mail_alerting(analysis_context, property_name, value)
         elif property_name == AMinerConfig.KEY_LOG_PREFIX:
@@ -97,34 +94,6 @@ class AMinerRemoteControlExecutionMethods:
             return 0
         except ValueError:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: property 'maxMemoryUsage' must be of type Integer!"
-            return 1
-
-    def change_config_property_max_cpu_percent_usage(self, max_cpu_percent_usage):
-        try:
-            max_cpu_percent_usage = int(shlex.quote(max_cpu_percent_usage))
-            # limit
-            # skipcq: BAN-B603, BAN-B607
-            with subprocess.Popen(['pgrep', '-f', 'AMiner'], stdout=subprocess.PIPE, shell=False) as child:
-                response = shlex.quote(child.communicate()[0].split())
-            pid = response[len(response) - 1]
-            package_installed_cmd = ['dpkg', '-l', 'cpulimit']
-            cpulimit_cmd = ['cpulimit', '-p', pid.decode(), '-l', str(max_cpu_percent_usage)]
-
-            # skipcq: BAN-B603
-            with subprocess.Popen(package_installed_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as out:
-                stdout, _stderr = out.communicate()
-
-            if 'dpkg-query: no packages found matching cpulimit.' in stdout.decode():
-                self.REMOTE_CONTROL_RESPONSE = 'FATAL: cpulimit package must be installed, when using' \
-                                               ' the property %s.' % AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE
-                return 1
-
-            # skipcq: BAN-B603
-            with subprocess.Popen(cpulimit_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as _out:
-                return 0
-        except ValueError:
-            self.REMOTE_CONTROL_RESPONSE = 'FATAL: %s must be an integer, terminating.' % (
-                AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE)
             return 1
 
     @staticmethod

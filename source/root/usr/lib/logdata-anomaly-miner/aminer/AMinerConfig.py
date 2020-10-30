@@ -27,7 +27,6 @@ DEFAULT_PERSISTENCE_DIR = '/var/lib/aminer'
 KEY_REMOTE_CONTROL_SOCKET_PATH = 'RemoteControlSocket'
 KEY_LOG_PREFIX = 'LogPrefix'
 KEY_RESOURCES_MAX_MEMORY_USAGE = 'Resources.MaxMemoryUsage'
-KEY_RESOURCES_MAX_PERCENT_CPU_USAGE = 'Resources.MaxCpuPercentUsage'
 LOG_FILE = '/tmp/AMinerRemoteLog.txt'
 configFN = None
 
