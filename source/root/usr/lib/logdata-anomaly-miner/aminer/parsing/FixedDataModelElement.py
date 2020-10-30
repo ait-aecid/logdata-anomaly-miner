@@ -1,4 +1,5 @@
-"""This module defines a model element representing a fixed string.
+"""
+This module defines a model element representing a fixed string.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -17,8 +18,10 @@ from aminer.parsing import ModelElementInterface
 
 
 class FixedDataModelElement(ModelElementInterface):
-    """This class defines a model element of a fixed string. The model element is considered a match if the fixed string is found at
-    this position in the log atom."""
+    """
+    This class defines a model element of a fixed string.
+    The model element is considered a match if the fixed string is found at this position in the log atom.
+    """
 
     def __init__(self, element_id, fixed_data):
         if not isinstance(fixed_data, bytes):
@@ -31,8 +34,10 @@ class FixedDataModelElement(ModelElementInterface):
         return self.element_id
 
     def get_child_elements(self):
-        """Get all possible child model elements of this element.
-        @return None as there are no children of this element."""
+        """
+        Get all possible child model elements of this element.
+        @return None as there are no children of this element.
+        """
         return None
 
     def get_match_element(self, path, match_context):

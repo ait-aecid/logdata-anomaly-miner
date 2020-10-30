@@ -1,10 +1,13 @@
-"""This module defines an evaluator and generator for event rules. The overall idea of generation is
+"""
+This module defines an evaluator and generator for event rules.
+The overall idea of generation is
 1) For each processed event A, randomly select another event B occurring within queue_delta_time.
 2) If B chronologically occurs after A, create the hypothesis A => B (observing event A implies that event B must be observed within
 current_time+queue_delta_time). If B chronologically occurs before A, create the hypothesis B <= A (observing event A implies that event B
 must be observed within currentTime-queueDeltaTime).
 3) Observe for a long time (max_observations) whether the hypothesis holds.
-4) If the hypothesis holds, transform it to a rule. Otherwise, discard the hypothesis."""
+4) If the hypothesis holds, transform it to a rule. Otherwise, discard the hypothesis.
+"""
 
 from collections import deque
 import random
@@ -26,7 +29,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                  generation_probability=1.0, generation_factor=1.0, max_observations=500, p0=0.9, alpha=0.05, candidates_size=10,
                  hypotheses_eval_delta_time=120.0, delta_time_to_discard_hypothesis=180.0, check_rules_flag=False,
                  auto_include_flag=True, whitelisted_paths=None, persistence_id='Default', output_log_line=True):
-        """Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        """
+        Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param max_hypotheses maximum amount of hypotheses and rules hold in memory.
@@ -47,7 +51,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         @param auto_include_flag specifies whether new hypotheses are generated.
         @param whitelisted_paths list of paths that are not considered for correlation, i.e., events that contain one of these paths are
         omitted. The default value is [] as None is not iterable.
-        @param persistence_id name of persitency document."""
+        @param persistence_id name of persitency document.
+        """
         self.anomaly_event_handlers = anomaly_event_handlers
         self.paths = paths
         self.last_unhandled_match = None
@@ -130,10 +135,13 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
 
     # skipcq: PYL-R1710
     def get_min_eval_true(self, max_observations, p0, alpha):
-        """Compute the critical value (minimal amount of true evaluations) for a hypothesis of form <eventA> implies <eventB> with at least
-        probability p0 to be accepted. This method tries to be efficient by
+        """
+        Compute the critical value (minimal amount of true evaluations) for a hypothesis.
+        The form of the hypothesis is <eventA> implies <eventB> with at least probability p0 to be accepted.
+        This method tries to be efficient by
         - Storing already computed critical values in a dictionary
-        - Swapping (1 - p0) and p0 and replace alpha with (1 - alpha) to reduce loops"""
+        - Swapping (1 - p0) and p0 and replace alpha with (1 - alpha) to reduce loops
+        """
         if (max_observations, p0, alpha) in self.min_eval_true_dict:
             return self.min_eval_true_dict[(max_observations, p0, alpha)]
 
@@ -152,6 +160,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                 return max_observations - i
 
     def receive_atom(self, log_atom):
+        """Receive a log atom from a source."""
         timestamp = log_atom.get_timestamp()
         if timestamp is None:
             log_atom.atom_time = time.time()
@@ -625,12 +634,14 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     self.hypothesis_candidates.append((log_event, log_atom.atom_time))
 
     def get_time_trigger_class(self):
-        """Get the trigger class this component should be registered for. This trigger is used only for persistency, so real-time
-        triggering is needed."""
+        """
+        Get the trigger class this component should be registered for.
+        This trigger is used only for persistency, so real-time triggering is needed.
+        """
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
-        """Check current ruleset should be persisted"""
+        """Check if current ruleset should be persisted."""
         if self.next_persist_time is None:
             return 600
 
@@ -667,6 +678,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
 
 
 class Implication:
+    """Define the shape of an implication rule."""
+
     def __init__(self, trigger_event, implied_event, generation_time, max_observations, min_eval_true):
         self.trigger_event = trigger_event
         self.implied_event = implied_event
@@ -682,6 +695,7 @@ class Implication:
         self.hypothesis_evaluated_true = 1
 
     def add_hypothesis_observation(self, result, timestamp):
+        """Update the observation counts for a hypothesis."""
         # Reset counters when max_observations is reached.
         self.most_recent_observation_timestamp = timestamp
         if self.hypothesis_observations >= self.max_observations:
@@ -691,6 +705,7 @@ class Implication:
             self.hypothesis_evaluated_true = self.hypothesis_evaluated_true + result
 
     def compute_hypothesis_stability(self):
+        """Compute the stability of a hypothesis."""
         if self.hypothesis_evaluated_true >= self.min_eval_true:
             # Known that hypothesis is stable.
             self.stable = 1
@@ -703,11 +718,13 @@ class Implication:
         return self.stable
 
     def add_rule_observation(self, result):
+        """Add a new rule to the observations."""
         if len(self.rule_observations) >= self.max_observations:
             self.rule_observations.popleft()
         self.rule_observations.append(result)
 
     def evaluate_rule(self):
+        """Evaluate a rule."""
         ones = 0
         for obs in self.rule_observations:
             ones = ones + obs
@@ -719,6 +736,7 @@ class Implication:
             self.rule_observations) + ', ruletriggerts=' + str(self.rule_trigger_timestamps)
 
     def get_dictionary_repr(self):
+        """Return the dictionary representation of an Implication."""
         return {'trigger_event': self.trigger_event, 'implied_event': self.implied_event, 'stable': self.stable,
                 'max_observations': self.max_observations, 'min_eval_true': self.min_eval_true,
                 'most_recent_observation_timestamp': self.most_recent_observation_timestamp,
@@ -728,4 +746,5 @@ class Implication:
 
 
 def set_random_seed(seed):
+    """Set the random seed for testing purposes."""
     random.seed(seed)

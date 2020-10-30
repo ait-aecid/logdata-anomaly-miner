@@ -1,4 +1,5 @@
-"""This module defines a matching parser model element.
+"""
+This module defines a matching parser model element.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -16,14 +17,18 @@ from collections import deque
 
 
 class ParserMatch:
-    """Objects of this class store information about a complete model match. Unlike the MatchElement, this class also provides
-    fields to store information commonly used when dealing with the match."""
+    """
+    Objects of this class store information about a complete model match.
+    Unlike the MatchElement, this class also provides fields to store information commonly used when dealing with the match.
+    """
 
     def __init__(self, match_element, parsing_process_data=None):
-        """Initialize the match.
+        """
+        Initialize the match.
         @param match_element the root MatchElement from the parsing process.
         @param parsing_process_data this parameter might provide more information about the parsing process, e.g. when parsing produced
-        warnings. The data is specific for the source producing the match."""
+        warnings. The data is specific for the source producing the match.
+        """
         self.match_element = match_element
         self.parsing_process_data = parsing_process_data
         self.match_dictionary = None
