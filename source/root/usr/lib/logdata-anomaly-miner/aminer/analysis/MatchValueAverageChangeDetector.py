@@ -142,7 +142,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        PersistencyUtil.store_json(self.persistence_file_name, self.stat_data)
+        PersistenceUtil.store_json(self.persistence_file_name, self.stat_data)
         self.next_persist_time = None
 
     def update(self, stat_data, timestamp_value, value):
