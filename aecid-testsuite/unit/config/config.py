@@ -75,9 +75,10 @@ config_properties['MailAlerting.MaxEventsPerMessage'] = 1000
 
 
 def build_analysis_pipeline(analysis_context):
-    """Define the function to create pipeline for parsing the log data. It has also to define an AtomizerFactory to instruct py
-    how to process incoming data streams to create log atoms from them."""
-
+    """
+    Define the function to create pipeline for parsing the log data.
+    It has also to define an AtomizerFactory to instruct py how to process incoming data streams to create log atoms from them.
+    """
     # Build the parsing model:
     from aminer.parsing import FirstMatchModelElement
     from aminer.parsing import SequenceModelElement

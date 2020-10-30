@@ -13,7 +13,7 @@ from unit.TestBase import TestBase
 
 
 class SecureOSFunctionsTestLocal(TestBase):
-    """This test class must be run locally due to import problems"""
+    """This test class must be run locally due to import problems."""
 
     opening_socket = 'Opening socket...'
     listening = 'Listening...'

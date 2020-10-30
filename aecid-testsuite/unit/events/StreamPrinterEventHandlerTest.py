@@ -9,8 +9,9 @@ from datetime import datetime
 
 
 class StreamPrinterEventHandlerTest(TestBase):
-    __expectedString = '%s New value for pathes %s: %s\n%s: "%s" (%d lines)\n%s\n'
+    """Unittests for the StreamPrinterEventHandler."""
 
+    __expectedString = '%s New value for pathes %s: %s\n%s: "%s" (%d lines)\n%s\n'
     pid = b' pid='
     test = 'Test.%s'
     match_s1 = 'match/s1'

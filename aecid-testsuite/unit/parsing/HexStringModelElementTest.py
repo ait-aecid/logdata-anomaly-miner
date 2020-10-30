@@ -4,6 +4,7 @@ from aminer.parsing.HexStringModelElement import HexStringModelElement
 
 
 class HexStringModelElementTest(unittest.TestCase):
+    """Unittests for the HexStringModelElement."""
 
     def test1check_all_values(self):
         """Try all values and check if the desired results are produced."""

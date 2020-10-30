@@ -12,11 +12,12 @@ from datetime import datetime
 
 
 class TimeCorrelationViolationDetectorTest(TestBase):
-    __expected_string = '%s Correlation rule "%s" violated\nTimeCorrelationViolationDetector: "%s" (%d lines)\n  FAIL: '
-    __expected_string_not_found = __expected_string + 'B-Event for "%s" (%s) not found!\n\n'
-    __expected_string_too_early = __expected_string + 'B-Event for "%s" (%s) was found too early!\n\n\n'
-    __expected_string_too_late = __expected_string + 'B-Event for "%s" (%s) was not found in time!\n\n\n'
-    __expected_string_different_attributes = __expected_string + '"%s" (%s) %d is not equal %d\n\n\n'
+    """Unittests for the TimeCorrelationViolationDetector."""
+
+    _expected_string = '%s Correlation rule "%s" violated\nTimeCorrelationViolationDetector: "%s" (%d lines)\n  FAIL: '
+    _expected_string_too_early = _expected_string + 'B-Event for "%s" (%s) was found too early!\n\n\n'
+    _expected_string_too_late = _expected_string + 'B-Event for "%s" (%s) was not found in time!\n\n\n'
+    _expected_string_different_attributes = _expected_string + '"%s" (%s) %d is not equal %d\n\n\n'
 
     model = '/model'
     datetime_format_string = '%Y-%m-%d %H:%M:%S'
@@ -45,6 +46,7 @@ class TimeCorrelationViolationDetectorTest(TestBase):
     match_element2_different = seq2.get_match_element(model, match_context2_different)
 
     def setUp(self):
+        """Set up the rules for the TimeCorrelationViolationDetector."""
         TestBase.setUp(self)
         self.correlation_rule = CorrelationRule('Correlation', 1, 1.2, max_artefacts_a_for_single_b=1, artefact_match_parameters=[
             ('/model/sequence1/Value2Value', '/model/sequence2/Value3Value')])
@@ -55,8 +57,10 @@ class TimeCorrelationViolationDetectorTest(TestBase):
         self.rules.append(Rules.PathExistsMatchRule('/model/sequence2/Value3Key', self.b_class_selector))
 
     def test1_check_status_ok(self):
-        """In this test case the status is OK after receiving the expected data and no error message is returned. The output of the
-        do_timer-method is also tested in this test case. """
+        """
+        In this test case the status is OK after receiving the expected data and no error message is returned.
+        The output of the do_timer-method is also tested in this test case.
+        """
         description = "Test1TimeCorrelationViolationDetector"
         time_correlation_violation_detector = TimeCorrelationViolationDetector(self.analysis_context.aminer_config, self.rules,
                                                                                [self.stream_printer_event_handler])
@@ -71,8 +75,10 @@ class TimeCorrelationViolationDetectorTest(TestBase):
         self.assertEqual(self.output_stream.getvalue(), "")
 
     def test2_check_status_not_found_error(self):
-        """In this test case the second log line is not found and an appropriate error message is expected from the check_status-method.
-        The output of the do_timer-method is also tested in this test case. """
+        """
+        In this test case the second log line is not found and an appropriate error message is expected from the check_status-method.
+        The output of the do_timer-method is also tested in this test case.
+        """
         description = "Test2TimeCorrelationViolationDetector"
         time_correlation_violation_detector = TimeCorrelationViolationDetector(self.analysis_context.aminer_config, self.rules,
                                                                                [self.stream_printer_event_handler])
@@ -85,8 +91,10 @@ class TimeCorrelationViolationDetectorTest(TestBase):
             self.match_element1.get_match_string().decode(), self.a_class_selector.action_id))
 
     def test3_check_status_before_expected_timespan(self):
-        """In this test case the second log line is found too early and an appropriate error message is expected from the
-        check_status-method. The output of the do_timer-method is also tested in this test case."""
+        """
+        In this test case the second log line is found too early. An appropriate error message is expected from the check_status-method.
+        The output of the do_timer-method is also tested in this test case.
+        """
         description = "Test3TimeCorrelationViolationDetector"
         time_correlation_violation_detector = TimeCorrelationViolationDetector(self.analysis_context.aminer_config, self.rules,
                                                                                [self.stream_printer_event_handler])
@@ -98,13 +106,15 @@ class TimeCorrelationViolationDetectorTest(TestBase):
         log_atom2 = LogAtom(self.match_context2.match_data, ParserMatch(self.match_element2), time.time(), self)
         time_correlation_violation_detector.receive_atom(log_atom2)
         time_correlation_violation_detector.do_timer(time.time())
-        self.assertEqual(self.output_stream.getvalue(), self.__expected_string_too_early % (
+        self.assertEqual(self.output_stream.getvalue(), self._expected_string_too_early % (
             datetime.fromtimestamp(t).strftime(self.datetime_format_string), self.correlation_rule.rule_id, description, 1,
             self.match_element1.get_match_string().decode(), self.a_class_selector.action_id))
 
     def test4_check_status_after_expected_timespan(self):
-        """In this test case the second log line is found too late and an appropriate error message is expected from the
-        check_status-method. The output of the do_timer-method is also tested in this test case."""
+        """
+        In this test case the second log line is found too late. An appropriate error message is expected from the check_status-method.
+        The output of the do_timer-method is also tested in this test case.
+        """
         description = "Test4TimeCorrelationViolationDetector"
         time_correlation_violation_detector = TimeCorrelationViolationDetector(self.analysis_context.aminer_config, self.rules,
                                                                                [self.stream_printer_event_handler])
@@ -116,13 +126,16 @@ class TimeCorrelationViolationDetectorTest(TestBase):
         log_atom2 = LogAtom(self.match_context2.match_data, ParserMatch(self.match_element2), t + 5, self)
         time_correlation_violation_detector.receive_atom(log_atom2)
         time_correlation_violation_detector.do_timer(time.time())
-        self.assertEqual(self.output_stream.getvalue(), self.__expected_string_too_late % (
+        self.assertEqual(self.output_stream.getvalue(), self._expected_string_too_late % (
             datetime.fromtimestamp(t).strftime(self.datetime_format_string), self.correlation_rule.rule_id, description, 1,
             self.match_element1.get_match_string().decode(), self.a_class_selector.action_id))
 
     def test5_check_status_attributes_not_matching(self):
-        """In this test case the second log line has different attributes than expected and an appropriate error message is expected from
-        the check_status-method. The output of the do_timer-method is also tested in this test case."""
+        """
+        In this test case the second log line has different attributes than expected.
+        An appropriate error message is expected from the check_status-method. The output of the do_timer-method is also tested in this
+        test case.
+        """
         description = "Test5TimeCorrelationViolationDetector"
         time_correlation_violation_detector = TimeCorrelationViolationDetector(self.analysis_context.aminer_config, self.rules,
                                                                                [self.stream_printer_event_handler])
@@ -134,13 +147,15 @@ class TimeCorrelationViolationDetectorTest(TestBase):
         log_atom2 = LogAtom(self.match_context2.match_data, ParserMatch(self.match_element2_different), t + 1, self)
         time_correlation_violation_detector.receive_atom(log_atom2)
         time_correlation_violation_detector.do_timer(time.time())
-        self.assertEqual(self.output_stream.getvalue(), self.__expected_string_different_attributes % (
+        self.assertEqual(self.output_stream.getvalue(), self._expected_string_different_attributes % (
             datetime.fromtimestamp(t).strftime(self.datetime_format_string), self.correlation_rule.rule_id, description, 1,
             self.match_element1.get_match_string().decode(), self.a_class_selector.action_id, 22500, 22501))
 
     def test6_prepare_history_entry(self):
-        """In this test case the prepare_history_entry-method is tested with multiple artefact_match_parameters. Also the case of not
-        finding a parameter is tested."""
+        """
+        In this test case the prepare_history_entry-method is tested with multiple artefact_match_parameters.
+        Also the case of not finding a parameter is tested.
+        """
         t = time.time()
         p1 = ParserMatch(self.match_element1)
         p2 = ParserMatch(self.match_element2)

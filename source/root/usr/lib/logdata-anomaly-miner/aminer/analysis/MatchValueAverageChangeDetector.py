@@ -54,6 +54,8 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             self.stat_data = []
             for path in analyze_path_list:
                 self.stat_data.append((path, [],))
+        else:
+            self.stat_data = persistence_data
 
     def receive_atom(self, log_atom):
         """Sends summary to all event handlers."""
@@ -144,6 +146,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
+        PersistencyUtil.store_json(self.persistence_file_name, self.stat_data)
         self.next_persist_time = None
         logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
