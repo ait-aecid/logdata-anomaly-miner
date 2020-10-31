@@ -28,6 +28,8 @@ import os
 import re
 import socket
 import time
+import sys
+import shutil
 
 __authors__ = ["Markus Wurzenberger", "Max Landauer", "Wolfgang Hotwagner", "Ernst Leierzopf", "Roman Fiedler", "Georg Hoeld",
                "Florian Skopik"]
@@ -41,9 +43,6 @@ __license__ = "GPLv3"
 __maintainer__ = "Markus Wurzenberger"
 __status__ = "Production"
 __version__ = "2.0.1"
-
-import sys
-import shutil
 
 # As site packages are not included, define from where we need to execute code before loading it.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
@@ -273,7 +272,7 @@ def main():
     if restore_relative_persistence_path is not None:
         absolute_persistence_path = os.path.join(persistence_dir, 'backup', restore_relative_persistence_path)
         if not os.path.exists(absolute_persistence_path):
-            print('%s does not exist. Continuing without restoring persistence.', sys.stderr)
+            print('%s does not exist. Continuing without restoring persistence.' % absolute_persistence_path, file=sys.stderr)
         else:
             clear_persistence(persistence_dir)
             copytree(absolute_persistence_path, persistence_dir)
