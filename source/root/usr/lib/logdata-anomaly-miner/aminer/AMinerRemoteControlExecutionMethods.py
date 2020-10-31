@@ -292,12 +292,23 @@ class AMinerRemoteControlExecutionMethods:
         self.REMOTE_CONTROL_RESPONSE = AMinerConfig.save_config(analysis_context, destination_file)
 
     def persist_all(self):
-        """Persists all data by calling PersistencyUtil.persist_all()"""
+        """Persist all data by calling PersistencyUtil.persist_all()"""
         PersistencyUtil.persist_all()
         self.REMOTE_CONTROL_RESPONSE = 'OK'
 
+    def create_backup(self, analysis_context):
+        """Create a backup with the current datetime string."""
+        backup_time = time.time()
+        backup_time_str = datetime.fromtimestamp(backup_time).strftime('%Y-%m-%d-%H-%M-%S')
+        persistence_dir = analysis_context.aminer_config.config_properties[AMinerConfig.KEY_PERSISTENCE_DIR]
+        persistence_dir = persistence_dir.rstrip('/')
+        backup_path = persistence_dir + '/backup/'
+        backup_path_with_date = os.path.join(backup_path, backup_time_str)
+        shutil.copytree(persistence_dir, backup_path_with_date, ignore=shutil.ignore_patterns('backup*'))
+        self.REMOTE_CONTROL_RESPONSE = 'Created backup %s' % backup_time_str
+
     def list_backups(self, analysis_context):
-        """Lists all available backups from the persistence directory."""
+        """List all available backups from the persistence directory."""
         persistence_dir = analysis_context.aminer_config.config_properties.get(
             AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
         for dirpath, dirnames, filenames in os.walk(os.path.join(persistence_dir, 'backup')):

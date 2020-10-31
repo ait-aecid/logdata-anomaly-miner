@@ -73,3 +73,6 @@ sudo aminerRemoteControl --Exec "persist_all()"
 
 # List all backups.
 sudo aminerRemoteControl --Exec "list_backups(analysis_context)"
+
+# Create a backup.
+sudo aminerRemoteControl --Exec "create_backup(analysis_context)"

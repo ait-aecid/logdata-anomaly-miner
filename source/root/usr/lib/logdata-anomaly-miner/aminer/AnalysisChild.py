@@ -374,7 +374,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
             # backup the persistence data.
             backup_time = time.time()
             backup_time_str = datetime.fromtimestamp(backup_time).strftime('%Y-%m-%d-%H-%M-%S')
-            persistence_dir = self.analysis_context.aminer_config.config_properties['Core.PersistenceDir']
+            persistence_dir = self.analysis_context.aminer_config.config_properties[AMinerConfig.KEY_PERSISTENCE_DIR]
             persistence_dir = persistence_dir.rstrip('/')
             backup_path = persistence_dir + '/backup/'
             backup_path_with_date = os.path.join(backup_path, backup_time_str)
@@ -538,6 +538,7 @@ class AnalysisChildRemoteControlHandler:
                     'whitelist_events_from_history': methods.whitelist_events_from_history,
                     'persist_all': methods.persist_all,
                     'list_backups': methods.list_backups,
+                    'create_backup': methods.create_backup,
                     'EnhancedNewMatchPathValueComboDetector': aminer.analysis.EnhancedNewMatchPathValueComboDetector,
                     'EventCorrelationDetector': aminer.analysis.EventCorrelationDetector,
                     'HistogramAnalysis': aminer.analysis.HistogramAnalysis,
