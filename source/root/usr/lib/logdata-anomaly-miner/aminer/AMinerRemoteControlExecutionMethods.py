@@ -16,6 +16,9 @@ import resource
 import subprocess  # skipcq: BAN-B404
 import shlex
 import os
+import shutil
+from time import time
+from datetime import datetime
 from aminer.input import LogAtom
 from aminer.input import AtomHandlerInterface
 from aminer.util import PersistencyUtil
@@ -298,7 +301,7 @@ class AMinerRemoteControlExecutionMethods:
 
     def create_backup(self, analysis_context):
         """Create a backup with the current datetime string."""
-        backup_time = time.time()
+        backup_time = time()
         backup_time_str = datetime.fromtimestamp(backup_time).strftime('%Y-%m-%d-%H-%M-%S')
         persistence_dir = analysis_context.aminer_config.config_properties[AMinerConfig.KEY_PERSISTENCE_DIR]
         persistence_dir = persistence_dir.rstrip('/')
