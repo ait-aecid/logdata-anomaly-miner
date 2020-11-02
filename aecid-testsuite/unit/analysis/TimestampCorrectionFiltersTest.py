@@ -11,11 +11,13 @@ from datetime import datetime
 
 
 class TimestampCorrectionFiltersTest(TestBase):
+    """Unittests for the TimestampCorrectionFilters."""
+
     __expected_string = '%s New path(es) detected\n%s: "%s" (%d lines)\n  %s\nb\' pid=\'\n\n'
     match_path = "['match/s1']"
 
     def test1simple_monotonic_timestamp_adjust_test(self):
-        """this test case checks if the timestamp is adjusted and logAtoms are forwarded correctly."""
+        """This test case checks if the timestamp is adjusted and logAtoms are forwarded correctly."""
         description = "Test1TimestampCorrectionFilter"
         match_context_fixed_dme = MatchContext(b' pid=')
         fixed_dme = FixedDataModelElement('s1', b' pid=')

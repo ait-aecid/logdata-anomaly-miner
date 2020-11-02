@@ -11,11 +11,14 @@ import random
 
 
 class EventCorrelationDetectorTest(TestBase):
+    """Unittests for the EventCorrelationDetector."""
+
     alphabet = b'abcdefghijklmnopqrstuvwxyz'
     alphabet_model = FirstMatchModelElement('first', [])
 
     @classmethod
     def setUpClass(cls):
+        """Set up the data for the all tests."""
         for i in range(len(cls.alphabet)):
             char = bytes([cls.alphabet[i]])
             cls.alphabet_model.children.append(FixedDataModelElement(char.decode(), char))
@@ -40,8 +43,11 @@ class EventCorrelationDetectorTest(TestBase):
         self.run_ecd_test(ecd, self.perfect_data_diff1[:12000])
 
     def test2learn_from_clear_examples_with_smaller_probabilities(self):
-        """Like in test1 perfect examples are used, but the generation_probability and generation_factor are set to 0.5 in the first case
-        and 0.1 in the second case. The EventCorrelationDetector should still learn the rules as expected."""
+        """
+        Like in test1 perfect examples are used.
+        The generation_probability and generation_factor are set to 0.5 in the first case and 0.1 in the second case.
+        The EventCorrelationDetector should still learn the rules as expected.
+        """
         description = 'test2eventCorrelationDetectorTest'
         ecd = EventCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True,
                                        generation_probability=0.5, generation_factor=0.5)
@@ -75,8 +81,10 @@ class EventCorrelationDetectorTest(TestBase):
         self.run_ecd_test(ecd, self.errored_data_diff1[:12000])
 
     def test4learn_from_examples_with_errors_and_smaller_probabilities(self):
-        """In this test case examples with errors are used, but still should be learned. These tests are using a higher
-        generation_probability and generation_factor, because the data contains errors."""
+        """
+        In this test case examples with errors are used, but still should be learned.
+        These tests are using a higher generation_probability and generation_factor, because the data contains errors.
+        """
         description = 'test4eventCorrelationDetectorTest'
         ecd = EventCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True,
                                        generation_probability=0.7, generation_factor=0.99)
@@ -99,8 +107,10 @@ class EventCorrelationDetectorTest(TestBase):
         self.run_ecd_test(ecd, self.errored_data_diff1_low_error_rate[:40000])
 
     def test5learn_safe_assumptions(self):
-        """In this test case p0 and alpha are chosen carefully to only find safe assumptions about the implications in the data. Therefor
-        more iterations in the training phase are needed."""
+        """
+        In this test case p0 and alpha are chosen carefully to only find safe assumptions about the implications in the data.
+        Therefor more iterations in the training phase are needed.
+        """
         description = 'test5eventCorrelationDetectorTest'
         ecd = EventCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, p0=1.0, alpha=0.01)
         self.analysis_context.register_component(ecd, description)
@@ -119,8 +129,10 @@ class EventCorrelationDetectorTest(TestBase):
         self.run_ecd_test(ecd, self.errored_data_diff1_low_error_rate[:40000])
 
     def test6approximately_learn_implications(self):
-        """In this unittest p0 and alpha are chosen to approximately find sequences in log data. Therefor not as many iterations are needed
-        to learn the rules."""
+        """
+        In this unittest p0 and alpha are chosen to approximately find sequences in log data.
+        Therefor not as many iterations are needed to learn the rules.
+        """
         description = 'test6eventCorrelationDetectorTest'
         ecd = EventCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, p0=0.7, alpha=0.1)
         self.analysis_context.register_component(ecd, description)
@@ -139,6 +151,7 @@ class EventCorrelationDetectorTest(TestBase):
         self.run_ecd_test(ecd, self.errored_data_diff1[:10000])
 
     def check_rules(self, sorted_back_rules, sorted_forward_rules, diff):
+        """Check if the rules are as expected."""
         for path in sorted_forward_rules:
             self.assertEqual(len(sorted_forward_rules[path]), 5 / diff)
             implications = []
@@ -159,6 +172,7 @@ class EventCorrelationDetectorTest(TestBase):
                 self.assertIn((self.alphabet.index(trigger) - i) % len(self.alphabet), implications)
 
     def check_anomaly_detection(self, ecd, t, diff):
+        """Check if anomalies were detected as expected."""
         for char in self.alphabet:
             self.reset_output_stream()
             char = bytes([char])
@@ -195,6 +209,7 @@ class EventCorrelationDetectorTest(TestBase):
                     bytes([self.alphabet[(self.alphabet.index(char) + i) % len(self.alphabet)]]), char), self.output_stream.getvalue())
 
     def run_ecd_test(self, ecd, log_atoms):
+        """Run the ECD test."""
         diff = log_atoms[1].atom_time - log_atoms[0].atom_time
         log_atom = None
         for log_atom in log_atoms:
@@ -208,6 +223,7 @@ class EventCorrelationDetectorTest(TestBase):
         self.check_anomaly_detection(ecd, log_atom.atom_time, diff)
 
     def generate_perfect_data(self, iterations, diff):
+        """Generate data without any error."""
         log_atoms = []
         t = time()
         for i in range(1, iterations+1):
@@ -218,6 +234,7 @@ class EventCorrelationDetectorTest(TestBase):
         return log_atoms
 
     def generate_errored_data(self, iterations, diff, error_rate):
+        """Generate data with errors according to the error_rate."""
         log_atoms = []
         t = time()
         divisor = 1

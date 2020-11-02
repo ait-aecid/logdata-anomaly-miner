@@ -1,5 +1,7 @@
-"""This module can assigns every parsed log line a eventtype and can be used for profiling purposes. It supports the modules
-VariableTypeDetector and VariableCorrelationDetector."""
+"""
+This module can assigns every parsed log line a eventtype and can be used for profiling purposes.
+It supports the modules VariableTypeDetector and VariableCorrelationDetector.
+"""
 import time
 import copy
 
@@ -11,13 +13,12 @@ from aminer.util import PersistencyUtil
 
 
 class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
-    """This class keeps track of the found eventtypes and the values of each variable"""
+    """This class keeps track of the found eventtypes and the values of each variable."""
 
     def __init__(self, aminer_config, anomaly_event_handlers, persistence_id='Default', path_list=None, min_num_vals=1000,
                  max_num_vals=1500, save_values=True, track_time_for_TSA=False, waiting_time_for_TSA=300,
                  num_sections_waiting_time_for_TSA=10):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
-
         self.next_persist_time = time.time() + 600.0
         self.anomaly_event_handlers = anomaly_event_handlers
         self.num_events = 0
@@ -87,8 +88,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 self.etd_time_trigger[2].append(-1)
 
     def receive_atom(self, log_atom):
-        """Receives an parsed atom and keeps track of the event types and the values of the variables of them"""
-
+        """Receives an parsed atom and keeps track of the event types and the values of the variables of them."""
         # Get the current time
         if self.track_time_for_TSA:
             if log_atom.atom_time is not None:
@@ -261,7 +261,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
-        """Checks if current ruleset should be persisted"""
+        """Check if current ruleset should be persisted."""
         if self.next_persist_time is None:
             return self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
 
@@ -292,11 +292,11 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
 
     def add_following_modules(self, following_module):
-        """Adds the given Module to the following module list"""
+        """Add the given Module to the following module list."""
         self.following_modules.append(following_module)
 
     def init_values(self, current_index):
-        """Initializes the variable_key_list and the list for the values"""
+        """Initialize the variable_key_list and the list for the values."""
         # Initializes the value_list
         if not self.values:
             self.values = [[[] for _ in range(len(self.variable_key_list[current_index]))]]
@@ -304,7 +304,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             self.values.append([[] for _ in range(len(self.variable_key_list[current_index]))])
 
     def append_values(self, log_atom, current_index):
-        """Adds the values of the variables of the current line to self.values"""
+        """Add the values of the variables of the current line to self.values."""
         for var_key in self.variable_key_list[current_index]:
             # Skips the variable if check_variable is False
             var_index = self.variable_key_list[current_index].index(var_key)

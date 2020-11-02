@@ -29,11 +29,10 @@ learn_mode = True
 
 
 def build_analysis_pipeline(analysis_context):
-    """Define the function to create pipeline for parsing the log
-    data. It has also to define an AtomizerFactory to instruct AMiner
-    how to process incoming data streams to create log atoms from
-    them."""
-
+    """
+    Define the function to create pipeline for parsing the log data.
+    It has also to define an AtomizerFactory to instruct AMiner how to process incoming data streams to create log atoms from them.
+    """
     # Build the parsing model:
     from aminer.parsing import SequenceModelElement
 

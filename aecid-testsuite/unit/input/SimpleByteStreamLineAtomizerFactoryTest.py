@@ -9,6 +9,7 @@ class SimpleByteStreamLineAtomizerFactoryTest(TestBase):
     """The SimpleByteStreamLineAtomizerFactory should return a valid ByteStreamLineAtomizer with all parameters of the Factory."""
 
     def test1get_atomizer(self):
+        """Tests the creating of an SimpleByteStreamLineAtomizer with the Factory."""
         any_byte_data_model_element = AnyByteDataModelElement('a1')
         new_match_path_detector1 = NewMatchPathDetector(self.aminer_config, [], 'Default', False)
         new_match_path_detector2 = NewMatchPathDetector(self.aminer_config, [], 'Default', False)

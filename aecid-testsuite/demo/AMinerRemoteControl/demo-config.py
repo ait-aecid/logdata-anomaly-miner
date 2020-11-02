@@ -79,11 +79,10 @@ config_properties['LogPrefix'] = 'Original log line: '
 
 
 def build_analysis_pipeline(analysis_context):
-    """Define the function to create pipeline for parsing the log
-    data. It has also to define an AtomizerFactory to instruct AMiner
-    how to process incoming data streams to create log atoms from
-    them."""
-
+    """
+    Define the function to create pipeline for parsing the log data.
+    It has also to define an AtomizerFactory to instruct AMiner how to process incoming data streams to create log atoms from them.
+    """
     # Build the parsing model:
 
     service_children_disk_report = [
@@ -202,7 +201,8 @@ def build_analysis_pipeline(analysis_context):
     atom_filters.add_handler(new_match_path_detector)
 
     def tuple_transformation_function(match_value_list):
-        extra_data = enhanced_new_match_path_value_combo_detector.known_values_dict.get(tuple(match_value_list), None)
+        """Only allow output of the EnhancedNewMatchPathValueComboDetector after every 10000th element."""
+        extra_data = enhanced_new_match_path_value_combo_detector.known_values_dict.get(tuple(match_value_list))
         if extra_data is not None:
             mod = 10000
             if (extra_data[2] + 1) % mod == 0:

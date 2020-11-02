@@ -7,10 +7,9 @@ from aminer.parsing import FixedDataModelElement
 from aminer.parsing import IpAddressDataModelElement
 from aminer.parsing import SequenceModelElement
 
+
 def get_model():
-
-    """This model defines how to parse Suricata Fast logs from the AIT-LDS."""
-
+    """Return a model to parse Suricata Fast logs from the AIT-LDS."""
     model = SequenceModelElement('model', [
         DateTimeModelElement('time', b'%m/%d/%Y-%H:%M:%S.%f'),
         FixedDataModelElement('brack_str1', b'  [**] ['),
@@ -36,5 +35,4 @@ def get_model():
         FixedDataModelElement('colon', b':'),
         DecimalIntegerValueModelElement('dst_port'),
         ])
-
     return model

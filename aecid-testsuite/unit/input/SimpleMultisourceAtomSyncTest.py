@@ -11,6 +11,8 @@ from datetime import datetime
 
 
 class SimpleMultisourceAtomSyncTest(TestBase):
+    """Unittests for the SimpleMultisourceAtomSync."""
+
     __expected_string = '%s New path(es) detected\n%s: "%s" (%d lines)\n  %s\n%s\n\n'
 
     calculation = b'256 * 2 = 512'
