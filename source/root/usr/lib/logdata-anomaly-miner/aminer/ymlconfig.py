@@ -757,6 +757,7 @@ def build_analysis_pipeline(analysis_context):
 
 
 def tuple_transformation_function_demo_print_every_10th_value(match_value_list):
+    """Only allow output of the EnhancedNewMatchPathValueComboDetector after every 10th element."""
     extra_data = enhanced_new_match_path_value_combo_detector_reference.known_values_dict.get(tuple(match_value_list), None)
     if extra_data is not None:
         mod = 10

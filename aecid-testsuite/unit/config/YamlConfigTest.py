@@ -185,8 +185,10 @@ class YamlConfigTest(unittest.TestCase):
             aminer_config.load_yaml('unit/data/configfiles/unknown_event_handler.yml')
 
     def test12_analysis_pipeline_working_config_without_event_handler_components(self):
-        """This test checks if the config can be loaded without any event handler components. This also tests if the
-        StreamPrinterEventHandler was loaded by default."""
+        """
+        This test checks if the config can be loaded without any event handler components.
+        This also tests if the StreamPrinterEventHandler was loaded by default.
+        """
         spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)

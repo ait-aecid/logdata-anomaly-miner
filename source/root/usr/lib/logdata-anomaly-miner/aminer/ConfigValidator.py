@@ -39,6 +39,7 @@ class AnalysisType:
 
 
 class EventHandlerType:
+    """Defines a type for event classes."""
     name = None
     func = None
 
@@ -85,6 +86,7 @@ class ConfigValidator(Validator):
     # "must have self"-issue will pop up
     # skipcq: PYL-R0201
     def _normalize_coerce_toeventhandlertype(self, value):
+        """Create a EventHandlerType from the string representation."""
         if isinstance(value, str):
             return EventHandlerType(value)
         return None

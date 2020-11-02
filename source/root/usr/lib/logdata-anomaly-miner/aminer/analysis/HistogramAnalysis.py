@@ -215,9 +215,7 @@ class HistogramData():
     """
 
     def __init__(self, property_path, bin_definition):
-        """
-        Create the histogram data structures.
-        """
+        """Create the histogram data structures."""
         self.property_path = property_path
         self.bin_definition = bin_definition
         self.bin_names = bin_definition.get_bin_names()
