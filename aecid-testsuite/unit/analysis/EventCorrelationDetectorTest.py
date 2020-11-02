@@ -157,6 +157,7 @@ class EventCorrelationDetectorTest(TestBase):
         self.analysis_context.register_component(ecd, description)
         self.assertEqual([], ecd.allowlisted_paths)
 
+        match_context_fixed_dme = MatchContext(b' pid=')
         fixed_dme = FixedDataModelElement('s1', b' pid=')
         match_element_fixed_dme = fixed_dme.get_match_element("", match_context_fixed_dme)
         log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme), time(), ecd)
