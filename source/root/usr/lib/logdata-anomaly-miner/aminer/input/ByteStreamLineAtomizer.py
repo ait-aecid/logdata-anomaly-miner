@@ -1,5 +1,5 @@
-"""This module provides support for splitting a data stream into
-atoms, perform parsing and forward the results.
+"""
+This module provides support for splitting a data stream into atoms, perform parsing and forward the results.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -19,18 +19,22 @@ from aminer.parsing import ParserMatch
 
 
 class ByteStreamLineAtomizer(StreamAtomizer):
-    """This atomizer consumes binary data from a stream to break it into lines, removing the line separator at the end. With
-    a parsing model, it will also perform line parsing. Failures in atomizing or parsing will cause events to be generated and
+    """
+    This atomizer consumes binary data from a stream to break it into lines, removing the line separator at the end.
+    With a parsing model, it will also perform line parsing. Failures in atomizing or parsing will cause events to be generated and
     sent to event handler. Data will be consumed only when there was no downstream handler registered
-    (the data will be discarded in that case) or when at least one downstream consumed the data."""
+    (the data will be discarded in that case) or when at least one downstream consumed the data.
+    """
 
     COUNTER = 0
 
     def __init__(self, parsing_model, atom_handler_list, event_handler_list, max_line_length, default_timestamp_paths):
-        """Create the atomizer.
+        """
+        Create the atomizer.
         @param event_handler_list when not None, send events to those handlers. The list might be empty at invocation and populated
         later on.
-        @param max_line_length the maximal line length including the final line separator."""
+        @param max_line_length the maximal line length including the final line separator.
+        """
         self.parsing_model = parsing_model
         self.atom_handler_list = atom_handler_list
         self.event_handler_list = event_handler_list
@@ -43,9 +47,11 @@ class ByteStreamLineAtomizer(StreamAtomizer):
         self.last_unconsumed_log_atom = None
 
     def consume_data(self, stream_data, end_of_stream_flag=False):
-        """Consume data from the underlying stream for atomizing.
+        """
+        Consume data from the underlying stream for atomizing.
         @return the number of consumed bytes, 0 if the atomizer would need more data for a complete atom or -1 when no data was
-        consumed at the moment but data might be consumed later on."""
+        consumed at the moment but data might be consumed later on.
+        """
         # Loop until as much streamData as possible was processed and then return a result. The correct processing of endOfStreamFlag
         # is tricky: by default, even when all data was processed, do one more iteration to handle also the flag.
         consumed_length = 0

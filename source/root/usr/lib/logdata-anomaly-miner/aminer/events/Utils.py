@@ -1,4 +1,5 @@
-"""This module defines a handler for storing event history.
+"""
+This module defines a handler for storing event history.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -16,8 +17,10 @@ from aminer.util import LogarithmicBackoffHistory
 
 
 class VolatileLogarithmicBackoffEventHistory(EventHandlerInterface, LogarithmicBackoffHistory):
-    """This class is a volatile filter to keep a history of received events, e.g. for analysis by other components or for external
-    access via remote control interface."""
+    """
+    This class is a volatile filter to keep a history of received events.
+    Example usages are for analysis by other components or for external access via remote control interface.
+    """
 
     def __init__(self, max_items):
         """Initialize the history component."""
