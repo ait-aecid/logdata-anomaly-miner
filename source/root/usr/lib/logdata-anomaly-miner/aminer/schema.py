@@ -185,7 +185,7 @@
                     'artefact_b_rules': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                     'ruleset': {'type': 'list', 'schema': {'type': 'string'}},
                     'exit_on_error_flag': {'type': 'boolean', 'required': False, 'default': False},
-                    'whitelist_rules': {'type': 'list', 'schema': {'type': 'string'}},
+                    'allowlist_rules': {'type': 'list', 'schema': {'type': 'string'}},
                     'parsed_atom_handler_lookup_list': {
                         'type': 'list', 'schema': {'type': 'list', 'schema': {'type': 'string', 'nullable': True}}},
                     'default_parsed_atom_handler': {'type': 'string', 'required': False, 'nullable': True, 'default': None},

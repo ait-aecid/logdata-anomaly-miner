@@ -630,15 +630,15 @@ def build_analysis_pipeline(analysis_context):
                     anomaly_event_handlers,
                     exit_on_error_flag=item['exit_on_error_flag'],
                     output_log_line=item['output_logline'])
-            elif item['type'].name == 'WhitelistViolationDetector':
-                whitelist_rules = []
-                for rule in item['whitelist_rules']:
+            elif item['type'].name == 'AllowlistViolationDetector':
+                allowlist_rules = []
+                for rule in item['allowlist_rules']:
                     if rule not in match_rules_dict:
                         raise ValueError('The match rule %s does not exist!' % rule)
-                    whitelist_rules.append(match_rules_dict[rule])
+                    allowlist_rules.append(match_rules_dict[rule])
                 tmp_analyser = func(
                     analysis_context.aminer_config,
-                    whitelist_rules,
+                    allowlist_rules,
                     anomaly_event_handlers,
                     output_log_line=item['output_logline'])
             elif item['type'].name == 'EventTypeDetector':
