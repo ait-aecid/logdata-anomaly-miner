@@ -2,8 +2,6 @@
 This file contains interface definition useful implemented by classes in this directory and for use from code outside this directory.
 All classes are defined in separate files, only the namespace references are added here to simplify the code.
 
-No generic interfaces here yet.
-
 Add also the namespace references to classes defined in this directory.
 """
 
@@ -26,6 +24,7 @@ from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector  # skipcq:
 from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector  # skipcq: FLK-E402
 from aminer.analysis.NewMatchPathValueDetector import NewMatchPathValueDetector  # skipcq: FLK-E402
 from aminer.analysis.ParserCount import ParserCount  # skipcq: FLK-E402
+from aminer.analysis.AllowlistViolationDetector import AllowlistViolationDetector  # skipcq: FLK-E402
 # skipcq: FLK-E402
 from aminer.analysis.Rules import AndMatchRule, OrMatchRule, AtomFilterMatchAction, DebugHistoryMatchRule, EventGenerationMatchAction,\
     DebugMatchRule, IPv4InRFC1918MatchRule, ModuloTimeMatchRule, NegationMatchRule, ParallelMatchRule, PathExistsMatchRule,\
@@ -37,4 +36,3 @@ from aminer.analysis.TimeCorrelationViolationDetector import TimeCorrelationViol
 from aminer.analysis.TimestampCorrectionFilters import SimpleMonotonicTimestampAdjust  # skipcq: FLK-E402
 from aminer.analysis.TimestampsUnsortedDetector import TimestampsUnsortedDetector  # skipcq: FLK-E402
 from aminer.analysis.VariableTypeDetector import VariableTypeDetector  # skipcq: FLK-E402
-from aminer.analysis.WhitelistViolationDetector import WhitelistViolationDetector  # skipcq: FLK-E402
