@@ -1,23 +1,39 @@
-# This schema is invalid, because of the Some_Weird_Option key.
-
-Some_Weird_Option: "test"
-
 AMinerUser: 'aminer'  # optional default: aminer
 AMinerGroup: 'aminer' # optional default: aminer
 
 LogResourceList:
         - 'file:///var/log/apache2/access.log'
 
-Parser:
-        - id: 'apacheModel'
-          type: ApacheAccessModel
-          name: 'apache'
-          args: 'apache'
+Core.PersistenceDir: '/tmp/lib/aminer'
 
-        - id: 'START'
-          type: SequenceModelElement
-          name: 'model'
-          args: apacheModel
+Parser:
+         - id: 'timeModel'
+           type: DateTimeModelElement
+           name: 'time'
+           args: '%Y-%m-%dT%H:%M:%S.%f'
+
+         - id: 'hostModel'
+           type: VariableByteDataModelElement
+           name: 'host'
+           args: '-.01234567890abcdefghijklmnopqrstuvwxyz:'
+
+         - id: 'reqMethodModel'
+           type:  FixedWordlistDataModelElement
+           name: 'method'
+           args:
+                   - 'GET'
+                   - 'POST'
+                   - 'PUT'
+                   - 'HEAD'
+
+         - id: 'START'
+           start: True
+           type: SequenceModelElement
+           name: 'model'
+           args:
+               - timeModel
+               - hostModel
+               - reqMethodModel
 
 Input:
         verbose: True # optional
@@ -45,7 +61,4 @@ Analysis:
 EventHandlers:
         - id: stpe
           json: True # optional default: False
-          type: StreamPrinterEventHandler
-
-        - id: syslog
-          type: SyslogWriterEventHandler
+          type: UnknownPrinterEventHandler
