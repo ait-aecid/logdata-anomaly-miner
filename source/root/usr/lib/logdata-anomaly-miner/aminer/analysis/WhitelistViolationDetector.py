@@ -1,5 +1,5 @@
-"""This module defines a detector for log atoms not matching
-any allowlisted rule.
+"""
+This module defines a detector for log atoms not matching any allowlisted rule.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -20,13 +20,17 @@ from datetime import datetime
 
 
 class AllowlistViolationDetector(AtomHandlerInterface):
-    """Objects of this class handle a list of allowlist rules to ensure, that each received log-atom is at least covered by a
-    single allowlist rule. To avoid traversing the complete rule tree more than once, the allowlist rules may have match actions
-    attached that set off an alarm by themselves."""
+    """
+    Objects of this class handle a list of allowlist rules.
+    They ensure, that each received log-atom is at least covered by a single allowlist rule. To avoid traversing the complete rule tree
+    more than once, the allowlist rules may have match actions attached that set off an alarm by themselves.
+    """
 
     def __init__(self, aminer_config, allowlist_rules, anomaly_event_handlers, output_log_line=True):
-        """Initialize the detector.
-        @param allowlist_rules list of rules executed in same way as inside Rules.OrMatchRule."""
+        """
+        Initialize the detector.
+        @param allowlist_rules list of rules executed in same way as inside Rules.OrMatchRule.
+        """
         self.allowlist_rules = allowlist_rules
         self.anomaly_event_handlers = anomaly_event_handlers
         self.output_log_line = output_log_line
@@ -34,9 +38,11 @@ class AllowlistViolationDetector(AtomHandlerInterface):
         self.persistence_id = None
 
     def receive_atom(self, log_atom):
-        """Receive on parsed atom and the information about the parser match.
+        """
+        Receive on parsed atom and the information about the parser match.
         @param log_atom atom with parsed data to check
-        @return True when logAtom is allowlisted, False otherwise."""
+        @return True when logAtom is allowlisted, False otherwise.
+        """
         event_data = {}
         for rule in self.allowlist_rules:
             if rule.match(log_atom):

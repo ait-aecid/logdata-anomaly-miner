@@ -1,4 +1,5 @@
-""" This file loads and parses a config-file in yaml format.
+"""
+This file loads and parses a config-file in yaml format.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -26,8 +27,10 @@ config_properties['LogResourceList'] = []
 config_properties['AMinerUser'] = 'aminer'
 config_properties['AMinerGroup'] = 'aminer'
 
-# This method loads the yaml-configfile and overrides defaults if neccessary
+
+# This method loads the yaml-configfile and overrides defaults if necessary
 def loadYaml(config_file):
+    """Load the yaml configuration from file."""
     # We might be able to remove this and us it like the config_properties
     # skipcq: PYL-W0603
     global yamldata
@@ -68,10 +71,10 @@ def loadYaml(config_file):
 
 # Add your ruleset here:
 def build_analysis_pipeline(analysis_context):
-    """Define the function to create pipeline for parsing the log
-    data. It has also to define an AtomizerFactory to instruct AMiner
-    how to process incoming data streams to create log atoms from
-    them."""
+    """
+    Define the function to create pipeline for parsing the log data.
+    It has also to define an AtomizerFactory to instruct AMiner how to process incoming data streams to create log atoms from them.
+    """
     # skipcq: PYL-W0611
     import importlib
     # skipcq: PYL-W0611

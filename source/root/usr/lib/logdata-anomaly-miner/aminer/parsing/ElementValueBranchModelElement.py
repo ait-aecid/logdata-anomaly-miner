@@ -1,4 +1,5 @@
-"""This module defines a model element that allows branches depending on the value of the previous model value.
+"""
+This module defines a model element that allows branches depending on the value of the previous model value.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -20,12 +21,14 @@ class ElementValueBranchModelElement(ModelElementInterface):
     """This class defines an element that selects a branch path based on a previous model value."""
 
     def __init__(self, element_id, value_model, value_path, branch_model_dict, default_branch=None):
-        """Create the branch model element.
+        """
+        Create the branch model element.
         @param value_path the relative path to the target value from the valueModel element on. When the path does not resolve
         to a value, this model element will not match. A path value of None indicates, that the match element of the valueModel
         should be used directly.
         @param branch_model_dict a dictionary to select a branch for the value identified by valuePath.
-        @param default_branch when lookup in branchModelDict fails, use this as default branch or fail when None."""
+        @param default_branch when lookup in branchModelDict fails, use this as default branch or fail when None.
+        """
         self.element_id = element_id
         self.value_model = value_model
         self.value_path = value_path
@@ -37,19 +40,24 @@ class ElementValueBranchModelElement(ModelElementInterface):
         return self.element_id
 
     def get_child_elements(self):
-        """Get all possible child model elements of this element. If this element implements a branching model element, then
-        not all child element IDs will be found in matches produced by getMatchElement.
-        @return a list with all children"""
+        """
+        Get all possible child model elements of this element.
+        If this element implements a branching model element, then not all child element IDs will be found in matches produced by
+        get_match_element.
+        @return a list with all children
+        """
         all_children = [self.value_model] + list(self.branch_model_dict.values())
         if self.default_branch is not None:
             all_children.append(self.default_branch)
         return all_children
 
     def get_match_element(self, path, match_context):
-        """Try to find a match on given data for the test model and the selected branch.
+        """
+        Try to find a match on given data for the test model and the selected branch.
         @param path the model path to the parent model element invoking this method.
         @param match_context an instance of MatchContext class holding the data context to match against.
-        @return the matchElement or None if the test model did not match, no branch was selected or the branch did not match."""
+        @return the matchElement or None if the test model did not match, no branch was selected or the branch did not match.
+        """
         current_path = "%s/%s" % (path, self.element_id)
         start_data = match_context.match_data
         model_match = self.value_model.get_match_element(current_path, match_context)

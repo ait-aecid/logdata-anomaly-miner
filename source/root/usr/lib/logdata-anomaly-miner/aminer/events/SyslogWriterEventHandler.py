@@ -1,5 +1,5 @@
-"""This module defines an event handler that prints data to
-a local syslog instance.
+"""
+This module defines an event handler that prints data to a local syslog instance.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -21,9 +21,11 @@ from aminer.events import StreamPrinterEventHandler
 
 
 class SyslogWriterEventHandler(EventHandlerInterface):
-    """This class implements an event record listener to forward events to the local syslog instance.
+    """
+    This class implements an event record listener to forward events to the local syslog instance.
     CAVEAT: USE THIS AT YOUR OWN RISK: by creating aminer/syslog log data processing loops, you will flood your syslog and probably
-    fill up your disks."""
+    fill up your disks.
+    """
 
     def __init__(self, analysis_context, instance_name='aminer'):
         self.instanceName = instance_name

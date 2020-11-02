@@ -72,7 +72,7 @@
             'has_start': True,
             'schema': {
                 'type': 'dict',
-                 'schema': {
+                'schema': {
                     'id': {'type': 'string'},
                     'start': {'type': 'boolean'},
                     'type': {'type': 'parsermodel', 'coerce': 'toparsermodel'},
@@ -153,4 +153,3 @@
             }
         }
 }
-
