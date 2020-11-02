@@ -143,6 +143,31 @@ class AMinerRemoteControlExecutionMethods:
                 self.REMOTE_CONTROL_RESPONSE += "Component '%s' renamed to '%s' successfully." % (
                     old_component_name, new_component_name)
 
+    def change_log_stat_level(self, level):
+        """Change the STAT_LEVEL."""
+        level = int(level)
+        if level in (0, 1, 2):
+            AMinerConfig.STAT_LEVEL = level
+            self.REMOTE_CONTROL_RESPONSE += "Changed STAT_LEVEL to %d" % level
+        else:
+            self.REMOTE_CONTROL_RESPONSE += "Could not change STAT_LEVEL to %d. Allowed STAT_LEVEL values are 0, 1, 2." % level
+
+    def change_log_debug_level(self, level):
+        """Change the DEBUG_LEVEL."""
+        level = int(level)
+        if level in (0, 1, 2):
+            AMinerConfig.DEBUG_LEVEL = level
+            debug_logger = logging.getLogger(AMinerConfig.DEBUG_LOG_NAME)
+            if AMinerConfig.DEBUG_LEVEL == 0:
+                debug_logger.setLevel(logging.ERROR)
+            elif AMinerConfig.DEBUG_LEVEL == 1:
+                debug_logger.setLevel(logging.INFO)
+            else:
+                debug_logger.setLevel(logging.DEBUG)
+            self.REMOTE_CONTROL_RESPONSE += "Changed DEBUG_LEVEL to %d" % level
+        else:
+            self.REMOTE_CONTROL_RESPONSE += "Could not change DEBUG_LEVEL to %d. Allowed DEBUG_LEVEL values are 0, 1, 2." % level
+
     def print_config_property(self, analysis_context, property_name):
         """
         Print a specific config property.

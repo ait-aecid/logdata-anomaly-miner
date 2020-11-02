@@ -46,6 +46,7 @@ __version__ = "2.0.1"
 
 import sys
 import logging
+import shutil
 
 # As site packages are not included, define from where we need to execute code before loading it.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
@@ -149,26 +150,32 @@ def run_analysis_child(aminer_config, program_name):
     sys.exit(1)
 
 
-def initialize_loggers(aminer_config):
+def initialize_loggers(aminer_config, aminer_user, aminer_grp):
     from aminer import AMinerConfig
     datefmt = '%d/%b/%Y:%H:%M:%S %z'
 
+    persistence_dir = aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
     rc_logger = logging.getLogger(AMinerConfig.REMOTE_CONTROL_LOG_NAME)
     rc_logger.setLevel(logging.DEBUG)
-    rc_file_handler = logging.FileHandler(AMinerConfig.REMOTE_CONTROL_LOG_FILE)
+    try:
+        rc_file_handler = logging.FileHandler(os.path.join(persistence_dir, AMinerConfig.REMOTE_CONTROL_LOG_FILE))
+        shutil.chown(os.path.join(persistence_dir, AMinerConfig.REMOTE_CONTROL_LOG_FILE), aminer_user, aminer_grp)
+    except OSError as e:
+        print('Could not create or open %s: %s. Stopping..' % (
+            os.path.join(persistence_dir, AMinerConfig.REMOTE_CONTROL_LOG_FILE), e), file=sys.stderr)
+        sys.exit(1)
     rc_file_handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(levelname)s %(message)s', datefmt=datefmt))
     rc_logger.addHandler(rc_file_handler)
     logging.addLevelName(15, "REMOTECONTROL")
 
-    persistence_dir = aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
     stat_logger = logging.getLogger(AMinerConfig.STAT_LOG_NAME)
     stat_logger.setLevel(logging.INFO)
-    if os.path.exists(persistence_dir):
-        try:
-            stat_file_handler = logging.FileHandler(os.path.join(persistence_dir, 'statistics.log'))
-        except OSError as e:
-            print('Could not create or open %s: %s. Stopping..' % (os.path.join(persistence_dir, 'statistics.log'), e), file=sys.stderr)
-            sys.exit(1)
+    try:
+        stat_file_handler = logging.FileHandler(os.path.join(persistence_dir, 'statistics.log'))
+        shutil.chown(os.path.join(persistence_dir, 'statistics.log'), aminer_user, aminer_grp)
+    except OSError as e:
+        print('Could not create or open %s: %s. Stopping..' % (os.path.join(persistence_dir, 'statistics.log'), e), file=sys.stderr)
+        sys.exit(1)
     stat_file_handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(message)s', datefmt=datefmt))
     stat_logger.addHandler(stat_file_handler)
 
@@ -179,7 +186,13 @@ def initialize_loggers(aminer_config):
         debug_logger.setLevel(logging.INFO)
     else:
         debug_logger.setLevel(logging.DEBUG)
-    debug_file_handler = logging.FileHandler(AMinerConfig.DEBUG_LOG_FILE)
+    try:
+        debug_file_handler = logging.FileHandler(os.path.join(persistence_dir, AMinerConfig.DEBUG_LOG_FILE))
+        shutil.chown(os.path.join(persistence_dir, AMinerConfig.DEBUG_LOG_FILE), aminer_user, aminer_grp)
+    except OSError as e:
+        print('Could not create or open %s: %s. Stopping..' % (
+            os.path.join(persistence_dir, AMinerConfig.DEBUG_LOG_FILE), e), file=sys.stderr)
+        sys.exit(1)
     debug_file_handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(levelname)s %(message)s', datefmt=datefmt))
     debug_logger.addHandler(debug_file_handler)
 
@@ -301,8 +314,6 @@ def main():
     AMinerConfig.STAT_LEVEL = stat_level
     AMinerConfig.DEBUG_LEVEL = debug_level
 
-    initialize_loggers(aminer_config)
-
     if clear_persistence_flag:
         if remove_persistence_dirs:
             print('The --Clear and --Remove arguments must not be used together!', file=sys.stderr)
@@ -383,8 +394,8 @@ def main():
                 sys.exit(1)
         log_data_resource_dict[log_resource_name] = log_resource
 
-    child_user_name = aminer_config.config_properties.get(AMinerConfig.KEY_AMINER_USER, None)
-    child_group_name = aminer_config.config_properties.get(AMinerConfig.KEY_AMINER_GROUP, None)
+    child_user_name = aminer_config.config_properties.get(AMinerConfig.KEY_AMINER_USER)
+    child_group_name = aminer_config.config_properties.get(AMinerConfig.KEY_AMINER_GROUP)
     child_user_id = -1
     child_group_id = -1
     try:
@@ -397,6 +408,8 @@ def main():
     except:  # skipcq: FLK-E722
         print('Failed to resolve %s or %s' % (AMinerConfig.KEY_AMINER_USER, AMinerConfig.KEY_AMINER_GROUP), file=sys.stderr)
         sys.exit(1)
+
+    initialize_loggers(aminer_config, child_user_name, child_group_name)
 
     # Create the remote control socket, if any. Do this in privileged mode to allow binding it at arbitrary locations and support restricted
     # permissions of any type for current (privileged) uid.
