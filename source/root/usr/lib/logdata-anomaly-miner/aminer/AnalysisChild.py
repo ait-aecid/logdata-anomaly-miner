@@ -24,7 +24,6 @@ import sys
 import time
 import traceback
 import resource
-import subprocess  # skipcq: BAN-B404
 import logging
 
 from aminer import AMinerConfig

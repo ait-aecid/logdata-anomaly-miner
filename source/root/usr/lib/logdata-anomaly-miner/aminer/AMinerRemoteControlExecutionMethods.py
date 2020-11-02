@@ -13,7 +13,6 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import aminer
 from aminer import AMinerConfig, AnalysisChild
 import resource
-import shlex
 from aminer.input import LogAtom
 from aminer.input import AtomHandlerInterface
 
