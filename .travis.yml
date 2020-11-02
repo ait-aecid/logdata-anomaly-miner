@@ -14,6 +14,7 @@ install:
   - sudo apt-get update -y
   - sudo apt-get install -y ansible
   - sudo ansible-playbook playbook.yml
+  - find /usr/ -name dateutil
   - sudo apt-get install -y exim4 procps cpulimit mailutils
   - sudo pip3 install coverage
   - cd aecid-testsuite
