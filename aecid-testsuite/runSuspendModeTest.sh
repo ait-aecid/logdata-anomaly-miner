@@ -7,7 +7,6 @@ sudo mkdir /tmp/lib/aminer 2> /dev/null
 sudo chown -R aminer:aminer /tmp/lib 2> /dev/null
 sudo rm /tmp/syslog 2> /dev/null
 touch /tmp/syslog
-ln -s $PWD/../source/root/usr/lib/logdata-anomaly-miner/aminer $PWD/aminer
 ln -s $PWD/../source/root/usr/lib/logdata-anomaly-miner/aminerRemoteControl.py $PWD/aminerRemoteControl
 
 FILE=/tmp/demo-config.py
@@ -81,7 +80,6 @@ sudo rm /tmp/suspend_output.txt 2> /dev/null
 sudo rm /tmp/syslog 2> /dev/null
 sudo rm /tmp/AMinerRemoteLog.txt 2> /dev/null
 sudo rm /tmp/suspend.md5 2> /dev/null
-sudo rm aminer
 sudo rm aminerRemoteControl
 sudo rm /tmp/test1.md5
 sudo rm /tmp/test2.md5
