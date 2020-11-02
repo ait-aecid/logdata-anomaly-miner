@@ -165,8 +165,6 @@ def initialize_loggers(aminer_config):
     stat_logger.setLevel(logging.INFO)
     if os.path.exists(persistence_dir):
         stat_file_handler = logging.FileHandler(os.path.join(persistence_dir, 'statistics.log'))
-    else:
-        stat_file_handler = logging.FileHandler('/tmp/statistics.log')
     stat_file_handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(message)s', datefmt=datefmt))
     stat_logger.addHandler(stat_file_handler)
 
