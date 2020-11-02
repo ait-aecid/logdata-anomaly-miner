@@ -2170,8 +2170,10 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             listener.receive_event('Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, log_atom, self)
 
     def log_statistics(self, component_name):
-        """log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
-        @param component_name the name of the component which is printed in the log line."""
+        """
+        Log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
+        @param component_name the name of the component which is printed in the log line.
+        """
         if STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
                 "'%s' processed %d out of %d log atoms successfully and learned %d new variable types and updated %d variable types "

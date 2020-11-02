@@ -151,6 +151,7 @@ def run_analysis_child(aminer_config, program_name):
 
 
 def initialize_loggers(aminer_config, aminer_user, aminer_grp):
+    """Initialize all loggers."""
     from aminer import AMinerConfig
     datefmt = '%d/%b/%Y:%H:%M:%S %z'
 
@@ -318,7 +319,6 @@ def main():
         if remove_persistence_dirs:
             print('The --Clear and --Remove arguments must not be used together!', file=sys.stderr)
             sys.exit(1)
-        import shutil
         persistence_dir_name = aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
         for filename in os.listdir(persistence_dir_name):
             file_path = os.path.join(persistence_dir_name, filename)
@@ -331,7 +331,6 @@ def main():
                 print('Failed to delete %s. Reason: %s' % (file_path, e), file=sys.stderr)
 
     if remove_persistence_dirs:
-        import shutil
         persistence_dir_name = aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
         for filename in remove_persistence_dirs:
             file_path = os.path.join(persistence_dir_name, filename)

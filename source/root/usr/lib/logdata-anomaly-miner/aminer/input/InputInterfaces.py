@@ -48,6 +48,7 @@ class StreamAtomizer(metaclass=abc.ABCMeta):
 
 class AtomHandlerInterface(metaclass=abc.ABCMeta):
     """This is the common interface of all handlers suitable for receiving log atoms."""
+
     log_success = 0
     log_total = 0
 

@@ -114,6 +114,10 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
         logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def log_statistics(self, component_name):
+        """
+        Log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
+        @param component_name the name of the component which is printed in the log line.
+        """
         super().log_statistics(component_name)
         for i, rule in enumerate(self.event_classification_ruleset):
             rule.log_statistics(component_name + '.' + rule.__class__.__name__ + str(i))

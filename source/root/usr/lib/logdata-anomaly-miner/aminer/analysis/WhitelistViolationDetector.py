@@ -81,6 +81,10 @@ class WhitelistViolationDetector(AtomHandlerInterface):
         return False
 
     def log_statistics(self, component_name):
+        """
+        Log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
+        @param component_name the name of the component which is printed in the log line.
+        """
         super().log_statistics(component_name)
         for i, rule in enumerate(self.whitelist_rules):
             rule.log_statistics(component_name + '.' + rule.__class__.__name__ + str(i))

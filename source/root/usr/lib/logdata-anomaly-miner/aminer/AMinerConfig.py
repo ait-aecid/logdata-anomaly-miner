@@ -130,7 +130,7 @@ def save_config(analysis_context, new_file):
             logs = logFile.readlines()
     except OSError as e:
         msg = 'Could not read %s: %s' % (REMOTE_CONTROL_LOG_FILE, e)
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+        logging.getLogger(DEBUG_LOG_NAME).error(msg)
         print(msg, file=sys.stderr)
 
     i = len(logs) - 1

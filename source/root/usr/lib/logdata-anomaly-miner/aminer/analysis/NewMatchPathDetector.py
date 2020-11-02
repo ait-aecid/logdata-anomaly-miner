@@ -137,8 +137,10 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         return 'Whitelisted path(es) %s in %s' % (whitelisted_str, sorted_log_lines[0])
 
     def log_statistics(self, component_name):
-        """log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
-        @param component_name the name of the component which is printed in the log line."""
+        """
+        Log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
+        @param component_name the name of the component which is printed in the log line.
+        """
         if STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
                 "'%s' processed %d out of %d log atoms successfully and learned %d new paths in the last 60"

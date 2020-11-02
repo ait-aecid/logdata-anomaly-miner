@@ -77,6 +77,7 @@ class AtomFilterMatchAction(MatchAction, SubhandlerFilter):
 
 class MatchRule(metaclass=abc.ABCMeta):
     """This is the interface of all match rules."""
+
     log_success = 0
     log_total = 0
 
@@ -85,7 +86,7 @@ class MatchRule(metaclass=abc.ABCMeta):
         """Check if this rule matches. On match an optional match_action could be triggered."""
 
     def log_statistics(self, rule_id):
-        """log statistics of an MatchRule. Override this method for more sophisticated statistics output of the MatchRule."""
+        """Log statistics of an MatchRule. Override this method for more sophisticated statistics output of the MatchRule."""
         if STAT_LEVEL > 0:
             logging.getLogger(STAT_LOG_NAME).info("Rule '%s' processed %d out of %d log atoms successfully in the last 60"
                                                   " minutes.", rule_id, self.log_success, self.log_total)

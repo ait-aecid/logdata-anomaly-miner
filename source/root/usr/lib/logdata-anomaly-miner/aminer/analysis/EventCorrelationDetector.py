@@ -687,8 +687,10 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def log_statistics(self, component_name):
-        """log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
-        @param component_name the name of the component which is printed in the log line."""
+        """
+        Log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
+        @param component_name the name of the component which is printed in the log line.
+        """
         if STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
                 "'%s' processed %d out of %d log atoms successfully and learned %d new forward rules and %d new back rules in the last 60 "

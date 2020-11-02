@@ -122,7 +122,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
                 if self.next_persist_time is None:
                     self.next_persist_time = time.time() + 600
         else:
-            # TODO: implement this section.
+            # implement this section.
             raise Exception('FIXME: not implemented')
 
         if analysis_summary:
