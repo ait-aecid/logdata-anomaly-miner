@@ -62,7 +62,7 @@ def load_config(config_file_name):
 
 
 def build_persistence_file_name(aminer_config, *args):
-    """Build the full persistency file name from persistency directory configuration and path parts."""
+    """Build the full persistence file name from persistence directory configuration and path parts."""
     persistence_dir_name = aminer_config.config_properties.get(KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR)
     return os.path.join(persistence_dir_name, *args)
 

@@ -18,7 +18,7 @@ from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input import AtomHandlerInterface
 from aminer.util import LogarithmicBackoffHistory
-from aminer.util import PersistencyUtil
+from aminer.util import PersistenceUtil
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.analysis import Rules
 
@@ -49,7 +49,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
                 event_correlation_set |= set(rule.match_action.artefact_b_rules)
         self.event_correlation_ruleset = list(event_correlation_set)
 
-        PersistencyUtil.add_persistable_component(self)
+        PersistenceUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, 'TimeCorrelationViolationDetector',
                                                                               persistence_id)
 
@@ -62,15 +62,15 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
     def get_time_trigger_class(self):
         """
         Get the trigger class this component should be registered for.
-        This trigger is used mainly for persistency, so real-time triggering is needed. Use also real-time triggering for analysis: usually
-        events for violations (timeouts) are generated when  receiving newer atoms. This is just the fallback periods of input silence.
+        This trigger is used mainly for persistence, so real-time triggering is needed. Use also real-time triggering for analysis: usually
+        events for violations (timeouts) are generated when receiving newer atoms. This is just the fallback periods of input silence.
         """
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
         """Check for any rule violations and if the current ruleset should be persisted."""
         # Persist the state only quite infrequently: As most correlation rules react in timeline of seconds, the persisted data will most
-        # likely be unsuitable to catch lost events. So persistency is mostly to capture the correlation rule context, e.g. the history
+        # likely be unsuitable to catch lost events. So persistence is mostly to capture the correlation rule context, e.g. the history
         # of loglines matched before.
         if self.next_persist_time - trigger_time < 0:
             self.do_persist()
