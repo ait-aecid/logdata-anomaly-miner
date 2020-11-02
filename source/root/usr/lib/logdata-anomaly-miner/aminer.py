@@ -160,7 +160,7 @@ def initialize_loggers(aminer_config):
     rc_logger.addHandler(rc_file_handler)
     logging.addLevelName(15, "REMOTECONTROL")
 
-    persistence_dir = aminer_config.config_properties['Core.PersistenceDir']
+    persistence_dir = aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
     stat_logger = logging.getLogger(AMinerConfig.STAT_LOG_NAME)
     stat_logger.setLevel(logging.INFO)
     if os.path.exists(persistence_dir):
