@@ -3,6 +3,8 @@ from cerberus import TypeDefinition
 
 
 class ParserModelType:
+    """Defines a type for parser classes."""
+
     name = None
     ismodel = False
     func = None
@@ -23,6 +25,8 @@ class ParserModelType:
 
 
 class AnalysisType:
+    """Defines a type for analysis classes."""
+
     name = None
     func = None
 
@@ -39,6 +43,8 @@ analysis_type = TypeDefinition('analysistype', (AnalysisType, str), ())
 
 
 class ConfigValidator(Validator):
+    """Validates values from the configs."""
+
     types_mapping = Validator.types_mapping.copy()
     types_mapping['parsermodel'] = parser_type
     types_mapping['analysistype'] = analysis_type
@@ -47,6 +53,7 @@ class ConfigValidator(Validator):
     # "must have self"-issue will pop up
     # skipcq: PYL-R0201
     def _normalize_coerce_toparsermodel(self, value):
+        """Create a ParserModelType from the string representation."""
         if isinstance(value, str):
             return ParserModelType(value)
         return None
@@ -55,12 +62,14 @@ class ConfigValidator(Validator):
     # "must have self"-issue will pop up
     # skipcq: PYL-R0201
     def _normalize_coerce_toanalysistype(self, value):
+        """Create a AnalysisType from the string representation."""
         if isinstance(value, str):
             return AnalysisType(value)
         return None
 
     def _validate_has_start(self, has_start, field, value):
-        """ Test if there is a key named 'has_start'.
+        """
+        Test if there is a key named 'has_start'.
         The rule's arguments are validated against this schema:
         {'type': 'boolean'}
         """
