@@ -24,12 +24,11 @@ import sys
 import time
 import traceback
 import resource
-import subprocess  # skipcq: BAN-B404
 import logging
 
 from aminer import AMinerConfig
 from aminer.input.LogStream import LogStream
-from aminer.util import PersistencyUtil
+from aminer.util import PersistenceUtil
 from aminer.util import SecureOSFunctions
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.util import JsonUtil
@@ -245,37 +244,9 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                 logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).critical(msg)
                 return 1
 
-        max_cpu_percent_usage = self.analysis_context.aminer_config.config_properties.get(AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE)
-        if max_cpu_percent_usage is not None:
-            try:
-                max_cpu_percent_usage = int(max_cpu_percent_usage)
-                # limit
-                pid = os.getpid()
-                package_installed_cmd = ['dpkg', '-l', 'cpulimit']
-                cpulimit_cmd = ['cpulimit', '-p', str(pid), '-l', str(max_cpu_percent_usage)]
-
-                # skipcq: BAN-B603
-                with subprocess.Popen(package_installed_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as out:
-                    stdout, _stderr = out.communicate()
-
-                if 'dpkg-query: no packages found matching cpulimit' in stdout.decode():
-                    msg = 'cpulimit package must be installed, when using the property %s' % \
-                          AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE
-                    print('FATAL: ' + msg, file=sys.stderr)
-                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).critical(msg)
-                    return 1
-                # skipcq: BAN-B603
-                _out = subprocess.Popen(cpulimit_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('set max cpu limit to %d%%.', max_cpu_percent_usage)
-            except ValueError:
-                msg = '%s must be an integer, terminating' % AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE
-                print('FATAL: ' + msg, file=sys.stderr)
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).critical(msg)
-                return 1
-
         # Load continuation data for last known log streams. The loaded data has to be a dictionary with repositioning information for
         # each stream. The data is used only when creating the first stream with that name.
-        self.repositioning_data_dict = PersistencyUtil.load_json(self.persistence_file_name)
+        self.repositioning_data_dict = PersistenceUtil.load_json(self.persistence_file_name)
         if self.repositioning_data_dict is None:
             self.repositioning_data_dict = {}
 
@@ -429,7 +400,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                 next_analysis_time_trigger_time = analysis_time + next_trigger_offset
 
         # Analysis loop is only left on shutdown. Try to persist everything and leave.
-        PersistencyUtil.persist_all()
+        PersistenceUtil.persist_all()
         return delayed_return_status
 
     def handle_master_control_socket_receive(self):
@@ -502,7 +473,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                 repositioning_data = log_stream.get_repositioning_data()
                 if repositioning_data is not None:
                     self.repositioning_data_dict[log_stream_name] = repositioning_data
-            PersistencyUtil.store_json(self.persistence_file_name, self.repositioning_data_dict)
+            PersistenceUtil.store_json(self.persistence_file_name, self.repositioning_data_dict)
             delta = 600
             self.next_persist_time = trigger_time + delta
         return delta

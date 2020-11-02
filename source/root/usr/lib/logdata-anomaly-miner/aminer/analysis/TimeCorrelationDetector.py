@@ -22,7 +22,7 @@ from aminer.AnalysisChild import AnalysisContext
 from aminer.analysis import Rules
 from aminer.input import AtomHandlerInterface
 from aminer.util import get_log_int
-from aminer.util import PersistencyUtil
+from aminer.util import PersistenceUtil
 from aminer.util import TimeTriggeredComponentInterface
 
 
@@ -59,9 +59,9 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
         self.use_path_match = use_path_match
         self.use_value_match = use_value_match
 
-        PersistencyUtil.add_persistable_component(self)
+        PersistenceUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, 'TimeCorrelationDetector', persistence_id)
-        persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is None:
             self.feature_list = []
             self.event_count_table = [0] * parallel_check_count * parallel_check_count * 2
@@ -176,7 +176,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
     def get_time_trigger_class(self):
         """
         Get the trigger class this component should be registered for.
-        This trigger is used only for persistency, so real-time triggering is needed.
+        This trigger is used only for persistence, so real-time triggering is needed.
         """
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 

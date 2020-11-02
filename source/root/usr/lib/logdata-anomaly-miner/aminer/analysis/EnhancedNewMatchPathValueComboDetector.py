@@ -19,7 +19,7 @@ import os
 import logging
 
 from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
-from aminer.util import PersistencyUtil
+from aminer.util import PersistenceUtil
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 from aminer import AMinerConfig
 from aminer.AMinerConfig import STAT_LEVEL, STAT_LOG_NAME
@@ -61,9 +61,9 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         self.log_learned_path_value_combos = 0
         self.log_new_learned_values = []
 
-    def load_persistency_data(self):
-        """Load the persistency data from storage."""
-        persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
+    def load_persistence_data(self):
+        """Load the persistence data from storage."""
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is not None:
             # Dictionary and tuples were stored as list of lists. Transform
             # the first lists to tuples to allow hash operation needed by set.
@@ -147,10 +147,10 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        persistency_data = []
+        persistence_data = []
         for dict_record in self.known_values_dict.items():
-            persistency_data.append(dict_record)
-        PersistencyUtil.store_json(self.persistence_file_name, persistency_data)
+            persistence_data.append(dict_record)
+        PersistenceUtil.store_json(self.persistence_file_name, persistence_data)
         self.next_persist_time = None
         logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 

@@ -19,7 +19,7 @@ import logging
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input import AtomHandlerInterface
-from aminer.util import PersistencyUtil
+from aminer.util import PersistenceUtil
 from aminer.util import TimeTriggeredComponentInterface
 
 
@@ -50,10 +50,10 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         self.persistence_id = persistence_id
         self.output_log_line = output_log_line
 
-        PersistencyUtil.add_persistable_component(self)
+        PersistenceUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, 'MatchValueAverageChangeDetector',
                                                                               persistence_id)
-        persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is None:
             self.stat_data = []
             for path in analyze_path_list:
@@ -135,7 +135,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
     def get_time_trigger_class(self):
         """
         Get the trigger class this component should be registered for.
-        This trigger is used only for persistency, so real-time triggering is needed.
+        This trigger is used only for persistence, so real-time triggering is needed.
         """
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
@@ -152,7 +152,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        PersistencyUtil.store_json(self.persistence_file_name, self.stat_data)
+        PersistenceUtil.store_json(self.persistence_file_name, self.stat_data)
         self.next_persist_time = None
         logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 

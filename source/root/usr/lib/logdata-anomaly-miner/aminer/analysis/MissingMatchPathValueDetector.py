@@ -19,7 +19,7 @@ from aminer.AMinerConfig import STAT_LEVEL, STAT_LOG_NAME
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events import EventSourceInterface
 from aminer.input import AtomHandlerInterface
-from aminer.util import PersistencyUtil
+from aminer.util import PersistenceUtil
 from aminer.util import TimeTriggeredComponentInterface
 
 
@@ -57,9 +57,9 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         self.log_learned_values = 0
         self.log_new_learned_values = []
 
-        PersistencyUtil.add_persistable_component(self)
+        PersistenceUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
-        persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is None:
             self.expected_values_dict = {}
         else:
@@ -98,7 +98,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
             self.log_learned_values += 1
             self.log_new_learned_values.append(value)
 
-        # Always enforce persistency syncs from time to time, the timestamps in the records change even when no new hosts are added.
+        # Always enforce persistence syncs from time to time, the timestamps in the records change even when no new hosts are added.
         if self.next_persist_time is None:
             self.next_persist_time = time.time() + 600
         self.check_timeouts(timestamp, log_atom)
@@ -197,7 +197,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         """Add or overwrite a value to be monitored by the detector."""
         self.expected_values_dict[value] = [self.last_seen_timestamp, interval, 0]
         self.next_check_timestamp = 0
-        # Explicitely trigger a persistency sync to avoid staying in unsynced state too long when no new received atoms trigger it. But do
+        # Explicitely trigger a persistence sync to avoid staying in unsynced state too long when no new received atoms trigger it. But do
         # not sync immediately, that would make bulk calls to this method quite inefficient.
         if self.next_persist_time is None:
             self.next_persist_time = time.time() + 600
@@ -217,14 +217,14 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
             return 600
         delta = self.next_persist_time - trigger_time
         if delta < 0:
-            PersistencyUtil.store_json(self.persistence_file_name, self.expected_values_dict)
+            PersistenceUtil.store_json(self.persistence_file_name, self.expected_values_dict)
             self.next_persist_time = None
             delta = 600
         return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        PersistencyUtil.store_json(self.persistence_file_name, self.expected_values_dict)
+        PersistenceUtil.store_json(self.persistence_file_name, self.expected_values_dict)
         self.next_persist_time = None
         logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 

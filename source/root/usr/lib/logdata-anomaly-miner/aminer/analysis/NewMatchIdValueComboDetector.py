@@ -23,7 +23,7 @@ from aminer.AMinerConfig import STAT_LEVEL, STAT_LOG_NAME
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events import EventSourceInterface
 from aminer.input import AtomHandlerInterface
-from aminer.util import PersistencyUtil
+from aminer.util import PersistenceUtil
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
@@ -65,16 +65,16 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
 
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         self.next_persist_time = None
-        self.load_persistency_data()
-        PersistencyUtil.add_persistable_component(self)
+        self.load_persistence_data()
+        PersistenceUtil.add_persistable_component(self)
 
         self.id_dict_current = {}
         self.id_dict_old = {}
         self.next_shift_time = None
 
-    def load_persistency_data(self):
-        """Load the persistency data from storage."""
-        persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
+    def load_persistence_data(self):
+        """Load the persistence data from storage."""
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         self.known_values = []
         if persistence_data is not None:
             # Combinations are stored as list of dictionaries
@@ -172,7 +172,7 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
     def get_time_trigger_class(self):
         """
         Get the trigger class this component should be registered for.
-        This trigger is used only for persistency, so real-time triggering is needed.
+        This trigger is used only for persistence, so real-time triggering is needed.
         """
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
@@ -189,7 +189,7 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        PersistencyUtil.store_json(self.persistence_file_name, self.known_values)
+        PersistenceUtil.store_json(self.persistence_file_name, self.known_values)
         self.next_persist_time = None
         logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
