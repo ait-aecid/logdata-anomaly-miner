@@ -19,7 +19,7 @@ from time import time
 from datetime import datetime
 from aminer.input import LogAtom
 from aminer.input import AtomHandlerInterface
-from aminer.util import PersistencyUtil
+from aminer.util import PersistenceUtil
 
 attr_str = '"%s": %s,\n'
 component_not_found = 'Event history component not found'
