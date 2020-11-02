@@ -17,7 +17,7 @@ import time
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input import AtomHandlerInterface
-from aminer.util import PersistencyUtil
+from aminer.util import PersistenceUtil
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
@@ -28,7 +28,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
     def __init__(self, aminer_config, anomaly_event_handlers, paths=None, max_hypotheses=1000, hypothesis_max_delta_time=5.0,
                  generation_probability=1.0, generation_factor=1.0, max_observations=500, p0=0.9, alpha=0.05, candidates_size=10,
                  hypotheses_eval_delta_time=120.0, delta_time_to_discard_hypothesis=180.0, check_rules_flag=False,
-                 auto_include_flag=True, whitelisted_paths=None, persistence_id='Default', output_log_line=True):
+                 auto_include_flag=True, allowlisted_paths=None, persistence_id='Default', output_log_line=True):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -49,7 +49,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         @param delta_time_to_discard_hypothesis time span required for old hypotheses to be discarded.
         @param check_rules_flag specifies whether existing rules are evaluated.
         @param auto_include_flag specifies whether new hypotheses are generated.
-        @param whitelisted_paths list of paths that are not considered for correlation, i.e., events that contain one of these paths are
+        @param allowlisted_paths list of paths that are not considered for correlation, i.e., events that contain one of these paths are
         omitted. The default value is [] as None is not iterable.
         @param persistence_id name of persitency document.
         """
@@ -75,9 +75,9 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         self.delta_time_to_discard_hypothesis = delta_time_to_discard_hypothesis
         self.check_rules_flag = check_rules_flag
         self.auto_include_flag = auto_include_flag
-        self.whitelisted_paths = whitelisted_paths
-        if self.whitelisted_paths is None:
-            self.whitelisted_paths = []
+        self.allowlisted_paths = allowlisted_paths
+        if self.allowlisted_paths is None:
+            self.allowlisted_paths = []
         self.forward_rule_queue = deque([])
         self.back_rule_queue = deque([])
         self.forward_hypotheses_queue = deque([])
@@ -100,10 +100,10 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         self.aminer_config = aminer_config
         self.output_log_line = output_log_line
 
-        PersistencyUtil.add_persistable_component(self)
+        PersistenceUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, 'EventCorrelationDetector', persistence_id)
         self.persistence_id = persistence_id
-        persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
 
         if persistence_data is not None:
             for record in persistence_data:
@@ -174,9 +174,9 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
             # Event is defined by the full path of log atom.
             log_event = tuple(parser_match.get_match_dictionary().keys())
 
-            # Skip whitelisted paths.
-            for whitelisted in self.whitelisted_paths:
-                if whitelisted in log_event:
+            # Skip allowlisted paths.
+            for allowlisted in self.allowlisted_paths:
+                if allowlisted in log_event:
                     return
         else:
             # Event is defined by value combos in paths
@@ -636,7 +636,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
     def get_time_trigger_class(self):
         """
         Get the trigger class this component should be registered for.
-        This trigger is used only for persistency, so real-time triggering is needed.
+        This trigger is used only for persistence, so real-time triggering is needed.
         """
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
@@ -657,7 +657,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     known_path_set.add(
                         ('forward', tuple(event_a), tuple(implication.implied_event), implication.max_observations,
                          implication.min_eval_true))
-            PersistencyUtil.store_json(self.persistence_file_name, list(known_path_set))
+            PersistenceUtil.store_json(self.persistence_file_name, list(known_path_set))
             self.next_persist_time = None
             delta = self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
         return delta
@@ -673,7 +673,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
             for implication in self.forward_rules[event_a]:
                 known_path_set.add(
                     ('forward', tuple(event_a), tuple(implication.implied_event), implication.max_observations, implication.min_eval_true))
-        PersistencyUtil.store_json(self.persistence_file_name, list(known_path_set))
+        PersistenceUtil.store_json(self.persistence_file_name, list(known_path_set))
         self.next_persist_time = None
 
 

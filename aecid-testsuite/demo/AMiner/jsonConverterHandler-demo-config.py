@@ -253,8 +253,8 @@ def build_analysis_pipeline(analysis_context):
     analysis_context.register_component(timestamps_unsorted_detector, component_name="TimestampsUnsortedDetector")
 
     from aminer.analysis import Rules
-    from aminer.analysis import WhitelistViolationDetector
-    whitelist_rules = [
+    from aminer.analysis import AllowlistViolationDetector
+    allowlist_rules = [
         Rules.OrMatchRule([
             Rules.AndMatchRule([
                 Rules.PathExistsMatchRule('/model/LoginDetails/PastTime/Time/Minutes'),
@@ -266,10 +266,10 @@ def build_analysis_pipeline(analysis_context):
 
     # This rule list should trigger, when the line does not look like: User root (logged in, logged out)
     # or User 'username' (logged in, logged out) x minutes ago.
-    whitelist_violation_detector = WhitelistViolationDetector(analysis_context.aminer_config, whitelist_rules, anomaly_event_handlers,
+    allowlist_violation_detector = AllowlistViolationDetector(analysis_context.aminer_config, allowlist_rules, anomaly_event_handlers,
                                                               output_log_line=True)
-    analysis_context.register_component(whitelist_violation_detector, component_name="Whitelist")
-    atom_filter.add_handler(whitelist_violation_detector)
+    analysis_context.register_component(allowlist_violation_detector, component_name="Allowlist")
+    atom_filter.add_handler(allowlist_violation_detector)
 
     from aminer.analysis import ParserCount
     parser_count = ParserCount(analysis_context.aminer_config, None, anomaly_event_handlers, 10, False)
@@ -383,7 +383,6 @@ def build_analysis_pipeline(analysis_context):
     time_correlation_detector = TimeCorrelationDetector(
         analysis_context.aminer_config, anomaly_event_handlers, 2, min_rule_attributes=1, max_rule_attributes=5,
         record_count_before_event=10000, output_log_line=True)
-
     analysis_context.register_component(time_correlation_detector, component_name="TimeCorrelationDetector")
     atom_filter.add_handler(time_correlation_detector)
 

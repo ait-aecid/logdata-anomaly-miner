@@ -95,7 +95,7 @@ def persist_all():
 
 def load_json(file_name):
     """
-    Load persistency data from file.
+    Load persistence data from file.
     @return None if file did not yet exist.
     """
     persistence_data = None
@@ -119,7 +119,7 @@ def load_json(file_name):
 
 
 def store_json(file_name, object_data):
-    """Store persistency data to file."""
+    """Store persistence data to file."""
     persistence_data = JsonUtil.dump_as_json(object_data)
     fd = create_temporary_persistence_file(file_name)
     os.write(fd, bytes(persistence_data, 'utf-8'))

@@ -79,7 +79,7 @@ List of components:
   This detector is useful to to detect algorithm malfunction or
   configuration errors, e.g. invalid timezone configuration.
 
-* WhitelistViolationDetector (FH): Check all inputs using ruleset
+* AllowlistViolationDetector (FH): Check all inputs using ruleset
   and create events, forward input to other components.
 
 
@@ -168,13 +168,13 @@ HistogramAnalysis.HistogramAnalysis, see documentation there.
   atom_filter.add_handler(path_dependent_histogram_analysis)
 
 
-WhitelistViolationDetector:
+AllowlistViolationDetector:
 ===========================
 
-This detector manages a list of whitelist rules to filter parsed
-atoms. All atoms not hit by any whitelist rule will cause events
+This detector manages a list of allowlist rules to filter parsed
+atoms. All atoms not hit by any allowlist rule will cause events
 to be generated. When an atom is matched by a rule, it will be
-regarded as whitelisted by default but there is also an option
+regarded as allowlisted by default but there is also an option
 to call user-defined functions on a matching rule via MatchAction
 elements, e.g. to forward the atom to another analyzer in one
 pass. Predefined actions are:
@@ -216,25 +216,25 @@ or source for full documentation:
 
 * Example:
 
-# Run a whitelisting over the parsed lines.
+# Run a allowlisting over the parsed lines.
   from aminer.analysis import Rules
-  from aminer.analysis import WhitelistViolationDetector
+  from aminer.analysis import AllowlistViolationDetector
   violation_action=Rules.EventGenerationMatchAction('Analysis.GenericViolation',
       'Violation detected', anomaly_event_handlers)
-  whitelist_rules=[]
+  allowlist_rules=[]
 # Filter out things so bad, that we do not want to accept the
-# risk, that a too broad whitelisting rule will accept the data
+# risk, that a too broad allowlisting rule will accept the data
 # later on.
-  whitelist_rules.append(Rules.ValueMatchRule('/model/services/cron/msgtype/exec/user', 'hacker', violation_action))
+  allowlist_rules.append(Rules.ValueMatchRule('/model/services/cron/msgtype/exec/user', 'hacker', violation_action))
 # Ignore Exim queue run start/stop messages
-  whitelist_rules.append(Rules.PathExistsMatchRule('/model/services/exim/msg/queue/pid'))
-# Add a debugging rule in the middle to see everything not whitelisted
+  allowlist_rules.append(Rules.PathExistsMatchRule('/model/services/exim/msg/queue/pid'))
+# Add a debugging rule in the middle to see everything not allowlisted
 # up to this point.
-  whitelist_rules.append(Rules.DebugMatchRule(False))
+  allowlist_rules.append(Rules.DebugMatchRule(False))
 # Ignore hourly cronjobs, but only when started at expected time
 # and duration is not too long.
-  whitelist_rules.append(Rules.AndMatchRule([
+  allowlist_rules.append(Rules.AndMatchRule([
       Rules.ValueMatchRule('/model/services/cron/msgtype/exec/command', '(   cd / && run-parts --report /etc/cron.hourly)'),
       Rules.ModuloTimeMatchRule('/model/syslog/time', 3600, 17*60, 17*60+5)]))
 
-  atom_filter.add_handler(WhitelistViolationDetector(whitelist_rules, anomaly_event_handlers))
+  atom_filter.add_handler(AllowlistViolationDetector(allowlist_rules, anomaly_event_handlers))
