@@ -1,4 +1,5 @@
-"""This module defines the match context.
+"""
+This module defines the match context.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -15,20 +16,26 @@ from aminer.parsing.MatchElement import MatchElement
 
 
 class MatchContext:
-    """This class allows storage of data relevant during the matching process, e.g. the root node and the remaining unmatched data.
+    """
+    This class allows storage of data relevant during the matching process, e.g. the root node and the remaining unmatched data.
     Then searching for non-atomic matches, e.g. sequences, the context might be modified by model subelements, even if the main model
-    element will not return a match. In that case, those non-atomic model elements have to care to restore the context before returning."""
+    element will not return a match. In that case, those non-atomic model elements have to care to restore the context before returning.
+    """
 
     def __init__(self, match_data):
-        """Create a MatchContext with the full unmatched string data.
-        @param match_data the data that will be tested by the next model element."""
+        """
+        Create a MatchContext with the full unmatched string data.
+        @param match_data the data that will be tested by the next model element.
+        """
         self.match_data = match_data
         self.root_match_element = MatchElement('/', None, None, [])
 
     def update(self, match_string):
-        """Update the match context by removing the given matched string data from the context data still to be matched. This
-        method does not check, if the removed data is the same as the trailing match data for performance reasons. This is done
-        only in the DebugMatchContext class."""
+        """
+        Update the match context by removing the given matched string data from the context data still to be matched.
+        This method does not check, if the removed data is the same as the trailing match data for performance reasons. This is done
+        only in the DebugMatchContext class.
+        """
         self.match_data = self.match_data[len(match_string):]
 
 
@@ -67,6 +74,8 @@ class DebugMatchContext(MatchContext):
         return result
 
     def getshortest_unmatched_data(self):
-        """Get shortest match_data found while updating the internal state. This is useful to find out where the parsing process
-        has terminated."""
+        """
+        Get shortest match_data found while updating the internal state.
+        This is useful to find out where the parsing process has terminated.
+        """
         return self.shortest_unmatched_data

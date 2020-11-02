@@ -202,7 +202,7 @@ def build_analysis_pipeline(analysis_context):
 
     def tuple_transformation_function(match_value_list):
         """Only allow output of the EnhancedNewMatchPathValueComboDetector after every 10000th element."""
-        extra_data = enhanced_new_match_path_value_combo_detector.known_values_dict.get(tuple(match_value_list), None)
+        extra_data = enhanced_new_match_path_value_combo_detector.known_values_dict.get(tuple(match_value_list))
         if extra_data is not None:
             mod = 10000
             if (extra_data[2] + 1) % mod == 0:

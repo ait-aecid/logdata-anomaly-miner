@@ -1,5 +1,5 @@
-"""This module defines a handler that forwards unparsed atoms
-to the event handlers.
+"""
+This module defines a handler that forwards unparsed atoms to the event handlers.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
