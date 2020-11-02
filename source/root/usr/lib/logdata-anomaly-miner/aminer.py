@@ -278,7 +278,7 @@ def main():
             copytree(absolute_persistence_path, persistence_dir)
             aminer_user = aminer_config.config_properties.get(AMinerConfig.KEY_AMINER_USER)
             aminer_grp = aminer_config.config_properties.get(AMinerConfig.KEY_AMINER_GROUP)
-            for dirpath, dirnames, filenames in os.walk(persistence_dir):
+            for dirpath, _dirnames, filenames in os.walk(persistence_dir):
                 shutil.chown(dirpath, aminer_user, aminer_grp)
                 for filename in filenames:
                     shutil.chown(os.path.join(dirpath, filename), aminer_user, aminer_grp)

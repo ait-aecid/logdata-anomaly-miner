@@ -103,10 +103,12 @@ def main():
         arg_pos += 1
 
         if arg_name in ('--List', '--list', '-l'):
+            # skipcq: BAN-B605, BAN-B607
             process = os.popen('sudo aminerRemoteControl --Exec "list_backups(analysis_context)"')
             print(process.read().strip('\n').strip(rc_response_string))
             break
         if arg_name in ('--Backup', '--backup', '-b'):
+            # skipcq: BAN-B605, BAN-B607
             process = os.popen('sudo aminerRemoteControl --Exec "create_backup(analysis_context)"')
             print(process.read().strip('\n').strip(rc_response_string))
             break
@@ -144,7 +146,7 @@ def main():
         else:
             clear_persistence(persistence_dir)
             copytree(absolute_persistence_path, persistence_dir)
-            for dirpath, dirnames, filenames in os.walk(persistence_dir):
+            for dirpath, _dirnames, filenames in os.walk(persistence_dir):
                 shutil.chown(dirpath, aminer_user, aminer_grp)
                 for filename in filenames:
                     shutil.chown(os.path.join(dirpath, filename), aminer_user, aminer_grp)

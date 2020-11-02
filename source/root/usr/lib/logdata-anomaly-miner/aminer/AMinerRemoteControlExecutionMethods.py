@@ -314,7 +314,7 @@ class AMinerRemoteControlExecutionMethods:
         """List all available backups from the persistence directory."""
         persistence_dir = analysis_context.aminer_config.config_properties.get(
             AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
-        for dirpath, dirnames, filenames in os.walk(os.path.join(persistence_dir, 'backup')):
+        for _dirpath, dirnames, _filenames in os.walk(os.path.join(persistence_dir, 'backup')):
             self.REMOTE_CONTROL_RESPONSE = '"backups": %s' % dirnames
             break
         self.REMOTE_CONTROL_RESPONSE = self.REMOTE_CONTROL_RESPONSE.replace("'", '"')
