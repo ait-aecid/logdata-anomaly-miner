@@ -101,7 +101,7 @@ class YamlConfigTest(unittest.TestCase):
         self.assertTrue(isinstance(context.registered_components[10][0], NewMatchPathDetector))
         self.assertTrue(isinstance(context.registered_components[11][0], TimeCorrelationViolationDetector))
         self.assertTrue(isinstance(context.registered_components[12][0], SimpleMonotonicTimestampAdjust))
-        self.assertTrue(isinstance(context.registered_components[13][0], WhitelistViolationDetector))
+        self.assertTrue(isinstance(context.registered_components[13][0], AllowlistViolationDetector))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[1], SyslogWriterEventHandler))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[2], DefaultMailNotificationEventHandler))
