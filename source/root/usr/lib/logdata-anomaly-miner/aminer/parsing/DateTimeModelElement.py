@@ -1,4 +1,5 @@
-"""This module contains a datetime parser and helper classes for parsing.
+"""
+This module contains a datetime parser and helper classes for parsing.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -22,14 +23,17 @@ from aminer.parsing.MatchElement import MatchElement
 
 
 class DateTimeModelElement(ModelElementInterface):
-    """This class defines a model element to parse date or datetime values. The element is similar to the strptime function but
-    does not use it due to the numerous problems associated with it, e.g. no leap year support for semiqualified years, no %s
-    (seconds since epoch) format in Python strptime, no %f support in libc strptime, no support to determine the length of the
-    parsed string."""
+    """
+    This class defines a model element to parse date or datetime values.
+    The element is similar to the strptime function but does not use it due to the numerous problems associated with it, e.g. no leap year
+    support for semiqualified years, no %s (seconds since epoch) format in Python strptime, no %f support in libc strptime, no support to
+    determine the length of the parsed string.
+    """
 
     # skipcq: PYL-W0613
     def __init__(self, path_id, date_format, time_zone=None, text_locale=None, start_year=None, max_time_jump_seconds=86400):
-        """Create a DateTimeModelElement to parse dates using a custom, timezone and locale-aware implementation similar to strptime.
+        """
+        Create a DateTimeModelElement to parse dates using a custom, timezone and locale-aware implementation similar to strptime.
         @param date_format, is a byte string that represents the date format for parsing, see Python strptime specification for
         available formats. Supported format specifiers are:
             * %b: month name in current locale
@@ -50,7 +54,8 @@ class DateTimeModelElement(ModelElementInterface):
         @param start_year when parsing date records without any year information, assume this is the year of the first value parsed.
         @param max_time_jump_seconds for detection of year wraps with date formats missing year information, also the current time
         of values has to be tracked. This value defines the window within that the time may jump between two matches. When not
-        within that window, the value is still parsed, corrected to the most likely value but does not change the detection year."""
+        within that window, the value is still parsed, corrected to the most likely value but does not change the detection year.
+        """
         self.path_id = path_id
         self.time_zone = time_zone
         if time_zone is None:
@@ -139,15 +144,19 @@ class DateTimeModelElement(ModelElementInterface):
         return self.path_id
 
     def get_child_elements(self):
-        """Get all possible child model elements of this element.
-        @return None as no children are allowed."""
+        """
+        Get all possible child model elements of this element.
+        @return None as no children are allowed.
+        """
         return None
 
     def get_match_element(self, path, match_context):
-        """Try to find a match on given data for this model element and all its children. When a match is found, the matchContext
-        is updated accordingly.
+        """
+        Try to find a match on given data for this model element and all its children.
+        When a match is found, the matchContext is updated accordingly.
         @return None when there is no match, MatchElement otherwise. The matchObject returned is a tuple containing the datetime
-        object and the seconds since 1970"""
+        object and the seconds since 1970
+        """
         parse_pos = 0
         # Year, month, day, hour, minute, second, fraction, gmt-seconds:
         result = [None, None, None, None, None, None, None, None]
@@ -337,5 +346,5 @@ class DateTimeModelElement(ModelElementInterface):
 
     @staticmethod
     def parse_fraction(value_str):
-        """This method is just required to pass it as function pointer to the parsing logic."""
+        """Pass this method as function pointer to the parsing logic."""
         return float(b'0.' + value_str)
