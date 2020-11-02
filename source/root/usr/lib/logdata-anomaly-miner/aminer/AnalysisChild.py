@@ -561,11 +561,11 @@ class AnalysisChildRemoteControlHandler:
                     'add_handler_to_atom_filter_and_register_analysis_component':
                         methods.add_handler_to_atom_filter_and_register_analysis_component,
                     'save_current_config': methods.save_current_config,
-                    'whitelist_event_in_component': methods.whitelist_event_in_component,
+                    'allowlist_event_in_component': methods.allowlist_event_in_component,
                     'dump_events_from_history': methods.dump_events_from_history,
                     'ignore_events_from_history': methods.ignore_events_from_history,
-                    'list_events_from_history': methods.list_events_from_history,
-                    'whitelist_events_from_history': methods.whitelist_events_from_history,
+                    'list_events_from_history': methods.list_events_from_history,l
+                    'allowlist_events_from_history': methods.allowlist_events_from_history,
                     'change_log_stat_level': methods.change_log_stat_level,
                     'change_log_debug_level': methods.change_log_debug_level,
                     'EnhancedNewMatchPathValueComboDetector': aminer.analysis.EnhancedNewMatchPathValueComboDetector,
@@ -583,7 +583,7 @@ class AnalysisChildRemoteControlHandler:
                     'TimeCorrelationViolationDetector': aminer.analysis.TimeCorrelationViolationDetector,
                     'TimestampCorrectionFilters': aminer.analysis.TimestampCorrectionFilters,
                     'TimestampsUnsortedDetector': aminer.analysis.TimestampsUnsortedDetector,
-                    'WhitelistViolationDetector': aminer.analysis.WhitelistViolationDetector}
+                    'AllowlistViolationDetector': aminer.analysis.AllowlistViolationDetector
 
                 logging.getLogger(AMinerConfig.REMOTE_CONTROL_LOG_NAME).log(15, json_request_data[0])
                 logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('Remote control: %s', json_request_data[0])

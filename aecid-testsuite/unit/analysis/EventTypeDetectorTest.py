@@ -65,8 +65,6 @@ class EventTypeDetectorTest(TestBase):
         b'ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 '
         b'comm="apache2" exe="/usr/sbin/apache2" key=(null)']
 
-    expected_whitelist_string = "Whitelisted path(es) parser/type/path/name, parser/type/syscall/syscall with %s in %s"
-
     parsing_model = FirstMatchModelElement('type', [SequenceModelElement('path', [
         FixedDataModelElement('type', b'type=PATH '), FixedDataModelElement('msg_audit', b'msg=audit('),
         DelimitedDataModelElement('msg', b':'), FixedDataModelElement('placeholder', b':'), DecimalIntegerValueModelElement('id'),

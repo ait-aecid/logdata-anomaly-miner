@@ -370,32 +370,32 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         <varlistentry>
           <term>
             <option>
-              <replaceable>whitelist_event_in_component(analysis_context,component_name,event_data,whitelisting_data=None)</replaceable>
+              <replaceable>allowlist_event_in_component(analysis_context,component_name,event_data,allowlisting_data=None)</replaceable>
             </option>
           </term>
           <listitem>
-            <para>Whitelists a path from <replaceable>event_data</replaceable> with the
-             whitelistEvent-method from the corresponding class of the component with the
+            <para>Allowlists a path from <replaceable>event_data</replaceable> with the
+             allowlist_event-method from the corresponding class of the component with the
             <replaceable>component_name</replaceable>. Only the following classes
-             support whitelisting: <replaceable>EnhancedNewMatchPathValueComboDetector </replaceable>, <replaceable>MissingMatchPathValueDetector</replaceable>, 
+             support allowlisting: <replaceable>EnhancedNewMatchPathValueComboDetector </replaceable>, <replaceable>MissingMatchPathValueDetector</replaceable>, 
              <replaceable>NewMatchPathDetector</replaceable> and 
              <replaceable>NewMatchPathValueComboDetector</replaceable>.
-             For most of the components no <replaceable>whitelisting_data</replaceable>
+             For most of the components no <replaceable>allowlisting_data</replaceable>
              is needed and the <replaceable>event_data</replaceable> is a path. The
             <replaceable>NewMatchPathDetector</replaceable> supports a list of multiple 
              pathes. The <replaceable>MissingMatchPathValueComboDetector</replaceable> 
-             needs an integer as <replaceable>whitelisting_data</replaceable>. A positive value
+             needs an integer as <replaceable>allowlisting_data</replaceable>. A positive value
              sets the interval in seconds to the value. -1 sets the interval to the default value of 3600. 
              A negative value removes the missingMatchPath.
              Please read the examples of this method to use the correct parameters.</para>
             <para><replaceable>example</replaceable>: aminerRemoteControl --Exec 
-            &quot;whitelist_event_in_component(analysis_context,&apos;EnhancedNewMatchPathValueComboDetector&apos;,&apos;new/path&apos;)&quot;</para>
+            &quot;allowlist_event_in_component(analysis_context,&apos;EnhancedNewMatchPathValueComboDetector&apos;,&apos;new/path&apos;)&quot;</para>
             <para><replaceable>example</replaceable>: aminerRemoteControl --Exec 
-            &quot;whitelist_event_in_component(analysis_context,&apos;MissingMatchPathValueDetector&apos;,&apos;new/path&apos;,-11)&quot;</para>
+            &quot;allowlist_event_in_component(analysis_context,&apos;MissingMatchPathValueDetector&apos;,&apos;new/path&apos;,-11)&quot;</para>
             <para><replaceable>example</replaceable>: aminerRemoteControl --Exec 
-            &quot;whitelist_event_in_component(analysis_context,&apos;NewMatchPathDetector&apos;,[&apos;new/path&apos;])&quot;</para>
+            &quot;allowlist_event_in_component(analysis_context,&apos;NewMatchPathDetector&apos;,[&apos;new/path&apos;])&quot;</para>
             <para><replaceable>example</replaceable>: aminerRemoteControl --Exec 
-            &quot;whitelist_event_in_component(analysis_context,&apos;NewMatchPathValueComboDetector&apos;,&apos;new/path&apos;)&quot;</para>
+            &quot;allowlist_event_in_component(analysis_context,&apos;NewMatchPathValueComboDetector&apos;,&apos;new/path&apos;)&quot;</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -447,15 +447,15 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         <varlistentry>
           <term>
             <option>
-              <replaceable>whitelist_events_from_history(analysis_context,history_component_name,id_spec_list,whitelisting_data=None)</replaceable>
+              <replaceable>allowlist_events_from_history(analysis_context,history_component_name,id_spec_list,allowlisting_data=None)</replaceable>
             </option>
           </term>
           <listitem>
-            <para>This method whitelists the events with the ids in the<replaceable>id_spec_list</replaceable> from the history.
+            <para>This method allowlists the events with the ids in the<replaceable>id_spec_list</replaceable> from the history.
             <replaceable>history_component_name</replaceable> is the registered component of the class
-            <replaceable>VolatileLogarithmicBackoffEventHistory</replaceable>. The whitelisting response is returned.</para>
+            <replaceable>VolatileLogarithmicBackoffEventHistory</replaceable>. The allowlisting response is returned.</para>
             <para><replaceable>example</replaceable>: aminerRemoteControl --Exec 
-            &quot;whitelist_events_from_history(analysis_context,&apos;VolatileLogarithmicBackoffEventHistory&apos;,[12,13,15])&quot;</para>
+            &quot;allowlist_events_from_history(analysis_context,&apos;VolatileLogarithmicBackoffEventHistory&apos;,[12,13,15])&quot;</para>
           </listitem>
         </varlistentry>
       </variablelist>

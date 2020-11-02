@@ -846,9 +846,9 @@ Analysis:
             - "and_match_rule1"
             - "and_match_rule2"
             - "negation_match_rule2"
-        - type: WhitelistViolationDetector
-          id: Whitelist
-          whitelist_rules:
+        - type: AllowlistViolationDetector
+          id: Allowlist
+          allowlist_rules:
             - "or_match_rule"
         - type: ParserCount
           id: ParserCount
