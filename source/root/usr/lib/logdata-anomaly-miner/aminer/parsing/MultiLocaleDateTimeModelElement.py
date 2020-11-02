@@ -1,4 +1,5 @@
-"""This module defines a model element representing date or datetime from sources with different locales.
+"""
+This module defines a model element representing date or datetime from sources with different locales.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -22,8 +23,10 @@ from aminer.parsing import ModelElementInterface
 
 
 class MultiLocaleDateTimeModelElement(ModelElementInterface):
-    """This class defines a model element to parse date or datetime values from log sources containing timestamps encoded in different
-    locales or on machines, where host/service locale does not match data locale(s).
+    """
+    This class defines a model element to parse date or datetime values from log sources.
+    The date or datetime can contain timestamps encoded in different locales or on machines, where host/service locale does not match data
+    locale(s).
     CAVEAT: Unlike other model elements, this element is not completely stateless! As parsing of semiqualified date values without any
     year information may produce wrong results, e.g. wrong year or 1 day off due to incorrect leap year handling, this object
     will keep track of the most recent timestamp parsed and will use it to regain information about the year in semiqualified
@@ -35,10 +38,12 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
     * When creating the object, make sure that there are no ambiguous dateFormats in the list, e.g. one with "day month" and another
     one with "month day".
     * To avoid decoding of binary input data in all locales before searching for e.g. month names, convert all possible month
-    names to bytes during object creation and just keep the lookup list."""
+    names to bytes during object creation and just keep the lookup list.
+    """
 
     def __init__(self, element_id, date_formats, start_year=None):
-        """Create a new MultiLocaleDateTimeModelElement object.
+        """
+        Create a new MultiLocaleDateTimeModelElement object.
         @param date_formats this parameter is a list of tuples, each tuple containing information about one date format to support.
         The tuple structure is (format_string, format_locale, format_timezone). The format_string may contain the same elements as supported
         by strptime from datetime.datetime. The format_locale defines the locale for the string content, e.g. de_DE for german,
@@ -54,7 +59,8 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
         This is especially relevant for historic datasets as otherwise leap year handling may fail. The startYear parameter will
         only take effect when the first timestamp to be parsed by this object is also semiqualified. Otherwise the year information
         is extracted from this record. When empty and first parsing invocation involves a semiqualified date, the current year
-        in UTC timezone is used."""
+        in UTC timezone is used.
+        """
         self.element_id = element_id
         self.start_year = start_year
         # The latest parsed timestamp value.
@@ -77,16 +83,19 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
         return self.element_id
 
     def get_child_elements(self):
-        """Get all possible child model elements of this element.
-        @return empty list as there are no children of this element."""
+        """
+        Get all possible child model elements of this element.
+        @return empty list as there are no children of this element.
+        """
         return None
 
     def get_match_element(self, path, match_context):
-        """This method checks if the data to match within the content is suitable to be parsed by any of the supplied date formats.
+        """
+        Check if the data to match within the content is suitable to be parsed by any of the supplied date formats.
         @return On match return a matchObject containing a tuple of the datetime object and the seconds since 1970. When not matching,
         None is returned. When the timestamp data parsed would be far off from the last ones parsed, so that correction may
-        not be applied correctly, then the method will also return None."""
-
+        not be applied correctly, then the method will also return None.
+        """
         delta_string = 'Delta to last timestamp out of range for %s'
         # Convert the head of the match_data to a timestamp value.
         parsed_data = self.date_formats.parse(match_context.match_data, 0)
@@ -192,11 +201,13 @@ class DateFormatComponent:
     """This class defines a component in the date format."""
 
     def __init__(self, component_type, end_separator, component_length, translation_dictionary, parent_component):
-        """Create the component object.
+        """
+        Create the component object.
         @param end_separator when not none, this component is separated from the next by the given separator.
         @param component_length length of component for fixed length components, 0 otherwise.
         @param translation_dictionary a dictionary describing how the bytes of a formatted date component should be translated
-        into a number by plain lookup. When None, the component will be treated as normal number."""
+        into a number by plain lookup. When None, the component will be treated as normal number.
+        """
         self.component_type = component_type
         if (end_separator is not None) and not end_separator:
             msg = 'Invalid zero-length separator string'
@@ -368,8 +379,10 @@ class DateFormatComponent:
                 raise Exception(msg)
 
     def make_end_node(self, format_timezone):
-        """Make this DateFormatComponent an end node. When reached during parsing, calculation of the timestamp value within
-        the given is triggered."""
+        """
+        Make this DateFormatComponent an end node.
+        When reached during parsing, calculation of the timestamp value within the given is triggered.
+        """
         if (self.format_timezone is not None) and (self.format_timezone != format_timezone):
             msg = 'Node is already an end node for different timezone'
             logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
@@ -381,9 +394,10 @@ class DateFormatComponent:
         self.format_timezone = format_timezone
 
     def parse(self, date_string, parse_pos):
-        """Parse the supplied dateString starting from the given position.
-        @return a triple containing the field list, the parsing end position and the target timezone for parsed fields."""
-
+        """
+        Parse the supplied dateString starting from the given position.
+        @return a triple containing the field list, the parsing end position and the target timezone for parsed fields.
+        """
         component_value = None
         # Position after value the value but before an optional separator.
         end_pos = -1

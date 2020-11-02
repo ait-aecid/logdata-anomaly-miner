@@ -1,4 +1,5 @@
-"""This module defines an event handler that forwards Json-objects to Kafka.
+"""
+This module defines an event handler that forwards Json-objects to Kafka.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -28,7 +29,7 @@ class KafkaEventHandler(EventHandlerInterface):
         self.kafkaImported = False
 
     def receive_event(self, event_type, event_message, sorted_log_lines, event_data, log_atom, event_source):
-        """Receive information about a detected event in json format"""
+        """Receive information about a detected event in json format."""
         if self.kafkaImported is False:
             try:
                 from kafka import KafkaProducer

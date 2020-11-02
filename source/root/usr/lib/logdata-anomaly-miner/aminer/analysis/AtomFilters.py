@@ -1,5 +1,5 @@
-"""This file collects various classes useful to filter log atoms
-and pass them to different handlers.
+"""
+This file collects various classes useful to filter log atoms and pass them to different handlers.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -18,12 +18,13 @@ from aminer.input import AtomHandlerInterface
 
 
 class SubhandlerFilter(AtomHandlerInterface):
-    """Handlers of this class pass the received atoms to one or more subhandlers. Depending on configuration, the atom is passed
-    to all subhandlers or only up to the first suitable to handle the atom."""
+    """
+    Handlers of this class pass the received atoms to one or more subhandlers.
+    Depending on configuration, the atom is passed to all subhandlers or only up to the first suitable to handle the atom.
+    """
 
     def __init__(self, subhandler_list, stop_when_handled_flag=False):
-        """@param subhandler_list when not None, initialize this filter
-        with the given list of handlers."""
+        """@param subhandler_list when not None, initialize this filter with the given list of handlers."""
         if subhandler_list is None:
             self.subhandler_list = []
         else:
@@ -41,8 +42,10 @@ class SubhandlerFilter(AtomHandlerInterface):
         self.subhandler_list.append((atom_handler, stop_when_handled_flag))
 
     def receive_atom(self, log_atom):
-        """Pass the atom to the subhandlers.
-        @return false when no subhandler was able to handle the atom."""
+        """
+        Pass the atom to the subhandlers.
+        @return false when no subhandler was able to handle the atom.
+        """
         result = False
         self.log_total += 1
         for handler, stop_when_handled_flag in self.subhandler_list:
@@ -59,17 +62,21 @@ class MatchPathFilter(AtomHandlerInterface):
     """This class just splits incoming matches according to existance of pathes in the match."""
 
     def __init__(self, parsed_atom_handler_lookup_list, default_parsed_atom_handler=None):
-        """Initialize the filter.
+        """
+        Initialize the filter.
         @param parsed_atom_handler_lookup_list has to contain tuples with search path string and handler. When the handler is None,
         the filter will just drop a received atom without forwarding.
         @param default_parsed_atom_handler invoke this handler when no handler was found for given match path or do not invoke any
-        handler when None."""
+        handler when None.
+        """
         self.parsed_atom_handler_lookup_list = parsed_atom_handler_lookup_list
         self.default_parsed_atom_handler = default_parsed_atom_handler
 
     def receive_atom(self, log_atom):
-        """Receive an atom and pass it to the subhandlers.
-        @return False when logAtom did not contain match data or was not forwarded to any handler, True otherwise."""
+        """
+        Receive an atom and pass it to the subhandlers.
+        @return False when logAtom did not contain match data or was not forwarded to any handler, True otherwise.
+        """
         self.log_total += 1
         if log_atom.parser_match is None:
             return False
@@ -91,14 +98,17 @@ class MatchValueFilter(AtomHandlerInterface):
     """This class just splits incoming matches using a given match value and forward them to different handlers."""
 
     def __init__(self, target_path, parsed_atom_handler_dict, default_parsed_atom_handler=None):
-        """Initialize the splitter.
+        """
+        Initialize the splitter.
         @param default_parsed_atom_handler invoke this default handler when no value handler was found or do not invoke any handler
-        when None."""
+        when None.
+        """
         self.target_path = target_path
         self.parsed_atom_handler_dict = parsed_atom_handler_dict
         self.default_parsed_atom_handler = default_parsed_atom_handler
 
     def receive_atom(self, log_atom):
+        """Receive a log atom from a source."""
         self.log_total += 1
         if log_atom.parser_match is None:
             return False

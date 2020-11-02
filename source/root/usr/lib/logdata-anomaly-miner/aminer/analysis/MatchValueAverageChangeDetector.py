@@ -1,5 +1,5 @@
-"""This module defines a detector that reports diverges from
-an average.
+"""
+This module defines a detector that reports diverges from an average.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -24,18 +24,22 @@ from aminer.util import TimeTriggeredComponentInterface
 
 
 class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
-    """This detector calculates the average of a given list of values to monitor and reports if the average of the latest diverges
-    significantly from the values observed before."""
+    """
+    This detector calculates the average of a given list of values to monitor.
+    Reports are generated if the average of the latest diverges significantly from the values observed before.
+    """
 
     def __init__(self, aminer_config, anomaly_event_handlers, timestamp_path, analyze_path_list, min_bin_elements, min_bin_time,
                  sync_bins_flag=True, debug_mode=False, persistence_id='Default', output_log_line=True):
-        """Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        """
+        Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param timestamp_path if not None, use this path value for timestamp based bins.
         @param analyze_path_list list of match pathes to analyze in this detector.
         @param min_bin_elements evaluate the latest bin only after at least that number of elements was added to it.
         @param min_bin_time evaluate the latest bin only when the first element is received after minBinTime has elapsed.
         @param sync_bins_flag if true the bins of all analyzed path values have to be filled enough to trigger analysis.
-        @param debug_mode if true, generate an analysis report even when average of last bin was within expected range."""
+        @param debug_mode if true, generate an analysis report even when average of last bin was within expected range.
+        """
         self.anomaly_event_handlers = anomaly_event_handlers
         self.timestamp_path = timestamp_path
         self.min_bin_elements = min_bin_elements
@@ -58,7 +62,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             self.stat_data = persistence_data
 
     def receive_atom(self, log_atom):
-        """Sends summary to all event handlers."""
+        """Send summary to all event handlers."""
         self.log_total += 1
         parser_match = log_atom.parser_match
         value_dict = parser_match.get_match_dictionary()
@@ -129,12 +133,14 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         self.log_success += 1
 
     def get_time_trigger_class(self):
-        """Get the trigger class this component should be registered for. This trigger is used only for persistency, so real-time
-        triggering is needed."""
+        """
+        Get the trigger class this component should be registered for.
+        This trigger is used only for persistency, so real-time triggering is needed.
+        """
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
-        """Check current ruleset should be persisted"""
+        """Check current ruleset should be persisted."""
         if self.next_persist_time is None:
             return 600
 
@@ -151,10 +157,11 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def update(self, stat_data, timestamp_value, value):
-        """Update the collected statistics data.
+        """
+        Update the collected statistics data.
         @param value if value not None, check only conditions if current bin is full enough.
-        @return true if the bin is full enough to perform an analysis."""
-
+        @return true if the bin is full enough to perform an analysis.
+        """
         if value is not None:
             if not stat_data:
                 # Append timestamp, k-value, old-bin (n, sum, sum2, avg, variance),
@@ -177,8 +184,10 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         return True
 
     def analyze(self, stat_data):
-        """Perform the analysis and progress from the last bin to the next one.
-        @return None when statistical data was as expected and debugging is disabled."""
+        """
+        Perform the analysis and progress from the last bin to the next one.
+        @return None when statistical data was as expected and debugging is disabled.
+        """
         logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s performs analysis.', self.__class__.__name__)
         current_bin = stat_data[3]
         current_average = current_bin[1] / current_bin[0]

@@ -1,7 +1,7 @@
-"""This component performs a histogram analysis on one or more input
-properties. The properties are parsed values denoted by their
-parsing path. Those values are then handed over to the selected
-"binning function", that calculates the histogram bin.
+"""
+This component performs a histogram analysis on one or more input properties.
+The properties are parsed values denoted by their parsing path. Those values
+are then handed over to the selected "binning function", that calculates the histogram bin.
 
 * Binning:
 
@@ -80,12 +80,14 @@ class BinDefinition(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def __init__(self):
-        """initiate the BinDefinition."""
+        """Initiate the BinDefinition."""
 
     @abc.abstractmethod
     def has_outlier_bins(self):
-        """Report if this binning works with outlier bins, that are bins for all values outside the normal binning range. If not,
-        outliers are discarded. When true, the outlier bins are the first and last bin."""
+        """
+        Report if this binning works with outlier bins, that are bins for all values outside the normal binning range.
+        If not, outliers are discarded. When true, the outlier bins are the first and last bin.
+        """
 
     @abc.abstractmethod
     def get_bin_names(self):
@@ -93,15 +95,19 @@ class BinDefinition(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def get_bin(self, value):
-        """Get the number of the bin this value should belong to.
+        """
+        Get the number of the bin this value should belong to.
         @return the bin number or None if the value is an outlier and outlier bins were not requested. With outliers, bin 0
-        is the bin with outliers below limit, first normal bin is at index 1."""
+        is the bin with outliers below limit, first normal bin is at index 1.
+        """
 
     @abc.abstractmethod
     def get_bin_p_value(self, bin_pos, total_values, bin_values):
-        """Calculate a p-Value, how likely the observed number of
-        elements in this bin is. This method is used as an interface method, but it also returns a default value.
-        @return the value or None when not applicable."""
+        """
+        Calculate a p-Value, how likely the observed number of elements in this bin is.
+        This method is used as an interface method, but it also returns a default value.
+        @return the value or None when not applicable.
+        """
         return None
 
 
@@ -117,8 +123,10 @@ class LinearNumericBinDefinition(BinDefinition):
         self.expected_bin_ratio = 1.0 / float(bin_count)
 
     def has_outlier_bins(self):
-        """Report if this binning works with outlier bins, that are bins for all values outside the normal binning range. If not,
-        outliers are discarded. When true, the outlier bins are the first and last bin."""
+        """
+        Report if this binning works with outlier bins, that are bins for all values outside the normal binning range.
+        If not, outliers are discarded. When true, the outlier bins are the first and last bin.
+        """
         return self.outlier_bins_flag
 
     def get_bin_names(self):
@@ -140,9 +148,11 @@ class LinearNumericBinDefinition(BinDefinition):
         return self.bin_names
 
     def get_bin(self, value):
-        """Get the number of the bin this value should belong to.
+        """
+        Get the number of the bin this value should belong to.
         @return the bin number or None if the value is an outlier and outlier bins were not requested. With outliers, bin 0
-        is the bin with outliers below limit, first normal bin is at index 1."""
+        is the bin with outliers below limit, first normal bin is at index 1.
+        """
         if self.outlier_bins_flag:
             if value < self.lower_limit:
                 return 0
@@ -159,8 +169,10 @@ class LinearNumericBinDefinition(BinDefinition):
         return None
 
     def get_bin_p_value(self, bin_pos, total_values, bin_values):
-        """Calculate a p-Value, how likely the observed number of elements in this bin is.
-        @return the value or None when not applicable."""
+        """
+        Calculate a p-Value, how likely the observed number of elements in this bin is.
+        @return the value or None when not applicable.
+        """
         if binomial_test is None:
             return None
         if self.outlier_bins_flag:
@@ -178,9 +190,11 @@ class ModuloTimeBinDefinition(LinearNumericBinDefinition):
         self.time_unit = time_unit
 
     def get_bin(self, value):
-        """Get the number of the bin this value should belong to.
+        """
+        Get the number of the bin this value should belong to.
         @return the bin number or None if the value is an outlier and outlier bins were not requested. With outliers, bin 0
-        is the bin with outliers below limit, first normal bin is at index 1."""
+        is the bin with outliers below limit, first normal bin is at index 1.
+        """
         if value is None:
             value = 0
         if isinstance(value, bytes):
@@ -194,12 +208,16 @@ class ModuloTimeBinDefinition(LinearNumericBinDefinition):
 
 
 class HistogramData():
-    """This class defines the properties of one histogram to create and performs the accounting and reporting. When the Python scipy
-    package is available, reports will also include probability score created using binomial testing."""
+    """
+    This class defines the properties of one histogram to create and performs the accounting and reporting.
+    When the Python scipy package is available, reports will also include probability score created using binomial testing.
+    """
 
     def __init__(self, property_path, bin_definition):
-        """Create the histogram data structures.
-        @param lower_limit the lowest value included in the first bin."""
+        """
+        Create the histogram data structures.
+        @param lower_limit the lowest value included in the first bin.
+        """
         self.property_path = property_path
         self.bin_definition = bin_definition
         self.bin_names = bin_definition.get_bin_names()
@@ -223,8 +241,10 @@ class HistogramData():
         self.bin_data = [0] * (len(self.bin_data))
 
     def clone(self):
-        """Clone this object so that calls to addValue do not influence the old object any more. This behavior is a mixture of shallow
-        and deep copy."""
+        """
+        Clone this object so that calls to addValue do not influence the old object any more.
+        This behavior is a mixture of shallow and deep copy.
+        """
         histogram_data = HistogramData(self.property_path, self.bin_definition)
         histogram_data.bin_names = self.bin_names
         histogram_data.bin_data = self.bin_data[:]
@@ -255,11 +275,13 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def __init__(self, aminer_config, histogram_defs, report_interval, report_event_handlers, reset_after_report_flag=True,
                  persistence_id='Default', output_log_line=True):
-        """Initialize the analysis component.
+        """
+        Initialize the analysis component.
         @param histogram_defs is a list of tuples containing the target property path to analyze and the BinDefinition to apply for
         binning.
         @param report_interval delay in seconds between creation of two reports. The parameter is applied to the parsed record data
-        time, not the system time. Hence reports can be delayed when no data is received."""
+        time, not the system time. Hence reports can be delayed when no data is received.
+        """
         self.last_report_time = None
         self.next_report_time = 0.0
         self.histogram_data = []
@@ -281,6 +303,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
             raise Exception(msg)
 
     def receive_atom(self, log_atom):
+        """Receive a log atom from a source."""
         self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
         data_updated_flag = False
@@ -306,12 +329,14 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
             self.next_persist_time = time.time() + 600
 
     def get_time_trigger_class(self):
-        """Get the trigger class this component should be registered for. This trigger is used only for persistency, so real-time
-        triggering is needed."""
+        """
+        Get the trigger class this component should be registered for.
+        This trigger is used only for persistency, so real-time triggering is needed.
+        """
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
-        """Check current ruleset should be persisted"""
+        """Check current ruleset should be persisted."""
         if self.next_persist_time is None:
             return 600
 
@@ -327,7 +352,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
         logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def send_report(self, log_atom, timestamp):
-        """Sends a report to the event handlers."""
+        """Send a report to the event handlers."""
         report_str = 'Histogram report '
         if self.last_report_time is not None:
             report_str += 'from %s ' % datetime.fromtimestamp(self.last_report_time).strftime(date_string)
@@ -389,16 +414,20 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
 
 class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
-    """This class provides a histogram analysis for only one property but separate histograms for each group of correlated match pathes.
+    """
+    This class provides a histogram analysis for only one property but separate histograms for each group of correlated match pathes.
     Assume there two pathes that include the requested property but they separate after the property was found on the path.
     Then objects of this class will produce 3 histograms: one for common path part including all occurences of the target property
-    and one for each separate subpath, counting only those property values where the specific subpath was followed."""
+    and one for each separate subpath, counting only those property values where the specific subpath was followed.
+    """
 
     def __init__(self, aminer_config, property_path, bin_definition, report_interval, report_event_handlers, reset_after_report_flag=True,
                  persistence_id='Default', output_log_line=True):
-        """Initialize the analysis component.
+        """
+        Initialize the analysis component.
         @param report_interval delay in seconds between creation of two reports. The parameter is applied to the parsed record data
-        time, not the system time. Hence reports can be delayed when no data is received."""
+        time, not the system time. Hence reports can be delayed when no data is received.
+        """
         self.last_report_time = None
         self.next_report_time = 0.0
         self.property_path = property_path
@@ -421,6 +450,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
             raise Exception(msg)
 
     def receive_atom(self, log_atom):
+        """Receive a log atom from a source."""
         self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
         match = match_dict.get(self.property_path, None)
@@ -497,12 +527,15 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
         self.log_success += 1
 
     def get_time_trigger_class(self):
-        """Get the trigger class this component should be registered for. This trigger is used only for persistency, so real-time
-        triggering is needed."""
+        """
+        Get the trigger class this component should be registered for.
+        This trigger is used only for persistency, so real-time
+        triggering is needed.
+        """
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
-        """Check current ruleset should be persisted"""
+        """Check current ruleset should be persisted."""
         if self.next_persist_time is None:
             return 600
 

@@ -1,4 +1,5 @@
-"""This module converts json strings to object structures also supporting byte array structures.
+"""
+This module converts json strings to object structures also supporting byte array structures.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -18,17 +19,17 @@ from aminer.util import encode_byte_string_as_string, decode_string_as_byte_stri
 
 
 def dump_as_json(input_object):
-    """Dump an input object encoded as string"""
+    """Dump an input object encoded as string."""
     return json.dumps(encode_object(input_object))
 
 
 def load_json(input_string):
-    """Load an string encoded as object structure"""
+    """Load an string encoded as object structure."""
     return decode_object(json.loads(input_string))
 
 
 def encode_object(term):
-    """@param term return an object encoded as string"""
+    """@param term return an object encoded as string."""
     encoded_object = ''
     if isinstance(term, str):
         encoded_object = 'string:' + term
@@ -53,7 +54,7 @@ def encode_object(term):
 
 
 def decode_object(term):
-    """@param term return a string decoded as object structure"""
+    """@param term return a string decoded as object structure."""
     decoded_object = ''
     if isinstance(term, str) and term.startswith('string:'):
         decoded_object = term[7:]

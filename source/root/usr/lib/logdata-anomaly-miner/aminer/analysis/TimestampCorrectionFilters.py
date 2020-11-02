@@ -1,4 +1,5 @@
-"""This file collects various classes useful to filter and correct the timestamp associated with a received parsed atom.
+"""
+This file collects various classes useful to filter and correct the timestamp associated with a received parsed atom.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -15,8 +16,10 @@ from aminer.input import AtomHandlerInterface
 
 
 class SimpleMonotonicTimestampAdjust(AtomHandlerInterface):
-    """Handlers of this class compare the timestamp of a newly received atom with the largest timestamp seen so far. When below, the
-    timestamp of this atom is adjusted to the largest value seen, otherwise the largest value seen is updated."""
+    """
+    Handlers of this class compare the timestamp of a newly received atom with the largest timestamp seen so far.
+    When below, the timestamp of this atom is adjusted to the largest value seen, otherwise the largest value seen is updated.
+    """
 
     def __init__(self, subhandler_list, stop_when_handled_flag=False):
         self.subhandler_list = subhandler_list
@@ -24,8 +27,10 @@ class SimpleMonotonicTimestampAdjust(AtomHandlerInterface):
         self.latest_timestamp_seen = 0
 
     def receive_atom(self, log_atom):
-        """Pass the atom to the subhandlers.
-        @return false when no subhandler was able to handle the atom."""
+        """
+        Pass the atom to the subhandlers.
+        @return false when no subhandler was able to handle the atom.
+        """
         self.log_total += 1
         if log_atom.get_timestamp() is not None:
             if log_atom.get_timestamp() < self.latest_timestamp_seen:

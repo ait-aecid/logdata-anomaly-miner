@@ -1,4 +1,5 @@
-"""This module defines functions for reading and writing files in a secure way.
+"""
+This module defines functions for reading and writing files in a secure way.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -31,8 +32,10 @@ def add_persistable_component(component):
 
 
 def open_persistence_file(file_name, flags):
-    """This function opens the given persistence file. When O_CREAT was specified, the function will attempt to create the directories
-    too."""
+    """
+    Open the given persistence file.
+    When O_CREAT was specified, the function will attempt to create the directories too.
+    """
     if isinstance(file_name, str):
         file_name = file_name.encode()
     try:
@@ -51,9 +54,12 @@ def open_persistence_file(file_name, flags):
 
 
 def create_temporary_persistence_file(file_name):
-    """Create a temporary file within persistence directory to write new persistence data to it. Thus the old data is not modified,
-    any error creating or writing the file will not harm the old state."""
+    """
+    Create a temporary file within persistence directory to write new persistence data to it.
+    Thus the old data is not modified, any error creating or writing the file will not harm the old state.
+    """
     fd = None
+    # skipcq: PYL-W0511
     # FIXME: This should use O_TMPFILE, but not yet available. That would obsolete the loop also.
     # while True:
     #  fd = openPersistenceFile('%s.tmp-%f' % (fileName, time.time()), os.O_WRONLY|os.O_CREAT|os.O_EXCL)
@@ -93,8 +99,10 @@ def persist_all():
 
 
 def load_json(file_name):
-    """Load persistency data from file.
-    @return None if file did not yet exist."""
+    """
+    Load persistency data from file.
+    @return None if file did not yet exist.
+    """
     persistence_data = None
     try:
         persistence_file_handle = open_persistence_file(file_name, os.O_RDONLY | os.O_NOFOLLOW)

@@ -1,4 +1,5 @@
-"""This module defines a model element that represents a hex string of arbitrary length.
+"""
+This module defines a model element that represents a hex string of arbitrary length.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -31,13 +32,17 @@ class HexStringModelElement(ModelElementInterface):
         return self.element_id
 
     def get_child_elements(self):
-        """Get all possible child model elements of this element.
-        @return None as there are no children of this element."""
+        """
+        Get all possible child model elements of this element.
+        @return None as there are no children of this element.
+        """
         return None
 
     def get_match_element(self, path, match_context):
-        """Find the maximum number of bytes forming a integer number according to the parameters specified
-        @return a match when at least one byte being a digit was found"""
+        """
+        Find the maximum number of bytes forming a integer number according to the parameters specified.
+        @return a match when at least one byte being a digit was found
+        """
         data = match_context.match_data
         match_len = 0
         for b_val in data:

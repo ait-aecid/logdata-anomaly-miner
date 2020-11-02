@@ -1,4 +1,5 @@
-"""This module defines a writer that forwards match information to a stream.
+"""
+This module defines a writer that forwards match information to a stream.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -18,9 +19,12 @@ import _io
 
 
 class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterface):
-    """This class extracts values from a given match and writes them to a stream. This can be used to forward these values to
-    another program (when stream is a wrapped network socket) or to a file for further analysis. A stream is used instead of
-    a file descriptor to increase performance. To flush it from time to time, add the writer object also to the time trigger list."""
+    """
+    This class extracts values from a given match and writes them to a stream.
+    This can be used to forward these values to another program (when stream is a wrapped network socket) or to a file for further analysis.
+    A stream is used instead of a file descriptor to increase performance. To flush it from time to time, add the writer object also to the
+    time trigger list.
+    """
 
     def __init__(self, stream, match_value_path_list, separator_string, missing_value_string):
         """Initialize the writer."""
@@ -56,8 +60,10 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
             self.log_success += 1
 
     def get_time_trigger_class(self):
-        """Get the trigger class this component should be registered for. This trigger is used only for persistency, so real-time
-        triggering is needed."""
+        """
+        Get the trigger class this component should be registered for.
+        This trigger is used only for persistency, so real-time triggering is needed.
+        """
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):

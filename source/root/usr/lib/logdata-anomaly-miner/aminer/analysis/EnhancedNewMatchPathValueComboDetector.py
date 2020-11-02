@@ -1,4 +1,5 @@
-"""This file defines the EnhancedNewMatchPathValueComboDetector
+"""
+This file defines the EnhancedNewMatchPathValueComboDetector.
 detector to extract values from LogAtoms and check, if the value
 combination was already seen before.
 
@@ -25,25 +26,29 @@ from aminer.AMinerConfig import STAT_LEVEL, STAT_LOG_NAME
 
 
 class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
-    """This class creates events when a new value combination for a given list of match data pathes were found. It is similar
-    to the NewMatchPathValueComboDetector basic detector but also provides support for storing meta information about each detected
-    value combination, e.g.
+    """
+    This class creates events when a new value combination for a given list of match data pathes were found.
+    It is similar to the NewMatchPathValueComboDetector basic detector but also provides support for storing meta information about each
+    detected value combination, e.g.
     * the first time a tuple was detected using the LogAtom default timestamp.
     * the last time a tuple was seen
     * the number of times the tuple was seen
     * user data for annotation.
-    Due to the additional features, this detector is slower than the basic detector."""
+    Due to the additional features, this detector is slower than the basic detector.
+    """
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id='Default', allow_missing_values_flag=False,
                  auto_include_flag=False, tuple_transformation_function=None, output_log_line=True):
-        """Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        """
+        Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param target_path_list the list of values to extract from each match to create the value combination to be checked.
         @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the pathes from target_path_list
         does not refer to an existing parsed data object.
         @param auto_include_flag when set to True, this detector will report a new value only the first time before including it
         in the known values set automatically.
         @param tuple_transformation_function when not None, this function will be invoked on each extracted value combination list to
-        transform it. It may modify the list directly or create a new one to return it."""
+        transform it. It may modify the list directly or create a new one to return it.
+        """
         self.known_values_dict = {}
         super(EnhancedNewMatchPathValueComboDetector, self).__init__(aminer_config, target_path_list, anomaly_event_handlers,
                                                                      persistence_id, allow_missing_values_flag, auto_include_flag)
@@ -67,9 +72,11 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
             logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     def receive_atom(self, log_atom):
-        """Receive on parsed atom and the information about the parser match.
+        """
+        Receive on parsed atom and the information about the parser match.
         @return True if a value combination was extracted and checked against the list of known combinations, no matter if the checked
-        values were new or not."""
+        values were new or not.
+        """
         self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
         timestamp = log_atom.get_timestamp()
@@ -90,11 +97,11 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
             match_value_list = self.tuple_transformation_function(match_value_list)
         match_value_tuple = tuple(match_value_list)
 
-        if self.known_values_dict.get(match_value_tuple, None) is None:
+        if self.known_values_dict.get(match_value_tuple) is None:
             self.known_values_dict[match_value_tuple] = [timestamp, timestamp, 1]
             self.log_new_learned_values.append(match_value_tuple)
         else:
-            extra_data = self.known_values_dict.get(match_value_tuple, None)
+            extra_data = self.known_values_dict.get(match_value_tuple)
             extra_data[1] = timestamp
             extra_data[2] += 1
 
@@ -104,7 +111,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
             if isinstance(match_value, bytes):
                 match_value = match_value.decode()
             affected_log_atom_values.append(str(match_value))
-        values = self.known_values_dict.get(match_value_tuple, None)
+        values = self.known_values_dict.get(match_value_tuple)
         metadata['TimeFirstOccurrence'] = str(values[0])
         metadata['TimeLastOccurence'] = str(values[1])
         metadata['NumberOfOccurences'] = str(values[2])
@@ -112,7 +119,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         analysis_component = {'AffectedLogAtomPaths': self.target_path_list, 'AffectedLogAtomValues': affected_log_atom_values,
                               'Metadata': metadata}
         event_data = {'AnalysisComponent': analysis_component}
-        if (self.auto_include_flag and self.known_values_dict.get(match_value_tuple, None)[2] == 1) or not self.auto_include_flag:
+        if (self.auto_include_flag and self.known_values_dict.get(match_value_tuple)[2] == 1) or not self.auto_include_flag:
             self.log_learned_path_value_combos += 1
             for listener in self.anomaly_event_handlers:
                 original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
@@ -148,9 +155,11 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def whitelist_event(self, event_type, sorted_log_lines, event_data, whitelisting_data):
-        """Whitelist an event generated by this source using the information emitted when generating the event.
+        """
+        Whitelist an event generated by this source using the information emitted when generating the event.
         @return a message with information about whitelisting
-        @throws Exception when whitelisting of this special event using given whitelistingData was not possible."""
+        @throws Exception when whitelisting of this special event using given whitelistingData was not possible.
+        """
         if event_type != 'Analysis.%s' % self.__class__.__name__:
             msg = 'Event not from this source'
             logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
