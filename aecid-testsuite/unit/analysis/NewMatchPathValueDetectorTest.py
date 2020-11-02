@@ -133,6 +133,7 @@ class NewMatchPathValueDetectorTest(TestBase):
         self.assertEqual(self.output_stream.getvalue(), '')
 
     def test4allowlist_event(self):
+        """Test the allowlist_event method."""
         description = "Test4NewMatchPathValueDetector"
         new_match_path_value_detector = NewMatchPathValueDetector(self.aminer_config, [self.first_f1_s1], [
             self.stream_printer_event_handler], 'Default', True, output_log_line=False)

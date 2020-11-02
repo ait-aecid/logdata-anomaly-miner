@@ -15,7 +15,6 @@ class EventCorrelationDetectorTest(TestBase):
 
     alphabet = b'abcdefghijklmnopqrstuvwxyz'
     alphabet_model = FirstMatchModelElement('first', [])
-    match_element_fixed_dme = fixed_dme.get_match_element("", match_context_fixed_dme)
 
     @classmethod
     def setUpClass(cls):
@@ -152,24 +151,24 @@ class EventCorrelationDetectorTest(TestBase):
         self.run_ecd_test(ecd, self.errored_data_diff1[:10000])
 
     def test7allowlist_paths(self):
+        """Test the allowlisting of paths."""
         description = 'test7eventCorrelationDetectorTest'
         ecd = EventCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, p0=0.7, alpha=0.1)
         self.analysis_context.register_component(ecd, description)
         self.assertEqual([], ecd.allowlisted_paths)
 
         fixed_dme = FixedDataModelElement('s1', b' pid=')
-        log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(self.match_element_fixed_dme), time(), ecd)
+        match_element_fixed_dme = fixed_dme.get_match_element("", match_context_fixed_dme)
+        log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme), time(), ecd)
 
         # unknown path
-        ecd.allowlist_event(self.analysis % ecd.__class__.__name__, [
-            log_atom_fixed_dme, self.match_element_fixed_dme.get_path()], [
-            log_atom_fixed_dme, self.match_element_fixed_dme.get_path()], None)
+        ecd.allowlist_event(self.analysis % ecd.__class__.__name__, [log_atom_fixed_dme, match_element_fixed_dme.get_path()], [
+            log_atom_fixed_dme, match_element_fixed_dme.get_path()], None)
         self.assertEqual(['s1'], ecd.allowlisted_paths)
 
         # known path
-        ecd.allowlist_event(self.analysis % ecd.__class__.__name__, [
-            log_atom_fixed_dme, self.match_element_fixed_dme.get_path()], [
-            log_atom_fixed_dme, self.match_element_fixed_dme.get_path()], None)
+        ecd.allowlist_event(self.analysis % ecd.__class__.__name__, [log_atom_fixed_dme, match_element_fixed_dme.get_path()], [
+            log_atom_fixed_dme, match_element_fixed_dme.get_path()], None)
         self.assertEqual(['s1'], ecd.allowlisted_paths)
 
     def check_rules(self, sorted_back_rules, sorted_forward_rules, diff):
