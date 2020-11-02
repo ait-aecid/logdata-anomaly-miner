@@ -21,6 +21,8 @@ MailAlerting.MaxEventsPerMessage: 1000
 
 LogPrefix: 'Original log line: '
 
+Log.StatisticsPeriod: 3600
+
 Parser:
        - id: space
          type: FixedDataModelElement

@@ -68,6 +68,11 @@
             'type': 'list',
             'schema': {'type': 'string'}
         },
+        'Log.StatisticsPeriod': {
+            'required': False,
+            'type': 'integer',
+            'default': 3600
+        },
         'Parser': {
             'required': True,
             'type': 'list',
