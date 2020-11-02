@@ -579,19 +579,6 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
            -1, which means that there is no limit.</para>
           </listitem>
         </varlistentry>
-        <varlistentry>
-          <term>
-            <replaceable>Resources.MaxCpuPercentUsage</replaceable>
-          </term>
-          <listitem>
-            <para><replaceable>Value</replaceable>: Integer: 1-100</para>
-            <para><replaceable>Example</replaceable>: aminerRemoteControl --Exec 
-            &quot;change_config_property(analysis_context, &apos;Resources.MaxCpuPercentUsage&apos;, 30)</para>
-            <para>By limiting the AMiner process to a fraction of possible CPU usage the system 
-            can not longer be overloaded by it. The percentages can only be full numbers and must 
-            be between 1 and 100.</para>
-          </listitem>
-        </varlistentry>
       </variablelist>
     </refsect2>
   </refsect1>

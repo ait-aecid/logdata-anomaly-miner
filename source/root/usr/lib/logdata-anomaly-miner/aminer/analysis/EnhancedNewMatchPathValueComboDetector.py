@@ -1,4 +1,5 @@
-"""This file defines the EnhancedNewMatchPathValueComboDetector
+"""
+This file defines the EnhancedNewMatchPathValueComboDetector.
 detector to extract values from LogAtoms and check, if the value
 combination was already seen before.
 
@@ -17,30 +18,34 @@ import time
 import os
 
 from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
-from aminer.util import PersistencyUtil
+from aminer.util import PersistenceUtil
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
 
 class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
-    """This class creates events when a new value combination for a given list of match data pathes were found. It is similar
-    to the NewMatchPathValueComboDetector basic detector but also provides support for storing meta information about each detected
-    value combination, e.g.
+    """
+    This class creates events when a new value combination for a given list of match data pathes were found.
+    It is similar to the NewMatchPathValueComboDetector basic detector but also provides support for storing meta information about each
+    detected value combination, e.g.
     * the first time a tuple was detected using the LogAtom default timestamp.
     * the last time a tuple was seen
     * the number of times the tuple was seen
     * user data for annotation.
-    Due to the additional features, this detector is slower than the basic detector."""
+    Due to the additional features, this detector is slower than the basic detector.
+    """
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id='Default', allow_missing_values_flag=False,
                  auto_include_flag=False, tuple_transformation_function=None, output_log_line=True):
-        """Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        """
+        Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param target_path_list the list of values to extract from each match to create the value combination to be checked.
         @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the pathes from target_path_list
         does not refer to an existing parsed data object.
         @param auto_include_flag when set to True, this detector will report a new value only the first time before including it
         in the known values set automatically.
         @param tuple_transformation_function when not None, this function will be invoked on each extracted value combination list to
-        transform it. It may modify the list directly or create a new one to return it."""
+        transform it. It may modify the list directly or create a new one to return it.
+        """
         self.known_values_dict = {}
         super(EnhancedNewMatchPathValueComboDetector, self).__init__(aminer_config, target_path_list, anomaly_event_handlers,
                                                                      persistence_id, allow_missing_values_flag, auto_include_flag)
@@ -49,9 +54,9 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         self.aminer_config = aminer_config
         self.date_string = "%Y-%m-%d %H:%M:%S"
 
-    def load_persistency_data(self):
-        """Load the persistency data from storage."""
-        persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
+    def load_persistence_data(self):
+        """Load the persistence data from storage."""
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is not None:
             # Dictionary and tuples were stored as list of lists. Transform
             # the first lists to tuples to allow hash operation needed by set.
@@ -59,9 +64,11 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
                 self.known_values_dict[tuple(value_tuple)] = extra_data
 
     def receive_atom(self, log_atom):
-        """Receive on parsed atom and the information about the parser match.
+        """
+        Receive on parsed atom and the information about the parser match.
         @return True if a value combination was extracted and checked against the list of known combinations, no matter if the checked
-        values were new or not."""
+        values were new or not.
+        """
         match_dict = log_atom.parser_match.get_match_dictionary()
         timestamp = log_atom.get_timestamp()
         if timestamp is None:
@@ -81,10 +88,10 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
             match_value_list = self.tuple_transformation_function(match_value_list)
         match_value_tuple = tuple(match_value_list)
 
-        if self.known_values_dict.get(match_value_tuple, None) is None:
+        if self.known_values_dict.get(match_value_tuple) is None:
             self.known_values_dict[match_value_tuple] = [timestamp, timestamp, 1]
         else:
-            extra_data = self.known_values_dict.get(match_value_tuple, None)
+            extra_data = self.known_values_dict.get(match_value_tuple)
             extra_data[1] = timestamp
             extra_data[2] += 1
 
@@ -94,7 +101,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
             if isinstance(match_value, bytes):
                 match_value = match_value.decode()
             affected_log_atom_values.append(str(match_value))
-        values = self.known_values_dict.get(match_value_tuple, None)
+        values = self.known_values_dict.get(match_value_tuple)
         metadata['TimeFirstOccurrence'] = str(values[0])
         metadata['TimeLastOccurence'] = str(values[1])
         metadata['NumberOfOccurences'] = str(values[2])
@@ -102,7 +109,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         analysis_component = {'AffectedLogAtomPaths': self.target_path_list, 'AffectedLogAtomValues': affected_log_atom_values,
                               'Metadata': metadata}
         event_data = {'AnalysisComponent': analysis_component}
-        if (self.auto_include_flag and self.known_values_dict.get(match_value_tuple, None)[2] == 1) or not self.auto_include_flag:
+        if (self.auto_include_flag and self.known_values_dict.get(match_value_tuple)[2] == 1) or not self.auto_include_flag:
             for listener in self.anomaly_event_handlers:
                 original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
                 if original_log_line_prefix is None:
@@ -128,16 +135,18 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        persistency_data = []
+        persistence_data = []
         for dict_record in self.known_values_dict.items():
-            persistency_data.append(dict_record)
-        PersistencyUtil.store_json(self.persistence_file_name, persistency_data)
+            persistence_data.append(dict_record)
+        PersistenceUtil.store_json(self.persistence_file_name, persistence_data)
         self.next_persist_time = None
 
     def whitelist_event(self, event_type, sorted_log_lines, event_data, whitelisting_data):
-        """Whitelist an event generated by this source using the information emitted when generating the event.
+        """
+        Whitelist an event generated by this source using the information emitted when generating the event.
         @return a message with information about whitelisting
-        @throws Exception when whitelisting of this special event using given whitelistingData was not possible."""
+        @throws Exception when whitelisting of this special event using given whitelistingData was not possible.
+        """
         if event_type != 'Analysis.%s' % self.__class__.__name__:
             raise Exception('Event not from this source')
         if whitelisting_data is not None:

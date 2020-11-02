@@ -1,4 +1,5 @@
-"""This component counts occurring combinations of values and periodically sends the results as a report.
+"""
+This component counts occurring combinations of values and periodically sends the results as a report.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -22,8 +23,7 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """This class creates a counter for path value combinations."""
 
     def __init__(self, aminer_config, target_path_list, report_event_handlers, report_interval=60, reset_after_report_flag=True):
-        """Initialize the ParserCount component.
-        @param aminer"""
+        """Initialize the ParserCount component."""
         self.aminer_config = aminer_config
         self.target_path_list = target_path_list
         self.report_interval = report_interval
@@ -42,6 +42,7 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def receive_atom(self, log_atom):
+        """Receive a log atom from a source."""
         match_dict = log_atom.parser_match.get_match_dictionary()
         for target_path in self.target_path_list:
             match_element = match_dict.get(target_path, None)
@@ -58,7 +59,7 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
         return True
 
     def do_timer(self, trigger_time):
-        """Check current ruleset should be persisted"""
+        """Check current ruleset should be persisted."""
         if self.next_report_time is None:
             return self.report_interval
         delta = self.next_report_time - trigger_time
@@ -73,7 +74,7 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
         return False
 
     def send_report(self):
-        """Sends a report to the event handlers."""
+        """Send a report to the event handlers."""
         output_string = 'Parsed paths in the last ' + str(self.report_interval) + ' seconds:\n'
 
         for k in self.count_dict:

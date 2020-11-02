@@ -1,4 +1,5 @@
-"""This module defines a model element that matches any byte.
+"""
+This module defines a model element that matches any byte.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -21,13 +22,19 @@ class AnyByteDataModelElement(ModelElementInterface):
     def __init__(self, element_id):
         self.element_id = element_id
 
+    def get_id(self):
+        """Get the element ID."""
+        return self.element_id
+
     def get_child_elements(self):
-        """Get all possible child model elements of this element.
-        @return None as there are no children of this element."""
+        """
+        Get all possible child model elements of this element.
+        @return None as there are no children of this element.
+        """
         return None
 
     def get_match_element(self, path, match_context):
-        """Just return a match including all data from the context"""
+        """Just return a match including all data from the context."""
         match_data = match_context.match_data
         if not match_data:
             return None

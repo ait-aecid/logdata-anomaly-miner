@@ -1,105 +1,11 @@
-#########################################################
-#
-#
-# Please note that the yaml-config is experimental and
-# incomplete at the moment. 
-#
-#
-#########################################################
-
-#LearnMode: false # optional
 AMinerUser: 'aminer'  # optional default: aminer
 AMinerGroup: 'aminer' # optional default: aminer
 
 LogResourceList:
         - 'file:///var/log/apache2/access.log'
 
-# Read and store information to be used between multiple invocations
-# of AMiner in this directory. The directory must only be accessible
-# to the 'AMinerUser' but not group/world readable. On violation,
-# AMiner will refuse to start. When undefined, '/var/lib/aminer'
-# is used.
-# Core.PersistenceDir: '/tmp/lib/aminer'
+Core.PersistenceDir: '/tmp/lib/aminer'
 
-# Define a target e-mail address to send alerts to. When undefined,
-# no e-mail notification hooks are added.
-# MailAlerting.TargetAddress: 'root@localhost'
-
-# Sender address of e-mail alerts. When undefined, "sendmail"
-# implementation on host will decide, which sender address should
-# be used.
-# MailAlerting.FromAddress: 'root@localhost'
-
-# Define, which text should be prepended to the standard aminer
-# subject. Defaults to "AMiner Alerts:"
-# MailAlerting.SubjectPrefix: 'AMiner Alerts:'
-
-# Define a grace time after startup before aminer will react to
-# an event and send the first alert e-mail. Defaults to 0 (any
-# event can immediately trigger alerting).
-# MailAlerting.AlertGraceTime: 0
-
-# Define how many seconds to wait after a first event triggered
-# the alerting procedure before really sending out the e-mail.
-# In that timespan, events are collected and will be sent all
-# using a single e-mail. Defaults to 10 seconds.
-# MailAlerting.EventCollectTime: 10
-
-# Define the minimum time between two alert e-mails in seconds
-# to avoid spamming. All events during this timespan are collected
-# and sent out with the next report. Defaults to 600 seconds.
-# MailAlerting.MinAlertGap: 600
-
-# Define the maximum time between two alert e-mails in seconds.
-# When undefined this defaults to "MailAlerting.MinAlertGap".
-# Otherwise this will activate an exponential backoff to reduce
-# messages during permanent error states by increasing the alert
-# gap by 50% when more alert-worthy events were recorded while
-# the previous gap time was not yet elapsed.
-# MailAlerting.MaxAlertGap: 600
-
-# Define how many events should be included in one alert mail
-# at most. This defaults to 1000
-# MailAlerting.MaxEventsPerMessage: 1000
-
-# Configure the logline prefix
-# LogPrefix: ''
-
-
-#########################################################
-#
-# Parser:
-#         - id: 'timeModel'
-#           type: DateTimeModelElement
-#           name: 'time'
-#           args: '%Y-%m-%dT%H:%M:%S.%f'
-#         
-#         - id: 'hostModel'
-#           type: VariableByteDataModelElement
-#           name: 'host'
-#           args: '-.01234567890abcdefghijklmnopqrstuvwxyz:'  
-# 
-#         - id: 'reqMethodModel'
-#           type:  FixedWordlistDataModelElement
-#           name: 'method'
-#           args:
-#                   - 'GET'
-#                   - 'POST'
-#                   - 'PUT'
-#                   - 'HEAD'
-#         - id: 'apacheModel'
-#           type: ApacheAccessModel
-#           name: 'apache'
-#           args: 'apache'
-# 
-#         - id: 'START'
-#           type: SequenceModelElement
-#           name: 'model'
-#           args:
-#               - timeModel        
-#               - hostModel
-#               - reqMethodModel
-#               - apacheModel
 Parser:
         - id: 'apacheModel'
           type: ApacheAccessModel
@@ -113,33 +19,32 @@ Parser:
           args: apacheModel
 
 Input:
-        Verbose: True # optional
-        MultiSource: False # optional
-        TimestampPath: "/model/accesslog/time"
-
+        verbose: True # optional
+        multi_source: False # optional
+        timestamp_paths: "/model/accesslog/time"
 
 Analysis:
-        - type: "NewMatchPathValueDetector"
+        - type: NewMatchPathValueDetector
           paths: ["/model/accesslog/status"]
           persistence_id: 'accesslog_status' # optional default: Default
-          output_logline: false # optional default: true
-          learnMode: true
+          output_logline: False # optional default: True
+          learn_mode: True
 
-        - type: "NewMatchPathValueComboDetector"
+        - type: NewMatchPathValueComboDetector
           paths: ["/model/accesslog/request","/model/accesslog/method"]
-          learnMode: true
+          learn_mode: True
           persistence_id: 'accesslog_request' # optional default: Default
-          output_logline: false # optional default: true
-          allow_missing_values: false # optional default: false
+          output_logline: False # optional default: True
+          allow_missing_values: False # optional default: False
 
-        - type: "NewMatchPathValueComboDetector"
+        - type: NewMatchPathValueComboDetector
           paths: ["/model/accesslog/request","/model/accesslog/status"]
-          learnMode: true
+          learn_mode: True
 
 EventHandlers:
-        - id: "stpe"
-          json: true # optional default: false
-          type: "StreamPrinterEventHandler"
+        - id: stpe
+          json: True # optional default: False
+          type: StreamPrinterEventHandler
 
-        - id: "syslog"
-          type: "SyslogWriterEventHandler"
+        - id: syslog
+          type: SyslogWriterEventHandler

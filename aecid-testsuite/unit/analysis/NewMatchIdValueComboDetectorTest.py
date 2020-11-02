@@ -8,6 +8,8 @@ from unit.TestBase import TestBase
 
 
 class NewMatchIdValueComboDetectorTest(TestBase):
+    """Unittests for the NewMatchIdValueComboDetector."""
+
     log_lines = [
         b'type=SYSCALL msg=audit(1580367384.000:1): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 '
         b'ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 '

@@ -81,11 +81,10 @@ config_properties['LogPrefix'] = 'Original log line: '
 
 
 def build_analysis_pipeline(analysis_context):
-    """Define the function to create pipeline for parsing the log
-    data. It has also to define an AtomizerFactory to instruct AMiner
-    how to process incoming data streams to create log atoms from
-    them."""
-
+    """
+    Define the function to create pipeline for parsing the log data.
+    It has also to define an AtomizerFactory to instruct AMiner how to process incoming data streams to create log atoms from them.
+    """
     date_format_string = b'%Y-%m-%d %H:%M:%S'
     cron = b' cron['
 
@@ -296,7 +295,7 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis import MatchFilter
     match_filter = MatchFilter(analysis_context.aminer_config, ['/model/Random'], anomaly_event_handlers, target_value_list=[
-        1,10,100], output_log_line=True)
+        1, 10, 100], output_log_line=True)
     analysis_context.register_component(match_filter, component_name="MatchFilter")
     atom_filter.add_handler(match_filter)
 
@@ -307,6 +306,7 @@ def build_analysis_pipeline(analysis_context):
     atom_filter.add_handler(new_match_path_detector)
 
     def tuple_transformation_function(match_value_list):
+        """Only allow output of the EnhancedNewMatchPathValueComboDetector after every 10th element."""
         extra_data = enhanced_new_match_path_value_combo_detector.known_values_dict.get(tuple(match_value_list))
         if extra_data is not None:
             mod = 10
@@ -383,7 +383,6 @@ def build_analysis_pipeline(analysis_context):
     time_correlation_detector = TimeCorrelationDetector(
         analysis_context.aminer_config, anomaly_event_handlers, 2, min_rule_attributes=1, max_rule_attributes=5,
         record_count_before_event=10000, output_log_line=True)
-
     analysis_context.register_component(time_correlation_detector, component_name="TimeCorrelationDetector")
     atom_filter.add_handler(time_correlation_detector)
 

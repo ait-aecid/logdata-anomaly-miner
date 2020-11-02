@@ -11,10 +11,9 @@ from aminer.parsing import OptionalMatchModelElement
 from aminer.parsing import SequenceModelElement
 from aminer.parsing import VariableByteDataModelElement
 
+
 def get_model():
-
-    """This model defines how to parse Apache Access logs from the AIT-LDS."""
-
+    """Return a model to parse Apache Access logs from the AIT-LDS."""
     alphabet = b'!"#$%&\'()*+,-./0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\\^_`abcdefghijklmnopqrstuvwxyz{|}~=[]'
 
     model = SequenceModelElement('model', [
@@ -34,7 +33,8 @@ def get_model():
         FirstMatchModelElement('fm', [
             FixedDataModelElement('dash', b'-'),
             SequenceModelElement('request', [
-                FixedWordlistDataModelElement('method', [b'GET', b'POST', b'PUT', b'HEAD', b'DELETE', b'CONNECT', b'OPTIONS', b'TRACE', b'PATCH']),
+                FixedWordlistDataModelElement('method', [
+                    b'GET', b'POST', b'PUT', b'HEAD', b'DELETE', b'CONNECT', b'OPTIONS', b'TRACE', b'PATCH']),
                 FixedDataModelElement('sp6', b' '),
                 DelimitedDataModelElement('request', b' ', b'\\'),
                 FixedDataModelElement('sp7', b' '),
@@ -45,8 +45,8 @@ def get_model():
         DecimalIntegerValueModelElement('status_code'),
         FixedDataModelElement('sp9', b' '),
         DecimalIntegerValueModelElement('content_size'),
-        OptionalMatchModelElement('combined',
-            SequenceModelElement('combined', [
+        OptionalMatchModelElement(
+            'combined', SequenceModelElement('combined', [
                 FixedDataModelElement('sp10', b' "'),
                 DelimitedDataModelElement('referer', b'"', b'\\'),
                 FixedDataModelElement('sp11', b'" "'),

@@ -11,6 +11,8 @@ from unit.TestBase import TestBase
 
 
 class MatchValueStreamWriterTest(TestBase):
+    """Unittests for the MatchValueStreamWriter."""
+
     euro = b'Euro '
     match_sequence_s1 = 'match/sequence/s1'
     match_sequence_d1 = 'match/sequence/d1'
@@ -46,8 +48,10 @@ class MatchValueStreamWriterTest(TestBase):
         self.assertEqual(output_stream.getvalue().decode(), '25537;Euro \n25538;Euro \n25539;Euro \n25540;Euro \n')
 
     def test2all_atoms_match_no_seperator(self):
-        """This test case sets up a set of values, which are all expected to be matched. The seperator string is None,
-        so all values are expected to be one string."""
+        """
+        This test case sets up a set of values, which are all expected to be matched.
+        The seperator string is None, so all values are expected to be one string.
+        """
         description = "Test2MatchValueStreamWriter"
         output_stream = BytesIO()
         match_context = MatchContext(b'25537Euro 25538Euro 25539Euro 25540Euro ')
@@ -78,8 +82,10 @@ class MatchValueStreamWriterTest(TestBase):
         self.assertEqual(output_stream.getvalue().decode(), '25537Euro \n25538Euro \n25539Euro \n25540Euro \n')
 
     def test3atom_no_match_missing_value_string_empty(self):
-        """This test case sets up a set of values, which are all expected to be matched. The missing value string is none,
-        so when a string does not match it is simply ignored."""
+        """
+        This test case sets up a set of values, which are all expected to be matched.
+        The missing value string is None, so when a string does not match it is simply ignored.
+        """
         description = "Test3MatchValueStreamWriter"
         output_stream = BytesIO()
         match_context = MatchContext(b'25537Euro 25538Euro 25539Euro 25540Pfund ')
@@ -111,8 +117,10 @@ class MatchValueStreamWriterTest(TestBase):
         self.assertEqual(output_stream.getvalue().decode(), '25537;Euro \n25538;Euro \n25539;Euro \n25540;\n')
 
     def test4atom_no_match_missing_value_string_set(self):
-        """This test case sets up a set of values, which are all expected to be matched.The missing value string is set to a value,
-        so when a string does not match this value is used instead."""
+        """
+        This test case sets up a set of values, which are all expected to be matched.
+        The missing value string is set to a value, so when a string does not match this value is used instead.
+        """
         description = "Test4MatchValueStreamWriter"
         output_stream = BytesIO()
         match_context = MatchContext(b'25537Euro 25538Euro 25539Euro 25540Pfund ')

@@ -81,7 +81,7 @@ In order to execute test classes the current path must be the *logdata-anomaly-m
      ├── util
           ├── __init__.py
           ├── JsonUtilTest.py
-          ├── PersistencyUtilTest.py
+          ├── PersistenceUtilTest.py
           ├── SecureOSFunctionsTest.py
 ```
 

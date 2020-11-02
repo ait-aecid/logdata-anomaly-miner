@@ -1,4 +1,5 @@
-"""This module defines a model element to detect fixed strings from a list of words.
+"""
+This module defines a model element to detect fixed strings from a list of words.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -16,14 +17,19 @@ from aminer.parsing.MatchElement import MatchElement
 
 
 class FixedWordlistDataModelElement(ModelElementInterface):
-    """This class defines a model element to detect fixed strings from a list of words. The match will return the position of
-    the word in the search list, thus the sorting of the list is important. Apart from that, the wordlist must not contain any
-    words, that are identical to the beginning of words later in the list. In that case, the longer match could never be detected."""
+    """
+    This class defines a model element to detect fixed strings from a list of words.
+    The match will return the position of the word in the search list, thus the sorting of the list is important. Apart from that, the
+    wordlist must not contain any words, that are identical to the beginning of words later in the list. In that case, the longer match
+    could never be detected.
+    """
 
     def __init__(self, path_id, wordlist):
-        """Create the model element.
+        """
+        Create the model element.
         @param wordlist the list of words to search for. If it does not fulfill the sorting criteria mentioned in the class documentation,
-        an Exception will be raised."""
+        an Exception will be raised.
+        """
         self.path_id = path_id
         self.wordlist = wordlist
         for test_pos, ref_word in enumerate(wordlist):
@@ -31,9 +37,15 @@ class FixedWordlistDataModelElement(ModelElementInterface):
                 if test_word.startswith(ref_word):
                     raise Exception('Word %s would be shadowed by word %s at lower position' % (repr(test_word), repr(ref_word)))
 
+    def get_id(self):
+        """Get the element ID."""
+        return self.path_id
+
     def get_child_elements(self):
-        """Get all possible child model elements of this element.
-        @return None as there are no children of this element."""
+        """
+        Get all possible child model elements of this element.
+        @return None as there are no children of this element.
+        """
         return None
 
     def get_match_element(self, path, match_context):

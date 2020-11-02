@@ -18,7 +18,7 @@ from aminer.parsing import WhiteSpaceLimitedDataModelElement
 
 
 def get_model():
-    """This function defines how to parse a audispd message logged via syslog after any standard logging preamble, e.g. from syslog."""
+    """Return a model to parse a audispd message logged via syslog after any standard logging preamble, e.g. from syslog."""
 
     class ExecArgumentDataModelElement():
         """This is a helper class for parsing the (encoded) exec argument strings found within audit logs."""
@@ -32,8 +32,10 @@ def get_model():
             return None
 
         def get_match_element(self, path, match_context):
-            """Find the maximum number of bytes belonging to an exec argument.
-            @return a match when at least two bytes were found including the delimiters."""
+            """
+            Find the maximum number of bytes belonging to an exec argument.
+            @return a match when at least two bytes were found including the delimiters.
+            """
             data = match_context.match_data
             match_len = 0
             match_value = b''

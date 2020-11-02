@@ -12,6 +12,7 @@ from datetime import datetime
 
 class SyslogWriterEventHandlerTest(TestBase):
     """Some of the test cases may fail if the same numbers as the PID are found in the syslog. Rerun the unit, when this happens."""
+
     __expected_string = '[0] %s New value for pathes %s, %s: %s\n[0-1] %s: "%s" (%d lines)\n[0-2]   %s\n[0-3]   %s\n'
     __expected_string2 = '[0] %s New value for pathes %s, %s: %s\n[0-1] %s: "%s" (%d lines)\n'
 

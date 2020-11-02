@@ -1,4 +1,5 @@
-"""This module provides base64 string matching.
+"""
+This module provides base64 string matching.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -24,12 +25,22 @@ class Base64StringModelElement(ModelElementInterface):
     def __init__(self, path_id):
         self.path_id = path_id
 
+    def get_id(self):
+        """Get the element ID."""
+        return self.path_id
+
     def get_child_elements(self):
+        """
+        Get all possible child model elements of this element.
+        @return None as no children are allowed.
+        """
         return None
 
     def get_match_element(self, path, match_context):
-        """Find the maximum number of bytes forming a integer number according to the parameters specified
-        @return a match when at least one byte being a digit was found"""
+        """
+        Find the maximum number of bytes forming a integer number according to the parameters specified.
+        @return a match when at least one byte being a digit was found.
+        """
         data = match_context.match_data
         match_len = 0
         at_end_flag = False
