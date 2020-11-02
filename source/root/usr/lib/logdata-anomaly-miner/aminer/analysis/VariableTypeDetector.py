@@ -9,7 +9,7 @@ from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input import AtomHandlerInterface
 from aminer.util import TimeTriggeredComponentInterface
-from aminer.util import PersistencyUtil
+from aminer.util import PersistenceUtil
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
 
@@ -591,13 +591,13 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 'num_bt = 20, alpha = 0.025': [0.0012650966644287111, 0.012348556518554692, 0.032070970535278326, 0.05733404159545899, 0.08657145500183107, 0.11893157958984377, 0.1539091587066651, 0.19119005203247075, 0.2305778980255127, 0.27195787429809565, 0.31527810096740716, 0.36054258346557605, 0.4078114986419677, 0.4572108268737792, 0.5089540958404539, 0.5633859634399412, 0.6210731983184814, 0.6830172538757324, 0.7512671947479248, 0.8315665245056152]  # skipcq: FLK-E501
                 }
 
-        # Loads the persistency
+        # Loads the persistence
         self.persistence_id = persistence_id
-        PersistencyUtil.add_persistable_component(self)
+        PersistenceUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
-        persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
 
-        # Imports the persistency
+        # Imports the persistence
         if persistence_data is not None:
             self.load_persistence_data(persistence_data)
 
@@ -663,16 +663,16 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     self.var_type_history_list_reference, self.failed_indicators, [[self.distr_val[event_index][var_index] if (
                         len(self.distr_val[event_index][var_index]) > 0 and self.var_type[event_index][var_index][0] == 'emp') else [] for
                             var_index in range(len(self.distr_val[event_index]))] for event_index in range(len(self.distr_val))]]
-        PersistencyUtil.store_json(self.persistence_file_name, tmp_list)
+        PersistenceUtil.store_json(self.persistence_file_name, tmp_list)
         self.next_persist_time = None
 
         if self.save_statistics:
-            PersistencyUtil.store_json(self.statistics_file_name, [
+            PersistenceUtil.store_json(self.statistics_file_name, [
                 self.failed_indicators_total, self.failed_indicators_values, self.failed_indicators_paths, self.failed_indicators])
 
     def load_persistence_data(self, persistence_data):
-        """Extract the persistency data and appends various lists to create a consistent state."""
-        # Import the lists of the persistency
+        """Extract the persistence data and appends various lists to create a consistent state."""
+        # Import the lists of the persistence
         self.var_type = persistence_data[0]
         self.alternative_distribution_types = persistence_data[1]
         self.var_type_history_list = persistence_data[2]
@@ -681,7 +681,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         self.distr_val = persistence_data[5]
         self.num_events = len(self.var_type)
 
-        # Create the initial lists which derive from the persistency
+        # Create the initial lists which derive from the persistence
         # Number of variables of the single events
         self.length = [len(self.event_type_detector.variable_key_list[event_index]) for event_index in range(self.num_events)]
         self.variable_path_num = [[]] * self.num_events

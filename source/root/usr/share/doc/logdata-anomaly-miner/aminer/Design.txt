@@ -38,7 +38,7 @@ data sources:
     whole analysis child configuration (code). When missing those
     configuration parameters are also taken from the main config.
 
-  * /var/lib/aminer: This directory is used for persistency of
+  * /var/lib/aminer: This directory is used for persistence of
     runtime data, e.g. learned patterns, statistical data, between
     different AMiner invocations.
 

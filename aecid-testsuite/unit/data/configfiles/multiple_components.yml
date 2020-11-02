@@ -1,0 +1,238 @@
+LearnMode: True # optional
+Core.PersistenceDir: '/var/tmp/test2/aminer'
+
+LogResourceList:
+        - 'file:///var/tmp/test2/log/access.log'
+
+Parser:
+        - id: host_name_model
+          type: VariableByteDataModelElement
+          name: 'host'
+          args: '-.01234567890abcdefghijklmnopqrstuvwxyz:'
+        
+        - id: identity_model
+          type: VariableByteDataModelElement
+          name: 'ident'
+          args: '-.01234567890abcdefghijklmnopqrstuvwxyz:'
+
+        - id: user_name_model
+          type: VariableByteDataModelElement
+          name: 'user'
+          args: '0123456789abcdefghijklmnopqrstuvwxyz.-'
+
+        - id: new_time_model
+          type: DateTimeModelElement
+          name: 'time'
+          args: '[%d/%b/%Y:%H:%M:%S +0000]'
+
+        - id: sq3
+          type: FixedDataModelElement
+          name: 'sq3'
+          args: ' "'
+
+        - id: request_method_model
+          type: FixedWordlistDataModelElement
+          name: 'method'
+          args:
+                  - 'GET'
+                  - 'POST'
+                  - 'PUT'
+                  - 'HEAD'
+                  - 'DELETE'
+                  - 'CONNECT'
+                  - 'OPTIONS'
+                  - 'TRACE'
+                  - 'PATCH'
+
+        - id: request_model
+          type: VariableByteDataModelElement
+          name: 'request'
+          args: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-/()[]{}!$%&=<?*+'
+
+        - id: http1
+          type: FixedDataModelElement
+          name: 'http1'
+          args: ' HTTP/'
+
+        - id: version_model
+          type: VariableByteDataModelElement
+          name: 'version'
+          args: '0123456789.'
+
+        - id: sq4
+          type: FixedDataModelElement
+          name: 'sq4'
+          args: '" '
+
+        - id: status_code_model
+          type: DecimalIntegerValueModelElement
+          name: 'status'
+
+        - id: size_model
+          type: DecimalIntegerValueModelElement
+          name: 'size'
+
+        - id: sq5
+          type: FixedDataModelElement
+          name: 'sq5'
+          args: ' "-" "'
+
+        - id: user_agent_model
+          type: VariableByteDataModelElement
+          name: 'useragent'
+          args: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-/()[]{}!$%&=<?*+;:_ '
+
+        - id: sq6
+          type: FixedDataModelElement
+          name: 'sq6'
+          args: '"'
+
+        - id: 'startModel'
+          start: True
+          type: SequenceModelElement
+          name: 'accesslog'
+          args:
+                  - host_name_model
+                  - WHITESPACE
+                  - identity_model
+                  - WHITESPACE
+                  - user_name_model
+                  - WHITESPACE
+                  - new_time_model
+                  - sq3
+                  - request_method_model
+                  - WHITESPACE
+                  - request_model
+                  - http1
+                  - version_model
+                  - sq4
+                  - status_code_model
+                  - WHITESPACE
+                  - size_model
+                  - sq5
+                  - user_agent_model
+                  - sq6
+Input:
+        timestamp_paths: ["/accesslog/time"]
+        verbose: False # use this to debug your parser-model
+
+Analysis:
+        - type: TimestampsUnsortedDetector
+          id: TimestampsUnsortedDetector
+        - type: NewMatchPathValueDetector
+          id: NewMatchPathValueDetector
+          paths: ["/accesslog/status"]
+        - type: NewMatchPathValueComboDetector
+          id: NewMatchPathValueComboDetector
+          paths: ["/accesslog/method","/accesslog/request","/accesslog/useragent"]
+        - type: LinearNumericBinDefinition
+          id: linear_numeric_bin_definition
+          lower_limit: 50
+          bin_size: 5
+          bin_count: 20
+          outlier_bins_flag: True
+        - type: ModuloTimeBinDefinition
+          id: modulo_time_bin_definition
+          modulo_value: 86400
+          time_unit: 3600
+          lower_limit: 0
+          bin_size: 1
+          bin_count: 24
+          outlier_bins_flag: True
+        - type: HistogramAnalysis
+          id: HistogramAnalysis
+          histogram_defs: [["/model/RandomTime/Random", "linear_numeric_bin_definition"]]
+          report_interval: 10
+          output_logline: True
+        - type: PathDependentHistogramAnalysis
+          id: PathDependentHistogramAnalysis
+          path: "/model/RandomTime"
+          bin_definition: "modulo_time_bin_definition"
+          report_interval: 10
+          output_logline: True
+        - type: EnhancedNewMatchPathValueComboDetector
+          id: EnhancedNewMatchPathValueComboDetector
+          paths: ["/model/DailyCron/UName", "/model/DailyCron/JobNumber"]
+          tuple_transformation_function: demo
+          output_logline: True
+        - type: MatchFilter
+          id: MatchFilter
+          paths: ["/model/Random"]
+          value_list: [1, 10, 100]
+          output_logline: True
+        - type: MatchValueAverageChangeDetector
+          id: MatchValueAverageChangeDetector
+          timestamp_path: None
+          paths: ["/model/Random"]
+          min_bin_elements: 100
+          min_bin_time: 10
+          output_logline: True
+        - type: MatchValueStreamWriter
+          id: MatchValueStreamWriter
+          stream: "sys.stdout"
+          paths: ["/model/Sensors/CPUTemp", "/model/Sensors/CPUWorkload", "/model/Sensors/DTM"]
+          separator: ";"
+          missing_value_string: ""
+        - type: NewMatchPathDetector
+          id: NewMatchPathDetector
+        - type: PathExistsMatchRule
+          id: path_exists_match_rule1
+          path: "/model/LoginDetails/PastTime/Time/Minutes"
+        - type: PathExistsMatchRule
+          id: path_exists_match_rule2
+          path: "/model/LoginDetails"
+        - type: ValueMatchRule
+          id: value_match_rule
+          path: "/model/LoginDetails/Username"
+          value: "root"
+        - type: NegationMatchRule
+          id: negation_match_rule1
+          sub_rule: "value_match_rule"
+        - type: NegationMatchRule
+          id: negation_match_rule2
+          sub_rule: "path_exists_match_rule2"
+        - type: AndMatchRule
+          id: and_match_rule1
+          sub_rules: ["path_exists_match_rule1", "negation_match_rule1"]
+        - type: AndMatchRule
+          id: and_match_rule2
+          sub_rules: ["negation_match_rule1", "path_exists_match_rule2"]
+        - type: OrMatchRule
+          id: or_match_rule
+          sub_rules: ["and_match_rule1", "and_match_rule2", "negation_match_rule2"]
+        - type: CorrelationRule
+          rule_id: correlation_rule
+          min_time_delta: 5
+          max_time_delta: 6
+          max_artefacts_a_for_single_b: 1
+          artefact_match_parameters: [["/model/CronAnnouncement/JobNumber", "/model/CronExecution/JobNumber"]]
+        - type: EventClassSelector
+          action_id: a_class_selector
+          artefact_a_rules: ["correlation_rule"]
+        - type: EventClassSelector
+          action_id: b_class_selector
+          artefact_b_rules: ["correlation_rule"]
+        - type: PathExistsMatchRule
+          id: path_exists_match_rule3
+          path: "/model/CronAnnouncement/Run"
+          match_action: "a_class_selector"
+        - type: PathExistsMatchRule
+          id: path_exists_match_rule4
+          path: "/model/CronExecution/Job"
+          match_action: "b_class_selector"
+        - type: TimeCorrelationViolationDetector
+          id: TimeCorrelationViolationDetector
+          ruleset: ["path_exists_match_rule3", "path_exists_match_rule4"]
+        - type: SimpleMonotonicTimestampAdjust
+          id: SimpleMonotonicTimestampAdjust
+        - type: AllowlistViolationDetector
+          id: AllowlistViolationDetector
+          allowlist_rules: ["or_match_rule"]
+
+EventHandlers:
+        - id: stpe
+          type: StreamPrinterEventHandler
+        - id: syslog_writer_event_handler
+          type: SyslogWriterEventHandler
+        - id: default_mail_notification_handler
+          type: DefaultMailNotificationEventHandler
