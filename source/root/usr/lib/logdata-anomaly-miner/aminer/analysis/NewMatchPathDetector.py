@@ -113,5 +113,12 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             raise Exception('Event not from this source')
         if allowlisting_data is not None:
             raise Exception('Allowlisting data not understood by this detector')
-        self.known_path_set.add(event_data[1])
-        return 'Allowlisted path %s in %s' % (event_data[1], sorted_log_lines[0])
+        allowlisted_str = ''
+        for path_name in event_data[1]:
+            if path_name in self.known_path_set:
+                continue
+            self.known_path_set.add(path_name)
+            if allowlisted_str:
+                allowlisted_str += ', '
+            allowlisted_str += path_name
+        return 'Allowlisted path(es) %s in %s' % (allowlisted_str, sorted_log_lines[0])

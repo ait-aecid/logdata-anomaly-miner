@@ -135,7 +135,7 @@
                     'hypotheses_eval_delta_time': {'type': 'float', 'required': False, 'default': 120.0},
                     'delta_time_to_discard_hypothesis': {'type': 'float', 'required': False, 'default': 180.0},
                     'check_rules_flag': {'type': 'boolean', 'required': False, 'default': True},
-                    'whitelisted_paths': {
+                    'allowlisted_paths': {
                         'type': 'list', 'schema': {'type': 'string'}, 'required': False, 'nullable': True, 'default': None},
                     'id_path_list': {'type': 'list', 'required': False, 'default': []},
                     'min_allowed_time_diff': {'type': 'float', 'required': False, 'default': 5.0},
@@ -185,7 +185,7 @@
                     'artefact_b_rules': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                     'ruleset': {'type': 'list', 'schema': {'type': 'string'}},
                     'exit_on_error_flag': {'type': 'boolean', 'required': False, 'default': False},
-                    'whitelist_rules': {'type': 'list', 'schema': {'type': 'string'}},
+                    'allowlist_rules': {'type': 'list', 'schema': {'type': 'string'}},
                     'parsed_atom_handler_lookup_list': {
                         'type': 'list', 'schema': {'type': 'list', 'schema': {'type': 'string', 'nullable': True}}},
                     'default_parsed_atom_handler': {'type': 'string', 'required': False, 'nullable': True, 'default': None},

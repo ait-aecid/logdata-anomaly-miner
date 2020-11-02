@@ -22,15 +22,15 @@ class NewMatchPathValueDetectorTest(TestBase):
     string2 = "{'first/f1/s1': '25537 uid=2'}\nb'25537 uid=2'"
 
     fixed_dme = FixedDataModelElement('s1', string)
-    decimalIntegerValueME = DecimalIntegerValueModelElement('d1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
-                                                            DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+    decimal_integer_value_me = DecimalIntegerValueModelElement('d1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                                                               DecimalIntegerValueModelElement.PAD_TYPE_NONE)
 
     match_context_first_match_me = MatchContext(string)
-    first_match_me = FirstMatchModelElement('f1', [fixed_dme, decimalIntegerValueME])
+    first_match_me = FirstMatchModelElement('f1', [fixed_dme, decimal_integer_value_me])
     match_element_first_match_me = first_match_me.get_match_element('first', match_context_first_match_me)
 
     match_context_first_match_me2 = MatchContext(string)
-    first_match_me2 = FirstMatchModelElement('f2', [decimalIntegerValueME, fixed_dme])
+    first_match_me2 = FirstMatchModelElement('f2', [decimal_integer_value_me, fixed_dme])
     match_element_first_match_me2 = first_match_me2.get_match_element('second', match_context_first_match_me2)
 
     def test1_log_atom_not_known(self):

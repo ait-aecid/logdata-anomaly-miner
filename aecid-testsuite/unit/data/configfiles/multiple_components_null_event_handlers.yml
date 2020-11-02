@@ -225,8 +225,8 @@ Analysis:
           ruleset: ["path_exists_match_rule3", "path_exists_match_rule4"]
         - type: SimpleMonotonicTimestampAdjust
           id: SimpleMonotonicTimestampAdjust
-        - type: WhitelistViolationDetector
-          id: WhitelistViolationDetector
-          whitelist_rules: ["or_match_rule"]
+        - type: AllowlistViolationDetector
+          id: AllowlistViolationDetector
+          allowlist_rules: ["or_match_rule"]
 
 EventHandlers: null

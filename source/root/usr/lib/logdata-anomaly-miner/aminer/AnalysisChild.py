@@ -24,7 +24,6 @@ import sys
 import time
 import traceback
 import resource
-import subprocess  # skipcq: BAN-B404
 import logging
 
 from aminer import AMinerConfig
@@ -226,30 +225,6 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                 resource.setrlimit(resource.RLIMIT_AS, (max_memory_mb * 1024 * 1024, resource.RLIM_INFINITY))
             except ValueError:
                 print('FATAL: %s must be an integer, terminating' % AMinerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE, file=sys.stderr)
-                return 1
-
-        max_cpu_percent_usage = self.analysis_context.aminer_config.config_properties.get(AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE)
-        if max_cpu_percent_usage is not None:
-            try:
-                max_cpu_percent_usage = int(max_cpu_percent_usage)
-                # limit
-                pid = os.getpid()
-                package_installed_cmd = ['dpkg', '-l', 'cpulimit']
-                cpulimit_cmd = ['cpulimit', '-p', str(pid), '-l', str(max_cpu_percent_usage)]
-
-                # skipcq: BAN-B603
-                with subprocess.Popen(package_installed_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as out:
-                    stdout, _stderr = out.communicate()
-
-                if 'dpkg-query: no packages found matching cpulimit' in stdout.decode():
-                    print(
-                        'FATAL: cpulimit package must be installed, when using the property %s' %
-                        AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE, file=sys.stderr)
-                    return 1
-                # skipcq: BAN-B603
-                _out = subprocess.Popen(cpulimit_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            except ValueError:
-                print('FATAL: %s must be an integer, terminating' % AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE, file=sys.stderr)
                 return 1
 
         # Load continuation data for last known log streams. The loaded data has to be a dictionary with repositioning information for
@@ -538,11 +513,11 @@ class AnalysisChildRemoteControlHandler:
                     'add_handler_to_atom_filter_and_register_analysis_component':
                         methods.add_handler_to_atom_filter_and_register_analysis_component,
                     'save_current_config': methods.save_current_config,
-                    'whitelist_event_in_component': methods.whitelist_event_in_component,
+                    'allowlist_event_in_component': methods.allowlist_event_in_component,
                     'dump_events_from_history': methods.dump_events_from_history,
                     'ignore_events_from_history': methods.ignore_events_from_history,
                     'list_events_from_history': methods.list_events_from_history,
-                    'whitelist_events_from_history': methods.whitelist_events_from_history,
+                    'allowlist_events_from_history': methods.allowlist_events_from_history,
                     'EnhancedNewMatchPathValueComboDetector': aminer.analysis.EnhancedNewMatchPathValueComboDetector,
                     'EventCorrelationDetector': aminer.analysis.EventCorrelationDetector,
                     'EventTypeDetector': aminer.analysis.EventTypeDetector,
@@ -562,7 +537,7 @@ class AnalysisChildRemoteControlHandler:
                     'TimestampCorrectionFilters': aminer.analysis.TimestampCorrectionFilters,
                     'TimestampsUnsortedDetector': aminer.analysis.TimestampsUnsortedDetector,
                     'VariableTypeDetector': aminer.analysis.VariableTypeDetector,
-                    'WhitelistViolationDetector': aminer.analysis.WhitelistViolationDetector}
+                    'AllowlistViolationDetector': aminer.analysis.AllowlistViolationDetector}
                 # write this to the log file!
                 logging.basicConfig(filename=AMinerConfig.LOG_FILE, level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s',
                                     datefmt='%d.%m.%Y %H:%M:%S')
