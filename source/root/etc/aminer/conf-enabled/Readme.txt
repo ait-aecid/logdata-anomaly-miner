@@ -7,4 +7,4 @@ on this host within a process running with elevated privileges,
 you can also include only some site package components by placing
 symlinks here, e.g.
 
-ln -s /usr/lib/python2.7/dist-packages/pytz conf-enabled/pytz
+ln -s /usr/lib/python3.6/dist-packages/pytz conf-enabled/pytz
