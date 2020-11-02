@@ -30,8 +30,10 @@ flame = ("            *     (        )       (     \n"
 
 
 def supports_color():
-    """Returns True if the running system's terminal supports color, and False otherwise.
-    The function was borrowed from the django-project (https://github.com/django/django/blob/master/django/core/management/color.py)"""
+    """
+    Return True if the running system's terminal supports color, and False otherwise.
+    The function was borrowed from the django-project (https://github.com/django/django/blob/master/django/core/management/color.py)
+    """
     plat = sys.platform
     supported_platform = plat != 'Pocket PC' and (plat != 'win32' or 'ANSICON' in os.environ)
     # isatty is not always implemented, #6223.
@@ -62,6 +64,7 @@ def print_help(program_name, version=False):
 
 
 def clear_persistence(persistence_dir_name):
+    """Delete all persistence data from the persistence_dir."""
     for filename in os.listdir(persistence_dir_name):
         if filename == 'backup':
             continue
@@ -76,6 +79,7 @@ def clear_persistence(persistence_dir_name):
 
 
 def copytree(src, dst, symlinks=False, ignore=None):
+    """Copy a directory recursively. This method has no issue with the destination directory existing (shutil.copytree has)."""
     for item in os.listdir(src):
         s = os.path.join(src, item)
         d = os.path.join(dst, item)
@@ -86,6 +90,7 @@ def copytree(src, dst, symlinks=False, ignore=None):
 
 
 def main():
+    """Run the aminer-persistence program."""
     # Extract program name, but only when sure to contain no problematic characters.
     program_name = sys.argv[0].split('/')[-1]
     if (program_name == '.') or (program_name == '..') or (re.match('^[a-zA-Z0-9._-]+$', program_name) is None):

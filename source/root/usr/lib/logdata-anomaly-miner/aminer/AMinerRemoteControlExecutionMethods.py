@@ -284,7 +284,7 @@ class AMinerRemoteControlExecutionMethods:
         self.REMOTE_CONTROL_RESPONSE = AMinerConfig.save_config(analysis_context, destination_file)
 
     def persist_all(self):
-        """Persist all data by calling PersistencyUtil.persist_all()"""
+        """Persist all data by calling PersistenceUtil.persist_all()."""
         PersistencyUtil.persist_all()
         self.REMOTE_CONTROL_RESPONSE = 'OK'
 

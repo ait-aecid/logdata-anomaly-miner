@@ -143,6 +143,7 @@ def run_analysis_child(aminer_config, program_name):
 
 
 def clear_persistence(persistence_dir_name):
+    """Delete all persistence data from the persistence_dir."""
     for filename in os.listdir(persistence_dir_name):
         if filename == 'backup':
             continue
@@ -157,6 +158,7 @@ def clear_persistence(persistence_dir_name):
 
 
 def copytree(src, dst, symlinks=False, ignore=None):
+    """Copy a directory recursively. This method has no issue with the destination directory existing (shutil.copytree has)."""
     for item in os.listdir(src):
         s = os.path.join(src, item)
         d = os.path.join(dst, item)
