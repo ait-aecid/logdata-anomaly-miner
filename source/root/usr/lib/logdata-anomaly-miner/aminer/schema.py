@@ -73,6 +73,15 @@
             'type': 'integer',
             'default': 3600
         },
+        'Log.StatisticsLevel': {
+            'required': False,
+            'type': 'integer',
+            'default': 1},
+        'Log.DebugLevel': {
+            'required': False,
+            'type': 'integer',
+            'default': 1
+        },
         'Parser': {
             'required': True,
             'type': 'list',

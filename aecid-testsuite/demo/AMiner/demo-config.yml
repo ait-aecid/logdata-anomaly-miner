@@ -23,6 +23,10 @@ LogPrefix: 'Original log line: '
 
 Log.StatisticsPeriod: 3600
 
+Log.StatisticsLevel: 1
+
+Log.DebugLevel: 1
+
 Parser:
        - id: space
          type: FixedDataModelElement

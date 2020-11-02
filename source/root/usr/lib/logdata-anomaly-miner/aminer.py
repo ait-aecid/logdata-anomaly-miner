@@ -164,7 +164,11 @@ def initialize_loggers(aminer_config):
     stat_logger = logging.getLogger(AMinerConfig.STAT_LOG_NAME)
     stat_logger.setLevel(logging.INFO)
     if os.path.exists(persistence_dir):
-        stat_file_handler = logging.FileHandler(os.path.join(persistence_dir, 'statistics.log'))
+        try:
+            stat_file_handler = logging.FileHandler(os.path.join(persistence_dir, 'statistics.log'))
+        except OSError as e:
+            print('Could not create or open %s: %s. Stopping..' % (os.path.join(persistence_dir, 'statistics.log'), e), file=sys.stderr)
+            sys.exit(1)
     stat_file_handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(message)s', datefmt=datefmt))
     stat_logger.addHandler(stat_file_handler)
 
@@ -201,6 +205,8 @@ def main():
     from_begin_flag = False
     stat_level = 1
     debug_level = 1
+    stat_level_console_flag = False
+    debug_level_console_flag = False
 
     arg_pos = 1
     while arg_pos < len(sys.argv):
@@ -232,6 +238,7 @@ def main():
                 stat_level = 2
             elif stat_level in ('q', 'quiet'):
                 stat_level = 0
+            stat_level_console_flag = True
             continue
         if arg_name in ('--Debug', '--debug', '-d'):
             debug_level = sys.argv[arg_pos]
@@ -245,6 +252,7 @@ def main():
                 debug_level = 2
             elif debug_level in ('q', 'quiet'):
                 debug_level = 0
+            debug_level_console_flag = True
             continue
         if arg_name in ('--RunAnalysis', '--runAnalysis', '--runanalysis', '-r'):
             run_analysis_child_flag = True
@@ -284,6 +292,11 @@ def main():
     except ValueError as e:
         print("Config-Error: %s" % e)
         sys.exit(1)
+
+    if not stat_level_console_flag and AMinerConfig.KEY_LOG_STAT_LEVEL in aminer_config.config_properties:
+        stat_level = aminer_config.config_properties[AMinerConfig.KEY_LOG_STAT_LEVEL]
+    if not debug_level_console_flag and AMinerConfig.KEY_LOG_DEBUG_LEVEL in aminer_config.config_properties:
+        debug_level = aminer_config.config_properties[AMinerConfig.KEY_LOG_DEBUG_LEVEL]
 
     AMinerConfig.STAT_LEVEL = stat_level
     AMinerConfig.DEBUG_LEVEL = debug_level

@@ -37,6 +37,8 @@ DEBUG_LOG_NAME = 'DEBUG'
 DEBUG_LOG_FILE = '/tmp/aminer.log'
 KEY_LOG_STAT_PERIOD = 'Log.StatisticsPeriod'
 DEFAULT_STAT_PERIOD = 3600
+KEY_LOG_STAT_LEVEL = 'Log.StatisticsLevel'
+KEY_LOG_DEBUG_LEVEL = 'Log.DebugLevel'
 
 
 def load_config(config_file_name):
@@ -123,8 +125,13 @@ def save_config(analysis_context, new_file):
             if old_component_name != '"%s"' % name:
                 old = old[:old_component_name_start] + '"%s"' % name + old[old_component_name_end + 1:]
 
-    with open(REMOTE_CONTROL_LOG_FILE, "r") as logFile:
-        logs = logFile.readlines()
+    try:
+        with open(REMOTE_CONTROL_LOG_FILE, "r") as logFile:
+            logs = logFile.readlines()
+    except OSError as e:
+        msg = 'Could not read %s: %s' % (REMOTE_CONTROL_LOG_FILE, e)
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+        print(msg, file=sys.stderr)
 
     i = len(logs) - 1
     while i > 0:
