@@ -12,6 +12,8 @@ from datetime import datetime
 
 
 class DefaultMailNotificationEventHandlerTest(TestBase):
+    """Unittests for the DefaultMailNotificationEventHandler."""
+
     __expected_string = '%s New value for pathes %s: %s\n%s: "%s" (%d lines)\n  %s'
     mail_call = 'echo p | mail -u root'
     mail_call = 'echo p | mail -u mail'
@@ -21,9 +23,11 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
     datetime_format_string = '%Y-%m-%d %H:%M:%S'
 
     def test1log_multiple_lines_event(self):
-        """In this test case multiple lines should be received, before sending an email to root@localhost. Make sure no mail
-        notifications are in /var/spool/mail/root, before running this test. This test case must wait some time to ensure, that the mail
-        can be read."""
+        """
+        In this test case multiple lines should be received, before sending an email to root@localhost.
+        Make sure no mail notifications are in /var/spool/mail/root, before running this test. This test case must wait some time to
+        ensure, that the mail can be read.
+        """
         description = "Test1DefaultMailNotificationEventHandler"
         match_context = MatchContext(self.pid)
         fixed_dme = FixedDataModelElement('s1', self.pid)
@@ -68,7 +72,7 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
                 str(result.stdout, 'utf-8'))
 
     def test2do_timer(self):
-        """In this test case the functionality of the timer is tested. The eventCollectTime must not be 0!"""
+        """In this test case the functionality of the timer is tested. The eventCollectTime must not be 0."""
         description = "Test2DefaultMailNotificationEventHandler"
         default_mail_notification_event_handler = DefaultMailNotificationEventHandler(self.analysis_context)
         self.analysis_context.register_component(self, description)
@@ -117,6 +121,7 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
                 self.__class__.__name__, description, 1, match_element.get_match_string().decode() + "\n\n"), str(result.stdout, 'utf-8')))
 
     def test3check_email_addresses(self):
+        """Test if mail addresses are validated as expected."""
         ac = self.analysis_context
         ac.aminer_config.config_properties[DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS] = "test123@gmail.com"
         ac.aminer_config.config_properties[DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_FROM_ADDRESS] = "test123@gmail.com"

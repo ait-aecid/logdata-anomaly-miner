@@ -1,4 +1,5 @@
-"""This module defines functions for secure file handling.
+"""
+This module defines functions for secure file handling.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -22,11 +23,12 @@ no_secure_open_warn_once_flag = True
 
 
 def secure_open_file(file_name, flags):
-    """Secure opening of a file with given flags. This call will refuse to open files where any path component is a symlink.
+    """
+    Secure opening of a file with given flags. This call will refuse to open files where any path component is a symlink.
     As operating system does not provide any means to do that, open the file_name directory by directory. It also adds O_NOCTTY to the
     flags as controlling TTY logics as this is just an additional risk and does not make sense for opening of log files.
-    @param file_name is the fileName as byte string"""
-
+    @param file_name is the fileName as byte string
+    """
     if not file_name.startswith(b'/'):
         raise Exception('Secure open on relative path not supported')
     if (file_name.endswith(b'/')) and ((flags & os.O_DIRECTORY) == 0):
@@ -67,10 +69,12 @@ def secure_open_file(file_name, flags):
 
 
 def send_annotated_file_descriptor(send_socket, send_fd, type_info, annotation_data):
-    """Send file descriptor and associated annotation data via SCM_RIGHTS.
+    """
+    Send file descriptor and associated annotation data via SCM_RIGHTS.
     @param type_info has to be a null-byte free string to inform the receiver how to handle the file descriptor and how to interpret
     the annotationData.
-    @param annotation_data this optional byte array  may convey additional information about the file descriptor."""
+    @param annotation_data this optional byte array  may convey additional information about the file descriptor.
+    """
     # Construct the message data first
     if isinstance(type_info, str):
         type_info = type_info.encode()
@@ -88,10 +92,12 @@ def send_logstream_descriptor(send_socket, send_fd, send_file_name):
 
 
 def receive_annoted_file_descriptor(receive_socket):
-    """Receive a single file descriptor and attached annotation information via SCM_RIGHTS via the given socket. The method
-    may raise an Exception when invoked on non-blocking sockets and no messages available.
+    """
+    Receive a single file descriptor and attached annotation information via SCM_RIGHTS via the given socket.
+    The method may raise an Exception when invoked on non-blocking sockets and no messages available.
     @return a tuple containing the received file descriptor, type information (see sendAnnotatedFileDescriptor) and the annotation
-    information."""
+    information.
+    """
     message_data, anc_data, _flags, _remote_address = receive_socket.recvmsg(1 << 16, socket.CMSG_LEN(struct.calcsize('i')))
     if len(anc_data) != 1:
         raise Exception('Received %d sets of ancillary data instead of 1' % len(anc_data))

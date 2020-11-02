@@ -8,6 +8,8 @@ from datetime import datetime
 
 
 class NewMatchPathValueComboDetectorTest(TestBase):
+    """Unittests for the NewMatchPathValueComboDetector."""
+
     __expected_string = '%s New value combination(s) detected\n%s: "%s" (%d lines)\n%s\n\n'
     fixed_dme = FixedDataModelElement('s1', b'25537 uid=')
     fixed_dme2 = FixedDataModelElement('s2', b' uid=2')
@@ -29,9 +31,11 @@ class NewMatchPathValueComboDetectorTest(TestBase):
     match_element_sequence_me2 = seq2.get_match_element('second', match_context_sequence_me2)
 
     def test1_log_atom_not_known(self):
-        """This test case checks the correct processing of unknown log lines, which in reality means that an anomaly has been found. The
-        output is directed to an output stream and compared for accuracy. The auto_include_flag is False and the output must be
-        repeatable on second run."""
+        """
+        This test case checks the correct processing of unknown log lines, which in reality means that an anomaly has been found.
+        The output is directed to an output stream and compared for accuracy. The auto_include_flag is False and the output must be
+        repeatable on second run.
+        """
         description = "Test1NewMatchPathValueComboDetector"
         new_match_path_value_combo_detector = NewMatchPathValueComboDetector(self.aminer_config, [self.first_seq_s1, self.first_seq_d1], [
             self.stream_printer_event_handler], 'Default', False, False, output_log_line=False)
@@ -68,8 +72,10 @@ class NewMatchPathValueComboDetectorTest(TestBase):
             description + "2", 1, "  (25537, b' uid=2')\nb'25537 uid=2'"))
 
     def test2_log_atom_known(self):
-        """This test case checks the functionality of the auto_include_flag. If the same MatchElement is processed a second time and the
-        auto_include_flag was True, no event must be triggered."""
+        """
+        This test case checks the functionality of the auto_include_flag.
+        If the same MatchElement is processed a second time and the auto_include_flag was True, no event must be triggered.
+        """
         description = "Test2NewMatchPathValueComboDetector"
         new_match_path_value_combo_detector = NewMatchPathValueComboDetector(self.aminer_config, [self.first_seq_s1, self.first_seq_d1], [
             self.stream_printer_event_handler], 'Default', False, True, output_log_line=False)

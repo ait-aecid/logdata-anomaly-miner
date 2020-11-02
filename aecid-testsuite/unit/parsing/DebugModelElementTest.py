@@ -6,6 +6,7 @@ from aminer.parsing.MatchContext import MatchContext
 
 
 class DebugModelElementTest(unittest.TestCase):
+    """Unittests for the DebugModelElement."""
 
     def test1start_debugging(self):
         """This test case checks if the DebugModelElement was initiated and the output was correct."""

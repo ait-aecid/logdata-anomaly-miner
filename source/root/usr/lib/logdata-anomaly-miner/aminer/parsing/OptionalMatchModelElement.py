@@ -1,4 +1,5 @@
-"""This module defines a model element that is optional.
+"""
+This module defines a model element that is optional.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -16,8 +17,10 @@ from aminer.parsing import ModelElementInterface
 
 
 class OptionalMatchModelElement(ModelElementInterface):
-    """This class defines a model element tries to match against a given model element and if that fails returns a zero length
-    match anyway."""
+    """
+    This class defines a model element tries to match against a given model element.
+    If that fails returns a zero length match anyway.
+    """
 
     def __init__(self, element_id, optional_element):
         self.element_id = element_id

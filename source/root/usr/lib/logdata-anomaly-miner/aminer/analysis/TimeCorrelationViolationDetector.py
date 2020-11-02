@@ -1,4 +1,5 @@
-"""This module defines a detector for time correlation rules.
+"""
+This module defines a detector for time correlation rules.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -23,12 +24,16 @@ from aminer.analysis import Rules
 
 
 class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
-    """This class creates events when one of the given time correlation rules is violated. This is used to implement checks as depicted
-    in http://dx.doi.org/10.1016/j.cose.2014.09.006"""
+    """
+    This class creates events when one of the given time correlation rules is violated.
+    This is used to implement checks as depicted in http://dx.doi.org/10.1016/j.cose.2014.09.006
+    """
 
     def __init__(self, aminer_config, ruleset, anomaly_event_handlers, persistence_id='Default', output_log_line=True):
-        """Initialize the detector. This will also trigger reading or creation of persistence storage location.
-        @param ruleset a list of MatchRule rules with appropriate CorrelationRules attached as actions."""
+        """
+        Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        @param ruleset a list of MatchRule rules with appropriate CorrelationRules attached as actions.
+        """
         self.event_classification_ruleset = ruleset
         self.anomaly_event_handlers = anomaly_event_handlers
         self.next_persist_time = time.time() + 600.0
@@ -49,16 +54,17 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
                                                                               persistence_id)
 
     def receive_atom(self, log_atom):
-        """Receive a parsed atom and check all the classification rules, that will trigger correlation rule evaluation and event
-        triggering on violations."""
+        """Receive a parsed atom and evaluate all the classification rules and event triggering on violations."""
         self.last_log_atom = log_atom
         for rule in self.event_classification_ruleset:
             rule.match(log_atom)
 
     def get_time_trigger_class(self):
-        """Get the trigger class this component should be registered for. This trigger is used mainly for persistency, so real-time
-        triggering is needed. Use also real-time triggering for analysis: usually events for violations (timeouts) are generated when
-        receiving newer atoms. This is just the fallback periods of input silence."""
+        """
+        Get the trigger class this component should be registered for.
+        This trigger is used mainly for persistency, so real-time triggering is needed. Use also real-time triggering for analysis: usually
+        events for violations (timeouts) are generated when  receiving newer atoms. This is just the fallback periods of input silence.
+        """
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
@@ -113,8 +119,10 @@ class EventClassSelector(Rules.MatchAction):
         self.artefact_b_rules = artefact_b_rules
 
     def match_action(self, log_atom):
-        """This method is invoked if a rule rule has matched.
-        @param log_atom the parser match_element that was also matching the rules."""
+        """
+        Invoke if a rule has matched.
+        @param log_atom the parser match_element that was also matching the rules.
+        """
         if self.artefact_a_rules is not None:
             for a_rule in self.artefact_a_rules:
                 a_rule.update_artefact_a(self, log_atom)
@@ -124,15 +132,19 @@ class EventClassSelector(Rules.MatchAction):
 
 
 class CorrelationRule:
-    """This class defines a correlation rule to match artefacts A and B, where a hidden event A* always triggers at least one
-    artefact A and the the hidden event B*, thus triggering also at least one artefact B."""
+    """
+    This class defines a correlation rule to match artefacts A and B.
+    A hidden event A* always triggers at least one artefact A and the the hidden event B*, thus triggering also at least one artefact B.
+    """
 
     def __init__(self, rule_id, min_time_delta, max_time_delta, max_artefacts_a_for_single_b=1, artefact_match_parameters=None):
-        """Create the correlation rule.
+        """
+        Create the correlation rule.
         @param artefact_match_parameters if not none, two artefacts A and B will be only treated as correlated when all the
         parsed artefact attributes identified by the list of attribute path tuples match.
         @param min_time_delta minimal delta in seconds, that artefact B may be observed after artefact A. Negative values are allowed
-        as artefact B may be found before A. """
+        as artefact B may be found before A.
+        """
         self.rule_id = rule_id
         self.min_time_delta = min_time_delta
         self.max_time_delta = max_time_delta
@@ -156,9 +168,7 @@ class CorrelationRule:
         self.history_b_events.append(history_entry)
 
     def check_status(self, newest_timestamp, max_violations=20):
-        """@return None if status is OK. Returns a tuple containing a descriptive message and a list of violating log data lines
-        on error."""
-
+        """@return None if status is OK. Return a tuple containing a descriptive message and a list of violating log data lines on error."""
         # This part of code would be good target to be implemented as native library with optimized algorithm in future.
         a_pos = 0
         check_range = len(self.history_a_events)

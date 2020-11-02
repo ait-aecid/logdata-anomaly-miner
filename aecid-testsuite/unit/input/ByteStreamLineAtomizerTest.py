@@ -7,6 +7,8 @@ from unit.TestBase import TestBase
 
 
 class ByteStreamLineAtomizerTest(TestBase):
+    """Unittests for the ByteStreamLineAtomizer."""
+
     illegal_access1 = b'WARNING: All illegal access operations will be denied in a future release'
     illegal_access2 = 'WARNING: All illegal access operations will be denied in a future release\n\n'
 

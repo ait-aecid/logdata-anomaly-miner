@@ -50,7 +50,7 @@ def load_config(config_file_name):
         spec.loader.exec_module(aminer_config)
         if extension in ymlext:
             # skipcq: FLK-E722
-            aminer_config.loadYaml(yaml_config)
+            aminer_config.load_yaml(yaml_config)
     except ValueError as e:
         raise e
     except Exception:

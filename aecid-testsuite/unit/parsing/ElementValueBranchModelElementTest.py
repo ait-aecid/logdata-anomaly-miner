@@ -9,6 +9,8 @@ from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelE
 
 
 class ElementValueBranchModelElementTest(unittest.TestCase):
+    """Unittests for the ElementValueBranchModelElement."""
+
     match = b'match '
     fixed_string = b'fixed String'
     path_to_match = b'match path: /path/to/match'

@@ -8,13 +8,13 @@ from aminer.parsing import OptionalMatchModelElement
 from aminer.parsing import SequenceModelElement
 from aminer.parsing import VariableByteDataModelElement
 
+
 def get_model():
-
-    """This model defines how to parse Audit logs from the AIT-LDS."""
-
+    """Return a model to parse Audit logs from the AIT-LDS."""
     alphabet = b'!"#$%&\'()*+,-./0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\\^_`abcdefghijklmnopqrstuvwxyz{|}~=[]'
 
-    seq = [FixedDataModelElement('audit_str', b'audit('),
+    seq = [
+        FixedDataModelElement('audit_str', b'audit('),
         DateTimeModelElement('time', b'%s.%f'),
         FixedDataModelElement('colon_str', b':'),
         DecimalIntegerValueModelElement('id'),
@@ -38,8 +38,8 @@ def get_model():
             SequenceModelElement('cmd', [
                 FixedDataModelElement('cmd_str', b' cmd='),
                 VariableByteDataModelElement('cmd', alphabet)])]),
-        OptionalMatchModelElement('opt',
-            SequenceModelElement('opt_seq', [
+        OptionalMatchModelElement(
+            'opt', SequenceModelElement('opt_seq', [
                 FixedDataModelElement('exe_str', b' exe='),
                 VariableByteDataModelElement('exe', alphabet),
                 FixedDataModelElement('hostname_str', b' hostname='),
@@ -63,80 +63,80 @@ def get_model():
                 DecimalIntegerValueModelElement('argc', value_sign_type=DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL),
                 FixedDataModelElement('a0_str', b' a0='),
                 VariableByteDataModelElement('a0', alphabet),
-                OptionalMatchModelElement('opt1',
-                    SequenceModelElement('seq1', [
+                OptionalMatchModelElement(
+                    'opt1', SequenceModelElement('seq1', [
                         FixedDataModelElement('a1_str', b' a1='),
                         VariableByteDataModelElement('a1', alphabet),
-                        OptionalMatchModelElement('opt2',
-                            SequenceModelElement('seq2', [
+                        OptionalMatchModelElement(
+                            'opt2', SequenceModelElement('seq2', [
                                 FixedDataModelElement('a2_str', b' a2='),
                                 VariableByteDataModelElement('a2', alphabet),
-                                OptionalMatchModelElement('opt3',
-                                    SequenceModelElement('seq3', [
+                                OptionalMatchModelElement(
+                                    'opt3', SequenceModelElement('seq3', [
                                         FixedDataModelElement('a3_str', b' a3='),
                                         VariableByteDataModelElement('a3', alphabet),
-                                        OptionalMatchModelElement('opt4',
-                                            SequenceModelElement('seq4', [
+                                        OptionalMatchModelElement(
+                                            'opt4', SequenceModelElement('seq4', [
                                                 FixedDataModelElement('a4_str', b' a4='),
                                                 VariableByteDataModelElement('a4', alphabet)
                                                 ])
                                             ),
-                                        OptionalMatchModelElement('opt5',
-                                            SequenceModelElement('seq5', [
+                                        OptionalMatchModelElement(
+                                            'opt5', SequenceModelElement('seq5', [
                                                 FixedDataModelElement('a5_str', b' a5='),
                                                 VariableByteDataModelElement('a5', alphabet)
                                                 ])
                                             ),
-                                        OptionalMatchModelElement('opt6',
-                                            SequenceModelElement('seq6', [
+                                        OptionalMatchModelElement(
+                                            'opt6', SequenceModelElement('seq6', [
                                                 FixedDataModelElement('a6_str', b' a6='),
                                                 VariableByteDataModelElement('a6', alphabet)
                                                 ])
                                             ),
-                                        OptionalMatchModelElement('opt7',
-                                            SequenceModelElement('seq7', [
+                                        OptionalMatchModelElement(
+                                            'opt7', SequenceModelElement('seq7', [
                                                 FixedDataModelElement('a7_str', b' a7='),
                                                 VariableByteDataModelElement('a7', alphabet)
                                                 ])
                                             ),
-                                        OptionalMatchModelElement('opt8',
-                                            SequenceModelElement('seq8', [
+                                        OptionalMatchModelElement(
+                                            'opt8', SequenceModelElement('seq8', [
                                                 FixedDataModelElement('a8_str', b' a8='),
                                                 VariableByteDataModelElement('a8', alphabet)
                                                 ])
                                             ),
-                                        OptionalMatchModelElement('opt9',
-                                            SequenceModelElement('seq9', [
+                                        OptionalMatchModelElement(
+                                            'opt9', SequenceModelElement('seq9', [
                                                 FixedDataModelElement('a9_str', b' a9='),
                                                 VariableByteDataModelElement('a9', alphabet)
                                                 ])
                                             ),
-                                        OptionalMatchModelElement('opt10',
-                                            SequenceModelElement('seq10', [
+                                        OptionalMatchModelElement(
+                                            'opt10', SequenceModelElement('seq10', [
                                                 FixedDataModelElement('a10_str', b' a10='),
                                                 VariableByteDataModelElement('a10', alphabet)
                                                 ])
                                             ),
-                                        OptionalMatchModelElement('opt11',
-                                            SequenceModelElement('seq11', [
+                                        OptionalMatchModelElement(
+                                            'opt11', SequenceModelElement('seq11', [
                                                 FixedDataModelElement('a11_str', b' a11='),
                                                 VariableByteDataModelElement('a11', alphabet)
                                                 ])
                                             ),
-                                        OptionalMatchModelElement('opt12',
-                                            SequenceModelElement('seq12', [
+                                        OptionalMatchModelElement(
+                                            'opt12', SequenceModelElement('seq12', [
                                                 FixedDataModelElement('a12_str', b' a12='),
                                                 VariableByteDataModelElement('a12', alphabet)
                                                 ])
                                             ),
-                                        OptionalMatchModelElement('opt13',
-                                            SequenceModelElement('seq13', [
+                                        OptionalMatchModelElement(
+                                            'opt13', SequenceModelElement('seq13', [
                                                 FixedDataModelElement('a13_str', b' a13='),
                                                 VariableByteDataModelElement('a13', alphabet)
                                                 ])
                                             ),
-                                        OptionalMatchModelElement('opt14',
-                                            SequenceModelElement('seq14', [
+                                        OptionalMatchModelElement(
+                                            'opt14', SequenceModelElement('seq14', [
                                                 FixedDataModelElement('a14_str', b' a14='),
                                                 VariableByteDataModelElement('a14', alphabet)
                                                 ])
@@ -244,8 +244,8 @@ def get_model():
                 VariableByteDataModelElement('old_auid', alphabet),
                 FixedDataModelElement('auid_str', b' auid='),
                 VariableByteDataModelElement('auid', alphabet),
-                OptionalMatchModelElement('tty',
-                    SequenceModelElement('tty', [
+                OptionalMatchModelElement(
+                    'tty', SequenceModelElement('tty', [
                         FixedDataModelElement('tty_str', b' tty='),
                         VariableByteDataModelElement('tty', alphabet)])),
                 FixedDataModelElement('old_ses_str', b' old-ses='),

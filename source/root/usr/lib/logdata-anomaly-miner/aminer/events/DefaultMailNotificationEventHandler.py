@@ -1,4 +1,5 @@
-"""This module defines the event handler for reporting via emails.
+"""
+This module defines the event handler for reporting via emails.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -27,8 +28,11 @@ from aminer.events.EventData import EventData
 
 
 class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredComponentInterface):
-    """This class implements an event record listener, that will pool received events, reduce the amount of events below the maximum
-    number allowed per timeframe, create text representation of received events and send them via "sendmail" transport."""
+    """
+    This class implements an event record listener.
+    It will pool received events, reduce the amount of events below the maximum number allowed per timeframe, create text representation
+    of received events and send them via "sendmail" transport.
+    """
 
     CONFIG_KEY_MAIL_TARGET_ADDRESS = 'MailAlerting.TargetAddress'
     CONFIG_KEY_MAIL_FROM_ADDRESS = 'MailAlerting.FromAddress'
@@ -118,8 +122,10 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
             self.send_notification(current_time)
 
     def get_time_trigger_class(self):
-        """Get the trigger class this component can be registered for. See AnalysisContext class for different trigger classes
-        available."""
+        """
+        Get the trigger class this component can be registered for.
+        See AnalysisContext class for different trigger classes available.
+        """
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
