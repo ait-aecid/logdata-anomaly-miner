@@ -686,7 +686,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
             raise Exception('Event not from this source')
         if allowlisting_data is not None:
             raise Exception('Allowlisting data not understood by this detector')
-        self.allowlisted_paths.add(event_data[1])
+        self.allowlisted_paths.append(event_data[1])
         return 'Allowlisted path %s in %s' % (event_data[1], sorted_log_lines[0])
 
 

@@ -15,7 +15,7 @@ class NewMatchPathValueDetectorTest(TestBase):
     """Unittests for the NewMatchPathValueDetector."""
 
     __expected_string = '%s New value(s) detected\n%s: "%s" (%d lines)\n  %s\n\n'
-
+    analysis = 'Analysis.%s'
     datetime_format_string = '%Y-%m-%d %H:%M:%S'
     string = b'25537 uid=2'
     first_f1_s1 = 'first/f1/s1'
