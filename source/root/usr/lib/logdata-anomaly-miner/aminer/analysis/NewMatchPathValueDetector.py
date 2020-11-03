@@ -107,7 +107,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        PersistenceUtil.store_json(self.persistence_file_name, list(self.known_path_set))
+        PersistenceUtil.store_json(self.persistence_file_name, list(self.known_values_set))
         self.next_persist_time = None
 
     def allowlist_event(self, event_type, sorted_log_lines, event_data, allowlisting_data):

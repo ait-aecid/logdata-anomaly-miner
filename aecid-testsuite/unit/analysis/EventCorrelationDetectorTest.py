@@ -15,6 +15,7 @@ class EventCorrelationDetectorTest(TestBase):
 
     alphabet = b'abcdefghijklmnopqrstuvwxyz'
     alphabet_model = FirstMatchModelElement('first', [])
+    analysis = 'Analysis.%s'
 
     @classmethod
     def setUpClass(cls):

@@ -139,7 +139,7 @@ class NewMatchPathValueDetectorTest(TestBase):
             self.stream_printer_event_handler], 'Default', True, output_log_line=False)
         self.analysis_context.register_component(new_match_path_value_detector, description)
 
-        self.assertEqual([], new_match_path_value_detector.known_values_set)
+        self.assertEqual(set(), new_match_path_value_detector.known_values_set)
         log_atom_sequence_me = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_first_match_me), time(),
                                        new_match_path_value_detector)
 
