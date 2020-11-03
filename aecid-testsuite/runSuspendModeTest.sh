@@ -84,5 +84,6 @@ sudo rm aminerRemoteControl
 sudo rm /tmp/test1.md5
 sudo rm /tmp/test2.md5
 sudo rm /tmp/test3.md5
+test -e /var/mail/mail && sudo rm -f /var/mail/mail
 
 exit $exit_code
