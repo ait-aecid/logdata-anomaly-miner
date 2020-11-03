@@ -245,6 +245,7 @@
                     'json': {'type': 'boolean', 'required': False, 'default': False},
                     'instance_name': {'type': 'string', 'required': False, 'default': 'aminer'},
                     'topic': {'type': 'string'},
+                    'cfgfile': {'type': 'string'},
                     'options': {'type': 'dict', 'schema': {'id': {'type': 'string'}, 'type': {'type': ['string', 'list', 'integer']}}}
                 }
             }
