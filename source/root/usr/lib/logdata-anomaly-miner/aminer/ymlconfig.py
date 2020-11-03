@@ -715,7 +715,7 @@ def build_analysis_pipeline(analysis_context):
                 if item['type'].name == 'SyslogWriterEventHandler':
                     ctx = func(analysis_context, item['instance_name'])
                 if item['type'].name == 'KafkaEventHandler':
-                    if not 'topic' in item:
+                    if 'topic' not in item:
                         raise ValueError("Kafka-Topic not defined")
                     import configparser
                     import os
@@ -735,7 +735,7 @@ def build_analysis_pipeline(analysis_context):
                             if key == "sasl_plain_username":
                                 continue
                             options[key] = int(val)
-                        except:
+                        except: # skipcq: FLK-E722
                             pass
                     ctx = func(analysis_context.aminer_config, item['topic'], options)
                 if ctx is None:
