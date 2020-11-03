@@ -19,6 +19,11 @@
             'type': 'string',
             'default': '/var/lib/aminer'
         },
+        'Core.PersistencePeriod': {
+            'required': False,
+            'type': 'integer',
+            'default': 600
+        },
         'MailAlerting.TargetAddress': {
             'required': False,
             'type': 'string',

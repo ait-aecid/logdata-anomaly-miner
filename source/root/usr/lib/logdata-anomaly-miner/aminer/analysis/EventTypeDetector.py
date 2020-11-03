@@ -62,6 +62,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.waiting_time_for_TSA = waiting_time_for_TSA
         # Number of subdivisions of the initialization window. The length of the input-list of the function_Init-funtion is numSubd+1
         self.num_sections_waiting_time_for_TSA = num_sections_waiting_time_for_TSA
+        self.aminer_config = aminer_config
 
         # Loads the persistence
         PersistenceUtil.add_persistable_component(self)
