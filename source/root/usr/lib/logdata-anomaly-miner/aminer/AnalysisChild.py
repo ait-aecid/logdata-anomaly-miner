@@ -564,7 +564,7 @@ class AnalysisChildRemoteControlHandler:
                     'allowlist_event_in_component': methods.allowlist_event_in_component,
                     'dump_events_from_history': methods.dump_events_from_history,
                     'ignore_events_from_history': methods.ignore_events_from_history,
-                    'list_events_from_history': methods.list_events_from_history,l
+                    'list_events_from_history': methods.list_events_from_history,
                     'allowlist_events_from_history': methods.allowlist_events_from_history,
                     'change_log_stat_level': methods.change_log_stat_level,
                     'change_log_debug_level': methods.change_log_debug_level,
@@ -584,7 +584,7 @@ class AnalysisChildRemoteControlHandler:
                     'TimestampCorrectionFilters': aminer.analysis.TimestampCorrectionFilters,
                     'TimestampsUnsortedDetector': aminer.analysis.TimestampsUnsortedDetector,
                     'AllowlistViolationDetector': aminer.analysis.AllowlistViolationDetector
-
+                }
                 logging.getLogger(AMinerConfig.REMOTE_CONTROL_LOG_NAME).log(15, json_request_data[0])
                 logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('Remote control: %s', json_request_data[0])
 
