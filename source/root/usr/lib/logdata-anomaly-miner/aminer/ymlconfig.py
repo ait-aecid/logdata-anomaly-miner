@@ -735,7 +735,7 @@ def build_analysis_pipeline(analysis_context):
                             if key == "sasl_plain_username":
                                 continue
                             options[key] = int(val)
-                        except: # skipcq: FLK-E722
+                        except:  # skipcq: FLK-E722
                             pass
                     ctx = func(analysis_context.aminer_config, item['topic'], options)
                 if ctx is None:
