@@ -4,7 +4,7 @@ python:
 dist: bionic
 
 before_install:
-  - git clone --depth 1 --branch v2.1.0-1 https://github.com/ait-aecid/aminer-ansible.git roles/aminer
+  - git clone --depth 1 --branch development https://github.com/ait-aecid/aminer-ansible.git roles/aminer
   - cp $PWD/source/root/etc/aminer/conf-available/generic/ApacheAccessModel.py $PWD/source/root/etc/aminer/conf-enabled/ApacheAccessModel.py
   - ln -s $PWD/source/root/usr/lib/logdata-anomaly-miner/aminer $PWD/aecid-testsuite/aminer
   - ln -s $PWD/source/root/etc/aminer/template_config.py $PWD/aecid-testsuite/demo/AMiner/template_config.py
