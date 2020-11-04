@@ -11,7 +11,7 @@ before_install:
 install:
   - sudo apt-get update -y
   - sudo apt-get install -y ansible
-  - sudo ansible-playbook playbook.yml
+  - sudo ansible-playbook -e "aminer_pythonpath=/usr/lib/python3.6/site-packages" playbook.yml
   - sudo echo "hello2"
   - sudo apt-get install -y exim4 procps cpulimit mailutils
   - sudo pip3 install coverage
