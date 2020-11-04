@@ -16,6 +16,13 @@ install:
   - sudo ansible-playbook playbook.yml
   - sudo apt-get install -y exim4 procps cpulimit mailutils
   - sudo pip3 install coverage
+  ##############################
+  - sudo rm /etc/aminer/conf-enabled/cerberus
+  - sudo rm /etc/aminer/conf-enabled/kafka
+  - sudo apt install python3-cerberus python3-kafka
+  - sudo ln -s /usr/lib/python3/dist-packages/cerberus /etc/aminer/conf-enabled/cerberus
+  - sudo ln -s /usr/lib/python3/dist-packages/kafka /etc/aminer/conf-enabled/kafka
+  ##############################
   - cd aecid-testsuite
   - sudo chmod +x runUnittests.sh
   - sudo chmod +x runAMinerDemo.sh
