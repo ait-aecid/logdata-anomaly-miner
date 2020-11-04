@@ -16,6 +16,7 @@ install:
   - sudo ansible-playbook playbook.yml
   - sudo apt-get install -y exim4 procps cpulimit mailutils
   - sudo pip3 install coverage
+  - find / -name coverage
   - cd aecid-testsuite
   - sudo chmod +x runUnittests.sh
   - sudo chmod +x runAMinerDemo.sh
