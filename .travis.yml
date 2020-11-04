@@ -23,7 +23,7 @@ install:
   - sudo chmod +x runCoverageTests.sh
 
 script:
-  - sudo find /usr/local -name cerberus
+  - sudo find /usr/local -name cerberus -print
   - ./runUnittests.sh
   - ./runAMinerDemo.sh demo/AMiner/demo-config.py
   - ./runAMinerDemo.sh demo/AMiner/jsonConverterHandler-demo-config.py
