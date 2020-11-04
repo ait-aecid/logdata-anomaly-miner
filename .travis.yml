@@ -13,8 +13,6 @@ before_install:
 install:
   - sudo apt-get update -y
   - sudo apt-get install -y ansible
-  - sudo apt install -y python3-pkg-resources
-  - sudo dpkg -L python3-pkg-resources
   - sudo ansible-playbook playbook.yml
   - sudo apt-get install -y exim4 procps cpulimit mailutils
   - sudo pip3 install coverage
