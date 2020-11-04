@@ -81,11 +81,10 @@ config_properties['LogPrefix'] = 'Original log line: '
 
 
 def build_analysis_pipeline(analysis_context):
-    """Define the function to create pipeline for parsing the log
-    data. It has also to define an AtomizerFactory to instruct AMiner
-    how to process incoming data streams to create log atoms from
-    them."""
-
+    """
+    Define the function to create pipeline for parsing the log data.
+    It has also to define an AtomizerFactory to instruct AMiner how to process incoming data streams to create log atoms from them.
+    """
     date_format_string = b'%Y-%m-%d %H:%M:%S'
     cron = b' cron['
 
@@ -254,8 +253,8 @@ def build_analysis_pipeline(analysis_context):
     analysis_context.register_component(timestamps_unsorted_detector, component_name="TimestampsUnsortedDetector")
 
     from aminer.analysis import Rules
-    from aminer.analysis import WhitelistViolationDetector
-    whitelist_rules = [
+    from aminer.analysis import AllowlistViolationDetector
+    allowlist_rules = [
         Rules.OrMatchRule([
             Rules.AndMatchRule([
                 Rules.PathExistsMatchRule('/model/LoginDetails/PastTime/Time/Minutes'),
@@ -267,10 +266,10 @@ def build_analysis_pipeline(analysis_context):
 
     # This rule list should trigger, when the line does not look like: User root (logged in, logged out)
     # or User 'username' (logged in, logged out) x minutes ago.
-    whitelist_violation_detector = WhitelistViolationDetector(analysis_context.aminer_config, whitelist_rules, anomaly_event_handlers,
+    allowlist_violation_detector = AllowlistViolationDetector(analysis_context.aminer_config, allowlist_rules, anomaly_event_handlers,
                                                               output_log_line=True)
-    analysis_context.register_component(whitelist_violation_detector, component_name="Whitelist")
-    atom_filter.add_handler(whitelist_violation_detector)
+    analysis_context.register_component(allowlist_violation_detector, component_name="Allowlist")
+    atom_filter.add_handler(allowlist_violation_detector)
 
     from aminer.analysis import ParserCount
     parser_count = ParserCount(analysis_context.aminer_config, None, anomaly_event_handlers, 10, False)
@@ -296,7 +295,7 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis import MatchFilter
     match_filter = MatchFilter(analysis_context.aminer_config, ['/model/Random'], anomaly_event_handlers, target_value_list=[
-        1,10,100], output_log_line=True)
+        1, 10, 100], output_log_line=True)
     analysis_context.register_component(match_filter, component_name="MatchFilter")
     atom_filter.add_handler(match_filter)
 
@@ -307,6 +306,7 @@ def build_analysis_pipeline(analysis_context):
     atom_filter.add_handler(new_match_path_detector)
 
     def tuple_transformation_function(match_value_list):
+        """Only allow output of the EnhancedNewMatchPathValueComboDetector after every 10th element."""
         extra_data = enhanced_new_match_path_value_combo_detector.known_values_dict.get(tuple(match_value_list))
         if extra_data is not None:
             mod = 10
@@ -383,7 +383,6 @@ def build_analysis_pipeline(analysis_context):
     time_correlation_detector = TimeCorrelationDetector(
         analysis_context.aminer_config, anomaly_event_handlers, 2, min_rule_attributes=1, max_rule_attributes=5,
         record_count_before_event=10000, output_log_line=True)
-
     analysis_context.register_component(time_correlation_detector, component_name="TimeCorrelationDetector")
     atom_filter.add_handler(time_correlation_detector)
 

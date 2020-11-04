@@ -8,6 +8,8 @@ from unit.TestBase import TestBase
 
 
 class EventTypeDetectorTest(TestBase):
+    """Unittests for the EventTypeDetector."""
+
     log_lines = [
         b'type=SYSCALL msg=audit(1580367384.000:1): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 '
         b'ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 '
@@ -63,8 +65,6 @@ class EventTypeDetectorTest(TestBase):
         b'ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 '
         b'comm="apache2" exe="/usr/sbin/apache2" key=(null)']
 
-    expected_whitelist_string = "Whitelisted path(es) parser/type/path/name, parser/type/syscall/syscall with %s in %s"
-
     parsing_model = FirstMatchModelElement('type', [SequenceModelElement('path', [
         FixedDataModelElement('type', b'type=PATH '), FixedDataModelElement('msg_audit', b'msg=audit('),
         DelimitedDataModelElement('msg', b':'), FixedDataModelElement('placeholder', b':'), DecimalIntegerValueModelElement('id'),
@@ -87,8 +87,10 @@ class EventTypeDetectorTest(TestBase):
             AnyByteDataModelElement('remainding_data')])])
 
     def test1receive_atoms_with_default_values(self):
-        """In this test case multiple log_atoms are received with default values of the EventTypeDetector. path_list is empty and all
-        paths are learned dynamically in variable_key_list."""
+        """
+        In this test case multiple log_atoms are received with default values of the EventTypeDetector.
+        path_list is empty and all paths are learned dynamically in variable_key_list.
+        """
         event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         log_atoms = []
         for line in self.log_lines:
@@ -100,8 +102,10 @@ class EventTypeDetectorTest(TestBase):
             self.assertEqual(event_type_detector.total_records, i + 1)
 
     def test2receive_atoms_with_defined_path_list(self):
-        """In this test case multiple log_atoms are received with default values of the EventTypeDetector. path_list is set to a static list
-        of paths and variable_key_list should not be used."""
+        """
+        In this test case multiple log_atoms are received with default values of the EventTypeDetector.
+        path_list is set to a static list of paths and variable_key_list should not be used.
+        """
         event_type_detector = EventTypeDetector(
             self.aminer_config, [self.stream_printer_event_handler], path_list=['parser/type/path/nametype'])
         results = [True, False, True, False, True, False, True, True, False, False, True, True, False, True, False, True, False, True,
@@ -143,8 +147,10 @@ class EventTypeDetectorTest(TestBase):
         self.assertEqual(event_type_detector.values, [[[22]]])
 
     def test4append_values_bytestring(self):
-        """This unittest checks the append_values method with raw_match_object being a bytestring. This should trigger a ValueError and
-        append the match_string."""
+        """
+        This unittest checks the append_values method with raw_match_object being a bytestring.
+        This should trigger a ValueError and append the match_string.
+        """
         event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         # initialize all values.
         t = time.time()

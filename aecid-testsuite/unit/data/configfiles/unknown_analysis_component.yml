@@ -1,0 +1,64 @@
+AMinerUser: 'aminer'  # optional default: aminer
+AMinerGroup: 'aminer' # optional default: aminer
+
+LogResourceList:
+        - 'file:///var/log/apache2/access.log'
+
+Core.PersistenceDir: '/tmp/lib/aminer'
+
+Parser:
+         - id: 'timeModel'
+           type: DateTimeModelElement
+           name: 'time'
+           args: '%Y-%m-%dT%H:%M:%S.%f'
+
+         - id: 'hostModel'
+           type: VariableByteDataModelElement
+           name: 'host'
+           args: '-.01234567890abcdefghijklmnopqrstuvwxyz:'
+
+         - id: 'reqMethodModel'
+           type:  FixedWordlistDataModelElement
+           name: 'method'
+           args:
+                   - 'GET'
+                   - 'POST'
+                   - 'PUT'
+                   - 'HEAD'
+
+         - id: 'START'
+           start: True
+           type: SequenceModelElement
+           name: 'model'
+           args:
+               - timeModel
+               - hostModel
+               - reqMethodModel
+
+Input:
+        verbose: True # optional
+        multi_source: False # optional
+        timestamp_paths: "/model/accesslog/time"
+
+Analysis:
+        - type: NewMatchPathValueDetector
+          paths: ["/model/accesslog/status"]
+          persistence_id: 'accesslog_status' # optional default: Default
+          output_logline: False # optional default: True
+          learn_mode: True
+
+        - type: NewMatchPathValueComboDetector
+          paths: ["/model/accesslog/request","/model/accesslog/method"]
+          auto_include_flag: True
+          persistence_id: 'accesslog_request' # optional default: Default
+          output_logline: False # optional default: True
+          allow_missing_values: False # optional default: False
+
+        - type: UnknownDetector
+          paths: ["/model/accesslog/request","/model/accesslog/status"]
+          learn_mode: True
+
+EventHandlers:
+        - id: stpe
+          json: True # optional default: False
+          type: StreamPrinterEventHandler

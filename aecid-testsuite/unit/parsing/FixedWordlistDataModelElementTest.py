@@ -4,9 +4,10 @@ from aminer.parsing.MatchContext import MatchContext
 
 
 class FixedWordlistDataModelElementTest(unittest.TestCase):
+    """Unittests for the FixedWordlistDataModelElement."""
 
     def test1sorted_list(self):
-        """A valid wordlist is used in this test case. """
+        """A valid wordlist is used in this test case."""
         match_context = MatchContext(b'wordlist started with "wordlist"')
         fixed_wordlist_data_model_element = FixedWordlistDataModelElement('wordlist', [b'wordlist', b'word'])
         match_element = fixed_wordlist_data_model_element.get_match_element('match', match_context)

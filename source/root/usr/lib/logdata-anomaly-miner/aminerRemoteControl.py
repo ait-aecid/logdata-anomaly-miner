@@ -1,22 +1,23 @@
 #!/usr/bin/python3 -BbbEIsSttW all
 # -*- coding: utf-8 -*-
 
-"""This tool allows to connect to a remote control socket, send requests and retrieve the responses. To allow remote use of this
-tool, e.g. via SSH forwarding, the remote control address can be set on the command line, no configuration is read.
+"""
+This tool allows to connect to a remote control socket, send requests and retrieve the responses.
+To allow remote use of this tool, e.g. via SSH forwarding, the remote control address can be set on the command line, no configuration is
+read.
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>."""
+You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
+"""
 
 import json
 import os
 import socket
 import traceback
 import sys
-
-from aminer.AnalysisChild import AnalysisChildRemoteControlHandler
 
 __authors__ = ["Markus Wurzenberger", "Max Landauer", "Wolfgang Hotwagner", "Ernst Leierzopf", "Roman Fiedler", "Georg Hoeld",
                "Florian Skopik"]
@@ -33,6 +34,8 @@ __version__ = "2.0.1"
 # Get rid of the default sys path immediately. Otherwise Python also attempts to load the following imports from e.g. directory
 # where this binary resides.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner']
+# skipcq: FLK-E402
+from aminer.AnalysisChild import AnalysisChildRemoteControlHandler
 
 remote_control_socket_name = None
 remote_control_data = None

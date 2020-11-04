@@ -1,8 +1,9 @@
 #!/usr/bin/python3 -BbbEIsSttW all
 # -*- coding: utf-8 -*-
 
-"""This is the main program of the "aminer" logfile miner tool. It does not import any local default site packages to decrease the attack
-surface due to manipulation of unused but available packages.
+"""
+This is the main program of the "aminer" logfile miner tool.
+It does not import any local default site packages to decrease the attack surface due to manipulation of unused but available packages.
 
 CAVEAT: This process will keep running with current permissions, no matter what was specified in 'AMinerUser' and 'AMinerGroup'
 configuration properties. This is required to allow the AMiner parent parent process to reopen log files, which might need the
@@ -21,7 +22,8 @@ This program is free software: you can redistribute it and/or modify it under th
 the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. You should have received a copy
-of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>."""
+of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
+"""
 
 import errno
 import os
@@ -68,10 +70,14 @@ flame = ("            *     (        )       (     \n"
          "  / _ \\  | |\\/| | | |  | .` || _| |   /  \n"
          " /_/ \\_\\ |_|  |_||___| |_|\\_||___||_|_\\  ")
 
+child_termination_triggered_flag = False
+
 
 def supports_color():
-    """Returns True if the running system's terminal supports color, and False otherwise.
-    The function was borrowed from the django-project (https://github.com/django/django/blob/master/django/core/management/color.py)"""
+    """
+    Return True if the running system's terminal supports color, and False otherwise.
+    The function was borrowed from the django-project (https://github.com/django/django/blob/master/django/core/management/color.py)
+    """
     plat = sys.platform
     supported_platform = plat != 'Pocket PC' and (plat != 'win32' or 'ANSICON' in os.environ)
     # isatty is not always implemented, #6223.
@@ -80,7 +86,7 @@ def supports_color():
 
 
 def print_help(program_name, version=False):
-    """AMiner print_help function"""
+    """Print the help string of the aminer program."""
     global colflame  # skipcq: PYL-W0603
     global flame  # skipcq: PYL-W0603
     if supports_color():
@@ -105,7 +111,7 @@ def print_help(program_name, version=False):
 
 
 def run_analysis_child(aminer_config, program_name):
-    """Runs the Analysis Child"""
+    """Run the Analysis Child."""
     from aminer import AMinerConfig
     # Verify existance and ownership of persistence directory.
     persistence_dir_name = aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
@@ -137,7 +143,7 @@ def run_analysis_child(aminer_config, program_name):
 
 
 def main():
-    """AMiner main function"""
+    """Run the aminer main program."""
     # Extract program name, but only when sure to contain no problematic characters.
     program_name = sys.argv[0].split('/')[-1]
     if (program_name == '.') or (program_name == '..') or (re.match('^[a-zA-Z0-9._-]+$', program_name) is None):
@@ -342,8 +348,8 @@ def main():
             print('Failed to daemonize: %s' % fork_exception, file=sys.stderr)
             sys.exit(1)
         if child_pid != 0:
-            # This is the parent. Exit without any python cleanup.
-            os._exit(0)  # skipcq: PYL-W0212
+            # This is the parent.
+            sys.exit(0)
         # This is the child. Create a new session and become process group leader. Here we get rid of the controlling tty.
         os.setsid()
         # Fork again to become an orphaned process not being session leader, hence not able to get a controlling tty again.
@@ -353,22 +359,24 @@ def main():
             print('Failed to daemonize: %s' % fork_exception, file=sys.stderr)
             sys.exit(1)
         if child_pid != 0:
-            # This is the parent. Exit without any python cleanup.
-            os._exit(0)  # skipcq: PYL-W0212
+            # This is the parent.
+            sys.exit(0)
         # Move to root directory to avoid lingering in some cwd someone else might want to unmount.
         os.chdir('/')
         # Change the umask here to clean all group/other mask bits so that accidentially created files are not accessible by other.
         os.umask(0o77)
 
     # Install a signal handler catching common stop signals and relaying it to all children for sure.
+    # skipcq: PYL-W0603
     global child_termination_triggered_flag
     child_termination_triggered_flag = False
 
     def graceful_shutdown_handler(_signo, _stackFrame):
-        """This is the signal handler function to react on typical shutdown signals."""
+        """React on typical shutdown signals."""
         print('%s: caught signal, shutting down' % program_name, file=sys.stderr)
         # Just set the flag. It is likely, that child received same signal also so avoid multiple signaling, which could interrupt the
         # shutdown procedure again.
+        # skipcq: PYL-W0603
         global child_termination_triggered_flag
         child_termination_triggered_flag = True
 

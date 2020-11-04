@@ -4,6 +4,8 @@ from aminer.parsing.MatchContext import MatchContext
 
 
 class WhiteSpaceLimitedDataModelElementTest(unittest.TestCase):
+    """Unittests for the WhiteSpaceLimitedDataModelElement."""
+
     white_space_limited_data_model_element = WhiteSpaceLimitedDataModelElement('Whitespace String')
 
     def test1_sentence_with_multiple_whitespaces(self):

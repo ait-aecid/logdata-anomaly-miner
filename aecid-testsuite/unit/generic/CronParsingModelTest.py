@@ -1,5 +1,5 @@
 # skipcq: FLK-D208
-"""package not used!
+"""package not used.
 import unittest
 from aminer.generic import CronParsingModel
 from aminer.parsing.MatchContext import MatchContext

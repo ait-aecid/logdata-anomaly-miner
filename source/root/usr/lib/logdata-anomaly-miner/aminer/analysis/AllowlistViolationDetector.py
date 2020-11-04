@@ -1,5 +1,5 @@
-"""This module defines a detector for log atoms not matching
-any whitelisted rule.
+"""
+This module defines a detector for log atoms not matching any allowlisted rule.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -19,26 +19,32 @@ from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 from datetime import datetime
 
 
-class WhitelistViolationDetector(AtomHandlerInterface):
-    """Objects of this class handle a list of whitelist rules to ensure, that each received log-atom is at least covered by a
-    single whitelist rule. To avoid traversing the complete rule tree more than once, the whitelist rules may have match actions
-    attached that set off an alarm by themselves."""
+class AllowlistViolationDetector(AtomHandlerInterface):
+    """
+    Objects of this class handle a list of allowlist rules.
+    They ensure, that each received log-atom is at least covered by a single allowlist rule. To avoid traversing the complete rule tree
+    more than once, the allowlist rules may have match actions attached that set off an alarm by themselves.
+    """
 
-    def __init__(self, aminer_config, whitelist_rules, anomaly_event_handlers, output_log_line=True):
-        """Initialize the detector.
-        @param whitelist_rules list of rules executed in same way as inside Rules.OrMatchRule."""
-        self.whitelist_rules = whitelist_rules
+    def __init__(self, aminer_config, allowlist_rules, anomaly_event_handlers, output_log_line=True):
+        """
+        Initialize the detector.
+        @param allowlist_rules list of rules executed in same way as inside Rules.OrMatchRule.
+        """
+        self.allowlist_rules = allowlist_rules
         self.anomaly_event_handlers = anomaly_event_handlers
         self.output_log_line = output_log_line
         self.aminer_config = aminer_config
         self.persistence_id = None
 
     def receive_atom(self, log_atom):
-        """Receive on parsed atom and the information about the parser match.
+        """
+        Receive on parsed atom and the information about the parser match.
         @param log_atom atom with parsed data to check
-        @return True when logAtom is whitelisted, False otherwise."""
+        @return True when logAtom is allowlisted, False otherwise.
+        """
         event_data = {}
-        for rule in self.whitelist_rules:
+        for rule in self.allowlist_rules:
             if rule.match(log_atom):
                 return True
         analysis_component = {'AffectedLogAtomPathes': list(log_atom.parser_match.get_match_dictionary()),
@@ -68,6 +74,6 @@ class WhitelistViolationDetector(AtomHandlerInterface):
             sorted_log_lines = [original_log_line_prefix + repr(log_atom.raw_data)]
         event_data['AnalysisComponent'] = analysis_component
         for listener in self.anomaly_event_handlers:
-            listener.receive_event('Analysis.%s' % self.__class__.__name__, 'No whitelisting for current atom', sorted_log_lines,
+            listener.receive_event('Analysis.%s' % self.__class__.__name__, 'No allowlisting for current atom', sorted_log_lines,
                                    event_data, log_atom, self)
         return False

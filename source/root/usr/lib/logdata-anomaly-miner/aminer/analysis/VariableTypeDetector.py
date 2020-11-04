@@ -9,13 +9,15 @@ from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input import AtomHandlerInterface
 from aminer.util import TimeTriggeredComponentInterface
-from aminer.util import PersistencyUtil
+from aminer.util import PersistenceUtil
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
 
 class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
-    """This class tests each variable of the event_types for the implemented variable types. This module needs to run after the
-    EventTypeDetector is initialized"""
+    """
+    This class tests each variable of the event_types for the implemented variable types.
+    This module needs to run after the EventTypeDetector is initialized
+    """
 
     def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id='Default', path_list=None, ks_alpha=0.05,
                  s_ks_alpha=0.05, s_ks_bt_alpha=0.05, d_alpha=0.1, d_bt_alpha=0.1, div_thres=0.3, sim_thres=0.1, indicator_thres=0.4,
@@ -26,7 +28,6 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                  num_updates_until_var_reduction=20, var_reduction_thres=0.6, num_skipped_ind_for_weights=1, num_ind_for_weights=100,
                  used_multinomial_test='Chi', use_empiric_distr=True, save_statistics=True, output_log_line=True):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
-
         self.next_persist_time = None
         self.anomaly_event_handlers = anomaly_event_handlers
         self.aminer_config = aminer_config
@@ -590,21 +591,22 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 'num_bt = 20, alpha = 0.025': [0.0012650966644287111, 0.012348556518554692, 0.032070970535278326, 0.05733404159545899, 0.08657145500183107, 0.11893157958984377, 0.1539091587066651, 0.19119005203247075, 0.2305778980255127, 0.27195787429809565, 0.31527810096740716, 0.36054258346557605, 0.4078114986419677, 0.4572108268737792, 0.5089540958404539, 0.5633859634399412, 0.6210731983184814, 0.6830172538757324, 0.7512671947479248, 0.8315665245056152]  # skipcq: FLK-E501
                 }
 
-        # Loads the persistency
+        # Loads the persistence
         self.persistence_id = persistence_id
-        PersistencyUtil.add_persistable_component(self)
+        PersistenceUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
-        persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
 
-        # Imports the persistency
+        # Imports the persistence
         if persistence_data is not None:
             self.load_persistence_data(persistence_data)
 
     def receive_atom(self, log_atom):
-        """Receive an parsed atom and the information about the parser match. Initializes Variables for new eventTypes
+        """
+        Receive an parsed atom and the information about the parser match. Initializes Variables for new eventTypes.
         @param log_atom the parsed log atom
-        @return True if this handler was really able to handle and process the match."""
-
+        @return True if this handler was really able to handle and process the match.
+        """
         event_index = self.event_type_detector.current_index
 
         # Initialize new entries in lists for a new eventType if necessary
@@ -645,7 +647,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
-        """Checks if current ruleset should be persisted"""
+        """Check if current ruleset should be persisted."""
         if self.next_persist_time is None:
             return 600
 
@@ -657,21 +659,20 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-
         tmp_list = [self.var_type, self.alternative_distribution_types, self.var_type_history_list,
                     self.var_type_history_list_reference, self.failed_indicators, [[self.distr_val[event_index][var_index] if (
                         len(self.distr_val[event_index][var_index]) > 0 and self.var_type[event_index][var_index][0] == 'emp') else [] for
                             var_index in range(len(self.distr_val[event_index]))] for event_index in range(len(self.distr_val))]]
-        PersistencyUtil.store_json(self.persistence_file_name, tmp_list)
+        PersistenceUtil.store_json(self.persistence_file_name, tmp_list)
         self.next_persist_time = None
 
         if self.save_statistics:
-            PersistencyUtil.store_json(self.statistics_file_name, [
+            PersistenceUtil.store_json(self.statistics_file_name, [
                 self.failed_indicators_total, self.failed_indicators_values, self.failed_indicators_paths, self.failed_indicators])
 
     def load_persistence_data(self, persistence_data):
-        """Extracts the persistency data and appends various lists to create a consistent state"""
-        # Import the lists of the persistency
+        """Extract the persistence data and appends various lists to create a consistent state."""
+        # Import the lists of the persistence
         self.var_type = persistence_data[0]
         self.alternative_distribution_types = persistence_data[1]
         self.var_type_history_list = persistence_data[2]
@@ -680,7 +681,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         self.distr_val = persistence_data[5]
         self.num_events = len(self.var_type)
 
-        # Create the initial lists which derive from the persistency
+        # Create the initial lists which derive from the persistence
         # Number of variables of the single events
         self.length = [len(self.event_type_detector.variable_key_list[event_index]) for event_index in range(self.num_events)]
         self.variable_path_num = [[]] * self.num_events
@@ -707,7 +708,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         self.d_init_bt(event_index, var_index)
 
     def process_ll(self, event_index, log_atom):
-        """Processes the LogLine. Extracts and appends the values of the logline to the values-list."""
+        """Process the log line. Extracts and appends the values of the log line to the values-list."""
         # Return if no variable is tracked in the VTD
         if len(self.event_type_detector.variable_key_list[event_index]) == 0 or (
                 self.path_list is not None and self.variable_path_num[event_index] == []):
@@ -1059,7 +1060,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                                         self.var_type_history_list[event_index][var_index][type_index][-self.num_var_type_hist_ref:]))
 
     def detect_var_type(self, event_index, var_index):
-        """Gives back the assumed variableType of the variable with the in self.event_type_detector stored values"""
+        """Give back the assumed variableType of the variable with the in self.event_type_detector stored values."""
         # Values which are being tested
         values = self.event_type_detector.values[event_index][var_index][-self.num_init:]
         # Unique values
@@ -1135,8 +1136,10 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         return var_type
 
     def detect_continuous_shape(self, values):
-        """Detects if the sample follows one of the checked continuous distribution and returns the found type in a fitting format, or ['d']
-        if none fit"""
+        """
+        Detect if the sample follows one of the checked continuous distribution and returns the found type in a fitting format.
+        ['d'] if none fit.
+        """
         # List of the p-values of the distributions
         significance = []
         # List of the tested distributions
@@ -1272,8 +1275,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         return ['d']
 
     def update_var_type(self, event_index, var_index, log_atom):
-        """Tests if the new num_update values fit the detected var type and updates the var type if the test fails"""
-
+        """Test if the new num_update values fit the detected var type and updates the var type if the test fails."""
         # Getting the new values and saving the old distribution for printing-purposes if the test fails
         new_values = self.event_type_detector.values[event_index][var_index][-self.num_update:]
         VT_old = self.var_type[event_index][var_index]
@@ -1580,7 +1582,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             return
 
     def s_ks_get_quantiles(self, event_index, var_index):
-        """Generates the needed quantiles of the distribution for the sliding KS-test"""
+        """Generate the needed quantiles of the distribution for the sliding KS-test."""
         if self.var_type[event_index][var_index][0] == 'emp':
             # Get a list of almost equidistant indices
             indices = [int(i) for i in [self.num_init * j / (2 * self.num_s_ks_values) for j in
@@ -1627,8 +1629,10 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             return
 
     def s_ks_test(self, event_index, var_index, first_distr):
-        """Makes a KS-test solely with the bucketlist. Returns a list with the first entry True/False and as the second entry the maximal
-        distance of the step functions"""
+        """
+        Make a KS-test solely with the bucketlist.
+        @return a list with the first entry True/False and as the second entry the maximal distance of the step functions
+        """
         num_distr_val = 2 * self.num_s_ks_values
 
         # Calculate the critical distance for the KS-test
@@ -1751,7 +1755,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         return [True, 0.0]
 
     def d_test(self, event_index, var_index):
-        """Makes a test if the new variables follow the discrete distribution and appends the result to the BT"""
+        """Make a test if the new variables follow the discrete distribution and appends the result to the BT."""
         if self.used_multinomial_test == 'MT':
             # Count the appearance of the values
             values_app = [0] * len(self.var_type[event_index][var_index][1])
@@ -1826,7 +1830,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             return
 
     def d_init_bt(self, event_index, var_index):
-        """Initializes the BT for discrete variables"""
+        """Initialize the BT for discrete variables."""
         if self.used_multinomial_test == 'MT':
             # Initialize the list for the results and the multinomialtest
             self.bt_results[event_index][var_index] = [
@@ -1850,7 +1854,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             self.bt_results[event_index][var_index] = [[1] * self.num_d_bt]
 
     def init_var_type_history_list(self, event_index):
-        """Initializes the history of the variabletypes of the eventType"""
+        """Initialize the history of the variabletypes of the eventType."""
         if len(self.var_type_history_list) < event_index + 1 or self.var_type_history_list[event_index] == []:
             for i in range(event_index + 1 - len(self.var_type_history_list)):
                 self.var_type_history_list.append([])
@@ -1906,7 +1910,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         self.var_type_history_list[event_index][var_index][6][1][-1] = self.var_type[event_index][var_index][2]
 
     def get_indicator(self, event_index):
-        """Calculates and returns a indicator for a change in the system behaviour based on the analysis of VarTypeD"""
+        """Calculate and returns a indicator for a change in the system behaviour based on the analysis of VarTypeD."""
         # List which stores the single indicators for the variables
         indicator_list = []
 
@@ -1986,9 +1990,10 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         return indicator_list
 
     def bt_min_successes(self, num_bt, p, alpha):  # skipcq: PYL-R0201
-        """Calculates the minimal number of successes for the BT with significance alpha, where p is the probability of success and num_bt
-        is the number of observed tests"""
-
+        """
+        Calculate the minimal number of successes for the BT with significance alpha.
+        p is the probability of success and num_bt is the number of observed tests.
+        """
         tmp_sum = 0.0
         max_observations_factorial = np.math.factorial(num_bt)
         i_factorial = 1
@@ -2001,9 +2006,10 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         return 0
 
     def bt_min_successes_multi_p(self, num_bt, p_list, alpha, event_index, var_index):
-        """Calculates the minimal number of successes for the BT with significance alpha, where p_list is a list of probabilities of
-        successes and num_bt is the number of observed tests"""
-
+        """
+        Calculate the minimal number of successes for the BT with significance alpha.
+        p_list is a list of probabilities of successes and num_bt is the number of observed tests.
+        """
         if 'num_bt = %s, alpha = %s' % (num_bt, alpha) in self.bt_min_succ_data:
             # Here the min_successes are not being generated, but instead the right Indices are searched for in the bt_min_succ_data-list
             return np.searchsorted(self.bt_min_succ_data['num_bt = %s, alpha = %s' % (num_bt, alpha)], p_list, side='left', sorter=None)
@@ -2016,7 +2022,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         return tmp_list
 
     def print_initial_var_type(self, event_index, log_atom):
-        """prints the initial variableTypes"""
+        """Print the initial variable types."""
         if self.silence_output_without_confidence or self.silence_output_except_indicator:
             return
         message = 'Initial detection of varTypes in lines like %s:' % repr(log_atom.raw_data)
@@ -2054,7 +2060,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 'Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, log_atom, self)
 
     def print_changed_var_type(self, event_index, vt_old, vt_new, var_index, log_atom, confidence=None):
-        """prints the changed variableTypes"""
+        """Print the changed variable types."""
         if self.save_statistics and ((not (isinstance(self.num_updates_until_var_reduction, bool)) and (
                 self.event_type_detector.num_eventlines[event_index] - self.num_init) / self.num_update >=
                 self.num_updates_until_var_reduction - 1)):
@@ -2088,7 +2094,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     self.event_type_detector.num_eventlines[event_index]), sorted_log_lines, event_data, log_atom, self)
 
     def print_reject_var_type(self, event_index, vt, var_index, log_atom):
-        """prints the changed variableTypes"""
+        """Print the changed variable types."""
         if self.silence_output_without_confidence or self.silence_output_except_indicator:
             return
 
@@ -2117,7 +2123,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         event_index]), sorted_log_lines, event_data, log_atom, self)
 
     def print(self, message, log_atom, affected_path, confidence=None, indicator=None):
-        """Prints the message"""
+        """Print the message."""
         if isinstance(affected_path, str):
             affected_path = [affected_path]
         if (self.silence_output_without_confidence and confidence is None) or (
@@ -2149,7 +2155,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
 
 def convert_to_floats(list_in):
-    """Gives back false if one entry of the list is no float and returns the list of floats otherwise"""
+    """Give back false if one entry of the list is no float and returns the list of floats otherwise."""
     num_list = []
     for item in list_in:
         try:
@@ -2160,12 +2166,12 @@ def convert_to_floats(list_in):
 
 
 def consists_of_floats(list_in):
-    """Gives back false if one entry of the list is no float or integer. True otherwise"""
+    """Give back false if one entry of the list is no float or integer. True otherwise."""
     return all(isinstance(x, (float, int)) for x in list_in)
 
 
 def consists_of_ints(list_in):
-    """Gives back True if all entries are integers an False otherwise"""
+    """Give back True if all entries are integers an False otherwise."""
     for item in list_in:
         if item != int(item):
             return False

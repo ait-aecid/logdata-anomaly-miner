@@ -21,8 +21,11 @@ from datetime import datetime, timezone
 
 
 class RuleTest(TestBase):
-    """NOTE: DebugMatchRule and DebugHistoryMatchRule are intentionally not tested, as there is not much to be tested. ParallelMatchRule is
-    also not tested as it is very similar to the OrMatchRule. """
+    """
+    NOTE: DebugMatchRule and DebugHistoryMatchRule are intentionally not tested, as there is not much to be tested.
+    ParallelMatchRule is also not tested as it is very similar to the OrMatchRule.
+    """
+
     __expected_string = '%s This message was generated, when the unit were successful.\n%s: "%s" (%d lines)\n  %s\n\n'
 
     match_s1 = 'match/s1'
@@ -62,7 +65,7 @@ class RuleTest(TestBase):
           log_atom.parser_match.match_element.annotate_match('')))
 
     def test2atom_filter_match_action(self):
-        """This test case proves the functionality of the AtomFilters"""
+        """This test case proves the functionality of the AtomFilters."""
         description = "Test2Rules"
         newMatchPathDetector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False)
         logAtomFixedDME = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_fixed_dme), time(), newMatchPathDetector)

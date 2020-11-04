@@ -1,7 +1,7 @@
 import unittest
 from aminer.analysis import NewMatchPathDetector, MatchValueAverageChangeDetector, MatchValueStreamWriter, \
     MissingMatchPathListValueDetector, NewMatchPathValueComboDetector, NewMatchPathValueDetector, TimeCorrelationDetector, \
-    TimestampsUnsortedDetector, Rules, WhitelistViolationDetector
+    TimestampsUnsortedDetector, Rules, AllowlistViolationDetector
 from aminer.analysis.AtomFilters import MatchPathFilter, SubhandlerFilter, MatchValueFilter
 from aminer.analysis.EventTypeDetector import EventTypeDetector
 from aminer.analysis.HistogramAnalysis import ModuloTimeBinDefinition, HistogramData, HistogramAnalysis
@@ -28,6 +28,8 @@ import pickle  # skipcq: BAN-B403
 
 
 class AnalysisComponentsPerformanceTest(TestBase):
+    """These unittests test the performance of all analysis components."""
+
     result_string = 'The %s could in average handle %d LogAtoms %s with %s\n'
     result = ''
     iterations = 2
@@ -38,16 +40,19 @@ class AnalysisComponentsPerformanceTest(TestBase):
 
     @classmethod
     def tearDownClass(cls):
+        """Run the TestBase tearDownClass method and print the results."""
         super(AnalysisComponentsPerformanceTest, cls).tearDownClass()
         print('\nwaiting time: %d seconds' % cls.waiting_time)
         print(cls.result)
 
     def setUp(self):
+        """Set up needed variables."""
         TestBase.setUp(self)
         self.output_stream = StringIO()
         self.stream_printer_event_handler = StreamPrinterEventHandler(self.analysis_context, self.output_stream)
 
     def run_atom_filters_match_path_filter(self, number_of_paths):
+        """Run the performance tests for AtomFilters.MatchPathFilter."""
         results = [None] * self.iterations
         avg = 0
         z = 0
@@ -89,6 +94,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 number_of_paths, match_path_filter.__class__.__name__, new_match_path_detector.__class__.__name__))
 
     def run_atom_filters_match_value_filter(self, number_of_paths):
+        """Run the performance tests for AtomFilters.MatchValueFilter."""
         results = [None] * self.iterations
         avg = 0
         z = 0
@@ -133,6 +139,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 number_of_paths, match_value_filter.__class__.__name__, new_match_path_detector.__class__.__name__))
 
     def run_new_match_path_detector(self, number_of_paths):
+        """Run the performance tests for NewMatchPathDetector."""
         results = [None] * self.iterations
         avg = 0
         z = 0
@@ -160,6 +167,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             new_match_path_detector.__class__.__name__, avg, results, self.different_paths % number_of_paths)
 
     def run_enhanced_new_match_path_value_combo_detector(self, number_of_paths):
+        """Run the performance tests for EnhancedNewMatchPathValueComboDetector."""
         results = [None] * self.iterations
         avg = 0
         z = 0
@@ -201,6 +209,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             avg, results, self.different_attributes % number_of_paths)
 
     def run_histogram_analysis(self, number_of_paths, amplifier):
+        """Run the performance tests for HistogramAnalysis."""
         results = [None] * self.iterations
         avg = 0
         z = 0
@@ -229,6 +238,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 number_of_paths, amplifier * self.waiting_time))
 
     def run_match_value_average_change_detector(self, number_of_paths):
+        """Run the performance tests for MatchValueAverageChangeDetector."""
         results = [None] * self.iterations
         avg = 0
         z = 0
@@ -285,6 +295,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             match_value_average_change_detector.__class__.__name__, avg, results, self.different_paths % number_of_paths)
 
     def run_match_value_stream_writer(self, number_of_paths):
+        """Run the performance tests for MatchValueStreamWriter."""
         results = [None] * self.iterations
         avg = 0
         z = 0
@@ -320,6 +331,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             match_value_stream_writer.__class__.__name__, avg, results, self.different_paths % number_of_paths)
 
     def run_missing_match_path_value_detector(self, number_of_paths):
+        """Run the performance tests for MissingMatchPathValueDetector."""
         results = [None] * self.iterations
         avg = 0
         z = 0
@@ -360,6 +372,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             missing_match_path_list_value_detector.__class__.__name__, avg, results, self.different_paths % number_of_paths)
 
     def run_new_match_path_value_combo_detector(self, number_of_paths):
+        """Run the performance tests for NewMatchPathValueComboDetector."""
         results = [None] * self.iterations
         avg = 0
         z = 0
@@ -391,6 +404,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             new_match_path_value_combo_detector.__class__.__name__, avg, results, self.different_attributes % number_of_paths)
 
     def run_new_match_path_value_detector(self, number_of_paths):
+        """Run the performance tests for NewMatchValueDetector."""
         results = [None] * self.iterations
         avg = 0
         z = 0
@@ -422,6 +436,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             new_match_path_value_detector.__class__.__name__, avg, results, self.different_attributes % number_of_paths)
 
     def run_time_correlation_detector(self, number_of_rules):
+        """Run the performance tests for TimeCorrelationDetector."""
         results = [None] * self.iterations
         avg = 0
         z = 0
@@ -447,6 +462,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             time_correlation_detector.__class__.__name__, avg, results, 'test_count=%d.' % number_of_rules)
 
     def run_time_correlation_violation_detector(self, chance):
+        """Run the performance tests for TimeCorrelationViolationDetector."""
         results = [None] * self.iterations
         avg = 0
         z = 0
@@ -497,6 +513,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             '%d%% chance of not finding an element' % ((1 - chance) * 100))
 
     def run_timestamp_correction_filters(self, number_of_paths):
+        """Run the performance tests for TimestampCorrectionFilters."""
         results = [None] * self.iterations
         avg = 0
         z = 0
@@ -529,6 +546,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             'a %s and %d different path(es).' % (new_match_path_detector.__class__.__name__, number_of_paths))
 
     def run_timestamps_unsorted_detector(self, reset_factor):
+        """Run the performance tests for TimestampsUnsortedDetector."""
         results = [None] * self.iterations
         avg = 0
         z = 0
@@ -559,7 +577,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
         type(self).result = self.result + self.result_string % (
             timestamps_unsorted_detector.__class__.__name__, avg, results, 'a reset_factor of %f.' % reset_factor)
 
-    def run_whitelist_violation_detector(self, number_of_paths, modulo_factor):
+    def run_allowlist_violation_detector(self, number_of_paths, modulo_factor):
+        """Run the performance tests for AllowlistViolationDetector."""
         results = [None] * self.iterations
         avg = 0
         z = 0
@@ -569,7 +588,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             while i < number_of_paths:
                 rules.append(PathExistsMatchRule(self.integerd + str(i % number_of_paths), None))
                 i = i + 1
-            whitelist_violation_detector = WhitelistViolationDetector(self.aminer_config, rules, [self.stream_printer_event_handler])
+            allowlist_violation_detector = AllowlistViolationDetector(self.aminer_config, rules, [self.stream_printer_event_handler])
             t = time.time()
             i = 0
             measured_time = 0
@@ -584,18 +603,19 @@ class AnalysisComponentsPerformanceTest(TestBase):
                     DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i % 100).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
-                log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, whitelist_violation_detector)
-                measured_time += timeit.timeit(lambda: whitelist_violation_detector.receive_atom(log_atom), number=1)
+                log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, allowlist_violation_detector)
+                measured_time += timeit.timeit(lambda: allowlist_violation_detector.receive_atom(log_atom), number=1)
                 i = i + 1
             results[z] = i * 10
             z = z + 1
             avg = avg + i * 10
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
-            whitelist_violation_detector.__class__.__name__, avg, results,
+            allowlist_violation_detector.__class__.__name__, avg, results,
             '%d different PathExistsMatchRules and a moduloFactor of %d.' % (number_of_paths, modulo_factor))
 
     def run_new_match_id_value_combo_detector(self, min_allowed_time_diff):
+        """Run the performance tests for NewMatchIdValueComboDetector."""
         log_lines = [
             b'type=SYSCALL msg=audit(1580367384.000:1): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f '
             b'items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) '
@@ -699,6 +719,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             '%.2f seconds min_allowed_time_diff.' % min_allowed_time_diff)
 
     def run_parser_count(self, set_target_path_list, report_after_number_of_elements):
+        """Run the performance tests for ParserCount."""
         log_lines = [
             b'type=SYSCALL msg=audit(1580367384.000:1): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f '
             b'items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) '
@@ -804,6 +825,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
 
     def run_event_correlation_detector(self, generation, diff, p0, alpha, max_hypotheses, max_observations, candidates_size,
                                        hypothesis_eval_delta_time, delta_time_to_discard_hypothesis):
+        """Run the performance tests for EventCorrelationDetector."""
         alphabet = b'abcdefghijklmnopqrstuvwxyz'
         alphabet_model = FirstMatchModelElement('first', [])
         for i, char in enumerate(alphabet):
@@ -867,6 +889,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 hypothesis_eval_delta_time, delta_time_to_discard_hypothesis))
 
     def run_match_filter(self, number_of_paths):
+        """Run the performance tests for MatchFilter."""
         results = [None] * self.iterations
         avg = 0
         z = 0
@@ -900,6 +923,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             'a %s and %d different path(es).' % (new_match_path_detector.__class__.__name__, number_of_paths))
 
     def run_event_type_detector(self, number_of_paths):
+        """Run the performance tests for EventTypeDetector."""
         with open('unit/data/vtd_data/uni_data_test6', 'rb') as f:
             uni_data_list = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/nor_data_test6', 'rb') as f:
@@ -958,6 +982,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             event_type_detector.__class__.__name__, avg, results, '%s different path(es).' % (str(number_of_paths)))
 
     def run_variable_type_detector(self, number_of_paths):
+        """Run the performance tests for VariableTypeDetector."""
         with open('unit/data/vtd_data/uni_data_test6', 'rb') as f:
             uni_data_list = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/nor_data_test6', 'rb') as f:
@@ -1018,6 +1043,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             variable_type_detector.__class__.__name__, avg, results, '%s different path(es).' % (str(number_of_paths)))
 
     def test01atom_filters(self):
+        """Start performance tests for AtomFilters."""
         self.run_atom_filters_match_path_filter(1)
         self.run_atom_filters_match_path_filter(30)
         self.run_atom_filters_match_path_filter(100)
@@ -1027,11 +1053,13 @@ class AnalysisComponentsPerformanceTest(TestBase):
         self.run_atom_filters_match_value_filter(100)
 
     def test02enhanced_new_match_path_value_combo_detector(self):
+        """Start performance tests for EnhancedNewMatchPathValueComboDetector."""
         self.run_enhanced_new_match_path_value_combo_detector(1)
         self.run_enhanced_new_match_path_value_combo_detector(30)
         self.run_enhanced_new_match_path_value_combo_detector(100)
 
     def test03histogram_analysis(self):
+        """Start performance tests for HistogramAnalysis."""
         self.run_histogram_analysis(1, 100)
         self.run_histogram_analysis(30, 100)
         self.run_histogram_analysis(100, 100)
@@ -1048,75 +1076,88 @@ class AnalysisComponentsPerformanceTest(TestBase):
         self.run_histogram_analysis(10000, 10000)
 
     def test04match_value_average_change_detector(self):
+        """Start performance tests for MatchValueAverageChangeDetector."""
         self.run_match_value_average_change_detector(1)
         self.run_match_value_average_change_detector(30)
         self.run_match_value_average_change_detector(100)
 
     def test05match_value_stream_writer(self):
+        """Start performance tests for MatchValueStreamWriter."""
         self.run_match_value_stream_writer(1)
         self.run_match_value_stream_writer(30)
         self.run_match_value_stream_writer(100)
 
     def test06missing_match_path_value_detector(self):
+        """Start performance tests for MissingMatchPathValueDetector."""
         self.run_missing_match_path_value_detector(1)
         self.run_missing_match_path_value_detector(30)
         self.run_missing_match_path_value_detector(100)
 
     def test07new_match_path_detector(self):
+        """Start performance tests for NewMatchPathDetector."""
         self.run_new_match_path_detector(1)
         self.run_new_match_path_detector(1000)
         self.run_new_match_path_detector(100000)
 
     def test08new_match_path_value_combo_detector(self):
+        """Start performance tests for NewMatchPathValueComboDetector."""
         self.run_new_match_path_value_combo_detector(1)
         self.run_new_match_path_value_combo_detector(30)
         self.run_new_match_path_value_combo_detector(100)
 
     def test09new_match_path_value_detector(self):
+        """Start performance tests for NewMatchPathValueDetector."""
         self.run_new_match_path_value_detector(1)
         self.run_new_match_path_value_detector(30)
         self.run_new_match_path_value_detector(100)
 
     def test10time_correlation_detector(self):
+        """Start performance tests for TimeCorrelationDetector."""
         self.run_time_correlation_detector(10)
         self.run_time_correlation_detector(100)
         self.run_time_correlation_detector(1000)
 
     def test11time_correlation_violation_detector(self):
+        """Start performance tests for TimeCorrelationViolationDetector."""
         self.run_time_correlation_violation_detector(0.99)
         self.run_time_correlation_violation_detector(0.95)
         self.run_time_correlation_violation_detector(0.50)
         self.run_time_correlation_violation_detector(0.01)
 
     def test12timestamp_correction_filters(self):
+        """Start performance tests for TimestampCorrectionFilters."""
         self.run_timestamp_correction_filters(1)
         self.run_timestamp_correction_filters(1000)
         self.run_timestamp_correction_filters(100000)
 
     def test13timestamps_unsorted_detector(self):
+        """Start performance tests for TimestampsUnsortedDetector."""
         self.run_timestamps_unsorted_detector(0.001)
         self.run_timestamps_unsorted_detector(0.1)
         self.run_timestamps_unsorted_detector(1)
         self.run_timestamps_unsorted_detector(100)
 
-    def test14whitelist_violation_detector(self):
-        self.run_whitelist_violation_detector(1, 99)
-        self.run_whitelist_violation_detector(1, 50)
-        self.run_whitelist_violation_detector(1, 1)
-        self.run_whitelist_violation_detector(1000, 99)
-        self.run_whitelist_violation_detector(1000, 50)
-        self.run_whitelist_violation_detector(1000, 1)
-        self.run_whitelist_violation_detector(100000, 99)
-        self.run_whitelist_violation_detector(100000, 50)
-        self.run_whitelist_violation_detector(100000, 1)
+    def test14allowlist_violation_detector(self):
+        """Start performance tests for AllowlistViolationDetector."""
+        self.run_allowlist_violation_detector(1, 99)
+        self.run_allowlist_violation_detector(1, 50)
+        self.run_allowlist_violation_detector(1, 1)
+        self.run_allowlist_violation_detector(1000, 99)
+        self.run_allowlist_violation_detector(1000, 50)
+        self.run_allowlist_violation_detector(1000, 1)
+        self.run_allowlist_violation_detector(100000, 99)
+        self.run_allowlist_violation_detector(100000, 50)
+        self.run_allowlist_violation_detector(100000, 1)
 
     def test15new_match_id_value_combo_detector(self):
+        """Start performance tests for NewMatchIdValueComboDetector."""
         self.run_new_match_id_value_combo_detector(0.1)
         self.run_new_match_id_value_combo_detector(5)
         self.run_new_match_id_value_combo_detector(20)
         self.run_new_match_id_value_combo_detector(100)
 
     def test16parser_count(self):
+        """Start performance tests for ParserCount."""
         # use target_paths
         self.run_parser_count(True, 60)
         self.run_parser_count(True, 1000)
@@ -1130,6 +1171,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
         self.run_parser_count(False, 100000)
 
     def test17event_correlation_detector(self):
+        """Start performance tests for EventCorrelationDetector."""
         self.run_event_correlation_detector(1.0, 5, 0.9, 0.05, 1000, 500, 5, 120, 180)
         self.run_event_correlation_detector(0.5, 5, 0.9, 0.05, 1000, 500, 5, 120, 180)
         self.run_event_correlation_detector(0.1, 5, 0.9, 0.05, 1000, 500, 5, 120, 180)
@@ -1154,17 +1196,20 @@ class AnalysisComponentsPerformanceTest(TestBase):
         self.run_event_correlation_detector(1.0, 5, 0.9, 0.05, 1000, 500, 5, 30, 45)
 
     def test18match_filter(self):
+        """Start performance tests for MatchFilter."""
         self.run_match_filter(1)
         self.run_match_filter(1000)
         self.run_match_filter(100000)
 
     def test19event_type_detector(self):
+        """Start performance tests for EventTypeDetector."""
         self.run_event_type_detector(None)
         self.run_event_type_detector(1)
         self.run_event_type_detector(10)
         self.run_event_type_detector(100)
 
     def test20variable_type_detector(self):
+        """Start performance tests for VariableTypeDetector."""
         self.run_variable_type_detector(None)
         self.run_variable_type_detector(1)
         self.run_variable_type_detector(10)

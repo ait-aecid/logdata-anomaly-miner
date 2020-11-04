@@ -5,6 +5,7 @@ from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
 
 
 class OptionalMatchModelElementTest(unittest.TestCase):
+    """Unittests for the OptionalMatchModelElement."""
 
     def test1_match_element_expected(self):
         """Because of the simplicity of the FixedDataModelElement it is used to test possible outcomes of this class."""

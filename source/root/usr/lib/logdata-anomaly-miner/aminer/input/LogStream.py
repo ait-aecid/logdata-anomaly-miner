@@ -1,4 +1,5 @@
-"""This module contains interfaces and classes for logdata resource handling and combining them to resumable virtual LogStream objects.
+"""
+This module contains interfaces and classes for logdata resource handling and combining them to resumable virtual LogStream objects.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -25,31 +26,37 @@ from aminer.util import encode_byte_string_as_string
 
 
 class LogDataResource(metaclass=abc.ABCMeta):
-    """This is the superinterface of each logdata resource monitored by AMiner. The interface is designed in a way, that instances
-    of same subclass can be used both on AMiner parent process side for keeping track of the resources and forwarding the file descriptors
-    to the child, but also on child side for the same purpose. The only difference is, that on child side, the stream reading and
-    read continuation features are used also. After creation on child side, this is the sole place for reading and closing the
-    streams. An external process may use the file descriptor only to wait for input via select."""
+    """
+    This is the superinterface of each logdata resource monitored by AMiner.
+    The interface is designed in a way, that instances of same subclass can be used both on AMiner parent process side for keeping track of
+    the resources and forwarding the file descriptors to the child, but also on child side for the same purpose. The only difference is,
+    that on child side, the stream reading and read continuation features are used also. After creation on child side, this is the sole
+    place for reading and closing the streams. An external process may use the file descriptor only to wait for input via select.
+    """
 
     @abc.abstractmethod
     def __init__(self, log_resource_name, log_stream_fd, default_buffer_size=1 << 16, repositioning_data=None):
-        """Create a new LogDataResource. Object creation must not touch the logStreamFd or read any data, unless repositioning_data
-        was given. In the later case, the stream has to support seek operation to reread data.
+        """
+        Create a new LogDataResource. Object creation must not touch the logStreamFd or read any data, unless repositioning_data  was given.
+        In the later case, the stream has to support seek operation to reread data.
         @param log_resource_name the unique encoded name of this source as byte array.
         @param log_stream_fd the stream for reading the resource or -1 if not yet opened.
-        @param repositioning_data if not None, attemt to position the the stream using the given data."""
+        @param repositioning_data if not None, attemt to position the the stream using the given data.
+        """
 
     @abc.abstractmethod
     def open(self, reopen_flag=False):
-        """Open the given resource.
+        """
+        Open the given resource.
         @param reopen_flag when True, attempt to reopen the same resource and check if it differs from the previously opened one.
         @raise Exception if valid logStreamFd was already provided, is still open and reopenFlag is False.
         @raise OSError when opening failed with unexpected error.
-        @return True if the resource was really opened or False if opening was not yet possible but should be attempted again."""
+        @return True if the resource was really opened or False if opening was not yet possible but should be attempted again.
+        """
 
     @abc.abstractmethod
     def get_resource_name(self):
-        """Get the name of this log resoruce."""
+        """Get the name of this log resource."""
 
     @abc.abstractmethod
     def get_file_descriptor(self):
@@ -57,8 +64,10 @@ class LogDataResource(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def fill_buffer(self):
-        """Fill the buffer data of this resource. The repositioning information is not updated, update_position() has to be used.
-        @return the number of bytes read or -1 on error or end."""
+        """
+        Fill the buffer data of this resource. The repositioning information is not updated, update_position() has to be used.
+        @return the number of bytes read or -1 on error or end.
+        """
 
     @abc.abstractmethod
     def update_position(self, length):
@@ -74,14 +83,18 @@ class LogDataResource(metaclass=abc.ABCMeta):
 
 
 class FileLogDataResource(LogDataResource):
-    """This class defines a single log data resource using an underlying file accessible via the file descriptor. The characteristics
-    of this type of resource is, that reopening and repositioning of the stream has to be possible."""
+    """
+    This class defines a single log data resource using an underlying file accessible via the file descriptor.
+    The characteristics of this type of resource is, that reopening and repositioning of the stream has to be possible.
+    """
 
     def __init__(self, log_resource_name, log_stream_fd, default_buffer_size=1 << 16, repositioning_data=None):
-        """Create a new file type resource.
+        """
+        Create a new file type resource.
         @param log_resource_name the unique name of this source as bytes array, has to start with "file://" before the file path.
         @param log_stream_fd the stream for reading the resource or -1 if not yet opened.
-        @param repositioning_data if not None, attempt to position the stream using the given data."""
+        @param repositioning_data if not None, attempt to position the stream using the given data.
+        """
         if not log_resource_name.startswith(b'file://'):
             raise Exception('Attempting to create different type resource as file')
         self.log_resource_name = log_resource_name
@@ -135,11 +148,13 @@ class FileLogDataResource(LogDataResource):
                     os.lseek(self.log_file_fd, 0, os.SEEK_SET)
 
     def open(self, reopen_flag=False):
-        """Open the given resource.
+        """
+        Open the given resource.
         @param reopen_flag when True, attempt to reopen the same resource and check if it differs from the previously opened one.
         @raise Exception if valid log_stream_fd was already provided, is still open and reopen_flag is False.
         @raise OSError when opening failed with unexpected error.
-        @return True if the resource was really opened or False if opening was not yet possible but should be attempted again."""
+        @return True if the resource was really opened or False if opening was not yet possible but should be attempted again.
+        """
         if not reopen_flag and (self.log_file_fd != -1):
             raise Exception('Cannot reopen stream still open when not instructed to do so')
         log_file_fd = -1
@@ -176,8 +191,10 @@ class FileLogDataResource(LogDataResource):
         return self.log_file_fd
 
     def fill_buffer(self):
-        """Fill the buffer data of this resource. The repositioning information is not updated, update_position() has to be used.
-        @return the number of bytes read or -1 on error or end."""
+        """
+        Fill the buffer data of this resource. The repositioning information is not updated, update_position() has to be used.
+        @return the number of bytes read or -1 on error or end.
+        """
         data = os.read(self.log_file_fd, self.default_buffer_size)
         self.buffer += data
         return len(data)
@@ -193,20 +210,25 @@ class FileLogDataResource(LogDataResource):
         return [self.stat_data.st_ino, self.total_consumed_length, base64.b64encode(self.repositioning_digest.digest())]
 
     def close(self):
+        """Close the log file."""
         os.close(self.log_file_fd)
         self.log_file_fd = -1
 
 
 class UnixSocketLogDataResource(LogDataResource):
-    """This class defines a single log data resource connecting to a local UNIX socket. The characteristics of this type of
-    resource is, that reopening works only after end of stream of was reached."""
+    """
+    This class defines a single log data resource connecting to a local UNIX socket.
+    The characteristics of this type of resource is, that reopening works only after end of stream of was reached.
+    """
 
     # skipcq: PYL-W0231
     def __init__(self, log_resource_name, log_stream_fd, default_buffer_size=1 << 16, repositioning_data=None):
-        """Create a new unix socket type resource.
+        """
+        Create a new unix socket type resource.
         @param log_resource_name the unique name of this source as byte array, has to start with "unix://" before the file path.
         @param log_stream_fd the stream for reading the resource or -1 if not yet opened.
-        @param repositioning_data has to be None for this type of resource."""
+        @param repositioning_data has to be None for this type of resource.
+        """
         if not log_resource_name.startswith(b'unix://'):
             raise Exception('Attempting to create different type resource as unix')
         self.log_resource_name = log_resource_name
@@ -216,11 +238,13 @@ class UnixSocketLogDataResource(LogDataResource):
         self.total_consumed_length = 0
 
     def open(self, reopen_flag=False):
-        """Open the given resource.
+        """
+        Open the given resource.
         @param reopen_flag when True, attempt to reopen the same resource and check if it differs from the previously opened one.
         @raise Exception if valid log_stream_fd was already provided, is still open and reopenFlag is False.
         @raise OSError when opening failed with unexpected error.
-        @return True if the resource was really opened or False if opening was not yet possible but should be attempted again."""
+        @return True if the resource was really opened or False if opening was not yet possible but should be attempted again.
+        """
         if reopen_flag:
             if self.log_stream_fd != -1:
                 return False
@@ -250,8 +274,10 @@ class UnixSocketLogDataResource(LogDataResource):
         return self.log_stream_fd
 
     def fill_buffer(self):
-        """Fill the buffer data of this resource. The repositioning information is not updated, update_position() has to be used.
-        @return the number of bytes read or -1 on error or end."""
+        """
+        Fill the buffer data of this resource. The repositioning information is not updated, update_position() has to be used.
+        @return the number of bytes read or -1 on error or end.
+        """
         data = os.read(self.log_stream_fd, self.default_buffer_size)
         self.buffer += data
         return len(data)
@@ -266,17 +292,22 @@ class UnixSocketLogDataResource(LogDataResource):
         return None
 
     def close(self):
+        """Close the log stream."""
         os.close(self.log_stream_fd)
         self.log_stream_fd = -1
 
 
 class LogStream:
-    """This class defines a continuous stream of logging data from a given source. This class also handles rollover from one file
-    descriptor to a new one."""
+    """
+    This class defines a continuous stream of logging data from a given source.
+    This class also handles rollover from one file descriptor to a new one.
+    """
 
     def __init__(self, log_data_resource, stream_atomizer):
-        """Create a new logstream with an initial logDataResource.
-        @param stream_atomizer the atomizer to forward data to."""
+        """
+        Create a new logstream with an initial logDataResource.
+        @param stream_atomizer the atomizer to forward data to.
+        """
         # The resource currently processed. Might also be None when previous
         # resource was read till end and no rollover to new one had occurred.
         self.log_data_resource = log_data_resource
@@ -287,8 +318,11 @@ class LogStream:
         self.next_resources = []
 
     def add_next_resource(self, next_log_data_resource):
-        """Roll over from one fd to another one pointing to the newer version of the same file. This will also change reading behaviour
-        of current resource to await EOF or stop as soon as first blocking read does not return any data."""
+        """
+        Roll over from one fd to another one pointing to the newer version of the same file.
+        This will also change reading behaviour of current resource to await EOF or stop as soon as first blocking read does not return
+        any data.
+        """
         # Just append the resource to the list of next resources. The next read operation without any input from the primary resource
         # will pick it up automatically.
         if self.log_data_resource is None:
@@ -297,10 +331,11 @@ class LogStream:
             self.next_resources.append(next_log_data_resource)
 
     def handle_stream(self):
-        """Handle data from this stream by forwarding it to the atomizer.
+        """
+        Handle data from this stream by forwarding it to the atomizer.
         @return the file descriptor to monitoring for new input or -1 if there is no new data or atomizer was not yet ready to
-        consume data. Handling should be tried again later on."""
-
+        consume data. Handling should be tried again later on.
+        """
         if self.log_data_resource is None:
             return -1
         if self.last_consume_state == 0:
@@ -330,9 +365,11 @@ class LogStream:
         return self.log_data_resource.get_file_descriptor()
 
     def roll_over(self):
-        """End reading of the current resource and switch to the next. This method does not handle last_consume_state, that has to
-        be done outside.
-        @return state in same manner as handle_stream()"""
+        """
+        End reading of the current resource and switch to the next.
+        This method does not handle last_consume_state, that has to be done outside.
+        @return state in same manner as handle_stream()
+        """
         consumed_length = self.stream_atomizer.consume_data(self.log_data_resource.buffer, True)
         if consumed_length < 0:
             # Consumer is not ready to consume yet. Retry later on.

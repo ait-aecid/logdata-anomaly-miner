@@ -1,4 +1,5 @@
-"""This module contains classes for execution of py child process main analysis loop.
+"""
+This module contains classes for execution of py child process main analysis loop.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -23,12 +24,11 @@ import sys
 import time
 import traceback
 import resource
-import subprocess  # skipcq: BAN-B404
 import logging
 
 from aminer import AMinerConfig
 from aminer.input.LogStream import LogStream
-from aminer.util import PersistencyUtil
+from aminer.util import PersistenceUtil
 from aminer.util import SecureOSFunctions
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.util import JsonUtil
@@ -79,13 +79,16 @@ class AnalysisContext:
             raise Exception('Attempting to timer component for unknown class %s' % trigger_class)
 
     def register_component(self, component, component_name=None, register_time_trigger_class_override=None):
-        """Register a new component. A component implementing the TimeTriggeredComponentInterface will also be added to the
-        appropriate lists unless registerTimeTriggerClassOverride is specified.
+        """
+        Register a new component.
+        A component implementing the TimeTriggeredComponentInterface will also be added to the appropriate lists unless
+        registerTimeTriggerClassOverride is specified.
         @param component the component to be registered.
         @param component_name an optional name assigned to the component when registering. When no name is specified, the detector class
         name plus an identifier will be used. When a component with the same name was already registered, this will cause an error.
         @param register_time_trigger_class_override if not none, ignore the time trigger class supplied by the component and register
-        it for the classes specified in the override list. Use an empty list to disable registration."""
+        it for the classes specified in the override list. Use an empty list to disable registration.
+        """
         if component_name is None:
             component_name = str(component.__class__.__name__) + str(self.next_registry_id)
         if component_name in self.registered_components_by_name:
@@ -108,8 +111,10 @@ class AnalysisContext:
         return self.registered_components.keys()
 
     def get_component_by_id(self, id_string):
-        """Get a component by ID.
-        @return None if not found."""
+        """
+        Get a component by ID.
+        @return None if not found.
+        """
         component_info = self.registered_components.get(id_string)
         if component_info is None:
             return None
@@ -120,34 +125,42 @@ class AnalysisContext:
         return list(self.registered_components_by_name.keys())
 
     def get_component_by_name(self, name):
-        """Get a component by name.
-        @return None if not found."""
+        """
+        Get a component by name.
+        @return None if not found.
+        """
         return self.registered_components_by_name.get(name)
 
     def get_name_by_component(self, component):
-        """Get the name of a component.
-        @return None if not found."""
+        """
+        Get the name of a component.
+        @return None if not found.
+        """
         for component_name, component_iter in self.registered_components_by_name.items():
             if component_iter == component:
                 return component_name
         return None
 
     def get_id_by_component(self, component):
-        """Get the name of a component.
-        @return None if not found."""
+        """
+        Get the name of a component.
+        @return None if not found.
+        """
         for component_id, component_iter in self.registered_components.items():
             if component_iter[0] == component:
                 return component_id
         return None
 
     def build_analysis_pipeline(self):
-        """Convenience method to create the pipeline."""
+        """Create the pipeline."""
         self.aminer_config.build_analysis_pipeline(self)
 
 
 class AnalysisChild(TimeTriggeredComponentInterface):
-    """This class defines the child performing the complete analysis workflow. When splitting privileges between analysis and monitor
-    process, this class should only be initialized within the analysis process!"""
+    """
+    This class defines the child performing the complete analysis workflow.
+    When splitting privileges between analysis and monitor  process, this class should only be initialized within the analysis process!
+    """
 
     def __init__(self, program_name, aminer_config):
         self.program_name = program_name
@@ -172,7 +185,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 
         # Override the signal handler to allow graceful shutdown.
         def graceful_shutdown_handler(_signo, _stack_frame):
-            """This is the signal handler function to react on typical shutdown signals."""
+            """React on typical shutdown signals."""
             print('%s: caught signal, shutting down' % program_name, file=sys.stderr)
             self.run_analysis_loop_flag = False
 
@@ -185,10 +198,11 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         self.analysis_context.add_time_triggered_component(self)
 
     def run_analysis(self, master_fd):
-        """This method runs the analysis thread.
+        """
+        Run the analysis thread.
         @param master_fd the main communication socket to the parent to receive logfile updates from the parent.
-        @return 0 on success, e.g. normal termination via signal or 1 on error."""
-
+        @return 0 on success, e.g. normal termination via signal or 1 on error.
+        """
         # The masterControlSocket is the socket to communicate with the master process to receive commands or logstream data. Expect
         # the parent/child communication socket on fd 3. This also duplicates the fd, so close the old one.
         self.master_control_socket = socket.fromfd(master_fd, socket.AF_UNIX, socket.SOCK_DGRAM, 0)
@@ -213,33 +227,9 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                 print('FATAL: %s must be an integer, terminating' % AMinerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE, file=sys.stderr)
                 return 1
 
-        max_cpu_percent_usage = self.analysis_context.aminer_config.config_properties.get(AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE)
-        if max_cpu_percent_usage is not None:
-            try:
-                max_cpu_percent_usage = int(max_cpu_percent_usage)
-                # limit
-                pid = os.getpid()
-                package_installed_cmd = ['dpkg', '-l', 'cpulimit']
-                cpulimit_cmd = ['cpulimit', '-p', str(pid), '-l', str(max_cpu_percent_usage)]
-
-                # skipcq: BAN-B603
-                with subprocess.Popen(package_installed_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as out:
-                    stdout, _stderr = out.communicate()
-
-                if 'dpkg-query: no packages found matching cpulimit' in stdout.decode():
-                    print(
-                        'FATAL: cpulimit package must be installed, when using the property %s' %
-                        AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE, file=sys.stderr)
-                    return 1
-                # skipcq: BAN-B603
-                _out = subprocess.Popen(cpulimit_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            except ValueError:
-                print('FATAL: %s must be an integer, terminating' % AMinerConfig.KEY_RESOURCES_MAX_PERCENT_CPU_USAGE, file=sys.stderr)
-                return 1
-
         # Load continuation data for last known log streams. The loaded data has to be a dictionary with repositioning information for
         # each stream. The data is used only when creating the first stream with that name.
-        self.repositioning_data_dict = PersistencyUtil.load_json(self.persistence_file_name)
+        self.repositioning_data_dict = PersistenceUtil.load_json(self.persistence_file_name)
         if self.repositioning_data_dict is None:
             self.repositioning_data_dict = {}
 
@@ -369,13 +359,14 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                 next_analysis_time_trigger_time = analysis_time + next_trigger_offset
 
         # Analysis loop is only left on shutdown. Try to persist everything and leave.
-        PersistencyUtil.persist_all()
+        PersistenceUtil.persist_all()
         return delayed_return_status
 
     def handle_master_control_socket_receive(self):
-        """Receive information from the parent process via the master control socket. This method may only be invoked when receiving
-        is guaranteed to be nonblocking and to return data."""
-
+        """
+        Receive information from the parent process via the master control socket.
+        This method may only be invoked when receiving is guaranteed to be nonblocking and to return data.
+        """
         # We cannot fail with None here as the socket was in the readList.
         (received_fd, received_type_info, annotation_data) = SecureOSFunctions.receive_annoted_file_descriptor(self.master_control_socket)
         if received_type_info == b'logstream':
@@ -413,18 +404,22 @@ class AnalysisChild(TimeTriggeredComponentInterface):
             raise Exception('Unhandled type info on received fd: %s' % (repr(received_type_info)))
 
     def get_time_trigger_class(self):
-        """Get the trigger class this component can be registered for. See AnalysisContext class for different trigger classes
-        available."""
+        """
+        Get the trigger class this component can be registered for.
+        See AnalysisContext class for different trigger classes available.
+        """
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
-        """This method is called to perform trigger actions and to determine the time for next invocation. The caller may decide
-        to invoke this method earlier than requested during the previous call. Classes implementing this method have to handle such
-        cases. Each class should try to limit the time spent in this method as it might delay trigger signals to other components.
-        For extensive compuational work or IO, a separate thread should be used.
+        """
+        Perform trigger actions and to determine the time for next invocation.
+        The caller may decide to invoke this method earlier than requested during the previous call. Classes implementing this method have
+        to handle such cases. Each class should try to limit the time spent in this method as it might delay trigger signals to other
+        components. For extensive compuational work or IO, a separate thread should be used.
         @param trigger_time the time this trigger is invoked. This might be the current real time when invoked from real time
         timers or the forensic log timescale time value.
-        @return the number of seconds when next invocation of this trigger is required."""
+        @return the number of seconds when next invocation of this trigger is required.
+        """
         delta = self.next_persist_time - trigger_time
         if delta <= 0:
             self.repositioning_data_dict = {}
@@ -432,14 +427,16 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                 repositioning_data = log_stream.get_repositioning_data()
                 if repositioning_data is not None:
                     self.repositioning_data_dict[log_stream_name] = repositioning_data
-            PersistencyUtil.store_json(self.persistence_file_name, self.repositioning_data_dict)
+            PersistenceUtil.store_json(self.persistence_file_name, self.repositioning_data_dict)
             delta = 600
             self.next_persist_time = trigger_time + delta
         return delta
 
 
 class AnalysisChildRemoteControlHandler:
-    """This class stores information about one open remote control connection. The handler can be in 3 different states:
+    """
+    This class stores information about one open remote control connection.
+    The handler can be in 3 different states:
     * receive request: the control request was not completely received. The main process may use select() to wait for input data without
       blocking or polling.
     * execute: the request is complete and is currently under execution. In that mode all other aminer analysis activity is blocked.
@@ -462,7 +459,8 @@ class AnalysisChildRemoteControlHandler:
     Method naming:
     * do...(): Those methods perform an action consuming input or output buffer data.
     * may...(): Those methods return true if it would make sense to call a do...() method with the same name.
-    * put...(): Those methods put a request on the buffers."""
+    * put...(): Those methods put a request on the buffers.
+    """
 
     max_control_packet_size = 1 << 32
 
@@ -515,11 +513,11 @@ class AnalysisChildRemoteControlHandler:
                     'add_handler_to_atom_filter_and_register_analysis_component':
                         methods.add_handler_to_atom_filter_and_register_analysis_component,
                     'save_current_config': methods.save_current_config,
-                    'whitelist_event_in_component': methods.whitelist_event_in_component,
+                    'allowlist_event_in_component': methods.allowlist_event_in_component,
                     'dump_events_from_history': methods.dump_events_from_history,
                     'ignore_events_from_history': methods.ignore_events_from_history,
                     'list_events_from_history': methods.list_events_from_history,
-                    'whitelist_events_from_history': methods.whitelist_events_from_history,
+                    'allowlist_events_from_history': methods.allowlist_events_from_history,
                     'EnhancedNewMatchPathValueComboDetector': aminer.analysis.EnhancedNewMatchPathValueComboDetector,
                     'EventCorrelationDetector': aminer.analysis.EventCorrelationDetector,
                     'HistogramAnalysis': aminer.analysis.HistogramAnalysis,
@@ -535,7 +533,7 @@ class AnalysisChildRemoteControlHandler:
                     'TimeCorrelationViolationDetector': aminer.analysis.TimeCorrelationViolationDetector,
                     'TimestampCorrectionFilters': aminer.analysis.TimestampCorrectionFilters,
                     'TimestampsUnsortedDetector': aminer.analysis.TimestampsUnsortedDetector,
-                    'WhitelistViolationDetector': aminer.analysis.WhitelistViolationDetector}
+                    'AllowlistViolationDetector': aminer.analysis.AllowlistViolationDetector}
                 # write this to the log file!
                 logging.basicConfig(filename=AMinerConfig.LOG_FILE, level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s',
                                     datefmt='%d.%m.%Y %H:%M:%S')
@@ -584,16 +582,20 @@ class AnalysisChildRemoteControlHandler:
             raise Exception('Invalid request type %s' % repr(request_type))
 
     def may_get(self):
-        """Check if a call to doGet would make sense.
-        @return True if the input buffer already contains a complete wellformed packet or definitely malformed one."""
+        """
+        Check if a call to do_get would make sense.
+        @return True if the input buffer already contains a complete wellformed packet or definitely malformed one.
+        """
         if len(self.input_buffer) < 4:
             return False
         request_length = struct.unpack("!I", self.input_buffer[:4])[0]
         return (request_length <= len(self.input_buffer)) or (request_length >= self.max_control_packet_size)
 
     def do_get(self):
-        """Get the next packet from the input buffer and remove it.
-        @return the packet data including the length preamble or None when request not yet complete."""
+        """
+        Get the next packet from the input buffer and remove it.
+        @return the packet data including the length preamble or None when request not yet complete.
+        """
         if len(self.input_buffer) < 4:
             return None
         request_length = struct.unpack("!I", self.input_buffer[:4])[0]
@@ -607,19 +609,23 @@ class AnalysisChildRemoteControlHandler:
         return request_data
 
     def do_receive(self):
-        """Receive data from the remote side and add it to the input buffer. This method call expects to read at least one byte
-        of data. A zero byte read indicates EOF and will cause normal handler termination when all input and output buffers are
-        empty. Any other state or error causes handler termination before reporting the error.
+        """
+        Receive data from the remote side and add it to the input buffer.
+        This method call expects to read at least one byte of data. A zero byte read indicates EOF and will cause normal handler termination
+        when all input and output buffers are empty. Any other state or error causes handler termination before reporting the error.
         @return True if read was successful, false if EOF is reached without reading any data and all buffers are empty.
-        @throws Exception when unexpected errors occured while receiving or shuting down the connection."""
+        @throws Exception when unexpected errors occured while receiving or shuting down the connection.
+        """
         data = os.read(self.remote_control_fd, 1 << 16)
         self.input_buffer += data
         if not data:
             self.terminate()
 
     def do_send(self):
-        """Send data from the output buffer to the remote side.
-        @return True if output buffer was emptied."""
+        """
+        Send data from the output buffer to the remote side.
+        @return True if output buffer was emptied.
+        """
         send_length = os.write(self.remote_control_fd, self.output_buffer)
         if send_length == len(self.output_buffer):
             self.output_buffer = b''
@@ -628,9 +634,11 @@ class AnalysisChildRemoteControlHandler:
         return False
 
     def put_request(self, request_type, request_data):
-        """Add a request of given type to the send queue.
+        """
+        Add a request of given type to the send queue.
         @param request_type is a byte string denoting the type of the request. Currently only 'EEEE' is supported.
-        @param request_data is a byte string denoting the content of the request."""
+        @param request_data is a byte string denoting the content of the request.
+        """
         if not isinstance(request_type, bytes):
             raise Exception('Request type is not a byte string')
         if len(request_type) != 4:

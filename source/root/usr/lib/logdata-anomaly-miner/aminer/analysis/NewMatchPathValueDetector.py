@@ -1,4 +1,5 @@
-"""This module defines a detector for new values in a data path.
+"""
+This module defines a detector for new values in a data path.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -17,7 +18,7 @@ import os
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input import AtomHandlerInterface
-from aminer.util import PersistencyUtil
+from aminer.util import PersistenceUtil
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
@@ -36,15 +37,16 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         self.aminer_config = aminer_config
         self.persistence_id = persistence_id
 
-        PersistencyUtil.add_persistable_component(self)
+        PersistenceUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
-        persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is None:
             self.known_path_set = set()
         else:
             self.known_path_set = set(persistence_data)
 
     def receive_atom(self, log_atom):
+        """Receive a log atom from a source."""
         match_dict = log_atom.parser_match.get_match_dictionary()
         for target_path in self.target_path_list:
             match = match_dict.get(target_path, None)
@@ -86,12 +88,14 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                                            log_atom, self)
 
     def get_time_trigger_class(self):
-        """Get the trigger class this component should be registered for. This trigger is used only for persistency, so real-time
-        triggering is needed."""
+        """
+        Get the trigger class this component should be registered for.
+        This trigger is used only for persistence, so real-time triggering is needed.
+        """
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
-        """Check current ruleset should be persisted"""
+        """Check current ruleset should be persisted."""
         if self.next_persist_time is None:
             return 600
 
@@ -103,5 +107,5 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        PersistencyUtil.store_json(self.persistence_file_name, list(self.known_path_set))
+        PersistenceUtil.store_json(self.persistence_file_name, list(self.known_path_set))
         self.next_persist_time = None
