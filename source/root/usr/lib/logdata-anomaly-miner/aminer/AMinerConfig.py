@@ -129,11 +129,14 @@ def save_config(analysis_context, new_file):
             if old_component_name != '"%s"' % name:
                 old = old[:old_component_name_start] + '"%s"' % name + old[old_component_name_end + 1:]
 
+    persistence_dir = analysis_context.aminer_config.config_properties.get(KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR)
+    remote_control_log_file = analysis_context.aminer_config.config_properties.get(
+        KEY_REMOTE_CONTROL_LOG_FILE, os.path.join(persistence_dir, DEFAULT_REMOTE_CONTROL_LOG_FILE))
     try:
-        with open(REMOTE_CONTROL_LOG_FILE, "r") as logFile:
+        with open(remote_control_log_file, "r") as logFile:
             logs = logFile.readlines()
     except OSError as e:
-        msg = 'Could not read %s: %s' % (REMOTE_CONTROL_LOG_FILE, e)
+        msg = 'Could not read %s: %s' % (remote_control_log_file, e)
         logging.getLogger(DEBUG_LOG_NAME).error(msg)
         print(msg, file=sys.stderr)
 
