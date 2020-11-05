@@ -1,4 +1,5 @@
-"""This module defines a model element that represents an IP address.
+"""
+This module defines a model element that represents an IP address.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -23,13 +24,19 @@ class IpAddressDataModelElement(ModelElementInterface):
         """Create an element to match IPv4 IP addresses."""
         self.element_id = element_id
 
+    def get_id(self):
+        """Get the element ID."""
+        return self.element_id
+
     def get_child_elements(self):
-        """Get all possible child model elements of this element.
-        @return None as there are no children of this element."""
+        """
+        Get all possible child model elements of this element.
+        @return None as there are no children of this element.
+        """
         return None
 
     def get_match_element(self, path, match_context):
-        """Read an IP address at the current data position. When found, the matchObject will be """
+        """Read an IP address at the current data position. When found, the matchObject will be."""
         data = match_context.match_data
 
         number_count = 0

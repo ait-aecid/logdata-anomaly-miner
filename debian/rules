@@ -14,7 +14,7 @@ override_dh_auto_build:
 	--param man.charmap.use.subset 0 \
 	-o debian/ \
 	http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl \
-	debian/AMiner.1.xml debian/AMinerRemoteControl.1.xml
+	debian/aminer.1.xml debian/aminerremotecontrol.1.xml
 	dh_auto_build
 
 # Modify startup behaviour in auto-generated code in postinst:

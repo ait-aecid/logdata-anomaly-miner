@@ -10,6 +10,8 @@ from unit.TestBase import TestBase
 
 
 class HistogramAnalysisTest(TestBase):
+    """Unittests for the HistogramAnalysis."""
+
     __expected_string_histogram_analysis = '%s Histogram report\n%s: "%s" (%d lines)\n  Histogram report from %s till %s\n  %s\n\n'
     __expected_string_path_dependent_histogram_analysis = '%s Histogram report\n%s: "%s" (%d lines)\n  Path histogram report from %s ' \
                                                           'till %s\n%s\n\n'
@@ -226,8 +228,10 @@ class HistogramAnalysisTest(TestBase):
             '(ratio = 5.00e-01, p = 8.16e-02)'))
 
     def test11_path_dependent_histogram_analysis_no_report(self):
-        """This test case aims to test the functionality of the PathDependantHistogramAnalysis's receive_atom method,
-        when NO report is expected."""
+        """
+        This test case aims to test the functionality of the PathDependantHistogramAnalysis.receive_atom method.
+        No report is expected.
+        """
         description = "Test11HistogramAnalysis"
         start_time = 57600
         end_time = 662600
@@ -276,8 +280,10 @@ class HistogramAnalysisTest(TestBase):
         self.assertEqual(self.output_stream.getvalue(), '')
 
     def test12_path_dependent_histogram_analysis_report_expected(self):
-        """This test case aims to test the functionality of the PathDependantHistogramAnalysis's receiveAtom method,
-        when A report is expected."""
+        """
+        This test case aims to test the functionality of the PathDependantHistogramAnalysis.receiveAtom method.
+        A report is expected.
+        """
         description = "Test12HistogramAnalysis"
         start_time = 57600
         end_time = 662600

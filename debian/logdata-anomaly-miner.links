@@ -1,2 +1,2 @@
-/usr/lib/logdata-anomaly-miner/AMiner /usr/bin/AMiner
-/usr/lib/logdata-anomaly-miner/AMinerRemoteControl /usr/bin/AMinerRemoteControl
+/usr/lib/logdata-anomaly-miner/aminer.py /usr/bin/aminer
+/usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerremotecontrol

@@ -6,6 +6,8 @@ import pytz
 
 
 class MultiLocaleDateTimeModelElementTest(unittest.TestCase):
+    """Unittests for the MultiLocaleDateTimeModelElement."""
+
     tz_gmt10 = "Etc/GMT+10"
     en_gb_utf8 = "en_GB.utf8"
     de_at_utf8 = "de_AT.utf8"
@@ -143,6 +145,7 @@ class MultiLocaleDateTimeModelElementTest(unittest.TestCase):
         self.assertFalse(self.multi_locale_date_time_model_element.checkTimestampValueInRange(date))
 
     def compare_match(self, match_element, string, total_seconds):
+        """Test if the result MatchElement is as expected."""
         self.assertEqual(match_element.get_path(), 'match/multiLocale')
         self.assertEqual(match_element.get_match_string(), string)
         self.assertEqual(match_element.get_match_object(), total_seconds)

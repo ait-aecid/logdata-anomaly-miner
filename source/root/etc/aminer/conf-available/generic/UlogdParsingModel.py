@@ -11,8 +11,7 @@ from aminer.parsing import SequenceModelElement
 
 
 def get_model():
-    """This function defines how to parse a su session information message after any standard logging preamble, e.g. from syslog."""
-
+    """Return a model for su session information messages after any standard logging preamble, e.g. from syslog."""
     type_children = [
         SequenceModelElement('build-stack', [
             FixedDataModelElement('s0', b'building new pluginstance stack: \''),

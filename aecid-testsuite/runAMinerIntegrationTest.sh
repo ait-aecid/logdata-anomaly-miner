@@ -14,6 +14,7 @@ do
 done
 
 sudo ./$script
+exit_code=$?
 
 cntr=0
 for var in "$@"
@@ -31,4 +32,4 @@ sudo rm /tmp/syslog
 sudo rm /tmp/output
 test -e /tmp/out && sudo rm /tmp/out
 test -e /tmp/auth.log && sudo rm /tmp/auth.log
-exit 0
+exit $exit_code

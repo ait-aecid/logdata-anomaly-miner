@@ -1,3 +1,4 @@
+# skipcq: FLK-D400
 """
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -14,6 +15,7 @@ from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
 
 class EventData:
+    """This class is used to create a string for different event handlers."""
 
     def __init__(self, event_type, event_message, sorted_log_lines, event_data, log_atom, event_source, analysis_context):
         self.event_type = event_type
@@ -31,6 +33,7 @@ class EventData:
         self.log_atom = log_atom
 
     def receive_event_string(self):
+        """Receive an event string."""
         message = ''
         if hasattr(self, "log_atom"):
             if self.log_atom.get_timestamp() is None:

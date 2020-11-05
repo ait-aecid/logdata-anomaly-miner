@@ -8,8 +8,10 @@ from datetime import datetime
 
 
 class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
+    """Unittests for the EnhancedNewMatchPathValueComboDetector."""
+
     __expected_string = '%s New value combination(s) detected\n%s: "%s" (%d lines)\n%s\n\n'
-    __expected_whitelisting_string = 'Whitelisted path(es) %s with %s in %s'
+    __expected_allowlisting_string = 'Allowlisted path(es) %s with %s in %s'
     fixed_dme = FixedDataModelElement('s1', b'25537 uid=')
     fixed_dme2 = FixedDataModelElement('s2', b' uid=2')
 
@@ -32,9 +34,11 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
     exp_str2 = "  {(b'25537 uid=', 2): [%s, %s, 1]}\nb'25537 uid=2'"
 
     def test1_log_atom_not_known(self):
-        """This test case checks the correct processing of unknown log lines, which in reality means that an anomaly has been found. The
-        output is directed to an output stream and compared for accuracy. The auto_include_flag is False and the output must be repeatable
-        on second run."""
+        """
+        This test case checks the correct processing of unknown log lines, which in reality means that an anomaly has been found.
+        The output is directed to an output stream and compared for accuracy. The auto_include_flag is False and the output must be
+        repeatable on second run.
+        """
         description = "Test1EnhancedNewMatchPathValueComboDetector"
         enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(self.aminer_config, [
             self.first_seq_s1, self.first_seq_d1], [self.stream_printer_event_handler], 'Default', False, False, output_log_line=False)
@@ -76,8 +80,10 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
             "  {(25537, b' uid=2'): [%s, %s, 1]}\nb'25537 uid=2'" % (t, t)))
 
     def test2_log_atom_known(self):
-        """This test case checks the functionality of the auto_include_flag. If the same MatchElement is processed a second time and the
-        auto_include_flag was True, no event must be triggered."""
+        """
+        This test case checks the functionality of the auto_include_flag.
+        If the same MatchElement is processed a second time and the auto_include_flag was True, no event must be triggered.
+        """
         description = "Test2EnhancedNewMatchPathValueComboDetector"
         enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(self.aminer_config, [
             self.first_seq_s1, self.first_seq_d1], [self.stream_printer_event_handler], 'Default', False, True, output_log_line=False)
@@ -156,7 +162,7 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
             enhanced_new_match_path_value_combo_detector.__class__.__name__, description + "2", 1,
             "  {(b'25537 uid=', 2): [%s, %s, 3]}\nb'25537 uid=2'" % (t, t + 5)))
 
-    def test4_whitelist_event_with_known_and_unknown_paths(self):
+    def test4_allowlist_event_with_known_and_unknown_paths(self):
         """This test case checks in which cases an event is triggered and compares with expected results."""
         description = "Test4EnhancedNewMatchPathValueComboDetector"
         enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(self.aminer_config, [
@@ -166,10 +172,10 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
         t = time.time()
         log_atom_sequence_me = LogAtom(self.match_element_sequence_me.get_match_string(), ParserMatch(self.match_element_sequence_me), t,
                                        enhanced_new_match_path_value_combo_detector)
-        self.assertEqual(enhanced_new_match_path_value_combo_detector.whitelist_event(
+        self.assertEqual(enhanced_new_match_path_value_combo_detector.allowlist_event(
             'Analysis.%s' % enhanced_new_match_path_value_combo_detector.__class__.__name__,
             [log_atom_sequence_me, [self.match_element_sequence_me.get_path()]],
-            [log_atom_sequence_me, self.match_element_sequence_me.get_path()], None), self.__expected_whitelisting_string % (
+            [log_atom_sequence_me, self.match_element_sequence_me.get_path()], None), self.__expected_allowlisting_string % (
             ', '.join(enhanced_new_match_path_value_combo_detector.target_path_list), self.match_element_sequence_me.get_path(),
             log_atom_sequence_me))
 
@@ -177,15 +183,15 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
                                         enhanced_new_match_path_value_combo_detector)
 
         enhanced_new_match_path_value_combo_detector.auto_include_flag = False
-        self.assertEqual(enhanced_new_match_path_value_combo_detector.whitelist_event(
+        self.assertEqual(enhanced_new_match_path_value_combo_detector.allowlist_event(
             'Analysis.%s' % enhanced_new_match_path_value_combo_detector.__class__.__name__,
             [log_atom_sequence_me2, [self.match_element_sequence_me2.get_path()]],
-            [log_atom_sequence_me2, self.match_element_sequence_me2.get_path()], None), self.__expected_whitelisting_string % (
+            [log_atom_sequence_me2, self.match_element_sequence_me2.get_path()], None), self.__expected_allowlisting_string % (
             ', '.join(enhanced_new_match_path_value_combo_detector.target_path_list), self.match_element_sequence_me2.path,
             log_atom_sequence_me2))
 
     def test5save_metadata(self):
-        """This test case checks the correctness of the metadata informations"""
+        """This test case checks the correctness of the metadata information."""
         enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(self.aminer_config, ['first/f1/s1'], [
             self.stream_printer_event_handler], 'Default', False, True, None, output_log_line=False)
         t = 1

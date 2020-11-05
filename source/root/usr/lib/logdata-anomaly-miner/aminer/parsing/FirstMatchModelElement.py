@@ -24,6 +24,10 @@ class FirstMatchModelElement(ModelElementInterface):
         if (children is None) or (None in children):
             raise Exception('Invalid children list')
 
+    def get_id(self):
+        """Get the element ID."""
+        return self.element_id
+
     def get_child_elements(self):
         """Get all possible child model elements of this element."""
         return self.children

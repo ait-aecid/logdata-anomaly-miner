@@ -1,4 +1,5 @@
-"""This file defines the NewMatchIdValueComboDetector
+"""
+This file defines the NewMatchIdValueComboDetector.
 detector to extract values from multiple LogAtoms and check, if the value
 combination was already seen before.
 
@@ -20,28 +21,31 @@ from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events import EventSourceInterface
 from aminer.input import AtomHandlerInterface
-from aminer.util import PersistencyUtil
+from aminer.util import PersistenceUtil
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
 
 class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
-    """This class creates events when a new value combination for
-    a given list of match data pathes were found in log atoms with
-    the same id value in a specific path."""
+    """
+    This class creates events when a new value combination for a given list of match data.
+    Paths need to be found in log atoms with the same id value in a specific path.
+    """
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, id_path_list, min_allowed_time_diff,
                  persistence_id='Default', allow_missing_values_flag=False, auto_include_flag=False, output_log_line=True):
-        """Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        """
+        Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param target_path_list the list of values to extract from each match to create the value combination to be checked.
         @param id_path_list the list of pathes where id values can be stored in all relevant log event types.
         @param min_allowed_time_diff the minimum amount of time in seconds after the first appearance of a log atom with a specific id
         that is waited for other log atoms with the same id to occur. The maximum possible time to keep an incomplete combo
         is 2*min_allowed_time_diff
-        @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the pathes from targetPathList
+        @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the pathes from target_path_list
         does not refer to an existing parsed data object.
         @param auto_include_flag when set to True, this detector will report a new value only the first time before including it
-        in the known values set automatically."""
+        in the known values set automatically.
+        """
         self.target_path_list = target_path_list
         self.anomaly_event_handlers = anomaly_event_handlers
         self.id_path_list = id_path_list
@@ -54,16 +58,16 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
 
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         self.next_persist_time = None
-        self.load_persistency_data()
-        PersistencyUtil.add_persistable_component(self)
+        self.load_persistence_data()
+        PersistenceUtil.add_persistable_component(self)
 
         self.id_dict_current = {}
         self.id_dict_old = {}
         self.next_shift_time = None
 
-    def load_persistency_data(self):
-        """Load the persistency data from storage."""
-        persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
+    def load_persistence_data(self):
+        """Load the persistence data from storage."""
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         self.known_values = []
         if persistence_data is not None:
             # Combinations are stored as list of dictionaries
@@ -71,9 +75,11 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
                 self.known_values.append(record)
 
     def receive_atom(self, log_atom):
-        """Receive on parsed atom and the information about the parser match.
+        """
+        Receive on parsed atom and the information about the parser match.
         @return True if a value combination was extracted and checked against the list of known combinations, no matter if the checked
-        values were new or not."""
+        values were new or not.
+        """
         match_dict = log_atom.parser_match.get_match_dictionary()
 
         id_match_element = None
@@ -130,6 +136,7 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
         return True
 
     def process_id_dict_entry(self, id_dict_entry, log_atom):
+        """Process an entry from the id_dict."""
         if id_dict_entry not in self.known_values:
             # Combo is unknown, process and raise anomaly
             if self.auto_include_flag:
@@ -137,7 +144,7 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
                 if self.next_persist_time is None:
                     self.next_persist_time = time.time() + 600
 
-            analysis_component = {'AffectedLogAtomValues': list(id_dict_entry.values())}
+            analysis_component = {'AffectedLogAtomValues': [str(i) for i in list(id_dict_entry.values())]}
             event_data = {'AnalysisComponent': analysis_component}
             original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
             if original_log_line_prefix is None:
@@ -152,12 +159,14 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
                                        event_data, log_atom, self)
 
     def get_time_trigger_class(self):
-        """Get the trigger class this component should be registered for. This trigger is used only for persistency, so real-time
-        triggering is needed."""
+        """
+        Get the trigger class this component should be registered for.
+        This trigger is used only for persistence, so real-time triggering is needed.
+        """
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
-        """Check current ruleset should be persisted"""
+        """Check current ruleset should be persisted."""
         if self.next_persist_time is None:
             return 600
 
@@ -169,17 +178,19 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        PersistencyUtil.store_json(self.persistence_file_name, self.known_values)
+        PersistenceUtil.store_json(self.persistence_file_name, self.known_values)
         self.next_persist_time = None
 
-    def whitelist_event(self, event_type, sorted_log_lines, event_data, whitelisting_data):
-        """Whitelist an event generated by this source using the information emitted when generating the event.
-        @return a message with information about whitelisting
-        @throws Exception when whitelisting of this special event using given whitelistingData was not possible."""
+    def allowlist_event(self, event_type, sorted_log_lines, event_data, allowlisting_data):
+        """
+        Allowlist an event generated by this source using the information emitted when generating the event.
+        @return a message with information about allowlisting
+        @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
+        """
         if event_type != 'Analysis.%s' % self.__class__.__name__:
             raise Exception('Event not from this source')
-        if whitelisting_data is not None:
-            raise Exception('Whitelisting data not understood by this detector')
+        if allowlisting_data is not None:
+            raise Exception('Allowlisting data not understood by this detector')
         if event_data[1] not in self.known_values:
             self.known_values.append(event_data[1])
-        return 'Whitelisted path(es) %s with %s in %s' % (', '.join(self.target_path_list), event_data[1], sorted_log_lines[0])
+        return 'Allowlisted path(es) %s with %s in %s' % (', '.join(self.target_path_list), event_data[1], sorted_log_lines[0])

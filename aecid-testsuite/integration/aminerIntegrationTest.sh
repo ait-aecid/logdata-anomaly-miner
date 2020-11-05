@@ -33,14 +33,14 @@ echo ""
 FILE=/tmp/config.py
 if ! test -f "$FILE"; then
     echo "$FILE does not exist!"
-	exit
+	exit 1
 fi
 
 #start AMiner
 if [[ $sudoInstalled == 0 ]]; then
-	sudo -H -u aminer bash -c 'AMiner --Foreground --Config '$FILE' > /tmp/output &'
+	sudo -H -u aminer bash -c 'aminer --Foreground --Config '$FILE' > /tmp/output &'
 else
-	runuser -u aminer -- AMiner --Foreground --Config $FILE > /tmp/output &
+	runuser -u aminer -- aminer --Foreground --Config $FILE > /tmp/output &
 fi
 
 time=`date +%s`
@@ -72,10 +72,10 @@ echo 'The Path of the home directory shown by pwd of the user guest is: /home/gu
 #stop AMiner
 sleep 3 & wait $!
 if [[ $sudoInstalled == 0 ]]; then
-	sudo pkill -f AMiner
+	sudo pkill -x aminer
 	KILL_PID=$!
 else
-	pkill -f AMiner
+	pkill -x -f aminer
 	KILL_PID=$!
 fi
 sleep 3
@@ -91,12 +91,12 @@ if [ $? == 0 ]; then
 	else
 		echo ""
 		echo "test failed at checking mails.."
-		exit -1
+		exit 1
 	fi
 else
 	echo ""
 	echo "test failed at checking outputs.."
-	exit -1
+	exit 1
 fi
 
 exit 0

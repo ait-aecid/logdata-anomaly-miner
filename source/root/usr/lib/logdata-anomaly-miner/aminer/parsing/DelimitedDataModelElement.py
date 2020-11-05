@@ -1,4 +1,5 @@
-"""This module defines a model element that takes any string up to a specific delimiter string.
+"""
+This module defines a model element that takes any string up to a specific delimiter string.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -17,7 +18,7 @@ import re
 
 
 class DelimitedDataModelElement(ModelElementInterface):
-    """Find a string delimited by given non-escaped delimiter string, possibly a match of zero byte length"""
+    """Find a string delimited by given non-escaped delimiter string, possibly a match of zero byte length."""
 
     def __init__(self, element_id, delimiter, escape=None):
         self.element_id = element_id
@@ -26,14 +27,22 @@ class DelimitedDataModelElement(ModelElementInterface):
             escape = escape.decode()
         self.escape = escape
 
+    def get_id(self):
+        """Get the element ID."""
+        return self.element_id
+
     def get_child_elements(self):
-        """Get all possible child model elements of this element.
-        @return None as there are no children of this element."""
+        """
+        Get all possible child model elements of this element.
+        @return None as there are no children of this element.
+        """
         return None
 
     def get_match_element(self, path, match_context):
-        """Find the maximum number of bytes before encountering the non-escaped delimiter.
-        @return a match when at least one byte was found but not the delimiter itself."""
+        """
+        Find the maximum number of bytes before encountering the non-escaped delimiter.
+        @return a match when at least one byte was found but not the delimiter itself.
+        """
         data = match_context.match_data
         match_len = -1
         if self.escape is None:

@@ -95,12 +95,12 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
     <manvolnum>&dhsection;</manvolnum>
   </refmeta>
   <refnamediv>
-    <refname>AMiner</refname>
+    <refname>aminer</refname>
     <refpurpose>lightweight tool for log checking, log analysis</refpurpose>
   </refnamediv>
   <refsynopsisdiv>
     <cmdsynopsis>
-      <command>AMiner</command>
+      <command>aminer</command>
       <!-- These are several examples, how syntaxes could look -->
       <arg choice="plain"><option>--Config <replaceable>file</replaceable></option></arg>
       <arg choice="opt"><option>--Foreground</option></arg>
@@ -111,7 +111,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
   </refsynopsisdiv>
   <refsect1 id="description">
     <title>DESCRIPTION</title>
-    <para>This manual page documents briefly the <command>AMiner</command>
+    <para>This manual page documents briefly the <command>aminer</command>
       command. For more details see packaged documentation at
       /usr/share/doc/logdata-anomaly-miner.</para>
   </refsect1>
@@ -150,6 +150,30 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         <listitem>
           <para>INTERNAL PARAMETER - DO NOT USE. It is just documented
           here for completeness.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>--Clear</option></term>
+        <listitem>
+          <para>With this parameter all persisted data in config_properties['Core.PersistenceDir']
+          is deleted. USE THIS PARAMETER CAREFULLY. IT DELETES ALL
+          SUB-DIRECTORIES OF THE PERSISTENCE DIRECTORY.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>--Remove <replaceable>directories</replaceable></option></term>
+        <listitem>
+          <para>Remove persisted data of one or multiple Detectors.</para>
+          <para><option>Example 1: </option>--Remove NewMatchPathDetector</para>
+          <para><option>Example 2: </option>--Remove [NewMatchPathDetector,EventCorrelationDetector]</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>--FromBegin</option></term>
+        <listitem>
+          <para>With this parameter all live data in 
+          config_properties['Core.PersistenceDir']/AnalysisChild/RepositioningData
+          is deleted.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -199,7 +223,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
     <title>SEE ALSO</title>
 <!-- In alpabetical order. -->
     <para>
-      <citerefentry><refentrytitle>AMinerRemoteControl</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+      <citerefentry><refentrytitle>aminerremotecontrol</refentrytitle><manvolnum>1</manvolnum></citerefentry>
     </para>
   </refsect1>
 </refentry>

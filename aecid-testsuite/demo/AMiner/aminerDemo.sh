@@ -8,27 +8,58 @@
 #
 # execute demo.sh as aminer:
 #    sudo -u aminer /pfad/zum/demo.sh
-# 
+#
 
-AMINER_PERSISTENCE_PATH=/tmp/lib/aminer/*
-mkdir /tmp/lib 2> /dev/null
-mkdir /tmp/lib/aminer 2> /dev/null
-# chown -R $USER:$USER /tmp/lib/aminer 2> /dev/null
-rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
-# chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
-rm /tmp/syslog 2> /dev/null
+sudoInstalled=`dpkg -s sudo | grep Status 2> /dev/null`
+if [[ $sudoInstalled == "Status: install ok installed" ]]; then
+	sudoInstalled=0
+else
+	sudoInstalled=1
+fi
+
+if [[ $sudoInstalled == 0 ]]; then
+	sudo mkdir /tmp/lib 2> /dev/null
+	sudo mkdir /tmp/lib/aminer 2> /dev/null
+	sudo chown -R $USER:$USER /tmp/lib/aminer 2> /dev/null
+	sudo rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
+	sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
+	sudo rm /tmp/syslog 2> /dev/null
+else
+	mkdir /tmp/lib 2> /dev/null
+	mkdir /tmp/lib/aminer 2> /dev/null
+	rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
+	chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
+	rm /tmp/syslog 2> /dev/null
+fi
 
 echo "Demo started.."
 echo ""
 
 FILE=/tmp/demo-config.py
 if ! test -f "$FILE"; then
-    echo "$FILE does not exist!"
-	exit
+    FILE=/tmp/demo-config.yml
+    if ! test -f "$FILE"; then
+        echo "$FILE does not exist!"
+	    exit 1
+	fi
 fi
 
 #start AMiner
-bash -c 'AMiner --Foreground --Config '$FILE' & #2> /dev/null & #> /tmp/output &'
+if [[ $sudoInstalled == 0 ]]; then
+	sudo -H -u aminer bash -c 'aminer --Foreground --Config '$FILE' &'
+else
+	runuser -u aminer -- aminer --Foreground --Config $FILE &
+fi
+
+#EventCorrelationDetetctor, NewMatchPathDetector
+#:<<Comment
+alphabet='abcdef'
+alphabet_len=$(echo -n $alphabet | wc -m)
+for ((i=0; i<10000; i++)); do
+	echo ${alphabet:$i % $alphabet_len:1} >> /tmp/syslog
+	sleep 0.0001
+done
+#Comment
 
 #EnhancedNewMatchPathValueComboDetector, NewMatchPathValueDetector
 #:<<Comment
@@ -43,7 +74,7 @@ for ((i=0; i<R; i++)); do
 done
 #Comment
 
-#HistogramAnalysis
+#HistogramAnalysis, MatchFilter
 #:<<Comment
 echo "Generating data for the LinearNumericBinDefinition histogram report.."
 startTime=`date +%s`
@@ -194,7 +225,7 @@ sleep 10
 
 #Comment
 
-# WhitelistRules, WhitelistViolationDetector
+# AllowlistRules, AllowlistViolationDetector
 #:<<Comment
 echo "User username logged in" >> /tmp/syslog
 echo "User root logged in" >> /tmp/syslog
@@ -251,7 +282,7 @@ echo "$text" >> /tmp/syslog
 
 #stop AMiner
 sleep 3 & wait $!
-pkill AMiner
+pkill -x aminer
 KILL_PID=$!
 sleep 3
 wait $KILL_PID

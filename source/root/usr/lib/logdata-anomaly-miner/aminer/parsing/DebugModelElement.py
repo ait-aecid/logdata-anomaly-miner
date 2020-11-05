@@ -1,5 +1,5 @@
-"""This moduel defines a debug model element that can be used to check whether a specific poistion in the parsing tree is reached
-by log atoms.
+"""
+This moduel defines a debug model element that can be used to check whether a specific position in the parsing tree is reached by log atoms.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -19,18 +19,26 @@ from aminer.parsing import ModelElementInterface
 
 
 class DebugModelElement(ModelElementInterface):
-    """This class defines a model element matching any data of length zero at any position. Thus it can never fail to match and can
-    be inserted at any position in the parsing tree, where matching itself does not alter parsing flow (see e.g. FirstMatchModelElement).
-    It will immediately write the current state of the match to stderr for inspection."""
+    """
+    This class defines a model element matching any data of length zero at any position.
+    Thus it can never fail to match and can be inserted at any position in the parsing tree, where matching itself does not alter parsing
+    flow (see e.g. FirstMatchModelElement). It will immediately write the current state of the match to stderr for inspection.
+    """
 
     def __init__(self, element_id):
         self.element_id = element_id
         # To avoid having those elements hidden in production configuration, write a line every time the class is instantiated.
         print('DebugModelElement %s added' % element_id, file=sys.stderr)
 
+    def get_id(self):
+        """Get the element ID."""
+        return self.element_id
+
     def get_child_elements(self):
-        """Get all possible child model elements of this element.
-        @return empty list as there are no children of this element."""
+        """
+        Get all possible child model elements of this element.
+        @return empty list as there are no children of this element.
+        """
         return None
 
     def get_match_element(self, path, match_context):

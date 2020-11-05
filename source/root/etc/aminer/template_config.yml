@@ -1,11 +1,6 @@
-#########################################################
-#
-#
-# Please note that the yaml-config is experimental and
-# incomplete at the moment. 
-#
-#
-#########################################################
+# This is a template for the "aminer" logdata-anomaly-miner tool. Copy
+# it to "config.yml" and define your ruleset. For more examples of component
+# usage see aecid-testsuite/demo/AMiner/demo-config.yml.
 
 #LearnMode: false # optional
 AMinerUser: 'aminer'  # optional default: aminer
@@ -106,7 +101,8 @@ Parser:
           name: 'apache'
           args: 'apache'
 
-        - id: 'START'
+        - id: 'startModel'
+          start: True
           type: SequenceModelElement
           name: 'model'
           args: apacheModel

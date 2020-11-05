@@ -1,0 +1,123 @@
+LearnMode: True # optional
+Core.PersistenceDir: '/var/tmp/test2/aminer'
+
+LogResourceList:
+        - 'file:///var/tmp/test2/log/access.log'
+
+Parser:
+        - id: host_name_model
+          type: VariableByteDataModelElement
+          name: 'host'
+          args: '-.01234567890abcdefghijklmnopqrstuvwxyz:'
+        
+        - id: identity_model
+          type: VariableByteDataModelElement
+          name: 'ident'
+          args: '-.01234567890abcdefghijklmnopqrstuvwxyz:'
+
+        - id: user_name_model
+          type: VariableByteDataModelElement
+          name: 'user'
+          args: '0123456789abcdefghijklmnopqrstuvwxyz.-'
+
+        - id: new_time_model
+          type: DateTimeModelElement
+          name: 'time'
+          args: '[%d/%b/%Y:%H:%M:%S +0000]'
+
+        - id: sq3
+          type: FixedDataModelElement
+          name: 'sq3'
+          args: ' "'
+
+        - id: request_method_model
+          type: FixedWordlistDataModelElement
+          name: 'method'
+          args:
+                  - 'GET'
+                  - 'POST'
+                  - 'PUT'
+                  - 'HEAD'
+                  - 'DELETE'
+                  - 'CONNECT'
+                  - 'OPTIONS'
+                  - 'TRACE'
+                  - 'PATCH'
+
+        - id: request_model
+          type: VariableByteDataModelElement
+          name: 'request'
+          args: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-/()[]{}!$%&=<?*+'
+
+        - id: http1
+          type: FixedDataModelElement
+          name: 'http1'
+          args: ' HTTP/'
+
+        - id: version_model
+          type: VariableByteDataModelElement
+          name: 'version'
+          args: '0123456789.'
+
+        - id: sq4
+          type: FixedDataModelElement
+          name: 'sq4'
+          args: '" '
+
+        - id: status_code_model
+          type: DecimalIntegerValueModelElement
+          name: 'status'
+
+        - id: size_model
+          type: DecimalIntegerValueModelElement
+          name: 'size'
+
+        - id: sq5
+          type: FixedDataModelElement
+          name: 'sq5'
+          args: ' "-" "'
+
+        - id: user_agent_model
+          type: VariableByteDataModelElement
+          name: 'useragent'
+          args: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-/()[]{}!$%&=<?*+;:_ '
+
+        - id: sq6
+          type: FixedDataModelElement
+          name: 'sq6'
+          args: '"'
+
+        - id: 'startModel'
+          start: True
+          type: SequenceModelElement
+          name: 'accesslog'
+          args:
+                  - host_name_model
+                  - WHITESPACE
+                  - identity_model
+                  - WHITESPACE
+                  - user_name_model
+                  - WHITESPACE
+                  - new_time_model
+                  - sq3
+                  - request_method_model
+                  - WHITESPACE
+                  - request_model
+                  - http1
+                  - version_model
+                  - sq4
+                  - status_code_model
+                  - WHITESPACE
+                  - size_model
+                  - sq5
+                  - user_agent_model
+                  - sq6
+Input:
+        timestamp_paths: "/accesslog/time"
+        verbose: False # use this to debug your parser-model
+
+Analysis: null
+
+EventHandlers:
+        - id: stpe
+          type: StreamPrinterEventHandler

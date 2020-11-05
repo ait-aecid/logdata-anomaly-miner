@@ -75,9 +75,10 @@ config_properties['LogPrefix'] = 'Original log line: '
 
 
 def build_analysis_pipeline(analysis_context):
-    """Define the function to create pipeline for parsing the log data. It has also to define an AtomizerFactory to instruct AMiner
-    how to process incoming data streams to create log atoms from them."""
-
+    """
+    Define the function to create pipeline for parsing the log data.
+    It has also to define an AtomizerFactory to instruct AMiner how to process incoming data streams to create log atoms from them.
+    """
     date_format_string = b'%Y-%m-%d %H:%M:%S'
     cron = b' cron['
 
@@ -176,8 +177,12 @@ def build_analysis_pipeline(analysis_context):
     service_children_parsing_model_element.append(HexStringModelElement('HexStringModelElement'))
     service_children_parsing_model_element.append(SequenceModelElement('', [
         FixedDataModelElement('FixedDataModelElement', b'Gateway IP-Address: '), IpAddressDataModelElement('IpAddressDataModelElement')]))
+    import locale
+    loc = locale.getlocale()
+    if loc == (None, None):
+        loc = ('en_US', 'utf8')
     service_children_parsing_model_element.append(
-        MultiLocaleDateTimeModelElement('MultiLocaleDateTimeModelElement', [(b'%b %d %Y', "de_AT.utf8", None)]))
+        MultiLocaleDateTimeModelElement('MultiLocaleDateTimeModelElement', [(b'%b %d %Y', '%s.%s' % (loc), None)]))
     service_children_parsing_model_element.append(
         RepeatedElementDataModelElement('RepeatedElementDataModelElement', SequenceModelElement('SequenceModelElement', [
             FixedDataModelElement('FixedDataModelElement', b'drawn number: '),
@@ -196,6 +201,12 @@ def build_analysis_pipeline(analysis_context):
             FixedDataModelElement('FixedDataModelElement', b'The-searched-element-was-found!'), SequenceModelElement('', [
                 FixedDataModelElement('FixedDME', b'Any:'), AnyByteDataModelElement('AnyByteDataModelElement')])])))
 
+    alphabet = b'abcdef'
+    service_children_ecd = []
+    for _, char in enumerate(alphabet):
+        char = bytes([char])
+        service_children_ecd.append(FixedDataModelElement(char.decode(), char))
+
     parsing_model = FirstMatchModelElement('model', [
         SequenceModelElement('CronAnnouncement', service_children_cron_job_announcement),
         SequenceModelElement('CronExecution', service_children_cron_job_execution),
@@ -203,7 +214,7 @@ def build_analysis_pipeline(analysis_context):
         SequenceModelElement('LoginDetails', service_children_login_details), DecimalIntegerValueModelElement('Random'),
         SequenceModelElement('RandomTime', service_children_random_time), SequenceModelElement('Sensors', service_children_sensors),
         SequenceModelElement('IPAddresses', service_children_user_ip_address), FirstMatchModelElement('type', service_children_audit),
-        FirstMatchModelElement('ParsingME', service_children_parsing_model_element)])
+        FirstMatchModelElement('ECD', service_children_ecd), FirstMatchModelElement('ParsingME', service_children_parsing_model_element)])
 
     # Some generic imports.
     from aminer.analysis import AtomFilters
@@ -242,11 +253,11 @@ def build_analysis_pipeline(analysis_context):
     analysis_context.register_component(timestamps_unsorted_detector, component_name="TimestampsUnsortedDetector")
 
     from aminer.analysis import Rules
-    from aminer.analysis import WhitelistViolationDetector
+    from aminer.analysis import AllowlistViolationDetector
 
     # This rule list should trigger, when the line does not look like: User root (logged in, logged out)
     # or User 'username' (logged in, logged out) x minutes ago.
-    whitelist_rules = [
+    allowlist_rules = [
         Rules.OrMatchRule([
             Rules.AndMatchRule([
                 Rules.PathExistsMatchRule('/model/LoginDetails/PastTime/Time/Minutes'),
@@ -256,15 +267,38 @@ def build_analysis_pipeline(analysis_context):
                 Rules.PathExistsMatchRule('/model/LoginDetails')]),
             Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails'))])]
 
-    whitelist_violation_detector = WhitelistViolationDetector(analysis_context.aminer_config, whitelist_rules, anomaly_event_handlers,
+    allowlist_violation_detector = AllowlistViolationDetector(analysis_context.aminer_config, allowlist_rules, anomaly_event_handlers,
                                                               output_log_line=True)
-    analysis_context.register_component(whitelist_violation_detector, component_name="Whitelist")
-    atom_filter.add_handler(whitelist_violation_detector)
+    analysis_context.register_component(allowlist_violation_detector, component_name="Allowlist")
+    atom_filter.add_handler(allowlist_violation_detector)
 
     from aminer.analysis import ParserCount
     parser_count = ParserCount(analysis_context.aminer_config, None, anomaly_event_handlers, 10, False)
     analysis_context.register_component(parser_count, component_name="ParserCount")
     atom_filter.add_handler(parser_count)
+
+    from aminer.analysis.EventTypeDetector import EventTypeDetector
+    etd = EventTypeDetector(analysis_context.aminer_config, anomaly_event_handlers)
+    analysis_context.register_component(etd, component_name="EventTypeDetector")
+    atom_filter.add_handler(etd)
+
+    from aminer.analysis.VariableTypeDetector import VariableTypeDetector
+    vtd = VariableTypeDetector(analysis_context.aminer_config, anomaly_event_handlers, etd, silence_output_except_indicator=False,
+                               output_log_line=False)
+    analysis_context.register_component(vtd, component_name="VariableTypeDetector")
+    atom_filter.add_handler(vtd)
+
+    from aminer.analysis import EventCorrelationDetector
+    ecd = EventCorrelationDetector(analysis_context.aminer_config, anomaly_event_handlers, check_rules_flag=True,
+                                   hypothesis_max_delta_time=1.0, auto_include_flag=True)
+    analysis_context.register_component(ecd, component_name="EventCorrelationDetector")
+    atom_filter.add_handler(ecd)
+
+    from aminer.analysis import MatchFilter
+    match_filter = MatchFilter(analysis_context.aminer_config, ['/model/Random'], anomaly_event_handlers, target_value_list=[
+        1, 10, 100], output_log_line=True)
+    analysis_context.register_component(match_filter, component_name="MatchFilter")
+    atom_filter.add_handler(match_filter)
 
     from aminer.analysis import NewMatchPathDetector
     new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=True,
@@ -273,7 +307,8 @@ def build_analysis_pipeline(analysis_context):
     atom_filter.add_handler(new_match_path_detector)
 
     def tuple_transformation_function(match_value_list):
-        extra_data = enhanced_new_match_path_value_combo_detector.known_values_dict.get(tuple(match_value_list), None)
+        """Only allow output of the EnhancedNewMatchPathValueComboDetector after every 10th element."""
+        extra_data = enhanced_new_match_path_value_combo_detector.known_values_dict.get(tuple(match_value_list))
         if extra_data is not None:
             mod = 10
             if (extra_data[2] + 1) % mod == 0:
@@ -320,7 +355,7 @@ def build_analysis_pipeline(analysis_context):
     from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
     new_match_path_value_combo_detector = NewMatchPathValueComboDetector(
         analysis_context.aminer_config, ['/model/IPAddresses/Username', '/model/IPAddresses/IP'], anomaly_event_handlers,
-        output_log_line=True)
+        output_log_line=True, auto_include_flag=True)
     analysis_context.register_component(new_match_path_value_combo_detector, component_name="NewMatchPathValueCombo")
     atom_filter.add_handler(new_match_path_value_combo_detector)
 
@@ -347,7 +382,8 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis.TimeCorrelationDetector import TimeCorrelationDetector
     time_correlation_detector = TimeCorrelationDetector(
-        analysis_context.aminer_config, 2, 1, 0, anomaly_event_handlers, record_count_before_event=3000, output_log_line=True)
+        analysis_context.aminer_config, anomaly_event_handlers, 2, min_rule_attributes=1, max_rule_attributes=5,
+        record_count_before_event=10000, output_log_line=True)
     analysis_context.register_component(time_correlation_detector, component_name="TimeCorrelationDetector")
     atom_filter.add_handler(time_correlation_detector)
 

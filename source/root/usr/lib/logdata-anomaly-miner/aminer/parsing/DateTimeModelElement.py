@@ -1,4 +1,5 @@
-"""This module contains a datetime parser and helper classes for parsing.
+"""
+This module contains a datetime parser and helper classes for parsing.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -15,20 +16,24 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import datetime
 import sys
 import time
+from dateutil.parser import parse
 
 from aminer.parsing import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
 
 
 class DateTimeModelElement(ModelElementInterface):
-    """This class defines a model element to parse date or datetime values. The element is similar to the strptime function but
-    does not use it due to the numerous problems associated with it, e.g. no leap year support for semiqualified years, no %s
-    (seconds since epoch) format in Python strptime, no %f support in libc strptime, no support to determine the length of the
-    parsed string."""
+    """
+    This class defines a model element to parse date or datetime values.
+    The element is similar to the strptime function but does not use it due to the numerous problems associated with it, e.g. no leap year
+    support for semiqualified years, no %s (seconds since epoch) format in Python strptime, no %f support in libc strptime, no support to
+    determine the length of the parsed string.
+    """
 
     # skipcq: PYL-W0613
     def __init__(self, path_id, date_format, time_zone=None, text_locale=None, start_year=None, max_time_jump_seconds=86400):
-        """Create a DateTimeModelElement to parse dates using a custom, timezone and locale-aware implementation similar to strptime.
+        """
+        Create a DateTimeModelElement to parse dates using a custom, timezone and locale-aware implementation similar to strptime.
         @param date_format, is a byte string that represents the date format for parsing, see Python strptime specification for
         available formats. Supported format specifiers are:
             * %b: month name in current locale
@@ -40,6 +45,7 @@ class DateTimeModelElement(ModelElementInterface):
             * %S: seconds
             * %s: seconds since the epoch (1970-01-01)
             * %Y: 4 digit year number
+            * %z: detect and parse timezone strings like UTC, CET, +0001, etc. automatically.
         Common formats are:
             * '%b %d %H:%M:%S' e.g. for 'Nov 19 05:08:43'
         @param time_zone the timezone for parsing the values or UTC when None.
@@ -48,13 +54,18 @@ class DateTimeModelElement(ModelElementInterface):
         @param start_year when parsing date records without any year information, assume this is the year of the first value parsed.
         @param max_time_jump_seconds for detection of year wraps with date formats missing year information, also the current time
         of values has to be tracked. This value defines the window within that the time may jump between two matches. When not
-        within that window, the value is still parsed, corrected to the most likely value but does not change the detection year."""
+        within that window, the value is still parsed, corrected to the most likely value but does not change the detection year.
+        """
         self.path_id = path_id
         self.time_zone = time_zone
         if time_zone is None:
             self.time_zone = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
         # Make sure that dateFormat is valid and extract the relevant parts from it.
         self.format_has_year_flag = False
+        self.format_has_tz_specifier = False
+        self.tz_specifier_offset = None
+        self.tz_specifier_offset_str = None
+        self.tz_specifier_format_length = -1
         self.date_format_parts = None
         self.scan_date_format(date_format)
 
@@ -107,6 +118,10 @@ class DateTimeModelElement(ModelElementInterface):
                 elif param_type_code == b'Y':
                     self.format_has_year_flag = True
                     new_element = (0, 4, int)
+                elif param_type_code == b'z':
+                    self.format_has_tz_specifier = True
+                    scan_pos = next_param_pos
+                    continue
                 else:
                     raise Exception('Unknown dateformat specifier %s' % repr(param_type_code))
             if isinstance(new_element, bytes):
@@ -124,20 +139,28 @@ class DateTimeModelElement(ModelElementInterface):
             raise Exception('Cannot use %%s (seconds since epoch) with other non-second format types')
         self.date_format_parts = date_format_parts
 
+    def get_id(self):
+        """Get the element ID."""
+        return self.path_id
+
     def get_child_elements(self):
-        """Get all possible child model elements of this element.
-        @return None as no children are allowed."""
+        """
+        Get all possible child model elements of this element.
+        @return None as no children are allowed.
+        """
         return None
 
     def get_match_element(self, path, match_context):
-        """Try to find a match on given data for this model element and all its children. When a match is found, the matchContext
-        is updated accordingly.
+        """
+        Try to find a match on given data for this model element and all its children.
+        When a match is found, the matchContext is updated accordingly.
         @return None when there is no match, MatchElement otherwise. The matchObject returned is a tuple containing the datetime
-        object and the seconds since 1970"""
+        object and the seconds since 1970
+        """
         parse_pos = 0
         # Year, month, day, hour, minute, second, fraction, gmt-seconds:
         result = [None, None, None, None, None, None, None, None]
-        for part_pos in range(0, len(self.date_format_parts)):
+        for part_pos in range(len(self.date_format_parts)):
             date_format_part = self.date_format_parts[part_pos]
             if isinstance(date_format_part, bytes):
                 if not match_context.match_data[parse_pos:].startswith(date_format_part):
@@ -257,10 +280,71 @@ class DateTimeModelElement(ModelElementInterface):
             if result[6] is not None:
                 total_seconds += result[6]
 
+        if self.format_has_tz_specifier and self.tz_specifier_format_length == -1:
+            start = 0
+            while start < parse_pos:
+                try:
+                    parse(match_context.match_data[start:parse_pos])
+                    break
+                # skipcq: FLK-E722
+                except:
+                    start += 1
+            self.tz_specifier_format_length = len(match_context.match_data)
+            # try to find the longest matching date
+            while True:
+                try:
+                    parse(match_context.match_data[start:self.tz_specifier_format_length])
+                    break
+                # skipcq: FLK-E722
+                except:
+                    self.tz_specifier_format_length -= 1
+                    if self.tz_specifier_format_length <= 0:
+                        raise Exception("The date_format could not be found.")
+
         match_context.update(date_str)
+        if self.format_has_tz_specifier:
+            if self.tz_specifier_format_length < parse_pos:
+                if b'+' in match_context.match_data or b'-' in match_context.match_data:
+                    data = match_context.match_data.split(b'+')
+                    if len(data) == 1:
+                        data = match_context.match_data.split(b'-')
+                    for i in range(1, 5):
+                        if not match_context.match_data[i:i+1].decode('utf-8').isdigit():
+                            i -= 1
+                            break
+                    self.tz_specifier_format_length = len(data[0]) + i + 1
+                    parse_pos = 0
+
+            remaining_data = match_context.match_data[:self.tz_specifier_format_length-parse_pos]
+            match_context.update(remaining_data)
+            if self.tz_specifier_offset is None:
+                # initialize tz_specifier variables. The first values are expected to match the time_zone argument.
+                self.tz_specifier_offset = 0
+                self.tz_specifier_offset_str = remaining_data
+            # check if the remaining_data has changed
+            elif remaining_data != self.tz_specifier_offset_str:
+                sign = 1
+                data = remaining_data.split(b'+')
+                if len(data) == 1:
+                    data = remaining_data.split(b'-')
+                    sign = -1
+                    if len(data) == 1:
+                        data = None
+                # only add offset if a + or - sign is used.
+                if data is not None:
+                    old_data = self.tz_specifier_offset_str.split(b'+')
+                    if len(old_data) == 1:
+                        old_data = remaining_data.split(b'-')
+                    self.tz_specifier_offset = (int(data[1]) - int(old_data[1]))*sign
+                    self.tz_specifier_offset_str = remaining_data
+                # if no + or - sign is found no offset is added.
+                else:
+                    self.tz_specifier_offset = 0
+                    self.tz_specifier_offset_str = remaining_data
+            return MatchElement("%s/%s" % (path, self.path_id), date_str+remaining_data, total_seconds+self.tz_specifier_offset*3600, None)
         return MatchElement("%s/%s" % (path, self.path_id), date_str, total_seconds, None)
 
     @staticmethod
     def parse_fraction(value_str):
-        """This method is just required to pass it as function pointer to the parsing logic."""
+        """Pass this method as function pointer to the parsing logic."""
         return float(b'0.' + value_str)

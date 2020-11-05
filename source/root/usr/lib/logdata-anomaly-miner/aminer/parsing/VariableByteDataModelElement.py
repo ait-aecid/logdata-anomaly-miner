@@ -1,4 +1,5 @@
-"""This module defines a model element for a variable amount of bytes.
+"""
+This module defines a model element for a variable amount of bytes.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -22,14 +23,22 @@ class VariableByteDataModelElement(ModelElementInterface):
         self.element_id = element_id
         self.alphabet = alphabet
 
+    def get_id(self):
+        """Get the element ID."""
+        return self.element_id
+
     def get_child_elements(self):
-        """Get all possible child model elements of this element.
-        @return None as there are no children of this element."""
+        """
+        Get all possible child model elements of this element.
+        @return None as there are no children of this element.
+        """
         return None
 
     def get_match_element(self, path, match_context):
-        """Find the maximum number of bytes matching the given alphabet.
-        @return a match when at least one byte was found within alphabet."""
+        """
+        Find the maximum number of bytes matching the given alphabet.
+        @return a match when at least one byte was found within alphabet.
+        """
         data = match_context.match_data
         match_len = 0
         for test_byte in data:

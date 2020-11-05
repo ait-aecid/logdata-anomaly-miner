@@ -1,7 +1,7 @@
 Preamble:
 =========
 
-Sorry, this part of the documentation was not yet written!
+Sorry, this part of the documentation was not written yet!
 
 Check the source code documentation headers from files in directory
 /usr/lib/logdata-anomaly-miner/aminer/parsing.

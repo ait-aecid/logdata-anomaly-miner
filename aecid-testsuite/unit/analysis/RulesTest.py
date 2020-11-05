@@ -17,12 +17,15 @@ from aminer.parsing.DateTimeModelElement import DateTimeModelElement
 from time import time
 from aminer.parsing.IpAddressDataModelElement import IpAddressDataModelElement
 from unit.TestBase import TestBase
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class RuleTest(TestBase):
-    """NOTE: DebugMatchRule and DebugHistoryMatchRule are intentionally not tested, as there is not much to be tested. ParallelMatchRule is
-    also not tested as it is very similar to the OrMatchRule. """
+    """
+    NOTE: DebugMatchRule and DebugHistoryMatchRule are intentionally not tested, as there is not much to be tested.
+    ParallelMatchRule is also not tested as it is very similar to the OrMatchRule.
+    """
+
     __expected_string = '%s This message was generated, when the unit were successful.\n%s: "%s" (%d lines)\n  %s\n\n'
 
     match_s1 = 'match/s1'
@@ -62,7 +65,7 @@ class RuleTest(TestBase):
           log_atom.parser_match.match_element.annotate_match('')))
 
     def test2atom_filter_match_action(self):
-        """This test case proves the functionality of the AtomFilters"""
+        """This test case proves the functionality of the AtomFilters."""
         description = "Test2Rules"
         newMatchPathDetector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False)
         logAtomFixedDME = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_fixed_dme), time(), newMatchPathDetector)
@@ -179,7 +182,7 @@ class RuleTest(TestBase):
         description = "Test8Rules"
         modulo_time_match_rule = ModuloTimeMatchRule(self.model_syslog_time, 86400, 43200, 86400, None)
         self.analysis_context.register_component(modulo_time_match_rule, description)
-        date_time_model_element = DateTimeModelElement('time', b'%d.%m.%Y %H:%M:%S')
+        date_time_model_element = DateTimeModelElement('time', b'%d.%m.%Y %H:%M:%S', timezone.utc)
 
         match_context = MatchContext(b'14.02.2019 13:00:00')
         match_element = date_time_model_element.get_match_element(self.model_syslog, match_context)
@@ -207,7 +210,7 @@ class RuleTest(TestBase):
         value_dependent_modulo_time_match_rule = ValueDependentModuloTimeMatchRule(self.model_syslog_time, 86400, [self.model_syslog_time],
                                                                                    {1550145600: [43200, 86400]})
         self.analysis_context.register_component(value_dependent_modulo_time_match_rule, description)
-        date_time_model_element = DateTimeModelElement('time', b'%d.%m.%Y %H:%M:%S')
+        date_time_model_element = DateTimeModelElement('time', b'%d.%m.%Y %H:%M:%S', timezone.utc)
 
         match_context = MatchContext(b'14.02.2019 12:00:00')
         match_element = date_time_model_element.get_match_element(self.model_syslog, match_context)
