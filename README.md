@@ -1,4 +1,4 @@
-# logdata-anomaly-miner  [![Build Status](https://api.travis-ci.com/ait-aecid/logdata-anomaly-miner.svg?branch=master)](https://travis-ci.org/ait-aecid/logdata-anomaly-miner) [![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/ait-aecid/logdata-anomaly-miner/?ref=repository-badge)
+# logdata-anomaly-miner  [![Build Status](https://travis-ci.com/ait-aecid/logdata-anomaly-miner.svg?branch=master)](https://travis-ci.com/ait-aecid/logdata-anomaly-miner) [![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/ait-aecid/logdata-anomaly-miner/?ref=repository-badge)
 
 This tool parses log data and allows to define analysis pipelines for anoamly detection. It was designed to run the analysis with limited resources and lowest possible permissions to make it suitable for production server use.
 
