@@ -7,6 +7,16 @@ current_time+queue_delta_time). If B chronologically occurs before A, create the
 must be observed within currentTime-queueDeltaTime).
 3) Observe for a long time (max_observations) whether the hypothesis holds.
 4) If the hypothesis holds, transform it to a rule. Otherwise, discard the hypothesis.
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with
+this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 from collections import deque
