@@ -158,12 +158,13 @@ def initialize_loggers(aminer_config, aminer_user, aminer_grp):
     persistence_dir = aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
     rc_logger = logging.getLogger(AMinerConfig.REMOTE_CONTROL_LOG_NAME)
     rc_logger.setLevel(logging.DEBUG)
+    remote_control_log_file = aminer_config.config_properties.get(
+        AMinerConfig.KEY_REMOTE_CONTROL_LOG_FILE, os.path.join(persistence_dir, AMinerConfig.DEFAULT_REMOTE_CONTROL_LOG_FILE))
     try:
-        rc_file_handler = logging.FileHandler(os.path.join(persistence_dir, AMinerConfig.REMOTE_CONTROL_LOG_FILE))
-        shutil.chown(os.path.join(persistence_dir, AMinerConfig.REMOTE_CONTROL_LOG_FILE), aminer_user, aminer_grp)
+        rc_file_handler = logging.FileHandler(remote_control_log_file)
+        shutil.chown(remote_control_log_file, aminer_user, aminer_grp)
     except OSError as e:
-        print('Could not create or open %s: %s. Stopping..' % (
-            os.path.join(persistence_dir, AMinerConfig.REMOTE_CONTROL_LOG_FILE), e), file=sys.stderr)
+        print('Could not create or open %s: %s. Stopping..' % (remote_control_log_file, e), file=sys.stderr)
         sys.exit(1)
     rc_file_handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(levelname)s %(message)s', datefmt=datefmt))
     rc_logger.addHandler(rc_file_handler)
@@ -171,11 +172,13 @@ def initialize_loggers(aminer_config, aminer_user, aminer_grp):
 
     stat_logger = logging.getLogger(AMinerConfig.STAT_LOG_NAME)
     stat_logger.setLevel(logging.INFO)
+    stat_log_file = aminer_config.config_properties.get(
+        AMinerConfig.KEY_STAT_LOG_FILE, os.path.join(persistence_dir, AMinerConfig.DEFAULT_STAT_LOG_FILE))
     try:
-        stat_file_handler = logging.FileHandler(os.path.join(persistence_dir, 'statistics.log'))
-        shutil.chown(os.path.join(persistence_dir, 'statistics.log'), aminer_user, aminer_grp)
+        stat_file_handler = logging.FileHandler(stat_log_file)
+        shutil.chown(stat_log_file, aminer_user, aminer_grp)
     except OSError as e:
-        print('Could not create or open %s: %s. Stopping..' % (os.path.join(persistence_dir, 'statistics.log'), e), file=sys.stderr)
+        print('Could not create or open %s: %s. Stopping..' % (stat_log_file, e), file=sys.stderr)
         sys.exit(1)
     stat_file_handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(message)s', datefmt=datefmt))
     stat_logger.addHandler(stat_file_handler)
@@ -187,12 +190,13 @@ def initialize_loggers(aminer_config, aminer_user, aminer_grp):
         debug_logger.setLevel(logging.INFO)
     else:
         debug_logger.setLevel(logging.DEBUG)
+    debug_log_file = aminer_config.config_properties.get(
+        AMinerConfig.KEY_DEBUG_LOG_FILE, os.path.join(persistence_dir, AMinerConfig.DEFAULT_DEBUG_LOG_FILE))
     try:
-        debug_file_handler = logging.FileHandler(os.path.join(persistence_dir, AMinerConfig.DEBUG_LOG_FILE))
-        shutil.chown(os.path.join(persistence_dir, AMinerConfig.DEBUG_LOG_FILE), aminer_user, aminer_grp)
+        debug_file_handler = logging.FileHandler(debug_log_file)
+        shutil.chown(debug_log_file, aminer_user, aminer_grp)
     except OSError as e:
-        print('Could not create or open %s: %s. Stopping..' % (
-            os.path.join(persistence_dir, AMinerConfig.DEBUG_LOG_FILE), e), file=sys.stderr)
+        print('Could not create or open %s: %s. Stopping..' % (debug_log_file, e), file=sys.stderr)
         sys.exit(1)
     debug_file_handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(levelname)s %(message)s', datefmt=datefmt))
     debug_logger.addHandler(debug_file_handler)

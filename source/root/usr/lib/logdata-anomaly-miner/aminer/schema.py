@@ -76,11 +76,24 @@
         'Log.StatisticsLevel': {
             'required': False,
             'type': 'integer',
-            'default': 1},
+            'default': 1
+        },
         'Log.DebugLevel': {
             'required': False,
             'type': 'integer',
             'default': 1
+        },
+        'Log.RemoteControlLogFile': {
+            'required': False,
+            'type': 'string'
+        },
+        'Log.StatisticsFile': {
+            'required': False,
+            'type': 'string'
+        },
+        'Log.DebugFile': {
+            'required': False,
+            'type': 'string'
         },
         'Parser': {
             'required': True,
