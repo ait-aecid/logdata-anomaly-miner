@@ -1,7 +1,7 @@
 #
 # logdata-anomaly-miner Dockerfile
 #
-# See:
+# See: https://github.com/ait-aecid/logdata-anomaly-miner/wiki/Deployment-with-Docker
 #
 
 # Pull base image.
