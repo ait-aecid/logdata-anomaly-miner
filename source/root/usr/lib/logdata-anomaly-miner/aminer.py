@@ -42,7 +42,7 @@ __website__ = "https://aecid.ait.ac.at"
 __license__ = "GPLv3"
 __maintainer__ = "Markus Wurzenberger"
 __status__ = "Production"
-__version__ = "2.0.1"
+__version__ = "2.1.0"
 
 import sys
 import logging

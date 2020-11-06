@@ -715,35 +715,32 @@ def build_analysis_pipeline(analysis_context):
                 if item['type'].name == 'SyslogWriterEventHandler':
                     ctx = func(analysis_context, item['instance_name'])
                 if item['type'].name == 'KafkaEventHandler':
-                    ctx = func(analysis_context, item['topic'], item['options'])
-                # if item['type'] == 'KafkaEventHandler':
-                #     try:
-                #         item['args'][0]
-                #     except:
-                #         raise ValueError("Kafka-Topic not defined")
-                #     try:
-                #         kafka_config = item['args'][1]
-                #     except:
-                #         kafka_config = '/etc/aminer/kafka-client.conf'
-                #     config = configparser.ConfigParser()
-                #     config.read(kafka_config)
-                #     options = dict(config.items("DEFAULT"))
-                #     for key, val in options.items():
-                #         try:
-                #             if key == "sasl_plain_username":
-                #                 continue
-                #             options[key] = int(val)
-                #         except:
-                #             pass
-                #     kafka_event_handler = func(analysis_context.aminer_config, item['args'][0], options)
-                #     from aminer.events import JsonConverterHandler
-                #     anomaly_event_handlers.append(
-                #         JsonConverterHandler(analysis_context.aminer_config, message_queue_event_handlers,
-                #                              analysis_context, learning_mode))
-                # else:
+                    if 'topic' not in item:
+                        raise ValueError("Kafka-Topic not defined")
+                    import configparser
+                    import os
+                    config = configparser.ConfigParser()
+                    kafkacfg = '/etc/aminer/kafka-client.conf'
+                    if 'cfgfile' in item:
+                        kafkacfg = item['cfgfile']
+
+                    if os.access(kafkacfg, os.R_OK):
+                        config.read(kafkacfg)
+                    else:
+                        raise ValueError("%s does not exist or is not readable" % kafkacfg)
+
+                    options = dict(config.items("DEFAULT"))
+                    for key, val in options.items():
+                        try:
+                            if key == "sasl_plain_username":
+                                continue
+                            options[key] = int(val)
+                        except:  # skipcq: FLK-E722
+                            pass
+                    ctx = func(analysis_context.aminer_config, item['topic'], options)
                 if ctx is None:
                     ctx = func(analysis_context)
-                if item['json'] is True:
+                if item['json'] is True or item['type'].name == 'KafkaEventHandler':
                     from aminer.events import JsonConverterHandler
                     ctx = JsonConverterHandler([ctx], analysis_context)
                 anomaly_event_handlers.append(ctx)

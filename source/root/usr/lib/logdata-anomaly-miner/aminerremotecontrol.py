@@ -29,7 +29,7 @@ __email__ = "aecid@ait.ac.at"
 __license__ = "GPLv3"
 __maintainer__ = "Markus Wurzenberger"
 __status__ = "Production"
-__version__ = "2.0.1"
+__version__ = "2.1.0"
 
 # Get rid of the default sys path immediately. Otherwise Python also attempts to load the following imports from e.g. directory
 # where this binary resides.
