@@ -1,3 +1,35 @@
+V2.1.0 (2020-11-05)
+===================
+
+* Changes:
+  * Added VariableTypeDetector,EventTypeDetector and EventCorrelationDetector
+  * Added support for unclean format strings in the DateTimeModelElement
+  * Added timezones to the DateTimeModelElement
+  * Enhanced ApacheAccessModel
+  * Yamlconfig: added support for kafka stream
+  * Removed cpu limit configuration
+  * Various refactoring
+  * Yamlconfig: added support for more detectors
+  * Added new command-line-parameters
+  * Renamed executables to aminer.py and aminerremotecontroly.py
+  * Run Aminer in forgroundd-mode per default
+  * Added various unit-tests
+  * Improved yamlconfig and checks
+  * Added start-config for parser to yamlconfig
+  * Renamed config templates
+  * Removed imports from init.py for better modularity
+  * Created AnalysisComponentsPerformanceTests for the EventTypeDetector
+  * Extended demo-config
+  * Renamed whitelist to allowlist
+  * Added warnings for non-existent resources
+  * Changed default of auto_include_flag to false
+* Bugfixes:
+  * Fixed some exit() in forks
+  * Fixed debian files
+  * Fixed JSON output of the AffectedLogAtomValues in all detectors
+  * Fixed normal output of the NewMatchPathValueDetector
+  * Fixed reoccuring alerting in MissingMatchPathValueDetector
+
 V2.0.2 (2020-07-17)
 ===================
 
