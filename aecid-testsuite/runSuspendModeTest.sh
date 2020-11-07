@@ -7,7 +7,7 @@ sudo mkdir /tmp/lib/aminer 2> /dev/null
 sudo chown -R aminer:aminer /tmp/lib 2> /dev/null
 sudo rm /tmp/syslog 2> /dev/null
 touch /tmp/syslog
-ln -s $PWD/../source/root/usr/lib/logdata-anomaly-miner/aminerRemoteControl.py $PWD/aminerRemoteControl
+ln -s $PWD/../source/root/usr/lib/logdata-anomaly-miner/aminerremotecontrol.py $PWD/aminerremotecontrol
 
 FILE=/tmp/demo-config.py
 if ! test -f "$FILE"; then
@@ -36,7 +36,7 @@ find /tmp/lib/aminer -type f -exec md5sum {} \; | tee /tmp/test1.md5 > /dev/null
 
 sleep 1
 md5sum $SUSPEND_FILE > $SUSPEND_FILE_MD5 2> /dev/null
-sudo ./aminerRemoteControl --Exec "suspend" > /dev/null
+sudo ./aminerremotecontrol --Exec "suspend" > /dev/null
 echo " Current Disk Data is: Filesystem     Type  Size  Used Avail Use%   %" >> /tmp/syslog
 md5_result=`md5sum -c $SUSPEND_FILE_MD5 2> /dev/null`
 if [[ $md5_result != "$SUSPEND_FILE: OK" ]]; then
@@ -47,7 +47,7 @@ fi
 sleep 7
 find /tmp/lib/aminer -type f -exec md5sum {} \; | tee /tmp/test2.md5 > /dev/null
 
-sudo ./aminerRemoteControl --Exec "activate" > /dev/null
+sudo ./aminerremotecontrol --Exec "activate" > /dev/null
 
 if [[ $md5_result == "/tmp/syslog: OK" ]]; then
 	echo 'The aminer should have produced outputs, but md5sum does not indicate any changes. (2)'
@@ -75,12 +75,12 @@ KILL_PID=$!
 sleep 3
 wait $KILL_PID
 
-sudo rm /tmp/demo-config.py 2> /dev/null
-sudo rm /tmp/suspend_output.txt 2> /dev/null
-sudo rm /tmp/syslog 2> /dev/null
-sudo rm /tmp/AMinerRemoteLog.txt 2> /dev/null
-sudo rm /tmp/suspend.md5 2> /dev/null
-sudo rm aminerRemoteControl
+sudo rm /tmp/demo-config.py
+sudo rm /tmp/suspend_output.txt
+sudo rm /tmp/syslog
+sudo rm /tmp/AMinerRemoteLog.txt
+sudo rm /tmp/suspend.md5
+sudo rm aminerremotecontrol
 sudo rm /tmp/test1.md5
 sudo rm /tmp/test2.md5
 sudo rm /tmp/test3.md5
