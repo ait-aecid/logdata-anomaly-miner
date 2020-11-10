@@ -45,7 +45,7 @@ def load_yaml(config_file):
         except yaml.YAMLError as exception:
             raise exception
 
-    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schema.py', 'r') as sma:
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'YamlSchema.py', 'r') as sma:
         # skipcq: PYL-W0123
         schema = eval(sma.read())
     sma.close()
