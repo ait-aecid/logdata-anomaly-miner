@@ -45,7 +45,7 @@ def load_yaml(config_file):
         except yaml.YAMLError as exception:
             raise exception
 
-    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schema.py', 'r') as sma:
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'YamlSchema.py', 'r') as sma:
         # skipcq: PYL-W0123
         schema = eval(sma.read())
     sma.close()
@@ -82,11 +82,18 @@ def build_analysis_pipeline(analysis_context):
     # skipcq: PYL-W0611
     import sys
 
+    parsing_model = build_parsing_model()
+    anomaly_event_handlers, atom_filter = build_input_pipeline(analysis_context, parsing_model)
+    build_analysis_components(analysis_context, anomaly_event_handlers, atom_filter)
+    build_event_handlers(analysis_context, anomaly_event_handlers)
+
+
+def build_parsing_model():
+    """Build the parsing model."""
     parser_model_dict = {}
     start = None
     ws_count = 0
     whitespace_str = b' '
-
     # We might be able to remove this and us it like the config_properties
     # skipcq: PYL-W0603
     global yaml_data
@@ -144,8 +151,7 @@ def build_analysis_pipeline(analysis_context):
                 parser_model_dict[item['id']] = item['type'].func(
                     item['name'], item['value_sign_type'], item['value_pad_type'], item['exponent_type'])
             elif item['type'].name == 'DecimalIntegerValueModelElement':
-                parser_model_dict[item['id']] = item['type'].func(
-                    item['name'], item['value_sign_type'], item['value_pad_type'])
+                parser_model_dict[item['id']] = item['type'].func(item['name'], item['value_sign_type'], item['value_pad_type'])
             elif item['type'].name in ('FirstMatchModelElement', 'SequenceModelElement'):
                 children = []
                 for child in item['args']:
@@ -166,7 +172,6 @@ def build_analysis_pipeline(analysis_context):
                     parser_model_dict[item['id']] = item['type'].func(item['name'])
         else:
             parser_model_dict[item['id']] = item['type'].func()
-
     args_list = []
     if 'args' in start:
         if isinstance(start['args'], list):
@@ -186,53 +191,49 @@ def build_analysis_pipeline(analysis_context):
             parsing_model = start['type'].func(start['name'], [parser_model_dict[start['args']]])
     else:
         parsing_model = start['type'].func()
+    return parsing_model
 
-# Some generic imports.
+
+def build_input_pipeline(analysis_context, parsing_model):
+    """Build the input pipeline."""
+    # Some generic imports.
     from aminer.analysis import AtomFilters
-
-# Create all global handler lists here and append the real handlers
-# later on.
-# Use this filter to distribute all atoms to the analysis handlers.
+    # Create all global handler lists here and append the real handlers later on.
+    # Use this filter to distribute all atoms to the analysis handlers.
     atom_filter = AtomFilters.SubhandlerFilter(None)
     anomaly_event_handlers = []
-
-# Now define the AtomizerFactory using the model. A simple line
-# based one is usually sufficient.
+    # Now define the AtomizerFactory using the model. A simple line based one is usually sufficient.
     from aminer.input import SimpleByteStreamLineAtomizerFactory
     timestamp_paths = yaml_data['Input']['timestamp_paths']
     if isinstance(timestamp_paths, str):
         timestamp_paths = [timestamp_paths]
     if yaml_data['Input']['multi_source'] is True:
         from aminer.input import SimpleMultisourceAtomSync
-        analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
-            parsing_model, [SimpleMultisourceAtomSync([atom_filter], sync_wait_time=5)],
-            anomaly_event_handlers, default_timestamp_paths=timestamp_paths)
+        analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(parsing_model, [SimpleMultisourceAtomSync([
+            atom_filter], sync_wait_time=5)], anomaly_event_handlers, default_timestamp_paths=timestamp_paths)
     else:
         analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
             parsing_model, [atom_filter], anomaly_event_handlers, default_timestamp_paths=timestamp_paths)
-
-# Just report all unparsed atoms to the event handlers.
+    # Just report all unparsed atoms to the event handlers.
     if yaml_data['Input']['verbose'] is True:
         from aminer.input import VerboseUnparsedAtomHandler
-        atom_filter.add_handler(
-            VerboseUnparsedAtomHandler(anomaly_event_handlers, parsing_model),
-            stop_when_handled_flag=True)
+        atom_filter.add_handler(VerboseUnparsedAtomHandler(anomaly_event_handlers, parsing_model), stop_when_handled_flag=True)
     else:
         from aminer.input import SimpleUnparsedAtomHandler
-        atom_filter.add_handler(
-            SimpleUnparsedAtomHandler(anomaly_event_handlers),
-            stop_when_handled_flag=True)
-
+        atom_filter.add_handler(SimpleUnparsedAtomHandler(anomaly_event_handlers), stop_when_handled_flag=True)
     from aminer.analysis import NewMatchPathDetector
     if 'LearnMode' in yaml_data:
         learn = yaml_data['LearnMode']
     else:
         learn = True
-    nmpd = NewMatchPathDetector(
-        analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=learn)
+    nmpd = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=learn)
     analysis_context.register_component(nmpd, component_name=None)
     atom_filter.add_handler(nmpd)
+    return anomaly_event_handlers, atom_filter
 
+
+def build_analysis_components(analysis_context, anomaly_event_handlers, atom_filter):
+    """Build the analysis components."""
     if 'Analysis' in yaml_data and yaml_data['Analysis'] is not None:
         analysis_dict = {}
         match_action_dict = {}
@@ -249,13 +250,8 @@ def build_analysis_pipeline(analysis_context):
                 learn = item['learn_mode']
             func = item['type'].func
             if item['type'].name == 'NewMatchPathValueDetector':
-                tmp_analyser = func(
-                    analysis_context.aminer_config,
-                    item['paths'],
-                    anomaly_event_handlers,
-                    auto_include_flag=learn,
-                    persistence_id=item['persistence_id'],
-                    output_log_line=item['output_logline'])
+                tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn,
+                                    persistence_id=item['persistence_id'], output_log_line=item['output_logline'])
             elif item['type'].name == 'MatchPathFilter':
                 parsed_atom_handler_lookup_list = []
                 for atom_handler in item['parsed_atom_handler_lookup_list']:
@@ -269,9 +265,7 @@ def build_analysis_pipeline(analysis_context):
                     if analysis_context.get_component_by_name(default_parsed_atom_handler) is None:
                         raise ValueError('The atom handler %s does not exist!' % default_parsed_atom_handler)
                     default_parsed_atom_handler = analysis_context.get_component_by_name(default_parsed_atom_handler)
-                tmp_analyser = func(
-                    parsed_atom_handler_lookup_list,
-                    default_parsed_atom_handler=default_parsed_atom_handler)
+                tmp_analyser = func(parsed_atom_handler_lookup_list, default_parsed_atom_handler=default_parsed_atom_handler)
             elif item['type'].name == 'MatchValueFilter':
                 parsed_atom_handler_dict = {}
                 for atom_handler in item['parsed_atom_handler_dict']:
@@ -283,107 +277,52 @@ def build_analysis_pipeline(analysis_context):
                     if analysis_context.get_component_by_name(default_parsed_atom_handler) is None:
                         raise ValueError('The atom handler %s does not exist!' % default_parsed_atom_handler)
                     default_parsed_atom_handler = analysis_context.get_component_by_name(default_parsed_atom_handler)
-                tmp_analyser = func(
-                    item['path'],
-                    parsed_atom_handler_dict,
-                    default_parsed_atom_handler=default_parsed_atom_handler)
+                tmp_analyser = func(item['path'], parsed_atom_handler_dict, default_parsed_atom_handler=default_parsed_atom_handler)
             elif item['type'].name == 'NewMatchPathValueComboDetector':
-                tmp_analyser = func(
-                    analysis_context.aminer_config,
-                    item['paths'],
-                    anomaly_event_handlers,
-                    auto_include_flag=learn,
-                    persistence_id=item['persistence_id'],
-                    allow_missing_values_flag=item['allow_missing_values'],
-                    output_log_line=item['output_logline'])
+                tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn,
+                                    persistence_id=item['persistence_id'], allow_missing_values_flag=item['allow_missing_values'],
+                                    output_log_line=item['output_logline'])
             elif item['type'].name == 'MissingMatchPathValueDetector':
-                tmp_analyser = func(
-                    analysis_context.aminer_config,
-                    item['path'],
-                    anomaly_event_handlers,
-                    auto_include_flag=learn,
-                    persistence_id=item['persistence_id'],
-                    default_interval=item['check_interval'],
-                    realert_interval=item['realert_interval'],
-                    output_log_line=item['output_logline'])
+                tmp_analyser = func(analysis_context.aminer_config, item['path'], anomaly_event_handlers, auto_include_flag=learn,
+                                    persistence_id=item['persistence_id'], default_interval=item['check_interval'],
+                                    realert_interval=item['realert_interval'], output_log_line=item['output_logline'])
             elif item['type'].name == 'MissingMatchPathListValueDetector':
-                tmp_analyser = func(
-                    analysis_context.aminer_config,
-                    item['path'],
-                    anomaly_event_handlers,
-                    auto_include_flag=learn,
-                    persistence_id=item['persistence_id'],
-                    default_interval=item['check_interval'],
-                    realert_interval=item['realert_interval'],
-                    output_log_line=item['output_logline'])
+                tmp_analyser = func(analysis_context.aminer_config, item['path'], anomaly_event_handlers, auto_include_flag=learn,
+                                    persistence_id=item['persistence_id'], default_interval=item['check_interval'],
+                                    realert_interval=item['realert_interval'], output_log_line=item['output_logline'])
             elif item['type'].name == 'TimeCorrelationDetector':
-                tmp_analyser = func(
-                    analysis_context.aminer_config,
-                    anomaly_event_handlers,
-                    item['parallel_check_count'],
-                    persistence_id=item['persistence_id'],
-                    record_count_before_event=item['record_count_before_event'],
-                    output_log_line=item['output_logline'],
-                    use_path_match=item['use_path_match'],
-                    use_value_match=item['use_value_match'],
-                    min_rule_attributes=item['min_rule_attributes'],
-                    max_rule_attributes=item['max_rule_attributes'])
+                tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['parallel_check_count'],
+                                    persistence_id=item['persistence_id'], record_count_before_event=item['record_count_before_event'],
+                                    output_log_line=item['output_logline'], use_path_match=item['use_path_match'],
+                                    use_value_match=item['use_value_match'], min_rule_attributes=item['min_rule_attributes'],
+                                    max_rule_attributes=item['max_rule_attributes'])
             elif item['type'].name == 'ParserCount':
-                tmp_analyser = func(
-                    analysis_context.aminer_config,
-                    item['paths'],
-                    anomaly_event_handlers,
-                    report_interval=item['report_interval'],
-                    reset_after_report_flag=item['reset_after_report_flag'])
+                tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers,
+                                    report_interval=item['report_interval'], reset_after_report_flag=item['reset_after_report_flag'])
             elif item['type'].name == 'EventCorrelationDetector':
                 tmp_analyser = func(
-                    analysis_context.aminer_config,
-                    anomaly_event_handlers,
-                    paths=item['paths'],
-                    max_hypotheses=item['max_hypotheses'],
-                    hypothesis_max_delta_time=item['hypothesis_max_delta_time'],
-                    generation_probability=item['generation_probability'],
-                    generation_factor=item['generation_factor'],
-                    max_observations=item['max_observations'],
-                    p0=item['p0'],
-                    alpha=item['alpha'],
-                    candidates_size=item['candidates_size'],
+                    analysis_context.aminer_config, anomaly_event_handlers, paths=item['paths'],
+                    max_hypotheses=item['max_hypotheses'], hypothesis_max_delta_time=item['hypothesis_max_delta_time'],
+                    generation_probability=item['generation_probability'], generation_factor=item['generation_factor'],
+                    max_observations=item['max_observations'], p0=item['p0'], alpha=item['alpha'], candidates_size=item['candidates_size'],
                     hypotheses_eval_delta_time=item['hypotheses_eval_delta_time'],
-                    delta_time_to_discard_hypothesis=item['delta_time_to_discard_hypothesis'],
-                    check_rules_flag=item['check_rules_flag'],
-                    auto_include_flag=learn,
-                    allowlisted_paths=item['allowlisted_paths'],
-                    persistence_id=item['persistence_id'])
+                    delta_time_to_discard_hypothesis=item['delta_time_to_discard_hypothesis'], check_rules_flag=item['check_rules_flag'],
+                    auto_include_flag=learn, allowlisted_paths=item['allowlisted_paths'], persistence_id=item['persistence_id'])
             elif item['type'].name == 'NewMatchIdValueComboDetector':
-                tmp_analyser = func(
-                    analysis_context.aminer_config,
-                    item['paths'],
-                    anomaly_event_handlers,
-                    id_path_list=item['id_path_list'],
-                    min_allowed_time_diff=item['min_allowed_time_diff'],
-                    auto_include_flag=learn,
-                    persistence_id=item['persistence_id'],
-                    allow_missing_values_flag=item['allow_missing_values'],
-                    output_log_line=item['output_logline'])
+                tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers,
+                                    id_path_list=item['id_path_list'], min_allowed_time_diff=item['min_allowed_time_diff'],
+                                    auto_include_flag=learn, persistence_id=item['persistence_id'],
+                                    allow_missing_values_flag=item['allow_missing_values'], output_log_line=item['output_logline'])
             elif item['type'].name == 'LinearNumericBinDefinition':
                 if comp_name is None:
                     raise ValueError('The %s must have an id!' % item['type'].name)
-                analysis_dict[comp_name] = func(
-                    item['lower_limit'],
-                    item['bin_size'],
-                    item['bin_count'],
-                    item['outlier_bins_flag'])
+                analysis_dict[comp_name] = func(item['lower_limit'], item['bin_size'], item['bin_count'], item['outlier_bins_flag'])
                 continue
             elif item['type'].name == 'ModuloTimeBinDefinition':
                 if comp_name is None:
                     raise ValueError('The %s must have an id!' % item['type'].name)
-                analysis_dict[comp_name] = func(
-                    item['modulo_value'],
-                    item['time_unit'],
-                    item['lower_limit'],
-                    item['bin_size'],
-                    item['bin_count'],
-                    item['outlier_bins_flag'])
+                analysis_dict[comp_name] = func(item['modulo_value'], item['time_unit'], item['lower_limit'], item['bin_size'],
+                                                item['bin_count'], item['outlier_bins_flag'])
                 continue
             elif item['type'].name == 'HistogramAnalysis':
                 histogram_defs = []
@@ -393,89 +332,50 @@ def build_analysis_pipeline(analysis_context):
                     if histogram_def[1] not in analysis_dict:
                         raise ValueError('%s first must be defined before used.' % histogram_def[1])
                     histogram_defs.append([histogram_def[0], analysis_dict[histogram_def[1]]])
-                tmp_analyser = func(
-                    analysis_context.aminer_config,
-                    histogram_defs,
-                    item['report_interval'],
-                    anomaly_event_handlers,
-                    reset_after_report_flag=item['reset_after_report_flag'],
-                    persistence_id=item['persistence_id'],
-                    output_log_line=item['output_logline'])
+                tmp_analyser = func(analysis_context.aminer_config, histogram_defs, item['report_interval'], anomaly_event_handlers,
+                                    reset_after_report_flag=item['reset_after_report_flag'], persistence_id=item['persistence_id'],
+                                    output_log_line=item['output_logline'])
             elif item['type'].name == 'PathDependentHistogramAnalysis':
                 if item['bin_definition'] not in analysis_dict:
                     raise ValueError('%s first must be defined before used.' % item['bin_definition'])
                 tmp_analyser = func(
-                    analysis_context.aminer_config,
-                    item['path'],
-                    analysis_dict[item['bin_definition']],
-                    item['report_interval'],
-                    anomaly_event_handlers,
-                    reset_after_report_flag=item['reset_after_report_flag'],
-                    persistence_id=item['persistence_id'],
+                    analysis_context.aminer_config, item['path'], analysis_dict[item['bin_definition']], item['report_interval'],
+                    anomaly_event_handlers, reset_after_report_flag=item['reset_after_report_flag'], persistence_id=item['persistence_id'],
                     output_log_line=item['output_logline'])
             elif item['type'].name == 'EnhancedNewMatchPathValueComboDetector':
                 tuple_transformation_function = None
                 if item['tuple_transformation_function'] == 'demo':
                     tuple_transformation_function = tuple_transformation_function_demo_print_every_10th_value
-                tmp_analyser = func(
-                    analysis_context.aminer_config,
-                    item['paths'],
-                    anomaly_event_handlers,
-                    persistence_id=item['persistence_id'],
-                    allow_missing_values_flag=item['allow_missing_values'],
-                    auto_include_flag=learn,
-                    tuple_transformation_function=tuple_transformation_function,
-                    output_log_line=item['output_logline'])
+                tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers,
+                                    persistence_id=item['persistence_id'], allow_missing_values_flag=item['allow_missing_values'],
+                                    auto_include_flag=learn, tuple_transformation_function=tuple_transformation_function,
+                                    output_log_line=item['output_logline'])
                 # skipcq: PYL-W0603
                 global enhanced_new_match_path_value_combo_detector_reference
                 enhanced_new_match_path_value_combo_detector_reference = tmp_analyser
             elif item['type'].name == 'MatchFilter':
-                tmp_analyser = func(
-                    analysis_context.aminer_config,
-                    item['paths'],
-                    anomaly_event_handlers,
-                    target_value_list=item['value_list'],
-                    output_log_line=item['output_logline'])
+                tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers,
+                                    target_value_list=item['value_list'], output_log_line=item['output_logline'])
             elif item['type'].name == 'MatchValueAverageChangeDetector':
-                tmp_analyser = func(
-                    analysis_context.aminer_config,
-                    anomaly_event_handlers,
-                    item['timestamp_path'],
-                    item['paths'],
-                    item['min_bin_elements'],
-                    item['min_bin_time'],
-                    sync_bins_flag=item['sync_bins_flag'],
-                    debug_mode=item['debug_mode'],
-                    persistence_id=item['persistence_id'],
-                    output_log_line=item['output_logline'])
+                tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['timestamp_path'], item['paths'],
+                                    item['min_bin_elements'], item['min_bin_time'], sync_bins_flag=item['sync_bins_flag'],
+                                    debug_mode=item['debug_mode'], persistence_id=item['persistence_id'],
+                                    output_log_line=item['output_logline'])
             elif item['type'].name == 'MatchValueStreamWriter':
                 stream = sys.stdout
                 if item['stream'] == 'sys.stderr':
                     stream = sys.stderr
-                tmp_analyser = func(
-                    stream,
-                    item['paths'],
-                    item['separator'].encode(),
-                    item['missing_value_string'].encode())
+                tmp_analyser = func(stream, item['paths'], item['separator'].encode(), item['missing_value_string'].encode())
             elif item['type'].name == 'NewMatchPathDetector':
-                tmp_analyser = func(
-                    analysis_context.aminer_config,
-                    anomaly_event_handlers,
-                    persistence_id=item['persistence_id'],
-                    auto_include_flag=learn,
-                    output_log_line=item['output_logline'])
+                tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
+                                    auto_include_flag=learn, output_log_line=item['output_logline'])
             elif 'MatchAction' in item['type'].name:
                 if comp_name is None:
                     raise ValueError('The %s must have an id!' % item['type'].name)
                 if item['type'].name == 'EventGenerationMatchAction':
-                    tmp_analyser = func(
-                        item['event_type'],
-                        item['event_message'],
-                        anomaly_event_handlers)
+                    tmp_analyser = func(item['event_type'], item['event_message'], anomaly_event_handlers)
                 elif item['type'].name == 'AtomFilterMatchAction':
-                    tmp_analyser = func(
-                        atom_filter,
-                        stop_when_handled_flag=item['stop_when_handled_flag'])
+                    tmp_analyser = func(atom_filter, stop_when_handled_flag=item['stop_when_handled_flag'])
                 match_action_dict[comp_name] = tmp_analyser
                 continue
             elif 'MatchRule' in item['type'].name:
@@ -492,97 +392,57 @@ def build_analysis_pipeline(analysis_context):
                         if sub_rule not in match_rules_dict:
                             raise ValueError('The sub match rule %s does not exist!' % sub_rule)
                         sub_rules.append(match_rules_dict[sub_rule])
-                    tmp_analyser = func(
-                        sub_rules,
-                        match_action=match_action)
+                    tmp_analyser = func(sub_rules, match_action=match_action)
                 if item['type'].name == 'ValueDependentDelegatedMatchRule':
                     rule_lookup_dict = {}
                     for rule in item['rule_lookup_dict']:
                         if rule not in match_rules_dict:
                             raise ValueError('The match rule %s does not exist!' % rule)
                         rule_lookup_dict[rule] = match_rules_dict[rule]
-                    tmp_analyser = func(
-                        item['paths'],
-                        rule_lookup_dict,
-                        default_rule=item['default_rule'],
-                        match_action=match_action)
+                    tmp_analyser = func(item['paths'], rule_lookup_dict, default_rule=item['default_rule'], match_action=match_action)
                 if item['type'].name == 'NegationMatchRule':
                     if item['sub_rule'] not in match_rules_dict:
                         raise ValueError('The match rule %s does not exist!' % item['sub_rule'])
                     sub_rule = match_rules_dict[item['sub_rule']]
-                    tmp_analyser = func(
-                        sub_rule,
-                        match_action=match_action)
+                    tmp_analyser = func(sub_rule, match_action=match_action)
                 if item['type'].name in ('PathExistsMatchRule', 'IPv4InRFC1918MatchRule'):
-                    tmp_analyser = func(
-                        item['path'],
-                        match_action=match_action)
+                    tmp_analyser = func(item['path'], match_action=match_action)
                 if item['type'].name == 'ValueMatchRule':
                     if isinstance(item['value'], str):
                         item['value'] = item['value'].encode()
-                    tmp_analyser = func(
-                        item['path'],
-                        item['value'],
-                        match_action=match_action)
+                    tmp_analyser = func(item['path'], item['value'], match_action=match_action)
                 if item['type'].name == 'ValueListMatchRule':
                     value_list = []
                     for val in item['value_list']:
                         if isinstance(val, str):
                             val = val.encode()
                         value_list.append(val)
-                    tmp_analyser = func(
-                        item['path'],
-                        value_list,
-                        match_action=match_action)
+                    tmp_analyser = func(item['path'], value_list, match_action=match_action)
                 if item['type'].name == 'ValueRangeMatchRule':
-                    tmp_analyser = func(
-                        item['path'],
-                        item['lower_limit'],
-                        item['upper_limit'],
-                        match_action)
+                    tmp_analyser = func(item['path'], item['lower_limit'], item['upper_limit'], match_action)
                 if item['type'].name == 'StringRegexMatchRule':
-                    tmp_analyser = func(
-                        item['path'],
-                        item['regex'],
-                        match_action=match_action)
+                    tmp_analyser = func(item['path'], item['regex'], match_action=match_action)
                 if item['type'].name == 'ModuloTimeMatchRule':
                     # tzinfo parameter cannot be used yet..
-                    tmp_analyser = func(
-                        item['path'],
-                        item['seconds_modulo'],
-                        item['lower_limit'],
-                        item['upper_limit'],
-                        match_action=match_action)
+                    tmp_analyser = func(item['path'], item['seconds_modulo'], item['lower_limit'], item['upper_limit'],
+                                        match_action=match_action)
                 if item['type'].name == 'ValueDependentModuloTimeMatchRule':
                     # tzinfo parameter cannot be used yet..
-                    tmp_analyser = func(
-                        item['path'],
-                        item['seconds_modulo'],
-                        item['paths'],
-                        item['limit_lookup_dict'],
-                        default_limit=item['default_limit'],
-                        match_action=match_action)
+                    tmp_analyser = func(item['path'], item['seconds_modulo'], item['paths'], item['limit_lookup_dict'],
+                                        default_limit=item['default_limit'], match_action=match_action)
                 if item['type'].name == 'DebugMatchRule':
-                    tmp_analyser = func(
-                        debug_match_result=item['debug_mode'],
-                        match_action=match_action)
+                    tmp_analyser = func(debug_match_result=item['debug_mode'], match_action=match_action)
                 if item['type'].name == 'DebugHistoryMatchRule':
                     # object_history is not supported yet..
-                    tmp_analyser = func(
-                        debug_match_result=item['debug_mode'],
-                        match_action=match_action)
+                    tmp_analyser = func(debug_match_result=item['debug_mode'], match_action=match_action)
                 match_rules_dict[comp_name] = tmp_analyser
                 continue
             elif item['type'].name == 'CorrelationRule':
                 artefact_match_parameters = []
                 for match_parameters in item['artefact_match_parameters']:
                     artefact_match_parameters.append(tuple(i for i in match_parameters))
-                tmp_analyser = func(
-                    item['rule_id'],
-                    item['min_time_delta'],
-                    item['max_time_delta'],
-                    item['max_artefacts_a_for_single_b'],
-                    artefact_match_parameters=artefact_match_parameters)
+                tmp_analyser = func(item['rule_id'], item['min_time_delta'], item['max_time_delta'], item['max_artefacts_a_for_single_b'],
+                                    artefact_match_parameters=artefact_match_parameters)
                 correlation_rules[item['rule_id']] = tmp_analyser
                 continue
             elif item['type'].name == 'EventClassSelector':
@@ -602,10 +462,7 @@ def build_analysis_pipeline(analysis_context):
                         if rule not in correlation_rules:
                             raise ValueError('The correlation rule %s does not exist!' % rule)
                         artefact_b_rules.append(correlation_rules[rule])
-                tmp_analyser = func(
-                    item['action_id'],
-                    artefact_a_rules,
-                    artefact_b_rules)
+                tmp_analyser = func(item['action_id'], artefact_a_rules, artefact_b_rules)
                 match_action_dict[item['action_id']] = tmp_analyser
                 continue
             elif item['type'].name == 'TimeCorrelationViolationDetector':
@@ -614,43 +471,26 @@ def build_analysis_pipeline(analysis_context):
                     if rule not in match_rules_dict:
                         raise ValueError('The match rule %s does not exist!' % rule)
                     ruleset.append(match_rules_dict[rule])
-                tmp_analyser = func(
-                    analysis_context.aminer_config,
-                    ruleset,
-                    anomaly_event_handlers,
-                    persistence_id=item['persistence_id'],
-                    output_log_line=item['output_logline'])
+                tmp_analyser = func(analysis_context.aminer_config, ruleset, anomaly_event_handlers, persistence_id=item['persistence_id'],
+                                    output_log_line=item['output_logline'])
             elif item['type'].name == 'SimpleMonotonicTimestampAdjust':
-                tmp_analyser = func(
-                    [atom_filter],
-                    stop_when_handled_flag=item['stop_when_handled_flag'])
+                tmp_analyser = func([atom_filter], stop_when_handled_flag=item['stop_when_handled_flag'])
             elif item['type'].name == 'TimestampsUnsortedDetector':
-                tmp_analyser = func(
-                    analysis_context.aminer_config,
-                    anomaly_event_handlers,
-                    exit_on_error_flag=item['exit_on_error_flag'],
-                    output_log_line=item['output_logline'])
+                tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, exit_on_error_flag=item['exit_on_error_flag'],
+                                    output_log_line=item['output_logline'])
             elif item['type'].name == 'AllowlistViolationDetector':
                 allowlist_rules = []
                 for rule in item['allowlist_rules']:
                     if rule not in match_rules_dict:
                         raise ValueError('The match rule %s does not exist!' % rule)
                     allowlist_rules.append(match_rules_dict[rule])
-                tmp_analyser = func(
-                    analysis_context.aminer_config,
-                    allowlist_rules,
-                    anomaly_event_handlers,
-                    output_log_line=item['output_logline'])
+                tmp_analyser = func(analysis_context.aminer_config, allowlist_rules, anomaly_event_handlers,
+                                    output_log_line=item['output_logline'])
             elif item['type'].name == 'EventTypeDetector':
                 tmp_analyser = func(
-                    analysis_context.aminer_config,
-                    anomaly_event_handlers,
-                    persistence_id=item['persistence_id'],
-                    path_list=item['paths'],
-                    min_num_vals=item['min_num_vals'],
-                    max_num_vals=item['max_num_vals'],
-                    save_values=item['save_values'],
-                    track_time_for_TSA=item['track_time_for_TSA'],
+                    analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
+                    path_list=item['paths'], min_num_vals=item['min_num_vals'], max_num_vals=item['max_num_vals'],
+                    save_values=item['save_values'], track_time_for_TSA=item['track_time_for_TSA'],
                     waiting_time_for_TSA=item['waiting_time_for_TSA'],
                     num_sections_waiting_time_for_TSA=item['num_sections_waiting_time_for_TSA'])
             elif item['type'].name == 'VariableTypeDetector':
@@ -658,53 +498,30 @@ def build_analysis_pipeline(analysis_context):
                 if etd is None:
                     raise ValueError('The defined EventTypeDetector %s does not exists!' % item['event_type_detector'])
                 tmp_analyser = func(
-                    analysis_context.aminer_config,
-                    anomaly_event_handlers,
-                    etd,
-                    persistence_id=item['persistence_id'],
-                    path_list=item['paths'],
-                    ks_alpha=item['ks_alpha'],
-                    s_ks_alpha=item['s_ks_alpha'],
-                    s_ks_bt_alpha=item['s_ks_bt_alpha'],
-                    d_alpha=item['d_alpha'],
-                    d_bt_alpha=item['d_bt_alpha'],
-                    div_thres=item['div_thres'],
-                    sim_thres=item['sim_thres'],
-                    indicator_thres=item['indicator_thres'],
-                    num_init=item['num_init'],
-                    num_update=item['num_update'],
-                    num_update_unq=item['num_update_unq'],
-                    num_s_ks_values=item['num_s_ks_values'],
-                    num_s_ks_bt=item['num_s_ks_bt'],
-                    num_d_bt=item['num_d_bt'],
-                    num_pause_discrete=item['num_pause_discrete'],
-                    num_pause_others=item['num_pause_others'],
-                    test_ks_int=item['test_ks_int'],
-                    update_var_type_bool=item['update_var_type_bool'],
-                    num_stop_update=item['num_stop_update'],
-                    silence_output_without_confidence=item['silence_output_without_confidence'],
+                    analysis_context.aminer_config, anomaly_event_handlers, etd, persistence_id=item['persistence_id'],
+                    path_list=item['paths'], ks_alpha=item['ks_alpha'], s_ks_alpha=item['s_ks_alpha'], s_ks_bt_alpha=item['s_ks_bt_alpha'],
+                    d_alpha=item['d_alpha'], d_bt_alpha=item['d_bt_alpha'], div_thres=item['div_thres'], sim_thres=item['sim_thres'],
+                    indicator_thres=item['indicator_thres'], num_init=item['num_init'], num_update=item['num_update'],
+                    num_update_unq=item['num_update_unq'], num_s_ks_values=item['num_s_ks_values'], num_s_ks_bt=item['num_s_ks_bt'],
+                    num_d_bt=item['num_d_bt'], num_pause_discrete=item['num_pause_discrete'], num_pause_others=item['num_pause_others'],
+                    test_ks_int=item['test_ks_int'], update_var_type_bool=item['update_var_type_bool'],
+                    num_stop_update=item['num_stop_update'], silence_output_without_confidence=item['silence_output_without_confidence'],
                     silence_output_except_indicator=item['silence_output_except_indicator'],
-                    num_var_type_hist_ref=item['num_var_type_hist_ref'],
-                    num_update_var_type_hist_ref=item['num_update_var_type_hist_ref'],
-                    num_var_type_considered_ind=item['num_var_type_considered_ind'],
-                    num_stat_stop_update=item['num_stat_stop_update'],
+                    num_var_type_hist_ref=item['num_var_type_hist_ref'], num_update_var_type_hist_ref=item['num_update_var_type_hist_ref'],
+                    num_var_type_considered_ind=item['num_var_type_considered_ind'], num_stat_stop_update=item['num_stat_stop_update'],
                     num_updates_until_var_reduction=item['num_updates_until_var_reduction'],
-                    var_reduction_thres=item['var_reduction_thres'],
-                    num_skipped_ind_for_weights=item['num_skipped_ind_for_weights'],
-                    num_ind_for_weights=item['num_ind_for_weights'],
-                    used_multinomial_test=item['used_multinomial_test'],
-                    use_empiric_distr=item['use_empiric_distr'],
-                    save_statistics=item['save_statistics'],
+                    var_reduction_thres=item['var_reduction_thres'], num_skipped_ind_for_weights=item['num_skipped_ind_for_weights'],
+                    num_ind_for_weights=item['num_ind_for_weights'], used_multinomial_test=item['used_multinomial_test'],
+                    use_empiric_distr=item['use_empiric_distr'], save_statistics=item['save_statistics'],
                     output_log_line=item['output_logline'])
             else:
-                tmp_analyser = func(
-                    analysis_context.aminer_config,
-                    item['paths'],
-                    anomaly_event_handlers,
-                    auto_include_flag=learn)
+                tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn)
             analysis_context.register_component(tmp_analyser, component_name=comp_name)
             atom_filter.add_handler(tmp_analyser)
 
+
+def build_event_handlers(analysis_context, anomaly_event_handlers):
+    """Build the event handlers."""
     try:
         if 'EventHandlers' in yaml_data and yaml_data['EventHandlers'] is not None:
             for item in yaml_data['EventHandlers']:
