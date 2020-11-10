@@ -39,7 +39,7 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.next_report_time = None
         if (target_path_list is None or target_path_list == []) and (target_label_list is not None and target_label_list != []):
             raise ValueError('Target labels cannot be used without specifying target paths.')
-        elif target_path_list is not None and target_label_list is not None and len(target_path_list) != len(target_label_list):
+        if target_path_list is not None and target_label_list is not None and len(target_path_list) != len(target_label_list):
             raise ValueError('Every path must have a target label if target labels are used.')
         if self.target_path_list is None:
             self.target_path_list = []

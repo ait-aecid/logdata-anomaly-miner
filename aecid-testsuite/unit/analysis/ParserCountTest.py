@@ -113,4 +113,4 @@ class ParserCountTest(TestBase):
                           target_label_list=['p'])
         self.assertRaises(ValueError, ParserCount, self.aminer_config, ['path1'], [self.stream_printer_event_handler],
                           target_label_list=['p1', 'p2'])
-        parser_count = ParserCount(self.aminer_config, ['path'], [self.stream_printer_event_handler], target_label_list=['p'])
+        ParserCount(self.aminer_config, ['path'], [self.stream_printer_event_handler], target_label_list=['p'])
