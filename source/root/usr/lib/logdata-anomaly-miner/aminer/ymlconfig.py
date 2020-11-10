@@ -11,6 +11,10 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
+import sys
+import importlib
+
+
 config_properties = {}
 yaml_data = None
 enhanced_new_match_path_value_combo_detector_reference = None
@@ -75,13 +79,6 @@ def build_analysis_pipeline(analysis_context):
     Define the function to create pipeline for parsing the log data.
     It has also to define an AtomizerFactory to instruct AMiner how to process incoming data streams to create log atoms from them.
     """
-    # skipcq: PYL-W0611
-    import importlib
-    # skipcq: PYL-W0611
-    # import configparser
-    # skipcq: PYL-W0611
-    import sys
-
     parsing_model = build_parsing_model()
     anomaly_event_handlers, atom_filter = build_input_pipeline(analysis_context, parsing_model)
     build_analysis_components(analysis_context, anomaly_event_handlers, atom_filter)
