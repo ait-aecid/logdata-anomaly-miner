@@ -48,11 +48,11 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
 
         t += 600
         log_atom = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element), t, self)
-        sleep(10)
+        # set the next_alert_time instead of sleeping 10 seconds
+        default_mail_notification_event_handler.next_alert_time = time()
         default_mail_notification_event_handler.receive_event(
             self.test % self.__class__.__name__, 'New value for pathes %s, %s: %s' % (
                 'match/s1', 'match/s2', repr(match_element.match_object)), [log_atom.raw_data, log_atom.raw_data], None, log_atom, self)
-        sleep(30)
         # skipcq: PYL-W1510, BAN-B602
         result = subprocess.run(self.mail_call, shell=True, stdout=subprocess.PIPE)
 
@@ -100,7 +100,6 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
         default_mail_notification_event_handler.next_alert_time = t + 500
         default_mail_notification_event_handler.do_timer(t)
 
-        sleep(5)
         # skipcq: PYL-W1510, BAN-B602
         result = subprocess.run(self.mail_call, shell=True, stdout=subprocess.PIPE)
         self.assertFalse(self.__expected_string % (
@@ -110,7 +109,6 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
         default_mail_notification_event_handler.next_alert_time = t
         default_mail_notification_event_handler.do_timer(t)
 
-        sleep(30)
         # skipcq: PYL-W1510, BAN-B602
         result = subprocess.run(self.mail_call, shell=True, stdout=subprocess.PIPE)
         self.assertTrue(self.__expected_string % (
