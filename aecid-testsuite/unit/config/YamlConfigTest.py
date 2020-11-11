@@ -292,7 +292,7 @@ class YamlConfigTest(unittest.TestCase):
 
     def test16_parsermodeltype_parameter_for_another_parsermodel_type(self):
         """This test checks if all ModelElements with child elements are working properly."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         aminer_config.load_yaml('unit/data/configfiles/parser_child_elements_config.yml')
@@ -353,7 +353,7 @@ class YamlConfigTest(unittest.TestCase):
 
     def test17_demo_yaml_config_equals_python_config(self):
         """This test checks if the yaml demo config is the same as the python version."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         aminer_config.load_yaml('demo/AMiner/demo-config.yml')
@@ -371,7 +371,7 @@ class YamlConfigTest(unittest.TestCase):
         del yml_config_properties['Analysis']
         del yml_config_properties['EventHandlers']
 
-        # remove SimpleUnparsedAtomHandler, VerboseUnparsedAtomHandler and NewMatchPathDetector as they are added by the ymlconfig.
+        # remove SimpleUnparsedAtomHandler, VerboseUnparsedAtomHandler and NewMatchPathDetector as they are added by the YamlConfig.
         py_registered_components = copy.copy(py_context.registered_components)
         del py_registered_components[0]
         del py_registered_components[1]
