@@ -12,12 +12,7 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
-import email.mime.text
-import os
-import tempfile
-import subprocess  # skipcq: BAN-B404
 import shlex
-import sys
 import time
 import re
 from smtplib import SMTP, SMTPException
@@ -84,12 +79,6 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
         self.current_alert_gap = self.min_alert_gap
         self.current_message = ''
 
-        # Locate the sendmail binary immediately at startup to avoid delayed errors due to misconfiguration.
-        # self.sendmail_binary_path = '/usr/sbin/sendmail'
-        # if not os.path.exists(self.sendmail_binary_path):
-        #     raise Exception('sendmail binary not found')
-        # self.running_sendmail_processes = []
-
     def receive_event(self, event_type, event_message, sorted_log_lines, event_data, log_atom, event_source):
         """Receive information about a detected event."""
         if self.alert_grace_time_end != 0:
@@ -155,7 +144,7 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
             smtp_obj = SMTP('localhost')
             smtp_obj.sendmail(self.sender_address, self.recipient_address, message)
             smtp_obj.close()
-        except SMTPException as e:
+        except SMTPException:  # as e:
             # here logging is needed, but cannot be implemented yet.
             pass
         self.last_alert_time = trigger_time

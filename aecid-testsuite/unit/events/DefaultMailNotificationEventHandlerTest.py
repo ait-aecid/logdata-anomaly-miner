@@ -1,7 +1,7 @@
 import unittest
 from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.FixedDataModelElement import FixedDataModelElement
-from time import time, sleep
+from time import time
 from aminer.input.LogAtom import LogAtom
 from aminer.parsing.ParserMatch import ParserMatch
 from aminer.events.DefaultMailNotificationEventHandler import DefaultMailNotificationEventHandler
