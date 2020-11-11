@@ -50,7 +50,7 @@ class YamlConfigTest(unittest.TestCase):
 
     def test1_load_generic_yaml_file(self):
         """Loads a yaml file into the variable aminer_config.yaml_data."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         aminer_config.load_yaml('unit/data/configfiles/template_config.yml')
@@ -58,7 +58,7 @@ class YamlConfigTest(unittest.TestCase):
 
     def test2_load_notexistent_yaml_file(self):
         """Tries to load a nonexistent yaml file. A FileNotFoundError is expected."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         with self.assertRaises(FileNotFoundError):
@@ -66,7 +66,7 @@ class YamlConfigTest(unittest.TestCase):
 
     def test3_load_invalid_yaml_file(self):
         """Tries to load a file with invalid yaml syntax. Expects an YAMLError."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         with self.assertRaises(yaml.YAMLError):
@@ -74,7 +74,7 @@ class YamlConfigTest(unittest.TestCase):
 
     def test4_load_yaml_file_with_invalid_schema(self):
         """Tries to load a yaml-file with an invalid schema. A ValueError is expected."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         with self.assertRaises(ValueError):
@@ -82,7 +82,7 @@ class YamlConfigTest(unittest.TestCase):
 
     def test5_analysis_pipeline_working_config(self):
         """This test builds a analysis_pipeline from a valid yaml-file."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         aminer_config.load_yaml('unit/data/configfiles/multiple_components.yml')
@@ -131,7 +131,7 @@ class YamlConfigTest(unittest.TestCase):
 
     def test6_analysis_fail_without_parser_start(self):
         """This test checks if the aminer fails without a start-tag for the first parser-model."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         with self.assertRaises(ValueError):
@@ -139,7 +139,7 @@ class YamlConfigTest(unittest.TestCase):
 
     def test7_analysis_fail_with_double_parser_start(self):
         """This test checks if the aminer fails without a start-tag for the first parser-model."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         with self.assertRaises(ValueError):
@@ -147,7 +147,7 @@ class YamlConfigTest(unittest.TestCase):
 
     def test8_analysis_fail_with_unknown_parser_start(self):
         """This test checks if the config-schema-validator raises an error if an unknown parser is configured."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         with self.assertRaises(ValueError):
@@ -155,7 +155,7 @@ class YamlConfigTest(unittest.TestCase):
 
     def test9_analysis_pipeline_working_config_without_analysis_components(self):
         """This test checks if the config can be loaded without any analysis components."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         aminer_config.load_yaml('unit/data/configfiles/multiple_components_null_analysis_components.yml')
@@ -170,7 +170,7 @@ class YamlConfigTest(unittest.TestCase):
 
     def test10_analysis_fail_with_unknown_analysis_component(self):
         """This test checks if the config-schema-validator raises an error if an unknown analysis component is configured."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         with self.assertRaises(ValueError):
@@ -178,7 +178,7 @@ class YamlConfigTest(unittest.TestCase):
 
     def test11_analysis_fail_with_unknown_event_handler(self):
         """This test checks if the config-schema-validator raises an error if an unknown event handler is configured."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         with self.assertRaises(ValueError):
@@ -189,7 +189,7 @@ class YamlConfigTest(unittest.TestCase):
         This test checks if the config can be loaded without any event handler components.
         This also tests if the StreamPrinterEventHandler was loaded by default.
         """
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         aminer_config.load_yaml('unit/data/configfiles/multiple_components_null_event_handlers.yml')
@@ -204,7 +204,7 @@ class YamlConfigTest(unittest.TestCase):
 
     def test13_analysis_pipeline_working_with_json(self):
         """This test checks if JsonConverterHandler is working properly."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         aminer_config.load_yaml('unit/data/configfiles/json_config.yml')
@@ -219,7 +219,7 @@ class YamlConfigTest(unittest.TestCase):
 
     def test14_analysis_pipeline_working_with_learnMode(self):
         """This test checks if learnMode is working properly."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         aminer_config.load_yaml('unit/data/configfiles/learnMode_config.yml')
@@ -263,7 +263,7 @@ class YamlConfigTest(unittest.TestCase):
 
     def test15_analysis_pipeline_working_with_input_parameters(self):
         """This test checks if the SimpleMultisourceAtomSync and SimpleByteStreamLineAtomizerFactory are working properly."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         aminer_config.load_yaml('unit/data/configfiles/multiSource_config.yml')

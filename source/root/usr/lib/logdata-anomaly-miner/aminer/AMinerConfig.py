@@ -43,7 +43,7 @@ def load_config(config_file_name):
 
     if extension in ymlext:
         yaml_config = config_file_name
-        config_file_name = os.path.dirname(os.path.abspath(__file__)) + '/' + 'ymlconfig.py'
+        config_file_name = os.path.dirname(os.path.abspath(__file__)) + '/' + 'YamlConfig.py'
     try:
         spec = importlib.util.spec_from_file_location('aminer_config', config_file_name)
         aminer_config = importlib.util.module_from_spec(spec)
