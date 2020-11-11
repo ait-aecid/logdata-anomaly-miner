@@ -853,7 +853,6 @@ Analysis:
         - type: ParserCount
           id: ParserCount
           report_interval: 10
-          reset_after_report_flag: False
         - type: EventTypeDetector
           id: EventTypeDetector
         - type: VariableTypeDetector

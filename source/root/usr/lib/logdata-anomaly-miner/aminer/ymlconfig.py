@@ -334,7 +334,8 @@ def build_analysis_pipeline(analysis_context):
                     item['paths'],
                     anomaly_event_handlers,
                     report_interval=item['report_interval'],
-                    reset_after_report_flag=item['reset_after_report_flag'])
+                    target_label_list=item['labels'],
+                    split_reports_flag=item['split_reports_flag'])
             elif item['type'].name == 'EventCorrelationDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config,

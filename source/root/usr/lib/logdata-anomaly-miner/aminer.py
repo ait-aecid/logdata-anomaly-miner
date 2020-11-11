@@ -215,7 +215,7 @@ def main():
     os.dup2(stdin_fd, 0)
     os.close(stdin_fd)
 
-    config_file_name = '/etc/aminer/config.py'
+    config_file_name = '/etc/aminer/config.yml'
     run_in_foreground_flag = True
     run_analysis_child_flag = False
     clear_persistence_flag = False
