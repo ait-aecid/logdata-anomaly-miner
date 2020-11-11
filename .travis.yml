@@ -6,6 +6,7 @@ before_install:
   - cp $PWD/source/root/etc/aminer/conf-available/generic/ApacheAccessModel.py $PWD/source/root/etc/aminer/conf-enabled/ApacheAccessModel.py
   - ln -s $PWD/source/root/usr/lib/logdata-anomaly-miner/aminer $PWD/aecid-testsuite/aminer
   - ln -s $PWD/source/root/etc/aminer/template_config.py $PWD/aecid-testsuite/demo/AMiner/template_config.py
+  - ln -s $PWD/source/root/etc/aminer/template_config.yml $PWD/aecid-testsuite/demo/AMiner/template_config.yml
   - sed -e "s+{{SOURCEDIR}}+$PWD+g" .playbook.yml > playbook.yml
 
 install:
@@ -25,6 +26,7 @@ script:
   - ./runAMinerDemo.sh demo/AMiner/demo-config.py
   - ./runAMinerDemo.sh demo/AMiner/jsonConverterHandler-demo-config.py
   - ./runAMinerDemo.sh demo/AMiner/template_config.py
+  - ./runAMinerDemo.sh demo/AMiner/template_config.yml
   - ./runAMinerDemo.sh demo/AMiner/demo-config.yml
   - ./runAMinerIntegrationTest.sh aminerIntegrationTest.sh config.py
   - ./runAMinerIntegrationTest.sh aminerIntegrationTest2.sh config21.py config22.py

@@ -801,10 +801,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
         while z < self.iterations:
             if set_target_path_list:
                 parser_count = ParserCount(self.aminer_config, ['parser/type/path/name', 'parser/type/syscall/syscall'], [
-                    self.stream_printer_event_handler], report_after_number_of_elements, True)
+                    self.stream_printer_event_handler], report_after_number_of_elements)
             else:
-                parser_count = ParserCount(self.aminer_config, None, [
-                    self.stream_printer_event_handler], report_after_number_of_elements, True)
+                parser_count = ParserCount(self.aminer_config, None, [self.stream_printer_event_handler], report_after_number_of_elements)
             t = time.time()
             measured_time = 0
             i = 0

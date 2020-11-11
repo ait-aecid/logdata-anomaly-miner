@@ -293,8 +293,13 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     use_value_match=item['use_value_match'], min_rule_attributes=item['min_rule_attributes'],
                                     max_rule_attributes=item['max_rule_attributes'])
             elif item['type'].name == 'ParserCount':
-                tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers,
-                                    report_interval=item['report_interval'], reset_after_report_flag=item['reset_after_report_flag'])
+                tmp_analyser = func(
+                    analysis_context.aminer_config,
+                    item['paths'],
+                    anomaly_event_handlers,
+                    report_interval=item['report_interval'],
+                    target_label_list=item['labels'],
+                    split_reports_flag=item['split_reports_flag'])
             elif item['type'].name == 'EventCorrelationDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, paths=item['paths'],
