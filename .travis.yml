@@ -27,10 +27,10 @@ script:
   - sudo ls -la /var/mail
   - sudo chown mail:mail /var/mail
   - echo "test" | sudo sendmail mail@localhost
-  - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP('127.0.0.1', port=25, local_hostname='mail', timeout=5); print(smtp_obj); smtp_obj.close()"""
-  - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP('127.0.0.1', port=25, timeout=5); print(smtp_obj); smtp_obj.close()"""
-  - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP(timeout=5); smtp_obj.connect(); print(smtp_obj); smtp_obj.close()"""
-  - sudo python3 -c """import socket; print(socket.getfqdn()); print(socket.gethostbyname(socket.gethostname())); import smtplib; soc = smtplib.SMTP(timeout=5); soc.connect(); print(soc); soc.close()"""
+  - sudo python3 -c """import smtplib; smtplib.debuglevel = 1; smtp_obj = smtplib.SMTP('127.0.0.1', port=25, local_hostname='mail', timeout=5); print(smtp_obj); smtp_obj.close()"""
+  - sudo python3 -c """import smtplib; smtplib.debuglevel = 1; smtp_obj = smtplib.SMTP('127.0.0.1', port=25, timeout=5); print(smtp_obj); smtp_obj.close()"""
+  - sudo python3 -c """import smtplib; smtplib.debuglevel = 1; smtp_obj = smtplib.SMTP(timeout=5); smtp_obj.connect(); print(smtp_obj); smtp_obj.close()"""
+  - sudo python3 -c """import socket; print(socket.getfqdn()); print(socket.gethostbyname(socket.gethostname())); import smtplib; smtplib.debuglevel = 1; soc = smtplib.SMTP(timeout=5); soc.connect(); print(soc); soc.close()"""
   - sudo ls -la /var/mail
   - echo d | sudo mail -u mail
   - sudo python3 -m unittest unit/events/DefaultMailNotificationEventHandlerTest.py
