@@ -30,7 +30,7 @@ script:
   - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP('localhost', port=25, local_hostname='mail', timeout=5); print(smtp_obj); smtp_obj.close()"""
   - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP('localhost', port=25, timeout=5); print(smtp_obj); smtp_obj.close()"""
   - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP(timeout=5); smtp_obj.connect(); print(smtp_obj); smtp_obj.close()"""
-  - sudo python3 -c """import socket; print(socket.getfqdn()); print(socket.gethostbyname(socket.gethostname())); import smtplib; soc = smtplib.SMTP(); soc.connect(); print(soc); soc.close()"""
+  - sudo python3 -c """import socket; print(socket.getfqdn()); print(socket.gethostbyname(socket.gethostname())); import smtplib; soc = smtplib.SMTP(timeout=5); soc.connect(); print(soc); soc.close()"""
   - sudo ls -la /var/mail
   - echo d | sudo mail -u mail
   - sudo python3 -m unittest unit/events/DefaultMailNotificationEventHandlerTest.py
