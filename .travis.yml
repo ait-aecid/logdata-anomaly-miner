@@ -22,11 +22,6 @@ install:
   - sudo chmod +x runCoverageTests.sh
 
 script:
-  - sudo service exim4 restart
-  - sudo netstat -a | grep smtp
-  - sudo netstat -nlp | grep :25
-  - echo dc_local_interfaces='127.0.0.1' >> /etc/exim4/update-exim4.conf.conf
-  - sudo service exim4 restart
   - sudo netstat -a | grep smtp
   - sudo netstat -nlp | grep :25
   - sudo exim -bt mail@localhost
@@ -37,11 +32,10 @@ script:
   - sudo chown mail:mail /var/mail
   - sudo chmod 660 /var/mail/mail
   - echo "test" | sudo sendmail mail@localhost
-  - sleep 10
-  - sudo python3 -c """import smtplib; smtplib.debuglevel = 3; smtp_obj = smtplib.SMTP('127.0.0.1', port=25, local_hostname='root', timeout=10); print(smtp_obj); smtp_obj.close()"""
-  - sudo python3 -c """import smtplib; smtplib.debuglevel = 3; smtp_obj = smtplib.SMTP('127.0.0.1', port=25, timeout=10); print(smtp_obj); smtp_obj.close()"""
+  - sudo python3 -c """import smtplib; smtplib.debuglevel = 3; smtp_obj = smtplib.SMTP('127.0.0.1', port=25, local_hostname='localhost', timeout=10); print(smtp_obj); smtp_obj.close()"""
+  - sudo python3 -c """import smtplib; smtplib.debuglevel = 3; smtp_obj = smtplib.SMTP('127.0.0.1', port=25, timeout=10, source_address=(localhost, 55666); print(smtp_obj); smtp_obj.close()"""
   - sudo python3 -c """import smtplib; smtplib.debuglevel = 3; smtp_obj = smtplib.SMTP(timeout=10); smtp_obj.connect(); print(smtp_obj); smtp_obj.close()"""
-  - sudo python3 -c """import socket; print(socket.getfqdn()); print(socket.gethostbyname(socket.gethostname())); import smtplib; smtplib.debuglevel = 1; soc = smtplib.SMTP(timeout=5); soc.connect(); print(soc); soc.close()"""
+  - sudo python3 -c """import socket; print(socket.getfqdn()); print(socket.gethostbyname(socket.gethostname())); import smtplib; smtplib.debuglevel = 1; soc = smtplib.SMTP(timeout=5); soc.connect(host='localhost', port=25); print(soc); soc.close()"""
   - sudo ls -la /var/mail
   - echo d | sudo mail -u mail
   - sudo python3 -m unittest unit/events/DefaultMailNotificationEventHandlerTest.py
