@@ -23,7 +23,7 @@ install:
 
 script:
   - sudo exim -bt mail@localhost
-  - sudo lsof -i -P | grep exim exim4
+  - sudo lsof -i -P | grep exim
   - sudo touch /var/mail/mail
   - sudo chown mail:mail /var/mail/mail
   - sudo ls -la /var/mail
