@@ -33,7 +33,7 @@ script:
   - sudo chmod 660 /var/mail/mail
   - echo "test" | sudo sendmail mail@localhost
   - sudo python3 -c """import smtplib; smtplib.debuglevel = 3; smtp_obj = smtplib.SMTP('127.0.0.1', port=25, local_hostname='localhost', timeout=10); print(smtp_obj); smtp_obj.close()"""
-  - sudo python3 -c """import smtplib; smtplib.debuglevel = 3; smtp_obj = smtplib.SMTP('127.0.0.1', port=25, timeout=10, source_address=(localhost, 55666); print(smtp_obj); smtp_obj.close()"""
+  - sudo python3 -c """import smtplib; smtplib.debuglevel = 3; smtp_obj = smtplib.SMTP('127.0.0.1', port=25, timeout=10, source_address=('localhost', 55666); print(smtp_obj); smtp_obj.close()"""
   - sudo python3 -c """import smtplib; smtplib.debuglevel = 3; smtp_obj = smtplib.SMTP(timeout=10); smtp_obj.connect(); print(smtp_obj); smtp_obj.close()"""
   - sudo python3 -c """import socket; print(socket.getfqdn()); print(socket.gethostbyname(socket.gethostname())); import smtplib; smtplib.debuglevel = 1; soc = smtplib.SMTP(timeout=5); soc.connect(host='localhost', port=25); print(soc); soc.close()"""
   - sudo ls -la /var/mail
