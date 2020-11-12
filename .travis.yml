@@ -31,7 +31,6 @@ script:
   - echo d | sudo mail -u mail
   - sudo python3 -m unittest unit/events/DefaultMailNotificationEventHandlerTest.py
   - sudo ls -la /var/mail
-  - sudo chown mail:mail /var/mail/mail
   - sleep 10
   - echo p | sudo mail -u mail
   - ./runUnittests.sh
