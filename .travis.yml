@@ -25,7 +25,7 @@ script:
   - sudo touch /var/mail/mail
   - sudo chown mail:mail /var/mail/mail
   - sudo ls -la /var/mail
-  - sudo chown mail:mail /var/spool/mail
+  - sudo chown mail:mail /var/mail
   - echo "test" | sudo sendmail mail@localhost
   - sudo ls -la /var/mail
   - echo d | sudo mail -u mail
@@ -34,7 +34,6 @@ script:
   - sudo chown mail:mail /var/mail/mail
   - sleep 10
   - echo p | sudo mail -u mail
-  - sudo rm /var/mail/mail
   - ./runUnittests.sh
   - ./runAMinerDemo.sh demo/AMiner/demo-config.py
   - ./runAMinerDemo.sh demo/AMiner/jsonConverterHandler-demo-config.py
