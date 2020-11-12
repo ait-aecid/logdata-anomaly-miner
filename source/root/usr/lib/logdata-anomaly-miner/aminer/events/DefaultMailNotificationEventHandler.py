@@ -149,7 +149,6 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
         except SMTPException as e:
             print(e)
             # here logging is needed, but cannot be implemented yet.
-            pass
         self.last_alert_time = trigger_time
         self.events_collected = 0
         self.current_message = ''
