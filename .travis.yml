@@ -27,7 +27,7 @@ script:
   - sudo ls -la /var/mail
   - sudo chown mail:mail /var/mail
   - echo "test" | sudo sendmail mail@localhost
-  - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP('localhost', port=25, local_hostname='mail', timeout=5); print(smtp_obj); smtp_obj.close()
+  - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP('localhost', port=25, local_hostname='mail', timeout=5); print(smtp_obj); smtp_obj.close()"""
   - sudo python3 -c """import socket; print(socket.getfqdn()); print(socket.gethostbyname(socket.gethostname())); import smtplib; soc = smtplib.SMTP(); soc.connect(); print(soc); soc.close()"""
   - sudo ls -la /var/mail
   - echo d | sudo mail -u mail
