@@ -28,10 +28,12 @@ script:
   - sudo chown mail:mail /var/mail/mail
   - sudo ls -la /var/mail
   - sudo chown mail:mail /var/mail
+  - sudo chmod 660 /var/mail/mail
   - echo "test" | sudo sendmail mail@localhost
-  - sudo python3 -c """import smtplib; smtplib.debuglevel = 1; smtp_obj = smtplib.SMTP('127.0.0.1', port=25, local_hostname='root', timeout=5); print(smtp_obj); smtp_obj.close()"""
-  - sudo python3 -c """import smtplib; smtplib.debuglevel = 1; smtp_obj = smtplib.SMTP('127.0.0.1', port=25, timeout=5); print(smtp_obj); smtp_obj.close()"""
-  - sudo python3 -c """import smtplib; smtplib.debuglevel = 1; smtp_obj = smtplib.SMTP(timeout=5); smtp_obj.connect(); print(smtp_obj); smtp_obj.close()"""
+  - sleep 10
+  - sudo python3 -c """import smtplib; smtplib.debuglevel = 3; smtp_obj = smtplib.SMTP('127.0.0.1', port=25, local_hostname='root', timeout=10); print(smtp_obj); smtp_obj.close()"""
+  - sudo python3 -c """import smtplib; smtplib.debuglevel = 3; smtp_obj = smtplib.SMTP('127.0.0.1', port=25, timeout=10); print(smtp_obj); smtp_obj.close()"""
+  - sudo python3 -c """import smtplib; smtplib.debuglevel = 3; smtp_obj = smtplib.SMTP(timeout=10); smtp_obj.connect(); print(smtp_obj); smtp_obj.close()"""
   - sudo python3 -c """import socket; print(socket.getfqdn()); print(socket.gethostbyname(socket.gethostname())); import smtplib; smtplib.debuglevel = 1; soc = smtplib.SMTP(timeout=5); soc.connect(); print(soc); soc.close()"""
   - sudo ls -la /var/mail
   - echo d | sudo mail -u mail
