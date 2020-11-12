@@ -15,7 +15,6 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
     """Unittests for the DefaultMailNotificationEventHandler."""
 
     __expected_string = '%s New value for pathes %s: %s\n%s: "%s" (%d lines)\n  %s'
-    mail_call = 'echo p | mail -u root'
     mail_call = 'echo p | mail -u mail'
 
     pid = b' pid='
