@@ -22,6 +22,7 @@ install:
   - sudo chmod +x runCoverageTests.sh
 
 script:
+  - sudo cat /etc/hosts
   - sudo touch /var/mail/mail
   - sudo chown mail:mail /var/mail/mail
   - sudo ls -la /var/mail
