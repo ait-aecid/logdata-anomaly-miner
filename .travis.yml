@@ -25,9 +25,9 @@ script:
   - sudo ls -la /usr/sbin/sendmail
   - sudo netstat -tulpn | grep LISTEN
   - netstat -lntp | grep 25
-  - echo "Subject: hello" | sudo sendmail mail@localhost
+  - echo -e "test" | sudo sendmail mail@localhost
   - sudo ls -la /var/mail
-  - touch /var/mail/mail
+  - sudo touch /var/mail/mail
   - sudo chown mail:mail /var/mail/mail
   - sudo python3 -m unittest unit/events/DefaultMailNotificationEventHandlerTest.py
   - sudo ls -la /var/mail
