@@ -24,6 +24,11 @@ install:
 script:
   - sudo netstat -tulpn | grep LISTEN
   - netstat -lntp | grep 25
+  - exim -bP | grep queue
+  - sudo python3 -m unittest unit/events/DefaultMailNotificationEventHandlerTest.py
+  - sleep 10
+  - echo p | sudo mail -u mail
+  - sudo rm /var/mail/mail
   - ./runUnittests.sh
   - ./runAMinerDemo.sh demo/AMiner/demo-config.py
   - ./runAMinerDemo.sh demo/AMiner/jsonConverterHandler-demo-config.py
