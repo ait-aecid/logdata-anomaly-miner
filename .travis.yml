@@ -13,7 +13,7 @@ install:
   - sudo apt-get update -y
   - sudo apt-get install -y ansible
   - sudo ansible-playbook -e "aminer_pkgrespath=/usr/lib/python3.6/site-packages aminer_pippath=/usr/lib/python3.6/site-packages" playbook.yml
-  - sudo apt-get install -y exim4 procps cpulimit mailutils
+  - sudo apt-get install -y sendmail-bin procps mailutils
   - sudo pip3 install coverage
   - cd aecid-testsuite
   - sudo chmod +x runUnittests.sh
@@ -29,6 +29,7 @@ script:
   - exim -bP | grep queue
   - sudo python3 -m unittest unit/events/DefaultMailNotificationEventHandlerTest.py
   - sudo ls -la /var/mail
+  - sudo chown mail:mail /var/mail/mail
   - sleep 10
   - echo p | sudo mail -u mail
   - sudo rm /var/mail/mail

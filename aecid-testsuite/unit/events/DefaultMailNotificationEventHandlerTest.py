@@ -1,7 +1,7 @@
 import unittest
 from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.FixedDataModelElement import FixedDataModelElement
-from time import time
+from time import time, sleep
 from aminer.input.LogAtom import LogAtom
 from aminer.parsing.ParserMatch import ParserMatch
 from aminer.events.DefaultMailNotificationEventHandler import DefaultMailNotificationEventHandler
@@ -16,6 +16,7 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
 
     __expected_string = '%s New value for pathes %s: %s\n%s: "%s" (%d lines)\n  %s'
     mail_call = 'echo p | mail -u mail'
+    mail_delete_call = 'echo d | mail -u mail'
 
     pid = b' pid='
     test = 'Test.%s'
@@ -52,8 +53,11 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
         default_mail_notification_event_handler.receive_event(
             self.test % self.__class__.__name__, 'New value for pathes %s, %s: %s' % (
                 'match/s1', 'match/s2', repr(match_element.match_object)), [log_atom.raw_data, log_atom.raw_data], None, log_atom, self)
+        sleep(0.5)
         # skipcq: PYL-W1510, BAN-B602
         result = subprocess.run(self.mail_call, shell=True, stdout=subprocess.PIPE)
+        # skipcq: PYL-W1510, BAN-B602
+        subprocess.run(self.mail_delete_call, shell=True, stdout=subprocess.PIPE)
 
         self.assertTrue(self.__expected_string % (
             datetime.fromtimestamp(t - 600).strftime(self.datetime_format_string), "" + match_element.get_path() + ", " +
@@ -108,8 +112,11 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
         default_mail_notification_event_handler.next_alert_time = t
         default_mail_notification_event_handler.do_timer(t)
 
+        sleep(0.5)
         # skipcq: PYL-W1510, BAN-B602
         result = subprocess.run(self.mail_call, shell=True, stdout=subprocess.PIPE)
+        # skipcq: PYL-W1510, BAN-B602
+        subprocess.run(self.mail_delete_call, shell=True, stdout=subprocess.PIPE)
         self.assertTrue(self.__expected_string % (
             datetime.fromtimestamp(t).strftime(self.datetime_format_string), match_element.get_path(), match_element.get_match_object(),
             self.__class__.__name__, description, 1, match_element.get_match_string().decode() + "\n\n") in
