@@ -141,10 +141,11 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
             subject_text += ' in the last %d seconds' % (trigger_time - self.last_alert_time)
         message = _message_str % (self.sender_address, self.recipient_address, subject_text, self.current_message)
         try:
-            smtp_obj = SMTP('127.0.0.1', port=25, local_hostname=self.recipient_address.split('@')[0])
+            smtp_obj = SMTP('127.0.0.1', port=25, local_hostname=self.recipient_address.split('@')[0], timeout=5)
             smtp_obj.sendmail(self.sender_address, self.recipient_address, message)
             smtp_obj.close()
-        except SMTPException:  # as e:
+        except SMTPException as e:
+            print(e)
             # here logging is needed, but cannot be implemented yet.
             pass
         self.last_alert_time = trigger_time
