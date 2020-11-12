@@ -24,6 +24,7 @@ install:
 script:
   - sudo netstat -tulpn | grep LISTEN
   - netstat -lntp | grep 25
+  - sudo chown mail:mail /var/mail/mail
   - sudo ls -la /var/mail
   - exim -bP | grep queue
   - sudo python3 -m unittest unit/events/DefaultMailNotificationEventHandlerTest.py
