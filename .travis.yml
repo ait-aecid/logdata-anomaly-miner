@@ -22,11 +22,13 @@ install:
   - sudo chmod +x runCoverageTests.sh
 
 script:
+  - sudo ls -la /usr/sbin/sendmail
   - sudo netstat -tulpn | grep LISTEN
   - netstat -lntp | grep 25
-  - sudo chown mail:mail /var/mail/mail
+  - echo "Subject: hello" | sudo sendmail mail@localhost
   - sudo ls -la /var/mail
-  - exim -bP | grep queue
+  - touch /var/mail/mail
+  - sudo chown mail:mail /var/mail/mail
   - sudo python3 -m unittest unit/events/DefaultMailNotificationEventHandlerTest.py
   - sudo ls -la /var/mail
   - sudo chown mail:mail /var/mail/mail
