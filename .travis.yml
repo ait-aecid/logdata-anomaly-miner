@@ -22,6 +22,9 @@ install:
   - sudo chmod +x runCoverageTests.sh
 
 script:
+  - netstat -lntp | grep 25
+  - python3 -m smtpd -n -c DebuggingServer localhost:25
+  - netstat -lntp | grep 25
   - ./runUnittests.sh
   - ./runAMinerDemo.sh demo/AMiner/demo-config.py
   - ./runAMinerDemo.sh demo/AMiner/jsonConverterHandler-demo-config.py
