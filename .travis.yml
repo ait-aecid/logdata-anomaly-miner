@@ -28,12 +28,14 @@ script:
   - sudo ls -la /var/mail
   - sudo ls -la /var/spool/
   - sudo ls -la /var/spool/mail
+  - sudo chown mail:mail /var/spool/mail
   - echo "test" | sudo sendmail mail@localhost
   - sudo ls -la /var/mail
   - sudo ls -la /var/spool/
   - sudo ls -la /var/spool/mail
   - sudo touch /var/mail/mail
   - sudo chown mail:mail /var/mail/mail
+  - echo d | sudo mail -u mail
   - sudo python3 -m unittest unit/events/DefaultMailNotificationEventHandlerTest.py
   - sudo ls -la /var/mail
   - sudo chown mail:mail /var/mail/mail
