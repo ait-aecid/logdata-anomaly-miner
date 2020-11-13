@@ -53,10 +53,19 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         PersistenceUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
-        if persistence_data is None:
-            self.expected_values_dict = {}
-        else:
-            self.expected_values_dict = persistence_data
+        self.expected_values_dict = {}
+        for key in persistence_data:
+            value = persistence_data[key]
+            if self.target_path is not None:
+                if value[3] != self.target_path:
+                    continue
+            elif self.target_path_list is not None:
+                if value[3] not in self.target_path_list:
+                    continue
+            if value[1] != default_interval:
+                value[1] = default_interval
+                value[2] = value[0] + default_interval
+            self.expected_values_dict[key] = value
         self.analysis_string = 'Analysis.%s'
 
     def receive_atom(self, log_atom):
@@ -70,6 +79,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         value = self.get_channel_key(log_atom)
         if value is None:
             return False
+        target_path, value = value
         timestamp = log_atom.get_timestamp()
         if timestamp is None:
             timestamp = time.time()
@@ -84,7 +94,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                 self.next_check_timestamp = min(self.next_check_timestamp, timestamp + detector_info[1])
 
         elif self.auto_include_flag:
-            self.expected_values_dict[value] = [timestamp, self.default_interval, 0]
+            self.expected_values_dict[value] = [timestamp, self.default_interval, 0, target_path]
             self.next_check_timestamp = min(self.next_check_timestamp, timestamp + self.default_interval)
 
         # Always enforce persistence syncs from time to time, the timestamps in the records change even when no new hosts are added.
@@ -102,7 +112,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
             affected_log_atom_values = match_element.match_object.decode()
         else:
             affected_log_atom_values = match_element.match_object
-        return str(affected_log_atom_values)
+        return self.target_path, str(affected_log_atom_values)
 
     def check_timeouts(self, timestamp, log_atom):
         """Check if there was any timeout on a channel, thus triggering event dispatching."""
@@ -111,8 +121,8 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         if self.last_seen_timestamp > self.next_check_timestamp:
             missing_value_list = []
             # Start with a large recheck interval. It will be lowered if any of the expectation intervals is below that.
-            if not self.next_check_timestamp:
-                self.next_check_timestamp = self.last_seen_timestamp + 86400
+            if self.next_check_timestamp == 0:
+                self.next_check_timestamp = self.last_seen_timestamp + self.realert_interval
             for value, detector_info in self.expected_values_dict.items():
                 value_overdue_time = int(self.last_seen_timestamp - detector_info[0] - detector_info[1])
                 if detector_info[2] != 0:
@@ -181,9 +191,9 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         anomaly_event_handler.receive_event(self.analysis_string % self.__class__.__name__, 'Interval too large between values',
                                             message_part, event_data, log_atom, self)
 
-    def set_check_value(self, value, interval):
+    def set_check_value(self, value, interval, target_path):
         """Add or overwrite a value to be monitored by the detector."""
-        self.expected_values_dict[value] = [self.last_seen_timestamp, interval, 0]
+        self.expected_values_dict[value] = [self.last_seen_timestamp, interval, 0, target_path]
         self.next_check_timestamp = 0
         # Explicitely trigger a persistence sync to avoid staying in unsynced state too long when no new received atoms trigger it. But do
         # not sync immediately, that would make bulk calls to this method quite inefficient.
@@ -249,9 +259,9 @@ class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param target_path to extract a source identification value from each logatom.
         """
+        self.target_path_list = target_path_list
         super(MissingMatchPathListValueDetector, self).__init__(aminer_config, None, anomaly_event_handlers, persistence_id,
                                                                 auto_include_flag, default_interval, realert_interval, output_log_line)
-        self.target_path_list = target_path_list
 
     def get_channel_key(self, log_atom):
         """Get the key identifying the channel this log_atom is coming from."""
@@ -263,7 +273,7 @@ class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
                 affected_log_atom_values = match_element.match_object.decode()
             else:
                 affected_log_atom_values = match_element.match_object
-            return str(affected_log_atom_values)
+            return target_path, str(affected_log_atom_values)
         return None
 
     def send_event_to_handlers(self, anomaly_event_handler, event_data, log_atom, message_part):
