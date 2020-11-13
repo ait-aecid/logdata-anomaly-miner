@@ -141,8 +141,6 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
             subject_text += ' in the last %d seconds' % (trigger_time - self.last_alert_time)
         message = _message_str % (self.sender_address, self.recipient_address, subject_text, self.current_message)
         try:
-            import smtplib
-            smtplib.debuglevel = 3
             smtp_obj = SMTP('127.0.0.1', port=25, timeout=5)
             smtp_obj.sendmail(self.sender_address, self.recipient_address, message)
             smtp_obj.quit()
