@@ -83,7 +83,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         timestamp = log_atom.get_timestamp()
         if timestamp is None:
             timestamp = time.time()
-        detector_info = self.expected_values_dict.get(value, None)
+        detector_info = self.expected_values_dict.get(value)
         if detector_info is not None:
             # Just update the last seen value and switch from non-reporting error state to normal state.
             detector_info[0] = timestamp
@@ -105,7 +105,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
 
     def get_channel_key(self, log_atom):
         """Get the key identifying the channel this log_atom is coming from."""
-        match_element = log_atom.parser_match.get_match_dictionary().get(self.target_path, None)
+        match_element = log_atom.parser_match.get_match_dictionary().get(self.target_path)
         if match_element is None:
             return None
         if isinstance(match_element.match_object, bytes):
@@ -237,11 +237,11 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         new_interval = allowlisting_data
         if new_interval == -1:
             new_interval = self.default_interval
-        for key_name, in event_data:
+        for key_name, target_path in event_data:
             if new_interval < 0:
                 self.remove_check_value(key_name)
             else:
-                self.set_check_value(key_name, new_interval)
+                self.set_check_value(key_name, new_interval, target_path)
         return 'Updated %d entries' % len(event_data)
 
 
@@ -266,7 +266,7 @@ class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
     def get_channel_key(self, log_atom):
         """Get the key identifying the channel this log_atom is coming from."""
         for target_path in self.target_path_list:
-            match_element = log_atom.parser_match.get_match_dictionary().get(target_path, None)
+            match_element = log_atom.parser_match.get_match_dictionary().get(target_path)
             if match_element is None:
                 continue
             if isinstance(match_element.match_object, bytes):
