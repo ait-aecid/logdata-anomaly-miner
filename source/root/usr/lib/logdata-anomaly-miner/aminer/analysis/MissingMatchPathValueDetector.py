@@ -54,18 +54,19 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         self.expected_values_dict = {}
-        for key in persistence_data:
-            value = persistence_data[key]
-            if self.target_path is not None:
-                if value[3] != self.target_path:
-                    continue
-            elif self.target_path_list is not None:
-                if value[3] not in self.target_path_list:
-                    continue
-            if value[1] != default_interval:
-                value[1] = default_interval
-                value[2] = value[0] + default_interval
-            self.expected_values_dict[key] = value
+        if persistence_data is not None:
+            for key in persistence_data:
+                value = persistence_data[key]
+                if self.target_path is not None:
+                    if value[3] != self.target_path:
+                        continue
+                elif self.target_path_list is not None:
+                    if value[3] not in self.target_path_list:
+                        continue
+                if value[1] != default_interval:
+                    value[1] = default_interval
+                    value[2] = value[0] + default_interval
+                self.expected_values_dict[key] = value
         self.analysis_string = 'Analysis.%s'
 
     def receive_atom(self, log_atom):
