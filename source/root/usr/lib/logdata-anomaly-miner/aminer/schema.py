@@ -150,7 +150,8 @@
                     'histogram_defs': {'type': 'list', 'schema': {'type': 'list', 'schema': {'type': 'string'}}},
                     'bin_definition': {'type': 'string'},
                     'tuple_transformation_function': {'type': 'string'},
-                    'value_list': {'type': 'list', 'schema': {'type': ['boolean', 'float', 'integer', 'string']}},
+                    'value_list': {
+                        'type': 'list', 'schema': {'type': ['boolean', 'float', 'integer', 'string']}, 'nullable': True, 'default': None},
                     'timestamp_path': {'type': 'string'},
                     'min_bin_elements': {'type': 'integer'},
                     'min_bin_time': {'type': 'integer'},
