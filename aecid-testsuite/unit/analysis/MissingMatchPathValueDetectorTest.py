@@ -117,8 +117,8 @@ class MissingMatchPathValueDetectorTest(TestBase):
         other_missing_match_path_value_detector = MissingMatchPathValueDetector(self.aminer_config, match_element_fixed_dme.get_path(), [
             self.stream_printer_event_handler], 'Default', True, self.__default_interval, self.__realert_interval)
         self.analysis_context.register_component(other_missing_match_path_value_detector, description + "2")
-        other_missing_match_path_value_detector.set_check_value(other_missing_match_path_value_detector.get_channel_key(log_atom_fixed_dme),
-                                                                self.__default_interval - past_time, match_element_fixed_dme.get_path())
+        other_missing_match_path_value_detector.set_check_value(other_missing_match_path_value_detector.get_channel_key(
+            log_atom_fixed_dme)[1], self.__default_interval - past_time, match_element_fixed_dme.get_path())
 
         log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme), round(time.time()) + past_time,
                                      other_missing_match_path_value_detector)
@@ -267,7 +267,7 @@ class MissingMatchPathValueDetectorTest(TestBase):
             'Default', True, self.__default_interval, self.__realert_interval)
         self.analysis_context.register_component(other_missing_match_path_list_value_detector, description + "2")
         other_missing_match_path_list_value_detector.set_check_value(other_missing_match_path_list_value_detector.get_channel_key(
-            log_atom_fixed_dme), self.__default_interval - past_time, match_element_fixed_dme.get_path())
+            log_atom_fixed_dme)[1], self.__default_interval - past_time, match_element_fixed_dme.get_path())
 
         log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme), round(time.time()) + past_time,
                                      other_missing_match_path_list_value_detector)
