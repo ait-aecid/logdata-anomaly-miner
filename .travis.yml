@@ -35,10 +35,10 @@ script:
   - sudo pip3 install psutil
   - sudo python3 -c """import psutil; print(psutil.net_connections())"""
   - sudo python3 -c """import socket; a_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM); location = ('127.0.0.1', 25); result_of_check = a_socket.connect_ex(location); print(result_of_check); a_socket.close()"""
-  - sudo python3 -c """import smtplib; smtplib.debuglevel = 3; smtp_obj = smtplib.SMTP('127.0.0.1', port=25, local_hostname='localhost', timeout=10); print(smtp_obj); smtp_obj.quit()"""
-  - sudo python3 -c """import smtplib; smtplib.debuglevel = 3; smtp_obj = smtplib.SMTP('127.0.0.1', port=25, timeout=10); print(smtp_obj); smtp_obj.quit()"""
-  - sudo python3 -c """import smtplib; smtplib.debuglevel = 3; smtp_obj = smtplib.SMTP(timeout=10); smtp_obj.connect(); print(smtp_obj); smtp_obj.quit()"""
-  - sudo python3 -c """import socket; print(socket.getfqdn()); print(socket.gethostbyname(socket.gethostname())); import smtplib; smtplib.debuglevel = 3; soc = smtplib.SMTP(timeout=5); soc.connect(host='localhost', port=25); print(soc); soc.quit()"""
+  - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP('127.0.0.1', port=25, local_hostname='localhost', timeout=10); print(smtp_obj); smtp_obj.quit()"""
+  - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP('127.0.0.1', port=25, timeout=10); print(smtp_obj); smtp_obj.quit()"""
+  - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP(timeout=10); smtp_obj.connect(); print(smtp_obj); smtp_obj.quit()"""
+  - sudo python3 -c """import socket; print(socket.getfqdn()); print(socket.gethostbyname(socket.gethostname())); import smtplib; soc = smtplib.SMTP(timeout=5); soc.debuglevel = 3; s = soc._get_socket('127.0.0.1', 25, 5); print(s); s.close(); print(socket.create_connection(('127.0.0.1', 25), 5)); soc.connect(host='localhost', port=25); print(soc); soc.quit()"""
   - sudo ls -la /var/mail
   - echo d | sudo mail -u mail
   - sudo python3 -m unittest unit/events/DefaultMailNotificationEventHandlerTest.py
