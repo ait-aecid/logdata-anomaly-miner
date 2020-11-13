@@ -32,7 +32,7 @@ script:
   - sudo chown mail:mail /var/mail
   - sudo chmod 660 /var/mail/mail
   - echo "test" | sudo sendmail mail@localhost
-  - sudo python3 -c """a_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM); location = ('127.0.0.1', 25); result_of_check = a_socket.connect_ex(location); print(result_of_check); a_socket.close()"""
+  - sudo python3 -c """import socket; a_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM); location = ('127.0.0.1', 25); result_of_check = a_socket.connect_ex(location); print(result_of_check); a_socket.close()"""
   - sudo python3 -c """import smtplib; smtplib.debuglevel = 3; smtp_obj = smtplib.SMTP('127.0.0.1', port=25, local_hostname='localhost', timeout=10); print(smtp_obj); smtp_obj.quit()"""
   - sudo python3 -c """import smtplib; smtplib.debuglevel = 3; smtp_obj = smtplib.SMTP('127.0.0.1', port=25, timeout=10; print(smtp_obj); smtp_obj.quit()"""
   - sudo python3 -c """import smtplib; smtplib.debuglevel = 3; smtp_obj = smtplib.SMTP(timeout=10); smtp_obj.connect(); print(smtp_obj); smtp_obj.quit()"""
