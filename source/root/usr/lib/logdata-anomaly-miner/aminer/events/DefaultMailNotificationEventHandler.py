@@ -145,7 +145,7 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
             smtplib.debuglevel = 3
             smtp_obj = SMTP('127.0.0.1', port=25, timeout=5)
             smtp_obj.sendmail(self.sender_address, self.recipient_address, message)
-            smtp_obj.close()
+            smtp_obj.quit()
         except SMTPException as e:
             print(e)
             # here logging is needed, but cannot be implemented yet.
