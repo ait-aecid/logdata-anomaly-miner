@@ -12,7 +12,9 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import json
+import logging
 
+from aminer import AMinerConfig
 from aminer.util import encode_byte_string_as_string, decode_string_as_byte_string
 
 
@@ -44,7 +46,9 @@ def encode_object(term):
     elif isinstance(term, (bool, int, float)) or term is None:
         encoded_object = term
     else:
-        raise Exception('Unencodeable object %s' % type(term))
+        msg = 'Unencodeable object %s' % type(term)
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+        raise Exception(msg)
 
     return encoded_object
 

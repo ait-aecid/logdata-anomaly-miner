@@ -43,9 +43,11 @@ class AllowlistViolationDetector(AtomHandlerInterface):
         @param log_atom atom with parsed data to check
         @return True when logAtom is allowlisted, False otherwise.
         """
+        self.log_total += 1
         event_data = {}
         for rule in self.allowlist_rules:
             if rule.match(log_atom):
+                self.log_success += 1
                 return True
         analysis_component = {'AffectedLogAtomPathes': list(log_atom.parser_match.get_match_dictionary()),
                               'AffectedLogAtomValues': [log_atom.raw_data.decode()]}
@@ -77,3 +79,12 @@ class AllowlistViolationDetector(AtomHandlerInterface):
             listener.receive_event('Analysis.%s' % self.__class__.__name__, 'No allowlisting for current atom', sorted_log_lines,
                                    event_data, log_atom, self)
         return False
+
+    def log_statistics(self, component_name):
+        """
+        Log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
+        @param component_name the name of the component which is printed in the log line.
+        """
+        super().log_statistics(component_name)
+        for i, rule in enumerate(self.allowlist_rules):
+            rule.log_statistics(component_name + '.' + rule.__class__.__name__ + str(i))

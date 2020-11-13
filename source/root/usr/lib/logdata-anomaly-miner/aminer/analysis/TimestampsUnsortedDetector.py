@@ -41,6 +41,7 @@ class TimestampsUnsortedDetector(AtomHandlerInterface, EventSourceInterface):
         @return True if this handler was really able to handle and process the match. Depending on this information, the caller
         may decide if it makes sense passing the parsed atom also to other handlers.
         """
+        self.log_total += 1
         if log_atom.get_timestamp() is None:
             return False
         if log_atom.get_timestamp() < self.last_timestamp:
@@ -63,6 +64,7 @@ class TimestampsUnsortedDetector(AtomHandlerInterface, EventSourceInterface):
                 import sys
                 sys.exit(1)
         self.last_timestamp = log_atom.get_timestamp()
+        self.log_success += 1
         return True
 
     def allowlist_event(self, event_type, sorted_log_lines, event_data, allowlisting_data):

@@ -15,6 +15,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import time
 import copy
+import logging
 
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
@@ -100,6 +101,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def receive_atom(self, log_atom):
         """Receives an parsed atom and keeps track of the event types and the values of the variables of them."""
+        self.log_total += 1
         # Get the current time
         if self.track_time_for_TSA:
             if log_atom.atom_time is not None:
@@ -264,7 +266,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             # Appends the values to the event type
             self.append_values(log_atom, current_index)
         self.num_eventlines[current_index] += 1
-
+        self.log_success += 1
         return True
 
     def get_time_trigger_class(self):
@@ -300,10 +302,13 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             following_module.do_persist()
 
         self.next_persist_time = time.time() + 600.0
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def add_following_modules(self, following_module):
         """Add the given Module to the following module list."""
         self.following_modules.append(following_module)
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug(
+            '%s added following module %s.', self.__class__.__name__, following_module.__class__.__name__)
 
     def init_values(self, current_index):
         """Initialize the variable_key_list and the list for the values."""
