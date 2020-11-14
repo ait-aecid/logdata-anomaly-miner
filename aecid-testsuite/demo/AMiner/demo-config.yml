@@ -21,6 +21,12 @@ MailAlerting.MaxEventsPerMessage: 1000
 
 LogPrefix: 'Original log line: '
 
+Log.StatisticsPeriod: 3600
+
+Log.StatisticsLevel: 1
+
+Log.DebugLevel: 1
+
 Parser:
        - id: space
          type: FixedDataModelElement
@@ -847,7 +853,6 @@ Analysis:
         - type: ParserCount
           id: ParserCount
           report_interval: 10
-          reset_after_report_flag: False
         - type: EventTypeDetector
           id: EventTypeDetector
         - type: VariableTypeDetector

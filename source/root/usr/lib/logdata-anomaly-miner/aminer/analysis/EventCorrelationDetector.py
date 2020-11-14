@@ -7,14 +7,26 @@ current_time+queue_delta_time). If B chronologically occurs before A, create the
 must be observed within currentTime-queueDeltaTime).
 3) Observe for a long time (max_observations) whether the hypothesis holds.
 4) If the hypothesis holds, transform it to a rule. Otherwise, discard the hypothesis.
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with
+this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 from collections import deque
 import random
 import math
 import time
+import logging
 
 from aminer import AMinerConfig
+from aminer.AMinerConfig import STAT_LEVEL, STAT_LOG_NAME
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input import AtomHandlerInterface
 from aminer.util import PersistenceUtil
@@ -100,6 +112,13 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         self.aminer_config = aminer_config
         self.output_log_line = output_log_line
 
+        self.log_success = 0
+        self.log_total = 0
+        self.log_forward_rules_learned = 0
+        self.log_back_rules_learned = 0
+        self.log_new_forward_rules = []
+        self.log_new_back_rules = []
+
         PersistenceUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, 'EventCorrelationDetector', persistence_id)
         self.persistence_id = persistence_id
@@ -132,6 +151,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                         self.forward_rules_inv[implied_event].append(rule)
                     else:
                         self.forward_rules_inv[implied_event] = [rule]
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     # skipcq: PYL-R1710
     def get_min_eval_true(self, max_observations, p0, alpha):
@@ -161,6 +181,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
+        self.log_total += 1
         timestamp = log_atom.get_timestamp()
         if timestamp is None:
             log_atom.atom_time = time.time()
@@ -381,8 +402,12 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                             # Add hypothesis to rules.
                             if implication.trigger_event in self.forward_rules:
                                 self.forward_rules[implication.trigger_event].append(implication)
+                                self.log_forward_rules_learned += 1
+                                self.log_new_forward_rules.append(implication)
                             else:
                                 self.forward_rules[implication.trigger_event] = [implication]
+                                self.log_forward_rules_learned += 1
+                                self.log_new_forward_rules.append(implication)
                             if implication.implied_event in self.forward_rules_inv:
                                 self.forward_rules_inv[implication.implied_event].append(implication)
                             else:
@@ -459,8 +484,12 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                                 # Add hypothesis to rules.
                                 if implication.trigger_event in self.back_rules:
                                     self.back_rules[implication.trigger_event].append(implication)
+                                    self.log_back_rules_learned += 1
+                                    self.log_new_back_rules.append(implication)
                                 else:
                                     self.back_rules[implication.trigger_event] = [implication]
+                                    self.log_back_rules_learned += 1
+                                    self.log_new_back_rules.append(implication)
                                 if implication.implied_event in self.back_rules_inv:
                                     self.back_rules_inv[implication.implied_event].append(implication)
                                 else:
@@ -632,6 +661,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
             if len(self.hypothesis_candidates) < self.candidates_size:
                 if random.uniform(0.0, 1.0) < self.generation_probability:
                     self.hypothesis_candidates.append((log_event, log_atom.atom_time))
+        self.log_success += 1
 
     def get_time_trigger_class(self):
         """
@@ -647,18 +677,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
 
         delta = self.next_persist_time - trigger_time
         if delta < 0:
-            known_path_set = set()
-            for event_a in self.back_rules:
-                for implication in self.back_rules[event_a]:
-                    known_path_set.add(
-                        ('back', tuple(event_a), tuple(implication.implied_event), implication.max_observations, implication.min_eval_true))
-            for event_a in self.forward_rules:
-                for implication in self.forward_rules[event_a]:
-                    known_path_set.add(
-                        ('forward', tuple(event_a), tuple(implication.implied_event), implication.max_observations,
-                         implication.min_eval_true))
-            PersistenceUtil.store_json(self.persistence_file_name, list(known_path_set))
-            self.next_persist_time = None
+            self.do_persist()
             delta = 600
         return delta
 
@@ -675,6 +694,29 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     ('forward', tuple(event_a), tuple(implication.implied_event), implication.max_observations, implication.min_eval_true))
         PersistenceUtil.store_json(self.persistence_file_name, list(known_path_set))
         self.next_persist_time = None
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+
+    def log_statistics(self, component_name):
+        """
+        Log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
+        @param component_name the name of the component which is printed in the log line.
+        """
+        if STAT_LEVEL == 1:
+            logging.getLogger(STAT_LOG_NAME).info(
+                "'%s' processed %d out of %d log atoms successfully and learned %d new forward rules and %d new back rules in the last 60 "
+                "minutes.", component_name, self.log_success, self.log_total, self.log_forward_rules_learned, self.log_back_rules_learned)
+        elif STAT_LEVEL == 2:
+            logging.getLogger(STAT_LOG_NAME).info(
+                "'%s' processed %d out of %d log atoms successfully and learned %d new forward rules and %d new back rules in the last "
+                "60 minutes. Following new forward rules were learned: %d. Following new back rules were learned: %d", component_name,
+                self.log_success, self.log_total, self.log_forward_rules_learned, self.log_back_rules_learned,
+                self.log_forward_rules_learned, self.log_back_rules_learned)
+        self.log_success = 0
+        self.log_total = 0
+        self.log_forward_rules_learned = 0
+        self.log_back_rules_learned = 0
+        self.log_new_forward_rules = []
+        self.log_new_back_rules = []
 
 
 class Implication:

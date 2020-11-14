@@ -1,4 +1,16 @@
-"""This module defines a filter for parsed paths and values."""
+"""This module defines a filter for parsed paths and values.
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with
+this program. If not, see <http://www.gnu.org/licenses/>.
+
+"""
 
 import os
 
@@ -20,6 +32,7 @@ class MatchFilter(AtomHandlerInterface):
 
     def receive_atom(self, log_atom):
         """Forward all log atoms that involve specified path and optionally value."""
+        self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
         for target_path in self.target_path_list:
             match = match_dict.get(target_path, None)
@@ -52,3 +65,4 @@ class MatchFilter(AtomHandlerInterface):
             for listener in self.anomaly_event_handlers:
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Log Atom Filtered',
                                        sorted_log_lines, event_data, log_atom, self)
+            self.log_success += 1

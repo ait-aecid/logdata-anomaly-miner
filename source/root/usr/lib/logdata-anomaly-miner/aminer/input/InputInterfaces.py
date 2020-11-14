@@ -1,8 +1,21 @@
 """
 This file contains interface definition useful implemented by classes in this directory and for use from code outside this directory.
 All classes are defined in separate files, only the namespace references are added here to simplify the code.
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with
+this program. If not, see <http://www.gnu.org/licenses/>.
+
 """
 import abc
+import logging
+from aminer.AMinerConfig import STAT_LEVEL, STAT_LOG_NAME
 
 
 class AtomizerFactory(metaclass=abc.ABCMeta):
@@ -47,6 +60,9 @@ class StreamAtomizer(metaclass=abc.ABCMeta):
 class AtomHandlerInterface(metaclass=abc.ABCMeta):
     """This is the common interface of all handlers suitable for receiving log atoms."""
 
+    log_success = 0
+    log_total = 0
+
     @abc.abstractmethod
     def receive_atom(self, log_atom):
         """
@@ -56,3 +72,14 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         may decide if it makes sense passing the atom also to other handlers or to retry later. This behaviour has to be documented
         at each source implementation sending LogAtoms.
         """
+
+    def log_statistics(self, component_name):
+        """
+        Log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
+        @param component_name the name of the component which is printed in the log line.
+        """
+        if STAT_LEVEL > 0:
+            logging.getLogger(STAT_LOG_NAME).info("'%s' processed %d out of %d log atoms successfully in the last 60"
+                                                  " minutes.", component_name, self.log_success, self.log_total)
+        self.log_success = 0
+        self.log_total = 0

@@ -12,7 +12,8 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
-
+import logging
+from aminer import AMinerConfig
 from aminer.parsing import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
 
@@ -45,7 +46,9 @@ class DecimalFloatValueModelElement(ModelElementInterface):
         elif value_sign_type == DecimalFloatValueModelElement.SIGN_TYPE_MANDATORY:
             self.start_characters = b'+-'
         else:
-            raise Exception('Invalid valueSignType "%s"' % value_sign_type)
+            msg = 'Invalid valueSignType "%s"' % value_sign_type
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
 
         self.pad_characters = b''
         if value_pad_type == DecimalFloatValueModelElement.PAD_TYPE_NONE:
@@ -55,12 +58,16 @@ class DecimalFloatValueModelElement(ModelElementInterface):
         elif value_pad_type == DecimalFloatValueModelElement.PAD_TYPE_BLANK:
             self.pad_characters = b' '
         else:
-            raise Exception('Invalid valuePadType "%s"' % value_sign_type)
+            msg = 'Invalid valuePadType "%s"' % value_sign_type
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         self.value_pad_type = value_pad_type
 
         if exponent_type not in [DecimalFloatValueModelElement.EXP_TYPE_NONE, DecimalFloatValueModelElement.EXP_TYPE_OPTIONAL,
                                  DecimalFloatValueModelElement.EXP_TYPE_MANDATORY]:
-            raise Exception('Invalid exponentType "%s"' % exponent_type)
+            msg = 'Invalid exponentType "%s"' % exponent_type
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         self.exponentType = exponent_type
 
     def get_id(self):

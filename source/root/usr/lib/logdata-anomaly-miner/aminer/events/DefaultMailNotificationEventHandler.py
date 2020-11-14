@@ -20,7 +20,9 @@ import shlex
 import sys
 import time
 import re
+import logging
 
+from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.events import EventHandlerInterface
@@ -51,11 +53,15 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
         self.recipient_address = shlex.quote(
             aminer_config.config_properties.get(DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS))
         if self.recipient_address is None:
-            raise Exception('Cannot create e-mail notification listener without target address')
+            msg = 'Cannot create e-mail notification listener without target address'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         self.sender_address = shlex.quote(
             aminer_config.config_properties.get(DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_FROM_ADDRESS))
         if not is_email.match(self.recipient_address) or not is_email.match(self.sender_address):
-            raise Exception('MailAlerting.TargetAddress and MailAlerting.FromAddress must be email addresses!')
+            msg = 'MailAlerting.TargetAddress and MailAlerting.FromAddress must be email addresses!'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
 
         self.subject_prefix = shlex.quote(
             aminer_config.config_properties.get(DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_SUBJECT_PREFIX, 'AMiner Alerts:'))
@@ -78,7 +84,9 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
         # Locate the sendmail binary immediately at startup to avoid delayed errors due to misconfiguration.
         self.sendmail_binary_path = '/usr/sbin/sendmail'
         if not os.path.exists(self.sendmail_binary_path):
-            raise Exception('sendmail binary not found')
+            msg = 'sendmail binary not found'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         self.running_sendmail_processes = []
 
     def receive_event(self, event_type, event_message, sorted_log_lines, event_data, log_atom, event_source):
@@ -139,7 +147,9 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
                     running_processes.append(process)
                     continue
                 if process.returncode != 0:
-                    print('WARNING: Sending mail terminated with error %d' % process.returncode, file=sys.stderr)
+                    msg = 'Sending mail terminated with error %d' % process.returncode
+                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
+                    print('WARNING: ' + msg, file=sys.stderr)
             self.running_sendmail_processes = running_processes
 
         if (self.next_alert_time != 0) and (trigger_time >= self.next_alert_time):
@@ -181,3 +191,4 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
         self.events_collected = 0
         self.current_message = ''
         self.next_alert_time = 0
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s sent notification.', self.__class__.__name__)
