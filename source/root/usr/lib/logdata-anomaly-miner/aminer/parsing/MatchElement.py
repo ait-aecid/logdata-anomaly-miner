@@ -12,6 +12,9 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
+import logging
+from aminer import AMinerConfig
+
 
 class MatchElement:
     """This class allows storage and handling of data related to a match found by a model element."""
@@ -25,7 +28,9 @@ class MatchElement:
         numbers or IP addresses.
         """
         if (not path) and children:
-            raise Exception("Anonymous match may not have children")
+            msg = "Anonymous match may not have children"
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         self.path = path
         self.match_string = match_string
         self.match_object = match_object

@@ -42,9 +42,11 @@ __website__ = "https://aecid.ait.ac.at"
 __license__ = "GPLv3"
 __maintainer__ = "Markus Wurzenberger"
 __status__ = "Production"
-__version__ = "2.0.1"
+__version__ = "2.1.0"
 
 import sys
+import logging
+import shutil
 
 # As site packages are not included, define from where we need to execute code before loading it.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
@@ -101,7 +103,11 @@ def print_help(program_name, version=False):
     print("\nusage: %s [options]" % program_name)
     print("options:")
     print("  -c, --Config <config-file>          \tpath to the config-file")
-    print("  -d, --Daemon                        \trun as a daemon process")
+    print("  -D  --Daemon                        \trun as a daemon process")
+    print("  -s  --Stat <stat-level>             \tset the stat level. Possible stat-levels are 0 for no statistics, 1 for normal statistic"
+          " level and 2 or v for vebose statistics.")
+    print("  -d  --Debug <debug-level>           \tset the debug level. Possible debug-levels are 0 for no debugging, 1 for normal output"
+          " (INFO and above), 2 or v for printing all debug information.")
     print("  -r, --RunAnalysis                   \tenable/disable analysis")
     print("  -R, --Remove <persistence-directory>\tremoves a specific persistence directory")
     print("  -C, --Clear                         \tremoves all persistence directories")
@@ -114,6 +120,8 @@ def run_analysis_child(aminer_config, program_name):
     """Run the Analysis Child."""
     from aminer import AMinerConfig
     # Verify existance and ownership of persistence directory.
+    logging.getLogger(AMinerConfig.REMOTE_CONTROL_LOG_NAME).info('aminer started.')
+    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info('aminer started.')
     persistence_dir_name = aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
     from aminer.util import SecureOSFunctions
     print('WARNING: SECURITY: Open should use O_PATH, but not yet available in python', file=sys.stderr)
@@ -142,6 +150,58 @@ def run_analysis_child(aminer_config, program_name):
     sys.exit(1)
 
 
+def initialize_loggers(aminer_config, aminer_user, aminer_grp):
+    """Initialize all loggers."""
+    from aminer import AMinerConfig
+    datefmt = '%d/%b/%Y:%H:%M:%S %z'
+
+    persistence_dir = aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
+    rc_logger = logging.getLogger(AMinerConfig.REMOTE_CONTROL_LOG_NAME)
+    rc_logger.setLevel(logging.DEBUG)
+    remote_control_log_file = aminer_config.config_properties.get(
+        AMinerConfig.KEY_REMOTE_CONTROL_LOG_FILE, os.path.join(persistence_dir, AMinerConfig.DEFAULT_REMOTE_CONTROL_LOG_FILE))
+    try:
+        rc_file_handler = logging.FileHandler(remote_control_log_file)
+        shutil.chown(remote_control_log_file, aminer_user, aminer_grp)
+    except OSError as e:
+        print('Could not create or open %s: %s. Stopping..' % (remote_control_log_file, e), file=sys.stderr)
+        sys.exit(1)
+    rc_file_handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(levelname)s %(message)s', datefmt=datefmt))
+    rc_logger.addHandler(rc_file_handler)
+    logging.addLevelName(15, "REMOTECONTROL")
+
+    stat_logger = logging.getLogger(AMinerConfig.STAT_LOG_NAME)
+    stat_logger.setLevel(logging.INFO)
+    stat_log_file = aminer_config.config_properties.get(
+        AMinerConfig.KEY_STAT_LOG_FILE, os.path.join(persistence_dir, AMinerConfig.DEFAULT_STAT_LOG_FILE))
+    try:
+        stat_file_handler = logging.FileHandler(stat_log_file)
+        shutil.chown(stat_log_file, aminer_user, aminer_grp)
+    except OSError as e:
+        print('Could not create or open %s: %s. Stopping..' % (stat_log_file, e), file=sys.stderr)
+        sys.exit(1)
+    stat_file_handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(message)s', datefmt=datefmt))
+    stat_logger.addHandler(stat_file_handler)
+
+    debug_logger = logging.getLogger(AMinerConfig.DEBUG_LOG_NAME)
+    if AMinerConfig.DEBUG_LEVEL == 0:
+        debug_logger.setLevel(logging.ERROR)
+    elif AMinerConfig.DEBUG_LEVEL == 1:
+        debug_logger.setLevel(logging.INFO)
+    else:
+        debug_logger.setLevel(logging.DEBUG)
+    debug_log_file = aminer_config.config_properties.get(
+        AMinerConfig.KEY_DEBUG_LOG_FILE, os.path.join(persistence_dir, AMinerConfig.DEFAULT_DEBUG_LOG_FILE))
+    try:
+        debug_file_handler = logging.FileHandler(debug_log_file)
+        shutil.chown(debug_log_file, aminer_user, aminer_grp)
+    except OSError as e:
+        print('Could not create or open %s: %s. Stopping..' % (debug_log_file, e), file=sys.stderr)
+        sys.exit(1)
+    debug_file_handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(levelname)s %(message)s', datefmt=datefmt))
+    debug_logger.addHandler(debug_file_handler)
+
+
 def main():
     """Run the aminer main program."""
     # Extract program name, but only when sure to contain no problematic characters.
@@ -155,12 +215,16 @@ def main():
     os.dup2(stdin_fd, 0)
     os.close(stdin_fd)
 
-    config_file_name = '/etc/aminer/config.py'
+    config_file_name = '/etc/aminer/config.yml'
     run_in_foreground_flag = True
     run_analysis_child_flag = False
     clear_persistence_flag = False
     remove_persistence_dirs = []
     from_begin_flag = False
+    stat_level = 1
+    debug_level = 1
+    stat_level_console_flag = False
+    debug_level_console_flag = False
 
     arg_pos = 1
     while arg_pos < len(sys.argv):
@@ -177,8 +241,36 @@ def main():
                 sys.exit(1)
             run_in_foreground_flag = True
             continue
-        if arg_name in ('--Daemon', '--daemon', '-d'):
+        if arg_name in ('--Daemon', '--daemon', '-D'):
             run_in_foreground_flag = False
+            continue
+        if arg_name in ('--Stat', '--stat', '-s'):
+            stat_level = sys.argv[arg_pos]
+            arg_pos += 1
+            if stat_level not in ('0', '1', '2', 'v', 'q', 'quiet'):
+                print('There is no stat level', stat_level, file=sys.stderr)
+                sys.exit(1)
+            if stat_level in ('0', '1', '2'):
+                stat_level = int(stat_level)
+            elif stat_level == 'v':
+                stat_level = 2
+            elif stat_level in ('q', 'quiet'):
+                stat_level = 0
+            stat_level_console_flag = True
+            continue
+        if arg_name in ('--Debug', '--debug', '-d'):
+            debug_level = sys.argv[arg_pos]
+            arg_pos += 1
+            if debug_level not in ('0', '1', '2', 'v', 'q', 'quiet'):
+                print('There is no debug level', debug_level, file=sys.stderr)
+                sys.exit(1)
+            if debug_level in ('0', '1', '2'):
+                debug_level = int(debug_level)
+            elif debug_level == 'v':
+                debug_level = 2
+            elif debug_level in ('q', 'quiet'):
+                debug_level = 0
+            debug_level_console_flag = True
             continue
         if arg_name in ('--RunAnalysis', '--runAnalysis', '--runanalysis', '-r'):
             run_analysis_child_flag = True
@@ -219,11 +311,18 @@ def main():
         print("Config-Error: %s" % e)
         sys.exit(1)
 
+    if not stat_level_console_flag and AMinerConfig.KEY_LOG_STAT_LEVEL in aminer_config.config_properties:
+        stat_level = aminer_config.config_properties[AMinerConfig.KEY_LOG_STAT_LEVEL]
+    if not debug_level_console_flag and AMinerConfig.KEY_LOG_DEBUG_LEVEL in aminer_config.config_properties:
+        debug_level = aminer_config.config_properties[AMinerConfig.KEY_LOG_DEBUG_LEVEL]
+
+    AMinerConfig.STAT_LEVEL = stat_level
+    AMinerConfig.DEBUG_LEVEL = debug_level
+
     if clear_persistence_flag:
         if remove_persistence_dirs:
             print('The --Clear and --Remove arguments must not be used together!', file=sys.stderr)
             sys.exit(1)
-        import shutil
         persistence_dir_name = aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
         for filename in os.listdir(persistence_dir_name):
             file_path = os.path.join(persistence_dir_name, filename)
@@ -236,7 +335,6 @@ def main():
                 print('Failed to delete %s. Reason: %s' % (file_path, e), file=sys.stderr)
 
     if remove_persistence_dirs:
-        import shutil
         persistence_dir_name = aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
         for filename in remove_persistence_dirs:
             file_path = os.path.join(persistence_dir_name, filename)
@@ -299,8 +397,8 @@ def main():
                 sys.exit(1)
         log_data_resource_dict[log_resource_name] = log_resource
 
-    child_user_name = aminer_config.config_properties.get(AMinerConfig.KEY_AMINER_USER, None)
-    child_group_name = aminer_config.config_properties.get(AMinerConfig.KEY_AMINER_GROUP, None)
+    child_user_name = aminer_config.config_properties.get(AMinerConfig.KEY_AMINER_USER)
+    child_group_name = aminer_config.config_properties.get(AMinerConfig.KEY_AMINER_GROUP)
     child_user_id = -1
     child_group_id = -1
     try:
@@ -313,6 +411,8 @@ def main():
     except:  # skipcq: FLK-E722
         print('Failed to resolve %s or %s' % (AMinerConfig.KEY_AMINER_USER, AMinerConfig.KEY_AMINER_GROUP), file=sys.stderr)
         sys.exit(1)
+
+    initialize_loggers(aminer_config, child_user_name, child_group_name)
 
     # Create the remote control socket, if any. Do this in privileged mode to allow binding it at arbitrary locations and support restricted
     # permissions of any type for current (privileged) uid.
@@ -436,7 +536,8 @@ def main():
         # Now execute the very same program again, but user might have moved or renamed it meanwhile. This would be problematic with
         # SUID-binaries (which we do not yet support). Do NOT just fork but also exec to avoid child circumventing
         # parent's ALSR due to cloned kernel VMA.
-        execArgs = ['AMinerChild', '--RunAnalysis', '--Config', analysis_config_file_name]
+        execArgs = ['AMinerChild', '--RunAnalysis', '--Config', analysis_config_file_name, '--Stat', str(stat_level), '--Debug',
+                    str(debug_level)]
         os.execve(sys.argv[0], execArgs, {})  # skipcq: BAN-B606
         print('%s: Failed to execute child process', file=sys.stderr)
         sys.stderr.flush()

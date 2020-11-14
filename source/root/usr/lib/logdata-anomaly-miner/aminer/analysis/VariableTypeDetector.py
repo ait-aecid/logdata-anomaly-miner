@@ -1,11 +1,24 @@
-"""This module defines a detector for variable type."""
+"""This module defines a detector for variable type.
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with
+this program. If not, see <http://www.gnu.org/licenses/>.
+"""
 import numpy as np
 import copy
 from scipy.stats import kstest, ks_2samp, norm, multinomial
 from scipy.stats import chisquare  # Only needed if the chisquare test is used (self.used_multinomial_test == 'Chi')
 import os
+import logging
 
 from aminer import AMinerConfig
+from aminer.AMinerConfig import STAT_LEVEL, STAT_LOG_NAME
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input import AtomHandlerInterface
 from aminer.util import TimeTriggeredComponentInterface
@@ -154,6 +167,12 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         self.distribution_data = {}
         # Stores the number of minimal successes for the BT for selected samplesize and probabilities.
         self.bt_min_succ_data = {}
+
+        self.log_success = 0
+        self.log_total = 0
+        self.log_new_learned = 0
+        self.log_new_learned_values = []
+        self.log_updated = 0
 
         # Initialize lists used for the tracking of the indicator
         if self.save_statistics:
@@ -600,6 +619,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         # Imports the persistence
         if persistence_data is not None:
             self.load_persistence_data(persistence_data)
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     def receive_atom(self, log_atom):
         """
@@ -607,6 +627,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         @param log_atom the parsed log atom
         @return True if this handler was really able to handle and process the match.
         """
+        self.log_total += 1
         event_index = self.event_type_detector.current_index
 
         # Initialize new entries in lists for a new eventType if necessary
@@ -669,6 +690,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if self.save_statistics:
             PersistenceUtil.store_json(self.statistics_file_name, [
                 self.failed_indicators_total, self.failed_indicators_values, self.failed_indicators_paths, self.failed_indicators])
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def load_persistence_data(self, persistence_data):
         """Extract the persistence data and appends various lists to create a consistent state."""
@@ -718,6 +740,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if self.event_type_detector.num_eventlines[event_index] == self.num_init and self.var_type[event_index][0] == []:
             # Test all variables
 
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s started initial detection of var types.', self.__class__.__name__)
             if self.path_list is None:
                 for var_index in range(self.length[event_index]):
                     tmp_var_type = self.detect_var_type(event_index, var_index)
@@ -783,11 +806,14 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
             self.init_var_type_history_list(event_index)
             self.print_initial_var_type(event_index, log_atom)
+            self.log_new_learned += len(self.var_type[event_index])
+            self.log_new_learned_values.append(self.var_type[event_index])
 
         # Update varTypes
         elif self.event_type_detector.num_eventlines[event_index] > self.num_init and (
                 self.event_type_detector.num_eventlines[event_index] - self.num_init) % self.num_update == 0:
 
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s started update phase of var types.', self.__class__.__name__)
             # Checks if the updates of the varTypes should be stopped
             if self.update_var_type_bool and (not isinstance(self.num_stop_update, bool)) and (
                     self.event_type_detector.total_records >= self.num_stop_update):
@@ -799,6 +825,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 index_list = range(self.length[event_index])
             else:
                 index_list = self.variable_path_num[event_index]
+            self.log_updated += len(index_list)
 
             # Update the variableTypes
             for var_index in index_list:
@@ -2152,6 +2179,26 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                       'TypeInfo': {'Confidence': confidence, 'Indicator': indicator}}
         for listener in self.anomaly_event_handlers:
             listener.receive_event('Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, log_atom, self)
+
+    def log_statistics(self, component_name):
+        """
+        Log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
+        @param component_name the name of the component which is printed in the log line.
+        """
+        if STAT_LEVEL == 1:
+            logging.getLogger(STAT_LOG_NAME).info(
+                "'%s' processed %d out of %d log atoms successfully and learned %d new variable types and updated %d variable types "
+                "in the last 60 minutes.", component_name, self.log_success, self.log_total, self.log_new_learned, self.log_updated)
+        elif STAT_LEVEL == 2:
+            logging.getLogger(STAT_LOG_NAME).info(
+                "'%s' processed %d out of %d log atoms successfully and learned %d new variable types and updated %d variable types "
+                "in the last 60 minutes. Following new variable types were learned: %s", component_name, self.log_success, self.log_total,
+                self.log_new_learned, self.log_updated, self.log_new_learned_values)
+        self.log_success = 0
+        self.log_total = 0
+        self.log_new_learned = 0
+        self.log_new_learned_values = []
+        self.log_updated = 0
 
 
 def convert_to_floats(list_in):

@@ -1,3 +1,20 @@
+"""
+Some useful string-functions.
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with
+this program. If not, see <http://www.gnu.org/licenses/>.
+"""
+import logging
+from aminer import AMinerConfig
+
+
 def decode_string_as_byte_string(string):
     """
     Decode a string produced by the encode function encodeByteStringAsString(byteString) below.
@@ -13,7 +30,9 @@ def decode_string_as_byte_string(string):
             decoded += bytearray((int(string[count + 1:count + 3], 16),))
             count += 3
         else:
-            raise Exception('Invalid encoded character')
+            msg = 'Invalid encoded character'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
     return decoded
 
 

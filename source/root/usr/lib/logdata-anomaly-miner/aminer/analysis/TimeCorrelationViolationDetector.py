@@ -13,6 +13,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import time
+import logging
 
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
@@ -55,9 +56,11 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
 
     def receive_atom(self, log_atom):
         """Receive a parsed atom and evaluate all the classification rules and event triggering on violations."""
+        self.log_total += 1
         self.last_log_atom = log_atom
         for rule in self.event_classification_ruleset:
             rule.match(log_atom)
+        self.log_success += 1
 
     def get_time_trigger_class(self):
         """
@@ -108,6 +111,16 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
     def do_persist(self):
         """Immediately write persistence data to storage."""
         self.next_persist_time = time.time() + 600.0
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+
+    def log_statistics(self, component_name):
+        """
+        Log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
+        @param component_name the name of the component which is printed in the log line.
+        """
+        super().log_statistics(component_name)
+        for i, rule in enumerate(self.event_classification_ruleset):
+            rule.log_statistics(component_name + '.' + rule.__class__.__name__ + str(i))
 
 
 class EventClassSelector(Rules.MatchAction):
@@ -302,7 +315,9 @@ class CorrelationRule:
         result[3] = parser_match
 
         if result[0] < self.last_timestamp_seen:
-            raise Exception('Unsorted!')
+            msg = 'Timestamps unsorted!'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         self.last_timestamp_seen = result[0]
 
         if self.artefact_match_parameters is not None:
