@@ -73,6 +73,33 @@
             'type': 'list',
             'schema': {'type': 'string'}
         },
+        'Log.StatisticsPeriod': {
+            'required': False,
+            'type': 'integer',
+            'default': 3600
+        },
+        'Log.StatisticsLevel': {
+            'required': False,
+            'type': 'integer',
+            'default': 1
+        },
+        'Log.DebugLevel': {
+            'required': False,
+            'type': 'integer',
+            'default': 1
+        },
+        'Log.RemoteControlLogFile': {
+            'required': False,
+            'type': 'string'
+        },
+        'Log.StatisticsFile': {
+            'required': False,
+            'type': 'string'
+        },
+        'Log.DebugFile': {
+            'required': False,
+            'type': 'string'
+        },
         'Parser': {
             'required': True,
             'type': 'list',
@@ -114,6 +141,7 @@
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
                     'type': {'type': 'analysistype', 'coerce': 'toanalysistype'},
                     'paths': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
+                    'labels': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                     'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},
                     'output_logline': {'type': 'boolean', 'required': False, 'default': True},
                     'learn_mode': {'type': 'boolean', 'required': False, 'default': False},
@@ -234,6 +262,7 @@
                     'used_multinomial_test': {'type': 'string', 'allowed': ['Approx', 'MT', 'Chi'], 'required': False, 'default': 'Chi'},
                     'use_empiric_distr': {'type': 'boolean', 'required': False, 'default': True},
                     'save_statistics': {'type': 'boolean', 'required': False, 'default': True},
+                    'split_reports_flag': {'type': 'boolean', 'required': False, 'default': False}
                 }
             }
         },

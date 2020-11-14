@@ -191,7 +191,7 @@ def build_analysis_pipeline(analysis_context):
     atom_filters.add_handler(allowlist_violation_detector)
 
     from aminer.analysis import ParserCount
-    parser_count = ParserCount(analysis_context.aminer_config, None, anomaly_event_handlers, 10, False)
+    parser_count = ParserCount(analysis_context.aminer_config, None, anomaly_event_handlers, 10)
     analysis_context.register_component(parser_count, component_name="ParserCount")
     atom_filters.add_handler(parser_count)
 

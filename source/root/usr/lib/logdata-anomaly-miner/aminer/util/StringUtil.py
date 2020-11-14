@@ -10,8 +10,9 @@ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
-
 """
+import logging
+from aminer import AMinerConfig
 
 
 def decode_string_as_byte_string(string):
@@ -29,7 +30,9 @@ def decode_string_as_byte_string(string):
             decoded += bytearray((int(string[count + 1:count + 3], 16),))
             count += 3
         else:
-            raise Exception('Invalid encoded character')
+            msg = 'Invalid encoded character'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
     return decoded
 
 

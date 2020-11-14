@@ -63,38 +63,39 @@ LogResourceList:
 
 #########################################################
 #
-# Parser:
-#         - id: 'timeModel'
-#           type: DateTimeModelElement
-#           name: 'time'
-#           args: '%Y-%m-%dT%H:%M:%S.%f'
-#         
-#         - id: 'hostModel'
-#           type: VariableByteDataModelElement
-#           name: 'host'
-#           args: '-.01234567890abcdefghijklmnopqrstuvwxyz:'  
-# 
-#         - id: 'reqMethodModel'
-#           type:  FixedWordlistDataModelElement
-#           name: 'method'
-#           args:
-#                   - 'GET'
-#                   - 'POST'
-#                   - 'PUT'
-#                   - 'HEAD'
-#         - id: 'apacheModel'
-#           type: ApacheAccessModel
-#           name: 'apache'
-#           args: 'apache'
-# 
-#         - id: 'START'
-#           type: SequenceModelElement
-#           name: 'model'
-#           args:
-#               - timeModel        
-#               - hostModel
-#               - reqMethodModel
-#               - apacheModel
+#Parser:
+#        - id: 'timeModel'
+#          type: DateTimeModelElement
+#          name: 'time'
+#          args: '%Y-%m-%dT%H:%M:%S.%f'
+#
+#        - id: 'hostModel'
+#          type: VariableByteDataModelElement
+#          name: 'host'
+#          args: '-.01234567890abcdefghijklmnopqrstuvwxyz:'
+#
+#        - id: 'reqMethodModel'
+#          type:  FixedWordlistDataModelElement
+#          name: 'method'
+#          args:
+#                  - 'GET'
+#                  - 'POST'
+#                  - 'PUT'
+#                  - 'HEAD'
+#        - id: 'apacheModel'
+#          type: ApacheAccessModel
+#          name: 'apache'
+#          args: 'apache'
+#
+#        - id: 'START'
+#          start: True
+#          type: SequenceModelElement
+#          name: 'model'
+#          args:
+#              - timeModel
+#              - hostModel
+#              - reqMethodModel
+#              - apacheModel
 Parser:
         - id: 'apacheModel'
           type: ApacheAccessModel
@@ -108,9 +109,9 @@ Parser:
           args: apacheModel
 
 Input:
-        Verbose: True # optional
-        MultiSource: False # optional
-        TimestampPath: "/model/accesslog/time"
+        verbose: True # optional
+        multi_source: False # optional
+        timestamp_paths: "/model/accesslog/time"
 
 
 Analysis:
@@ -118,18 +119,18 @@ Analysis:
           paths: ["/model/accesslog/status"]
           persistence_id: 'accesslog_status' # optional default: Default
           output_logline: false # optional default: true
-          learnMode: true
+          learn_mode: true
 
         - type: "NewMatchPathValueComboDetector"
           paths: ["/model/accesslog/request","/model/accesslog/method"]
-          learnMode: true
+          learn_mode: true
           persistence_id: 'accesslog_request' # optional default: Default
           output_logline: false # optional default: true
           allow_missing_values: false # optional default: false
 
         - type: "NewMatchPathValueComboDetector"
           paths: ["/model/accesslog/request","/model/accesslog/status"]
-          learnMode: true
+          learn_mode: true
 
 EventHandlers:
         - id: "stpe"

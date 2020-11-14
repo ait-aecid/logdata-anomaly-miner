@@ -29,8 +29,22 @@ DEFAULT_PERSISTENCE_PERIOD = 600
 KEY_REMOTE_CONTROL_SOCKET_PATH = 'RemoteControlSocket'
 KEY_LOG_PREFIX = 'LogPrefix'
 KEY_RESOURCES_MAX_MEMORY_USAGE = 'Resources.MaxMemoryUsage'
-LOG_FILE = '/tmp/AMinerRemoteLog.txt'
+REMOTE_CONTROL_LOG_NAME = 'REMOTE_CONTROL'
+KEY_REMOTE_CONTROL_LOG_FILE = 'Log.RemoteControlLogFile'
+DEFAULT_REMOTE_CONTROL_LOG_FILE = 'aminerRemoteLog.txt'
 configFN = None
+STAT_LEVEL = 1
+STAT_LOG_NAME = 'STAT'
+KEY_STAT_LOG_FILE = 'Log.StatisticsFile'
+DEFAULT_STAT_LOG_FILE = 'statistics.log'
+DEBUG_LEVEL = 1
+DEBUG_LOG_NAME = 'DEBUG'
+KEY_DEBUG_LOG_FILE = 'Log.DebugFile'
+DEFAULT_DEBUG_LOG_FILE = 'aminer.log'
+KEY_LOG_STAT_PERIOD = 'Log.StatisticsPeriod'
+DEFAULT_STAT_PERIOD = 3600
+KEY_LOG_STAT_LEVEL = 'Log.StatisticsLevel'
+KEY_LOG_DEBUG_LEVEL = 'Log.DebugLevel'
 
 
 def load_config(config_file_name):
@@ -81,9 +95,8 @@ def save_config(analysis_context, new_file):
         pos = old.find(find_str)
         if pos == -1:
             msg += "WARNING: %s not found in the old config file." % find_str
-            logging.basicConfig(filename=LOG_FILE, level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s',
-                                datefmt='%d.%m.%Y %H:%M:%S')
-            logging.warning("WARNING: %s not found in the old config file.", find_str)
+            rc_logger = logging.getLogger(REMOTE_CONTROL_LOG_NAME)
+            rc_logger.warning("WARNING: %s not found in the old config file.", find_str)
         else:
             string = old[pos + len(find_str):]
             old_len = string.find('\n')
@@ -118,8 +131,16 @@ def save_config(analysis_context, new_file):
             if old_component_name != '"%s"' % name:
                 old = old[:old_component_name_start] + '"%s"' % name + old[old_component_name_end + 1:]
 
-    with open(LOG_FILE, "r") as logFile:
-        logs = logFile.readlines()
+    persistence_dir = analysis_context.aminer_config.config_properties.get(KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR)
+    remote_control_log_file = analysis_context.aminer_config.config_properties.get(
+        KEY_REMOTE_CONTROL_LOG_FILE, os.path.join(persistence_dir, DEFAULT_REMOTE_CONTROL_LOG_FILE))
+    try:
+        with open(remote_control_log_file, "r") as logFile:
+            logs = logFile.readlines()
+    except OSError as e:
+        msg = 'Could not read %s: %s' % (remote_control_log_file, e)
+        logging.getLogger(DEBUG_LOG_NAME).error(msg)
+        print(msg, file=sys.stderr)
 
     i = len(logs) - 1
     while i > 0:

@@ -71,6 +71,9 @@ config_properties['MailAlerting.MaxAlertGap'] = 600
 # at most. This defaults to 1000
 config_properties['MailAlerting.MaxEventsPerMessage'] = 1000
 config_properties['LogPrefix'] = 'Original log line: '
+config_properties['Log.StatisticsPeriod'] = 3600
+config_properties['Log.StatisticsLevel'] = 1
+config_properties['Log.DebugLevel'] = 1
 
 # Add your ruleset here:
 
@@ -274,7 +277,7 @@ def build_analysis_pipeline(analysis_context):
     atom_filter.add_handler(allowlist_violation_detector)
 
     from aminer.analysis import ParserCount
-    parser_count = ParserCount(analysis_context.aminer_config, None, anomaly_event_handlers, 10, False)
+    parser_count = ParserCount(analysis_context.aminer_config, None, anomaly_event_handlers, 10)
     analysis_context.register_component(parser_count, component_name="ParserCount")
     atom_filter.add_handler(parser_count)
 

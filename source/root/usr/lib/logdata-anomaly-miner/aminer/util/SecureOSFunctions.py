@@ -16,6 +16,8 @@ import os
 import socket
 import struct
 import sys
+import logging
+from aminer import AMinerConfig
 
 # Those should go away as soon as Python (or aminer via libc)
 # provides those functions.
@@ -30,9 +32,13 @@ def secure_open_file(file_name, flags):
     @param file_name is the fileName as byte string
     """
     if not file_name.startswith(b'/'):
-        raise Exception('Secure open on relative path not supported')
+        msg = 'Secure open on relative path not supported'
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+        raise Exception(msg)
     if (file_name.endswith(b'/')) and ((flags & os.O_DIRECTORY) == 0):
-        raise Exception('Opening directory but O_DIRECTORY flag missing')
+        msg = 'Opening directory but O_DIRECTORY flag missing'
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+        raise Exception(msg)
 
     # This code would allow secure open but openat is not available
     # in python2 series. A long way to go, but keep it here for the
@@ -63,7 +69,9 @@ def secure_open_file(file_name, flags):
     # skipcq: PYL-W0603
     global no_secure_open_warn_once_flag
     if no_secure_open_warn_once_flag:
-        print('WARNING: SECURITY: No secure open yet due to missing openat in python!', file=sys.stderr)
+        msg = 'SECURITY: No secure open yet due to missing openat in python!'
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
+        print('WARNING: ' + msg, file=sys.stderr)
         no_secure_open_warn_once_flag = False
     return os.open(file_name, flags | os.O_NOFOLLOW | os.O_NOCTTY)
 
@@ -81,7 +89,9 @@ def send_annotated_file_descriptor(send_socket, send_fd, type_info, annotation_d
     if isinstance(annotation_data, str):
         annotation_data = annotation_data.encode()
     if type_info.find(b'\x00') >= 0:
-        raise Exception('Null bytes not supported in typeInfo')
+        msg = 'Null bytes not supported in typeInfo'
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+        raise Exception(msg)
     message_data = b'%s\x00%s' % (type_info, annotation_data)
     send_socket.sendmsg([message_data], [(socket.SOL_SOCKET, socket.SCM_RIGHTS, struct.pack('i', send_fd))])
 
@@ -100,22 +110,32 @@ def receive_annoted_file_descriptor(receive_socket):
     """
     message_data, anc_data, _flags, _remote_address = receive_socket.recvmsg(1 << 16, socket.CMSG_LEN(struct.calcsize('i')))
     if len(anc_data) != 1:
-        raise Exception('Received %d sets of ancillary data instead of 1' % len(anc_data))
+        msg = 'Received %d sets of ancillary data instead of 1' % len(anc_data)
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+        raise Exception(msg)
     cmsg_level, cmsg_type, cmsg_data = anc_data[0]
     if (cmsg_level != socket.SOL_SOCKET) or (cmsg_type != socket.SCM_RIGHTS):
-        raise Exception('Received invalid message from remote side')
+        msg = 'Received invalid message from remote side'
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+        raise Exception(msg)
     # Do not accept multiple or unaligned FDs.
     if len(cmsg_data) != 4:
-        raise Exception('Unsupported control message length %d' % len(cmsg_data))
+        msg = 'Unsupported control message length %d' % len(cmsg_data)
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+        raise Exception(msg)
     received_fd = struct.unpack('i', cmsg_data)[0]
 
     split_pos = message_data.find(b'\x00')
     if split_pos < 0:
-        raise Exception('No null byte in received message')
+        msg = 'No null byte in received message'
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+        raise Exception(msg)
     type_info = message_data[:split_pos]
     annotation_data = message_data[split_pos + 1:]
     if received_fd <= 2:
-        print('WARNING: received "reserved" fd %d' % received_fd, file=sys.stderr)
+        msg = 'received "reserved" fd %d' % received_fd
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
+        print('WARNING: ', file=sys.stderr)
     if isinstance(type_info, str):
         type_info = type_info.encode()
     if isinstance(annotation_data, str):

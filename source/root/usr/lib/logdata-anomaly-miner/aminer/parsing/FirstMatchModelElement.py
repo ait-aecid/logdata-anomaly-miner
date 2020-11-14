@@ -11,7 +11,8 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
-
+import logging
+from aminer import AMinerConfig
 from aminer.parsing import ModelElementInterface
 
 
@@ -22,7 +23,9 @@ class FirstMatchModelElement(ModelElementInterface):
         self.element_id = element_id
         self.children = children
         if (children is None) or (None in children):
-            raise Exception('Invalid children list')
+            msg = 'Invalid children list'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
 
     def get_id(self):
         """Get the element ID."""
