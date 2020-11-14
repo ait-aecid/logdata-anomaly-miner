@@ -40,7 +40,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
     def __init__(self, aminer_config, anomaly_event_handlers, paths=None, max_hypotheses=1000, hypothesis_max_delta_time=5.0,
                  generation_probability=1.0, generation_factor=1.0, max_observations=500, p0=0.9, alpha=0.05, candidates_size=10,
                  hypotheses_eval_delta_time=120.0, delta_time_to_discard_hypothesis=180.0, check_rules_flag=False,
-                 auto_include_flag=True, allowlisted_paths=None, persistence_id='Default', output_log_line=True):
+                 auto_include_flag=True, blocklisted_paths=None, persistence_id='Default', output_log_line=True):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -61,7 +61,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         @param delta_time_to_discard_hypothesis time span required for old hypotheses to be discarded.
         @param check_rules_flag specifies whether existing rules are evaluated.
         @param auto_include_flag specifies whether new hypotheses are generated.
-        @param allowlisted_paths list of paths that are not considered for correlation, i.e., events that contain one of these paths are
+        @param blocklisted_paths list of paths that are not considered for correlation, i.e., events that contain one of these paths are
         omitted. The default value is [] as None is not iterable.
         @param persistence_id name of persitency document.
         """
@@ -87,9 +87,9 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         self.delta_time_to_discard_hypothesis = delta_time_to_discard_hypothesis
         self.check_rules_flag = check_rules_flag
         self.auto_include_flag = auto_include_flag
-        self.allowlisted_paths = allowlisted_paths
-        if self.allowlisted_paths is None:
-            self.allowlisted_paths = []
+        self.blocklisted_paths = blocklisted_paths
+        if self.blocklisted_paths is None:
+            self.blocklisted_paths = []
         self.forward_rule_queue = deque([])
         self.back_rule_queue = deque([])
         self.forward_hypotheses_queue = deque([])
@@ -188,17 +188,15 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
             timestamp = log_atom.atom_time
 
         parser_match = log_atom.parser_match
-
         self.total_records += 1
 
+        # Skip blocklisted paths.
+        for blocklisted in self.blocklisted_paths:
+            if blocklisted in parser_match.get_match_dictionary().keys():
+                return
         if self.paths is None or len(self.paths) == 0:
             # Event is defined by the full path of log atom.
             log_event = tuple(parser_match.get_match_dictionary().keys())
-
-            # Skip allowlisted paths.
-            for allowlisted in self.allowlisted_paths:
-                if allowlisted in log_event:
-                    return
         else:
             # Event is defined by value combos in paths
             values = []
