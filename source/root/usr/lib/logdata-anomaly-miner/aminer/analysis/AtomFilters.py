@@ -12,6 +12,8 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
+import logging
+from aminer import AMinerConfig
 from aminer.input import AtomHandlerInterface
 
 
@@ -28,7 +30,9 @@ class SubhandlerFilter(AtomHandlerInterface):
         else:
             if (not isinstance(subhandler_list, list)) or \
                     (not all(isinstance(handler, AtomHandlerInterface) for handler in subhandler_list)):
-                raise Exception('Only subclasses of AtomHandlerInterface allowed in subhandlerList')
+                msg = 'Only subclasses of AtomHandlerInterface allowed in subhandlerList'
+                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                raise Exception(msg)
             self.subhandler_list = [None] * len(subhandler_list)
             for handler_pos, handler_element in enumerate(subhandler_list):
                 self.subhandler_list[handler_pos] = (handler_element, stop_when_handled_flag)
@@ -43,10 +47,12 @@ class SubhandlerFilter(AtomHandlerInterface):
         @return false when no subhandler was able to handle the atom.
         """
         result = False
+        self.log_total += 1
         for handler, stop_when_handled_flag in self.subhandler_list:
             handler_result = handler.receive_atom(log_atom)
             if handler_result is True:
                 result = True
+                self.log_success += 1
                 if stop_when_handled_flag:
                     break
         return result
@@ -71,6 +77,7 @@ class MatchPathFilter(AtomHandlerInterface):
         Receive an atom and pass it to the subhandlers.
         @return False when logAtom did not contain match data or was not forwarded to any handler, True otherwise.
         """
+        self.log_total += 1
         if log_atom.parser_match is None:
             return False
         match_dict = log_atom.parser_match.get_match_dictionary()
@@ -78,10 +85,12 @@ class MatchPathFilter(AtomHandlerInterface):
             if path_name in match_dict:
                 if target_handler is not None:
                     target_handler.receive_atom(log_atom)
+                self.log_success += 1
                 return True
         if self.default_parsed_atom_handler is None:
             return False
         self.default_parsed_atom_handler.receive_atom(log_atom)
+        self.log_success += 1
         return True
 
 
@@ -100,6 +109,7 @@ class MatchValueFilter(AtomHandlerInterface):
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
+        self.log_total += 1
         if log_atom.parser_match is None:
             return False
         target_value = log_atom.parser_match.get_match_dictionary().get(self.target_path, None)
@@ -109,4 +119,5 @@ class MatchValueFilter(AtomHandlerInterface):
         if target_handler is None:
             return False
         target_handler.receive_atom(log_atom)
+        self.log_success += 1
         return True

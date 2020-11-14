@@ -14,6 +14,8 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import datetime
 import time
+import logging
+from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input import AtomHandlerInterface
 from aminer.util import TimeTriggeredComponentInterface
@@ -55,10 +57,13 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
+        self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
+        success_flag = False
         for target_path in self.target_path_list:
             match_element = match_dict.get(target_path, None)
             if match_element is not None:
+                success_flag = True
                 if self.target_label_list:
                     target_path = self.target_label_list[self.target_path_list.index(target_path)]
                 self.count_dict[target_path][current_processed_lines_str] += 1
@@ -72,6 +77,8 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
         if self.next_report_time is None:
             self.next_report_time = time.time() + self.report_interval
+        if success_flag:
+            self.log_success += 1
         return True
 
     def do_timer(self, trigger_time):
@@ -118,3 +125,4 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
             if self.target_label_list:
                 target_path = self.target_label_list[self.target_path_list.index(target_path)]
             self.count_dict[target_path][current_processed_lines_str] = 0
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s sent report.', self.__class__.__name__)

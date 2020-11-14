@@ -16,7 +16,9 @@ import shlex
 import time
 import re
 from smtplib import SMTP, SMTPException
+import logging
 
+from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.events import EventHandlerInterface
@@ -55,11 +57,15 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
         self.recipient_address = shlex.quote(
             aminer_config.config_properties.get(DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS))
         if self.recipient_address is None:
-            raise Exception('Cannot create e-mail notification listener without target address')
+            msg = 'Cannot create e-mail notification listener without target address'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         self.sender_address = shlex.quote(
             aminer_config.config_properties.get(DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_FROM_ADDRESS))
         if not is_email.match(self.recipient_address) or not is_email.match(self.sender_address):
-            raise Exception('MailAlerting.TargetAddress and MailAlerting.FromAddress must be email addresses!')
+            msg = 'MailAlerting.TargetAddress and MailAlerting.FromAddress must be email addresses!'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
 
         self.subject_prefix = shlex.quote(
             aminer_config.config_properties.get(DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_SUBJECT_PREFIX, 'AMiner Alerts:'))
@@ -151,3 +157,4 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
         self.events_collected = 0
         self.current_message = ''
         self.next_alert_time = 0
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s sent notification.', self.__class__.__name__)

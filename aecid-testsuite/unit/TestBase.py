@@ -1,6 +1,7 @@
 import unittest
 import os
 import shutil
+import logging
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
@@ -23,6 +24,7 @@ class TestBase(unittest.TestCase):
             shutil.rmtree(persistence_file_name)
         if not os.path.exists(persistence_file_name):
             os.makedirs(persistence_file_name)
+        logging.disable(logging.CRITICAL)
 
     def tearDown(self):
         """Delete all persisted data after the tests."""
@@ -32,6 +34,7 @@ class TestBase(unittest.TestCase):
             shutil.rmtree(persistence_file_name)
         if not os.path.exists(persistence_file_name):
             os.makedirs(persistence_file_name)
+        logging.disable(logging.NOTSET)
 
     def reset_output_stream(self):
         """Reset the output stream."""
