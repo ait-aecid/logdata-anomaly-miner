@@ -32,6 +32,7 @@ import socket
 import time
 import sys
 import shutil
+import logging
 
 __authors__ = ["Markus Wurzenberger", "Max Landauer", "Wolfgang Hotwagner", "Ernst Leierzopf", "Roman Fiedler", "Georg Hoeld",
                "Florian Skopik"]
@@ -45,10 +46,6 @@ __license__ = "GPLv3"
 __maintainer__ = "Markus Wurzenberger"
 __status__ = "Production"
 __version__ = "2.1.0"
-
-import sys
-import logging
-import shutil
 
 
 # As site packages are not included, define from where we need to execute code before loading it.
@@ -177,6 +174,7 @@ def copytree(src, dst, symlinks=False, ignore=None):
             shutil.copytree(s, d, symlinks, ignore)
         else:
             shutil.copy2(s, d)
+
 
 def initialize_loggers(aminer_config, aminer_user, aminer_grp):
     """Initialize all loggers."""
