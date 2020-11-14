@@ -50,7 +50,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         if persistence_data is None:
             self.known_values_set = set()
         else:
-            self.known_path_set = set(persistence_data)
+            self.known_values_set = set(persistence_data)
             logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     def receive_atom(self, log_atom):
@@ -63,7 +63,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                 continue
             if match.match_object not in self.known_values_set:
                 if self.auto_include_flag:
-                    self.known_path_set.add(match.match_object)
+                    self.known_values_set.add(match.match_object)
                     self.log_learned_path_values += 1
                     self.log_new_learned_values.append(match.match_object)
                     if self.next_persist_time is None:
