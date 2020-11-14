@@ -70,6 +70,9 @@ config_properties['MailAlerting.MaxAlertGap'] = 600
 # at most. This defaults to 1000
 config_properties['MailAlerting.MaxEventsPerMessage'] = 1000
 config_properties['LogPrefix'] = 'Original log line: '
+config_properties['Log.StatisticsPeriod'] = 3600
+config_properties['Log.StatisticsLevel'] = 1
+config_properties['Log.DebugLevel'] = 1
 
 # Add your ruleset here:
 

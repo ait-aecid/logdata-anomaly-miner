@@ -18,7 +18,6 @@ sudo coverage report >> /tmp/report
 cat /tmp/report
 rm /tmp/report
 test -e /var/mail/mail && sudo rm -f /var/mail/mail
-sudo rm /tmp/AMinerRemoteLog.txt
 sudo rm /tmp/test4unixSocket.sock
 sudo rm /tmp/test5unixSocket.sock
 sudo rm /tmp/test6unixSocket.sock

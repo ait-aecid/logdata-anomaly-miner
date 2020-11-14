@@ -14,6 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import time
 import os
+import logging
 
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
@@ -62,6 +63,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
 
     def receive_atom(self, log_atom):
         """Send summary to all event handlers."""
+        self.log_total += 1
         parser_match = log_atom.parser_match
         value_dict = parser_match.get_match_dictionary()
 
@@ -120,6 +122,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
                 if self.next_persist_time is None:
                     self.next_persist_time = time.time() + 600
         else:
+            # implement this section.
             raise Exception('FIXME: not implemented')
 
         if analysis_summary:
@@ -127,6 +130,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             res[0] = analysis_summary
             for listener in self.anomaly_event_handlers:
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Statistical data report', res, event_data, log_atom, self)
+        self.log_success += 1
 
     def get_time_trigger_class(self):
         """
@@ -150,6 +154,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         """Immediately write persistence data to storage."""
         PersistenceUtil.store_json(self.persistence_file_name, self.stat_data)
         self.next_persist_time = None
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def update(self, stat_data, timestamp_value, value):
         """
@@ -183,6 +188,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         Perform the analysis and progress from the last bin to the next one.
         @return None when statistical data was as expected and debugging is disabled.
         """
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s performs analysis.', self.__class__.__name__)
         current_bin = stat_data[3]
         current_average = current_bin[1] / current_bin[0]
         current_variance = (current_bin[2] - (current_bin[1] * current_bin[1]) / current_bin[0]) / (current_bin[0] - 1)
