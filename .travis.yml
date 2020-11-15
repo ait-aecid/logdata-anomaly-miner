@@ -37,7 +37,7 @@ script:
   - sudo service exim4 status -l
   - sudo lsof -i:25
   - sudo cat /var/log/exim4/mainlog
-  - touch /var/mail/mail
+  - sudo touch /var/mail/mail
   - sudo chown mail:mail /var/mail/mail
   - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP('127.0.0.1', timeout=None); print(smtp_obj); smtp_obj.quit()"""
   - sudo python3 -c """import psutil; print(psutil.net_connections())"""
