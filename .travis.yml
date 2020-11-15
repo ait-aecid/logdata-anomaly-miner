@@ -27,10 +27,13 @@ script:
   - sudo sed -i "s/dc_local_interfaces='127.0.0.1 ; ::1'/dc_local_interfaces='127.0.0.1 ; '/g" /etc/exim4/update-exim4.conf.conf
   - sudo cat /etc/mailname
   - sudo cat /etc/exim4/update-exim4.conf.conf
+  - sudo service exim4 stop
+  - sudo service exim4 status -l
+  - sudo service exim4 stop
+  - sudo service exim4 status -l
   - sudo update-exim4.conf
-  - sleep 5
   - sudo rm /var/log/exim4/mainlog
-  - sudo service exim4 restart
+  - sudo service exim4 start
   - sudo service exim4 status -l
   - sleep 30
   - sudo service exim4 status -l
