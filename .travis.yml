@@ -30,6 +30,8 @@ script:
   - sudo rm /var/log/exim4/mainlog
   - sudo service exim4 restart
   - sudo service exim4 status -l
+  - sleep 30
+  - sudo service exim4 status -l
   - sudo lsof -i:25
   - sudo cat /var/log/exim4/mainlog
   - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP('127.0.0.1', timeout=None); print(smtp_obj); smtp_obj.quit()"""
