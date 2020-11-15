@@ -29,7 +29,7 @@ script:
   - sudo cat /etc/exim4/update-exim4.conf.conf
   - sudo service exim4 stop
   - sudo service exim4 status -l
-  - sudo service exim4 stop
+  - sudo pkil exim4
   - sudo service exim4 status -l
   - sudo update-exim4.conf
   - sudo rm /var/log/exim4/mainlog
