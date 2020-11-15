@@ -147,6 +147,8 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
             subject_text += ' in the last %d seconds' % (trigger_time - self.last_alert_time)
         message = _message_str % (self.sender_address, self.recipient_address, subject_text, self.current_message)
         try:
+            # timeout explicitly needs to be set None, because in python version < 3.7 socket.settimeout() sets the socket type
+            # SOCK_NONBLOCKING and the code fails.
             smtp_obj = SMTP('127.0.0.1', port=25, timeout=None)
             smtp_obj.sendmail(self.sender_address, self.recipient_address, message)
             smtp_obj.quit()
