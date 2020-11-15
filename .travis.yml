@@ -24,17 +24,17 @@ install:
 script:
   - sudo pip3 install psutil
   - sudo python3 -c """import psutil; print(psutil.net_connections())"""
-  - sudo sed -i "s/dc_local_interfaces='127.0.0.1 ; ::1'/dc_local_interfaces='127.0.0.1'/g" /etc/exim4/update-exim4.conf.conf
+  - sudo sed -i "s/dc_local_interfaces='127.0.0.1 ; ::1'/dc_local_interfaces='127.0.0.1 ; '/g" /etc/exim4/update-exim4.conf.conf
   - sudo cat /etc/mailname
   - sudo cat /etc/exim4/update-exim4.conf.conf
   - sudo rm /var/log/exim4/mainlog
   - sudo service exim4 restart
-  - sudo service exim4 status
+  - sudo service exim4 status -l
   - sudo lsof -i:25
   - sudo cat /var/log/exim4/mainlog
   - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP('127.0.0.1', timeout=None); print(smtp_obj); smtp_obj.quit()"""
   - sudo python3 -c """import psutil; print(psutil.net_connections())"""
-  - sudo service exim4 status
+  - sudo service exim4 status -l
   - sudo lsof -i:25
   - sudo cat /var/log/exim4/mainlog
   - python3 -c """import socket; a_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM); location = ('127.0.0.1', 25); result_of_check = a_socket.connect_ex(location); print(result_of_check); a_socket.close()"""
