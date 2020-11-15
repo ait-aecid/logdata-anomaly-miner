@@ -24,7 +24,8 @@ install:
 script:
   - sudo pip3 install psutil
   - sudo python3 -c """import psutil; print(psutil.net_connections())"""
-  - sudo echo "dc_local_interfaces='127.0.0.1'" > /etc/exim4/update-exim4.conf.conf
+  - echo "dc_local_interfaces='127.0.0.1'" | sudo tee -a /etc/exim4/update-exim4.conf.conf
+  - sudo cat /etc/exim4/update-exim4.conf.conf
   - sudo rm /var/log/exim4/mainlog
   - sudo service exim4 restart
   - sudo service exim4 status
