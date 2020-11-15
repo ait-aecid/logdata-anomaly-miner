@@ -22,35 +22,8 @@ install:
   - sudo chmod +x runCoverageTests.sh
 
 script:
-  - sudo iptables -vL
-  - sudo netstat -a | grep smtp
-  - sudo netstat -nlp | grep :25
-  - sudo exim -bt mail@localhost
-  - sudo lsof -i -P | grep exim
-  - sudo touch /var/mail/mail
-  - sudo chown mail:mail /var/mail/mail
-  - sudo ls -la /var/mail
-  - sudo chown mail:mail /var/mail
-  - sudo chmod 660 /var/mail/mail
-  - echo "test" | sudo sendmail mail@localhost
-  - sudo pip3 install psutil
-  - sudo cat -n /usr/lib/python3.6/socket.py
-  - sudo python3 -c """import socket; print(socket.getfqdn()); print(socket.gethostbyname(socket.gethostname())); import smtplib; soc = smtplib.SMTP(timeout=None); soc.debuglevel = 3; print('local_hostname', soc.local_hostname); s = soc._get_socket('127.0.0.1', 25, None); print('first socket ', s); file = s.makefile('rb'); print(file.readable(), type(file), s._closed, s.gettimeout(), s.__repr__(), s.getsockname(), s.getpeername(), list(socket.SocketKind)); s.close(); print('getaddrinfo', socket.getaddrinfo('127.0.0.1', 25, 0, 1)); print('create_connection'); create_soc = socket.create_connection(('127.0.0.1', 25), None); print('create_connection_soc', create_soc); soc.connect(host='localhost', port=25); print('soc', soc); soc.quit()"""
-  - sudo python3 -c """import psutil; print(psutil.net_connections())"""
-  - python3 -c """import socket; a_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM); location = ('127.0.0.1', 25); result_of_check = a_socket.connect_ex(location); print(result_of_check); a_socket.close()"""
-  - python3 -c """import socket; a_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM); location = ('127.0.0.1', 25); result_of_check = a_socket.connect(location); print(result_of_check); a_socket.close()"""
-  - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP('localhost', timeout=10); print(smtp_obj); smtp_obj.quit()"""
-  - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP('localhost', timeout=10); print(smtp_obj); smtp_obj.quit()"""
-  - python3 -c """import smtplib; smtp_obj = smtplib.SMTP('localhost', timeout=10); print(smtp_obj); smtp_obj.quit()"""
-  - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP('127.0.0.1', port=25, local_hostname='localhost', timeout=10); print(smtp_obj); smtp_obj.quit()"""
-  - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP('127.0.0.1', port=25, timeout=10); print(smtp_obj); smtp_obj.quit()"""
-  - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP(timeout=10); smtp_obj.connect(); print(smtp_obj); smtp_obj.quit()"""
-  - sudo iptables -vL
-  - sudo ls -la /var/mail
-  - echo d | sudo mail -u mail
+
   - sudo python3 -m unittest unit/events/DefaultMailNotificationEventHandlerTest.py
-  - sudo ls -la /var/mail
-  - echo p | sudo mail -u mail
   - ./runUnittests.sh
   - ./runAMinerDemo.sh demo/AMiner/demo-config.py
   - ./runAMinerDemo.sh demo/AMiner/jsonConverterHandler-demo-config.py
