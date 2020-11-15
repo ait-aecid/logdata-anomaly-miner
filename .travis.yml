@@ -25,7 +25,7 @@ script:
   - sudo pip3 install psutil
   - sudo python3 -c """import psutil; print(psutil.net_connections())"""
   - sudo service exim status
-  - sudo python3 -c """import socket; print(socket.getfqdn()); print(socket.gethostbyname(socket.gethostname())); import smtplib; soc = smtplib.SMTP(timeout=None); soc.debuglevel = 3; print('local_hostname', soc.local_hostname); s = soc._get_socket('127.0.0.1', 25, None); print('first socket ', s); file = s.makefile('rb'); print(file.readable(), type(file), s._closed, s.gettimeout(), s.__repr__(), s.getsockname(), s.getpeername(), list(socket.SocketKind)); s.close(); print('getaddrinfo', socket.getaddrinfo('127.0.0.1', 25, 0, 1)); print('create_connection'); create_soc = socket.create_connection(('127.0.0.1', 25), None); print('create_connection_soc', create_soc); soc.connect(host='localhost', port=25); print('soc', soc); soc.quit()"""
+  - sudo python3 -c """import socket; print(socket.getfqdn()); print(socket.gethostbyname(socket.gethostname())); import smtplib; soc = smtplib.SMTP('localhost', timeout=None); soc.debuglevel = 3; print('local_hostname', soc.local_hostname); s = soc._get_socket('127.0.0.1', 25, None); print('first socket ', s); s.close(); print('getaddrinfo', socket.getaddrinfo('127.0.0.1', 25, 0, 1)); print('create_connection'); create_soc = socket.create_connection(('127.0.0.1', 25), None); print('create_connection_soc', create_soc); create_soc.close(); soc.quit()"""
   - sudo python3 -c """import psutil; print(psutil.net_connections())"""
   - sudo service exim status
   - python3 -c """import socket; a_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM); location = ('127.0.0.1', 25); result_of_check = a_socket.connect_ex(location); print(result_of_check); a_socket.close()"""
