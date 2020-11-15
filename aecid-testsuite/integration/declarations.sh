@@ -279,9 +279,6 @@ function checkAllMails() {
 	echo ""
 	echo "waiting for mails to arrive.."
 	echo ""
-	
-	#sudo inotifywait /var/spool/mail/root
-	#sleep 60
 
 	i=1
 	while [ $i -lt $linecount ] 
