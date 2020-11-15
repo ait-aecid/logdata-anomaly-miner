@@ -24,18 +24,19 @@ install:
 script:
   - sudo pip3 install psutil
   - sudo python3 -c """import psutil; print(psutil.net_connections())"""
-  - sudo service exim status
-  - sudo python3 -c """import socket; print(socket.getfqdn()); print(socket.gethostbyname(socket.gethostname())); import smtplib; soc = smtplib.SMTP('localhost', timeout=None); soc.debuglevel = 3; print('local_hostname', soc.local_hostname); s = soc._get_socket('127.0.0.1', 25, None); print('first socket ', s); s.close(); print('getaddrinfo', socket.getaddrinfo('127.0.0.1', 25, 0, 1)); print('create_connection'); create_soc = socket.create_connection(('127.0.0.1', 25), None); print('create_connection_soc', create_soc); create_soc.close(); soc.quit()"""
+  - sudo service exim4 status
+  - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP('localhost', timeout=None); print(smtp_obj); smtp_obj.quit()"""
   - sudo python3 -c """import psutil; print(psutil.net_connections())"""
-  - sudo service exim status
+  - sudo service exim4 status
   - python3 -c """import socket; a_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM); location = ('127.0.0.1', 25); result_of_check = a_socket.connect_ex(location); print(result_of_check); a_socket.close()"""
   - python3 -c """import socket; a_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM); location = ('127.0.0.1', 25); result_of_check = a_socket.connect(location); print(result_of_check); a_socket.close()"""
-  - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP('localhost', timeout=10); print(smtp_obj); smtp_obj.quit()"""
-  - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP('localhost', timeout=10); print(smtp_obj); smtp_obj.quit()"""
-  - python3 -c """import smtplib; smtp_obj = smtplib.SMTP('localhost', timeout=10); print(smtp_obj); smtp_obj.quit()"""
-  - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP('127.0.0.1', port=25, local_hostname='localhost', timeout=10); print(smtp_obj); smtp_obj.quit()"""
-  - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP('127.0.0.1', port=25, timeout=10); print(smtp_obj); smtp_obj.quit()"""
-  - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP(timeout=10); smtp_obj.connect(); print(smtp_obj); smtp_obj.quit()"""
+  - sudo python3 -c """import socket; print(socket.getfqdn()); print(socket.gethostbyname(socket.gethostname())); import smtplib; soc = smtplib.SMTP('localhost', timeout=None); soc.debuglevel = 3; print('local_hostname', soc.local_hostname); s = soc._get_socket('127.0.0.1', 25, None); print('first socket ', s); s.close(); print('getaddrinfo', socket.getaddrinfo('127.0.0.1', 25, 0, 1)); print('create_connection'); create_soc = socket.create_connection(('127.0.0.1', 25), None); print('create_connection_soc', create_soc); create_soc.close(); soc.quit()"""
+  - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP('localhost', timeout=None); print(smtp_obj); smtp_obj.quit()"""
+  - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP('localhost', timeout=None); print(smtp_obj); smtp_obj.quit()"""
+  - python3 -c """import smtplib; smtp_obj = smtplib.SMTP('localhost', timeout=None); print(smtp_obj); smtp_obj.quit()"""
+  - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP('127.0.0.1', port=25, local_hostname='localhost', timeout=None); print(smtp_obj); smtp_obj.quit()"""
+  - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP('127.0.0.1', port=25, timeout=None); print(smtp_obj); smtp_obj.quit()"""
+  - sudo python3 -c """import smtplib; smtp_obj = smtplib.SMTP(timeout=None); smtp_obj.connect(); print(smtp_obj); smtp_obj.quit()"""
   - sudo iptables -vL
   - sudo ls -la /var/mail
   - echo d | sudo mail -u mail
