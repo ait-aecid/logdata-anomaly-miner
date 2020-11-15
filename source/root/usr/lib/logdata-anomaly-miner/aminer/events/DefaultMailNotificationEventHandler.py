@@ -149,7 +149,7 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
         try:
             # timeout explicitly needs to be set None, because in python version < 3.7 socket.settimeout() sets the socket type
             # SOCK_NONBLOCKING and the code fails.
-            smtp_obj = SMTP('127.0.0.1', port=25, timeout=None)
+            smtp_obj = SMTP('127.0.0.1', port=25, timeout=5)
             smtp_obj.sendmail(self.sender_address, self.recipient_address, message)
             smtp_obj.quit()
         except SMTPException as e:
