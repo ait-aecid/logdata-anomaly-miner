@@ -139,7 +139,7 @@
                     'labels': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                     'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},
                     'output_logline': {'type': 'boolean', 'required': False, 'default': True},
-                    'learn_mode': {'type': 'boolean', 'required': False, 'default': False},
+                    'learn_mode': {'type': 'boolean', 'required': False},
                     'allow_missing_values': {'type': 'boolean', 'required': False, 'default': False},
                     'check_interval': {'type': 'integer', 'required': False, 'default': 3600},
                     'realert_interval': {'type': 'integer', 'required': False, 'default': 36000},
