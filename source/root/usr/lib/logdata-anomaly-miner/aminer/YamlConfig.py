@@ -70,6 +70,7 @@ def build_parsing_model():
     start = None
     ws_count = 0
     whitespace_str = b' '
+
     # We might be able to remove this and us it like the config_properties
     # skipcq: PYL-W0603
     global yaml_data
@@ -148,6 +149,7 @@ def build_parsing_model():
                     parser_model_dict[item['id']] = item['type'].func(item['name'])
         else:
             parser_model_dict[item['id']] = item['type'].func()
+
     args_list = []
     if 'args' in start:
         if isinstance(start['args'], list):
