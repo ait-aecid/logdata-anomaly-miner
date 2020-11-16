@@ -240,10 +240,12 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 comp_name = None
             else:
                 comp_name = item['id']
-            if 'LearnMode' in yaml_data:
-                learn = yaml_data['LearnMode']
-            else:
+            if 'learn_mode' in item:
                 learn = item['learn_mode']
+            else:
+                if 'LearnMode' not in yaml_data:
+                    raise ValueError('Config error: LearnMode must be defined if an analysis component does not define learn_mode.')
+                learn = yaml_data['LearnMode']
             func = item['type'].func
             if item['type'].name == 'NewMatchPathValueDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn,

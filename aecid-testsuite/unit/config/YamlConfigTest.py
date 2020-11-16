@@ -233,33 +233,32 @@ class YamlConfigTest(unittest.TestCase):
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model, SequenceModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[0], VariableByteDataModelElement))
 
-        # learnMode: True should ignore all learn_mode arguments.
-        for key in context.registered_components:
-            self.assertTrue(context.registered_components[key][0].auto_include_flag)
-
-        # learnMode: False should ignore all learn_mode arguments.
-        aminer_config.yaml_data['LearnMode'] = False
-        context = AnalysisContext(aminer_config)
-        context.build_analysis_pipeline()
-        for key in context.registered_components:
-            self.assertFalse(context.registered_components[key][0].auto_include_flag)
-
-        # unset learnMode: use learn_mode arguments
-        del aminer_config.yaml_data['LearnMode']
+        # specific learn_mode arguments should be preferred.
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
         self.assertTrue(context.registered_components[0][0].auto_include_flag)
         self.assertTrue(context.registered_components[1][0].auto_include_flag)
         self.assertFalse(context.registered_components[2][0].auto_include_flag)
 
-        # unset learnMode and set learn_mode to default arguments: by default True should be used.
+        # unset specific learn_mode parameters and set LearnMode True.
         for component in aminer_config.yaml_data['Analysis']:
-            component['learn_mode'] = True
+            del component['learn_mode']
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        self.assertTrue(context.registered_components[0][0].auto_include_flag)
-        self.assertTrue(context.registered_components[1][0].auto_include_flag)
-        self.assertTrue(context.registered_components[2][0].auto_include_flag)
+        for key in context.registered_components:
+            self.assertTrue(context.registered_components[key][0].auto_include_flag)
+
+        # unset specific learn_mode parameters and set LearnMode False.
+        aminer_config.yaml_data['LearnMode'] = False
+        context = AnalysisContext(aminer_config)
+        context.build_analysis_pipeline()
+        for key in context.registered_components:
+            self.assertFalse(context.registered_components[key][0].auto_include_flag)
+
+        # unset LearnMode config property. An Error should be raised.
+        del aminer_config.yaml_data['LearnMode']
+        context = AnalysisContext(aminer_config)
+        self.assertRaises(ValueError, context.build_analysis_pipeline)
 
     def test15_analysis_pipeline_working_with_input_parameters(self):
         """This test checks if the SimpleMultisourceAtomSync and SimpleByteStreamLineAtomizerFactory are working properly."""
@@ -370,6 +369,7 @@ class YamlConfigTest(unittest.TestCase):
         del yml_config_properties['Input']
         del yml_config_properties['Analysis']
         del yml_config_properties['EventHandlers']
+        del yml_config_properties['LearnMode']
 
         # remove SimpleUnparsedAtomHandler, VerboseUnparsedAtomHandler and NewMatchPathDetector as they are added by the YamlConfig.
         py_registered_components = copy.copy(py_context.registered_components)
