@@ -280,7 +280,8 @@
                     'instance_name': {'type': 'string', 'required': False, 'default': 'aminer'},
                     'topic': {'type': 'string'},
                     'cfgfile': {'type': 'string'},
-                    'options': {'type': 'dict', 'schema': {'id': {'type': 'string'}, 'type': {'type': ['string', 'list', 'integer']}}}
+                    'options': {'type': 'dict', 'schema': {'id': {'type': 'string'}, 'type': {'type': ['string', 'list', 'integer']}}},
+                    'output_file_path': {'type': 'string', 'required': False}
                 }
             }
         }

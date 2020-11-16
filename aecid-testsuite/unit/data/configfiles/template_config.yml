@@ -45,8 +45,8 @@ Analysis:
 
 EventHandlers:
         - id: stpe
-          json: True # optional default: False
           type: StreamPrinterEventHandler
+          output_file_path: '/tmp/streamPrinter.txt'
 
         - id: syslog
           type: SyslogWriterEventHandler

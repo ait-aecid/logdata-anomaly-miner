@@ -512,7 +512,13 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
             for item in yaml_data['EventHandlers']:
                 func = item['type'].func
                 ctx = None
-                if item['type'].name in ('StreamPrinterEventHandler', 'DefaultMailNotificationEventHandler'):
+                if item['type'].name == 'StreamPrinterEventHandler':
+                    if 'output_file_path' in item:
+                        with open(item['output_file_path'], 'w+') as stream:
+                            ctx = func(analysis_context, stream)
+                    else:
+                        ctx = func(analysis_context)
+                if item['type'].name == 'DefaultMailNotificationEventHandler':
                     ctx = func(analysis_context)
                 if item['type'].name == 'SyslogWriterEventHandler':
                     ctx = func(analysis_context, item['instance_name'])
