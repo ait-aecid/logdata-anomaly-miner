@@ -165,6 +165,8 @@
                     'check_rules_flag': {'type': 'boolean', 'required': False, 'default': True},
                     'allowlisted_paths': {
                         'type': 'list', 'schema': {'type': 'string'}, 'required': False, 'nullable': True, 'default': None},
+                    'blocklisted_paths': {
+                        'type': 'list', 'schema': {'type': 'string'}, 'required': False, 'nullable': True, 'default': None},
                     'id_path_list': {'type': 'list', 'required': False, 'default': []},
                     'min_allowed_time_diff': {'type': 'float', 'required': False, 'default': 5.0},
                     'lower_limit': {'type': ['integer', 'float']},

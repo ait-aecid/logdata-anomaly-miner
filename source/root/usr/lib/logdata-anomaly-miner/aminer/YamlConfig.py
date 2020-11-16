@@ -308,7 +308,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     max_observations=item['max_observations'], p0=item['p0'], alpha=item['alpha'], candidates_size=item['candidates_size'],
                     hypotheses_eval_delta_time=item['hypotheses_eval_delta_time'],
                     delta_time_to_discard_hypothesis=item['delta_time_to_discard_hypothesis'], check_rules_flag=item['check_rules_flag'],
-                    auto_include_flag=learn, allowlisted_paths=item['allowlisted_paths'], persistence_id=item['persistence_id'])
+                    auto_include_flag=learn, blocklisted_paths=item['blocklisted_paths'], persistence_id=item['persistence_id'])
             elif item['type'].name == 'NewMatchIdValueComboDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers,
                                     id_path_list=item['id_path_list'], min_allowed_time_diff=item['min_allowed_time_diff'],
