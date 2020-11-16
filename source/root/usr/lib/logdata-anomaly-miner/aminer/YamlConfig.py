@@ -18,19 +18,6 @@ config_properties = {}
 yaml_data = None
 enhanced_new_match_path_value_combo_detector_reference = None
 
-# Define the list of log resources to read from: the resources
-# named here do not need to exist when aminer is started. This
-# will just result in a warning. However if they exist, they have
-# to be readable by the aminer process! Supported types are:
-# * file://[path]: Read data from file, reopen it after rollover
-# * unix://[path]: Open the path as UNIX local socket for reading
-config_properties['LogResourceList'] = []
-
-# Define the uid/gid of the process that runs the calculation
-# after opening the log files:
-config_properties['AMinerUser'] = 'aminer'
-config_properties['AMinerGroup'] = 'aminer'
-
 
 def load_yaml(config_file):
     """Load the yaml configuration from file."""
@@ -65,13 +52,6 @@ def load_yaml(config_file):
         config_properties[str(key)] = val
 
 
-# Read and store information to be used between multiple invocations
-# of AMiner in this directory. The directory must only be accessible
-# to the 'AMinerUser' but not group/world readable. On violation,
-# AMiner will refuse to start. When undefined, '/var/lib/aminer'
-# is used.
-# config_properties['Core.PersistenceDir'] = '/var/lib/aminer'
-
 # Add your ruleset here:
 def build_analysis_pipeline(analysis_context):
     """
@@ -90,6 +70,7 @@ def build_parsing_model():
     start = None
     ws_count = 0
     whitespace_str = b' '
+
     # We might be able to remove this and us it like the config_properties
     # skipcq: PYL-W0603
     global yaml_data
@@ -168,6 +149,7 @@ def build_parsing_model():
                     parser_model_dict[item['id']] = item['type'].func(item['name'])
         else:
             parser_model_dict[item['id']] = item['type'].func()
+
     args_list = []
     if 'args' in start:
         if isinstance(start['args'], list):
@@ -240,10 +222,12 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 comp_name = None
             else:
                 comp_name = item['id']
-            if 'LearnMode' in yaml_data:
-                learn = yaml_data['LearnMode']
-            else:
+            if 'learn_mode' in item:
                 learn = item['learn_mode']
+            else:
+                if 'LearnMode' not in yaml_data:
+                    raise ValueError('Config error: LearnMode must be defined if an analysis component does not define learn_mode.')
+                learn = yaml_data['LearnMode']
             func = item['type'].func
             if item['type'].name == 'NewMatchPathValueDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn,

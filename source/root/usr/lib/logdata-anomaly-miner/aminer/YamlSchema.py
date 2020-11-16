@@ -14,6 +14,10 @@
             'type': 'string',
             'default': 'aminer'
         },
+        'RemoteControlSocket': {
+            'required': False,
+            'type': 'string'
+        },
         'Core.PersistenceDir': {
             'required': False,
             'type': 'string',
@@ -139,7 +143,7 @@
                     'labels': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                     'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},
                     'output_logline': {'type': 'boolean', 'required': False, 'default': True},
-                    'learn_mode': {'type': 'boolean', 'required': False, 'default': False},
+                    'learn_mode': {'type': 'boolean', 'required': False},
                     'allow_missing_values': {'type': 'boolean', 'required': False, 'default': False},
                     'check_interval': {'type': 'integer', 'required': False, 'default': 3600},
                     'realert_interval': {'type': 'integer', 'required': False, 'default': 36000},
@@ -177,7 +181,8 @@
                     'histogram_defs': {'type': 'list', 'schema': {'type': 'list', 'schema': {'type': 'string'}}},
                     'bin_definition': {'type': 'string'},
                     'tuple_transformation_function': {'type': 'string'},
-                    'value_list': {'type': 'list', 'schema': {'type': ['boolean', 'float', 'integer', 'string']}},
+                    'value_list': {
+                        'type': 'list', 'schema': {'type': ['boolean', 'float', 'integer', 'string']}, 'nullable': True, 'default': None},
                     'timestamp_path': {'type': 'string'},
                     'min_bin_elements': {'type': 'integer'},
                     'min_bin_time': {'type': 'integer'},
