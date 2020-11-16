@@ -14,6 +14,11 @@
             'type': 'string',
             'default': 'aminer'
         },
+        'RemoteControlSocket': {
+            'required': False,
+            'type': 'string',
+            'default': '/var/run/aminer-remote.socket'
+        },
         'Core.PersistenceDir': {
             'required': False,
             'type': 'string',
