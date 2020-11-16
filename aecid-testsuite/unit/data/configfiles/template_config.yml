@@ -4,6 +4,8 @@ AMinerGroup: 'aminer' # optional default: aminer
 LogResourceList:
         - 'file:///var/log/apache2/access.log'
 
+RemoteControlSocket: '/var/run/aminer-remote.socket'
+
 Core.PersistenceDir: '/tmp/lib/aminer'
 
 Parser:

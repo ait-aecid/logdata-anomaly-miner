@@ -14,6 +14,10 @@
             'type': 'string',
             'default': 'aminer'
         },
+        'RemoteControlSocket': {
+            'required': False,
+            'type': 'string'
+        },
         'Core.PersistenceDir': {
             'required': False,
             'type': 'string',

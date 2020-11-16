@@ -18,19 +18,6 @@ config_properties = {}
 yaml_data = None
 enhanced_new_match_path_value_combo_detector_reference = None
 
-# Define the list of log resources to read from: the resources
-# named here do not need to exist when aminer is started. This
-# will just result in a warning. However if they exist, they have
-# to be readable by the aminer process! Supported types are:
-# * file://[path]: Read data from file, reopen it after rollover
-# * unix://[path]: Open the path as UNIX local socket for reading
-config_properties['LogResourceList'] = []
-
-# Define the uid/gid of the process that runs the calculation
-# after opening the log files:
-config_properties['AMinerUser'] = 'aminer'
-config_properties['AMinerGroup'] = 'aminer'
-
 
 def load_yaml(config_file):
     """Load the yaml configuration from file."""
@@ -64,13 +51,6 @@ def load_yaml(config_file):
     for key, val in yaml_data.items():
         config_properties[str(key)] = val
 
-
-# Read and store information to be used between multiple invocations
-# of AMiner in this directory. The directory must only be accessible
-# to the 'AMinerUser' but not group/world readable. On violation,
-# AMiner will refuse to start. When undefined, '/var/lib/aminer'
-# is used.
-# config_properties['Core.PersistenceDir'] = '/var/lib/aminer'
 
 # Add your ruleset here:
 def build_analysis_pipeline(analysis_context):
