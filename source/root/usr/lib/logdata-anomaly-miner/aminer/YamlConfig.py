@@ -243,6 +243,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             if 'learn_mode' in item:
                 learn = item['learn_mode']
             else:
+                if 'LearnMode' not in yaml_data:
+                    raise ValueError('Config error: LearnMode must be defined if an analysis component does not define learn_mode.')
                 learn = yaml_data['LearnMode']
             func = item['type'].func
             if item['type'].name == 'NewMatchPathValueDetector':
