@@ -30,6 +30,10 @@ import os
 import re
 import socket
 import time
+import sys
+import logging
+import shutil
+import warnings
 
 __authors__ = ["Markus Wurzenberger", "Max Landauer", "Wolfgang Hotwagner", "Ernst Leierzopf", "Roman Fiedler", "Georg Hoeld",
                "Florian Skopik"]
@@ -43,10 +47,6 @@ __license__ = "GPLv3"
 __maintainer__ = "Markus Wurzenberger"
 __status__ = "Production"
 __version__ = "2.1.0"
-
-import sys
-import logging
-import shutil
 
 # As site packages are not included, define from where we need to execute code before loading it.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
@@ -118,6 +118,7 @@ def print_help(program_name, version=False):
 
 def run_analysis_child(aminer_config, program_name):
     """Run the Analysis Child."""
+    warnings.filterwarnings('ignore', category=ImportWarning)
     from aminer import AMinerConfig
     # Verify existance and ownership of persistence directory.
     logging.getLogger(AMinerConfig.REMOTE_CONTROL_LOG_NAME).info('aminer started.')
