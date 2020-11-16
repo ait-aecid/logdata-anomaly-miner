@@ -204,7 +204,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                 if parser_match.get_match_dictionary().get(allowlisted) is not None:
                     allowlisted = True
                     break
-            if not allowlisted and not self.allowlisted_paths == []:
+            if not allowlisted and self.allowlisted_paths != []:
                 return
             log_event = tuple(parser_match.get_match_dictionary().keys())
         else:
