@@ -68,6 +68,33 @@
             'type': 'list',
             'schema': {'type': 'string'}
         },
+        'Log.StatisticsPeriod': {
+            'required': False,
+            'type': 'integer',
+            'default': 3600
+        },
+        'Log.StatisticsLevel': {
+            'required': False,
+            'type': 'integer',
+            'default': 1
+        },
+        'Log.DebugLevel': {
+            'required': False,
+            'type': 'integer',
+            'default': 1
+        },
+        'Log.RemoteControlLogFile': {
+            'required': False,
+            'type': 'string'
+        },
+        'Log.StatisticsFile': {
+            'required': False,
+            'type': 'string'
+        },
+        'Log.DebugFile': {
+            'required': False,
+            'type': 'string'
+        },
         'Parser': {
             'required': True,
             'type': 'list',
