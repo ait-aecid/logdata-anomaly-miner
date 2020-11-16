@@ -41,6 +41,8 @@ Analysis:
           paths: ["/model/accesslog/request","/model/accesslog/status"]
           learn_mode: True
 
+        - type: EventTypeDetector
+
 EventHandlers:
         - id: stpe
           json: True # optional default: False
