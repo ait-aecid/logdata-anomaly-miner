@@ -642,7 +642,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         # Skip blocklisted paths.
         for blocklisted in self.blocklisted_paths:
             if blocklisted in parser_match.get_match_dictionary().keys():
-                return
+                return False
 
         if self.path_list is None or len(self.path_list) == 0:
             allowlisted = False
@@ -651,7 +651,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     allowlisted = True
                     break
             if not allowlisted and self.allowlisted_paths != []:
-                return
+                return False
 
         # Initialize new entries in lists for a new eventType if necessary
         if len(self.length) < event_index + 1 or self.var_type[event_index] == []:
