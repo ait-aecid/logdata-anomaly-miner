@@ -70,7 +70,8 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     self.log_new_learned_paths.append(path)
         if unknown_path_list:
             if self.next_persist_time is None:
-                self.next_persist_time = time.time() + 600
+                self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
+                    AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
             original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
             if original_log_line_prefix is None:
                 original_log_line_prefix = ''
@@ -102,12 +103,12 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted."""
         if self.next_persist_time is None:
-            return 600
+            return self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
         if delta < 0:
             self.do_persist()
-            delta = 600
+            delta = self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
         return delta
 
     def do_persist(self):
