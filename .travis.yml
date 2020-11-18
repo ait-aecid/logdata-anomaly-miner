@@ -13,21 +13,13 @@ install:
   - sudo apt-get update -y
   - sudo apt-get install -y ansible
   - sudo ansible-playbook -e "aminer_pkgrespath=/usr/lib/python3.6/site-packages aminer_pippath=/usr/lib/python3.6/site-packages" playbook.yml
-  - sudo apt-get install -y exim4 procps mailutils
+  - sudo apt-get install -y postfix procps mailutils
   - sudo pip3 install coverage
   - cd aecid-testsuite
   - sudo chmod +x runUnittests.sh
   - sudo chmod +x runAMinerDemo.sh
   - sudo chmod +x runAMinerIntegrationTest.sh
   - sudo chmod +x runCoverageTests.sh
-  # fix up exim4
-  - sudo sed -i "s/dc_local_interfaces='127.0.0.1 ; ::1'/dc_local_interfaces='127.0.0.1 ; '/g" /etc/exim4/update-exim4.conf.conf
-  - sudo service exim4 stop
-  - sudo pkill exim4
-  - sudo update-exim4.conf
-  - sudo service exim4 start
-  - sudo touch /var/mail/mail
-  - sudo chown mail:mail /var/mail/mail
 
 script:
   - ./runUnittests.sh
