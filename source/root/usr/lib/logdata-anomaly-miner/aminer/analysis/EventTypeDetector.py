@@ -212,6 +212,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     valid_log_atom = True
                     break
         if self.path_list and not valid_log_atom:
+            self.current_index = -1
             return False
         self.total_records += 1
 
