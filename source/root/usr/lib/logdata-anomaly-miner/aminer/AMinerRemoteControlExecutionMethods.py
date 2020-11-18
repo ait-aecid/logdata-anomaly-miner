@@ -13,9 +13,14 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import aminer
 from aminer import AMinerConfig, AnalysisChild
 import resource
+import os
+import shutil
+from time import time
+from datetime import datetime
 import logging
 from aminer.input import LogAtom
 from aminer.input import AtomHandlerInterface
+from aminer.util import PersistenceUtil
 
 attr_str = '"%s": %s,\n'
 component_not_found = 'Event history component not found'
@@ -303,6 +308,31 @@ class AMinerRemoteControlExecutionMethods:
         @param destination_file the path to the file in which the config is saved.
         """
         self.REMOTE_CONTROL_RESPONSE = AMinerConfig.save_config(analysis_context, destination_file)
+
+    def persist_all(self):
+        """Persist all data by calling the function in PersistenceUtil."""
+        PersistenceUtil.persist_all()
+        self.REMOTE_CONTROL_RESPONSE = 'OK'
+
+    def create_backup(self, analysis_context):
+        """Create a backup with the current datetime string."""
+        backup_time = time()
+        backup_time_str = datetime.fromtimestamp(backup_time).strftime('%Y-%m-%d-%H-%M-%S')
+        persistence_dir = analysis_context.aminer_config.config_properties[AMinerConfig.KEY_PERSISTENCE_DIR]
+        persistence_dir = persistence_dir.rstrip('/')
+        backup_path = persistence_dir + '/backup/'
+        backup_path_with_date = os.path.join(backup_path, backup_time_str)
+        shutil.copytree(persistence_dir, backup_path_with_date, ignore=shutil.ignore_patterns('backup*'))
+        self.REMOTE_CONTROL_RESPONSE = 'Created backup %s' % backup_time_str
+
+    def list_backups(self, analysis_context):
+        """List all available backups from the persistence directory."""
+        persistence_dir = analysis_context.aminer_config.config_properties.get(
+            AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
+        for _dirpath, dirnames, _filenames in os.walk(os.path.join(persistence_dir, 'backup')):
+            self.REMOTE_CONTROL_RESPONSE = '"backups": %s' % dirnames
+            break
+        self.REMOTE_CONTROL_RESPONSE = self.REMOTE_CONTROL_RESPONSE.replace("'", '"')
 
     def allowlist_event_in_component(self, analysis_context, component_name, event_data, allowlisting_data=None):
         """
