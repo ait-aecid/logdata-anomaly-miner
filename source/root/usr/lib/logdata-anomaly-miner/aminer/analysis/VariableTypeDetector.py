@@ -39,7 +39,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                  silence_output_without_confidence=False, silence_output_except_indicator=True, num_var_type_hist_ref=10,
                  num_update_var_type_hist_ref=10,  num_var_type_considered_ind=10, num_stat_stop_update=200,
                  num_updates_until_var_reduction=20, var_reduction_thres=0.6, num_skipped_ind_for_weights=1, num_ind_for_weights=100,
-                 used_multinomial_test='Chi', use_empiric_distr=True, save_statistics=True, output_log_line=True):
+                 used_multinomial_test='Chi', use_empiric_distr=True, save_statistics=True, output_log_line=True, blocklisted_paths=None,
+                 allowlisted_paths=None):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
         self.next_persist_time = None
         self.anomaly_event_handlers = anomaly_event_handlers
@@ -610,6 +611,13 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 'num_bt = 20, alpha = 0.025': [0.0012650966644287111, 0.012348556518554692, 0.032070970535278326, 0.05733404159545899, 0.08657145500183107, 0.11893157958984377, 0.1539091587066651, 0.19119005203247075, 0.2305778980255127, 0.27195787429809565, 0.31527810096740716, 0.36054258346557605, 0.4078114986419677, 0.4572108268737792, 0.5089540958404539, 0.5633859634399412, 0.6210731983184814, 0.6830172538757324, 0.7512671947479248, 0.8315665245056152]  # skipcq: FLK-E501
                 }
 
+        self.blocklisted_paths = blocklisted_paths
+        if self.blocklisted_paths is None:
+            self.blocklisted_paths = []
+        self.allowlisted_paths = allowlisted_paths
+        if self.allowlisted_paths is None:
+            self.allowlisted_paths = []
+
         # Loads the persistence
         self.persistence_id = persistence_id
         PersistenceUtil.add_persistable_component(self)
@@ -629,6 +637,21 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         """
         self.log_total += 1
         event_index = self.event_type_detector.current_index
+
+        parser_match = log_atom.parser_match
+        # Skip blocklisted paths.
+        for blocklisted in self.blocklisted_paths:
+            if blocklisted in parser_match.get_match_dictionary().keys():
+                return False
+
+        if self.path_list is None or len(self.path_list) == 0:
+            allowlisted = False
+            for allowlisted in self.allowlisted_paths:
+                if parser_match.get_match_dictionary().get(allowlisted) is not None:
+                    allowlisted = True
+                    break
+            if not allowlisted and self.allowlisted_paths != []:
+                return False
 
         # Initialize new entries in lists for a new eventType if necessary
         if len(self.length) < event_index + 1 or self.var_type[event_index] == []:
@@ -670,12 +693,12 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
     def do_timer(self, trigger_time):
         """Check if current ruleset should be persisted."""
         if self.next_persist_time is None:
-            return 600
+            return self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
         if delta < 0:
             self.do_persist()
-            delta = 600
+            delta = self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
         return delta
 
     def do_persist(self):

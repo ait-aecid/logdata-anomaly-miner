@@ -67,7 +67,8 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                     self.log_learned_path_values += 1
                     self.log_new_learned_values.append(match.match_object)
                     if self.next_persist_time is None:
-                        self.next_persist_time = time.time() + 600
+                        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
+                            AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
 
                 if isinstance(match.match_object, bytes):
                     affected_log_atom_values = [match.match_object.decode()]
