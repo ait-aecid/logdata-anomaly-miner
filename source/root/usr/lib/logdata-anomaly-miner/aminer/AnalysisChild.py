@@ -168,6 +168,9 @@ class AnalysisContext:
         self.aminer_config.build_analysis_pipeline(self)
 
 
+suspended_flag = False
+
+
 class AnalysisChild(TimeTriggeredComponentInterface):
     """
     This class defines the child performing the complete analysis workflow.
@@ -281,12 +284,13 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                     input_select_fd_list.append(fd_handler_object.fileno())
 
             # Loop over the list in reverse order to avoid skipping elements in remove.
-            for log_stream in reversed(blocked_log_streams):
-                current_stream_fd = log_stream.handle_stream()
-                if current_stream_fd >= 0:
-                    self.tracked_fds_dict[current_stream_fd] = log_stream
-                    input_select_fd_list.append(current_stream_fd)
-                    blocked_log_streams.remove(log_stream)
+            if not suspended_flag:
+                for log_stream in reversed(blocked_log_streams):
+                    current_stream_fd = log_stream.handle_stream()
+                    if current_stream_fd >= 0:
+                        self.tracked_fds_dict[current_stream_fd] = log_stream
+                        input_select_fd_list.append(current_stream_fd)
+                        blocked_log_streams.remove(log_stream)
 
             read_list = None
             write_list = None
@@ -379,7 +383,8 @@ class AnalysisChild(TimeTriggeredComponentInterface):
             if next_real_time_trigger_time is None or real_time >= next_real_time_trigger_time:
                 next_trigger_offset = 3600
                 for component in real_time_triggered_components:
-                    next_trigger_request = component.do_timer(real_time)
+                    if not suspended_flag:
+                        next_trigger_request = component.do_timer(real_time)
                     next_trigger_offset = min(next_trigger_offset, next_trigger_request)
                 next_real_time_trigger_time = real_time + next_trigger_offset
 
@@ -398,7 +403,8 @@ class AnalysisChild(TimeTriggeredComponentInterface):
             if next_analysis_time_trigger_time is None or analysis_time >= next_analysis_time_trigger_time:
                 next_trigger_offset = 3600
                 for component in analysis_time_triggered_components:
-                    next_trigger_request = component.do_timer(real_time)
+                    if not suspended_flag:
+                        next_trigger_request = component.do_timer(real_time)
                     next_trigger_offset = min(next_trigger_offset, next_trigger_request)
                 next_analysis_time_trigger_time = analysis_time + next_trigger_offset
 
@@ -607,16 +613,25 @@ class AnalysisChildRemoteControlHandler:
                 logging.getLogger(AMinerConfig.REMOTE_CONTROL_LOG_NAME).log(15, json_request_data[0])
                 logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('Remote control: %s', json_request_data[0])
 
-                # skipcq: PYL-W0122
-                exec(json_request_data[0], {'__builtins__': None}, exec_locals)
-                json_remote_control_response = json.dumps(exec_locals.get('remoteControlResponse'))
-                if methods.REMOTE_CONTROL_RESPONSE == '':
-                    methods.REMOTE_CONTROL_RESPONSE = None
-                if exec_locals.get('remoteControlResponse') is None:
-                    json_remote_control_response = json.dumps(methods.REMOTE_CONTROL_RESPONSE)
+                # skipcq: PYL-W0603
+                global suspended_flag
+                if json_request_data[0] in ('suspend_aminer()', 'suspend_aminer', 'suspend'):
+                    suspended_flag = True
+                    json_remote_control_response = json.dumps(methods.REMOTE_CONTROL_RESPONSE + 'OK. aminer is suspended now.')
+                elif json_request_data[0] in ('activate_aminer()', 'activate_aminer', 'activate'):
+                    suspended_flag = False
+                    json_remote_control_response = json.dumps(methods.REMOTE_CONTROL_RESPONSE + 'OK. aminer is activated now.')
                 else:
-                    json_remote_control_response = json.dumps(
-                        exec_locals.get('remoteControlResponse') + methods.REMOTE_CONTROL_RESPONSE)
+                    # skipcq: PYL-W0122
+                    exec(json_request_data[0], {'__builtins__': None}, exec_locals)
+                    json_remote_control_response = json.dumps(exec_locals.get('remoteControlResponse'))
+                    if methods.REMOTE_CONTROL_RESPONSE == '':
+                        methods.REMOTE_CONTROL_RESPONSE = None
+                    if exec_locals.get('remoteControlResponse') is None:
+                        json_remote_control_response = json.dumps(methods.REMOTE_CONTROL_RESPONSE)
+                    else:
+                        json_remote_control_response = json.dumps(
+                            exec_locals.get('remoteControlResponse') + methods.REMOTE_CONTROL_RESPONSE)
             # skipcq: FLK-E722
             except:
                 exception_data = traceback.format_exc()

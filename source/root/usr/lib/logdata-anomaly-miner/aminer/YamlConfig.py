@@ -18,19 +18,6 @@ config_properties = {}
 yaml_data = None
 enhanced_new_match_path_value_combo_detector_reference = None
 
-# Define the list of log resources to read from: the resources
-# named here do not need to exist when aminer is started. This
-# will just result in a warning. However if they exist, they have
-# to be readable by the aminer process! Supported types are:
-# * file://[path]: Read data from file, reopen it after rollover
-# * unix://[path]: Open the path as UNIX local socket for reading
-config_properties['LogResourceList'] = []
-
-# Define the uid/gid of the process that runs the calculation
-# after opening the log files:
-config_properties['AMinerUser'] = 'aminer'
-config_properties['AMinerGroup'] = 'aminer'
-
 
 def load_yaml(config_file):
     """Load the yaml configuration from file."""
@@ -48,7 +35,7 @@ def load_yaml(config_file):
         except yaml.YAMLError as exception:
             raise exception
 
-    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schema.py', 'r') as sma:
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'YamlSchema.py', 'r') as sma:
         # skipcq: PYL-W0123
         schema = eval(sma.read())
     sma.close()
@@ -64,13 +51,6 @@ def load_yaml(config_file):
     for key, val in yaml_data.items():
         config_properties[str(key)] = val
 
-
-# Read and store information to be used between multiple invocations
-# of AMiner in this directory. The directory must only be accessible
-# to the 'AMinerUser' but not group/world readable. On violation,
-# AMiner will refuse to start. When undefined, '/var/lib/aminer'
-# is used.
-# config_properties['Core.PersistenceDir'] = '/var/lib/aminer'
 
 # Add your ruleset here:
 def build_analysis_pipeline(analysis_context):
@@ -90,6 +70,7 @@ def build_parsing_model():
     start = None
     ws_count = 0
     whitespace_str = b' '
+
     # We might be able to remove this and us it like the config_properties
     # skipcq: PYL-W0603
     global yaml_data
@@ -168,6 +149,7 @@ def build_parsing_model():
                     parser_model_dict[item['id']] = item['type'].func(item['name'])
         else:
             parser_model_dict[item['id']] = item['type'].func()
+
     args_list = []
     if 'args' in start:
         if isinstance(start['args'], list):
@@ -240,10 +222,12 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 comp_name = None
             else:
                 comp_name = item['id']
-            if 'LearnMode' in yaml_data:
-                learn = yaml_data['LearnMode']
-            else:
+            if 'learn_mode' in item:
                 learn = item['learn_mode']
+            else:
+                if 'LearnMode' not in yaml_data:
+                    raise ValueError('Config error: LearnMode must be defined if an analysis component does not define learn_mode.')
+                learn = yaml_data['LearnMode']
             func = item['type'].func
             if item['type'].name == 'NewMatchPathValueDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn,
@@ -302,13 +286,13 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     split_reports_flag=item['split_reports_flag'])
             elif item['type'].name == 'EventCorrelationDetector':
                 tmp_analyser = func(
-                    analysis_context.aminer_config, anomaly_event_handlers, paths=item['paths'],
-                    max_hypotheses=item['max_hypotheses'], hypothesis_max_delta_time=item['hypothesis_max_delta_time'],
-                    generation_probability=item['generation_probability'], generation_factor=item['generation_factor'],
-                    max_observations=item['max_observations'], p0=item['p0'], alpha=item['alpha'], candidates_size=item['candidates_size'],
-                    hypotheses_eval_delta_time=item['hypotheses_eval_delta_time'],
+                    analysis_context.aminer_config, anomaly_event_handlers, paths=item['paths'], max_hypotheses=item['max_hypotheses'],
+                    hypothesis_max_delta_time=item['hypothesis_max_delta_time'], generation_probability=item['generation_probability'],
+                    generation_factor=item['generation_factor'], max_observations=item['max_observations'], p0=item['p0'],
+                    alpha=item['alpha'], candidates_size=item['candidates_size'],
+                    hypotheses_eval_delta_time=item['hypotheses_eval_delta_time'], allowlisted_paths=item['allowlisted_paths'],
                     delta_time_to_discard_hypothesis=item['delta_time_to_discard_hypothesis'], check_rules_flag=item['check_rules_flag'],
-                    auto_include_flag=learn, allowlisted_paths=item['allowlisted_paths'], persistence_id=item['persistence_id'])
+                    auto_include_flag=learn, blocklisted_paths=item['blocklisted_paths'], persistence_id=item['persistence_id'])
             elif item['type'].name == 'NewMatchIdValueComboDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers,
                                     id_path_list=item['id_path_list'], min_allowed_time_diff=item['min_allowed_time_diff'],
@@ -514,7 +498,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     var_reduction_thres=item['var_reduction_thres'], num_skipped_ind_for_weights=item['num_skipped_ind_for_weights'],
                     num_ind_for_weights=item['num_ind_for_weights'], used_multinomial_test=item['used_multinomial_test'],
                     use_empiric_distr=item['use_empiric_distr'], save_statistics=item['save_statistics'],
-                    output_log_line=item['output_logline'])
+                    output_log_line=item['output_logline'], blocklisted_paths=item['blocklisted_paths'],
+                    allowlisted_paths=item['allowlisted_paths'])
             else:
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn)
             analysis_context.register_component(tmp_analyser, component_name=comp_name)
@@ -528,7 +513,13 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
             for item in yaml_data['EventHandlers']:
                 func = item['type'].func
                 ctx = None
-                if item['type'].name in ('StreamPrinterEventHandler', 'DefaultMailNotificationEventHandler'):
+                if item['type'].name == 'StreamPrinterEventHandler':
+                    if 'output_file_path' in item:
+                        with open(item['output_file_path'], 'w+') as stream:
+                            ctx = func(analysis_context, stream)
+                    else:
+                        ctx = func(analysis_context)
+                if item['type'].name == 'DefaultMailNotificationEventHandler':
                     ctx = func(analysis_context)
                 if item['type'].name == 'SyslogWriterEventHandler':
                     ctx = func(analysis_context, item['instance_name'])

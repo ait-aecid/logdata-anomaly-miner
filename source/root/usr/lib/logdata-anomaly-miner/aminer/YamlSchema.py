@@ -14,10 +14,19 @@
             'type': 'string',
             'default': 'aminer'
         },
+        'RemoteControlSocket': {
+            'required': False,
+            'type': 'string'
+        },
         'Core.PersistenceDir': {
             'required': False,
             'type': 'string',
             'default': '/var/lib/aminer'
+        },
+        'Core.PersistencePeriod': {
+            'required': False,
+            'type': 'integer',
+            'default': 600
         },
         'MailAlerting.TargetAddress': {
             'required': False,
@@ -139,7 +148,7 @@
                     'labels': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                     'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},
                     'output_logline': {'type': 'boolean', 'required': False, 'default': True},
-                    'learn_mode': {'type': 'boolean', 'required': False, 'default': False},
+                    'learn_mode': {'type': 'boolean', 'required': False},
                     'allow_missing_values': {'type': 'boolean', 'required': False, 'default': False},
                     'check_interval': {'type': 'integer', 'required': False, 'default': 3600},
                     'realert_interval': {'type': 'integer', 'required': False, 'default': 36000},
@@ -165,6 +174,8 @@
                     'check_rules_flag': {'type': 'boolean', 'required': False, 'default': True},
                     'allowlisted_paths': {
                         'type': 'list', 'schema': {'type': 'string'}, 'required': False, 'nullable': True, 'default': None},
+                    'blocklisted_paths': {
+                        'type': 'list', 'schema': {'type': 'string'}, 'required': False, 'nullable': True, 'default': None},
                     'id_path_list': {'type': 'list', 'required': False, 'default': []},
                     'min_allowed_time_diff': {'type': 'float', 'required': False, 'default': 5.0},
                     'lower_limit': {'type': ['integer', 'float']},
@@ -177,7 +188,8 @@
                     'histogram_defs': {'type': 'list', 'schema': {'type': 'list', 'schema': {'type': 'string'}}},
                     'bin_definition': {'type': 'string'},
                     'tuple_transformation_function': {'type': 'string'},
-                    'value_list': {'type': 'list', 'schema': {'type': ['boolean', 'float', 'integer', 'string']}},
+                    'value_list': {
+                        'type': 'list', 'schema': {'type': ['boolean', 'float', 'integer', 'string']}, 'nullable': True, 'default': None},
                     'timestamp_path': {'type': 'string'},
                     'min_bin_elements': {'type': 'integer'},
                     'min_bin_time': {'type': 'integer'},
@@ -275,7 +287,8 @@
                     'instance_name': {'type': 'string', 'required': False, 'default': 'aminer'},
                     'topic': {'type': 'string'},
                     'cfgfile': {'type': 'string'},
-                    'options': {'type': 'dict', 'schema': {'id': {'type': 'string'}, 'type': {'type': ['string', 'list', 'integer']}}}
+                    'options': {'type': 'dict', 'schema': {'id': {'type': 'string'}, 'type': {'type': ['string', 'list', 'integer']}}},
+                    'output_file_path': {'type': 'string', 'required': False}
                 }
             }
         }

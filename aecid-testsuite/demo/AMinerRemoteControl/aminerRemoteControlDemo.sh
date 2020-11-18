@@ -76,3 +76,9 @@ sudo aminerRemoteControl --Exec "list_backups(analysis_context)"
 
 # Create a backup.
 sudo aminerRemoteControl --Exec "create_backup(analysis_context)"
+
+# suspend the aminer.
+sudo aminerRemoteControl --Exec "suspend"
+
+# activate the aminer.
+sudo aminerRemoteControl --Exec "activate"

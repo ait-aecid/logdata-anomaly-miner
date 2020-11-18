@@ -24,6 +24,8 @@ KEY_AMINER_GROUP = 'AMinerGroup'
 KEY_ANALYSIS_CONFIG_FILE = 'AnalysisConfigFile'
 KEY_PERSISTENCE_DIR = 'Core.PersistenceDir'
 DEFAULT_PERSISTENCE_DIR = '/var/lib/aminer'
+KEY_PERSISTENCE_PERIOD = 'Core.PersistencePeriod'
+DEFAULT_PERSISTENCE_PERIOD = 600
 KEY_REMOTE_CONTROL_SOCKET_PATH = 'RemoteControlSocket'
 KEY_LOG_PREFIX = 'LogPrefix'
 KEY_RESOURCES_MAX_MEMORY_USAGE = 'Resources.MaxMemoryUsage'
@@ -57,7 +59,7 @@ def load_config(config_file_name):
 
     if extension in ymlext:
         yaml_config = config_file_name
-        config_file_name = os.path.dirname(os.path.abspath(__file__)) + '/' + 'ymlconfig.py'
+        config_file_name = os.path.dirname(os.path.abspath(__file__)) + '/' + 'YamlConfig.py'
     try:
         spec = importlib.util.spec_from_file_location('aminer_config', config_file_name)
         aminer_config = importlib.util.module_from_spec(spec)
