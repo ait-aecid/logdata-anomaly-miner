@@ -25,6 +25,8 @@ import time
 import traceback
 import resource
 import logging
+from datetime import datetime
+import shutil
 
 from aminer import AMinerConfig
 from aminer.input.LogStream import LogStream
@@ -259,6 +261,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         # Always start when number is None.
         next_real_time_trigger_time = None
         next_analysis_time_trigger_time = None
+        next_backup_time_trigger_time = None
         log_stat_period = self.analysis_context.aminer_config.config_properties.get(
             AMinerConfig.KEY_LOG_STAT_PERIOD, AMinerConfig.DEFAULT_STAT_PERIOD)
         next_statistics_log_time = time.time() + log_stat_period
@@ -404,6 +407,19 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                         next_trigger_request = component.do_timer(real_time)
                     next_trigger_offset = min(next_trigger_offset, next_trigger_request)
                 next_analysis_time_trigger_time = analysis_time + next_trigger_offset
+
+            # backup the persistence data.
+            backup_time = time.time()
+            backup_time_str = datetime.fromtimestamp(backup_time).strftime('%Y-%m-%d-%H-%M-%S')
+            persistence_dir = self.analysis_context.aminer_config.config_properties[AMinerConfig.KEY_PERSISTENCE_DIR]
+            persistence_dir = persistence_dir.rstrip('/')
+            backup_path = persistence_dir + '/backup/'
+            backup_path_with_date = os.path.join(backup_path, backup_time_str)
+            if next_backup_time_trigger_time is None or backup_time >= next_backup_time_trigger_time:
+                next_trigger_offset = 3600 * 24
+                if next_backup_time_trigger_time is not None:
+                    shutil.copytree(persistence_dir, backup_path_with_date, ignore=shutil.ignore_patterns('backup*'))
+                next_backup_time_trigger_time = backup_time + next_trigger_offset
 
         # Analysis loop is only left on shutdown. Try to persist everything and leave.
         PersistenceUtil.persist_all()
@@ -573,6 +589,9 @@ class AnalysisChildRemoteControlHandler:
                     'ignore_events_from_history': methods.ignore_events_from_history,
                     'list_events_from_history': methods.list_events_from_history,
                     'allowlist_events_from_history': methods.allowlist_events_from_history,
+                    'persist_all': methods.persist_all,
+                    'list_backups': methods.list_backups,
+                    'create_backup': methods.create_backup,
                     'change_log_stat_level': methods.change_log_stat_level,
                     'change_log_debug_level': methods.change_log_debug_level,
                     'EnhancedNewMatchPathValueComboDetector': aminer.analysis.EnhancedNewMatchPathValueComboDetector,

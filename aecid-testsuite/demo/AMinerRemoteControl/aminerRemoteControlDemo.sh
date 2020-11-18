@@ -71,6 +71,15 @@ sudo AMinerRemoteControl --Exec "change_attribute_of_registered_analysis_compone
 # Adds a new path to the known_path_set
 sudo aminerRemoteControl --Exec "allowlist_event_in_component(analysis_context,'NewMatchPathDet',['/new/path1','/new/path2'])" --StringResponse
 
+# Persist all data.
+sudo aminerRemoteControl --Exec "persist_all()"
+
+# List all backups.
+sudo aminerRemoteControl --Exec "list_backups(analysis_context)"
+
+# Create a backup.
+sudo aminerRemoteControl --Exec "create_backup(analysis_context)"
+
 # suspend the aminer.
 sudo aminerRemoteControl --Exec "suspend"
 

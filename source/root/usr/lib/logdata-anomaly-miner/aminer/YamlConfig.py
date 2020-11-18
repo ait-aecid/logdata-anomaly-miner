@@ -217,6 +217,16 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
         match_action_dict = {}
         match_rules_dict = {}
         correlation_rules = {}
+        # changed order if ETD is defined.
+        for item in yaml_data['Analysis']:
+            if item['type'].name == 'EventTypeDetector':
+                index = yaml_data['Analysis'].index(item)
+                new_analysis_list = [item]
+                del yaml_data['Analysis'][index]
+                new_analysis_list += yaml_data['Analysis']
+                yaml_data['Analysis'] = new_analysis_list
+                break
+
         for item in yaml_data['Analysis']:
             if item['id'] == 'None':
                 comp_name = None
