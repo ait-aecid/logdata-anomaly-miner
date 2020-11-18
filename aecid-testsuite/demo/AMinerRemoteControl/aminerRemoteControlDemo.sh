@@ -70,3 +70,9 @@ sudo AMinerRemoteControl --Exec "change_attribute_of_registered_analysis_compone
 
 # Adds a new path to the known_path_set
 sudo aminerRemoteControl --Exec "allowlist_event_in_component(analysis_context,'NewMatchPathDet',['/new/path1','/new/path2'])" --StringResponse
+
+# suspend the aminer.
+sudo aminerRemoteControl --Exec "suspend"
+
+# activate the aminer.
+sudo aminerRemoteControl --Exec "activate"
