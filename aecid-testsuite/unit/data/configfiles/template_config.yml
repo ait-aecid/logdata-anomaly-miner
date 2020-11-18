@@ -44,6 +44,7 @@ Analysis:
           learn_mode: True
 
         - type: EventTypeDetector
+          learn_mode: False
 
 EventHandlers:
         - id: stpe
