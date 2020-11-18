@@ -2,6 +2,7 @@ import sys
 import os
 import shutil
 import re
+from aminer.AMinerConfig import load_config, KEY_AMINER_USER, KEY_AMINER_GROUP, KEY_PERSISTENCE_DIR
 
 
 __website__ = "https://aecid.ait.ac.at"
@@ -98,23 +99,29 @@ def main():
         sys.exit(1)
 
     absolute_persistence_path = None
+    config_file_name = None
     aminer_user = 'aminer'
     aminer_grp = 'aminer'
     persistence_dir = '/var/lib/aminer'
+
     rc_response_string = 'Remote execution response: '
     arg_pos = 1
     while arg_pos < len(sys.argv):
         arg_name = sys.argv[arg_pos]
         arg_pos += 1
 
+        if arg_name in ('--Config', '--config', '-c'):
+            config_file_name = sys.argv[arg_pos]
+            arg_pos += 1
+            continue
         if arg_name in ('--List', '--list', '-l'):
             # skipcq: BAN-B605, BAN-B607
-            process = os.popen('sudo aminerRemoteControl --Exec "list_backups(analysis_context)"')
+            process = os.popen('sudo aminerremotecontrol --Exec "list_backups(analysis_context)"')
             print(process.read().strip('\n').strip(rc_response_string))
             break
         if arg_name in ('--Backup', '--backup', '-b'):
             # skipcq: BAN-B605, BAN-B607
-            process = os.popen('sudo aminerRemoteControl --Exec "create_backup(analysis_context)"')
+            process = os.popen('sudo aminerremotecontrol --Exec "create_backup(analysis_context)"')
             print(process.read().strip('\n').strip(rc_response_string))
             break
         if arg_name in ('--Restore', '--restore', '-r'):
@@ -138,6 +145,13 @@ def main():
             aminer_grp = sys.argv[arg_pos]
             arg_pos += 1
             continue
+        if arg_name in ('--PersistenceDir', '--persistencedir', '-p'):
+            if not sys.argv[arg_pos].startswith('/'):
+                print('The persistence_dir path must be absolute.', file=sys.stderr)
+                sys.exit(1)
+            persistence_dir = sys.argv[arg_pos]
+            arg_pos += 1
+            continue
         if arg_name in ('--print_help', '--Help', '--help', '-h'):
             print_help(program_name)
             sys.exit(1)
@@ -146,6 +160,15 @@ def main():
         sys.exit(1)
 
     if absolute_persistence_path is not None:
+        if config_file_name is not None:
+            aminer_config = load_config(config_file_name)
+            if '--User' not in sys.argv and '--user' not in sys.argv and '-u' not in sys.argv:
+                aminer_user = aminer_config.config_properties[KEY_AMINER_USER]
+            if '--Group' not in sys.argv and '--group' not in sys.argv and '-g' not in sys.argv:
+                aminer_grp = aminer_config.config_properties[KEY_AMINER_GROUP]
+            if '--PersistenceDir' not in sys.argv and '--persistencedir' not in sys.argv and '-p' not in sys.argv:
+                persistence_dir = aminer_config.config_properties[KEY_PERSISTENCE_DIR]
+
         if not os.path.exists(absolute_persistence_path):
             print('%s does not exist.' % absolute_persistence_path, file=sys.stderr)
         else:
