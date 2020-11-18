@@ -221,8 +221,11 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
         for item in yaml_data['Analysis']:
             if item['type'].name == 'EventTypeDetector':
                 index = yaml_data['Analysis'].index(item)
-                yaml_data['Analysis'][index] = yaml_data['Analysis'][0]
-                yaml_data['Analysis'][0] = item
+                new_analysis_list = [item]
+                del yaml_data['Analysis'][index]
+                new_analysis_list += yaml_data['Analysis']
+                yaml_data['Analysis'] = new_analysis_list
+                break
 
         for item in yaml_data['Analysis']:
             if item['id'] == 'None':
