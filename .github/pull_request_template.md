@@ -6,6 +6,8 @@
 - [ ] I added related issues using the "Fixes #123'-notations
 - [ ] This Pull-Requests merges into the "development"-branch
 
+Fixes #
+
 # Submission specific
 
 - [ ] This PR introduces breaking changes
@@ -15,6 +17,4 @@
 - [ ] All new and existing tests passed
 
 # Describe changes:
--
--
 -
