@@ -568,6 +568,7 @@ class AnalysisChildRemoteControlHandler:
                         methods.add_handler_to_atom_filter_and_register_analysis_component,
                     'save_current_config': methods.save_current_config,
                     'allowlist_event_in_component': methods.allowlist_event_in_component,
+                    'blocklist_event_in_component': methods.blocklist_event_in_component,
                     'dump_events_from_history': methods.dump_events_from_history,
                     'ignore_events_from_history': methods.ignore_events_from_history,
                     'list_events_from_history': methods.list_events_from_history,
