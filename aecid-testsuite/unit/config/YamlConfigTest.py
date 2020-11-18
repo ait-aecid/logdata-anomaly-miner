@@ -405,6 +405,17 @@ class YamlConfigTest(unittest.TestCase):
         self.assertEqual(yml_context.atomizer_factory.default_timestamp_paths, py_context.atomizer_factory.default_timestamp_paths)
         self.assertEqual(type(yml_context.atomizer_factory.event_handler_list), type(py_context.atomizer_factory.event_handler_list))
 
+    def test19_stream_printer_output_file(self):
+        """Check if the output_file_path property of StreamPrinterEventHandler works properly."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        aminer_config.load_yaml('unit/data/configfiles/template_config.yml')
+        context = AnalysisContext(aminer_config)
+        context.build_analysis_pipeline()
+        self.assertEqual(context.atomizer_factory.event_handler_list[0].stream.name, '/tmp/streamPrinter.txt')
+        self.assertEqual(context.atomizer_factory.event_handler_list[0].stream.mode, 'w+')
+
     def run_empty_components_tests(self, context):
         """Run the empty components tests."""
         self.assertTrue(isinstance(context.registered_components[0][0], NewMatchPathDetector))
