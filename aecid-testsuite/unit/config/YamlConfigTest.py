@@ -414,7 +414,9 @@ class YamlConfigTest(unittest.TestCase):
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
         self.assertEqual(context.aminer_config.yaml_data['Analysis'][0]['type'].name, 'EventTypeDetector')
-        self.assertEqual(context.aminer_config.yaml_data['Analysis'][-1]['type'].name, 'NewMatchPathValueDetector')
+        self.assertEqual(context.aminer_config.yaml_data['Analysis'][1]['type'].name, 'NewMatchPathValueDetector')
+        self.assertEqual(context.aminer_config.yaml_data['Analysis'][2]['type'].name, 'NewMatchPathValueComboDetector')
+        self.assertEqual(context.aminer_config.yaml_data['Analysis'][3]['type'].name, 'NewMatchPathValueComboDetector')
 
     def run_empty_components_tests(self, context):
         """Run the empty components tests."""
