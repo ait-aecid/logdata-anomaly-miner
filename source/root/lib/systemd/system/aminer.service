@@ -1,16 +1,19 @@
 [Unit]
-Description=AMiner log data mining server
+Description=aminer log data mining server
 Documentation=man:aminer(1)
 
 [Service]
 Type=simple
+ExecStartPre=touch /var/log/aminer.log
+ExecStartPre=chown aminer:aminer /var/log/aminer.log
 ExecStart=/usr/lib/logdata-anomaly-miner/aminer.py --Config /etc/aminer/config.yml
 KillMode=control-group
 # Write everything to /dev/null: if AMiner is misconfigured, it
 # may detect anonamies in its own log data, thus creating a logging
 # loop. You may prefer logging to journal only, which needs journald
 # to be reconfigured with "ForwardToSyslog=false".
-StandardOutput=null
+StandardOutput=file:/var/log/aminer.log
+StandardError=file:/var/log/aminer.log
 
 [Install]
 WantedBy=multi-user.target
