@@ -49,7 +49,7 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
     CONFIG_KEY_ALERT_MAX_GAP = 'MailAlerting.MaxAlertGap'
     CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE = 'MailAlerting.MaxEventsPerMessage'
 
-    def __init__(self, analysis_context):
+    def __init__(self, analysis_context, suppress_detector_list=None):
         self.analysis_context = analysis_context
         aminer_config = analysis_context.aminer_config
         # @see https://emailregex.com/
@@ -84,6 +84,7 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
         self.next_alert_time = 0
         self.current_alert_gap = self.min_alert_gap
         self.current_message = ''
+        self.suppress_detector_list = suppress_detector_list
 
     def receive_event(self, event_type, event_message, sorted_log_lines, event_data, log_atom, event_source):
         """Receive information about a detected event."""
@@ -91,6 +92,10 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
             if self.alert_grace_time_end >= time.time():
                 return
             self.alert_grace_time_end = 0
+
+        component_name = self.analysis_context.get_name_by_component(event_source)
+        if self.suppress_detector_list is not None and component_name in self.suppress_detector_list:
+            return
 
         # Avoid too many calls to the operating system time()
         current_time = time.time()

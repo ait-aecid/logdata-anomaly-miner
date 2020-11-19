@@ -60,8 +60,8 @@ def build_analysis_pipeline(analysis_context):
     """
     parsing_model = build_parsing_model()
     anomaly_event_handlers, atom_filter = build_input_pipeline(analysis_context, parsing_model)
-    build_analysis_components(analysis_context, anomaly_event_handlers, atom_filter)
-    build_event_handlers(analysis_context, anomaly_event_handlers)
+    suppress_detector_list = build_analysis_components(analysis_context, anomaly_event_handlers, atom_filter)
+    build_event_handlers(analysis_context, anomaly_event_handlers, suppress_detector_list)
 
 
 def build_parsing_model():
@@ -205,13 +205,16 @@ def build_input_pipeline(analysis_context, parsing_model):
     else:
         learn = True
     nmpd = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=learn)
-    analysis_context.register_component(nmpd, component_name=None)
+    analysis_context.register_component(nmpd, component_name='DefaultNewMatchPathDetector')
     atom_filter.add_handler(nmpd)
     return anomaly_event_handlers, atom_filter
 
 
 def build_analysis_components(analysis_context, anomaly_event_handlers, atom_filter):
     """Build the analysis components."""
+    suppress_detector_list = []
+    if yaml_data['SuppressNewMatchPathDetector']:
+        suppress_detector_list.append('DefaultNewMatchPathDetector')
     if 'Analysis' in yaml_data and yaml_data['Analysis'] is not None:
         analysis_dict = {}
         match_action_dict = {}
@@ -239,6 +242,11 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     raise ValueError('Config error: LearnMode must be defined if an analysis component does not define learn_mode.')
                 learn = yaml_data['LearnMode']
             func = item['type'].func
+            if item['suppress']:
+                if comp_name is None:
+                    raise ValueError(
+                        'Config error: id must be specified for the analysis component %s to enable suppression.' % item['type'])
+                suppress_detector_list.append(comp_name)
             if item['type'].name == 'NewMatchPathValueDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn,
                                     persistence_id=item['persistence_id'], output_log_line=item['output_logline'])
@@ -514,9 +522,10 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn)
             analysis_context.register_component(tmp_analyser, component_name=comp_name)
             atom_filter.add_handler(tmp_analyser)
+    return suppress_detector_list
 
 
-def build_event_handlers(analysis_context, anomaly_event_handlers):
+def build_event_handlers(analysis_context, anomaly_event_handlers, suppress_detector_list):
     """Build the event handlers."""
     try:
         if 'EventHandlers' in yaml_data and yaml_data['EventHandlers'] is not None:
@@ -526,13 +535,13 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                 if item['type'].name == 'StreamPrinterEventHandler':
                     if 'output_file_path' in item:
                         with open(item['output_file_path'], 'w+') as stream:
-                            ctx = func(analysis_context, stream)
+                            ctx = func(analysis_context, stream=stream, suppress_detector_list=suppress_detector_list)
                     else:
-                        ctx = func(analysis_context)
+                        ctx = func(analysis_context, suppress_detector_list=suppress_detector_list)
                 if item['type'].name == 'DefaultMailNotificationEventHandler':
-                    ctx = func(analysis_context)
+                    ctx = func(analysis_context, suppress_detector_list=suppress_detector_list)
                 if item['type'].name == 'SyslogWriterEventHandler':
-                    ctx = func(analysis_context, item['instance_name'])
+                    ctx = func(analysis_context, item['instance_name'], suppress_detector_list=suppress_detector_list)
                 if item['type'].name == 'KafkaEventHandler':
                     if 'topic' not in item:
                         raise ValueError("Kafka-Topic not defined")
@@ -556,12 +565,12 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                             options[key] = int(val)
                         except:  # skipcq: FLK-E722
                             pass
-                    ctx = func(analysis_context.aminer_config, item['topic'], options)
+                    ctx = func(analysis_context.aminer_config, item['topic'], options, suppress_detector_list=suppress_detector_list)
                 if ctx is None:
-                    ctx = func(analysis_context)
+                    ctx = func(analysis_context, suppress_detector_list=suppress_detector_list)
                 if item['json'] is True or item['type'].name == 'KafkaEventHandler':
                     from aminer.events import JsonConverterHandler
-                    ctx = JsonConverterHandler([ctx], analysis_context)
+                    ctx = JsonConverterHandler([ctx], analysis_context, suppress_detector_list=suppress_detector_list)
                 anomaly_event_handlers.append(ctx)
         else:
             raise KeyError()

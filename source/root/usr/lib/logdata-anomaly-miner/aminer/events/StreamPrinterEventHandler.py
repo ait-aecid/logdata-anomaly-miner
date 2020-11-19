@@ -24,12 +24,16 @@ class StreamPrinterEventHandler(EventHandlerInterface):
     By default this is stdout.
     """
 
-    def __init__(self, analysis_context, stream=sys.stdout):
+    def __init__(self, analysis_context, stream=sys.stdout, suppress_detector_list=None):
         self.analysis_context = analysis_context
         self.stream = stream
+        self.suppress_detector_list = suppress_detector_list
 
     def receive_event(self, event_type, event_message, sorted_log_lines, event_data, log_atom, event_source):
         """Receive information about a detected event."""
+        component_name = self.analysis_context.get_name_by_component(event_source)
+        if self.suppress_detector_list is not None and component_name in self.suppress_detector_list:
+            return
         event_data_obj = EventData(event_type, event_message, sorted_log_lines, event_data, log_atom, event_source, self.analysis_context)
         message = '%s\n' % event_data_obj.receive_event_string()
         if hasattr(self.stream, 'buffer'):
