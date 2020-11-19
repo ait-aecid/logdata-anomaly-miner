@@ -2,6 +2,7 @@ import unittest
 import os
 import shutil
 import logging
+import sys
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
@@ -10,7 +11,6 @@ from _io import StringIO
 
 def initialize_loggers(aminer_config, aminer_user, aminer_grp):
     """Initialize all loggers."""
-    from aminer import AMinerConfig
     datefmt = '%d/%b/%Y:%H:%M:%S %z'
 
     persistence_dir = aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
