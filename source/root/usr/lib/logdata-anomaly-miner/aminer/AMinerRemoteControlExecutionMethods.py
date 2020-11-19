@@ -41,6 +41,16 @@ class AMinerRemoteControlExecutionMethods:
     CONFIG_KEY_ALERT_MAX_GAP = 'MailAlerting.MaxAlertGap'
     CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE = 'MailAlerting.MaxEventsPerMessage'
 
+    MAIL_CONFIG_PROPERTIES = [CONFIG_KEY_MAIL_TARGET_ADDRESS, CONFIG_KEY_MAIL_FROM_ADDRESS]
+    INTEGER_CONFIG_PROPERTY_LIST = [
+        CONFIG_KEY_MAIL_ALERT_GRACE_TIME, CONFIG_KEY_EVENT_COLLECT_TIME, CONFIG_KEY_ALERT_MIN_GAP, CONFIG_KEY_ALERT_MAX_GAP,
+        CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE, AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.KEY_LOG_STAT_LEVEL,
+        AMinerConfig.KEY_LOG_DEBUG_LEVEL, AMinerConfig.KEY_LOG_STAT_PERIOD, KEY_RESOURCES_MAX_MEMORY_USAGE
+    ]
+    STRING_CONFIG_PROPERTY_LIST = [
+        CONFIG_KEY_MAIL_TARGET_ADDRESS, CONFIG_KEY_MAIL_FROM_ADDRESS, CONFIG_KEY_MAIL_SUBJECT_PREFIX, KEY_LOG_PREFIX
+    ]
+
     def print_response(self, value):
         """Add a value to the response string."""
         self.REMOTE_CONTROL_RESPONSE += str(value)
@@ -48,22 +58,24 @@ class AMinerRemoteControlExecutionMethods:
     def change_config_property(self, analysis_context, property_name, value):
         """Change a config_property in an running aminer instance."""
         result = 0
-        config_keys_mail_alerting = {
+        config_keys_mail_alerting = [
             self.CONFIG_KEY_MAIL_TARGET_ADDRESS, self.CONFIG_KEY_MAIL_FROM_ADDRESS, self.CONFIG_KEY_MAIL_SUBJECT_PREFIX,
             self.CONFIG_KEY_EVENT_COLLECT_TIME, self.CONFIG_KEY_ALERT_MIN_GAP, self.CONFIG_KEY_ALERT_MAX_GAP,
-            self.CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE}
+            self.CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE]
         if not isinstance(analysis_context, AnalysisChild.AnalysisContext):
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: the analysis_context must be of type %s." % AnalysisChild.AnalysisContext.__class__
             return
 
-        if property_name not in analysis_context.aminer_config.config_properties:
+        if property_name not in self.INTEGER_CONFIG_PROPERTY_LIST + self.STRING_CONFIG_PROPERTY_LIST:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: the property '%s' does not exist in the current config!" % property_name
             return
 
-        t = type(analysis_context.aminer_config.config_properties[property_name])
+        if property_name in self.INTEGER_CONFIG_PROPERTY_LIST:
+            t = int
+        else:
+            t = str
         if not isinstance(value, t):
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: the value of the property '%s' must be of type %s!" % (
-                property_name, t)
+            self.REMOTE_CONTROL_RESPONSE += "FAILURE: the value of the property '%s' must be of type %s!" % (property_name, t)
             return
 
         if property_name in [AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.KEY_LOG_SOURCES_LIST]:
@@ -74,10 +86,15 @@ class AMinerRemoteControlExecutionMethods:
             result = self.change_config_property_max_memory(analysis_context, value)
         elif property_name in config_keys_mail_alerting:
             result = self.change_config_property_mail_alerting(analysis_context, property_name, value)
-        elif property_name == AMinerConfig.KEY_LOG_PREFIX:
-            result = self.change_config_property_log_prefix(analysis_context, value)
+        elif property_name in (AMinerConfig.KEY_LOG_PREFIX, AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.KEY_LOG_STAT_PERIOD):
+            analysis_context.aminer_config.config_properties[property_name] = value
+            result = 0
+        elif property_name == AMinerConfig.KEY_LOG_STAT_LEVEL:
+            self.change_config_property_log_stat_level(analysis_context, value)
+        elif property_name == AMinerConfig.KEY_LOG_DEBUG_LEVEL:
+            self.change_config_property_log_debug_level(analysis_context, value)
         else:
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: property %s could not be changed. Please check the propertyName " \
+            self.REMOTE_CONTROL_RESPONSE += "FAILURE: property %s could not be changed. Please check the property_name " \
                                             "again." % property_name
             return
         if result == 0:
@@ -86,6 +103,10 @@ class AMinerRemoteControlExecutionMethods:
     @staticmethod
     def change_config_property_mail_alerting(analysis_context, property_name, value):
         """Change any mail property."""
+        is_email = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)|^[a-zA-Z0-9]+@localhost$")
+        if property_name in self.MAIL_CONFIG_PROPERTIES and not is_email.match(value):
+            self.REMOTE_CONTROL_RESPONSE += "FAILURE: MailAlerting.TargetAddress and MailAlerting.FromAddress must be email addresses!"
+            return 1
         analysis_context.aminer_config.config_properties[property_name] = value
         for analysis_component_id in analysis_context.get_registered_component_ids():
             component = analysis_context.get_component_by_id(analysis_component_id)
@@ -107,11 +128,29 @@ class AMinerRemoteControlExecutionMethods:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: property 'maxMemoryUsage' must be of type Integer!"
             return 1
 
-    @staticmethod
-    def change_config_property_log_prefix(analysis_context, log_prefix):
-        """Change the config_property LogPrefix."""
-        analysis_context.aminer_config.config_properties[AMinerConfig.KEY_LOG_PREFIX] = str(log_prefix)
-        return 0
+    def change_config_property_log_stat_level(self, analysis_context, stat_level):
+        """Set the statistic logging level."""
+        if debug_level in (0, 1, 2):
+            analysis_context.aminer_config.config_properties[AMinerConfig.KEY_LOG_STAT_LEVEL] = stat_level
+            return 0
+        else:
+            self.REMOTE_CONTROL_RESPONSE += "FAILURE: stat level %d is not allowed. Allowed values are 0, 1, 2." % stat_level
+            return 1
+
+    def change_config_property_log_debug_level(self, analysis_context, debug_level):
+        """Set the debug log level."""
+        if debug_level in (0, 1, 2):
+            analysis_context.aminer_config.config_properties[AMinerConfig.KEY_LOG_DEBUG_LEVEL] = debug_level
+            if debug_level == 0:
+                debug_logger.setLevel(logging.ERROR)
+            elif debug_level == 1:
+                debug_logger.setLevel(logging.INFO)
+            else:
+                debug_logger.setLevel(logging.DEBUG)
+            return 0
+        else:
+            self.REMOTE_CONTROL_RESPONSE += "FAILURE: debug level %d is not allowed. Allowed values are 0, 1, 2." % debug_level
+            return 1
 
     def change_attribute_of_registered_analysis_component(self, analysis_context, component_name, attribute, value):
         """
