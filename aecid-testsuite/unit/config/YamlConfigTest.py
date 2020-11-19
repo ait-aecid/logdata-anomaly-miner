@@ -512,6 +512,17 @@ class YamlConfigTest(TestBase):
         self.assertEqual(self.output_stream.getvalue(), "")
         self.reset_output_stream()
 
+    def test21_suppress_output_no_id_error(self):
+        """Check if an error is raised if no id parameter is defined."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        aminer_config.load_yaml('unit/data/configfiles/suppress_config.yml')
+        aminer_config.yaml_data['Analysis'][0]['id'] = None
+        aminer_config.yaml_data['Analysis'][0]['suppress'] = True
+        context = AnalysisContext(aminer_config)
+        self.assertRaises(ValueError, context.build_analysis_pipeline)
+
     def run_empty_components_tests(self, context):
         """Run the empty components tests."""
         self.assertTrue(isinstance(context.registered_components[0][0], NewMatchPathDetector))
