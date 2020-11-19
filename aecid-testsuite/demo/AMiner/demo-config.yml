@@ -2,6 +2,8 @@ LearnMode: False
 
 Core.PersistenceDir: '/tmp/lib/aminer'
 
+Core.PersistencePeriod: 600
+
 LogResourceList:
         - 'file:///tmp/syslog'
 

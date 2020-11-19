@@ -67,3 +67,18 @@ sudo AMinerRemoteControl --Exec "change_attribute_of_registered_analysis_compone
 
 # In the last step we remove all special rules and only allow User 'username' (logged in, logged out) x minutes ago.
 sudo AMinerRemoteControl --Exec "change_attribute_of_registered_analysis_component(analysis_context,'Allowlist','allowlist_rules',[Rules.OrMatchRule([Rules.AndMatchRule([Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails/PastTime/Time/Minutes')),Rules.PathExistsMatchRule('/model/LoginDetails')]),Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails'))])])"
+
+# Persist all data.
+sudo aminerRemoteControl --Exec "persist_all()"
+
+# List all backups.
+sudo aminerRemoteControl --Exec "list_backups(analysis_context)"
+
+# Create a backup.
+sudo aminerRemoteControl --Exec "create_backup(analysis_context)"
+
+# suspend the aminer.
+sudo aminerRemoteControl --Exec "suspend"
+
+# activate the aminer.
+sudo aminerRemoteControl --Exec "activate"

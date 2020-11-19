@@ -23,6 +23,11 @@
             'type': 'string',
             'default': '/var/lib/aminer'
         },
+        'Core.PersistencePeriod': {
+            'required': False,
+            'type': 'integer',
+            'default': 600
+        },
         'MailAlerting.TargetAddress': {
             'required': False,
             'type': 'string',
@@ -282,7 +287,8 @@
                     'instance_name': {'type': 'string', 'required': False, 'default': 'aminer'},
                     'topic': {'type': 'string'},
                     'cfgfile': {'type': 'string'},
-                    'options': {'type': 'dict', 'schema': {'id': {'type': 'string'}, 'type': {'type': ['string', 'list', 'integer']}}}
+                    'options': {'type': 'dict', 'schema': {'id': {'type': 'string'}, 'type': {'type': ['string', 'list', 'integer']}}},
+                    'output_file_path': {'type': 'string', 'required': False}
                 }
             }
         }

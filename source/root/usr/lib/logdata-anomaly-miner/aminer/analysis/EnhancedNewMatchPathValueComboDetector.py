@@ -18,10 +18,10 @@ import time
 import os
 import logging
 
+from aminer import AMinerConfig
 from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
 from aminer.util import PersistenceUtil
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
-from aminer import AMinerConfig
 from aminer.AMinerConfig import STAT_LEVEL, STAT_LOG_NAME
 
 
@@ -141,7 +141,8 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
                                        event_data, log_atom, self)
         if self.auto_include_flag:
             if self.next_persist_time is None:
-                self.next_persist_time = time.time() + 600
+                self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
+                    AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
         self.log_success += 1
         return True
 

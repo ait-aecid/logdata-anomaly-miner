@@ -217,6 +217,16 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
         match_action_dict = {}
         match_rules_dict = {}
         correlation_rules = {}
+        # changed order if ETD is defined.
+        for item in yaml_data['Analysis']:
+            if item['type'].name == 'EventTypeDetector':
+                index = yaml_data['Analysis'].index(item)
+                new_analysis_list = [item]
+                del yaml_data['Analysis'][index]
+                new_analysis_list += yaml_data['Analysis']
+                yaml_data['Analysis'] = new_analysis_list
+                break
+
         for item in yaml_data['Analysis']:
             if item['id'] == 'None':
                 comp_name = None
@@ -498,7 +508,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     var_reduction_thres=item['var_reduction_thres'], num_skipped_ind_for_weights=item['num_skipped_ind_for_weights'],
                     num_ind_for_weights=item['num_ind_for_weights'], used_multinomial_test=item['used_multinomial_test'],
                     use_empiric_distr=item['use_empiric_distr'], save_statistics=item['save_statistics'],
-                    output_log_line=item['output_logline'])
+                    output_log_line=item['output_logline'], blocklisted_paths=item['blocklisted_paths'],
+                    allowlisted_paths=item['allowlisted_paths'])
             else:
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn)
             analysis_context.register_component(tmp_analyser, component_name=comp_name)
@@ -512,7 +523,13 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
             for item in yaml_data['EventHandlers']:
                 func = item['type'].func
                 ctx = None
-                if item['type'].name in ('StreamPrinterEventHandler', 'DefaultMailNotificationEventHandler'):
+                if item['type'].name == 'StreamPrinterEventHandler':
+                    if 'output_file_path' in item:
+                        with open(item['output_file_path'], 'w+') as stream:
+                            ctx = func(analysis_context, stream)
+                    else:
+                        ctx = func(analysis_context)
+                if item['type'].name == 'DefaultMailNotificationEventHandler':
                     ctx = func(analysis_context)
                 if item['type'].name == 'SyslogWriterEventHandler':
                     ctx = func(analysis_context, item['instance_name'])

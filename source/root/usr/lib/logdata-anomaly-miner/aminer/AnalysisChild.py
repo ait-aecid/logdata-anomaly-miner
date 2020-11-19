@@ -25,6 +25,8 @@ import time
 import traceback
 import resource
 import logging
+from datetime import datetime
+import shutil
 
 from aminer import AMinerConfig
 from aminer.input.LogStream import LogStream
@@ -166,6 +168,9 @@ class AnalysisContext:
         self.aminer_config.build_analysis_pipeline(self)
 
 
+suspended_flag = False
+
+
 class AnalysisChild(TimeTriggeredComponentInterface):
     """
     This class defines the child performing the complete analysis workflow.
@@ -256,6 +261,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         # Always start when number is None.
         next_real_time_trigger_time = None
         next_analysis_time_trigger_time = None
+        next_backup_time_trigger_time = None
         log_stat_period = self.analysis_context.aminer_config.config_properties.get(
             AMinerConfig.KEY_LOG_STAT_PERIOD, AMinerConfig.DEFAULT_STAT_PERIOD)
         next_statistics_log_time = time.time() + log_stat_period
@@ -278,12 +284,13 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                     input_select_fd_list.append(fd_handler_object.fileno())
 
             # Loop over the list in reverse order to avoid skipping elements in remove.
-            for log_stream in reversed(blocked_log_streams):
-                current_stream_fd = log_stream.handle_stream()
-                if current_stream_fd >= 0:
-                    self.tracked_fds_dict[current_stream_fd] = log_stream
-                    input_select_fd_list.append(current_stream_fd)
-                    blocked_log_streams.remove(log_stream)
+            if not suspended_flag:
+                for log_stream in reversed(blocked_log_streams):
+                    current_stream_fd = log_stream.handle_stream()
+                    if current_stream_fd >= 0:
+                        self.tracked_fds_dict[current_stream_fd] = log_stream
+                        input_select_fd_list.append(current_stream_fd)
+                        blocked_log_streams.remove(log_stream)
 
             read_list = None
             write_list = None
@@ -376,7 +383,8 @@ class AnalysisChild(TimeTriggeredComponentInterface):
             if next_real_time_trigger_time is None or real_time >= next_real_time_trigger_time:
                 next_trigger_offset = 3600
                 for component in real_time_triggered_components:
-                    next_trigger_request = component.do_timer(real_time)
+                    if not suspended_flag:
+                        next_trigger_request = component.do_timer(real_time)
                     next_trigger_offset = min(next_trigger_offset, next_trigger_request)
                 next_real_time_trigger_time = real_time + next_trigger_offset
 
@@ -395,9 +403,23 @@ class AnalysisChild(TimeTriggeredComponentInterface):
             if next_analysis_time_trigger_time is None or analysis_time >= next_analysis_time_trigger_time:
                 next_trigger_offset = 3600
                 for component in analysis_time_triggered_components:
-                    next_trigger_request = component.do_timer(real_time)
+                    if not suspended_flag:
+                        next_trigger_request = component.do_timer(real_time)
                     next_trigger_offset = min(next_trigger_offset, next_trigger_request)
                 next_analysis_time_trigger_time = analysis_time + next_trigger_offset
+
+            # backup the persistence data.
+            backup_time = time.time()
+            backup_time_str = datetime.fromtimestamp(backup_time).strftime('%Y-%m-%d-%H-%M-%S')
+            persistence_dir = self.analysis_context.aminer_config.config_properties[AMinerConfig.KEY_PERSISTENCE_DIR]
+            persistence_dir = persistence_dir.rstrip('/')
+            backup_path = persistence_dir + '/backup/'
+            backup_path_with_date = os.path.join(backup_path, backup_time_str)
+            if next_backup_time_trigger_time is None or backup_time >= next_backup_time_trigger_time:
+                next_trigger_offset = 3600 * 24
+                if next_backup_time_trigger_time is not None:
+                    shutil.copytree(persistence_dir, backup_path_with_date, ignore=shutil.ignore_patterns('backup*'))
+                next_backup_time_trigger_time = backup_time + next_trigger_offset
 
         # Analysis loop is only left on shutdown. Try to persist everything and leave.
         PersistenceUtil.persist_all()
@@ -566,6 +588,9 @@ class AnalysisChildRemoteControlHandler:
                     'ignore_events_from_history': methods.ignore_events_from_history,
                     'list_events_from_history': methods.list_events_from_history,
                     'allowlist_events_from_history': methods.allowlist_events_from_history,
+                    'persist_all': methods.persist_all,
+                    'list_backups': methods.list_backups,
+                    'create_backup': methods.create_backup,
                     'change_log_stat_level': methods.change_log_stat_level,
                     'change_log_debug_level': methods.change_log_debug_level,
                     'EnhancedNewMatchPathValueComboDetector': aminer.analysis.EnhancedNewMatchPathValueComboDetector,
@@ -588,16 +613,25 @@ class AnalysisChildRemoteControlHandler:
                 logging.getLogger(AMinerConfig.REMOTE_CONTROL_LOG_NAME).log(15, json_request_data[0])
                 logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('Remote control: %s', json_request_data[0])
 
-                # skipcq: PYL-W0122
-                exec(json_request_data[0], {'__builtins__': None}, exec_locals)
-                json_remote_control_response = json.dumps(exec_locals.get('remoteControlResponse'))
-                if methods.REMOTE_CONTROL_RESPONSE == '':
-                    methods.REMOTE_CONTROL_RESPONSE = None
-                if exec_locals.get('remoteControlResponse') is None:
-                    json_remote_control_response = json.dumps(methods.REMOTE_CONTROL_RESPONSE)
+                # skipcq: PYL-W0603
+                global suspended_flag
+                if json_request_data[0] in ('suspend_aminer()', 'suspend_aminer', 'suspend'):
+                    suspended_flag = True
+                    json_remote_control_response = json.dumps(methods.REMOTE_CONTROL_RESPONSE + 'OK. aminer is suspended now.')
+                elif json_request_data[0] in ('activate_aminer()', 'activate_aminer', 'activate'):
+                    suspended_flag = False
+                    json_remote_control_response = json.dumps(methods.REMOTE_CONTROL_RESPONSE + 'OK. aminer is activated now.')
                 else:
-                    json_remote_control_response = json.dumps(
-                        exec_locals.get('remoteControlResponse') + methods.REMOTE_CONTROL_RESPONSE)
+                    # skipcq: PYL-W0122
+                    exec(json_request_data[0], {'__builtins__': None}, exec_locals)
+                    json_remote_control_response = json.dumps(exec_locals.get('remoteControlResponse'))
+                    if methods.REMOTE_CONTROL_RESPONSE == '':
+                        methods.REMOTE_CONTROL_RESPONSE = None
+                    if exec_locals.get('remoteControlResponse') is None:
+                        json_remote_control_response = json.dumps(methods.REMOTE_CONTROL_RESPONSE)
+                    else:
+                        json_remote_control_response = json.dumps(
+                            exec_locals.get('remoteControlResponse') + methods.REMOTE_CONTROL_RESPONSE)
             # skipcq: FLK-E722
             except:
                 exception_data = traceback.format_exc()
