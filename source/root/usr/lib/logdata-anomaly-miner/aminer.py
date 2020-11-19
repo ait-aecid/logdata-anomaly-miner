@@ -119,7 +119,6 @@ def print_help(program_name, version=False):
 
 def run_analysis_child(aminer_config, program_name):
     """Run the Analysis Child."""
-    warnings.filterwarnings('ignore', category=ImportWarning)
     from aminer import AMinerConfig
     # Verify existance and ownership of persistence directory.
     logging.getLogger(AMinerConfig.REMOTE_CONTROL_LOG_NAME).info('aminer started.')
@@ -233,6 +232,7 @@ def initialize_loggers(aminer_config, aminer_user, aminer_grp):
 def main():
     """Run the aminer main program."""
     # Extract program name, but only when sure to contain no problematic characters.
+    warnings.filterwarnings('ignore', category=ImportWarning)
     program_name = sys.argv[0].split('/')[-1]
     if (program_name == '.') or (program_name == '..') or (re.match('^[a-zA-Z0-9._-]+$', program_name) is None):
         print('Invalid program name, check your execution args', file=sys.stderr)

@@ -411,7 +411,8 @@ class AnalysisChild(TimeTriggeredComponentInterface):
             # backup the persistence data.
             backup_time = time.time()
             backup_time_str = datetime.fromtimestamp(backup_time).strftime('%Y-%m-%d-%H-%M-%S')
-            persistence_dir = self.analysis_context.aminer_config.config_properties[AMinerConfig.KEY_PERSISTENCE_DIR]
+            persistence_dir = self.analysis_context.aminer_config.config_properties.get(
+                AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
             persistence_dir = persistence_dir.rstrip('/')
             backup_path = persistence_dir + '/backup/'
             backup_path_with_date = os.path.join(backup_path, backup_time_str)
