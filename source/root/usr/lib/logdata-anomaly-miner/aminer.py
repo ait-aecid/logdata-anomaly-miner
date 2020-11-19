@@ -105,12 +105,13 @@ def print_help(program_name, version=False):
     print("options:")
     print("  -c, --Config <config-file>          \tpath to the config-file")
     print("  -D  --Daemon                        \trun as a daemon process")
-    print("  -s  --Stat <stat-level>             \tset the stat level. Possible stat-levels are 0 for no statistics, 1 for normal statistic"
-          " level and 2 or v for vebose statistics.")
+    print("  -s  --Stat <stat-level>             \tset the stat level. Possible stat-levels are 0 or q or quiet for no statistics, 1 for"
+          " normal statistic level and 2 or v for verbose statistics.")
     print("  -d  --Debug <debug-level>           \tset the debug level. Possible debug-levels are 0 for no debugging, 1 for normal output"
           " (INFO and above), 2 or v for printing all debug information.")
     print("  -r, --RunAnalysis                   \tenable/disable analysis")
     print("  -R, --Remove <persistence-directory>\tremoves a specific persistence directory")
+    print("  --Restore <backup-directory>        \trestore a persistence backup")
     print("  -C, --Clear                         \tremoves all persistence directories")
     print("  -f, --FromBegin                     \tremoves RepositioningData before starting the AMiner")
     print("  -h, --Help                          \tprint this print_help screen")
@@ -327,7 +328,7 @@ def main():
         if arg_name in ('--print_help', '--Help', '--help', '-h'):
             print_help(program_name)
             sys.exit(1)
-        if arg_name in ('--version', '--Version', '-v'):
+        if arg_name in ('--Version', '--version', '-v'):
             print_help(program_name, True)
             sys.exit(1)
 
