@@ -635,8 +635,11 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         @param log_atom the parsed log atom
         @return True if this handler was really able to handle and process the match.
         """
-        self.log_total += 1
         event_index = self.event_type_detector.current_index
+        if event_index == -1:
+            return False
+
+        self.log_total += 1
 
         parser_match = log_atom.parser_match
         # Skip blocklisted paths.
@@ -729,7 +732,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         # Create the initial lists which derive from the persistence
         # Number of variables of the single events
         self.length = [len(self.event_type_detector.variable_key_list[event_index]) for event_index in range(self.num_events)]
-        self.variable_path_num = [[]] * self.num_events
+        self.variable_path_num = [[] for _ in range(self.num_events)]
         # List of the successes of the binomialtest for the rejection in the sKS or variables of discrete type
         self.bt_results = [[[] for var_index in range(self.length[event_index])] for event_index in range(self.num_events)]
 
