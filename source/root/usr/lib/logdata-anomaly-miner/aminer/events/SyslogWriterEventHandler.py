@@ -28,6 +28,7 @@ class SyslogWriterEventHandler(EventHandlerInterface):
     """
 
     def __init__(self, analysis_context, instance_name='aminer', suppress_detector_list=None):
+        self.analysis_context = analysis_context
         self.instanceName = instance_name
         syslog.openlog('%s[%d]' % (self.instanceName, os.getpid()), syslog.LOG_INFO, syslog.LOG_DAEMON)
         syslog.syslog(syslog.LOG_INFO, 'Syslog logger initialized')
