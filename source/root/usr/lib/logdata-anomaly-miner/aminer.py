@@ -348,6 +348,23 @@ def main():
         sys.exit(1)
     persistence_dir = aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
 
+    child_user_name = aminer_config.config_properties.get(AMinerConfig.KEY_AMINER_USER)
+    child_group_name = aminer_config.config_properties.get(AMinerConfig.KEY_AMINER_GROUP)
+    child_user_id = -1
+    child_group_id = -1
+    try:
+        if child_user_name is not None:
+            from pwd import getpwnam
+            child_user_id = getpwnam(child_user_name).pw_uid
+        if child_group_name is not None:
+            from grp import getgrnam
+            child_group_id = getgrnam(child_user_name).gr_gid
+    except:  # skipcq: FLK-E722
+        print('Failed to resolve %s or %s' % (AMinerConfig.KEY_AMINER_USER, AMinerConfig.KEY_AMINER_GROUP), file=sys.stderr)
+        sys.exit(1)
+
+    initialize_loggers(aminer_config, child_user_name, child_group_name)
+
     if restore_relative_persistence_path is not None and (clear_persistence_flag or remove_persistence_dirs):
         print('The --Restore parameter removes all persistence files. Do not use this parameter with --Clear or --Remove!', sys.stderr)
         sys.exit(1)
@@ -452,23 +469,6 @@ def main():
                     program_name, repr(log_resource_name), open_os_error.errno, os.strerror(open_os_error.errno)), file=sys.stderr)
                 sys.exit(1)
         log_data_resource_dict[log_resource_name] = log_resource
-
-    child_user_name = aminer_config.config_properties.get(AMinerConfig.KEY_AMINER_USER)
-    child_group_name = aminer_config.config_properties.get(AMinerConfig.KEY_AMINER_GROUP)
-    child_user_id = -1
-    child_group_id = -1
-    try:
-        if child_user_name is not None:
-            from pwd import getpwnam
-            child_user_id = getpwnam(child_user_name).pw_uid
-        if child_group_name is not None:
-            from grp import getgrnam
-            child_group_id = getgrnam(child_user_name).gr_gid
-    except:  # skipcq: FLK-E722
-        print('Failed to resolve %s or %s' % (AMinerConfig.KEY_AMINER_USER, AMinerConfig.KEY_AMINER_GROUP), file=sys.stderr)
-        sys.exit(1)
-
-    initialize_loggers(aminer_config, child_user_name, child_group_name)
 
     # Create the remote control socket, if any. Do this in privileged mode to allow binding it at arbitrary locations and support restricted
     # permissions of any type for current (privileged) uid.
