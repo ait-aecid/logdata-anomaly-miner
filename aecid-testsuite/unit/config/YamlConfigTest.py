@@ -3,6 +3,7 @@ import importlib
 import yaml
 import sys
 import aminer.AMinerConfig as AMinerConfig
+from datetime import datetime
 from aminer.AnalysisChild import AnalysisContext
 from aminer.analysis.AtomFilters import SubhandlerFilter
 from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
@@ -33,19 +34,26 @@ from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueMo
 from aminer.parsing.RepeatedElementDataModelElement import RepeatedElementDataModelElement
 from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
 from aminer.parsing.ElementValueBranchModelElement import ElementValueBranchModelElement
+from aminer.parsing.MatchContext import MatchContext
+from aminer.parsing.ParserMatch import ParserMatch
+from aminer.input.LogAtom import LogAtom
+from time import time
+from unit.TestBase import TestBase
 
 
-class YamlConfigTest(unittest.TestCase):
+class YamlConfigTest(TestBase):
     """Unittests for the YamlConfig."""
 
     sysp = sys.path
 
     def setUp(self):
         """Add the aminer syspath."""
+        TestBase.setUp(self)
         sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
 
     def tearDown(self):
         """Reset the syspath."""
+        TestBase.tearDown(self)
         sys.path = self.sysp
 
     def test1_load_generic_yaml_file(self):
@@ -370,6 +378,7 @@ class YamlConfigTest(unittest.TestCase):
         del yml_config_properties['Analysis']
         del yml_config_properties['EventHandlers']
         del yml_config_properties['LearnMode']
+        del yml_config_properties['SuppressNewMatchPathDetector']
 
         # remove SimpleUnparsedAtomHandler, VerboseUnparsedAtomHandler and NewMatchPathDetector as they are added by the YamlConfig.
         py_registered_components = copy.copy(py_context.registered_components)
@@ -390,7 +399,8 @@ class YamlConfigTest(unittest.TestCase):
         del py_registered_components_by_name['NewMatchPath']
         del py_registered_components_by_name['SimpleMonotonicTimestampAdjust']
         yml_registered_components_by_name = copy.copy(yml_context.registered_components_by_name)
-        del yml_registered_components_by_name['NewMatchPathDetector0']
+        del yml_registered_components_by_name['DefaultNewMatchPathDetector']
+        self.maxDiff = None
 
         self.assertEqual(yml_config_properties, py_context.aminer_config.config_properties)
         # there actually is no easy way to compare AMiner components as they do not implement the __eq__ method.
@@ -428,6 +438,79 @@ class YamlConfigTest(unittest.TestCase):
         context.build_analysis_pipeline()
         self.assertEqual(context.atomizer_factory.event_handler_list[0].stream.name, '/tmp/streamPrinter.txt')
         self.assertEqual(context.atomizer_factory.event_handler_list[0].stream.mode, 'w+')
+
+    def test20_suppress_output(self):
+        """
+        Check if the suppress property and SuppressNewMatchPathDetector are working as expected.
+        This test only includes the StreamPrinterEventHandler.
+        """
+        __expected_string1 = '%s New path(es) detected\n%s: "%s" (%d lines)\n  %s\n%s\n\n'
+        t = time()
+        fixed_dme = FixedDataModelElement('s1', b' pid=')
+        match_context_fixed_dme = MatchContext(b' pid=')
+        match_element_fixed_dme = fixed_dme.get_match_element("", match_context_fixed_dme)
+        log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme), t, 'DefaultNewMatchPathDetector')
+        datetime_format_string = '%Y-%m-%d %H:%M:%S'
+        match_path_s1 = "['/s1']"
+        pid = "b' pid='"
+        __expected_string2 = '%s New value combination(s) detected\n%s: "%s" (%d lines)\n%s\n\n'
+        fixed_dme2 = FixedDataModelElement('s1', b'25537 uid=')
+        decimal_integer_value_me = DecimalIntegerValueModelElement(
+            'd1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+        match_context_sequence_me = MatchContext(b'25537 uid=2')
+        seq = SequenceModelElement('seq', [fixed_dme2, decimal_integer_value_me])
+        match_element_sequence_me = seq.get_match_element('first', match_context_sequence_me)
+        string2 = "  (b'25537 uid=', 2)\nb'25537 uid=2'"
+
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        aminer_config.load_yaml('unit/data/configfiles/suppress_config.yml')
+        context = AnalysisContext(aminer_config)
+        context.build_analysis_pipeline()
+
+        context.aminer_config.yaml_data['SuppressNewMatchPathDetector'] = False
+        self.stream_printer_event_handler = context.atomizer_factory.event_handler_list[0]
+        self.stream_printer_event_handler.stream = self.output_stream
+        default_nmpd = context.registered_components[0][0]
+        default_nmpd.output_log_line = False
+        self.assertTrue(default_nmpd.receive_atom(log_atom_fixed_dme))
+        self.assertEqual(self.output_stream.getvalue(), __expected_string1 % (
+            datetime.fromtimestamp(t).strftime(datetime_format_string), default_nmpd.__class__.__name__, 'DefaultNewMatchPathDetector', 1,
+            match_path_s1, pid))
+        self.reset_output_stream()
+
+        context.aminer_config.yaml_data['SuppressNewMatchPathDetector'] = True
+        context = AnalysisContext(aminer_config)
+        context.build_analysis_pipeline()
+        self.stream_printer_event_handler = context.atomizer_factory.event_handler_list[0]
+        self.stream_printer_event_handler.stream = self.output_stream
+        default_nmpd = context.registered_components[0][0]
+        default_nmpd.output_log_line = False
+        self.assertTrue(default_nmpd.receive_atom(log_atom_fixed_dme))
+        self.assertEqual(self.output_stream.getvalue(), "")
+        self.reset_output_stream()
+
+        value_combo_det = context.registered_components[1][0]
+        log_atom_sequence_me = LogAtom(match_element_sequence_me.get_match_string(), ParserMatch(match_element_sequence_me), t,
+                                       value_combo_det)
+        self.stream_printer_event_handler = context.atomizer_factory.event_handler_list[0]
+        self.stream_printer_event_handler.stream = self.output_stream
+        self.assertTrue(value_combo_det.receive_atom(log_atom_sequence_me))
+        self.assertEqual(self.output_stream.getvalue(), __expected_string2 % (
+            datetime.fromtimestamp(t).strftime(datetime_format_string), value_combo_det.__class__.__name__,
+            'ValueComboDetector', 1, string2))
+        self.reset_output_stream()
+
+        context.aminer_config.yaml_data['Analysis'][0]['suppress'] = True
+        context = AnalysisContext(aminer_config)
+        context.build_analysis_pipeline()
+        value_combo_det = context.registered_components[1][0]
+        self.stream_printer_event_handler = context.atomizer_factory.event_handler_list[0]
+        self.stream_printer_event_handler.stream = self.output_stream
+        self.assertTrue(value_combo_det.receive_atom(log_atom_sequence_me))
+        self.assertEqual(self.output_stream.getvalue(), "")
+        self.reset_output_stream()
 
     def run_empty_components_tests(self, context):
         """Run the empty components tests."""
