@@ -39,8 +39,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                  silence_output_without_confidence=False, silence_output_except_indicator=True, num_var_type_hist_ref=10,
                  num_update_var_type_hist_ref=10,  num_var_type_considered_ind=10, num_stat_stop_update=200,
                  num_updates_until_var_reduction=20, var_reduction_thres=0.6, num_skipped_ind_for_weights=1, num_ind_for_weights=100,
-                 used_multinomial_test='Chi', use_empiric_distr=True, save_statistics=True, output_log_line=True, blocklisted_paths=None,
-                 allowlisted_paths=None):
+                 used_multinomial_test='Chi', use_empiric_distr=True, save_statistics=True, output_log_line=True, ignore_list=None,
+                 constraint_list=None):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
         self.next_persist_time = None
         self.anomaly_event_handlers = anomaly_event_handlers
@@ -611,12 +611,12 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 'num_bt = 20, alpha = 0.025': [0.0012650966644287111, 0.012348556518554692, 0.032070970535278326, 0.05733404159545899, 0.08657145500183107, 0.11893157958984377, 0.1539091587066651, 0.19119005203247075, 0.2305778980255127, 0.27195787429809565, 0.31527810096740716, 0.36054258346557605, 0.4078114986419677, 0.4572108268737792, 0.5089540958404539, 0.5633859634399412, 0.6210731983184814, 0.6830172538757324, 0.7512671947479248, 0.8315665245056152]  # skipcq: FLK-E501
                 }
 
-        self.blocklisted_paths = blocklisted_paths
-        if self.blocklisted_paths is None:
-            self.blocklisted_paths = []
-        self.allowlisted_paths = allowlisted_paths
-        if self.allowlisted_paths is None:
-            self.allowlisted_paths = []
+        self.ignore_list = ignore_list
+        if self.ignore_list is None:
+            self.ignore_list = []
+        self.constraint_list = constraint_list
+        if self.constraint_list is None:
+            self.constraint_list = []
 
         # Loads the persistence
         self.persistence_id = persistence_id
@@ -635,22 +635,25 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         @param log_atom the parsed log atom
         @return True if this handler was really able to handle and process the match.
         """
-        self.log_total += 1
         event_index = self.event_type_detector.current_index
+        if event_index == -1:
+            return False
+
+        self.log_total += 1
 
         parser_match = log_atom.parser_match
-        # Skip blocklisted paths.
-        for blocklisted in self.blocklisted_paths:
-            if blocklisted in parser_match.get_match_dictionary().keys():
+        # Skip paths from ignore_list.
+        for ignore_path in self.ignore_list:
+            if ignore_path in parser_match.get_match_dictionary().keys():
                 return False
 
         if self.path_list is None or len(self.path_list) == 0:
-            allowlisted = False
-            for allowlisted in self.allowlisted_paths:
-                if parser_match.get_match_dictionary().get(allowlisted) is not None:
-                    allowlisted = True
+            constraint_path = False
+            for constraint_path in self.constraint_list:
+                if parser_match.get_match_dictionary().get(constraint_path) is not None:
+                    constraint_path = True
                     break
-            if not allowlisted and self.allowlisted_paths != []:
+            if not constraint_path and self.constraint_list != []:
                 return False
 
         # Initialize new entries in lists for a new eventType if necessary
@@ -729,7 +732,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         # Create the initial lists which derive from the persistence
         # Number of variables of the single events
         self.length = [len(self.event_type_detector.variable_key_list[event_index]) for event_index in range(self.num_events)]
-        self.variable_path_num = [[]] * self.num_events
+        self.variable_path_num = [[] for _ in range(self.num_events)]
         # List of the successes of the binomialtest for the rejection in the sKS or variables of discrete type
         self.bt_results = [[[] for var_index in range(self.length[event_index])] for event_index in range(self.num_events)]
 

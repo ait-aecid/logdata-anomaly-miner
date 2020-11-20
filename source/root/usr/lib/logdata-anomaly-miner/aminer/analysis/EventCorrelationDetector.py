@@ -193,18 +193,18 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         parser_match = log_atom.parser_match
         self.total_records += 1
 
-        # Skip blocklisted paths.
-        for blocklisted in self.ignore_list:
-            if blocklisted in parser_match.get_match_dictionary().keys():
+        # Skip paths from ignore_list.
+        for ignore_path in self.ignore_list:
+            if ignore_path in parser_match.get_match_dictionary().keys():
                 return
         if self.paths is None or len(self.paths) == 0:
             # Event is defined by the full path of log atom.
-            allowlisted = False
-            for allowlisted in self.constraint_list:
-                if parser_match.get_match_dictionary().get(allowlisted) is not None:
-                    allowlisted = True
+            constraint_path = False
+            for constraint_path in self.constraint_list:
+                if parser_match.get_match_dictionary().get(constraint_path) is not None:
+                    constraint_path = True
                     break
-            if not allowlisted and self.constraint_list != []:
+            if not constraint_path and self.constraint_list != []:
                 return
             log_event = tuple(parser_match.get_match_dictionary().keys())
         else:

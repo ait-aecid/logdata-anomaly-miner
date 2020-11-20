@@ -300,9 +300,9 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     hypothesis_max_delta_time=item['hypothesis_max_delta_time'], generation_probability=item['generation_probability'],
                     generation_factor=item['generation_factor'], max_observations=item['max_observations'], p0=item['p0'],
                     alpha=item['alpha'], candidates_size=item['candidates_size'],
-                    hypotheses_eval_delta_time=item['hypotheses_eval_delta_time'], allowlisted_paths=item['allowlisted_paths'],
+                    hypotheses_eval_delta_time=item['hypotheses_eval_delta_time'], constraint_list=item['constraint_list'],
                     delta_time_to_discard_hypothesis=item['delta_time_to_discard_hypothesis'], check_rules_flag=item['check_rules_flag'],
-                    auto_include_flag=learn, blocklisted_paths=item['blocklisted_paths'], persistence_id=item['persistence_id'])
+                    auto_include_flag=learn, ignore_list=item['ignore_list'], persistence_id=item['persistence_id'])
             elif item['type'].name == 'NewMatchIdValueComboDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers,
                                     id_path_list=item['id_path_list'], min_allowed_time_diff=item['min_allowed_time_diff'],
@@ -508,8 +508,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     var_reduction_thres=item['var_reduction_thres'], num_skipped_ind_for_weights=item['num_skipped_ind_for_weights'],
                     num_ind_for_weights=item['num_ind_for_weights'], used_multinomial_test=item['used_multinomial_test'],
                     use_empiric_distr=item['use_empiric_distr'], save_statistics=item['save_statistics'],
-                    output_log_line=item['output_logline'], blocklisted_paths=item['blocklisted_paths'],
-                    allowlisted_paths=item['allowlisted_paths'])
+                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'], constraint_list=item['constraint_list'])
             else:
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn)
             analysis_context.register_component(tmp_analyser, component_name=comp_name)
