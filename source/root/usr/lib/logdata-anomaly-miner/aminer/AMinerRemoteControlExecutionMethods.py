@@ -132,14 +132,16 @@ class AMinerRemoteControlExecutionMethods:
         """Set the statistic logging level."""
         if stat_level in (0, 1, 2):
             analysis_context.aminer_config.config_properties[AMinerConfig.KEY_LOG_STAT_LEVEL] = stat_level
+            AMinerConfig.STAT_LEVEL = stat_level
             return 0
-        self.REMOTE_CONTROL_RESPONSE += "FAILURE: stat level %d is not allowed. Allowed values are 0, 1, 2." % stat_level
+        self.REMOTE_CONTROL_RESPONSE += "FAILURE: STAT_LEVEL %d is not allowed. Allowed STAT_LEVEL values are 0, 1, 2." % stat_level
         return 1
 
     def change_config_property_log_debug_level(self, analysis_context, debug_level):
         """Set the debug log level."""
         if debug_level in (0, 1, 2):
             analysis_context.aminer_config.config_properties[AMinerConfig.KEY_LOG_DEBUG_LEVEL] = debug_level
+            AMinerConfig.DEBUG_LEVEL = debug_level
             debug_logger = logging.getLogger(AMinerConfig.DEBUG_LOG_NAME)
             if debug_level == 0:
                 debug_logger.setLevel(logging.ERROR)
@@ -148,7 +150,7 @@ class AMinerRemoteControlExecutionMethods:
             else:
                 debug_logger.setLevel(logging.DEBUG)
             return 0
-        self.REMOTE_CONTROL_RESPONSE += "FAILURE: debug level %d is not allowed. Allowed values are 0, 1, 2." % debug_level
+        self.REMOTE_CONTROL_RESPONSE += "FAILURE: DEBUG_LEVEL %d is not allowed. Allowed DEBUG_LEVEL values are 0, 1, 2." % debug_level
         return 1
 
     def change_attribute_of_registered_analysis_component(self, analysis_context, component_name, attribute, value):
@@ -159,14 +161,12 @@ class AMinerRemoteControlExecutionMethods:
         @param attribute the name of the attribute to be printed.
         @param value the new value of the attribute.
         """
-        attr = getattr(analysis_context.get_component_by_name(component_name), attribute, None)
+        attr = getattr(analysis_context.get_component_by_name(component_name), attribute)
         if type(attr) is type(value):
             setattr(analysis_context.get_component_by_name(component_name), attribute, value)
-            self.REMOTE_CONTROL_RESPONSE += "'%s.%s' changed from %s to %s successfully." % (component_name,
-                                                                                             attribute, repr(attr), value)
+            self.REMOTE_CONTROL_RESPONSE += "'%s.%s' changed from %s to %s successfully." % (component_name, attribute, repr(attr), value)
         else:
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: property '%s.%s' must be of type %s!" % (component_name,
-                                                                                               attribute, type(attr))
+            self.REMOTE_CONTROL_RESPONSE += "FAILURE: property '%s.%s' must be of type %s!" % (component_name, attribute, type(attr))
 
     def rename_registered_analysis_component(self, analysis_context, old_component_name, new_component_name):
         """
@@ -186,31 +186,6 @@ class AMinerRemoteControlExecutionMethods:
                 analysis_context.registered_components_by_name[new_component_name] = component
                 self.REMOTE_CONTROL_RESPONSE += "Component '%s' renamed to '%s' successfully." % (
                     old_component_name, new_component_name)
-
-    def change_log_stat_level(self, level):
-        """Change the STAT_LEVEL."""
-        level = int(level)
-        if level in (0, 1, 2):
-            AMinerConfig.STAT_LEVEL = level
-            self.REMOTE_CONTROL_RESPONSE += "Changed STAT_LEVEL to %d" % level
-        else:
-            self.REMOTE_CONTROL_RESPONSE += "Could not change STAT_LEVEL to %d. Allowed STAT_LEVEL values are 0, 1, 2." % level
-
-    def change_log_debug_level(self, level):
-        """Change the DEBUG_LEVEL."""
-        level = int(level)
-        if level in (0, 1, 2):
-            AMinerConfig.DEBUG_LEVEL = level
-            debug_logger = logging.getLogger(AMinerConfig.DEBUG_LOG_NAME)
-            if AMinerConfig.DEBUG_LEVEL == 0:
-                debug_logger.setLevel(logging.ERROR)
-            elif AMinerConfig.DEBUG_LEVEL == 1:
-                debug_logger.setLevel(logging.INFO)
-            else:
-                debug_logger.setLevel(logging.DEBUG)
-            self.REMOTE_CONTROL_RESPONSE += "Changed DEBUG_LEVEL to %d" % level
-        else:
-            self.REMOTE_CONTROL_RESPONSE += "Could not change DEBUG_LEVEL to %d. Allowed DEBUG_LEVEL values are 0, 1, 2." % level
 
     def print_config_property(self, analysis_context, property_name):
         """
