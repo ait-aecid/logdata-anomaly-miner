@@ -163,13 +163,13 @@ class EventCorrelationDetectorTest(TestBase):
         self.analysis_context.register_component(ecd, description + '4')
         self.run_ecd_test(ecd, self.errored_data_diff1[:10000])
 
-    def test7allowlist_paths(self):
+    def test7constraint_list(self):
         """Test the allowlisting of paths."""
         description = 'test7eventCorrelationDetectorTest'
         ecd = EventCorrelationDetector(
             self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, p0=0.7, alpha=0.1, auto_include_flag=True)
         self.analysis_context.register_component(ecd, description)
-        self.assertEqual([], ecd.allowlisted_paths)
+        self.assertEqual([], ecd.constraint_list)
 
         match_context_fixed_dme = MatchContext(b' pid=')
         fixed_dme = FixedDataModelElement('s1', b' pid=')
@@ -179,12 +179,12 @@ class EventCorrelationDetectorTest(TestBase):
         # unknown path
         ecd.allowlist_event(self.analysis % ecd.__class__.__name__, [log_atom_fixed_dme, match_element_fixed_dme.get_path()], [
             log_atom_fixed_dme, match_element_fixed_dme.get_path()], None)
-        self.assertEqual(['/s1'], ecd.allowlisted_paths)
+        self.assertEqual(['/s1'], ecd.constraint_list)
 
         # known path
         ecd.allowlist_event(self.analysis % ecd.__class__.__name__, [log_atom_fixed_dme, match_element_fixed_dme.get_path()], [
             log_atom_fixed_dme, match_element_fixed_dme.get_path()], None)
-        self.assertEqual(['/s1'], ecd.allowlisted_paths)
+        self.assertEqual(['/s1'], ecd.constraint_list)
 
     def check_rules(self, sorted_back_rules, sorted_forward_rules, diff):
         """Check if the rules are as expected."""
