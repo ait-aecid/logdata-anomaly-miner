@@ -34,7 +34,6 @@ import sys
 import logging
 import shutil
 import warnings
-from aminer import AMinerConfig
 
 __authors__ = ["Markus Wurzenberger", "Max Landauer", "Wolfgang Hotwagner", "Ernst Leierzopf", "Roman Fiedler", "Georg Hoeld",
                "Florian Skopik"]
@@ -52,6 +51,7 @@ __version__ = "2.1.0"
 
 # As site packages are not included, define from where we need to execute code before loading it.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
+from aminer import AMinerConfig
 
 colflame = ("\033[31m"
             "            *     (        )       (     \n"
