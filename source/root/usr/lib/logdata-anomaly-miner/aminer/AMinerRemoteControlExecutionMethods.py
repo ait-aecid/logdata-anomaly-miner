@@ -24,7 +24,7 @@ from aminer.input import AtomHandlerInterface
 from aminer.util import PersistenceUtil
 
 attr_str = '"%s": %s,\n'
-component_not_found = 'Event history component not found'
+component_not_found = 'Event history component not found.'
 
 
 class AMinerRemoteControlExecutionMethods:
@@ -99,7 +99,9 @@ class AMinerRemoteControlExecutionMethods:
                                             "again." % property_name
             return
         if result == 0:
-            self.REMOTE_CONTROL_RESPONSE += "'%s' changed to '%s' successfully." % (property_name, value)
+            msg = "'%s' changed to '%s' successfully." % (property_name, value)
+            self.REMOTE_CONTROL_RESPONSE += msg
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info(msg)
 
     def change_config_property_mail_alerting(self, analysis_context, property_name, value):
         """Change any mail property."""
@@ -164,7 +166,9 @@ class AMinerRemoteControlExecutionMethods:
         attr = getattr(analysis_context.get_component_by_name(component_name), attribute)
         if type(attr) is type(value):
             setattr(analysis_context.get_component_by_name(component_name), attribute, value)
-            self.REMOTE_CONTROL_RESPONSE += "'%s.%s' changed from %s to %s successfully." % (component_name, attribute, repr(attr), value)
+            msg = "'%s.%s' changed from %s to %s successfully." % (component_name, attribute, repr(attr), value)
+            self.REMOTE_CONTROL_RESPONSE += msg
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info(msg)
         else:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: property '%s.%s' must be of type %s!" % (component_name, attribute, type(attr))
 
@@ -176,7 +180,7 @@ class AMinerRemoteControlExecutionMethods:
         @param new_component_name the new name of the component.
         """
         if type(old_component_name) is not str or type(new_component_name) is not str:
-            self.REMOTE_CONTROL_RESPONSE = "FAILURE: the parameters 'oldComponentName' and 'newComponentName' must be of type str."
+            self.REMOTE_CONTROL_RESPONSE = "FAILURE: the parameters 'old_component_name' and 'new_component_name' must be of type str."
         else:
             component = analysis_context.get_component_by_name(old_component_name)
             if component is None:
@@ -184,8 +188,9 @@ class AMinerRemoteControlExecutionMethods:
             else:
                 analysis_context.registered_components_by_name[old_component_name] = None
                 analysis_context.registered_components_by_name[new_component_name] = component
-                self.REMOTE_CONTROL_RESPONSE += "Component '%s' renamed to '%s' successfully." % (
-                    old_component_name, new_component_name)
+                msg = "Component '%s' renamed to '%s' successfully." % (old_component_name, new_component_name)
+                self.REMOTE_CONTROL_RESPONSE += msg
+                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info(msg)
 
     def print_config_property(self, analysis_context, property_name):
         """
@@ -320,12 +325,15 @@ class AMinerRemoteControlExecutionMethods:
         @param analysis_context the analysis context of the AMiner.
         @param destination_file the path to the file in which the config is saved.
         """
-        self.REMOTE_CONTROL_RESPONSE = AMinerConfig.save_config(analysis_context, destination_file)
+        msg = AMinerConfig.save_config(analysis_context, destination_file)
+        self.REMOTE_CONTROL_RESPONSE = msg
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info(msg)
 
     def persist_all(self):
         """Persist all data by calling the function in PersistenceUtil."""
         PersistenceUtil.persist_all()
         self.REMOTE_CONTROL_RESPONSE = 'OK'
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info('Called persist_all() via remote control.')
 
     def create_backup(self, analysis_context):
         """Create a backup with the current datetime string."""
@@ -336,7 +344,9 @@ class AMinerRemoteControlExecutionMethods:
         backup_path = persistence_dir + '/backup/'
         backup_path_with_date = os.path.join(backup_path, backup_time_str)
         shutil.copytree(persistence_dir, backup_path_with_date, ignore=shutil.ignore_patterns('backup*'))
+        msg = 'Created backup %s' % backup_time_str
         self.REMOTE_CONTROL_RESPONSE = 'Created backup %s' % backup_time_str
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info(msg)
 
     def list_backups(self, analysis_context):
         """List all available backups from the persistence directory."""
@@ -371,12 +381,13 @@ class AMinerRemoteControlExecutionMethods:
             return
         try:
             if component.__class__.__name__ == "MissingMatchPathValueDetector":
-                self.REMOTE_CONTROL_RESPONSE += component.allowlist_event("Analysis.%s" % component.__class__.__name__,
-                                                                          [component.__class__.__name__], event_data, allowlisting_data)
+                msg = component.allowlist_event("Analysis.%s" % component.__class__.__name__, [component.__class__.__name__],
+                                                event_data, allowlisting_data)
             else:
-                self.REMOTE_CONTROL_RESPONSE += component.allowlist_event(
-                    "Analysis.%s" % component.__class__.__name__, [component.__class__.__name__],
-                    [LogAtom("", None, 1666.0, None), event_data], allowlisting_data)
+                msg = component.allowlist_event("Analysis.%s" % component.__class__.__name__, [component.__class__.__name__],[
+                    LogAtom("", None, 1666.0, None), event_data], allowlisting_data)
+            self.REMOTE_CONTROL_RESPONSE += msg
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info(msg)
         # skipcq: PYL-W0703
         except Exception as e:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
@@ -394,15 +405,14 @@ class AMinerRemoteControlExecutionMethods:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: component '%s' does not exist!" % component
             return
         if component.__class__.__name__ not in ["EventCorrelationDetector"]:
-            self.REMOTE_CONTROL_RESPONSE += \
-                "FAILURE: component class '%s' does not support blocklisting! Only the following classes support blocklisting: " \
-                "EventCorrelationDetector." % component.__class__.__name__
+            self.REMOTE_CONTROL_RESPONSE += "FAILURE: component class '%s' does not support blocklisting! Only the following classes " \
+                                            "support blocklisting: EventCorrelationDetector." % component.__class__.__name__
             return
         try:
-
-            self.REMOTE_CONTROL_RESPONSE += component.blocklist_event(
-                "Analysis.%s" % component.__class__.__name__, [component.__class__.__name__],
-                [LogAtom("", None, 1666.0, None), event_data], blocklisting_data)
+            msg = component.blocklist_event("Analysis.%s" % component.__class__.__name__, [component.__class__.__name__], [
+                LogAtom("", None, 1666.0, None), event_data], blocklisting_data)
+            self.REMOTE_CONTROL_RESPONSE += msg
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info(msg)
         # skipcq: PYL-W0703
         except Exception as e:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
@@ -427,8 +437,9 @@ class AMinerRemoteControlExecutionMethods:
             return
         atom_filter.add_handler(component)
         analysis_context.register_component(component, component_name)
-        self.REMOTE_CONTROL_RESPONSE += "Component '%s' added to '%s' successfully." % (
-            component_name, atom_handler)
+        msg = "Component '%s' added to '%s' successfully." % (component_name, atom_handler)
+        self.REMOTE_CONTROL_RESPONSE += msg
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info(msg)
 
     def dump_events_from_history(self, analysis_context, history_component_name, dump_event_id):
         """
@@ -466,6 +477,7 @@ class AMinerRemoteControlExecutionMethods:
                     result_string += '\n  Log lines:\n    %s' % '\n    '.join(sorted_log_lines)
                 break
             self.REMOTE_CONTROL_RESPONSE = result_string
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info(result_string)
 
     def ignore_events_from_history(self, analysis_context, history_component_name, event_ids):
         """
@@ -499,7 +511,9 @@ class AMinerRemoteControlExecutionMethods:
                 delete_count += 1
             else:
                 event_pos += 1
-        self.REMOTE_CONTROL_RESPONSE = 'OK\n%d elements ignored' % delete_count
+        msg = 'OK\n%d elements ignored' % delete_count
+        self.REMOTE_CONTROL_RESPONSE = msg
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info(msg)
 
     def list_events_from_history(self, analysis_context, history_component_name, max_event_count=None):
         """
@@ -536,7 +550,7 @@ class AMinerRemoteControlExecutionMethods:
             return
         if id_spec_list is None or not isinstance(id_spec_list, list):
             self.REMOTE_CONTROL_RESPONSE = \
-                'Request requires remote_control_data with ID specification list and optional allowlisting information'
+                'Request requires remote_control_data with ID specification list and optional allowlisting information.'
             return
         history_data = history_handler.get_history()
         result_string = ''
@@ -562,12 +576,13 @@ class AMinerRemoteControlExecutionMethods:
                     message = event_source.allowlist_event(
                         event_type, sorted_log_lines, event_data, allowlisting_data)
                     result_string += 'OK %d: %s\n' % (event_id, message)
+                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info(result_string)
                     allowlisted_flag = True
                 except NotImplementedError:
-                    result_string += 'FAIL %d: component does not support allowlisting' % event_id
+                    result_string += 'FAIL %d: component does not support allowlisting.' % event_id
                 # skipcq: PYL-W0703
-                except Exception as wlException:
-                    result_string += 'FAIL %d: %s\n' % (event_id, str(wlException))
+                except Exception as wl_exception:
+                    result_string += 'FAIL %d: %s\n' % (event_id, str(wl_exception))
             elif event_type == 'Analysis.AllowlistViolationDetector':
                 result_string += 'FAIL %d: No automatic modification of allowlist rules, manual changes required\n' % event_id
                 allowlisted_flag = True
