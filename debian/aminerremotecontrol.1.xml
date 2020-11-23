@@ -99,20 +99,11 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>aminerremotecontrol</command>
-<!-- These are several examples, how syntaxes could look -->      <arg choice="plain">
-        <option>--ControlSocket <replaceable>socket</replaceable></option>
-      </arg>
       <arg choice="opt">
-        <option>--Exec <replaceable>command</replaceable></option>
+        <option>[--Exec <replaceable>command</replaceable>] | [--ExecFile <replaceable>file</replaceable>]</option>
       </arg>
-      <arg choice="opt">
-        <option>--ExecFile <replaceable>file</replaceable></option>
-      </arg>
-      <arg choice="opt">
-        <option>--Data <replaceable>data</replaceable></option>
-      </arg>
-      <arg choice="opt">
-        <option>--StringResponse</option>
+      <arg choice="plain">
+        <option>[OPTIONS]...</option>
       </arg>
     </cmdsynopsis>
   </refsynopsisdiv>
@@ -324,7 +315,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             <para>Prints the property with the <replaceable>property_name</replaceable>
             from the current AMinerConfig.</para>
             <para><replaceable>example</replaceable>: aminerremotecontrol --Exec 
-            &quot;print_config_property(analysis_context,&apos;NewMatchPath&apos;)&quot;</para>
+            &quot;print_config_property(analysis_context,&apos;LogResourceList&apos;)&quot;</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -363,8 +354,45 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             <para>Saves the current AMinerConfig into <replaceable>destination_file</replaceable>.
             <replaceable>destination_file</replaceable> must have write permissions by the
              aminerremotecontrol process or it returns an <option>PermissionError</option>.</para>
-            <para><replaceable>example</replaceable>: aminerremotecontrol --Exec 
-            &quot;save_current_config(analysis_context,&apos;/tmp/config.py&apos;)&quot;</para>
+            <para><replaceable>example</replaceable>: aminerremotecontrol --Exec
+             &quot;save_current_config(analysis_context,&apos;/tmp/config.py&apos;)&quot;</para>
+          </listitem>
+        </varlistentry>
+		<varlistentry>
+          <term>
+            <option>
+              <replaceable>persist_all()</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>Saves all persistence data by calling PersistenceUtil.persist_all().</para>
+            <para><replaceable>example</replaceable>: aminerremotecontrol --Exec
+             &quot;persist_all()&quot;</para>
+          </listitem>
+        </varlistentry>
+		<varlistentry>
+          <term>
+            <option>
+              <replaceable>create_backup()</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>Creates a backup of the current persistence directory and saves it in
+			 {persistence_dir}/backup/{timestamp}. Use this preferably after persist_all().</para>
+            <para><replaceable>example</replaceable>: aminerremotecontrol --Exec
+             &quot;create_backup()&quot;</para>
+          </listitem>
+        </varlistentry>
+		<varlistentry>
+          <term>
+            <option>
+              <replaceable>list_backups()</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>Returns a list of all existing persistence backups.</para>
+            <para><replaceable>example</replaceable>: aminerremotecontrol --Exec
+             &quot;list_backups()&quot;</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -484,8 +512,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             <para><replaceable>Example</replaceable>: aminerremotecontrol --Exec 
             &quot;change_config_property(analysis_context, &apos;MailAlerting.FromAddress&apos;,
             &apos;root@localhost&apos;)&quot;</para>
-            <para>Sender address of e-mail alerts. When undefined, &quot;sendmail&quot; 
-            implementation on host will decide, which sender address should be used.</para>
+            <para>Sender address of e-mail alerts.</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -561,8 +588,8 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             <para><replaceable>Example</replaceable>: aminerremotecontrol --Exec 
             &quot;change_config_property(analysis_context, &apos;LogPrefix&apos;, &apos;
             Original log line: &apos;)&quot;</para>
-            <para>Most analysis components implement the outputLogLine-property, which is True by default. 
-             Define a prefix to the original captured log lines. This defaults to &apos;&apos;</para>
+            <para>Most analysis components implement the output_log_line-property, which is True by default.
+              Define a prefix to the original captured log lines. This defaults to &apos;&apos;.</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -577,6 +604,53 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             <para>This property limits the maximal possible RAM in MB which the AMiner process can use. 
             Be careful at choosing the value, as a shortage of memory causes a MemoryError. This defaults to 
            -1, which means that there is no limit.</para>
+          </listitem>
+        </varlistentry>
+		<varlistentry>
+          <term>
+            <replaceable>Core.PersistencePeriod</replaceable>
+          </term>
+          <listitem>
+            <para><replaceable>Value</replaceable>: Seconds (Integer)</para>
+            <para><replaceable>Example</replaceable>: aminerremotecontrol --Exec
+             &quot;change_config_property(analysis_context, &apos;Core.PersistencePeriod&apos;, 300)&quot;</para>
+            <para>Use this property to change the time between persisting data in analysis components.
+			 Defaults to 600 seconds.</para>
+          </listitem>
+        </varlistentry>
+		<varlistentry>
+          <term>
+            <replaceable>Log.StatisticsLevel</replaceable>
+          </term>
+          <listitem>
+            <para><replaceable>Value</replaceable>: Level [0, 1, 2]</para>
+            <para><replaceable>Example</replaceable>: aminerremotecontrol --Exec
+             &quot;change_config_property(analysis_context, &apos;Log.StatisticsLevel&apos;, 2)&quot;</para>
+            <para>Change the amount of data saved in statistics. Possible stat-levels are 0 for no statistics, 1 for
+             normal statistic level and 2 for verbose statistics. Defaults to 1.</para>
+          </listitem>
+        </varlistentry>
+		<varlistentry>
+          <term>
+            <replaceable>Log.DebugLevel</replaceable>
+          </term>
+          <listitem>
+            <para><replaceable>Value</replaceable>: Level [0, 1, 2]</para>
+            <para><replaceable>Example</replaceable>: aminerremotecontrol --Exec
+             &quot;change_config_property(analysis_context, &apos;Log.DebugLevel&apos;, 2)&quot;</para>
+            <para>Change the debug logging level. Possible debug-levels are 0 for no logging, 1 for normal output
+            (INFO and above), 2 for printing all debug information. Defaults to 1.</para>
+          </listitem>
+        </varlistentry>
+		<varlistentry>
+          <term>
+            <replaceable>Log.StatisticsPeriod</replaceable>
+          </term>
+          <listitem>
+            <para><replaceable>Value</replaceable>: Seconds (Integer)</para>
+            <para><replaceable>Example</replaceable>: aminerremotecontrol --Exec
+             &quot;change_config_property(analysis_context, &apos;Log.StatisticsPeriod&apos;, 360)&quot;</para>
+            <para>Change how often statistics are logged and reset. This defaults to 3600 seconds.</para>
           </listitem>
         </varlistentry>
       </variablelist>

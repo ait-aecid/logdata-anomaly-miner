@@ -593,8 +593,6 @@ class AnalysisChildRemoteControlHandler:
                     'persist_all': methods.persist_all,
                     'list_backups': methods.list_backups,
                     'create_backup': methods.create_backup,
-                    'change_log_stat_level': methods.change_log_stat_level,
-                    'change_log_debug_level': methods.change_log_debug_level,
                     'EnhancedNewMatchPathValueComboDetector': aminer.analysis.EnhancedNewMatchPathValueComboDetector,
                     'EventCorrelationDetector': aminer.analysis.EventCorrelationDetector,
                     'EventTypeDetector': aminer.analysis.EventTypeDetector,
