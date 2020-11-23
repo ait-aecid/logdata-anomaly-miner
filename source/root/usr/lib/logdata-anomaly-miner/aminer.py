@@ -34,6 +34,7 @@ import sys
 import logging
 import shutil
 import warnings
+from aminer import AMinerConfig
 
 __authors__ = ["Markus Wurzenberger", "Max Landauer", "Wolfgang Hotwagner", "Ernst Leierzopf", "Roman Fiedler", "Georg Hoeld",
                "Florian Skopik"]
@@ -120,7 +121,6 @@ def print_help(program_name, version=False):
 
 def run_analysis_child(aminer_config, program_name):
     """Run the Analysis Child."""
-    from aminer import AMinerConfig
     # Verify existance and ownership of persistence directory.
     logging.getLogger(AMinerConfig.REMOTE_CONTROL_LOG_NAME).info('aminer started.')
     logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info('aminer started.')
