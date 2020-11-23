@@ -3,7 +3,7 @@ dist: bionic
 
 before_install:
   - git clone --depth 1 --branch v2.1.0-2 https://github.com/ait-aecid/aminer-ansible.git roles/aminer
-  - ln -s /etc/aminer/conf-available/ait-lds/* /etc/aminer/conf-enabled/
+  - ln -s $PWD/source/root/etc/aminer/conf-available/ait-lds/* /etc/aminer/conf-enabled/
   - ln -s $PWD/source/root/usr/lib/logdata-anomaly-miner/aminer $PWD/aecid-testsuite/aminer
   - ln -s $PWD/source/root/etc/aminer/template_config.py $PWD/aecid-testsuite/demo/AMiner/template_config.py
   - ln -s $PWD/source/root/etc/aminer/template_config.yml $PWD/aecid-testsuite/demo/AMiner/template_config.yml
