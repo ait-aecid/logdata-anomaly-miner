@@ -33,6 +33,7 @@ if [[ $md5_result == "$SUSPEND_FILE: OK" ]]; then
 fi
 
 find /tmp/lib/aminer -type f ! -path "/tmp/lib/aminer/aminerRemoteLog.txt" -exec md5sum {} \; | tee /tmp/test1.md5 > /dev/null
+cat /tmp/lib/aminer/aminer.log
 
 sleep 1
 md5sum $SUSPEND_FILE > $SUSPEND_FILE_MD5 2> /dev/null
@@ -46,6 +47,7 @@ fi
 
 sleep 7
 find /tmp/lib/aminer -type f ! -path "/tmp/lib/aminer/aminerRemoteLog.txt" -exec md5sum {} \; | tee /tmp/test2.md5 > /dev/null
+cat /tmp/lib/aminer/aminer.log
 
 sudo ./aminerremotecontrol --Exec "activate" > /dev/null
 
