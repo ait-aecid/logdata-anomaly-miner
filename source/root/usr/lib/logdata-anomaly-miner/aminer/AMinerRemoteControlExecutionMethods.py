@@ -384,7 +384,7 @@ class AMinerRemoteControlExecutionMethods:
                 msg = component.allowlist_event("Analysis.%s" % component.__class__.__name__, [component.__class__.__name__],
                                                 event_data, allowlisting_data)
             else:
-                msg = component.allowlist_event("Analysis.%s" % component.__class__.__name__, [component.__class__.__name__],[
+                msg = component.allowlist_event("Analysis.%s" % component.__class__.__name__, [component.__class__.__name__], [
                     LogAtom("", None, 1666.0, None), event_data], allowlisting_data)
             self.REMOTE_CONTROL_RESPONSE += msg
             logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info(msg)
