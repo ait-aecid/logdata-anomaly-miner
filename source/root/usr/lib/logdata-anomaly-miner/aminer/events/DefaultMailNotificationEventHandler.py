@@ -17,6 +17,7 @@ import time
 import re
 from smtplib import SMTP, SMTPException
 import logging
+import sys
 
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
@@ -153,8 +154,8 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
             smtp_obj.sendmail(self.sender_address, self.recipient_address, message)
             smtp_obj.quit()
         except SMTPException as e:
-            print(e)
-            # here logging is needed, but cannot be implemented yet.
+            print(e, file=sys.stderr)
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(e)
         self.last_alert_time = trigger_time
         self.events_collected = 0
         self.current_message = ''

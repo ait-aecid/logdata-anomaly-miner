@@ -4,7 +4,7 @@ sudo aminerremotecontrol --Exec "change_config_property(analysis_context, 'LogPr
 #renames the 'NewMatchPathValueCombo' component to 'NewMatchPathValueComboDetector'
 sudo aminerremotecontrol --Exec "rename_registered_analysis_component(analysis_context,'NewMatchPathValueCombo','NewMatchPathValueComboDetector')"
 
-#changes the 'autoIncludeFlag' of the 'NewMatchPathValueComboDetector' to False.
+#changes the 'auto_include_flag' of the 'NewMatchPathValueComboDetector' to False.
 sudo aminerremotecontrol --Exec "change_attribute_of_registered_analysis_component(analysis_context, 'NewMatchPathValueComboDetector',  'auto_include_flag', False)"
 
 #prints the current list of paths

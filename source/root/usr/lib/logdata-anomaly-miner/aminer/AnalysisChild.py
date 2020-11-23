@@ -420,6 +420,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                 next_trigger_offset = 3600 * 24
                 if next_backup_time_trigger_time is not None:
                     shutil.copytree(persistence_dir, backup_path_with_date, ignore=shutil.ignore_patterns('backup*'))
+                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info('Persistence backup created in %s.' %backup_path_with_date)
                 next_backup_time_trigger_time = backup_time + next_trigger_offset
 
         # Analysis loop is only left on shutdown. Try to persist everything and leave.
@@ -499,6 +500,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
             PersistenceUtil.store_json(self.persistence_file_name, self.repositioning_data_dict)
             delta = 600
             self.next_persist_time = trigger_time + delta
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('Repositioning data was persisted.')
         return delta
 
 
@@ -621,10 +623,14 @@ class AnalysisChildRemoteControlHandler:
                 global suspended_flag
                 if json_request_data[0] in ('suspend_aminer()', 'suspend_aminer', 'suspend'):
                     suspended_flag = True
-                    json_remote_control_response = json.dumps(methods.REMOTE_CONTROL_RESPONSE + 'OK. aminer is suspended now.')
+                    msg = methods.REMOTE_CONTROL_RESPONSE + 'OK. aminer is suspended now.'
+                    json_remote_control_response = json.dumps(msg)
+                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info(msg)
                 elif json_request_data[0] in ('activate_aminer()', 'activate_aminer', 'activate'):
                     suspended_flag = False
-                    json_remote_control_response = json.dumps(methods.REMOTE_CONTROL_RESPONSE + 'OK. aminer is activated now.')
+                    msg = methods.REMOTE_CONTROL_RESPONSE + 'OK. aminer is activated now.'
+                    json_remote_control_response = json.dumps(msg)
+                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info(msg)
                 else:
                     # skipcq: PYL-W0122
                     exec(json_request_data[0], {'__builtins__': None}, exec_locals)
