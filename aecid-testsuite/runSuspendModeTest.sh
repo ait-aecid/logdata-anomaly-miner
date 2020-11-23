@@ -21,7 +21,7 @@ SUSPEND_FILE_MD5=/tmp/suspend.md5
 
 sudo aminer --Foreground --Config $FILE > $SUSPEND_FILE &
 
-sleep 2
+sleep 4
 
 md5sum $SUSPEND_FILE > $SUSPEND_FILE_MD5 2> /dev/null
 echo "User username logged in" >> /tmp/syslog
@@ -82,7 +82,7 @@ wait $KILL_PID
 sudo rm /tmp/demo-config.py
 sudo rm /tmp/suspend_output.txt
 sudo rm /tmp/syslog
-sudo rm -r /tmp/lib/aminer/* 2> /dev/null
+# sudo rm -r /tmp/lib/aminer/* 2> /dev/null
 sudo rm /tmp/suspend.md5
 sudo rm aminerremotecontrol
 sudo rm /tmp/test1.md5
