@@ -568,7 +568,6 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
     except KeyError:
         # Add stdout stream printing for debugging, tuning.
         from aminer.events import StreamPrinterEventHandler
-        import sys
         anomaly_event_handlers.append(StreamPrinterEventHandler(analysis_context, stream=sys.stderr))
 
 
