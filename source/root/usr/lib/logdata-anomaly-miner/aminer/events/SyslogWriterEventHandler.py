@@ -37,6 +37,8 @@ class SyslogWriterEventHandler(EventHandlerInterface):
 
     def receive_event(self, event_type, event_message, sorted_log_lines, event_data, log_atom, event_source):
         """Receive information about a detected even and forward it to syslog."""
+        if event_source.output_event_handlers is not None and self not in event_source.output_event_handlers:
+            return
         self.buffer_stream.seek(0)
         self.buffer_stream.truncate(0)
         self.event_writer.receive_event(event_type, event_message, sorted_log_lines, event_data, log_atom, event_source)

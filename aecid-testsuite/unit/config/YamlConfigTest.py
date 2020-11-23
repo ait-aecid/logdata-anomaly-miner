@@ -429,6 +429,22 @@ class YamlConfigTest(unittest.TestCase):
         self.assertEqual(context.atomizer_factory.event_handler_list[0].stream.name, '/tmp/streamPrinter.txt')
         self.assertEqual(context.atomizer_factory.event_handler_list[0].stream.mode, 'w+')
 
+    def test20_set_output_handlers(self):
+        """Check if setting the output_event_handlers is working as expected."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        aminer_config.load_yaml('unit/data/configfiles/template_config.yml')
+        context = AnalysisContext(aminer_config)
+        context.build_analysis_pipeline()
+        for index in context.registered_components:
+            component = context.registered_components[index]
+            if component[1] == 'EventTypeDetector':
+                self.assertEqual(1, len(component[0].output_event_handlers))
+                self.assertEqual(StreamPrinterEventHandler, type(component[0].output_event_handlers[0]))
+            else:
+                self.assertEqual(None, component[0].output_event_handlers)
+
     def run_empty_components_tests(self, context):
         """Run the empty components tests."""
         self.assertTrue(isinstance(context.registered_components[0][0], NewMatchPathDetector))

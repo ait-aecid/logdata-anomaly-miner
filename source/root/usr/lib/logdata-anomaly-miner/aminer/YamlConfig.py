@@ -61,7 +61,14 @@ def build_analysis_pipeline(analysis_context):
     parsing_model = build_parsing_model()
     anomaly_event_handlers, atom_filter = build_input_pipeline(analysis_context, parsing_model)
     build_analysis_components(analysis_context, anomaly_event_handlers, atom_filter)
-    build_event_handlers(analysis_context, anomaly_event_handlers)
+    event_handler_id_list = build_event_handlers(analysis_context, anomaly_event_handlers)
+    # do not check UnparsedAtomHandler
+    for index, analysis_component in enumerate(atom_filter.subhandler_list[1:]):
+        if analysis_component[0].output_event_handlers is not None:
+            event_handlers = []
+            for i in analysis_component[0].output_event_handlers:
+                event_handlers.append(anomaly_event_handlers[event_handler_id_list.index(i)])
+            atom_filter.subhandler_list[index+1][0].output_event_handlers = event_handlers
 
 
 def build_parsing_model():
@@ -205,6 +212,7 @@ def build_input_pipeline(analysis_context, parsing_model):
     else:
         learn = True
     nmpd = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=learn)
+    nmpd.output_event_handlers = None
     analysis_context.register_component(nmpd, component_name=None)
     atom_filter.add_handler(nmpd)
     return anomaly_event_handlers, atom_filter
@@ -511,6 +519,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     output_log_line=item['output_logline'], ignore_list=item['ignore_list'], constraint_list=item['constraint_list'])
             else:
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn)
+            if item['output_event_handlers'] is not None:
+                tmp_analyser.output_event_handlers = item['output_event_handlers']
             analysis_context.register_component(tmp_analyser, component_name=comp_name)
             atom_filter.add_handler(tmp_analyser)
 
@@ -518,14 +528,16 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
 def build_event_handlers(analysis_context, anomaly_event_handlers):
     """Build the event handlers."""
     try:
+        event_handler_id_list = []
         if 'EventHandlers' in yaml_data and yaml_data['EventHandlers'] is not None:
             for item in yaml_data['EventHandlers']:
+                event_handler_id_list.append(item['id'])
                 func = item['type'].func
                 ctx = None
                 if item['type'].name == 'StreamPrinterEventHandler':
                     if 'output_file_path' in item:
-                        with open(item['output_file_path'], 'w+') as stream:
-                            ctx = func(analysis_context, stream)
+                        stream = open(item['output_file_path'], 'w+')
+                        ctx = func(analysis_context, stream)
                     else:
                         ctx = func(analysis_context)
                 if item['type'].name == 'DefaultMailNotificationEventHandler':
@@ -562,9 +574,9 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                     from aminer.events import JsonConverterHandler
                     ctx = JsonConverterHandler([ctx], analysis_context)
                 anomaly_event_handlers.append(ctx)
+            return event_handler_id_list
         else:
             raise KeyError()
-
     except KeyError:
         # Add stdout stream printing for debugging, tuning.
         from aminer.events import StreamPrinterEventHandler

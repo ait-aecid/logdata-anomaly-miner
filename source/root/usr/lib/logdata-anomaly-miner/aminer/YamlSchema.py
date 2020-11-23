@@ -269,7 +269,8 @@
                     'used_multinomial_test': {'type': 'string', 'allowed': ['Approx', 'MT', 'Chi'], 'required': False, 'default': 'Chi'},
                     'use_empiric_distr': {'type': 'boolean', 'required': False, 'default': True},
                     'save_statistics': {'type': 'boolean', 'required': False, 'default': True},
-                    'split_reports_flag': {'type': 'boolean', 'required': False, 'default': False}
+                    'split_reports_flag': {'type': 'boolean', 'required': False, 'default': False},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None}
                 }
             }
         },
