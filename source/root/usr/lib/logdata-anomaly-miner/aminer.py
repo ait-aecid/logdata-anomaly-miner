@@ -51,6 +51,7 @@ __version__ = "2.1.0"
 
 # As site packages are not included, define from where we need to execute code before loading it.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
+# skipcq: FLK-E402
 from aminer import AMinerConfig
 
 colflame = ("\033[31m"
