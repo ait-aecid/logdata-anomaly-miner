@@ -17,6 +17,7 @@ install:
   - sudo pip3 install coverage
   - cd aecid-testsuite
   - sudo chmod +x runGettingStarted.sh
+  - sudo chmod +x runTryItOut.sh
   - sudo chmod +x runSuspendModeTest.sh
   - sudo chmod +x runUnittests.sh
   - sudo chmod +x runAMinerDemo.sh
@@ -25,6 +26,7 @@ install:
 
 script:
   - ./runGettingStarted.sh
+  - ./runTryItOut.sh
   - ./runSuspendModeTest.sh
   - ./runUnittests.sh
   - ./runAMinerDemo.sh demo/AMiner/demo-config.py

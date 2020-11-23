@@ -1,5 +1,5 @@
 sudo chown -R aminer:aminer /var/lib/aminer 2> /dev/null
-sudo aminer --Config demo/AMiner/tryItOut-config.yml > /dev/null &
+sudo aminer --Config demo/AMiner/tryItOut-config.yml &
 sleep 5 & wait $!
 sudo pkill -x aminer
 exit_code=$?
