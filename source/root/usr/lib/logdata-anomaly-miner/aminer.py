@@ -190,7 +190,6 @@ def copytree(src, dst, symlinks=False, ignore=None):
 
 def initialize_loggers(aminer_config, aminer_user, aminer_grp):
     """Initialize all loggers."""
-    from aminer import AMinerConfig
     datefmt = '%d/%b/%Y:%H:%M:%S %z'
 
     persistence_dir = aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
@@ -351,7 +350,6 @@ def main():
         sys.exit(1)
 
     # Minimal import to avoid loading too much within the privileged process.
-    from aminer import AMinerConfig
     try:
         aminer_config = AMinerConfig.load_config(config_file_name)
     except ValueError as e:
