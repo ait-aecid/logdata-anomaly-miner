@@ -61,11 +61,15 @@ suspend_diff=`diff /tmp/test1.md5 /tmp/test2.md5`
 activate_diff=`diff /tmp/test2.md5 /tmp/test3.md5`
 
 if [[ $suspend_diff != "" ]]; then
+    cat /tmp/test1.md5
+    cat /tmp/test2.md5
 	echo 'The aminer should not persist data after being suspended.'
 	exit_code=1
 fi
 
 if [[ $activate_diff == "" ]]; then
+    cat /tmp/test2.md5
+    cat /tmp/test3.md5
 	echo 'The aminer should persist data after being activated.'
 	exit_code=1
 fi
