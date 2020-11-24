@@ -62,7 +62,7 @@ class AMinerRemoteControlExecutionMethods:
         config_keys_mail_alerting = [
             self.CONFIG_KEY_MAIL_TARGET_ADDRESS, self.CONFIG_KEY_MAIL_FROM_ADDRESS, self.CONFIG_KEY_MAIL_SUBJECT_PREFIX,
             self.CONFIG_KEY_EVENT_COLLECT_TIME, self.CONFIG_KEY_ALERT_MIN_GAP, self.CONFIG_KEY_ALERT_MAX_GAP,
-            self.CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE]
+            self.CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE, self.CONFIG_KEY_MAIL_ALERT_GRACE_TIME]
         if not isinstance(analysis_context, AnalysisChild.AnalysisContext):
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: the analysis_context must be of type %s." % AnalysisChild.AnalysisContext.__class__
             return
@@ -176,7 +176,7 @@ class AMinerRemoteControlExecutionMethods:
         @param new_component_name the new name of the component.
         """
         if type(old_component_name) is not str or type(new_component_name) is not str:
-            self.REMOTE_CONTROL_RESPONSE = "FAILURE: the parameters 'oldComponentName' and 'newComponentName' must be of type str."
+            self.REMOTE_CONTROL_RESPONSE = "FAILURE: the parameters 'old_component_name' and 'new_component_name' must be of type str."
         else:
             component = analysis_context.get_component_by_name(old_component_name)
             if component is None:

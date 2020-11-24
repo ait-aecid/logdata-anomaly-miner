@@ -94,9 +94,9 @@ def save_config(analysis_context, new_file):
         find_str = "config_properties['%s'] = " % config_property
         pos = old.find(find_str)
         if pos == -1:
-            msg += "WARNING: %s not found in the old config file." % find_str
+            msg += "WARNING: %snot found in the old config file.\n" % find_str
             rc_logger = logging.getLogger(REMOTE_CONTROL_LOG_NAME)
-            rc_logger.warning("WARNING: %s not found in the old config file.", find_str)
+            rc_logger.warning(msg.strip('\n'))
         else:
             string = old[pos + len(find_str):]
             old_len = string.find('\n')
@@ -138,8 +138,8 @@ def save_config(analysis_context, new_file):
         with open(remote_control_log_file, "r") as logFile:
             logs = logFile.readlines()
     except OSError as e:
-        msg = 'Could not read %s: %s' % (remote_control_log_file, e)
-        logging.getLogger(DEBUG_LOG_NAME).error(msg)
+        msg = 'Could not read %s: %s\n' % (remote_control_log_file, e)
+        logging.getLogger(DEBUG_LOG_NAME).error(msg.strip('\n'))
         print(msg, file=sys.stderr)
 
     i = len(logs) - 1
@@ -180,6 +180,8 @@ def save_config(analysis_context, new_file):
                 end = min(old.find(")", pos), old.find(",", pos))
             elif p1 == -1 and p2 == -1:
                 msg += "WARNING: '%s.%s' could not be found in the current config!\n" % (component_name, attr)
+                rc_logger = logging.getLogger(REMOTE_CONTROL_LOG_NAME)
+                rc_logger.warning(msg.strip('\n'))
                 continue
             elif p1 == -1:
                 end = p2
