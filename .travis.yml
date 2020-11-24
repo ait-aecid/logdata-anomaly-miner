@@ -16,6 +16,7 @@ install:
   - sudo apt-get install -y postfix procps mailutils
   - sudo pip3 install coverage
   - cd aecid-testsuite
+  - sudo chmod +x runRemoteControlTest.sh
   - sudo chmod +x runSuspendModeTest.sh
   - sudo chmod +x runUnittests.sh
   - sudo chmod +x runAMinerDemo.sh
@@ -23,6 +24,7 @@ install:
   - sudo chmod +x runCoverageTests.sh
 
 script:
+  - ./runRemoteControlTest.sh
   - ./runSuspendModeTest.sh
   - ./runUnittests.sh
   - ./runAMinerDemo.sh demo/AMiner/demo-config.py

@@ -185,8 +185,8 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
         enhanced_new_match_path_value_combo_detector.auto_include_flag = False
         self.assertEqual(enhanced_new_match_path_value_combo_detector.allowlist_event(
             'Analysis.%s' % enhanced_new_match_path_value_combo_detector.__class__.__name__,
-            [log_atom_sequence_me2, [self.match_element_sequence_me2.get_path()]],
-            [log_atom_sequence_me2, self.match_element_sequence_me2.get_path()], None), self.__expected_allowlisting_string % (
+            [log_atom_sequence_me2.get_timestamp(), [self.match_element_sequence_me2.get_path()]],
+            [log_atom_sequence_me2.get_timestamp(), self.match_element_sequence_me2.get_path()], None), self.__expected_allowlisting_string % (
             ', '.join(enhanced_new_match_path_value_combo_detector.target_path_list), self.match_element_sequence_me2.path,
             log_atom_sequence_me2))
 

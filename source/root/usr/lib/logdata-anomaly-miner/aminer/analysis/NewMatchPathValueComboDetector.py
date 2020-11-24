@@ -157,8 +157,8 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
             raise Exception('Event not from this source')
         if allowlisting_data is not None:
             raise Exception('Allowlisting data not understood by this detector')
-        self.known_values_set.add(event_data[1])
-        return 'Allowlisted path(es) %s with %s in %s' % (', '.join(self.target_path_list), event_data[1], sorted_log_lines[0])
+        self.known_values_set.add(event_data)
+        return 'Allowlisted path(es) %s with %s.' % (', '.join(self.target_path_list), event_data)
 
     def log_statistics(self, component_name):
         """

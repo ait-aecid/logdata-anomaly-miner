@@ -128,14 +128,14 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if allowlisting_data is not None:
             raise Exception('Allowlisting data not understood by this detector')
         allowlisted_str = ''
-        for path_name in event_data[1]:
+        for path_name in event_data:
             if path_name in self.known_path_set:
                 continue
             self.known_path_set.add(path_name)
             if allowlisted_str:
                 allowlisted_str += ', '
             allowlisted_str += path_name
-        return 'Allowlisted path(es) %s in %s' % (allowlisted_str, sorted_log_lines[0])
+        return 'Allowlisted path(es) %s in %s' % (allowlisted_str, event_type)
 
     def log_statistics(self, component_name):
         """

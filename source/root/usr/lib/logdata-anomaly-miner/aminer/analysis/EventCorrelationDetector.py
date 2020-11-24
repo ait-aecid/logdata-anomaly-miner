@@ -736,9 +736,9 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
             raise Exception('Event not from this source')
         if allowlisting_data is not None:
             raise Exception('Allowlisting data not understood by this detector')
-        if event_data[1] not in self.constraint_list:
-            self.constraint_list.append(event_data[1])
-        return 'Allowlisted path %s in %s' % (event_data[1], sorted_log_lines[0])
+        if event_data not in self.constraint_list:
+            self.constraint_list.append(event_data)
+        return 'Allowlisted path %s.' % event_data
 
     def blocklist_event(self, event_type, sorted_log_lines, event_data, blocklisting_data):
         """

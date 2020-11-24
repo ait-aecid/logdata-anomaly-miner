@@ -254,12 +254,11 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         new_interval = allowlisting_data
         if new_interval == -1:
             new_interval = self.default_interval
-        for key_name, target_path in event_data:
-            if new_interval < 0:
-                self.remove_check_value(key_name)
-            else:
-                self.set_check_value(key_name, new_interval, target_path)
-        return 'Updated %d entries' % len(event_data)
+        if new_interval < 0:
+            self.remove_check_value(event_data[0])
+        else:
+            self.set_check_value(event_data[0], new_interval, event_data[1])
+        return "Updated '%s' in '%s' to new interval %d." % (event_data[0], event_data[1], new_interval)
 
     def log_statistics(self, component_name):
         """

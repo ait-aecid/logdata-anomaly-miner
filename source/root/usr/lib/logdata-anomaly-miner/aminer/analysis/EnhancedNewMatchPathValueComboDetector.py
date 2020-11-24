@@ -169,9 +169,9 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
             msg = 'Allowlisting data not understood by this detector'
             logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
-        current_timestamp = event_data[0].get_timestamp()
+        current_timestamp = event_data[0]
         self.known_values_dict[event_data[1]] = [current_timestamp, current_timestamp, 1]
-        return 'Allowlisted path(es) %s with %s in %s' % (', '.join(self.target_path_list), event_data[1], sorted_log_lines[0])
+        return 'Allowlisted path(es) %s with %s.' % (', '.join(self.target_path_list), event_data)
 
     def log_statistics(self, component_name):
         """

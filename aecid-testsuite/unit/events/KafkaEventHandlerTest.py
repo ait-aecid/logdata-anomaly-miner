@@ -52,8 +52,8 @@ class KafkaEventHandlerTest(TestBase):
         event_data = {'AnalysisComponent': {'AffectedParserPaths': ['test/path/1', 'test/path/2']}}
         json_converter_handler.receive_event(self.test_detector, self.event_message, self.sorted_log_lines, event_data, log_atom, self)
         output = self.output_stream.getvalue()
-        kafka_event_handler = KafkaEventHandler(
-            self.analysis_context, self.kafka_topic, {'bootstrap_servers': ['localhost:9092'], 'api_version': (2, 0, 1)})
+        kafka_event_handler = KafkaEventHandler(self.analysis_context, self.kafka_topic, {
+            'bootstrap_servers': ['localhost:9092'], 'api_version': (2, 0, 1), max_block_ms: 3000})
         self.assertTrue(kafka_event_handler.receive_event(self.test_detector, self.event_message, self.sorted_log_lines, output, log_atom,
                                                           self))
 
@@ -66,8 +66,8 @@ class KafkaEventHandlerTest(TestBase):
         log_atom = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element), self.t, self)
         self.analysis_context.register_component(self, self.description)
         event_data = {'AnalysisComponent': {'AffectedParserPaths': ['test/path/1', 'test/path/2']}}
-        kafka_event_handler = KafkaEventHandler(
-            self.analysis_context, self.kafka_topic, {'bootstrap_servers': ['localhost:9092'], 'api_version': (2, 0, 1)})
+        kafka_event_handler = KafkaEventHandler(self.analysis_context, self.kafka_topic, {
+            'bootstrap_servers': ['localhost:9092'], 'api_version': (2, 0, 1), max_block_ms: 3000})
         self.assertFalse(kafka_event_handler.receive_event(self.test_detector, self.event_message, self.sorted_log_lines, event_data,
                          log_atom, self))
         self.assertRaises(StopIteration, self.consumer.__next__)

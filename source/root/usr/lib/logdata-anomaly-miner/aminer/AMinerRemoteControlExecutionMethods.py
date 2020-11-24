@@ -91,9 +91,9 @@ class AMinerRemoteControlExecutionMethods:
             analysis_context.aminer_config.config_properties[property_name] = value
             result = 0
         elif property_name == AMinerConfig.KEY_LOG_STAT_LEVEL:
-            self.change_config_property_log_stat_level(analysis_context, value)
+            result = self.change_config_property_log_stat_level(analysis_context, value)
         elif property_name == AMinerConfig.KEY_LOG_DEBUG_LEVEL:
-            self.change_config_property_log_debug_level(analysis_context, value)
+            result = self.change_config_property_log_debug_level(analysis_context, value)
         else:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: property %s could not be changed. Please check the property_name " \
                                             "again." % property_name
@@ -302,13 +302,12 @@ class AMinerRemoteControlExecutionMethods:
     @staticmethod
     def isinstance_aminer_class(obj):
         """Test if an object is of an instance of a aminer class."""
-        from aminer.analysis.TimeCorrelationDetector import CorrelationFeature
-        from aminer.analysis.TimeCorrelationViolationDetector import CorrelationRule
         class_list = [
             aminer.analysis.AtomFilters.SubhandlerFilter, aminer.analysis.AtomFilters.MatchPathFilter,
-            aminer.analysis.AtomFilters.MatchValueFilter, aminer.analysis.HistogramAnalysis.BinDefinition,
-            aminer.analysis.HistogramAnalysis.HistogramData, aminer.analysis.Rules.MatchAction, aminer.analysis.Rules.MatchRule,
-            CorrelationRule, CorrelationFeature, aminer.events.EventHandlerInterface, aminer.util.ObjectHistory]
+            aminer.analysis.AtomFilters.MatchValueFilter, aminer.analysis.LinearNumericBinDefinition, aminer.analysis.BinDefinition,
+            aminer.analysis.ModuloTimeBinDefinition, aminer.analysis.Rules.MatchAction, aminer.analysis.Rules.MatchRule,
+            aminer.analysis.HistogramData, aminer.analysis.CorrelationRule, aminer.analysis.CorrelationFeature,
+            aminer.events.EventHandlerInterface, aminer.util.ObjectHistory]
         for c in class_list:
             if isinstance(obj, c):
                 return True
@@ -361,22 +360,17 @@ class AMinerRemoteControlExecutionMethods:
             return
         if component.__class__.__name__ not in [
                 "EnhancedNewMatchPathValueComboDetector", "MissingMatchPathValueDetector", "NewMatchPathDetector",
-                "NewMatchPathValueComboDetector", "NewMatchIdValueComboDetector", "TimestampsUnsortedDetector", "EventCorrelationDetector",
+                "NewMatchPathValueComboDetector", "NewMatchIdValueComboDetector", "EventCorrelationDetector",
                 "NewMatchPathValueDetector"]:
             self.REMOTE_CONTROL_RESPONSE += \
                 "FAILURE: component class '%s' does not support allowlisting! Only the following classes support allowlisting: " \
-                "EnhancedNewMatchPathValueComboDetector, MissingMatchPathValueDetector, NewMatchPathDetector, TimestampsUnsortedDetector" \
-                " NewMatchIdValueComboDetector, NewMatchPathValueComboDetector, NewMatchPathValueDetector and EventCorrelationDetector." \
+                "EnhancedNewMatchPathValueComboDetector, MissingMatchPathValueDetector, NewMatchPathDetector, NewMatchIdValueComboDetector," \
+                " NewMatchPathValueComboDetector, NewMatchPathValueDetector and EventCorrelationDetector." \
                 % component.__class__.__name__
             return
         try:
-            if component.__class__.__name__ == "MissingMatchPathValueDetector":
-                self.REMOTE_CONTROL_RESPONSE += component.allowlist_event("Analysis.%s" % component.__class__.__name__,
-                                                                          [component.__class__.__name__], event_data, allowlisting_data)
-            else:
-                self.REMOTE_CONTROL_RESPONSE += component.allowlist_event(
-                    "Analysis.%s" % component.__class__.__name__, [component.__class__.__name__],
-                    [LogAtom("", None, 1666.0, None), event_data], allowlisting_data)
+            self.REMOTE_CONTROL_RESPONSE += component.allowlist_event(
+                "Analysis.%s" % component.__class__.__name__, [""], event_data, allowlisting_data)
         # skipcq: PYL-W0703
         except Exception as e:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
