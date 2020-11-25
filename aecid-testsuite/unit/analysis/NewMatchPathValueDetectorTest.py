@@ -142,11 +142,11 @@ class NewMatchPathValueDetectorTest(TestBase):
 
         # an unknown value should be allowlisted
         new_match_path_value_detector.allowlist_event(
-            self.analysis % new_match_path_value_detector.__class__.__name__, None, self.fixed_dme.fixed_data, None)
+            self.analysis % new_match_path_value_detector.__class__.__name__, self.fixed_dme.fixed_data, None)
         self.assertEqual({self.fixed_dme.fixed_data}, new_match_path_value_detector.known_values_set)
 
         # an known value should be allowlisted
-        new_match_path_value_detector.allowlist_event(self.analysis % new_match_path_value_detector.__class__.__name__, None,
+        new_match_path_value_detector.allowlist_event(self.analysis % new_match_path_value_detector.__class__.__name__,
                                                       self.fixed_dme.fixed_data, None)
         self.assertEqual({self.fixed_dme.fixed_data}, new_match_path_value_detector.known_values_set)
 

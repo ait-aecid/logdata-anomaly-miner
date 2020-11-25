@@ -250,18 +250,16 @@ class NewMatchIdValueComboDetectorTest(TestBase):
             auto_include_flag=False, allow_missing_values_flag=True, persistence_id='audit_type_path', output_log_line=False)
         self.analysis_context.register_component(new_match_id_value_combo_detector, description)
         self.assertEqual(new_match_id_value_combo_detector.known_values, [])
-        sorted_log_lines = None
         event_data = {'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}
-        output = new_match_id_value_combo_detector.allowlist_event('Analysis.%s' % new_match_id_value_combo_detector.__class__.__name__,
-                                                                   sorted_log_lines, event_data, None)
+        output = new_match_id_value_combo_detector.allowlist_event(
+            'Analysis.%s' % new_match_id_value_combo_detector.__class__.__name__, event_data, None)
         self.assertEqual(new_match_id_value_combo_detector.known_values, [
             {'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}])
         self.assertEqual(output, self.expected_allowlist_string % event_data)
 
-        sorted_log_lines = None
         event_data = {'parser/type/syscall/syscall': 2, 'parser/type/path/name': 'two'}
-        output = new_match_id_value_combo_detector.allowlist_event('Analysis.%s' % new_match_id_value_combo_detector.__class__.__name__,
-                                                                   sorted_log_lines, event_data, None)
+        output = new_match_id_value_combo_detector.allowlist_event(
+            'Analysis.%s' % new_match_id_value_combo_detector.__class__.__name__, event_data, None)
         self.assertEqual(new_match_id_value_combo_detector.known_values, [
             {'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'},
             {'parser/type/syscall/syscall': 2, 'parser/type/path/name': 'two'}])
@@ -277,18 +275,16 @@ class NewMatchIdValueComboDetectorTest(TestBase):
             auto_include_flag=False, allow_missing_values_flag=True, persistence_id='audit_type_path', output_log_line=False)
         self.analysis_context.register_component(new_match_id_value_combo_detector, description)
         self.assertEqual(new_match_id_value_combo_detector.known_values, [])
-        sorted_log_lines = None
         event_data = {'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}
-        output = new_match_id_value_combo_detector.allowlist_event('Analysis.%s' % new_match_id_value_combo_detector.__class__.__name__,
-                                                                   sorted_log_lines, event_data, None)
+        output = new_match_id_value_combo_detector.allowlist_event(
+            'Analysis.%s' % new_match_id_value_combo_detector.__class__.__name__, event_data, None)
         self.assertEqual(new_match_id_value_combo_detector.known_values,
                          [{'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}])
         self.assertEqual(output, self.expected_allowlist_string % event_data)
 
-        sorted_log_lines = None
         event_data = {'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}
-        output = new_match_id_value_combo_detector.allowlist_event('Analysis.%s' % new_match_id_value_combo_detector.__class__.__name__,
-                                                                   sorted_log_lines, event_data, None)
+        output = new_match_id_value_combo_detector.allowlist_event(
+            'Analysis.%s' % new_match_id_value_combo_detector.__class__.__name__, event_data, None)
         self.assertEqual(new_match_id_value_combo_detector.known_values,
                          [{'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}])
         self.assertEqual(output, self.expected_allowlist_string % event_data)

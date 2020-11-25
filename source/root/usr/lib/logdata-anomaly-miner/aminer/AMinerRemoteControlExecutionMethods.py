@@ -369,7 +369,7 @@ class AMinerRemoteControlExecutionMethods:
             return
         try:
             self.REMOTE_CONTROL_RESPONSE += component.allowlist_event(
-                "Analysis.%s" % component.__class__.__name__, [""], event_data, allowlisting_data)
+                "Analysis.%s" % component.__class__.__name__, event_data, allowlisting_data)
         # skipcq: PYL-W0703
         except Exception as e:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)

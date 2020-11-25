@@ -171,7 +171,7 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
 
         t = time.time()
         self.assertEqual(enhanced_new_match_path_value_combo_detector.allowlist_event(
-            'Analysis.%s' % enhanced_new_match_path_value_combo_detector.__class__.__name__, None,
+            'Analysis.%s' % enhanced_new_match_path_value_combo_detector.__class__.__name__,
             self.match_element_sequence_me.get_path(), None), self.__expected_allowlisting_string % (
             ', '.join(enhanced_new_match_path_value_combo_detector.target_path_list), self.match_element_sequence_me.get_path()))
 
@@ -180,7 +180,7 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
 
         enhanced_new_match_path_value_combo_detector.auto_include_flag = False
         self.assertEqual(enhanced_new_match_path_value_combo_detector.allowlist_event(
-            'Analysis.%s' % enhanced_new_match_path_value_combo_detector.__class__.__name__, None,
+            'Analysis.%s' % enhanced_new_match_path_value_combo_detector.__class__.__name__,
             [log_atom_sequence_me2.get_timestamp(), self.match_element_sequence_me2.get_path()], None),
             self.__expected_allowlisting_string % (', '.join(enhanced_new_match_path_value_combo_detector.target_path_list), [
                 log_atom_sequence_me2.get_timestamp(), self.match_element_sequence_me2.path]))
