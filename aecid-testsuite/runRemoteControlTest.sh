@@ -1,8 +1,8 @@
-mkdir /tmp/lib #2> /dev/null
-mkdir /tmp/lib/aminer #2> /dev/null
-rm -r /tmp/lib/aminer/* #2> /dev/null
-chown -R aminer:aminer /tmp/lib #2> /dev/null
-rm /tmp/syslog #2> /dev/null
+sudo mkdir /tmp/lib 2> /dev/null
+sudo mkdir /tmp/lib/aminer 2> /dev/null
+sudo rm -r /tmp/lib/aminer/* 2> /dev/null
+sudo chown -R aminer:aminer /tmp/lib 2> /dev/null
+sudo rm /tmp/syslog 2> /dev/null
 
 FILE=demo/AMinerRemoteControl/demo-config.py
 sudo bash -c 'aminer --Config '$FILE' &' > /dev/null
