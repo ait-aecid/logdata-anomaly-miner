@@ -28,13 +28,14 @@ import logging
 from aminer import AMinerConfig
 from aminer.AMinerConfig import STAT_LEVEL, STAT_LOG_NAME
 from aminer.AnalysisChild import AnalysisContext
+from aminer.events import EventSourceInterface
 from aminer.input import AtomHandlerInterface
 from aminer.util import PersistenceUtil
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
 
-class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
+class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
     """This class tries to find time correlation patterns between different log atom events."""
 
     def __init__(self, aminer_config, anomaly_event_handlers, paths=None, max_hypotheses=1000, hypothesis_max_delta_time=5.0,

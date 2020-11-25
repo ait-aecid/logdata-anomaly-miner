@@ -364,8 +364,8 @@ class AMinerRemoteControlExecutionMethods:
                 "NewMatchPathValueDetector"]:
             self.REMOTE_CONTROL_RESPONSE += \
                 "FAILURE: component class '%s' does not support allowlisting! Only the following classes support allowlisting: " \
-                "EnhancedNewMatchPathValueComboDetector, MissingMatchPathValueDetector, NewMatchPathDetector, NewMatchIdValueComboDetector," \
-                " NewMatchPathValueComboDetector, NewMatchPathValueDetector and EventCorrelationDetector." \
+                "EnhancedNewMatchPathValueComboDetector, MissingMatchPathValueDetector, NewMatchPathDetector," \
+                " NewMatchIdValueComboDetector, NewMatchPathValueComboDetector, NewMatchPathValueDetector and EventCorrelationDetector." \
                 % component.__class__.__name__
             return
         try:

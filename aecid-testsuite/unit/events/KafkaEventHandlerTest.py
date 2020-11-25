@@ -63,8 +63,6 @@ class KafkaEventHandlerTest(TestBase):
 
     def test2receive_non_serialized_data(self):
         """This unittest tests the receive_event method with not serialized data."""
-        import kafka
-        print(kafka.version.__version__)
         log_atom = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element), self.t, self)
         self.analysis_context.register_component(self, self.description)
         event_data = {'AnalysisComponent': {'AffectedParserPaths': ['test/path/1', 'test/path/2']}}
