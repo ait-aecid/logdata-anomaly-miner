@@ -400,7 +400,6 @@ class YamlConfigTest(TestBase):
         del py_registered_components_by_name['SimpleMonotonicTimestampAdjust']
         yml_registered_components_by_name = copy.copy(yml_context.registered_components_by_name)
         del yml_registered_components_by_name['DefaultNewMatchPathDetector']
-        self.maxDiff = None
 
         self.assertEqual(yml_config_properties, py_context.aminer_config.config_properties)
         # there actually is no easy way to compare AMiner components as they do not implement the __eq__ method.
