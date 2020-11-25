@@ -393,10 +393,8 @@ class AMinerRemoteControlExecutionMethods:
                 "EventCorrelationDetector." % component.__class__.__name__
             return
         try:
-
             self.REMOTE_CONTROL_RESPONSE += component.blocklist_event(
-                "Analysis.%s" % component.__class__.__name__, [component.__class__.__name__],
-                [LogAtom("", None, 1666.0, None), event_data], blocklisting_data)
+                "Analysis.%s" % component.__class__.__name__, event_data, blocklisting_data)
         # skipcq: PYL-W0703
         except Exception as e:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)

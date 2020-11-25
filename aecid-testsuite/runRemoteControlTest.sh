@@ -394,6 +394,26 @@ if [[ "$stdout" != "$expected" ]]; then
 	exit_code=1
 fi
 
+stdout=$(sudo aminerremotecontrol --Exec "blocklist_event_in_component(analysis_context,'EventCorrelationDetector','/model/somepath',blocklisting_data=None)")
+expected="${PREFIX}'Blocklisted path /model/somepath.'"
+if [[ "$stdout" != "$expected" ]]; then
+	echo "$ERROR blocklist_event EventCorrelationDetector."
+	echo "$stdout"
+	echo "Expected: $expected"
+	echo
+	exit_code=1
+fi
+
+stdout=$(sudo aminerremotecontrol --Exec "blocklist_event_in_component(analysis_context,'EventCorrelationDetector','/model/somepath',blocklisting_data=None)")
+expected="${PREFIX}'Blocklisted path /model/somepath.'"
+if [[ "$stdout" != "$expected" ]]; then
+	echo "$ERROR blocklist_event EventCorrelationDetector."
+	echo "$stdout"
+	echo "Expected: $expected"
+	echo
+	exit_code=1
+fi
+
 sudo pkill -x aminer
 sleep 2 & wait $!
 
