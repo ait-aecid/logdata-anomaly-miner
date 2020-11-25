@@ -153,8 +153,6 @@ class NewMatchPathValueComboDetectorTest(TestBase):
                 self.match_element_sequence_me.get_path(), None), 'Allowlisted path(es) %s with %s.' % (
                 ", ".join(new_match_path_value_combo_detector.target_path_list), self.match_element_sequence_me.get_path()))
 
-        log_atom_sequence_me2 = LogAtom(self.match_element_sequence_me2.get_match_string(), ParserMatch(self.match_element_sequence_me2), t,
-                                        new_match_path_value_combo_detector)
         new_match_path_value_combo_detector.auto_include_flag = False
         self.assertEqual(
             new_match_path_value_combo_detector.allowlist_event(

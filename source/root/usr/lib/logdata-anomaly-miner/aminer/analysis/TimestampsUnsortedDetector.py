@@ -14,7 +14,6 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
 
-from aminer.events import EventSourceInterface
 from aminer.input import AtomHandlerInterface
 from datetime import datetime
 from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX

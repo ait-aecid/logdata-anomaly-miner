@@ -170,8 +170,6 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
         self.analysis_context.register_component(enhanced_new_match_path_value_combo_detector, description)
 
         t = time.time()
-        log_atom_sequence_me = LogAtom(self.match_element_sequence_me.get_match_string(), ParserMatch(self.match_element_sequence_me), t,
-                                       enhanced_new_match_path_value_combo_detector)
         self.assertEqual(enhanced_new_match_path_value_combo_detector.allowlist_event(
             'Analysis.%s' % enhanced_new_match_path_value_combo_detector.__class__.__name__, None,
             self.match_element_sequence_me.get_path(), None), self.__expected_allowlisting_string % (

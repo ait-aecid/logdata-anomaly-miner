@@ -199,8 +199,6 @@ class NewMatchPathDetectorTest(TestBase):
             'Allowlisted path(es) %s in %s.' % (
                 self.match_element_fixed_dme.get_path(), self.analysis % new_match_path_detector.__class__.__name__))
 
-        log_atom_decimal_integer_value_me = LogAtom(self.match_context_decimal_integer_value_me.match_data,
-                                                    ParserMatch(self.match_element_decimal_integer_value_me), t, new_match_path_detector)
         new_match_path_detector.auto_include_flag = False
         self.assertEqual(new_match_path_detector.allowlist_event(
             self.analysis % new_match_path_detector.__class__.__name__, None, self.match_element_decimal_integer_value_me.get_path(), None),
