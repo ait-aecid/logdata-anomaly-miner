@@ -429,7 +429,7 @@ class YamlConfigTest(unittest.TestCase):
         self.assertEqual(context.atomizer_factory.event_handler_list[0].stream.name, '/tmp/streamPrinter.txt')
         self.assertEqual(context.atomizer_factory.event_handler_list[0].stream.mode, 'w+')
 
-    def test21_set_output_handlers(self):
+    def test22_set_output_handlers(self):
         """Check if setting the output_event_handlers is working as expected."""
         spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
