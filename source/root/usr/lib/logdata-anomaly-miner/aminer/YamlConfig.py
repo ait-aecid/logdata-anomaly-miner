@@ -12,6 +12,9 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import sys
+import logging
+import logging
+from aminer import AMinerConfig
 
 
 config_properties = {}
@@ -536,8 +539,13 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                 ctx = None
                 if item['type'].name == 'StreamPrinterEventHandler':
                     if 'output_file_path' in item:
-                        stream = open(item['output_file_path'], 'w+')
-                        ctx = func(analysis_context, stream)
+                        try:
+                            stream = open(item['output_file_path'], 'w+')
+                            ctx = func(analysis_context, stream)
+                        except OSError as e:
+                            msg = 'Error occured when opening stream to output_file_path %s. Error: %s' % (item['output_file_path'], e)
+                            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                            print(msg, file=sys.stderr)
                     else:
                         ctx = func(analysis_context)
                 if item['type'].name == 'DefaultMailNotificationEventHandler':
