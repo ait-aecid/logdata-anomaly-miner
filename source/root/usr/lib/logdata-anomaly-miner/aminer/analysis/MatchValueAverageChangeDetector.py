@@ -59,10 +59,14 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         for path in analyze_path_list:
             self.stat_data.append((path, [],))
         if persistence_data is not None:
-            for string in persistence_data:
-                string = string.strip('[').strip(']').split(',', 2)
-                path = string[0].strip('"')
-                values = string[1].strip(' ').strip('[').strip(']')
+            for val in persistence_data:
+                if isinstance(val, str):
+                    val = val.strip('[').strip(']').split(',', 2)
+                    path = val[0].strip('"')
+                    values = val[1].strip(' ').strip('[').strip(']')
+                else:
+                    path = val[0]
+                    values = val[1]
                 index = 0
                 for p, v in self.stat_data:
                     if p == path:

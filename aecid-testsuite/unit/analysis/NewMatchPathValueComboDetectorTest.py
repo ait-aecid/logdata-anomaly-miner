@@ -148,21 +148,19 @@ class NewMatchPathValueComboDetectorTest(TestBase):
                                        new_match_path_value_combo_detector)
         new_match_path_value_combo_detector.receive_atom(log_atom_sequence_me)
         self.assertEqual(
-            new_match_path_value_combo_detector.allowlist_event('Analysis.%s' % new_match_path_value_combo_detector.__class__.__name__, [
-                log_atom_sequence_me, [self.match_element_sequence_me.get_path()]],
-                [log_atom_sequence_me, self.match_element_sequence_me.get_path()], None), 'Allowlisted path(es) %s with %s in %s' % (
-                ", ".join(new_match_path_value_combo_detector.target_path_list), self.match_element_sequence_me.get_path(),
-                log_atom_sequence_me))
+            new_match_path_value_combo_detector.allowlist_event(
+                'Analysis.%s' % new_match_path_value_combo_detector.__class__.__name__, None,
+                self.match_element_sequence_me.get_path(), None), 'Allowlisted path(es) %s with %s.' % (
+                ", ".join(new_match_path_value_combo_detector.target_path_list), self.match_element_sequence_me.get_path()))
 
         log_atom_sequence_me2 = LogAtom(self.match_element_sequence_me2.get_match_string(), ParserMatch(self.match_element_sequence_me2), t,
                                         new_match_path_value_combo_detector)
         new_match_path_value_combo_detector.auto_include_flag = False
         self.assertEqual(
-            new_match_path_value_combo_detector.allowlist_event('Analysis.%s' % new_match_path_value_combo_detector.__class__.__name__, [
-                log_atom_sequence_me2, [self.match_element_sequence_me2.get_path()]], [
-                log_atom_sequence_me2, self.match_element_sequence_me2.get_path()], None), 'Allowlisted path(es) %s with %s in %s' % (
-                ", ".join(new_match_path_value_combo_detector.target_path_list), self.match_element_sequence_me2.path,
-                log_atom_sequence_me2))
+            new_match_path_value_combo_detector.allowlist_event(
+                'Analysis.%s' % new_match_path_value_combo_detector.__class__.__name__, None, self.match_element_sequence_me2.get_path(),
+                None), 'Allowlisted path(es) %s with %s.' % (
+                ", ".join(new_match_path_value_combo_detector.target_path_list), self.match_element_sequence_me2.path))
 
 
 if __name__ == "__main__":

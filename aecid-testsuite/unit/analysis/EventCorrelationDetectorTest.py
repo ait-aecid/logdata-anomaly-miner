@@ -177,13 +177,11 @@ class EventCorrelationDetectorTest(TestBase):
         log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme), time(), ecd)
 
         # unknown path
-        ecd.allowlist_event(self.analysis % ecd.__class__.__name__, [log_atom_fixed_dme, match_element_fixed_dme.get_path()], [
-            log_atom_fixed_dme, match_element_fixed_dme.get_path()], None)
+        ecd.allowlist_event(self.analysis % ecd.__class__.__name__, None, match_element_fixed_dme.get_path(), None)
         self.assertEqual(['/s1'], ecd.constraint_list)
 
         # known path
-        ecd.allowlist_event(self.analysis % ecd.__class__.__name__, [log_atom_fixed_dme, match_element_fixed_dme.get_path()], [
-            log_atom_fixed_dme, match_element_fixed_dme.get_path()], None)
+        ecd.allowlist_event(self.analysis % ecd.__class__.__name__, None, match_element_fixed_dme.get_path(), None)
         self.assertEqual(['/s1'], ecd.constraint_list)
 
     def check_rules(self, sorted_back_rules, sorted_forward_rules, diff):
