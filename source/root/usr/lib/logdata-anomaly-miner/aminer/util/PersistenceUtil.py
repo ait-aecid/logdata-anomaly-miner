@@ -15,7 +15,6 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import errno
 import os
 import sys
-import time
 import logging
 import tempfile
 
@@ -126,6 +125,7 @@ def store_json(file_name, object_data):
 
 
 def create_missing_directories(file_name):
+    """Create missing persistence directories."""
     # Find out, which directory is missing by stating our way up.
     dir_name_length = file_name.rfind('/')
     if dir_name_length > 0:
