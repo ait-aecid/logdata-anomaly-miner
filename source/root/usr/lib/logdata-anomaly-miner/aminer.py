@@ -265,12 +265,6 @@ def main():
             config_file_name = sys.argv[arg_pos]
             arg_pos += 1
             continue
-        if arg_name in ('--Foreground', '--foreground'):
-            if not run_in_foreground_flag:
-                print('The AMiner process can not be run as Daemon and in Foreground simultaneously! Stopping..', file=sys.stderr)
-                sys.exit(1)
-            run_in_foreground_flag = True
-            continue
         if arg_name in ('--Daemon', '--daemon', '-D'):
             run_in_foreground_flag = False
             continue
