@@ -17,6 +17,7 @@ import os
 import sys
 import time
 import logging
+import tempfile
 
 from aminer import AMinerConfig
 from aminer.util import SecureOSFunctions
@@ -45,27 +46,16 @@ def open_persistence_file(file_name, flags):
         if ((flags & os.O_CREAT) == 0) or (openOsError.errno != errno.ENOENT):
             logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(openOsError)
             raise openOsError
-
-    # Find out, which directory is missing by stating our way up.
-    dir_name_length = file_name.rfind(b'/')
-    if dir_name_length > 0:
-        os.makedirs(file_name[:dir_name_length])
-    return SecureOSFunctions.secure_open_file(file_name, flags)
+    create_missing_directories(file_name)
 
 
-def create_temporary_persistence_file(file_name):
+def create_temporary_persistence_file():
     """
     Create a temporary file within persistence directory to write new persistence data to it.
     Thus the old data is not modified, any error creating or writing the file will not harm the old state.
     """
-    fd = None
-    # skipcq: PYL-W0511
-    # FIXME: This should use O_TMPFILE, but not yet available. That would obsolete the loop also.
-    # while True:
-    #  fd = openPersistenceFile('%s.tmp-%f' % (fileName, time.time()), os.O_WRONLY|os.O_CREAT|os.O_EXCL)
-    #  break
-    fd = open_persistence_file('%s.tmp-%f' % (file_name, time.time()), os.O_WRONLY | os.O_CREAT | os.O_EXCL)
-    return fd
+    fd, file_name = tempfile.mkstemp()
+    return fd, file_name
 
 
 no_secure_link_unlink_at_warn_once_flag = True
@@ -128,7 +118,16 @@ def load_json(file_name):
 def store_json(file_name, object_data):
     """Store persistence data to file."""
     persistence_data = JsonUtil.dump_as_json(object_data)
-    fd = create_temporary_persistence_file(file_name)
+    fd, _ = create_temporary_persistence_file()
     os.write(fd, bytes(persistence_data, 'utf-8'))
+    create_missing_directories(file_name)
     replace_persistence_file(file_name, fd)
     os.close(fd)
+
+
+def create_missing_directories(file_name):
+    # Find out, which directory is missing by stating our way up.
+    dir_name_length = file_name.rfind('/')
+    if dir_name_length > 0:
+        if not os.path.exists(file_name[:dir_name_length]):
+            os.makedirs(file_name[:dir_name_length])
