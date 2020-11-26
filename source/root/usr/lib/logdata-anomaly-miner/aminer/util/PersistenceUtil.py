@@ -39,22 +39,13 @@ def open_persistence_file(file_name, flags):
     if isinstance(file_name, str):
         file_name = file_name.encode()
     try:
-        fd = SecureOSFunctions.secure_open_file(file_name, flags)
-        return fd
+        fd, dir_fd = SecureOSFunctions.secure_open_file(file_name, flags)
+        return fd, dir_fd
     except OSError as openOsError:
         if ((flags & os.O_CREAT) == 0) or (openOsError.errno != errno.ENOENT):
             logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(openOsError)
             raise openOsError
     create_missing_directories(file_name)
-
-
-def create_temporary_persistence_file():
-    """
-    Create a temporary file within persistence directory to write new persistence data to it.
-    Thus the old data is not modified, any error creating or writing the file will not harm the old state.
-    """
-    fd, file_name = tempfile.mkstemp()
-    return fd, file_name
 
 
 no_secure_link_unlink_at_warn_once_flag = True
@@ -94,10 +85,11 @@ def load_json(file_name):
     """
     persistence_data = None
     try:
-        persistence_file_handle = open_persistence_file(file_name, os.O_RDONLY | os.O_NOFOLLOW)
+        persistence_file_handle, dir_fd = open_persistence_file(file_name, os.O_RDONLY | os.O_NOFOLLOW)
         persistence_data = os.read(persistence_file_handle, os.fstat(persistence_file_handle).st_size)
         persistence_data = str(persistence_data, 'utf-8')
         os.close(persistence_file_handle)
+        os.close(dir_fd)
     except OSError as openOsError:
         if openOsError.errno != errno.ENOENT:
             logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(openOsError)
@@ -117,7 +109,9 @@ def load_json(file_name):
 def store_json(file_name, object_data):
     """Store persistence data to file."""
     persistence_data = JsonUtil.dump_as_json(object_data)
-    fd, _ = create_temporary_persistence_file()
+    # Create a temporary file within persistence directory to write new persistence data to it.
+    # Thus the old data is not modified, any error creating or writing the file will not harm the old state.
+    fd, _ = tempfile.mkstemp()
     os.write(fd, bytes(persistence_data, 'utf-8'))
     create_missing_directories(file_name)
     replace_persistence_file(file_name, fd)

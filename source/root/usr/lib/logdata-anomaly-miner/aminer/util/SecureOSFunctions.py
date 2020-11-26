@@ -40,40 +40,10 @@ def secure_open_file(file_name, flags):
         logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
 
-    # This code would allow secure open but openat is not available
-    # in python2 series. A long way to go, but keep it here for the
-    # python3 port to come.
-    # if trustedRoot=='/':
-    #   fileName = fileName[1:]
-    # else:
-    #   if (not fileName.startswith(trustedRoot)) or (fileName[len(trustedRoot)] != '/'):
-    #     raise Exception('File name not within trusted root')
-    #   fileName = fileName[len(trustedRoot)+1:]
-    #
-    # dirFd = os.open(trustedRoot, os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW|os.O_NOCTTY)
-    # lastPathPart = None
-    # Open all path parts excluding the last one only as directory.
-    # This will prevent us from opening something unexpected if a
-    # user would move around directories while traversing.
-    # for part in fileName.split['/']:
-    #   if len(part)==0: continue
-    #   if lastPathPart is not None:
-    #     nextFd = os.openat(dirFd, os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW|os.O_NOCTTY)
-    #     os.close(dirFd)
-    #     dirFd = nextFd
-    #   lastPathPart = part
-    # if lastPathPart is None: lastPathPart = '.'
-    # result = os.openat(dirFd, lastPathPart, flags|os.O_NOFOLLOW|os.O_NOCTTY)
-    # os.close(dirFd)
-    # return(result)
-    # skipcq: PYL-W0603
-    global no_secure_open_warn_once_flag
-    if no_secure_open_warn_once_flag:
-        msg = 'SECURITY: No secure open yet due to missing openat in python!'
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
-        print('WARNING: ' + msg, file=sys.stderr)
-        no_secure_open_warn_once_flag = False
-    return os.open(file_name, flags | os.O_NOFOLLOW | os.O_NOCTTY)
+    dir_name = os.path.dirname(file_name)
+    base_name = os.path.basename(file_name)
+    dir_fd = os.open(dir_name, flags | os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY)
+    return os.open(base_name, flags | os.O_NOFOLLOW | os.O_NOCTTY, dir_fd=dir_fd), dir_fd
 
 
 def send_annotated_file_descriptor(send_socket, send_fd, type_info, annotation_data):
