@@ -90,36 +90,6 @@ def supports_color():
     return supported_platform and is_a_tty
 
 
-def print_help(program_name, version=False):
-    """Print the help string of the aminer program."""
-    global colflame  # skipcq: PYL-W0603
-    global flame  # skipcq: PYL-W0603
-    if supports_color():
-        print(colflame)
-    else:
-        print(flame)
-    print("   (Austrian Institute of Technology)")
-    print("       (%s)" % __website__)
-    print("            Version: %s" % __version__)
-    if version:
-        return
-    print("\nusage: %s [options]" % program_name)
-    print("options:")
-    print("  -c, --Config <config-file>          \tpath to the config-file")
-    print("  -D  --Daemon                        \trun as a daemon process")
-    print("  -s  --Stat <stat-level>             \tset the stat level. Possible stat-levels are 0 or q or quiet for no statistics, 1 for"
-          " normal statistic level and 2 or v for verbose statistics.")
-    print("  -d  --Debug <debug-level>           \tset the debug level. Possible debug-levels are 0 for no debugging, 1 for normal output"
-          " (INFO and above), 2 or v for printing all debug information.")
-    print("  -r, --RunAnalysis                   \tenable/disable analysis")
-    print("  -R, --Remove <persistence-directory>\tremoves a specific persistence directory")
-    print("  --Restore <backup-directory>        \trestore a persistence backup")
-    print("  -C, --Clear                         \tremoves all persistence directories")
-    print("  -f, --FromBegin                     \tremoves RepositioningData before starting the AMiner")
-    print("  -h, --Help                          \tprint this print_help screen")
-    print("  -v, --Version                       \tprint version-string")
-
-
 def run_analysis_child(aminer_config, program_name):
     """Run the Analysis Child."""
     from aminer import AMinerConfig
@@ -246,17 +216,24 @@ def main():
     os.dup2(stdin_fd, 0)
     os.close(stdin_fd)
 
-    parser = argparse.ArgumentParser(description='aminer - logdata-anomaly-miner', formatter_class=argparse.RawTextHelpFormatter)
+    help_message = 'aminer - logdata-anomaly-miner\n'
+    if supports_color():
+        help_message += colflame
+    else:
+        help_message += flame
+    parser = argparse.ArgumentParser(description=help_message, formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-v', '--version', action='version', version=__version_string__)
     parser.add_argument('-c', '--config', default='/etc/aminer/config.yml', type=str, help='path to the config-file')
     parser.add_argument('-D', '--daemon', action='store_false', help='run as a daemon process')
-    parser.add_argument('-s', '--stat', choices=[0, 1, 2], help='')
-    parser.add_argument('-d', '--debug', choices=[0, 1, 2], help='')
-    parser.add_argument('--run-analysis', action='store_true', help='')
-    parser.add_argument('-C', '--clear', action='store_true', help='')
-    parser.add_argument('-r', '--remove', action='append', type=str, help='')
-    parser.add_argument('-R', '--restore', type=str, help='')
-    parser.add_argument('-f', '--from-begin', action='store_true', help='')
+    parser.add_argument('-s', '--stat', choices=[0, 1, 2], help='set the stat level. Possible stat-levels are 0 for no statistics, 1 for '
+                                                                'normal statistic level and 2 for verbose statistics.')
+    parser.add_argument('-d', '--debug', choices=[0, 1, 2], help='set the debug level. Possible debug-levels are 0 for no debugging, 1 for '
+                                                                 'normal output (INFO and above), 2 for printing all debug information.')
+    parser.add_argument('--run-analysis', action='store_true', help='enable/disable analysis')
+    parser.add_argument('-C', '--clear', action='store_true', help='removes all persistence directories')
+    parser.add_argument('-r', '--remove', action='append', type=str, help='removes a specific persistence directory')
+    parser.add_argument('-R', '--restore', type=str, help='restore a persistence backup')
+    parser.add_argument('-f', '--from-begin', action='store_true', help='removes RepositioningData before starting the aminer')
 
     args = parser.parse_args()
 
