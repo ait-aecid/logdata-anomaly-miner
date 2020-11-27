@@ -14,7 +14,7 @@
 # Run a shell inside the container:
 #    docker run -m=2G -it --rm aecid/logdata-anomaly-miner-testing SHELL
 #
-# See: https://github.com/ait-aecid/logdata-anomaly-miner/wiki/Deployment-with-Docker
+# See: https://github.com/ait-aecid/logdata-anomaly-miner/wiki/How-to-use-the-AECID-testsuite
 #
 
 # Pull base image.
