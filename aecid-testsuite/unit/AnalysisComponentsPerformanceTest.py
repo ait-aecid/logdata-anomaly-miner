@@ -14,6 +14,7 @@ from aminer.analysis.ParserCount import ParserCount
 from aminer.analysis.EventCorrelationDetector import EventCorrelationDetector
 from aminer.analysis.MatchFilter import MatchFilter
 from aminer.analysis.VariableTypeDetector import VariableTypeDetector
+from aminer.analysis.VariableCorrelationDetector import VariableCorrelationDetector
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
 from aminer.input import LogAtom
 from aminer.parsing import ParserMatch, MatchContext, MatchElement, DecimalIntegerValueModelElement, FirstMatchModelElement, \
@@ -1041,6 +1042,67 @@ class AnalysisComponentsPerformanceTest(TestBase):
         type(self).result = self.result + self.result_string % (
             variable_type_detector.__class__.__name__, avg, results, '%s different path(es).' % (str(number_of_paths)))
 
+    def run_variable_correlation_detector(self, number_of_paths):
+        """Run the performance tests for VariableCorrelationDetector."""
+        with open('unit/data/vtd_data/uni_data_test6', 'rb') as f:
+            uni_data_list = pickle.load(f)  # skipcq: BAN-B301
+        with open('unit/data/vtd_data/nor_data_test6', 'rb') as f:
+            nor_data_list = pickle.load(f)  # skipcq: BAN-B301
+        with open('unit/data/vtd_data/beta1_data_test6', 'rb') as f:
+            beta1_data_list = pickle.load(f)  # skipcq: BAN-B301
+        with open('unit/data/vtd_data/uni_data_test7', 'rb') as f:
+            [uni_data_list_ini, uni_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+        with open('unit/data/vtd_data/nor_data_test7', 'rb') as f:
+            [nor_data_list_ini, nor_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+        with open('unit/data/vtd_data/beta1_data_test7', 'rb') as f:
+            [beta1_data_list_ini, beta1_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+        with open('unit/data/vtd_data/beta2_data_test7', 'rb') as f:
+            [beta2_data_list_ini, beta2_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+        with open('unit/data/vtd_data/beta3_data_test7', 'rb') as f:
+            [beta3_data_list_ini, beta3_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+        with open('unit/data/vtd_data/beta4_data_test7', 'rb') as f:
+            [beta4_data_list_ini, beta4_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+        with open('unit/data/vtd_data/beta5_data_test7', 'rb') as f:
+            [beta5_data_list_ini, beta5_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+
+        data = uni_data_list + nor_data_list + beta1_data_list + uni_data_list_ini + uni_data_list_upd + nor_data_list_ini +\
+            nor_data_list_upd + beta1_data_list_ini + beta1_data_list_upd + beta2_data_list_ini + beta2_data_list_upd + beta3_data_list_ini\
+            + beta3_data_list_upd + beta4_data_list_ini + beta4_data_list_upd + beta5_data_list_ini + beta5_data_list_upd
+        results = [None] * self.iterations
+        avg = 0
+        z = 0
+        while z < self.iterations:
+            path_list = None
+            if number_of_paths is not None and number_of_paths != 1000000:
+                path_list = ['/integer/d' + str(i) for i in range(number_of_paths)]
+            else:
+                number_of_paths = 1000000
+            event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], path_list=path_list)
+            variable_correlation_detector = VariableCorrelationDetector(
+                self.aminer_config, [self.stream_printer_event_handler], event_type_detector)
+            seconds = time.time()
+            i = 0
+            measured_time = 0
+            while measured_time < self.waiting_time / 10:
+                any_byte_data_me = AnyByteDataModelElement('d' + str(i % number_of_paths))
+                p = process_time()
+                r = random.randint(1, 1000000)
+                seconds = seconds + process_time() - p
+                match_context = MatchContext(str(data[i % len(data)]).encode())
+                match_element = any_byte_data_me.get_match_element('/integer', match_context)
+                log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), seconds - r, event_type_detector)
+                self.assertTrue(event_type_detector.receive_atom(log_atom))
+                measured_time += timeit.timeit(lambda: variable_correlation_detector.receive_atom(log_atom), number=1)
+                i = i + 1
+            results[z] = i * 10
+            z = z + 1
+            avg = avg + i * 10
+        avg = avg / self.iterations
+        if number_of_paths == 1000000:
+            number_of_paths = 'all'
+        type(self).result = self.result + self.result_string % (
+            variable_correlation_detector.__class__.__name__, avg, results, '%s different path(es).' % (str(number_of_paths)))
+
     def test01atom_filters(self):
         """Start performance tests for AtomFilters."""
         self.run_atom_filters_match_path_filter(1)
@@ -1213,6 +1275,15 @@ class AnalysisComponentsPerformanceTest(TestBase):
         self.run_variable_type_detector(1)
         self.run_variable_type_detector(10)
         self.run_variable_type_detector(100)
+
+    def test21variable_correlation_detector(self):
+        """Start performance tests for VariableCorrelationDetector."""
+        # The VCD should never been run without restrictions of paths (in ETD or via ignore_list, constraint_list) as the performance is
+        # terrible.
+        # self.run_variable_correlation_detector(None)
+        self.run_variable_correlation_detector(1)
+        self.run_variable_correlation_detector(10)
+        self.run_variable_correlation_detector(100)
 
 
 if __name__ == '__main__':
