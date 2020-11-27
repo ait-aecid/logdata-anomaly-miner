@@ -34,6 +34,39 @@ __status__ = "Production"
 __version__ = "2.1.0"
 __version_string__ = """   (Austrian Institute of Technology)\n       (%s)\n            Version: %s""" % (__website__, __version__)
 
+colflame = ("\033[31m"
+            "            *     (        )       (     \n"
+            "   (      (  `    )\\ )  ( /(       )\\ )  \n"
+            "   )\\     )\\))(  (()/(  )\\()) (   (()/(  \n"
+            "\033[33m"
+            "((((_)(  ((_)()\\  /(_))((_)\\  )\\   /(_)) \n"
+            " )\\ _ )\\ (_()((_)(_))   _((_)((_) (_))   \n"
+            " (_)\033[39m_\\\033[33m(_)\033[39m|  \\/  ||_ _| | \\| || __|| _ \\  \n"
+            "  / _ \\  | |\\/| | | |  | .` || _| |   /  \n"
+            " /_/ \\_\\ |_|  |_||___| |_|\\_||___||_|_\\  "
+            "\033[39m")
+
+flame = ("            *     (        )       (     \n"
+         "   (      (  `    )\\ )  ( /(       )\\ )  \n"
+         "   )\\     )\\))(  (()/(  )\\()) (   (()/(  \n"
+         "((((_)(  ((_)()\\  /(_))((_)\\  )\\   /(_)) \n"
+         " )\\ _ )\\ (_()((_)(_))   _((_)((_) (_))   \n"
+         " (_)_\\(_)|  \\/  ||_ _| | \\| || __|| _ \\  \n"
+         "  / _ \\  | |\\/| | | |  | .` || _| |   /  \n"
+         " /_/ \\_\\ |_|  |_||___| |_|\\_||___||_|_\\  ")
+
+
+def supports_color():
+    """
+    Return True if the running system's terminal supports color, and False otherwise.
+    The function was borrowed from the django-project (https://github.com/django/django/blob/master/django/core/management/color.py)
+    """
+    plat = sys.platform
+    supported_platform = plat != 'Pocket PC' and (plat != 'win32' or 'ANSICON' in os.environ)
+    # isatty is not always implemented, #6223.
+    is_a_tty = hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
+    return supported_platform and is_a_tty
+
 # Get rid of the default sys path immediately. Otherwise Python also attempts to load the following imports from e.g. directory
 # where this binary resides.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
