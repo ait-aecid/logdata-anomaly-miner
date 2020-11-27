@@ -2,6 +2,7 @@ import sys
 import os
 import shutil
 import re
+import argparse
 from aminer.AMinerConfig import load_config, KEY_AMINER_USER, KEY_AMINER_GROUP, KEY_PERSISTENCE_DIR
 
 

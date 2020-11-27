@@ -67,6 +67,7 @@ def supports_color():
     is_a_tty = hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
     return supported_platform and is_a_tty
 
+
 # Get rid of the default sys path immediately. Otherwise Python also attempts to load the following imports from e.g. directory
 # where this binary resides.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
