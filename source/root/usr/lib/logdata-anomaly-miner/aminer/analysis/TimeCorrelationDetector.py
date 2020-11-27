@@ -229,7 +229,9 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
             elif rule_type == 1:
                 sub_rules.append(Rules.ValueMatchRule(key_name, key_value))
             else:
-                raise Exception('Invalid rule type')
+                msg = 'Invalid rule type'
+                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                raise Exception(msg)
             if not all_keys:
                 break
 
