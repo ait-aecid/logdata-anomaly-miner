@@ -21,18 +21,17 @@ from aminer.events import EventHandlerInterface
 class KafkaEventHandler(EventHandlerInterface):
     """This class implements an event record listener, that will forward Json-objects to a Kafka queue."""
 
-    def __init__(self, analysis_context, topic, options, suppress_detector_list=None):
+    def __init__(self, analysis_context, topic, options):
         self.analysis_context = analysis_context
         self.options = options
         self.topic = topic
         self.producer = None
         self.kafkaImported = False
-        self.suppress_detector_list = suppress_detector_list
 
     def receive_event(self, event_type, event_message, sorted_log_lines, event_data, log_atom, event_source):
         """Receive information about a detected event in json format."""
         component_name = self.analysis_context.get_name_by_component(event_source)
-        if self.suppress_detector_list is not None and component_name in self.suppress_detector_list:
+        if component_name in self.analysis_context.suppress_detector_list:
             return True
         if self.kafkaImported is False:
             try:

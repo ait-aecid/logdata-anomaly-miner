@@ -27,7 +27,7 @@ class SyslogWriterEventHandler(EventHandlerInterface):
     fill up your disks.
     """
 
-    def __init__(self, analysis_context, instance_name='aminer', suppress_detector_list=None):
+    def __init__(self, analysis_context, instance_name='aminer'):
         self.analysis_context = analysis_context
         self.instanceName = instance_name
         syslog.openlog('%s[%d]' % (self.instanceName, os.getpid()), syslog.LOG_INFO, syslog.LOG_DAEMON)
@@ -35,12 +35,11 @@ class SyslogWriterEventHandler(EventHandlerInterface):
         self.buffer_stream = io.StringIO()
         self.event_writer = StreamPrinterEventHandler(analysis_context, self.buffer_stream)
         self.event_id = 0
-        self.suppress_detector_list = suppress_detector_list
 
     def receive_event(self, event_type, event_message, sorted_log_lines, event_data, log_atom, event_source):
         """Receive information about a detected even and forward it to syslog."""
         component_name = self.analysis_context.get_name_by_component(event_source)
-        if self.suppress_detector_list is not None and component_name in self.suppress_detector_list:
+        if component_name in self.analysis_context.suppress_detector_list:
             return
         self.buffer_stream.seek(0)
         self.buffer_stream.truncate(0)
