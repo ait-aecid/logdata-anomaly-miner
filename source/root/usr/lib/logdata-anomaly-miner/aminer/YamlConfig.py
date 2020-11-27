@@ -573,6 +573,24 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     num_ind_for_weights=item['num_ind_for_weights'], used_multinomial_test=item['used_multinomial_test'],
                     use_empiric_distr=item['use_empiric_distr'], save_statistics=item['save_statistics'],
                     output_log_line=item['output_logline'], ignore_list=item['ignore_list'], constraint_list=item['constraint_list'])
+            elif item['type'].name == 'VariableCorrelationDetector':
+                etd = analysis_context.get_component_by_name(item['event_type_detector'])
+                if etd is None:
+                    msg = 'The defined EventTypeDetector %s does not exists!' % item['event_type_detector']
+                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
+                print(func)
+                tmp_analyser = func(
+                    analysis_context.aminer_config, anomaly_event_handlers, etd, persistence_id=item['persistence_id'],
+                    num_init=item['num_init'], num_update=item['num_update'], disc_div_thres=item['disc_div_thres'],
+                    num_steps_create_new_rules=item['num_steps_create_new_rules'],
+                    num_upd_until_validation=item['num_upd_until_validation'], num_end_learning_phase=item['num_end_learning_phase'],
+                    num_bt=item['num_bt'], alpha_bt=item['alpha_bt'], max_dist_rule_distr=item['max_dist_rule_distr'],
+                    used_presel_meth=item['used_presel_meth'], intersect_presel_meth=item['intersect_presel_meth'],
+                    percentage_random_cors=item['percentage_random_cors'], used_cor_d_meth=item['used_cor_d_meth'],
+                    used_validate_cor_d_meth=item['used_validate_cor_d_meth'],
+                    validate_cor_cover_vals_thres=item['validate_cor_cover_vals_thres'],
+                    validate_cor_distinct_thres=item['validate_cor_distinct_thres'], ignore_list=item['ignore_list'])
             else:
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn)
             analysis_context.register_component(tmp_analyser, component_name=comp_name)

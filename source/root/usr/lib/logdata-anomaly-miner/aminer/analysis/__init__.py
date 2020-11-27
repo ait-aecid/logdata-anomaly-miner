@@ -36,3 +36,4 @@ from aminer.analysis.TimeCorrelationViolationDetector import TimeCorrelationViol
 from aminer.analysis.TimestampCorrectionFilters import SimpleMonotonicTimestampAdjust  # skipcq: FLK-E402
 from aminer.analysis.TimestampsUnsortedDetector import TimestampsUnsortedDetector  # skipcq: FLK-E402
 from aminer.analysis.VariableTypeDetector import VariableTypeDetector  # skipcq: FLK-E402
+from aminer.analysis.VariableCorrelationDetector import VariableCorrelationDetector  # skipcq: FLK-E402

@@ -269,7 +269,24 @@
                     'used_multinomial_test': {'type': 'string', 'allowed': ['Approx', 'MT', 'Chi'], 'required': False, 'default': 'Chi'},
                     'use_empiric_distr': {'type': 'boolean', 'required': False, 'default': True},
                     'save_statistics': {'type': 'boolean', 'required': False, 'default': True},
-                    'split_reports_flag': {'type': 'boolean', 'required': False, 'default': False}
+                    'split_reports_flag': {'type': 'boolean', 'required': False, 'default': False},
+                    'disc_div_thres': {'type': 'float', 'required': False, 'default': 0.3},
+                    'num_steps_create_new_rules': {'type': ['boolean', 'integer'], 'required': False, 'default': False},
+                    'num_upd_until_validation': {'type': 'integer', 'required': False, 'default': 20},
+                    'num_end_learning_phase': {'type': ['boolean', 'integer'], 'required': False, 'default': False},
+                    'num_bt': {'type': 'integer', 'required': False, 'default': 30},
+                    'alpha_bt': {'type': 'float', 'required': False, 'default': 0.1},
+                    'max_dist_rule_distr': {'type': 'float', 'required': False, 'default': 0.1},
+                    'used_presel_meth': {'type': 'list', 'required': False, 'schema': {'type': 'string', 'allowed': [
+                        'matchDiskDistr', 'excludeDueDistr', 'matchDiskVals', 'random']}, 'nullable': True, 'default': None},
+                    'intersect_presel_meth': {'type': 'boolean', 'required': False, 'default': False},
+                    'percentage_random_cors': {'type': 'float', 'required': False, 'default': 0.20},
+                    'used_cor_d_meth': {'type': 'list', 'required': False, 'schema': {'type': 'string', 'allowed': ['Rel', 'WRel']},
+                                        'nullable': True, 'default': None},
+                    'used_validate_cor_d_meth': {'type': 'list', 'required': False, 'schema': {'type': 'string', 'allowed': [
+                        'coverVals', 'distinctDistr']}, 'nullable': True, 'default': None},
+                    'validate_cor_cover_vals_thres': {'type': 'float', 'required': False, 'default': 0.7},
+                    'validate_cor_distinct_thres': {'type': 'float', 'required': False, 'default': 0.05},
                 }
             }
         },
