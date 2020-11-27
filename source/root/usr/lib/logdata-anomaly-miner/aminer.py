@@ -542,7 +542,7 @@ def main():
             sys.exit(1)
         if child_pid != 0:
             # This is the parent.
-            sys.exit(0)
+            os._exit(0)
         # This is the child. Create a new session and become process group leader. Here we get rid of the controlling tty.
         os.setsid()
         # Fork again to become an orphaned process not being session leader, hence not able to get a controlling tty again.
@@ -555,7 +555,7 @@ def main():
             sys.exit(1)
         if child_pid != 0:
             # This is the parent.
-            sys.exit(0)
+            os._exit(0)
         # Move to root directory to avoid lingering in some cwd someone else might want to unmount.
         os.chdir('/')
         # Change the umask here to clean all group/other mask bits so that accidentially created files are not accessible by other.
@@ -625,6 +625,7 @@ def main():
         else:
             msg = 'INFO: No privilege separation when started as unprivileged user'
             print(msg, file=sys.stderr)
+            initialize_loggers(aminer_config, 'aminer', 'aminer')
             logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info(msg)
 
         # Now resolve the specific analysis configuration file (if any).

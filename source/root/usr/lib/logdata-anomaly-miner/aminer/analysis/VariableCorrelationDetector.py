@@ -6,7 +6,7 @@ from aminer.AnalysisChild import AnalysisContext
 from aminer.events import EventSourceInterface
 from aminer.input import AtomHandlerInterface
 from aminer.util import TimeTriggeredComponentInterface
-from aminer.util import PersistencyUtil
+from aminer.util import PersistenceUtil
 
 
 class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
@@ -21,7 +21,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                  num_update=100, disc_div_thres=0.3, num_steps_create_new_rules=False, num_upd_until_validation=20,
                  num_end_learning_phase=False, num_bt=30, alpha_bt=0.1, max_dist_rule_distr=0.1, used_presel_meth=None,
                  intersect_presel_meth=False, percentage_random_cors=0.20, used_cor_d_meth=None, used_validate_cor_d_meth=None,
-                 validate_cor_cover_vals_thres=0.7, validate_cor_distinct_thres=0.05):
+                 validate_cor_cover_vals_thres=0.7, validate_cor_distinct_thres=0.05, ignore_list=None, constraint_list=None):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
         self.next_persist_time = None
         self.event_type_detector = event_type_detector
@@ -113,10 +113,17 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         # Calculate the minimal number of successes for the BT
         self.min_successes_bt = self.bt_min_successes(self.num_bt, 1 - self.alpha_bt, self.alpha_bt)
 
+        self.ignore_list = ignore_list
+        if self.ignore_list is None:
+            self.ignore_list = []
+        self.constraint_list = constraint_list
+        if self.constraint_list is None:
+            self.constraint_list = []
+
         # Loads the persistence
-        PersistencyUtil.add_persistable_component(self)
+        PersistenceUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
-        persistence_data = PersistencyUtil.load_json(self.persistence_file_name)
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
 
         # Imports the persistence if self.event_type_detector.load_persistence_data is True
         if persistence_data is not None:
@@ -129,6 +136,17 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         @param log_atom the parsed log atom
         @return True if this handler was really able to handle and process the match.
         """
+        parser_match = log_atom.parser_match
+        for ignore_path in self.ignore_list:
+            if ignore_path in parser_match.get_match_dictionary().keys():
+                return
+        constraint_path_flag = False
+        for constraint_path in self.constraint_list:
+            if parser_match.get_match_dictionary().get(constraint_path) is not None:
+                constraint_path_flag = True
+                break
+        if not constraint_path_flag and self.constraint_list != []:
+            return
         event_index = self.event_type_detector.current_index
         if self.event_type_detector.num_eventlines[event_index] == self.num_init:  # Initialisation Phase
             self.init_cor(event_index)  # Initialise the correlations
@@ -182,7 +200,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         """Immediately write persistence data to storage."""
         persistence_data = [self.pos_var_cor, self.pos_var_val, self.discrete_indices, self.update_rules, self.generate_rules,
                             self.rel_list, self.w_rel_list, self.w_rel_num_ll_to_vals]
-        PersistencyUtil.store_json(self.persistence_file_name, persistence_data)
+        PersistenceUtil.store_json(self.persistence_file_name, persistence_data)
 
     def load_persistence_data(self, persistence_data):
         """Extract the persistence data and appends various lists to create a consistent state."""
