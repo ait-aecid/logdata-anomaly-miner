@@ -805,8 +805,10 @@ class VariableCorrelationDetectorTest(TestBase):
                         self.assertTrue(value in ({key: 7}, {key*2: 0, key: 0, key*2+offset: 2}))
 
     def update_or_test_with_w_rel_correlation_method(self, etd, vcd, update_rules, generate_rules, offset=0):
-        """Run the update or test of w_rel correlations. This method initializes the vcd with a distribution of 70% 0.1 and 30% 0.2.
-        In the update phase the distribution is 80% 1 and 20% 2."""
+        """
+        Run the update or test of w_rel correlations. This method initializes the vcd with a distribution of 70% 0.1 and 30% 0.2.
+        In the update phase the distribution is 80% 1 and 20% 2.
+        """
         t = time()
         values = []
         # generate the initialization data with child elements being (i % 10) * 1.

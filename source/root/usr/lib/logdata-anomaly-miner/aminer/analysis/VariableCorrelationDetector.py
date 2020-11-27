@@ -139,14 +139,14 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         parser_match = log_atom.parser_match
         for ignore_path in self.ignore_list:
             if ignore_path in parser_match.get_match_dictionary().keys():
-                return
+                return False
         constraint_path_flag = False
         for constraint_path in self.constraint_list:
             if parser_match.get_match_dictionary().get(constraint_path) is not None:
                 constraint_path_flag = True
                 break
         if not constraint_path_flag and self.constraint_list != []:
-            return
+            return False
         event_index = self.event_type_detector.current_index
         if self.event_type_detector.num_eventlines[event_index] == self.num_init:  # Initialisation Phase
             self.init_cor(event_index)  # Initialise the correlations
@@ -1328,7 +1328,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
     # skipcq: PYL-R0201
     def bt_min_successes(self, num_BT, p, alpha):
         """
-        Calculates the minimal number of successes for the BT with significance alpha.
+        Calculate the minimal number of successes for the BT with significance alpha.
         p is the probability of success and num_BT is the number of observed tests.
         """
         tmp_sum = 0.0
