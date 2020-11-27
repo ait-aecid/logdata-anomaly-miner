@@ -34,6 +34,7 @@ import sys
 import logging
 import shutil
 import warnings
+import argparse
 
 __authors__ = ["Markus Wurzenberger", "Max Landauer", "Wolfgang Hotwagner", "Ernst Leierzopf", "Roman Fiedler", "Georg Hoeld",
                "Florian Skopik"]
@@ -47,6 +48,7 @@ __license__ = "GPLv3"
 __maintainer__ = "Markus Wurzenberger"
 __status__ = "Production"
 __version__ = "2.1.0"
+__version_string__ = """   (Austrian Institute of Technology)\n       (%s)\n            Version: %s""" % (__website__, __version__)
 
 
 # As site packages are not included, define from where we need to execute code before loading it.
@@ -244,96 +246,43 @@ def main():
     os.dup2(stdin_fd, 0)
     os.close(stdin_fd)
 
-    config_file_name = '/etc/aminer/config.yml'
-    run_in_foreground_flag = True
-    run_analysis_child_flag = False
-    clear_persistence_flag = False
-    remove_persistence_dirs = []
-    from_begin_flag = False
-    restore_relative_persistence_path = None
+    parser = argparse.ArgumentParser(description='aminer - logdata-anomaly-miner', formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument('-v', '--version', action='version', version=__version_string__)
+    parser.add_argument('-c', '--config', default='/etc/aminer/config.yml', type=str, help='path to the config-file')
+    parser.add_argument('-D', '--daemon', action='store_false', help='run as a daemon process')
+    parser.add_argument('-s', '--stat', choices=[0, 1, 2], help='')
+    parser.add_argument('-d', '--debug', choices=[0, 1, 2], help='')
+    parser.add_argument('--run-analysis', action='store_true', help='')
+    parser.add_argument('-C', '--clear', action='store_true', help='')
+    parser.add_argument('-r', '--remove', action='append', type=str, help='')
+    parser.add_argument('-R', '--restore', type=str, help='')
+    parser.add_argument('-f', '--from-begin', action='store_true', help='')
+
+    args = parser.parse_args()
+
+    config_file_name = args.config
+    run_in_foreground_flag = args.daemon
+    run_analysis_child_flag = args.run_analysis
+    clear_persistence_flag = args.clear
+    remove_persistence_dirs = args.remove
+    from_begin_flag = args.from_begin
+    if args.restore is not None and ('.' in args.restore or '/' in args.restore):
+        parser.error('The restore path %s must not contain any . or /' % args.restore)
+    if args.remove is not None:
+        for remove in args.remove:
+            if '.' in remove or '/' in remove:
+                parser.error('The remove path %s must not contain any . or /' % remove)
+    restore_relative_persistence_path = args.restore
     stat_level = 1
     debug_level = 1
     stat_level_console_flag = False
     debug_level_console_flag = False
-
-    arg_pos = 1
-    while arg_pos < len(sys.argv):
-        arg_name = sys.argv[arg_pos]
-        arg_pos += 1
-
-        if arg_name in ('--Config', '--config', '-c'):
-            config_file_name = sys.argv[arg_pos]
-            arg_pos += 1
-            continue
-        if arg_name in ('--Foreground', '--foreground'):
-            if not run_in_foreground_flag:
-                print('The AMiner process can not be run as Daemon and in Foreground simultaneously! Stopping..', file=sys.stderr)
-                sys.exit(1)
-            run_in_foreground_flag = True
-            continue
-        if arg_name in ('--Daemon', '--daemon', '-D'):
-            run_in_foreground_flag = False
-            continue
-        if arg_name in ('--Stat', '--stat', '-s'):
-            stat_level = sys.argv[arg_pos]
-            arg_pos += 1
-            if stat_level not in ('0', '1', '2', 'v', 'q', 'quiet'):
-                print('There is no stat level', stat_level, file=sys.stderr)
-                sys.exit(1)
-            if stat_level in ('0', '1', '2'):
-                stat_level = int(stat_level)
-            elif stat_level == 'v':
-                stat_level = 2
-            elif stat_level in ('q', 'quiet'):
-                stat_level = 0
-            stat_level_console_flag = True
-            continue
-        if arg_name in ('--Debug', '--debug', '-d'):
-            debug_level = sys.argv[arg_pos]
-            arg_pos += 1
-            if debug_level not in ('0', '1', '2', 'v', 'q', 'quiet'):
-                print('There is no debug level', debug_level, file=sys.stderr)
-                sys.exit(1)
-            if debug_level in ('0', '1', '2'):
-                debug_level = int(debug_level)
-            elif debug_level == 'v':
-                debug_level = 2
-            elif debug_level in ('q', 'quiet'):
-                debug_level = 0
-            debug_level_console_flag = True
-            continue
-        if arg_name in ('--RunAnalysis', '--runAnalysis', '--runanalysis', '-r'):
-            run_analysis_child_flag = True
-            continue
-        if arg_name in ('--Clear', '--clear', '-C'):
-            clear_persistence_flag = True
-            continue
-        if arg_name in ('--Remove', '--remove', '-R'):
-            if '.' in sys.argv[arg_pos] or '/' in sys.argv[arg_pos]:
-                print('The remove path %s must not contain any . or /' % sys.argv[arg_pos], file=sys.stderr)
-                sys.exit(1)
-            remove_persistence_dirs.append(sys.argv[arg_pos])
-            arg_pos += 1
-            continue
-        if arg_name in ('--Restore', '--restore'):
-            if '.' in sys.argv[arg_pos] or '/' in sys.argv[arg_pos]:
-                print('The remove path %s must not contain any . or /' % sys.argv[arg_pos], file=sys.stderr)
-                sys.exit(1)
-            restore_relative_persistence_path = sys.argv[arg_pos]
-            arg_pos += 1
-            continue
-        if arg_name in ('--FromBegin', '--fromBegin', '--frombegin', '-f'):
-            from_begin_flag = True
-            continue
-        if arg_name in ('--print_help', '--Help', '--help', '-h'):
-            print_help(program_name)
-            sys.exit(1)
-        if arg_name in ('--Version', '--version', '-v'):
-            print_help(program_name, True)
-            sys.exit(1)
-
-        print('Unknown parameter "%s"' % arg_name, file=sys.stderr)
-        sys.exit(1)
+    if args.stat is not None:
+        stat_level = args.stat
+        stat_level_console_flag = True
+    if args.debug is not None:
+        debug_level = args.stat
+        debug_level_console_flag = True
 
     # Load the main configuration file.
     if not os.path.exists(config_file_name):
