@@ -36,10 +36,16 @@ class TSAArima(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourc
         self.num_division_time_step = 10
         # History of the time windows
         self.time_window_history = []
+        # List of the the single arima_models
+        self.arima_models = []
+
+        self.plots = [[], [], []]
+        self.fast = True # True for update, False for new calculation every step
+        self.sum = True # Build the sum of the single windows
         return
 
     def receive_atom(self, log_atom):
-        if False and not self.event_type_detector.total_records % 100:
+        if not self.event_type_detector.total_records % 100:
             print(self.event_type_detector.total_records)
         return True
 
@@ -69,8 +75,9 @@ class TSAArima(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourc
         """Returns a list of the timestep lenghts in seconds, if no timestep should be created the value is set to -1"""
         # List of the resulting time_steps
         time_step_list = []
-        # Initialize time_window_history
+        # Initialize time_window_history and arima_models
         self.time_window_history = [[] for _ in range(len(counts))]
+        self.arima_models = [None for _ in range(len(counts))]
         # Minimal size of the time step
         min_lag = max(int(0.2*self.event_type_detector.num_sections_waiting_time_for_TSA),1)
         for data in counts:
@@ -86,37 +93,91 @@ class TSAArima(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourc
 
         return time_step_list
 
-    def passed_timewindow(self, event_number, count):
+    def test_num_appearance(self, event_number, count):
         """This function makes a one step prediction and raises an alert if the count do not match the expected appearance"""
+        # Append the list of time_window_history and arima_models if it is to short
+        if len(self.time_window_history) <= event_number:
+            self.time_window_history += [[] for _ in range(event_number + 1 - len(self.time_window_history))]
+            self.arima_models += [None for _ in range(event_number + 1 - len(self.arima_models))]
 
-        # Add the new count to the history and shorten it, if neccessary
-        self.time_window_history[event_number].append(count)
-        if len(self.time_window_history[event_number]) > 10 * self.num_division_time_step:
-            self.time_window_history[event_number] = self.time_window_history[event_number][-5*self.num_division_time_step:]
+        # Initialize the arima_model if needed
+        if self.arima_models[event_number] == None:
 
-        # Make a one step prediction if enough counts have been received
-        if len(self.time_window_history[event_number]) >= 5*self.num_division_time_step:
-            print(self.time_window_history[event_number])
-            
-            error = "None"
-            try:
-                lower, pred, upper = self.one_step_prediction(self.time_window_history[event_number][-5*self.num_division_time_step:-1])
-            except ValueError:
-                error = "ValueError"
-                lower, pred, upper = 0,0,0
-            except np.linalg.LinAlgError:
-                error = "LinAlgError"
-                lower, pred, upper = 0,0,0
+            # Add the new count to the history and shorten it, if neccessary
+            self.time_window_history[event_number].append(count)
+            if len(self.time_window_history[event_number]) > 20 * self.num_division_time_step:
+                self.time_window_history[event_number] = self.time_window_history[event_number][-10*self.num_division_time_step:]
+                print(len(self.time_window_history[event_number]))
 
-            print('EventNumber: %s, Count: %s, Lower: %s, Pred: %s, Upper: %s'%(event_number, count, lower, pred, upper))
+            # Check if enough values have been stored to initialize the arima_model
+            if self.arima_models[event_number] == None and len(self.time_window_history[event_number]) >= 10*self.num_division_time_step:
+                print('Ini:')
+                print(self.time_window_history[event_number])
+                
+                if self.fast:
+                    if not self.sum:
+                        # Add the arima_model to the list
+                        try:
+                            model = pm.auto_arima(self.time_window_history[event_number][-10*self.num_division_time_step:],
+                                    seasonal=True, error_action='ignore', suppress_warnings=True, m=self.num_division_time_step, max_order=2)
+                            self.arima_models[event_number] = model.fit(self.time_window_history[event_number][-10*self.num_division_time_step:])
+                            self.time_window_history[event_number] = []
+                        except:
+                            self.arima_models[event_number] = None
+                    else:
+                        # Add the arima_model to the list
+                        try:
+                            model = pm.auto_arima([sum(self.time_window_history[event_number][-10*self.num_division_time_step+i:-9*self.num_division_time_step+i]) for i in range(9*self.num_division_time_step)]+[sum(self.time_window_history[event_number][-self.num_division_time_step:])],
+                                    seasonal=False, error_action='ignore', suppress_warnings=True, max_order=2)
+                            self.arima_models[event_number] = model.fit([sum(self.time_window_history[event_number][-10*self.num_division_time_step+i:-9*self.num_division_time_step+i]) for i in range(9*self.num_division_time_step)]+[sum(self.time_window_history[event_number][-self.num_division_time_step:])])
+                        except:
+                            self.arima_models[event_number] = None
+                else:
+                    try:
+                        model = pm.auto_arima(self.time_window_history[event_number][-10*self.num_division_time_step:-1],
+                                seasonal=True, error_action='ignore', suppress_warnings=True, m=self.num_division_time_step)
+                        fit_model = model.fit(self.time_window_history[event_number][-10*self.num_division_time_step:-1])
+                        prediction = fit_model.predict(n_periods=1, return_conf_int=True, alpha=self.alpha)
+                        pred, lower, upper = prediction[0][0], prediction[1][0][0], prediction[1][0][1]
+                        self.plots[0].append(lower)
+                        self.plots[1].append(count)
+                        self.plots[2].append(upper)
+                    except:
+                        self.arima_models[event_number] = None
+        # Add the new value and make a one step prediction
+        else:
+            if not self.sum:
+                pred, lower, upper = self.one_step_prediction(event_number)
+                self.plots[0].append(lower)
+                self.plots[1].append(count)
+                self.plots[2].append(upper)
 
-    def one_step_prediction(self, history):
-        model = pm.auto_arima(history, seasonal=True, error_action='ignore', suppress_warnings=True)
-        fitted_model = model.fit(history)
-        prediction = fitted_model.predict(n_periods=1, return_conf_int=True, alpha=self.alpha)
-        pred = prediction[0][0]
-        upper = prediction[1][0][1]
-        lower = prediction[1][0][0]
-        return lower, pred, upper
+                # Test if count is in boundaries
+                print('EventNumber: %s, Count: %s, Lower: %s, Pred: %s, Upper: %s'%(event_number, count, lower, pred, upper))
+
+                # Update the model, for the next step
+                self.arima_models[event_number].update([count])
+            else:
+                # Add the new count to the history and shorten it, if neccessary
+                self.time_window_history[event_number].append(count)
+
+                pred, lower, upper = self.one_step_prediction(event_number)
+                self.plots[0].append(lower)
+                self.plots[1].append(sum(self.time_window_history[event_number][-self.num_division_time_step:]))
+                self.plots[2].append(upper)
+
+                # Test if count is in boundaries
+                print('EventNumber: %s, Count: %s, Lower: %s, Pred: %s, Upper: %s'%(event_number, sum(self.time_window_history[event_number][-self.num_division_time_step:]), lower, pred, upper))
+
+                # Update the model, for the next step
+                self.arima_models[event_number].update([sum(self.time_window_history[event_number][-self.num_division_time_step:])])
+
+                
+
+
+    def one_step_prediction(self, event_number):
+        prediction = self.arima_models[event_number].predict(n_periods=1, return_conf_int=True, alpha=self.alpha)
+        # return in the order: pred, lower, upper
+        return prediction[0][0], prediction[1][0][0], prediction[1][0][1]
 
 
