@@ -39,8 +39,8 @@ def open_persistence_file(file_name, flags):
     if isinstance(file_name, str):
         file_name = file_name.encode()
     try:
-        fd, dir_fd = SecureOSFunctions.secure_open_file(file_name, flags)
-        return fd, dir_fd
+        fd = SecureOSFunctions.secure_open_file(file_name, flags)
+        return fd
     except OSError as openOsError:
         if ((flags & os.O_CREAT) == 0) or (openOsError.errno != errno.ENOENT):
             logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(openOsError)
@@ -85,11 +85,10 @@ def load_json(file_name):
     """
     persistence_data = None
     try:
-        persistence_file_handle, dir_fd = open_persistence_file(file_name, os.O_RDONLY | os.O_NOFOLLOW)
+        persistence_file_handle = open_persistence_file(file_name, os.O_RDONLY | os.O_NOFOLLOW)
         persistence_data = os.read(persistence_file_handle, os.fstat(persistence_file_handle).st_size)
         persistence_data = str(persistence_data, 'utf-8')
         os.close(persistence_file_handle)
-        os.close(dir_fd)
     except OSError as openOsError:
         if openOsError.errno != errno.ENOENT:
             logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(openOsError)

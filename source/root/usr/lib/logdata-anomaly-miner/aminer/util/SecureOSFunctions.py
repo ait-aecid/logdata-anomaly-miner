@@ -19,9 +19,40 @@ import sys
 import logging
 from aminer import AMinerConfig
 
-# Those should go away as soon as Python (or aminer via libc)
-# provides those functions.
-no_secure_open_warn_once_flag = True
+
+base_dir_fd = None
+base_dir_path = None
+
+
+def secure_open_base_directory(directory_name, flags):
+    """Open the base directory in a secure way."""
+    global base_dir_fd
+    global base_dir_path
+    if not directory_name.startswith(b'/'):
+        msg = 'Secure open on relative path not supported'
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+        raise Exception(msg)
+    if (flags & os.O_DIRECTORY) == 0:
+        msg = 'Opening directory but O_DIRECTORY flag missing'
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+        raise Exception(msg)
+
+    if base_dir_fd is None:
+        base_dir_fd = os.open(directory_name, flags | os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY)
+        base_dir_path = directory_name
+    return base_dir_fd
+
+
+def close_base_directory():
+    """Close the base directory at program shutdown."""
+    global base_dir_fd
+    try:
+        if base_dir_fd is not None:
+            os.close(base_dir_fd)
+    except OSError as e:
+        msg = 'Could not close the base directory. Error: %s' % e
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+        raise Exception(msg)
 
 
 def secure_open_file(file_name, flags):
@@ -29,7 +60,7 @@ def secure_open_file(file_name, flags):
     Secure opening of a file with given flags. This call will refuse to open files where any path component is a symlink.
     As operating system does not provide any means to do that, open the file_name directory by directory. It also adds O_NOCTTY to the
     flags as controlling TTY logics as this is just an additional risk and does not make sense for opening of log files.
-    @param file_name is the fileName as byte string
+    @param file_name is the file name as byte string
     """
     if not file_name.startswith(b'/'):
         msg = 'Secure open on relative path not supported'
@@ -40,10 +71,15 @@ def secure_open_file(file_name, flags):
         logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
 
+    global base_dir_path
+    global base_dir_fd
+    if base_dir_path is not None:
+        base_name = file_name.lstrip(base_dir_path)
+        return os.open(base_name, flags | os.O_NOFOLLOW | os.O_NOCTTY, dir_fd=base_dir_fd)
     dir_name = os.path.dirname(file_name)
     base_name = os.path.basename(file_name)
     dir_fd = os.open(dir_name, flags | os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY)
-    return os.open(base_name, flags | os.O_NOFOLLOW | os.O_NOCTTY, dir_fd=dir_fd), dir_fd
+    return os.open(base_name, flags | os.O_NOFOLLOW | os.O_NOCTTY, dir_fd=dir_fd)
 
 
 def send_annotated_file_descriptor(send_socket, send_fd, type_info, annotation_data):
@@ -105,7 +141,7 @@ def receive_annoted_file_descriptor(receive_socket):
     if received_fd <= 2:
         msg = 'received "reserved" fd %d' % received_fd
         logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
-        print('WARNING: ', file=sys.stderr)
+        print('WARNING: ' + msg, file=sys.stderr)
     if isinstance(type_info, str):
         type_info = type_info.encode()
     if isinstance(annotation_data, str):

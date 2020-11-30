@@ -171,20 +171,18 @@ class FileLogDataResource(LogDataResource):
         log_file_fd = -1
         stat_data = None
         try:
-            log_file_fd, dir_fd = SecureOSFunctions.secure_open_file(self.log_resource_name[7:], os.O_RDONLY)
+            log_file_fd = SecureOSFunctions.secure_open_file(self.log_resource_name[7:], os.O_RDONLY)
             stat_data = os.fstat(log_file_fd)
         except OSError as openOsError:
             logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error('OSError occurred in FileLogDataResource.open(). Error message: %s',
                                                                  openOsError)
             if log_file_fd != -1:
                 os.close(log_file_fd)
-                os.close(dir_fd)
             if openOsError.errno == errno.ENOENT:
                 return False
             raise
         if not stat.S_ISREG(stat_data.st_mode):
             os.close(log_file_fd)
-            os.close(dir_fd)
             msg = 'Attempting to open non-regular file %s as file' % encode_byte_string_as_string(self.log_resource_name)
             logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
@@ -193,7 +191,6 @@ class FileLogDataResource(LogDataResource):
                 stat_data.st_dev == self.stat_data.st_dev):
             # Reopening was requested, but we would reopen the file already opened, which is of no use.
             os.close(log_file_fd)
-            os.close(dir_fd)
             return False
         # This is a new file or a successful reopen attempt.
         self.log_file_fd = log_file_fd

@@ -129,7 +129,7 @@ def run_analysis_child(aminer_config, program_name):
     print('WARNING: SECURITY: Open should use O_PATH, but not yet available in python', file=sys.stderr)
     if isinstance(persistence_dir_name, str):
         persistence_dir_name = persistence_dir_name.encode()
-    persistence_dir_fd, dir_fd = SecureOSFunctions.secure_open_file(persistence_dir_name, os.O_RDONLY | os.O_DIRECTORY)
+    persistence_dir_fd = SecureOSFunctions.secure_open_base_directory(persistence_dir_name, os.O_RDONLY | os.O_DIRECTORY)
     stat_result = os.fstat(persistence_dir_fd)
     import stat
     if ((not stat.S_ISDIR(stat_result.st_mode)) or ((stat_result.st_mode & stat.S_IRWXU) != 0o700) or (
@@ -140,8 +140,6 @@ def run_analysis_child(aminer_config, program_name):
         sys.exit(1)
     print('WARNING: SECURITY: No checking for backdoor access via POSIX ACLs, use "getfacl" from "acl" package '
           'to check manually.', file=sys.stderr)
-    os.close(persistence_dir_fd)
-    os.close(dir_fd)
 
     from aminer.AnalysisChild import AnalysisChild
     child = AnalysisChild(program_name, aminer_config)
@@ -653,11 +651,10 @@ def main():
                         program_name, log_resouce_name, open_os_error.errno, os.strerror(open_os_error.errno)), file=sys.stderr)
                 exit_status = 2
                 continue
-
             SecureOSFunctions.send_logstream_descriptor(parent_socket, log_data_resource.get_file_descriptor(), log_resouce_name)
             log_data_resource.close()
-
         time.sleep(1)
+    SecureOSFunctions.close_base_directory()
     sys.exit(exit_status)
 
 
