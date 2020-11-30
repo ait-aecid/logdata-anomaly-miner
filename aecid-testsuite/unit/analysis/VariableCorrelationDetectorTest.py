@@ -585,9 +585,11 @@ class VariableCorrelationDetectorTest(TestBase):
         keys are calculated with (i % 10) * 0.2. Due to that the existing value's count must stay the same in cases where new values are not
         created and new values must be created from 1.0 to 1.8. Values are increased by or created with a count of 10.
         """
+        description = 'test15VCD1'
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5,
                                           used_cor_d_meth=['Rel'], num_init=self.dataset_size)
+        self.analysis_context.register_component(vcd, description)
         self.update_or_test_with_rel_correlation_method(etd, vcd, update_rules=True, generate_rules=True)
         for rel in vcd.rel_list[0]:
             for r in rel:
@@ -602,9 +604,11 @@ class VariableCorrelationDetectorTest(TestBase):
                     else:
                         self.assertEqual({key: 10}, value)
 
+        description = 'test15VCD2'
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5,
                                           used_cor_d_meth=['Rel'], num_init=self.dataset_size)
+        self.analysis_context.register_component(vcd, description)
         self.update_or_test_with_rel_correlation_method(etd, vcd, update_rules=True, generate_rules=False)
         for rel in vcd.rel_list[0]:
             for r in rel:
@@ -620,16 +624,20 @@ class VariableCorrelationDetectorTest(TestBase):
                     else:
                         self.assertEqual({key: 10}, value)
 
+        description = 'test15VCD3'
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5,
                                           used_cor_d_meth=['Rel'], num_init=self.dataset_size)
+        self.analysis_context.register_component(vcd, description)
         old_rel_list = self.update_or_test_with_rel_correlation_method(etd, vcd, update_rules=False, generate_rules=False)
         # no values in the rel_list should be changed.
         self.assertEqual(vcd.rel_list[0], old_rel_list)
 
+        description = 'test15VCD4'
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5,
                                           used_cor_d_meth=['Rel'], num_init=self.dataset_size)
+        self.analysis_context.register_component(vcd, description)
         offset = 200
         self.update_or_test_with_rel_correlation_method(etd, vcd, update_rules=True, generate_rules=False, offset=offset)
         # old correlations from child elements with the value being divisible by 2 should be deleted. The first ten correlations from the
@@ -692,6 +700,7 @@ class VariableCorrelationDetectorTest(TestBase):
                 '/', bytes(str((i % 10) * 2), 'utf-8').decode(), bytes(str((i % 10) * 2), 'utf-8'), children)), t,
                 self.__class__.__name__)
             etd.receive_atom(log_atom)
+        vcd.log_atom = log_atom
         vcd.update_rules[0] = update_rules
         vcd.generate_rules[0] = generate_rules
         vcd.update_or_test_cor(0)
@@ -705,10 +714,12 @@ class VariableCorrelationDetectorTest(TestBase):
         """
         # This part tests if rules are updated when update_rules=True and generate_rules=True, however no new rules are generated as the
         # same data is passed on in the update process.
+        description = 'test16VCD1'
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(
             self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_d_meth=['WRel'],
             num_init=self.dataset_size, num_update=self.dataset_size, max_dist_rule_distr=0.5)
+        self.analysis_context.register_component(vcd, description)
         self.update_or_test_with_w_rel_correlation_method(etd, vcd, update_rules=True, generate_rules=True)
         self.assertEqual(1, len(vcd.w_rel_list[0]))
         for rel in vcd.w_rel_list[0]:
@@ -727,10 +738,12 @@ class VariableCorrelationDetectorTest(TestBase):
 
         # This part tests if rules are updated when update_rules=True and generate_rules=False. Therefore the assumptions of correlations is
         # the same as above, because there were no new correlations generated due to the same data being used.
+        description = 'test16VCD2'
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(
             self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_d_meth=['WRel'],
             num_init=self.dataset_size, num_update=self.dataset_size, max_dist_rule_distr=0.5)
+        self.analysis_context.register_component(vcd, description)
         self.update_or_test_with_w_rel_correlation_method(etd, vcd, update_rules=True, generate_rules=False)
         self.assertEqual(1, len(vcd.w_rel_list[0]))
         for rel in vcd.w_rel_list[0]:
@@ -748,10 +761,12 @@ class VariableCorrelationDetectorTest(TestBase):
                         self.assertTrue(value in ({key: 15}, {key*2: 5, key: 15}))
 
         # This part tests if rules are updated when update_rules=False and generate_rules=False. No correlation should be changed.
+        description = 'test16VCD3'
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(
             self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_d_meth=['WRel'],
             num_init=self.dataset_size, num_update=self.dataset_size, max_dist_rule_distr=0.5)
+        self.analysis_context.register_component(vcd, description)
         old_w_rel_list = self.update_or_test_with_w_rel_correlation_method(etd, vcd, update_rules=False, generate_rules=False)
         # no values in the rel_list should be changed.
         self.assertEqual(vcd.w_rel_list[0], old_w_rel_list)
@@ -759,10 +774,12 @@ class VariableCorrelationDetectorTest(TestBase):
         # This part tests if rules are updated when update_rules=True and generate_rules=False but with an offset of 200. Therefore the
         # assumptions of correlations for the first part should stay the same and no new correlations should be learned, because an offset
         # is added to all data.
+        description = 'test16VCD4'
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(
             self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_d_meth=['WRel'],
             num_init=self.dataset_size, num_update=self.dataset_size, max_dist_rule_distr=0.5)
+        self.analysis_context.register_component(vcd, description)
         offset = 200
         self.update_or_test_with_w_rel_correlation_method(etd, vcd, update_rules=True, generate_rules=False, offset=offset)
         self.assertEqual(1, len(vcd.w_rel_list[0]))
@@ -782,11 +799,13 @@ class VariableCorrelationDetectorTest(TestBase):
 
         # This part tests if rules are updated when update_rules=True and generate_rules=True but with an offset of 200. Therefore the
         # assumptions of correlations for the first part should stay the same and new correlations should be learned, because an offset
-        # is added to all data. The update step should
+        # is added to all data.
+        description = 'test16VCD5'
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(
             self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5,
             used_cor_d_meth=['WRel'], num_init=self.dataset_size, num_update=self.dataset_size, max_dist_rule_distr=0.5)
+        self.analysis_context.register_component(vcd, description)
         offset = 200
         self.update_or_test_with_w_rel_correlation_method(etd, vcd, update_rules=True, generate_rules=True, offset=offset)
         self.assertEqual(1, len(vcd.w_rel_list[0]))
@@ -858,6 +877,7 @@ class VariableCorrelationDetectorTest(TestBase):
             log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', bytes(
                 str((i % 10) * 1), 'utf-8').decode(), bytes(str((i % 10) * 1), 'utf-8'), children)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)
+        vcd.log_atom = log_atom
         vcd.update_rules[0] = update_rules
         vcd.generate_rules[0] = generate_rules
         vcd.update_or_test_cor(0)
@@ -865,10 +885,12 @@ class VariableCorrelationDetectorTest(TestBase):
 
     def test17init_and_update_timings(self):
         """This test checks if the init and update intervals are calculated correctly."""
+        description = 'test17VCD1'
         t = time()
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5,
                                           num_init=self.dataset_size, num_update=self.dataset_size)
+        self.analysis_context.register_component(vcd, description)
         values = []
         for i in range(self.dataset_size):
             stat_data = bytes(str((i % 10) * 0.1), 'utf-8')

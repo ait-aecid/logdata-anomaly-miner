@@ -288,7 +288,7 @@ def build_analysis_pipeline(analysis_context):
     atom_filter.add_handler(vtd)
 
     from aminer.analysis.VariableCorrelationDetector import VariableCorrelationDetector
-    vtd = VariableCorrelationDetector(analysis_context.aminer_config, anomaly_event_handlers, etd)
+    vtd = VariableCorrelationDetector(analysis_context.aminer_config, anomaly_event_handlers, etd, disc_div_thres=0.5)
     analysis_context.register_component(vtd, component_name="VariableCorrelationDetector")
     atom_filter.add_handler(vtd)
 
