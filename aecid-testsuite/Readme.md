@@ -1,7 +1,7 @@
 # aecid-testsuite
 
-This project includes all kinds of tests for *AECID* and *aminer*. We used Docker instances for testing (see: [How to use the aecid-testsuite](https://github.com/ait-aecid/logdata-anomaly-miner/wiki/How-to-use-the-AECID-testsuite))
-The aminer was tested and working with all tests in **Ubuntu 20.04** and **Debian Bullseye**.
+This project includes all kinds of tests for *AECID* and *aminer*. We used Docker instances for testing (see: [How to use the aecid-testsuite](https://github.com/ait-aecid/logdata-anomaly-miner/wiki/How-to-use-the-AECID-testsuite)).
+The aminer was successfully tested with all tests in **Ubuntu 20.04** and **Debian Bullseye**.
 In order to execute test classes the current path must be the *logdata-anomaly-miner* directory and the project structure must be as following:
 
 ## Unit-Tests
@@ -42,12 +42,14 @@ In order to execute test classes the current path must be the *logdata-anomaly-m
           ├── TimestampCorrectionFiltersTest.py
           ├── TimestampsUnsortedDetectorTest.py
           ├── AllowlistViolationDetectorTest.py
+          ├── ...
      ├── events
           ├── __init__.py
           ├── DefaultMailNotificationEventHandlerTest.py
           ├── StreamPrinterEventHandlerTest.py
           ├── SyslogWriterEventHandlerTest.py
           ├── UtilsTest.py
+          ├── ...
      ├── generic
           ├── __init__.py
           ├── CronParsingModelTest.py
@@ -58,8 +60,10 @@ In order to execute test classes the current path must be the *logdata-anomaly-m
           ├── SimpleByteStreamLineAtomizerFactoryTest.py
           ├── SimpleMultisourceAtomSyncTest.py
           ├── SimpleUnparsedAtomHandlerTest.py
+          ├── ...
      ├── testutilities
           ├── config.py
+          ├── ...
      ├── parsing
           ├── __init__.py
           ├── AnyByteDataModelElementTest.py
@@ -79,11 +83,13 @@ In order to execute test classes the current path must be the *logdata-anomaly-m
           ├── RepeatedElementDataModelElementTest.py
           ├── SequenceModelElementTest.py
           ├── VariableByteDataModelElementTest.py
+          ├── ...
      ├── util
           ├── __init__.py
           ├── JsonUtilTest.py
           ├── PersistenceUtilTest.py
           ├── SecureOSFunctionsTest.py
+          ├── ...
 ```
 
 Before starting any test case the path to the *config.py* should be changed. This can be achieved recursively by using following command (*/path/to/config.py* needs to be changed.):
