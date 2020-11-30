@@ -4,6 +4,8 @@ This project includes all kinds of tests for *AECID* and *aminer*.
 The aminer was tested and working with all tests in **Ubuntu 20.04** and **Debian Bullseye**.
 In order to execute test classes the current path must be the *logdata-anomaly-miner* directory and the project structure must be as following:
 
+* [How to use the aecid-testsuite](https://github.com/ait-aecid/logdata-anomaly-miner/wiki/How-to-use-the-AECID-testsuite)
+
 ## Unit-Tests
 
 ```logdata-anomaly-miner/
