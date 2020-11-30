@@ -49,7 +49,6 @@ def encode_object(term):
         msg = 'Unencodeable object %s' % type(term)
         logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
-
     return encoded_object
 
 
