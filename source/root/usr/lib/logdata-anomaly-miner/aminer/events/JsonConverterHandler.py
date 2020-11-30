@@ -69,25 +69,9 @@ class JsonConverterHandler(EventHandlerInterface):
             if json_error != '':
                 event_data['JsonError'] = json_error
 
-        # if eventSource.__class__.__name__ == 'VariableTypeDetector' and len(eventData) >= 4 and isinstance(eventData[3], float):
-        #   detector['Confidence'] = float(eventData[3])
-        #   eventData['Confidence'] = float(eventData[3])
-        # else:
-        #   detector['Confidence'] = 1.0
-        #   eventData['Confidence'] = 1.0
-
-        # if hasattr(eventSource, 'targetPathList'):
-        #   path = eventSource.targetPathList[0]
-        #   path_parts = path.split('/')
-        #   short_path = ''
-        #   for i in range(1, len(path_parts) - 1):
-        #     short_path += path_parts[i] + '/'
-        #   eventData['Path'] = short_path
-
         json_data = json.dumps(event_data, indent=2)
         res = [''] * len(sorted_log_lines)
         res[0] = str(json_data)
-        # print(json_data)
 
         for listener in self.json_event_handlers:
             listener.receive_event(event_type, event_message, res, json_data, log_atom, event_source)

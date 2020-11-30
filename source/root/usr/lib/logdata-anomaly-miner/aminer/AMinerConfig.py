@@ -68,10 +68,14 @@ def load_config(config_file_name):
             # skipcq: FLK-E722
             aminer_config.load_yaml(yaml_config)
     except ValueError as e:
+        logging.getLogger(DEBUG_LOG_NAME).error(e)
         raise e
     except Exception:
-        print('Failed to load configuration from %s' % config_file_name, file=sys.stderr)
+        msg = 'Failed to load configuration from %s' % config_file_name
+        print(msg, file=sys.stderr)
+        logging.getLogger(DEBUG_LOG_NAME).error(msg)
         exception_info = sys.exc_info()
+        logging.getLogger(DEBUG_LOG_NAME).error(exception_info)
         raise Exception(exception_info[0], exception_info[1], exception_info[2])
     return aminer_config
 
@@ -215,7 +219,9 @@ def save_config(analysis_context, new_file):
         with open(new_file, "w") as file:
             file.write(old)
         msg += "Successfully saved the current config to %s." % new_file
+        logging.getLogger(DEBUG_LOG_NAME).info(msg)
         return msg
     except FileNotFoundError:
         msg += "FAILURE: file '%s' could not be found or opened!" % new_file
+        logging.getLogger(DEBUG_LOG_NAME).error(msg)
         return msg

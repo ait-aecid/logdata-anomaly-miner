@@ -13,7 +13,9 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import os
+import logging
 
+from aminer import AMinerConfig
 from aminer.events import EventSourceInterface
 from aminer.input import AtomHandlerInterface
 from datetime import datetime
@@ -74,5 +76,9 @@ class TimestampsUnsortedDetector(AtomHandlerInterface, EventSourceInterface):
         @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
         """
         if event_type != 'Analysis.%s' % self.__class__.__name__:
-            raise Exception('Event not from this source')
-        raise Exception('No allowlisting for algorithm malfunction or configuration errors')
+            msg = 'Event not from this source'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+        msg = 'No allowlisting for algorithm malfunction or configuration errors'
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+        raise Exception(msg)

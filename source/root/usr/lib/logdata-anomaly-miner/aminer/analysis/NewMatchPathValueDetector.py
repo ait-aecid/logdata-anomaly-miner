@@ -131,9 +131,13 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
         """
         if event_type != 'Analysis.%s' % self.__class__.__name__:
-            raise Exception('Event not from this source')
+            msg = 'Event not from this source'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         if allowlisting_data is not None:
-            raise Exception('Allowlisting data not understood by this detector')
+            msg = 'Allowlisting data not understood by this detector'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         self.known_values_set.add(event_data[1])
         return 'Allowlisted path(es) %s with %s in %s' % (', '.join(self.target_path_list), event_data[1], sorted_log_lines[0])
 
