@@ -26,8 +26,8 @@ base_dir_path = None
 
 def secure_open_base_directory(directory_name, flags):
     """Open the base directory in a secure way."""
-    global base_dir_fd
-    global base_dir_path
+    global base_dir_fd  # skipcq: PYL-W0603
+    global base_dir_path  # skipcq: PYL-W0603
     if not directory_name.startswith(b'/'):
         msg = 'Secure open on relative path not supported'
         logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
@@ -45,7 +45,7 @@ def secure_open_base_directory(directory_name, flags):
 
 def close_base_directory():
     """Close the base directory at program shutdown."""
-    global base_dir_fd
+    global base_dir_fd  # skipcq: PYL-W0603
     try:
         if base_dir_fd is not None:
             os.close(base_dir_fd)
@@ -71,8 +71,8 @@ def secure_open_file(file_name, flags):
         logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
 
-    global base_dir_path
-    global base_dir_fd
+    global base_dir_path  # skipcq: PYL-W0603
+    global base_dir_fd  # skipcq: PYL-W0603
     if base_dir_path is not None:
         base_name = file_name.lstrip(base_dir_path)
         return os.open(base_name, flags | os.O_NOFOLLOW | os.O_NOCTTY, dir_fd=base_dir_fd)
