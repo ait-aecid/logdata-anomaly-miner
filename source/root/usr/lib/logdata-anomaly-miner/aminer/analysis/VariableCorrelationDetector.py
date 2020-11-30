@@ -663,7 +663,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                             affected_values = []
                             affected_log_atom_paths.append(self.event_type_detector.variable_key_list[event_index][self.discrete_indices[
                                 event_index][self.pos_var_cor[event_index][pos_var_cor_index][1]]])
-                            affected_log_atom_paths.append(elf.event_type_detector.variable_key_list[event_index][self.discrete_indices[
+                            affected_log_atom_paths.append(self.event_type_detector.variable_key_list[event_index][self.discrete_indices[
                                 event_index][self.pos_var_cor[event_index][pos_var_cor_index][0]]])
                             affected_values.append(repr(j_val))
                             affected_values.append(list(self.rel_list[event_index][pos_var_cor_index][1][j_val].keys())[0])
