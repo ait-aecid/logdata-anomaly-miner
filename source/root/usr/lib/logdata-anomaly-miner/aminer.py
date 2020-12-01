@@ -127,12 +127,9 @@ def run_analysis_child(aminer_config, program_name):
     logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info('aminer started.')
     persistence_dir_name = aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
     from aminer.util import SecureOSFunctions
-    msg = 'WARNING: SECURITY: Open should use O_PATH, but not yet available in python'
-    print(msg, file=sys.stderr)
-    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
     if isinstance(persistence_dir_name, str):
         persistence_dir_name = persistence_dir_name.encode()
-    persistence_dir_fd = SecureOSFunctions.secure_open_base_directory(persistence_dir_name, os.O_RDONLY | os.O_DIRECTORY)
+    persistence_dir_fd = SecureOSFunctions.secure_open_base_directory(persistence_dir_name, os.O_RDONLY | os.O_DIRECTORY | os.O_PATH)
     stat_result = os.fstat(persistence_dir_fd)
     import stat
     if ((not stat.S_ISDIR(stat_result.st_mode)) or ((stat_result.st_mode & stat.S_IRWXU) != 0o700) or (
