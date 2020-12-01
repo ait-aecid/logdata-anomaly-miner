@@ -597,20 +597,6 @@ def main():
             os.dup2(child_socket.fileno(), 3)
             child_socket.close()
 
-        # This is the child. Close all parent file descriptors, we do not need. Perhaps this could be done more elegantly.
-        for close_fd in range(4, 1 << 16):
-            try:
-                os.close(close_fd)
-            except OSError as open_os_error:
-                if open_os_error.errno == errno.EBADF:
-                    continue
-                msg = '%s: unexpected exception closing file descriptors: %s' % (program_name, open_os_error)
-                print(msg, file=sys.stderr)
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
-                # Flush stderr before exit without any cleanup.
-                sys.stderr.flush()
-                os._exit(1)  # skipcq: PYL-W0212
-
         # Clear the supplementary groups before dropping privileges. This makes only sense when changing the uid or gid.
         if os.getuid() == 0:
             if ((child_user_id != -1) and (child_user_id != os.getuid())) or ((child_group_id != -1) and (child_group_id != os.getgid())):
@@ -632,6 +618,20 @@ def main():
             analysis_config_file_name = config_file_name
         elif not os.path.isabs(analysis_config_file_name):
             analysis_config_file_name = os.path.join(os.path.dirname(config_file_name), analysis_config_file_name)
+
+        # This is the child. Close all parent file descriptors, we do not need. Perhaps this could be done more elegantly.
+        for close_fd in range(4, 1 << 16):
+            try:
+                os.close(close_fd)
+            except OSError as open_os_error:
+                if open_os_error.errno == errno.EBADF:
+                    continue
+                msg = '%s: unexpected exception closing file descriptors: %s' % (program_name, open_os_error)
+                print(msg, file=sys.stderr)
+                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                # Flush stderr before exit without any cleanup.
+                sys.stderr.flush()
+                os._exit(1)  # skipcq: PYL-W0212
 
         # Now execute the very same program again, but user might have moved or renamed it meanwhile. This would be problematic with
         # SUID-binaries (which we do not yet support). Do NOT just fork but also exec to avoid child circumventing
@@ -705,6 +705,7 @@ def main():
             SecureOSFunctions.send_logstream_descriptor(parent_socket, log_data_resource.get_file_descriptor(), log_resouce_name)
             log_data_resource.close()
         time.sleep(1)
+    parent_socket.close()
     SecureOSFunctions.close_base_directory()
     sys.exit(exit_status)
 

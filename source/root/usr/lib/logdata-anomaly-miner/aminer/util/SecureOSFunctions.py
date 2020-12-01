@@ -21,18 +21,22 @@ from aminer import AMinerConfig
 
 
 base_dir_fd = None
+tmp_base_dir_fd = None
 base_dir_path = None
+tmp_base_dir_path = b'/tmp'
 
 
-def secure_open_base_directory(directory_name, flags):
+def secure_open_base_directory(directory_name=None, flags=0):
     """Open the base directory in a secure way."""
     global base_dir_fd  # skipcq: PYL-W0603
     global base_dir_path  # skipcq: PYL-W0603
-    if not directory_name.startswith(b'/'):
+    global tmp_base_dir_fd  # skipcq: PYL-W0603
+    global tmp_base_dir_path  # skipcq: PYL-W0603
+    if base_dir_path is None and (directory_name is None or not directory_name.startswith(b'/')):
         msg = 'Secure open on relative path not supported'
         logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
-    if (flags & os.O_DIRECTORY) == 0:
+    if base_dir_path is None and (flags & os.O_DIRECTORY) == 0:
         msg = 'Opening directory but O_DIRECTORY flag missing'
         logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
@@ -40,15 +44,19 @@ def secure_open_base_directory(directory_name, flags):
     if base_dir_fd is None:
         base_dir_fd = os.open(directory_name, flags | os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY)
         base_dir_path = directory_name
+        tmp_base_dir_fd = os.open(tmp_base_dir_path, flags | os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY)
     return base_dir_fd
 
 
 def close_base_directory():
     """Close the base directory at program shutdown."""
     global base_dir_fd  # skipcq: PYL-W0603
+    global tmp_base_dir_fd  # skipcq: PYL-W0603
     try:
         if base_dir_fd is not None:
             os.close(base_dir_fd)
+        if tmp_base_dir_fd is not None:
+            os.close(tmp_base_dir_fd)
     except OSError as e:
         msg = 'Could not close the base directory. Error: %s' % e
         logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)

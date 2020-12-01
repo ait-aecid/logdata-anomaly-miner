@@ -48,28 +48,20 @@ def open_persistence_file(file_name, flags):
     create_missing_directories(file_name)
 
 
-no_secure_link_unlink_at_warn_once_flag = True
-
-
 def replace_persistence_file(file_name, new_file_handle):
     """Replace the named file with the file referred by the handle."""
-    # skipcq: PYL-W0603
-    global no_secure_link_unlink_at_warn_once_flag
-    if no_secure_link_unlink_at_warn_once_flag:
-        msg = 'SECURITY: unsafe unlink (unavailable unlinkat/linkat should be used, but not available in python)'
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
-        print('WARNING: ' + msg, file=sys.stderr)
-        no_secure_link_unlink_at_warn_once_flag = False
     try:
-        os.unlink(file_name)
+        os.unlink(file_name, dir_fd=SecureOSFunctions.secure_open_base_directory())
     except OSError as openOsError:
         if openOsError.errno != errno.ENOENT:
             logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(openOsError)
             raise openOsError
 
     tmp_file_name = os.readlink('/proc/self/fd/%d' % new_file_handle)
-    os.link(tmp_file_name, file_name)
-    os.unlink(tmp_file_name)
+    file_name = file_name.lstrip(SecureOSFunctions.base_dir_path.decode())
+    os.link(
+        tmp_file_name, file_name, src_dir_fd=SecureOSFunctions.tmp_base_dir_fd, dst_dir_fd=SecureOSFunctions.secure_open_base_directory())
+    os.unlink(tmp_file_name, dir_fd=SecureOSFunctions.tmp_base_dir_fd)
 
 
 def persist_all():
