@@ -139,9 +139,13 @@ def run_analysis_child(aminer_config, program_name):
         print(msg, file=sys.stderr)
         logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).critical(msg)
         sys.exit(1)
-    msg = 'WARNING: SECURITY: No checking for backdoor access via POSIX ACLs, use "getfacl" from "acl" package to check manually.'
-    print(msg, file=sys.stderr)
-    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
+    import posix1e
+    # O_PATH is problematic when checking ACL. However it is possible to check the ACL using the file name.
+    if posix1e.has_extended(persistence_dir_name):
+        msg = 'WARNING: SECURITY: Extended POSIX ACLs are set in %s, but not supported by the aminer. Backdoor access could be possible.'\
+              % persistence_dir_name.decode()
+        print(msg, file=sys.stderr)
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
 
     from aminer.AnalysisChild import AnalysisChild
     child = AnalysisChild(program_name, aminer_config)

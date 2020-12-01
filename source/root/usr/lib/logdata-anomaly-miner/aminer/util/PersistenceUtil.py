@@ -14,7 +14,6 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import errno
 import os
-import sys
 import logging
 import tempfile
 
