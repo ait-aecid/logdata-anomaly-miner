@@ -599,7 +599,10 @@ def _repr_recursive(attr):
     elif isinstance(attr, dict):
         new_attr = {}
         for key in attr.keys():
-            new_attr[str(key)] = _repr_recursive(key).replace('\\"', "'")
+            value = _repr_recursive(key)
+            if isinstance(value, str):
+                value = value.replace('\\"', "'")
+            new_attr[str(key)] = value
         rep = str(new_attr).replace("'[", "[").replace("]'", "]")
     else:
         rep = attr.__class__.__name__
