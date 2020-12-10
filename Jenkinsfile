@@ -1,9 +1,15 @@
-node {
-     checkout scm
-     def testImage = docker.build("aminer-test","-f aecid-testsuite/Dockerfile .")
-     stage("UnitTest"){
-       testImage.inside("-u aminer --entrypoint= "){
-       	sh 'cd aecid-testsuite && ./runUnittests.sh'
-       }
+pipeline {
+     agent {
+         dockerfile {
+            filename "aecid-testsuite/Dockerfile"
+         }
+     }
+     stages {
+         stage("UnitTest"){
+             steps {
+                 sh 'docker images'
+       	         // sh 'docker run -m=2G --rm aecid/logdata-anomaly-miner-testing runUnittests'
+             }
+          }
     }
 } 
