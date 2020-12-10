@@ -36,7 +36,7 @@ find /tmp/lib/aminer -type f ! -path "/tmp/lib/aminer/aminerRemoteLog.txt" ! -pa
 
 sleep 1
 md5sum $SUSPEND_FILE > $SUSPEND_FILE_MD5 2> /dev/null
-sudo ./aminerremotecontrol --Exec "suspend" > /dev/null
+sudo aminerremotecontrol --Exec "suspend" > /dev/null
 echo " Current Disk Data is: Filesystem     Type  Size  Used Avail Use%   %" >> /tmp/syslog
 md5_result=`md5sum -c $SUSPEND_FILE_MD5 2> /dev/null`
 if [[ $md5_result != "$SUSPEND_FILE: OK" ]]; then
@@ -47,7 +47,7 @@ fi
 sleep 7
 find /tmp/lib/aminer -type f ! -path "/tmp/lib/aminer/aminerRemoteLog.txt" ! -path "/tmp/lib/aminer/aminer.log" -exec md5sum {} \; | tee /tmp/test2.md5 > /dev/null
 
-sudo ./aminerremotecontrol --Exec "activate" > /dev/null
+sudo aminerremotecontrol --Exec "activate" > /dev/null
 
 if [[ $md5_result == "/tmp/syslog: OK" ]]; then
 	echo 'The aminer should have produced outputs, but md5sum does not indicate any changes. (2)'
