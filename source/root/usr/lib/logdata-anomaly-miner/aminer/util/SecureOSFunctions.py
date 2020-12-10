@@ -52,11 +52,15 @@ def close_base_directory():
     """Close the base directory at program shutdown."""
     global base_dir_fd  # skipcq: PYL-W0603
     global tmp_base_dir_fd  # skipcq: PYL-W0603
+    global base_dir_path  # skipcq: PYL-W0603
     try:
         if base_dir_fd is not None:
             os.close(base_dir_fd)
+            base_dir_fd = None
+            base_dir_path = None
         if tmp_base_dir_fd is not None:
             os.close(tmp_base_dir_fd)
+            tmp_base_dir_fd = None
     except OSError as e:
         msg = 'Could not close the base directory. Error: %s' % e
         logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
