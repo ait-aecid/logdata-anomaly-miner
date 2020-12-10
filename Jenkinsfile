@@ -15,42 +15,42 @@ pipeline {
 
           stage("Build Test-Container"){
              steps {
-                 sh "docker build -f aecid-testsuite/Dockerfile -t aecid/logdata-anomaly-miner-testing:$BUILD_NUMBER ."
+                 sh "docker build -f aecid-testsuite/Dockerfile -t aecid/logdata-anomaly-miner-testing:$BUILD_ID ."
              }
           }
          
          stage("UnitTest"){
              steps {
-       	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$BUILD_NUMBER runUnittests"
-       	         sh 'docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$BUILD_NUMBER runSuspendModeTest'
+       	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$BUILD_ID runUnittests"
+       	         sh 'docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$BUILD_ID runSuspendModeTest'
              }
          }
          stage("Run Demo-Configs"){
              steps {
-       	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$BUILD_NUMBER runAMinerDemo demo/AMiner/demo-config.py"
-       	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$BUILD_NUMBER runAMinerDemo demo/AMiner/jsonConverterHandler-demo-config.py"
-       	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$BUILD_NUMBER runAMinerDemo demo/AMiner/template_config.py"
-       	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$BUILD_NUMBER runAMinerDemo demo/AMiner/template_config.yml"
-       	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$BUILD_NUMBER runAMinerDemo demo/AMiner/demo-config.yml"
+       	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$BUILD_ID runAMinerDemo demo/AMiner/demo-config.py"
+       	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$BUILD_ID runAMinerDemo demo/AMiner/jsonConverterHandler-demo-config.py"
+       	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$BUILD_ID runAMinerDemo demo/AMiner/template_config.py"
+       	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$BUILD_ID runAMinerDemo demo/AMiner/template_config.yml"
+       	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$BUILD_ID runAMinerDemo demo/AMiner/demo-config.yml"
              }
          }
 
          stage("Integrations Test"){
              steps {
-       	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$BUILD_NUMBER runAMinerIntegrationTest aminerIntegrationTest.sh config.py"
-       	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$BUILD_NUMBER runAMinerIntegrationTest aminerIntegrationTest2.sh config21.py config22.py"
+       	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$BUILD_ID runAMinerIntegrationTest aminerIntegrationTest.sh config.py"
+       	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$BUILD_ID runAMinerIntegrationTest aminerIntegrationTest2.sh config21.py config22.py"
              }
          }
 
          stage("Coverage Tests"){
              steps {
-       	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$BUILD_NUMBER runCoverageTests"
+       	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$BUILD_ID runCoverageTests"
              }
          }
     }
     post {
         always {
-           sh "docker rmi aecid/logdata-anomaly-miner-testing:$BUILD_NUMBER"
+           sh "docker rmi aecid/logdata-anomaly-miner-testing:$BUILD_ID"
         }
 	success {
         setBuildStatus("Build succeeded", "SUCCESS");
