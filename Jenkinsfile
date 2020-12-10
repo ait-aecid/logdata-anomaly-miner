@@ -26,12 +26,26 @@ pipeline {
              }
          }
          stage("Run Demo-Configs"){
-             steps {
-       	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runAMinerDemo demo/AMiner/demo-config.py"
-       	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runAMinerDemo demo/AMiner/jsonConverterHandler-demo-config.py"
-       	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runAMinerDemo demo/AMiner/template_config.py"
-       	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runAMinerDemo demo/AMiner/template_config.yml"
-       	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runAMinerDemo demo/AMiner/demo-config.yml"
+             parallel {
+                 stage("demo-config and jsonConverterHandler-demo-config") {
+                     steps {
+       	                 sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runAMinerDemo demo/AMiner/demo-config.py"
+       	                 sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runAMinerDemo demo/AMiner/demo-config.yml"
+                     }
+                 }
+                 stage("template_config") {
+                     steps {
+       	         	sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runAMinerDemo demo/AMiner/template_config.py"
+       	         	sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runAMinerDemo demo/AMiner/template_config.yml"
+                     }
+                 }
+                 stage("jsonConverterHandler") {
+                     steps {
+       	                 sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runAMinerDemo demo/AMiner/jsonConverterHandler-demo-config.py"
+                     }
+                 }
+
+
              }
          }
 
@@ -43,6 +57,9 @@ pipeline {
          }
 
          stage("Coverage Tests"){
+             when {
+                 branch 'development'
+             }
              steps {
        	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runCoverageTests"
              }
