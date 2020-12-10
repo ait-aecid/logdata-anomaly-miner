@@ -16,6 +16,9 @@ class AllowlistViolationDetectorTest(TestBase):
     __expected_string = '%s No allowlisting for current atom\n%s: "%s" (%d lines)\n  %s\n\n'
     fixed_string = b'fixed String'
 
+    def testfail(self):
+        self.assertTrue(False)
+
     def test1match_found(self):
         """This test case checks if valid inputs are recognized."""
         description = "Test1AllowlistViolationDetector"
