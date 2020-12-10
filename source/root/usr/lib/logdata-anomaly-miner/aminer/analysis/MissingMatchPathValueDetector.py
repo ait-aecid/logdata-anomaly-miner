@@ -247,10 +247,13 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         @return a message with information about allowlisting using given allowlisting_data was not possible.
         """
         if event_type != self.analysis_string % self.__class__.__name__:
-            raise Exception('Event not from this source')
+            msg = 'Event not from this source'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         if not isinstance(allowlisting_data, int):
-            raise Exception('Allowlisting data has to integer with new interval, -1 to reset to defaults, other negative '
-                            'value to remove the entry')
+            msg = 'Allowlisting data has to integer with new interval, -1 to reset to defaults, other negative value to remove the entry'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         new_interval = allowlisting_data
         if new_interval == -1:
             new_interval = self.default_interval
