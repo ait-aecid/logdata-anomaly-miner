@@ -13,7 +13,6 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import os
-import logging
 
 from aminer.input import AtomHandlerInterface
 from datetime import datetime
