@@ -480,7 +480,7 @@ class YamlConfigTest(TestBase):
         context.aminer_config.yaml_data['SuppressNewMatchPathDetector'] = False
         self.stream_printer_event_handler = context.atomizer_factory.event_handler_list[0]
         self.stream_printer_event_handler.stream = self.output_stream
-        default_nmpd = context.registered_components[0][0]
+        default_nmpd = context.registered_components[1][0]
         default_nmpd.output_log_line = False
         self.assertTrue(default_nmpd.receive_atom(log_atom_fixed_dme))
         self.assertEqual(self.output_stream.getvalue(), __expected_string1 % (
@@ -493,13 +493,13 @@ class YamlConfigTest(TestBase):
         context.build_analysis_pipeline()
         self.stream_printer_event_handler = context.atomizer_factory.event_handler_list[0]
         self.stream_printer_event_handler.stream = self.output_stream
-        default_nmpd = context.registered_components[0][0]
+        default_nmpd = context.registered_components[1][0]
         default_nmpd.output_log_line = False
         self.assertTrue(default_nmpd.receive_atom(log_atom_fixed_dme))
         self.assertEqual(self.output_stream.getvalue(), "")
         self.reset_output_stream()
 
-        value_combo_det = context.registered_components[1][0]
+        value_combo_det = context.registered_components[2][0]
         log_atom_sequence_me = LogAtom(match_element_sequence_me.get_match_string(), ParserMatch(match_element_sequence_me), t,
                                        value_combo_det)
         self.stream_printer_event_handler = context.atomizer_factory.event_handler_list[0]
