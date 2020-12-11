@@ -12,6 +12,8 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import sys
+import logging
+from aminer import AMinerConfig
 
 
 config_properties = {}
@@ -33,6 +35,7 @@ def load_yaml(config_file):
             yaml_data = yaml.safe_load(yamlfile)
             yamlfile.close()
         except yaml.YAMLError as exception:
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(exception)
             raise exception
 
     with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'YamlSchema.py', 'r') as sma:
@@ -45,6 +48,7 @@ def load_yaml(config_file):
         test = v.normalized(yaml_data)
         yaml_data = test
     else:
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(v.errors)
         raise ValueError(v.errors)
 
     # Set default values
@@ -93,20 +97,26 @@ def build_parsing_model():
             if item['type'].name == 'ElementValueBranchModelElement':
                 value_model = parser_model_dict.get(item['args'][0].decode())
                 if value_model is None:
-                    raise ValueError('The parser model %s does not exist!' % value_model)
+                    msg = 'The parser model %s does not exist!' % value_model
+                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
                 branch_model_dict = {}
                 for i in item['branch_model_dict']:
                     key = i['id']
                     model = i['model']
                     if parser_model_dict.get(model) is None:
-                        raise ValueError('The parser model %s does not exist!' % model)
+                        msg = 'The parser model %s does not exist!' % model
+                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                        raise ValueError(msg)
                     branch_model_dict[key] = parser_model_dict.get(model)
                 parser_model_dict[item['id']] = item['type'].func(item['name'], value_model, item['args'][1].decode(), branch_model_dict)
             elif item['type'].name == 'MultiLocaleDateTimeModelElement':
                 date_formats = []
                 for date_format in item['date_formats']:
                     if len(date_format['format']) != 3:
-                        raise ValueError('The date_format must have a size of 3!')
+                        msg = 'The date_format must have a size of 3!'
+                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                        raise ValueError(msg)
                     date_formats.append(tuple(i for i in date_format['format']))
                 if 'args' in item:
                     parser_model_dict[item['id']] = item['type'].func(item['name'], date_formats, item['args'])
@@ -115,7 +125,9 @@ def build_parsing_model():
             elif item['type'].name == 'RepeatedElementDataModelElement':
                 model = item['args'][0].decode()
                 if parser_model_dict.get(model) is None:
-                    raise ValueError('The parser model %s does not exist!' % model)
+                    msg = 'The parser model %s does not exist!' % model
+                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
                 item['args'][0] = parser_model_dict.get(model)
                 parser_model_dict[item['id']] = item['type'].func(item['name'], item['args'][0])
                 if len(item['args']) == 2:
@@ -123,7 +135,9 @@ def build_parsing_model():
                 elif len(item['args']) == 3:
                     parser_model_dict[item['id']] = item['type'].func(item['name'], item['args'][0], item['args'][1], item['args'][2])
                 elif len(item['args']) > 3:
-                    raise ValueError('The RepeatedElementDataModelElement does not have more than 3 arguments.')
+                    msg = 'The RepeatedElementDataModelElement does not have more than 3 arguments.'
+                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
             elif item['type'].name == 'DecimalFloatValueModelElement':
                 parser_model_dict[item['id']] = item['type'].func(
                     item['name'], item['value_sign_type'], item['value_pad_type'], item['exponent_type'])
@@ -134,13 +148,17 @@ def build_parsing_model():
                 for child in item['args']:
                     child = parser_model_dict.get(child.decode())
                     if child is None:
-                        raise ValueError('The parser model %s does not exist!' % child)
+                        msg = 'The parser model %s does not exist!' % child
+                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                        raise ValueError(msg)
                     children.append(child)
                 parser_model_dict[item['id']] = item['type'].func(item['name'], children)
             elif item['type'].name == 'OptionalMatchModelElement':
                 optional_element = parser_model_dict.get(item['args'].decode())
                 if optional_element is None:
-                    raise ValueError('The parser model %s does not exist!' % optional_element)
+                    msg = 'The parser model %s does not exist!' % optional_element
+                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
                 parser_model_dict[item['id']] = item['type'].func(item['name'], optional_element)
             else:
                 if 'args' in item:
@@ -162,7 +180,9 @@ def build_parsing_model():
                 else:
                     model = parser_model_dict.get(i)
                     if model is None:
-                        raise ValueError('The parser model %s does not exist!' % model)
+                        msg = 'The parser model %s does not exist!' % model
+                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                        raise ValueError(msg)
                     args_list.append(model)
             parsing_model = start['type'].func(start['name'], args_list)
         else:
@@ -205,13 +225,16 @@ def build_input_pipeline(analysis_context, parsing_model):
     else:
         learn = True
     nmpd = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=learn)
-    analysis_context.register_component(nmpd, component_name=None)
+    analysis_context.register_component(nmpd, component_name='DefaultNewMatchPathDetector')
     atom_filter.add_handler(nmpd)
     return anomaly_event_handlers, atom_filter
 
 
 def build_analysis_components(analysis_context, anomaly_event_handlers, atom_filter):
     """Build the analysis components."""
+    suppress_detector_list = []
+    if yaml_data['SuppressNewMatchPathDetector']:
+        suppress_detector_list.append('DefaultNewMatchPathDetector')
     if 'Analysis' in yaml_data and yaml_data['Analysis'] is not None:
         analysis_dict = {}
         match_action_dict = {}
@@ -236,9 +259,16 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 learn = item['learn_mode']
             else:
                 if 'LearnMode' not in yaml_data:
-                    raise ValueError('Config error: LearnMode must be defined if an analysis component does not define learn_mode.')
+                    msg = 'Config error: LearnMode must be defined if an analysis component does not define learn_mode.'
+                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
                 learn = yaml_data['LearnMode']
             func = item['type'].func
+            if item['suppress']:
+                if comp_name is None:
+                    raise ValueError(
+                        'Config error: id must be specified for the analysis component %s to enable suppression.' % item['type'])
+                suppress_detector_list.append(comp_name)
             if item['type'].name == 'NewMatchPathValueDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn,
                                     persistence_id=item['persistence_id'], output_log_line=item['output_logline'])
@@ -247,25 +277,33 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 for atom_handler in item['parsed_atom_handler_lookup_list']:
                     if atom_handler[1] is not None:
                         if analysis_context.get_component_by_name(atom_handler[1]) is None:
-                            raise ValueError('The atom handler %s does not exist!' % atom_handler[1])
+                            msg = 'The atom handler %s does not exist!' % atom_handler[1]
+                            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                            raise ValueError(msg)
                         atom_handler[1] = analysis_context.get_component_by_name(atom_handler[1])
                     parsed_atom_handler_lookup_list.append(tuple(i for i in atom_handler))
                 default_parsed_atom_handler = item['default_parsed_atom_handler']
                 if default_parsed_atom_handler is not None:
                     if analysis_context.get_component_by_name(default_parsed_atom_handler) is None:
-                        raise ValueError('The atom handler %s does not exist!' % default_parsed_atom_handler)
+                        msg = 'The atom handler %s does not exist!' % default_parsed_atom_handler
+                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                        raise ValueError(msg)
                     default_parsed_atom_handler = analysis_context.get_component_by_name(default_parsed_atom_handler)
                 tmp_analyser = func(parsed_atom_handler_lookup_list, default_parsed_atom_handler=default_parsed_atom_handler)
             elif item['type'].name == 'MatchValueFilter':
                 parsed_atom_handler_dict = {}
                 for atom_handler in item['parsed_atom_handler_dict']:
                     if analysis_context.get_component_by_name(atom_handler) is None:
-                        raise ValueError('The atom handler %s does not exist!' % atom_handler)
+                        msg = 'The atom handler %s does not exist!' % atom_handler
+                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                        raise ValueError(msg)
                     parsed_atom_handler_dict[atom_handler] = analysis_context.get_component_by_name(atom_handler)
                 default_parsed_atom_handler = item['default_parsed_atom_handler']
                 if default_parsed_atom_handler is not None:
                     if analysis_context.get_component_by_name(default_parsed_atom_handler) is None:
-                        raise ValueError('The atom handler %s does not exist!' % default_parsed_atom_handler)
+                        msg = 'The atom handler %s does not exist!' % default_parsed_atom_handler
+                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                        raise ValueError(msg)
                     default_parsed_atom_handler = analysis_context.get_component_by_name(default_parsed_atom_handler)
                 tmp_analyser = func(item['path'], parsed_atom_handler_dict, default_parsed_atom_handler=default_parsed_atom_handler)
             elif item['type'].name == 'NewMatchPathValueComboDetector':
@@ -310,12 +348,16 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     allow_missing_values_flag=item['allow_missing_values'], output_log_line=item['output_logline'])
             elif item['type'].name == 'LinearNumericBinDefinition':
                 if comp_name is None:
-                    raise ValueError('The %s must have an id!' % item['type'].name)
+                    msg = 'The %s must have an id!' % item['type'].name
+                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
                 analysis_dict[comp_name] = func(item['lower_limit'], item['bin_size'], item['bin_count'], item['outlier_bins_flag'])
                 continue
             elif item['type'].name == 'ModuloTimeBinDefinition':
                 if comp_name is None:
-                    raise ValueError('The %s must have an id!' % item['type'].name)
+                    msg = 'The %s must have an id!' % item['type'].name
+                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
                 analysis_dict[comp_name] = func(item['modulo_value'], item['time_unit'], item['lower_limit'], item['bin_size'],
                                                 item['bin_count'], item['outlier_bins_flag'])
                 continue
@@ -323,16 +365,22 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 histogram_defs = []
                 for histogram_def in item['histogram_defs']:
                     if len(histogram_def) != 2:
-                        raise ValueError('Every item of the histogram_defs must have an size of 2!')
+                        msg = 'Every item of the histogram_defs must have an size of 2!'
+                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                        raise ValueError(msg)
                     if histogram_def[1] not in analysis_dict:
-                        raise ValueError('%s first must be defined before used.' % histogram_def[1])
+                        msg = '%s first must be defined before used.' % histogram_def[1]
+                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                        raise ValueError(msg)
                     histogram_defs.append([histogram_def[0], analysis_dict[histogram_def[1]]])
                 tmp_analyser = func(analysis_context.aminer_config, histogram_defs, item['report_interval'], anomaly_event_handlers,
                                     reset_after_report_flag=item['reset_after_report_flag'], persistence_id=item['persistence_id'],
                                     output_log_line=item['output_logline'])
             elif item['type'].name == 'PathDependentHistogramAnalysis':
                 if item['bin_definition'] not in analysis_dict:
-                    raise ValueError('%s first must be defined before used.' % item['bin_definition'])
+                    msg = '%s first must be defined before used.' % item['bin_definition']
+                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
                 tmp_analyser = func(
                     analysis_context.aminer_config, item['path'], analysis_dict[item['bin_definition']], item['report_interval'],
                     anomaly_event_handlers, reset_after_report_flag=item['reset_after_report_flag'], persistence_id=item['persistence_id'],
@@ -366,7 +414,9 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     auto_include_flag=learn, output_log_line=item['output_logline'])
             elif 'MatchAction' in item['type'].name:
                 if comp_name is None:
-                    raise ValueError('The %s must have an id!' % item['type'].name)
+                    msg = 'The %s must have an id!' % item['type'].name
+                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
                 if item['type'].name == 'EventGenerationMatchAction':
                     tmp_analyser = func(item['event_type'], item['event_message'], anomaly_event_handlers)
                 elif item['type'].name == 'AtomFilterMatchAction':
@@ -375,29 +425,39 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 continue
             elif 'MatchRule' in item['type'].name:
                 if comp_name is None:
-                    raise ValueError('The %s must have an id!' % item['type'].name)
+                    msg = 'The %s must have an id!' % item['type'].name
+                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
                 match_action = None
                 if item['match_action'] is not None:
                     if item['match_action'] not in match_action_dict:
-                        raise ValueError('The match action %s does not exist!' % item['match_action'])
+                        msg = 'The match action %s does not exist!' % item['match_action']
+                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                        raise ValueError(msg)
                     match_action = match_action_dict[item['match_action']]
                 if item['type'].name in ('AndMatchRule', 'OrMatchRule', 'ParallelMatchRule'):
                     sub_rules = []
                     for sub_rule in item['sub_rules']:
                         if sub_rule not in match_rules_dict:
-                            raise ValueError('The sub match rule %s does not exist!' % sub_rule)
+                            msg = 'The sub match rule %s does not exist!' % sub_rule
+                            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                            raise ValueError(msg)
                         sub_rules.append(match_rules_dict[sub_rule])
                     tmp_analyser = func(sub_rules, match_action=match_action)
                 if item['type'].name == 'ValueDependentDelegatedMatchRule':
                     rule_lookup_dict = {}
                     for rule in item['rule_lookup_dict']:
                         if rule not in match_rules_dict:
-                            raise ValueError('The match rule %s does not exist!' % rule)
+                            msg = 'The match rule %s does not exist!' % rule
+                            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                            raise ValueError(msg)
                         rule_lookup_dict[rule] = match_rules_dict[rule]
                     tmp_analyser = func(item['paths'], rule_lookup_dict, default_rule=item['default_rule'], match_action=match_action)
                 if item['type'].name == 'NegationMatchRule':
                     if item['sub_rule'] not in match_rules_dict:
-                        raise ValueError('The match rule %s does not exist!' % item['sub_rule'])
+                        msg = 'The match rule %s does not exist!' % item['sub_rule']
+                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                        raise ValueError(msg)
                     sub_rule = match_rules_dict[item['sub_rule']]
                     tmp_analyser = func(sub_rule, match_action=match_action)
                 if item['type'].name in ('PathExistsMatchRule', 'IPv4InRFC1918MatchRule'):
@@ -442,20 +502,26 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 continue
             elif item['type'].name == 'EventClassSelector':
                 if item['artefact_a_rules'] is None and item['artefact_b_rules'] is None:
-                    raise ValueError('At least one of the EventClassSelector\'s rules must not be None!')
+                    msg = 'At least one of the EventClassSelector\'s rules must not be None!'
+                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
                 artefact_a_rules = None
                 artefact_b_rules = None
                 if item['artefact_a_rules'] is not None:
                     artefact_a_rules = []
                     for rule in item['artefact_a_rules']:
                         if rule not in correlation_rules:
-                            raise ValueError('The correlation rule %s does not exist!' % rule)
+                            msg = 'The correlation rule %s does not exist!' % rule
+                            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                            raise ValueError(msg)
                         artefact_a_rules.append(correlation_rules[rule])
                 if item['artefact_b_rules'] is not None:
                     artefact_b_rules = []
                     for rule in item['artefact_b_rules']:
                         if rule not in correlation_rules:
-                            raise ValueError('The correlation rule %s does not exist!' % rule)
+                            msg = 'The correlation rule %s does not exist!' % rule
+                            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                            raise ValueError(msg)
                         artefact_b_rules.append(correlation_rules[rule])
                 tmp_analyser = func(item['action_id'], artefact_a_rules, artefact_b_rules)
                 match_action_dict[item['action_id']] = tmp_analyser
@@ -464,7 +530,9 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 ruleset = []
                 for rule in item['ruleset']:
                     if rule not in match_rules_dict:
-                        raise ValueError('The match rule %s does not exist!' % rule)
+                        msg = 'The match rule %s does not exist!' % rule
+                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                        raise ValueError(msg)
                     ruleset.append(match_rules_dict[rule])
                 tmp_analyser = func(analysis_context.aminer_config, ruleset, anomaly_event_handlers, persistence_id=item['persistence_id'],
                                     output_log_line=item['output_logline'])
@@ -477,7 +545,9 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 allowlist_rules = []
                 for rule in item['allowlist_rules']:
                     if rule not in match_rules_dict:
-                        raise ValueError('The match rule %s does not exist!' % rule)
+                        msg = 'The match rule %s does not exist!' % rule
+                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                        raise ValueError(msg)
                     allowlist_rules.append(match_rules_dict[rule])
                 tmp_analyser = func(analysis_context.aminer_config, allowlist_rules, anomaly_event_handlers,
                                     output_log_line=item['output_logline'])
@@ -491,7 +561,9 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             elif item['type'].name == 'VariableTypeDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
-                    raise ValueError('The defined EventTypeDetector %s does not exists!' % item['event_type_detector'])
+                    msg = 'The defined EventTypeDetector %s does not exists!' % item['event_type_detector']
+                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, etd, persistence_id=item['persistence_id'],
                     path_list=item['paths'], ks_alpha=item['ks_alpha'], s_ks_alpha=item['s_ks_alpha'], s_ks_bt_alpha=item['s_ks_bt_alpha'],
@@ -513,6 +585,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn)
             analysis_context.register_component(tmp_analyser, component_name=comp_name)
             atom_filter.add_handler(tmp_analyser)
+    analysis_context.suppress_detector_list = suppress_detector_list
 
 
 def build_event_handlers(analysis_context, anomaly_event_handlers):
@@ -525,7 +598,7 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                 if item['type'].name == 'StreamPrinterEventHandler':
                     if 'output_file_path' in item:
                         with open(item['output_file_path'], 'w+') as stream:
-                            ctx = func(analysis_context, stream)
+                            ctx = func(analysis_context, stream=stream)
                     else:
                         ctx = func(analysis_context)
                 if item['type'].name == 'DefaultMailNotificationEventHandler':
@@ -534,19 +607,21 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                     ctx = func(analysis_context, item['instance_name'])
                 if item['type'].name == 'KafkaEventHandler':
                     if 'topic' not in item:
-                        raise ValueError("Kafka-Topic not defined")
+                        msg = "Kafka-Topic not defined"
+                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                        raise ValueError(msg)
                     import configparser
                     import os
                     config = configparser.ConfigParser()
                     kafkacfg = '/etc/aminer/kafka-client.conf'
                     if 'cfgfile' in item:
                         kafkacfg = item['cfgfile']
-
                     if os.access(kafkacfg, os.R_OK):
                         config.read(kafkacfg)
                     else:
-                        raise ValueError("%s does not exist or is not readable" % kafkacfg)
-
+                        msg = "%s does not exist or is not readable" % kafkacfg
+                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                        raise ValueError(msg)
                     options = dict(config.items("DEFAULT"))
                     for key, val in options.items():
                         try:

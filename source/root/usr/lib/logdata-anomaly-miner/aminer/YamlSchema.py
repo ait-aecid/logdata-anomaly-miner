@@ -4,6 +4,11 @@
             'required': False,
             'type': 'boolean'
         },
+        'SuppressNewMatchPathDetector': {
+            'required': False,
+            'type': 'boolean',
+            'default': False
+        },
         'AMinerUser': {
             'required': False,
             'type': 'string',
@@ -269,7 +274,8 @@
                     'used_multinomial_test': {'type': 'string', 'allowed': ['Approx', 'MT', 'Chi'], 'required': False, 'default': 'Chi'},
                     'use_empiric_distr': {'type': 'boolean', 'required': False, 'default': True},
                     'save_statistics': {'type': 'boolean', 'required': False, 'default': True},
-                    'split_reports_flag': {'type': 'boolean', 'required': False, 'default': False}
+                    'split_reports_flag': {'type': 'boolean', 'required': False, 'default': False},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 }
             }
         },

@@ -1,0 +1,43 @@
+AMinerUser: 'aminer'  # optional default: aminer
+AMinerGroup: 'aminer' # optional default: aminer
+
+LearnMode: False
+
+SuppressNewMatchPathDetector: False
+
+LogResourceList:
+        - 'file:///var/log/apache2/access.log'
+
+RemoteControlSocket: '/var/run/aminer-remote.socket'
+
+Core.PersistenceDir: '/tmp/lib/aminer'
+
+Parser:
+        - id: 'apacheModel'
+          type: ApacheAccessModel
+          name: 'apache'
+          args: 'apache'
+
+        - id: 'START'
+          start: True
+          type: SequenceModelElement
+          name: 'model'
+          args: apacheModel
+
+Input:
+        verbose: True # optional
+        multi_source: False # optional
+        timestamp_paths: "/model/accesslog/time"
+
+Analysis:
+        - type: NewMatchPathValueComboDetector
+          id: ValueComboDetector
+          paths: ["first/seq/s1","first/seq/d1"]
+          persistence_id: 'accesslog_request' # optional default: Default
+          output_logline: False # optional default: True
+          allow_missing_values: False # optional default: False
+          suppress: False
+
+EventHandlers:
+        - id: stpe
+          type: StreamPrinterEventHandler

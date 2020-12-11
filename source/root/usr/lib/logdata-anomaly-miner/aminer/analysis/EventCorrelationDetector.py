@@ -733,9 +733,13 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
         """
         if event_type != 'Analysis.%s' % self.__class__.__name__:
-            raise Exception('Event not from this source')
+            msg = 'Event not from this source'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         if allowlisting_data is not None:
-            raise Exception('Allowlisting data not understood by this detector')
+            msg = 'Allowlisting data not understood by this detector'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         if event_data[1] not in self.constraint_list:
             self.constraint_list.append(event_data[1])
         return 'Allowlisted path %s in %s' % (event_data[1], sorted_log_lines[0])
@@ -747,9 +751,13 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         @throws Exception when blocklisting of this special event using given blocklisting_data was not possible.
         """
         if event_type != 'Analysis.%s' % self.__class__.__name__:
-            raise Exception('Event not from this source')
+            msg = 'Event not from this source'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         if blocklisting_data is not None:
-            raise Exception('Blocklisting data not understood by this detector')
+            msg = 'Blocklisting data not understood by this detector'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         if event_data[1] not in self.ignore_list:
             self.ignore_list.append(event_data[1])
         return 'Blocklisted path %s in %s' % (event_data[1], sorted_log_lines[0])
