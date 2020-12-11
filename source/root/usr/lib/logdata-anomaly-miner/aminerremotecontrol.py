@@ -124,7 +124,7 @@ remote_control_socket.setblocking(True)
 
 control_handler = AnalysisChildRemoteControlHandler(remote_control_socket)
 
-for remote_control_code, remote_control_data in command_list:
+for remote_control_code in command_list:
     control_handler.put_execute_request(remote_control_code, remote_control_data)
     # Send data until we are ready for receiving.
     while not control_handler.may_receive():

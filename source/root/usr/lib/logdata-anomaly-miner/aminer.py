@@ -303,7 +303,7 @@ def main():
     initialize_loggers(aminer_config, child_user_name, child_group_name)
 
     if restore_relative_persistence_path is not None and (clear_persistence_flag or remove_persistence_dirs):
-        msg = 'The --Restore parameter removes all persistence files. Do not use this parameter with --Clear or --Remove!'
+        msg = 'The --restore parameter removes all persistence files. Do not use this parameter with --Clear or --Remove!'
         print(msg, sys.stderr)
         logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
         sys.exit(1)
@@ -318,7 +318,7 @@ def main():
 
     if clear_persistence_flag:
         if remove_persistence_dirs:
-            msg = 'The --Clear and --Remove arguments must not be used together!'
+            msg = 'The --clear and --remove arguments must not be used together!'
             print(msg, file=sys.stderr)
             logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
             sys.exit(1)
@@ -330,7 +330,7 @@ def main():
             file_path = os.path.join(persistence_dir_name, filename)
             try:
                 if not os.path.isdir(file_path):
-                    msg = 'The AMiner persistence directory should not contain any files.'
+                    msg = 'The aminer persistence directory should not contain any files.'
                     print(msg, file=sys.stderr)
                     logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
                     continue
@@ -346,7 +346,7 @@ def main():
                 if not os.path.exists(file_path):
                     continue
                 if not os.path.isdir(file_path):
-                    msg = 'The AMiner persistence directory should not contain any files.'
+                    msg = 'The aminer persistence directory should not contain any files.'
                     print(msg, file=sys.stderr)
                     logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
                     continue

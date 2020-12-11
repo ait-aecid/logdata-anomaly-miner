@@ -562,7 +562,7 @@ class AnalysisChildRemoteControlHandler:
                     msg = 'Invalid request data'
                     logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
                     raise Exception(msg)
-                if json_request_data[0]:
+                if json_request_data[0] and isinstance(json_request_data[0], bytes):
                     json_request_data[0] = json_request_data[0].decode()
                 if json_request_data[1]:
                     if isinstance(json_request_data[1], list):
