@@ -14,8 +14,8 @@ to open logfiles is already under full control of an attacker. However it is not
 require code changes to protect also against standard SUID attacks.
 
 Parameters:
-* --Config [file]: Location of configuration file, defaults to '/etc/aminer/config.py' when not set.
-* --RunAnalysis: This parameters is NOT intended to be used on command line when starting aminer, it will trigger execution
+* --config [file]: Location of configuration file, defaults to '/etc/aminer/config.py' when not set.
+* --run-analysis: This parameters is NOT intended to be used on command line when starting aminer, it will trigger execution
   of the unprivileged aminer background child performing the real analysis.
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
@@ -563,7 +563,7 @@ def main():
         # Now execute the very same program again, but user might have moved or renamed it meanwhile. This would be problematic with
         # SUID-binaries (which we do not yet support). Do NOT just fork but also exec to avoid child circumventing
         # parent's ALSR due to cloned kernel VMA.
-        execArgs = ['AMinerChild', '--RunAnalysis', '--Config', analysis_config_file_name, '--Stat', str(stat_level), '--Debug',
+        execArgs = ['AMinerChild', '--run-analysis', '--config', analysis_config_file_name, '--stat', str(stat_level), '--debug',
                     str(debug_level)]
         os.execve(sys.argv[0], execArgs, {})  # skipcq: BAN-B606
         msg = 'Failed to execute child process'
