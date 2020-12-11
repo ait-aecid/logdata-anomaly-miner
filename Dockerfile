@@ -1,11 +1,13 @@
-#
 # logdata-anomaly-miner Dockerfile
+#
+# Build:
+#    docker build -t aecid/logdata-anomaly-miner:latest -t aecid/logdata-anomaly-miner:$(grep '__version__ =' source/root/usr/lib/logdata-anomaly-miner/aminer.py | awk -F '"' '{print $2}') .
 #
 # See: https://github.com/ait-aecid/logdata-anomaly-miner/wiki/Deployment-with-Docker
 #
 
 # Pull base image.
-FROM ubuntu:18.04
+FROM debian:bullseye
 
 # Set local timezone
 ENV TZ=Europe/Vienna
@@ -26,10 +28,9 @@ RUN apt-get update && apt-get install -y \
         python3-dateutil \
         python3-six \
         python3-scipy \
+        python3-kafka \
+        python3-cerberus \
         python3-yaml 
-
-# Install python packages
-RUN pip3 install cerberus kafka-python
 
 # Copy logdata-anomaly-miner-sources
 ADD source/root/usr/lib/logdata-anomaly-miner /usr/lib/logdata-anomaly-miner
@@ -42,8 +43,8 @@ RUN ln -s /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerr
 	&& ln -s /usr/lib/logdata-anomaly-miner/aminer.py /usr/bin/aminer \
 	&& chmod 0755 /usr/lib/logdata-anomaly-miner/aminer.py  \
 	&& chmod 0755 /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py \
-	&& ln -s /usr/local/lib/python3.6/dist-packages/kafka /usr/lib/logdata-anomaly-miner/kafka \
-	&& ln -s /usr/local/lib/python3.6/dist-packages/cerberus /usr/lib/logdata-anomaly-miner/cerberus \
+	&& ln -s /usr/lib/python3/dist-packages/kafka /usr/lib/logdata-anomaly-miner/kafka \
+	&& ln -s /usr/lib/python3/dist-packages/cerberus /usr/lib/logdata-anomaly-miner/cerberus \
 	&& ln -s /usr/lib/python3/dist-packages/scipy /usr/lib/logdata-anomaly-miner/scipy \
 	&& ln -s /usr/lib/python3/dist-packages/numpy /usr/lib/logdata-anomaly-miner/numpy \
 	&& ln -s /usr/lib/python3/dist-packages/pkg_resources /usr/lib/logdata-anomaly-miner/pkg_resources \

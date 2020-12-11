@@ -62,6 +62,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
 
     log_success = 0
     log_total = 0
+    output_event_handlers = None
 
     @abc.abstractmethod
     def receive_atom(self, log_atom):

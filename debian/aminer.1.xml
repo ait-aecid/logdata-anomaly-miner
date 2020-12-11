@@ -126,16 +126,6 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
           for configuration file templates and examples.</para>
         </listitem>
       </varlistentry>
-      <varlistentry>
-        <term><option>--Foreground, --foreground (deprecated)</option></term>
-        <listitem>
-          <para>With this parameter, aminer will not detach from
-          the terminal and daemonize. When not in foreground mode,
-          aminer will also change the working directory to /,
-          hence relative path in configuration file will not work.
-		   (deprecated - will be removed in next release version)</para>
-        </listitem>
-      </varlistentry>
 	  <varlistentry>
         <term><option>--Daemon, --daemon, -D</option></term>
         <listitem>
