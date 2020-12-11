@@ -4,6 +4,11 @@
             'required': False,
             'type': 'boolean'
         },
+        'SuppressNewMatchPathDetector': {
+            'required': False,
+            'type': 'boolean',
+            'default': False
+        },
         'AMinerUser': {
             'required': False,
             'type': 'string',
@@ -271,6 +276,7 @@
                     'save_statistics': {'type': 'boolean', 'required': False, 'default': True},
                     'split_reports_flag': {'type': 'boolean', 'required': False, 'default': False},
                     'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None}
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 }
             }
         },

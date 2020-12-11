@@ -33,6 +33,9 @@ class KafkaEventHandler(EventHandlerInterface):
         if hasattr(event_source, 'output_event_handlers') and event_source.output_event_handlers is not None and self not in \
                 event_source.output_event_handlers:
             return True
+        component_name = self.analysis_context.get_name_by_component(event_source)
+        if component_name in self.analysis_context.suppress_detector_list:
+            return True
         if self.kafkaImported is False:
             try:
                 from kafka import KafkaProducer

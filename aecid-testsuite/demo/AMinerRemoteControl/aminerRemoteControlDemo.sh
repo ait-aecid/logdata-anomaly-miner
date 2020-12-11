@@ -4,7 +4,7 @@ sudo aminerremotecontrol --Exec "change_config_property(analysis_context, 'LogPr
 #renames the 'NewMatchPathValueCombo' component to 'NewMatchPathValueComboDetector'
 sudo aminerremotecontrol --Exec "rename_registered_analysis_component(analysis_context,'NewMatchPathValueCombo','NewMatchPathValueComboDetector')"
 
-#changes the 'autoIncludeFlag' of the 'NewMatchPathValueComboDetector' to False.
+#changes the 'auto_include_flag' of the 'NewMatchPathValueComboDetector' to False.
 sudo aminerremotecontrol --Exec "change_attribute_of_registered_analysis_component(analysis_context, 'NewMatchPathValueComboDetector',  'auto_include_flag', False)"
 
 #prints the current list of paths
@@ -67,6 +67,9 @@ sudo AMinerRemoteControl --Exec "change_attribute_of_registered_analysis_compone
 
 # In the last step we remove all special rules and only allow User 'username' (logged in, logged out) x minutes ago.
 sudo AMinerRemoteControl --Exec "change_attribute_of_registered_analysis_component(analysis_context,'Allowlist','allowlist_rules',[Rules.OrMatchRule([Rules.AndMatchRule([Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails/PastTime/Time/Minutes')),Rules.PathExistsMatchRule('/model/LoginDetails')]),Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails'))])])"
+
+# Adds a new path to the known_path_set
+sudo aminerRemoteControl --Exec "allowlist_event_in_component(analysis_context,'NewMatchPathDet',['/new/path1','/new/path2'])" --StringResponse
 
 # Persist all data.
 sudo aminerRemoteControl --Exec "persist_all()"

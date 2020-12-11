@@ -61,6 +61,7 @@ class AnalysisContext:
         # Keep lists of components that should receive timer interrupts when real time or analysis time has elapsed.
         self.real_time_triggered_components = []
         self.analysis_time_triggered_components = []
+        self.suppress_detector_list = []
 
     def add_time_triggered_component(self, component, trigger_class=None):
         """Add a time-triggered component to the registry."""
@@ -420,6 +421,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                 next_trigger_offset = 3600 * 24
                 if next_backup_time_trigger_time is not None:
                     shutil.copytree(persistence_dir, backup_path_with_date, ignore=shutil.ignore_patterns('backup*'))
+                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info('Persistence backup created in %s.', backup_path_with_date)
                 next_backup_time_trigger_time = backup_time + next_trigger_offset
 
         # Analysis loop is only left on shutdown. Try to persist everything and leave.
@@ -499,6 +501,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
             PersistenceUtil.store_json(self.persistence_file_name, self.repositioning_data_dict)
             delta = 600
             self.next_persist_time = trigger_time + delta
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('Repositioning data was persisted.')
         return delta
 
 
@@ -585,6 +588,7 @@ class AnalysisChildRemoteControlHandler:
                         methods.add_handler_to_atom_filter_and_register_analysis_component,
                     'save_current_config': methods.save_current_config,
                     'allowlist_event_in_component': methods.allowlist_event_in_component,
+                    'blocklist_event_in_component': methods.blocklist_event_in_component,
                     'dump_events_from_history': methods.dump_events_from_history,
                     'ignore_events_from_history': methods.ignore_events_from_history,
                     'list_events_from_history': methods.list_events_from_history,
@@ -592,23 +596,25 @@ class AnalysisChildRemoteControlHandler:
                     'persist_all': methods.persist_all,
                     'list_backups': methods.list_backups,
                     'create_backup': methods.create_backup,
-                    'change_log_stat_level': methods.change_log_stat_level,
-                    'change_log_debug_level': methods.change_log_debug_level,
                     'EnhancedNewMatchPathValueComboDetector': aminer.analysis.EnhancedNewMatchPathValueComboDetector,
                     'EventCorrelationDetector': aminer.analysis.EventCorrelationDetector,
+                    'EventTypeDetector': aminer.analysis.EventTypeDetector,
                     'HistogramAnalysis': aminer.analysis.HistogramAnalysis,
                     'MatchFilter': aminer.analysis.MatchFilter,
                     'MatchValueAverageChangeDetector': aminer.analysis.MatchValueAverageChangeDetector,
                     'MatchValueStreamWriter': aminer.analysis.MatchValueStreamWriter,
                     'MissingMatchPathValueDetector': aminer.analysis.MissingMatchPathValueDetector,
+                    'NewMatchIdValueComboDetector': aminer.analysis.NewMatchIdValueComboDetector,
                     'NewMatchPathDetector': aminer.analysis.NewMatchPathDetector,
                     'NewMatchPathValueComboDetector': aminer.analysis.NewMatchPathValueComboDetector,
+                    'NewMatchPathValueDetector': aminer.analysis.NewMatchPathValueDetector,
                     'ParserCount': aminer.analysis.ParserCount,
                     'Rules': aminer.analysis.Rules,
                     'TimeCorrelationDetector': aminer.analysis.TimeCorrelationDetector,
                     'TimeCorrelationViolationDetector': aminer.analysis.TimeCorrelationViolationDetector,
                     'TimestampCorrectionFilters': aminer.analysis.TimestampCorrectionFilters,
                     'TimestampsUnsortedDetector': aminer.analysis.TimestampsUnsortedDetector,
+                    'VariableTypeDetector': aminer.analysis.VariableTypeDetector,
                     'AllowlistViolationDetector': aminer.analysis.AllowlistViolationDetector
                 }
                 logging.getLogger(AMinerConfig.REMOTE_CONTROL_LOG_NAME).log(15, json_request_data[0])
@@ -618,10 +624,14 @@ class AnalysisChildRemoteControlHandler:
                 global suspended_flag
                 if json_request_data[0] in ('suspend_aminer()', 'suspend_aminer', 'suspend'):
                     suspended_flag = True
-                    json_remote_control_response = json.dumps(methods.REMOTE_CONTROL_RESPONSE + 'OK. aminer is suspended now.')
+                    msg = methods.REMOTE_CONTROL_RESPONSE + 'OK. aminer is suspended now.'
+                    json_remote_control_response = json.dumps(msg)
+                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info(msg)
                 elif json_request_data[0] in ('activate_aminer()', 'activate_aminer', 'activate'):
                     suspended_flag = False
-                    json_remote_control_response = json.dumps(methods.REMOTE_CONTROL_RESPONSE + 'OK. aminer is activated now.')
+                    msg = methods.REMOTE_CONTROL_RESPONSE + 'OK. aminer is activated now.'
+                    json_remote_control_response = json.dumps(msg)
+                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info(msg)
                 else:
                     # skipcq: PYL-W0122
                     exec(json_request_data[0], {'__builtins__': None}, exec_locals)
