@@ -61,6 +61,7 @@ class AnalysisContext:
         # Keep lists of components that should receive timer interrupts when real time or analysis time has elapsed.
         self.real_time_triggered_components = []
         self.analysis_time_triggered_components = []
+        self.suppress_detector_list = []
 
     def add_time_triggered_component(self, component, trigger_class=None):
         """Add a time-triggered component to the registry."""
