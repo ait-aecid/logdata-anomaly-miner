@@ -563,8 +563,7 @@ def main():
         # Now execute the very same program again, but user might have moved or renamed it meanwhile. This would be problematic with
         # SUID-binaries (which we do not yet support). Do NOT just fork but also exec to avoid child circumventing
         # parent's ALSR due to cloned kernel VMA.
-        execArgs = ['AMinerChild', '--run-analysis', '--config', analysis_config_file_name, '--stat', str(stat_level), '--debug',
-                    str(debug_level)]
+        execArgs = ['AMinerChild', '--run-analysis', '--config', analysis_config_file_name, '--stat', stat_level, '--debug', debug_level]
         os.execve(sys.argv[0], execArgs, {})  # skipcq: BAN-B606
         msg = 'Failed to execute child process'
         print(msg, file=sys.stderr)
