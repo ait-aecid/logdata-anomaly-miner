@@ -53,12 +53,25 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, 'MatchValueAverageChangeDetector',
                                                                               persistence_id)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
-        if persistence_data is None:
-            self.stat_data = []
-            for path in analyze_path_list:
-                self.stat_data.append((path, [],))
-        else:
-            self.stat_data = persistence_data
+        self.stat_data = []
+        for path in analyze_path_list:
+            self.stat_data.append((path, [],))
+        if persistence_data is not None:
+            for val in persistence_data:
+                if isinstance(val, str):
+                    val = val.strip('[').strip(']').split(',', 2)
+                    path = val[0].strip('"')
+                    values = val[1].strip(' ').strip('[').strip(']')
+                else:
+                    path = val[0]
+                    values = val[1]
+                index = 0
+                for p, _ in self.stat_data:
+                    if p == path:
+                        break
+                    index += 1
+                for value in values:
+                    self.stat_data[index][1].append(value)
 
     def receive_atom(self, log_atom):
         """Send summary to all event handlers."""
