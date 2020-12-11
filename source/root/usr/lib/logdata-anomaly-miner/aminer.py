@@ -235,10 +235,11 @@ def main():
     parser.add_argument('-v', '--version', action='version', version=__version_string__)
     parser.add_argument('-c', '--config', default='/etc/aminer/config.yml', type=str, help='path to the config-file')
     parser.add_argument('-D', '--daemon', action='store_false', help='run as a daemon process')
-    parser.add_argument('-s', '--stat', choices=[0, 1, 2], help='set the stat level. Possible stat-levels are 0 for no statistics, 1 for '
-                                                                'normal statistic level and 2 for verbose statistics.')
-    parser.add_argument('-d', '--debug', choices=[0, 1, 2], help='set the debug level. Possible debug-levels are 0 for no debugging, 1 for '
-                                                                 'normal output (INFO and above), 2 for printing all debug information.')
+    parser.add_argument('-s', '--stat', choices=[0, 1, 2], type=int, help='set the stat level. Possible stat-levels are 0 for no statistics'
+                                                                          ', 1 for normal statistic level and 2 for verbose statistics.')
+    parser.add_argument('-d', '--debug', choices=[0, 1, 2], type=int, help='set the debug level. Possible debug-levels are 0 for no '
+                                                                           'debugging, 1 for normal output (INFO and above), 2 for printing'
+                                                                           ' all debug information.')
     parser.add_argument('--run-analysis', action='store_true', help='enable/disable analysis')
     parser.add_argument('-C', '--clear', action='store_true', help='removes all persistence directories')
     parser.add_argument('-r', '--remove', action='append', type=str, help='removes a specific persistence directory')
@@ -563,7 +564,8 @@ def main():
         # Now execute the very same program again, but user might have moved or renamed it meanwhile. This would be problematic with
         # SUID-binaries (which we do not yet support). Do NOT just fork but also exec to avoid child circumventing
         # parent's ALSR due to cloned kernel VMA.
-        execArgs = ['AMinerChild', '--run-analysis', '--config', analysis_config_file_name, '--stat', stat_level, '--debug', debug_level]
+        execArgs = ['AMinerChild', '--run-analysis', '--config', analysis_config_file_name, '--stat', str(stat_level), '--debug',
+                    str(debug_level)]
         os.execve(sys.argv[0], execArgs, {})  # skipcq: BAN-B606
         msg = 'Failed to execute child process'
         print(msg, file=sys.stderr)
