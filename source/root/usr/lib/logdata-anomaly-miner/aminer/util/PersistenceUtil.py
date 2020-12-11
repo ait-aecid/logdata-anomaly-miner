@@ -57,7 +57,7 @@ def replace_persistence_file(file_name, new_file_handle):
             raise openOsError
 
     tmp_file_name = os.readlink('/proc/self/fd/%d' % new_file_handle)
-    file_name = file_name.lstrip(SecureOSFunctions.base_dir_path.decode())
+    file_name = file_name.replace(SecureOSFunctions.base_dir_path.decode(), '').lstrip('/')
     os.link(
         tmp_file_name, file_name, src_dir_fd=SecureOSFunctions.tmp_base_dir_fd, dst_dir_fd=SecureOSFunctions.secure_open_base_directory())
     os.unlink(tmp_file_name, dir_fd=SecureOSFunctions.tmp_base_dir_fd)
