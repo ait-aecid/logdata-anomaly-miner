@@ -659,8 +659,7 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
     except KeyError:
         # Add stdout stream printing for debugging, tuning.
         from aminer.events import StreamPrinterEventHandler
-        anomaly_event_handlers.append(StreamPrinterEventHandler(analysis_context))
-    return None
+        anomaly_event_handlers.append(StreamPrinterEventHandler(analysis_context, stream=sys.stderr))
 
 
 def tuple_transformation_function_demo_print_every_10th_value(match_value_list):
