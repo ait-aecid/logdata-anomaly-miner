@@ -1,9 +1,20 @@
-# logdata-anomaly-miner Dockerfile
+#
+# PLEASE NOTE THAT YOUR WORKING-DIRECTORY MUST BE THE ROOT OF THIS REPOSITORY
+# IN ORDER WO BUIILD THIS CONTAINER-IMAGE!!!
 #
 # Build:
-#    docker build -t aecid/logdata-anomaly-miner:latest -t aecid/logdata-anomaly-miner:$(grep '__version__ =' source/root/usr/lib/logdata-anomaly-miner/aminer.py | awk -F '"' '{print $2}') .
+#    docker build -f aecid-testsuite/Dockerfile -t aecid/logdata-anomaly-miner-testing:latest .
 #
-# See: https://github.com/ait-aecid/logdata-anomaly-miner/wiki/Deployment-with-Docker
+# Use:
+#    docker run -m=2G --rm aecid/logdata-anomaly-miner-testing runUnittests
+#
+# Run all tests:
+#    docker run -m=2G --rm aecid/logdata-anomaly-miner-testing ALL
+#
+# Run a shell inside the container:
+#    docker run -m=2G -it --rm aecid/logdata-anomaly-miner-testing SHELL
+#
+# See: https://github.com/ait-aecid/logdata-anomaly-miner/wiki/How-to-use-the-AECID-testsuite
 #
 
 # Pull base image.
@@ -30,13 +41,37 @@ RUN apt-get update && apt-get install -y \
         python3-scipy \
         python3-kafka \
         python3-cerberus \
-        python3-yaml 
+        python3-yaml \
+        python3-pylibacl \
+        libacl1-dev \
+        postfix \
+        procps \ 
+        mailutils \
+        sudo \
+        curl \
+        postfix \
+        openjdk-15-jre \
+        locales \
+        locales-all \
+        rsyslog
+
+RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
+    dpkg-reconfigure --frontend=noninteractive locales && \
+    update-locale LANG=en_US.UTF-8
+
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en  
+ENV LC_ALL en_US.UTF-8
+
+
+RUN pip3 install coverage
 
 # Copy logdata-anomaly-miner-sources
 ADD source/root/usr/lib/logdata-anomaly-miner /usr/lib/logdata-anomaly-miner
 
 # Entrypoint-wrapper
 ADD scripts/aminerwrapper.sh /aminerwrapper.sh
+
 
 # Prepare the system and link all python-modules
 RUN ln -s /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerremotecontrol \
@@ -51,17 +86,31 @@ RUN ln -s /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerr
 	&& ln -s /usr/lib/python3/dist-packages/yaml /usr/lib/logdata-anomaly-miner/yaml \
 	&& ln -s /usr/lib/python3/dist-packages/pytz /usr/lib/logdata-anomaly-miner/pytz \
 	&& ln -s /usr/lib/python3/dist-packages/dateutil /usr/lib/logdata-anomaly-miner/dateutil \
+        && find /usr/lib/python3/dist-packages -name posix1e.cpython\*.so -exec ln -s {} /usr/lib/logdata-anomaly-miner/posix1e.cpython-x86_64-linux-gnu.so \; \
 	&& ln -s /usr/lib/python3/dist-packages/six.py /usr/lib/logdata-anomaly-miner/six.py \
 	&& useradd -ms /usr/sbin/nologin aminer && mkdir /var/lib/aminer && mkdir /etc/aminer \
         && chmod 0755 /aminerwrapper.sh
 
+# Add config
+ADD source/root/etc/aminer /etc/aminer
+
+# Copy the testsuite
+ADD aecid-testsuite /home/aminer/aecid-testsuite
+
+RUN chown aminer.aminer -R /home/aminer \
+    && ln -s /usr/lib/logdata-anomaly-miner/aminer /home/aminer/aecid-testsuite/aminer \
+    && ln -s /etc/aminer/conf-available/generic/ApacheAccessModel.py /etc/aminer/conf-enabled/ApacheAccessModel.py \
+    && ln -s /etc/aminer/template_config.py /home/aminer/aecid-testsuite/demo/AMiner/template_config.py \
+    && ln -s /etc/aminer/template_config.yml /home/aminer/aecid-testsuite/demo/AMiner/template_config.yml \
+    && chmod +x /home/aminer/aecid-testsuite/*.sh \
+    && echo "aminer ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/aminer
+
+ADD scripts/testingwrapper.sh /testingwrapper.sh
+
 USER aminer
-WORKDIR /home/aminer
+WORKDIR /home/aminer/aecid-testsuite
 
 # The following volumes can be mounted
 VOLUME ["/etc/aminer","/var/lib/aminer","/logs"]
 
-ENTRYPOINT ["/aminerwrapper.sh"]
-
-# Default command for the ENTRYPOINT(wrapper)
-CMD ["aminer","--Config","/etc/aminer/config.yml"]
+ENTRYPOINT ["/testingwrapper.sh"]

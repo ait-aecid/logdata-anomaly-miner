@@ -282,7 +282,11 @@ echo "$text" >> /tmp/syslog
 
 #stop AMiner
 sleep 3 & wait $!
-pkill -x aminer
+if [[ $sudoInstalled == 0 ]]; then
+	sudo pkill -x aminer
+else
+    pkill -x aminer
+fi
 KILL_PID=$!
 sleep 3
 wait $KILL_PID

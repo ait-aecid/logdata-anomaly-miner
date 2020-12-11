@@ -4,6 +4,11 @@
             'required': False,
             'type': 'boolean'
         },
+        'SuppressNewMatchPathDetector': {
+            'required': False,
+            'type': 'boolean',
+            'default': False
+        },
         'AMinerUser': {
             'required': False,
             'type': 'string',
@@ -287,6 +292,7 @@
                         'coverVals', 'distinctDistr']}, 'nullable': True, 'default': None},
                     'validate_cor_cover_vals_thres': {'type': 'float', 'required': False, 'default': 0.7},
                     'validate_cor_distinct_thres': {'type': 'float', 'required': False, 'default': 0.05},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 }
             }
         },
