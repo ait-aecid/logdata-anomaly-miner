@@ -86,7 +86,10 @@ def secure_open_file(file_name, flags):
     global base_dir_path  # skipcq: PYL-W0603
     global base_dir_fd  # skipcq: PYL-W0603
     if base_dir_path is not None:
-        base_name = file_name.replace(base_dir_path, b'').lstrip(b'/')
+        if file_name.startswith(base_dir_path):
+            base_name = file_name.replace(base_dir_path, b'').lstrip(b'/')
+        else:
+            base_name = file_name
         return os.open(base_name, flags | os.O_NOFOLLOW | os.O_NOCTTY, dir_fd=base_dir_fd)
     dir_name = os.path.dirname(file_name)
     base_name = os.path.basename(file_name)
