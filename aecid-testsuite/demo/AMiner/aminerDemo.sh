@@ -46,9 +46,9 @@ fi
 
 #start AMiner
 if [[ $sudoInstalled == 0 ]]; then
-	sudo -H -u aminer bash -c 'aminer --Config '$FILE' &'
+	sudo -H -u aminer bash -c 'aminer --config '$FILE' &'
 else
-	runuser -u aminer -- aminer --Config $FILE &
+	runuser -u aminer -- aminer --config $FILE &
 fi
 
 #EventCorrelationDetetctor, NewMatchPathDetector
