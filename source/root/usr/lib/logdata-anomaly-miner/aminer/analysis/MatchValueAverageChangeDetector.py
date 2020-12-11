@@ -34,7 +34,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param timestamp_path if not None, use this path value for timestamp based bins.
-        @param analyze_path_list list of match pathes to analyze in this detector.
+        @param analyze_path_list list of match paths to analyze in this detector.
         @param min_bin_elements evaluate the latest bin only after at least that number of elements was added to it.
         @param min_bin_time evaluate the latest bin only when the first element is received after minBinTime has elapsed.
         @param debug_mode if true, generate an analysis report even when average of last bin was within expected range.
@@ -101,7 +101,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
                         analysis_summary += os.linesep
                         analysis_summary += '  "%s": %s' % (path, analysis_data[0])
                     anomaly_scores.append(d)
-            analysis_component = {'AffectedLogAtomPathes': list(value_dict)}
+            analysis_component = {'AffectedLogAtomPaths': list(value_dict)}
             if self.output_log_line:
                 match_paths_values = {}
                 for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
