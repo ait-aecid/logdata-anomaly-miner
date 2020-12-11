@@ -30,6 +30,9 @@ class StreamPrinterEventHandler(EventHandlerInterface):
 
     def receive_event(self, event_type, event_message, sorted_log_lines, event_data, log_atom, event_source):
         """Receive information about a detected event."""
+        component_name = self.analysis_context.get_name_by_component(event_source)
+        if component_name in self.analysis_context.suppress_detector_list:
+            return
         event_data_obj = EventData(event_type, event_message, sorted_log_lines, event_data, log_atom, event_source, self.analysis_context)
         message = '%s\n' % event_data_obj.receive_event_string()
         if hasattr(self.stream, 'buffer'):

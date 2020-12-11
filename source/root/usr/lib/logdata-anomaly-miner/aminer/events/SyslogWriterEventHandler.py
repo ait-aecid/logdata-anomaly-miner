@@ -28,6 +28,7 @@ class SyslogWriterEventHandler(EventHandlerInterface):
     """
 
     def __init__(self, analysis_context, instance_name='aminer'):
+        self.analysis_context = analysis_context
         self.instanceName = instance_name
         syslog.openlog('%s[%d]' % (self.instanceName, os.getpid()), syslog.LOG_INFO, syslog.LOG_DAEMON)
         syslog.syslog(syslog.LOG_INFO, 'Syslog logger initialized')
@@ -37,6 +38,9 @@ class SyslogWriterEventHandler(EventHandlerInterface):
 
     def receive_event(self, event_type, event_message, sorted_log_lines, event_data, log_atom, event_source):
         """Receive information about a detected even and forward it to syslog."""
+        component_name = self.analysis_context.get_name_by_component(event_source)
+        if component_name in self.analysis_context.suppress_detector_list:
+            return
         self.buffer_stream.seek(0)
         self.buffer_stream.truncate(0)
         self.event_writer.receive_event(event_type, event_message, sorted_log_lines, event_data, log_atom, event_source)

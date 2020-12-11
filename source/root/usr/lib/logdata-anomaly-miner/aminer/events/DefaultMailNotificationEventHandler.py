@@ -93,6 +93,10 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
                 return
             self.alert_grace_time_end = 0
 
+        component_name = self.analysis_context.get_name_by_component(event_source)
+        if component_name in self.analysis_context.suppress_detector_list:
+            return
+
         # Avoid too many calls to the operating system time()
         current_time = time.time()
 
