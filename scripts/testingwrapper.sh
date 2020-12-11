@@ -34,10 +34,29 @@ case "$1" in
 		./${1}.sh ${*:2}
 		exit $?
 		;;
+	runRemoteControlTest)
+		cd $TESTDIR
+		./${1}.sh ${*:2}
+		exit $?
+		;;
+
+	runGettingStarted)
+		cd $TESTDIR
+		./${1}.sh ${*:2}
+		exit $?
+		;;
+
+	runTryItOut)
+		cd $TESTDIR
+		./${1}.sh ${*:2}
+		exit $?
+		;;
+
 	ALL)
 		cd $TESTDIR
                 ./runSuspendModeTest.sh
                 ./runUnittests.sh
+		./runRemoteControlTest.sh
                 ./runAMinerDemo.sh demo/AMiner/demo-config.py
                 ./runAMinerDemo.sh demo/AMiner/jsonConverterHandler-demo-config.py
                 ./runAMinerDemo.sh demo/AMiner/template_config.py
@@ -45,6 +64,8 @@ case "$1" in
                 ./runAMinerDemo.sh demo/AMiner/demo-config.yml
                 ./runAMinerIntegrationTest.sh aminerIntegrationTest.sh config.py
                 ./runAMinerIntegrationTest.sh aminerIntegrationTest2.sh config21.py config22.py
+		./runGettingStarted.sh
+		./runTryItOut.sh
                 ./runCoverageTests.sh
                 exit $?
 		;;
@@ -53,7 +74,8 @@ case "$1" in
 		exit 0
 		;;
 	*)
-		echo "Usage: [ ALL | SHELL | runSuspendModeTest | runUnittests | runAMinerDemo | runAMinerIntegrationTest | runCoverageTests] <options>"
+		echo "Usage: [ ALL | SHELL | runSuspendModeTest | runUnittests | runAMinerDemo "
+		echo "         runAMinerIntegrationTest | runCoverageTests | runRemoteControlTest | runTryItOut | runGettingStarted] <options>"
 		exit 1
 		;;
         
