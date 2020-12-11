@@ -65,7 +65,14 @@ def build_analysis_pipeline(analysis_context):
     parsing_model = build_parsing_model()
     anomaly_event_handlers, atom_filter = build_input_pipeline(analysis_context, parsing_model)
     build_analysis_components(analysis_context, anomaly_event_handlers, atom_filter)
-    build_event_handlers(analysis_context, anomaly_event_handlers)
+    event_handler_id_list = build_event_handlers(analysis_context, anomaly_event_handlers)
+    # do not check UnparsedAtomHandler
+    for index, analysis_component in enumerate(atom_filter.subhandler_list[1:]):
+        if analysis_component[0].output_event_handlers is not None:
+            event_handlers = []
+            for i in analysis_component[0].output_event_handlers:
+                event_handlers.append(anomaly_event_handlers[event_handler_id_list.index(i)])
+            atom_filter.subhandler_list[index+1][0].output_event_handlers = event_handlers
 
 
 def build_parsing_model():
@@ -225,6 +232,7 @@ def build_input_pipeline(analysis_context, parsing_model):
     else:
         learn = True
     nmpd = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=learn)
+    nmpd.output_event_handlers = None
     analysis_context.register_component(nmpd, component_name='DefaultNewMatchPathDetector')
     atom_filter.add_handler(nmpd)
     return anomaly_event_handlers, atom_filter
@@ -401,9 +409,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     target_value_list=item['value_list'], output_log_line=item['output_logline'])
             elif item['type'].name == 'MatchValueAverageChangeDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['timestamp_path'], item['paths'],
-                                    item['min_bin_elements'], item['min_bin_time'], sync_bins_flag=item['sync_bins_flag'],
-                                    debug_mode=item['debug_mode'], persistence_id=item['persistence_id'],
-                                    output_log_line=item['output_logline'])
+                                    item['min_bin_elements'], item['min_bin_time'], debug_mode=item['debug_mode'],
+                                    persistence_id=item['persistence_id'], output_log_line=item['output_logline'])
             elif item['type'].name == 'MatchValueStreamWriter':
                 stream = sys.stdout
                 if item['stream'] == 'sys.stderr':
@@ -601,6 +608,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     validate_cor_distinct_thres=item['validate_cor_distinct_thres'], ignore_list=item['ignore_list'])
             else:
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn)
+            if item['output_event_handlers'] is not None:
+                tmp_analyser.output_event_handlers = item['output_event_handlers']
             analysis_context.register_component(tmp_analyser, component_name=comp_name)
             atom_filter.add_handler(tmp_analyser)
     analysis_context.suppress_detector_list = suppress_detector_list
@@ -609,14 +618,21 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
 def build_event_handlers(analysis_context, anomaly_event_handlers):
     """Build the event handlers."""
     try:
+        event_handler_id_list = []
         if 'EventHandlers' in yaml_data and yaml_data['EventHandlers'] is not None:
             for item in yaml_data['EventHandlers']:
+                event_handler_id_list.append(item['id'])
                 func = item['type'].func
                 ctx = None
                 if item['type'].name == 'StreamPrinterEventHandler':
                     if 'output_file_path' in item:
-                        with open(item['output_file_path'], 'w+') as stream:
-                            ctx = func(analysis_context, stream=stream)
+                        try:
+                            stream = open(item['output_file_path'], 'w+')
+                            ctx = func(analysis_context, stream)
+                        except OSError as e:
+                            msg = 'Error occured when opening stream to output_file_path %s. Error: %s' % (item['output_file_path'], e)
+                            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                            print(msg, file=sys.stderr)
                     else:
                         ctx = func(analysis_context)
                 if item['type'].name == 'DefaultMailNotificationEventHandler':
@@ -655,13 +671,13 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                     from aminer.events import JsonConverterHandler
                     ctx = JsonConverterHandler([ctx], analysis_context)
                 anomaly_event_handlers.append(ctx)
-        else:
-            raise KeyError()
-
+            return event_handler_id_list
+        raise KeyError()
     except KeyError:
         # Add stdout stream printing for debugging, tuning.
         from aminer.events import StreamPrinterEventHandler
-        anomaly_event_handlers.append(StreamPrinterEventHandler(analysis_context))
+        anomaly_event_handlers.append(StreamPrinterEventHandler(analysis_context, stream=sys.stderr))
+    return None
 
 
 def tuple_transformation_function_demo_print_every_10th_value(match_value_list):

@@ -198,7 +198,6 @@
                     'timestamp_path': {'type': 'string'},
                     'min_bin_elements': {'type': 'integer'},
                     'min_bin_time': {'type': 'integer'},
-                    'sync_bins_flag': {'type': 'boolean', 'required': False, 'default': True},
                     'debug_mode': {'type': 'boolean', 'required': False, 'default': False},
                     # skipcq: PYL-W0511
                     # TODO check which streams should be allowed
@@ -292,6 +291,7 @@
                         'coverVals', 'distinctDistr']}, 'nullable': True, 'default': None},
                     'validate_cor_cover_vals_thres': {'type': 'float', 'required': False, 'default': 0.7},
                     'validate_cor_distinct_thres': {'type': 'float', 'required': False, 'default': 0.05},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
                     'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 }
             }

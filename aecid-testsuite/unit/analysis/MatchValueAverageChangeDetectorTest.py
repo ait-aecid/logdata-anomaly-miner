@@ -26,7 +26,7 @@ class MatchValueAverageChangeDetectorTest(TestBase):
         start_time = 57600
         match_element1 = MatchElement(self.cron_job1, "%s" % start_time, start_time, [])
         match_value_average_change_detector = MatchValueAverageChangeDetector(self.aminer_config, [
-            self.stream_printer_event_handler], None, [match_element1.get_path()], 3, start_time, True, False, 'Default')
+            self.stream_printer_event_handler], None, [match_element1.get_path()], 3, start_time, False, 'Default')
         self.analysis_context.register_component(match_value_average_change_detector, description)
 
         # create oldBin
@@ -62,8 +62,8 @@ class MatchValueAverageChangeDetectorTest(TestBase):
         start_time = 57600
         match_element1 = MatchElement(self.cron_job1, "%s" % start_time, start_time, [])
         match_value_average_change_detector = MatchValueAverageChangeDetector(
-            self.aminer_config, [self.stream_printer_event_handler], 'time', [match_element1.get_path()], 3, start_time + 86400, True,
-            False, 'Default')
+            self.aminer_config, [self.stream_printer_event_handler], 'time', [match_element1.get_path()], 3, start_time + 86400, False,
+            'Default')
         self.analysis_context.register_component(match_value_average_change_detector, description)
 
         # create oldBin
@@ -104,8 +104,7 @@ class MatchValueAverageChangeDetectorTest(TestBase):
         start_time = 57600
         match_element1 = MatchElement(self.cron_job1, "%s" % start_time, start_time, [])
         match_value_average_change_detector = MatchValueAverageChangeDetector(
-            self.aminer_config, [self.stream_printer_event_handler], 'time', [match_element1.get_path()], 3, start_time, True, False,
-            'Default')
+            self.aminer_config, [self.stream_printer_event_handler], 'time', [match_element1.get_path()], 3, start_time, False, 'Default')
         self.analysis_context.register_component(match_value_average_change_detector, description)
 
         # create oldBin
@@ -147,8 +146,7 @@ class MatchValueAverageChangeDetectorTest(TestBase):
 
         match_element1 = MatchElement(self.cron_job1, "%s" % start_time, start_time, [])
         match_value_average_change_detector = MatchValueAverageChangeDetector(
-            self.aminer_config, [self.stream_printer_event_handler], None, [match_element1.get_path()], 3, start_time, True, False,
-            'Default')
+            self.aminer_config, [self.stream_printer_event_handler], None, [match_element1.get_path()], 3, start_time, False, 'Default')
         self.analysis_context.register_component(match_value_average_change_detector, description)
 
         # create oldBin
@@ -193,7 +191,7 @@ class MatchValueAverageChangeDetectorTest(TestBase):
         match_element2 = MatchElement(self.cron_job2, "%s" % start_time, start_time, [])
         match_value_average_change_detector = MatchValueAverageChangeDetector(
             self.aminer_config, [self.stream_printer_event_handler], None, [
-                match_element1.get_path(), match_element2.get_path()], 2, start_time, True, False, 'Default')
+                match_element1.get_path(), match_element2.get_path()], 2, start_time, False, 'Default')
         self.analysis_context.register_component(match_value_average_change_detector, description)
 
         # create oldBin

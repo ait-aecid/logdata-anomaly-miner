@@ -88,6 +88,9 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
 
     def receive_event(self, event_type, event_message, sorted_log_lines, event_data, log_atom, event_source):
         """Receive information about a detected event."""
+        if hasattr(event_source, 'output_event_handlers') and event_source.output_event_handlers is not None and self not in \
+                event_source.output_event_handlers:
+            return
         if self.alert_grace_time_end != 0:
             if self.alert_grace_time_end >= time.time():
                 return

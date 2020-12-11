@@ -1,0 +1,21 @@
+LearnMode: True
+
+LogResourceList:
+        - 'file:///var/log/apache2/access.log'
+
+Parser:
+        - id: 'START'
+          start: True
+          type: ApacheAccessModel
+          name: 'apache'
+
+Input:
+        timestamp_paths: "/accesslog/time"
+
+Analysis:
+        - type: "NewMatchPathValueDetector"
+          paths: ["/accesslog/status"]
+
+EventHandlers:
+        - id: "stpe"
+          type: "StreamPrinterEventHandler"

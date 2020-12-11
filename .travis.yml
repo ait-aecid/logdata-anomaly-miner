@@ -3,6 +3,7 @@ dist: bionic
 
 before_install:
   - git clone --depth 1 --branch v2.1.0-2 https://github.com/ait-aecid/aminer-ansible.git roles/aminer
+  - cp $PWD/source/root/etc/aminer/conf-available/ait-lds/* $PWD/source/root/etc/aminer/conf-enabled/
   - cp $PWD/source/root/etc/aminer/conf-available/generic/ApacheAccessModel.py $PWD/source/root/etc/aminer/conf-enabled/ApacheAccessModel.py
   - ln -s $PWD/source/root/usr/lib/logdata-anomaly-miner/aminer $PWD/aecid-testsuite/aminer
   - ln -s $PWD/source/root/etc/aminer/template_config.py $PWD/aecid-testsuite/demo/AMiner/template_config.py
@@ -16,6 +17,8 @@ install:
   - sudo apt-get install -y postfix procps mailutils
   - sudo pip3 install coverage
   - cd aecid-testsuite
+  - sudo chmod +x runGettingStarted.sh
+  - sudo chmod +x runTryItOut.sh
   - sudo chmod +x runSuspendModeTest.sh
   - sudo chmod +x runUnittests.sh
   - sudo chmod +x runAMinerDemo.sh
@@ -23,6 +26,8 @@ install:
   - sudo chmod +x runCoverageTests.sh
 
 script:
+  - ./runGettingStarted.sh
+  - ./runTryItOut.sh
   - ./runSuspendModeTest.sh
   - ./runUnittests.sh
   - ./runAMinerDemo.sh demo/AMiner/demo-config.py

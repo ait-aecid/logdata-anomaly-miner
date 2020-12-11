@@ -251,7 +251,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 i = i + 1
             t = time.time()
             match_value_average_change_detector = MatchValueAverageChangeDetector(self.aminer_config, [
-                self.stream_printer_event_handler], None, path_list, 2, t, True, False, 'Default')
+                self.stream_printer_event_handler], None, path_list, 2, t, False, 'Default')
             i = 0
             while i < number_of_paths:
                 match_element = MatchElement(self.integerd + str(i), '%s' % str(t), t, [])
