@@ -60,8 +60,8 @@ class PersistenceUtilTest(TestBase):
         PersistenceUtil.persist_all()
         persistence_data = PersistenceUtil.load_json(new_match_path_detector.persistence_file_name)
         self.assertTrue(
-            persistence_data == [self.match_element_fixed_dme.get_path(), self.match_element_decimal_integer_value_me.get_path()] or
-            persistence_data == [self.match_element_decimal_integer_value_me.get_path(), self.match_element_fixed_dme.get_path()])
+            persistence_data in ([self.match_element_fixed_dme.get_path(), self.match_element_decimal_integer_value_me.get_path()], [
+                self.match_element_decimal_integer_value_me.get_path(), self.match_element_fixed_dme.get_path()]))
         self.assertEqual(PersistenceUtil.load_json(other_new_match_path_detector.persistence_file_name), [
             self.match_element_fixed_dme.get_path()])
 
@@ -94,8 +94,8 @@ class PersistenceUtilTest(TestBase):
         PersistenceUtil.persist_all()
         persistence_data = PersistenceUtil.load_json(new_match_path_detector.persistence_file_name)
         self.assertTrue(
-            persistence_data == [self.match_element_fixed_dme.get_path(), self.match_element_decimal_integer_value_me.get_path()] or
-            persistence_data == [self.match_element_decimal_integer_value_me.get_path(), self.match_element_fixed_dme.get_path()])
+            persistence_data in ([self.match_element_fixed_dme.get_path(), self.match_element_decimal_integer_value_me.get_path()], [
+                self.match_element_decimal_integer_value_me.get_path(), self.match_element_fixed_dme.get_path()]))
         self.assertEqual(PersistenceUtil.load_json(other_new_match_path_detector.persistence_file_name),
                          [self.match_element_fixed_dme.get_path()])
         self.assertEqual(PersistenceUtil.load_json(new_match_path_value_combo_detector.persistence_file_name),
