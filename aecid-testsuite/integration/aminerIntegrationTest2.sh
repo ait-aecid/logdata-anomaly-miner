@@ -148,9 +148,9 @@ COUNTER=0
 
 #start AMiner
 if [[ $sudoInstalled == 0 ]]; then
-	sudo -H -u aminer bash -c 'aminer --Config /tmp/config22.py > /tmp/output &'
+	sudo -H -u aminer bash -c 'aminer --config /tmp/config22.py > /tmp/output &'
 else
-	runuser -u aminer -- aminer --Config /tmp/config22.py > /tmp/output &
+	runuser -u aminer -- aminer --config /tmp/config22.py > /tmp/output &
 fi
 
 time=`date +%s`
