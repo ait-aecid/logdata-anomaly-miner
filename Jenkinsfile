@@ -23,7 +23,7 @@ pipeline {
              steps {
        	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runUnittests"
        	         sh 'docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runSuspendModeTest'
-//       	         sh 'docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runRemoteControlTest'
+       	         sh 'docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runRemoteControlTest'
              }
          }
          stage("Run Demo-Configs"){
@@ -57,7 +57,7 @@ pipeline {
              }
          }
 
-/*
+
          stage("Wiki Tests"){
              when {
                  branch 'development'
@@ -67,7 +67,7 @@ pipeline {
        	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runGettingStarted"
              }
          }
-*/
+
          stage("Coverage Tests"){
              when {
                  branch 'development'
