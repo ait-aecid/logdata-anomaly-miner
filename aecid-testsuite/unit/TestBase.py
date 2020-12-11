@@ -7,6 +7,7 @@ from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
 from _io import StringIO
+from aminer.util import PersistenceUtil
 
 
 def initialize_loggers(aminer_config, aminer_user, aminer_grp):
@@ -67,6 +68,7 @@ class TestBase(unittest.TestCase):
 
     def setUp(self):
         """Set up all needed variables and remove persisted data."""
+        PersistenceUtil.persistable_components = []
         self.aminer_config = AMinerConfig.load_config(self.__configFilePath)
         self.analysis_context = AnalysisContext(self.aminer_config)
         self.output_stream = StringIO()
