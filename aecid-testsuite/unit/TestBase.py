@@ -6,8 +6,8 @@ import sys
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
-from _io import StringIO
 from aminer.util import PersistenceUtil
+from _io import StringIO
 
 
 def initialize_loggers(aminer_config, aminer_user, aminer_grp):
