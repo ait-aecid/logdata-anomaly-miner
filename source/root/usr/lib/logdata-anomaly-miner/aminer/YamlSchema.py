@@ -275,7 +275,7 @@
                     'use_empiric_distr': {'type': 'boolean', 'required': False, 'default': True},
                     'save_statistics': {'type': 'boolean', 'required': False, 'default': True},
                     'split_reports_flag': {'type': 'boolean', 'required': False, 'default': False},
-                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None}
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
                     'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 }
             }
