@@ -206,6 +206,7 @@ def build_input_pipeline(analysis_context, parsing_model):
     # Create all global handler lists here and append the real handlers later on.
     # Use this filter to distribute all atoms to the analysis handlers.
     atom_filter = AtomFilters.SubhandlerFilter(None)
+    analysis_context.register_component(atom_filter, component_name="AtomFilter")
     anomaly_event_handlers = []
     # Now define the AtomizerFactory using the model. A simple line based one is usually sufficient.
     from aminer.input import SimpleByteStreamLineAtomizerFactory
