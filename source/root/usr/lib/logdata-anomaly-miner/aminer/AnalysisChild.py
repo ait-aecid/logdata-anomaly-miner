@@ -600,6 +600,7 @@ class AnalysisChildRemoteControlHandler:
                     'EventCorrelationDetector': aminer.analysis.EventCorrelationDetector,
                     'EventTypeDetector': aminer.analysis.EventTypeDetector,
                     'HistogramAnalysis': aminer.analysis.HistogramAnalysis,
+                    'PathDependentHistogramAnalysis': aminer.analysis.PathDependentHistogramAnalysis,
                     'MatchFilter': aminer.analysis.MatchFilter,
                     'MatchValueAverageChangeDetector': aminer.analysis.MatchValueAverageChangeDetector,
                     'MatchValueStreamWriter': aminer.analysis.MatchValueStreamWriter,

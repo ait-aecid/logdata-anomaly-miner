@@ -138,19 +138,16 @@ class NewMatchPathValueDetectorTest(TestBase):
         new_match_path_value_detector = NewMatchPathValueDetector(self.aminer_config, [self.first_f1_s1], [
             self.stream_printer_event_handler], 'Default', True, output_log_line=False)
         self.analysis_context.register_component(new_match_path_value_detector, description)
-
         self.assertEqual(set(), new_match_path_value_detector.known_values_set)
-        log_atom_sequence_me = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_first_match_me), time(),
-                                       new_match_path_value_detector)
 
         # an unknown value should be allowlisted
-        new_match_path_value_detector.allowlist_event(self.analysis % new_match_path_value_detector.__class__.__name__, [
-            log_atom_sequence_me, self.fixed_dme.fixed_data], [log_atom_sequence_me, self.fixed_dme.fixed_data], None)
+        new_match_path_value_detector.allowlist_event(
+            self.analysis % new_match_path_value_detector.__class__.__name__, self.fixed_dme.fixed_data, None)
         self.assertEqual({self.fixed_dme.fixed_data}, new_match_path_value_detector.known_values_set)
 
         # an known value should be allowlisted
-        new_match_path_value_detector.allowlist_event(self.analysis % new_match_path_value_detector.__class__.__name__, [
-            log_atom_sequence_me, self.fixed_dme.fixed_data], [log_atom_sequence_me, self.fixed_dme.fixed_data], None)
+        new_match_path_value_detector.allowlist_event(self.analysis % new_match_path_value_detector.__class__.__name__,
+                                                      self.fixed_dme.fixed_data, None)
         self.assertEqual({self.fixed_dme.fixed_data}, new_match_path_value_detector.known_values_set)
 
 

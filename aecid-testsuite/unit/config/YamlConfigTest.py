@@ -96,20 +96,21 @@ class YamlConfigTest(TestBase):
         aminer_config.load_yaml('unit/data/configfiles/multiple_components.yml')
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        self.assertTrue(isinstance(context.registered_components[0][0], NewMatchPathDetector))
-        self.assertTrue(isinstance(context.registered_components[1][0], TimestampsUnsortedDetector))
-        self.assertTrue(isinstance(context.registered_components[2][0], NewMatchPathValueDetector))
-        self.assertTrue(isinstance(context.registered_components[3][0], NewMatchPathValueComboDetector))
-        self.assertTrue(isinstance(context.registered_components[4][0], HistogramAnalysis))
-        self.assertTrue(isinstance(context.registered_components[5][0], PathDependentHistogramAnalysis))
-        self.assertTrue(isinstance(context.registered_components[6][0], EnhancedNewMatchPathValueComboDetector))
-        self.assertTrue(isinstance(context.registered_components[7][0], MatchFilter))
-        self.assertTrue(isinstance(context.registered_components[8][0], MatchValueAverageChangeDetector))
-        self.assertTrue(isinstance(context.registered_components[9][0], MatchValueStreamWriter))
-        self.assertTrue(isinstance(context.registered_components[10][0], NewMatchPathDetector))
-        self.assertTrue(isinstance(context.registered_components[11][0], TimeCorrelationViolationDetector))
-        self.assertTrue(isinstance(context.registered_components[12][0], SimpleMonotonicTimestampAdjust))
-        self.assertTrue(isinstance(context.registered_components[13][0], AllowlistViolationDetector))
+        self.assertTrue(isinstance(context.registered_components[0][0], SubhandlerFilter))
+        self.assertTrue(isinstance(context.registered_components[1][0], NewMatchPathDetector))
+        self.assertTrue(isinstance(context.registered_components[2][0], TimestampsUnsortedDetector))
+        self.assertTrue(isinstance(context.registered_components[3][0], NewMatchPathValueDetector))
+        self.assertTrue(isinstance(context.registered_components[4][0], NewMatchPathValueComboDetector))
+        self.assertTrue(isinstance(context.registered_components[5][0], HistogramAnalysis))
+        self.assertTrue(isinstance(context.registered_components[6][0], PathDependentHistogramAnalysis))
+        self.assertTrue(isinstance(context.registered_components[7][0], EnhancedNewMatchPathValueComboDetector))
+        self.assertTrue(isinstance(context.registered_components[8][0], MatchFilter))
+        self.assertTrue(isinstance(context.registered_components[9][0], MatchValueAverageChangeDetector))
+        self.assertTrue(isinstance(context.registered_components[10][0], MatchValueStreamWriter))
+        self.assertTrue(isinstance(context.registered_components[11][0], NewMatchPathDetector))
+        self.assertTrue(isinstance(context.registered_components[12][0], TimeCorrelationViolationDetector))
+        self.assertTrue(isinstance(context.registered_components[13][0], SimpleMonotonicTimestampAdjust))
+        self.assertTrue(isinstance(context.registered_components[14][0], AllowlistViolationDetector))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[1], SyslogWriterEventHandler))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[2], DefaultMailNotificationEventHandler))
@@ -218,7 +219,8 @@ class YamlConfigTest(TestBase):
         aminer_config.load_yaml('unit/data/configfiles/json_config.yml')
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        self.assertTrue(isinstance(context.registered_components[0][0], NewMatchPathDetector))
+        self.assertTrue(isinstance(context.registered_components[0][0], SubhandlerFilter))
+        self.assertTrue(isinstance(context.registered_components[1][0], NewMatchPathDetector))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], JsonConverterHandler))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0].json_event_handlers[0], StreamPrinterEventHandler))
         self.assertEqual(context.atomizer_factory.default_timestamp_paths, ['/accesslog/time'])
@@ -233,9 +235,10 @@ class YamlConfigTest(TestBase):
         aminer_config.load_yaml('unit/data/configfiles/learnMode_config.yml')
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        self.assertTrue(isinstance(context.registered_components[0][0], NewMatchPathDetector))
-        self.assertTrue(isinstance(context.registered_components[1][0], NewMatchPathValueDetector))
-        self.assertTrue(isinstance(context.registered_components[2][0], NewMatchPathValueComboDetector))
+        self.assertTrue(isinstance(context.registered_components[0][0], SubhandlerFilter))
+        self.assertTrue(isinstance(context.registered_components[1][0], NewMatchPathDetector))
+        self.assertTrue(isinstance(context.registered_components[2][0], NewMatchPathValueDetector))
+        self.assertTrue(isinstance(context.registered_components[3][0], NewMatchPathValueComboDetector))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
         self.assertEqual(context.atomizer_factory.default_timestamp_paths, ['/accesslog/time'])
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model, SequenceModelElement))
@@ -244,9 +247,9 @@ class YamlConfigTest(TestBase):
         # specific learn_mode arguments should be preferred.
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        self.assertTrue(context.registered_components[0][0].auto_include_flag)
         self.assertTrue(context.registered_components[1][0].auto_include_flag)
-        self.assertFalse(context.registered_components[2][0].auto_include_flag)
+        self.assertTrue(context.registered_components[2][0].auto_include_flag)
+        self.assertFalse(context.registered_components[3][0].auto_include_flag)
 
         # unset specific learn_mode parameters and set LearnMode True.
         for component in aminer_config.yaml_data['Analysis']:
@@ -254,14 +257,16 @@ class YamlConfigTest(TestBase):
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
         for key in context.registered_components:
-            self.assertTrue(context.registered_components[key][0].auto_include_flag)
+            if hasattr(context.registered_components[key][0], 'auto_include_flag'):
+                self.assertTrue(context.registered_components[key][0].auto_include_flag)
 
         # unset specific learn_mode parameters and set LearnMode False.
         aminer_config.yaml_data['LearnMode'] = False
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
         for key in context.registered_components:
-            self.assertFalse(context.registered_components[key][0].auto_include_flag)
+            if hasattr(context.registered_components[key][0], 'auto_include_flag'):
+                self.assertFalse(context.registered_components[key][0].auto_include_flag)
 
         # unset LearnMode config property. An Error should be raised.
         del aminer_config.yaml_data['LearnMode']
@@ -276,9 +281,10 @@ class YamlConfigTest(TestBase):
         aminer_config.load_yaml('unit/data/configfiles/multiSource_config.yml')
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        self.assertTrue(isinstance(context.registered_components[0][0], NewMatchPathDetector))
-        self.assertTrue(isinstance(context.registered_components[1][0], NewMatchPathValueDetector))
-        self.assertTrue(isinstance(context.registered_components[2][0], NewMatchPathValueComboDetector))
+        self.assertTrue(isinstance(context.registered_components[0][0], SubhandlerFilter))
+        self.assertTrue(isinstance(context.registered_components[1][0], NewMatchPathDetector))
+        self.assertTrue(isinstance(context.registered_components[2][0], NewMatchPathValueDetector))
+        self.assertTrue(isinstance(context.registered_components[3][0], NewMatchPathValueComboDetector))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
         self.assertEqual(context.atomizer_factory.default_timestamp_paths, ['/model/accesslog/time'])
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model, SequenceModelElement))
@@ -305,9 +311,10 @@ class YamlConfigTest(TestBase):
         aminer_config.load_yaml('unit/data/configfiles/parser_child_elements_config.yml')
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        self.assertTrue(isinstance(context.registered_components[0][0], NewMatchPathDetector))
-        self.assertTrue(isinstance(context.registered_components[1][0], NewMatchPathValueDetector))
-        self.assertTrue(isinstance(context.registered_components[2][0], NewMatchPathValueComboDetector))
+        self.assertTrue(isinstance(context.registered_components[0][0], SubhandlerFilter))
+        self.assertTrue(isinstance(context.registered_components[1][0], NewMatchPathDetector))
+        self.assertTrue(isinstance(context.registered_components[2][0], NewMatchPathValueDetector))
+        self.assertTrue(isinstance(context.registered_components[3][0], NewMatchPathValueComboDetector))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
         self.assertEqual(context.atomizer_factory.default_timestamp_paths, ['/model/accesslog/time'])
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model, FirstMatchModelElement))
@@ -388,6 +395,7 @@ class YamlConfigTest(TestBase):
         del py_registered_components[10]
         yml_registered_components = copy.copy(yml_context.registered_components)
         del yml_registered_components[0]
+        del yml_registered_components[1]
         tmp = {}
         keys = list(py_registered_components.keys())
         for i in range(1, len(py_registered_components)+1):
@@ -400,11 +408,12 @@ class YamlConfigTest(TestBase):
         del py_registered_components_by_name['SimpleMonotonicTimestampAdjust']
         yml_registered_components_by_name = copy.copy(yml_context.registered_components_by_name)
         del yml_registered_components_by_name['DefaultNewMatchPathDetector']
+        del yml_registered_components_by_name['AtomFilter']
 
         self.assertEqual(yml_config_properties, py_context.aminer_config.config_properties)
         # there actually is no easy way to compare AMiner components as they do not implement the __eq__ method.
         self.assertEqual(len(yml_registered_components), len(py_registered_components))
-        for i in range(1, len(yml_registered_components)):
+        for i in range(2, len(yml_registered_components)):
             self.assertEqual(type(yml_registered_components[i]), type(py_registered_components[i]))
         self.assertEqual(yml_registered_components_by_name.keys(), py_registered_components_by_name.keys())
         for name in yml_registered_components_by_name.keys():
@@ -471,7 +480,7 @@ class YamlConfigTest(TestBase):
         context.aminer_config.yaml_data['SuppressNewMatchPathDetector'] = False
         self.stream_printer_event_handler = context.atomizer_factory.event_handler_list[0]
         self.stream_printer_event_handler.stream = self.output_stream
-        default_nmpd = context.registered_components[0][0]
+        default_nmpd = context.registered_components[1][0]
         default_nmpd.output_log_line = False
         self.assertTrue(default_nmpd.receive_atom(log_atom_fixed_dme))
         self.assertEqual(self.output_stream.getvalue(), __expected_string1 % (
@@ -484,13 +493,13 @@ class YamlConfigTest(TestBase):
         context.build_analysis_pipeline()
         self.stream_printer_event_handler = context.atomizer_factory.event_handler_list[0]
         self.stream_printer_event_handler.stream = self.output_stream
-        default_nmpd = context.registered_components[0][0]
+        default_nmpd = context.registered_components[1][0]
         default_nmpd.output_log_line = False
         self.assertTrue(default_nmpd.receive_atom(log_atom_fixed_dme))
         self.assertEqual(self.output_stream.getvalue(), "")
         self.reset_output_stream()
 
-        value_combo_det = context.registered_components[1][0]
+        value_combo_det = context.registered_components[2][0]
         log_atom_sequence_me = LogAtom(match_element_sequence_me.get_match_string(), ParserMatch(match_element_sequence_me), t,
                                        value_combo_det)
         self.stream_printer_event_handler = context.atomizer_factory.event_handler_list[0]
@@ -540,7 +549,8 @@ class YamlConfigTest(TestBase):
 
     def run_empty_components_tests(self, context):
         """Run the empty components tests."""
-        self.assertTrue(isinstance(context.registered_components[0][0], NewMatchPathDetector))
+        self.assertTrue(isinstance(context.registered_components[0][0], SubhandlerFilter))
+        self.assertTrue(isinstance(context.registered_components[1][0], NewMatchPathDetector))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
         self.assertEqual(context.atomizer_factory.default_timestamp_paths, ['/accesslog/time'])
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model, SequenceModelElement))
