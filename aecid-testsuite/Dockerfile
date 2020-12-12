@@ -78,6 +78,9 @@ RUN ln -s /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerr
 	&& ln -s /usr/lib/logdata-anomaly-miner/aminer.py /usr/bin/aminer \
 	&& chmod 0755 /usr/lib/logdata-anomaly-miner/aminer.py  \
 	&& chmod 0755 /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py \
+	# copy these files instead as symlinks would need absolute paths.
+    && cp source/root/etc/aminer/conf-available/ait-lds/* /etc/aminer/conf-enabled/ \
+    && cp source/root/etc/aminer/conf-available/generic/* /etc/aminer/conf-enabled/ \
 	&& ln -s /usr/lib/python3/dist-packages/kafka /usr/lib/logdata-anomaly-miner/kafka \
 	&& ln -s /usr/lib/python3/dist-packages/cerberus /usr/lib/logdata-anomaly-miner/cerberus \
 	&& ln -s /usr/lib/python3/dist-packages/scipy /usr/lib/logdata-anomaly-miner/scipy \
@@ -100,9 +103,6 @@ ADD aecid-testsuite /home/aminer/aecid-testsuite
 
 RUN chown aminer.aminer -R /home/aminer \
     && ln -s /usr/lib/logdata-anomaly-miner/aminer /home/aminer/aecid-testsuite/aminer \
-    # copy these files instead as symlinks would need absolute paths.
-    && cp source/root/etc/aminer/conf-available/ait-lds/* /etc/aminer/conf-enabled/ \
-    && cp source/root/etc/aminer/conf-available/generic/* /etc/aminer/conf-enabled/ \
     && ln -s /etc/aminer/template_config.py /home/aminer/aecid-testsuite/demo/AMiner/template_config.py \
     && ln -s /etc/aminer/template_config.yml /home/aminer/aecid-testsuite/demo/AMiner/template_config.yml \
     && chmod +x /home/aminer/aecid-testsuite/*.sh \
