@@ -43,8 +43,6 @@ RUN ln -s /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerr
 	&& ln -s /usr/lib/logdata-anomaly-miner/aminer.py /usr/bin/aminer \
 	&& chmod 0755 /usr/lib/logdata-anomaly-miner/aminer.py  \
 	&& chmod 0755 /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py \
-	&& ln -s /usr/lib/logdata-anomaly-miner/source/root/etc/aminer/conf-available/ait-lds/* usr/lib/logdata-anomaly-miner/ \
-	&& ln -s /usr/lib/logdata-anomaly-miner/source/root/etc/aminer/conf-available/generic/* usr/lib/logdata-anomaly-miner/ \
 	&& ln -s /usr/lib/python3/dist-packages/kafka /usr/lib/logdata-anomaly-miner/kafka \
 	&& ln -s /usr/lib/python3/dist-packages/cerberus /usr/lib/logdata-anomaly-miner/cerberus \
 	&& ln -s /usr/lib/python3/dist-packages/scipy /usr/lib/logdata-anomaly-miner/scipy \
