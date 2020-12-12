@@ -38,9 +38,9 @@ fi
 
 #start AMiner
 if [[ $sudoInstalled == 0 ]]; then
-	sudo -H -u aminer bash -c 'aminer --Config '$FILE' > /tmp/output &'
+	sudo aminer --config "$FILE" > /tmp/output &
 else
-	runuser -u aminer -- aminer --Config $FILE > /tmp/output &
+	aminer --config "$FILE" > /tmp/output &
 fi
 
 time=`date +%s`
@@ -75,7 +75,7 @@ if [[ $sudoInstalled == 0 ]]; then
 	sudo pkill -x aminer
 	KILL_PID=$!
 else
-	pkill -x -f aminer
+	pkill -x aminer
 	KILL_PID=$!
 fi
 sleep 3
