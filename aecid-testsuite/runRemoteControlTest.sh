@@ -5,7 +5,7 @@ sudo chown -R aminer:aminer /tmp/lib 2> /dev/null
 sudo rm /tmp/syslog 2> /dev/null
 
 FILE=demo/AMinerRemoteControl/demo-config.py
-sudo aminer --config '$FILE' & > /dev/null
+sudo aminer --config "$FILE" & > /dev/null
 
 PREFIX="Remote execution response: "
 NOT_FOUND_WARNINGS="WARNING: config_properties['Core.PersistencePeriod'] = not found in the old config file.\nWARNING: config_properties['Log.StatisticsLevel'] = not found in the old config file.\nWARNING: config_properties['Log.DebugLevel'] = not found in the old config file.\nWARNING: config_properties['Log.StatisticsPeriod'] = not found in the old config file.\n"
