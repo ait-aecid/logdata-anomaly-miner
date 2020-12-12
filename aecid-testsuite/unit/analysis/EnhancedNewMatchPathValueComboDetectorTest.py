@@ -11,7 +11,7 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
     """Unittests for the EnhancedNewMatchPathValueComboDetector."""
 
     __expected_string = '%s New value combination(s) detected\n%s: "%s" (%d lines)\n%s\n\n'
-    __expected_allowlisting_string = 'Allowlisted path(es) %s with %s in %s'
+    __expected_allowlisting_string = 'Allowlisted path(es) %s with %s.'
     fixed_dme = FixedDataModelElement('s1', b'25537 uid=')
     fixed_dme2 = FixedDataModelElement('s2', b' uid=2')
 
@@ -170,14 +170,10 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
         self.analysis_context.register_component(enhanced_new_match_path_value_combo_detector, description)
 
         t = time.time()
-        log_atom_sequence_me = LogAtom(self.match_element_sequence_me.get_match_string(), ParserMatch(self.match_element_sequence_me), t,
-                                       enhanced_new_match_path_value_combo_detector)
         self.assertEqual(enhanced_new_match_path_value_combo_detector.allowlist_event(
             'Analysis.%s' % enhanced_new_match_path_value_combo_detector.__class__.__name__,
-            [log_atom_sequence_me, [self.match_element_sequence_me.get_path()]],
-            [log_atom_sequence_me, self.match_element_sequence_me.get_path()], None), self.__expected_allowlisting_string % (
-            ', '.join(enhanced_new_match_path_value_combo_detector.target_path_list), self.match_element_sequence_me.get_path(),
-            log_atom_sequence_me))
+            self.match_element_sequence_me.get_path(), None), self.__expected_allowlisting_string % (
+            ', '.join(enhanced_new_match_path_value_combo_detector.target_path_list), self.match_element_sequence_me.get_path()))
 
         log_atom_sequence_me2 = LogAtom(self.match_element_sequence_me2.get_match_string(), ParserMatch(self.match_element_sequence_me2), t,
                                         enhanced_new_match_path_value_combo_detector)
@@ -185,10 +181,9 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
         enhanced_new_match_path_value_combo_detector.auto_include_flag = False
         self.assertEqual(enhanced_new_match_path_value_combo_detector.allowlist_event(
             'Analysis.%s' % enhanced_new_match_path_value_combo_detector.__class__.__name__,
-            [log_atom_sequence_me2, [self.match_element_sequence_me2.get_path()]],
-            [log_atom_sequence_me2, self.match_element_sequence_me2.get_path()], None), self.__expected_allowlisting_string % (
-            ', '.join(enhanced_new_match_path_value_combo_detector.target_path_list), self.match_element_sequence_me2.path,
-            log_atom_sequence_me2))
+            [log_atom_sequence_me2.get_timestamp(), self.match_element_sequence_me2.get_path()], None),
+            self.__expected_allowlisting_string % (', '.join(enhanced_new_match_path_value_combo_detector.target_path_list), [
+                log_atom_sequence_me2.get_timestamp(), self.match_element_sequence_me2.path]))
 
     def test5save_metadata(self):
         """This test case checks the correctness of the metadata information."""
