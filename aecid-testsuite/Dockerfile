@@ -100,8 +100,9 @@ ADD aecid-testsuite /home/aminer/aecid-testsuite
 
 RUN chown aminer.aminer -R /home/aminer \
     && ln -s /usr/lib/logdata-anomaly-miner/aminer /home/aminer/aecid-testsuite/aminer \
-    && ln -s /etc/aminer/conf-available/generic/* /etc/aminer/conf-enabled/ \
-    && ln -s /etc/aminer/conf-available/ait-lds/* /etc/aminer/conf-enabled/ \
+    # copy these files instead as symlinks would need absolute paths.
+    && cp source/root/etc/aminer/conf-available/ait-lds/* /etc/aminer/conf-enabled/ \
+    && cp source/root/etc/aminer/conf-available/generic/* /etc/aminer/conf-enabled/ \
     && ln -s /etc/aminer/template_config.py /home/aminer/aecid-testsuite/demo/AMiner/template_config.py \
     && ln -s /etc/aminer/template_config.yml /home/aminer/aecid-testsuite/demo/AMiner/template_config.yml \
     && chmod +x /home/aminer/aecid-testsuite/*.sh \
