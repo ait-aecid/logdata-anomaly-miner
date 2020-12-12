@@ -69,6 +69,10 @@ RUN pip3 install coverage
 # Copy logdata-anomaly-miner-sources
 ADD source/root/usr/lib/logdata-anomaly-miner /usr/lib/logdata-anomaly-miner
 
+# copy these files instead as symlinks would need absolute paths.
+ADD source/root/etc/aminer/conf-available/ait-lds/* /etc/aminer/conf-enabled/
+ADD source/root/etc/aminer/conf-available/generic/* /etc/aminer/conf-enabled/
+
 # Entrypoint-wrapper
 ADD scripts/aminerwrapper.sh /aminerwrapper.sh
 
@@ -78,9 +82,6 @@ RUN ln -s /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerr
 	&& ln -s /usr/lib/logdata-anomaly-miner/aminer.py /usr/bin/aminer \
 	&& chmod 0755 /usr/lib/logdata-anomaly-miner/aminer.py  \
 	&& chmod 0755 /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py \
-	# copy these files instead as symlinks would need absolute paths.
-    && cp source/root/etc/aminer/conf-available/ait-lds/* /etc/aminer/conf-enabled/ \
-    && cp source/root/etc/aminer/conf-available/generic/* /etc/aminer/conf-enabled/ \
 	&& ln -s /usr/lib/python3/dist-packages/kafka /usr/lib/logdata-anomaly-miner/kafka \
 	&& ln -s /usr/lib/python3/dist-packages/cerberus /usr/lib/logdata-anomaly-miner/cerberus \
 	&& ln -s /usr/lib/python3/dist-packages/scipy /usr/lib/logdata-anomaly-miner/scipy \
