@@ -18,6 +18,15 @@ pipeline {
                  sh "docker build -f aecid-testsuite/Dockerfile -t aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID ."
              }
           }
+          
+          // DELETE THIS BEFORE ACCEPTING THE PULL REQUEST!
+          stage("Wiki Tests"){
+             steps {
+       	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runTryItOut"
+       	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runGettingStarted"
+             }
+         }
+
          
          stage("UnitTest"){
              steps {
