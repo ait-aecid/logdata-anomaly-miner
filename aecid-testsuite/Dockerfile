@@ -65,7 +65,7 @@ ENV LC_ALL en_US.UTF-8
 
 
 RUN pip3 install coverage
-RUN apt install git
+RUN apt install git -y
 
 # Copy logdata-anomaly-miner-sources
 ADD source/root/usr/lib/logdata-anomaly-miner /usr/lib/logdata-anomaly-miner
