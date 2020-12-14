@@ -50,9 +50,9 @@ fi
 
 #start AMiner
 if [[ $sudoInstalled == 0 ]]; then
-	sudo -H -u aminer bash -c 'aminer --config /tmp/config21.py > /tmp/output &'
+	sudo aminer --config /tmp/config21.py > /tmp/output &
 else
-	runuser -u aminer -- aminer --config $FILE > /tmp/output &
+	aminer --config /tmp/config21.py > /tmp/output &
 fi
 
 time=`date +%s`
@@ -148,9 +148,9 @@ COUNTER=0
 
 #start AMiner
 if [[ $sudoInstalled == 0 ]]; then
-	sudo -H -u aminer bash -c 'aminer --config /tmp/config22.py > /tmp/output &'
+	sudo aminer --config /tmp/config22.py > /tmp/output &
 else
-	runuser -u aminer -- aminer --config /tmp/config22.py > /tmp/output &
+	aminer --config /tmp/config22.py > /tmp/output &
 fi
 
 time=`date +%s`
