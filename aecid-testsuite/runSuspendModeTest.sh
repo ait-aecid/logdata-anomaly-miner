@@ -19,7 +19,7 @@ exit_code=0
 SUSPEND_FILE=/tmp/suspend_output.txt
 SUSPEND_FILE_MD5=/tmp/suspend.md5
 
-sudo aminer --Config $FILE > $SUSPEND_FILE &
+sudo aminer --config "$FILE" > $SUSPEND_FILE &
 
 sleep 2
 
