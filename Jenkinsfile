@@ -13,11 +13,11 @@ pipeline {
      agent any
      stages {
 
-          stage("Build Test-Container"){
+         stage("Build Test-Container"){
              steps {
                  sh "docker build -f aecid-testsuite/Dockerfile -t aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID ."
              }
-          }
+         }
          
          stage("UnitTest"){
              steps {
