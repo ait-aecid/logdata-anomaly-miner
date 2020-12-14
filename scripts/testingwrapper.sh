@@ -56,7 +56,7 @@ case "$1" in
 		cd $TESTDIR
                 ./runSuspendModeTest.sh
                 ./runUnittests.sh
-		./runRemoteControlTest.sh
+                ./runRemoteControlTest.sh
                 ./runAMinerDemo.sh demo/AMiner/demo-config.py
                 ./runAMinerDemo.sh demo/AMiner/jsonConverterHandler-demo-config.py
                 ./runAMinerDemo.sh demo/AMiner/template_config.py
@@ -64,8 +64,8 @@ case "$1" in
                 ./runAMinerDemo.sh demo/AMiner/demo-config.yml
                 ./runAMinerIntegrationTest.sh aminerIntegrationTest.sh config.py
                 ./runAMinerIntegrationTest.sh aminerIntegrationTest2.sh config21.py config22.py
-		./runGettingStarted.sh
-		./runTryItOut.sh
+                ./runGettingStarted.sh
+                ./runTryItOut.sh
                 ./runCoverageTests.sh
                 exit $?
 		;;

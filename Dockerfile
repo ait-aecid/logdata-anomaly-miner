@@ -64,4 +64,4 @@ VOLUME ["/etc/aminer","/var/lib/aminer","/logs"]
 ENTRYPOINT ["/aminerwrapper.sh"]
 
 # Default command for the ENTRYPOINT(wrapper)
-CMD ["aminer","--Config","/etc/aminer/config.yml"]
+CMD ["aminer","--config","/etc/aminer/config.yml"]
