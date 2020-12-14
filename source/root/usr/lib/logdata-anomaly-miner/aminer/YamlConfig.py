@@ -569,7 +569,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             elif item['type'].name == 'VariableTypeDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
-                    msg = 'The defined EventTypeDetector %s does not exists!' % item['event_type_detector']
+                    msg = 'The defined EventTypeDetector %s does not exist!' % item['event_type_detector']
                     logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 tmp_analyser = func(
@@ -592,7 +592,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             elif item['type'].name == 'VariableCorrelationDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
-                    msg = 'The defined EventTypeDetector %s does not exists!' % item['event_type_detector']
+                    msg = 'The defined EventTypeDetector %s does not exist!' % item['event_type_detector']
                     logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 print(func)
