@@ -1293,8 +1293,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
     def check_cor_w_rel(self, probability_list, total_pos_val):
         """Check if the probabilities can be considered a possible correlation."""
         if (self.check_cor_thres * total_pos_val < len(probability_list)) and (
-            total_pos_val > self.check_cor_num_thres or max(probability_list) - min(probability_list) < (
-            self.check_cor_prob_thres * sum(probability_list) / len(probability_list))):
+                total_pos_val > self.check_cor_num_thres or max(probability_list) - min(probability_list) < (
+                    self.check_cor_prob_thres * sum(probability_list) / len(probability_list))):
             return False
         return True
 
