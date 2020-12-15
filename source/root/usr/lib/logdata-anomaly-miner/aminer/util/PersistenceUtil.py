@@ -14,9 +14,8 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import errno
 import os
-import sys
-import time
 import logging
+import tempfile
 
 from aminer import AMinerConfig
 from aminer.util import SecureOSFunctions
@@ -45,51 +44,24 @@ def open_persistence_file(file_name, flags):
         if ((flags & os.O_CREAT) == 0) or (openOsError.errno != errno.ENOENT):
             logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(openOsError)
             raise openOsError
-
-    # Find out, which directory is missing by stating our way up.
-    dir_name_length = file_name.rfind(b'/')
-    if dir_name_length > 0:
-        os.makedirs(file_name[:dir_name_length])
-    return SecureOSFunctions.secure_open_file(file_name, flags)
-
-
-def create_temporary_persistence_file(file_name):
-    """
-    Create a temporary file within persistence directory to write new persistence data to it.
-    Thus the old data is not modified, any error creating or writing the file will not harm the old state.
-    """
-    fd = None
-    # skipcq: PYL-W0511
-    # FIXME: This should use O_TMPFILE, but not yet available. That would obsolete the loop also.
-    # while True:
-    #  fd = openPersistenceFile('%s.tmp-%f' % (fileName, time.time()), os.O_WRONLY|os.O_CREAT|os.O_EXCL)
-    #  break
-    fd = open_persistence_file('%s.tmp-%f' % (file_name, time.time()), os.O_WRONLY | os.O_CREAT | os.O_EXCL)
-    return fd
-
-
-no_secure_link_unlink_at_warn_once_flag = True
+    create_missing_directories(file_name)
 
 
 def replace_persistence_file(file_name, new_file_handle):
     """Replace the named file with the file referred by the handle."""
-    # skipcq: PYL-W0603
-    global no_secure_link_unlink_at_warn_once_flag
-    if no_secure_link_unlink_at_warn_once_flag:
-        msg = 'SECURITY: unsafe unlink (unavailable unlinkat/linkat should be used, but not available in python)'
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
-        print('WARNING: ' + msg, file=sys.stderr)
-        no_secure_link_unlink_at_warn_once_flag = False
     try:
-        os.unlink(file_name)
+        os.unlink(file_name, dir_fd=SecureOSFunctions.secure_open_base_directory())
     except OSError as openOsError:
         if openOsError.errno != errno.ENOENT:
             logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(openOsError)
             raise openOsError
 
     tmp_file_name = os.readlink('/proc/self/fd/%d' % new_file_handle)
-    os.link(tmp_file_name, file_name)
-    os.unlink(tmp_file_name)
+    if SecureOSFunctions.base_dir_path.decode() in file_name:
+        file_name = file_name.replace(SecureOSFunctions.base_dir_path.decode(), '').lstrip('/')
+    os.link(
+        tmp_file_name, file_name, src_dir_fd=SecureOSFunctions.tmp_base_dir_fd, dst_dir_fd=SecureOSFunctions.secure_open_base_directory())
+    os.unlink(tmp_file_name, dir_fd=SecureOSFunctions.tmp_base_dir_fd)
 
 
 def persist_all():
@@ -128,7 +100,19 @@ def load_json(file_name):
 def store_json(file_name, object_data):
     """Store persistence data to file."""
     persistence_data = JsonUtil.dump_as_json(object_data)
-    fd = create_temporary_persistence_file(file_name)
+    # Create a temporary file within persistence directory to write new persistence data to it.
+    # Thus the old data is not modified, any error creating or writing the file will not harm the old state.
+    fd, _ = tempfile.mkstemp()
     os.write(fd, bytes(persistence_data, 'utf-8'))
+    create_missing_directories(file_name)
     replace_persistence_file(file_name, fd)
     os.close(fd)
+
+
+def create_missing_directories(file_name):
+    """Create missing persistence directories."""
+    # Find out, which directory is missing by stating our way up.
+    dir_name_length = file_name.rfind('/')
+    if dir_name_length > 0:
+        if not os.path.exists(file_name[:dir_name_length]):
+            os.makedirs(file_name[:dir_name_length])

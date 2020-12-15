@@ -600,12 +600,17 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     num_init=item['num_init'], num_update=item['num_update'], disc_div_thres=item['disc_div_thres'],
                     num_steps_create_new_rules=item['num_steps_create_new_rules'],
                     num_upd_until_validation=item['num_upd_until_validation'], num_end_learning_phase=item['num_end_learning_phase'],
-                    num_bt=item['num_bt'], alpha_bt=item['alpha_bt'], max_dist_rule_distr=item['max_dist_rule_distr'],
-                    used_presel_meth=item['used_presel_meth'], intersect_presel_meth=item['intersect_presel_meth'],
-                    percentage_random_cors=item['percentage_random_cors'], used_cor_d_meth=item['used_cor_d_meth'],
-                    used_validate_cor_d_meth=item['used_validate_cor_d_meth'],
+                    check_cor_thres=item['check_cor_thres'], check_cor_prob_thres=item['check_cor_prob_thres'],
+                    check_cor_num_thres=item['check_cor_num_thres'], num_bt=item['num_bt'], alpha_bt=item['alpha_bt'],
+                    max_dist_rule_distr=item['max_dist_rule_distr'], used_presel_meth=item['used_presel_meth'],
+                    intersect_presel_meth=item['intersect_presel_meth'], percentage_random_cors=item['percentage_random_cors'],
+                    match_disc_vals_sim_tresh=item['match_disc_vals_sim_tresh'],
+                    exclude_due_distr_lower_limit=item['exclude_due_distr_lower_limit'],
+                    match_disc_distr_threshold=item['match_disc_distr_threshold'], used_cor_meth=item['used_cor_meth'],
+                    used_validate_cor_meth=item['used_validate_cor_meth'],
                     validate_cor_cover_vals_thres=item['validate_cor_cover_vals_thres'],
-                    validate_cor_distinct_thres=item['validate_cor_distinct_thres'], ignore_list=item['ignore_list'])
+                    validate_cor_distinct_thres=item['validate_cor_distinct_thres'], ignore_list=item['ignore_list'],
+                    constraint_list=item['constraint_list'])
             else:
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn)
             if item['output_event_handlers'] is not None:

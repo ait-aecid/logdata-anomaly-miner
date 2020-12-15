@@ -13,15 +13,17 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
     """
     This class first finds for each eventType a list of pairs of variables, which are afterwards tested if they are correlated.
     For this a couple of preselection methods can be used. (See self.used_presel_meth)
-    Thereafter the correlations are checked, with the selected methods. (See self.used_cor_d_meth)
+    Thereafter the correlations are checked, with the selected methods. (See self.used_cor_meth)
     This module builds upon the event_type_detector.
     """
 
     def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id='Default', num_init=100,
                  num_update=100, disc_div_thres=0.3, num_steps_create_new_rules=False, num_upd_until_validation=20,
-                 num_end_learning_phase=False, num_bt=30, alpha_bt=0.1, max_dist_rule_distr=0.1, used_presel_meth=None,
-                 intersect_presel_meth=False, percentage_random_cors=0.20, used_cor_d_meth=None, used_validate_cor_d_meth=None,
-                 validate_cor_cover_vals_thres=0.7, validate_cor_distinct_thres=0.05, ignore_list=None, constraint_list=None):
+                 num_end_learning_phase=False, check_cor_thres=0.5, check_cor_prob_thres=1, check_cor_num_thres=10, num_bt=30,
+                 alpha_bt=0.1, max_dist_rule_distr=0.1, used_presel_meth=None, intersect_presel_meth=False, percentage_random_cors=0.20,
+                 match_disc_vals_sim_tresh=0.7, exclude_due_distr_lower_limit=0.4, match_disc_distr_threshold=0.5, used_cor_meth=None,
+                 used_validate_cor_meth=None, validate_cor_cover_vals_thres=0.7, validate_cor_distinct_thres=0.05,
+                 ignore_list=None, constraint_list=None):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
         self.next_persist_time = None
         self.event_type_detector = event_type_detector
@@ -54,7 +56,18 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         self.num_init = num_init
         # Number of lines after the initialization after which the correlations are periodically tested and updated
         self.num_update = num_update
-        # Diversity threshold for variables to be considered discrete
+        if self.event_type_detector.min_num_vals < max(num_init, num_update):
+            self.event_type_detector.min_num_vals = max(num_init, num_update)
+        if self.event_type_detector.max_num_vals <= max(num_init, num_update):
+            self.event_type_detector.max_num_vals = max(num_init, num_update) + 500
+
+        # Threshold for the number of allowed different values of the distribution to be considderd a correlation
+        self.check_cor_thres = check_cor_thres
+        # Threshold for the difference of the probability of the values to be considderd a correlation
+        self.check_cor_prob_thres = check_cor_prob_thres
+        # Number of allowed different values for the calculation if the distribution can be considderd a correlation
+        self.check_cor_num_thres = check_cor_num_thres
+        # Diversity threshold for variables to be considered discrete.
         self.disc_div_thres = disc_div_thres
         # Number of update steps, for which new rules are generated periodically. States False if rules should not be updated
         self.num_steps_create_new_rules = num_steps_create_new_rules
@@ -68,12 +81,12 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         self.alpha_bt = alpha_bt
         # Maximum distance between the distribution of the rule and the distribution of the read in values before the rule fails
         self.max_dist_rule_distr = max_dist_rule_distr
-        # Used preselection methods. The implemented methods are ['matchDiskDistr', 'excludeDueDistr', 'matchDiskVals', 'random']
+        # Used preselection methods. The implemented methods are ['matchDiscDistr', 'excludeDueDistr', 'matchDiscVals', 'random']
         self.used_presel_meth = used_presel_meth
         if used_presel_meth is None:
             self.used_presel_meth = []
         for presel_meth in self.used_presel_meth:
-            if presel_meth not in ['matchDiskDistr', 'excludeDueDistr', 'matchDiskVals', 'random']:
+            if presel_meth not in ['matchDiscDistr', 'excludeDueDistr', 'matchDiscVals', 'random']:
                 raise ValueError("The preselection method '%s' does not exist!" % presel_meth)
         # States if the intersection or the union of the possible correlations found by the presel_meth is used for the resulting
         # correlations.
@@ -83,24 +96,31 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         if self.percentage_random_cors <= 0. or self.percentage_random_cors >= 1.:
             raise ValueError('The Random preselection method makes no sense if percentage_random_cors = %f. If the percentage_random_cors'
                              ' is >= 1.0 better use no preselection method for that case.')
+        # Similarity threshold for the preselection method pick_cor_match_disc_vals
+        self.match_disc_vals_sim_tresh = match_disc_vals_sim_tresh
+        # Lower limit for the maximal appearance to one value of the distributions.
+        # If the maximal appearance is exceeded the variable is excluded.
+        self.exclude_due_distr_lower_limit = exclude_due_distr_lower_limit
+        # Thresholf for the preselection method pick_cor_match_disc_distr
+        self.match_disc_distr_threshold = match_disc_distr_threshold
         # Used correlation detection methods. The implemented methods are ['Rel', 'WRel']
-        self.used_cor_d_meth = used_cor_d_meth
-        if used_cor_d_meth is None or used_cor_d_meth == []:
-            self.used_cor_d_meth = ['Rel', 'WRel']
-        for cor_d_meth in self.used_cor_d_meth:
-            if cor_d_meth not in ['Rel', 'WRel']:
-                raise ValueError("The correlation rule '%s' does not exist!" % cor_d_meth)
+        self.used_cor_meth = used_cor_meth
+        if used_cor_meth is None or used_cor_meth == []:
+            self.used_cor_meth = ['Rel', 'WRel']
+        for cor_meth in self.used_cor_meth:
+            if cor_meth not in ['Rel', 'WRel']:
+                raise ValueError("The correlation rule '%s' does not exist!" % cor_meth)
         # Used validation methods. The implemented methods are ['coverVals', 'distinctDistr']
-        self.used_validate_cor_d_meth = used_validate_cor_d_meth
-        if used_validate_cor_d_meth is None:
-            self.used_validate_cor_d_meth = ['coverVals', 'distinctDistr']
+        self.used_validate_cor_meth = used_validate_cor_meth
+        if used_validate_cor_meth is None:
+            self.used_validate_cor_meth = ['coverVals', 'distinctDistr']
             # The distinctDistr validation requires the 'WRel' method.
-            if 'WRel' not in self.used_validate_cor_d_meth:
-                self.used_validate_cor_d_meth = ['coverVals']
-        for validate_cor_d_meth in self.used_validate_cor_d_meth:
-            if validate_cor_d_meth not in ['coverVals', 'distinctDistr']:
-                raise ValueError("The validation correlation rule '%s' does not exist!" % validate_cor_d_meth)
-        if 'WRel' not in self.used_cor_d_meth and 'distinctDistr' in self.used_validate_cor_d_meth:
+            if 'WRel' not in self.used_cor_meth:
+                self.used_validate_cor_meth = ['coverVals']
+        for validate_cor_meth in self.used_validate_cor_meth:
+            if validate_cor_meth not in ['coverVals', 'distinctDistr']:
+                raise ValueError("The validation correlation rule '%s' does not exist!" % validate_cor_meth)
+        if 'WRel' not in self.used_cor_meth and 'distinctDistr' in self.used_validate_cor_meth:
             raise ValueError("The 'distinctDistr' validation correlation rule requires the 'WRel' correlation method!")
         # Threshold for the validation method coverVals. The higher the threshold the more correlations must be detected to be validated
         # a correlation.
@@ -159,9 +179,9 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                 self.validate_cor()  # Validate the correlations and removes the cors, which fail the requirements
 
             # Print the found correlations
-            if 'Rel' in self.used_cor_d_meth:
+            if 'Rel' in self.used_cor_meth:
                 self.print_cor_rel(event_index)
-            if 'WRel' in self.used_cor_d_meth:
+            if 'WRel' in self.used_cor_meth:
                 self.print_cor_w_rel(event_index)
 
         # Updates or tests the correlations
@@ -228,7 +248,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         raise Exception('No allowlisting for algorithm malfunction or configuration errors')
 
     def init_cor(self, event_index):
-        """Initialise the possible correlations and runs the init-functions for the methods in self.used_cor_d_meth."""
+        """Initialise the possible correlations and runs the init-functions for the methods in self.used_cor_meth."""
         # Append the supporting lists if necessary
         if len(self.pos_var_cor) < event_index+1:
             for i in range(event_index + 1 - len(self.pos_var_cor)):
@@ -304,36 +324,36 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                                     useable_indices.append(i)
                         tmp_pos_var_cor = [[i, j] for i in useable_indices for j in useable_indices if i < j]
 
-                    elif meth == 'matchDiskDistr':
+                    elif meth == 'matchDiscDistr':
                         if self.variable_type_detector is not None:
                             for i in range(len(self.discrete_indices[event_index])):
                                 for j in range(i+1, len(self.discrete_indices[event_index])):
-                                    if self.pick_cor_match_disk_distr(self.variable_type_detector.var_type[event_index][
+                                    if self.pick_cor_match_disc_distr(self.variable_type_detector.var_type[event_index][
                                         self.discrete_indices[event_index][i]][2], self.variable_type_detector.var_type[event_index][
                                             self.discrete_indices[event_index][j]][2]):
-                                        # If self.pick_cor_match_disk_distr returned True the indices are being appended
+                                        # If self.pick_cor_match_disc_distr returned True the indices are being appended
                                         tmp_pos_var_cor.append([i, j])
                         else:
                             for i in range(len(self.discrete_indices[event_index])):
                                 for j in range(i+1, len(self.discrete_indices[event_index])):
-                                    if self.pick_cor_match_disk_distr(variable_distributions[i], variable_distributions[j]):
-                                        # If self.pick_cor_match_disk_distr returned True the indices are being appended
+                                    if self.pick_cor_match_disc_distr(variable_distributions[i], variable_distributions[j]):
+                                        # If self.pick_cor_match_disc_distr returned True the indices are being appended
                                         tmp_pos_var_cor.append([i, j])
 
-                    elif meth == 'matchDiskVals':
+                    elif meth == 'matchDiscVals':
                         if self.variable_type_detector is not None:
                             for i in range(len(self.discrete_indices[event_index])):
                                 for j in range(i+1, len(self.discrete_indices[event_index])):
-                                    if self.pick_cor_match_disk_vals(self.variable_type_detector.var_type[event_index][
+                                    if self.pick_cor_match_disc_vals(self.variable_type_detector.var_type[event_index][
                                         self.discrete_indices[event_index][i]][1], self.variable_type_detector.var_type[event_index][
                                             self.discrete_indices[event_index][j]][1]):
-                                        # If self.pick_cor_match_disk_vals returned True the indices are being appended
+                                        # If self.pick_cor_match_disc_vals returned True the indices are being appended
                                         tmp_pos_var_cor.append([i, j])
                         else:
                             for i in range(len(self.discrete_indices[event_index])):
                                 for j in range(i+1, len(self.discrete_indices[event_index])):
-                                    if self.pick_cor_match_disk_vals(variable_values[i], variable_values[j]):
-                                        # If self.pick_cor_match_disk_vals returned True the indices are being appended
+                                    if self.pick_cor_match_disc_vals(variable_values[i], variable_values[j]):
+                                        # If self.pick_cor_match_disc_vals returned True the indices are being appended
                                         tmp_pos_var_cor.append([i, j])
 
                     elif meth == 'random':
@@ -356,7 +376,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                                 self.pos_var_cor[event_index].append(cor)
 
         # Initialise the correlation methods
-        for meth in self.used_cor_d_meth:
+        for meth in self.used_cor_meth:
             if meth == 'Rel':
                 self.init_cor_rel(event_index)
             elif meth == 'WRel':
@@ -501,7 +521,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
     def update_or_test_cor(self, event_index):
         """Update or test the possible correlations and removes the false ones."""
-        for meth in self.used_cor_d_meth:
+        for meth in self.used_cor_meth:
             if meth == 'Rel':
                 self.update_or_test_cor_rel(event_index)
             elif meth == 'WRel':
@@ -1199,7 +1219,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                                         'Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, self.log_atom, self)
 
     # skipcq: PYL-R0201
-    def pick_cor_match_disk_distr(self, prob_list1, prob_list2):
+    def pick_cor_match_disc_distr(self, prob_list1, prob_list2):
         """Check if the the two discrete distribution could have a possible correlation."""
         list1 = prob_list1.copy()
         list2 = prob_list2.copy()
@@ -1207,7 +1227,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         list2.sort(reverse=True)
 
         for i in range(min(len(list1), len(list2))):
-            if abs(list1[i]-list2[i]) > 0.5/max(len(list1), len(list2)):
+            if abs(list1[i]-list2[i]) > self.match_disc_distr_threshold/max(len(list1), len(list2)):
                 return False
         return True
 
@@ -1218,12 +1238,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         Returns True for possible correlation and False to be excluded.
         """
         # Assigning epsilon
-        if len(prob_list) == 2:
-            epsilon = 0.7
-        elif len(prob_list) <= 4:
-            epsilon = 0.55
-        else:
-            epsilon = 0.4
+        epsilon = self.exclude_due_distr_lower_limit + (1 - self.exclude_due_distr_lower_limit) / len(prob_list)
 
         # Check the single probabilities
         for i in range(len(prob_list)):
@@ -1232,9 +1247,10 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         return True
 
     # skipcq: PYL-R0201
-    def pick_cor_match_disk_vals(self, val_list1, val_list2):
+    def pick_cor_match_disc_vals(self, val_list1, val_list2):
         """Check through the values of the two discrete distributions if they could have a possible correlation."""
-        if len(set(val_list1 + val_list2)) > 1.2*max(len(val_list1), len(val_list2)):
+        if len([val for val in val_list1 if val in val_list2]) > self.match_disc_vals_sim_tresh*min(
+                len(val_list1), len(val_list2)):
             return False
         return True
 
@@ -1276,14 +1292,15 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
     # skipcq: PYL-R0201
     def check_cor_w_rel(self, probability_list, total_pos_val):
         """Check if the probabilities can be considered a possible correlation."""
-        if (total_pos_val > 10 and total_pos_val == len(probability_list)) or (total_pos_val < 2 * len(probability_list) and max(
-                probability_list) - min(probability_list) < sum(probability_list) / len(probability_list)):
+        if (self.check_cor_thres * total_pos_val < len(probability_list)) and (
+                total_pos_val > self.check_cor_num_thres or max(probability_list) - min(probability_list) < (
+                    self.check_cor_prob_thres * sum(probability_list) / len(probability_list))):
             return False
         return True
 
     def validate_cor(self):
         """Validate the found correlations and removes the ones, which fail the requirements."""
-        for meth in self.used_validate_cor_d_meth:
+        for meth in self.used_validate_cor_meth:
             if meth == 'coverVals':
                 self.validate_cor_cover_vals()
             elif meth == 'distinctDistr':
@@ -1294,7 +1311,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         Rate all found relation in regards to their coverage of the values in the first variable.
         It removes the ones, which have a low rating and therefore can not considered real relations.
         """
-        for meth in self.used_cor_d_meth:
+        for meth in self.used_cor_meth:
             if meth == 'Rel':
                 for event_index in range(len(self.rel_list)):
                     for pos_var_cor_index in range(len(self.pos_var_cor[event_index])):
@@ -1334,7 +1351,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         Compare the right hand sides of the found relations.
         It removes the correlations, which are too similar to the distribution of the variable type.
         """
-        for meth in self.used_cor_d_meth:
+        for meth in self.used_cor_meth:
             if meth == 'WRel':
                 for event_index in range(len(self.w_rel_list)):
                     for pos_var_cor_index in range(len(self.pos_var_cor[event_index])):
