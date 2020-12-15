@@ -292,7 +292,7 @@
                     'exclude_due_distr_lower_limit': {'type': 'float', 'required': False, 'default': 0.4},
                     'match_disc_distr_threshold': {'type': 'float', 'required': False, 'default': 0.5},
                     'used_cor_meth': {'type': 'list', 'required': False, 'schema': {'type': 'string', 'allowed': ['Rel', 'WRel']},
-                                        'nullable': True, 'default': None},
+                                      'nullable': True, 'default': None},
                     'used_validate_cor_meth': {'type': 'list', 'required': False, 'schema': {'type': 'string', 'allowed': [
                         'coverVals', 'distinctDistr']}, 'nullable': True, 'default': None},
                     'validate_cor_cover_vals_thres': {'type': 'float', 'required': False, 'default': 0.7},
