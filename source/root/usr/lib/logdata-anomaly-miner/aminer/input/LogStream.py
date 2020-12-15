@@ -174,8 +174,9 @@ class FileLogDataResource(LogDataResource):
             log_file_fd = SecureOSFunctions.secure_open_file(self.log_resource_name[7:], os.O_RDONLY)
             stat_data = os.fstat(log_file_fd)
         except OSError as openOsError:
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error('OSError occurred in FileLogDataResource.open(). Error message: %s',
-                                                                 openOsError)
+            msg = 'OSError occurred in FileLogDataResource.open(). Error message: %s' % openOsError
+            print(msg, file=sys.stderr)
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
             if log_file_fd != -1:
                 os.close(log_file_fd)
             if openOsError.errno == errno.ENOENT:
@@ -184,6 +185,7 @@ class FileLogDataResource(LogDataResource):
         if not stat.S_ISREG(stat_data.st_mode):
             os.close(log_file_fd)
             msg = 'Attempting to open non-regular file %s as file' % encode_byte_string_as_string(self.log_resource_name)
+            print(msg, file=sys.stderr)
             logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
