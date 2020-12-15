@@ -154,7 +154,7 @@ class VariableCorrelationDetectorTest(TestBase):
         values = [0.33]*3
         self.assertTrue(vcd.pick_cor_exclude_due_distr(values))
 
-        values = [0.6] + [0.2]*2
+        values = [0.7] + [0.15]*2
         self.assertFalse(vcd.pick_cor_exclude_due_distr(values))
 
         values = [0.25]*4
@@ -171,16 +171,16 @@ class VariableCorrelationDetectorTest(TestBase):
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1)
         values_set1 = [i*0.1 for i in range(10)]
-        values_set2 = [i*0.2 for i in range(7)]
+        values_set2 = [i*0.3 for i in range(7)]
         # an correlation should be detected even if the second list contains less values than the first.
         self.assertTrue(vcd.pick_cor_match_disc_vals(values_set1, values_set2))
 
-        values_set2 = [i*0.2 for i in range(8)]
+        values_set2 = [i*0.2 for i in range(7)]
         # an correlation should not be detected if too many values are different.
         self.assertFalse(vcd.pick_cor_match_disc_vals(values_set1, values_set2))
 
         values = []
-        for i in range(60):
+        for i in range(58):
             stat_data = bytes(str((i % 60) * 0.1), 'utf-8')
             values.append(float(stat_data))
         values_set1 = values
@@ -194,7 +194,7 @@ class VariableCorrelationDetectorTest(TestBase):
         self.assertTrue(vcd.pick_cor_match_disc_vals(values_set1, values_set2))
 
         values = []
-        for i in range(43):
+        for i in range(41):
             stat_data = bytes(str((i % 43) * 0.2), 'utf-8')
             values.append(float(stat_data))
         values_set2 = values
