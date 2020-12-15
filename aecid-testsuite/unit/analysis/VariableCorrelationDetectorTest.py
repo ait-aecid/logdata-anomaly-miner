@@ -96,32 +96,32 @@ class VariableCorrelationDetectorTest(TestBase):
         # the vcd should not learn any correlations if the discrete data is not in the threshold.
         self.assertEqual(vcd.pos_var_val, [[]])
 
-    def test3initialize_variables_with_matchDiskDistr_preselection_method(self):
-        """This test case checks the functionality of the matchDiskDistr preselection method."""
+    def test3initialize_variables_with_matchDiscDistr_preselection_method(self):
+        """This test case checks the functionality of the matchDiscDistr preselection method."""
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1)
         values_list1 = [1.0/10]*10
         values_list2 = [1.0/14]*14
         # an correlation should be detected even if the second list contains more values than the first.
-        self.assertTrue(vcd.pick_cor_match_disk_distr(values_list1, values_list2))
+        self.assertTrue(vcd.pick_cor_match_disc_distr(values_list1, values_list2))
 
         values_list2 = [1.0/7]*7
         # an correlation should be detected even if the second list contains less values than the first.
-        self.assertTrue(vcd.pick_cor_match_disk_distr(values_list1, values_list2))
+        self.assertTrue(vcd.pick_cor_match_disc_distr(values_list1, values_list2))
 
         values_list2 = [1.0/30]*30
         # an correlation should not be detected if the probability of occurrence difference is too high.
-        self.assertFalse(vcd.pick_cor_match_disk_distr(values_list1, values_list2))
+        self.assertFalse(vcd.pick_cor_match_disc_distr(values_list1, values_list2))
 
         values_list2 = [0.2] + [0.8/9]*9
         # an correlation should not be detected if the probability of occurrence difference is too high.
-        self.assertFalse(vcd.pick_cor_match_disk_distr(values_list1, values_list2))
+        self.assertFalse(vcd.pick_cor_match_disc_distr(values_list1, values_list2))
 
         # find correlations even when the lists are randomly shuffled.
         values_list1 = [0.3]*2 + [0.4/3]*3
         values_list2 = [1.0/5] * 5
         random.shuffle(values_list1)
-        self.assertTrue(vcd.pick_cor_match_disk_distr(values_list1, values_list2))
+        self.assertTrue(vcd.pick_cor_match_disc_distr(values_list1, values_list2))
 
     def test4initialize_variables_with_excludeDueDistr_preselection_method(self):
         """This test case checks the functionality of the excludeDueDistr preselection method."""
@@ -163,9 +163,9 @@ class VariableCorrelationDetectorTest(TestBase):
         values = [0.58] + [0.14]*3
         self.assertFalse(vcd.pick_cor_exclude_due_distr(values))
 
-    def test5initialize_variables_with_matchDiskVals_preselection_method(self):
+    def test5initialize_variables_with_matchDiscVals_preselection_method(self):
         """
-        This test case checks the functionality of the matchDiskVals preselection method.
+        This test case checks the functionality of the matchDiscVals preselection method.
         This test actually uses values instead of probabilities, but they are similar to the values used in test3.
         """
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
@@ -173,11 +173,11 @@ class VariableCorrelationDetectorTest(TestBase):
         values_set1 = [i*0.1 for i in range(10)]
         values_set2 = [i*0.2 for i in range(7)]
         # an correlation should be detected even if the second list contains less values than the first.
-        self.assertTrue(vcd.pick_cor_match_disk_vals(values_set1, values_set2))
+        self.assertTrue(vcd.pick_cor_match_disc_vals(values_set1, values_set2))
 
         values_set2 = [i*0.2 for i in range(8)]
         # an correlation should not be detected if too many values are different.
-        self.assertFalse(vcd.pick_cor_match_disk_vals(values_set1, values_set2))
+        self.assertFalse(vcd.pick_cor_match_disc_vals(values_set1, values_set2))
 
         values = []
         for i in range(60):
@@ -191,7 +191,7 @@ class VariableCorrelationDetectorTest(TestBase):
             values.append(float(stat_data))
         values_set2 = values
         # an correlation should be detected if not too many values are different.
-        self.assertTrue(vcd.pick_cor_match_disk_vals(values_set1, values_set2))
+        self.assertTrue(vcd.pick_cor_match_disc_vals(values_set1, values_set2))
 
         values = []
         for i in range(43):
@@ -199,7 +199,7 @@ class VariableCorrelationDetectorTest(TestBase):
             values.append(float(stat_data))
         values_set2 = values
         # an correlation should not be detected if too many values are different.
-        self.assertFalse(vcd.pick_cor_match_disk_vals(values_set1, values_set2))
+        self.assertFalse(vcd.pick_cor_match_disc_vals(values_set1, values_set2))
 
     def test6initialize_variables_with_random_preselection_method(self):
         """
@@ -247,7 +247,7 @@ class VariableCorrelationDetectorTest(TestBase):
     def test7initialize_variables_with_intersect_presel_meth(self):
         """
         This test case checks the functionality of the intersect_presel_meth flag with multiple preselection methods.
-        These are 'excludeDueDistr' and 'matchDiskVals'. In the first case intersect_presel_meth=False and correlations can be detected
+        These are 'excludeDueDistr' and 'matchDiscVals'. In the first case intersect_presel_meth=False and correlations can be detected
         successfully. In the second case intersect_presel_meth=True and no correlations are found because they are excluded in
         'excludeDueDistr'.
         """
@@ -255,14 +255,14 @@ class VariableCorrelationDetectorTest(TestBase):
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd_union = VariableCorrelationDetector(
             self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_presel_meth=[
-                'excludeDueDistr', 'matchDiskVals'], intersect_presel_meth=False)
+                'excludeDueDistr', 'matchDiscVals'], intersect_presel_meth=False)
         vcd_intersection = VariableCorrelationDetector(
             self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_presel_meth=[
-                'excludeDueDistr', 'matchDiskVals'], intersect_presel_meth=True)
+                'excludeDueDistr', 'matchDiscVals'], intersect_presel_meth=True)
         vcd_exclude = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1,
                                                   used_presel_meth=['excludeDueDistr'])
         vcd_match = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1,
-                                                used_presel_meth=['matchDiskVals'])
+                                                used_presel_meth=['matchDiscVals'])
         var1 = ['a']*50 + ['b']*50
         var2 = ['a']*90 + ['b']*10
         var3 = ['c']*20 + ['d']*50 + ['e']*30
@@ -416,7 +416,7 @@ class VariableCorrelationDetectorTest(TestBase):
         """This test case checks if an error occurs, when using an nonexistent correlation method or empty list."""
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd,
-                          disc_div_thres=0.1, used_cor_d_meth=['nonexistentCorDMeth'])
+                          disc_div_thres=0.1, used_cor_meth=['nonexistentCorDMeth'])
 
     def test11validate_correlation_rules_coverVals(self):
         """
@@ -430,7 +430,7 @@ class VariableCorrelationDetectorTest(TestBase):
         for h in range(1, 11, 1):
             etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
             vcd = VariableCorrelationDetector(
-                self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_validate_cor_d_meth=['coverVals'],
+                self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_validate_cor_meth=['coverVals'],
                 validate_cor_cover_vals_thres=0.7, num_init=self.dataset_size)
             # set new validate_cor_cover_vals_thres
             vcd.validate_cor_cover_vals_thres = h*0.1
@@ -489,7 +489,7 @@ class VariableCorrelationDetectorTest(TestBase):
         t = time()
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(
-            self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_validate_cor_d_meth=['distinctDistr'],
+            self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_validate_cor_meth=['distinctDistr'],
             validate_cor_distinct_thres=0.05, num_init=self.dataset_size)
         # init and validate
         similar_data1 = ['a']*50 + ['b']*20 + ['c']*25 + ['d']*5
@@ -534,7 +534,7 @@ class VariableCorrelationDetectorTest(TestBase):
         vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size, div_thres=0.1,
                                    test_ks_int=True, sim_thres=0.1, ks_alpha=self.significance_niveau)
         vcd = VariableCorrelationDetector(
-            self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_validate_cor_d_meth=['distinctDistr'],
+            self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_validate_cor_meth=['distinctDistr'],
             validate_cor_distinct_thres=0.05, num_init=self.dataset_size)
         for i in range(self.dataset_size):
             children = [MatchElement(str(1), unsimilar_data2[i], bytes(unsimilar_data2[i], 'utf-8'), None),
@@ -570,13 +570,13 @@ class VariableCorrelationDetectorTest(TestBase):
         """This test case checks if an error occurs, when using the distinctDistr validation method without the WRel correlation method."""
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd,
-                          disc_div_thres=0.1, used_cor_d_meth=['Rel'], used_validate_cor_d_meth=['distinctDistr'])
+                          disc_div_thres=0.1, used_cor_meth=['Rel'], used_validate_cor_meth=['distinctDistr'])
 
     def test14nonexistent_validation_method(self):
         """This test case checks if an error occurs, when using an nonexistent validation method or empty list."""
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd,
-                          disc_div_thres=0.1, used_validate_cor_d_meth=['nonexistentValidateCorDMeth'])
+                          disc_div_thres=0.1, used_validate_cor_meth=['nonexistentValidateCorDMeth'])
 
     def test15update_and_test_correlation_rules_with_rel_correlation_method(self):
         """
@@ -588,7 +588,7 @@ class VariableCorrelationDetectorTest(TestBase):
         description = 'test15VCD1'
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5,
-                                          used_cor_d_meth=['Rel'], num_init=self.dataset_size)
+                                          used_cor_meth=['Rel'], num_init=self.dataset_size)
         self.analysis_context.register_component(vcd, description)
         self.update_or_test_with_rel_correlation_method(etd, vcd, update_rules=True, generate_rules=True)
         for rel in vcd.rel_list[0]:
@@ -607,7 +607,7 @@ class VariableCorrelationDetectorTest(TestBase):
         description = 'test15VCD2'
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5,
-                                          used_cor_d_meth=['Rel'], num_init=self.dataset_size)
+                                          used_cor_meth=['Rel'], num_init=self.dataset_size)
         self.analysis_context.register_component(vcd, description)
         self.update_or_test_with_rel_correlation_method(etd, vcd, update_rules=True, generate_rules=False)
         for rel in vcd.rel_list[0]:
@@ -627,7 +627,7 @@ class VariableCorrelationDetectorTest(TestBase):
         description = 'test15VCD3'
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5,
-                                          used_cor_d_meth=['Rel'], num_init=self.dataset_size)
+                                          used_cor_meth=['Rel'], num_init=self.dataset_size)
         self.analysis_context.register_component(vcd, description)
         old_rel_list = self.update_or_test_with_rel_correlation_method(etd, vcd, update_rules=False, generate_rules=False)
         # no values in the rel_list should be changed.
@@ -636,7 +636,7 @@ class VariableCorrelationDetectorTest(TestBase):
         description = 'test15VCD4'
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5,
-                                          used_cor_d_meth=['Rel'], num_init=self.dataset_size)
+                                          used_cor_meth=['Rel'], num_init=self.dataset_size)
         self.analysis_context.register_component(vcd, description)
         offset = 200
         self.update_or_test_with_rel_correlation_method(etd, vcd, update_rules=True, generate_rules=False, offset=offset)
@@ -717,7 +717,7 @@ class VariableCorrelationDetectorTest(TestBase):
         description = 'test16VCD1'
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(
-            self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_d_meth=['WRel'],
+            self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_meth=['WRel'],
             num_init=self.dataset_size, num_update=self.dataset_size, max_dist_rule_distr=0.5)
         self.analysis_context.register_component(vcd, description)
         self.update_or_test_with_w_rel_correlation_method(etd, vcd, update_rules=True, generate_rules=True)
@@ -741,7 +741,7 @@ class VariableCorrelationDetectorTest(TestBase):
         description = 'test16VCD2'
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(
-            self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_d_meth=['WRel'],
+            self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_meth=['WRel'],
             num_init=self.dataset_size, num_update=self.dataset_size, max_dist_rule_distr=0.5)
         self.analysis_context.register_component(vcd, description)
         self.update_or_test_with_w_rel_correlation_method(etd, vcd, update_rules=True, generate_rules=False)
@@ -764,7 +764,7 @@ class VariableCorrelationDetectorTest(TestBase):
         description = 'test16VCD3'
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(
-            self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_d_meth=['WRel'],
+            self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_meth=['WRel'],
             num_init=self.dataset_size, num_update=self.dataset_size, max_dist_rule_distr=0.5)
         self.analysis_context.register_component(vcd, description)
         old_w_rel_list = self.update_or_test_with_w_rel_correlation_method(etd, vcd, update_rules=False, generate_rules=False)
@@ -777,7 +777,7 @@ class VariableCorrelationDetectorTest(TestBase):
         description = 'test16VCD4'
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(
-            self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_d_meth=['WRel'],
+            self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_meth=['WRel'],
             num_init=self.dataset_size, num_update=self.dataset_size, max_dist_rule_distr=0.5)
         self.analysis_context.register_component(vcd, description)
         offset = 200
@@ -804,7 +804,7 @@ class VariableCorrelationDetectorTest(TestBase):
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(
             self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5,
-            used_cor_d_meth=['WRel'], num_init=self.dataset_size, num_update=self.dataset_size, max_dist_rule_distr=0.5)
+            used_cor_meth=['WRel'], num_init=self.dataset_size, num_update=self.dataset_size, max_dist_rule_distr=0.5)
         self.analysis_context.register_component(vcd, description)
         offset = 200
         self.update_or_test_with_w_rel_correlation_method(etd, vcd, update_rules=True, generate_rules=True, offset=offset)
