@@ -23,7 +23,7 @@ from aminer import AMinerConfig
 base_dir_fd = None
 tmp_base_dir_fd = None
 base_dir_path = None
-tmp_base_dir_path = b'/tmp'
+tmp_base_dir_path = None
 
 
 def secure_open_base_directory(directory_name=None, flags=0):
@@ -44,6 +44,7 @@ def secure_open_base_directory(directory_name=None, flags=0):
     if base_dir_fd is None:
         base_dir_fd = os.open(directory_name, flags | os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY)
         base_dir_path = directory_name
+        tmp_base_dir_path = directory_name
         tmp_base_dir_fd = os.open(tmp_base_dir_path, flags | os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY)
     return base_dir_fd
 
