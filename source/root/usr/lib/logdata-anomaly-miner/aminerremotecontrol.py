@@ -18,6 +18,7 @@ import os
 import socket
 import traceback
 import sys
+import argparse
 
 __authors__ = ["Markus Wurzenberger", "Max Landauer", "Wolfgang Hotwagner", "Ernst Leierzopf", "Roman Fiedler", "Georg Hoeld",
                "Florian Skopik"]
@@ -26,10 +27,46 @@ __copyright__ = "Copyright 2020, AIT Austrian Institute of Technology GmbH"
 __date__ = "2020/06/19"
 __deprecated__ = False
 __email__ = "aecid@ait.ac.at"
+__website__ = "https://aecid.ait.ac.at"
 __license__ = "GPLv3"
 __maintainer__ = "Markus Wurzenberger"
 __status__ = "Production"
 __version__ = "2.1.0"
+__version_string__ = """   (Austrian Institute of Technology)\n       (%s)\n            Version: %s""" % (__website__, __version__)
+
+colflame = ("\033[31m"
+            "            *     (        )       (     \n"
+            "   (      (  `    )\\ )  ( /(       )\\ )  \n"
+            "   )\\     )\\))(  (()/(  )\\()) (   (()/(  \n"
+            "\033[33m"
+            "((((_)(  ((_)()\\  /(_))((_)\\  )\\   /(_)) \n"
+            " )\\ _ )\\ (_()((_)(_))   _((_)((_) (_))   \n"
+            " (_)\033[39m_\\\033[33m(_)\033[39m|  \\/  ||_ _| | \\| || __|| _ \\  \n"
+            "  / _ \\  | |\\/| | | |  | .` || _| |   /  \n"
+            " /_/ \\_\\ |_|  |_||___| |_|\\_||___||_|_\\  "
+            "\033[39m")
+
+flame = ("            *     (        )       (     \n"
+         "   (      (  `    )\\ )  ( /(       )\\ )  \n"
+         "   )\\     )\\))(  (()/(  )\\()) (   (()/(  \n"
+         "((((_)(  ((_)()\\  /(_))((_)\\  )\\   /(_)) \n"
+         " )\\ _ )\\ (_()((_)(_))   _((_)((_) (_))   \n"
+         " (_)_\\(_)|  \\/  ||_ _| | \\| || __|| _ \\  \n"
+         "  / _ \\  | |\\/| | | |  | .` || _| |   /  \n"
+         " /_/ \\_\\ |_|  |_||___| |_|\\_||___||_|_\\  ")
+
+
+def supports_color():
+    """
+    Return True if the running system's terminal supports color, and False otherwise.
+    The function was borrowed from the django-project (https://github.com/django/django/blob/master/django/core/management/color.py)
+    """
+    plat = sys.platform
+    supported_platform = plat != 'Pocket PC' and (plat != 'win32' or 'ANSICON' in os.environ)
+    # isatty is not always implemented, #6223.
+    is_a_tty = hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
+    return supported_platform and is_a_tty
+
 
 # Get rid of the default sys path immediately. Otherwise Python also attempts to load the following imports from e.g. directory
 # where this binary resides.
@@ -37,66 +74,40 @@ sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-e
 # skipcq: FLK-E402
 from aminer.AnalysisChild import AnalysisChildRemoteControlHandler
 
-remote_control_socket_name = None
-remote_control_data = None
-arg_pos = 1
-command_list = []
-string_response_flag = False
-while arg_pos < len(sys.argv):
-    param_name = sys.argv[arg_pos]
-    arg_pos += 1
+help_message = 'aminerremotecontrol\n'
+if supports_color():
+    help_message += colflame
+else:
+    help_message += flame
+help_message += 'For further information read the man pages running "man AMinerRemoteControl".'
+parser = argparse.ArgumentParser(description=help_message, formatter_class=argparse.RawTextHelpFormatter)
+parser.add_argument('-v', '--version', action='version', version=__version_string__)
+parser.add_argument('-c', '--control-socket', default='/var/run/aminer-remote.socket', type=str,
+                    help='when given, use nonstandard control socket')
+parser.add_argument('-d', '--data', help='provide this json serialized data within execution environment as "remote_control_data" (see man '
+                                         'page).')
+parser.add_argument('-e', '--exec', action='append', type=str, help='add command to the execution list, can be used more than once.')
+parser.add_argument('-f', '--exec-file', type=str, help='add commands from file to the execution list in same way as if content would have '
+                                                        'been used with "--Exec"')
+parser.add_argument('-s', '--string-response', action='store_true',
+                    help='if set, print the response just as string instead of passing it to repr')
 
-    if param_name == '--ControlSocket':
-        if remote_control_socket_name is not None:
-            print('%s: %s parameter given twice' % (sys.argv[0], param_name))
-            sys.exit(1)
-        remote_control_socket_name = sys.argv[arg_pos]
-        arg_pos += 1
-        continue
-    if param_name == '--Data':
-        remote_control_data = json.loads(sys.argv[arg_pos])
-        arg_pos += 1
-        continue
-    if param_name == '--Exec':
-        command_list.append((sys.argv[arg_pos].encode(), remote_control_data))
-        arg_pos += 1
-        continue
-    if param_name == '--ExecFile':
-        if not os.path.exists(sys.argv[arg_pos]):
-            print('File %s does not exit' % sys.argv[arg_pos])
-            sys.exit(1)
-        exec_data = None
-        with open(sys.argv[arg_pos], 'rb') as exec_file:
-            exec_data = exec_file.read()
-        command_list.append((exec_data, remote_control_data))
-        arg_pos += 1
-        continue
-    if param_name == '--Help':
-        if len(sys.argv) != 2:
-            print('Ignoring all other arguments with --Help')
-        print("""Usage: %s [arguments]
-  --ControlSocket [socketpath]: when given, use nonstandard control socket.
-  --Data [data]: provide this json serialized data within execution
-    environment as 'remote_control_data' (see man page).
-  --Exec [command]: add command to the execution list, can be
-    used more than once.
-  --ExecFile [file]: add commands from file to the execution list
-    in same way as if content would have been used with "--Exec".
-  --Help: this output
-  --StringResponse: if set, print the response just as string
-    instead of passing it to repr.
+args = parser.parse_args()
 
-  For further information read the man pages running 'man AMinerRemoteControl'.""" % sys.argv[0])
-        sys.exit(0)
-    if param_name == '--StringResponse':
-        string_response_flag = True
-        continue
-
-    print('Unknown parameter "%s", use --Help for overview' % param_name)
-    sys.exit(1)
-
-if remote_control_socket_name is None:
-    remote_control_socket_name = '/var/run/aminer-remote.socket'
+remote_control_socket_name = args.control_socket
+if args.data is not None:
+    args.data = json.loads(args.data)
+remote_control_data = args.data
+command_list = args.exec
+if command_list is None:
+    command_list = []
+if args.exec_file is not None:
+    if not os.path.exists(args.exec_file):
+        print('File %s does not exist' % args.exec_file)
+        sys.exit(1)
+    with open(args.exec_file, 'rb') as exec_file:
+        command_list += exec_file.readlines()
+string_response_flag = args.string_response
 
 if not command_list:
     print('No commands given, use --Exec [cmd]')
@@ -113,7 +124,7 @@ remote_control_socket.setblocking(True)
 
 control_handler = AnalysisChildRemoteControlHandler(remote_control_socket)
 
-for remote_control_code, remote_control_data in command_list:
+for remote_control_code in command_list:
     control_handler.put_execute_request(remote_control_code, remote_control_data)
     # Send data until we are ready for receiving.
     while not control_handler.may_receive():
