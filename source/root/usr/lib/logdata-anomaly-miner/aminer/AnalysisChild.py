@@ -426,6 +426,8 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 
         # Analysis loop is only left on shutdown. Try to persist everything and leave.
         PersistenceUtil.persist_all()
+        for sock in self.tracked_fds_dict.values():
+            sock.close()
         return delayed_return_status
 
     def handle_master_control_socket_receive(self):

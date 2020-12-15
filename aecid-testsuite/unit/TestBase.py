@@ -6,6 +6,7 @@ import sys
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
+from aminer.util import SecureOSFunctions
 from _io import StringIO
 
 
@@ -71,12 +72,15 @@ class TestBase(unittest.TestCase):
         self.analysis_context = AnalysisContext(self.aminer_config)
         self.output_stream = StringIO()
         self.stream_printer_event_handler = StreamPrinterEventHandler(self.analysis_context, self.output_stream)
-        persistence_file_name = AMinerConfig.build_persistence_file_name(self.aminer_config)
-        if os.path.exists(persistence_file_name):
-            shutil.rmtree(persistence_file_name)
-        if not os.path.exists(persistence_file_name):
-            os.makedirs(persistence_file_name)
+        persistence_dir_name = AMinerConfig.build_persistence_file_name(self.aminer_config)
+        if os.path.exists(persistence_dir_name):
+            shutil.rmtree(persistence_dir_name)
+        if not os.path.exists(persistence_dir_name):
+            os.makedirs(persistence_dir_name)
         initialize_loggers(self.aminer_config, 'aminer', 'aminer')
+        if isinstance(persistence_dir_name, str):
+            persistence_dir_name = persistence_dir_name.encode()
+        SecureOSFunctions.secure_open_base_directory(persistence_dir_name, os.O_RDONLY | os.O_DIRECTORY | os.O_PATH)
 
     def tearDown(self):
         """Delete all persisted data after the tests."""
@@ -86,6 +90,7 @@ class TestBase(unittest.TestCase):
             shutil.rmtree(persistence_file_name)
         if not os.path.exists(persistence_file_name):
             os.makedirs(persistence_file_name)
+        SecureOSFunctions.close_base_directory()
 
     def reset_output_stream(self):
         """Reset the output stream."""
