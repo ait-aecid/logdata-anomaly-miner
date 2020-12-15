@@ -2,10 +2,23 @@ import sys
 import os
 import shutil
 import re
+import argparse
 from aminer.AMinerConfig import load_config, KEY_AMINER_USER, KEY_AMINER_GROUP, KEY_PERSISTENCE_DIR
 
 
+__authors__ = ["Markus Wurzenberger", "Max Landauer", "Wolfgang Hotwagner", "Ernst Leierzopf", "Roman Fiedler", "Georg Hoeld",
+               "Florian Skopik"]
+__contact__ = "aecid@ait.ac.at"
+__copyright__ = "Copyright 2020, AIT Austrian Institute of Technology GmbH"
+__date__ = "2020/06/19"
+__deprecated__ = False
+__email__ = "aecid@ait.ac.at"
 __website__ = "https://aecid.ait.ac.at"
+__license__ = "GPLv3"
+__maintainer__ = "Markus Wurzenberger"
+__status__ = "Production"
+__version__ = "2.1.0"
+__version_string__ = """   (Austrian Institute of Technology)\n       (%s)\n            Version: %s""" % (__website__, __version__)
 
 
 colflame = ("\033[31m"
@@ -42,28 +55,6 @@ def supports_color():
     return supported_platform and is_a_tty
 
 
-def print_help(program_name, version=False):
-    """Print the aminer-persistence help."""
-    global colflame  # skipcq: PYL-W0603
-    global flame  # skipcq: PYL-W0603
-    if supports_color():
-        print(colflame)
-    else:
-        print(flame)
-    print("   (Austrian Institute of Technology)")
-    print("       (%s)" % __website__)
-    if version:
-        return
-    print("\nusage: %s [options]" % program_name)
-    print("options:")
-    print("  -l, --List                      \tlist all existing backups")
-    print("  -b, --Backup                    \tcreate a backup with the current datetime")
-    print("  -r, --Restore <persistence-path>\tenable/disable analysis")
-    print("  -u, --User <aminer-user>        \tset the aminer user. Only used with --Restore")
-    print("  -g, --Group <aminer-group>      \tset the aminer group. Only used with --Restore")
-    print("  -h, --Help                      \tprint this print_help screen")
-
-
 def clear_persistence(persistence_dir_name):
     """Delete all persistence data from the persistence_dir."""
     for filename in os.listdir(persistence_dir_name):
@@ -98,76 +89,66 @@ def main():
         print('Invalid program name, check your execution args', file=sys.stderr)
         sys.exit(1)
 
+    help_message = 'aminer-persistence\n'
+    if supports_color():
+        help_message += colflame
+    else:
+        help_message += flame
+    help_message += 'For further information read the man pages running "man AMinerRemoteControl".'
+    parser = argparse.ArgumentParser(description=help_message, formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument('-v', '--version', action='version', version=__version_string__)
+    parser.add_argument('-c', '--config', type=str, help='path to the config-file')
+    parser.add_argument('-l', '--list', action='store_true', help='list all existing backups')
+    parser.add_argument('-b', '--backup', action='store_true', help='create a backup with the current datetime')
+    parser.add_argument('-r', '--restore', type=str, help='restore a persistence backup')
+    parser.add_argument('-u', '--user', type=str, help='set the aminer user. Only used with --restore')
+    parser.add_argument('-g', '--group', type=str, help='set the aminer group. Only used with --restore')
+    parser.add_argument('-p', '--persistence-dir', type=str, help='set the persistence directory. Only used with --restore')
+
+    args = parser.parse_args()
+
     absolute_persistence_path = None
-    config_file_name = None
-    aminer_user = 'aminer'
-    aminer_grp = 'aminer'
-    persistence_dir = '/var/lib/aminer'
-
+    config_file_name = args.config
     rc_response_string = 'Remote execution response: '
-    arg_pos = 1
-    while arg_pos < len(sys.argv):
-        arg_name = sys.argv[arg_pos]
-        arg_pos += 1
-
-        if arg_name in ('--Config', '--config', '-c'):
-            config_file_name = sys.argv[arg_pos]
-            arg_pos += 1
-            continue
-        if arg_name in ('--List', '--list', '-l'):
-            # skipcq: BAN-B605, BAN-B607
-            process = os.popen('sudo aminerremotecontrol --Exec "list_backups(analysis_context)"')
-            print(process.read().strip('\n').strip(rc_response_string))
-            break
-        if arg_name in ('--Backup', '--backup', '-b'):
-            # skipcq: BAN-B605, BAN-B607
-            process = os.popen('sudo aminerremotecontrol --Exec "create_backup(analysis_context)"')
-            print(process.read().strip('\n').strip(rc_response_string))
-            break
-        if arg_name in ('--Restore', '--restore', '-r'):
-            if not sys.argv[arg_pos].startswith('/'):
-                print('The backup path must be absolute.', file=sys.stderr)
-                sys.exit(1)
-            absolute_persistence_path = sys.argv[arg_pos]
-            arg_pos += 1
-            continue
-        if arg_name in ('--User', '--user', '-u'):
-            if '.' in sys.argv[arg_pos] or '/' in sys.argv[arg_pos]:
-                print('The aminer user %s must not contain any . or /' % sys.argv[arg_pos], file=sys.stderr)
-                sys.exit(1)
-            aminer_user = sys.argv[arg_pos]
-            arg_pos += 1
-            continue
-        if arg_name in ('--Group', '--group', '-g'):
-            if '.' in sys.argv[arg_pos] or '/' in sys.argv[arg_pos]:
-                print('The aminer group %s must not contain any . or /' % sys.argv[arg_pos], file=sys.stderr)
-                sys.exit(1)
-            aminer_grp = sys.argv[arg_pos]
-            arg_pos += 1
-            continue
-        if arg_name in ('--PersistenceDir', '--persistencedir', '-p'):
-            if not sys.argv[arg_pos].startswith('/'):
-                print('The persistence_dir path must be absolute.', file=sys.stderr)
-                sys.exit(1)
-            persistence_dir = sys.argv[arg_pos]
-            arg_pos += 1
-            continue
-        if arg_name in ('--print_help', '--Help', '--help', '-h'):
-            print_help(program_name)
+    if args.list:
+        # skipcq: BAN-B605, BAN-B607
+        process = os.popen('sudo aminerremotecontrol --exec "list_backups(analysis_context)"')
+        print(process.read().strip('\n').strip(rc_response_string))
+    if args.backup:
+        # skipcq: BAN-B605, BAN-B607
+        process = os.popen('sudo aminerremotecontrol --exec "create_backup(analysis_context)"')
+        print(process.read().strip('\n').strip(rc_response_string))
+    if args.restore is not None:
+        if not args.restore.startswith('/'):
+            print('The restore path must be absolute.', file=sys.stderr)
             sys.exit(1)
-
-        print('Unknown parameter "%s"' % arg_name, file=sys.stderr)
+        absolute_persistence_path = args.restore
+    if '.' in args.user or '/' in args.user:
+        print('The aminer user %s must not contain any . or /' % args.user, file=sys.stderr)
         sys.exit(1)
+    aminer_user = args.user
+    if '.' in args.group or '/' in args.group:
+        print('The aminer group %s must not contain any . or /' % args.group, file=sys.stderr)
+        sys.exit(1)
+    aminer_grp = args.group
+    if not args.persistence_dir.startswith('/'):
+        print('The persistence_dir path must be absolute.', file=sys.stderr)
+        sys.exit(1)
+    persistence_dir = args.persistence_dir
 
     if absolute_persistence_path is not None:
         if config_file_name is not None:
             aminer_config = load_config(config_file_name)
-            if '--User' not in sys.argv and '--user' not in sys.argv and '-u' not in sys.argv:
+            if args.user is None:
                 aminer_user = aminer_config.config_properties[KEY_AMINER_USER]
-            if '--Group' not in sys.argv and '--group' not in sys.argv and '-g' not in sys.argv:
+            if args.group is None:
                 aminer_grp = aminer_config.config_properties[KEY_AMINER_GROUP]
-            if '--PersistenceDir' not in sys.argv and '--persistencedir' not in sys.argv and '-p' not in sys.argv:
+            if args.persistence_dir is None:
                 persistence_dir = aminer_config.config_properties[KEY_PERSISTENCE_DIR]
+        else:
+            aminer_user = 'aminer'
+            aminer_grp = 'aminer'
+            persistence_dir = '/var/lib/aminer'
 
         if not os.path.exists(absolute_persistence_path):
             print('%s does not exist.' % absolute_persistence_path, file=sys.stderr)

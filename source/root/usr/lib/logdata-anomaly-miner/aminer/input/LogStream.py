@@ -175,7 +175,6 @@ class FileLogDataResource(LogDataResource):
             stat_data = os.fstat(log_file_fd)
         except OSError as openOsError:
             msg = 'OSError occurred in FileLogDataResource.open(). Error message: %s' % openOsError
-            print(msg, file=sys.stderr)
             logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
             if log_file_fd != -1:
                 os.close(log_file_fd)
