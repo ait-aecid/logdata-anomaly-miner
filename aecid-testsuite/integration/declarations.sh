@@ -284,7 +284,7 @@ function checkAllMails() {
 	while [ $i -lt $linecount ] 
 	do
 		if [[ $sudoInstalled == 0 ]]; then
-			sudo -u root bash -c "echo p | mail > /tmp/out"
+			sudo echo p | mail > /tmp/out
 		else
 			echo p | mail > /tmp/out
 		fi
@@ -353,7 +353,7 @@ function checkAllMails() {
 # This function checks if the output of the Syslog is as expected.
 function checkAllSyslogs(){
 	if [[ $sudoInstalled == 0 ]]; then
-		sudo -u root bash -c "tail -n 1000 /var/log/syslog > /tmp/out"
+		sudo tail -n 1000 /var/log/syslog > /tmp/out
 	else
 		tail -n 1000 /var/log/syslog > /tmp/out
 	fi
@@ -361,7 +361,7 @@ function checkAllSyslogs(){
 	lastLine=`tail -n 1 /tmp/output`
 	if [[ $lastLine == "" ]]; then
 		if [[ $sudoInstalled == 0 ]]; then
-			sudo -H -u aminer bash -c 'sed -i "$ d" /tmp/output'
+			sudo sed -i "$ d" /tmp/output
 		else
 			runuser -u aminer -- sed -i '$ d' /tmp/output
 		fi

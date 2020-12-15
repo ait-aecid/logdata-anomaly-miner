@@ -13,11 +13,11 @@ pipeline {
      agent any
      stages {
 
-          stage("Build Test-Container"){
+         stage("Build Test-Container"){
              steps {
                  sh "docker build -f aecid-testsuite/Dockerfile -t aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID ."
              }
-          }
+         }
          
          stage("UnitTest"){
              steps {
@@ -59,9 +59,9 @@ pipeline {
 
 
          stage("Wiki Tests"){
-             when {
-                 branch 'development'
-             }
+             //when {
+             //    branch 'development'
+             //}
              steps {
        	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runTryItOut"
        	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runGettingStarted"
