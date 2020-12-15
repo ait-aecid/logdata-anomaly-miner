@@ -1285,7 +1285,6 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         if self.percentage_random_cors <= 0.5:
             # Return the generated variable pairs
             return tmp_list
-        
         # Return all variable pairs, which are not in the generated set
         return [[i, j] for i in range(len(self.discrete_indices[event_index])) for j in range(i + 1, len(self.discrete_indices[
             event_index])) if [i, j] not in tmp_list]
@@ -1293,9 +1292,9 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
     # skipcq: PYL-R0201
     def check_cor_w_rel(self, probability_list, total_pos_val):
         """Check if the probabilities can be considered a possible correlation."""
-        if (self.check_cor_thres * total_pos_val < len(probability_list)) and (total_pos_val > self.check_cor_num_thres or
-                max(probability_list) - min(probability_list) < (
-                self.check_cor_prob_thres * sum(probability_list) / len(probability_list))):
+        if (self.check_cor_thres * total_pos_val < len(probability_list)) and (
+            total_pos_val > self.check_cor_num_thres or max(probability_list) - min(probability_list) < (
+            self.check_cor_prob_thres * sum(probability_list) / len(probability_list))):
             return False
         return True
 
