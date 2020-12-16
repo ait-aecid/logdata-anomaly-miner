@@ -79,11 +79,6 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         # Number of values for which the variableType is updated
         # If used_multinomial_test == 'Approx' then faster runtime for values in the p list of bt_min_succ_data
         self.num_update = num_update
-        if self.event_type_detector.min_num_vals < max(num_init, num_update):
-            self.event_type_detector.min_num_vals = max(num_init, num_update)
-        if self.event_type_detector.max_num_vals <= max(num_init, num_update) + 500:
-            self.event_type_detector.max_num_vals = max(num_init, num_update) + 500
-
         # Number of values for which the values of type unq is unique (the last num_update + num_update_unq values are unique)
         self.num_update_unq = num_update_unq
         # Number of values which are tested in the sKS-test. The value has to be <= num_init, >= num_update.
@@ -145,6 +140,11 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         self.event_type_detector = event_type_detector
         # Add the varTypeDetector to the list of the modules, which use the event_type_detector.
         self.event_type_detector.add_following_modules(self)
+        if self.event_type_detector.min_num_vals < max(num_init, num_update):
+            self.event_type_detector.min_num_vals = max(num_init, num_update)
+        if self.event_type_detector.max_num_vals <= max(num_init, num_update) + 500:
+            self.event_type_detector.max_num_vals = max(num_init, num_update) + 500
+
         # List of the numbers of variables of the eventTypes
         self.length = []
         # Used to keep track of the indices of the variables if the path_list is not empty
