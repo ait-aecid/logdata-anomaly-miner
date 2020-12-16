@@ -42,7 +42,7 @@ parser.add_argument('-d', '--data', help='provide this json serialized data with
                                          'page).')
 parser.add_argument('-e', '--exec', action='append', type=str, help='add command to the execution list, can be used more than once.')
 parser.add_argument('-f', '--exec-file', type=str, help='add commands from file to the execution list in same way as if content would have '
-                                                        'been used with "--Exec"')
+                                                        'been used with "--exec"')
 parser.add_argument('-s', '--string-response', action='store_true',
                     help='if set, print the response just as string instead of passing it to repr')
 
@@ -64,14 +64,14 @@ if args.exec_file is not None:
 string_response_flag = args.string_response
 
 if not command_list:
-    print('No commands given, use --Exec [cmd]')
+    print('No commands given, use --exec [cmd]')
     sys.exit(1)
 
 remote_control_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 try:
     remote_control_socket.connect(remote_control_socket_name)
 except socket.error as connectException:
-    print('Failed to connect to socket %s, AMiner might not be running or remote control is disabled in '
+    print('Failed to connect to socket %s, aminer might not be running or remote control is disabled in '
           'configuration: %s' % (remote_control_socket_name, str(connectException)))
     sys.exit(1)
 remote_control_socket.setblocking(True)
