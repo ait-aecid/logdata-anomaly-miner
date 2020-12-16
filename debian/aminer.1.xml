@@ -119,7 +119,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
            variablelist.term.break.after parameters to
            control the term elements. -->
       <varlistentry>
-        <term><option>--Config, --config, -c <replaceable>file</replaceable></option></term>
+        <term><option>--config, -c <replaceable>file</replaceable></option></term>
         <listitem>
           <para>Specify the configuration file, otherwise /etc/aminer/config.py
           is used. See /etc/aminer/template_config.py or /etc/aminer/template_config.yml
@@ -127,7 +127,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         </listitem>
       </varlistentry>
 	  <varlistentry>
-        <term><option>--Daemon, --daemon, -D</option></term>
+        <term><option>--daemon, -D</option></term>
         <listitem>
           <para>With this parameter, aminer will detach from
 		   the terminal and daemonize. When not in foreground mode,
@@ -136,35 +136,35 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         </listitem>
       </varlistentry>
 	  <varlistentry>
-        <term><option>--Stat, --stat, -s <replaceable>stat-level</replaceable></option></term>
+        <term><option>--stat, -s <replaceable>stat-level</replaceable></option></term>
         <listitem>
           <para>Set the statistic logging level. Possible stat-levels
-		   are 0 or q or quiet for no statistics, 1 (default) for normal statistic
-		   level and 2 or v for verbose statistics.</para>
+		   are 0 for no statistics, 1 (default) for normal statistic
+		   level and 2 for verbose statistics.</para>
         </listitem>
       </varlistentry>
 	  <varlistentry>
-        <term><option>--Debug, --debug, -d <replaceable>debug-level</replaceable></option></term>
+        <term><option>--debug, -d <replaceable>debug-level</replaceable></option></term>
         <listitem>
           <para>Set the debug logging level. Possible debug-levels are 0 for no debugging,
-		   1 (default) for normal output (INFO and above), 2 or v for printing all debug information.</para>
+		   1 (default) for normal output (INFO and above), 2 for printing all debug information.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>--RunAnalysis, --runAnalysis, --runanalysis, -r</option></term>
+        <term><option>--run-analysis</option></term>
         <listitem>
           <para>INTERNAL PARAMETER - DO NOT USE. It is just documented
           here for completeness.</para>
         </listitem>
       </varlistentry>
 	  <varlistentry>
-        <term><option>--Restore, --restore <replaceable>backup-directory</replaceable></option></term>
+        <term><option>--restore, -R <replaceable>backup-directory</replaceable></option></term>
         <listitem>
           <para>Restores the persistence directory from <replaceable>backup-directory</replaceable>.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>--Clear, --clear, --C</option></term>
+        <term><option>--clear, -C</option></term>
         <listitem>
           <para>With this parameter all persisted data in config_properties['Core.PersistenceDir']
           is deleted. USE THIS PARAMETER CAREFULLY. IT DELETES ALL
@@ -172,15 +172,15 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>--Remove, --remove, --R <replaceable>directory</replaceable></option></term>
+        <term><option>--remove, -r <replaceable>directory</replaceable></option></term>
         <listitem>
           <para>Remove persisted data of one Detector.</para>
-          <para><option>Example 1: </option>--Remove NewMatchPathDetector</para>
-          <para><option>Example 2: </option>--Remove NewMatchPathDetector --Remove EventCorrelationDetector</para>
+          <para><option>Example 1: </option>--remove NewMatchPathDetector</para>
+          <para><option>Example 2: </option>--remove NewMatchPathDetector --remove EventCorrelationDetector</para>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>--FromBegin, --fromBegin, --frombegin, -f</option></term>
+        <term><option>--from-begin, -f</option></term>
         <listitem>
           <para>With this parameter all live data in 
           config_properties['Core.PersistenceDir']/AnalysisChild/RepositioningData
@@ -188,13 +188,13 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>--print_help, --Help, --help, -h</option></term>
+        <term><option>--help, -h</option></term>
         <listitem>
           <para>Prints the help-screen</para>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>--Version, --version, -v</option></term>
+        <term><option>--version, -v</option></term>
         <listitem>
           <para>Prints the version-string</para>
         </listitem>

@@ -102,7 +102,7 @@ def store_json(file_name, object_data):
     persistence_data = JsonUtil.dump_as_json(object_data)
     # Create a temporary file within persistence directory to write new persistence data to it.
     # Thus the old data is not modified, any error creating or writing the file will not harm the old state.
-    fd, _ = tempfile.mkstemp()
+    fd, _ = tempfile.mkstemp(dir=SecureOSFunctions.tmp_base_dir_path)
     os.write(fd, bytes(persistence_data, 'utf-8'))
     create_missing_directories(file_name)
     replace_persistence_file(file_name, fd)
