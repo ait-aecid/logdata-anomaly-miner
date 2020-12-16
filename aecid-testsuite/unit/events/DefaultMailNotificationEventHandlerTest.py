@@ -53,7 +53,7 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
         default_mail_notification_event_handler.receive_event(
             self.test % self.__class__.__name__, 'New value for pathes %s, %s: %s' % (
                 'match/s1', 'match/s2', repr(match_element.match_object)), [log_atom.raw_data, log_atom.raw_data], None, log_atom, self)
-        sleep(0.5)
+        sleep(2)
         # skipcq: PYL-W1510, BAN-B602
         result = subprocess.run(self.mail_call, shell=True, stdout=subprocess.PIPE)
         # skipcq: PYL-W1510, BAN-B602
@@ -112,7 +112,7 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
         default_mail_notification_event_handler.next_alert_time = t
         default_mail_notification_event_handler.do_timer(t)
 
-        sleep(0.5)
+        sleep(2)
         # skipcq: PYL-W1510, BAN-B602
         result = subprocess.run(self.mail_call, shell=True, stdout=subprocess.PIPE)
         # skipcq: PYL-W1510, BAN-B602
