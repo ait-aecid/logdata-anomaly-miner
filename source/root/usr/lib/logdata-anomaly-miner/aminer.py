@@ -36,25 +36,12 @@ import shutil
 import warnings
 import argparse
 
-__authors__ = ["Markus Wurzenberger", "Max Landauer", "Wolfgang Hotwagner", "Ernst Leierzopf", "Roman Fiedler", "Georg Hoeld",
-               "Florian Skopik"]
-__contact__ = "aecid@ait.ac.at"
-__copyright__ = "Copyright 2020, AIT Austrian Institute of Technology GmbH"
-__date__ = "2020/06/19"
-__deprecated__ = False
-__email__ = "aecid@ait.ac.at"
-__website__ = "https://aecid.ait.ac.at"
-__license__ = "GPLv3"
-__maintainer__ = "Markus Wurzenberger"
-__status__ = "Production"
-__version__ = "2.1.0"
-__version_string__ = """   (Austrian Institute of Technology)\n       (%s)\n            Version: %s""" % (__website__, __version__)
-
 
 # As site packages are not included, define from where we need to execute code before loading it.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
 # skipcq: FLK-E402
 from aminer import AMinerConfig
+from metadata import *
 
 colflame = ("\033[31m"
             "            *     (        )       (     \n"
