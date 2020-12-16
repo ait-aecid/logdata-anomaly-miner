@@ -9,8 +9,11 @@ case "$1" in
 	aminerremotecontrol)
 		$AMINERDIR/aminerremotecontrol.py ${*:2}
 		;;
+  aminer-persistence)
+		$AMINERDIR/aminer-persistence.py ${*:2}
+		;;
 	*)
-		echo "Usage: [ aminer | aminerremotecontrol ] <options>"
+		echo "Usage: [ aminer | aminerremotecontrol | aminer-persistence ] <options>"
 		exit 1
 		;;
         
