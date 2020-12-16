@@ -25,8 +25,8 @@ import argparse
 # where this binary resides.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
 from aminer.AnalysisChild import AnalysisChildRemoteControlHandler  # skipcq: FLK-E402
-from metadata import __version_string__  # skipcq: FLK-E402
 from aminer.util.StringUtil import colflame, flame, supports_color  # skipcq: FLK-E402
+from metadata import __version_string__  # skipcq: FLK-E402
 
 help_message = 'aminerremotecontrol\n'
 if supports_color():

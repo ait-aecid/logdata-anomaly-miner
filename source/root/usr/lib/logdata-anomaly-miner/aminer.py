@@ -40,8 +40,9 @@ import argparse
 # As site packages are not included, define from where we need to execute code before loading it.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
 from aminer import AMinerConfig  # skipcq: FLK-E402
-from metadata import __version_string__  # skipcq: FLK-E402
 from aminer.util.StringUtil import colflame, flame, supports_color  # skipcq: FLK-E402
+from aminer.util.PersistenceUtil import clear_persistence, copytree  # skipcq: FLK-E402
+from metadata import __version_string__  # skipcq: FLK-E402
 
 
 child_termination_triggered_flag = False
@@ -84,36 +85,6 @@ def run_analysis_child(aminer_config, program_name):
     print(msg, file=sys.stderr)
     logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
     sys.exit(1)
-
-
-def clear_persistence(persistence_dir_name):
-    """Delete all persistence data from the persistence_dir."""
-    for filename in os.listdir(persistence_dir_name):
-        if filename == 'backup':
-            continue
-        file_path = os.path.join(persistence_dir_name, filename)
-        try:
-            if not os.path.isdir(file_path):
-                msg = 'The AMiner persistence directory should not contain any files.'
-                print(msg, file=sys.stderr)
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
-                continue
-            shutil.rmtree(file_path)
-        except OSError as e:
-            msg = 'Failed to delete %s. Reason: %s' % (file_path, e)
-            print(msg, file=sys.stderr)
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
-
-
-def copytree(src, dst, symlinks=False, ignore=None):
-    """Copy a directory recursively. This method has no issue with the destination directory existing (shutil.copytree has)."""
-    for item in os.listdir(src):
-        s = os.path.join(src, item)
-        d = os.path.join(dst, item)
-        if os.path.isdir(s):
-            shutil.copytree(s, d, symlinks, ignore)
-        else:
-            shutil.copy2(s, d)
 
 
 def initialize_loggers(aminer_config, aminer_user, aminer_grp):

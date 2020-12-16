@@ -3,36 +3,11 @@ import os
 import shutil
 import re
 import argparse
-from aminer.AMinerConfig import load_config, KEY_AMINER_USER, KEY_AMINER_GROUP, KEY_PERSISTENCE_DIR
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
-from metadata import __version_string__  # skipcq: FLK-E402
+from aminer.AMinerConfig import load_config, KEY_AMINER_USER, KEY_AMINER_GROUP, KEY_PERSISTENCE_DIR  # skipcq: FLK-E402
 from aminer.util.StringUtil import colflame, flame, supports_color  # skipcq: FLK-E402
-
-
-def clear_persistence(persistence_dir_name):
-    """Delete all persistence data from the persistence_dir."""
-    for filename in os.listdir(persistence_dir_name):
-        if filename == 'backup':
-            continue
-        file_path = os.path.join(persistence_dir_name, filename)
-        try:
-            if not os.path.isdir(file_path):
-                print('The AMiner persistence directory should not contain any files.', file=sys.stderr)
-                continue
-            shutil.rmtree(file_path)
-        except OSError as e:
-            print('Failed to delete %s. Reason: %s' % (file_path, e), file=sys.stderr)
-
-
-def copytree(src, dst, symlinks=False, ignore=None):
-    """Copy a directory recursively. This method has no issue with the destination directory existing (shutil.copytree has)."""
-    for item in os.listdir(src):
-        s = os.path.join(src, item)
-        d = os.path.join(dst, item)
-        if os.path.isdir(s):
-            shutil.copytree(s, d, symlinks, ignore)
-        else:
-            shutil.copy2(s, d)
+from aminer.util.PersistenceUtil import clear_persistence, copytree  # skipcq: FLK-E402
+from metadata import __version_string__  # skipcq: FLK-E402
 
 
 def main():
