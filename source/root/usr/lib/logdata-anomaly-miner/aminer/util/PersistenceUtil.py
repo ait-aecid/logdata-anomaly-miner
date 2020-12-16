@@ -17,6 +17,7 @@ import os
 import logging
 import tempfile
 import shutil
+import sys
 
 from aminer import AMinerConfig
 from aminer.util import SecureOSFunctions
