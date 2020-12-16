@@ -16,6 +16,8 @@ import errno
 import os
 import logging
 import tempfile
+import shutil
+import sys
 
 from aminer import AMinerConfig
 from aminer.util import SecureOSFunctions
@@ -116,3 +118,33 @@ def create_missing_directories(file_name):
     if dir_name_length > 0:
         if not os.path.exists(file_name[:dir_name_length]):
             os.makedirs(file_name[:dir_name_length])
+
+
+def clear_persistence(persistence_dir_name):
+    """Delete all persistence data from the persistence_dir."""
+    for filename in os.listdir(persistence_dir_name):
+        if filename == 'backup':
+            continue
+        file_path = os.path.join(persistence_dir_name, filename)
+        try:
+            if not os.path.isdir(file_path):
+                msg = 'The AMiner persistence directory should not contain any files.'
+                print(msg, file=sys.stderr)
+                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
+                continue
+            shutil.rmtree(file_path)
+        except OSError as e:
+            msg = 'Failed to delete %s. Reason: %s' % (file_path, e)
+            print(msg, file=sys.stderr)
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+
+
+def copytree(src, dst, symlinks=False, ignore=None):
+    """Copy a directory recursively. This method has no issue with the destination directory existing (shutil.copytree has)."""
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            shutil.copytree(s, d, symlinks, ignore)
+        else:
+            shutil.copy2(s, d)

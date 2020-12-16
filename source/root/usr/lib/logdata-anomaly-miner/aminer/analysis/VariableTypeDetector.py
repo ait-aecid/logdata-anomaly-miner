@@ -648,12 +648,12 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 return False
 
         if self.path_list is None or len(self.path_list) == 0:
-            constraint_path = False
+            constraint_path_flag = False
             for constraint_path in self.constraint_list:
                 if parser_match.get_match_dictionary().get(constraint_path) is not None:
-                    constraint_path = True
+                    constraint_path_flag = True
                     break
-            if not constraint_path and self.constraint_list != []:
+            if not constraint_path_flag and self.constraint_list != []:
                 return False
 
         # Initialize new entries in lists for a new eventType if necessary

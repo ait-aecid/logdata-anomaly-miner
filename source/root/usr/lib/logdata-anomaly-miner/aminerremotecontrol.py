@@ -20,59 +20,13 @@ import traceback
 import sys
 import argparse
 
-__authors__ = ["Markus Wurzenberger", "Max Landauer", "Wolfgang Hotwagner", "Ernst Leierzopf", "Roman Fiedler", "Georg Hoeld",
-               "Florian Skopik"]
-__contact__ = "aecid@ait.ac.at"
-__copyright__ = "Copyright 2020, AIT Austrian Institute of Technology GmbH"
-__date__ = "2020/06/19"
-__deprecated__ = False
-__email__ = "aecid@ait.ac.at"
-__website__ = "https://aecid.ait.ac.at"
-__license__ = "GPLv3"
-__maintainer__ = "Markus Wurzenberger"
-__status__ = "Production"
-__version__ = "2.1.0"
-__version_string__ = """   (Austrian Institute of Technology)\n       (%s)\n            Version: %s""" % (__website__, __version__)
-
-colflame = ("\033[31m"
-            "            *     (        )       (     \n"
-            "   (      (  `    )\\ )  ( /(       )\\ )  \n"
-            "   )\\     )\\))(  (()/(  )\\()) (   (()/(  \n"
-            "\033[33m"
-            "((((_)(  ((_)()\\  /(_))((_)\\  )\\   /(_)) \n"
-            " )\\ _ )\\ (_()((_)(_))   _((_)((_) (_))   \n"
-            " (_)\033[39m_\\\033[33m(_)\033[39m|  \\/  ||_ _| | \\| || __|| _ \\  \n"
-            "  / _ \\  | |\\/| | | |  | .` || _| |   /  \n"
-            " /_/ \\_\\ |_|  |_||___| |_|\\_||___||_|_\\  "
-            "\033[39m")
-
-flame = ("            *     (        )       (     \n"
-         "   (      (  `    )\\ )  ( /(       )\\ )  \n"
-         "   )\\     )\\))(  (()/(  )\\()) (   (()/(  \n"
-         "((((_)(  ((_)()\\  /(_))((_)\\  )\\   /(_)) \n"
-         " )\\ _ )\\ (_()((_)(_))   _((_)((_) (_))   \n"
-         " (_)_\\(_)|  \\/  ||_ _| | \\| || __|| _ \\  \n"
-         "  / _ \\  | |\\/| | | |  | .` || _| |   /  \n"
-         " /_/ \\_\\ |_|  |_||___| |_|\\_||___||_|_\\  ")
-
-
-def supports_color():
-    """
-    Return True if the running system's terminal supports color, and False otherwise.
-    The function was borrowed from the django-project (https://github.com/django/django/blob/master/django/core/management/color.py)
-    """
-    plat = sys.platform
-    supported_platform = plat != 'Pocket PC' and (plat != 'win32' or 'ANSICON' in os.environ)
-    # isatty is not always implemented, #6223.
-    is_a_tty = hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
-    return supported_platform and is_a_tty
-
 
 # Get rid of the default sys path immediately. Otherwise Python also attempts to load the following imports from e.g. directory
 # where this binary resides.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
-# skipcq: FLK-E402
-from aminer.AnalysisChild import AnalysisChildRemoteControlHandler
+from aminer.AnalysisChild import AnalysisChildRemoteControlHandler  # skipcq: FLK-E402
+from aminer.util.StringUtil import colflame, flame, supports_color  # skipcq: FLK-E402
+from metadata import __version_string__  # skipcq: FLK-E402
 
 help_message = 'aminerremotecontrol\n'
 if supports_color():
@@ -88,7 +42,7 @@ parser.add_argument('-d', '--data', help='provide this json serialized data with
                                          'page).')
 parser.add_argument('-e', '--exec', action='append', type=str, help='add command to the execution list, can be used more than once.')
 parser.add_argument('-f', '--exec-file', type=str, help='add commands from file to the execution list in same way as if content would have '
-                                                        'been used with "--Exec"')
+                                                        'been used with "--exec"')
 parser.add_argument('-s', '--string-response', action='store_true',
                     help='if set, print the response just as string instead of passing it to repr')
 
@@ -110,14 +64,14 @@ if args.exec_file is not None:
 string_response_flag = args.string_response
 
 if not command_list:
-    print('No commands given, use --Exec [cmd]')
+    print('No commands given, use --exec [cmd]')
     sys.exit(1)
 
 remote_control_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 try:
     remote_control_socket.connect(remote_control_socket_name)
 except socket.error as connectException:
-    print('Failed to connect to socket %s, AMiner might not be running or remote control is disabled in '
+    print('Failed to connect to socket %s, aminer might not be running or remote control is disabled in '
           'configuration: %s' % (remote_control_socket_name, str(connectException)))
     sys.exit(1)
 remote_control_socket.setblocking(True)

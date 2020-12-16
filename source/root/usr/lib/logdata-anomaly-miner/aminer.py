@@ -36,60 +36,16 @@ import shutil
 import warnings
 import argparse
 
-__authors__ = ["Markus Wurzenberger", "Max Landauer", "Wolfgang Hotwagner", "Ernst Leierzopf", "Roman Fiedler", "Georg Hoeld",
-               "Florian Skopik"]
-__contact__ = "aecid@ait.ac.at"
-__copyright__ = "Copyright 2020, AIT Austrian Institute of Technology GmbH"
-__date__ = "2020/06/19"
-__deprecated__ = False
-__email__ = "aecid@ait.ac.at"
-__website__ = "https://aecid.ait.ac.at"
-__license__ = "GPLv3"
-__maintainer__ = "Markus Wurzenberger"
-__status__ = "Production"
-__version__ = "2.1.0"
-__version_string__ = """   (Austrian Institute of Technology)\n       (%s)\n            Version: %s""" % (__website__, __version__)
-
 
 # As site packages are not included, define from where we need to execute code before loading it.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
-# skipcq: FLK-E402
-from aminer import AMinerConfig
+from aminer import AMinerConfig  # skipcq: FLK-E402
+from aminer.util.StringUtil import colflame, flame, supports_color  # skipcq: FLK-E402
+from aminer.util.PersistenceUtil import clear_persistence, copytree  # skipcq: FLK-E402
+from metadata import __version_string__  # skipcq: FLK-E402
 
-colflame = ("\033[31m"
-            "            *     (        )       (     \n"
-            "   (      (  `    )\\ )  ( /(       )\\ )  \n"
-            "   )\\     )\\))(  (()/(  )\\()) (   (()/(  \n"
-            "\033[33m"
-            "((((_)(  ((_)()\\  /(_))((_)\\  )\\   /(_)) \n"
-            " )\\ _ )\\ (_()((_)(_))   _((_)((_) (_))   \n"
-            " (_)\033[39m_\\\033[33m(_)\033[39m|  \\/  ||_ _| | \\| || __|| _ \\  \n"
-            "  / _ \\  | |\\/| | | |  | .` || _| |   /  \n"
-            " /_/ \\_\\ |_|  |_||___| |_|\\_||___||_|_\\  "
-            "\033[39m")
-
-flame = ("            *     (        )       (     \n"
-         "   (      (  `    )\\ )  ( /(       )\\ )  \n"
-         "   )\\     )\\))(  (()/(  )\\()) (   (()/(  \n"
-         "((((_)(  ((_)()\\  /(_))((_)\\  )\\   /(_)) \n"
-         " )\\ _ )\\ (_()((_)(_))   _((_)((_) (_))   \n"
-         " (_)_\\(_)|  \\/  ||_ _| | \\| || __|| _ \\  \n"
-         "  / _ \\  | |\\/| | | |  | .` || _| |   /  \n"
-         " /_/ \\_\\ |_|  |_||___| |_|\\_||___||_|_\\  ")
 
 child_termination_triggered_flag = False
-
-
-def supports_color():
-    """
-    Return True if the running system's terminal supports color, and False otherwise.
-    The function was borrowed from the django-project (https://github.com/django/django/blob/master/django/core/management/color.py)
-    """
-    plat = sys.platform
-    supported_platform = plat != 'Pocket PC' and (plat != 'win32' or 'ANSICON' in os.environ)
-    # isatty is not always implemented, #6223.
-    is_a_tty = hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
-    return supported_platform and is_a_tty
 
 
 def run_analysis_child(aminer_config, program_name):
@@ -129,36 +85,6 @@ def run_analysis_child(aminer_config, program_name):
     print(msg, file=sys.stderr)
     logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
     sys.exit(1)
-
-
-def clear_persistence(persistence_dir_name):
-    """Delete all persistence data from the persistence_dir."""
-    for filename in os.listdir(persistence_dir_name):
-        if filename == 'backup':
-            continue
-        file_path = os.path.join(persistence_dir_name, filename)
-        try:
-            if not os.path.isdir(file_path):
-                msg = 'The AMiner persistence directory should not contain any files.'
-                print(msg, file=sys.stderr)
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
-                continue
-            shutil.rmtree(file_path)
-        except OSError as e:
-            msg = 'Failed to delete %s. Reason: %s' % (file_path, e)
-            print(msg, file=sys.stderr)
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
-
-
-def copytree(src, dst, symlinks=False, ignore=None):
-    """Copy a directory recursively. This method has no issue with the destination directory existing (shutil.copytree has)."""
-    for item in os.listdir(src):
-        s = os.path.join(src, item)
-        d = os.path.join(dst, item)
-        if os.path.isdir(s):
-            shutil.copytree(s, d, symlinks, ignore)
-        else:
-            shutil.copy2(s, d)
 
 
 def initialize_loggers(aminer_config, aminer_user, aminer_grp):
@@ -469,7 +395,7 @@ def main():
             sys.exit(1)
         if child_pid != 0:
             # This is the parent.
-            sys.exit(0)
+            os._exit(0)  # skipcq: PYL-W0212
         # This is the child. Create a new session and become process group leader. Here we get rid of the controlling tty.
         os.setsid()
         # Fork again to become an orphaned process not being session leader, hence not able to get a controlling tty again.
@@ -482,7 +408,7 @@ def main():
             sys.exit(1)
         if child_pid != 0:
             # This is the parent.
-            sys.exit(0)
+            os._exit(0)  # skipcq: PYL-W0212
         # Move to root directory to avoid lingering in some cwd someone else might want to unmount.
         os.chdir('/')
         # Change the umask here to clean all group/other mask bits so that accidentially created files are not accessible by other.
@@ -538,6 +464,7 @@ def main():
         else:
             msg = 'INFO: No privilege separation when started as unprivileged user'
             print(msg, file=sys.stderr)
+            initialize_loggers(aminer_config, 'aminer', 'aminer')
             logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info(msg)
 
         # Now resolve the specific analysis configuration file (if any).

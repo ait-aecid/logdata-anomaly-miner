@@ -200,12 +200,12 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                 return
         if self.paths is None or len(self.paths) == 0:
             # Event is defined by the full path of log atom.
-            constraint_path = False
+            constraint_path_flag = False
             for constraint_path in self.constraint_list:
                 if parser_match.get_match_dictionary().get(constraint_path) is not None:
-                    constraint_path = True
+                    constraint_path_flag = True
                     break
-            if not constraint_path and self.constraint_list != []:
+            if not constraint_path_flag and self.constraint_list != []:
                 return
             log_event = tuple(parser_match.get_match_dictionary().keys())
         else:

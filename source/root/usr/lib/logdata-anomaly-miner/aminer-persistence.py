@@ -3,82 +3,11 @@ import os
 import shutil
 import re
 import argparse
-from aminer.AMinerConfig import load_config, KEY_AMINER_USER, KEY_AMINER_GROUP, KEY_PERSISTENCE_DIR
-
-
-__authors__ = ["Markus Wurzenberger", "Max Landauer", "Wolfgang Hotwagner", "Ernst Leierzopf", "Roman Fiedler", "Georg Hoeld",
-               "Florian Skopik"]
-__contact__ = "aecid@ait.ac.at"
-__copyright__ = "Copyright 2020, AIT Austrian Institute of Technology GmbH"
-__date__ = "2020/06/19"
-__deprecated__ = False
-__email__ = "aecid@ait.ac.at"
-__website__ = "https://aecid.ait.ac.at"
-__license__ = "GPLv3"
-__maintainer__ = "Markus Wurzenberger"
-__status__ = "Production"
-__version__ = "2.1.0"
-__version_string__ = """   (Austrian Institute of Technology)\n       (%s)\n            Version: %s""" % (__website__, __version__)
-
-
-colflame = ("\033[31m"
-            "            *     (        )       (     \n"
-            "   (      (  `    )\\ )  ( /(       )\\ )  \n"
-            "   )\\     )\\))(  (()/(  )\\()) (   (()/(  \n"
-            "\033[33m"
-            "((((_)(  ((_)()\\  /(_))((_)\\  )\\   /(_)) \n"
-            " )\\ _ )\\ (_()((_)(_))   _((_)((_) (_))   \n"
-            " (_)\033[39m_\\\033[33m(_)\033[39m|  \\/  ||_ _| | \\| || __|| _ \\  \n"
-            "  / _ \\  | |\\/| | | |  | .` || _| |   /  \n"
-            " /_/ \\_\\ |_|  |_||___| |_|\\_||___||_|_\\  "
-            "\033[39m")
-
-flame = ("            *     (        )       (     \n"
-         "   (      (  `    )\\ )  ( /(       )\\ )  \n"
-         "   )\\     )\\))(  (()/(  )\\()) (   (()/(  \n"
-         "((((_)(  ((_)()\\  /(_))((_)\\  )\\   /(_)) \n"
-         " )\\ _ )\\ (_()((_)(_))   _((_)((_) (_))   \n"
-         " (_)_\\(_)|  \\/  ||_ _| | \\| || __|| _ \\  \n"
-         "  / _ \\  | |\\/| | | |  | .` || _| |   /  \n"
-         " /_/ \\_\\ |_|  |_||___| |_|\\_||___||_|_\\  ")
-
-
-def supports_color():
-    """
-    Return True if the running system's terminal supports color, and False otherwise.
-    The function was borrowed from the django-project (https://github.com/django/django/blob/master/django/core/management/color.py)
-    """
-    plat = sys.platform
-    supported_platform = plat != 'Pocket PC' and (plat != 'win32' or 'ANSICON' in os.environ)
-    # isatty is not always implemented, #6223.
-    is_a_tty = hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
-    return supported_platform and is_a_tty
-
-
-def clear_persistence(persistence_dir_name):
-    """Delete all persistence data from the persistence_dir."""
-    for filename in os.listdir(persistence_dir_name):
-        if filename == 'backup':
-            continue
-        file_path = os.path.join(persistence_dir_name, filename)
-        try:
-            if not os.path.isdir(file_path):
-                print('The AMiner persistence directory should not contain any files.', file=sys.stderr)
-                continue
-            shutil.rmtree(file_path)
-        except OSError as e:
-            print('Failed to delete %s. Reason: %s' % (file_path, e), file=sys.stderr)
-
-
-def copytree(src, dst, symlinks=False, ignore=None):
-    """Copy a directory recursively. This method has no issue with the destination directory existing (shutil.copytree has)."""
-    for item in os.listdir(src):
-        s = os.path.join(src, item)
-        d = os.path.join(dst, item)
-        if os.path.isdir(s):
-            shutil.copytree(s, d, symlinks, ignore)
-        else:
-            shutil.copy2(s, d)
+sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
+from aminer.AMinerConfig import load_config, KEY_AMINER_USER, KEY_AMINER_GROUP, KEY_PERSISTENCE_DIR  # skipcq: FLK-E402
+from aminer.util.StringUtil import colflame, flame, supports_color  # skipcq: FLK-E402
+from aminer.util.PersistenceUtil import clear_persistence, copytree  # skipcq: FLK-E402
+from metadata import __version_string__  # skipcq: FLK-E402
 
 
 def main():

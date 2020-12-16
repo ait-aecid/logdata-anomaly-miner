@@ -1239,7 +1239,6 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         """
         # Assigning epsilon
         epsilon = self.exclude_due_distr_lower_limit + (1 - self.exclude_due_distr_lower_limit) / len(prob_list)
-
         # Check the single probabilities
         for i in range(len(prob_list)):
             if prob_list[i] > epsilon:

@@ -12,7 +12,43 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import logging
+import sys
+import os
 from aminer import AMinerConfig
+
+
+colflame = ("\033[31m"
+            "            *     (        )       (     \n"
+            "   (      (  `    )\\ )  ( /(       )\\ )  \n"
+            "   )\\     )\\))(  (()/(  )\\()) (   (()/(  \n"
+            "\033[33m"
+            "((((_)(  ((_)()\\  /(_))((_)\\  )\\   /(_)) \n"
+            " )\\ _ )\\ (_()((_)(_))   _((_)((_) (_))   \n"
+            " (_)\033[39m_\\\033[33m(_)\033[39m|  \\/  ||_ _| | \\| || __|| _ \\  \n"
+            "  / _ \\  | |\\/| | | |  | .` || _| |   /  \n"
+            " /_/ \\_\\ |_|  |_||___| |_|\\_||___||_|_\\  "
+            "\033[39m")
+
+flame = ("            *     (        )       (     \n"
+         "   (      (  `    )\\ )  ( /(       )\\ )  \n"
+         "   )\\     )\\))(  (()/(  )\\()) (   (()/(  \n"
+         "((((_)(  ((_)()\\  /(_))((_)\\  )\\   /(_)) \n"
+         " )\\ _ )\\ (_()((_)(_))   _((_)((_) (_))   \n"
+         " (_)_\\(_)|  \\/  ||_ _| | \\| || __|| _ \\  \n"
+         "  / _ \\  | |\\/| | | |  | .` || _| |   /  \n"
+         " /_/ \\_\\ |_|  |_||___| |_|\\_||___||_|_\\  ")
+
+
+def supports_color():
+    """
+    Return True if the running system's terminal supports color, and False otherwise.
+    The function was borrowed from the django-project (https://github.com/django/django/blob/master/django/core/management/color.py)
+    """
+    plat = sys.platform
+    supported_platform = plat != 'Pocket PC' and (plat != 'win32' or 'ANSICON' in os.environ)
+    # isatty is not always implemented, #6223.
+    is_a_tty = hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
+    return supported_platform and is_a_tty
 
 
 def decode_string_as_byte_string(string):
