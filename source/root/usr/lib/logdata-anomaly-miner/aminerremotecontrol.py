@@ -58,9 +58,8 @@ def supports_color():
 # Get rid of the default sys path immediately. Otherwise Python also attempts to load the following imports from e.g. directory
 # where this binary resides.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
-# skipcq: FLK-E402
-from aminer.AnalysisChild import AnalysisChildRemoteControlHandler
-from metadata import *
+from aminer.AnalysisChild import AnalysisChildRemoteControlHandler  # skipcq: FLK-E402
+from metadata import __version_string__  # skipcq: FLK-E402
 
 help_message = 'aminerremotecontrol\n'
 if supports_color():

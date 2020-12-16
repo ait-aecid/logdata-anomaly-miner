@@ -4,7 +4,7 @@ import shutil
 import re
 import argparse
 from aminer.AMinerConfig import load_config, KEY_AMINER_USER, KEY_AMINER_GROUP, KEY_PERSISTENCE_DIR
-from metadata import *
+from metadata import __version_string__  # skipcq: FLK-E402
 
 
 colflame = ("\033[31m"
