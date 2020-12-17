@@ -78,9 +78,9 @@ pipeline {
          }
 
          stage("Distribution Tests"){
-             when {
+/*             when {
                  branch 'development'
-             }
+             }*/
              parallel {
                  stage("Test Debian Buster") {
                      sh "docker build -f aecid-testsuite/docker/Dockerfile_deb -t aecid/aminer-debian-buster:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID --build-arg=varbranch=development --build-arg=vardistri=debian:buster ."
