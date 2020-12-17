@@ -81,7 +81,7 @@ pipeline {
 //             when {
 //                 branch 'development'
 //             }
-             parallel {
+//             parallel {
                  stage("Test Debian Buster") {
                     steps {
                      sh "docker build -f aecid-testsuite/docker/Dockerfile_deb -t aecid/aminer-debian-buster:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID --build-arg=varbranch=development --build-arg=vardistri=debian:buster ."
@@ -102,7 +102,7 @@ pipeline {
                      sh "docker run --rm aecid/aminer-ubuntu-1804:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
                    }
                  }
-             }
+//             }
          }
     }
     post {
