@@ -78,23 +78,29 @@ pipeline {
          }
 
          stage("Distribution Tests"){
-/*             when {
-                 branch 'development'
-             }*/
+//             when {
+//                 branch 'development'
+//             }
              parallel {
                  stage("Test Debian Buster") {
+                    steps {
                      sh "docker build -f aecid-testsuite/docker/Dockerfile_deb -t aecid/aminer-debian-buster:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID --build-arg=varbranch=development --build-arg=vardistri=debian:buster ."
                      sh "docker run -it --rm aecid/aminer-debian-buster:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
+                   }
                  }
 
 		stage("Test Ubuntu 18.04") {
+                    steps {
                      sh "docker build -f aecid-testsuite/docker/Dockerfile_deb -t aecid/aminer-ubuntu-1804:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID --build-arg=varbranch=development --build-arg=vardistri=ubuntu:18.04 ."
                      sh "docker run -it --rm aecid/aminer-ubuntu-1804:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
+                    }
                  }
 
 		stage("Test Ubuntu 20.04") {
+                    steps {
                      sh "docker build -f aecid-testsuite/docker/Dockerfile_deb -t aecid/aminer-ubuntu-2004:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID --build-arg=varbranch=development --build-arg=vardistri=ubuntu:20.04 ."
                      sh "docker run -it --rm aecid/aminer-ubuntu-1804:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
+                   }
                  }
              }
          }
