@@ -142,13 +142,13 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         # Add the varTypeDetector to the list of the modules, which use the event_type_detector.
         self.event_type_detector.add_following_modules(self)
         if self.event_type_detector.min_num_vals < max(num_init, num_update):
-            msg = 'Changed the parameter min_num_vals of the ETD from %s to %s to prevent errors in the execution of the VTD'%(
+            msg = 'Changed the parameter min_num_vals of the ETD from %s to %s to prevent errors in the execution of the VTD' % (
                     self.event_type_detector.min_num_vals, max(num_init, num_update))
             logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
             self.event_type_detector.min_num_vals = max(num_init, num_update)
         if self.event_type_detector.max_num_vals <= max(num_init, num_update) + 500:
-            msg = 'Changed the parameter max_num_vals of the ETD from %s to %s to prevent errors in the execution of the VTD'%(
+            msg = 'Changed the parameter max_num_vals of the ETD from %s to %s to prevent errors in the execution of the VTD' % (
                     self.event_type_detector.max_num_vals, max(num_init, num_update) + 500)
             logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
