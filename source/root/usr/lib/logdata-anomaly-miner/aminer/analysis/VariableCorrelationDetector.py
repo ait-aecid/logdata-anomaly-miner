@@ -1,5 +1,7 @@
 """This module defines a detector for correlations between discrete variables."""
 import numpy as np
+import logging
+import sys
 
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
@@ -57,10 +59,17 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         # Number of lines after the initialization after which the correlations are periodically tested and updated
         self.num_update = num_update
         if self.event_type_detector.min_num_vals < max(num_init, num_update):
+            msg = 'Changed the parameter min_num_vals of the ETD from %s to %s to prevent errors in the execution of the VCD' % (
+                    self.event_type_detector.min_num_vals, max(num_init, num_update))
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
+            print('WARNING: ' + msg, file=sys.stderr)
             self.event_type_detector.min_num_vals = max(num_init, num_update)
-        if self.event_type_detector.max_num_vals <= max(num_init, num_update):
+        if self.event_type_detector.max_num_vals <= max(num_init, num_update) + 500:
+            msg = 'Changed the parameter max_num_vals of the ETD from %s to %s to prevent errors in the execution of the VCD' % (
+                    self.event_type_detector.max_num_vals, max(num_init, num_update) + 500)
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
+            print('WARNING: ' + msg, file=sys.stderr)
             self.event_type_detector.max_num_vals = max(num_init, num_update) + 500
-
         # Threshold for the number of allowed different values of the distribution to be considderd a correlation
         self.check_cor_thres = check_cor_thres
         # Threshold for the difference of the probability of the values to be considderd a correlation
