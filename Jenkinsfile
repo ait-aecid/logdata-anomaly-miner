@@ -77,7 +77,7 @@ pipeline {
              }
          }
 
-         stage("Distribution Tests"){
+//         stage("Distribution Tests"){
 //             when {
 //                 branch 'development'
 //             }
@@ -103,7 +103,7 @@ pipeline {
                    }
                  }
 //             }
-         }
+//         }
     }
     post {
         always {
