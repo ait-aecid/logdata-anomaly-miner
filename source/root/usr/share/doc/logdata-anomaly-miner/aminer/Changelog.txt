@@ -1,3 +1,33 @@
+V2.2.0 (2020-12-18)
+===================
+
+* Changes:
+  * Added Dockerfile
+  * Addes checks for acl of persistency directory
+  * Added VariableCorrelationDetector
+  * Added tool for managing multiple persistency files
+  * Added supress-list for output
+  * Added suspend-mode to remote-control
+  * Added requirements.txt
+  * Extended documentation
+  * Extended yaml-configuration-support
+  * Standardize command line parameters
+  * Removed --Forground cli parameter
+  * Fixed Security warnings by removing functions that allow race-condition
+  * Refactoring
+  * Ethical correct naming of variables
+  * Enhanced testing
+  * Added statistic outputs
+  * Enhanced status info output
+  * Changed global learn_mode behavior
+  * Added RemoteControlSocket to yaml-config
+  * Reimplemented the default mailnotificationhandler
+* Bugfixes:
+  * Fixed typos in documentation
+  * Fixed issue with the AtomFilter in the yaml-config
+  * Fixed order of ETD in yaml-config
+  * Fixed various issues in persistency
+
 V2.1.0 (2020-11-05)
 ===================
 
