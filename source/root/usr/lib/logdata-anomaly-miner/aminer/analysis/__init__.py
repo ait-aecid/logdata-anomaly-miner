@@ -13,7 +13,7 @@ from aminer.analysis.EventCorrelationDetector import EventCorrelationDetector  #
 from aminer.analysis.EventTypeDetector import EventTypeDetector  # skipcq: FLK-E402
 # skipcq: FLK-E402
 from aminer.analysis.HistogramAnalysis import HistogramAnalysis, LinearNumericBinDefinition, ModuloTimeBinDefinition,\
-    PathDependentHistogramAnalysis
+    PathDependentHistogramAnalysis, BinDefinition, HistogramData
 from aminer.analysis.MatchFilter import MatchFilter  # skipcq: FLK-E402
 from aminer.analysis.MatchValueAverageChangeDetector import MatchValueAverageChangeDetector  # skipcq: FLK-E402
 from aminer.analysis.MatchValueStreamWriter import MatchValueStreamWriter  # skipcq: FLK-E402
@@ -30,9 +30,10 @@ from aminer.analysis.Rules import AndMatchRule, OrMatchRule, AtomFilterMatchActi
     DebugMatchRule, IPv4InRFC1918MatchRule, ModuloTimeMatchRule, NegationMatchRule, ParallelMatchRule, PathExistsMatchRule,\
     StringRegexMatchRule, ValueDependentDelegatedMatchRule, ValueDependentModuloTimeMatchRule, ValueListMatchRule, ValueMatchRule,\
     ValueRangeMatchRule
-from aminer.analysis.TimeCorrelationDetector import TimeCorrelationDetector  # skipcq: FLK-E402
+from aminer.analysis.TimeCorrelationDetector import TimeCorrelationDetector, CorrelationFeature  # skipcq: FLK-E402
 # skipcq: FLK-E402
 from aminer.analysis.TimeCorrelationViolationDetector import TimeCorrelationViolationDetector, CorrelationRule, EventClassSelector
 from aminer.analysis.TimestampCorrectionFilters import SimpleMonotonicTimestampAdjust  # skipcq: FLK-E402
 from aminer.analysis.TimestampsUnsortedDetector import TimestampsUnsortedDetector  # skipcq: FLK-E402
 from aminer.analysis.VariableTypeDetector import VariableTypeDetector  # skipcq: FLK-E402
+from aminer.analysis.VariableCorrelationDetector import VariableCorrelationDetector  # skipcq: FLK-E402

@@ -1,6 +1,6 @@
-# logdata-anomaly-miner [![Build Status](https://travis-ci.com/ait-aecid/logdata-anomaly-miner.svg?branch=master)](https://travis-ci.com/ait-aecid/logdata-anomaly-miner) [![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/ait-aecid/logdata-anomaly-miner/?ref=repository-badge)
+# logdata-anomaly-miner [![Build Status](https://aecidjenkins.ait.ac.at/buildStatus/icon?job=AECID%2FAECID%2Flogdata-anomaly-miner%2Fdevelopment)](https://aecidjenkins.ait.ac.at/job/AECID/job/AECID/job/logdata-anomaly-miner/job/development/) [![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/ait-aecid/logdata-anomaly-miner/?ref=repository-badge)
 
-This tool parses log data and allows to define analysis pipelines for anoamly detection. It was designed to run the analysis with limited resources and lowest possible permissions to make it suitable for production server use.
+This tool parses log data and allows to define analysis pipelines for anomaly detection. It was designed to run the analysis with limited resources and lowest possible permissions to make it suitable for production server use.
 
 [![AECID Demo – Anomaly Detection with AMiner and Reporting to IBM QRadar](https://img.youtube.com/vi/tL7KiMf8NfE/0.jpg)](https://www.youtube.com/watch?v=tL7KiMf8NfE)
 

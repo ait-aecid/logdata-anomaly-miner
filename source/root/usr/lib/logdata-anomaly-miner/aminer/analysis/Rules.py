@@ -19,11 +19,14 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import datetime
 import sys
 import abc
+import logging
 
 from aminer.util import LogarithmicBackoffHistory
 from aminer.util import ObjectHistory
 
 from aminer.analysis.AtomFilters import SubhandlerFilter
+from aminer import AMinerConfig
+from aminer.AMinerConfig import STAT_LEVEL, STAT_LOG_NAME
 
 result_string = '%s(%s)'
 
@@ -75,9 +78,31 @@ class AtomFilterMatchAction(MatchAction, SubhandlerFilter):
 class MatchRule(metaclass=abc.ABCMeta):
     """This is the interface of all match rules."""
 
+    log_success = 0
+    log_total = 0
+
     @abc.abstractmethod
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
+
+    def log_statistics(self, rule_id):
+        """Log statistics of an MatchRule. Override this method for more sophisticated statistics output of the MatchRule."""
+        if STAT_LEVEL > 0:
+            logging.getLogger(STAT_LOG_NAME).info("Rule '%s' processed %d out of %d log atoms successfully in the last 60"
+                                                  " minutes.", rule_id, self.log_success, self.log_total)
+        self.log_success = 0
+        self.log_total = 0
+        if hasattr(self, 'sub_rules'):
+            for i, rule in enumerate(self.sub_rules):
+                rule.log_statistics(rule_id + '.' + rule.__class__.__name__ + str(i))
+        if hasattr(self, 'rule_lookup_dict'):
+            for i, rule_key in enumerate(self.rule_lookup_dict):
+                rule = self.rule_lookup_dict[rule_key]
+                rule.log_statistics(rule_id + '.' + rule.__class__.__name__ + str(i))
+        if hasattr(self, 'default_rule'):
+            self.default_rule.log_statistics(rule_id + '.default_rule.' + self.default_rule.__class__.__name__)
+        if hasattr(self, 'sub_rule'):
+            self.sub_rule.log_statistics(rule_id + '.' + self.sub_rule.__class__.__name__)
 
 
 class AndMatchRule(MatchRule):
@@ -97,11 +122,13 @@ class AndMatchRule(MatchRule):
         If a matchAction is attached to this rule, it will be invoked at the end of all checks.
         @return True when all subrules matched.
         """
+        self.log_total += 1
         for rule in self.sub_rules:
             if not rule.match(log_atom):
                 return False
         if self.match_action is not None:
             self.match_action.match_action(log_atom)
+        self.log_success += 1
         return True
 
     def __str__(self):
@@ -130,10 +157,12 @@ class OrMatchRule(MatchRule):
         If a matchAction is attached to this rule, it will be invoked after the first match.
         @return True when any subrule matched.
         """
+        self.log_total += 1
         for rule in self.sub_rules:
             if rule.match(log_atom):
                 if self.match_action is not None:
                     self.match_action.match_action(log_atom)
+                self.log_success += 1
                 return True
         return False
 
@@ -167,12 +196,15 @@ class ParallelMatchRule(MatchRule):
         If a matchAction is attached to this rule, it will be invoked at the end of all checks.
         @return True when any subrule matched.
         """
+        self.log_total += 1
         match_flag = False
         for rule in self.sub_rules:
             if rule.match(log_atom):
                 match_flag = True
         if match_flag and (self.match_action is not None):
             self.match_action.match_action(log_atom)
+        if match_flag:
+            self.log_success += 1
         return match_flag
 
     def __str__(self):
@@ -210,6 +242,7 @@ class ValueDependentDelegatedMatchRule(MatchRule):
         Try to locate a rule for delegation or use the default rule.
         @return True when selected delegation rule matched.
         """
+        self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
         value_list = []
         for path in self.value_path_list:
@@ -224,6 +257,7 @@ class ValueDependentDelegatedMatchRule(MatchRule):
         if rule.match(log_atom):
             if self.match_action is not None:
                 self.match_action.match_action(log_atom)
+            self.log_success += 1
             return True
         return False
 
@@ -241,10 +275,12 @@ class NegationMatchRule(MatchRule):
 
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
+        self.log_total += 1
         if self.sub_rule.match(log_atom):
             return False
         if self.match_action is not None:
             self.match_action.match_action(log_atom)
+        self.log_success += 1
         return True
 
     def __str__(self):
@@ -260,9 +296,11 @@ class PathExistsMatchRule(MatchRule):
 
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
+        self.log_total += 1
         if self.path in log_atom.parser_match.get_match_dictionary():
             if self.match_action is not None:
                 self.match_action.match_action(log_atom)
+            self.log_success += 1
             return True
         return False
 
@@ -280,6 +318,7 @@ class ValueMatchRule(MatchRule):
 
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
+        self.log_total += 1
         test_value = log_atom.parser_match.get_match_dictionary().get(self.path, None)
         if test_value is not None:
             if isinstance(self.value, bytes) and not isinstance(test_value.match_object, bytes) and test_value.match_object is not None:
@@ -289,6 +328,7 @@ class ValueMatchRule(MatchRule):
         if (test_value is not None) and (test_value.match_object == self.value):
             if self.match_action is not None:
                 self.match_action.match_action(log_atom)
+            self.log_success += 1
             return True
         return False
 
@@ -308,15 +348,17 @@ class ValueListMatchRule(MatchRule):
 
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
+        self.log_total += 1
         test_value = log_atom.parser_match.get_match_dictionary().get(self.path, None)
         if (test_value is not None) and (test_value.match_object in self.value_list):
             if self.match_action is not None:
                 self.match_action.match_action(log_atom)
+            self.log_success += 1
             return True
         return False
 
     def __str__(self):
-        return 'value(%s) in %s' % (self.path, ' '.join(self.value_list))
+        return 'value(%s) in %s' % (' '.join([str(value) for value in self.value_list]), self.path)
 
 
 class ValueRangeMatchRule(MatchRule):
@@ -330,6 +372,7 @@ class ValueRangeMatchRule(MatchRule):
 
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
+        self.log_total += 1
         test_value = log_atom.parser_match.get_match_dictionary().get(self.path, None)
         if test_value is None:
             return False
@@ -337,6 +380,7 @@ class ValueRangeMatchRule(MatchRule):
         if self.lower_limit <= test_value <= self.upper_limit:
             if self.match_action is not None:
                 self.match_action.match_action(log_atom)
+            self.log_success += 1
             return True
         return False
 
@@ -354,12 +398,14 @@ class StringRegexMatchRule(MatchRule):
 
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
+        self. log_total += 1
         # Use the class object as marker for nonexisting entries
         test_value = log_atom.parser_match.get_match_dictionary().get(self.path, None)
         if (test_value is None) or (self.match_regex.match(test_value.match_string) is None):
             return False
         if self.match_action is not None:
             self.match_action.match_action(log_atom)
+        self.log_success += 1
         return True
 
     def __str__(self):
@@ -389,6 +435,7 @@ class ModuloTimeMatchRule(MatchRule):
 
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
+        self.log_total += 1
         test_value = None
         if self.path is None:
             test_value = log_atom.get_timestamp()
@@ -404,6 +451,7 @@ class ModuloTimeMatchRule(MatchRule):
         if self.lower_limit <= test_value <= self.upper_limit:
             if self.match_action is not None:
                 self.match_action.match_action(log_atom)
+            self.log_success += 1
             return True
         return False
 
@@ -434,6 +482,7 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
 
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
+        self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
         value_list = []
         for path in self.value_path_list:
@@ -461,6 +510,7 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
         if limits[0] <= test_value <= limits[1]:
             if self.match_action is not None:
                 self.match_action.match_action(log_atom)
+            self.log_success += 1
             return True
         return False
 
@@ -477,6 +527,7 @@ class IPv4InRFC1918MatchRule(MatchRule):
 
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
+        self.log_total += 1
         match_element = log_atom.parser_match.get_match_dictionary().get(self.path, None)
         if (match_element is None) or not isinstance(match_element.match_object, int):
             return False
@@ -484,6 +535,7 @@ class IPv4InRFC1918MatchRule(MatchRule):
         if ((value & 0xff000000) == 0xa000000) or ((value & 0xfff00000) == 0xac100000) or ((value & 0xffff0000) == 0xc0a80000):
             if self.match_action is not None:
                 self.match_action.match_action(log_atom)
+            self.log_success += 1
             return True
         return False
 
@@ -504,10 +556,12 @@ class DebugMatchRule(MatchRule):
 
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
+        self.log_total += 1
         print('Rules.DebugMatchRule: triggered while handling "%s"' % repr(log_atom.parser_match.match_element.match_string),
               file=sys.stderr)
         if self.matchAction is not None:
             self.matchAction.match_action(log_atom)
+        self.log_success += 1
         return self.debug_match_result
 
     def __str__(self):
@@ -528,16 +582,20 @@ class DebugHistoryMatchRule(MatchRule):
         if object_history is None:
             object_history = LogarithmicBackoffHistory(10)
         elif not isinstance(object_history, ObjectHistory):
-            raise Exception('objectHistory is not an instance of ObjectHistory')
+            msg = 'object_history is not an instance of ObjectHistory'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         self.object_history = object_history
         self.debug_match_result = debug_match_result
         self.match_action = match_action
 
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
+        self.log_total += 1
         self.object_history.add_object(log_atom)
         if self.match_action is not None:
             self.match_action.match_action(log_atom)
+        self.log_success += 1
         return self.debug_match_result
 
     def get_history(self):

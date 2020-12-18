@@ -12,19 +12,26 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
-import email.mime.text
-import os
-import tempfile
-import subprocess  # skipcq: BAN-B404
 import shlex
-import sys
 import time
 import re
+from smtplib import SMTP, SMTPException
+import logging
+import sys
 
+from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.events import EventHandlerInterface
 from aminer.events.EventData import EventData
+
+
+_message_str = """From: %s
+To: %s
+Subject: %s
+
+%s
+"""
 
 
 class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredComponentInterface):
@@ -51,11 +58,15 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
         self.recipient_address = shlex.quote(
             aminer_config.config_properties.get(DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS))
         if self.recipient_address is None:
-            raise Exception('Cannot create e-mail notification listener without target address')
+            msg = 'Cannot create e-mail notification listener without target address'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         self.sender_address = shlex.quote(
             aminer_config.config_properties.get(DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_FROM_ADDRESS))
         if not is_email.match(self.recipient_address) or not is_email.match(self.sender_address):
-            raise Exception('MailAlerting.TargetAddress and MailAlerting.FromAddress must be email addresses!')
+            msg = 'MailAlerting.TargetAddress and MailAlerting.FromAddress must be email addresses!'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
 
         self.subject_prefix = shlex.quote(
             aminer_config.config_properties.get(DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_SUBJECT_PREFIX, 'AMiner Alerts:'))
@@ -75,18 +86,19 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
         self.current_alert_gap = self.min_alert_gap
         self.current_message = ''
 
-        # Locate the sendmail binary immediately at startup to avoid delayed errors due to misconfiguration.
-        self.sendmail_binary_path = '/usr/sbin/sendmail'
-        if not os.path.exists(self.sendmail_binary_path):
-            raise Exception('sendmail binary not found')
-        self.running_sendmail_processes = []
-
     def receive_event(self, event_type, event_message, sorted_log_lines, event_data, log_atom, event_source):
         """Receive information about a detected event."""
+        if hasattr(event_source, 'output_event_handlers') and event_source.output_event_handlers is not None and self not in \
+                event_source.output_event_handlers:
+            return
         if self.alert_grace_time_end != 0:
             if self.alert_grace_time_end >= time.time():
                 return
             self.alert_grace_time_end = 0
+
+        component_name = self.analysis_context.get_name_by_component(event_source)
+        if component_name in self.analysis_context.suppress_detector_list:
+            return
 
         # Avoid too many calls to the operating system time()
         current_time = time.time()
@@ -130,18 +142,6 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
 
     def do_timer(self, trigger_time):
         """Check exit status of previous mail sending procedures and check if alerts should be sent."""
-        # Cleanup old sendmail processes.
-        if self.running_sendmail_processes:
-            running_processes = []
-            for process in self.running_sendmail_processes:
-                process.poll()
-                if process.returncode is None:
-                    running_processes.append(process)
-                    continue
-                if process.returncode != 0:
-                    print('WARNING: Sending mail terminated with error %d' % process.returncode, file=sys.stderr)
-            self.running_sendmail_processes = running_processes
-
         if (self.next_alert_time != 0) and (trigger_time >= self.next_alert_time):
             self.send_notification(trigger_time)
         return 10
@@ -150,34 +150,21 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
         """Really send out the message."""
         if self.events_collected == 0:
             return
-
-        # Write whole message to file to allow sendmail send it asynchronously.
-        message_tmp_file = tempfile.TemporaryFile()
-        message = email.mime.text.MIMEText(self.current_message)
         subject_text = '%s Collected Events' % self.subject_prefix
         if self.last_alert_time != 0:
             subject_text += ' in the last %d seconds' % (trigger_time - self.last_alert_time)
-        message['Subject'] = subject_text
-        if self.sender_address is not None:
-            message['From'] = self.sender_address
-        message['To'] = self.recipient_address
-        message_tmp_file.write(message.as_bytes())
-
-        # Rewind before handling over the fd to sendmail.
-        message_tmp_file.seek(0)
-
-        sendmail_args = ['sendmail']
-        if self.sender_address is not None:
-            sendmail_args += ['-f', self.sender_address]
-        sendmail_args.append(self.recipient_address)
-        # Start the sendmail process. Use close_fds to avoid leaking of any open file descriptors to the new client.
-        # skipcq: BAN-B603
-        process = subprocess.Popen(sendmail_args, executable=self.sendmail_binary_path, stdin=message_tmp_file, close_fds=True)
-        # Just append the process to the list of running processes. It will remain in zombie state until next invocation of list cleanup.
-        self.running_sendmail_processes.append(process)
-        message_tmp_file.close()
-
+        message = _message_str % (self.sender_address, self.recipient_address, subject_text, self.current_message)
+        try:
+            # timeout explicitly needs to be set None, because in python version < 3.7 socket.settimeout() sets the socket type
+            # SOCK_NONBLOCKING and the code fails.
+            smtp_obj = SMTP('127.0.0.1', port=25, timeout=5)
+            smtp_obj.sendmail(self.sender_address, self.recipient_address, message)
+            smtp_obj.quit()
+        except SMTPException as e:
+            print(e, file=sys.stderr)
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(e)
         self.last_alert_time = trigger_time
         self.events_collected = 0
         self.current_message = ''
         self.next_alert_time = 0
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s sent notification.', self.__class__.__name__)

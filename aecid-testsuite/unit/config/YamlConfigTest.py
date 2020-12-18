@@ -3,6 +3,7 @@ import importlib
 import yaml
 import sys
 import aminer.AMinerConfig as AMinerConfig
+from datetime import datetime
 from aminer.AnalysisChild import AnalysisContext
 from aminer.analysis.AtomFilters import SubhandlerFilter
 from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
@@ -33,24 +34,31 @@ from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueMo
 from aminer.parsing.RepeatedElementDataModelElement import RepeatedElementDataModelElement
 from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
 from aminer.parsing.ElementValueBranchModelElement import ElementValueBranchModelElement
+from aminer.parsing.MatchContext import MatchContext
+from aminer.parsing.ParserMatch import ParserMatch
+from aminer.input.LogAtom import LogAtom
+from time import time
+from unit.TestBase import TestBase
 
 
-class YamlConfigTest(unittest.TestCase):
+class YamlConfigTest(TestBase):
     """Unittests for the YamlConfig."""
 
     sysp = sys.path
 
     def setUp(self):
         """Add the aminer syspath."""
+        TestBase.setUp(self)
         sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
 
     def tearDown(self):
         """Reset the syspath."""
+        TestBase.tearDown(self)
         sys.path = self.sysp
 
     def test1_load_generic_yaml_file(self):
         """Loads a yaml file into the variable aminer_config.yaml_data."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         aminer_config.load_yaml('unit/data/configfiles/template_config.yml')
@@ -58,7 +66,7 @@ class YamlConfigTest(unittest.TestCase):
 
     def test2_load_notexistent_yaml_file(self):
         """Tries to load a nonexistent yaml file. A FileNotFoundError is expected."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         with self.assertRaises(FileNotFoundError):
@@ -66,7 +74,7 @@ class YamlConfigTest(unittest.TestCase):
 
     def test3_load_invalid_yaml_file(self):
         """Tries to load a file with invalid yaml syntax. Expects an YAMLError."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         with self.assertRaises(yaml.YAMLError):
@@ -74,7 +82,7 @@ class YamlConfigTest(unittest.TestCase):
 
     def test4_load_yaml_file_with_invalid_schema(self):
         """Tries to load a yaml-file with an invalid schema. A ValueError is expected."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         with self.assertRaises(ValueError):
@@ -82,26 +90,27 @@ class YamlConfigTest(unittest.TestCase):
 
     def test5_analysis_pipeline_working_config(self):
         """This test builds a analysis_pipeline from a valid yaml-file."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         aminer_config.load_yaml('unit/data/configfiles/multiple_components.yml')
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        self.assertTrue(isinstance(context.registered_components[0][0], NewMatchPathDetector))
-        self.assertTrue(isinstance(context.registered_components[1][0], TimestampsUnsortedDetector))
-        self.assertTrue(isinstance(context.registered_components[2][0], NewMatchPathValueDetector))
-        self.assertTrue(isinstance(context.registered_components[3][0], NewMatchPathValueComboDetector))
-        self.assertTrue(isinstance(context.registered_components[4][0], HistogramAnalysis))
-        self.assertTrue(isinstance(context.registered_components[5][0], PathDependentHistogramAnalysis))
-        self.assertTrue(isinstance(context.registered_components[6][0], EnhancedNewMatchPathValueComboDetector))
-        self.assertTrue(isinstance(context.registered_components[7][0], MatchFilter))
-        self.assertTrue(isinstance(context.registered_components[8][0], MatchValueAverageChangeDetector))
-        self.assertTrue(isinstance(context.registered_components[9][0], MatchValueStreamWriter))
-        self.assertTrue(isinstance(context.registered_components[10][0], NewMatchPathDetector))
-        self.assertTrue(isinstance(context.registered_components[11][0], TimeCorrelationViolationDetector))
-        self.assertTrue(isinstance(context.registered_components[12][0], SimpleMonotonicTimestampAdjust))
-        self.assertTrue(isinstance(context.registered_components[13][0], AllowlistViolationDetector))
+        self.assertTrue(isinstance(context.registered_components[0][0], SubhandlerFilter))
+        self.assertTrue(isinstance(context.registered_components[1][0], NewMatchPathDetector))
+        self.assertTrue(isinstance(context.registered_components[2][0], TimestampsUnsortedDetector))
+        self.assertTrue(isinstance(context.registered_components[3][0], NewMatchPathValueDetector))
+        self.assertTrue(isinstance(context.registered_components[4][0], NewMatchPathValueComboDetector))
+        self.assertTrue(isinstance(context.registered_components[5][0], HistogramAnalysis))
+        self.assertTrue(isinstance(context.registered_components[6][0], PathDependentHistogramAnalysis))
+        self.assertTrue(isinstance(context.registered_components[7][0], EnhancedNewMatchPathValueComboDetector))
+        self.assertTrue(isinstance(context.registered_components[8][0], MatchFilter))
+        self.assertTrue(isinstance(context.registered_components[9][0], MatchValueAverageChangeDetector))
+        self.assertTrue(isinstance(context.registered_components[10][0], MatchValueStreamWriter))
+        self.assertTrue(isinstance(context.registered_components[11][0], NewMatchPathDetector))
+        self.assertTrue(isinstance(context.registered_components[12][0], TimeCorrelationViolationDetector))
+        self.assertTrue(isinstance(context.registered_components[13][0], SimpleMonotonicTimestampAdjust))
+        self.assertTrue(isinstance(context.registered_components[14][0], AllowlistViolationDetector))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[1], SyslogWriterEventHandler))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[2], DefaultMailNotificationEventHandler))
@@ -131,7 +140,7 @@ class YamlConfigTest(unittest.TestCase):
 
     def test6_analysis_fail_without_parser_start(self):
         """This test checks if the aminer fails without a start-tag for the first parser-model."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         with self.assertRaises(ValueError):
@@ -139,7 +148,7 @@ class YamlConfigTest(unittest.TestCase):
 
     def test7_analysis_fail_with_double_parser_start(self):
         """This test checks if the aminer fails without a start-tag for the first parser-model."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         with self.assertRaises(ValueError):
@@ -147,7 +156,7 @@ class YamlConfigTest(unittest.TestCase):
 
     def test8_analysis_fail_with_unknown_parser_start(self):
         """This test checks if the config-schema-validator raises an error if an unknown parser is configured."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         with self.assertRaises(ValueError):
@@ -155,7 +164,7 @@ class YamlConfigTest(unittest.TestCase):
 
     def test9_analysis_pipeline_working_config_without_analysis_components(self):
         """This test checks if the config can be loaded without any analysis components."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         aminer_config.load_yaml('unit/data/configfiles/multiple_components_null_analysis_components.yml')
@@ -170,7 +179,7 @@ class YamlConfigTest(unittest.TestCase):
 
     def test10_analysis_fail_with_unknown_analysis_component(self):
         """This test checks if the config-schema-validator raises an error if an unknown analysis component is configured."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         with self.assertRaises(ValueError):
@@ -178,7 +187,7 @@ class YamlConfigTest(unittest.TestCase):
 
     def test11_analysis_fail_with_unknown_event_handler(self):
         """This test checks if the config-schema-validator raises an error if an unknown event handler is configured."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         with self.assertRaises(ValueError):
@@ -189,7 +198,7 @@ class YamlConfigTest(unittest.TestCase):
         This test checks if the config can be loaded without any event handler components.
         This also tests if the StreamPrinterEventHandler was loaded by default.
         """
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         aminer_config.load_yaml('unit/data/configfiles/multiple_components_null_event_handlers.yml')
@@ -204,13 +213,14 @@ class YamlConfigTest(unittest.TestCase):
 
     def test13_analysis_pipeline_working_with_json(self):
         """This test checks if JsonConverterHandler is working properly."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         aminer_config.load_yaml('unit/data/configfiles/json_config.yml')
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        self.assertTrue(isinstance(context.registered_components[0][0], NewMatchPathDetector))
+        self.assertTrue(isinstance(context.registered_components[0][0], SubhandlerFilter))
+        self.assertTrue(isinstance(context.registered_components[1][0], NewMatchPathDetector))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], JsonConverterHandler))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0].json_event_handlers[0], StreamPrinterEventHandler))
         self.assertEqual(context.atomizer_factory.default_timestamp_paths, ['/accesslog/time'])
@@ -219,59 +229,62 @@ class YamlConfigTest(unittest.TestCase):
 
     def test14_analysis_pipeline_working_with_learnMode(self):
         """This test checks if learnMode is working properly."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         aminer_config.load_yaml('unit/data/configfiles/learnMode_config.yml')
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        self.assertTrue(isinstance(context.registered_components[0][0], NewMatchPathDetector))
-        self.assertTrue(isinstance(context.registered_components[1][0], NewMatchPathValueDetector))
-        self.assertTrue(isinstance(context.registered_components[2][0], NewMatchPathValueComboDetector))
+        self.assertTrue(isinstance(context.registered_components[0][0], SubhandlerFilter))
+        self.assertTrue(isinstance(context.registered_components[1][0], NewMatchPathDetector))
+        self.assertTrue(isinstance(context.registered_components[2][0], NewMatchPathValueDetector))
+        self.assertTrue(isinstance(context.registered_components[3][0], NewMatchPathValueComboDetector))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
         self.assertEqual(context.atomizer_factory.default_timestamp_paths, ['/accesslog/time'])
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model, SequenceModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[0], VariableByteDataModelElement))
 
-        # learnMode: True should ignore all learn_mode arguments.
-        for key in context.registered_components:
-            self.assertTrue(context.registered_components[key][0].auto_include_flag)
+        # specific learn_mode arguments should be preferred.
+        context = AnalysisContext(aminer_config)
+        context.build_analysis_pipeline()
+        self.assertTrue(context.registered_components[1][0].auto_include_flag)
+        self.assertTrue(context.registered_components[2][0].auto_include_flag)
+        self.assertFalse(context.registered_components[3][0].auto_include_flag)
 
-        # learnMode: False should ignore all learn_mode arguments.
+        # unset specific learn_mode parameters and set LearnMode True.
+        for component in aminer_config.yaml_data['Analysis']:
+            del component['learn_mode']
+        context = AnalysisContext(aminer_config)
+        context.build_analysis_pipeline()
+        for key in context.registered_components:
+            if hasattr(context.registered_components[key][0], 'auto_include_flag'):
+                self.assertTrue(context.registered_components[key][0].auto_include_flag)
+
+        # unset specific learn_mode parameters and set LearnMode False.
         aminer_config.yaml_data['LearnMode'] = False
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
         for key in context.registered_components:
-            self.assertFalse(context.registered_components[key][0].auto_include_flag)
+            if hasattr(context.registered_components[key][0], 'auto_include_flag'):
+                self.assertFalse(context.registered_components[key][0].auto_include_flag)
 
-        # unset learnMode: use learn_mode arguments
+        # unset LearnMode config property. An Error should be raised.
         del aminer_config.yaml_data['LearnMode']
         context = AnalysisContext(aminer_config)
-        context.build_analysis_pipeline()
-        self.assertTrue(context.registered_components[0][0].auto_include_flag)
-        self.assertTrue(context.registered_components[1][0].auto_include_flag)
-        self.assertFalse(context.registered_components[2][0].auto_include_flag)
-
-        # unset learnMode and set learn_mode to default arguments: by default True should be used.
-        for component in aminer_config.yaml_data['Analysis']:
-            component['learn_mode'] = True
-        context = AnalysisContext(aminer_config)
-        context.build_analysis_pipeline()
-        self.assertTrue(context.registered_components[0][0].auto_include_flag)
-        self.assertTrue(context.registered_components[1][0].auto_include_flag)
-        self.assertTrue(context.registered_components[2][0].auto_include_flag)
+        self.assertRaises(ValueError, context.build_analysis_pipeline)
 
     def test15_analysis_pipeline_working_with_input_parameters(self):
         """This test checks if the SimpleMultisourceAtomSync and SimpleByteStreamLineAtomizerFactory are working properly."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         aminer_config.load_yaml('unit/data/configfiles/multiSource_config.yml')
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        self.assertTrue(isinstance(context.registered_components[0][0], NewMatchPathDetector))
-        self.assertTrue(isinstance(context.registered_components[1][0], NewMatchPathValueDetector))
-        self.assertTrue(isinstance(context.registered_components[2][0], NewMatchPathValueComboDetector))
+        self.assertTrue(isinstance(context.registered_components[0][0], SubhandlerFilter))
+        self.assertTrue(isinstance(context.registered_components[1][0], NewMatchPathDetector))
+        self.assertTrue(isinstance(context.registered_components[2][0], NewMatchPathValueDetector))
+        self.assertTrue(isinstance(context.registered_components[3][0], NewMatchPathValueComboDetector))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
         self.assertEqual(context.atomizer_factory.default_timestamp_paths, ['/model/accesslog/time'])
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model, SequenceModelElement))
@@ -292,15 +305,16 @@ class YamlConfigTest(unittest.TestCase):
 
     def test16_parsermodeltype_parameter_for_another_parsermodel_type(self):
         """This test checks if all ModelElements with child elements are working properly."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         aminer_config.load_yaml('unit/data/configfiles/parser_child_elements_config.yml')
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        self.assertTrue(isinstance(context.registered_components[0][0], NewMatchPathDetector))
-        self.assertTrue(isinstance(context.registered_components[1][0], NewMatchPathValueDetector))
-        self.assertTrue(isinstance(context.registered_components[2][0], NewMatchPathValueComboDetector))
+        self.assertTrue(isinstance(context.registered_components[0][0], SubhandlerFilter))
+        self.assertTrue(isinstance(context.registered_components[1][0], NewMatchPathDetector))
+        self.assertTrue(isinstance(context.registered_components[2][0], NewMatchPathValueDetector))
+        self.assertTrue(isinstance(context.registered_components[3][0], NewMatchPathValueComboDetector))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
         self.assertEqual(context.atomizer_factory.default_timestamp_paths, ['/model/accesslog/time'])
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model, FirstMatchModelElement))
@@ -353,7 +367,7 @@ class YamlConfigTest(unittest.TestCase):
 
     def test17_demo_yaml_config_equals_python_config(self):
         """This test checks if the yaml demo config is the same as the python version."""
-        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/ymlconfig.py')
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         aminer_config.load_yaml('demo/AMiner/demo-config.yml')
@@ -370,8 +384,10 @@ class YamlConfigTest(unittest.TestCase):
         del yml_config_properties['Input']
         del yml_config_properties['Analysis']
         del yml_config_properties['EventHandlers']
+        del yml_config_properties['LearnMode']
+        del yml_config_properties['SuppressNewMatchPathDetector']
 
-        # remove SimpleUnparsedAtomHandler, VerboseUnparsedAtomHandler and NewMatchPathDetector as they are added by the ymlconfig.
+        # remove SimpleUnparsedAtomHandler, VerboseUnparsedAtomHandler and NewMatchPathDetector as they are added by the YamlConfig.
         py_registered_components = copy.copy(py_context.registered_components)
         del py_registered_components[0]
         del py_registered_components[1]
@@ -379,6 +395,7 @@ class YamlConfigTest(unittest.TestCase):
         del py_registered_components[10]
         yml_registered_components = copy.copy(yml_context.registered_components)
         del yml_registered_components[0]
+        del yml_registered_components[1]
         tmp = {}
         keys = list(py_registered_components.keys())
         for i in range(1, len(py_registered_components)+1):
@@ -390,12 +407,13 @@ class YamlConfigTest(unittest.TestCase):
         del py_registered_components_by_name['NewMatchPath']
         del py_registered_components_by_name['SimpleMonotonicTimestampAdjust']
         yml_registered_components_by_name = copy.copy(yml_context.registered_components_by_name)
-        del yml_registered_components_by_name['NewMatchPathDetector0']
+        del yml_registered_components_by_name['DefaultNewMatchPathDetector']
+        del yml_registered_components_by_name['AtomFilter']
 
         self.assertEqual(yml_config_properties, py_context.aminer_config.config_properties)
         # there actually is no easy way to compare AMiner components as they do not implement the __eq__ method.
         self.assertEqual(len(yml_registered_components), len(py_registered_components))
-        for i in range(1, len(yml_registered_components)):
+        for i in range(2, len(yml_registered_components)):
             self.assertEqual(type(yml_registered_components[i]), type(py_registered_components[i]))
         self.assertEqual(yml_registered_components_by_name.keys(), py_registered_components_by_name.keys())
         for name in yml_registered_components_by_name.keys():
@@ -405,9 +423,134 @@ class YamlConfigTest(unittest.TestCase):
         self.assertEqual(yml_context.atomizer_factory.default_timestamp_paths, py_context.atomizer_factory.default_timestamp_paths)
         self.assertEqual(type(yml_context.atomizer_factory.event_handler_list), type(py_context.atomizer_factory.event_handler_list))
 
+    def test18_etd_order(self):
+        """Loads the template_config and checks if the position of the ETD was changed as expected."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        aminer_config.load_yaml('unit/data/configfiles/template_config.yml')
+        context = AnalysisContext(aminer_config)
+        context.build_analysis_pipeline()
+        self.assertEqual(context.aminer_config.yaml_data['Analysis'][0]['type'].name, 'EventTypeDetector')
+        self.assertEqual(context.aminer_config.yaml_data['Analysis'][1]['type'].name, 'NewMatchPathValueDetector')
+        self.assertEqual(context.aminer_config.yaml_data['Analysis'][2]['type'].name, 'NewMatchPathValueComboDetector')
+        self.assertEqual(context.aminer_config.yaml_data['Analysis'][3]['type'].name, 'NewMatchPathValueComboDetector')
+
+    def test19_stream_printer_output_file(self):
+        """Check if the output_file_path property of StreamPrinterEventHandler works properly."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        aminer_config.load_yaml('unit/data/configfiles/template_config.yml')
+        context = AnalysisContext(aminer_config)
+        context.build_analysis_pipeline()
+        self.assertEqual(context.atomizer_factory.event_handler_list[0].stream.name, '/tmp/streamPrinter.txt')
+        self.assertEqual(context.atomizer_factory.event_handler_list[0].stream.mode, 'w+')
+
+    def test20_suppress_output(self):
+        """
+        Check if the suppress property and SuppressNewMatchPathDetector are working as expected.
+        This test only includes the StreamPrinterEventHandler.
+        """
+        __expected_string1 = '%s New path(es) detected\n%s: "%s" (%d lines)\n  %s\n%s\n\n'
+        t = time()
+        fixed_dme = FixedDataModelElement('s1', b' pid=')
+        match_context_fixed_dme = MatchContext(b' pid=')
+        match_element_fixed_dme = fixed_dme.get_match_element("", match_context_fixed_dme)
+        log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme), t, 'DefaultNewMatchPathDetector')
+        datetime_format_string = '%Y-%m-%d %H:%M:%S'
+        match_path_s1 = "['/s1']"
+        pid = "b' pid='"
+        __expected_string2 = '%s New value combination(s) detected\n%s: "%s" (%d lines)\n%s\n\n'
+        fixed_dme2 = FixedDataModelElement('s1', b'25537 uid=')
+        decimal_integer_value_me = DecimalIntegerValueModelElement(
+            'd1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+        match_context_sequence_me = MatchContext(b'25537 uid=2')
+        seq = SequenceModelElement('seq', [fixed_dme2, decimal_integer_value_me])
+        match_element_sequence_me = seq.get_match_element('first', match_context_sequence_me)
+        string2 = "  (b'25537 uid=', 2)\nb'25537 uid=2'"
+
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        aminer_config.load_yaml('unit/data/configfiles/suppress_config.yml')
+        context = AnalysisContext(aminer_config)
+        context.build_analysis_pipeline()
+
+        context.aminer_config.yaml_data['SuppressNewMatchPathDetector'] = False
+        self.stream_printer_event_handler = context.atomizer_factory.event_handler_list[0]
+        self.stream_printer_event_handler.stream = self.output_stream
+        default_nmpd = context.registered_components[1][0]
+        default_nmpd.output_log_line = False
+        self.assertTrue(default_nmpd.receive_atom(log_atom_fixed_dme))
+        self.assertEqual(self.output_stream.getvalue(), __expected_string1 % (
+            datetime.fromtimestamp(t).strftime(datetime_format_string), default_nmpd.__class__.__name__, 'DefaultNewMatchPathDetector', 1,
+            match_path_s1, pid))
+        self.reset_output_stream()
+
+        context.aminer_config.yaml_data['SuppressNewMatchPathDetector'] = True
+        context = AnalysisContext(aminer_config)
+        context.build_analysis_pipeline()
+        self.stream_printer_event_handler = context.atomizer_factory.event_handler_list[0]
+        self.stream_printer_event_handler.stream = self.output_stream
+        default_nmpd = context.registered_components[1][0]
+        default_nmpd.output_log_line = False
+        self.assertTrue(default_nmpd.receive_atom(log_atom_fixed_dme))
+        self.assertEqual(self.output_stream.getvalue(), "")
+        self.reset_output_stream()
+
+        value_combo_det = context.registered_components[2][0]
+        log_atom_sequence_me = LogAtom(match_element_sequence_me.get_match_string(), ParserMatch(match_element_sequence_me), t,
+                                       value_combo_det)
+        self.stream_printer_event_handler = context.atomizer_factory.event_handler_list[0]
+        self.stream_printer_event_handler.stream = self.output_stream
+        self.assertTrue(value_combo_det.receive_atom(log_atom_sequence_me))
+        self.assertEqual(self.output_stream.getvalue(), __expected_string2 % (
+            datetime.fromtimestamp(t).strftime(datetime_format_string), value_combo_det.__class__.__name__,
+            'ValueComboDetector', 1, string2))
+        self.reset_output_stream()
+
+        context.aminer_config.yaml_data['Analysis'][0]['suppress'] = True
+        context = AnalysisContext(aminer_config)
+        context.build_analysis_pipeline()
+        value_combo_det = context.registered_components[1][0]
+        self.stream_printer_event_handler = context.atomizer_factory.event_handler_list[0]
+        self.stream_printer_event_handler.stream = self.output_stream
+        self.assertTrue(value_combo_det.receive_atom(log_atom_sequence_me))
+        self.assertEqual(self.output_stream.getvalue(), "")
+        self.reset_output_stream()
+
+    def test21_suppress_output_no_id_error(self):
+        """Check if an error is raised if no id parameter is defined."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        aminer_config.load_yaml('unit/data/configfiles/suppress_config.yml')
+        aminer_config.yaml_data['Analysis'][0]['id'] = None
+        aminer_config.yaml_data['Analysis'][0]['suppress'] = True
+        context = AnalysisContext(aminer_config)
+        self.assertRaises(ValueError, context.build_analysis_pipeline)
+
+    def test22_set_output_handlers(self):
+        """Check if setting the output_event_handlers is working as expected."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        aminer_config.load_yaml('unit/data/configfiles/template_config.yml')
+        context = AnalysisContext(aminer_config)
+        context.build_analysis_pipeline()
+        for index in context.registered_components:
+            component = context.registered_components[index]
+            if component[1] == 'EventTypeDetector':
+                self.assertEqual(1, len(component[0].output_event_handlers))
+                self.assertEqual(StreamPrinterEventHandler, type(component[0].output_event_handlers[0]))
+            else:
+                self.assertEqual(None, component[0].output_event_handlers)
+
     def run_empty_components_tests(self, context):
         """Run the empty components tests."""
-        self.assertTrue(isinstance(context.registered_components[0][0], NewMatchPathDetector))
+        self.assertTrue(isinstance(context.registered_components[0][0], SubhandlerFilter))
+        self.assertTrue(isinstance(context.registered_components[1][0], NewMatchPathDetector))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
         self.assertEqual(context.atomizer_factory.default_timestamp_paths, ['/accesslog/time'])
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model, SequenceModelElement))

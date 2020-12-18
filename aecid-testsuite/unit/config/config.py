@@ -38,11 +38,11 @@ config_properties['Core.PersistenceDir'] = '/tmp/lib/aminer'
 
 # Define a target e-mail address to send alerts to. When undefined,
 # no e-mail notification hooks are added.
-config_properties['MailAlerting.TargetAddress'] = 'root@localhost'
+config_properties['MailAlerting.TargetAddress'] = 'mail@localhost'
 # Sender address of e-mail alerts. When undefined, "sendmail"
 # implementation on host will decide, which sender address should
 # be used.
-config_properties['MailAlerting.FromAddress'] = 'root@localhost'
+config_properties['MailAlerting.FromAddress'] = 'mail@localhost'
 # Define, which text should be prepended to the standard aminer
 # subject. Defaults to "py Alerts:"
 config_properties['MailAlerting.SubjectPrefix'] = 'AMiner Alerts:'

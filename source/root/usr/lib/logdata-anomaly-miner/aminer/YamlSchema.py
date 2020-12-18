@@ -4,6 +4,11 @@
             'required': False,
             'type': 'boolean'
         },
+        'SuppressNewMatchPathDetector': {
+            'required': False,
+            'type': 'boolean',
+            'default': False
+        },
         'AMinerUser': {
             'required': False,
             'type': 'string',
@@ -14,10 +19,19 @@
             'type': 'string',
             'default': 'aminer'
         },
+        'RemoteControlSocket': {
+            'required': False,
+            'type': 'string'
+        },
         'Core.PersistenceDir': {
             'required': False,
             'type': 'string',
             'default': '/var/lib/aminer'
+        },
+        'Core.PersistencePeriod': {
+            'required': False,
+            'type': 'integer',
+            'default': 600
         },
         'MailAlerting.TargetAddress': {
             'required': False,
@@ -68,6 +82,33 @@
             'type': 'list',
             'schema': {'type': 'string'}
         },
+        'Log.StatisticsPeriod': {
+            'required': False,
+            'type': 'integer',
+            'default': 3600
+        },
+        'Log.StatisticsLevel': {
+            'required': False,
+            'type': 'integer',
+            'default': 1
+        },
+        'Log.DebugLevel': {
+            'required': False,
+            'type': 'integer',
+            'default': 1
+        },
+        'Log.RemoteControlLogFile': {
+            'required': False,
+            'type': 'string'
+        },
+        'Log.StatisticsFile': {
+            'required': False,
+            'type': 'string'
+        },
+        'Log.DebugFile': {
+            'required': False,
+            'type': 'string'
+        },
         'Parser': {
             'required': True,
             'type': 'list',
@@ -109,9 +150,10 @@
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
                     'type': {'type': 'analysistype', 'coerce': 'toanalysistype'},
                     'paths': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
+                    'labels': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                     'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},
                     'output_logline': {'type': 'boolean', 'required': False, 'default': True},
-                    'learn_mode': {'type': 'boolean', 'required': False, 'default': False},
+                    'learn_mode': {'type': 'boolean', 'required': False},
                     'allow_missing_values': {'type': 'boolean', 'required': False, 'default': False},
                     'check_interval': {'type': 'integer', 'required': False, 'default': 3600},
                     'realert_interval': {'type': 'integer', 'required': False, 'default': 36000},
@@ -135,7 +177,9 @@
                     'hypotheses_eval_delta_time': {'type': 'float', 'required': False, 'default': 120.0},
                     'delta_time_to_discard_hypothesis': {'type': 'float', 'required': False, 'default': 180.0},
                     'check_rules_flag': {'type': 'boolean', 'required': False, 'default': True},
-                    'allowlisted_paths': {
+                    'constraint_list': {
+                        'type': 'list', 'schema': {'type': 'string'}, 'required': False, 'nullable': True, 'default': None},
+                    'ignore_list': {
                         'type': 'list', 'schema': {'type': 'string'}, 'required': False, 'nullable': True, 'default': None},
                     'id_path_list': {'type': 'list', 'required': False, 'default': []},
                     'min_allowed_time_diff': {'type': 'float', 'required': False, 'default': 5.0},
@@ -149,11 +193,11 @@
                     'histogram_defs': {'type': 'list', 'schema': {'type': 'list', 'schema': {'type': 'string'}}},
                     'bin_definition': {'type': 'string'},
                     'tuple_transformation_function': {'type': 'string'},
-                    'value_list': {'type': 'list', 'schema': {'type': ['boolean', 'float', 'integer', 'string']}},
+                    'value_list': {
+                        'type': 'list', 'schema': {'type': ['boolean', 'float', 'integer', 'string']}, 'nullable': True, 'default': None},
                     'timestamp_path': {'type': 'string'},
                     'min_bin_elements': {'type': 'integer'},
                     'min_bin_time': {'type': 'integer'},
-                    'sync_bins_flag': {'type': 'boolean', 'required': False, 'default': True},
                     'debug_mode': {'type': 'boolean', 'required': False, 'default': False},
                     # skipcq: PYL-W0511
                     # TODO check which streams should be allowed
@@ -229,6 +273,32 @@
                     'used_multinomial_test': {'type': 'string', 'allowed': ['Approx', 'MT', 'Chi'], 'required': False, 'default': 'Chi'},
                     'use_empiric_distr': {'type': 'boolean', 'required': False, 'default': True},
                     'save_statistics': {'type': 'boolean', 'required': False, 'default': True},
+                    'split_reports_flag': {'type': 'boolean', 'required': False, 'default': False},
+                    'disc_div_thres': {'type': 'float', 'required': False, 'default': 0.3},
+                    'num_steps_create_new_rules': {'type': ['boolean', 'integer'], 'required': False, 'default': False},
+                    'num_upd_until_validation': {'type': 'integer', 'required': False, 'default': 20},
+                    'num_end_learning_phase': {'type': ['boolean', 'integer'], 'required': False, 'default': False},
+                    'check_cor_thres': {'type': 'float', 'required': False, 'default': 0.5},
+                    'check_cor_prob_thres': {'type': 'float', 'required': False, 'default': 1.0},
+                    'check_cor_num_thres': {'type': 'integer', 'required': False, 'default': 10},
+                    'num_bt': {'type': 'integer', 'required': False, 'default': 30},
+                    'alpha_bt': {'type': 'float', 'required': False, 'default': 0.1},
+                    'max_dist_rule_distr': {'type': 'float', 'required': False, 'default': 0.1},
+                    'used_presel_meth': {'type': 'list', 'required': False, 'schema': {'type': 'string', 'allowed': [
+                        'matchDiscDistr', 'excludeDueDistr', 'matchDiscVals', 'random']}, 'nullable': True, 'default': None},
+                    'intersect_presel_meth': {'type': 'boolean', 'required': False, 'default': False},
+                    'percentage_random_cors': {'type': 'float', 'required': False, 'default': 0.20},
+                    'match_disc_vals_sim_tresh': {'type': 'float', 'required': False, 'default': 0.7},
+                    'exclude_due_distr_lower_limit': {'type': 'float', 'required': False, 'default': 0.4},
+                    'match_disc_distr_threshold': {'type': 'float', 'required': False, 'default': 0.5},
+                    'used_cor_meth': {'type': 'list', 'required': False, 'schema': {'type': 'string', 'allowed': ['Rel', 'WRel']},
+                                      'nullable': True, 'default': None},
+                    'used_validate_cor_meth': {'type': 'list', 'required': False, 'schema': {'type': 'string', 'allowed': [
+                        'coverVals', 'distinctDistr']}, 'nullable': True, 'default': None},
+                    'validate_cor_cover_vals_thres': {'type': 'float', 'required': False, 'default': 0.7},
+                    'validate_cor_distinct_thres': {'type': 'float', 'required': False, 'default': 0.05},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 }
             }
         },
@@ -246,7 +316,8 @@
                     'instance_name': {'type': 'string', 'required': False, 'default': 'aminer'},
                     'topic': {'type': 'string'},
                     'cfgfile': {'type': 'string'},
-                    'options': {'type': 'dict', 'schema': {'id': {'type': 'string'}, 'type': {'type': ['string', 'list', 'integer']}}}
+                    'options': {'type': 'dict', 'schema': {'id': {'type': 'string'}, 'type': {'type': ['string', 'list', 'integer']}}},
+                    'output_file_path': {'type': 'string', 'required': False}
                 }
             }
         }

@@ -12,6 +12,8 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
+import logging
+from aminer import AMinerConfig
 from aminer.parsing.MatchElement import MatchElement
 
 
@@ -57,7 +59,9 @@ class DebugMatchContext(MatchContext):
             self.debug_info += 'Starting match update on %s\n' % repr(self.match_data)
         if not self.match_data.startswith(match_string):
             self.debug_info += '  Current data %s does not start with %s\n' % (repr(self.match_data), repr(match_string))
-            raise Exception('Illegal state')
+            msg = 'Illegal state'
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
         self.match_data = self.match_data[len(match_string):]
         self.last_match_data = self.match_data
         if (self.shortest_unmatched_data is None) or (len(self.match_data) < len(self.shortest_unmatched_data)):

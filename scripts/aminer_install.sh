@@ -51,7 +51,7 @@ fi
 git clone -b $BRANCH $URL $AMINERSRC
 cd $AMINERSRC
 mkdir roles
-git clone https://github.com/ait-aecid/aminer-ansible roles/aminer
+git clone -b $BRANCH https://github.com/ait-aecid/aminer-ansible roles/aminer
 
 
 cat > playbook.yml << EOF

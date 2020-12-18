@@ -20,7 +20,7 @@ def get_model():
         DecimalIntegerValueModelElement('id3'),
         FixedDataModelElement('sep3', b'] '),
         DelimitedDataModelElement('message', b' [**] '),
-        FixedDataModelElement('classficiation_str', b' [**] [Classification: '),
+        FixedDataModelElement('classification_str', b' [**] [Classification: '),
         DelimitedDataModelElement('classification', b']'),
         FixedDataModelElement('priority_str', b'] [Priority: '),
         DecimalIntegerValueModelElement('priority'),

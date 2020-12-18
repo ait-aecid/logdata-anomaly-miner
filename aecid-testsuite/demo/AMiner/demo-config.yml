@@ -1,4 +1,8 @@
+LearnMode: False
+
 Core.PersistenceDir: '/tmp/lib/aminer'
+
+Core.PersistencePeriod: 600
 
 LogResourceList:
         - 'file:///tmp/syslog'
@@ -20,6 +24,12 @@ MailAlerting.MaxAlertGap: 600
 MailAlerting.MaxEventsPerMessage: 1000
 
 LogPrefix: 'Original log line: '
+
+Log.StatisticsPeriod: 3600
+
+Log.StatisticsLevel: 1
+
+Log.DebugLevel: 1
 
 Parser:
        - id: space
@@ -847,7 +857,6 @@ Analysis:
         - type: ParserCount
           id: ParserCount
           report_interval: 10
-          reset_after_report_flag: False
         - type: EventTypeDetector
           id: EventTypeDetector
         - type: VariableTypeDetector
@@ -855,6 +864,9 @@ Analysis:
           event_type_detector: EventTypeDetector
           silence_output_except_indicator: False
           output_logline: False
+        - type: VariableCorrelationDetector
+          id: VariableCorrelationDetector
+          event_type_detector: EventTypeDetector
         - type: EventCorrelationDetector
           id: EventCorrelationDetector
           check_rules_flag: True

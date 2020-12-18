@@ -15,6 +15,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 from datetime import datetime
 import random
 import time
+import logging
 
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
@@ -57,6 +58,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
         self.output_log_line = output_log_line
         self.use_path_match = use_path_match
         self.use_value_match = use_value_match
+        self.aminer_config = aminer_config
 
         PersistenceUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, 'TimeCorrelationDetector', persistence_id)
@@ -65,9 +67,12 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
             self.feature_list = []
             self.event_count_table = [0] * parallel_check_count * parallel_check_count * 2
             self.event_delta_table = [0] * parallel_check_count * parallel_check_count * 2
+        else:
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
+        self.log_total += 1
         event_data = {}
         timestamp = log_atom.get_timestamp()
         if timestamp is None:
@@ -106,7 +111,8 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
         if not features_found_list:
             self.last_unhandled_match = log_atom
         elif self.next_persist_time is None:
-            self.next_persist_time = time.time() + 600
+            self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
+                AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
 
         if (self.total_records % self.record_count_before_event) == 0:
             result = self.total_records * ['']
@@ -148,6 +154,8 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
             for listener in self.anomaly_event_handlers:
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Correlation report', result, event_data, log_atom, self)
             self.reset_statistics()
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s ran analysis.', self.__class__.__name__)
+        self.log_success += 1
 
     def rule_to_dict(self, rule):
         """Convert a rule to a dict structure."""
@@ -177,17 +185,18 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted."""
         if self.next_persist_time is None:
-            return 600
+            return self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
         if delta < 0:
             self.next_persist_time = None
-            delta = 600
+            delta = self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
         return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
         self.next_persist_time = None
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def create_random_rule(self, log_atom):
         """Create a random existing path rule or value match rule."""
@@ -220,7 +229,9 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
             elif rule_type == 1:
                 sub_rules.append(Rules.ValueMatchRule(key_name, key_value))
             else:
-                raise Exception('Invalid rule type')
+                msg = 'Invalid rule type'
+                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                raise Exception(msg)
             if not all_keys:
                 break
 

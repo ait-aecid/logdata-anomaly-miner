@@ -14,6 +14,8 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 """
 import abc
+import logging
+from aminer.AMinerConfig import STAT_LEVEL, STAT_LOG_NAME
 
 
 class AtomizerFactory(metaclass=abc.ABCMeta):
@@ -58,6 +60,10 @@ class StreamAtomizer(metaclass=abc.ABCMeta):
 class AtomHandlerInterface(metaclass=abc.ABCMeta):
     """This is the common interface of all handlers suitable for receiving log atoms."""
 
+    log_success = 0
+    log_total = 0
+    output_event_handlers = None
+
     @abc.abstractmethod
     def receive_atom(self, log_atom):
         """
@@ -67,3 +73,14 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         may decide if it makes sense passing the atom also to other handlers or to retry later. This behaviour has to be documented
         at each source implementation sending LogAtoms.
         """
+
+    def log_statistics(self, component_name):
+        """
+        Log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
+        @param component_name the name of the component which is printed in the log line.
+        """
+        if STAT_LEVEL > 0:
+            logging.getLogger(STAT_LOG_NAME).info("'%s' processed %d out of %d log atoms successfully in the last 60"
+                                                  " minutes.", component_name, self.log_success, self.log_total)
+        self.log_success = 0
+        self.log_total = 0

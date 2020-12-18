@@ -21,13 +21,13 @@ if [[ $sudoInstalled == 0 ]]; then
 	sudo mkdir /tmp/lib 2> /dev/null
 	sudo mkdir /tmp/lib/aminer 2> /dev/null
 	sudo chown -R $USER:$USER /tmp/lib/aminer 2> /dev/null
-	sudo rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
+	sudo rm -r /tmp/lib/aminer/* 2> /dev/null
 	sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
 	sudo rm /tmp/syslog 2> /dev/null
 else
 	mkdir /tmp/lib 2> /dev/null
 	mkdir /tmp/lib/aminer 2> /dev/null
-	rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
+	rm -r /tmp/lib/aminer/* 2> /dev/null
 	chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
 	rm /tmp/syslog 2> /dev/null
 fi
@@ -46,9 +46,9 @@ fi
 
 #start AMiner
 if [[ $sudoInstalled == 0 ]]; then
-	sudo -H -u aminer bash -c 'aminer --Foreground --Config '$FILE' &'
+	sudo aminer --config "$FILE" &
 else
-	runuser -u aminer -- aminer --Foreground --Config $FILE &
+	aminer --config "$FILE" &
 fi
 
 #EventCorrelationDetetctor, NewMatchPathDetector
@@ -282,7 +282,11 @@ echo "$text" >> /tmp/syslog
 
 #stop AMiner
 sleep 3 & wait $!
-pkill -x aminer
+if [[ $sudoInstalled == 0 ]]; then
+	sudo pkill -x aminer
+else
+    pkill -x aminer
+fi
 KILL_PID=$!
 sleep 3
 wait $KILL_PID

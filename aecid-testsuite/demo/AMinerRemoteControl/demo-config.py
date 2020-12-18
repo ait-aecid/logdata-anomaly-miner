@@ -191,12 +191,18 @@ def build_analysis_pipeline(analysis_context):
     atom_filters.add_handler(allowlist_violation_detector)
 
     from aminer.analysis import ParserCount
-    parser_count = ParserCount(analysis_context.aminer_config, None, anomaly_event_handlers, 10, False)
+    parser_count = ParserCount(analysis_context.aminer_config, None, anomaly_event_handlers, 10)
     analysis_context.register_component(parser_count, component_name="ParserCount")
     atom_filters.add_handler(parser_count)
 
+    from aminer.analysis import EventCorrelationDetector
+    ecd = EventCorrelationDetector(analysis_context.aminer_config, anomaly_event_handlers, check_rules_flag=True,
+                                   hypothesis_max_delta_time=1.0, auto_include_flag=True)
+    analysis_context.register_component(ecd, component_name="EventCorrelationDetector")
+    atom_filters.add_handler(ecd)
+
     from aminer.analysis import NewMatchPathDetector
-    new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=False)
+    new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=True)
     analysis_context.register_component(new_match_path_detector, component_name="NewMatchPath")
     atom_filters.add_handler(new_match_path_detector)
 
@@ -251,6 +257,14 @@ def build_analysis_pipeline(analysis_context):
         '/model/IPAddresses/Username', '/model/IPAddresses/IP'], anomaly_event_handlers, auto_include_flag=False)
     analysis_context.register_component(new_match_path_value_combo_detector, component_name="NewMatchPathValueCombo")
     atom_filters.add_handler(new_match_path_value_combo_detector)
+
+    from aminer.analysis.NewMatchIdValueComboDetector import NewMatchIdValueComboDetector
+    new_match_id_value_combo_detector = NewMatchIdValueComboDetector(
+        analysis_context.aminer_config, ['/model/type/path/name', '/model/type/syscall/syscall'], anomaly_event_handlers,
+        id_path_list=['/model/type/path/id', '/model/type/syscall/id'], min_allowed_time_diff=5, auto_include_flag=True,
+        allow_missing_values_flag=True, output_log_line=True)
+    analysis_context.register_component(new_match_id_value_combo_detector, component_name="NewMatchIdValueComboDetector")
+    atom_filters.add_handler(new_match_id_value_combo_detector)
 
     from aminer.analysis.NewMatchPathValueDetector import NewMatchPathValueDetector
     new_match_path_value_detector = NewMatchPathValueDetector(analysis_context.aminer_config, [

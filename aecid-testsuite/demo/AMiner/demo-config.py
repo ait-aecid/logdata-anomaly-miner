@@ -35,6 +35,7 @@ config_properties['AMinerGroup'] = 'aminer'
 # AMiner will refuse to start. When undefined, '/var/lib/aminer'
 # is used.
 config_properties['Core.PersistenceDir'] = '/tmp/lib/aminer'
+config_properties['Core.PersistencePeriod'] = 600
 
 # Define a target e-mail address to send alerts to. When undefined,
 # no e-mail notification hooks are added.
@@ -70,6 +71,9 @@ config_properties['MailAlerting.MaxAlertGap'] = 600
 # at most. This defaults to 1000
 config_properties['MailAlerting.MaxEventsPerMessage'] = 1000
 config_properties['LogPrefix'] = 'Original log line: '
+config_properties['Log.StatisticsPeriod'] = 3600
+config_properties['Log.StatisticsLevel'] = 1
+config_properties['Log.DebugLevel'] = 1
 
 # Add your ruleset here:
 
@@ -273,7 +277,7 @@ def build_analysis_pipeline(analysis_context):
     atom_filter.add_handler(allowlist_violation_detector)
 
     from aminer.analysis import ParserCount
-    parser_count = ParserCount(analysis_context.aminer_config, None, anomaly_event_handlers, 10, False)
+    parser_count = ParserCount(analysis_context.aminer_config, None, anomaly_event_handlers, 10)
     analysis_context.register_component(parser_count, component_name="ParserCount")
     atom_filter.add_handler(parser_count)
 
@@ -286,6 +290,11 @@ def build_analysis_pipeline(analysis_context):
     vtd = VariableTypeDetector(analysis_context.aminer_config, anomaly_event_handlers, etd, silence_output_except_indicator=False,
                                output_log_line=False)
     analysis_context.register_component(vtd, component_name="VariableTypeDetector")
+    atom_filter.add_handler(vtd)
+
+    from aminer.analysis.VariableCorrelationDetector import VariableCorrelationDetector
+    vtd = VariableCorrelationDetector(analysis_context.aminer_config, anomaly_event_handlers, etd, disc_div_thres=0.5)
+    analysis_context.register_component(vtd, component_name="VariableCorrelationDetector")
     atom_filter.add_handler(vtd)
 
     from aminer.analysis import EventCorrelationDetector

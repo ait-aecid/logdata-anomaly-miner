@@ -14,6 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import time
 import os
+import logging
 
 from aminer import AMinerConfig
 from aminer.AnalysisChild import AnalysisContext
@@ -29,39 +30,52 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
     """
 
     def __init__(self, aminer_config, anomaly_event_handlers, timestamp_path, analyze_path_list, min_bin_elements, min_bin_time,
-                 sync_bins_flag=True, debug_mode=False, persistence_id='Default', output_log_line=True):
+                 debug_mode=False, persistence_id='Default', output_log_line=True):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param timestamp_path if not None, use this path value for timestamp based bins.
-        @param analyze_path_list list of match pathes to analyze in this detector.
+        @param analyze_path_list list of match paths to analyze in this detector.
         @param min_bin_elements evaluate the latest bin only after at least that number of elements was added to it.
         @param min_bin_time evaluate the latest bin only when the first element is received after minBinTime has elapsed.
-        @param sync_bins_flag if true the bins of all analyzed path values have to be filled enough to trigger analysis.
         @param debug_mode if true, generate an analysis report even when average of last bin was within expected range.
         """
         self.anomaly_event_handlers = anomaly_event_handlers
         self.timestamp_path = timestamp_path
         self.min_bin_elements = min_bin_elements
         self.min_bin_time = min_bin_time
-        self.sync_bins_flag = sync_bins_flag
         self.debug_mode = debug_mode
         self.next_persist_time = None
         self.persistence_id = persistence_id
         self.output_log_line = output_log_line
+        self.aminer_config = aminer_config
 
         PersistenceUtil.add_persistable_component(self)
         self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, 'MatchValueAverageChangeDetector',
                                                                               persistence_id)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
-        if persistence_data is None:
-            self.stat_data = []
-            for path in analyze_path_list:
-                self.stat_data.append((path, [],))
-        else:
-            self.stat_data = persistence_data
+        self.stat_data = []
+        for path in analyze_path_list:
+            self.stat_data.append((path, [],))
+        if persistence_data is not None:
+            for val in persistence_data:
+                if isinstance(val, str):
+                    val = val.strip('[').strip(']').split(',', 2)
+                    path = val[0].strip('"')
+                    values = val[1].strip(' ').strip('[').strip(']')
+                else:
+                    path = val[0]
+                    values = val[1]
+                index = 0
+                for p, _ in self.stat_data:
+                    if p == path:
+                        break
+                    index += 1
+                for value in values:
+                    self.stat_data[index][1].append(value)
 
     def receive_atom(self, log_atom):
         """Send summary to all event handlers."""
+        self.log_total += 1
         parser_match = log_atom.parser_match
         value_dict = parser_match.get_match_dictionary()
 
@@ -74,59 +88,57 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             event_data = {'MatchValue': match_value.match_object}
 
         analysis_summary = ''
-        if self.sync_bins_flag:
-            ready_for_analysis_flag = True
+        ready_for_analysis_flag = True
+        for (path, stat_data) in self.stat_data:
+            match = value_dict.get(path, None)
+            if match is None:
+                ready_for_analysis_flag = (ready_for_analysis_flag and self.update(stat_data, timestamp_value, None))
+            else:
+                ready_for_analysis_flag = (ready_for_analysis_flag and self.update(stat_data, timestamp_value, match.match_object))
+
+        if ready_for_analysis_flag:
+            anomaly_scores = []
             for (path, stat_data) in self.stat_data:
-                match = value_dict.get(path, None)
-                if match is None:
-                    ready_for_analysis_flag = (ready_for_analysis_flag and self.update(stat_data, timestamp_value, None))
-                else:
-                    ready_for_analysis_flag = (ready_for_analysis_flag and self.update(stat_data, timestamp_value, match.match_object))
+                analysis_data = self.analyze(stat_data)
+                if analysis_data is not None:
+                    d = {'Path': path}
+                    a = {}
+                    new = {'N': analysis_data[1], 'Avg': analysis_data[2], 'Var': analysis_data[3]}
+                    old = {'N': analysis_data[4], 'Avg': analysis_data[5], 'Var': analysis_data[6]}
+                    a['New'] = new
+                    a['Old'] = old
+                    d['AnalysisData'] = a
+                    if analysis_summary == '':
+                        analysis_summary += '"%s": %s' % (path, analysis_data[0])
+                    else:
+                        analysis_summary += os.linesep
+                        analysis_summary += '  "%s": %s' % (path, analysis_data[0])
+                    anomaly_scores.append(d)
+            analysis_component = {'AffectedLogAtomPaths': list(value_dict)}
+            if self.output_log_line:
+                match_paths_values = {}
+                for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
+                    match_value = match_element.match_object
+                    if isinstance(match_value, bytes):
+                        match_value = match_value.decode()
+                    match_paths_values[match_path] = match_value
+                analysis_component['ParsedLogAtom'] = match_paths_values
+            analysis_component['AnomalyScores'] = anomaly_scores
+            analysis_component['MinBinElements'] = self.min_bin_elements
+            analysis_component['MinBinTime'] = self.min_bin_time
+            analysis_component['DebugMode'] = self.debug_mode
+            event_data = {'AnalysisComponent': analysis_component}
 
-            if ready_for_analysis_flag:
-                anomaly_scores = []
-                for (path, stat_data) in self.stat_data:
-                    analysis_data = self.analyze(stat_data)
-                    if analysis_data is not None:
-                        d = {'Path': path}
-                        a = {}
-                        new = {'N': analysis_data[1], 'Avg': analysis_data[2], 'Var': analysis_data[3]}
-                        old = {'N': analysis_data[4], 'Avg': analysis_data[5], 'Var': analysis_data[6]}
-                        a['New'] = new
-                        a['Old'] = old
-                        d['AnalysisData'] = a
-                        if analysis_summary == '':
-                            analysis_summary += '"%s": %s' % (path, analysis_data[0])
-                        else:
-                            analysis_summary += os.linesep
-                            analysis_summary += '  "%s": %s' % (path, analysis_data[0])
-                        anomaly_scores.append(d)
-                analysis_component = {'AffectedLogAtomPathes': list(value_dict)}
-                if self.output_log_line:
-                    match_paths_values = {}
-                    for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
-                        match_value = match_element.match_object
-                        if isinstance(match_value, bytes):
-                            match_value = match_value.decode()
-                        match_paths_values[match_path] = match_value
-                    analysis_component['ParsedLogAtom'] = match_paths_values
-                analysis_component['AnomalyScores'] = anomaly_scores
-                analysis_component['MinBinElements'] = self.min_bin_elements
-                analysis_component['MinBinTime'] = self.min_bin_time
-                analysis_component['SyncBinsFlag'] = self.sync_bins_flag
-                analysis_component['DebugMode'] = self.debug_mode
-                event_data = {'AnalysisComponent': analysis_component}
-
-                if self.next_persist_time is None:
-                    self.next_persist_time = time.time() + 600
-        else:
-            raise Exception('FIXME: not implemented')
+            if self.next_persist_time is None:
+                self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
+                    AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
 
         if analysis_summary:
             res = [''] * stat_data[2][0]
             res[0] = analysis_summary
             for listener in self.anomaly_event_handlers:
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Statistical data report', res, event_data, log_atom, self)
+        self.log_success += 1
 
     def get_time_trigger_class(self):
         """
@@ -138,18 +150,19 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted."""
         if self.next_persist_time is None:
-            return 600
+            return self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
         if delta < 0:
             self.next_persist_time = None
-            delta = 600
+            delta = self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
         return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
         PersistenceUtil.store_json(self.persistence_file_name, self.stat_data)
         self.next_persist_time = None
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def update(self, stat_data, timestamp_value, value):
         """
@@ -183,6 +196,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         Perform the analysis and progress from the last bin to the next one.
         @return None when statistical data was as expected and debugging is disabled.
         """
+        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s performs analysis.', self.__class__.__name__)
         current_bin = stat_data[3]
         current_average = current_bin[1] / current_bin[0]
         current_variance = (current_bin[2] - (current_bin[1] * current_bin[1]) / current_bin[0]) / (current_bin[0] - 1)
