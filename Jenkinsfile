@@ -8,6 +8,9 @@ void setBuildStatus(String message, String state) {
   ]);
 }
 
+def  ubuntu18image = false
+def  ubuntu20image = false
+def  debianbusterimage = false
 
 pipeline {
      agent any
@@ -76,11 +79,68 @@ pipeline {
        	         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runCoverageTests"
              }
          }
+
+                 stage("Test Debian Buster") {
+                    when {
+                       expression {
+                            BRANCH_NAME == 'master' || BRANCH_NAME == 'development'
+                       }
+                    }
+                    steps {
+                    script {
+                      debianbusterimage = true
+                    }
+                     sh "docker build -f aecid-testsuite/docker/Dockerfile_deb -t aecid/aminer-debian-buster:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID --build-arg=varbranch=development --build-arg=vardistri=debian:buster ."
+                     sh "docker run --rm aecid/aminer-debian-buster:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
+                   }
+                 }
+
+		stage("Test Ubuntu 18.04") {
+                    when {
+                       expression {
+                            BRANCH_NAME == 'master' || BRANCH_NAME == 'development'
+                       }
+                    }
+                    steps {
+                     script{
+                       ubuntu18image = true
+                     }
+                     sh "docker build -f aecid-testsuite/docker/Dockerfile_deb -t aecid/aminer-ubuntu-1804:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID --build-arg=varbranch=development --build-arg=vardistri=ubuntu:18.04 ."
+                     sh "docker run --rm aecid/aminer-ubuntu-1804:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
+                    }
+                 }
+
+		stage("Test Ubuntu 20.04") {
+                    when {
+                       expression {
+                            BRANCH_NAME == 'master' || BRANCH_NAME == 'development'
+                       }
+                    }
+                    steps {
+                    script {
+                      ubuntu20image = true
+                    }
+                     sh "docker build -f aecid-testsuite/docker/Dockerfile_deb -t aecid/aminer-ubuntu-2004:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID --build-arg=varbranch=development --build-arg=vardistri=ubuntu:20.04 ."
+                     sh "docker run --rm aecid/aminer-ubuntu-1804:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
+                   }
+                 }
     }
     post {
         always {
+           script {
            sh "docker rmi aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
+           if( debianbusterimage == true ){
+               sh "docker rmi aecid/aminer-debian-buster:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
+           }
+           if( ubuntu18image == true ){
+               sh "docker rmi aecid/aminer-ubuntu-1804:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
+           }
+           if( ubuntu20image == true ){
+               sh "docker rmi aecid/aminer-ubuntu-2004:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
+           }
+         }
         }
+ 
 	success {
         setBuildStatus("Build succeeded", "SUCCESS");
     }

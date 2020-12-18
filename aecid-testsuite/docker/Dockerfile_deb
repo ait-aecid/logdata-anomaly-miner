@@ -1,0 +1,61 @@
+# Pull base image.
+ARG vardistri
+
+FROM $vardistri
+ARG varbranch
+
+ENV BRANCH=$varbranch
+
+# Set local timezone
+ENV TZ=Europe/Vienna
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+LABEL maintainer="wolfgang.hotwagner@ait.ac.at"
+
+# Install necessary debian packages
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y \
+	ansible \
+        git \
+        vim \
+        postfix \ 
+        procps \
+        cpulimit \
+        mailutils \
+        postfix \
+        rsyslog \
+        sudo \
+        curl \
+        apache2 \
+        locales \
+        locales-all
+
+RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
+    dpkg-reconfigure --frontend=noninteractive locales && \
+    update-locale LANG=en_US.UTF-8
+
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en  
+ENV LC_ALL en_US.UTF-8
+
+
+
+ADD scripts/distritest.sh /distritest.sh
+ADD . /opt/logdata-anomaly-miner
+
+RUN chmod 755 /distritest.sh
+RUN mkdir -p /opt/logdata-anomaly-miner/roles/aminer
+RUN echo varbranch $varbranch
+RUN cd /opt/logdata-anomaly-miner/roles && git clone -b $varbranch https://github.com/ait-aecid/aminer-ansible.git aminer
+RUN cd /opt/logdata-anomaly-miner && sed -e "s+{{SOURCEDIR}}+$PWD+g" /opt/logdata-anomaly-miner/.playbook.yml > /opt/logdata-anomaly-miner/playbook.yml
+RUN cd /opt/logdata-anomaly-miner && ansible-playbook playbook.yml
+RUN git clone -b $varbranch https://github.com/ait-aecid/logdata-anomaly-miner.wiki.git /opt/wiki
+RUN awk '/^```yaml$/ && ++n == 1, /^```$/' < /opt/wiki/Getting-started-\(tutorial\).md | sed '/^```/ d' | sed '/^```python/ d' > /home/aminer/gettingStarted-config.yml
+RUN ln -s /etc/aminer/conf-available/generic/ApacheAccessModel.py /etc/aminer/conf-enabled/
+
+RUN echo "aminer ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/aminer
+
+USER aminer
+WORKDIR /home/aminer
+
+ENTRYPOINT ["/distritest.sh"]
