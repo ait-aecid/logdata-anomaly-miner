@@ -127,17 +127,20 @@ pipeline {
     }
     post {
         always {
+           script {
            sh "docker rmi aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
-           if( debianbusterimage ){
+           if( debianbusterimage == true ){
                sh "docker rmi aecid/aminer-debian-buster:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
            }
-           if( ubuntu18image ){
+           if( ubuntu18image == true ){
                sh "docker rmi aecid/aminer-ubuntu-1804:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
            }
-           if( ubuntu20image ){
+           if( ubuntu20image == true ){
                sh "docker rmi aecid/aminer-ubuntu-2004:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
            }
+         }
         }
+ 
 	success {
         setBuildStatus("Build succeeded", "SUCCESS");
     }
