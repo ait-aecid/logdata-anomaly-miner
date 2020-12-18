@@ -27,6 +27,8 @@ logdata-anomaly-miner (2.2.0) unstable; urgency=low
   * Fixed order of ETD in yaml-config
   * Fixed various issues in persistency
 
+ -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Fri,  18 Dec 2020 17:00:00 +0000
+
 logdata-anomaly-miner (2.1.0) unstable; urgency=low
 
   Changes:
