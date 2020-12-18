@@ -77,12 +77,12 @@ pipeline {
              }
          }
 
-//         stage("Distribution Tests"){
-//             when {
-//                 branch 'development'
-//             }
-//             parallel {
                  stage("Test Debian Buster") {
+                    when {
+                       expression {
+                            BRANCH_NAME == 'master' || BRANCH_NAME == 'development'
+                       }
+                    }
                     steps {
                      sh "docker build -f aecid-testsuite/docker/Dockerfile_deb -t aecid/aminer-debian-buster:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID --build-arg=varbranch=development --build-arg=vardistri=debian:buster ."
                      sh "docker run --rm aecid/aminer-debian-buster:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
@@ -90,6 +90,11 @@ pipeline {
                  }
 
 		stage("Test Ubuntu 18.04") {
+                    when {
+                       expression {
+                            BRANCH_NAME == 'master' || BRANCH_NAME == 'development'
+                       }
+                    }
                     steps {
                      sh "docker build -f aecid-testsuite/docker/Dockerfile_deb -t aecid/aminer-ubuntu-1804:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID --build-arg=varbranch=development --build-arg=vardistri=ubuntu:18.04 ."
                      sh "docker run --rm aecid/aminer-ubuntu-1804:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
@@ -97,13 +102,16 @@ pipeline {
                  }
 
 		stage("Test Ubuntu 20.04") {
+                    when {
+                       expression {
+                            BRANCH_NAME == 'master' || BRANCH_NAME == 'development'
+                       }
+                    }
                     steps {
                      sh "docker build -f aecid-testsuite/docker/Dockerfile_deb -t aecid/aminer-ubuntu-2004:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID --build-arg=varbranch=development --build-arg=vardistri=ubuntu:20.04 ."
                      sh "docker run --rm aecid/aminer-ubuntu-1804:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
                    }
                  }
-//             }
-//         }
     }
     post {
         always {
