@@ -7,7 +7,7 @@
 %:
 	dh $@ --with=python3
 
-override_dh_auto_build:
+execute_before_dh_auto_build:
 	xsltproc --nonet \
 	--param make.year.ranges 1 \
 	--param make.single.year.ranges 1 \
@@ -15,7 +15,6 @@ override_dh_auto_build:
 	-o debian/ \
 	http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl \
 	debian/aminer.1.xml debian/aminerremotecontrol.1.xml
-	dh_auto_build
 
 # Modify startup behaviour in auto-generated code in postinst:
 # Do not attempt to add aminer.service to autostart if user does
