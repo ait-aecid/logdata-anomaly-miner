@@ -7,7 +7,7 @@
 %:
 	dh $@ --with=python3
 
-override_dh_auto_build:
+execute_before_dh_auto_build:
 	xsltproc --nonet \
 	--param make.year.ranges 1 \
 	--param make.single.year.ranges 1 \
@@ -15,7 +15,12 @@ override_dh_auto_build:
 	-o debian/ \
 	http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl \
 	debian/aminer.1.xml debian/aminerremotecontrol.1.xml
-	dh_auto_build
+
+execute_after_dh_install:
+	chmod a-x \
+		debian/logdata-anomaly-miner/usr/lib/logdata-anomaly-miner/aminer/analysis/NewMatchPathValueComboDetector.py \
+		debian/logdata-anomaly-miner/usr/lib/logdata-anomaly-miner/aminer/analysis/NewMatchPathValueDetector.py \
+		debian/logdata-anomaly-miner/usr/lib/logdata-anomaly-miner/aminer/analysis/__init__.py
 
 # Modify startup behaviour in auto-generated code in postinst:
 # Do not attempt to add aminer.service to autostart if user does
