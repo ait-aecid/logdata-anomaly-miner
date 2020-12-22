@@ -1,3 +1,4 @@
+#!/usr/bin/python3 -BbbEIsSttW all
 import sys
 import os
 import shutil
