@@ -1,6 +1,20 @@
 logdata-anomaly-miner (2.2.0-1) unstable; urgency=low
 
+  [ Markus Wurzenberger ]
   * New upstream release V2.2.0
+
+  [ Sebastian Ramacher ]
+  * debian/control:
+    - Bump Standards-Version
+    - Set RRR: no
+  * debian/logdata-anomaly-miner.maintscript: Move conffiles to new location
+  * debian/logdata-anomaly-miner.links: Add link for aminer-peristence.py
+  * debian/patches: Add hashbang to aminer-peristence.py
+  * debian/rules:
+    - Simplify rules by using execute_before_dh_auto_build target
+    - Remove executable bits of some Python modules
+
+ -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Tue, 22 Dec 2020 12:20:17 +0100
 
 logdata-anomaly-miner (2.0.1-1) unstable; urgency=low
 
