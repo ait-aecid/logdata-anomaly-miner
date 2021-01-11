@@ -21,8 +21,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
     def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id='Default', num_init=100,
                  num_update=100, disc_div_thres=0.3, num_steps_create_new_rules=False, num_upd_until_validation=20,
-                 num_end_learning_phase=False, check_cor_thres=0.5, check_cor_prob_thres=1, check_cor_num_thres=10, 
-                 min_values_cors_thres=5, new_vals_alarm_thres=3.5, num_bt=30, alpha_bt=0.1, max_dist_rule_distr=0.1, 
+                 num_end_learning_phase=False, check_cor_thres=0.5, check_cor_prob_thres=1, check_cor_num_thres=10,
+                 min_values_cors_thres=5, new_vals_alarm_thres=3.5, num_bt=30, alpha_bt=0.1, max_dist_rule_distr=0.1,
                  used_presel_meth=None, intersect_presel_meth=False, percentage_random_cors=0.20, match_disc_vals_sim_tresh=0.7,
                  exclude_due_distr_lower_limit=0.4, match_disc_distr_threshold=0.5, used_cor_meth=None,
                  used_validate_cor_meth=None, validate_cor_cover_vals_thres=0.7, validate_cor_distinct_thres=0.05,
@@ -1509,7 +1509,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
             event_index, self.event_type_detector.longest_path[event_index])
         message += '\n%s rules have been generated for this event type' % (
                 sum([len([i_val for i_val in self.w_rel_list[event_index][pos_var_cor_index][0] if len(self.w_rel_list[event_index][
-                    pos_var_cor_index][0][i_val]) > 0 and sum(self.w_rel_list[event_index][pos_var_cor_index][0][i_val].values()) > \
+                    pos_var_cor_index][0][i_val]) > 0 and sum(self.w_rel_list[event_index][pos_var_cor_index][0][i_val].values()) >
                     self.min_values_cors_thres])
                     for pos_var_cor_index in range(len(self.w_rel_list[event_index])) if self.w_rel_list[event_index][
                         pos_var_cor_index] != [{}, {}]]) + sum([len([j_val for j_val in self.w_rel_list[event_index][pos_var_cor_index][
