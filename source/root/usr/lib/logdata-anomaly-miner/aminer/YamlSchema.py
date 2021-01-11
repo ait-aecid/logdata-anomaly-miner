@@ -281,8 +281,12 @@
                     'check_cor_thres': {'type': 'float', 'required': False, 'default': 0.5},
                     'check_cor_prob_thres': {'type': 'float', 'required': False, 'default': 1.0},
                     'check_cor_num_thres': {'type': 'integer', 'required': False, 'default': 10},
+                    'min_values_cors_thres': {'type': 'integer', 'required': False, 'default': 5},
+                    'new_vals_alarm_thres': {'type': 'float', 'required': False, 'default': 3.5},
                     'num_bt': {'type': 'integer', 'required': False, 'default': 30},
                     'alpha_bt': {'type': 'float', 'required': False, 'default': 0.1},
+                    'used_homogeneity_test': {'type': 'string', 'allowed': ['Chi', 'MaxDist'], 'required': False, 'default': 'Chi'},
+                    'alpha_chisquare_test': {'type': 'float', 'required': False, 'default': 0.05},
                     'max_dist_rule_distr': {'type': 'float', 'required': False, 'default': 0.1},
                     'used_presel_meth': {'type': 'list', 'required': False, 'schema': {'type': 'string', 'allowed': [
                         'matchDiscDistr', 'excludeDueDistr', 'matchDiscVals', 'random']}, 'nullable': True, 'default': None},
