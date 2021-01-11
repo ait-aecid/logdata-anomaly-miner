@@ -21,9 +21,10 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
     def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id='Default', num_init=100,
                  num_update=100, disc_div_thres=0.3, num_steps_create_new_rules=False, num_upd_until_validation=20,
-                 num_end_learning_phase=False, check_cor_thres=0.5, check_cor_prob_thres=1, check_cor_num_thres=10, num_bt=30,
-                 alpha_bt=0.1, max_dist_rule_distr=0.1, used_presel_meth=None, intersect_presel_meth=False, percentage_random_cors=0.20,
-                 match_disc_vals_sim_tresh=0.7, exclude_due_distr_lower_limit=0.4, match_disc_distr_threshold=0.5, used_cor_meth=None,
+                 num_end_learning_phase=False, check_cor_thres=0.5, check_cor_prob_thres=1, check_cor_num_thres=10, 
+                 min_values_cors_thres=5, new_vals_alarm_thres=3.5, num_bt=30, alpha_bt=0.1, max_dist_rule_distr=0.1, 
+                 used_presel_meth=None, intersect_presel_meth=False, percentage_random_cors=0.20, match_disc_vals_sim_tresh=0.7,
+                 exclude_due_distr_lower_limit=0.4, match_disc_distr_threshold=0.5, used_cor_meth=None,
                  used_validate_cor_meth=None, validate_cor_cover_vals_thres=0.7, validate_cor_distinct_thres=0.05,
                  ignore_list=None, constraint_list=None):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
@@ -76,6 +77,10 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         self.check_cor_prob_thres = check_cor_prob_thres
         # Number of allowed different values for the calculation if the distribution can be considderd a correlation
         self.check_cor_num_thres = check_cor_num_thres
+        # Minimal number of apearances of values on the left side to considder the distribution as a possible correlation
+        self.min_values_cors_thres = min_values_cors_thres
+        # Threshold which has to be exceeded by number of new values divided by number of old values to generate an alarm
+        self.new_vals_alarm_thres = new_vals_alarm_thres
         # Diversity threshold for variables to be considered discrete.
         self.disc_div_thres = disc_div_thres
         # Number of update steps, for which new rules are generated periodically. States False if rules should not be updated
@@ -928,7 +933,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                         # States True after the following steps if all tests were positive, and False if at least one was negative.
                         tmp_bool = True
                         if sum([current_appearance_list[pos_var_cor_index][0][i_val][j_val] for j_val in current_appearance_list[
-                                pos_var_cor_index][0][i_val]]) > 5:
+                                pos_var_cor_index][0][i_val]]) > self.min_values_cors_thres:
                             for j_val in self.w_rel_list[event_index][pos_var_cor_index][0][i_val]:
                                 if abs(self.w_rel_list[event_index][pos_var_cor_index][0][i_val][j_val] / sum(self.w_rel_list[event_index][
                                         pos_var_cor_index][0][i_val].values()) - current_appearance_list[pos_var_cor_index][0][i_val][
@@ -950,7 +955,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                         # States True after the following steps if all tests were positive, and False if at least one was negative
                         tmp_bool = True
                         if sum([current_appearance_list[pos_var_cor_index][1][j_val][i_val] for i_val in current_appearance_list[
-                                pos_var_cor_index][1][j_val]]) > 5:
+                                pos_var_cor_index][1][j_val]]) > self.min_values_cors_thres:
                             for i_val in self.w_rel_list[event_index][pos_var_cor_index][1][j_val]:
                                 if abs(self.w_rel_list[event_index][pos_var_cor_index][1][j_val][i_val] / sum(self.w_rel_list[event_index][
                                         pos_var_cor_index][1][j_val].values()) - current_appearance_list[pos_var_cor_index][1][j_val][
@@ -979,7 +984,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                             if len(self.w_rel_list[event_index][pos_var_cor_index][0][i_val]) != len(current_appearance_list[
                                     pos_var_cor_index][0][i_val]):
                                 if len(current_appearance_list[pos_var_cor_index][0][i_val]) / len(self.w_rel_list[event_index][
-                                        pos_var_cor_index][0][i_val]) >= 3.5:
+                                        pos_var_cor_index][0][i_val]) >= self.new_vals_alarm_thres:
                                     sorted_log_lines.append(
                                         'Alarm: New value occurred in correlation of the paths %s = %s -> %s =' % (
                                                 self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
@@ -1031,7 +1036,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                             if len(self.w_rel_list[event_index][pos_var_cor_index][1][j_val]) != len(current_appearance_list[
                                     pos_var_cor_index][1][j_val]):
                                 if len(current_appearance_list[pos_var_cor_index][1][j_val]) / len(self.w_rel_list[event_index][
-                                        pos_var_cor_index][1][j_val]) >= 3.5:
+                                        pos_var_cor_index][1][j_val]) >= self.new_vals_alarm_thres:
                                     sorted_log_lines.append('Alarm: New value occurred in correlation of the paths %s = %s -> %s =' % (
                                         self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
                                             self.pos_var_cor[event_index][pos_var_cor_index][1]]],  repr(j_val),
@@ -1369,7 +1374,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                         # The probabilities can be read out with: distribution_list[j_val][i_val]
                         frequency_list = []  # List which stores the appearance of the single correlations
                         for i_val in self.w_rel_list[event_index][pos_var_cor_index][0]:
-                            if sum(self.w_rel_list[event_index][pos_var_cor_index][0][i_val].values()) > 5:
+                            if sum(self.w_rel_list[event_index][pos_var_cor_index][0][i_val].values()) > self.min_values_cors_thres:
                                 # Calculates the distribution and appends it to distribution_list
                                 frequency_list.append(sum(self.w_rel_list[event_index][pos_var_cor_index][0][i_val].values()))
                                 for k in range(len(self.pos_var_val[event_index][self.pos_var_cor[event_index][pos_var_cor_index][1]])):
@@ -1407,7 +1412,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                         # The probabilities can be read out with: distribution_list[i_val][j_val]
                         frequency_list = []  # List which stores the appearance of the single correlations
                         for j_val in self.w_rel_list[event_index][pos_var_cor_index][1]:
-                            if sum(self.w_rel_list[event_index][pos_var_cor_index][1][j_val].values()) > 5:
+                            if sum(self.w_rel_list[event_index][pos_var_cor_index][1][j_val].values()) > self.min_values_cors_thres:
                                 # Calculates the distribution and appends it to distribution_list
                                 frequency_list.append(sum(self.w_rel_list[event_index][pos_var_cor_index][1][j_val].values()))
                                 for k in range(len(self.pos_var_val[event_index][self.pos_var_cor[event_index][pos_var_cor_index][0]])):
@@ -1460,7 +1465,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
                 for i_val in self.rel_list[event_index][pos_var_cor_index][0]:  # Var i=i_val -> Var j=j_val
                     if len(self.rel_list[event_index][pos_var_cor_index][0][i_val]) > 0 and sum(self.rel_list[event_index][
-                            pos_var_cor_index][0][i_val].values()) > 5:
+                            pos_var_cor_index][0][i_val].values()) > self.min_values_cors_thres:
                         sorted_log_lines.append('-> VarPath %s = %s' % (
                             self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][i]], repr(i_val)))
                         sorted_log_lines.append('   VarPath %s = %s' % (
@@ -1477,7 +1482,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
                 for j_val in self.rel_list[event_index][pos_var_cor_index][1]:  # Var j=j_val -> Var i=i_val
                     if len(self.rel_list[event_index][pos_var_cor_index][1][j_val]) > 0 and \
-                            sum(self.rel_list[event_index][pos_var_cor_index][1][j_val].values()) > 5:
+                            sum(self.rel_list[event_index][pos_var_cor_index][1][j_val].values()) > self.min_values_cors_thres:
                         sorted_log_lines.append('-> VarPath %s = %s' % (
                             self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][j]], repr(j_val)))
                         sorted_log_lines.append('   VarPath %s = %s' % (
@@ -1504,12 +1509,13 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
             event_index, self.event_type_detector.longest_path[event_index])
         message += '\n%s rules have been generated for this event type' % (
                 sum([len([i_val for i_val in self.w_rel_list[event_index][pos_var_cor_index][0] if len(self.w_rel_list[event_index][
-                    pos_var_cor_index][0][i_val]) > 0 and sum(self.w_rel_list[event_index][pos_var_cor_index][0][i_val].values()) > 5])
+                    pos_var_cor_index][0][i_val]) > 0 and sum(self.w_rel_list[event_index][pos_var_cor_index][0][i_val].values()) > \
+                    self.min_values_cors_thres])
                     for pos_var_cor_index in range(len(self.w_rel_list[event_index])) if self.w_rel_list[event_index][
                         pos_var_cor_index] != [{}, {}]]) + sum([len([j_val for j_val in self.w_rel_list[event_index][pos_var_cor_index][
                             1] if len(self.w_rel_list[event_index][pos_var_cor_index][1][j_val]) > 0 and sum(self.w_rel_list[event_index][
-                                pos_var_cor_index][1][j_val].values()) > 5]) for pos_var_cor_index in range(len(self.w_rel_list[
-                                    event_index])) if self.w_rel_list[event_index][pos_var_cor_index] != [{}, {}]]))
+                                pos_var_cor_index][1][j_val].values()) > self.min_values_cors_thres]) for pos_var_cor_index in range(len(
+                                    self.w_rel_list[event_index])) if self.w_rel_list[event_index][pos_var_cor_index] != [{}, {}]]))
         sorted_log_lines = []
         event_data = {'EventIndex': event_index}
         affected_log_atom_paths = []
