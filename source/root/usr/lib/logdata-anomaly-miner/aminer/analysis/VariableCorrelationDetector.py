@@ -98,7 +98,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         # The implemented methods are ['Chi', 'MaxDist']
         self.used_homogeneity_test = used_homogeneity_test
         if used_homogeneity_test not in ['Chi', 'MaxDist']:
-            raise ValueError("The homogeneity test '%s' does not exist!" % presel_meth)
+            raise ValueError("The homogeneity test '%s' does not exist!" % used_homogeneity_test)
         # Significance level alpha for the chisquare test
         self.alpha_chisquare_test = alpha_chisquare_test
         # Maximum distance between the distribution of the rule and the distribution of the read in values before the rule fails
@@ -808,8 +808,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                                 if any(current_appearance_list[pos_var_cor_index][0][i_val][j_val] for j_val in current_appearance_list[
                                         pos_var_cor_index][0][i_val]):
                                     print(1)
-                                    tmp_bool = self.homogeneity_test(self.w_rel_list[event_index][pos_var_cor_index][0][i_val], \
-                                            current_appearance_list[pos_var_cor_index][0][i_val])
+                                    tmp_bool = self.homogeneity_test(self.w_rel_list[event_index][pos_var_cor_index][0][i_val],
+                                                                     current_appearance_list[pos_var_cor_index][0][i_val])
 
                                 # Update the bt_results list
                                 if tmp_bool:
@@ -879,8 +879,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                                 if any(current_appearance_list[pos_var_cor_index][1][j_val][i_val] for i_val in current_appearance_list[
                                         pos_var_cor_index][1][j_val]):
                                     print(2)
-                                    tmp_bool = self.homogeneity_test(self.w_rel_list[event_index][pos_var_cor_index][1][j_val], \
-                                            current_appearance_list[pos_var_cor_index][1][j_val])
+                                    tmp_bool = self.homogeneity_test(self.w_rel_list[event_index][pos_var_cor_index][1][j_val],
+                                                                     current_appearance_list[pos_var_cor_index][1][j_val])
 
                                 # Update the bt_results list
                                 if tmp_bool:
@@ -926,8 +926,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                         if sum([current_appearance_list[pos_var_cor_index][0][i_val][j_val] for j_val in current_appearance_list[
                                 pos_var_cor_index][0][i_val]]) > self.min_values_cors_thres:
                             print(3)
-                            tmp_bool = self.homogeneity_test(self.w_rel_list[event_index][pos_var_cor_index][0][i_val], \
-                                    current_appearance_list[pos_var_cor_index][0][i_val])
+                            tmp_bool = self.homogeneity_test(self.w_rel_list[event_index][pos_var_cor_index][0][i_val],
+                                                             current_appearance_list[pos_var_cor_index][0][i_val])
 
                         # Update the bt_results list
                         if tmp_bool:
@@ -945,8 +945,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                         if sum([current_appearance_list[pos_var_cor_index][1][j_val][i_val] for i_val in current_appearance_list[
                                 pos_var_cor_index][1][j_val]]) > self.min_values_cors_thres:
                             print(4)
-                            tmp_bool = self.homogeneity_test(self.w_rel_list[event_index][pos_var_cor_index][1][j_val], \
-                                    current_appearance_list[pos_var_cor_index][1][j_val])
+                            tmp_bool = self.homogeneity_test(self.w_rel_list[event_index][pos_var_cor_index][1][j_val],
+                                                             current_appearance_list[pos_var_cor_index][1][j_val])
 
                         # Update the bt_results list
                         if tmp_bool:
@@ -1219,26 +1219,26 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
     # skipcq: PYL-R0201
     def homogeneity_test(self, occurances1, occurances2):
-        """Makes an two sample test of homogeneity of the given occurances."""
+        """Make a two sample test of homogeneity of the given occurances."""
         if self.used_homogeneity_test == 'Chi':
             test_result = 0
             for val in occurances1:
                 if occurances1[val] > 0:
                     observed1 = occurances1[val]
                     expected1 = sum(occurances1.values()) * (occurances1[val]+occurances2[val]) / \
-                            (sum(occurances1.values()) + sum(occurances2.values()))
+                        (sum(occurances1.values()) + sum(occurances2.values()))
                     test_result += (observed1 - expected1) * (observed1 - expected1) / expected1
 
                     observed2 = occurances2[val]
                     expected2 = sum(occurances2.values()) * (occurances1[val]+occurances2[val]) / \
-                            (sum(occurances1.values()) + sum(occurances2.values()))
+                        (sum(occurances1.values()) + sum(occurances2.values()))
                     test_result += (observed2 - expected2) * (observed2 - expected2) / expected2
 
             if test_result >= chi2.ppf(1-self.alpha_chisquare_test, (len(occurances1)-1)):
                 return False
         elif self.used_homogeneity_test == 'MaxDist':
             for val in occurances1:
-                if abs(occurances1[val] / sum(occurances1.values()) - \
+                if abs(occurances1[val] / sum(occurances1.values()) -
                         occurances2[val] / max(1, sum(occurances2.values()))) > self.max_dist_rule_distr:
                     return False
         return True
