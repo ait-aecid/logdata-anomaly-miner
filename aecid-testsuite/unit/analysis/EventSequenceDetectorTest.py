@@ -89,7 +89,6 @@ class EventSequenceDetectorTest(TestBase):
 
         # Next log atom is of user with id 1, new sequence should be generated
         event_sequence_detector.receive_atom(log_atom_4)
-        print(event_sequence_detector.sequences)
         self.assertEqual(test_handler.anomaly, {'AnalysisComponent': {'AffectedLogAtomPaths': [['/model/value']],
                                                                       'AffectedLogAtomValues': [('b',), ('c',)]}})
         sequences_set.add((('b',), ('c',)))
