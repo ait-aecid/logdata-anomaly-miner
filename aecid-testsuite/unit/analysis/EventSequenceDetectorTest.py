@@ -14,7 +14,7 @@ class TestHandler():
 
     # skipcq: PYL-W0613
     def receive_event(self, name, msg, ll, evdat, atom, obj):
-        """Dummy method to receive anomaly information."""
+        """Receive anomaly information."""
         self.anomaly = evdat
 
 
@@ -76,7 +76,7 @@ class EventSequenceDetectorTest(TestBase):
 
         # Second log atom should create first sequence
         event_sequence_detector.receive_atom(log_atom_2)
-        self.assertEqual(test_handler.anomaly, {'AnalysisComponent': {'AffectedLogAtomPaths': [['/model/value']], 
+        self.assertEqual(test_handler.anomaly, {'AnalysisComponent': {'AffectedLogAtomPaths': [['/model/value']],
                                                                       'AffectedLogAtomValues': [('a',), ('b',)]}})
         sequences_set.add((('a',), ('b',)))
         self.assertEqual(event_sequence_detector.sequences, sequences_set)
@@ -90,7 +90,7 @@ class EventSequenceDetectorTest(TestBase):
         # Next log atom is of user with id 1, new sequence should be generated
         event_sequence_detector.receive_atom(log_atom_4)
         print(event_sequence_detector.sequences)
-        self.assertEqual(test_handler.anomaly, {'AnalysisComponent': {'AffectedLogAtomPaths': [['/model/value']], 
+        self.assertEqual(test_handler.anomaly, {'AnalysisComponent': {'AffectedLogAtomPaths': [['/model/value']],
                                                                       'AffectedLogAtomValues': [('b',), ('c',)]}})
         sequences_set.add((('b',), ('c',)))
         self.assertEqual(event_sequence_detector.sequences, sequences_set)
