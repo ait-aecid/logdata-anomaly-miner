@@ -1,9 +1,9 @@
 """
-This module defines an detector for event and value sequences. The concept is
-based on STIDE which was first published by Forrest, S., Hofmeyr, S. A., 
-Somayaji, A., & Longstaff, T. A. (1996, May). A sense of self for unix 
-processes. In Proceedings of the 1996 IEEE Symposium on Security and Privacy 
-(pp. 120-128). IEEE.
+This module defines an detector for event and value sequences.
+The concept is based on STIDE which was first published by Forrest, S.,
+Hofmeyr, S. A., Somayaji, A., & Longstaff, T. A. (1996, May). A sense of self
+for unix processes. In Proceedings of the 1996 IEEE Symposium on Security and
+Privacy (pp. 120-128). IEEE.
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
 Foundation, either version 3 of the License, or (at your option) any later
@@ -32,8 +32,8 @@ from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
     """This class creates events when new event or value sequences were found."""
 
-    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, id_path_list, seq_len=3, persistence_id='Default', auto_include_flag=False,
-                 output_log_line=True, ignore_list=None, constraint_list=None):
+    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, id_path_list, seq_len=3, persistence_id='Default',
+                 auto_include_flag=False, output_log_line=True, ignore_list=None, constraint_list=None):
         """Initialize the detector."""
         self.target_path_list = target_path_list
         self.anomaly_event_handlers = anomaly_event_handlers
@@ -132,7 +132,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
             if len(self.current_sequences[id_tuple]) != self.seq_len:
                 return
         else:
-            self.current_sequences[id_tuple] = self.current_sequences[id_tuple][1:] + (log_event,) 
+            self.current_sequences[id_tuple] = self.current_sequences[id_tuple][1:] + (log_event,)
 
         # Report anomalies if the current processed sequence never occurred before.
         if self.current_sequences[id_tuple] not in self.sequences:
@@ -147,16 +147,19 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
             if original_log_line_prefix is None:
                 original_log_line_prefix = ''
             if self.output_log_line:
-                sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
+                sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix +
+                                    repr(log_atom.raw_data)]
             else:
                 sorted_log_lines = [repr(log_atom.raw_data)]
             if self.target_path_list is None or len(self.target_path_list) == 0:
-                analysis_component = {'AffectedLogAtomPaths': [self.current_sequences[id_path]]}
+                analysis_component = {'AffectedLogAtomPaths': [self.current_sequences[id_tuple]]}
             else:
-                analysis_component = {'AffectedLogAtomPaths': [self.target_path_list], 'AffectedLogAtomValues': list(self.current_sequences[id_tuple])}
+                analysis_component = {'AffectedLogAtomPaths': [self.target_path_list], 
+                                      'AffectedLogAtomValues': list(self.current_sequences[id_tuple])}
             event_data = {'AnalysisComponent': analysis_component}
             for listener in self.anomaly_event_handlers:
-                listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New sequence detected', sorted_log_lines, event_data, log_atom, self)
+                listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New sequence detected', sorted_log_lines, event_data,
+                                       log_atom, self)
         self.log_success += 1
 
     def get_time_trigger_class(self):
