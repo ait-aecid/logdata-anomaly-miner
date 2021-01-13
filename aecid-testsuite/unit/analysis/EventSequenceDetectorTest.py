@@ -1,31 +1,28 @@
 import unittest
-from aminer.parsing.FixedDataModelElement import FixedDataModelElement
-from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
-from aminer.parsing.MatchContext import MatchContext
-from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
 from aminer.analysis.EventSequenceDetector import EventSequenceDetector
 from aminer.input.LogAtom import LogAtom
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.ParserMatch import ParserMatch
 from unit.TestBase import TestBase
-from time import time
-from datetime import datetime
 
 
 class TestHandler():
+    """Dummy anomaly handler."""
+
     def __init__(self):
         self.anomaly = None
 
+    # skipcq: PYL-W0613
     def receive_event(self, name, msg, ll, evdat, atom, obj):
+        """Dummy method to receive anomaly information."""
         self.anomaly = evdat
+
 
 class EventSequenceDetectorTest(TestBase):
     """Unittests for the EventSequenceDetectorDetector."""
 
     def test1_normal_sequence_detection(self):
-        """
-        This test case checks the normal detection of new sequences.
-        """
+        """This test case checks the normal detection of new sequences."""
         description = "Test1EventSequenceDetector"
 
         # Initialize detector
@@ -79,7 +76,8 @@ class EventSequenceDetectorTest(TestBase):
 
         # Second log atom should create first sequence
         event_sequence_detector.receive_atom(log_atom_2)
-        self.assertEqual(test_handler.anomaly, {'AnalysisComponent': {'AffectedLogAtomPaths': [['/model/value']], 'AffectedLogAtomValues': [('a',), ('b',)]}})
+        self.assertEqual(test_handler.anomaly, {'AnalysisComponent': {'AffectedLogAtomPaths': [['/model/value']], 
+                                                                      'AffectedLogAtomValues': [('a',), ('b',)]}})
         sequences_set.add((('a',), ('b',)))
         self.assertEqual(event_sequence_detector.sequences, sequences_set)
         test_handler.anomaly = None
@@ -92,7 +90,8 @@ class EventSequenceDetectorTest(TestBase):
         # Next log atom is of user with id 1, new sequence should be generated
         event_sequence_detector.receive_atom(log_atom_4)
         print(event_sequence_detector.sequences)
-        self.assertEqual(test_handler.anomaly, {'AnalysisComponent': {'AffectedLogAtomPaths': [['/model/value']], 'AffectedLogAtomValues': [('b',), ('c',)]}})
+        self.assertEqual(test_handler.anomaly, {'AnalysisComponent': {'AffectedLogAtomPaths': [['/model/value']], 
+                                                                      'AffectedLogAtomValues': [('b',), ('c',)]}})
         sequences_set.add((('b',), ('c',)))
         self.assertEqual(event_sequence_detector.sequences, sequences_set)
         test_handler.anomaly = None
@@ -101,6 +100,7 @@ class EventSequenceDetectorTest(TestBase):
         event_sequence_detector.receive_atom(log_atom_5)
         self.assertIsNone(test_handler.anomaly)
         self.assertEqual(event_sequence_detector.sequences, sequences_set)
+
 
 if __name__ == "__main__":
     unittest.main()
