@@ -154,7 +154,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
             if self.target_path_list is None or len(self.target_path_list) == 0:
                 analysis_component = {'AffectedLogAtomPaths': [self.current_sequences[id_tuple]]}
             else:
-                analysis_component = {'AffectedLogAtomPaths': [self.target_path_list], 
+                analysis_component = {'AffectedLogAtomPaths': [self.target_path_list],
                                       'AffectedLogAtomValues': list(self.current_sequences[id_tuple])}
             event_data = {'AnalysisComponent': analysis_component}
             for listener in self.anomaly_event_handlers:
