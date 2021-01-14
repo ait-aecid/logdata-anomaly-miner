@@ -2265,6 +2265,7 @@ def consists_of_ints(list_in):
             return False
     return True
 
+
 def get_vt_string(vt):
     """Return a string which states the variable type with selected parameters."""
     if vt[0] == 'stat':
