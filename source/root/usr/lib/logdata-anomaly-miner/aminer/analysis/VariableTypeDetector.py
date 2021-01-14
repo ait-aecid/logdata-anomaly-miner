@@ -2152,12 +2152,53 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
         event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
                       'TypeInfo': {'from': vt_old[0], 'to': vt_new[0], 'lines': self.event_type_detector.num_eventlines[event_index]}}
+        vt_old_string = self.get_vt_string(vt_old)
+        vt_new_string = self.get_vt_string(vt_new)
         for listener in self.anomaly_event_handlers:
             listener.receive_event(
                 'Analysis.%s' % self.__class__.__name__,
-                "VariableType of path '%s' changed from '%s' to '%s' after the %s-th analysed line" % (
-                    self.event_type_detector.variable_key_list[event_index][var_index], vt_old[0], vt_new[0],
+                "VariableType of path '%s' changed from %s to %s after the %s-th analysed line" % (
+                    self.event_type_detector.variable_key_list[event_index][var_index], vt_old_string, vt_new_string,
                     self.event_type_detector.num_eventlines[event_index]), sorted_log_lines, event_data, log_atom, self)
+
+    def get_vt_string(self, vt):
+        """Return a string which states the variable type with selected parameters"""
+        if vt[0] == 'stat':
+            return_string = '%s %s'%(vt[0], vt[1])
+        elif vt[0] == 'd':
+            return_string = vt[0] + ' ['
+            for i in range(len(vt[2])):
+                if vt[2][i] >= 0.1:
+                    return_string += '%s(%s%%), '%(str(vt[1][i]), str(int(vt[2][i]*100)))
+            if any(vt[2][i] < 0.1 for i in range(len(vt[2]))):
+                return_string += '...]'
+            else:
+                return_string = return_string[:-2]
+                return_string += ']'
+        elif vt[0] == 'asc' or vt[0] == 'desc':
+            return_string = '%s [%s]'%(vt[0], vt[1])
+        elif vt[0] == 'unq':
+            return_string = vt[0]
+        elif vt[0] == 'others':
+            return_string = vt[0]
+        elif vt[0] == 'uni':
+            return_string = '%s [min: %s, max: %s]'%(vt[0], vt[1], vt[2])
+        elif vt[0] == 'nor':
+            return_string = '%s [EV: %s, SD: %s]'%(vt[0], vt[1], vt[2])
+        elif vt[0] == 'spec':
+            return_string = '%s%s [EV: %s, SD: %s]'%(vt[0], vt[5], vt[1], vt[2])
+        elif vt[0] == 'beta':
+            if vt[5] == 1:
+                return_string = '%s%s [min: %s, max: %s]'%(vt[0], vt[5], vt[3], vt[4])
+            else:
+                return_string = '%s%s [EV: %s, SD: %s]'%(vt[0], vt[5], vt[1], vt[2])
+        elif vt[0] == 'betam':
+            return_string = '%s [min: %s, max: %s, proportion: %s]'%(vt[0], vt[3], vt[4], vt[5])
+        elif vt[0] == 'emp':
+            return_string = vt[0]
+        else:
+            return_string = vt[0]
+        return return_string
 
     def print_reject_var_type(self, event_index, vt, var_index, log_atom):
         """Print the changed variable types."""
