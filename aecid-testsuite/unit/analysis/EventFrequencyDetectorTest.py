@@ -140,13 +140,20 @@ class EventFrequencyDetectorTest(TestBase):
         # Add a
         # This should cause one anomaly for a and b respectively.
         event_frequency_detector.receive_atom(log_atom_9)
-        self.assertEqual(test_handler.anomalies, [{'AnalysisComponent': {'AffectedLogAtomPaths': ['/value'],
-                                                   'AffectedLogAtomValues': ['a']}, 'FrequencyData': {'ExpectedLogAtomValuesFrequency': 3,
-                                                   'LogAtomValuesFrequency': 1, 'ConfidenceFactor': 2,
-                                                   'Confidence': 0.6666666666666667}}, {'AnalysisComponent': {'AffectedLogAtomPaths':
-                                                   ['/value'], 'AffectedLogAtomValues': ['b']}, 'FrequencyData': {
-                                                   'ExpectedLogAtomValuesFrequency': 1, 'LogAtomValuesFrequency': 0,
-                                                   'ConfidenceFactor': 2, 'Confidence': 1.0}}])
+        self.assertEqual(test_handler.anomalies,
+                         [{'AnalysisComponent': {'AffectedLogAtomPaths': ['/value'
+                         ], 'AffectedLogAtomValues': ['a']}, 'FrequencyData': {
+            'ExpectedLogAtomValuesFrequency': 3,
+            'LogAtomValuesFrequency': 1,
+            'ConfidenceFactor': 2,
+            'Confidence': 0.6666666666666667,
+            }}, {'AnalysisComponent': {'AffectedLogAtomPaths': ['/value'],
+                 'AffectedLogAtomValues': ['b']}, 'FrequencyData': {
+            'ExpectedLogAtomValuesFrequency': 1,
+            'LogAtomValuesFrequency': 0,
+            'ConfidenceFactor': 2,
+            'Confidence': 1.0,
+            }}])
         self.assertEqual(event_frequency_detector.counts, {('a',): 1})
         self.assertEqual(event_frequency_detector.counts_prev, {('a',): 1})
 

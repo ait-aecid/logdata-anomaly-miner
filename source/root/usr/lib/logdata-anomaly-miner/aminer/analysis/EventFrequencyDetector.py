@@ -132,9 +132,10 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 if log_ev in self.counts:
                     occurrences = self.counts[log_ev]
                 # Compare log event frequency of previous and current time window
-                if occurrences < self.counts_prev[log_ev] / self.confidence_factor or occurrences > self.counts_prev[log_ev] * \
-                                                                                      self.confidence_factor:
+                if occurrences < self.counts_prev[log_ev] / self.confidence_factor or \
+                   occurrences > self.counts_prev[log_ev] * self.confidence_factor:
                     if self.output_log_line:
+                        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
                         sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix +
                                             repr(log_atom.raw_data)]
                     else:
@@ -233,8 +234,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         elif STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
                 "'%s' processed %d out of %d log atoms successfully in %d time windows in the last 60"
-                " minutes. Following new sequences were learned: %s", component_name, self.log_success, self.log_total,
-                self.log_windows)
+                " minutes.", component_name, self.log_success, self.log_total, self.log_windows)
         self.log_success = 0
         self.log_total = 0
         self.log_windows = 0
