@@ -132,7 +132,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 if log_ev in self.counts:
                     occurrences = self.counts[log_ev]
                 # Compare log event frequency of previous and current time window
-                if occurrences < self.counts_prev[log_ev] / self.confidence_factor or occurrences > self.counts_prev[log_ev] *
+                if occurrences < self.counts_prev[log_ev] / self.confidence_factor or occurrences > self.counts_prev[log_ev] * \
                                                                                       self.confidence_factor:
                     if self.output_log_line:
                         sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix +
@@ -146,7 +146,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                                       'Confidence': confidence}
                     event_data = {'AnalysisComponent': analysis_component, 'FrequencyData': frequency_info}
                     for listener in self.anomaly_event_handlers:
-                        listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Frequency anomaly detected', sorted_log_lines, event_data, log_atom, self)
+                        listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Frequency anomaly detected', sorted_log_lines,
+                                               event_data, log_atom, self)
             if self.auto_include_flag is True:
                 self.counts_prev = self.counts
             self.counts = {}
