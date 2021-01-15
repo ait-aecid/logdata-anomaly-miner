@@ -103,7 +103,7 @@ class EventFrequencyDetectorTest(TestBase):
         self.assertEqual(event_frequency_detector.counts, {('a',): 2, ('b',): 1})
         self.assertEqual(event_frequency_detector.counts_prev, {})
 
-        # Time window 2 should not create anomalies since a is within confidence (3 instead of 2 occurrences) and b is identical (1 occurrence).
+        # Time window 2 should not create anomalies since a is in confidence (3 vs 2 occurrences) and b is identical (1 occurrence).
         # Also, counts is moved to counts_prev.
         # Add a
         event_frequency_detector.receive_atom(log_atom_4)
@@ -140,7 +140,13 @@ class EventFrequencyDetectorTest(TestBase):
         # Add a
         # This should cause one anomaly for a and b respectively.
         event_frequency_detector.receive_atom(log_atom_9)
-        self.assertEqual(test_handler.anomalies, [{'AnalysisComponent': {'AffectedLogAtomPaths': ['/value'], 'AffectedLogAtomValues': ['a']}, 'FrequencyData': {'ExpectedLogAtomValuesFrequency': 3, 'LogAtomValuesFrequency': 1, 'ConfidenceFactor': 2, 'Confidence': 0.6666666666666667}}, {'AnalysisComponent': {'AffectedLogAtomPaths': ['/value'], 'AffectedLogAtomValues': ['b']}, 'FrequencyData': {'ExpectedLogAtomValuesFrequency': 1, 'LogAtomValuesFrequency': 0, 'ConfidenceFactor': 2, 'Confidence': 1.0}}])
+        self.assertEqual(test_handler.anomalies, [{'AnalysisComponent': {'AffectedLogAtomPaths': ['/value'],
+                                                   'AffectedLogAtomValues': ['a']}, 'FrequencyData': {'ExpectedLogAtomValuesFrequency': 3,
+                                                   'LogAtomValuesFrequency': 1, 'ConfidenceFactor': 2,
+                                                   'Confidence': 0.6666666666666667}}, {'AnalysisComponent': {'AffectedLogAtomPaths':
+                                                   ['/value'], 'AffectedLogAtomValues': ['b']}, 'FrequencyData': {
+                                                   'ExpectedLogAtomValuesFrequency': 1, 'LogAtomValuesFrequency': 0,
+                                                   'ConfidenceFactor': 2, 'Confidence': 1.0}}])
         self.assertEqual(event_frequency_detector.counts, {('a',): 1})
         self.assertEqual(event_frequency_detector.counts_prev, {('a',): 1})
 

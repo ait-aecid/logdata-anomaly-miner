@@ -28,8 +28,8 @@ from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
     """This class creates events when event or value frequencies change."""
 
-    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, window_size=600, confidence_factor=2, persistence_id='Default',
-                 auto_include_flag=False, output_log_line=True, ignore_list=None, constraint_list=None):
+    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, window_size=600, confidence_factor=2,
+                 persistence_id='Default', auto_include_flag=False, output_log_line=True, ignore_list=None, constraint_list=None):
         """Initialize the detector."""
         self.target_path_list = target_path_list
         self.anomaly_event_handlers = anomaly_event_handlers
@@ -69,6 +69,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
             logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     def receive_atom(self, log_atom):
+        """Receive a log atom from a source."""
         parser_match = log_atom.parser_match
         self.log_total += 1
 
@@ -131,12 +132,13 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 if log_ev in self.counts:
                     occurrences = self.counts[log_ev]
                 # Compare log event frequency of previous and current time window
-                if occurrences < self.counts_prev[log_ev] / self.confidence_factor or occurrences > self.counts_prev[log_ev] * self.confidence_factor:
-                    #print(str(log_ev) + ' occurred ' + str(occurrences) + ' instead of ' + str(self.counts_prev[log_ev]) + ' times in the last ' + str(self.window_size) + ' seconds!')
+                if occurrences < self.counts_prev[log_ev] / self.confidence_factor or occurrences > self.counts_prev[log_ev] *
+                                                                                      self.confidence_factor:
                     if self.output_log_line:
-                        sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('')]
+                        sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix +
+                                            repr(log_atom.raw_data)]
                     else:
-                        sorted_log_lines = [log_atom.raw_data]
+                        sorted_log_lines = [repr(log_atom.raw_data)]
                     confidence = 1 - min(occurrences, self.counts_prev[log_ev]) / max(occurrences, self.counts_prev[log_ev])
                     analysis_component = {'AffectedLogAtomPaths': self.target_path_list, 'AffectedLogAtomValues': list(log_ev)}
                     frequency_info = {'ExpectedLogAtomValuesFrequency': self.counts_prev[log_ev], 'LogAtomValuesFrequency': occurrences,
@@ -148,7 +150,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
             if self.auto_include_flag is True:
                 self.counts_prev = self.counts
             self.counts = {}
-        
+
         if log_event in self.counts:
             self.counts[log_event] += 1
         else:
@@ -226,7 +228,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         if STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
                 "'%s' processed %d out of %d log atoms successfully in %d time windows in the last 60"
-                " minutes.", component_name, self.log_success, self.log_windows)
+                " minutes.", component_name, self.log_success, self.log_total, self.log_windows)
         elif STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
                 "'%s' processed %d out of %d log atoms successfully in %d time windows in the last 60"
