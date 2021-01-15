@@ -331,6 +331,10 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers,
                                     persistence_id=item['persistence_id'], id_path_list=item['id_path_list'], seq_len=item['seq_len'],
                                     auto_include_flag=learn, output_log_line=item['output_logline'])
+            elif item['type'].name == 'EventFrequencyDetector':
+                tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, persistence_id=item['persistence_id'],
+                                    window_size=item['window_size'], confidence_factor=item['confidence_factor'], auto_include_flag=learn,
+                                    output_log_line=item['output_logline'])
             elif item['type'].name == 'TimeCorrelationDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['parallel_check_count'],
                                     persistence_id=item['persistence_id'], record_count_before_event=item['record_count_before_event'],
