@@ -182,6 +182,7 @@
                     'ignore_list': {
                         'type': 'list', 'schema': {'type': 'string'}, 'required': False, 'nullable': True, 'default': None},
                     'id_path_list': {'type': 'list', 'required': False, 'default': []},
+                    'seq_len': {'type': 'integer', 'required': False, 'default': 3},
                     'min_allowed_time_diff': {'type': 'float', 'required': False, 'default': 5.0},
                     'lower_limit': {'type': ['integer', 'float']},
                     'upper_limit': {'type': ['integer', 'float']},

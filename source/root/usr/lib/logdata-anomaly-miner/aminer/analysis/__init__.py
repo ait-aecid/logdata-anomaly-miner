@@ -30,6 +30,7 @@ from aminer.analysis.Rules import AndMatchRule, OrMatchRule, AtomFilterMatchActi
     DebugMatchRule, IPv4InRFC1918MatchRule, ModuloTimeMatchRule, NegationMatchRule, ParallelMatchRule, PathExistsMatchRule,\
     StringRegexMatchRule, ValueDependentDelegatedMatchRule, ValueDependentModuloTimeMatchRule, ValueListMatchRule, ValueMatchRule,\
     ValueRangeMatchRule
+from aminer.analysis.EventSequenceDetector import EventSequenceDetector  # skipcq: FLK-E402
 from aminer.analysis.TimeCorrelationDetector import TimeCorrelationDetector, CorrelationFeature  # skipcq: FLK-E402
 # skipcq: FLK-E402
 from aminer.analysis.TimeCorrelationViolationDetector import TimeCorrelationViolationDetector, CorrelationRule, EventClassSelector
