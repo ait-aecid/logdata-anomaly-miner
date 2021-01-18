@@ -28,7 +28,7 @@ class EventFrequencyDetectorTest(TestBase):
         # Initialize detector
         test_handler = TestHandler()
         event_frequency_detector = EventFrequencyDetector(self.aminer_config, ['/value'], [
-            test_handler], 10, 2, 'Default', True, output_log_line=False)
+            test_handler], 10, 0.5, 'Default', True, output_log_line=False)
         self.analysis_context.register_component(event_frequency_detector, description)
 
         # Prepare log atoms that represent different amounts of values a, b over time
@@ -146,13 +146,13 @@ class EventFrequencyDetectorTest(TestBase):
                  'AffectedLogAtomValues': ['a']}, 'FrequencyData': {
                     'ExpectedLogAtomValuesFrequency': 3,
                     'LogAtomValuesFrequency': 1,
-                    'ConfidenceFactor': 2,
+                    'ConfidenceFactor': 0.5,
                     'Confidence': 0.6666666666666667,
                     }}, {'AnalysisComponent': {'AffectedLogAtomPaths': ['/value'],
                          'AffectedLogAtomValues': ['b']}, 'FrequencyData':
                              {'ExpectedLogAtomValuesFrequency': 1,
                               'LogAtomValuesFrequency': 0,
-                              'ConfidenceFactor': 2,
+                              'ConfidenceFactor': 0.5,
                               'Confidence': 1.0}}])
         self.assertEqual(event_frequency_detector.counts, {('a',): 1})
         self.assertEqual(event_frequency_detector.counts_prev, {('a',): 1})

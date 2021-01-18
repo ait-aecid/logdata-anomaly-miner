@@ -28,9 +28,24 @@ from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
     """This class creates events when event or value frequencies change."""
 
-    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, window_size=600, confidence_factor=2,
+    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, window_size=600, confidence_factor=0.5,
                  persistence_id='Default', auto_include_flag=False, output_log_line=True, ignore_list=None, constraint_list=None):
-        """Initialize the detector."""
+        """
+        Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        @param aminer_config configuration from analysis_context.
+        @param target_path_list parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined
+        occurrences. When no paths are specified, the events given by the full path list are analyzed.
+        @param anomaly_event_handlers for handling events, e.g., print events to stdout.
+        @param window_size the length of the time window for counting in seconds.
+        @param confidence factor defines range of tolerable deviation of measured frequency from ground truth frequency gt by
+        [gf * confidence_factor, gf / confidence_factor]. confidence_factor must be in range [0, 1].
+        @param persistence_id name of persistency document.
+        @param auto_include_flag specifies whether new frequency measurements override ground truth frequencies.
+        @param output_log_line specifies whether the full parsed log atom should be provided in the output.
+        @param ignore_list list of paths that are not considered for analysis, i.e., events that contain one of these paths are
+        omitted. The default value is [] as None is not iterable.
+        @param constrain_list list of paths that have to be present in the log atom to be analyzed.
+        """
         self.target_path_list = target_path_list
         self.anomaly_event_handlers = anomaly_event_handlers
         self.auto_include_flag = auto_include_flag
@@ -45,8 +60,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         if self.ignore_list is None:
             self.ignore_list = []
         self.window_size = window_size
-        if confidence_factor < 1:
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning('confidence_factor must be >= 1!')
+        if confidence_factor > 1 or confidence_factor < 0:
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning('confidence_factor must be in the range [0,1]!')
             confidence_factor = 1
         self.confidence_factor = confidence_factor
         self.next_check_time = None
@@ -132,8 +147,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 if log_ev in self.counts:
                     occurrences = self.counts[log_ev]
                 # Compare log event frequency of previous and current time window
-                if occurrences < self.counts_prev[log_ev] / self.confidence_factor or \
-                   occurrences > self.counts_prev[log_ev] * self.confidence_factor:
+                if occurrences < self.counts_prev[log_ev] * self.confidence_factor or \
+                   occurrences > self.counts_prev[log_ev] / self.confidence_factor:
                     if self.output_log_line:
                         original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
                         sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix +

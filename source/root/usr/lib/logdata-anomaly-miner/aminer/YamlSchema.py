@@ -184,7 +184,7 @@
                     'id_path_list': {'type': 'list', 'required': False, 'default': []},
                     'seq_len': {'type': 'integer', 'required': False, 'default': 3},
                     'window_size': {'type': 'integer', 'required': False, 'default': 600},
-                    'confidence_factor': {'type': 'float', 'required': False, 'default': 2},
+                    'confidence_factor': {'type': 'float', 'required': False, 'default': 0.5},
                     'min_allowed_time_diff': {'type': 'float', 'required': False, 'default': 5.0},
                     'lower_limit': {'type': ['integer', 'float']},
                     'upper_limit': {'type': ['integer', 'float']},
