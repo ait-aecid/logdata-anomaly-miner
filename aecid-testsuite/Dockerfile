@@ -50,7 +50,7 @@ RUN apt-get update && apt-get install -y \
         sudo \
         curl \
         postfix \
-        openjdk-15-jre \
+        openjdk-14-jre \
         locales \
         locales-all \
         rsyslog
@@ -92,7 +92,7 @@ RUN ln -s /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerr
 	&& ln -s /usr/lib/python3/dist-packages/pytz /usr/lib/logdata-anomaly-miner/pytz \
 	&& ln -s /usr/lib/python3/dist-packages/dateutil /usr/lib/logdata-anomaly-miner/dateutil \
 	&& ln -s /usr/lib/python3/dist-packages/six.py /usr/lib/logdata-anomaly-miner/six.py \
-	&& useradd -ms /usr/sbin/nologin aminer && mkdir /var/lib/aminer && chmod 0755 /aminerwrapper.sh \
+	&& useradd -ms /usr/sbin/nologin aminer && mkdir -p /var/lib/aminer/log && chmod 0755 /aminerwrapper.sh \
         && chown aminer.aminer -R /var/lib/aminer
 
 RUN PACK=$(find /usr/lib/python3/dist-packages -name posix1e.cpython\*.so) && FILE=$(echo $PACK | awk -F '/' '{print $NF}') ln -s $PACK /usr/lib/logdata-anomaly-miner/$FILE 

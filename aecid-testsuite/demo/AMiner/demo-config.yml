@@ -1,5 +1,7 @@
 LearnMode: False
 
+Core.LogDir: '/tmp/lib/aminer/log'
+
 Core.PersistenceDir: '/tmp/lib/aminer'
 
 Core.PersistencePeriod: 600

@@ -14,7 +14,10 @@ LogResourceList:
 # to the 'AMinerUser' but not group/world readable. On violation,
 # AMiner will refuse to start. When undefined, '/var/lib/aminer'
 # is used.
-# Core.PersistenceDir: '/tmp/lib/aminer'
+# Core.PersistenceDir: '/var/lib/aminer'
+
+# Directory for logfiles. Default: /var/lib/aminer/log
+# Core.LogDir: '/var/lib/aminer/log'
 
 # Define a target e-mail address to send alerts to. When undefined,
 # no e-mail notification hooks are added.
