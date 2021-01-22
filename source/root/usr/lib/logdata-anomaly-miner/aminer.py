@@ -36,7 +36,6 @@ import shutil
 import warnings
 import argparse
 
-
 # As site packages are not included, define from where we need to execute code before loading it.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
 from aminer import AMinerConfig  # skipcq: FLK-E402
@@ -91,11 +90,28 @@ def initialize_loggers(aminer_config, aminer_user, aminer_grp):
     """Initialize all loggers."""
     datefmt = '%d/%b/%Y:%H:%M:%S %z'
 
-    persistence_dir = aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
+    log_dir = aminer_config.config_properties.get(AMinerConfig.KEY_LOG_DIR, AMinerConfig.DEFAULT_LOG_DIR)
+    if log_dir == AMinerConfig.DEFAULT_LOG_DIR:
+        try:
+            if not os.path.isdir(log_dir):
+                os.makedirs(log_dir)
+                from pwd import getpwnam
+                from grp import getgrnam
+                os.chown(log_dir,
+                         getpwnam(aminer_user).pw_uid,
+                         getgrnam(aminer_grp).gr_gid)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                msg = 'Unable to create log-directory: %s' % log_dir
+            else:
+                msg = e
+            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg.strip('\n'))
+            print(msg, file=sys.stderr)
+
     rc_logger = logging.getLogger(AMinerConfig.REMOTE_CONTROL_LOG_NAME)
     rc_logger.setLevel(logging.DEBUG)
     remote_control_log_file = aminer_config.config_properties.get(
-        AMinerConfig.KEY_REMOTE_CONTROL_LOG_FILE, os.path.join(persistence_dir, AMinerConfig.DEFAULT_REMOTE_CONTROL_LOG_FILE))
+        AMinerConfig.KEY_REMOTE_CONTROL_LOG_FILE, os.path.join(log_dir, AMinerConfig.DEFAULT_REMOTE_CONTROL_LOG_FILE))
     try:
         rc_file_handler = logging.FileHandler(remote_control_log_file)
         shutil.chown(remote_control_log_file, aminer_user, aminer_grp)
@@ -109,7 +125,7 @@ def initialize_loggers(aminer_config, aminer_user, aminer_grp):
     stat_logger = logging.getLogger(AMinerConfig.STAT_LOG_NAME)
     stat_logger.setLevel(logging.INFO)
     stat_log_file = aminer_config.config_properties.get(
-        AMinerConfig.KEY_STAT_LOG_FILE, os.path.join(persistence_dir, AMinerConfig.DEFAULT_STAT_LOG_FILE))
+        AMinerConfig.KEY_STAT_LOG_FILE, os.path.join(log_dir, AMinerConfig.DEFAULT_STAT_LOG_FILE))
     try:
         stat_file_handler = logging.FileHandler(stat_log_file)
         shutil.chown(stat_log_file, aminer_user, aminer_grp)
@@ -127,7 +143,7 @@ def initialize_loggers(aminer_config, aminer_user, aminer_grp):
     else:
         debug_logger.setLevel(logging.DEBUG)
     debug_log_file = aminer_config.config_properties.get(
-        AMinerConfig.KEY_DEBUG_LOG_FILE, os.path.join(persistence_dir, AMinerConfig.DEFAULT_DEBUG_LOG_FILE))
+        AMinerConfig.KEY_DEBUG_LOG_FILE, os.path.join(log_dir, AMinerConfig.DEFAULT_DEBUG_LOG_FILE))
     try:
         debug_file_handler = logging.FileHandler(debug_log_file)
         shutil.chown(debug_log_file, aminer_user, aminer_grp)

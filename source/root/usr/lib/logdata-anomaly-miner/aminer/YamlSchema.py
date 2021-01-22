@@ -28,6 +28,11 @@
             'type': 'string',
             'default': '/var/lib/aminer'
         },
+        'Core.LogDir': {
+            'required': False,
+            'type': 'string',
+            'default': '/var/lib/aminer/log'
+        },
         'Core.PersistencePeriod': {
             'required': False,
             'type': 'integer',
