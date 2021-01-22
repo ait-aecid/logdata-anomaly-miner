@@ -1,4 +1,4 @@
-# logdata-anomaly-miner [![Build Status](https://aecidjenkins.ait.ac.at/buildStatus/icon?job=AECID%2FAECID%2Flogdata-anomaly-miner%2Fmaster)](https://aecidjenkins.ait.ac.at/job/AECID/job/AECID/job/logdata-anomaly-miner/job/master/) [![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/ait-aecid/logdata-anomaly-miner/?ref=repository-badge)
+# logdata-anomaly-miner [![Build Status](https://aecidjenkins.ait.ac.at/buildStatus/icon?job=AECID%2FAECID%2Flogdata-anomaly-miner%2Fmain)](https://aecidjenkins.ait.ac.at/job/AECID/job/AECID/job/logdata-anomaly-miner/job/main/) [![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/ait-aecid/logdata-anomaly-miner/?ref=repository-badge)
 
 This tool parses log data and allows to define analysis pipelines for anomaly detection. It was designed to run the analysis with limited resources and lowest possible permissions to make it suitable for production server use.
 
@@ -21,7 +21,7 @@ apt-get update && apt-get install logdata-anomaly-miner
 The following command will install the latest stable release:
 ```
 cd $HOME
-wget https://raw.githubusercontent.com/ait-aecid/logdata-anomaly-miner/master/scripts/aminer_install.sh
+wget https://raw.githubusercontent.com/ait-aecid/logdata-anomaly-miner/main/scripts/aminer_install.sh
 chmod +x aminer_install.sh
 ./aminer_install.sh
 ```
@@ -31,8 +31,8 @@ chmod +x aminer_install.sh
 Here are some resources to read in order to get started with configurations:
 
 * [Getting started](https://github.com/ait-aecid/logdata-anomaly-miner/wiki/Getting-started-(tutorial))
-* [Some available configurations](https://github.com/ait-aecid/logdata-anomaly-miner/tree/master/source/root/etc/aminer/conf-available/generic)
-* [Documentation](https://github.com/ait-aecid/logdata-anomaly-miner/tree/master/source/root/usr/share/doc/logdata-anomaly-miner)
+* [Some available configurations](https://github.com/ait-aecid/logdata-anomaly-miner/tree/main/source/root/etc/aminer/conf-available/generic)
+* [Documentation](https://github.com/ait-aecid/logdata-anomaly-miner/tree/main/source/root/usr/share/doc/logdata-anomaly-miner)
 
 ## Publications
 
