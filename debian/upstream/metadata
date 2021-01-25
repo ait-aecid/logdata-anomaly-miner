@@ -1,7 +1,7 @@
 Bug-Database: https://github.com/ait-aecid/logdata-anomaly-miner/issues
 Bug-Submit: https://github.com/ait-aecid/logdata-anomaly-miner/issues/new
-Changelog: https://github.com/ait-aecid/logdata-anomaly-miner/blob/master/changelog
-Documentation: https://github.com/ait-aecid/logdata-anomaly-miner/blob/master/README.md
+Changelog: https://github.com/ait-aecid/logdata-anomaly-miner/blob/main/changelog
+Documentation: https://github.com/ait-aecid/logdata-anomaly-miner/blob/main/README.md
 Other-References: https://aecid.ait.ac.at/further-information/
 Reference:
  - Author: Markus Wurzenberger and Florian Skopik and Giuseppe Settanni and Roman Fiedler
@@ -16,4 +16,4 @@ Reference:
    Year: 2018
 Repository: https://github.com/ait-aecid/logdata-anomaly-miner.git
 Repository-Browse: https://github.com/ait-aecid/logdata-anomaly-miner
-Security-Contact: https://github.com/ait-aecid/logdata-anomaly-miner/blob/master/SECURITY.md
+Security-Contact: https://github.com/ait-aecid/logdata-anomaly-miner/blob/main/SECURITY.md

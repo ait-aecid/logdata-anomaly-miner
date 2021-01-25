@@ -116,7 +116,7 @@ pipeline {
 		stage("Test Ubuntu 18.04") {
                     when {
                        expression {
-                            BRANCH_NAME == 'master' || BRANCH_NAME == 'development'
+                            BRANCH_NAME == 'main' || BRANCH_NAME == 'development'
                        }
                     }
                     steps {
@@ -131,7 +131,7 @@ pipeline {
 		stage("Test Ubuntu 20.04") {
                     when {
                        expression {
-                            BRANCH_NAME == 'master' || BRANCH_NAME == 'development'
+                            BRANCH_NAME == 'main' || BRANCH_NAME == 'development'
                        }
                     }
                     steps {
