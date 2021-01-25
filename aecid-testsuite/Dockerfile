@@ -50,7 +50,7 @@ RUN apt-get update && apt-get install -y \
         sudo \
         curl \
         postfix \
-        openjdk-14-jre \
+        openjdk-11-jre \
         locales \
         locales-all \
         rsyslog
