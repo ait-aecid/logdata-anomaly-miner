@@ -1,13 +1,7 @@
 logdata-anomaly-miner (2.2.1-1) unstable; urgency=low
 
-  Bugfixes:
-  * Fixed warnigs due to files in Persistency-Directory
-  * Fixed ACL-problems in dockerfile and autocreate /var/lib/aminer/log
-  Changes:
-  * added simple test for dockercontainer
-  * negate result of the timeout-command. 1 is okay. 0 must be an error
-  * added bullseye-tests
-  * make tmp-dir in debian-bullseye-test and debian-buster-test unique
+ * New upstream release V2.2.1, see
+    https://github.com/ait-aecid/logdata-anomaly-miner/releases/tag/V2.2.1
 
  -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Mon,  25 Jan 2021 12:00:00 +0000
 
