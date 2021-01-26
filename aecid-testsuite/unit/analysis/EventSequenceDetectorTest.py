@@ -22,16 +22,23 @@ class EventSequenceDetectorTest(TestBase):
     """Unittests for the EventSequenceDetectorDetector."""
 
     def test1_normal_sequence_detection(self):
-        """This test case checks the normal detection of new sequences."""
+        """This test case checks the normal detection of new sequences.
+        The ESD is used to detect value sequences of length 2 and uses one id path to cope with
+        interleaving sequences, i.e., the sequences only make sense when logs that contain the
+        same id are considered."""
         description = "Test1EventSequenceDetector"
 
-        # Initialize detector
+        # Initialize detector for sequence length 2
         test_handler = TestHandler()
         event_sequence_detector = EventSequenceDetector(self.aminer_config, ['/model/value'], [
             test_handler], ['/model/id'], 2, 'Default', True, output_log_line=False)
         self.analysis_context.register_component(event_sequence_detector, description)
 
         # Prepare log atoms that represent two users (id) that produce interleaved sequence a, b, c
+        # This means, user with id 1 creates sequence a, b, c, and user with id 2 creates sequence
+        # a, b, however, these sequences are interleaved. The ESD resolves this issue using the id
+        # as an id path (/model/id). The path of the values is /model/value.
+        # The following events are generated:
         #  id: 1 value: a
         #  id: 1 value: b
         #  id: 2 value: a
@@ -69,12 +76,16 @@ class EventSequenceDetectorTest(TestBase):
 
         # Forward log atoms to detector
         # Since sequence length is 2, first atom should not have any effect
+        # Input: id: 1 value: a
+        # Expected output: None
         event_sequence_detector.receive_atom(log_atom_1)
         self.assertIsNone(test_handler.anomaly)
         sequences_set = set()
         self.assertEqual(event_sequence_detector.sequences, sequences_set)
 
         # Second log atom should create first sequence
+        # Input: id: 1 value: b
+        # Expected output: New sequence (a, b) detected, added to known sequences
         event_sequence_detector.receive_atom(log_atom_2)
         self.assertEqual(test_handler.anomaly, {'AnalysisComponent': {'AffectedLogAtomPaths': [['/model/value']],
                                                                       'AffectedLogAtomValues': [('a',), ('b',)]}})
@@ -83,11 +94,15 @@ class EventSequenceDetectorTest(TestBase):
         test_handler.anomaly = None
 
         # Next log atom is of different user, should not have any effect
+        # Input: id: 2 value: a
+        # Expected output: None
         event_sequence_detector.receive_atom(log_atom_3)
         self.assertIsNone(test_handler.anomaly)
         self.assertEqual(event_sequence_detector.sequences, sequences_set)
 
-        # Next log atom is of user with id 1, new sequence should be generated
+        # Next log atom is of user with id 1, but new value c, thus new sequence should be generated
+        # Input: id: 1 value: c
+        # Expected output: New sequence (b, c) detected, added to known sequences
         event_sequence_detector.receive_atom(log_atom_4)
         self.assertEqual(test_handler.anomaly, {'AnalysisComponent': {'AffectedLogAtomPaths': [['/model/value']],
                                                                       'AffectedLogAtomValues': [('b',), ('c',)]}})
@@ -96,6 +111,8 @@ class EventSequenceDetectorTest(TestBase):
         test_handler.anomaly = None
 
         # Next log atom is of user with id 2, but sequence a, b is already known from user with id 1, thus no effect
+        # Input: id: 2 value: b
+        # Expected output: None
         event_sequence_detector.receive_atom(log_atom_5)
         self.assertIsNone(test_handler.anomaly)
         self.assertEqual(event_sequence_detector.sequences, sequences_set)
