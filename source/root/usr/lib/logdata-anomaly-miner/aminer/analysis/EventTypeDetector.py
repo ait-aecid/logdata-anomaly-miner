@@ -351,10 +351,10 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     self.values[current_index][var_index].append(log_atom.parser_match.get_match_dictionary()[var_key].match_string)
 
         # Reduce the numbers of entries in the value_list
-        if len(self.variable_key_list[current_index]) > 0 and len([i for i in self.check_variables[current_index] if i]) > 0:
-            if len(self.values[current_index][self.check_variables[current_index].index(True)]) > self.max_num_vals:
-                for var_index in range(len(self.variable_key_list[current_index])):
-                    # Skips the variable if check_variable is False
-                    if not self.check_variables[current_index][var_index]:
-                        continue
-                    self.values[current_index][var_index] = self.values[current_index][var_index][-self.min_num_vals:]
+        if len(self.variable_key_list[current_index]) > 0 and len([i for i in self.check_variables[current_index] if i]) > 0 and \
+                len(self.values[current_index][self.check_variables[current_index].index(True)]) > self.max_num_vals:
+            for var_index in range(len(self.variable_key_list[current_index])):
+                # Skips the variable if check_variable is False
+                if not self.check_variables[current_index][var_index]:
+                    continue
+                self.values[current_index][var_index] = self.values[current_index][var_index][-self.min_num_vals:]

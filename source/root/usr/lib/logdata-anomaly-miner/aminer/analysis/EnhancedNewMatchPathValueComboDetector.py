@@ -139,10 +139,9 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
                     sorted_log_lines = [str(self.known_values_dict) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected', sorted_log_lines,
                                        event_data, log_atom, self)
-        if self.auto_include_flag:
-            if self.next_persist_time is None:
-                self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                    AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
+        if self.auto_include_flag and self.next_persist_time is None:
+            self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
+                AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
         self.log_success += 1
         return True
 

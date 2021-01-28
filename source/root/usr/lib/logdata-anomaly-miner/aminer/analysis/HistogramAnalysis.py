@@ -175,9 +175,8 @@ class LinearNumericBinDefinition(BinDefinition):
         """
         if binomial_test is None:
             return None
-        if self.outlier_bins_flag:
-            if (bin_pos == 0) or (bin_pos > self.bin_count):
-                return None
+        if self.outlier_bins_flag and (bin_pos == 0 or bin_pos > self.bin_count):
+            return None
         return binomial_test(bin_values, total_values, self.expected_bin_ratio)
 
 
