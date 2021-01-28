@@ -91,7 +91,7 @@ def build_parsing_model():
             continue
         if item['type'].is_model:
             if 'args' in item:
-                if isinstance(item['args'], list): # skipcq: PTC-W0048
+                if isinstance(item['args'], list):  # skipcq: PTC-W0048
                     if item['type'].name not in ('DecimalFloatValueModelElement', 'DecimalIntegerValueModelElement'):
                         # encode string to bytearray
                         for j in range(len(item['args'])):
