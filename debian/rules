@@ -28,3 +28,6 @@ execute_after_dh_install:
 # from /usr/share/doc/aminer/Readme.txt.gz for more information.
 override_dh_installsystemd:
 	dh_installsystemd --no-enable
+
+override_dh_installchangelogs:
+	dh_installchangelogs changelog
