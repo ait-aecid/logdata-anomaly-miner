@@ -580,7 +580,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                         self.rel_list[event_index][pos_var_cor_index][0][i_val] = {j_val: 0}
                     elif i_val in self.rel_list[event_index][pos_var_cor_index][0] and j_val not in self.rel_list[event_index][
                             pos_var_cor_index][0][i_val]:
-                        if self.generate_rules[event_index]: # skipcq: PTC-W0048
+                        if self.generate_rules[event_index]:  # skipcq: PTC-W0048
                             if i_val not in failed_i_vals:
                                 failed_i_vals.append(i_val)
                         else:
@@ -607,7 +607,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                         self.rel_list[event_index][pos_var_cor_index][1][j_val] = {i_val: 0}
                     elif j_val in self.rel_list[event_index][pos_var_cor_index][1] and i_val not in self.rel_list[event_index][
                             pos_var_cor_index][1][j_val]:
-                        if self.generate_rules[event_index]: # skipcq: PTC-W0048
+                        if self.generate_rules[event_index]:  # skipcq: PTC-W0048
                             if j_val not in failed_j_vals:
                                 failed_j_vals.append(j_val)
                         else:

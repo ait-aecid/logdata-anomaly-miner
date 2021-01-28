@@ -226,7 +226,7 @@ class DateTimeModelElement(ModelElementInterface):
         # Now combine the values and build the final value.
         parsed_date_time = None
         total_seconds = result[7]
-        if total_seconds is not None: # skipcq: PTC-W0048
+        if total_seconds is not None:  # skipcq: PTC-W0048
             if result[6] is not None:
                 total_seconds += result[6]
         # For epoch second formats, the datetime value usually is not important. So stay with parsed_date_time to none.

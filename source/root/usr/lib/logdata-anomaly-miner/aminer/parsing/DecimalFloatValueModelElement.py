@@ -105,7 +105,7 @@ class DecimalFloatValueModelElement(ModelElementInterface):
                 break
             match_len += 1
 
-        if match_len == 1: # skipcq: PTC-W0048
+        if match_len == 1:  # skipcq: PTC-W0048
             if data[0] not in b'0123456789':
                 return None
         elif num_start_pos == match_len:
