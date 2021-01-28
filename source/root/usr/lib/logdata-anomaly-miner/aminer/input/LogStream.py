@@ -263,7 +263,7 @@ class UnixSocketLogDataResource(LogDataResource):
         @raise OSError when opening failed with unexpected error.
         @return True if the resource was really opened or False if opening was not yet possible but should be attempted again.
         """
-        if reopen_flag:
+        if reopen_flag: # skipcq: PTC-W0048
             if self.log_stream_fd != -1:
                 return False
         elif self.log_stream_fd != -1:

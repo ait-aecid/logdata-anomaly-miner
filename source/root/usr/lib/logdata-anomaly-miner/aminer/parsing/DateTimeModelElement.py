@@ -226,7 +226,7 @@ class DateTimeModelElement(ModelElementInterface):
         # Now combine the values and build the final value.
         parsed_date_time = None
         total_seconds = result[7]
-        if total_seconds is not None:
+        if total_seconds is not None: # skipcq: PTC-W0048
             if result[6] is not None:
                 total_seconds += result[6]
         # For epoch second formats, the datetime value usually is not important. So stay with parsed_date_time to none.
@@ -319,17 +319,16 @@ class DateTimeModelElement(ModelElementInterface):
 
         match_context.update(date_str)
         if self.format_has_tz_specifier:
-            if self.tz_specifier_format_length < parse_pos:
-                if b'+' in match_context.match_data or b'-' in match_context.match_data:
-                    data = match_context.match_data.split(b'+')
-                    if len(data) == 1:
-                        data = match_context.match_data.split(b'-')
-                    for i in range(1, 5):
-                        if not match_context.match_data[i:i+1].decode('utf-8').isdigit():
-                            i -= 1
-                            break
-                    self.tz_specifier_format_length = len(data[0]) + i + 1
-                    parse_pos = 0
+            if self.tz_specifier_format_length < parse_pos and (b'+' in match_context.match_data or b'-' in match_context.match_data):
+                data = match_context.match_data.split(b'+')
+                if len(data) == 1:
+                    data = match_context.match_data.split(b'-')
+                for i in range(1, 5):
+                    if not match_context.match_data[i:i+1].decode('utf-8').isdigit():
+                        i -= 1
+                        break
+                self.tz_specifier_format_length = len(data[0]) + i + 1
+                parse_pos = 0
 
             remaining_data = match_context.match_data[:self.tz_specifier_format_length-parse_pos]
             match_context.update(remaining_data)

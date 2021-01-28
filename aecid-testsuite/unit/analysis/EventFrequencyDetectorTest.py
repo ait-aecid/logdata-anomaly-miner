@@ -22,10 +22,12 @@ class EventFrequencyDetectorTest(TestBase):
     """Unittests for the EventFrequencyDetector."""
 
     def test1_normal_frequency_detection(self):
-        """This test case checks the normal detection of new frequencies.
+        """
+        This test case checks the normal detection of new frequencies.
         The EFD is used with one path to be analyzed over four time windows. The frequencies
         do not change a lot in the first time windows, thus no anomalies are generated. Then,
-        value frequencies change and anomalies are created in the last time windows."""
+        value frequencies change and anomalies are created in the last time windows.
+        """
         description = "Test1EventFrequencyDetector"
 
         # Initialize detector for analyzing values in one path in time windows of 10 seconds
