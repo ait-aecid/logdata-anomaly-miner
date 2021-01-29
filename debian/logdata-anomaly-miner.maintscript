@@ -1,3 +1,0 @@
-rm_conffile /etc/aminer/config.py.template 2.0.1-1~
-rm_conffile /etc/init/aminer.conf 2.0.1-1~
-mv_conffile /etc/aminer/conf-available/generic/EximParsingModel.py /etc/aminer/conf-available/generic/EximGenericParsingModel.py 2.2.0-1~
