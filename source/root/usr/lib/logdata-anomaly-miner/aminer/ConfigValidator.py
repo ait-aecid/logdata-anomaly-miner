@@ -40,6 +40,7 @@ class AnalysisType:
 
 class EventHandlerType:
     """Defines a type for event classes."""
+
     name = None
     func = None
 

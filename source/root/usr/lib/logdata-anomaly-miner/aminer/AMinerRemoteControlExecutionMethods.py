@@ -646,10 +646,9 @@ def _reformat_attr(attr):
         rep = rep.strip('"').replace("'", '"')
     else:
         rep = rep.strip('"').replace("'", '\\"')
-    if not isinstance(attr, (list, dict, tuple, set)):
-        if not rep.startswith('"') and not rep.isdecimal():
-            try:
-                float(rep)
-            except:  # skipcq: FLK-E722
-                rep = '"%s"' % rep
+    if not isinstance(attr, (list, dict, tuple, set)) and not rep.startswith('"') and not rep.isdecimal():
+        try:
+            float(rep)
+        except:  # skipcq: FLK-E722
+            rep = '"%s"' % rep
     return rep
