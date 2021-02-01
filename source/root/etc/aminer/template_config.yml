@@ -1,18 +1,18 @@
 # This is a template for the "aminer" logdata-anomaly-miner tool. Copy
 # it to "config.yml" and define your ruleset. For more examples of component
-# usage see aecid-testsuite/demo/AMiner/demo-config.yml.
+# usage see aecid-testsuite/demo/aminer/demo-config.yml.
 
 #LearnMode: false # optional
-AMinerUser: 'aminer'  # optional default: aminer
-AMinerGroup: 'aminer' # optional default: aminer
+AminerUser: 'aminer'  # optional default: aminer
+AminerGroup: 'aminer' # optional default: aminer
 
 LogResourceList:
         - 'file:///var/log/apache2/access.log'
 
 # Read and store information to be used between multiple invocations
-# of AMiner in this directory. The directory must only be accessible
-# to the 'AMinerUser' but not group/world readable. On violation,
-# AMiner will refuse to start. When undefined, '/var/lib/aminer'
+# of aminer in this directory. The directory must only be accessible
+# to the 'AminerUser' but not group/world readable. On violation,
+# aminer will refuse to start. When undefined, '/var/lib/aminer'
 # is used.
 # Core.PersistenceDir: '/var/lib/aminer'
 
@@ -29,8 +29,8 @@ LogResourceList:
 # MailAlerting.FromAddress: 'root@localhost'
 
 # Define, which text should be prepended to the standard aminer
-# subject. Defaults to "AMiner Alerts:"
-# MailAlerting.SubjectPrefix: 'AMiner Alerts:'
+# subject. Defaults to "aminer Alerts:"
+# MailAlerting.SubjectPrefix: 'aminer Alerts:'
 
 # Define a grace time after startup before aminer will react to
 # an event and send the first alert e-mail. Defaults to 0 (any

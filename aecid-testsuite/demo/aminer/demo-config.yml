@@ -13,7 +13,7 @@ MailAlerting.TargetAddress: 'root@localhost'
 
 MailAlerting.FromAddress: 'root@localhost'
 
-MailAlerting.SubjectPrefix: 'AMiner Alerts:'
+MailAlerting.SubjectPrefix: 'aminer Alerts:'
 
 MailAlerting.AlertGraceTime: 0
 

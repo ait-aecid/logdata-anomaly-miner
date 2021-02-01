@@ -13,8 +13,8 @@ config_properties['LogResourceList'] = ['file:///tmp/syslog']
 
 # Define the uid/gid of the process that runs the calculation
 # after opening the log files:
-config_properties['AMinerUser'] = 'aminer'
-config_properties['AMinerGroup'] = 'aminer'
+config_properties['AminerUser'] = 'aminer'
+config_properties['AminerGroup'] = 'aminer'
 
 # Define the path, where aminer will listen for incoming remote
 # control connections. When missing, no remote control socket
@@ -31,7 +31,7 @@ config_properties['AMinerGroup'] = 'aminer'
 
 # Read and store information to be used between multiple invocations
 # of py in this directory. The directory must only be accessible
-# to the 'AMinerUser' but not group/world readable. On violation,
+# to the 'AminerUser' but not group/world readable. On violation,
 # py will refuse to start. When undefined, '/var/lib/aminer'
 # is used.
 config_properties['Core.PersistenceDir'] = '/tmp/lib/aminer'
@@ -45,7 +45,7 @@ config_properties['MailAlerting.TargetAddress'] = 'mail@localhost'
 config_properties['MailAlerting.FromAddress'] = 'mail@localhost'
 # Define, which text should be prepended to the standard aminer
 # subject. Defaults to "py Alerts:"
-config_properties['MailAlerting.SubjectPrefix'] = 'AMiner Alerts:'
+config_properties['MailAlerting.SubjectPrefix'] = 'aminer Alerts:'
 # Define a grace time after startup before aminer will react to
 # an event and send the first alert e-mail. Defaults to 0 (any
 # event can immediately trigger alerting).
@@ -120,19 +120,19 @@ def build_analysis_pipeline(analysis_context):
     atom_filter.add_handler(SimpleUnparsedAtomHandler(anomaly_event_handlers), stop_when_handled_flag=True)
 
     from aminer.analysis import NewMatchPathDetector
-    new_match_path_detector = NewMatchPathDetector(analysis_context.aminerConfig, anomaly_event_handlers, auto_include_flag=True)
+    new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=True)
     analysis_context.register_component(new_match_path_detector, component_name=None)
     atom_filter.add_handler(new_match_path_detector)
 
     from aminer.analysis import NewMatchPathValueComboDetector
-    new_match_path_value_combo_detector = NewMatchPathValueComboDetector(analysis_context.aminerConfig, [
+    new_match_path_value_combo_detector = NewMatchPathValueComboDetector(analysis_context.aminer_config, [
         '/model/Home Path/Username', '/model/Home Path/Path'], anomaly_event_handlers, auto_include_flag=True)
     analysis_context.register_component(new_match_path_value_combo_detector, component_name=None)
     atom_filter.add_handler(new_match_path_value_combo_detector)
 
     # Include the e-mail notification handler only if the configuration parameter was set.
     from aminer.events import DefaultMailNotificationEventHandler
-    if DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS in analysis_context.aminerConfig.config_properties:
-        mail_notification_handler = DefaultMailNotificationEventHandler(analysis_context.aminerConfig)
+    if DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS in analysis_context.aminer_config.config_properties:
+        mail_notification_handler = DefaultMailNotificationEventHandler(analysis_context.aminer_config)
         analysis_context.register_component(mail_notification_handler, component_name=None)
         anomaly_event_handlers.append(mail_notification_handler)

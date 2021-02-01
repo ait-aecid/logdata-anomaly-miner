@@ -17,7 +17,7 @@ import random
 import time
 import logging
 
-from aminer import AMinerConfig
+from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.analysis import Rules
 from aminer.input import AtomHandlerInterface
@@ -61,14 +61,14 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
         self.aminer_config = aminer_config
 
         PersistenceUtil.add_persistable_component(self)
-        self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, 'TimeCorrelationDetector', persistence_id)
+        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, 'TimeCorrelationDetector', persistence_id)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is None:
             self.feature_list = []
             self.event_count_table = [0] * parallel_check_count * parallel_check_count * 2
             self.event_delta_table = [0] * parallel_check_count * parallel_check_count * 2
         else:
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
@@ -112,7 +112,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
             self.last_unhandled_match = log_atom
         elif self.next_persist_time is None:
             self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
+                AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
 
         if (self.total_records % self.record_count_before_event) == 0:
             result = self.total_records * ['']
@@ -154,7 +154,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
             for listener in self.anomaly_event_handlers:
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Correlation report', result, event_data, log_atom, self)
             self.reset_statistics()
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s ran analysis.', self.__class__.__name__)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s ran analysis.', self.__class__.__name__)
         self.log_success += 1
 
     def rule_to_dict(self, rule):
@@ -185,18 +185,18 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted."""
         if self.next_persist_time is None:
-            return self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
+            return self.aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
         if delta < 0:
             self.next_persist_time = None
-            delta = self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
+            delta = self.aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
         return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
         self.next_persist_time = None
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def create_random_rule(self, log_atom):
         """Create a random existing path rule or value match rule."""
@@ -230,7 +230,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
                 sub_rules.append(Rules.ValueMatchRule(key_name, key_value))
             else:
                 msg = 'Invalid rule type'
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                 raise Exception(msg)
             if not all_keys:
                 break

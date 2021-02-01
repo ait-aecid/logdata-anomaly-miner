@@ -28,13 +28,13 @@ import logging
 from datetime import datetime
 import shutil
 
-from aminer import AMinerConfig
+from aminer import AminerConfig
 from aminer.input.LogStream import LogStream
 from aminer.util import PersistenceUtil
 from aminer.util import SecureOSFunctions
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.util import JsonUtil
-from aminer.AMinerRemoteControlExecutionMethods import AMinerRemoteControlExecutionMethods
+from aminer.AminerRemoteControlExecutionMethods import AminerRemoteControlExecutionMethods
 
 
 class AnalysisContext:
@@ -68,7 +68,7 @@ class AnalysisContext:
         if not isinstance(component, TimeTriggeredComponentInterface):
             msg = 'Attempting to register component of class %s not implementing aminer.util.TimeTriggeredComponentInterface' % (
                   component.__class__.__name__)
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if trigger_class is None:
             trigger_class = component.get_time_trigger_class()
@@ -78,9 +78,9 @@ class AnalysisContext:
             self.analysis_time_triggered_components.append(component)
         else:
             msg = 'Attempting to timer component for unknown class %s' % trigger_class
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug(
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(
             'Called %s for the component %s', 'add_time_triggered_component', component.__class__.__name__)
 
     def register_component(self, component, component_name=None, register_time_trigger_class_override=None):
@@ -98,11 +98,11 @@ class AnalysisContext:
             component_name = str(component.__class__.__name__) + str(self.next_registry_id)
         if component_name in self.registered_components_by_name:
             msg = 'Component with same name already registered'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if register_time_trigger_class_override is not None and not isinstance(component, TimeTriggeredComponentInterface):
             msg = 'Requesting override on component not implementing TimeTriggeredComponentInterface'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
         self.registered_components[self.next_registry_id] = (component, component_name)
@@ -114,7 +114,7 @@ class AnalysisContext:
             else:
                 for trigger_class in register_time_trigger_class_override:
                     self.add_time_triggered_component(component, trigger_class)
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug(
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(
             "Registered component %s with the id %d and component_name '%s'.", component.__class__.__name__, self.next_registry_id - 1,
             component_name)
 
@@ -165,7 +165,7 @@ class AnalysisContext:
 
     def build_analysis_pipeline(self):
         """Create the pipeline."""
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug("Started with build_analysis_pipeline.")
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug("Started with build_analysis_pipeline.")
         self.aminer_config.build_analysis_pipeline(self)
 
 
@@ -183,7 +183,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         self.analysis_context = AnalysisContext(aminer_config)
         self.run_analysis_loop_flag = True
         self.log_streams_by_name = {}
-        self.persistence_file_name = AMinerConfig.build_persistence_file_name(
+        self.persistence_file_name = AminerConfig.build_persistence_file_name(
           self.analysis_context.aminer_config, self.__class__.__name__ + '/RepositioningData')
         self.next_persist_time = time.time() + 600
 
@@ -204,7 +204,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
             """React on typical shutdown signals."""
             msg = '%s: caught signal, shutting down' % program_name
             print(msg, file=sys.stderr)
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info(msg)
             self.run_analysis_loop_flag = False
 
         import signal
@@ -232,22 +232,22 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         if self.analysis_context.atomizer_factory is None:
             msg = 'build_analysis_pipeline() did not initialize atomizer_factory, terminating'
             print('FATAL: ' + msg, file=sys.stderr)
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).critical(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).critical(msg)
             return 1
 
         real_time_triggered_components = self.analysis_context.real_time_triggered_components
         analysis_time_triggered_components = self.analysis_context.analysis_time_triggered_components
 
-        max_memory_mb = self.analysis_context.aminer_config.config_properties.get(AMinerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE, None)
+        max_memory_mb = self.analysis_context.aminer_config.config_properties.get(AminerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE, None)
         if max_memory_mb is not None:
             try:
                 max_memory_mb = int(max_memory_mb)
                 resource.setrlimit(resource.RLIMIT_AS, (max_memory_mb * 1024 * 1024, resource.RLIM_INFINITY))
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('set max memory limit to %d MB.', max_memory_mb)
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('set max memory limit to %d MB.', max_memory_mb)
             except ValueError:
-                msg = '%s must be an integer, terminating' % AMinerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE
+                msg = '%s must be an integer, terminating' % AminerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE
                 print('FATAL: ' + msg, file=sys.stderr)
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).critical(msg)
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).critical(msg)
                 return 1
 
         # Load continuation data for last known log streams. The loaded data has to be a dictionary with repositioning information for
@@ -264,7 +264,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         next_analysis_time_trigger_time = None
         next_backup_time_trigger_time = None
         log_stat_period = self.analysis_context.aminer_config.config_properties.get(
-            AMinerConfig.KEY_LOG_STAT_PERIOD, AMinerConfig.DEFAULT_STAT_PERIOD)
+            AminerConfig.KEY_LOG_STAT_PERIOD, AminerConfig.DEFAULT_STAT_PERIOD)
         next_statistics_log_time = time.time() + log_stat_period
 
         delayed_return_status = 0
@@ -303,7 +303,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                     continue
                 msg = 'Unexpected select result %s' % str(select_error)
                 print(msg, file=sys.stderr)
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                 delayed_return_status = 1
                 break
             for read_fd in read_list:
@@ -327,10 +327,10 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                         fd_handler_object.do_receive()
                     except ConnectionError as receiveException:
                         msg = 'Unclean termination of remote control: %s' % str(receiveException)
-                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                         print(msg, file=sys.stderr)
                     if fd_handler_object.is_dead():
-                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('Deleting fd %s from tracked_fds_dict.', str(read_fd))
+                        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('Deleting fd %s from tracked_fds_dict.', str(read_fd))
                         del self.tracked_fds_dict[read_fd]
                     # Reading is only attempted when output buffer was already flushed. Try processing the next request to fill the output
                     # buffer for next round.
@@ -351,7 +351,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                     self.tracked_fds_dict[control_client_socket.fileno()] = remote_control_handler
                     continue
                 msg = 'Unhandled object type %s' % type(fd_handler_object)
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                 raise Exception(msg)
 
             for write_fd in write_list:
@@ -363,20 +363,20 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                     except OSError as sendError:
                         msg = 'Error at sending data via remote control: %s' % str(sendError)
                         print(msg, file=sys.stderr)
-                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                         try:
                             fd_handler_object.terminate()
                         except ConnectionError as terminateException:
                             msg = 'Unclean termination of remote control: %s' % str(terminateException)
                             print(msg, file=sys.stderr)
-                            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                     if buffer_flushed_flag:
                         fd_handler_object.do_process(self.analysis_context)
                     if fd_handler_object.is_dead():
                         del self.tracked_fds_dict[write_fd]
                     continue
                 msg = 'Unhandled object type %s' % type(fd_handler_object)
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                 raise Exception(msg)
 
             # Handle the real time events.
@@ -391,7 +391,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 
             if real_time >= next_statistics_log_time:
                 next_statistics_log_time = real_time + log_stat_period
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('Statistics logs are written..')
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('Statistics logs are written..')
                 # log the statistics for every component.
                 for component_name in self.analysis_context.registered_components_by_name:
                     component = self.analysis_context.registered_components_by_name[component_name]
@@ -413,7 +413,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
             backup_time = time.time()
             backup_time_str = datetime.fromtimestamp(backup_time).strftime('%Y-%m-%d-%H-%M-%S')
             persistence_dir = self.analysis_context.aminer_config.config_properties.get(
-                AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
+                AminerConfig.KEY_PERSISTENCE_DIR, AminerConfig.DEFAULT_PERSISTENCE_DIR)
             persistence_dir = persistence_dir.rstrip('/')
             backup_path = persistence_dir + '/backup/'
             backup_path_with_date = os.path.join(backup_path, backup_time_str)
@@ -421,7 +421,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                 next_trigger_offset = 3600 * 24
                 if next_backup_time_trigger_time is not None:
                     shutil.copytree(persistence_dir, backup_path_with_date, ignore=shutil.ignore_patterns('backup*'))
-                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info('Persistence backup created in %s.', backup_path_with_date)
+                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info('Persistence backup created in %s.', backup_path_with_date)
                 next_backup_time_trigger_time = backup_time + next_trigger_offset
 
         # Analysis loop is only left on shutdown. Try to persist everything and leave.
@@ -450,7 +450,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                 res = UnixSocketLogDataResource(annotation_data, received_fd)
             else:
                 msg = 'Filedescriptor of unknown type received'
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                 raise Exception(msg)
             # Make fd nonblocking.
             fd_flags = fcntl.fcntl(res.get_file_descriptor(), fcntl.F_GETFL)
@@ -466,14 +466,14 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         elif received_type_info == b'remotecontrol':
             if self.remote_control_socket is not None:
                 msg = 'Received another remote control socket: multiple remote control not supported (yet?).'
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                 raise Exception(msg)
             self.remote_control_socket = socket.fromfd(received_fd, socket.AF_UNIX, socket.SOCK_STREAM, 0)
             os.close(received_fd)
             self.tracked_fds_dict[self.remote_control_socket.fileno()] = self.remote_control_socket
         else:
             msg = 'Unhandled type info on received fd: %s' % repr(received_type_info)
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
     def get_time_trigger_class(self):
@@ -503,7 +503,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
             PersistenceUtil.store_json(self.persistence_file_name, self.repositioning_data_dict)
             delta = 600
             self.next_persist_time = trigger_time + delta
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('Repositioning data was persisted.')
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('Repositioning data was persisted.')
         return delta
 
 
@@ -562,7 +562,7 @@ class AnalysisChildRemoteControlHandler:
                 json_request_data = JsonUtil.decode_object(json_request_data)
                 if (json_request_data is None) or (not isinstance(json_request_data, list)) or (len(json_request_data) != 2):
                     msg = 'Invalid request data'
-                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                     raise Exception(msg)
                 if json_request_data[0] and isinstance(json_request_data[0], bytes):
                     json_request_data[0] = json_request_data[0].decode()
@@ -577,7 +577,7 @@ class AnalysisChildRemoteControlHandler:
                         json_request_data[1] = new_list
                     else:
                         json_request_data[1] = json_request_data[1].decode()
-                methods = AMinerRemoteControlExecutionMethods()
+                methods = AminerRemoteControlExecutionMethods()
                 import aminer.analysis
                 exec_locals = {
                     'analysis_context': analysis_context, 'remote_control_data': json_request_data[1],
@@ -620,8 +620,8 @@ class AnalysisChildRemoteControlHandler:
                     'VariableTypeDetector': aminer.analysis.VariableTypeDetector,
                     'AllowlistViolationDetector': aminer.analysis.AllowlistViolationDetector
                 }
-                logging.getLogger(AMinerConfig.REMOTE_CONTROL_LOG_NAME).log(15, json_request_data[0])
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('Remote control: %s', json_request_data[0])
+                logging.getLogger(AminerConfig.REMOTE_CONTROL_LOG_NAME).log(15, json_request_data[0])
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('Remote control: %s', json_request_data[0])
 
                 # skipcq: PYL-W0603
                 global suspended_flag
@@ -629,12 +629,12 @@ class AnalysisChildRemoteControlHandler:
                     suspended_flag = True
                     msg = methods.REMOTE_CONTROL_RESPONSE + 'OK. aminer is suspended now.'
                     json_remote_control_response = json.dumps(msg)
-                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info(msg)
+                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info(msg)
                 elif json_request_data[0] in ('activate_aminer()', 'activate_aminer', 'activate'):
                     suspended_flag = False
                     msg = methods.REMOTE_CONTROL_RESPONSE + 'OK. aminer is activated now.'
                     json_remote_control_response = json.dumps(msg)
-                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info(msg)
+                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info(msg)
                 else:
                     # skipcq: PYL-W0122
                     exec(json_request_data[0], {'__builtins__': None}, exec_locals)
@@ -649,7 +649,7 @@ class AnalysisChildRemoteControlHandler:
             # skipcq: FLK-E722
             except:
                 exception_data = traceback.format_exc()
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('Remote control exception data: %s', str(exception_data))
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('Remote control exception data: %s', str(exception_data))
             # This is little dirty but avoids having to pass over remoteControlResponse dumping again.
             if json_remote_control_response is None:
                 json_remote_control_response = 'null'
@@ -677,7 +677,7 @@ class AnalysisChildRemoteControlHandler:
             self.output_buffer += struct.pack("!I", len(json_response) + 8) + b'RRRR' + json_response
         else:
             msg = 'Invalid request type %s' % repr(request_type)
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
     def may_get(self):
@@ -701,7 +701,7 @@ class AnalysisChildRemoteControlHandler:
         if (request_length < 0) or (request_length >= self.max_control_packet_size):
             msg = 'Invalid length value 0x%x in malformed request starting with b64:%s' % (
                 request_length, base64.b64encode(self.input_buffer[:60]))
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if request_length > len(self.input_buffer):
             return None
@@ -742,19 +742,19 @@ class AnalysisChildRemoteControlHandler:
         """
         if not isinstance(request_type, bytes):
             msg = 'Request type is not a byte string'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if len(request_type) != 4:
             msg = 'Request type has to be 4 bytes long'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if not isinstance(request_data, bytes):
             msg = 'Request data is not a byte string'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if len(request_data) + 8 > self.max_control_packet_size:
             msg = 'Data too large to fit into single packet'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         self.output_buffer += struct.pack("!I", len(request_data) + 8) + request_type + request_data
 
@@ -778,7 +778,7 @@ class AnalysisChildRemoteControlHandler:
         self.remote_control_fd = -1
         if self.input_buffer or self.output_buffer:
             msg = 'Unhandled input data'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
     def is_dead(self):
