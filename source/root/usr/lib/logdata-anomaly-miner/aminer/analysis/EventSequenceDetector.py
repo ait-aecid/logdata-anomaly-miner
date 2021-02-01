@@ -19,8 +19,8 @@ import time
 import os
 import logging
 
-from aminer import AMinerConfig
-from aminer.AMinerConfig import STAT_LEVEL, STAT_LOG_NAME
+from aminer import AminerConfig
+from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events import EventSourceInterface
 from aminer.input import AtomHandlerInterface
@@ -58,7 +58,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
         self.log_learned_sequences = []
 
         PersistenceUtil.add_persistable_component(self)
-        self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
+        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
 
         # Persisted data contains lists of sequences, i.e., [[<seq1_elem1>, <seq1_elem2>], [<seq2_elem1, ...], ...]
         # Thereby, sequence elements may be tuples, i.e., combinations of values, or paths that define events.
@@ -69,7 +69,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
                 for sequence_elem in sequence:
                     sequence_elem_tuple.append(tuple(sequence_elem))
                 self.sequences.add(tuple(sequence_elem_tuple))
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
@@ -142,7 +142,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
                 self.log_learned_sequences.append(self.current_sequences[id_tuple])
                 if self.next_persist_time is None:
                     self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                        AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
+                        AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
             original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
             if original_log_line_prefix is None:
                 original_log_line_prefix = ''
@@ -184,7 +184,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
         """Immediately write persistence data to storage."""
         PersistenceUtil.store_json(self.persistence_file_name, list(self.sequences))
         self.next_persist_time = None
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """
@@ -194,11 +194,11 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
         """
         if event_type != 'Analysis.%s' % self.__class__.__name__:
             msg = 'Event not from this source'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if allowlisting_data is not None:
             msg = 'Allowlisting data not understood by this detector'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if event_data not in self.constraint_list:
             self.constraint_list.append(event_data)
@@ -212,11 +212,11 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
         """
         if event_type != 'Analysis.%s' % self.__class__.__name__:
             msg = 'Event not from this source'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if blocklisting_data is not None:
             msg = 'Blocklisting data not understood by this detector'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if event_data not in self.ignore_list:
             self.ignore_list.append(event_data)

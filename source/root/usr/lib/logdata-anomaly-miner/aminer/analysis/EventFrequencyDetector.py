@@ -15,8 +15,8 @@ import time
 import os
 import logging
 
-from aminer import AMinerConfig
-from aminer.AMinerConfig import STAT_LEVEL, STAT_LOG_NAME
+from aminer import AminerConfig
+from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events import EventSourceInterface
 from aminer.input import AtomHandlerInterface
@@ -61,7 +61,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
             self.ignore_list = []
         self.window_size = window_size
         if confidence_factor > 1 or confidence_factor < 0:
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning('confidence_factor must be in the range [0,1]!')
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning('confidence_factor must be in the range [0,1]!')
             confidence_factor = 1
         self.confidence_factor = confidence_factor
         self.next_check_time = None
@@ -72,7 +72,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         self.log_windows = 0
 
         PersistenceUtil.add_persistable_component(self)
-        self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
+        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
 
         # Persisted data contains lists of event-frequency pairs, i.e., [[<ev1, ev2>, <freq>], [<ev1, ev2>, <freq>], ...]
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
@@ -81,7 +81,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 log_event = entry[0]
                 frequency = entry[1]
                 self.counts_prev[tuple(log_event)] = frequency
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
@@ -132,7 +132,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
             self.log_windows += 1
             if self.next_persist_time is None:
                 self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                    AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
+                    AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
 
             if log_atom.atom_time >= self.next_check_time:
                 self.next_check_time = log_atom.atom_time + self.window_size
@@ -199,7 +199,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
             persist_data.append((log_ev, freq))
         PersistenceUtil.store_json(self.persistence_file_name, persist_data)
         self.next_persist_time = None
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """
@@ -209,11 +209,11 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         """
         if event_type != 'Analysis.%s' % self.__class__.__name__:
             msg = 'Event not from this source'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if allowlisting_data is not None:
             msg = 'Allowlisting data not understood by this detector'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if event_data not in self.constraint_list:
             self.constraint_list.append(event_data)
@@ -227,11 +227,11 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         """
         if event_type != 'Analysis.%s' % self.__class__.__name__:
             msg = 'Event not from this source'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if blocklisting_data is not None:
             msg = 'Blocklisting data not understood by this detector'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if event_data not in self.ignore_list:
             self.ignore_list.append(event_data)

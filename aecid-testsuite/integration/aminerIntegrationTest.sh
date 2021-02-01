@@ -36,7 +36,7 @@ if ! test -f "$FILE"; then
 	exit 1
 fi
 
-#start AMiner
+#start aminer
 if [[ $sudoInstalled == 0 ]]; then
 	sudo aminer --config "$FILE" > /tmp/output &
 else
@@ -69,7 +69,7 @@ echo 'The Path of the home directory shown by pwd of the user guest is: /home/gu
 
 #ADD HERE
 
-#stop AMiner
+#stop aminer
 sleep 3 & wait $!
 if [[ $sudoInstalled == 0 ]]; then
 	sudo pkill -x aminer

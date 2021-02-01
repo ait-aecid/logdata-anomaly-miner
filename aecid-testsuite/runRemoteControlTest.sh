@@ -6,7 +6,7 @@ sudo chown -R aminer:aminer /tmp/lib 2> /dev/null
 sudo rm /tmp/syslog 2> /dev/null
 touch /tmp/syslog
 
-FILE=demo/AMinerRemoteControl/demo-config.py
+FILE=demo/aminerRemoteControl/demo-config.py
 sudo aminer --config "$FILE" & > /dev/null
 
 sleep 1
@@ -128,7 +128,7 @@ for property in "${INTEGER_CONFIG_PROPERTIES[@]}"; do
   expected="$PREFIX\"FAILURE: the value of the property $property must be of type <class 'int'>!\""
   expected_list="${expected_list}${expected}
 "
-  if [[ "$stdout" != "$expected" && "$stdout" != "$PREFIX'FAILURE: it is not safe to run the AMiner with less than 32MB RAM.'" ]]; then
+  if [[ "$stdout" != "$expected" && "$stdout" != "$PREFIX'FAILURE: it is not safe to run the aminer with less than 32MB RAM.'" ]]; then
 	  echo "$ERROR changing $property wrong Type."
 	  echo "$stdout"
 	  echo "Expected: $expected"
@@ -138,14 +138,14 @@ for property in "${INTEGER_CONFIG_PROPERTIES[@]}"; do
   echo "change_config_property(analysis_context, $property, 1)" >> /tmp/commands.txt
   stdout=$(sudo aminerremotecontrol --exec "change_config_property(analysis_context, $property, 1)")
   expected="$PREFIX\"$property changed to '1' successfully.\""
-  if [[ "$stdout" == "$PREFIX'FAILURE: it is not safe to run the AMiner with less than 32MB RAM.'" ]]; then
+  if [[ "$stdout" == "$PREFIX'FAILURE: it is not safe to run the aminer with less than 32MB RAM.'" ]]; then
     expected_list="${expected_list}${stdout}
 "
   else
     expected_list="${expected_list}${expected}
 "
   fi
-  if [[ "$stdout" != "$expected" && "$stdout" != "$PREFIX'FAILURE: it is not safe to run the AMiner with less than 32MB RAM.'" ]]; then
+  if [[ "$stdout" != "$expected" && "$stdout" != "$PREFIX'FAILURE: it is not safe to run the aminer with less than 32MB RAM.'" ]]; then
 	    echo "$ERROR changing $property to 1."
 	    echo "$stdout"
 	    echo "Expected: $expected"

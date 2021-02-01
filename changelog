@@ -54,7 +54,7 @@ logdata-anomaly-miner (2.1.0) unstable; urgency=low
   * Yamlconfig: added support for more detectors
   * Added new command-line-parameters
   * Renamed executables to aminer.py and aminerremotecontroly.py
-  * Run Aminer in forgroundd-mode per default
+  * Run aminer in forgroundd-mode per default
   * Added various unit-tests
   * Improved yamlconfig and checks
   * Added start-config for parser to yamlconfig
@@ -101,7 +101,7 @@ logdata-anomaly-miner (2.0.1) unstable; urgency=low
   * Updated demos
   * Updated debian files
   * Added copyright headers
-  * Added executable bit to AMiner
+  * Added executable bit to aminer
   
  -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Wed,  24 Jun 2020 17:00:00 +0000
 
@@ -112,7 +112,7 @@ logdata-anomaly-miner (2.0.0) bionic; urgency=low
   * Added functions getNameByComponent and getIdByComponent to
     AnalysisChild.py
   * Update DefaultMailNotificationEventHandler.py to python3
-  * Extended AMinerRemoteControl
+  * Extended aminerRemoteControl
   * Added support for configuration in yaml format
   * Refactoring
   * Added KafkaEventHandler
@@ -191,7 +191,7 @@ logdata-anomaly-miner (0.0.6) xenial; urgency=low
 
   The input IO-handling was redesigned, thus introducing following
   API changes. The changes are flaged with (D)eveloper and (U)ser
-  to indicate if only developers of own AMiner addons are affected
+  to indicate if only developers of own aminer addons are affected
   or also users may need to migrate their configuration.
 
   * Upper layers receive LogAtom objects instead of log lines,

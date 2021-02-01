@@ -9,12 +9,12 @@
             'type': 'boolean',
             'default': False
         },
-        'AMinerUser': {
+        'AminerUser': {
             'required': False,
             'type': 'string',
             'default': 'aminer'
         },
-        'AMinerGroup': {
+        'AminerGroup': {
             'required': False,
             'type': 'string',
             'default': 'aminer'
@@ -51,7 +51,7 @@
         'MailAlerting.SubjectPrefix': {
             'required': False,
             'type': 'string',
-            'default': 'AMiner Alerts:'
+            'default': 'aminer Alerts:'
         },
         'MailAlerting.AlertGraceTime': {
             'required': False,
