@@ -2299,8 +2299,6 @@ def get_vt_string(vt):
             return_string = '%s%s [EV: %s, SD: %s]' % (vt[0], vt[5], vt[1], vt[2])
     elif vt[0] == 'betam':
         return_string = '%s [min: %s, max: %s, proportion: %s]' % (vt[0], vt[3], vt[4], vt[5])
-    elif vt[0] == 'emp':
-        return_string = vt[0]
     else:
         return_string = vt[0]
     return return_string
