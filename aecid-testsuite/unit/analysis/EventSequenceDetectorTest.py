@@ -22,10 +22,12 @@ class EventSequenceDetectorTest(TestBase):
     """Unittests for the EventSequenceDetectorDetector."""
 
     def test1_normal_sequence_detection(self):
-        """This test case checks the normal detection of new sequences.
+        """
+        This test case checks the normal detection of new sequences.
         The ESD is used to detect value sequences of length 2 and uses one id path to cope with
         interleaving sequences, i.e., the sequences only make sense when logs that contain the
-        same id are considered."""
+        same id are considered.
+        """
         description = "Test1EventSequenceDetector"
 
         # Initialize detector for sequence length 2

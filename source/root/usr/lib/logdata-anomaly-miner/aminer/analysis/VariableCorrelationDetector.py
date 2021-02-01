@@ -580,7 +580,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                         self.rel_list[event_index][pos_var_cor_index][0][i_val] = {j_val: 0}
                     elif i_val in self.rel_list[event_index][pos_var_cor_index][0] and j_val not in self.rel_list[event_index][
                             pos_var_cor_index][0][i_val]:
-                        if self.generate_rules[event_index]:
+                        if self.generate_rules[event_index]:  # skipcq: PTC-W0048
                             if i_val not in failed_i_vals:
                                 failed_i_vals.append(i_val)
                         else:
@@ -607,7 +607,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                         self.rel_list[event_index][pos_var_cor_index][1][j_val] = {i_val: 0}
                     elif j_val in self.rel_list[event_index][pos_var_cor_index][1] and i_val not in self.rel_list[event_index][
                             pos_var_cor_index][1][j_val]:
-                        if self.generate_rules[event_index]:
+                        if self.generate_rules[event_index]:  # skipcq: PTC-W0048
                             if j_val not in failed_j_vals:
                                 failed_j_vals.append(j_val)
                         else:
@@ -663,58 +663,58 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
                     # At least two possible values, therefore print message
                     if i_val in self.rel_list[event_index][pos_var_cor_index][0] and self.rel_list[event_index][pos_var_cor_index][0][
-                            i_val] != {} and j_val not in self.rel_list[event_index][pos_var_cor_index][0][i_val]:
-                        if [i_val, j_val] not in reported_values_ij:
-                            reported_values_ij.append([i_val, j_val])
-                            message = 'correlation of the paths %s = %s -> %s = %s would be rejected after the %s-th line' % (
-                                self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
-                                    self.pos_var_cor[event_index][pos_var_cor_index][0]]], repr(i_val),
-                                self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][self.pos_var_cor[
-                                    event_index][pos_var_cor_index][1]]], list(self.rel_list[event_index][pos_var_cor_index][0][
-                                        i_val].keys())[0], self.event_type_detector.total_records)
-                            sorted_log_lines = []
-                            event_data = {'EventIndex': event_index}
-                            affected_log_atom_paths = []
-                            affected_values = []
-                            affected_log_atom_paths.append(self.event_type_detector.variable_key_list[event_index][self.discrete_indices[
-                                event_index][self.pos_var_cor[event_index][pos_var_cor_index][0]]])
-                            affected_log_atom_paths.append(self.event_type_detector.variable_key_list[event_index][self.discrete_indices[
-                                event_index][self.pos_var_cor[event_index][pos_var_cor_index][1]]])
-                            affected_values.append(repr(i_val), list(self.rel_list[event_index][pos_var_cor_index][0][i_val].keys())[0])
-                            event_data['AffectedLogAtomPaths'] = list(set(affected_log_atom_paths))
-                            event_data['AffectedValues'] = affected_values
-                            sorted_log_lines += [''] * (self.event_type_detector.total_records - len(sorted_log_lines))
-                            for listener in self.anomaly_event_handlers:
-                                listener.receive_event(
-                                    'Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, self.log_atom, self)
+                            i_val] != {} and j_val not in self.rel_list[event_index][pos_var_cor_index][0][i_val] and [i_val, j_val] \
+                            not in reported_values_ij:
+                        reported_values_ij.append([i_val, j_val])
+                        message = 'correlation of the paths %s = %s -> %s = %s would be rejected after the %s-th line' % (
+                            self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
+                                self.pos_var_cor[event_index][pos_var_cor_index][0]]], repr(i_val),
+                            self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][self.pos_var_cor[
+                                event_index][pos_var_cor_index][1]]], list(self.rel_list[event_index][pos_var_cor_index][0][
+                                    i_val].keys())[0], self.event_type_detector.total_records)
+                        sorted_log_lines = []
+                        event_data = {'EventIndex': event_index}
+                        affected_log_atom_paths = []
+                        affected_values = []
+                        affected_log_atom_paths.append(self.event_type_detector.variable_key_list[event_index][self.discrete_indices[
+                            event_index][self.pos_var_cor[event_index][pos_var_cor_index][0]]])
+                        affected_log_atom_paths.append(self.event_type_detector.variable_key_list[event_index][self.discrete_indices[
+                            event_index][self.pos_var_cor[event_index][pos_var_cor_index][1]]])
+                        affected_values.append(repr(i_val), list(self.rel_list[event_index][pos_var_cor_index][0][i_val].keys())[0])
+                        event_data['AffectedLogAtomPaths'] = list(set(affected_log_atom_paths))
+                        event_data['AffectedValues'] = affected_values
+                        sorted_log_lines += [''] * (self.event_type_detector.total_records - len(sorted_log_lines))
+                        for listener in self.anomaly_event_handlers:
+                            listener.receive_event(
+                                'Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, self.log_atom, self)
 
                     # At least two possible values, therefore print message
                     if j_val in self.rel_list[event_index][pos_var_cor_index][1] and self.rel_list[event_index][pos_var_cor_index][1][
-                            j_val] != {} and i_val not in self.rel_list[event_index][pos_var_cor_index][1][j_val]:
-                        if [j_val, i_val] not in reported_values_ji:
-                            reported_values_ji.append([j_val, i_val])
-                            message = 'correlation of the paths %s = %s -> %s = %s would be rejected after the %s-th line' % (
-                                self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
-                                    self.pos_var_cor[event_index][pos_var_cor_index][1]]], repr(j_val),
-                                self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
-                                    self.pos_var_cor[event_index][pos_var_cor_index][0]]], list(self.rel_list[event_index][
-                                        pos_var_cor_index][1][j_val].keys())[0], self.event_type_detector.total_records)
-                            sorted_log_lines = []
-                            event_data = {'EventIndex': event_index}
-                            affected_log_atom_paths = []
-                            affected_values = []
-                            affected_log_atom_paths.append(self.event_type_detector.variable_key_list[event_index][self.discrete_indices[
-                                event_index][self.pos_var_cor[event_index][pos_var_cor_index][1]]])
-                            affected_log_atom_paths.append(self.event_type_detector.variable_key_list[event_index][self.discrete_indices[
-                                event_index][self.pos_var_cor[event_index][pos_var_cor_index][0]]])
-                            affected_values.append(repr(j_val))
-                            affected_values.append(list(self.rel_list[event_index][pos_var_cor_index][1][j_val].keys())[0])
-                            event_data['AffectedLogAtomPaths'] = list(set(affected_log_atom_paths))
-                            event_data['AffectedValues'] = affected_values
-                            sorted_log_lines += [''] * (self.event_type_detector.total_records - len(sorted_log_lines))
-                            for listener in self.anomaly_event_handlers:
-                                listener.receive_event(
-                                    'Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, self.log_atom, self)
+                            j_val] != {} and i_val not in self.rel_list[event_index][pos_var_cor_index][1][j_val] and [j_val, i_val] \
+                            not in reported_values_ji:
+                        reported_values_ji.append([j_val, i_val])
+                        message = 'correlation of the paths %s = %s -> %s = %s would be rejected after the %s-th line' % (
+                            self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
+                                self.pos_var_cor[event_index][pos_var_cor_index][1]]], repr(j_val),
+                            self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
+                                self.pos_var_cor[event_index][pos_var_cor_index][0]]], list(self.rel_list[event_index][
+                                    pos_var_cor_index][1][j_val].keys())[0], self.event_type_detector.total_records)
+                        sorted_log_lines = []
+                        event_data = {'EventIndex': event_index}
+                        affected_log_atom_paths = []
+                        affected_values = []
+                        affected_log_atom_paths.append(self.event_type_detector.variable_key_list[event_index][self.discrete_indices[
+                            event_index][self.pos_var_cor[event_index][pos_var_cor_index][1]]])
+                        affected_log_atom_paths.append(self.event_type_detector.variable_key_list[event_index][self.discrete_indices[
+                            event_index][self.pos_var_cor[event_index][pos_var_cor_index][0]]])
+                        affected_values.append(repr(j_val))
+                        affected_values.append(list(self.rel_list[event_index][pos_var_cor_index][1][j_val].keys())[0])
+                        event_data['AffectedLogAtomPaths'] = list(set(affected_log_atom_paths))
+                        event_data['AffectedValues'] = affected_values
+                        sorted_log_lines += [''] * (self.event_type_detector.total_records - len(sorted_log_lines))
+                        for listener in self.anomaly_event_handlers:
+                            listener.receive_event(
+                                'Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, self.log_atom, self)
 
     def update_or_test_cor_w_rel(self, event_index):
         """Update or test the w_rel_list."""

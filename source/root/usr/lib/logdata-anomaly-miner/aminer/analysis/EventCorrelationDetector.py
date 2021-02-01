@@ -446,17 +446,16 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     # Too much time has elapsed; append negative evaluation.
                     implication.hypothesis_trigger_timestamps.popleft()
                     implication.add_hypothesis_observation(0, log_atom.atom_time)
-                    if implication.compute_hypothesis_stability() == -1:
-                        if implication.trigger_event in self.forward_hypotheses and implication in self.forward_hypotheses[
-                                implication.trigger_event]:
-                            # This check is required if a hypothesis was already removed, but triggered hypotheses are still in the queue.
-                            self.sum_unstable_unknown_hypotheses = self.sum_unstable_unknown_hypotheses - 1
-                            self.forward_hypotheses[implication.trigger_event].remove(implication)
-                            self.forward_hypotheses_inv[implication.implied_event].remove(implication)
-                            if len(self.forward_hypotheses[implication.trigger_event]) == 0:
-                                del self.forward_hypotheses[implication.trigger_event]
-                            if len(self.forward_hypotheses_inv[implication.implied_event]) == 0:
-                                del self.forward_hypotheses_inv[implication.implied_event]
+                    if implication.compute_hypothesis_stability() == -1 and implication.trigger_event in self.forward_hypotheses and \
+                            implication in self.forward_hypotheses[implication.trigger_event]:
+                        # This check is required if a hypothesis was already removed, but triggered hypotheses are still in the queue.
+                        self.sum_unstable_unknown_hypotheses = self.sum_unstable_unknown_hypotheses - 1
+                        self.forward_hypotheses[implication.trigger_event].remove(implication)
+                        self.forward_hypotheses_inv[implication.implied_event].remove(implication)
+                        if len(self.forward_hypotheses[implication.trigger_event]) == 0:
+                            del self.forward_hypotheses[implication.trigger_event]
+                        if len(self.forward_hypotheses_inv[implication.implied_event]) == 0:
+                            del self.forward_hypotheses_inv[implication.implied_event]
                     self.forward_hypotheses_queue.popleft()
                     continue
                 break
@@ -667,9 +666,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                 break
 
             # Add new hypothesis candidates
-            if len(self.hypothesis_candidates) < self.candidates_size:
-                if random.uniform(0.0, 1.0) < self.generation_probability:
-                    self.hypothesis_candidates.append((log_event, log_atom.atom_time))
+            if len(self.hypothesis_candidates) < self.candidates_size and random.uniform(0.0, 1.0) < self.generation_probability:
+                self.hypothesis_candidates.append((log_event, log_atom.atom_time))
         self.log_success += 1
 
     def get_time_trigger_class(self):

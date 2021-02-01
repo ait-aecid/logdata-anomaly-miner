@@ -115,9 +115,8 @@ def create_missing_directories(file_name):
     """Create missing persistence directories."""
     # Find out, which directory is missing by stating our way up.
     dir_name_length = file_name.rfind('/')
-    if dir_name_length > 0:
-        if not os.path.exists(file_name[:dir_name_length]):
-            os.makedirs(file_name[:dir_name_length])
+    if dir_name_length > 0 and not os.path.exists(file_name[:dir_name_length]):
+        os.makedirs(file_name[:dir_name_length])
 
 
 def clear_persistence(persistence_dir_name):
