@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#This script should be used to test the performance of the AMiner in different hardware setups or virtual machines with different ressources.
+#This script should be used to test the performance of the aminer in different hardware setups or virtual machines with different ressources.
 
 MACHINE_NAME="Acer Aspire 5750g"
 CPU_NAME="i7-2630QM"
@@ -56,14 +56,14 @@ echo ""
 
 python3 generateSystemLogdata.py $((waitingTime+10)) 2> /tmp/error.log &
 
-#start AMiner
-sudo -H -u aminer bash -c 'aminer --Config '$FILE' & #2> /dev/null & #> /tmp/output &'
+#start aminer
+sudo -H -u aminer bash -c 'aminer --config '$FILE' & #2> /dev/null & #> /tmp/output &'
 
 sleep $waitingTime
 
 touch $RESULTS_PATH
 sudo chown -R aminer:aminer $RESULTS_PATH
-#stop AMiner and python3
+#stop aminer and python3
 sleep 3 & wait $!
 sudo pkill -x aminer
 KILL_PID=$!

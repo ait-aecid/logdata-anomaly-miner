@@ -2,7 +2,7 @@ Preamble:
 =========
 
 This document describes the requirement, design and implementation
-of AMiner. For using it, the general "README.md" may suit your
+of aminer. For using it, the general "README.md" may suit your
 needs better than this document.
 
 
@@ -24,7 +24,7 @@ Design:
 
 * Configuration layout:
 
-The behaviour of AMiner is controlled by 3 different configuration
+The behaviour of aminer is controlled by 3 different configuration
 data sources:
 
   * config.py: This configuration file is used by the privileged
@@ -40,12 +40,12 @@ data sources:
 
   * /var/lib/aminer: This directory is used for persistence of
     runtime data, e.g. learned patterns, statistical data, between
-    different AMiner invocations.
+    different aminer invocations.
 
 
 * Loading of python code:
 
-AMiner does not use the default dist/site-packages to load code.
+aminer does not use the default dist/site-packages to load code.
 The rationale behind that is:
 
   * Avoid unused code to be loadable or even loaded by default:
@@ -144,19 +144,19 @@ Therefore the algorithm should have following properties:
 Implementation:
 ===============
 
-* AMiner:
+* aminer:
 
 This is the privileged master process having access to logfiles.
-It just launches the AMinerAnalysisChild and forwards logfiles
+It just launches the AminerAnalysisChild and forwards logfiles
 to it.
 
 
-* AMinerAnalysisChild:
+* AminerAnalysisChild:
 
 This process runs without root capablities and just reads logfiles
 and stores state information in /var/lib/aminer.
 
-AMinerAnalysisChild processes data in a multistage process. Each
+AminerAnalysisChild processes data in a multistage process. Each
 transformation step is configurable, components can be registered
 to receive output from one layer and create input for the next
 one.

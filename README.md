@@ -2,7 +2,7 @@
 
 This tool parses log data and allows to define analysis pipelines for anomaly detection. It was designed to run the analysis with limited resources and lowest possible permissions to make it suitable for production server use.
 
-[![AECID Demo – Anomaly Detection with AMiner and Reporting to IBM QRadar](https://img.youtube.com/vi/tL7KiMf8NfE/0.jpg)](https://www.youtube.com/watch?v=tL7KiMf8NfE)
+[![AECID Demo – Anomaly Detection with aminer and Reporting to IBM QRadar](https://img.youtube.com/vi/tL7KiMf8NfE/0.jpg)](https://www.youtube.com/watch?v=tL7KiMf8NfE)
 
 
 ## Installation

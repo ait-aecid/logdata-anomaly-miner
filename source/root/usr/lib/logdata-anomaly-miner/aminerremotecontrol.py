@@ -33,7 +33,7 @@ if supports_color():
     help_message += colflame
 else:
     help_message += flame
-help_message += 'For further information read the man pages running "man AMinerRemoteControl".'
+help_message += 'For further information read the man pages running "man aminerRemoteControl".'
 parser = argparse.ArgumentParser(description=help_message, formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('-v', '--version', action='version', version=__version_string__)
 parser.add_argument('-c', '--control-socket', default='/var/run/aminer-remote.socket', type=str,

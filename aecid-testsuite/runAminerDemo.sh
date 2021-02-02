@@ -8,8 +8,8 @@ else
     exit 2
 fi
 sudo chown -R aminer:aminer /tmp/lib 2> /dev/null
-sudo chmod +x demo/AMiner/aminerDemo.sh
-sudo ./demo/AMiner/aminerDemo.sh > /dev/null
+sudo chmod +x demo/aminer/aminerDemo.sh
+sudo ./demo/aminer/aminerDemo.sh > /dev/null
 exit_code=$?
 sudo rm /tmp/demo-config.py 2> /dev/null
 sudo rm /tmp/demo-config.yml 2> /dev/null

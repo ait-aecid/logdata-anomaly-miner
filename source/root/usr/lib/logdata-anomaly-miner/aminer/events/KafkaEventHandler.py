@@ -14,7 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import sys
 import logging
-from aminer import AMinerConfig
+from aminer import AminerConfig
 from aminer.events import EventHandlerInterface
 
 
@@ -44,19 +44,19 @@ class KafkaEventHandler(EventHandlerInterface):
                 self.kafkaImported = True
             except ImportError:
                 msg = 'Kafka module not found.'
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                 print('ERROR: ' + msg, file=sys.stderr)
                 return False
         if not isinstance(event_data, str) and not isinstance(event_data, bytes):
             msg = 'KafkaEventHandler received non-string event data. Use the JsonConverterHandler to serialize it first.'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
             return False
         try:
             self.producer.send(self.topic, event_data)
         except KafkaError as err:
             msg = str(err)
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             print("Error: " + msg, file=sys.stderr)
             self.producer.close()
             self.producer = None

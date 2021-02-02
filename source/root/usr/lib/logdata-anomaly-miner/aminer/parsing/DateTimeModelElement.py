@@ -19,7 +19,7 @@ import time
 import logging
 from dateutil.parser import parse
 
-from aminer import AMinerConfig
+from aminer import AminerConfig
 from aminer.parsing import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
 
@@ -82,7 +82,7 @@ class DateTimeModelElement(ModelElementInterface):
         """Scan the date format."""
         if self.date_format_parts is not None:
             msg = 'Cannot rescan date format after initialization'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         date_format_parts = []
         date_format_type_set = set()
@@ -128,7 +128,7 @@ class DateTimeModelElement(ModelElementInterface):
                     continue
                 else:
                     msg = 'Unknown dateformat specifier %s' % repr(param_type_code)
-                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                     raise Exception(msg)
             if isinstance(new_element, bytes):
                 if date_format_parts and (isinstance(date_format_parts[-1], bytes)):
@@ -138,14 +138,14 @@ class DateTimeModelElement(ModelElementInterface):
             else:
                 if new_element[0] in date_format_type_set:
                     msg = 'Multiple format specifiers for type %d' % new_element[0]
-                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                     raise Exception(msg)
                 date_format_type_set.add(new_element[0])
                 date_format_parts.append(new_element)
             scan_pos = next_param_pos
         if (7 in date_format_type_set) and (not date_format_type_set.isdisjoint(set(range(0, 6)))):
             msg = 'Cannot use %%s (seconds since epoch) with other non-second format types'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         self.date_format_parts = date_format_parts
 
@@ -273,7 +273,7 @@ class DateTimeModelElement(ModelElementInterface):
                             msg = 'DateTimeModelElement unqualified timestamp year wraparound detected from %s to %s' % (
                                 datetime.datetime.fromtimestamp(self.last_parsed_seconds, self.time_zone).isoformat(),
                                 parsed_date_time.isoformat())
-                            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
+                            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
                             print('WARNING: ' + msg, file=sys.stderr)
                         else:
                             last_year_date_time = parsed_date_time.replace(self.start_year - 1)
@@ -287,7 +287,7 @@ class DateTimeModelElement(ModelElementInterface):
                                 # None of both seems correct, just report that.
                                 msg = 'DateTimeModelElement time inconsistencies parsing %s, expecting value around %d. ' \
                                       'Check your settings!' % (repr(date_str), self.last_parsed_seconds)
-                                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
+                                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
                                 print('WARNING: ' + msg, file=sys.stderr)
 
             # We discarded the parsed_date_time microseconds beforehand, use the full float value here instead of the rounded integer.
@@ -314,7 +314,7 @@ class DateTimeModelElement(ModelElementInterface):
                     self.tz_specifier_format_length -= 1
                     if self.tz_specifier_format_length <= 0:
                         msg = "The date_format could not be found."
-                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                         raise Exception(msg)
 
         match_context.update(date_str)
