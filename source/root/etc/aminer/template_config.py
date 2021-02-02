@@ -1,6 +1,6 @@
 # This is a template for the "aminer" logdata-anomaly-miner tool. Copy
 # it to "config.py" and define your ruleset. For more examples of component
-# usage see aecid-testsuite/demo/AMiner/demo-config.py.
+# usage see aecid-testsuite/demo/aminer/demo-config.py.
 
 config_properties = {}
 
@@ -14,15 +14,15 @@ config_properties['LogResourceList'] = ['file:///tmp/syslog']
 
 # Define the uid/gid of the process that runs the calculation
 # after opening the log files:
-config_properties['AMinerUser'] = 'aminer'
-config_properties['AMinerGroup'] = 'aminer'
+config_properties['AminerUser'] = 'aminer'
+config_properties['AminerGroup'] = 'aminer'
 
 learn_mode = True
 
 # Read and store information to be used between multiple invocations
-# of AMiner in this directory. The directory must only be accessible
-# to the 'AMinerUser' but not group/world readable. On violation,
-# AMiner will refuse to start. When undefined, '/var/lib/aminer'
+# of aminer in this directory. The directory must only be accessible
+# to the 'AminerUser' but not group/world readable. On violation,
+# aminer will refuse to start. When undefined, '/var/lib/aminer'
 # is used.
 # config_properties['Core.PersistenceDir'] = '/var/lib/aminer'
 
@@ -32,7 +32,7 @@ learn_mode = True
 def build_analysis_pipeline(analysis_context):
     """
     Define the function to create pipeline for parsing the log data.
-    It has also to define an AtomizerFactory to instruct AMiner how to process incoming data streams to create log atoms from them.
+    It has also to define an AtomizerFactory to instruct aminer how to process incoming data streams to create log atoms from them.
     """
     # Build the parsing model:
     from aminer.parsing import SequenceModelElement

@@ -14,7 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import sys
 import logging
-from aminer import AMinerConfig
+from aminer import AminerConfig
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing import ModelElementInterface
 
@@ -30,7 +30,7 @@ class DebugModelElement(ModelElementInterface):
         self.element_id = element_id
         # To avoid having those elements hidden in production configuration, write a line every time the class is instantiated.
         msg = 'DebugModelElement %s added' % element_id
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info(msg)
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info(msg)
         print(msg, file=sys.stderr)
 
     def get_id(self):
@@ -47,6 +47,6 @@ class DebugModelElement(ModelElementInterface):
     def get_match_element(self, path, match_context):
         """@return Always return a match."""
         msg = 'DebugModelElement path = "%s/%s", unmatched = "%s"' % (path, self.element_id, repr(match_context.match_data))
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info(msg)
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info(msg)
         print(msg, file=sys.stderr)
         return MatchElement('%s/%s' % (path, self.element_id), '', '', None)

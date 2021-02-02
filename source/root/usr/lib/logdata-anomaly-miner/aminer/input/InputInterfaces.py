@@ -15,7 +15,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import abc
 import logging
-from aminer.AMinerConfig import STAT_LEVEL, STAT_LOG_NAME
+from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME
 
 
 class AtomizerFactory(metaclass=abc.ABCMeta):

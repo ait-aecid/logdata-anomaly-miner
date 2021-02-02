@@ -77,7 +77,7 @@ function startswithPredefinedMarkers() {
 	return 0
 }
 
-# This function reads the output of the AMiner, which is saved at /tmp/output, until an empty line occurs.
+# This function reads the output of the aminer, which is saved at /tmp/output, until an empty line occurs.
 # Every time a paragraph was read, the global variable $COUNTER is set to the iteration variable $i.
 # On the next call of this function all lines until $i equals $COUNTER are skipped.
 # $1 = String identifier for the expected values
@@ -302,7 +302,7 @@ function checkAllMails() {
 					break
 				fi
 			fi
-			# If the first empty line was found and the subject equals "AMiner Alerts:" the following paragraph
+			# If the first empty line was found and the subject equals "aminer Alerts:" the following paragraph
 			# must be found in the previously created /tmp/output file.
 			if [[ $t == true && $aminerMail == true ]]; then
 
@@ -316,11 +316,11 @@ function checkAllMails() {
 					fi
 				done < "$expected"
 			# Set the aminerMail boolean to True, when the expected subject was found
-			elif [[ "$searched" == *"Subject: AMiner Alerts:"* ]]; then
+			elif [[ "$searched" == *"Subject: aminer Alerts:"* ]]; then
 				#echo "Subject found!"
 				aminerMail=true
-			# Stop searching, when the subject is not the expected AMiner subject.
-			elif [[ "$searched" != *"Subject: AMiner Alerts:"* && "$searched" == *"Subject:"* ]]; then
+			# Stop searching, when the subject is not the expected aminer subject.
+			elif [[ "$searched" != *"Subject: aminer Alerts:"* && "$searched" == *"Subject:"* ]]; then
 				echo "wrong mail"
 				i=$(($i-1))
 				break

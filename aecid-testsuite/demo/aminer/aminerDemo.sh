@@ -22,12 +22,14 @@ if [[ $sudoInstalled == 0 ]]; then
 	sudo mkdir /tmp/lib/aminer 2> /dev/null
 	sudo chown -R $USER:$USER /tmp/lib/aminer 2> /dev/null
 	sudo rm -r /tmp/lib/aminer/* 2> /dev/null
+	sudo mkdir /tmp/lib/aminer/log 2> /dev/null
 	sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
 	sudo rm /tmp/syslog 2> /dev/null
 else
 	mkdir /tmp/lib 2> /dev/null
 	mkdir /tmp/lib/aminer 2> /dev/null
 	rm -r /tmp/lib/aminer/* 2> /dev/null
+	mkdir /tmp/lib/aminer/log 2> /dev/null
 	chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
 	rm /tmp/syslog 2> /dev/null
 fi
@@ -44,7 +46,7 @@ if ! test -f "$FILE"; then
 	fi
 fi
 
-#start AMiner
+#start aminer
 if [[ $sudoInstalled == 0 ]]; then
 	sudo aminer --config "$FILE" &
 else
@@ -280,7 +282,7 @@ done
 echo "$text" >> /tmp/syslog
 #Comment
 
-#stop AMiner
+#stop aminer
 sleep 3 & wait $!
 if [[ $sudoInstalled == 0 ]]; then
 	sudo pkill -x aminer

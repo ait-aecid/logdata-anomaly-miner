@@ -140,4 +140,4 @@ playbook.retry
 
 # for testing
 aecid-testsuite/aminer
-aecid-testsuite/demo/AMiner/template_config.py
+aecid-testsuite/demo/aminer/template_config.py

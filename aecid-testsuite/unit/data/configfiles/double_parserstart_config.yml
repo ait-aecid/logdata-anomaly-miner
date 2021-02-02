@@ -1,5 +1,5 @@
-AMinerUser: 'aminer'
-AMinerGroup: 'aminer'
+AminerUser: 'aminer'
+AminerGroup: 'aminer'
 
 LogResourceList:
         - 'file:///var/log/apache2/access.log'

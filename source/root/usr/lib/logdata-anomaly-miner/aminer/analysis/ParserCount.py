@@ -15,7 +15,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import datetime
 import time
 import logging
-from aminer import AMinerConfig
+from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input import AtomHandlerInterface
 from aminer.util import TimeTriggeredComponentInterface
@@ -41,11 +41,11 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.next_report_time = None
         if (target_path_list is None or target_path_list == []) and (target_label_list is not None and target_label_list != []):
             msg = 'Target labels cannot be used without specifying target paths.'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         if target_path_list is not None and target_label_list is not None and len(target_path_list) != len(target_label_list):
             msg = 'Every path must have a target label if target labels are used.'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         if self.target_path_list is None:
             self.target_path_list = []
@@ -129,4 +129,4 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
             if self.target_label_list:
                 target_path = self.target_label_list[self.target_path_list.index(target_path)]
             self.count_dict[target_path][current_processed_lines_str] = 0
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s sent report.', self.__class__.__name__)
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s sent report.', self.__class__.__name__)

@@ -17,7 +17,7 @@ import locale
 import sys
 import logging
 
-from aminer import AMinerConfig
+from aminer import AminerConfig
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing import ModelElementInterface
 
@@ -145,7 +145,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
                         parsed_fields[COMPONENT_TYPE_SECOND], parsed_fields[COMPONENT_TYPE_MICROSECOND], time_zone_info)
                     if not self.checkTimestampValueInRange(parsed_value):
                         msg = delta_string % repr(date_str)
-                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error('%s: %s', self.__class__.__name__, msg)
+                        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error('%s: %s', self.__class__.__name__, msg)
                         print(msg, file=sys.stderr)
                         return None
 
@@ -155,7 +155,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
                 delta_seconds = (delta.days * 86400 + delta.seconds + delta.microseconds / 1000)
                 if (delta_seconds < -86400) or (delta_seconds > 86400 * 30):
                     msg = delta_string % repr(date_str)
-                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error('%s: %s', self.__class__.__name__, msg)
+                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error('%s: %s', self.__class__.__name__, msg)
                     print(msg, file=sys.stderr)
                     return None
 
@@ -166,7 +166,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
                 parsed_fields[COMPONENT_TYPE_SECOND], parsed_fields[COMPONENT_TYPE_MICROSECOND], time_zone_info)
             if not self.checkTimestampValueInRange(parsed_value):
                 msg = delta_string % repr(date_str)
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error('%s: %s', self.__class__.__name__, msg)
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error('%s: %s', self.__class__.__name__, msg)
                 print(msg, file=sys.stderr)
                 return None
 
@@ -211,12 +211,12 @@ class DateFormatComponent:
         self.component_type = component_type
         if (end_separator is not None) and not end_separator:
             msg = 'Invalid zero-length separator string'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         self.end_separator = end_separator
         if (end_separator is None) and (component_length == 0) and (translation_dictionary is None):
             msg = 'Invalid parameters to determine the length of the field'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         self.component_length = component_length
         self.translation_dictionary = translation_dictionary
@@ -233,11 +233,11 @@ class DateFormatComponent:
 
         if format_string[0] != '%':
             msg = 'Format string has to start with "%", strip away all static data outside this formatter before starting to parse'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if self.format_timezone is not None:
             msg = 'Current node is already an end node, no format adding any more'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
         parse_pos = 1
@@ -257,12 +257,12 @@ class DateFormatComponent:
                 for old_value in translation_dictionary:
                     if (old_value.startswith(new_value)) or (new_value.startswith(old_value)):
                         msg = 'Strange locale with month names too similar'
-                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                         raise Exception(msg)
                 translation_dictionary[new_value] = month_num
             if len(translation_dictionary) != 12:
                 msg = 'Internal error: less than 12 month a year'
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                 raise Exception(msg)
         elif format_string[parse_pos] == 'd':
             # Day number
@@ -301,7 +301,7 @@ class DateFormatComponent:
             component_length = 6
         else:
             msg = 'Unsupported date format code "%s"' % format_string[parse_pos]
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
         end_pos = format_string.find('%', parse_pos)
@@ -321,7 +321,7 @@ class DateFormatComponent:
         while check_component is not None:
             if check_component.component_type == component_type:
                 msg = 'Current format defines component of type %d twice' % component_type
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                 raise Exception(msg)
             check_component = check_component.parent_component
 
@@ -353,11 +353,11 @@ class DateFormatComponent:
         """Merge data of given component type, length and lookup information into the current dataset."""
         if (self.component_type != component_type) or (self.component_length != component_length):
             msg = 'Cannot merge data with different type or length'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if (self.translation_dictionary is not None) != (translation_dictionary is not None):
             msg = 'Cannot merge digit and translated data'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if translation_dictionary is None:
             # Without dictionary, we are done here: length and type are matching.
@@ -367,7 +367,7 @@ class DateFormatComponent:
             for old_key in self.translation_dictionary:
                 if key.startswith(old_key) or old_key.startswith(key) and key != old_key:
                     msg = 'Translation strings from different locales too similar for unambiguous parsing'
-                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                     raise Exception(msg)
             value = translation_dictionary.get(key)
             current_value = self.translation_dictionary.get(key, None)
@@ -375,7 +375,7 @@ class DateFormatComponent:
                 self.translation_dictionary[key] = value
             elif current_value != value:
                 msg = 'Conflict in translation dictionary for %s: %s vs %s' % (key, value, current_value)
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                 raise Exception(msg)
 
     def make_end_node(self, format_timezone):
@@ -385,11 +385,11 @@ class DateFormatComponent:
         """
         if (self.format_timezone is not None) and (self.format_timezone != format_timezone):
             msg = 'Node is already an end node for different timezone'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if self.next_components:
             msg = 'Cannot make node with subcomponents an end node'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         self.format_timezone = format_timezone
 

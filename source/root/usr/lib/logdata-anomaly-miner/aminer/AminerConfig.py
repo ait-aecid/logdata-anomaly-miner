@@ -19,8 +19,8 @@ from importlib import util
 import logging
 
 KEY_LOG_SOURCES_LIST = 'LogResourceList'
-KEY_AMINER_USER = 'AMinerUser'
-KEY_AMINER_GROUP = 'AMinerGroup'
+KEY_AMINER_USER = 'AminerUser'
+KEY_AMINER_GROUP = 'AminerGroup'
 KEY_ANALYSIS_CONFIG_FILE = 'AnalysisConfigFile'
 KEY_PERSISTENCE_DIR = 'Core.PersistenceDir'
 KEY_LOG_DIR = 'Core.LogDir'
@@ -89,7 +89,7 @@ def build_persistence_file_name(aminer_config, *args):
 
 
 def save_config(analysis_context, new_file):
-    """Save the current configuration to a file by using the AMinerRemoteControl."""
+    """Save the current configuration to a file by using the aminerRemoteControl."""
     register_component = 'register_component('
     VAR_ID = 0
     msg = ""
@@ -150,7 +150,7 @@ def save_config(analysis_context, new_file):
 
     i = len(logs) - 1
     while i > 0:
-        if "INFO AMiner started." in logs[i]:
+        if "INFO aminer started." in logs[i]:
             logs = logs[i:]
             break
         i = i - 1

@@ -21,7 +21,7 @@ with open('/tmp/results.csv', 'a+', buffering=100) as file:
     while time.time() < endTime:
         t = time.time()
         for proc in psutil.process_iter():
-            if psutil.pid_exists(proc.pid) and proc.name() == "AMiner":
+            if psutil.pid_exists(proc.pid) and proc.name() == "aminer":
                 pid = proc.pid
                 if p is None or pid > ppid:
                     ppid = pid

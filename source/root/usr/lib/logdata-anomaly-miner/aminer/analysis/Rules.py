@@ -25,8 +25,8 @@ from aminer.util import LogarithmicBackoffHistory
 from aminer.util import ObjectHistory
 
 from aminer.analysis.AtomFilters import SubhandlerFilter
-from aminer import AMinerConfig
-from aminer.AMinerConfig import STAT_LEVEL, STAT_LOG_NAME
+from aminer import AminerConfig
+from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME
 
 result_string = '%s(%s)'
 
@@ -583,7 +583,7 @@ class DebugHistoryMatchRule(MatchRule):
             object_history = LogarithmicBackoffHistory(10)
         elif not isinstance(object_history, ObjectHistory):
             msg = 'object_history is not an instance of ObjectHistory'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         self.object_history = object_history
         self.debug_match_result = debug_match_result
