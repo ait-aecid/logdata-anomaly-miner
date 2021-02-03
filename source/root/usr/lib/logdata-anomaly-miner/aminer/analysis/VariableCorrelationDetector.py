@@ -182,6 +182,10 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         @param log_atom the parsed log atom
         @return True if this handler was really able to handle and process the match.
         """
+        event_index = self.event_type_detector.current_index
+        if event_index == -1:
+            return False
+
         parser_match = log_atom.parser_match
         for ignore_path in self.ignore_list:
             if ignore_path in parser_match.get_match_dictionary().keys():
@@ -194,7 +198,6 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         if not constraint_path_flag and self.constraint_list != []:
             return False
         self.log_atom = log_atom
-        event_index = self.event_type_detector.current_index
         if self.event_type_detector.num_eventlines[event_index] == self.num_init:  # Initialisation Phase
             self.init_cor(event_index)  # Initialise the correlations
 
