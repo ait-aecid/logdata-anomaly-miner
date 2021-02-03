@@ -88,7 +88,8 @@ def build_analysis_pipeline(analysis_context):
 
     # Add stdout stream printing for debugging, tuning.
     from aminer.events import StreamPrinterEventHandler
-    anomaly_event_handlers.append(StreamPrinterEventHandler(analysis_context))
+    stream_printer_event_handler = StreamPrinterEventHandler(analysis_context)
+    anomaly_event_handlers.append(stream_printer_event_handler)
 
     from aminer.events.JsonConverterHandler import JsonConverterHandler
     json_converter_handler = JsonConverterHandler([stream_printer_event_handler], analysis_context)
