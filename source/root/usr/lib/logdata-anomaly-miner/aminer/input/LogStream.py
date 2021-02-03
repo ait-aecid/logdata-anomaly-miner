@@ -429,3 +429,8 @@ class LogStream:
         if self.log_data_resource is None:
             return None
         return self.log_data_resource.get_repositioning_data()
+
+    def close(self):
+        """Close the log stream."""
+        if self.log_data_resource is not None:
+            self.log_data_resource.close()
