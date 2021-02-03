@@ -1271,8 +1271,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         """Check through the values of the two discrete distributions if they could have a possible correlation."""
         if len([val for val in val_list1 if val in val_list2]) > self.match_disc_vals_sim_tresh*min(
                 len(val_list1), len(val_list2)):
-            return False
-        return True
+            return True
+        return False
 
     def pick_cor_random(self, event_index):
         """Match variables randomly to correlation."""
