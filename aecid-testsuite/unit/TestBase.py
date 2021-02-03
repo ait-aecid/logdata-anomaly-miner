@@ -11,18 +11,52 @@ from aminer.util import SecureOSFunctions
 from _io import StringIO
 
 
-def initialize_loggers(aminer_config, aminer_user, aminer_grp):
+def initialize_loggers(aminer_config, aminer_user_id, aminer_grp_id):
     """Initialize all loggers."""
     datefmt = '%d/%b/%Y:%H:%M:%S %z'
 
-    persistence_dir = aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_DIR, AminerConfig.DEFAULT_PERSISTENCE_DIR)
+    log_dir = aminer_config.config_properties.get(AminerConfig.KEY_LOG_DIR, AminerConfig.DEFAULT_LOG_DIR)
+    if log_dir == AminerConfig.DEFAULT_LOG_DIR:
+        try:
+            if not os.path.isdir(log_dir):
+                os.makedirs(log_dir)
+                base_log_dir = os.open(os.path.split(AminerConfig.DEFAULT_LOG_DIR)[0], flags | os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY)
+                os.chown(log_dir, aminer_user_id, aminer_grp_id, dir_fd=base_log_dir, follow_symlinks=False)
+                os.close(base_log_dir)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                msg = 'Unable to create log-directory: %s' % log_dir
+            else:
+                msg = e
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg.strip('\n'))
+            print(msg, file=sys.stderr)
+
+    tmp_value = aminer_config.config_properties.get(AminerConfig.KEY_REMOTE_CONTROL_LOG_FILE)
+    if tmp_value is not None and b'/' in tmp_value:
+        print('%s attribute must not contain a full directory path, but only the filename.' % AminerConfig.KEY_REMOTE_CONTROL_LOG_FILE,
+              file=sys.stderr)
+        sys.exit(1)
+    tmp_value = aminer_config.config_properties.get(AminerConfig.KEY_STAT_LOG_FILE)
+    if tmp_value is not None and b'/' in tmp_value:
+        print('%s attribute must not contain a full directory path, but only the filename.' % AminerConfig.KEY_STAT_LOG_FILE,
+              file=sys.stderr)
+        sys.exit(1)
+    tmp_value = aminer_config.config_properties.get(AminerConfig.KEY_DEBUG_LOG_FILE)
+    if tmp_value is not None and b'/' in tmp_value:
+        print('%s attribute must not contain a full directory path, but only the filename.' % AminerConfig.KEY_DEBUG_LOG_FILE,
+              file=sys.stderr)
+        sys.exit(1)
+
+    log_dir_fd = SecureOSFunctions.secure_open_base_directory(log_dir, os.O_RDONLY | os.O_DIRECTORY | os.O_PATH)
     rc_logger = logging.getLogger(AminerConfig.REMOTE_CONTROL_LOG_NAME)
     rc_logger.setLevel(logging.DEBUG)
     remote_control_log_file = aminer_config.config_properties.get(
-        AminerConfig.KEY_REMOTE_CONTROL_LOG_FILE, os.path.join(persistence_dir, AminerConfig.DEFAULT_REMOTE_CONTROL_LOG_FILE))
+        AminerConfig.KEY_REMOTE_CONTROL_LOG_FILE, os.path.join(log_dir, AminerConfig.DEFAULT_REMOTE_CONTROL_LOG_FILE))
+    if not remote_control_log_file.startswith(log_dir):
+        remote_control_log_file = os.path.join(log_dir, remote_control_log_file)
     try:
         rc_file_handler = logging.FileHandler(remote_control_log_file)
-        shutil.chown(remote_control_log_file, aminer_user, aminer_grp)
+        os.chown(remote_control_log_file, aminer_user_id, aminer_grp_id, dir_fd=log_dir_fd, follow_symlinks=False)
     except OSError as e:
         print('Could not create or open %s: %s. Stopping..' % (remote_control_log_file, e), file=sys.stderr)
         sys.exit(1)
@@ -33,10 +67,12 @@ def initialize_loggers(aminer_config, aminer_user, aminer_grp):
     stat_logger = logging.getLogger(AminerConfig.STAT_LOG_NAME)
     stat_logger.setLevel(logging.INFO)
     stat_log_file = aminer_config.config_properties.get(
-        AminerConfig.KEY_STAT_LOG_FILE, os.path.join(persistence_dir, AminerConfig.DEFAULT_STAT_LOG_FILE))
+        AminerConfig.KEY_STAT_LOG_FILE, os.path.join(log_dir, AminerConfig.DEFAULT_STAT_LOG_FILE))
+    if not stat_log_file.startswith(log_dir):
+        stat_log_file = os.path.join(log_dir, stat_log_file)
     try:
         stat_file_handler = logging.FileHandler(stat_log_file)
-        shutil.chown(stat_log_file, aminer_user, aminer_grp)
+        os.chown(stat_log_file, aminer_user_id, aminer_grp_id, dir_fd=log_dir_fd, follow_symlinks=False)
     except OSError as e:
         print('Could not create or open %s: %s. Stopping..' % (stat_log_file, e), file=sys.stderr)
         sys.exit(1)
@@ -51,10 +87,12 @@ def initialize_loggers(aminer_config, aminer_user, aminer_grp):
     else:
         debug_logger.setLevel(logging.DEBUG)
     debug_log_file = aminer_config.config_properties.get(
-        AminerConfig.KEY_DEBUG_LOG_FILE, os.path.join(persistence_dir, AminerConfig.DEFAULT_DEBUG_LOG_FILE))
+        AminerConfig.KEY_DEBUG_LOG_FILE, os.path.join(log_dir, AminerConfig.DEFAULT_DEBUG_LOG_FILE))
+    if not debug_log_file.startswith(log_dir):
+        debug_log_file = os.path.join(log_dir, debug_log_file)
     try:
         debug_file_handler = logging.FileHandler(debug_log_file)
-        shutil.chown(debug_log_file, aminer_user, aminer_grp)
+        os.chown(debug_log_file, aminer_user_id, aminer_grp_id, dir_fd=log_dir_fd, follow_symlinks=False)
     except OSError as e:
         print('Could not create or open %s: %s. Stopping..' % (debug_log_file, e), file=sys.stderr)
         sys.exit(1)
