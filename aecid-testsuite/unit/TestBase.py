@@ -3,6 +3,7 @@ import os
 import shutil
 import logging
 import sys
+import errno
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
@@ -20,7 +21,7 @@ def initialize_loggers(aminer_config, aminer_user_id, aminer_grp_id):
         try:
             if not os.path.isdir(log_dir):
                 os.makedirs(log_dir)
-                base_log_dir = os.open(os.path.split(AminerConfig.DEFAULT_LOG_DIR)[0], flags | os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY)
+                base_log_dir = os.open(os.path.split(AminerConfig.DEFAULT_LOG_DIR)[0], os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY)
                 os.chown(log_dir, aminer_user_id, aminer_grp_id, dir_fd=base_log_dir, follow_symlinks=False)
                 os.close(base_log_dir)
         except OSError as e:
@@ -47,7 +48,7 @@ def initialize_loggers(aminer_config, aminer_user_id, aminer_grp_id):
               file=sys.stderr)
         sys.exit(1)
 
-    log_dir_fd = SecureOSFunctions.secure_open_base_directory(log_dir, os.O_RDONLY | os.O_DIRECTORY | os.O_PATH)
+    log_dir_fd = SecureOSFunctions.secure_open_log_directory(log_dir, os.O_RDONLY | os.O_DIRECTORY | os.O_PATH)
     rc_logger = logging.getLogger(AminerConfig.REMOTE_CONTROL_LOG_NAME)
     rc_logger.setLevel(logging.DEBUG)
     remote_control_log_file = aminer_config.config_properties.get(
