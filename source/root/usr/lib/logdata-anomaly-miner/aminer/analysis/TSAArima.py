@@ -2,7 +2,7 @@
 
 # ToDo:
 # x) Update-Function
-# x) no generation of the time window
+# x) No generation of the time window
 
 import time
 
@@ -172,12 +172,7 @@ class TSAArima(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourc
                 # Update the model, for the next step
                 self.arima_models[event_number].update([sum(self.time_window_history[event_number][-self.num_division_time_step:])])
 
-                
-
-
     def one_step_prediction(self, event_number):
         prediction = self.arima_models[event_number].predict(n_periods=1, return_conf_int=True, alpha=self.alpha)
         # return in the order: pred, lower, upper
         return prediction[0][0], prediction[1][0][0], prediction[1][0][1]
-
-
