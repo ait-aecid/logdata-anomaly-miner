@@ -89,3 +89,6 @@ def build_analysis_pipeline(analysis_context):
     # Add stdout stream printing for debugging, tuning.
     from aminer.events import StreamPrinterEventHandler
     anomaly_event_handlers.append(StreamPrinterEventHandler(analysis_context))
+
+    from aminer.events import KafkaEventHandler
+    anomaly_event_handlers.append(KafkaEventHandler(analysis_context, 'test_topic', {'bootstrap_servers': ['localhost:9092'], 'api_version': (2, 0, 1)}))
