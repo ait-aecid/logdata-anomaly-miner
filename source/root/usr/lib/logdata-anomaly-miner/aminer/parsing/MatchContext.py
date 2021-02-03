@@ -77,7 +77,7 @@ class DebugMatchContext(MatchContext):
         result += '  Shortest unmatched data was %s\n' % repr(self.shortest_unmatched_data)
         return result
 
-    def getshortest_unmatched_data(self):
+    def get_shortest_unmatched_data(self):
         """
         Get shortest match_data found while updating the internal state.
         This is useful to find out where the parsing process has terminated.
