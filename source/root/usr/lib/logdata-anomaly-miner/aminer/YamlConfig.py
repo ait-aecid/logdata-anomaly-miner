@@ -680,7 +680,7 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                             options[key] = int(val)
                         except:  # skipcq: FLK-E722
                             pass
-                    ctx = func(analysis_context.aminer_config, item['topic'], options)
+                    ctx = func(analysis_context, item['topic'], options)
                 if ctx is None:
                     ctx = func(analysis_context)
                 if item['json'] is True or item['type'].name == 'KafkaEventHandler':
