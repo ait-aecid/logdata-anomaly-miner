@@ -9,12 +9,12 @@
             'type': 'boolean',
             'default': False
         },
-        'AMinerUser': {
+        'AminerUser': {
             'required': False,
             'type': 'string',
             'default': 'aminer'
         },
-        'AMinerGroup': {
+        'AminerGroup': {
             'required': False,
             'type': 'string',
             'default': 'aminer'
@@ -27,6 +27,11 @@
             'required': False,
             'type': 'string',
             'default': '/var/lib/aminer'
+        },
+        'Core.LogDir': {
+            'required': False,
+            'type': 'string',
+            'default': '/var/lib/aminer/log'
         },
         'Core.PersistencePeriod': {
             'required': False,
@@ -46,7 +51,7 @@
         'MailAlerting.SubjectPrefix': {
             'required': False,
             'type': 'string',
-            'default': 'AMiner Alerts:'
+            'default': 'aminer Alerts:'
         },
         'MailAlerting.AlertGraceTime': {
             'required': False,

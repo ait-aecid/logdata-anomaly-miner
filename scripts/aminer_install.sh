@@ -3,7 +3,7 @@
 # if set to 1 this installer will delete the 
 # source directory after installation
 DELDIR=0
-BRANCH="master"
+BRANCH="main"
 URL="https://github.com/ait-aecid/logdata-anomaly-miner.git"
 
 

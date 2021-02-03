@@ -17,7 +17,7 @@ import time
 import copy
 import logging
 
-from aminer import AMinerConfig
+from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input import AtomHandlerInterface
 from aminer.util import TimeTriggeredComponentInterface
@@ -78,7 +78,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
         # Loads the persistence
         PersistenceUtil.add_persistable_component(self)
-        self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
+        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
 
         # Imports the persistence
@@ -278,12 +278,12 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     def do_timer(self, trigger_time):
         """Check if current ruleset should be persisted."""
         if self.next_persist_time is None:
-            return self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
+            return self.aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
         if delta <= 0:
             self.do_persist()
-            delta = self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
+            delta = self.aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
         return delta
 
     def do_persist(self):
@@ -304,13 +304,13 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             following_module.do_persist()
 
         self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-            AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+            AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def add_following_modules(self, following_module):
         """Add the given Module to the following module list."""
         self.following_modules.append(following_module)
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug(
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(
             '%s added following module %s.', self.__class__.__name__, following_module.__class__.__name__)
 
     def init_values(self, current_index):
@@ -351,10 +351,10 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     self.values[current_index][var_index].append(log_atom.parser_match.get_match_dictionary()[var_key].match_string)
 
         # Reduce the numbers of entries in the value_list
-        if len(self.variable_key_list[current_index]) > 0 and len([i for i in self.check_variables[current_index] if i]) > 0:
-            if len(self.values[current_index][self.check_variables[current_index].index(True)]) > self.max_num_vals:
-                for var_index in range(len(self.variable_key_list[current_index])):
-                    # Skips the variable if check_variable is False
-                    if not self.check_variables[current_index][var_index]:
-                        continue
-                    self.values[current_index][var_index] = self.values[current_index][var_index][-self.min_num_vals:]
+        if len(self.variable_key_list[current_index]) > 0 and len([i for i in self.check_variables[current_index] if i]) > 0 and \
+                len(self.values[current_index][self.check_variables[current_index].index(True)]) > self.max_num_vals:
+            for var_index in range(len(self.variable_key_list[current_index])):
+                # Skips the variable if check_variable is False
+                if not self.check_variables[current_index][var_index]:
+                    continue
+                self.values[current_index][var_index] = self.values[current_index][var_index][-self.min_num_vals:]

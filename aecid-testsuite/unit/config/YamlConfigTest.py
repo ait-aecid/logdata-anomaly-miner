@@ -2,7 +2,7 @@ import unittest
 import importlib
 import yaml
 import sys
-import aminer.AMinerConfig as AMinerConfig
+import aminer.AminerConfig as AminerConfig
 from datetime import datetime
 from aminer.AnalysisChild import AnalysisContext
 from aminer.analysis.AtomFilters import SubhandlerFilter
@@ -370,11 +370,11 @@ class YamlConfigTest(TestBase):
         spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
-        aminer_config.load_yaml('demo/AMiner/demo-config.yml')
+        aminer_config.load_yaml('demo/aminer/demo-config.yml')
         yml_context = AnalysisContext(aminer_config)
         yml_context.build_analysis_pipeline()
 
-        aminer_config = AMinerConfig.load_config('demo/AMiner/demo-config.py')
+        aminer_config = AminerConfig.load_config('demo/aminer/demo-config.py')
         py_context = AnalysisContext(aminer_config)
         py_context.build_analysis_pipeline()
 
@@ -411,7 +411,7 @@ class YamlConfigTest(TestBase):
         del yml_registered_components_by_name['AtomFilter']
 
         self.assertEqual(yml_config_properties, py_context.aminer_config.config_properties)
-        # there actually is no easy way to compare AMiner components as they do not implement the __eq__ method.
+        # there actually is no easy way to compare aminer components as they do not implement the __eq__ method.
         self.assertEqual(len(yml_registered_components), len(py_registered_components))
         for i in range(2, len(yml_registered_components)):
             self.assertEqual(type(yml_registered_components[i]), type(py_registered_components[i]))

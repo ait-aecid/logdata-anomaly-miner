@@ -13,7 +13,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import logging
-from aminer import AMinerConfig
+from aminer import AminerConfig
 
 
 class MatchElement:
@@ -29,7 +29,7 @@ class MatchElement:
         """
         if (not path) and children:
             msg = "Anonymous match may not have children"
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         self.path = path
         self.match_string = match_string

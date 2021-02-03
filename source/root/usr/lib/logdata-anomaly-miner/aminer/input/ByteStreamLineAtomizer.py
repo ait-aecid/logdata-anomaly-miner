@@ -13,7 +13,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import logging
-from aminer import AMinerConfig
+from aminer import AminerConfig
 from aminer.input.LogAtom import LogAtom
 from aminer.input import StreamAtomizer
 from aminer.parsing import MatchContext
@@ -128,7 +128,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
         """Dispatch the data using the appropriate handlers. Also clean or set lastUnconsumed fields depending on outcome of dispatching."""
         type(self).COUNTER = type(self).COUNTER + 1
         if self.COUNTER % 1000 == 0 and self.COUNTER != 0:
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info('%d log atoms were processed totally.', self.COUNTER)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info('%d log atoms were processed totally.', self.COUNTER)
         was_consumed_flag = False
         if not self.atom_handler_list:
             was_consumed_flag = True

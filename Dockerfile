@@ -30,7 +30,9 @@ RUN apt-get update && apt-get install -y \
         python3-scipy \
         python3-kafka \
         python3-cerberus \
-        python3-yaml 
+        python3-yaml \
+        python3-pylibacl \
+        libacl1-dev
 
 # Copy logdata-anomaly-miner-sources
 ADD source/root/usr/lib/logdata-anomaly-miner /usr/lib/logdata-anomaly-miner
@@ -52,8 +54,11 @@ RUN ln -s /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerr
 	&& ln -s /usr/lib/python3/dist-packages/pytz /usr/lib/logdata-anomaly-miner/pytz \
 	&& ln -s /usr/lib/python3/dist-packages/dateutil /usr/lib/logdata-anomaly-miner/dateutil \
 	&& ln -s /usr/lib/python3/dist-packages/six.py /usr/lib/logdata-anomaly-miner/six.py \
-	&& useradd -ms /usr/sbin/nologin aminer && mkdir /var/lib/aminer && mkdir /etc/aminer \
+	&& useradd -ms /usr/sbin/nologin aminer && mkdir -p /var/lib/aminer/logs && mkdir /etc/aminer \
+        && chown aminer.aminer -R /var/lib/aminer \
         && chmod 0755 /aminerwrapper.sh
+
+RUN PACK=$(find /usr/lib/python3/dist-packages -name posix1e.cpython\*.so) && FILE=$(echo $PACK | awk -F '/' '{print $NF}') ln -s $PACK /usr/lib/logdata-anomaly-miner/$FILE
 
 USER aminer
 WORKDIR /home/aminer

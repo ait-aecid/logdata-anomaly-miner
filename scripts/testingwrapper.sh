@@ -19,12 +19,12 @@ case "$1" in
 		./${1}.sh ${*:2}
 		exit $?
 		;;
-	runAMinerDemo)
+	runAminerDemo)
 		cd $TESTDIR
 		./${1}.sh ${*:2}
 		exit $?
 		;;
-	runAMinerIntegrationTest)
+	runAminerIntegrationTest)
 		cd $TESTDIR
 		./${1}.sh ${*:2}
 		exit $?
@@ -57,13 +57,13 @@ case "$1" in
                 ./runSuspendModeTest.sh
                 ./runUnittests.sh
                 ./runRemoteControlTest.sh
-                ./runAMinerDemo.sh demo/AMiner/demo-config.py
-                ./runAMinerDemo.sh demo/AMiner/jsonConverterHandler-demo-config.py
-                ./runAMinerDemo.sh demo/AMiner/template_config.py
-                ./runAMinerDemo.sh demo/AMiner/template_config.yml
-                ./runAMinerDemo.sh demo/AMiner/demo-config.yml
-                ./runAMinerIntegrationTest.sh aminerIntegrationTest.sh config.py
-                ./runAMinerIntegrationTest.sh aminerIntegrationTest2.sh config21.py config22.py
+                ./runAminerDemo.sh demo/aminer/demo-config.py
+                ./runAminerDemo.sh demo/aminer/jsonConverterHandler-demo-config.py
+                ./runAminerDemo.sh demo/aminer/template_config.py
+                ./runAminerDemo.sh demo/aminer/template_config.yml
+                ./runAminerDemo.sh demo/aminer/demo-config.yml
+                ./runAminerIntegrationTest.sh aminerIntegrationTest.sh config.py
+                ./runAminerIntegrationTest.sh aminerIntegrationTest2.sh config21.py config22.py
                 ./runGettingStarted.sh
                 ./runTryItOut.sh
                 ./runCoverageTests.sh
@@ -74,8 +74,8 @@ case "$1" in
 		exit 0
 		;;
 	*)
-		echo "Usage: [ ALL | SHELL | runSuspendModeTest | runUnittests | runAMinerDemo "
-		echo "         runAMinerIntegrationTest | runCoverageTests | runRemoteControlTest | runTryItOut | runGettingStarted] <options>"
+		echo "Usage: [ ALL | SHELL | runSuspendModeTest | runUnittests | runAminerDemo "
+		echo "         runAminerIntegrationTest | runCoverageTests | runRemoteControlTest | runTryItOut | runGettingStarted] <options>"
 		exit 1
 		;;
         
