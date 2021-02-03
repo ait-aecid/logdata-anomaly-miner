@@ -26,7 +26,7 @@ class KafkaEventHandler(EventHandlerInterface):
         self.options = options
         self.topic = topic
         self.producer = None
-        self.kafkaImported = False
+        self.kafka_imported = False
 
     def receive_event(self, event_type, event_message, sorted_log_lines, event_data, log_atom, event_source):
         """Receive information about a detected event in json format."""
@@ -36,12 +36,12 @@ class KafkaEventHandler(EventHandlerInterface):
         component_name = self.analysis_context.get_name_by_component(event_source)
         if component_name in self.analysis_context.suppress_detector_list:
             return True
-        if self.kafkaImported is False:
+        if self.kafka_imported is False:
             try:
                 from kafka import KafkaProducer
                 from kafka.errors import KafkaError
                 self.producer = KafkaProducer(**self.options, value_serializer=lambda v: v.encode())
-                self.kafkaImported = True
+                self.kafka_imported = True
             except ImportError:
                 msg = 'Kafka module not found.'
                 logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
