@@ -74,7 +74,7 @@ def secure_open_log_directory(log_directory_name=None, flags=0):
     """Open the base log directory in a secure way."""
     global log_dir_fd  # skipcq: PYL-W0603
     global log_dir_path  # skipcq: PYL-W0603
-    if log_dir_path is None and (log_directory_name is None or not log_directory_name.startswith(b'/')):
+    if log_dir_path is None and (log_directory_name is None or not log_directory_name.startswith('/')):
         msg = 'Secure open on relative path not supported'
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)

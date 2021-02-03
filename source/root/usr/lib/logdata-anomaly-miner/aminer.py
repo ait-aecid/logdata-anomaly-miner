@@ -35,12 +35,19 @@ import logging
 import shutil
 import warnings
 import argparse
+import stat
+from pwd import getpwnam
+from grp import getgrnam
 
 # As site packages are not included, define from where we need to execute code before loading it.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
 from aminer import AminerConfig  # skipcq: FLK-E402
 from aminer.util.StringUtil import colflame, flame, supports_color  # skipcq: FLK-E402
 from aminer.util.PersistenceUtil import clear_persistence, copytree  # skipcq: FLK-E402
+from aminer.util import SecureOSFunctions  # skipcq: FLK-E402
+from aminer.util import decode_string_as_byte_string  # skipcq: FLK-E402
+from aminer.AnalysisChild import AnalysisChild  # skipcq: FLK-E402
+from aminer.input.LogStream import FileLogDataResource, UnixSocketLogDataResource  # skipcq: FLK-E402
 from metadata import __version_string__  # skipcq: FLK-E402
 
 
@@ -53,12 +60,10 @@ def run_analysis_child(aminer_config, program_name):
     logging.getLogger(AminerConfig.REMOTE_CONTROL_LOG_NAME).info('aminer started.')
     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info('aminer started.')
     persistence_dir_name = aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_DIR, AminerConfig.DEFAULT_PERSISTENCE_DIR)
-    from aminer.util import SecureOSFunctions
     if isinstance(persistence_dir_name, str):
         persistence_dir_name = persistence_dir_name.encode()
     persistence_dir_fd = SecureOSFunctions.secure_open_base_directory(persistence_dir_name, os.O_RDONLY | os.O_DIRECTORY | os.O_PATH)
     stat_result = os.fstat(persistence_dir_fd)
-    import stat
     if ((not stat.S_ISDIR(stat_result.st_mode)) or ((stat_result.st_mode & stat.S_IRWXU) != 0o700) or (
             stat_result.st_uid != os.getuid()) or (stat_result.st_gid != os.getgid())):
         msg = 'FATAL: persistence directory "%s" has to be owned by analysis process (uid %d!=%d, gid %d!=%d) and have access mode 0700 ' \
@@ -74,7 +79,6 @@ def run_analysis_child(aminer_config, program_name):
         print(msg, file=sys.stderr)
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
 
-    from aminer.AnalysisChild import AnalysisChild
     child = AnalysisChild(program_name, aminer_config)
     # This function call will only return on error or signal induced normal termination.
     child_return_status = child.run_analysis(3)
@@ -122,7 +126,7 @@ def initialize_loggers(aminer_config, aminer_user_id, aminer_grp_id):
               file=sys.stderr)
         sys.exit(1)
 
-    log_dir_fd = SecureOSFunctions.secure_open_base_directory(log_dir, os.O_RDONLY | os.O_DIRECTORY | os.O_PATH)
+    log_dir_fd = SecureOSFunctions.secure_open_log_directory(log_dir, os.O_RDONLY | os.O_DIRECTORY | os.O_PATH)
     rc_logger = logging.getLogger(AminerConfig.REMOTE_CONTROL_LOG_NAME)
     rc_logger.setLevel(logging.DEBUG)
     remote_control_log_file = aminer_config.config_properties.get(
@@ -254,10 +258,8 @@ def main():
     child_group_id = -1
     try:
         if child_user_name is not None:
-            from pwd import getpwnam
             child_user_id = getpwnam(child_user_name).pw_uid
         if child_group_name is not None:
-            from grp import getgrnam
             child_group_id = getgrnam(child_user_name).gr_gid
     except:  # skipcq: FLK-E722
         print('Failed to resolve %s or %s' % (AminerConfig.KEY_AMINER_USER, AminerConfig.KEY_AMINER_GROUP), file=sys.stderr)
@@ -347,8 +349,6 @@ def main():
 
     # Start importing of aminer specific components after reading of "config.py" to allow replacement of components via sys.path
     # from within configuration.
-    from aminer.util import SecureOSFunctions
-    from aminer.util import decode_string_as_byte_string
     log_sources_list = aminer_config.config_properties.get(AminerConfig.KEY_LOG_SOURCES_LIST)
     if (log_sources_list is None) or not log_sources_list:
         msg = '%s: %s not defined' % (program_name, AminerConfig.KEY_LOG_SOURCES_LIST)
@@ -363,10 +363,8 @@ def main():
         log_resource_name = decode_string_as_byte_string(log_resource_name)
         log_resource = None
         if log_resource_name.startswith(b'file://'):
-            from aminer.input.LogStream import FileLogDataResource
             log_resource = FileLogDataResource(log_resource_name, -1)
         elif log_resource_name.startswith(b'unix://'):
-            from aminer.input.LogStream import UnixSocketLogDataResource
             log_resource = UnixSocketLogDataResource(log_resource_name, -1)
         else:
             msg = 'Unsupported schema in %s: %s' % (AminerConfig.KEY_LOG_SOURCES_LIST, repr(log_resource_name))
