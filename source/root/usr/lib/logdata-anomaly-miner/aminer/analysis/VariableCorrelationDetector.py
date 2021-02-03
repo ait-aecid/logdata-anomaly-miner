@@ -66,7 +66,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
             self.event_type_detector.min_num_vals = max(num_init, num_update)
-        if self.event_type_detector.max_num_vals <= max(num_init, num_update) + 500:
+        if self.event_type_detector.max_num_vals < max(num_init, num_update) + 500:
             msg = 'Changed the parameter max_num_vals of the ETD from %s to %s to prevent errors in the execution of the VCD' % (
                     self.event_type_detector.max_num_vals, max(num_init, num_update) + 500)
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
