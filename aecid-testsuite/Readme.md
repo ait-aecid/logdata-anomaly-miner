@@ -4,6 +4,45 @@ This project includes all kinds of tests for *AECID* and *aminer*. We used Docke
 The aminer was successfully tested with all tests in **Ubuntu 20.04** and **Debian Bullseye**.
 In order to execute test classes the current path must be the *logdata-anomaly-miner* directory and the project structure must be as following:
 
+## Guidelines for testing
+
+To provide the best quality of code possible we use the guidelines described in this chapter for all unittests.
+
+Before writing the unittests, a complete index should be created with all test cases for the component. This index must be reviewed with at least another person who knows the component.
+
+If the rules are followed, a reviewer should be able to see very clearly:
+  * What is being tested?
+  * Which INPUT is used for testing?
+  * Which OUTPUT was expected?
+
+### General Rules
+
+- Unittest classes must be named \<tested class name\>Test.py
+- Parameter initialization: every test has to initialize it's own values to prevent unintentional changes in different test cases.
+- Input values must not be initialized in setup methods or as global variables.
+- It should be clear what input an unittest uses and what output is expected.
+- An unittest may only fullfill one case and no more.
+- Wherever possible, a test should only deliver an assert, unless the state that arises in the test is explicitly checked.
+- Unittests must fullfill following naming pattern (for every test class the numbering is reset): test\<#number of test\>\_\<method name\>\_\<input value description\>
+- Unittests must contain a description in form of a docstring in which the structure of the test, tested input value and expected output are described.
+- Unittests must not have any dependencies with each other and any global changes must be reset after every test case. Every test case must run independently from other tests.
+- Unittest cases must only contain the tested components and only necessary input values.
+- Cases must test only one component. Dependencies to other classes or handlers must be solved by dummy classes without functionality.
+- Test cases must be as short as possible. If test cases fail it should be clear what the error is.
+- Test code should be readable to be able to see the input and expected output values.
+- Tests should be as simple as possible. If this is not possible, we should think again about the structure of our code. This
+  can be a clear indication that the code is not clear and simple.
+- Helper functions should also be tested separately.
+
+### Rules for input values
+
+- All or as many as possible / meaningful parameters must be tested. If it is not possible to test all cases at least edge cases must be tested.
+- Correlations between parameters must be examined and combinations must be tested extensively.
+- Expected error cases must be tested.
+- All paths that lead to exceptions must be tested separately.
+- Different return values must also be tested.
+- Inputs must not be random or time based. Unittests must always lead to the same expected outputs.
+
 ## Unit-Tests
 
 ```logdata-anomaly-miner/
