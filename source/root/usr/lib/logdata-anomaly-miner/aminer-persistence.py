@@ -1,7 +1,6 @@
 #!/usr/bin/python3 -BbbEIsSttW all
 import sys
 import os
-import shutil
 import re
 import argparse
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']

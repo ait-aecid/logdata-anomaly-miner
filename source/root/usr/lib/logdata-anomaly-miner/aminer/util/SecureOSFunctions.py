@@ -22,8 +22,10 @@ from aminer import AminerConfig
 
 base_dir_fd = None
 tmp_base_dir_fd = None
+log_dir_fd = None
 base_dir_path = None
 tmp_base_dir_path = None
+log_dir_path = None
 
 
 def secure_open_base_directory(directory_name=None, flags=0):
@@ -64,6 +66,39 @@ def close_base_directory():
             tmp_base_dir_fd = None
     except OSError as e:
         msg = 'Could not close the base directory. Error: %s' % e
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+        raise Exception(msg)
+
+
+def secure_open_log_directory(log_directory_name=None, flags=0):
+    """Open the base log directory in a secure way."""
+    global log_dir_fd  # skipcq: PYL-W0603
+    global log_dir_path  # skipcq: PYL-W0603
+    if log_dir_path is None and (log_directory_name is None or not log_directory_name.startswith(b'/')):
+        msg = 'Secure open on relative path not supported'
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+        raise Exception(msg)
+    if log_dir_path is None and (flags & os.O_DIRECTORY) == 0:
+        msg = 'Opening directory but O_DIRECTORY flag missing'
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+        raise Exception(msg)
+    if log_dir_fd is None:
+        log_dir_fd = os.open(log_directory_name, flags | os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY)
+        log_dir_path = log_directory_name
+    return log_dir_fd
+
+
+def close_log_directory():
+    """Close the base directory at program shutdown."""
+    global log_dir_fd  # skipcq: PYL-W0603
+    global log_dir_path  # skipcq: PYL-W0603
+    try:
+        if log_dir_fd is not None:
+            os.close(log_dir_fd)
+            log_dir_fd = None
+            log_dir_path = None
+    except OSError as e:
+        msg = 'Could not close the base log directory. Error: %s' % e
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
 
