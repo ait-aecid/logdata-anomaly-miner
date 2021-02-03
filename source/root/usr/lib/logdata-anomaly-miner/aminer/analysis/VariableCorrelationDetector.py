@@ -564,8 +564,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                 message = 'New values appeared after the %s-th line in correlation(s) with EventID - EventPath: %s - %s' % (
                     self.event_type_detector.total_records, event_index, self.event_type_detector.longest_path[event_index])
                 confidence = 0
-                total_correlations = len([None for _ in self.rel_list[event_index][pos_var_cor_index][0]]) + len([None for _ in 
-                        self.rel_list[event_index][pos_var_cor_index][1]])
+                total_correlations = len([None for _ in self.rel_list[event_index][pos_var_cor_index][0]]) + len([None for _ in
+                                     self.rel_list[event_index][pos_var_cor_index][1]])
                 sorted_log_lines = []
                 event_data = {'EventIndex': event_index}
                 affected_log_atom_paths = []
@@ -1018,8 +1018,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                         message = 'New values appeared after the %s-th line in correlation(s) with EventID - EventPath: %s - %s' % (
                             self.event_type_detector.total_records, event_index, self.event_type_detector.longest_path[event_index])
                         confidence = 0
-                        total_correlations = len([None for _ in self.w_rel_list[event_index][pos_var_cor_index][0]]) + len([None for _ in 
-                                self.w_rel_list[event_index][pos_var_cor_index][1]])
+                        total_correlations = len([None for _ in self.w_rel_list[event_index][pos_var_cor_index][0]]) + len([None for _ in
+                                             self.w_rel_list[event_index][pos_var_cor_index][1]])
                         sorted_log_lines = []
                         event_data = {'EventIndex': event_index}
                         affected_log_atom_paths = []
@@ -1181,7 +1181,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
             for val in occurrences1:
                 if abs(occurrences1[val] / sum(occurrences1.values()) -
                         occurrences2[val] / max(1, sum(occurrences2.values()))) > self.max_dist_rule_distr:
-                    self.w_rel_confidences[event_index][pos_var_cor_index][cor_direction][value1].append(abs(occurrences1[val] / 
+                    self.w_rel_confidences[event_index][pos_var_cor_index][cor_direction][value1].append(abs(occurrences1[val] /
                             sum(occurrences1.values()) - occurrences2[val] / max(1, sum(occurrences2.values()))))
                     self.w_rel_confidences[event_index][pos_var_cor_index][cor_direction][value1] = self.w_rel_confidences[
                             event_index][pos_var_cor_index][cor_direction][value1][-(self.num_bt-self.min_successes_bt+1):]
@@ -1525,6 +1525,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, self.log_atom, self)
 
     def print_failed_wrel_test(self, event_index, pos_var_cor_index, cor_direction, value1):
+        """Print the correlations which failed in a test step for the method 'weighted relations'."""
         cor_direction_neg = 0
         if cor_direction == 0:
             cor_direction_neg = 1
@@ -1559,6 +1560,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                 'Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, self.log_atom, self)
 
     def print_failed_wrel_update(self, event_index, pos_var_cor_index, cor_direction, value1):
+        """Print the correlations which failed in an update step for the method 'weighted relations'."""
         cor_direction_neg = 0
         if cor_direction == 0:
             cor_direction_neg = 1
