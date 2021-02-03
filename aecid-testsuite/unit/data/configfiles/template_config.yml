@@ -59,3 +59,7 @@ EventHandlers:
 
         - id: syslog
           type: SyslogWriterEventHandler
+
+        - id: kafka
+          type: KafkaEventHandler
+          topic: test_topic
