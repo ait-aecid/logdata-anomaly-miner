@@ -13,8 +13,8 @@ config_properties['LogResourceList'] = ['file:///tmp/syslog']
 
 # Define the uid/gid of the process that runs the calculation
 # after opening the log files:
-config_properties['AMinerUser'] = 'aminer'
-config_properties['AMinerGroup'] = 'aminer'
+config_properties['AminerUser'] = 'aminer'
+config_properties['AminerGroup'] = 'aminer'
 
 # Define the path, where aminer will listen for incoming remote
 # control connections. When missing, no remote control socket
@@ -30,9 +30,9 @@ config_properties['AMinerGroup'] = 'aminer'
 # config_properties['AnalysisConfigFile'] = 'analysis.py'
 
 # Read and store information to be used between multiple invocations
-# of AMiner in this directory. The directory must only be accessible
-# to the 'AMinerUser' but not group/world readable. On violation,
-# AMiner will refuse to start. When undefined, '/var/lib/aminer'
+# of aminer in this directory. The directory must only be accessible
+# to the 'AminerUser' but not group/world readable. On violation,
+# aminer will refuse to start. When undefined, '/var/lib/aminer'
 # is used.
 config_properties['Core.PersistenceDir'] = '/tmp/lib/aminer'
 
@@ -44,8 +44,8 @@ config_properties['MailAlerting.TargetAddress'] = 'root@localhost'
 # be used.
 config_properties['MailAlerting.FromAddress'] = 'root@localhost'
 # Define, which text should be prepended to the standard aminer
-# subject. Defaults to "AMiner Alerts:"
-config_properties['MailAlerting.SubjectPrefix'] = 'AMiner Alerts:'
+# subject. Defaults to "aminer Alerts:"
+config_properties['MailAlerting.SubjectPrefix'] = 'aminer Alerts:'
 # Define a grace time after startup before aminer will react to
 # an event and send the first alert e-mail. Defaults to 0 (any
 # event can immediately trigger alerting).
@@ -77,7 +77,7 @@ config_properties['LogPrefix'] = 'Original log line: '
 def build_analysis_pipeline(analysis_context):
     """
     Define the function to create pipeline for parsing the log data.
-    It has also to define an AtomizerFactory to instruct AMiner how to process incoming data streams to create log atoms from them.
+    It has also to define an AtomizerFactory to instruct aminer how to process incoming data streams to create log atoms from them.
     """
     # Build the parsing model:
     from aminer.parsing import AnyByteDataModelElement

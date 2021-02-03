@@ -13,7 +13,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import logging
-from aminer import AMinerConfig
+from aminer import AminerConfig
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing import ModelElementInterface
 
@@ -27,7 +27,7 @@ class FixedDataModelElement(ModelElementInterface):
     def __init__(self, element_id, fixed_data):
         if not isinstance(fixed_data, bytes):
             msg = 'fixedData has to be byte string'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         self.element_id = element_id
         self.fixed_data = fixed_data

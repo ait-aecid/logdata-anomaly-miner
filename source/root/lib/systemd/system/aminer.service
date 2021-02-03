@@ -6,9 +6,9 @@ Documentation=man:aminer(1)
 Type=simple
 ExecStartPre=touch /var/log/aminer.log
 ExecStartPre=chown aminer:aminer /var/log/aminer.log
-ExecStart=/usr/lib/logdata-anomaly-miner/aminer.py --Config /etc/aminer/config.yml
+ExecStart=/usr/lib/logdata-anomaly-miner/aminer.py --config /etc/aminer/config.yml
 KillMode=control-group
-# Write everything to /dev/null: if AMiner is misconfigured, it
+# Write everything to /dev/null: if aminer is misconfigured, it
 # may detect anonamies in its own log data, thus creating a logging
 # loop. You may prefer logging to journal only, which needs journald
 # to be reconfigured with "ForwardToSyslog=false".

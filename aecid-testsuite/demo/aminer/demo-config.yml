@@ -1,5 +1,7 @@
 LearnMode: False
 
+Core.LogDir: '/tmp/lib/aminer/log'
+
 Core.PersistenceDir: '/tmp/lib/aminer'
 
 Core.PersistencePeriod: 600
@@ -11,7 +13,7 @@ MailAlerting.TargetAddress: 'root@localhost'
 
 MailAlerting.FromAddress: 'root@localhost'
 
-MailAlerting.SubjectPrefix: 'AMiner Alerts:'
+MailAlerting.SubjectPrefix: 'aminer Alerts:'
 
 MailAlerting.AlertGraceTime: 0
 

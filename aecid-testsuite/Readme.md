@@ -9,7 +9,7 @@ In order to execute test classes the current path must be the *logdata-anomaly-m
 ```logdata-anomaly-miner/
 ├── aminer
 │    ├── __init__.py
-│    ├── AMinerConfig.py
+│    ├── AminerConfig.py
 │    ├── AnalysisChild.py
 │    ├── analysis
 │        ├── ...
@@ -116,10 +116,10 @@ The created mails under */var/spool/mail/root* should be deleted.
 ## Integration Testing:
 To prepare every test the associated configuration file(s) first must be copied to */tmp*. The test-scripts **MUST NOT** be run as root. In addition, **declarations.sh** must be in the **same folder** as the integration test being run.
 
-Please note that the script needs root privileges for running the *AMiner* and all **persistent data is deleted** from */tmp/lib/aminer*!
+Please note that the script needs root privileges for running the *aminer* and all **persistent data is deleted** from */tmp/lib/aminer*!
 
 ### Integration Test 1:
-In this integration test the learning phase of the AMiner is tested. Multiple log-lines are used to be learned and checked. Some analysis components are used and all other lines are handled by the *SimpleUnparsedAtomHandler*. The Events are received by a *DefaultMailNotificationEventHandler* and a *StreamPrinterEventHandler*. Other lines are used to check if the pathes were learned and persisted in the persistence directory of the *AMiner*. In this test case the *SubhandlerFilter* is suitable, because only one file, */tmp/syslog*, is monitored.
+In this integration test the learning phase of the aminer is tested. Multiple log-lines are used to be learned and checked. Some analysis components are used and all other lines are handled by the *SimpleUnparsedAtomHandler*. The Events are received by a *DefaultMailNotificationEventHandler* and a *StreamPrinterEventHandler*. Other lines are used to check if the pathes were learned and persisted in the persistence directory of the *aminer*. In this test case the *SubhandlerFilter* is suitable, because only one file, */tmp/syslog*, is monitored.
 
 Following command makes the script executeable:
   ```
@@ -145,7 +145,7 @@ Following command makes the script executeable:
   ```
 
 ## Demo:
-The goal of this demo is to create a representative output of all the different *analysis*-components of the *AMiner*. Every component has its own comment section, which starts with **:<<Comment** and ends with **Comment**. Just comment these two lines with an **'#'** to use the wished component.
+The goal of this demo is to create a representative output of all the different *analysis*-components of the *aminer*. Every component has its own comment section, which starts with **:<<Comment** and ends with **Comment**. Just comment these two lines with an **'#'** to use the wished component.
 
 Following command makes the script executeable:
   ```
@@ -228,9 +228,9 @@ For better comparison every test uses the same input logfile.
 
 The results of these tests are a CSV file with measurements of the ressource usage of the system and the number of processed log lines in a predefined timeframe. For better documentation the name of the CSV file must contain the exact name of the computer, CPU and disk in the first line.
 
-Before these tests can be run, it is necessary to copy the provided *AnalysisChild* and *ByteStreamLineAtomizer* classes into the *AMiner* installation folder. These classes are adapted to contain a counter of every log line processed and are necessary to be able to evaluate the results.
+Before these tests can be run, it is necessary to copy the provided *AnalysisChild* and *ByteStreamLineAtomizer* classes into the *aminer* installation folder. These classes are adapted to contain a counter of every log line processed and are necessary to be able to evaluate the results.
 
-The *AMiner* requires a config file under */tmp/performance-config.py*. As there are multiple config files for every of the three tests, they must be renamed to *performance-config.py* in the */tmp* folder.
+The *aminer* requires a config file under */tmp/performance-config.py*. As there are multiple config files for every of the three tests, they must be renamed to *performance-config.py* in the */tmp* folder.
 
 Following commands make the scripts executeable:
   ```

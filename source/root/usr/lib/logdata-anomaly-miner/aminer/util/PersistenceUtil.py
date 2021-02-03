@@ -19,7 +19,7 @@ import tempfile
 import shutil
 import sys
 
-from aminer import AMinerConfig
+from aminer import AminerConfig
 from aminer.util import SecureOSFunctions
 from aminer.util import JsonUtil
 
@@ -44,7 +44,7 @@ def open_persistence_file(file_name, flags):
         return fd
     except OSError as openOsError:
         if ((flags & os.O_CREAT) == 0) or (openOsError.errno != errno.ENOENT):
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(openOsError)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(openOsError)
             raise openOsError
     create_missing_directories(file_name)
 
@@ -55,7 +55,7 @@ def replace_persistence_file(file_name, new_file_handle):
         os.unlink(file_name, dir_fd=SecureOSFunctions.secure_open_base_directory())
     except OSError as openOsError:
         if openOsError.errno != errno.ENOENT:
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(openOsError)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(openOsError)
             raise openOsError
 
     tmp_file_name = os.readlink('/proc/self/fd/%d' % new_file_handle)
@@ -85,7 +85,7 @@ def load_json(file_name):
         os.close(persistence_file_handle)
     except OSError as openOsError:
         if openOsError.errno != errno.ENOENT:
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(openOsError)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(openOsError)
             raise openOsError
         return None
 
@@ -94,7 +94,7 @@ def load_json(file_name):
         result = JsonUtil.load_json(persistence_data)
     except ValueError as valueError:
         msg = 'Corrupted data in %s' % file_name, valueError
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
     return result
 
@@ -115,9 +115,8 @@ def create_missing_directories(file_name):
     """Create missing persistence directories."""
     # Find out, which directory is missing by stating our way up.
     dir_name_length = file_name.rfind('/')
-    if dir_name_length > 0:
-        if not os.path.exists(file_name[:dir_name_length]):
-            os.makedirs(file_name[:dir_name_length])
+    if dir_name_length > 0 and not os.path.exists(file_name[:dir_name_length]):
+        os.makedirs(file_name[:dir_name_length])
 
 
 def clear_persistence(persistence_dir_name):
@@ -128,15 +127,15 @@ def clear_persistence(persistence_dir_name):
         file_path = os.path.join(persistence_dir_name, filename)
         try:
             if not os.path.isdir(file_path):
-                msg = 'The AMiner persistence directory should not contain any files.'
+                msg = 'The aminer persistence directory should not contain any files.'
                 print(msg, file=sys.stderr)
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
                 continue
             shutil.rmtree(file_path)
         except OSError as e:
             msg = 'Failed to delete %s. Reason: %s' % (file_path, e)
             print(msg, file=sys.stderr)
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
 
 
 def copytree(src, dst, symlinks=False, ignore=None):

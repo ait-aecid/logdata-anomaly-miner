@@ -19,11 +19,13 @@ from importlib import util
 import logging
 
 KEY_LOG_SOURCES_LIST = 'LogResourceList'
-KEY_AMINER_USER = 'AMinerUser'
-KEY_AMINER_GROUP = 'AMinerGroup'
+KEY_AMINER_USER = 'AminerUser'
+KEY_AMINER_GROUP = 'AminerGroup'
 KEY_ANALYSIS_CONFIG_FILE = 'AnalysisConfigFile'
 KEY_PERSISTENCE_DIR = 'Core.PersistenceDir'
+KEY_LOG_DIR = 'Core.LogDir'
 DEFAULT_PERSISTENCE_DIR = '/var/lib/aminer'
+DEFAULT_LOG_DIR = '/var/lib/aminer/log'
 KEY_PERSISTENCE_PERIOD = 'Core.PersistencePeriod'
 DEFAULT_PERSISTENCE_PERIOD = 600
 KEY_REMOTE_CONTROL_SOCKET_PATH = 'RemoteControlSocket'
@@ -87,7 +89,7 @@ def build_persistence_file_name(aminer_config, *args):
 
 
 def save_config(analysis_context, new_file):
-    """Save the current configuration to a file by using the AMinerRemoteControl."""
+    """Save the current configuration to a file by using the aminerRemoteControl."""
     register_component = 'register_component('
     VAR_ID = 0
     msg = ""
@@ -106,7 +108,7 @@ def save_config(analysis_context, new_file):
             old_len = string.find('\n')
             string = string[:old_len]
             prop = analysis_context.aminer_config.config_properties[config_property]
-            if (string[0] == "'" and string[len(string) - 1] == "'") or (string[0] == '"' and string[len(string) - 1] == '"'):
+            if (string[0] == "'" and string[-1] == "'") or (string[0] == '"' and string[-1] == '"'):
                 prop = "'" + prop + "'"
             if "%s" % string != "%s" % prop:
                 old = old[:pos + len(find_str)] + "%s" % prop + old[pos + len(find_str) + old_len:]
@@ -135,9 +137,9 @@ def save_config(analysis_context, new_file):
             if old_component_name != '"%s"' % name:
                 old = old[:old_component_name_start] + '"%s"' % name + old[old_component_name_end + 1:]
 
-    persistence_dir = analysis_context.aminer_config.config_properties.get(KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR)
+    log_dir = analysis_context.aminer_config.config_properties.get(KEY_LOG_DIR, DEFAULT_LOG_DIR)
     remote_control_log_file = analysis_context.aminer_config.config_properties.get(
-        KEY_REMOTE_CONTROL_LOG_FILE, os.path.join(persistence_dir, DEFAULT_REMOTE_CONTROL_LOG_FILE))
+        KEY_REMOTE_CONTROL_LOG_FILE, os.path.join(log_dir, DEFAULT_REMOTE_CONTROL_LOG_FILE))
     try:
         with open(remote_control_log_file, "r") as logFile:
             logs = logFile.readlines()
@@ -148,7 +150,7 @@ def save_config(analysis_context, new_file):
 
     i = len(logs) - 1
     while i > 0:
-        if "INFO AMiner started." in logs[i]:
+        if "INFO aminer started." in logs[i]:
             logs = logs[i:]
             break
         i = i - 1

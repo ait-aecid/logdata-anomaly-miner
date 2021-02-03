@@ -20,7 +20,7 @@ def get_model():
     ]
 
     model = SequenceModelElement('aminer', [
-        FixedDataModelElement('sname', b'AMiner['),
+        FixedDataModelElement('sname', b'aminer['),
         DecimalIntegerValueModelElement('pid'),
         FixedDataModelElement('s0', b']: '),
         FirstMatchModelElement('msg', type_children)
