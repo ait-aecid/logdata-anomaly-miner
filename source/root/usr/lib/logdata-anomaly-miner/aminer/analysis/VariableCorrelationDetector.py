@@ -54,7 +54,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         # correlation is examined, fourth index states the value of the first variable and the fifth value states the value of the second
         # variable. The content is the number of appearance in the log lines.
         self.w_rel_num_ll_to_vals = []  # List of the number of lines in which the values of the first variable have appeared
-        self.w_rel_bt_results = []  # List for the successes of the binomial test to the values of the first variables
+        self.w_rel_ht_results = []  # List of the results of the homogeneity tests for the binomial test
         self.w_rel_confidences = []  # List for the confidences of the homogeneity tests
 
         # Minimal number of lines of one event type to initialize the correlation rules
@@ -249,7 +249,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
     def do_persist(self):
         """Immediately write persistence data to storage."""
         persistence_data = [self.pos_var_cor, self.pos_var_val, self.discrete_indices, self.update_rules, self.generate_rules,
-                            self.rel_list, self.w_rel_list, self.w_rel_num_ll_to_vals, self.w_rel_bt_results, self.w_rel_confidences]
+                            self.rel_list, self.w_rel_list, self.w_rel_num_ll_to_vals, self.w_rel_ht_results, self.w_rel_confidences]
         PersistenceUtil.store_json(self.persistence_file_name, persistence_data)
 
     def load_persistence_data(self, persistence_data):
@@ -262,7 +262,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         self.rel_list = persistence_data[5]
         self.w_rel_list = persistence_data[6]
         self.w_rel_num_ll_to_vals = persistence_data[7]
-        self.w_rel_bt_results = persistence_data[8]
+        self.w_rel_ht_results = persistence_data[8]
         self.w_rel_confidences = persistence_data[9]
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
@@ -759,9 +759,9 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
     def update_or_test_cor_w_rel(self, event_index):
         """Update or test the w_rel_list."""
         # Initialise the lists for the BT results if necessary
-        if len(self.w_rel_bt_results) < event_index + 1 or self.w_rel_bt_results[event_index] == []:
-            self.w_rel_bt_results += [[] for i in range(event_index + 1 - len(self.w_rel_bt_results))]
-            self.w_rel_bt_results[event_index] = [
+        if len(self.w_rel_ht_results) < event_index + 1 or self.w_rel_ht_results[event_index] == []:
+            self.w_rel_ht_results += [[] for i in range(event_index + 1 - len(self.w_rel_ht_results))]
+            self.w_rel_ht_results[event_index] = [
                 [{i_val: [1] * self.num_bt for i_val in self.w_rel_list[event_index][pos_var_cor_index][0]}, {
                     j_val: [1]*self.num_bt for j_val in self.w_rel_list[event_index][pos_var_cor_index][1]}] for pos_var_cor_index in range(
                     len(self.pos_var_cor[event_index]))]
@@ -839,16 +839,16 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                                         self.w_rel_list[event_index][pos_var_cor_index][0][i_val][j_val] = current_appearance_list[
                                             pos_var_cor_index][0][i_val][j_val]
                                 else:
-                                    self.w_rel_bt_results[event_index][pos_var_cor_index][0][i_val] = self.w_rel_bt_results[event_index][
+                                    self.w_rel_ht_results[event_index][pos_var_cor_index][0][i_val] = self.w_rel_ht_results[event_index][
                                         pos_var_cor_index][0][i_val][1:] + [0]
                                     self.w_rel_confidences[event_index][pos_var_cor_index][0][i_val].append(
                                             0.5 + 1 / len(current_appearance_list[pos_var_cor_index][0][i_val]))
                                     self.w_rel_confidences[event_index][pos_var_cor_index][0][i_val] = self.w_rel_confidences[
                                             event_index][pos_var_cor_index][0][i_val][-(self.num_bt-self.min_successes_bt+1):]
-                                    if sum(self.w_rel_bt_results[event_index][pos_var_cor_index][0][i_val]) < self.min_successes_bt:  # BT
+                                    if sum(self.w_rel_ht_results[event_index][pos_var_cor_index][0][i_val]) < self.min_successes_bt:  # BT
                                         self.print_failed_wrel_update(event_index, pos_var_cor_index, 0, i_val)
                                         del self.w_rel_list[event_index][pos_var_cor_index][0][i_val]
-                                        del self.w_rel_bt_results[event_index][pos_var_cor_index][0][i_val]
+                                        del self.w_rel_ht_results[event_index][pos_var_cor_index][0][i_val]
 
                             # No new values have appeared on the right side. Update the appearance of the relation
                             else:
@@ -863,18 +863,18 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
                                 # Update the bt_results list
                                 if tmp_bool:
-                                    self.w_rel_bt_results[event_index][pos_var_cor_index][0][i_val] = self.w_rel_bt_results[event_index][
+                                    self.w_rel_ht_results[event_index][pos_var_cor_index][0][i_val] = self.w_rel_ht_results[event_index][
                                         pos_var_cor_index][0][i_val][1:] + [1]
                                     for j_val in self.w_rel_list[event_index][pos_var_cor_index][0][i_val]:
                                         self.w_rel_list[event_index][pos_var_cor_index][0][i_val][j_val] += current_appearance_list[
                                             pos_var_cor_index][0][i_val][j_val]
                                 else:
-                                    self.w_rel_bt_results[event_index][pos_var_cor_index][0][i_val] = self.w_rel_bt_results[event_index][
+                                    self.w_rel_ht_results[event_index][pos_var_cor_index][0][i_val] = self.w_rel_ht_results[event_index][
                                         pos_var_cor_index][0][i_val][1:] + [0]
-                                    if sum(self.w_rel_bt_results[event_index][pos_var_cor_index][0][i_val]) < self.min_successes_bt:  # BT
+                                    if sum(self.w_rel_ht_results[event_index][pos_var_cor_index][0][i_val]) < self.min_successes_bt:  # BT
                                         self.print_failed_wrel_update(event_index, pos_var_cor_index, 0, i_val)
                                         del self.w_rel_list[event_index][pos_var_cor_index][0][i_val]
-                                        del self.w_rel_bt_results[event_index][pos_var_cor_index][0][i_val]
+                                        del self.w_rel_ht_results[event_index][pos_var_cor_index][0][i_val]
 
                         # i_val not in self.w_rel_list[event_index][pos_var_cor_index][0]. Therefore test if the rule should be used
                         else:
@@ -883,7 +883,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                                 self.w_rel_list[event_index][pos_var_cor_index][0][i_val] = {}
                                 self.w_rel_num_ll_to_vals[event_index][pos_var_cor_index][0][i_val] = sum(current_appearance_list[
                                     pos_var_cor_index][0][i_val].values())
-                                self.w_rel_bt_results[event_index][pos_var_cor_index][0][i_val] = [1] * self.num_bt
+                                self.w_rel_ht_results[event_index][pos_var_cor_index][0][i_val] = [1] * self.num_bt
                                 self.w_rel_confidences[event_index][pos_var_cor_index][0][i_val] = []
 
                                 # Add the entries for j_val
@@ -917,16 +917,16 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                                         self.w_rel_list[event_index][pos_var_cor_index][1][j_val][i_val] = current_appearance_list[
                                             pos_var_cor_index][1][j_val][i_val]
                                 else:
-                                    self.w_rel_bt_results[event_index][pos_var_cor_index][1][j_val] = self.w_rel_bt_results[event_index][
+                                    self.w_rel_ht_results[event_index][pos_var_cor_index][1][j_val] = self.w_rel_ht_results[event_index][
                                         pos_var_cor_index][1][j_val][1:] + [0]
                                     self.w_rel_confidences[event_index][pos_var_cor_index][1][j_val].append(
                                             0.5 + 1 / len(current_appearance_list[pos_var_cor_index][1][j_val]))
                                     self.w_rel_confidences[event_index][pos_var_cor_index][0][i_val] = self.w_rel_confidences[
                                             event_index][pos_var_cor_index][0][i_val][-(self.num_bt-self.min_successes_bt+1):]
-                                    if sum(self.w_rel_bt_results[event_index][pos_var_cor_index][1][j_val]) < self.min_successes_bt:  # BT
+                                    if sum(self.w_rel_ht_results[event_index][pos_var_cor_index][1][j_val]) < self.min_successes_bt:  # BT
                                         self.print_failed_wrel_update(event_index, pos_var_cor_index, 1, j_val)
                                         del self.w_rel_list[event_index][pos_var_cor_index][1][j_val]
-                                        del self.w_rel_bt_results[event_index][pos_var_cor_index][1][j_val]
+                                        del self.w_rel_ht_results[event_index][pos_var_cor_index][1][j_val]
 
                             # No new values have appeared on the right side. Update the appearance of the relation
                             else:
@@ -941,18 +941,18 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
                                 # Update the bt_results list
                                 if tmp_bool:
-                                    self.w_rel_bt_results[event_index][pos_var_cor_index][1][j_val] = self.w_rel_bt_results[event_index][
+                                    self.w_rel_ht_results[event_index][pos_var_cor_index][1][j_val] = self.w_rel_ht_results[event_index][
                                         pos_var_cor_index][1][j_val][1:] + [1]
                                     for i_val in self.w_rel_list[event_index][pos_var_cor_index][1][j_val]:
                                         self.w_rel_list[event_index][pos_var_cor_index][1][j_val][i_val] += current_appearance_list[
                                             pos_var_cor_index][1][j_val][i_val]
                                 else:
-                                    self.w_rel_bt_results[event_index][pos_var_cor_index][1][j_val] = self.w_rel_bt_results[event_index][
+                                    self.w_rel_ht_results[event_index][pos_var_cor_index][1][j_val] = self.w_rel_ht_results[event_index][
                                         pos_var_cor_index][1][j_val][1:] + [0]
-                                    if sum(self.w_rel_bt_results[event_index][pos_var_cor_index][1][j_val]) < self.min_successes_bt:  # BT
+                                    if sum(self.w_rel_ht_results[event_index][pos_var_cor_index][1][j_val]) < self.min_successes_bt:  # BT
                                         self.print_failed_wrel_update(event_index, pos_var_cor_index, 1, j_val)
                                         del self.w_rel_list[event_index][pos_var_cor_index][1][j_val]
-                                        del self.w_rel_bt_results[event_index][pos_var_cor_index][1][j_val]
+                                        del self.w_rel_ht_results[event_index][pos_var_cor_index][1][j_val]
 
                         # j_val not in self.w_rel_list[event_index][pos_var_cor_index][1]. Therefore test if the rule should be used
                         else:
@@ -961,7 +961,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                                 self.w_rel_list[event_index][pos_var_cor_index][1][j_val] = {}
                                 self.w_rel_num_ll_to_vals[event_index][pos_var_cor_index][1][j_val] = sum(current_appearance_list[
                                     pos_var_cor_index][1][j_val].values())
-                                self.w_rel_bt_results[event_index][pos_var_cor_index][1][j_val] = [1] * self.num_bt
+                                self.w_rel_ht_results[event_index][pos_var_cor_index][1][j_val] = [1] * self.num_bt
                                 self.w_rel_confidences[event_index][pos_var_cor_index][1][j_val] = []
 
                                 # Add the entries for i_val
@@ -990,10 +990,10 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
                         # Update the bt_results list
                         if tmp_bool:
-                            self.w_rel_bt_results[event_index][pos_var_cor_index][0][i_val] = self.w_rel_bt_results[event_index][
+                            self.w_rel_ht_results[event_index][pos_var_cor_index][0][i_val] = self.w_rel_ht_results[event_index][
                                 pos_var_cor_index][0][i_val][1:] + [1]
                         else:
-                            self.w_rel_bt_results[event_index][pos_var_cor_index][0][i_val] = self.w_rel_bt_results[event_index][
+                            self.w_rel_ht_results[event_index][pos_var_cor_index][0][i_val] = self.w_rel_ht_results[event_index][
                                 pos_var_cor_index][0][i_val][1:] + [0]
                             failed_i_vals.append(i_val)
 
@@ -1009,10 +1009,10 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
                         # Update the bt_results list
                         if tmp_bool:
-                            self.w_rel_bt_results[event_index][pos_var_cor_index][1][j_val] = self.w_rel_bt_results[event_index][
+                            self.w_rel_ht_results[event_index][pos_var_cor_index][1][j_val] = self.w_rel_ht_results[event_index][
                                 pos_var_cor_index][1][j_val][1:] + [1]
                         else:
-                            self.w_rel_bt_results[event_index][pos_var_cor_index][1][j_val] = self.w_rel_bt_results[event_index][
+                            self.w_rel_ht_results[event_index][pos_var_cor_index][1][j_val] = self.w_rel_ht_results[event_index][
                                 pos_var_cor_index][1][j_val][1:] + [0]
                             failed_j_vals.append(j_val)
 
@@ -1116,29 +1116,29 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                         # Remove the failed rules if it is a update step
                         # Binomialtest and delete rules of the form i=i_val -> j=j_val
                         for i_val in failed_i_vals:
-                            if sum(self.w_rel_bt_results[event_index][pos_var_cor_index][0][i_val]) < self.min_successes_bt:  # BT
+                            if sum(self.w_rel_ht_results[event_index][pos_var_cor_index][0][i_val]) < self.min_successes_bt:  # BT
                                 self.print_failed_wrel_update(event_index, pos_var_cor_index, 0, i_val)
                                 del self.w_rel_list[event_index][pos_var_cor_index][0][i_val]
-                                del self.w_rel_bt_results[event_index][pos_var_cor_index][0][i_val]
+                                del self.w_rel_ht_results[event_index][pos_var_cor_index][0][i_val]
 
                         # Binomialtest and delete rules of the form j=j_val -> i=i_val
                         for j_val in failed_j_vals:
-                            if sum(self.w_rel_bt_results[event_index][pos_var_cor_index][1][j_val]) < self.min_successes_bt:  # BT
+                            if sum(self.w_rel_ht_results[event_index][pos_var_cor_index][1][j_val]) < self.min_successes_bt:  # BT
                                 self.print_failed_wrel_update(event_index, pos_var_cor_index, 1, j_val)
                                 del self.w_rel_list[event_index][pos_var_cor_index][1][j_val]
-                                del self.w_rel_bt_results[event_index][pos_var_cor_index][1][j_val]
+                                del self.w_rel_ht_results[event_index][pos_var_cor_index][1][j_val]
 
                         # Update the distributions of the correlation rules, which succeded the test above
                         # Update i=i_val -> j=j_val
                         for i_val in self.w_rel_list[event_index][pos_var_cor_index][0]:
-                            if self.w_rel_bt_results[event_index][pos_var_cor_index][0][i_val][-1]:
+                            if self.w_rel_ht_results[event_index][pos_var_cor_index][0][i_val][-1]:
                                 for j_val in self.w_rel_list[event_index][pos_var_cor_index][0][i_val]:
                                     self.w_rel_list[event_index][pos_var_cor_index][0][i_val][j_val] += current_appearance_list[
                                         pos_var_cor_index][0][i_val][j_val]
 
                         # Update j=j_val -> i=i_val
                         for j_val in self.w_rel_list[event_index][pos_var_cor_index][1]:
-                            if self.w_rel_bt_results[event_index][pos_var_cor_index][1][j_val][-1]:
+                            if self.w_rel_ht_results[event_index][pos_var_cor_index][1][j_val][-1]:
                                 for i_val in self.w_rel_list[event_index][pos_var_cor_index][1][j_val]:
                                     self.w_rel_list[event_index][pos_var_cor_index][1][j_val][i_val] += current_appearance_list[
                                         pos_var_cor_index][1][j_val][i_val]
@@ -1146,15 +1146,15 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                     else:
                         # Print the rules, which failed the binomial test
                         for i_val in failed_i_vals:
-                            if sum(self.w_rel_bt_results[event_index][pos_var_cor_index][0][i_val]) < self.min_successes_bt:  # BT
+                            if sum(self.w_rel_ht_results[event_index][pos_var_cor_index][0][i_val]) < self.min_successes_bt:  # BT
                                 self.print_failed_wrel_test(event_index, pos_var_cor_index, 0, i_val)
-                                self.w_rel_bt_results[event_index][pos_var_cor_index][0][i_val] = [1] * self.num_bt
+                                self.w_rel_ht_results[event_index][pos_var_cor_index][0][i_val] = [1] * self.num_bt
                                 self.w_rel_confidences[event_index][pos_var_cor_index][0][i_val] = []
 
                         for j_val in failed_j_vals:
-                            if sum(self.w_rel_bt_results[event_index][pos_var_cor_index][1][j_val]) < self.min_successes_bt:  # BT
+                            if sum(self.w_rel_ht_results[event_index][pos_var_cor_index][1][j_val]) < self.min_successes_bt:  # BT
                                 self.print_failed_wrel_test(event_index, pos_var_cor_index, 1, j_val)
-                                self.w_rel_bt_results[event_index][pos_var_cor_index][1][j_val] = [1] * self.num_bt
+                                self.w_rel_ht_results[event_index][pos_var_cor_index][1][j_val] = [1] * self.num_bt
                                 self.w_rel_confidences[event_index][pos_var_cor_index][1][j_val] = []
 
     # skipcq: PYL-R0201
