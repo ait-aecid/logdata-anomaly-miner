@@ -90,6 +90,9 @@ def build_analysis_pipeline(analysis_context):
     from aminer.events import StreamPrinterEventHandler
     anomaly_event_handlers.append(StreamPrinterEventHandler(analysis_context))
 
+    from aminer.events.JsonConverterHandler import JsonConverterHandler
+    json_converter_handler = JsonConverterHandler([stream_printer_event_handler], analysis_context)
+    anomaly_event_handlers.append(json_converter_handler)
     from aminer.events import KafkaEventHandler
     anomaly_event_handlers.append(KafkaEventHandler(analysis_context, 'test_topic', {
         'bootstrap_servers': ['localhost:9092'], 'api_version': (2, 0, 1)}))
