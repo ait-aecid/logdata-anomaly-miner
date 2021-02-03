@@ -1608,4 +1608,3 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
             if tmp_sum > alpha:
                 return num_BT-i
         return 0
-
