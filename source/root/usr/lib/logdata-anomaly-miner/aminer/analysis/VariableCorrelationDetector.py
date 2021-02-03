@@ -1183,7 +1183,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                         occurrences2[val] / max(1, sum(occurrences2.values()))) > self.max_dist_rule_distr:
                     self.w_rel_confidences[event_index][pos_var_cor_index][cor_direction][value1].append(abs(
                             occurrences1[val] / sum(occurrences1.values()) - occurrences2[val] / max(
-                            1, sum(occurrences2.values()))))
+                                1, sum(occurrences2.values()))))
                     self.w_rel_confidences[event_index][pos_var_cor_index][cor_direction][value1] = self.w_rel_confidences[
                             event_index][pos_var_cor_index][cor_direction][value1][-(self.num_bt-self.min_successes_bt+1):]
                     return False
