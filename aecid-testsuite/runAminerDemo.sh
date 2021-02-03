@@ -1,4 +1,3 @@
-sudo cp unit/config/kafka_client.conf /etc/aminer/kafka-client.conf
 if [[ $1 == *.py ]]; then
     cp $1 /tmp/demo-config.py
     sudo chown aminer:aminer /tmp/demo-config.py 2> /dev/null

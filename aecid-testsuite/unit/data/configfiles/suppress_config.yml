@@ -41,3 +41,8 @@ Analysis:
 EventHandlers:
         - id: stpe
           type: StreamPrinterEventHandler
+
+        - id: kafka
+          type: KafkaEventHandler
+          json: True
+          topic: test_topic

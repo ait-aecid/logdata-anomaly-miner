@@ -142,8 +142,3 @@ EventHandlers:
 
         - id: "syslog"
           type: "SyslogWriterEventHandler"
-
-        - id: "kafka"
-          type: "KafkaEventHandler"
-          json: true
-          topic: "test_topic"
