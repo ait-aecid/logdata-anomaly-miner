@@ -45,4 +45,4 @@ EventHandlers:
         - id: kafka
           type: KafkaEventHandler
           json: True
-          topic: test_topic
+          topic: yaml_test_topic
