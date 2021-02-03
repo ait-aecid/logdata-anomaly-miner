@@ -86,7 +86,7 @@ def run_analysis_child(aminer_config, program_name):
     sys.exit(1)
 
 
-def initialize_loggers(aminer_config, aminer_user, aminer_grp):
+def initialize_loggers(aminer_config, aminer_user_id, aminer_grp_id):
     """Initialize all loggers."""
     datefmt = '%d/%b/%Y:%H:%M:%S %z'
 
@@ -95,11 +95,7 @@ def initialize_loggers(aminer_config, aminer_user, aminer_grp):
         try:
             if not os.path.isdir(log_dir):
                 os.makedirs(log_dir)
-                from pwd import getpwnam
-                from grp import getgrnam
-                os.chown(log_dir,
-                         getpwnam(aminer_user).pw_uid,
-                         getgrnam(aminer_grp).gr_gid)
+                os.chown(log_dir, aminer_user_id, aminer_grp_id)
         except OSError as e:
             if e.errno != errno.EEXIST:
                 msg = 'Unable to create log-directory: %s' % log_dir
@@ -114,7 +110,7 @@ def initialize_loggers(aminer_config, aminer_user, aminer_grp):
         AminerConfig.KEY_REMOTE_CONTROL_LOG_FILE, os.path.join(log_dir, AminerConfig.DEFAULT_REMOTE_CONTROL_LOG_FILE))
     try:
         rc_file_handler = logging.FileHandler(remote_control_log_file)
-        shutil.chown(remote_control_log_file, aminer_user, aminer_grp)
+        os.chown(remote_control_log_file, aminer_user_id, aminer_grp_id)
     except OSError as e:
         print('Could not create or open %s: %s. Stopping..' % (remote_control_log_file, e), file=sys.stderr)
         sys.exit(1)
@@ -128,7 +124,7 @@ def initialize_loggers(aminer_config, aminer_user, aminer_grp):
         AminerConfig.KEY_STAT_LOG_FILE, os.path.join(log_dir, AminerConfig.DEFAULT_STAT_LOG_FILE))
     try:
         stat_file_handler = logging.FileHandler(stat_log_file)
-        shutil.chown(stat_log_file, aminer_user, aminer_grp)
+        os.chown(stat_log_file, aminer_user_id, aminer_grp_id)
     except OSError as e:
         print('Could not create or open %s: %s. Stopping..' % (stat_log_file, e), file=sys.stderr)
         sys.exit(1)
@@ -146,7 +142,7 @@ def initialize_loggers(aminer_config, aminer_user, aminer_grp):
         AminerConfig.KEY_DEBUG_LOG_FILE, os.path.join(log_dir, AminerConfig.DEFAULT_DEBUG_LOG_FILE))
     try:
         debug_file_handler = logging.FileHandler(debug_log_file)
-        shutil.chown(debug_log_file, aminer_user, aminer_grp)
+        os.chown(debug_log_file, aminer_user_id, aminer_grp_id)
     except OSError as e:
         print('Could not create or open %s: %s. Stopping..' % (debug_log_file, e), file=sys.stderr)
         sys.exit(1)
@@ -242,7 +238,7 @@ def main():
         print('Failed to resolve %s or %s' % (AminerConfig.KEY_AMINER_USER, AminerConfig.KEY_AMINER_GROUP), file=sys.stderr)
         sys.exit(1)
 
-    initialize_loggers(aminer_config, child_user_name, child_group_name)
+    initialize_loggers(aminer_config, child_user_id, child_group_id)
 
     if restore_relative_persistence_path is not None and (clear_persistence_flag or remove_persistence_dirs):
         msg = 'The --restore parameter removes all persistence files. Do not use this parameter with --Clear or --Remove!'
@@ -310,9 +306,9 @@ def main():
             aminer_user = aminer_config.config_properties.get(AminerConfig.KEY_AMINER_USER)
             aminer_grp = aminer_config.config_properties.get(AminerConfig.KEY_AMINER_GROUP)
             for dirpath, _dirnames, filenames in os.walk(persistence_dir):
-                shutil.chown(dirpath, aminer_user, aminer_grp)
+                os.chown(dirpath, child_user_id, child_group_id)
                 for filename in filenames:
-                    shutil.chown(os.path.join(dirpath, filename), aminer_user, aminer_grp)
+                    os.chown(os.path.join(dirpath, filename), child_user_id, child_user_id)
 
     if from_begin_flag:
         repositioning_data_path = os.path.join(aminer_config.config_properties.get(

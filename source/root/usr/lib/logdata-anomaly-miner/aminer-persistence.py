@@ -83,12 +83,16 @@ def main():
         if not os.path.exists(absolute_persistence_path):
             print('%s does not exist.' % absolute_persistence_path, file=sys.stderr)
         else:
+            from pwd import getpwnam
+            from grp import getgrnam
+            child_user_id = getpwnam(aminer_user).pw_uid
+            child_group_id = getgrnam(aminer_grp).gr_gid
             clear_persistence(persistence_dir)
             copytree(absolute_persistence_path, persistence_dir)
             for dirpath, _dirnames, filenames in os.walk(persistence_dir):
-                shutil.chown(dirpath, aminer_user, aminer_grp)
+                os.chown(dirpath, child_user_id, child_group_id)
                 for filename in filenames:
-                    shutil.chown(os.path.join(dirpath, filename), aminer_user, aminer_grp)
+                    os.chown(os.path.join(dirpath, filename), child_user_id, child_group_id)
             print('Restored persistence from %s successfully.' % absolute_persistence_path)
 
 
