@@ -19,4 +19,5 @@ kafka_2.12-2.7.0/bin/zookeeper-server-stop.sh > /dev/null
 sudo rm -r kafka_2.12-2.7.0/
 sudo rm -r /tmp/zookeeper
 sudo rm -r /tmp/kafka-logs
+sudo rm /etc/aminer/kafka-client.conf
 exit $exit_code
