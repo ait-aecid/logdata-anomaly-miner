@@ -1,3 +1,4 @@
+sudo cp unit/config/kafka-client.conf /etc/aminer/kafka-client.conf
 curl https://mirror.klaus-uwe.me/apache/kafka/2.7.0/kafka_2.12-2.7.0.tgz --output kafka.tgz
 tar xvf kafka.tgz > /dev/null
 rm kafka.tgz
