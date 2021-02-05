@@ -25,6 +25,7 @@ from aminer.util import JsonUtil
 
 # Have a registry of all persistable components. Those might be happy to be invoked before python process is terminating.
 persistable_components = []
+SKIP_PERSISTENCE_ID_WARNING = False
 
 
 def add_persistable_component(component):
@@ -34,7 +35,8 @@ def add_persistable_component(component):
             msg = 'Detectors of type %s use the persistence_id "%s" multiple times. Please assign a unique persistence_id for every ' \
                   'component.' % (c.__class__.__name__, os.path.split(c.persistence_file_name)[1])
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
-            print(msg, file=sys.stderr)
+            if not SKIP_PERSISTENCE_ID_WARNING:
+                print('Warning: ' + msg, file=sys.stderr)
     persistable_components.append(component)
 
 
