@@ -115,14 +115,14 @@ class PersistenceUtilTest(TestBase):
         self.assertEqual('', new_stderr.getvalue())
 
         NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', True)
-        self.assertEqual('Detectors of type NewMatchPathDetector use the persistence_id "Default" multiple times. Please assign a unique '
-                         'persistence_id for every component.\n', new_stderr.getvalue())
+        self.assertEqual('Warning: Detectors of type NewMatchPathDetector use the persistence_id "Default" multiple times. Please assign a'
+                         ' unique persistence_id for every component.\n', new_stderr.getvalue())
         new_stderr.seek(0)
         new_stderr.truncate(0)
 
         NewMatchPathValueComboDetector(self.aminer_config, ['first/f1/s1'], [self.stream_printer_event_handler], 'Default', False, True)
-        self.assertEqual('Detectors of type NewMatchPathValueComboDetector use the persistence_id "Default" multiple times. Please assign '
-                         'a unique persistence_id for every component.\n', new_stderr.getvalue())
+        self.assertEqual('Warning: Detectors of type NewMatchPathValueComboDetector use the persistence_id "Default" multiple times. Please'
+                         ' assign a unique persistence_id for every component.\n', new_stderr.getvalue())
         sys.stderr = old_stderr
 
 
