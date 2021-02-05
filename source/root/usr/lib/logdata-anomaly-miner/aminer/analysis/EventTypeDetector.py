@@ -77,8 +77,8 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.aminer_config = aminer_config
 
         # Loads the persistence
-        PersistenceUtil.add_persistable_component(self)
         self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
+        PersistenceUtil.add_persistable_component(self)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
 
         # Imports the persistence

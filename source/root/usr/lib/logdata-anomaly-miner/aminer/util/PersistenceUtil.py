@@ -29,6 +29,12 @@ persistable_components = []
 
 def add_persistable_component(component):
     """Add a component to the registry of all persistable components."""
+    for c in persistable_components:
+        if hasattr(c, 'persistence_file_name') and c.persistence_file_name == component.persistence_file_name:
+            msg = 'Detectors of type %s use the persistence_id "%s" multiple times. Please assign a unique persistence_id for every ' \
+                  'component.' % (c.__class__.__name__, os.path.split(c.persistence_file_name)[1])
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
+            print(msg, file=sys.stderr)
     persistable_components.append(component)
 
 

@@ -1,4 +1,6 @@
 import unittest
+import sys
+import io
 from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
 from aminer.input.LogAtom import LogAtom
 from aminer.parsing.ParserMatch import ParserMatch
@@ -100,6 +102,27 @@ class PersistenceUtilTest(TestBase):
                          [self.match_element_fixed_dme.get_path()])
         self.assertEqual(PersistenceUtil.load_json(new_match_path_value_combo_detector.persistence_file_name),
                          ([[log_atom_sequence_me.raw_data]]))
+
+    def test3_no_unique_persistence_id(self):
+        """Check if a warning is printed if the same persistence_id is used for the same component type."""
+        old_stderr = sys.stderr
+        new_stderr = io.StringIO()
+        sys.stderr = new_stderr
+
+        NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', True)
+        NewMatchPathValueComboDetector(self.aminer_config, ['first/f1/s1'], [self.stream_printer_event_handler], 'Default', False, True)
+        self.assertEqual('', new_stderr.getvalue())
+
+        NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', True)
+        self.assertEqual('Detectors of type NewMatchPathDetector use the persistence_id "Default" multiple times. Please assign a unique '
+                         'persistence_id for every component.\n', new_stderr.getvalue())
+        new_stderr.seek(0)
+        new_stderr.truncate(0)
+
+        NewMatchPathValueComboDetector(self.aminer_config, ['first/f1/s1'], [self.stream_printer_event_handler], 'Default', False, True)
+        self.assertEqual('Detectors of type NewMatchPathValueComboDetector use the persistence_id "Default" multiple times. Please assign '
+                         'a unique persistence_id for every component.\n', new_stderr.getvalue())
+        sys.stderr = old_stderr
 
 
 if __name__ == "__main__":

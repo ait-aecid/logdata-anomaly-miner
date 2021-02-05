@@ -123,8 +123,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         self.log_new_forward_rules = []
         self.log_new_back_rules = []
 
+        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
-        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, 'EventCorrelationDetector', persistence_id)
         self.persistence_id = persistence_id
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
 
