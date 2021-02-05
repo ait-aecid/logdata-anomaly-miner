@@ -55,16 +55,16 @@ def load_yaml(config_file):
     with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/ParserValidationSchema.py', 'r') as sma:
         # skipcq: PYL-W0123
         parser_validation_schema = eval(sma.read())
-    # with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/AnalysisValidationSchema.py', 'r') as sma:
-    #     # skipcq: PYL-W0123
-    #     analysis_validation_schema = eval(sma.read())
-    # with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/EventHandlerValidationSchema.py', 'r') as sma:
-    #     # skipcq: PYL-W0123
-    #     event_handler_validation_schema = eval(sma.read())
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/AnalysisValidationSchema.py', 'r') as sma:
+        # skipcq: PYL-W0123
+        analysis_validation_schema = eval(sma.read())
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/EventHandlerValidationSchema.py', 'r') as sma:
+        # skipcq: PYL-W0123
+        event_handler_validation_schema = eval(sma.read())
 
     normalisation_schema = {
         **base_schema, **parser_normalisation_schema, **analysis_normalisation_schema, **event_handler_normalisation_schema}
-    validation_schema = {**base_schema, **parser_validation_schema}
+    validation_schema = {**base_schema, **parser_validation_schema, **analysis_validation_schema, **event_handler_validation_schema}
 
     v = Validator(validation_schema)
     if not v.validate(yaml_data, validation_schema):
