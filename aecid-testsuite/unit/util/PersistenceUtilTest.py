@@ -108,6 +108,7 @@ class PersistenceUtilTest(TestBase):
         old_stderr = sys.stderr
         new_stderr = io.StringIO()
         sys.stderr = new_stderr
+        PersistenceUtil.SKIP_PERSISTENCE_ID_WARNING = False
 
         NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', True)
         NewMatchPathValueComboDetector(self.aminer_config, ['first/f1/s1'], [self.stream_printer_event_handler], 'Default', False, True)

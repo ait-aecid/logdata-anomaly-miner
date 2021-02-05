@@ -86,7 +86,6 @@ class TestBase(unittest.TestCase):
         SecureOSFunctions.secure_open_base_directory(persistence_dir_name, os.O_RDONLY | os.O_DIRECTORY | os.O_PATH)
         PersistenceUtil.SKIP_PERSISTENCE_ID_WARNING = True
 
-
     def tearDown(self):
         """Delete all persisted data after the tests."""
         self.aminer_config = AminerConfig.load_config(self.__configFilePath)
