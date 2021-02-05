@@ -1,151 +1,64 @@
 # skipcq: PYL-W0104
 {
-        'LearnMode': {
-            'required': False,
-            'type': 'boolean'
-        },
-        'SuppressNewMatchPathDetector': {
-            'required': False,
-            'type': 'boolean',
-            'default': False
-        },
-        'AminerUser': {
-            'required': False,
-            'type': 'string',
-            'default': 'aminer'
-        },
-        'AminerGroup': {
-            'required': False,
-            'type': 'string',
-            'default': 'aminer'
-        },
-        'RemoteControlSocket': {
-            'required': False,
-            'type': 'string'
-        },
-        'Core.PersistenceDir': {
-            'required': False,
-            'type': 'string',
-            'default': '/var/lib/aminer'
-        },
-        'Core.LogDir': {
-            'required': False,
-            'type': 'string',
-            'default': '/var/lib/aminer/log'
-        },
-        'Core.PersistencePeriod': {
-            'required': False,
-            'type': 'integer',
-            'default': 600
-        },
-        'MailAlerting.TargetAddress': {
-            'required': False,
-            'type': 'string',
-            'default': 'root@localhost'
-        },
-        'MailAlerting.FromAddress': {
-            'required': False,
-            'type': 'string',
-            'default': 'root@localhost'
-        },
-        'MailAlerting.SubjectPrefix': {
-            'required': False,
-            'type': 'string',
-            'default': 'aminer Alerts:'
-        },
-        'MailAlerting.AlertGraceTime': {
-            'required': False,
-            'type': 'integer',
-            'default': 0
-        },
-        'MailAlerting.EventCollectTime': {
-            'required': False,
-            'type': 'integer',
-            'default': 10
-        },
-        'MailAlerting.MinAlertGap': {
-            'required': False,
-            'type': 'integer',
-            'default': 600
-        },
-        'MailAlerting.MaxAlertGap': {
-            'required': False,
-            'type': 'integer',
-            'default': 600
-        },
-        'MailAlerting.MaxEventsPerMessage': {
-            'required': False,
-            'type': 'integer',
-            'default': 1000
-        },
-        'LogPrefix': {
-            'required': False,
-            'type': 'string',
-        },
-        'LogResourceList': {
-            'required': True,
-            'type': 'list',
-            'schema': {'type': 'string'}
-        },
-        'Log.StatisticsPeriod': {
-            'required': False,
-            'type': 'integer',
-            'default': 3600
-        },
-        'Log.StatisticsLevel': {
-            'required': False,
-            'type': 'integer',
-            'default': 1
-        },
-        'Log.DebugLevel': {
-            'required': False,
-            'type': 'integer',
-            'default': 1
-        },
-        'Log.RemoteControlLogFile': {
-            'required': False,
-            'type': 'string'
-        },
-        'Log.StatisticsFile': {
-            'required': False,
-            'type': 'string'
-        },
-        'Log.DebugFile': {
-            'required': False,
-            'type': 'string'
-        },
-        'Parser': {
-            'required': True,
-            'type': 'list',
-            'has_start': True,
-            'schema': {
-                'type': 'dict',
-                'schema': {
+    'Parser': {
+        'required': True,
+        'type': 'list',
+        'schema': {
+            'type': 'dict',
+            'allow_unknown': False,
+            'oneof_schema': [
+                {
                     'id': {'type': 'string'},
                     'start': {'type': 'boolean'},
-                    'type': {'type': 'parsermodel', 'coerce': 'toparsermodel'},
+                    'type': {'type': 'string', 'forbidden': [
+                        'ElementValueBranchModelElement', 'DecimalIntegerValueModelElement', 'DecimalIntegerValueModelElement',
+                        'MultiLocaleDateTimeModelElement']},
                     'name': {'type': 'string'},
-                    'args': {'type': ['string', 'list'], 'schema': {'type': ['string', 'integer']}, 'nullable': True},
+                    'args': {'type': ['string', 'list'], 'schema': {'type': ['string', 'integer']}}
+                },
+                {
+                    'id': {'type': 'string'},
+                    'start': {'type': 'boolean'},
+                    'type': {'type': 'string', 'allowed': ['ElementValueBranchModelElement']},
+                    'name': {'type': 'string'},
+                    'args': {'type': ['string', 'list'], 'schema': {'type': ['string', 'integer']}},
                     'branch_model_dict': {'type': 'list', 'schema': {'type': 'dict', 'schema': {'id': {
-                        'type': ['boolean', 'float', 'integer', 'string']}, 'model': {'type': 'string'}}}},
-                    'date_formats': {'type': 'list', 'schema': {'type': 'dict', 'schema': {'format': {'type': 'list', 'schema': {
-                        'type': 'string', 'nullable': True}}}}},
+                         'type': ['boolean', 'float', 'integer', 'string']}, 'model': {'type': 'string'}}}},
+                },
+                {
+                    'id': {'type': 'string'},
+                    'start': {'type': 'boolean'},
+                    'type': {'type': 'string', 'allowed': ['DecimalFloatValueModelElement']},
+                    'name': {'type': 'string'},
                     'value_sign_type': {'type': 'string', 'allowed': ['none', 'optional', 'mandatory'], 'default': 'none'},
                     'value_pad_type': {'type': 'string', 'allowed': ['none', 'zero', 'blank'], 'default': 'none'},
                     'exponent_type': {'type': 'string', 'allowed': ['none', 'optional', 'mandatory'], 'default': 'none'}
-                }
-            }
-        },
-        'Input': {
-            'required': True,
-            'type': 'dict',
-            'schema': {
-                'verbose': {'type': 'boolean', 'required': False, 'default': False},
-                'multi_source': {'type': 'boolean', 'required': False, 'default': False},
-                'timestamp_paths': {'type': ['string', 'list']}
-            }
-        },
-        'Analysis': {
+                },
+                {
+                    'id': {'type': 'string'},
+                    'start': {'type': 'boolean'},
+                    'type': {'type': 'string', 'allowed': ['DecimalIntegerValueModelElement']},
+                    'name': {'type': 'string'},
+                    'value_sign_type': {'type': 'string', 'allowed': ['none', 'optional', 'mandatory'], 'default': 'none'},
+                    'value_pad_type': {'type': 'string', 'allowed': ['none', 'zero', 'blank'], 'default': 'none'}
+                },
+                {
+                    'id': {'type': 'string'},
+                    'start': {'type': 'boolean'},
+                    'type': {'type': 'string', 'allowed': ['MultiLocaleDateTimeModelElement']},
+                    'name': {'type': 'string'},
+                    'date_formats': {'type': 'list', 'schema': {'type': 'dict', 'schema': {'format': {'type': 'list', 'schema': {
+                        'type': 'string', 'nullable': True}, 'maxlength': 3, 'minlength': 3}}}},
+                },
+            ]
+        }
+    },
+    
+    
+    
+    
+    
+    'Analysis': {
             'required': False,
             'type': 'list',
             'nullable': True,
@@ -153,7 +66,7 @@
                 'type': 'dict',
                 'schema': {
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
-                    'type': {'type': 'analysistype', 'coerce': 'toanalysistype'},
+                    'type': {'type': 'string'},
                     'paths': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                     'labels': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                     'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},
@@ -323,7 +236,7 @@
                 'type': 'dict',
                 'schema': {
                     'id': {'type': 'string'},
-                    'type': {'type': 'eventhandlertype', 'coerce': 'toeventhandlertype'},
+                    'type': {'type': 'string'},
                     'json': {'type': 'boolean', 'required': False, 'default': False},
                     'instance_name': {'type': 'string', 'required': False, 'default': 'aminer'},
                     'topic': {'type': 'string'},

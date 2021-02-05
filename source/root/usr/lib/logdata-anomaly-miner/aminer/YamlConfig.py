@@ -28,6 +28,7 @@ def load_yaml(config_file):
     global yaml_data
 
     import yaml
+    from cerberus import Validator
     from aminer.ConfigValidator import ConfigValidator
     import os
     with open(config_file) as yamlfile:
@@ -38,13 +39,40 @@ def load_yaml(config_file):
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(exception)
             raise exception
 
-    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'YamlSchema.py', 'r') as sma:
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/BaseSchema.py', 'r') as sma:
         # skipcq: PYL-W0123
-        schema = eval(sma.read())
-    sma.close()
+        base_schema = eval(sma.read())
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/ParserNormalisationSchema.py', 'r') as sma:
+        # skipcq: PYL-W0123
+        parser_normalisation_schema = eval(sma.read())
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/AnalysisNormalisationSchema.py', 'r') as sma:
+        # skipcq: PYL-W0123
+        analysis_normalisation_schema = eval(sma.read())
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/EventHandlerNormalisationSchema.py', 'r') as sma:
+        # skipcq: PYL-W0123
+        event_handler_normalisation_schema = eval(sma.read())
 
-    v = ConfigValidator(schema)
-    if v.validate(yaml_data, schema):
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/ParserValidationSchema.py', 'r') as sma:
+        # skipcq: PYL-W0123
+        parser_validation_schema = eval(sma.read())
+    # with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/AnalysisValidationSchema.py', 'r') as sma:
+    #     # skipcq: PYL-W0123
+    #     analysis_validation_schema = eval(sma.read())
+    # with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/EventHandlerValidationSchema.py', 'r') as sma:
+    #     # skipcq: PYL-W0123
+    #     event_handler_validation_schema = eval(sma.read())
+
+    normalisation_schema = {
+        **base_schema, **parser_normalisation_schema, **analysis_normalisation_schema, **event_handler_normalisation_schema}
+    validation_schema = {**base_schema, **parser_validation_schema}
+
+    v = Validator(validation_schema)
+    if not v.validate(yaml_data, validation_schema):
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(v.errors)
+        raise ValueError(v.errors)
+
+    v = ConfigValidator(normalisation_schema)
+    if v.validate(yaml_data, normalisation_schema):
         test = v.normalized(yaml_data)
         yaml_data = test
     else:
