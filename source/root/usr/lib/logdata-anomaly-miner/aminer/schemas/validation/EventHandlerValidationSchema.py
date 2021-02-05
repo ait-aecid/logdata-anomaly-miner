@@ -11,7 +11,7 @@
             'oneof_schema': [
                 {
                     'id': {'type': 'string'},
-                    'type': {'type': 'string', 'forbidden': ['KafkaEventHandler', 'StreamPrinterEventHandler']},
+                    'type': {'type': 'string', 'forbidden': ['KafkaEventHandler', 'StreamPrinterEventHandler', 'SyslogWriterEventHandler']},
                     'json': {
                         'type': 'boolean',
                         'required': False,
@@ -42,7 +42,7 @@
                 },
                 {
                     'id': {'type': 'string'},
-                    'type': {'type': 'string', 'forbidden': ['KafkaEventHandler', 'StreamPrinterEventHandler']},
+                    'type': {'type': 'string', 'allowed': ['SyslogWriterEventHandler']},
                     'json': {
                         'type': 'boolean',
                         'required': False,
