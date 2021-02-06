@@ -8,47 +8,49 @@
             'allow_unknown': False,
             'oneof_schema': [
                 {
-                    'id': {'type': 'string'},
+                    'id': {'type': 'string', 'required': True},
                     'start': {'type': 'boolean'},
                     'type': {'type': 'string', 'forbidden': [
                         'ElementValueBranchModelElement', 'DecimalIntegerValueModelElement', 'DecimalIntegerValueModelElement',
-                        'MultiLocaleDateTimeModelElement']},
-                    'name': {'type': 'string'},
+                        'MultiLocaleDateTimeModelElement'], 'required': True},
+                    'name': {'type': 'string', 'required': True},
                     'args': {'type': ['string', 'list'], 'schema': {'type': ['string', 'integer']}}
                 },
                 {
-                    'id': {'type': 'string'},
+                    'id': {'type': 'string', 'required': True},
                     'start': {'type': 'boolean'},
-                    'type': {'type': 'string', 'allowed': ['ElementValueBranchModelElement']},
-                    'name': {'type': 'string'},
-                    'args': {'type': ['string', 'list'], 'schema': {'type': ['string', 'integer']}},
+                    'type': {'type': 'string', 'allowed': ['ElementValueBranchModelElement'], 'required': True},
+                    'name': {'type': 'string', 'required': True},
+                    'args': {'type': ['string', 'list'], 'schema': {'type': ['string', 'integer']}, 'required': True},
                     'branch_model_dict': {'type': 'list', 'schema': {'type': 'dict', 'schema': {'id': {
-                         'type': ['boolean', 'float', 'integer', 'string']}, 'model': {'type': 'string'}}}},
+                         'type': ['boolean', 'float', 'integer', 'string']}, 'model': {'type': 'string'}}}, 'required': True}
                 },
                 {
-                    'id': {'type': 'string'},
+                    'id': {'type': 'string', 'required': True},
                     'start': {'type': 'boolean'},
-                    'type': {'type': 'string', 'allowed': ['DecimalFloatValueModelElement']},
-                    'name': {'type': 'string'},
+                    'type': {'type': 'string', 'allowed': ['DecimalFloatValueModelElement'], 'required': True},
+                    'name': {'type': 'string', 'required': True},
                     'value_sign_type': {'type': 'string', 'allowed': ['none', 'optional', 'mandatory'], 'default': 'none'},
                     'value_pad_type': {'type': 'string', 'allowed': ['none', 'zero', 'blank'], 'default': 'none'},
                     'exponent_type': {'type': 'string', 'allowed': ['none', 'optional', 'mandatory'], 'default': 'none'}
                 },
                 {
-                    'id': {'type': 'string'},
+                    'id': {'type': 'string', 'required': True},
                     'start': {'type': 'boolean'},
-                    'type': {'type': 'string', 'allowed': ['DecimalIntegerValueModelElement']},
-                    'name': {'type': 'string'},
-                    'value_sign_type': {'type': 'string', 'allowed': ['none', 'optional', 'mandatory'], 'default': 'none'},
+                    'type': {'type': 'string', 'allowed': ['DecimalIntegerValueModelElement'], 'required': True},
+                    'name': {'type': 'string', 'required': True},
+                    'value_sign_type': {
+                        'type': 'string', 'allowed': ['none', 'optional', 'mandatory'], 'default': 'none'},
                     'value_pad_type': {'type': 'string', 'allowed': ['none', 'zero', 'blank'], 'default': 'none'}
                 },
                 {
-                    'id': {'type': 'string'},
+                    'id': {'type': 'string', 'required': True},
                     'start': {'type': 'boolean'},
-                    'type': {'type': 'string', 'allowed': ['MultiLocaleDateTimeModelElement']},
-                    'name': {'type': 'string'},
+                    'type': {'type': 'string', 'allowed': ['MultiLocaleDateTimeModelElement'], 'required': True},
+                    'name': {'type': 'string', 'required': True},
                     'date_formats': {'type': 'list', 'schema': {'type': 'dict', 'schema': {'format': {'type': 'list', 'schema': {
-                        'type': 'string', 'nullable': True}, 'maxlength': 3, 'minlength': 3}}}},
+                        'type': 'string', 'nullable': True}, 'maxlength': 3, 'minlength': 3}}}, 'required': True},
+                    'start_year': {'type': 'integer', 'nullable': True, 'default': None}
                 }
             ]
         }
