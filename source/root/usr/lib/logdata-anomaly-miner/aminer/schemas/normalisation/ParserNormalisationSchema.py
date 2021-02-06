@@ -7,10 +7,10 @@
         'schema': {
             'type': 'dict',
             'schema': {
-                'id': {'type': 'string'},
+                'id': {'type': 'string', 'required': True},
                 'start': {'type': 'boolean'},
-                'type': {'type': 'parsermodel', 'coerce': 'toparsermodel'},
-                'name': {'type': 'string'},
+                'type': {'type': 'parsermodel', 'coerce': 'toparsermodel', 'required': True},
+                'name': {'type': 'string', 'required': True},
                 'args': {'type': ['string', 'list'], 'schema': {'type': ['string', 'integer']}, 'nullable': True},
                 'branch_model_dict': {'type': 'list', 'schema': {'type': 'dict', 'schema': {'id': {
                     'type': ['boolean', 'float', 'integer', 'string']}, 'model': {'type': 'string'}}}},
@@ -18,7 +18,8 @@
                     'type': 'string', 'nullable': True}}}}},
                 'value_sign_type': {'type': 'string', 'allowed': ['none', 'optional', 'mandatory'], 'default': 'none'},
                 'value_pad_type': {'type': 'string', 'allowed': ['none', 'zero', 'blank'], 'default': 'none'},
-                'exponent_type': {'type': 'string', 'allowed': ['none', 'optional', 'mandatory'], 'default': 'none'}
+                'exponent_type': {'type': 'string', 'allowed': ['none', 'optional', 'mandatory'], 'default': 'none'},
+                'start_year': {'type': 'integer', 'nullable': True, 'default': None}
             }
         }
     },

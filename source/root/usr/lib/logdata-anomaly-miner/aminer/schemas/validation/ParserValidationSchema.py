@@ -30,18 +30,17 @@
                     'start': {'type': 'boolean'},
                     'type': {'type': 'string', 'allowed': ['DecimalFloatValueModelElement'], 'required': True},
                     'name': {'type': 'string', 'required': True},
-                    'value_sign_type': {'type': 'string', 'allowed': ['none', 'optional', 'mandatory'], 'default': 'none'},
-                    'value_pad_type': {'type': 'string', 'allowed': ['none', 'zero', 'blank'], 'default': 'none'},
-                    'exponent_type': {'type': 'string', 'allowed': ['none', 'optional', 'mandatory'], 'default': 'none'}
+                    'value_sign_type': {'type': 'string', 'allowed': ['none', 'optional', 'mandatory']},
+                    'value_pad_type': {'type': 'string', 'allowed': ['none', 'zero', 'blank']},
+                    'exponent_type': {'type': 'string', 'allowed': ['none', 'optional', 'mandatory']}
                 },
                 {
                     'id': {'type': 'string', 'required': True},
                     'start': {'type': 'boolean'},
                     'type': {'type': 'string', 'allowed': ['DecimalIntegerValueModelElement'], 'required': True},
                     'name': {'type': 'string', 'required': True},
-                    'value_sign_type': {
-                        'type': 'string', 'allowed': ['none', 'optional', 'mandatory'], 'default': 'none'},
-                    'value_pad_type': {'type': 'string', 'allowed': ['none', 'zero', 'blank'], 'default': 'none'}
+                    'value_sign_type': {'type': 'string', 'allowed': ['none', 'optional', 'mandatory']},
+                    'value_pad_type': {'type': 'string', 'allowed': ['none', 'zero', 'blank']}
                 },
                 {
                     'id': {'type': 'string', 'required': True},
@@ -50,7 +49,7 @@
                     'name': {'type': 'string', 'required': True},
                     'date_formats': {'type': 'list', 'schema': {'type': 'dict', 'schema': {'format': {'type': 'list', 'schema': {
                         'type': 'string', 'nullable': True}, 'maxlength': 3, 'minlength': 3}}}, 'required': True},
-                    'start_year': {'type': 'integer', 'nullable': True, 'default': None}
+                    'start_year': {'type': 'integer', 'nullable': True}
                 }
             ]
         }

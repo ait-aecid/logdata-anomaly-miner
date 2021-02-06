@@ -8,14 +8,14 @@
         'schema': {
             'type': 'dict',
             'schema': {
-                'id': {'type': 'string'},
-                'type': {'type': 'eventhandlertype', 'coerce': 'toeventhandlertype'},
-                'json': {'type': 'boolean', 'required': False, 'default': False},
-                'instance_name': {'type': 'string', 'required': False, 'default': 'aminer'},
+                'id': {'type': 'string', 'required': True},
+                'type': {'type': 'eventhandlertype', 'coerce': 'toeventhandlertype', 'required': True},
+                'json': {'type': 'boolean', 'default': False},
+                'instance_name': {'type': 'string', 'default': 'aminer'},
                 'topic': {'type': 'string'},
-                'cfgfile': {'type': 'string'},
+                'cfgfile': {'type': 'string', 'default': '/etc/aminer/kafka-client.conf'},
                 'options': {'type': 'dict', 'schema': {'id': {'type': 'string'}, 'type': {'type': ['string', 'list', 'integer']}}},
-                'output_file_path': {'type': 'string', 'required': False}
+                'output_file_path': {'type': 'string'}
             }
         }
     }
