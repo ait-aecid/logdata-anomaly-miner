@@ -12,7 +12,9 @@
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
                     'type': {'type': 'string', 'allowed': ['AllowlistViolationDetector']},
                     'allowlist_rules': {'type': 'list', 'schema': {'type': 'string'}},
-                    'output_logline': {'type': 'boolean', 'required': False, 'default': True}
+                    'output_logline': {'type': 'boolean', 'required': False, 'default': True},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 },
                 {
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
@@ -20,6 +22,8 @@
                     'parsed_atom_handler_lookup_list': {
                         'type': 'list', 'schema': {'type': 'list', 'schema': {'type': 'string', 'nullable': True}}},
                     'default_parsed_atom_handler': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 },
                 {
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
@@ -27,6 +31,8 @@
                     'path': {'type': 'string', 'required': False, 'default': 'Default'},
                     'parsed_atom_handler_dict': {'type': 'dict', 'schema': {'id': {'type': 'string'}, 'type': {'type': 'string'}}},
                     'default_parsed_atom_handler': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 },
                 {
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
@@ -37,6 +43,8 @@
                     'learn_mode': {'type': 'boolean', 'required': False},
                     'tuple_transformation_function': {'type': 'string', 'allowed': ['demo']},
                     'output_logline': {'type': 'boolean', 'required': False, 'default': True},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 },
                 {
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
@@ -58,6 +66,8 @@
                     'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},
                     'output_logline': {'type': 'boolean', 'required': False, 'default': True},
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string'}, 'required': False, 'nullable': True, 'default': None},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 },
                 {
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
@@ -70,6 +80,8 @@
                     'output_logline': {'type': 'boolean', 'required': False, 'default': True},
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string'}, 'required': False, 'nullable': True, 'default': None},
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string'}, 'required': False, 'nullable': True, 'default': None},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 },
                 {
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
@@ -82,6 +94,8 @@
                     'output_logline': {'type': 'boolean', 'required': False, 'default': True},
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string'}, 'required': False, 'nullable': True, 'default': None},
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string'}, 'required': False, 'nullable': True, 'default': None},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 },
                 {
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
@@ -94,6 +108,9 @@
                     'track_time_for_TSA': {'type': 'boolean', 'required': False, 'default': False},
                     'waiting_time_for_TSA': {'type': 'integer', 'required': False, 'default': 300},
                     'num_sections_waiting_time_for_TSA': {'type': 'integer', 'required': False, 'default': 10},
+                    'learn_mode': {'type': 'boolean', 'required': False},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 },
                 {
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
@@ -102,6 +119,8 @@
                     'bin_size': {'type': 'integer'},
                     'bin_count': {'type': 'integer'},
                     'outlier_bins_flag': {'type': 'boolean', 'required': False, 'default': False},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 },
                 {
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
@@ -112,6 +131,8 @@
                     'bin_size': {'type': 'integer'},
                     'bin_count': {'type': 'integer'},
                     'outlier_bins_flag': {'type': 'boolean', 'required': False, 'default': False},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 },
                 {
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
@@ -121,6 +142,8 @@
                     'reset_after_report_flag': {'type': 'boolean', 'required': False, 'default': True},
                     'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},
                     'output_logline': {'type': 'boolean', 'required': False, 'default': True},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 },
                 {
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
@@ -130,7 +153,9 @@
                     'report_interval': {'type': 'integer', 'required': False, 'default': 10},
                     'reset_after_report_flag': {'type': 'boolean', 'required': False, 'default': True},
                     'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},
-                    'output_logline': {'type': 'boolean', 'required': False, 'default': True}
+                    'output_logline': {'type': 'boolean', 'required': False, 'default': True},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 },
                 {
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
@@ -138,7 +163,9 @@
                     'paths': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                     'value_list': {
                         'type': 'list', 'schema': {'type': ['boolean', 'float', 'integer', 'string']}, 'nullable': True, 'default': None},
-                    'output_logline': {'type': 'boolean', 'required': False, 'default': True}
+                    'output_logline': {'type': 'boolean', 'required': False, 'default': True},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 },
                 {
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
@@ -149,7 +176,9 @@
                     'min_bin_time': {'type': 'integer'},
                     'debug_mode': {'type': 'boolean', 'required': False, 'default': False},
                     'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},
-                    'output_logline': {'type': 'boolean', 'required': False, 'default': True}
+                    'output_logline': {'type': 'boolean', 'required': False, 'default': True},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 },
                 {
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
@@ -160,6 +189,8 @@
                     'paths': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                     'separator': {'type': 'string'},
                     'missing_value_string': {'type': 'string'},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 },
                 {
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
@@ -170,6 +201,8 @@
                     'check_interval': {'type': 'integer', 'required': False, 'default': 3600},
                     'realert_interval': {'type': 'integer', 'required': False, 'default': 86400},
                     'output_logline': {'type': 'boolean', 'required': False, 'default': True},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 },
                 {
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
@@ -180,6 +213,8 @@
                     'check_interval': {'type': 'integer', 'required': False, 'default': 3600},
                     'realert_interval': {'type': 'integer', 'required': False, 'default': 86400},
                     'output_logline': {'type': 'boolean', 'required': False, 'default': True},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 },
                 {
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
@@ -191,6 +226,8 @@
                     'allow_missing_values': {'type': 'boolean', 'required': False, 'default': False},
                     'learn_mode': {'type': 'boolean', 'required': False},
                     'output_logline': {'type': 'boolean', 'required': False, 'default': True},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 },
                 {
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
@@ -198,6 +235,8 @@
                     'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},
                     'learn_mode': {'type': 'boolean', 'required': False},
                     'output_logline': {'type': 'boolean', 'required': False, 'default': True},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 },
                 {
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
@@ -207,6 +246,8 @@
                     'allow_missing_values': {'type': 'boolean', 'required': False, 'default': False},
                     'learn_mode': {'type': 'boolean', 'required': False},
                     'output_logline': {'type': 'boolean', 'required': False, 'default': True},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 },
                 {
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
@@ -215,6 +256,8 @@
                     'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},
                     'learn_mode': {'type': 'boolean', 'required': False},
                     'output_logline': {'type': 'boolean', 'required': False, 'default': True},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 },
                 {
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
@@ -223,6 +266,8 @@
                     'report_interval': {'type': 'integer', 'required': False, 'default': 60},
                     'labels': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                     'split_reports_flag': {'type': 'boolean', 'required': False, 'default': False},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 },
                 {
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
@@ -317,24 +362,47 @@
                     'use_value_match': {'type': 'boolean', 'required': False, 'default': True},
                     'min_rule_attributes': {'type': 'integer', 'required': False, 'default': 1},
                     'max_rule_attributes': {'type': 'integer', 'required': False, 'default': 5},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 },
                 {
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
                     'type': {'type': 'string', 'allowed': ['TimeCorrelationViolationDetector']},
                     'ruleset': {'type': 'list', 'schema': {'type': 'string'}},
                     'persistence_id': {'type': 'string', 'required': False, 'default': 'Default'},
-                    'output_logline': {'type': 'boolean', 'required': False, 'default': True}
+                    'output_logline': {'type': 'boolean', 'required': False, 'default': True},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
+                },
+                {
+                    'type': {'type': 'string', 'allowed': ['CorrelationRule']},
+                    'rule_id': {'type': 'string'},
+                    'min_time_delta': {'type': 'integer'},
+                    'max_time_delta': {'type': 'integer'},
+                    'max_artefacts_a_for_single_b': {'type': 'integer'},
+                    'artefact_match_parameters': {'type': 'list', 'schema': {'type': 'list', 'schema': {'type': 'string'}},
+                                                  'required': False, 'nullable': True, 'default': None}
+                },
+                {
+                    'type': {'type': 'string', 'allowed': ['EventClassSelector']},
+                    'action_id': {'type': 'string'},
+                    'artefact_a_rules': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
+                    'artefact_b_rules': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None}
                 },
                 {
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
                     'type': {'type': 'string', 'allowed': ['SimpleMonotonicTimestampAdjust']},
-                    'stop_when_handled_flag': {'type': 'boolean', 'required': False, 'default': False}
+                    'stop_when_handled_flag': {'type': 'boolean', 'required': False, 'default': False},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 },
                 {
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
                     'type': {'type': 'string', 'allowed': ['TimestampsUnsortedDetector']},
                     'exit_on_error_flag': {'type': 'boolean', 'required': False, 'default': False},
-                    'output_logline': {'type': 'boolean', 'required': False, 'default': True}
+                    'output_logline': {'type': 'boolean', 'required': False, 'default': True},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 },
                 {
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
@@ -371,7 +439,9 @@
                     'validate_cor_cover_vals_thres': {'type': 'float', 'required': False, 'default': 0.7},
                     'validate_cor_distinct_thres': {'type': 'float', 'required': False, 'default': 0.05},
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string'}, 'required': False, 'nullable': True, 'default': None},
-                    'ignore_list': {'type': 'list', 'schema': {'type': 'string'}, 'required': False, 'nullable': True, 'default': None}
+                    'ignore_list': {'type': 'list', 'schema': {'type': 'string'}, 'required': False, 'nullable': True, 'default': None},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 },
                 {
                     'id': {'type': 'string', 'required': False, 'nullable': True, 'default': None},
@@ -413,7 +483,9 @@
                     'save_statistics': {'type': 'boolean', 'required': False, 'default': True},
                     'output_logline': {'type': 'boolean', 'required': False, 'default': True},
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string'}, 'required': False, 'nullable': True, 'default': None},
-                    'ignore_list': {'type': 'list', 'schema': {'type': 'string'}, 'required': False, 'nullable': True, 'default': None}
+                    'ignore_list': {'type': 'list', 'schema': {'type': 'string'}, 'required': False, 'nullable': True, 'default': None},
+                    'output_event_handlers': {'type': 'list', 'required': False, 'nullable': True, 'default': None},
+                    'suppress': {'type': 'boolean', 'required': False, 'default': False}
                 }
             ]
         }
