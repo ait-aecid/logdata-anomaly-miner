@@ -691,13 +691,10 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                     import configparser
                     import os
                     config = configparser.ConfigParser()
-                    kafkacfg = '/etc/aminer/kafka-client.conf'
-                    if 'cfgfile' in item:
-                        kafkacfg = item['cfgfile']
-                    if os.access(kafkacfg, os.R_OK):
-                        config.read(kafkacfg)
+                    if os.access(item['cfgfile'], os.R_OK):
+                        config.read(item['cfgfile'])
                     else:
-                        msg = "%s does not exist or is not readable" % kafkacfg
+                        msg = "%s does not exist or is not readable" % item['cfgfile']
                         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     options = dict(config.items("DEFAULT"))
