@@ -106,7 +106,7 @@ def build_analysis_pipeline(analysis_context):
     atom_filter.add_handler(simple_unparsed_atom_handler, stop_when_handled_flag=True)
     analysis_context.register_component(simple_unparsed_atom_handler, component_name="UnparsedHandler")
 
-    from aminer.analysis import NewMatchPathDetector
+    from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
     new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=True)
     analysis_context.register_component(new_match_path_detector, component_name="NewMatchPath")
     atom_filter.add_handler(new_match_path_detector)

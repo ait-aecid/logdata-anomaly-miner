@@ -226,7 +226,7 @@ def build_analysis_pipeline(analysis_context):
     analysis_context.register_component(timestamps_unsorted_detector, component_name="TimestampsUnsortedDetector")
 
     from aminer.analysis import Rules
-    from aminer.analysis import AllowlistViolationDetector
+    from aminer.analysis.AllowlistViolationDetector import AllowlistViolationDetector
     allowlist_rules = [
         Rules.OrMatchRule([
             Rules.AndMatchRule([
@@ -243,7 +243,7 @@ def build_analysis_pipeline(analysis_context):
     analysis_context.register_component(allowlist_violation_detector, component_name="Allowlist")
     atom_filter.add_handler(allowlist_violation_detector)
 
-    from aminer.analysis import NewMatchPathDetector
+    from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
     new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=True)
     analysis_context.register_component(new_match_path_detector, component_name="NewMatchPath")
     atom_filter.add_handler(new_match_path_detector)

@@ -253,7 +253,7 @@ def build_analysis_pipeline(analysis_context):
     analysis_context.register_component(timestamps_unsorted_detector, component_name="TimestampsUnsortedDetector")
 
     from aminer.analysis import Rules
-    from aminer.analysis import AllowlistViolationDetector
+    from aminer.analysis.AllowlistViolationDetector import AllowlistViolationDetector
     allowlist_rules = [
         Rules.OrMatchRule([
             Rules.AndMatchRule([
@@ -271,7 +271,7 @@ def build_analysis_pipeline(analysis_context):
     analysis_context.register_component(allowlist_violation_detector, component_name="Allowlist")
     atom_filter.add_handler(allowlist_violation_detector)
 
-    from aminer.analysis import ParserCount
+    from aminer.analysis.ParserCount import ParserCount
     parser_count = ParserCount(analysis_context.aminer_config, None, anomaly_event_handlers, 10)
     analysis_context.register_component(parser_count, component_name="ParserCount")
     atom_filter.add_handler(parser_count)
@@ -292,19 +292,19 @@ def build_analysis_pipeline(analysis_context):
     analysis_context.register_component(vtd, component_name="VariableCorrelationDetector")
     atom_filter.add_handler(vtd)
 
-    from aminer.analysis import EventCorrelationDetector
+    from aminer.analysis.EventCorrelationDetector import EventCorrelationDetector
     ecd = EventCorrelationDetector(analysis_context.aminer_config, anomaly_event_handlers, check_rules_flag=True,
                                    hypothesis_max_delta_time=1.0)
     analysis_context.register_component(ecd, component_name="EventCorrelationDetector")
     atom_filter.add_handler(ecd)
 
-    from aminer.analysis import MatchFilter
+    from aminer.analysis.MatchFilter import MatchFilter
     match_filter = MatchFilter(analysis_context.aminer_config, ['/model/Random'], anomaly_event_handlers, target_value_list=[
         1, 10, 100], output_log_line=True)
     analysis_context.register_component(match_filter, component_name="MatchFilter")
     atom_filter.add_handler(match_filter)
 
-    from aminer.analysis import NewMatchPathDetector
+    from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
     new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=True,
                                                    output_log_line=True)
     analysis_context.register_component(new_match_path_detector, component_name="NewMatchPath")
