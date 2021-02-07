@@ -237,12 +237,12 @@ def build_input_pipeline(analysis_context, parsing_model):
     analysis_context.register_component(atom_filter, component_name="AtomFilter")
     anomaly_event_handlers = []
     # Now define the AtomizerFactory using the model. A simple line based one is usually sufficient.
-    from aminer.input import SimpleByteStreamLineAtomizerFactory
+    from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
     timestamp_paths = yaml_data['Input']['timestamp_paths']
     if isinstance(timestamp_paths, str):
         timestamp_paths = [timestamp_paths]
     if yaml_data['Input']['multi_source'] is True:
-        from aminer.input import SimpleMultisourceAtomSync
+        from aminer.input.SimpleMultisourceAtomSync import SimpleMultisourceAtomSync
         analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(parsing_model, [SimpleMultisourceAtomSync([
             atom_filter], sync_wait_time=5)], anomaly_event_handlers, default_timestamp_paths=timestamp_paths)
     else:
@@ -250,10 +250,10 @@ def build_input_pipeline(analysis_context, parsing_model):
             parsing_model, [atom_filter], anomaly_event_handlers, default_timestamp_paths=timestamp_paths)
     # Just report all unparsed atoms to the event handlers.
     if yaml_data['Input']['verbose'] is True:
-        from aminer.input import VerboseUnparsedAtomHandler
+        from aminer.input.VerboseUnparsedAtomHandler import VerboseUnparsedAtomHandler
         atom_filter.add_handler(VerboseUnparsedAtomHandler(anomaly_event_handlers, parsing_model), stop_when_handled_flag=True)
     else:
-        from aminer.input import SimpleUnparsedAtomHandler
+        from aminer.input.SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler
         atom_filter.add_handler(SimpleUnparsedAtomHandler(anomaly_event_handlers), stop_when_handled_flag=True)
     from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
     if 'LearnMode' in yaml_data:

@@ -17,7 +17,7 @@ import time
 import logging
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
-from aminer.input import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util import TimeTriggeredComponentInterface
 
 

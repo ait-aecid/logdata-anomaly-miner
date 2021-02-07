@@ -15,7 +15,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import logging
 from aminer import AminerConfig
 from aminer.input.LogAtom import LogAtom
-from aminer.input import StreamAtomizer
+from aminer.input.InputInterfaces import StreamAtomizer
 from aminer.parsing import MatchContext
 from aminer.parsing import ParserMatch
 

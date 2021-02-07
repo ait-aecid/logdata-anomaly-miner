@@ -112,17 +112,17 @@ def build_analysis_pipeline(analysis_context):
     syslog_writer_event_handler = SyslogWriterEventHandler(analysis_context)
     anomaly_event_handlers = [stream_printer_event_handler, syslog_writer_event_handler]
 
-    from aminer.input import SimpleMultisourceAtomSync
+    from aminer.input.SimpleMultisourceAtomSync import SimpleMultisourceAtomSync
     simple_multisource_atom_sync = SimpleMultisourceAtomSync([atom_filter], 9)
 
     # Now define the AtomizerFactory using the model. A simple line
     # based one is usually sufficient.
-    from aminer.input import SimpleByteStreamLineAtomizerFactory
+    from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
     analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
         parsing_model, [simple_multisource_atom_sync], anomaly_event_handlers, default_timestamp_paths=['model/DiskUpgrade/Date'])
 
     # Just report all unparsed atoms to the event handlers.
-    from aminer.input import SimpleUnparsedAtomHandler
+    from aminer.input.SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler
     simple_unparsed_atom_handler = SimpleUnparsedAtomHandler(anomaly_event_handlers)
     atom_filter.add_handler(simple_unparsed_atom_handler, stop_when_handled_flag=True)
     analysis_context.register_component(simple_unparsed_atom_handler, component_name="UnparsedHandler")

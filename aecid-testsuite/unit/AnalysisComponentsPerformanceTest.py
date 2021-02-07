@@ -23,7 +23,7 @@ from aminer.analysis.MatchFilter import MatchFilter
 from aminer.analysis.VariableTypeDetector import VariableTypeDetector
 from aminer.analysis.VariableCorrelationDetector import VariableCorrelationDetector
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
-from aminer.input import LogAtom
+from aminer.input.LogAtom import LogAtom
 from aminer.parsing import ParserMatch, MatchContext, MatchElement, DecimalIntegerValueModelElement, FirstMatchModelElement, \
     DelimitedDataModelElement, FixedWordlistDataModelElement, AnyByteDataModelElement, SequenceModelElement, FixedDataModelElement
 from unit.TestBase import TestBase

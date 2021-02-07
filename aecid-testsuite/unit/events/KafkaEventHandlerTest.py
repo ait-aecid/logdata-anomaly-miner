@@ -3,7 +3,7 @@ from datetime import datetime
 from kafka import KafkaConsumer
 from aminer.events.JsonConverterHandler import JsonConverterHandler
 from aminer.events.KafkaEventHandler import KafkaEventHandler
-from aminer.input import LogAtom
+from aminer.input.LogAtom import LogAtom
 from aminer.parsing import MatchContext, FixedDataModelElement, ParserMatch
 from unit.TestBase import TestBase
 

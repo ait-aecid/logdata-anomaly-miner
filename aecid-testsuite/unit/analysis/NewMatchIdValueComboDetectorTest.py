@@ -1,7 +1,7 @@
 import time
 
 from aminer.analysis.NewMatchIdValueComboDetector import NewMatchIdValueComboDetector
-from aminer.input import LogAtom
+from aminer.input.LogAtom import LogAtom
 from aminer.parsing import FirstMatchModelElement, SequenceModelElement, FixedDataModelElement, DelimitedDataModelElement, \
     DecimalIntegerValueModelElement, FixedWordlistDataModelElement, AnyByteDataModelElement, MatchContext, ParserMatch
 from unit.TestBase import TestBase

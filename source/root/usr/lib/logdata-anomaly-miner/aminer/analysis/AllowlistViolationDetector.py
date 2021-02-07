@@ -14,7 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
 
-from aminer.input import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.AminerConfig import CONFIG_KEY_LOG_LINE_PREFIX
 from datetime import datetime
 

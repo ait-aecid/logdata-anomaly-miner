@@ -205,7 +205,7 @@ logdata-anomaly-miner (0.0.6) xenial; urgency=low
       fields (D):
 
   -from aminer.parsing import ParsedAtomHandlerInterface
-  +from aminer.input import AtomHandlerInterface
+  +from aminer.input.InputInterfaces import AtomHandlerInterface
   -class YourHandler(ParsedAtomHandlerInterface, ...
   +class YourHandler(AtomHandlerInterface,
   -  def receiveParsedAtom(self, atom_data, parser_match):
@@ -265,7 +265,7 @@ logdata-anomaly-miner (0.0.5) xenial; urgency=low
 
   # Now define the AtomizerFactory using the model. A simple line
   # based one is usually sufficient.
-    from aminer.input import SimpleByteStreamLineAtomizerFactory
+    from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
     analysis_context.atomizer_factory=SimpleByteStreamLineAtomizerFactory(
         parsing_model, parsed_atom_handlers, unparsed_atom_handlers,
         anomaly_event_handlers, default_timestamp_paths=['/model/syslog/time'])

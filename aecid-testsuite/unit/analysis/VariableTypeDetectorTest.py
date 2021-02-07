@@ -1,6 +1,6 @@
 from aminer.analysis.EventTypeDetector import EventTypeDetector
 from aminer.analysis.VariableTypeDetector import VariableTypeDetector, convert_to_floats, consists_of_ints, consists_of_floats
-from aminer.input import LogAtom
+from aminer.input.LogAtom import LogAtom
 from aminer.parsing import ParserMatch, MatchElement
 from unit.TestBase import TestBase
 

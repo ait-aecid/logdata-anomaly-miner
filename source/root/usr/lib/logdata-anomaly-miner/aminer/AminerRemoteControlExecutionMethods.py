@@ -19,7 +19,7 @@ from time import time
 from datetime import datetime
 import logging
 import re
-from aminer.input import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util import PersistenceUtil
 
 attr_str = '"%s": %s,\n'

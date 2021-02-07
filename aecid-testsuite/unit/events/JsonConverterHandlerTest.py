@@ -2,7 +2,7 @@ import time
 import unittest
 from datetime import datetime
 from aminer.events.JsonConverterHandler import JsonConverterHandler
-from aminer.input import LogAtom
+from aminer.input.LogAtom import LogAtom
 from aminer.parsing import MatchContext, FixedDataModelElement, ParserMatch
 from unit.TestBase import TestBase
 
