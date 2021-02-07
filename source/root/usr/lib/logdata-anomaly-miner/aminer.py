@@ -38,7 +38,7 @@ import argparse
 
 # As site packages are not included, define from where we need to execute code before loading it.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
-from aminer import AminerConfig  # skipcq: FLK-E402
+import aminer.AminerConfig as AminerConfig  # skipcq: FLK-E402
 from aminer.util.StringUtil import colflame, flame, supports_color  # skipcq: FLK-E402
 from aminer.util.PersistenceUtil import clear_persistence, copytree  # skipcq: FLK-E402
 from metadata import __version_string__  # skipcq: FLK-E402
