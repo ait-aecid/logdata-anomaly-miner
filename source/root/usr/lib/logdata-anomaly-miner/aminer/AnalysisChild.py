@@ -476,7 +476,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
-    def get_time_trigger_class(self):
+    def get_time_trigger_class(self):  # skipcq: PYL-R0201
         """
         Get the trigger class this component can be registered for.
         See AnalysisContext class for different trigger classes available.

@@ -65,7 +65,14 @@ class EventHandlerType:
 
     def __init__(self, name):
         self.name = name
-        self.func = getattr(__import__("aminer.events", fromlist=[name]), name)
+        module = "aminer.events"
+        if name in ('EventHandlerInterface', 'EventSourceInterface'):
+            module += '.EventInterfaces'
+        elif name == 'VolatileLogarithmicBackoffEventHistory':
+            module += '.Utils'
+        else:
+            module += '.' + name
+        self.func = getattr(__import__(module, fromlist=[name]), name)
 
     def __str__(self):
         return self.name

@@ -59,6 +59,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         self.log_total = 0
         self.log_learned_path_value_combos = 0
         self.log_new_learned_values = []
+        self.next_persist_time = None
 
     def load_persistence_data(self):
         """Load the persistence data from storage."""
