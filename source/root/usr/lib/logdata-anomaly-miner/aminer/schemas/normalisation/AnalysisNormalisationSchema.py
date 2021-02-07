@@ -55,7 +55,7 @@
                 'time_unit': {'type': 'integer'},
                 'histogram_defs': {'type': 'list', 'schema': {'type': 'list', 'schema': {'type': 'string'}}},
                 'bin_definition': {'type': 'string'},
-                'tuple_transformation_function': {'type': 'string'},
+                'tuple_transformation_function': {'type': 'string', 'allowed': ['demo'], 'nullable': True, 'default': None},
                 'value_list': {
                     'type': 'list', 'schema': {'type': ['boolean', 'float', 'integer', 'string']}, 'nullable': True, 'default': None},
                 'timestamp_path': {'type': 'string'},
