@@ -59,7 +59,7 @@ from datetime import datetime
 
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
-from aminer.input.InputInterfacesy import AtomHandlerInterface
+from aminer.input.InputInterface import AtomHandlerInterface
 from aminer.util import PersistenceUtil
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
