@@ -1,7 +1,14 @@
 import unittest
-from aminer.analysis import NewMatchPathDetector, MatchValueAverageChangeDetector, MatchValueStreamWriter, \
-    MissingMatchPathListValueDetector, NewMatchPathValueComboDetector, NewMatchPathValueDetector, TimeCorrelationDetector, \
-    TimestampsUnsortedDetector, Rules, AllowlistViolationDetector
+from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
+from aminer.analysis.MatchValueAverageChangeDetector import MatchValueAverageChangeDetector
+from aminer.analysis.MatchValueStreamWriter import MatchValueStreamWriter
+from aminer.analysis.MissingMatchPathValueDetector import MissingMatchPathListValueDetector
+from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
+from aminer.analysis.NewMatchPathValueDetector import NewMatchPathValueDetector
+from aminer.analysis.TimeCorrelationDetector import TimeCorrelationDetector
+from aminer.analysis.TimestampsUnsortedDetector import TimestampsUnsortedDetector
+from aminer.analysis import Rules
+from aminer.analysis.AllowlistViolationDetector import AllowlistViolationDetector
 from aminer.analysis.AtomFilters import MatchPathFilter, SubhandlerFilter, MatchValueFilter
 from aminer.analysis.EventTypeDetector import EventTypeDetector
 from aminer.analysis.HistogramAnalysis import ModuloTimeBinDefinition, HistogramData, HistogramAnalysis
