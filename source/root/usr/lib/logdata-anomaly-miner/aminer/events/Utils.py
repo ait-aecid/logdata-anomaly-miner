@@ -13,7 +13,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 from aminer.events.EventInterfaces import EventHandlerInterface
-from aminer.util import LogarithmicBackoffHistory
+from aminer.util.History import LogarithmicBackoffHistory
 
 
 class VolatileLogarithmicBackoffEventHistory(EventHandlerInterface, LogarithmicBackoffHistory):

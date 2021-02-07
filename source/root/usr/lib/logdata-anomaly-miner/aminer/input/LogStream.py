@@ -24,7 +24,7 @@ import logging
 
 from aminer import AminerConfig
 from aminer.util import SecureOSFunctions
-from aminer.util import encode_byte_string_as_string
+from aminer.util.StringUtil import encode_byte_string_as_string
 
 
 class LogDataResource(metaclass=abc.ABCMeta):

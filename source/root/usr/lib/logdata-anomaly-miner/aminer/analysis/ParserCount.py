@@ -18,7 +18,7 @@ import logging
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input.InputInterfaces import AtomHandlerInterface
-from aminer.util import TimeTriggeredComponentInterface
+from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
 
 current_processed_lines_str = 'CurrentProcessedLines'

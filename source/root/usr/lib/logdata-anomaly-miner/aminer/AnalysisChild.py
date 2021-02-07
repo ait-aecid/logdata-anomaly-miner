@@ -32,7 +32,7 @@ from aminer import AminerConfig
 from aminer.input.LogStream import LogStream
 from aminer.util import PersistenceUtil
 from aminer.util import SecureOSFunctions
-from aminer.util import TimeTriggeredComponentInterface
+from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 from aminer.util import JsonUtil
 from aminer.AminerRemoteControlExecutionMethods import AminerRemoteControlExecutionMethods
 

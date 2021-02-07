@@ -220,7 +220,7 @@ logdata-anomaly-miner (0.0.6) xenial; urgency=low
       of other classes does not make sense any more (U):
 
   -from aminer.analysis import VolatileLogarithmicBackoffParsedAtomHistory
-  +from aminer.util import VolatileLogarithmicBackoffAtomHistory
+  +from aminer.util.History import VolatileLogarithmicBackoffAtomHistory
   - from aminer.analysis import ParsedAtomFilters
   + from aminer.analysis import AtomFilters
   - match_action=Rules.ParsedAtomFilterMatchAction(...
