@@ -21,8 +21,7 @@ import logging
 from aminer import AminerConfig
 from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
 from aminer.util import PersistenceUtil
-from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
-from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME
+from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX
 
 
 class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):

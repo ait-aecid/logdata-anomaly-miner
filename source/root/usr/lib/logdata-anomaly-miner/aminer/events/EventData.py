@@ -11,7 +11,7 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 from datetime import datetime
-from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
+from aminer.AminerConfig import CONFIG_KEY_LOG_LINE_PREFIX
 
 
 class EventData:

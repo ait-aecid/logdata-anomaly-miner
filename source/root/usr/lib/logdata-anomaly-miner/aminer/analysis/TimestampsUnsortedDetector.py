@@ -16,7 +16,7 @@ import os
 
 from aminer.input import AtomHandlerInterface
 from datetime import datetime
-from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
+from aminer.AminerConfig import CONFIG_KEY_LOG_LINE_PREFIX
 
 
 class TimestampsUnsortedDetector(AtomHandlerInterface):

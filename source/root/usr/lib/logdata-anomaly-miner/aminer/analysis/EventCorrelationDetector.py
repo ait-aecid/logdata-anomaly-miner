@@ -26,13 +26,12 @@ import time
 import logging
 
 from aminer import AminerConfig
-from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME
+from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events import EventSourceInterface
 from aminer.input import AtomHandlerInterface
 from aminer.util import PersistenceUtil
 from aminer.util import TimeTriggeredComponentInterface
-from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
 
 class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
