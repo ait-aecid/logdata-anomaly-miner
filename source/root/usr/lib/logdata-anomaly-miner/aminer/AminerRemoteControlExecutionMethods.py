@@ -311,7 +311,7 @@ class AminerRemoteControlExecutionMethods:
             aminer.analysis.AtomFilters.MatchValueFilter, aminer.analysis.LinearNumericBinDefinition, aminer.analysis.BinDefinition,
             aminer.analysis.ModuloTimeBinDefinition, aminer.analysis.Rules.MatchAction, aminer.analysis.Rules.MatchRule,
             aminer.analysis.HistogramData, aminer.analysis.CorrelationRule, aminer.analysis.CorrelationFeature,
-            aminer.events.EventHandlerInterface, aminer.util.ObjectHistory]
+            aminer.events.EventInterfaces.EventHandlerInterface, aminer.util.ObjectHistory]
         for c in class_list:
             if isinstance(obj, c):
                 return True
@@ -535,7 +535,7 @@ class AminerRemoteControlExecutionMethods:
         @param id_spec_list a list of numeric ids of the events to be allowlisted.
         @param allowlisting_data this data is passed on into the allowlist_event method.
         """
-        from aminer.events import EventSourceInterface
+        from aminer.events.EventInterfaces import EventSourceInterface
         history_handler = analysis_context.get_component_by_name(history_component_name)
         if history_handler is None:
             self.REMOTE_CONTROL_RESPONSE = component_not_found

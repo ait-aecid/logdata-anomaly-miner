@@ -87,5 +87,5 @@ def build_analysis_pipeline(analysis_context):
     atom_filter.add_handler(new_match_path_value_combo_detector2)
 
     # Add stdout stream printing for debugging, tuning.
-    from aminer.events import StreamPrinterEventHandler
+    from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
     anomaly_event_handlers.append(StreamPrinterEventHandler(analysis_context))

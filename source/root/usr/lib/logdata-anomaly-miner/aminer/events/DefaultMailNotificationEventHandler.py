@@ -22,7 +22,7 @@ import sys
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.util import TimeTriggeredComponentInterface
-from aminer.events import EventHandlerInterface
+from aminer.events.EventInterfaces import EventHandlerInterface
 from aminer.events.EventData import EventData
 
 

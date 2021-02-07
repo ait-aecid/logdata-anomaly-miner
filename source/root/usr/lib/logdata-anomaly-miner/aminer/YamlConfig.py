@@ -709,14 +709,14 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                 if ctx is None:
                     ctx = func(analysis_context)
                 if item['json'] is True or item['type'].name == 'KafkaEventHandler':
-                    from aminer.events import JsonConverterHandler
+                    from aminer.events.JsonConverterHandler import JsonConverterHandler
                     ctx = JsonConverterHandler([ctx], analysis_context)
                 anomaly_event_handlers.append(ctx)
             return event_handler_id_list
         raise KeyError()
     except KeyError:
         # Add stdout stream printing for debugging, tuning.
-        from aminer.events import StreamPrinterEventHandler
+        from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
         anomaly_event_handlers.append(StreamPrinterEventHandler(analysis_context, stream=sys.stderr))
     return None
 

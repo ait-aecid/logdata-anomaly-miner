@@ -203,7 +203,7 @@ def build_analysis_pipeline(analysis_context):
     stream_printer_event_handler = StreamPrinterEventHandler(analysis_context)
     from aminer.events.SyslogWriterEventHandler import SyslogWriterEventHandler
     syslog_event_handler = SyslogWriterEventHandler(analysis_context)
-    from aminer.events import DefaultMailNotificationEventHandler
+    from aminer.events.DefaultMailNotificationEventHandler import DefaultMailNotificationEventHandler
     if DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS in analysis_context.aminer_config.config_properties:
         mail_notification_handler = DefaultMailNotificationEventHandler(analysis_context)
         analysis_context.register_component(mail_notification_handler, component_name="MailHandler")

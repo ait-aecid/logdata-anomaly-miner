@@ -15,7 +15,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import sys
 import logging
 from aminer import AminerConfig
-from aminer.events import EventHandlerInterface
+from aminer.events.EventInterfaces import EventHandlerInterface
 
 
 class KafkaEventHandler(EventHandlerInterface):
