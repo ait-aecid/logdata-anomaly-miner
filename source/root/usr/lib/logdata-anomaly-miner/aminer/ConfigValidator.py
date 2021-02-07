@@ -32,7 +32,26 @@ class AnalysisType:
 
     def __init__(self, name):
         self.name = name
-        self.func = getattr(__import__("aminer.analysis", fromlist=[name]), name)
+        module = "aminer.analysis"
+        if name in ('MatchPathFilter', 'MatchValueFilter', 'SubhandlerFilter'):
+            module += '.AtomFilters'
+        elif name in ('LinearNumericBinDefinition', 'ModuloTimeBinDefinition', 'PathDependentHistogramAnalysis', 'BinDefinition',
+                      'HistogramData'):
+            module += '.HistogramAnalysis'
+        elif name in ('AndMatchRule', 'OrMatchRule', 'AtomFilterMatchAction', 'DebugHistoryMatchRule', 'EventGenerationMatchAction',
+                      'DebugMatchRule', 'IPv4InRFC1918MatchRule', 'ModuloTimeMatchRule', 'NegationMatchRule', 'ParallelMatchRule',
+                      'PathExistsMatchRule', 'StringRegexMatchRule', 'ValueDependentDelegatedMatchRule',
+                      'ValueDependentModuloTimeMatchRule', 'ValueListMatchRule', 'ValueMatchRule', 'ValueRangeMatchRule'):
+            module += '.Rules'
+        elif name in ('TimeCorrelationDetector', 'CorrelationFeature'):
+            module += '.TimeCorrelationDetector'
+        elif name in ('TimeCorrelationViolationDetector', 'CorrelationRule', 'EventClassSelector'):
+            module += '.TimeCorrelationViolationDetector'
+        elif name == 'SimpleMonotonicTimestampAdjust':
+            module += '.TimestampCorrectionFilters'
+        else:
+            module += '.' + name
+        self.func = getattr(__import__(module, fromlist=[name]), name)
 
     def __str__(self):
         return self.name
