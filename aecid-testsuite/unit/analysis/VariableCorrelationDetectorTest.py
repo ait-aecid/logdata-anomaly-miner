@@ -2,7 +2,8 @@ from aminer.analysis.EventTypeDetector import EventTypeDetector
 from aminer.analysis.VariableTypeDetector import VariableTypeDetector
 from aminer.analysis.VariableCorrelationDetector import VariableCorrelationDetector
 from aminer.input.LogAtom import LogAtom
-from aminer.parsing import ParserMatch, MatchElement
+from aminer.parsing.ParserMatch import ParserMatch
+from aminer.parsing.MatchElement import MatchElement
 from unit.TestBase import TestBase
 
 from time import time

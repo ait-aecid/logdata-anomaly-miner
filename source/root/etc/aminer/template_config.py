@@ -35,7 +35,7 @@ def build_analysis_pipeline(analysis_context):
     It has also to define an AtomizerFactory to instruct aminer how to process incoming data streams to create log atoms from them.
     """
     # Build the parsing model:
-    from aminer.parsing import SequenceModelElement
+    from aminer.parsing.SequenceModelElement import SequenceModelElement
 
     import ApacheAccessModel
     apache_access_model = ApacheAccessModel.get_model()

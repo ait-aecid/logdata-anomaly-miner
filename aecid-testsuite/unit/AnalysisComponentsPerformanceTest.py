@@ -24,8 +24,16 @@ from aminer.analysis.VariableTypeDetector import VariableTypeDetector
 from aminer.analysis.VariableCorrelationDetector import VariableCorrelationDetector
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
 from aminer.input.LogAtom import LogAtom
-from aminer.parsing import ParserMatch, MatchContext, MatchElement, DecimalIntegerValueModelElement, FirstMatchModelElement, \
-    DelimitedDataModelElement, FixedWordlistDataModelElement, AnyByteDataModelElement, SequenceModelElement, FixedDataModelElement
+from aminer.parsing.ParserMatch import ParserMatch
+from aminer.parsing.MatchContext import MatchContext
+from aminer.parsing.MatchElement import MatchElement
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
+from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
+from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
+from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
+from aminer.parsing.SequenceModelElement import SequenceModelElement
+from aminer.parsing.FixedDataModelElement import FixedDataModelElement
 from unit.TestBase import TestBase
 import time
 import random

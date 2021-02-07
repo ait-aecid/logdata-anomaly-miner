@@ -16,8 +16,8 @@ import logging
 from aminer import AminerConfig
 from aminer.input.LogAtom import LogAtom
 from aminer.input.InputInterfaces import StreamAtomizer
-from aminer.parsing import MatchContext
-from aminer.parsing import ParserMatch
+from aminer.parsing.MatchContext import MatchContext
+from aminer.parsing.ParserMatch import ParserMatch
 
 
 class ByteStreamLineAtomizer(StreamAtomizer):

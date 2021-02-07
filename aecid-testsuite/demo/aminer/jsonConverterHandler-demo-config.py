@@ -1,8 +1,21 @@
-from aminer.parsing import FirstMatchModelElement, SequenceModelElement, DecimalFloatValueModelElement, FixedDataModelElement, \
-    DelimitedDataModelElement, AnyByteDataModelElement, FixedWordlistDataModelElement, DecimalIntegerValueModelElement, \
-    DateTimeModelElement, IpAddressDataModelElement, Base64StringModelElement, ElementValueBranchModelElement, HexStringModelElement, \
-    MultiLocaleDateTimeModelElement, OptionalMatchModelElement, RepeatedElementDataModelElement, VariableByteDataModelElement, \
-    WhiteSpaceLimitedDataModelElement
+from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
+from aminer.parsing.SequenceModelElement import SequenceModelElement
+from aminer.parsing.DecimalFloatValueModelElement import DecimalFloatValueModelElement
+from aminer.parsing.FixedDataModelElement import FixedDataModelElement
+from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
+from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
+from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.DateTimeModelElement import DateTimeModelElement
+from aminer.parsing.IpAddressDataModelElement import IpAddressDataModelElement
+from aminer.parsing.Base64StringModelElement import Base64StringModelElement
+from aminer.parsing.ElementValueBranchModelElement import ElementValueBranchModelElement
+from aminer.parsing.HexStringModelElement import HexStringModelElement
+from aminer.parsing.MultiLocaleDateTimeModelElement import MultiLocaleDateTimeModelElement
+from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
+from aminer.parsing.RepeatedElementDataModelElement import RepeatedElementDataModelElement
+from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
+from aminer.parsing.WhiteSpaceLimitedDataModelElement import WhiteSpaceLimitedDataModelElement
 
 # This is a template for the "aminer" logfile miner tool. Copy
 # it to "config.py" and define your ruleset.

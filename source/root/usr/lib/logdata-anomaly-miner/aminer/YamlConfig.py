@@ -208,7 +208,7 @@ def build_parsing_model():
         if isinstance(start['args'], list):
             for i in start['args']:
                 if i == 'WHITESPACE':
-                    from aminer.parsing import FixedDataModelElement
+                    from aminer.parsing.FixedDataModelElement import FixedDataModelElement
                     sp = 'sp%d' % ws_count
                     args_list.append(FixedDataModelElement(sp, whitespace_str))
                     ws_count += 1

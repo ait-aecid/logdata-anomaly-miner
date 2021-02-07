@@ -13,7 +13,7 @@ class ParserModelType:
         self.name = name
         if name.endswith('ModelElement'):
             self.is_model = True
-            self.func = getattr(__import__("aminer.parsing", fromlist=[name]), name)
+            self.func = getattr(__import__("aminer.parsing" + name, fromlist=[name]), name)
         else:
             self.is_model = False
             # we need this import:

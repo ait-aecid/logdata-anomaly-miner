@@ -80,7 +80,7 @@ def build_analysis_pipeline(analysis_context):
     It has also to define an AtomizerFactory to instruct aminer how to process incoming data streams to create log atoms from them.
     """
     # Build the parsing model:
-    from aminer.parsing import AnyByteDataModelElement
+    from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
 
     parsing_model = AnyByteDataModelElement('AnyByteDataModelElement')
 

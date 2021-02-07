@@ -77,12 +77,12 @@ def build_analysis_pipeline(analysis_context):
     It has also to define an AtomizerFactory to instruct aminer how to process incoming data streams to create log atoms from them.
     """
     # Build the parsing model:
-    from aminer.parsing import FirstMatchModelElement
-    from aminer.parsing import SequenceModelElement
+    from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
+    from aminer.parsing.SequenceModelElement import SequenceModelElement
     from aminer.parsing.DateTimeModelElement import DateTimeModelElement
-    from aminer.parsing import FixedDataModelElement
+    from aminer.parsing.FixedDataModelElement import FixedDataModelElement
     from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
-    from aminer.parsing import AnyByteDataModelElement
+    from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
 
     service_children_disk_upgrade = [
         DateTimeModelElement('DTM', b'%Y-%m-%d %H:%M:%S'), FixedDataModelElement('UNameSpace1', b' '),

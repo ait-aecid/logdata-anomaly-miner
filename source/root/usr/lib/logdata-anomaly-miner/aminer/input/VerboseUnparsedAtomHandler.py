@@ -12,7 +12,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 from aminer.input.InputInterfaces import AtomHandlerInterface
-from aminer.parsing import DebugMatchContext
+from aminer.parsing.DebugMatchContext import DebugMatchContext
 
 
 class VerboseUnparsedAtomHandler(AtomHandlerInterface):

@@ -19,7 +19,7 @@ import logging
 
 from aminer import AminerConfig
 from aminer.parsing.MatchElement import MatchElement
-from aminer.parsing import ModelElementInterface
+from aminer.parsing.ModelElementInterface import ModelElementInterface
 
 
 class MultiLocaleDateTimeModelElement(ModelElementInterface):

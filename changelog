@@ -297,7 +297,7 @@ logdata-anomaly-miner (0.0.3) xenial; urgency=low
   * To improve readability of configuration files, main parser,
     analysis and event classes were added to the submodule namespaces.
     After imports directly from the submodule, e.g.
-    "from aminer.parsing import FixedDataModelElement",
+    "from aminer.parsing.FixedDataModelElement import FixedDataModelElement",
     the name duplication "FixedDataModelElement.FixedDataModelElement"
     is not required any more, "FixedDataModelElement" is sufficient.
     Use "sed -i -e 's/Name.Name/Name/g' [files]" to adapt.
