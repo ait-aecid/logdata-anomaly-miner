@@ -762,7 +762,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
                     if self.var_type[event_index][var_index][0] in self.distr_list:
                         self.bt_results[event_index][var_index] = [1] * self.num_s_ks_bt
-                        if self.var_type[event_index][var_index][0] == 'betam' or self.var_type[event_index][var_index][0] == 'spec':
+                        if self.var_type[event_index][var_index][0] in ('betam', 'spec'):
                             self.s_ks_get_quantiles(event_index, var_index)
                     elif self.var_type[event_index][var_index][0] == 'd':
                         self.d_init_bt(event_index, var_index)
@@ -794,7 +794,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         self.var_type[event_index][var_index] = tmp_var_type[:-1]
                         self.alternative_distribution_types[event_index][var_index] = tmp_var_type[-1]
                         self.bt_results[event_index][var_index] = [1] * self.num_s_ks_bt
-                        if self.var_type[event_index][var_index][0] == 'betam' or self.var_type[event_index][var_index][0] == 'spec':
+                        if self.var_type[event_index][var_index][0] in ('betam', 'spec'):
                             self.s_ks_get_quantiles(event_index, var_index)
 
                     # Initializes the binomialtest for the discrete type
@@ -826,7 +826,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         self.var_type[event_index][var_index] = tmp_var_type[:-1]
                         self.alternative_distribution_types[event_index][var_index] = tmp_var_type[-1]
                         self.bt_results[event_index][var_index] = [1] * self.num_s_ks_bt
-                        if self.var_type[event_index][var_index][0] == 'betam' or self.var_type[event_index][var_index][0] == 'spec':
+                        if self.var_type[event_index][var_index][0] in ('betam', 'spec'):
                             self.s_ks_get_quantiles(event_index, var_index)
 
                     # Initializes the binomialtest for the discrete type
@@ -1382,7 +1382,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     self.alternative_distribution_types[event_index][var_index] = self.alternative_distribution_types[event_index][
                         var_index][1:]
                     self.bt_results[event_index][var_index] = [1] * self.num_s_ks_bt
-                    if self.var_type[event_index][var_index][0] == 'betam' or self.var_type[event_index][var_index][0] == 'spec':
+                    if self.var_type[event_index][var_index][0] in ('betam', 'spec'):
                         self.s_ks_get_quantiles(event_index, var_index)
 
                     s_ks_result = self.s_ks_test(event_index, var_index, first_distr)
@@ -1631,7 +1631,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     self.var_type[event_index][var_index] = vt_new[:-1]
                     self.alternative_distribution_types[event_index][var_index] = vt_new[-1]
                     self.bt_results[event_index][var_index] = [1] * self.num_s_ks_bt
-                    if self.var_type[event_index][var_index][0] == 'betam' or self.var_type[event_index][var_index][0] == 'spec':
+                    if self.var_type[event_index][var_index][0] in ('betam', 'spec'):
                         self.s_ks_get_quantiles(event_index, var_index)
 
                 # VarType is discrete
@@ -2279,7 +2279,7 @@ def get_vt_string(vt):
         else:
             return_string = return_string[:-2]
             return_string += ']'
-    elif vt[0] == 'asc' or vt[0] == 'desc':
+    elif vt[0] in ('asc', 'desc'):
         return_string = '%s [%s]' % (vt[0], vt[1])
     elif vt[0] == 'unq':
         return_string = vt[0]

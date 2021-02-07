@@ -185,7 +185,7 @@ def save_config(analysis_context, new_file):
             p2 = old.find(",", pos)
             if p1 != -1 and p2 != -1:
                 end = min(old.find(")", pos), old.find(",", pos))
-            elif p1 == -1 and p2 == -1:
+            elif -1 not in (p1, p2):
                 msg += "WARNING: '%s.%s' could not be found in the current config!\n" % (component_name, attr)
                 rc_logger = logging.getLogger(REMOTE_CONTROL_LOG_NAME)
                 rc_logger.warning(msg.strip('\n'))

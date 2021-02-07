@@ -578,7 +578,12 @@ class AnalysisChildRemoteControlHandler:
                     else:
                         json_request_data[1] = json_request_data[1].decode()
                 methods = AminerRemoteControlExecutionMethods()
-                import aminer.analysis
+                from aminer.analysis import EnhancedNewMatchPathValueComboDetector, EventCorrelationDetector, EventTypeDetector, \
+                    HistogramAnalysis, MatchFilter, MatchValueAverageChangeDetector,\
+                    MatchValueStreamWriter, MissingMatchPathValueDetector, NewMatchIdValueComboDetector, NewMatchPathDetector,\
+                    NewMatchPathValueComboDetector, NewMatchPathValueDetector, ParserCount, Rules, TimeCorrelationDetector,\
+                    TimeCorrelationViolationDetector, TimestampCorrectionFilters, TimestampsUnsortedDetector, VariableTypeDetector,\
+                    AllowlistViolationDetector
                 exec_locals = {
                     'analysis_context': analysis_context, 'remote_control_data': json_request_data[1],
                     'print_current_config': methods.print_current_config, 'print_config_property': methods.print_config_property,
@@ -598,27 +603,27 @@ class AnalysisChildRemoteControlHandler:
                     'persist_all': methods.persist_all,
                     'list_backups': methods.list_backups,
                     'create_backup': methods.create_backup,
-                    'EnhancedNewMatchPathValueComboDetector': aminer.analysis.EnhancedNewMatchPathValueComboDetector,
-                    'EventCorrelationDetector': aminer.analysis.EventCorrelationDetector,
-                    'EventTypeDetector': aminer.analysis.EventTypeDetector,
-                    'HistogramAnalysis': aminer.analysis.HistogramAnalysis,
-                    'PathDependentHistogramAnalysis': aminer.analysis.PathDependentHistogramAnalysis,
-                    'MatchFilter': aminer.analysis.MatchFilter,
-                    'MatchValueAverageChangeDetector': aminer.analysis.MatchValueAverageChangeDetector,
-                    'MatchValueStreamWriter': aminer.analysis.MatchValueStreamWriter,
-                    'MissingMatchPathValueDetector': aminer.analysis.MissingMatchPathValueDetector,
-                    'NewMatchIdValueComboDetector': aminer.analysis.NewMatchIdValueComboDetector,
-                    'NewMatchPathDetector': aminer.analysis.NewMatchPathDetector,
-                    'NewMatchPathValueComboDetector': aminer.analysis.NewMatchPathValueComboDetector,
-                    'NewMatchPathValueDetector': aminer.analysis.NewMatchPathValueDetector,
-                    'ParserCount': aminer.analysis.ParserCount,
-                    'Rules': aminer.analysis.Rules,
-                    'TimeCorrelationDetector': aminer.analysis.TimeCorrelationDetector,
-                    'TimeCorrelationViolationDetector': aminer.analysis.TimeCorrelationViolationDetector,
-                    'TimestampCorrectionFilters': aminer.analysis.TimestampCorrectionFilters,
-                    'TimestampsUnsortedDetector': aminer.analysis.TimestampsUnsortedDetector,
-                    'VariableTypeDetector': aminer.analysis.VariableTypeDetector,
-                    'AllowlistViolationDetector': aminer.analysis.AllowlistViolationDetector
+                    'EnhancedNewMatchPathValueComboDetector': EnhancedNewMatchPathValueComboDetector.EnhancedNewMatchPathValueComboDetector,
+                    'EventCorrelationDetector': EventCorrelationDetector.EventCorrelationDetector,
+                    'EventTypeDetector': EventTypeDetector.EventTypeDetector,
+                    'HistogramAnalysis': HistogramAnalysis.HistogramAnalysis,
+                    'PathDependentHistogramAnalysis': HistogramAnalysis.PathDependentHistogramAnalysis,
+                    'MatchFilter': MatchFilter.MatchFilter,
+                    'MatchValueAverageChangeDetector': MatchValueAverageChangeDetector.MatchValueAverageChangeDetector,
+                    'MatchValueStreamWriter': MatchValueStreamWriter.MatchValueStreamWriter,
+                    'MissingMatchPathValueDetector': MissingMatchPathValueDetector.MissingMatchPathValueDetector,
+                    'NewMatchIdValueComboDetector': NewMatchIdValueComboDetector.NewMatchIdValueComboDetector,
+                    'NewMatchPathDetector': NewMatchPathDetector.NewMatchPathDetector,
+                    'NewMatchPathValueComboDetector': NewMatchPathValueComboDetector.NewMatchPathValueComboDetector,
+                    'NewMatchPathValueDetector': NewMatchPathValueDetector.NewMatchPathValueDetector,
+                    'ParserCount': ParserCount.ParserCount,
+                    'Rules': Rules,
+                    'TimeCorrelationDetector': TimeCorrelationDetector.TimeCorrelationDetector,
+                    'TimeCorrelationViolationDetector': TimeCorrelationViolationDetector.TimeCorrelationViolationDetector,
+                    'SimpleMonotonicTimestampAdjust': TimestampCorrectionFilters.SimpleMonotonicTimestampAdjust,
+                    'TimestampsUnsortedDetector': TimestampsUnsortedDetector.TimestampsUnsortedDetector,
+                    'VariableTypeDetector': VariableTypeDetector.VariableTypeDetector,
+                    'AllowlistViolationDetector': AllowlistViolationDetector.AllowlistViolationDetector
                 }
                 logging.getLogger(AminerConfig.REMOTE_CONTROL_LOG_NAME).log(15, json_request_data[0])
                 logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('Remote control: %s', json_request_data[0])
