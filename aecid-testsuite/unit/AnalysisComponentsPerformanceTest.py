@@ -1,7 +1,14 @@
 import unittest
-from aminer.analysis import NewMatchPathDetector, MatchValueAverageChangeDetector, MatchValueStreamWriter, \
-    MissingMatchPathListValueDetector, NewMatchPathValueComboDetector, NewMatchPathValueDetector, TimeCorrelationDetector, \
-    TimestampsUnsortedDetector, Rules, AllowlistViolationDetector
+from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
+from aminer.analysis.MatchValueAverageChangeDetector import MatchValueAverageChangeDetector
+from aminer.analysis.MatchValueStreamWriter import MatchValueStreamWriter
+from aminer.analysis.MissingMatchPathValueDetector import MissingMatchPathListValueDetector
+from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
+from aminer.analysis.NewMatchPathValueDetector import NewMatchPathValueDetector
+from aminer.analysis.TimeCorrelationDetector import TimeCorrelationDetector
+from aminer.analysis.TimestampsUnsortedDetector import TimestampsUnsortedDetector
+from aminer.analysis import Rules
+from aminer.analysis.AllowlistViolationDetector import AllowlistViolationDetector
 from aminer.analysis.AtomFilters import MatchPathFilter, SubhandlerFilter, MatchValueFilter
 from aminer.analysis.EventTypeDetector import EventTypeDetector
 from aminer.analysis.HistogramAnalysis import ModuloTimeBinDefinition, HistogramData, HistogramAnalysis
@@ -16,9 +23,17 @@ from aminer.analysis.MatchFilter import MatchFilter
 from aminer.analysis.VariableTypeDetector import VariableTypeDetector
 from aminer.analysis.VariableCorrelationDetector import VariableCorrelationDetector
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
-from aminer.input import LogAtom
-from aminer.parsing import ParserMatch, MatchContext, MatchElement, DecimalIntegerValueModelElement, FirstMatchModelElement, \
-    DelimitedDataModelElement, FixedWordlistDataModelElement, AnyByteDataModelElement, SequenceModelElement, FixedDataModelElement
+from aminer.input.LogAtom import LogAtom
+from aminer.parsing.ParserMatch import ParserMatch
+from aminer.parsing.MatchContext import MatchContext
+from aminer.parsing.MatchElement import MatchElement
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
+from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
+from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
+from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
+from aminer.parsing.SequenceModelElement import SequenceModelElement
+from aminer.parsing.FixedDataModelElement import FixedDataModelElement
 from unit.TestBase import TestBase
 import time
 import random

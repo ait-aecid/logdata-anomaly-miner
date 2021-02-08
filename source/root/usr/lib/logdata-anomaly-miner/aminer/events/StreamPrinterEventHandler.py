@@ -14,7 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import sys
 
-from aminer.events import EventHandlerInterface
+from aminer.events.EventInterfaces import EventHandlerInterface
 from aminer.events.EventData import EventData
 
 

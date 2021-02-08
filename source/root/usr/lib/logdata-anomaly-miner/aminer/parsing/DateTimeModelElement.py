@@ -20,7 +20,7 @@ import logging
 from dateutil.parser import parse
 
 from aminer import AminerConfig
-from aminer.parsing import ModelElementInterface
+from aminer.parsing.ModelElementInterface import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
 
 

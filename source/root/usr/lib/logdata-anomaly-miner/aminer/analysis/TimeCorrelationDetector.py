@@ -20,10 +20,10 @@ import logging
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.analysis import Rules
-from aminer.input import AtomHandlerInterface
-from aminer.util import get_log_int
+from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.util.History import get_log_int
 from aminer.util import PersistenceUtil
-from aminer.util import TimeTriggeredComponentInterface
+from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
 
 class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):

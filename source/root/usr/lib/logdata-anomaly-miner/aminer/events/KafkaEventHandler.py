@@ -15,7 +15,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import sys
 import logging
 from aminer import AminerConfig
-from aminer.events import EventHandlerInterface
+from aminer.events.EventInterfaces import EventHandlerInterface
 
 
 class KafkaEventHandler(EventHandlerInterface):
@@ -28,7 +28,7 @@ class KafkaEventHandler(EventHandlerInterface):
         self.producer = None
         self.kafka_imported = False
 
-    def receive_event(self, event_type, event_message, sorted_log_lines, event_data, log_atom, event_source):
+    def receive_event(self, _event_type, _event_message, _sorted_log_lines, event_data, _log_atom, event_source):
         """Receive information about a detected event in json format."""
         if hasattr(event_source, 'output_event_handlers') and event_source.output_event_handlers is not None and self not in \
                 event_source.output_event_handlers:

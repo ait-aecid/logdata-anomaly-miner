@@ -1,9 +1,10 @@
-from aminer.analysis import ParserCount
-from aminer.analysis.ParserCount import current_processed_lines_str, total_processed_lines_str
-from aminer.input import LogAtom
-from aminer.parsing import FixedDataModelElement, MatchContext, SequenceModelElement, ParserMatch
+from aminer.analysis.ParserCount import ParserCount, current_processed_lines_str, total_processed_lines_str
+from aminer.input.LogAtom import LogAtom
+from aminer.parsing.FixedDataModelElement import FixedDataModelElement
+from aminer.parsing.MatchContext import MatchContext
+from aminer.parsing.SequenceModelElement import SequenceModelElement
+from aminer.parsing.ParserMatch import ParserMatch
 from unit.TestBase import TestBase
-
 import time
 
 

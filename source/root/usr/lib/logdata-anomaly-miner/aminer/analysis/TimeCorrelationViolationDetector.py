@@ -17,10 +17,10 @@ import logging
 
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
-from aminer.input import AtomHandlerInterface
-from aminer.util import LogarithmicBackoffHistory
+from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.util.History import LogarithmicBackoffHistory
 from aminer.util import PersistenceUtil
-from aminer.util import TimeTriggeredComponentInterface
+from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 from aminer.analysis import Rules
 
 

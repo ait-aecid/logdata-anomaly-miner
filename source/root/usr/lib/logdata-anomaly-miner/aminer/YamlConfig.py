@@ -22,13 +22,19 @@ enhanced_new_match_path_value_combo_detector_reference = None
 
 
 def load_yaml(config_file):
-    """Load the yaml configuration from file."""
+    """
+    Load the yaml configuration from files. Basically there are two schema types: validation schemas and normalisation schemas.
+    The validation schemas validate together with the BaseSchema all inputs as specifically as possible. Due to the limitations of
+    oneof_schemas and the not functional normalisation in the validation schemas, the normalisation schemas are used to set default values
+    and convert the date in right data types with coerce procedures.
+    """
     # We might be able to remove this and us it like the config_properties
     # skipcq: PYL-W0603
     global yaml_data
 
     import yaml
-    from aminer.ConfigValidator import ConfigValidator
+    from cerberus import Validator
+    from aminer.ConfigValidator import ConfigValidator, NormalisationValidator
     import os
     with open(config_file) as yamlfile:
         try:
@@ -38,13 +44,40 @@ def load_yaml(config_file):
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(exception)
             raise exception
 
-    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'YamlSchema.py', 'r') as sma:
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/BaseSchema.py', 'r') as sma:
         # skipcq: PYL-W0123
-        schema = eval(sma.read())
-    sma.close()
+        base_schema = eval(sma.read())
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/ParserNormalisationSchema.py', 'r') as sma:
+        # skipcq: PYL-W0123
+        parser_normalisation_schema = eval(sma.read())
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/AnalysisNormalisationSchema.py', 'r') as sma:
+        # skipcq: PYL-W0123
+        analysis_normalisation_schema = eval(sma.read())
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/EventHandlerNormalisationSchema.py', 'r') as sma:
+        # skipcq: PYL-W0123
+        event_handler_normalisation_schema = eval(sma.read())
 
-    v = ConfigValidator(schema)
-    if v.validate(yaml_data, schema):
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/ParserValidationSchema.py', 'r') as sma:
+        # skipcq: PYL-W0123
+        parser_validation_schema = eval(sma.read())
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/AnalysisValidationSchema.py', 'r') as sma:
+        # skipcq: PYL-W0123
+        analysis_validation_schema = eval(sma.read())
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/EventHandlerValidationSchema.py', 'r') as sma:
+        # skipcq: PYL-W0123
+        event_handler_validation_schema = eval(sma.read())
+
+    normalisation_schema = {
+        **base_schema, **parser_normalisation_schema, **analysis_normalisation_schema, **event_handler_normalisation_schema}
+    validation_schema = {**base_schema, **parser_validation_schema, **analysis_validation_schema, **event_handler_validation_schema}
+
+    v = ConfigValidator(validation_schema)
+    if not v.validate(yaml_data, validation_schema):
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(v.errors)
+        raise ValueError(v.errors)
+
+    v = NormalisationValidator(normalisation_schema)
+    if v.validate(yaml_data, normalisation_schema):
         test = v.normalized(yaml_data)
         yaml_data = test
     else:
@@ -180,7 +213,7 @@ def build_parsing_model():
         if isinstance(start['args'], list):
             for i in start['args']:
                 if i == 'WHITESPACE':
-                    from aminer.parsing import FixedDataModelElement
+                    from aminer.parsing.FixedDataModelElement import FixedDataModelElement
                     sp = 'sp%d' % ws_count
                     args_list.append(FixedDataModelElement(sp, whitespace_str))
                     ws_count += 1
@@ -209,12 +242,12 @@ def build_input_pipeline(analysis_context, parsing_model):
     analysis_context.register_component(atom_filter, component_name="AtomFilter")
     anomaly_event_handlers = []
     # Now define the AtomizerFactory using the model. A simple line based one is usually sufficient.
-    from aminer.input import SimpleByteStreamLineAtomizerFactory
+    from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
     timestamp_paths = yaml_data['Input']['timestamp_paths']
     if isinstance(timestamp_paths, str):
         timestamp_paths = [timestamp_paths]
     if yaml_data['Input']['multi_source'] is True:
-        from aminer.input import SimpleMultisourceAtomSync
+        from aminer.input.SimpleMultisourceAtomSync import SimpleMultisourceAtomSync
         analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(parsing_model, [SimpleMultisourceAtomSync([
             atom_filter], sync_wait_time=5)], anomaly_event_handlers, default_timestamp_paths=timestamp_paths)
     else:
@@ -222,12 +255,12 @@ def build_input_pipeline(analysis_context, parsing_model):
             parsing_model, [atom_filter], anomaly_event_handlers, default_timestamp_paths=timestamp_paths)
     # Just report all unparsed atoms to the event handlers.
     if yaml_data['Input']['verbose'] is True:
-        from aminer.input import VerboseUnparsedAtomHandler
+        from aminer.input.VerboseUnparsedAtomHandler import VerboseUnparsedAtomHandler
         atom_filter.add_handler(VerboseUnparsedAtomHandler(anomaly_event_handlers, parsing_model), stop_when_handled_flag=True)
     else:
-        from aminer.input import SimpleUnparsedAtomHandler
+        from aminer.input.SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler
         atom_filter.add_handler(SimpleUnparsedAtomHandler(anomaly_event_handlers), stop_when_handled_flag=True)
-    from aminer.analysis import NewMatchPathDetector
+    from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
     if 'LearnMode' in yaml_data:
         learn = yaml_data['LearnMode']
     else:
@@ -663,13 +696,10 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                     import configparser
                     import os
                     config = configparser.ConfigParser()
-                    kafkacfg = '/etc/aminer/kafka-client.conf'
-                    if 'cfgfile' in item:
-                        kafkacfg = item['cfgfile']
-                    if os.access(kafkacfg, os.R_OK):
-                        config.read(kafkacfg)
+                    if os.access(item['cfgfile'], os.R_OK):
+                        config.read(item['cfgfile'])
                     else:
-                        msg = "%s does not exist or is not readable" % kafkacfg
+                        msg = "%s does not exist or is not readable" % item['cfgfile']
                         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     options = dict(config.items("DEFAULT"))
@@ -684,14 +714,14 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                 if ctx is None:
                     ctx = func(analysis_context)
                 if item['json'] is True or item['type'].name == 'KafkaEventHandler':
-                    from aminer.events import JsonConverterHandler
+                    from aminer.events.JsonConverterHandler import JsonConverterHandler
                     ctx = JsonConverterHandler([ctx], analysis_context)
                 anomaly_event_handlers.append(ctx)
             return event_handler_id_list
         raise KeyError()
     except KeyError:
         # Add stdout stream printing for debugging, tuning.
-        from aminer.events import StreamPrinterEventHandler
+        from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
         anomaly_event_handlers.append(StreamPrinterEventHandler(analysis_context, stream=sys.stderr))
     return None
 

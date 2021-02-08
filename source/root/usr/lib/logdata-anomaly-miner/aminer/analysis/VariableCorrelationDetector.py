@@ -6,9 +6,9 @@ from scipy.stats import chi2
 
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
-from aminer.events import EventSourceInterface
-from aminer.input import AtomHandlerInterface
-from aminer.util import TimeTriggeredComponentInterface
+from aminer.events.EventInterfaces import EventSourceInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 from aminer.util import PersistenceUtil
 
 
@@ -21,8 +21,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
     """
 
     def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id='Default', num_init=100,
-                 num_update=100, disc_div_thres=0.3, num_steps_create_new_rules=False, num_upd_until_validation=20,
-                 num_end_learning_phase=False, check_cor_thres=0.5, check_cor_prob_thres=1, check_cor_num_thres=10,
+                 num_update=100, disc_div_thres=0.3, num_steps_create_new_rules=-1, num_upd_until_validation=20,
+                 num_end_learning_phase=-1, check_cor_thres=0.5, check_cor_prob_thres=1, check_cor_num_thres=10,
                  min_values_cors_thres=5, new_vals_alarm_thres=3.5, num_bt=30, alpha_bt=0.1, used_homogeneity_test='Chi',
                  alpha_chisquare_test=0.05, max_dist_rule_distr=0.1, used_presel_meth=None, intersect_presel_meth=False,
                  percentage_random_cors=0.20, match_disc_vals_sim_tresh=0.7, exclude_due_distr_lower_limit=0.4,
@@ -214,11 +214,11 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         elif self.event_type_detector.num_eventlines[event_index] > self.num_init and \
                 (self.event_type_detector.num_eventlines[event_index]-self.num_init) % self.num_update == 0:
             # Checks if the correlations should be updated or tested
-            if self.num_end_learning_phase is False or self.event_type_detector.num_eventlines[event_index]-self.num_init <= \
+            if self.num_end_learning_phase < 0 or self.event_type_detector.num_eventlines[event_index]-self.num_init <= \
                     (self.num_update*self.num_end_learning_phase):
                 # Update Phase
                 self.update_rules[event_index] = True
-                if self.num_steps_create_new_rules and ((self.event_type_detector.num_eventlines[
+                if self.num_steps_create_new_rules > 0 and ((self.event_type_detector.num_eventlines[
                         event_index]-self.num_init) / self.num_update) % self.num_steps_create_new_rules == 0:  # generate new rules
                     self.generate_rules[event_index] = True
                 else:

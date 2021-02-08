@@ -59,9 +59,9 @@ from datetime import datetime
 
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
-from aminer.input import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util import PersistenceUtil
-from aminer.util import TimeTriggeredComponentInterface
+from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
 binomial_test = None
 try:
@@ -206,7 +206,7 @@ class ModuloTimeBinDefinition(LinearNumericBinDefinition):
         return super(ModuloTimeBinDefinition, self).get_bin(time_value)
 
 
-class HistogramData():
+class HistogramData:
     """
     This class defines the properties of one histogram to create and performs the accounting and reporting.
     When the Python scipy package is available, reports will also include probability score created using binomial testing.

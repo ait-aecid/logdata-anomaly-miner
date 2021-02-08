@@ -547,6 +547,14 @@ class YamlConfigTest(TestBase):
             else:
                 self.assertEqual(None, component[0].output_event_handlers)
 
+    def test23_check_functionality_of_validate_bigger_than_or_equal(self):
+        """Check the functionality of the _validate_bigger_than_or_equal procedure"""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        aminer_config.load_yaml('unit/data/configfiles/bigger_than_or_equal_valid.yml')
+        self.assertRaises(ValueError, aminer_config.load_yaml, 'unit/data/configfiles/bigger_than_or_equal_error.yml')
+
     def run_empty_components_tests(self, context):
         """Run the empty components tests."""
         self.assertTrue(isinstance(context.registered_components[0][0], SubhandlerFilter))

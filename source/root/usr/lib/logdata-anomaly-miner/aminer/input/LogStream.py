@@ -24,7 +24,7 @@ import logging
 
 from aminer import AminerConfig
 from aminer.util import SecureOSFunctions
-from aminer.util import encode_byte_string_as_string
+from aminer.util.StringUtil import encode_byte_string_as_string
 
 
 class LogDataResource(metaclass=abc.ABCMeta):
@@ -279,7 +279,7 @@ class UnixSocketLogDataResource(LogDataResource):
                                                                  socketError.msg)
             if log_socket is not None:
                 log_socket.close()
-            if (socketError.errno == errno.ENOENT) or (socketError.errno == errno.ECONNREFUSED):
+            if socketError.errno in (errno.ENOENT, errno.ECONNREFUSED):
                 return False
             # Transform exception to OSError as caller does not expect something else.
             raise OSError(socketError[0], socketError[1])

@@ -21,8 +21,8 @@ import sys
 import abc
 import logging
 
-from aminer.util import LogarithmicBackoffHistory
-from aminer.util import ObjectHistory
+from aminer.util.History import LogarithmicBackoffHistory
+from aminer.util.History import ObjectHistory
 
 from aminer.analysis.AtomFilters import SubhandlerFilter
 from aminer import AminerConfig

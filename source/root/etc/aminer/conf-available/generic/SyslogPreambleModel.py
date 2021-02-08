@@ -1,9 +1,9 @@
 """This module defines a parser for syslog."""
 
-from aminer.parsing import DateTimeModelElement
-from aminer.parsing import FixedDataModelElement
-from aminer.parsing import SequenceModelElement
-from aminer.parsing import VariableByteDataModelElement
+from aminer.parsing.DateTimeModelElement import DateTimeModelElement
+from aminer.parsing.FixedDataModelElement import FixedDataModelElement
+from aminer.parsing.SequenceModelElement import SequenceModelElement
+from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
 
 
 def get_model(time_model=None):
