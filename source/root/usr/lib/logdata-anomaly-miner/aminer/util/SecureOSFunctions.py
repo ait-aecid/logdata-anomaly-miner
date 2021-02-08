@@ -83,8 +83,12 @@ def secure_open_log_directory(log_directory_name=None, flags=0):
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
     if log_dir_fd is None:
-        log_dir_fd = os.open(log_directory_name, flags | os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY)
-        log_dir_path = log_directory_name
+        if base_dir_path.startswith(os.path.split(log_directory_name)[0]):
+            log_dir_fd = os.open(log_directory_name, flags | os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY, dir_fd=base_dir_fd)
+            log_dir_path = log_directory_name
+        else:
+            log_dir_fd = os.open(log_directory_name, flags | os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY)
+            log_dir_path = log_directory_name
     return log_dir_fd
 
 

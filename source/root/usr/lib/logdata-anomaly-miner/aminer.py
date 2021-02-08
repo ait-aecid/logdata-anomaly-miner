@@ -99,10 +99,10 @@ def initialize_loggers(aminer_config, aminer_user_id, aminer_grp_id):
         try:
             if not os.path.isdir(log_dir):
                 persistence_dir_fd = SecureOSFunctions.secure_open_base_directory()
-                os.mkdir(log_dir, dir_fd=persistence_dir_fd)
-                base_log_dir = os.open(os.path.split(AminerConfig.DEFAULT_LOG_DIR)[0], os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY)
-                os.chown(log_dir, aminer_user_id, aminer_grp_id, dir_fd=base_log_dir, follow_symlinks=False)
-                os.close(base_log_dir)
+                if SecureOSFunctions.base_dir_path == AminerConfig.DEFAULT_PERSISTENCE_DIR:
+                    relative_path_log_dir = os.path.split(AminerConfig.DEFAULT_LOG_DIR)[1]
+                    os.mkdir(relative_path_log_dir, dir_fd=persistence_dir_fd)
+                    os.chown(relative_path_log_dir, aminer_user_id, aminer_grp_id, dir_fd=persistence_dir_fd, follow_symlinks=False)
         except OSError as e:
             if e.errno != errno.EEXIST:
                 msg = 'Unable to create log-directory: %s' % log_dir
