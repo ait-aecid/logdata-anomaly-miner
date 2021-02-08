@@ -13,7 +13,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import time
-from aminer.input import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface
 
 
 class SimpleMultisourceAtomSync(AtomHandlerInterface):

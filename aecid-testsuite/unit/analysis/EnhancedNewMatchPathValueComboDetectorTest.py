@@ -1,5 +1,9 @@
 import unittest
-from aminer.parsing import FixedDataModelElement, DecimalIntegerValueModelElement, MatchContext, ParserMatch, SequenceModelElement
+from aminer.parsing.FixedDataModelElement import FixedDataModelElement
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.MatchContext import MatchContext
+from aminer.parsing.ParserMatch import ParserMatch
+from aminer.parsing.SequenceModelElement import SequenceModelElement
 from aminer.input.LogAtom import LogAtom
 from aminer.analysis.EnhancedNewMatchPathValueComboDetector import EnhancedNewMatchPathValueComboDetector
 from unit.TestBase import TestBase

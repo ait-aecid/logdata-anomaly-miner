@@ -1,3 +1,4 @@
+sudo cp unit/config/kafka-client.conf /etc/aminer/kafka-client.conf
 curl https://mirror.klaus-uwe.me/apache/kafka/2.7.0/kafka_2.12-2.7.0.tgz --output kafka.tgz
 tar xvf kafka.tgz > /dev/null
 rm kafka.tgz
@@ -18,4 +19,5 @@ kafka_2.12-2.7.0/bin/zookeeper-server-stop.sh > /dev/null
 sudo rm -r kafka_2.12-2.7.0/
 sudo rm -r /tmp/zookeeper
 sudo rm -r /tmp/kafka-logs
+sudo rm /etc/aminer/kafka-client.conf
 exit $exit_code

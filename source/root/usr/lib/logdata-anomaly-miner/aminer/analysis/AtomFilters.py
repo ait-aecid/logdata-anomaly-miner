@@ -14,7 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import logging
 from aminer import AminerConfig
-from aminer.input import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface
 
 
 class SubhandlerFilter(AtomHandlerInterface):

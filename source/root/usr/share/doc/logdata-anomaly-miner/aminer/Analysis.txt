@@ -218,7 +218,7 @@ or source for full documentation:
 
 # Run a allowlisting over the parsed lines.
   from aminer.analysis import Rules
-  from aminer.analysis import AllowlistViolationDetector
+  from aminer.analysis.AllowlistViolationDetector import AllowlistViolationDetector
   violation_action=Rules.EventGenerationMatchAction('Analysis.GenericViolation',
       'Violation detected', anomaly_event_handlers)
   allowlist_rules=[]

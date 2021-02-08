@@ -19,12 +19,11 @@ import logging
 import sys
 
 from aminer import AminerConfig
-from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME
+from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX
 from aminer.AnalysisChild import AnalysisContext
-from aminer.input import AtomHandlerInterface
-from aminer.util import TimeTriggeredComponentInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 from aminer.util import PersistenceUtil
-from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
 
 
 class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
@@ -147,7 +146,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
             self.event_type_detector.min_num_vals = max(num_init, num_update)
-        if self.event_type_detector.max_num_vals <= max(num_init, num_update) + 500:
+        if self.event_type_detector.max_num_vals < max(num_init, num_update) + 500:
             msg = 'Changed the parameter max_num_vals of the ETD from %s to %s to prevent errors in the execution of the VTD' % (
                     self.event_type_detector.max_num_vals, max(num_init, num_update) + 500)
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
@@ -633,8 +632,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
         # Loads the persistence
         self.persistence_id = persistence_id
-        PersistenceUtil.add_persistable_component(self)
         self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
+        PersistenceUtil.add_persistable_component(self)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
 
         # Imports the persistence
@@ -702,7 +701,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         self.process_ll(event_index, log_atom)
         return True
 
-    def get_time_trigger_class(self):
+    def get_time_trigger_class(self):  # skipcq: PYL-R0201
         """Get the trigger class this component can be registered for. This detector only needs persisteny triggers in real time."""
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
@@ -763,7 +762,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
                     if self.var_type[event_index][var_index][0] in self.distr_list:
                         self.bt_results[event_index][var_index] = [1] * self.num_s_ks_bt
-                        if self.var_type[event_index][var_index][0] == 'betam' or self.var_type[event_index][var_index][0] == 'spec':
+                        if self.var_type[event_index][var_index][0] in ('betam', 'spec'):
                             self.s_ks_get_quantiles(event_index, var_index)
                     elif self.var_type[event_index][var_index][0] == 'd':
                         self.d_init_bt(event_index, var_index)
@@ -795,7 +794,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         self.var_type[event_index][var_index] = tmp_var_type[:-1]
                         self.alternative_distribution_types[event_index][var_index] = tmp_var_type[-1]
                         self.bt_results[event_index][var_index] = [1] * self.num_s_ks_bt
-                        if self.var_type[event_index][var_index][0] == 'betam' or self.var_type[event_index][var_index][0] == 'spec':
+                        if self.var_type[event_index][var_index][0] in ('betam', 'spec'):
                             self.s_ks_get_quantiles(event_index, var_index)
 
                     # Initializes the binomialtest for the discrete type
@@ -827,7 +826,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         self.var_type[event_index][var_index] = tmp_var_type[:-1]
                         self.alternative_distribution_types[event_index][var_index] = tmp_var_type[-1]
                         self.bt_results[event_index][var_index] = [1] * self.num_s_ks_bt
-                        if self.var_type[event_index][var_index][0] == 'betam' or self.var_type[event_index][var_index][0] == 'spec':
+                        if self.var_type[event_index][var_index][0] in ('betam', 'spec'):
                             self.s_ks_get_quantiles(event_index, var_index)
 
                     # Initializes the binomialtest for the discrete type
@@ -1383,7 +1382,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     self.alternative_distribution_types[event_index][var_index] = self.alternative_distribution_types[event_index][
                         var_index][1:]
                     self.bt_results[event_index][var_index] = [1] * self.num_s_ks_bt
-                    if self.var_type[event_index][var_index][0] == 'betam' or self.var_type[event_index][var_index][0] == 'spec':
+                    if self.var_type[event_index][var_index][0] in ('betam', 'spec'):
                         self.s_ks_get_quantiles(event_index, var_index)
 
                     s_ks_result = self.s_ks_test(event_index, var_index, first_distr)
@@ -1632,7 +1631,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     self.var_type[event_index][var_index] = vt_new[:-1]
                     self.alternative_distribution_types[event_index][var_index] = vt_new[-1]
                     self.bt_results[event_index][var_index] = [1] * self.num_s_ks_bt
-                    if self.var_type[event_index][var_index][0] == 'betam' or self.var_type[event_index][var_index][0] == 'spec':
+                    if self.var_type[event_index][var_index][0] in ('betam', 'spec'):
                         self.s_ks_get_quantiles(event_index, var_index)
 
                 # VarType is discrete
@@ -2280,7 +2279,7 @@ def get_vt_string(vt):
         else:
             return_string = return_string[:-2]
             return_string += ']'
-    elif vt[0] == 'asc' or vt[0] == 'desc':
+    elif vt[0] in ('asc', 'desc'):
         return_string = '%s [%s]' % (vt[0], vt[1])
     elif vt[0] == 'unq':
         return_string = vt[0]

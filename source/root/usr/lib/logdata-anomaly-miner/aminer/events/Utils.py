@@ -12,8 +12,8 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
-from aminer.events import EventHandlerInterface
-from aminer.util import LogarithmicBackoffHistory
+from aminer.events.EventInterfaces import EventHandlerInterface
+from aminer.util.History import LogarithmicBackoffHistory
 
 
 class VolatileLogarithmicBackoffEventHistory(EventHandlerInterface, LogarithmicBackoffHistory):

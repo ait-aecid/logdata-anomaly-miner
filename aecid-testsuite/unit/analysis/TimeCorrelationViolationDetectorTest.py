@@ -1,13 +1,14 @@
-from unit.TestBase import TestBase
-from aminer.parsing import FixedDataModelElement, DecimalIntegerValueModelElement
 import unittest
 import time
-from aminer.parsing.SequenceModelElement import SequenceModelElement
 from aminer.analysis.TimeCorrelationViolationDetector import CorrelationRule, EventClassSelector, TimeCorrelationViolationDetector
 from aminer.analysis import Rules
-from aminer.parsing.MatchContext import MatchContext
 from aminer.input.LogAtom import LogAtom
 from aminer.parsing.ParserMatch import ParserMatch
+from aminer.parsing.MatchContext import MatchContext
+from aminer.parsing.FixedDataModelElement import FixedDataModelElement
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.SequenceModelElement import SequenceModelElement
+from unit.TestBase import TestBase
 from datetime import datetime
 
 

@@ -1,13 +1,13 @@
 """This module contains functions and classes to create the parsing model."""
 
-from aminer.parsing import DecimalFloatValueModelElement
-from aminer.parsing import DecimalIntegerValueModelElement
-from aminer.parsing import DelimitedDataModelElement
-from aminer.parsing import FirstMatchModelElement
-from aminer.parsing import FixedDataModelElement
-from aminer.parsing import OptionalMatchModelElement
-from aminer.parsing import SequenceModelElement
-from aminer.parsing import VariableByteDataModelElement
+from aminer.parsing.DecimalFloatValueModelElement import DecimalFloatValueModelElement
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
+from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
+from aminer.parsing.FixedDataModelElement import FixedDataModelElement
+from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
+from aminer.parsing.SequenceModelElement import SequenceModelElement
+from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
 
 
 def get_systemd_model():

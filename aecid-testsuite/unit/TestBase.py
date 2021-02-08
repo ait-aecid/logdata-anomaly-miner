@@ -128,6 +128,7 @@ class TestBase(unittest.TestCase):
         if isinstance(persistence_dir_name, str):
             persistence_dir_name = persistence_dir_name.encode()
         SecureOSFunctions.secure_open_base_directory(persistence_dir_name, os.O_RDONLY | os.O_DIRECTORY | os.O_PATH)
+        PersistenceUtil.SKIP_PERSISTENCE_ID_WARNING = True
 
     def tearDown(self):
         """Delete all persisted data after the tests."""
