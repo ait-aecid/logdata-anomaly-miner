@@ -36,7 +36,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         occurrences. When no paths are specified, the events given by the full path list are analyzed.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param window_size the length of the time window for counting in seconds.
-        @param confidence factor defines range of tolerable deviation of measured frequency from ground truth frequency gt by
+        @param confidence_factor defines range of tolerable deviation of measured frequency from ground truth frequency gt by
         [gf * confidence_factor, gf / confidence_factor]. confidence_factor must be in range [0, 1].
         @param persistence_id name of persistency document.
         @param auto_include_flag specifies whether new frequency measurements override ground truth frequencies.

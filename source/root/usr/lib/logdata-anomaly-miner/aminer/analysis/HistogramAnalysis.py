@@ -206,7 +206,7 @@ class ModuloTimeBinDefinition(LinearNumericBinDefinition):
         return super(ModuloTimeBinDefinition, self).get_bin(time_value)
 
 
-class HistogramData():
+class HistogramData:
     """
     This class defines the properties of one histogram to create and performs the accounting and reporting.
     When the Python scipy package is available, reports will also include probability score created using binomial testing.

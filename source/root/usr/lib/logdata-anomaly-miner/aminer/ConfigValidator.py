@@ -13,6 +13,7 @@ class ParserModelType:
         self.name = name
         if name.endswith('ModelElement'):
             self.is_model = True
+            # Classes must be imported from the right modules. Some class names do not match the module name and need to be set explicitly.
             module = "aminer.parsing"
             if name == 'DebugMatchContext':
                 module += '.MatchContext'
@@ -37,6 +38,7 @@ class AnalysisType:
 
     def __init__(self, name):
         self.name = name
+        # Classes must be imported from the right modules. Some class names do not match the module name and need to be set explicitly.
         module = "aminer.analysis"
         if name in ('MatchPathFilter', 'MatchValueFilter', 'SubhandlerFilter'):
             module += '.AtomFilters'
@@ -70,6 +72,7 @@ class EventHandlerType:
 
     def __init__(self, name):
         self.name = name
+        # Classes must be imported from the right modules. Some class names do not match the module name and need to be set explicitly.
         module = "aminer.events"
         if name in ('EventHandlerInterface', 'EventSourceInterface'):
             module += '.EventInterfaces'
@@ -90,6 +93,44 @@ event_handler_type = TypeDefinition('eventhandlertype', (EventHandlerType, str),
 
 class ConfigValidator(Validator):
     """Validates values from the configs."""
+    def _validate_has_start(self, has_start, field, value):
+        """
+        Test if there is a key named 'has_start'.
+        The rule's arguments are validated against this schema:
+        {'type': 'boolean'}
+        """
+        seen_start = False
+        for var in value:
+            if "start" in var and var['start'] is True:
+                if seen_start:
+                    self._error(field, "Only one parser with 'start'-key is allowed")
+                seen_start = True
+        if has_start and not seen_start:
+            self._error(field, "Parser must contain a 'start'-key")
+
+    def _validate_bigger_than_or_equal(self, bigger_than_or_equal, field, value):
+        """
+        Check if the value of the current attribute is bigger than the value of bigger_than.
+        This check works for integers and floats.
+        Usage:
+        {'bigger_than_or_equal': ['lower_value_attribute', default_value_if_not_defined]}
+        For example:
+        'max_num_vals': {'type': 'integer', 'bigger_than_or_equal': ['min_num_vals', 1000]}
+
+        The rule's arguments are validated against this schema:
+        {'type': 'list'}
+        """
+        key, default_value = bigger_than_or_equal
+        if key not in self.document:
+            lower_value = default_value
+        else:
+            lower_value = self.document[key]
+        if value < lower_value:
+            self._error(field, "%s(=%s) must be bigger than or equal with %s(=%s)." % (field, str(value), key, str(self.document[key])))
+
+
+class NormalisationValidator(ConfigValidator):
+    """Normalises values from the configs."""
 
     types_mapping = Validator.types_mapping.copy()
     types_mapping['parsermodel'] = parser_type
@@ -122,18 +163,3 @@ class ConfigValidator(Validator):
         if isinstance(value, str):
             return EventHandlerType(value)
         return None
-
-    def _validate_has_start(self, has_start, field, value):
-        """
-        Test if there is a key named 'has_start'.
-        The rule's arguments are validated against this schema:
-        {'type': 'boolean'}
-        """
-        seen_start = False
-        for var in value:
-            if "start" in var and var['start'] is True:
-                if seen_start:
-                    self._error(field, "Only one parser with 'start'-key is allowed")
-                seen_start = True
-        if has_start and not seen_start:
-            self._error(field, "Parser must contain a 'start'-key")

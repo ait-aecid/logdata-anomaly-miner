@@ -930,7 +930,7 @@ class VariableCorrelationDetectorTest(TestBase):
                 self.assertEqual(vcd.pos_var_val, old_pos_var_val)
                 self.assertEqual(vcd.w_rel_list, old_w_rel_list)
                 self.assertEqual(vcd.rel_list, old_rel_list)
-        # no new values are expected as num_steps_create_new_rules is False by default.
+        # no new values are expected as num_steps_create_new_rules is -1 by default.
         self.assertEqual(vcd.pos_var_cor, old_pos_var_cor)
         self.assertEqual(vcd.pos_var_val, old_pos_var_val)
         self.assertNotEqual(vcd.w_rel_list, old_w_rel_list)

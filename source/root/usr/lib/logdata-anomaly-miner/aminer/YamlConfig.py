@@ -22,14 +22,19 @@ enhanced_new_match_path_value_combo_detector_reference = None
 
 
 def load_yaml(config_file):
-    """Load the yaml configuration from file."""
+    """
+    Load the yaml configuration from files. Basically there are two schema types: validation schemas and normalisation schemas.
+    The validation schemas validate together with the BaseSchema all inputs as specifically as possible. Due to the limitations of
+    oneof_schemas and the not functional normalisation in the validation schemas, the normalisation schemas are used to set default values
+    and convert the date in right data types with coerce procedures.
+    """
     # We might be able to remove this and us it like the config_properties
     # skipcq: PYL-W0603
     global yaml_data
 
     import yaml
     from cerberus import Validator
-    from aminer.ConfigValidator import ConfigValidator
+    from aminer.ConfigValidator import ConfigValidator, NormalisationValidator
     import os
     with open(config_file) as yamlfile:
         try:
@@ -66,12 +71,12 @@ def load_yaml(config_file):
         **base_schema, **parser_normalisation_schema, **analysis_normalisation_schema, **event_handler_normalisation_schema}
     validation_schema = {**base_schema, **parser_validation_schema, **analysis_validation_schema, **event_handler_validation_schema}
 
-    v = Validator(validation_schema)
+    v = ConfigValidator(validation_schema)
     if not v.validate(yaml_data, validation_schema):
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(v.errors)
         raise ValueError(v.errors)
 
-    v = ConfigValidator(normalisation_schema)
+    v = NormalisationValidator(normalisation_schema)
     if v.validate(yaml_data, normalisation_schema):
         test = v.normalized(yaml_data)
         yaml_data = test
