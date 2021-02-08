@@ -57,8 +57,8 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
         self.log_learned = 0
         self.log_learned_sequences = []
 
-        PersistenceUtil.add_persistable_component(self)
         self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
+        PersistenceUtil.add_persistable_component(self)
 
         # Persisted data contains lists of sequences, i.e., [[<seq1_elem1>, <seq1_elem2>], [<seq2_elem1, ...], ...]
         # Thereby, sequence elements may be tuples, i.e., combinations of values, or paths that define events.

@@ -167,8 +167,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
         # Loads the persistence
         self.persistence_id = persistence_id
-        PersistenceUtil.add_persistable_component(self)
         self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
+        PersistenceUtil.add_persistable_component(self)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
 
         # Imports the persistence if self.event_type_detector.load_persistence_data is True

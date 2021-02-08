@@ -49,9 +49,8 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         self.output_log_line = output_log_line
         self.aminer_config = aminer_config
 
+        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
-        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, 'MatchValueAverageChangeDetector',
-                                                                              persistence_id)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         self.stat_data = []
         for path in analyze_path_list:

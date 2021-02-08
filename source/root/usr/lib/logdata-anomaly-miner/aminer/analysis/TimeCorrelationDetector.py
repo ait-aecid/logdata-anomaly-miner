@@ -60,8 +60,8 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
         self.use_value_match = use_value_match
         self.aminer_config = aminer_config
 
+        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
-        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, 'TimeCorrelationDetector', persistence_id)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is None:
             self.feature_list = []
