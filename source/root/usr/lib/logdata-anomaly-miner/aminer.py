@@ -45,7 +45,6 @@ import aminer.AminerConfig as AminerConfig  # skipcq: FLK-E402
 from aminer.util.StringUtil import colflame, flame, supports_color, decode_string_as_byte_string  # skipcq: FLK-E402
 from aminer.util.PersistenceUtil import clear_persistence, copytree  # skipcq: FLK-E402
 from aminer.util import SecureOSFunctions  # skipcq: FLK-E402
-from aminer.util import decode_string_as_byte_string  # skipcq: FLK-E402
 from aminer.AnalysisChild import AnalysisChild  # skipcq: FLK-E402
 from aminer.input.LogStream import FileLogDataResource, UnixSocketLogDataResource  # skipcq: FLK-E402
 from metadata import __version_string__  # skipcq: FLK-E402
