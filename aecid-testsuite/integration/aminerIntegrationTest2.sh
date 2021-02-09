@@ -132,17 +132,32 @@ echo ""
 
 AMINER_PERSISTENCE_PATH=/tmp/lib/aminer/*
 if [[ $sudoInstalled == 0 ]]; then
+	sudo mkdir /tmp/lib 2> /dev/null
+	sudo mkdir /tmp/lib/aminer 2> /dev/null
 	sudo chown -R $USER:$USER /tmp/lib/aminer 2> /dev/null
 	sudo rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
 	sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
 	sudo rm /tmp/syslog 2> /dev/null
 	sudo rm /tmp/auth.log 2> /dev/null
+	sudo rm /tmp/output 2> /dev/null
+  sudo cp ../unit/config/kafka-client.conf /etc/aminer/kafka-client.conf
 else
+	mkdir /tmp/lib 2> /dev/null
+	mkdir /tmp/lib/aminer 2> /dev/null
 	rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
 	chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
 	rm /tmp/syslog 2> /dev/null
 	rm /tmp/auth.log 2> /dev/null
+	rm /tmp/output 2> /dev/null
+	cp ../unit/config/kafka-client.conf /etc/aminer/kafka-client.conf
 fi
+curl https://mirror.klaus-uwe.me/apache/kafka/2.7.0/kafka_2.12-2.7.0.tgz --output kafka.tgz
+tar xvf kafka.tgz > /dev/null
+rm kafka.tgz
+kafka_2.12-2.7.0/bin/zookeeper-server-start.sh kafka_2.12-2.7.0/config/zookeeper.properties > /dev/null &
+sleep 1
+kafka_2.12-2.7.0/bin/kafka-server-start.sh kafka_2.12-2.7.0/config/server.properties > /dev/null &
+sleep 1
 
 COUNTER=0
 
@@ -152,6 +167,7 @@ if [[ $sudoInstalled == 0 ]]; then
 else
 	aminer --config /tmp/config22.py > /tmp/output &
 fi
+sleep 5
 
 time=`date +%s`
 
@@ -199,31 +215,45 @@ fi
 sleep 3
 wait $KILL_PID
 
+result=0
 checkAllOutputs
 if [ $? == 0 ]; then
 	checkAllSyslogs
 	if [ $? == 0 ]; then
 		checkAllMails
 		if [ $? == 0 ]; then
-			echo ""
-			echo "all mails were found in the mailbox!"
-			echo "finished test successfully.."
+		  checkKafkaTopic
+		  if [ $? == 0 ]; then
+			  echo ""
+			  echo "all kafka outputs were found!"
+			  echo "finished test successfully.."
+			else
+			  echo ""
+			  echo "test failed at checking kafka topic.."
+			  result=1
+			fi
 		else
 			echo ""
 			echo "test failed at checking mails.."
-			exit 1
+			result=1
 		fi
 	else
 		echo ""
 		echo "test failed at checking syslogs.."
-		exit 1
+		result=1
 	fi
 else
 	echo ""
 	echo "test failed at checking outputs.."
-	exit 1
+	result=1
 fi
 echo ""
 echo "part 2 finished"
-exit 0
+sudo kafka_2.12-2.7.0/bin/kafka-server-stop.sh > /dev/null
+sudo kafka_2.12-2.7.0/bin/zookeeper-server-stop.sh > /dev/null
+sudo rm -r kafka_2.12-2.7.0/
+sudo rm -r /tmp/zookeeper
+sudo rm -r /tmp/kafka-logs
+sudo rm /etc/aminer/kafka-client.conf
+exit $result
 

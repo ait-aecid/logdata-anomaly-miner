@@ -1,4 +1,3 @@
-echo localhost | sudo tee /etc/hostname
 cd integration
 script=$1
 sudo chmod +x $script
