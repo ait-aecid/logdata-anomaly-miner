@@ -21,8 +21,7 @@ import logging
 from aminer import AminerConfig
 from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
 from aminer.util import PersistenceUtil
-from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
-from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME
+from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX
 
 
 class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
@@ -60,6 +59,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         self.log_total = 0
         self.log_learned_path_value_combos = 0
         self.log_new_learned_values = []
+        self.next_persist_time = None
 
     def load_persistence_data(self):
         """Load the persistence data from storage."""

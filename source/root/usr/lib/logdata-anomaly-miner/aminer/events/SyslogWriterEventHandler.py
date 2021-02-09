@@ -16,8 +16,8 @@ import io
 import os
 import syslog
 
-from aminer.events import EventHandlerInterface
-from aminer.events import StreamPrinterEventHandler
+from aminer.events.EventInterfaces import EventHandlerInterface
+from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
 
 
 class SyslogWriterEventHandler(EventHandlerInterface):

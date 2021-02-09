@@ -47,6 +47,7 @@ KEY_LOG_STAT_PERIOD = 'Log.StatisticsPeriod'
 DEFAULT_STAT_PERIOD = 3600
 KEY_LOG_STAT_LEVEL = 'Log.StatisticsLevel'
 KEY_LOG_DEBUG_LEVEL = 'Log.DebugLevel'
+CONFIG_KEY_LOG_LINE_PREFIX = 'LogPrefix'
 
 
 def load_config(config_file_name):
@@ -182,7 +183,7 @@ def save_config(analysis_context, new_file):
             pos = old.find(attr, pos)
             p1 = old.find(")", pos)
             p2 = old.find(",", pos)
-            if p1 != -1 and p2 != -1:
+            if -1 not in (p1, p2):
                 end = min(old.find(")", pos), old.find(",", pos))
             elif p1 == -1 and p2 == -1:
                 msg += "WARNING: '%s.%s' could not be found in the current config!\n" % (component_name, attr)

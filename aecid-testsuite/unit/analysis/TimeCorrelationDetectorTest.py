@@ -1,9 +1,9 @@
 import unittest
 from unit.TestBase import TestBase
-from aminer.parsing import FixedDataModelElement
-from aminer.parsing import DecimalIntegerValueModelElement
-from aminer.parsing import FirstMatchModelElement
-from aminer.parsing import MatchContext
+from aminer.parsing.FixedDataModelElement import FixedDataModelElement
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
+from aminer.parsing.MatchContext import MatchContext
 from aminer.analysis.TimeCorrelationDetector import TimeCorrelationDetector
 import time
 from aminer.input.LogAtom import LogAtom

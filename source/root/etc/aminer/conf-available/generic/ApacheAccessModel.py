@@ -1,9 +1,9 @@
-from aminer.parsing import DateTimeModelElement
-from aminer.parsing import DecimalIntegerValueModelElement
-from aminer.parsing import FixedDataModelElement
-from aminer.parsing import SequenceModelElement
-from aminer.parsing import VariableByteDataModelElement
-from aminer.parsing import FixedWordlistDataModelElement
+from aminer.parsing.DateTimeModelElement import DateTimeModelElement
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.FixedDataModelElement import FixedDataModelElement
+from aminer.parsing.SequenceModelElement import SequenceModelElement
+from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
+from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
 
 
 def get_model():

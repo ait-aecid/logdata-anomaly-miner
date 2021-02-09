@@ -19,7 +19,7 @@ import logging
 
 from aminer import AminerConfig
 from aminer.parsing.MatchElement import MatchElement
-from aminer.parsing import ModelElementInterface
+from aminer.parsing.ModelElementInterface import ModelElementInterface
 
 
 class MultiLocaleDateTimeModelElement(ModelElementInterface):
@@ -244,7 +244,7 @@ class DateFormatComponent:
         component_type = -1
         component_length = -1
         translation_dictionary = None
-        if format_string[parse_pos] == 'b' or format_string[parse_pos] == 'B':
+        if format_string[parse_pos] in ('b', 'B'):
             # Month name
             parse_pos += 1
             component_type = COMPONENT_TYPE_MONTH

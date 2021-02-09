@@ -16,13 +16,12 @@ import os
 import logging
 
 from aminer import AminerConfig
-from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME
+from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX
 from aminer.AnalysisChild import AnalysisContext
-from aminer.events import EventSourceInterface
-from aminer.input import AtomHandlerInterface
+from aminer.events.EventInterfaces import EventSourceInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util import PersistenceUtil
-from aminer.util import TimeTriggeredComponentInterface
-from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
+from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
 
 class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
@@ -37,7 +36,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         occurrences. When no paths are specified, the events given by the full path list are analyzed.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param window_size the length of the time window for counting in seconds.
-        @param confidence factor defines range of tolerable deviation of measured frequency from ground truth frequency gt by
+        @param confidence_factor defines range of tolerable deviation of measured frequency from ground truth frequency gt by
         [gf * confidence_factor, gf / confidence_factor]. confidence_factor must be in range [0, 1].
         @param persistence_id name of persistency document.
         @param auto_include_flag specifies whether new frequency measurements override ground truth frequencies.
@@ -71,8 +70,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         self.log_success = 0
         self.log_windows = 0
 
-        PersistenceUtil.add_persistable_component(self)
         self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
+        PersistenceUtil.add_persistable_component(self)
 
         # Persisted data contains lists of event-frequency pairs, i.e., [[<ev1, ev2>, <freq>], [<ev1, ev2>, <freq>], ...]
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
@@ -174,7 +173,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
             self.counts[log_event] = 1
         self.log_success += 1
 
-    def get_time_trigger_class(self):
+    def get_time_trigger_class(self):  # skipcq: PYL-R0201
         """
         Get the trigger class this component should be registered for.
         This trigger is used only for persistence, so real-time triggering is needed.

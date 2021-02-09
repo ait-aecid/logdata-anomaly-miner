@@ -38,8 +38,8 @@ import argparse
 
 # As site packages are not included, define from where we need to execute code before loading it.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
-from aminer import AminerConfig  # skipcq: FLK-E402
-from aminer.util.StringUtil import colflame, flame, supports_color  # skipcq: FLK-E402
+import aminer.AminerConfig as AminerConfig  # skipcq: FLK-E402
+from aminer.util.StringUtil import colflame, flame, supports_color, decode_string_as_byte_string  # skipcq: FLK-E402
 from aminer.util.PersistenceUtil import clear_persistence, copytree  # skipcq: FLK-E402
 from metadata import __version_string__  # skipcq: FLK-E402
 
@@ -327,7 +327,6 @@ def main():
     # Start importing of aminer specific components after reading of "config.py" to allow replacement of components via sys.path
     # from within configuration.
     from aminer.util import SecureOSFunctions
-    from aminer.util import decode_string_as_byte_string
     log_sources_list = aminer_config.config_properties.get(AminerConfig.KEY_LOG_SOURCES_LIST)
     if (log_sources_list is None) or not log_sources_list:
         msg = '%s: %s not defined' % (program_name, AminerConfig.KEY_LOG_SOURCES_LIST)
