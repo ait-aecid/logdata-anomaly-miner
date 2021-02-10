@@ -222,15 +222,15 @@ if [ $? == 0 ]; then
 	if [ $? == 0 ]; then
 		checkAllMails
 		if [ $? == 0 ]; then
-		  checkKafkaTopic
-		  if [ $? == 0 ]; then
-			  echo ""
-			  echo "all kafka outputs were found!"
-			  echo "finished test successfully.."
+			checkKafkaTopic
+			if [ $? == 0 ]; then
+				echo ""
+				echo "all kafka outputs were found!"
+				echo "finished test successfully.."
 			else
-			  echo ""
-			  echo "test failed at checking kafka topic.."
-			  result=1
+				echo ""
+				echo "test failed at checking kafka topic.."
+				result=1
 			fi
 		else
 			echo ""
@@ -256,4 +256,3 @@ sudo rm -r /tmp/zookeeper
 sudo rm -r /tmp/kafka-logs
 sudo rm /etc/aminer/kafka-client.conf
 exit $result
-
