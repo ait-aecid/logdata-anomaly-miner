@@ -140,7 +140,7 @@ if [[ $sudoInstalled == 0 ]]; then
 	sudo rm /tmp/syslog 2> /dev/null
 	sudo rm /tmp/auth.log 2> /dev/null
 	sudo rm /tmp/output 2> /dev/null
-  sudo cp ../unit/config/kafka-client.conf /etc/aminer/kafka-client.conf
+	sudo cp ../unit/config/kafka-client.conf /etc/aminer/kafka-client.conf
 else
 	mkdir /tmp/lib 2> /dev/null
 	mkdir /tmp/lib/aminer 2> /dev/null
