@@ -28,10 +28,10 @@ class ByteStreamLineAtomizer(StreamAtomizer):
     sent to event handler. Data will be consumed only when there was no downstream handler registered
     (the data will be discarded in that case) or when at least one downstream consumed the data.
     """
-
     COUNTER = 0
 
-    def __init__(self, parsing_model, atom_handler_list, event_handler_list, max_line_length, default_timestamp_paths, eol_sep=b'\n'):
+    def __init__(self, parsing_model, atom_handler_list, event_handler_list, max_line_length, default_timestamp_paths, eol_sep=b'\n',
+                 json_format=False):
         """
         Create the atomizer.
         @param event_handler_list when not None, send events to those handlers. The list might be empty at invocation and populated
@@ -48,6 +48,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
             print(msg, file=sys.stderr)
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
         self.eol_sep = eol_sep
+        self.json_format = json_format
 
         self.in_overlong_line_flag = False
         # If consuming of data was already attempted but the downstream handlers refused to handle it, keep the data and the parsed
@@ -75,7 +76,19 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                     consumed_length = -1
                 break
 
-            line_end = stream_data.find(b'\n', consumed_length)
+            line_end = stream_data.find(self.eol_sep, consumed_length)
+            if self.json_format and stream_data[consumed_length] == b'{':
+                json_end = 0
+                while True:
+                    json_end = stream_data.find(b'}', consumed_length+json_end)
+                    bracket_count = stream_data.count(b'{', consumed_length, json_end) - stream_data.count(b'}', consumed_length, json_end)
+                    # break out if the bracket count is 0 (valid json) or if the bracket count is negative (invalid json). That would mean,
+                    # that more closing brackets than opening brackets exist, which is not possible.
+                    if json_end <= 0 or bracket_count <= 0:
+                        break
+                if json_end > 0 and bracket_count == 0:
+                    line_end += json_end
+
             if self.in_overlong_line_flag:
                 if line_end < 0:
                     consumed_length = len(stream_data)

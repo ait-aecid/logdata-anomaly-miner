@@ -16,8 +16,8 @@ class ByteStreamLineAtomizerTest(TestBase):
         """A normal line is tested as Input of the Class."""
         fixed_dme = FixedDataModelElement('s1', self.illegal_access1)
         byte_stream_line_atomizer = ByteStreamLineAtomizer(fixed_dme, [], [self.stream_printer_event_handler], 300, [])
-        self.assertGreater(
-            byte_stream_line_atomizer.consume_data(b'WARNING: All illegal access operations will be denied in a future release\n', True), 0)
+        data = b'WARNING: All illegal access operations will be denied in a future release\n'
+        self.assertEqual(byte_stream_line_atomizer.consume_data(data, True), len(data))
 
     def test2normal_complete_overlong_line(self):
         """A complete, overlong line is tested as Input of the Class."""
@@ -48,6 +48,14 @@ class ByteStreamLineAtomizerTest(TestBase):
         byte_stream_line_atomizer = ByteStreamLineAtomizer(fixed_dme, [], [self.stream_printer_event_handler], 300, [])
         self.assertGreater(byte_stream_line_atomizer.consume_data(self.illegal_access1, True), 0)
         self.assertEqual(self.output_stream.getvalue(), 'Incomplete last line (1 lines)\n  %s' % self.illegal_access2)
+
+    def test5eol_sep(self):
+        """Test the eol_sep parameter."""
+        fixed_dme = FixedDataModelElement('s1', self.illegal_access1)
+        byte_stream_line_atomizer = ByteStreamLineAtomizer(fixed_dme, [], [self.stream_printer_event_handler], 300, [], eol_sep=b'\n\n')
+        data = b'WARNING: All illegal access operations will be denied in a future release\nAnother line of data\nThe third line of data.' \
+               b'\n\n'
+        self.assertEqual(byte_stream_line_atomizer.consume_data(data, True), len(data))
 
 
 if __name__ == "__main__":
