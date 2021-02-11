@@ -13,6 +13,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import logging
+import sys
 from aminer import AminerConfig
 from aminer.input.LogAtom import LogAtom
 from aminer.input.InputInterfaces import StreamAtomizer
@@ -30,7 +31,8 @@ class ByteStreamLineAtomizer(StreamAtomizer):
 
     COUNTER = 0
 
-    def __init__(self, parsing_model, atom_handler_list, event_handler_list, max_line_length, default_timestamp_paths):
+    def __init__(self, parsing_model, atom_handler_list, event_handler_list, max_line_length, default_timestamp_paths, eol_sep=b'\n',
+                 json_format=False):
         """
         Create the atomizer.
         @param event_handler_list when not None, send events to those handlers. The list might be empty at invocation and populated
@@ -42,6 +44,13 @@ class ByteStreamLineAtomizer(StreamAtomizer):
         self.event_handler_list = event_handler_list
         self.max_line_length = max_line_length
         self.default_timestamp_paths = default_timestamp_paths
+        if not isinstance(eol_sep, bytes):
+            msg = '%s eol_sep parameter must be of type bytes!' % self.__class__.__name__
+            print(msg, file=sys.stderr)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            sys.exit(-1)
+        self.eol_sep = eol_sep
+        self.json_format = json_format
 
         self.in_overlong_line_flag = False
         # If consuming of data was already attempted but the downstream handlers refused to handle it, keep the data and the parsed
@@ -62,14 +71,53 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                 # Keep length before dispatching: dispatch will reset the field.
                 data_length = len(self.last_unconsumed_log_atom.raw_data)
                 if self.dispatch_atom(self.last_unconsumed_log_atom):
-                    consumed_length += data_length + 1
+                    consumed_length += data_length + len(self.eol_sep)
                     continue
                 # Nothing consumed, tell upstream to wait if appropriate.
                 if consumed_length == 0:
                     consumed_length = -1
                 break
 
-            line_end = stream_data.find(b'\n', consumed_length)
+            line_end = None
+            if self.json_format and stream_data.find(b'{', consumed_length) == consumed_length:
+                bracket_count = 0
+                counted_data_pos = 0
+                while True:
+                    json_end = stream_data.find(b'}', consumed_length + counted_data_pos)
+                    bracket_count += stream_data.count(
+                        b'{', consumed_length+counted_data_pos, json_end + (json_end > 0)) - stream_data.count(
+                        b'}', consumed_length+counted_data_pos, json_end + (json_end > 0))
+                    counted_data_pos = json_end - consumed_length + (json_end > 0)
+                    # break out if the bracket count is 0 (valid json) or if the bracket count is negative (invalid json). That would mean,
+                    # that more closing brackets than opening brackets exist, which is not possible.
+                    if json_end <= 0 or bracket_count <= 0:
+                        break
+                if json_end > 0 and bracket_count == 0:
+                    # +1 as the last } was not counted yet.
+                    line_end = json_end + 1
+                    if stream_data.find(self.eol_sep, line_end) != line_end:
+                        line_end -= 1
+                else:
+                    line_end = stream_data.find(self.eol_sep, consumed_length)
+                    if bracket_count < 0:
+                        line = stream_data[consumed_length:counted_data_pos]
+                    else:
+                        line = stream_data[consumed_length:line_end]
+                    line_num = 0
+                    curr_pos = 0
+                    lines = stream_data.splitlines(True)
+                    for line_num, line in enumerate(lines):
+                        if curr_pos + len(line) > consumed_length:
+                            line_num = line_num + 1
+                            break
+                        curr_pos += len(line)
+                    msg = "Invalid JSON received – opening and closing brackets do not match at line %d: %s" % (line_num, line)
+                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
+                    print(msg, file=sys.stderr)
+
+            if line_end is None:
+                line_end = stream_data.find(self.eol_sep, consumed_length)
+
             if self.in_overlong_line_flag:
                 if line_end < 0:
                     consumed_length = len(stream_data)
@@ -77,7 +125,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                         self.dispatch_event('Overlong line terminated by end of stream', stream_data)
                         self.in_overlong_line_flag = False
                     break
-                consumed_length = line_end + 1
+                consumed_length = line_end + len(self.eol_sep)
                 self.in_overlong_line_flag = False
                 continue
 
@@ -96,10 +144,10 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                 break
 
             # This is at least a complete/overlong line.
-            line_length = line_end + 1 - consumed_length
+            line_length = line_end + len(self.eol_sep) - consumed_length
             if line_length > self.max_line_length:
                 self.dispatch_event('Overlong line detected', stream_data[consumed_length:line_end])
-                consumed_length = line_end + 1
+                consumed_length = line_end + len(self.eol_sep)
                 continue
 
             # This is a normal line.
@@ -116,7 +164,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                             log_atom.set_timestamp(ts_match.match_object)
                             break
             if self.dispatch_atom(log_atom):
-                consumed_length = line_end + 1
+                consumed_length = line_end + len(self.eol_sep)
                 continue
             if consumed_length == 0:
                 # Downstream did not want the data, so tell upstream to block for a while.
