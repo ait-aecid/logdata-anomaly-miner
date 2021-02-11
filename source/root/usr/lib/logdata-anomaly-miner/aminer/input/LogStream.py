@@ -19,7 +19,6 @@ import os
 import socket
 import stat
 import sys
-import abc
 import logging
 
 from aminer import AminerConfig

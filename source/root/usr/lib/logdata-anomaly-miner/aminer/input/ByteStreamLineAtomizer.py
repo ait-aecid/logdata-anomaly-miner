@@ -28,6 +28,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
     sent to event handler. Data will be consumed only when there was no downstream handler registered
     (the data will be discarded in that case) or when at least one downstream consumed the data.
     """
+
     COUNTER = 0
 
     def __init__(self, parsing_model, atom_handler_list, event_handler_list, max_line_length, default_timestamp_paths, eol_sep=b'\n',
