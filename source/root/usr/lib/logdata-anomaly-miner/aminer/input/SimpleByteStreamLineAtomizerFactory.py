@@ -37,6 +37,7 @@ class SimpleByteStreamLineAtomizerFactory(AtomizerFactory):
         else:
             self.default_timestamp_paths = default_timestamp_paths
         self.eol_sep = eol_sep
+        self.json_format = json_format
 
     def get_atomizer_for_resource(self, resource_name):
         """
@@ -45,4 +46,4 @@ class SimpleByteStreamLineAtomizerFactory(AtomizerFactory):
         @return a StreamAtomizer object
         """
         return ByteStreamLineAtomizer(self.parsing_model, self.atom_handler_list, self.event_handler_list, 1 << 16,
-                                      self.default_timestamp_paths, self.eol_sep)
+                                      self.default_timestamp_paths, self.eol_sep, self.json_format)

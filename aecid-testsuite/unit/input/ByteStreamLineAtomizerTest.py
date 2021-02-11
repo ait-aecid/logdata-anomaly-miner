@@ -2,7 +2,6 @@ import unittest
 from aminer.input.ByteStreamLineAtomizer import ByteStreamLineAtomizer
 from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
-from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
 import sys
 from unit.TestBase import TestBase
 
