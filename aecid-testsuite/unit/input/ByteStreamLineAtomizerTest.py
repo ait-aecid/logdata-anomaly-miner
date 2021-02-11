@@ -82,6 +82,9 @@ class ByteStreamLineAtomizerTest(TestBase):
         self.assertEqual(byte_stream_line_atomizer.consume_data(json_data + data, False), len(json_data))
         self.assertEqual(byte_stream_line_atomizer.consume_data(data + json_data + data, False), len(data) + len(json_data))
 
+        json_data = b'{"a": 1, "b": {"c": 2}, "d": 3}\n{"a": 1, "b": {"c": 2}, "d'
+        self.assertEqual(byte_stream_line_atomizer.consume_data(json_data, False), json_data.rfind(b'\n') + 1)
+
 
 if __name__ == "__main__":
     unittest.main()

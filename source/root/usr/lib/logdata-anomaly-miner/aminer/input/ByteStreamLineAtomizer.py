@@ -48,6 +48,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
             msg = '%s eol_sep parameter must be of type bytes!' % self.__class__.__name__
             print(msg, file=sys.stderr)
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            sys.exit(-1)
         self.eol_sep = eol_sep
         self.json_format = json_format
 
@@ -96,6 +97,15 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                     line_end = json_end + 1
                     if stream_data.find(self.eol_sep, line_end) != line_end:
                         line_end -= 1
+                else:
+                    line_end = stream_data.find(self.eol_sep, consumed_length)
+                    if bracket_count < 0:
+                        line = stream_data[consumed_length:counted_data_pos]
+                    else:
+                        line = stream_data[consumed_length:line_end]
+                    msg = "Invalid JSON received – opening and closing brackets do not match at line %s" % line
+                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
+                    print(msg, file=sys.stderr)
 
             if line_end is None:
                 line_end = stream_data.find(self.eol_sep, consumed_length)
