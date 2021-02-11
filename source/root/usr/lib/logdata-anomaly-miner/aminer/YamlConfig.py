@@ -247,13 +247,16 @@ def build_input_pipeline(analysis_context, parsing_model):
     if isinstance(timestamp_paths, str):
         timestamp_paths = [timestamp_paths]
     eol_sep = yaml_data['Input']['eol_sep'].encode()
+    json_format = yaml_data['Input']['json_format']
     if yaml_data['Input']['multi_source'] is True:
         from aminer.input.SimpleMultisourceAtomSync import SimpleMultisourceAtomSync
         analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(parsing_model, [SimpleMultisourceAtomSync([
-            atom_filter], sync_wait_time=5)], anomaly_event_handlers, default_timestamp_paths=timestamp_paths, eol_sep=eol_sep)
+            atom_filter], sync_wait_time=5)], anomaly_event_handlers, default_timestamp_paths=timestamp_paths, eol_sep=eol_sep,
+            json_format=json_format)
     else:
         analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
-            parsing_model, [atom_filter], anomaly_event_handlers, default_timestamp_paths=timestamp_paths, eol_sep=eol_sep)
+            parsing_model, [atom_filter], anomaly_event_handlers, default_timestamp_paths=timestamp_paths, eol_sep=eol_sep,
+            json_format=json_format)
     # Just report all unparsed atoms to the event handlers.
     if yaml_data['Input']['verbose'] is True:
         from aminer.input.VerboseUnparsedAtomHandler import VerboseUnparsedAtomHandler

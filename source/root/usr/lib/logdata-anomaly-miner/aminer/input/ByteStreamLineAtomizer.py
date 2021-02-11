@@ -76,18 +76,28 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                     consumed_length = -1
                 break
 
-            line_end = stream_data.find(self.eol_sep, consumed_length)
-            if self.json_format and stream_data[consumed_length] == b'{':
-                json_end = 0
+            line_end = None
+            if self.json_format and stream_data.find(b'{', consumed_length) == consumed_length:
+                bracket_count = 0
+                counted_data_pos = 0
                 while True:
-                    json_end = stream_data.find(b'}', consumed_length+json_end)
-                    bracket_count = stream_data.count(b'{', consumed_length, json_end) - stream_data.count(b'}', consumed_length, json_end)
+                    json_end = stream_data.find(b'}', consumed_length + counted_data_pos)
+                    bracket_count += stream_data.count(
+                        b'{', consumed_length+counted_data_pos, json_end + (json_end > 0)) - stream_data.count(
+                        b'}', consumed_length+counted_data_pos, json_end + (json_end > 0))
+                    counted_data_pos = json_end - consumed_length + (json_end > 0)
                     # break out if the bracket count is 0 (valid json) or if the bracket count is negative (invalid json). That would mean,
                     # that more closing brackets than opening brackets exist, which is not possible.
                     if json_end <= 0 or bracket_count <= 0:
                         break
                 if json_end > 0 and bracket_count == 0:
-                    line_end += json_end
+                    # +1 as the last } was not counted yet.
+                    line_end = json_end + 1
+                    if stream_data.find(self.eol_sep, line_end) != line_end:
+                        line_end -= 1
+
+            if line_end is None:
+                line_end = stream_data.find(self.eol_sep, consumed_length)
 
             if self.in_overlong_line_flag:
                 if line_end < 0:

@@ -121,7 +121,8 @@
                 'verbose': {'type': 'boolean', 'required': False, 'default': False},
                 'multi_source': {'type': 'boolean', 'required': False, 'default': False},
                 'timestamp_paths': {'type': ['string', 'list']},
-                'eol_sep': {'type': 'string', 'required': False, 'default': '\n'}
+                'eol_sep': {'type': 'string', 'required': False, 'default': '\n'},
+                'json_format': {'type': 'boolean', 'required': False, 'default': False}
             }
         }
 }
