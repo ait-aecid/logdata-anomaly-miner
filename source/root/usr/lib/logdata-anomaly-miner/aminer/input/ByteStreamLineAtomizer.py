@@ -103,7 +103,15 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                         line = stream_data[consumed_length:counted_data_pos]
                     else:
                         line = stream_data[consumed_length:line_end]
-                    msg = "Invalid JSON received – opening and closing brackets do not match at line %s" % line
+                    line_num = 0
+                    curr_pos = 0
+                    lines = stream_data.splitlines(True)
+                    for line_num, line in enumerate(lines):
+                        if curr_pos + len(line) > consumed_length:
+                            line_num = line_num + 1
+                            break
+                        curr_pos += len(line)
+                    msg = "Invalid JSON received – opening and closing brackets do not match at line %d: %s" % (line_num, line)
                     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
                     print(msg, file=sys.stderr)
 
