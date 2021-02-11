@@ -22,7 +22,8 @@ class SimpleByteStreamLineAtomizerFactory(AtomizerFactory):
     All parsed and unparsed atoms are delivered via two lists of handlers.
     """
 
-    def __init__(self, parsing_model, atom_handler_list, event_handler_list, default_timestamp_paths=None, eol_sep=b'\n'):
+    def __init__(
+            self, parsing_model, atom_handler_list, event_handler_list, default_timestamp_paths=None, eol_sep=b'\n', json_format=False):
         """
         Create the factory to forward data and events to the given lists for each newly created atomizer.
         @param default_timestamp_paths if not empty list, the value of this timestamp field is extracted from parsed atoms and stored
