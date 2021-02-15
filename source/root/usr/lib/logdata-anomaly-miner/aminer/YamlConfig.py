@@ -367,12 +367,14 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             elif item['type'].name == 'EventSequenceDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['id_path_list'],
                                     target_path_list=item['paths'], persistence_id=item['persistence_id'], seq_len=item['seq_len'],
-                                    auto_include_flag=learn, output_log_line=item['output_logline'])
+                                    auto_include_flag=learn, output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
+                                    constraint_list=item['constraint_list'])
             elif item['type'].name == 'EventFrequencyDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
                                     persistence_id=item['persistence_id'], window_size=item['window_size'],
                                     confidence_factor=item['confidence_factor'], auto_include_flag=learn,
-                                    output_log_line=item['output_logline'])
+                                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
+                                    constraint_list=item['constraint_list'])
             elif item['type'].name == 'TimeCorrelationDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['parallel_check_count'],
                                     persistence_id=item['persistence_id'], record_count_before_event=item['record_count_before_event'],
