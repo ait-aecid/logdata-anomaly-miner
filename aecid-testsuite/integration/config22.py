@@ -80,7 +80,6 @@ def build_analysis_pipeline(analysis_context):
     # Build the parsing model:
     from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
     from aminer.parsing.SequenceModelElement import SequenceModelElement
-
     from aminer.parsing.DateTimeModelElement import DateTimeModelElement
     import datetime
     from aminer.parsing.FixedDataModelElement import FixedDataModelElement
@@ -110,7 +109,12 @@ def build_analysis_pipeline(analysis_context):
     stream_printer_event_handler = StreamPrinterEventHandler(analysis_context)
     from aminer.events.SyslogWriterEventHandler import SyslogWriterEventHandler
     syslog_writer_event_handler = SyslogWriterEventHandler(analysis_context)
-    anomaly_event_handlers = [stream_printer_event_handler, syslog_writer_event_handler]
+    from aminer.events.KafkaEventHandler import KafkaEventHandler
+    kafka_event_handler = KafkaEventHandler(analysis_context, 'test_topic', {
+        'bootstrap_servers': ['localhost:9092'], 'api_version': (2, 0, 1)})
+    from aminer.events.JsonConverterHandler import JsonConverterHandler
+    json_converter_handler = JsonConverterHandler([kafka_event_handler], analysis_context)
+    anomaly_event_handlers = [stream_printer_event_handler, syslog_writer_event_handler, json_converter_handler]
 
     from aminer.input.SimpleMultisourceAtomSync import SimpleMultisourceAtomSync
     simple_multisource_atom_sync = SimpleMultisourceAtomSync([atom_filter], 9)

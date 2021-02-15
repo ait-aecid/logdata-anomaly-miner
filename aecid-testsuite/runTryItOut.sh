@@ -16,12 +16,20 @@ git clone https://github.com/ait-aecid/logdata-anomaly-miner.wiki.git 2> /dev/nu
 cd logdata-anomaly-miner.wiki 2> /dev/null
 git checkout $BRANCH > /dev/null 2>&1
 cd ..
-awk '/^```python$/ && ++n == 2, /^```$/' < logdata-anomaly-miner.wiki/AMiner-TryItOut.md | sed '/^```/ d' | sed '/^```python/ d' > /tmp/tryItOut-config.yml
-sudo rm -r logdata-anomaly-miner.wiki
+awk '/^```python$/ && ++n == 2, /^```$/' < logdata-anomaly-miner.wiki/aminer-TryItOut.md | sed '/^```/ d' | sed '/^```python/ d' > /tmp/tryItOut-config.yml
+# text before Analysis:
+sed -e '/Analysis:/,$d' /tmp/tryItOut-config.yml > /tmp/before
+#text after Analysis:
+sed -n -e '/Analysis:/,$p' /tmp/tryItOut-config.yml > /tmp/after
+cat /tmp/before > /tmp/tryItOut-config.yml
+sed 's/#//g' /tmp/after >> /tmp/tryItOut-config.yml
 
 sudo aminer --config /tmp/tryItOut-config.yml > /dev/null &
 sleep 5 & wait $!
 sudo pkill -x aminer
 exit_code=$?
 rm /tmp/tryItOut-config.yml
+rm /tmp/before
+rm /tmp/after
+sudo rm -r logdata-anomaly-miner.wiki
 exit $exit_code

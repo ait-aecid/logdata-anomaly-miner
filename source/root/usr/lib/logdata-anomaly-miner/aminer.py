@@ -35,12 +35,18 @@ import logging
 import shutil
 import warnings
 import argparse
+import stat
+from pwd import getpwnam
+from grp import getgrnam
 
 # As site packages are not included, define from where we need to execute code before loading it.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
 import aminer.AminerConfig as AminerConfig  # skipcq: FLK-E402
 from aminer.util.StringUtil import colflame, flame, supports_color, decode_string_as_byte_string  # skipcq: FLK-E402
 from aminer.util.PersistenceUtil import clear_persistence, copytree  # skipcq: FLK-E402
+from aminer.util import SecureOSFunctions  # skipcq: FLK-E402
+from aminer.AnalysisChild import AnalysisChild  # skipcq: FLK-E402
+from aminer.input.LogStream import FileLogDataResource, UnixSocketLogDataResource  # skipcq: FLK-E402
 from metadata import __version_string__  # skipcq: FLK-E402
 
 
@@ -53,12 +59,10 @@ def run_analysis_child(aminer_config, program_name):
     logging.getLogger(AminerConfig.REMOTE_CONTROL_LOG_NAME).info('aminer started.')
     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info('aminer started.')
     persistence_dir_name = aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_DIR, AminerConfig.DEFAULT_PERSISTENCE_DIR)
-    from aminer.util import SecureOSFunctions
     if isinstance(persistence_dir_name, str):
         persistence_dir_name = persistence_dir_name.encode()
     persistence_dir_fd = SecureOSFunctions.secure_open_base_directory(persistence_dir_name, os.O_RDONLY | os.O_DIRECTORY | os.O_PATH)
     stat_result = os.fstat(persistence_dir_fd)
-    import stat
     if ((not stat.S_ISDIR(stat_result.st_mode)) or ((stat_result.st_mode & stat.S_IRWXU) != 0o700) or (
             stat_result.st_uid != os.getuid()) or (stat_result.st_gid != os.getgid())):
         msg = 'FATAL: persistence directory "%s" has to be owned by analysis process (uid %d!=%d, gid %d!=%d) and have access mode 0700 ' \
@@ -74,7 +78,6 @@ def run_analysis_child(aminer_config, program_name):
         print(msg, file=sys.stderr)
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
 
-    from aminer.AnalysisChild import AnalysisChild
     child = AnalysisChild(program_name, aminer_config)
     # This function call will only return on error or signal induced normal termination.
     child_return_status = child.run_analysis(3)
@@ -86,7 +89,7 @@ def run_analysis_child(aminer_config, program_name):
     sys.exit(1)
 
 
-def initialize_loggers(aminer_config, aminer_user, aminer_grp):
+def initialize_loggers(aminer_config, aminer_user_id, aminer_grp_id):
     """Initialize all loggers."""
     datefmt = '%d/%b/%Y:%H:%M:%S %z'
 
@@ -94,12 +97,13 @@ def initialize_loggers(aminer_config, aminer_user, aminer_grp):
     if log_dir == AminerConfig.DEFAULT_LOG_DIR:
         try:
             if not os.path.isdir(log_dir):
-                os.makedirs(log_dir)
-                from pwd import getpwnam
-                from grp import getgrnam
-                os.chown(log_dir,
-                         getpwnam(aminer_user).pw_uid,
-                         getgrnam(aminer_grp).gr_gid)
+                persistence_dir_path = aminer_config.config_properties.get(
+                    AminerConfig.KEY_PERSISTENCE_DIR, AminerConfig.DEFAULT_PERSISTENCE_DIR)
+                persistence_dir_fd = SecureOSFunctions.secure_open_base_directory(persistence_dir_path)
+                if SecureOSFunctions.base_dir_path == AminerConfig.DEFAULT_PERSISTENCE_DIR:
+                    relative_path_log_dir = os.path.split(AminerConfig.DEFAULT_LOG_DIR)[1]
+                    os.mkdir(relative_path_log_dir, dir_fd=persistence_dir_fd)
+                    os.chown(relative_path_log_dir, aminer_user_id, aminer_grp_id, dir_fd=persistence_dir_fd, follow_symlinks=False)
         except OSError as e:
             if e.errno != errno.EEXIST:
                 msg = 'Unable to create log-directory: %s' % log_dir
@@ -108,13 +112,32 @@ def initialize_loggers(aminer_config, aminer_user, aminer_grp):
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg.strip('\n'))
             print(msg, file=sys.stderr)
 
+    tmp_value = aminer_config.config_properties.get(AminerConfig.KEY_REMOTE_CONTROL_LOG_FILE)
+    if tmp_value is not None and b'/' in tmp_value:
+        print('%s attribute must not contain a full directory path, but only the filename.' % AminerConfig.KEY_REMOTE_CONTROL_LOG_FILE,
+              file=sys.stderr)
+        sys.exit(1)
+    tmp_value = aminer_config.config_properties.get(AminerConfig.KEY_STAT_LOG_FILE)
+    if tmp_value is not None and b'/' in tmp_value:
+        print('%s attribute must not contain a full directory path, but only the filename.' % AminerConfig.KEY_STAT_LOG_FILE,
+              file=sys.stderr)
+        sys.exit(1)
+    tmp_value = aminer_config.config_properties.get(AminerConfig.KEY_DEBUG_LOG_FILE)
+    if tmp_value is not None and b'/' in tmp_value:
+        print('%s attribute must not contain a full directory path, but only the filename.' % AminerConfig.KEY_DEBUG_LOG_FILE,
+              file=sys.stderr)
+        sys.exit(1)
+
+    log_dir_fd = SecureOSFunctions.secure_open_log_directory(log_dir, os.O_RDONLY | os.O_DIRECTORY | os.O_PATH)
     rc_logger = logging.getLogger(AminerConfig.REMOTE_CONTROL_LOG_NAME)
     rc_logger.setLevel(logging.DEBUG)
     remote_control_log_file = aminer_config.config_properties.get(
         AminerConfig.KEY_REMOTE_CONTROL_LOG_FILE, os.path.join(log_dir, AminerConfig.DEFAULT_REMOTE_CONTROL_LOG_FILE))
+    if not remote_control_log_file.startswith(log_dir):
+        remote_control_log_file = os.path.join(log_dir, remote_control_log_file)
     try:
         rc_file_handler = logging.FileHandler(remote_control_log_file)
-        shutil.chown(remote_control_log_file, aminer_user, aminer_grp)
+        os.chown(remote_control_log_file, aminer_user_id, aminer_grp_id, dir_fd=log_dir_fd, follow_symlinks=False)
     except OSError as e:
         print('Could not create or open %s: %s. Stopping..' % (remote_control_log_file, e), file=sys.stderr)
         sys.exit(1)
@@ -126,9 +149,11 @@ def initialize_loggers(aminer_config, aminer_user, aminer_grp):
     stat_logger.setLevel(logging.INFO)
     stat_log_file = aminer_config.config_properties.get(
         AminerConfig.KEY_STAT_LOG_FILE, os.path.join(log_dir, AminerConfig.DEFAULT_STAT_LOG_FILE))
+    if not stat_log_file.startswith(log_dir):
+        stat_log_file = os.path.join(log_dir, stat_log_file)
     try:
         stat_file_handler = logging.FileHandler(stat_log_file)
-        shutil.chown(stat_log_file, aminer_user, aminer_grp)
+        os.chown(stat_log_file, aminer_user_id, aminer_grp_id, dir_fd=log_dir_fd, follow_symlinks=False)
     except OSError as e:
         print('Could not create or open %s: %s. Stopping..' % (stat_log_file, e), file=sys.stderr)
         sys.exit(1)
@@ -144,9 +169,11 @@ def initialize_loggers(aminer_config, aminer_user, aminer_grp):
         debug_logger.setLevel(logging.DEBUG)
     debug_log_file = aminer_config.config_properties.get(
         AminerConfig.KEY_DEBUG_LOG_FILE, os.path.join(log_dir, AminerConfig.DEFAULT_DEBUG_LOG_FILE))
+    if not debug_log_file.startswith(log_dir):
+        debug_log_file = os.path.join(log_dir, debug_log_file)
     try:
         debug_file_handler = logging.FileHandler(debug_log_file)
-        shutil.chown(debug_log_file, aminer_user, aminer_grp)
+        os.chown(debug_log_file, aminer_user_id, aminer_grp_id, dir_fd=log_dir_fd, follow_symlinks=False)
     except OSError as e:
         print('Could not create or open %s: %s. Stopping..' % (debug_log_file, e), file=sys.stderr)
         sys.exit(1)
@@ -233,16 +260,14 @@ def main():
     child_group_id = -1
     try:
         if child_user_name is not None:
-            from pwd import getpwnam
             child_user_id = getpwnam(child_user_name).pw_uid
         if child_group_name is not None:
-            from grp import getgrnam
             child_group_id = getgrnam(child_user_name).gr_gid
     except:  # skipcq: FLK-E722
         print('Failed to resolve %s or %s' % (AminerConfig.KEY_AMINER_USER, AminerConfig.KEY_AMINER_GROUP), file=sys.stderr)
         sys.exit(1)
 
-    initialize_loggers(aminer_config, child_user_name, child_group_name)
+    initialize_loggers(aminer_config, child_user_id, child_group_id)
 
     if restore_relative_persistence_path is not None and (clear_persistence_flag or remove_persistence_dirs):
         msg = 'The --restore parameter removes all persistence files. Do not use this parameter with --Clear or --Remove!'
@@ -307,12 +332,12 @@ def main():
         else:
             clear_persistence(persistence_dir)
             copytree(absolute_persistence_path, persistence_dir)
-            aminer_user = aminer_config.config_properties.get(AminerConfig.KEY_AMINER_USER)
-            aminer_grp = aminer_config.config_properties.get(AminerConfig.KEY_AMINER_GROUP)
+            persistence_dir_fd = SecureOSFunctions.secure_open_base_directory(persistence_dir, os.O_RDONLY | os.O_DIRECTORY | os.O_PATH)
             for dirpath, _dirnames, filenames in os.walk(persistence_dir):
-                shutil.chown(dirpath, aminer_user, aminer_grp)
+                os.chown(dirpath, child_user_id, child_group_id, dir_fd=persistence_dir_fd, follow_symlinks=False)
                 for filename in filenames:
-                    shutil.chown(os.path.join(dirpath, filename), aminer_user, aminer_grp)
+                    os.chown(os.path.join(dirpath, filename), child_user_id, child_user_id, dir_fd=persistence_dir_fd,
+                             follow_symlinks=False)
 
     if from_begin_flag:
         repositioning_data_path = os.path.join(aminer_config.config_properties.get(
@@ -326,7 +351,6 @@ def main():
 
     # Start importing of aminer specific components after reading of "config.py" to allow replacement of components via sys.path
     # from within configuration.
-    from aminer.util import SecureOSFunctions
     log_sources_list = aminer_config.config_properties.get(AminerConfig.KEY_LOG_SOURCES_LIST)
     if (log_sources_list is None) or not log_sources_list:
         msg = '%s: %s not defined' % (program_name, AminerConfig.KEY_LOG_SOURCES_LIST)
@@ -341,10 +365,8 @@ def main():
         log_resource_name = decode_string_as_byte_string(log_resource_name)
         log_resource = None
         if log_resource_name.startswith(b'file://'):
-            from aminer.input.LogStream import FileLogDataResource
             log_resource = FileLogDataResource(log_resource_name, -1)
         elif log_resource_name.startswith(b'unix://'):
-            from aminer.input.LogStream import UnixSocketLogDataResource
             log_resource = UnixSocketLogDataResource(log_resource_name, -1)
         else:
             msg = 'Unsupported schema in %s: %s' % (AminerConfig.KEY_LOG_SOURCES_LIST, repr(log_resource_name))
@@ -577,6 +599,7 @@ def main():
         time.sleep(1)
     parent_socket.close()
     SecureOSFunctions.close_base_directory()
+    SecureOSFunctions.close_log_directory()
     sys.exit(exit_status)
 
 
