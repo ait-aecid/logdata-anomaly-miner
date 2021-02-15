@@ -169,7 +169,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
                 analysis_component = {'AffectedLogAtomPaths': self.current_sequences[id_tuple]}
             else:
                 analysis_component = {'AffectedLogAtomPaths': self.target_path_list,
-                                      'AffectedLogAtomValues': self.current_sequences[id_tuple]}
+                                      'AffectedLogAtomValues': list(self.current_sequences[id_tuple])}
             event_data = {'AnalysisComponent': analysis_component}
             for listener in self.anomaly_event_handlers:
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New sequence detected', sorted_log_lines, event_data,
