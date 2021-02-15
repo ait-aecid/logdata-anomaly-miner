@@ -166,7 +166,6 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
             else:
                 sorted_log_lines = [repr(log_atom.raw_data)]
             if self.target_path_list is None or len(self.target_path_list) == 0:
-                print(True, self.current_sequences[id_tuple])
                 analysis_component = {'AffectedLogAtomPaths': self.current_sequences[id_tuple]}
             else:
                 analysis_component = {'AffectedLogAtomPaths': self.target_path_list,
