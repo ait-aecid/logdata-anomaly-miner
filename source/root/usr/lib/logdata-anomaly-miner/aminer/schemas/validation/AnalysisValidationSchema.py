@@ -74,7 +74,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True},
                     'type': {'type': 'string', 'allowed': ['EventFrequencyDetector'], 'required': True},
-                    'paths': {'type': 'list', 'schema': {'type': 'string'}, 'required': True},
+                    'paths': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True},
                     'window_size': {'type': 'integer', 'min': 1},
                     'confidence_factor': {'type': 'float', 'min': 0, 'max': 1},
                     'persistence_id': {'type': 'string'},
@@ -88,7 +88,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True},
                     'type': {'type': 'string', 'allowed': ['EventSequenceDetector'], 'required': True},
-                    'paths': {'type': 'list', 'schema': {'type': 'string'}, 'required': True},
+                    'paths': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True},
                     'id_path_list': {'type': 'list', 'required': True},
                     'seq_len': {'type': 'integer', 'min': 1},
                     'persistence_id': {'type': 'string'},

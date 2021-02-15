@@ -27,7 +27,7 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
     """This class creates events when event or value frequencies change."""
 
-    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, window_size=600, confidence_factor=0.5,
+    def __init__(self, aminer_config, anomaly_event_handlers, target_path_list=None, window_size=600, confidence_factor=0.5,
                  persistence_id='Default', auto_include_flag=False, output_log_line=True, ignore_list=None, constraint_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
