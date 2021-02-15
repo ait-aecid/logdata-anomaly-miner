@@ -59,7 +59,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         if self.ignore_list is None:
             self.ignore_list = []
         self.window_size = window_size
-        if confidence_factor > 1 or confidence_factor < 0:
+        if not 0 <= confidence_factor <= 1:
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning('confidence_factor must be in the range [0,1]!')
             confidence_factor = 1
         self.confidence_factor = confidence_factor
@@ -135,7 +135,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
 
             if log_atom.atom_time >= self.next_check_time:
                 self.next_check_time = log_atom.atom_time + self.window_size
-                analysis_component = {'AffectedLogAtomPaths': [self.target_path_list]}
+                analysis_component = {'AffectedLogAtomPaths': self.target_path_list}
                 event_data = {'AnalysisComponent': analysis_component}
                 for listener in self.anomaly_event_handlers:
                     listener.receive_event('Analysis.%s' % self.__class__.__name__, 'No log events received in time window',
