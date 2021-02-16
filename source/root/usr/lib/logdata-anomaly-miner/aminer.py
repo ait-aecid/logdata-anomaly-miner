@@ -59,8 +59,6 @@ def run_analysis_child(aminer_config, program_name):
     logging.getLogger(AminerConfig.REMOTE_CONTROL_LOG_NAME).info('aminer started.')
     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info('aminer started.')
     persistence_dir_name = aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_DIR, AminerConfig.DEFAULT_PERSISTENCE_DIR)
-    if isinstance(persistence_dir_name, str):
-        persistence_dir_name = persistence_dir_name.encode()
     persistence_dir_fd = SecureOSFunctions.secure_open_base_directory(persistence_dir_name, os.O_RDONLY | os.O_DIRECTORY | os.O_PATH)
     stat_result = os.fstat(persistence_dir_fd)
     if ((not stat.S_ISDIR(stat_result.st_mode)) or ((stat_result.st_mode & stat.S_IRWXU) != 0o700) or (
@@ -99,7 +97,8 @@ def initialize_loggers(aminer_config, aminer_user_id, aminer_grp_id):
             if not os.path.isdir(log_dir):
                 persistence_dir_path = aminer_config.config_properties.get(
                     AminerConfig.KEY_PERSISTENCE_DIR, AminerConfig.DEFAULT_PERSISTENCE_DIR)
-                persistence_dir_fd = SecureOSFunctions.secure_open_base_directory(persistence_dir_path)
+                persistence_dir_fd = SecureOSFunctions.secure_open_base_directory(
+                    persistence_dir_path, os.O_RDONLY | os.O_DIRECTORY | os.O_PATH)
                 if SecureOSFunctions.base_dir_path == AminerConfig.DEFAULT_PERSISTENCE_DIR:
                     relative_path_log_dir = os.path.split(AminerConfig.DEFAULT_LOG_DIR)[1]
                     os.mkdir(relative_path_log_dir, dir_fd=persistence_dir_fd)
