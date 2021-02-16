@@ -140,7 +140,9 @@ def secure_open_file(file_name, flags):
     dir_name = os.path.dirname(file_name)
     base_name = os.path.basename(file_name)
     dir_fd = os.open(dir_name, flags | os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY)
-    return os.open(base_name, flags | os.O_NOFOLLOW | os.O_NOCTTY, dir_fd=dir_fd)
+    ret_fd = os.open(base_name, flags | os.O_NOFOLLOW | os.O_NOCTTY, dir_fd=dir_fd)
+    os.close(dir_fd)
+    return ret_fd
 
 
 def send_annotated_file_descriptor(send_socket, send_fd, type_info, annotation_data):
