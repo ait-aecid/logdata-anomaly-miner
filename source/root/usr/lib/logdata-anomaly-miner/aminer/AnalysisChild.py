@@ -579,7 +579,7 @@ class AnalysisChildRemoteControlHandler:
                         json_request_data[1] = json_request_data[1].decode()
                 methods = AminerRemoteControlExecutionMethods()
                 from aminer.analysis import EnhancedNewMatchPathValueComboDetector, EventCorrelationDetector, EventTypeDetector, \
-                    HistogramAnalysis, MatchFilter, MatchValueAverageChangeDetector,\
+                    EventFrequencyDetector, EventSequenceDetector, HistogramAnalysis, MatchFilter, MatchValueAverageChangeDetector,\
                     MatchValueStreamWriter, MissingMatchPathValueDetector, NewMatchIdValueComboDetector, NewMatchPathDetector,\
                     NewMatchPathValueComboDetector, NewMatchPathValueDetector, ParserCount, Rules, TimeCorrelationDetector,\
                     TimeCorrelationViolationDetector, TimestampCorrectionFilters, TimestampsUnsortedDetector, VariableTypeDetector,\
@@ -606,6 +606,8 @@ class AnalysisChildRemoteControlHandler:
                     'EnhancedNewMatchPathValueComboDetector': EnhancedNewMatchPathValueComboDetector.EnhancedNewMatchPathValueComboDetector,
                     'EventCorrelationDetector': EventCorrelationDetector.EventCorrelationDetector,
                     'EventTypeDetector': EventTypeDetector.EventTypeDetector,
+                    'EventFrequencyDetector': EventFrequencyDetector.EventFrequencyDetector,
+                    'EventSequenceDetector': EventSequenceDetector.EventSequenceDetector,
                     'HistogramAnalysis': HistogramAnalysis.HistogramAnalysis,
                     'PathDependentHistogramAnalysis': HistogramAnalysis.PathDependentHistogramAnalysis,
                     'MatchFilter': MatchFilter.MatchFilter,

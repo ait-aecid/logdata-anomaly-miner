@@ -32,8 +32,8 @@ class EventFrequencyDetectorTest(TestBase):
 
         # Initialize detector for analyzing values in one path in time windows of 10 seconds
         test_handler = TestHandler()
-        event_frequency_detector = EventFrequencyDetector(self.aminer_config, ['/value'], [
-            test_handler], 10, 0.5, 'Default', True, output_log_line=False)
+        event_frequency_detector = EventFrequencyDetector(self.aminer_config, [test_handler], ['/value'], 10, 0.5, 'Default', True,
+                                                          output_log_line=False)
         self.analysis_context.register_component(event_frequency_detector, description)
 
         # Prepare log atoms that represent different amounts of values a, b over time
