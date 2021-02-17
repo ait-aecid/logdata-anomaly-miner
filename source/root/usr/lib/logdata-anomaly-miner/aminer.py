@@ -292,6 +292,7 @@ def main():
 
     if remove_persistence_dirs:
         persistence_dir_name = aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_DIR, AminerConfig.DEFAULT_PERSISTENCE_DIR)
+        persistence_dir_fd = SecureOSFunctions.secure_open_base_directory(persistence_dir_name, os.O_RDONLY | os.O_DIRECTORY | os.O_PATH)
         for filename in os.listdir(persistence_dir_name):
             file_path = os.path.join(persistence_dir_name, filename)
             try:

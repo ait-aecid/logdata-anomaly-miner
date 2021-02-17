@@ -111,6 +111,15 @@ def close_log_directory():
         raise Exception(msg)
 
 
+def secure_rmtree(directory, fd):
+    for dirpath, dirnames, filenames in os.walk(directory, topdown=False):
+        for filename in filenames:
+            os.unlink(os.path.join(dirpath, filename), dir_fd=fd)
+        for dirname in dirnames:
+            os.rmdir(os.path.join(dirpath, dirname), dir_fd=fd)
+    os.rmdir(directory, dir_fd=fd)
+
+
 def secure_open_file(file_name, flags):
     """
     Secure opening of a file with given flags. This call will refuse to open files where any path component is a symlink.
