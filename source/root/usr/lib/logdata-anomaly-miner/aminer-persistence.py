@@ -52,15 +52,15 @@ def main():
             print('The restore path must be absolute.', file=sys.stderr)
             sys.exit(1)
         absolute_persistence_path = args.restore
-    if '.' in args.user or '/' in args.user:
+    if args.user is not None and ('.' in args.user or '/' in args.user):
         print('The aminer user %s must not contain any . or /' % args.user, file=sys.stderr)
         sys.exit(1)
     aminer_user = args.user
-    if '.' in args.group or '/' in args.group:
+    if args.group is not None and ('.' in args.group or '/' in args.group):
         print('The aminer group %s must not contain any . or /' % args.group, file=sys.stderr)
         sys.exit(1)
     aminer_grp = args.group
-    if not args.persistence_dir.startswith('/'):
+    if args.persistence_dir is not None and not args.persistence_dir.startswith('/'):
         print('The persistence_dir path must be absolute.', file=sys.stderr)
         sys.exit(1)
     persistence_dir = args.persistence_dir
@@ -86,7 +86,7 @@ def main():
             from grp import getgrnam
             child_user_id = getpwnam(aminer_user).pw_uid
             child_group_id = getgrnam(aminer_grp).gr_gid
-            clear_persistence(persistence_dir)
+            clear_persistence(persistence_dir, None)
             copytree(absolute_persistence_path, persistence_dir)
             for dirpath, _dirnames, filenames in os.walk(persistence_dir):
                 os.chown(dirpath, child_user_id, child_group_id)

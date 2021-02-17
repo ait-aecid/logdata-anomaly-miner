@@ -130,7 +130,9 @@ def create_missing_directories(file_name):
 def clear_persistence(persistence_dir_name, persistence_dir_fd):
     """Delete all persistence data from the persistence_dir."""
     skip_directories = ['backup']
-    if SecureOSFunctions.log_dir_path.startswith(SecureOSFunctions.base_dir_path):
+    log_dir = SecureOSFunctions.log_dir_path
+    base_dir = SecureOSFunctions.base_dir_path
+    if log_dir is not None and base_dir is not None and log_dir.startswith(base_dir):
         skip_directories.append(os.path.basename(SecureOSFunctions.log_dir_path).decode())
     for filename in os.listdir(persistence_dir_name):
         if filename in skip_directories:
