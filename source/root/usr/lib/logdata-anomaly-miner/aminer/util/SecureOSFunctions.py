@@ -34,6 +34,8 @@ def secure_open_base_directory(directory_name=None, flags=0):
     global base_dir_path  # skipcq: PYL-W0603
     global tmp_base_dir_fd  # skipcq: PYL-W0603
     global tmp_base_dir_path  # skipcq: PYL-W0603
+    if directory_name is not None and isinstance(directory_name, str):
+        directory_name = directory_name.encode()
     if base_dir_path is None and (directory_name is None or not directory_name.startswith(b'/')):
         msg = 'Secure open on relative path not supported'
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
@@ -74,7 +76,9 @@ def secure_open_log_directory(log_directory_name=None, flags=0):
     """Open the base log directory in a secure way."""
     global log_dir_fd  # skipcq: PYL-W0603
     global log_dir_path  # skipcq: PYL-W0603
-    if log_dir_path is None and (log_directory_name is None or not log_directory_name.startswith('/')):
+    if log_directory_name is not None and isinstance(log_directory_name, str):
+        log_directory_name = log_directory_name.encode()
+    if log_dir_path is None and (log_directory_name is None or not log_directory_name.startswith(b'/')):
         msg = 'Secure open on relative path not supported'
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
@@ -114,6 +118,8 @@ def secure_open_file(file_name, flags):
     flags as controlling TTY logics as this is just an additional risk and does not make sense for opening of log files.
     @param file_name is the file name as byte string
     """
+    if isinstance(file_name, str):
+        file_name = file_name.encode()
     if not file_name.startswith(b'/'):
         msg = 'Secure open on relative path not supported'
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
@@ -134,7 +140,9 @@ def secure_open_file(file_name, flags):
     dir_name = os.path.dirname(file_name)
     base_name = os.path.basename(file_name)
     dir_fd = os.open(dir_name, flags | os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY)
-    return os.open(base_name, flags | os.O_NOFOLLOW | os.O_NOCTTY, dir_fd=dir_fd)
+    ret_fd = os.open(base_name, flags | os.O_NOFOLLOW | os.O_NOCTTY, dir_fd=dir_fd)
+    os.close(dir_fd)
+    return ret_fd
 
 
 def send_annotated_file_descriptor(send_socket, send_fd, type_info, annotation_data):

@@ -43,7 +43,7 @@
                     'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                 'id_path_list': {'type': 'list', 'default': []},
                 'seq_len': {'type': 'integer', 'default': 3},
-                'window_size': {'type': 'integer', 'default': 600},
+                'window_size': {'type': ['integer', 'float'], 'default': 600},
                 'confidence_factor': {'type': 'float', 'default': 0.5},
                 'min_allowed_time_diff': {'type': 'float', 'default': 5.0},
                 'lower_limit': {'type': ['integer', 'float']},

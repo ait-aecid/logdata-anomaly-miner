@@ -27,7 +27,7 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
     """This class creates events when event or value frequencies change."""
 
-    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, window_size=600, confidence_factor=0.5,
+    def __init__(self, aminer_config, anomaly_event_handlers, target_path_list=None, window_size=600, confidence_factor=0.5,
                  persistence_id='Default', auto_include_flag=False, output_log_line=True, ignore_list=None, constraint_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
@@ -59,7 +59,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         if self.ignore_list is None:
             self.ignore_list = []
         self.window_size = window_size
-        if confidence_factor > 1 or confidence_factor < 0:
+        if not 0 <= confidence_factor <= 1:
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning('confidence_factor must be in the range [0,1]!')
             confidence_factor = 1
         self.confidence_factor = confidence_factor
@@ -135,7 +135,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
 
             if log_atom.atom_time >= self.next_check_time:
                 self.next_check_time = log_atom.atom_time + self.window_size
-                analysis_component = {'AffectedLogAtomPaths': [self.target_path_list]}
+                analysis_component = {'AffectedLogAtomPaths': self.target_path_list}
                 event_data = {'AnalysisComponent': analysis_component}
                 for listener in self.anomaly_event_handlers:
                     listener.receive_event('Analysis.%s' % self.__class__.__name__, 'No log events received in time window',
