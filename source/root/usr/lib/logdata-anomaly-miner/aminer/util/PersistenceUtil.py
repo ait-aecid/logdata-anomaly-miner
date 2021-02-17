@@ -127,10 +127,13 @@ def create_missing_directories(file_name):
         os.makedirs(file_name[:dir_name_length])
 
 
-def clear_persistence(persistence_dir_name):
+def clear_persistence(persistence_dir_name, persistence_dir_fd):
     """Delete all persistence data from the persistence_dir."""
+    skip_directories = ['backup']
+    if SecureOSFunctions.log_dir_path.startswith(SecureOSFunctions.base_dir_path):
+        skip_directories.append(os.path.basename(SecureOSFunctions.log_dir_path).decode())
     for filename in os.listdir(persistence_dir_name):
-        if filename == 'backup':
+        if filename in skip_directories:
             continue
         file_path = os.path.join(persistence_dir_name, filename)
         try:
@@ -139,7 +142,7 @@ def clear_persistence(persistence_dir_name):
                 print(msg, file=sys.stderr)
                 logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
                 continue
-            shutil.rmtree(file_path)
+            SecureOSFunctions.secure_rmtree(file_path, persistence_dir_fd)
         except OSError as e:
             msg = 'Failed to delete %s. Reason: %s' % (file_path, e)
             print(msg, file=sys.stderr)

@@ -32,7 +32,6 @@ import socket
 import time
 import sys
 import logging
-import shutil
 import warnings
 import argparse
 import stat
@@ -269,7 +268,7 @@ def main():
     initialize_loggers(aminer_config, child_user_id, child_group_id)
 
     if restore_relative_persistence_path is not None and (clear_persistence_flag or remove_persistence_dirs):
-        msg = 'The --restore parameter removes all persistence files. Do not use this parameter with --Clear or --Remove!'
+        msg = 'The --restore parameter removes all persistence files. Do not use this parameter with --clear or --remove!'
         print(msg, sys.stderr)
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
         sys.exit(1)
@@ -288,7 +287,9 @@ def main():
             print(msg, file=sys.stderr)
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             sys.exit(1)
-        clear_persistence(persistence_dir)
+        persistence_dir_name = aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_DIR, AminerConfig.DEFAULT_PERSISTENCE_DIR)
+        persistence_dir_fd = SecureOSFunctions.secure_open_base_directory(persistence_dir_name, os.O_RDONLY | os.O_DIRECTORY | os.O_PATH)
+        clear_persistence(persistence_dir, persistence_dir_fd)
 
     if remove_persistence_dirs:
         persistence_dir_name = aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_DIR, AminerConfig.DEFAULT_PERSISTENCE_DIR)
@@ -301,7 +302,6 @@ def main():
                     print(msg, file=sys.stderr)
                     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
                     continue
-                shutil.rmtree(file_path)
             except OSError as e:
                 msg = 'Failed to delete %s. Reason: %s' % (file_path, e)
                 print(msg, file=sys.stderr)
@@ -317,7 +317,7 @@ def main():
                     print(msg, file=sys.stderr)
                     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
                     continue
-                shutil.rmtree(file_path)
+                SecureOSFunctions.secure_rmtree(file_path, persistence_dir_fd)
             except OSError as e:
                 msg = 'Failed to delete %s. Reason: %s' % (file_path, e)
                 print(msg, file=sys.stderr)
@@ -330,9 +330,12 @@ def main():
             print(msg, file=sys.stderr)
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
         else:
-            clear_persistence(persistence_dir)
+            persistence_dir_name = aminer_config.config_properties.get(
+                AminerConfig.KEY_PERSISTENCE_DIR, AminerConfig.DEFAULT_PERSISTENCE_DIR)
+            persistence_dir_fd = SecureOSFunctions.secure_open_base_directory(
+                persistence_dir_name, os.O_RDONLY | os.O_DIRECTORY | os.O_PATH)
+            clear_persistence(persistence_dir, persistence_dir_fd)
             copytree(absolute_persistence_path, persistence_dir)
-            persistence_dir_fd = SecureOSFunctions.secure_open_base_directory(persistence_dir, os.O_RDONLY | os.O_DIRECTORY | os.O_PATH)
             for dirpath, _dirnames, filenames in os.walk(persistence_dir):
                 os.chown(dirpath, child_user_id, child_group_id, dir_fd=persistence_dir_fd, follow_symlinks=False)
                 for filename in filenames:
