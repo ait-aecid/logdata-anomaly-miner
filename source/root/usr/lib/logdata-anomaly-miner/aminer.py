@@ -99,7 +99,7 @@ def initialize_loggers(aminer_config, aminer_user_id, aminer_grp_id):
                     AminerConfig.KEY_PERSISTENCE_DIR, AminerConfig.DEFAULT_PERSISTENCE_DIR)
                 persistence_dir_fd = SecureOSFunctions.secure_open_base_directory(
                     persistence_dir_path, os.O_RDONLY | os.O_DIRECTORY | os.O_PATH)
-                if SecureOSFunctions.base_dir_path == AminerConfig.DEFAULT_PERSISTENCE_DIR:
+                if SecureOSFunctions.base_dir_path.decode() == AminerConfig.DEFAULT_PERSISTENCE_DIR:
                     relative_path_log_dir = os.path.split(AminerConfig.DEFAULT_LOG_DIR)[1]
                     os.mkdir(relative_path_log_dir, dir_fd=persistence_dir_fd)
                     os.chown(relative_path_log_dir, aminer_user_id, aminer_grp_id, dir_fd=persistence_dir_fd, follow_symlinks=False)
