@@ -53,7 +53,7 @@ else
 	aminer --config "$FILE" &
 fi
 
-#EventCorrelationDetetctor, NewMatchPathDetector
+#EventCorrelationDetector, NewMatchPathDetector
 #:<<Comment
 alphabet='abcdef'
 alphabet_len=$(echo -n $alphabet | wc -m)
