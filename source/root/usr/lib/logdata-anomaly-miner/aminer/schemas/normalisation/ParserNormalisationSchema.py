@@ -19,7 +19,9 @@
                 'value_sign_type': {'type': 'string', 'allowed': ['none', 'optional', 'mandatory'], 'default': 'none'},
                 'value_pad_type': {'type': 'string', 'allowed': ['none', 'zero', 'blank'], 'default': 'none'},
                 'exponent_type': {'type': 'string', 'allowed': ['none', 'optional', 'mandatory'], 'default': 'none'},
-                'start_year': {'type': 'integer', 'nullable': True, 'default': None}
+                'start_year': {'type': 'integer', 'nullable': True, 'default': None},
+                'delimiter': {'type': 'string'},
+                'consume_delimiter': {'type': 'boolean', 'default': False}
             }
         }
     },

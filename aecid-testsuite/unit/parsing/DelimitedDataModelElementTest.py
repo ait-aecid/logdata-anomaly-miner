@@ -63,22 +63,22 @@ class DelimitedDataModelElementTest(unittest.TestCase):
     def test5consume_delimeter(self):
         """In this test case check if the consume_delimeter parameter is working properly."""
         match_context = MatchContext(self.match_context_string)
-        delimited_data_model_element = DelimitedDataModelElement('id', b'c', consume_delimeter=False)
+        delimited_data_model_element = DelimitedDataModelElement('id', b'c', consume_delimiter=False)
         match_element = delimited_data_model_element.get_match_element('match', match_context)
         self.assertEqual(match_element.get_match_string(), b'this is a mat')
 
         match_context = MatchContext(self.match_context_string)
-        delimited_data_model_element = DelimitedDataModelElement('id', b'c', consume_delimeter=True)
+        delimited_data_model_element = DelimitedDataModelElement('id', b'c', consume_delimiter=True)
         match_element = delimited_data_model_element.get_match_element('match', match_context)
         self.assertEqual(match_element.get_match_string(), b'this is a matc')
 
         match_context = MatchContext(self.match_context_string)
-        delimited_data_model_element = DelimitedDataModelElement('id', b' is', consume_delimeter=False)
+        delimited_data_model_element = DelimitedDataModelElement('id', b' is', consume_delimiter=False)
         match_element = delimited_data_model_element.get_match_element('match', match_context)
         self.assertEqual(match_element.get_match_string(), b'this')
 
         match_context = MatchContext(self.match_context_string)
-        delimited_data_model_element = DelimitedDataModelElement('id', b' is', consume_delimeter=True)
+        delimited_data_model_element = DelimitedDataModelElement('id', b' is', consume_delimiter=True)
         match_element = delimited_data_model_element.get_match_element('match', match_context)
         self.assertEqual(match_element.get_match_string(), b'this is')
 

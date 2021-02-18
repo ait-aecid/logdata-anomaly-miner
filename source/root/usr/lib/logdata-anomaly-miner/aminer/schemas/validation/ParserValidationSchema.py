@@ -12,7 +12,7 @@
                     'start': {'type': 'boolean'},
                     'type': {'type': 'string', 'forbidden': [
                         'ElementValueBranchModelElement', 'DecimalIntegerValueModelElement', 'DecimalIntegerValueModelElement',
-                        'MultiLocaleDateTimeModelElement'], 'required': True},
+                        'MultiLocaleDateTimeModelElement', 'DelimitedDataModelElement'], 'required': True},
                     'name': {'type': 'string', 'required': True},
                     'args': {'type': ['string', 'list'], 'schema': {'type': ['string', 'integer']}}
                 },
@@ -50,7 +50,15 @@
                     'date_formats': {'type': 'list', 'schema': {'type': 'dict', 'schema': {'format': {'type': 'list', 'schema': {
                         'type': 'string', 'nullable': True}, 'maxlength': 3, 'minlength': 3}}}, 'required': True},
                     'start_year': {'type': 'integer', 'nullable': True}
-                }
+                },
+                {
+                    'id': {'type': 'string', 'required': True},
+                    'start': {'type': 'boolean'},
+                    'type': {'type': 'string', 'allowed': ['DelimitedDataModelElement'], 'required': True},
+                    'name': {'type': 'string', 'required': True},
+                    'delimiter': {'type': 'string', 'required': True},
+                    'consume_delimiter': {'type': 'boolean'}
+                },
             ]
         }
     }

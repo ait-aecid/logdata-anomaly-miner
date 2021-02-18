@@ -42,7 +42,7 @@ Parser:
        - id: data
          type: DelimitedDataModelElement
          name: 'Data'
-         args: '%'
+         delimiter: '%'
 
        - id: rest
          type: AnyByteDataModelElement

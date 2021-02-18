@@ -200,6 +200,8 @@ def build_parsing_model():
                     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 parser_model_dict[item['id']] = item['type'].func(item['name'], optional_element)
+            elif item['type'].name == 'DelimitedDataModelElement':
+                parser_model_dict[item['id']] = item['type'].func(item['name'], item['args'], item['consume_delimiter'])
             else:
                 if 'args' in item:
                     parser_model_dict[item['id']] = item['type'].func(item['name'], item['args'])
