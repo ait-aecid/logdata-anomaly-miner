@@ -82,6 +82,33 @@ read -r -d '' VAR << END
   }
 }
 END
+
+# start everything in new line
+read -r -d '' VAR << END
+{
+  "menu":
+  {
+    "id": "file",
+    "value": "File",
+    "popup":
+    {
+      "menuitem":
+      [
+        {
+          "value": "New",
+          "onclick": "CreateNewDoc()"
+        },
+        {
+          "value": "Open",
+          "onclick": "OpenDoc()"},
+        {
+          "value": "Close",
+          "onclick": "CloseDoc()"}
+      ]
+    }
+  }
+}
+END
 echo "$VAR" >> /tmp/syslog
 
 #stop aminer

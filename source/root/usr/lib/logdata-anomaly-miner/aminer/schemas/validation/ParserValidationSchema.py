@@ -57,6 +57,7 @@
                     'type': {'type': 'string', 'allowed': ['DelimitedDataModelElement'], 'required': True},
                     'name': {'type': 'string', 'required': True},
                     'delimiter': {'type': 'string', 'required': True},
+                    'escape': {'type': 'string'},
                     'consume_delimiter': {'type': 'boolean'}
                 },
             ]

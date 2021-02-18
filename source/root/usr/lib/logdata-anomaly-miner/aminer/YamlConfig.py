@@ -201,7 +201,8 @@ def build_parsing_model():
                     raise ValueError(msg)
                 parser_model_dict[item['id']] = item['type'].func(item['name'], optional_element)
             elif item['type'].name == 'DelimitedDataModelElement':
-                parser_model_dict[item['id']] = item['type'].func(item['name'], item['args'], item['consume_delimiter'])
+                delimiter = item['delimiter'].encode()
+                parser_model_dict[item['id']] = item['type'].func(item['name'], delimiter, item['escape'], item['consume_delimiter'])
             else:
                 if 'args' in item:
                     parser_model_dict[item['id']] = item['type'].func(item['name'], item['args'])

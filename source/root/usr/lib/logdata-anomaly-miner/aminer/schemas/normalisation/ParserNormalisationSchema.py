@@ -21,7 +21,8 @@
                 'exponent_type': {'type': 'string', 'allowed': ['none', 'optional', 'mandatory'], 'default': 'none'},
                 'start_year': {'type': 'integer', 'nullable': True, 'default': None},
                 'delimiter': {'type': 'string'},
-                'consume_delimiter': {'type': 'boolean', 'default': False}
+                'escape': {'type': 'string', 'nullable': True, 'default': None},
+                'consume_delimiter': {'type': 'boolean', 'default': False},
             }
         }
     },
