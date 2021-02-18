@@ -13,7 +13,11 @@ Welcome to logdata-anomaly-miner's documentation!
    README.md
    SECURITY.md
 
+.. toctree::
+   ::maxdepth: 3
+   :caption: Configuration:
 
+   CONFIGURATION.rst
 
 Indices and tables
 ==================
