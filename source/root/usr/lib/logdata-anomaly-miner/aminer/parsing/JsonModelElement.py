@@ -13,6 +13,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import json
+from json import JSONDecodeError
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.ModelElementInterface import ModelElementInterface
