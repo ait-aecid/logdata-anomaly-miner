@@ -59,13 +59,6 @@ class JsonModelElement(ModelElementInterface):
         if None in matches:
             return None
         match_context.match_data = b''
-        # for child_element in self.children:
-        #     child_match = child_element.get_match_element(current_path, match_context)
-        #     if child_match is None:
-        #         match_context.match_data = start_data
-        #         return None
-        #     matches += [child_match]
-        #
         match_context.update(match_context.match_data)
         return MatchElement(current_path, json_match_data, json_match_data, matches)
 
@@ -78,7 +71,6 @@ class JsonModelElement(ModelElementInterface):
                 matches += self.parse_json_dict(value, json_match_data[key], "%s/%s" % (current_path, key))
             elif isinstance(value, list):
                 for json_object in json_match_data[key]:
-                    print(json_object, value[0])
                     matches += self.parse_json_dict(value[0], json_object, "%s/%s" % (current_path, key))
             else:
                 match_element = json_dict[key].get_match_element(current_path, MatchContext(json_match_data[key].encode()))

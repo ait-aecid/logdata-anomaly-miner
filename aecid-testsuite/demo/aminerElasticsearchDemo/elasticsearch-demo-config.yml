@@ -1,4 +1,4 @@
-LearnMode: False
+LearnMode: True
 
 Core.LogDir: '/tmp/lib/aminer/log'
 
@@ -82,14 +82,14 @@ Analysis:
         - type: NewMatchPathValueComboDetector
           id: NewMatchPathValueCombo
           paths:
-            - "/model/IPAddresses/Username"
-            - "/model/IPAddresses/IP"
+            - "/model/menu/id"
+            - "/model/menu/value"
           learn_mode: True
         - type: NewMatchPathValueDetector
           id: NewMatchPathValue
           paths:
-            - "/model/DailyCron/JobNumber"
-            - "/model/IPAddresses/Username"
+            - "/model/menu/id"
+            - "/model/menu/value"
           learn_mode: True
 
 EventHandlers:

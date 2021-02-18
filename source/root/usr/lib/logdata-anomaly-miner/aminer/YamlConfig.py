@@ -218,9 +218,9 @@ def build_parsing_model():
             parser_model_dict[item['id']] = item['type'].func()
 
     args_list = []
-    if item['type'].name == 'JsonModelElement':
+    if start.__class__.__name__ == 'JsonModelElement':
         parsing_model = start
-    elif item['type'].name != 'JsonModelElement' and 'args' in start:
+    elif 'args' in start:
         if isinstance(start['args'], list):
             for i in start['args']:
                 if i == 'WHITESPACE':
