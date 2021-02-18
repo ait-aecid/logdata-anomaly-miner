@@ -24,7 +24,7 @@
                 'escape': {'type': 'string', 'nullable': True, 'default': None},
                 'consume_delimiter': {'type': 'boolean', 'default': False},
                 'key_parser_dict': {'type': 'dict'},
-                'optional_key_identifier': {'type': 'string', 'default': 'optional_key_'}
+                'optional_key_prefix': {'type': 'string', 'default': 'optional_key_'}
             }
         }
     },

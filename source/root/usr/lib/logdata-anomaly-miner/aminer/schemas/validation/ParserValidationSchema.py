@@ -66,7 +66,7 @@
                     'type': {'type': 'string', 'allowed': ['JsonModelElement'], 'required': True},
                     'name': {'type': 'string', 'required': True},
                     'key_parser_dict': {'type': 'dict', 'required': True},
-                    'optional_key_identifier': {'type': 'string'}
+                    'optional_key_prefix': {'type': 'string'}
                 },
             ]
         }

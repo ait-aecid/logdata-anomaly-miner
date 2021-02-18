@@ -206,9 +206,9 @@ def build_parsing_model():
             elif item['type'].name == 'JsonModelElement':
                 key_parser_dict = parse_json_yaml(item['key_parser_dict'], parser_model_dict)
                 if 'start' in item and item['start'] is True:
-                    start = item['type'].func(item['name'], key_parser_dict, item['optional_key_identifier'])
+                    start = item['type'].func(item['name'], key_parser_dict, item['optional_key_prefix'])
                 else:
-                    parser_model_dict[item['id']] = item['type'].func(item['name'], key_parser_dict, item['optional_key_identifier'])
+                    parser_model_dict[item['id']] = item['type'].func(item['name'], key_parser_dict, item['optional_key_prefix'])
             else:
                 if 'args' in item:
                     parser_model_dict[item['id']] = item['type'].func(item['name'], item['args'])

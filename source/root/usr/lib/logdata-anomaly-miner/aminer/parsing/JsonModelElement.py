@@ -21,17 +21,17 @@ from aminer.parsing.ModelElementInterface import ModelElementInterface
 class JsonModelElement(ModelElementInterface):
     """Parse single- or multi-lined JSON data."""
 
-    def __init__(self, element_id, key_parser_dict, optional_key_identifier='optional_key_'):
+    def __init__(self, element_id, key_parser_dict, optional_key_prefix='optional_key_'):
         """
         Initialize the JsonModelElement.
         @param element_id: The ID of the element.
         @param key_parser_dict: A dictionary of all keys with the according parsers. If a key should be optional, the associated parser must
             start with the OptionalMatchModelElement.
-        @param optional_key_identifier: If some key starts with the optional_key_identifier it will be considered optional.
+        @param optional_key_prefix: If some key starts with the optional_key_prefix it will be considered optional.
         """
         self.element_id = element_id
         self.key_parser_dict = key_parser_dict
-        self.optional_key_identifier = optional_key_identifier
+        self.optional_key_prefix = optional_key_prefix
 
     def get_id(self):
         """Get the element ID."""
@@ -74,6 +74,6 @@ class JsonModelElement(ModelElementInterface):
                     matches += self.parse_json_dict(value[0], json_object, "%s/%s" % (current_path, key))
             else:
                 match_element = json_dict[key].get_match_element(current_path, MatchContext(json_match_data[key].encode()))
-                if match_element is not None or not key.startswith(self.optional_key_identifier):
+                if match_element is not None or not key.startswith(self.optional_key_prefix):
                     matches.append(match_element)
         return matches
