@@ -47,15 +47,11 @@ class EventData:
         for line in self.sorted_log_lines:
             if isinstance(line, bytes):  # skipcq: PTC-W0048
                 if line != b'':
-                    if line.count(b'\n') < 2:
-                        message += '  '
-                    message += line.decode() + '\n'
+                    message += '  ' + line.decode() + '\n'
             else:
                 original_log_line_prefix = self.analysis_context.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
                 if original_log_line_prefix is not None and line.startswith(original_log_line_prefix):
                     message += line + '\n'
                 elif line != '':
-                    if line.count('\n') < 2:
-                        message += '  '
-                    message += line + '\n'
+                    message += '  ' + line + '\n'
         return message
