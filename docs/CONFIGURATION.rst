@@ -65,6 +65,28 @@ This option defines the system-group that owns the aminer-process.
 
    AminerGroup: 'aminer'
 
+RemoteControlSocket
+~~~~~~~~~~~~~~~~~~~
+
+This option controls where the unix-domain-socket for the RemoteControl should be created. The socket will not be created if this option was not set.
+
+.. code-block:: yaml
+
+   RemoteControlSocket: '/var/lib/aminer/remcontrol.sock'
+
+SuppressNewMatchPathDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Default: False
+* Type: boolean (True,False)
+
+Disable the NewMatchPathDetector which detects new paths for logtypes.
+
+.. code-block:: yaml
+
+   SuppressNewMatchPathDetector: 'False'
+
+
 LogResourceList
 ~~~~~~~~~~~~~~~
 
@@ -97,6 +119,19 @@ Read and store information to be used between multiple invocations of aminer in 
 .. code-block:: yaml
 
    Core.PersistenceDir: '/var/lib/aminer'
+
+Core.PersistencePeriod
+~~~~~~~~~~~~~~~~~~~~~~
+
+* Type: Number of seconds
+* Default: 600
+
+This options controls the logdata-anomaly-miner should write it's persistency to disk.
+
+.. code-block:: yaml
+
+   Core.PersistencePeriod: 600
+
 
 Core.LogDir
 ~~~~~~~~~~~
@@ -209,6 +244,78 @@ This option defines the prefix for the output of each anomaly.
 
    LogPrefix: ''
 
+Log.StatisticsPeriod
+~~~~~~~~~~~~~~~~~~~~
+
+* Type: Number of seconds
+* Default: 3600
+
+Defines how often to write into stat-logfiles.
+
+.. code-block:: yaml
+   
+   Log.StatisticsPeriod: 3600
+
+Log.StatisticsLevel
+~~~~~~~~~~~~~~~~~~~
+
+* Type: Number of loglevel
+* Default: 1
+
+Defines the loglevel for the stat logs.
+
+.. code-block:: yaml
+   
+   Log.StatisticsLevel: 2
+
+Log.DebugLevel
+~~~~~~~~~~~~~~
+
+* Type: Number of loglevel
+* Default: 1
+
+Defines the loglevel of the aminer debug-logfile.
+
+.. code-block:: yaml
+   
+   Log.DebugLevel: 2
+
+Log.RemoteControlLogFile
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Default: '/var/lib/aminer/log/aminerRemoteLog.txt'
+* Type: string (path to the logfile)
+
+Defines the path of the logfile for the RemoteControl.
+
+.. code-block:: yaml
+
+   Log.RemoteControlLogFile: '/var/log/aminerremotecontrol.log'
+
+Log.StatisticsFile
+~~~~~~~~~~~~~~~~~~
+
+* Default: '/var/lib/aminer/log/statistics.log'
+* Type: string (path to the logfile)
+
+Defines the path of the stats-file.
+
+.. code-block:: yaml
+
+   Log.StatisticsFile: '/var/log/aminer-stats.log'
+
+Log.DebugFile
+~~~~~~~~~~~~~~~~~~
+
+* Default: '/var/lib/aminer/log/aminer.log'
+* Type: string (path to the logfile)
+
+Defines the path of the debug-log-file.
+
+.. code-block:: yaml
+
+   Log.DebugFile: '/var/log/aminer.log'
+
 
 -----
 Input
@@ -217,11 +324,72 @@ Input
 timestamp_paths
 ~~~~~~~~~~~~~~~
 
-Configure the logline prefix
+* Type: string or list of strings
+
+Parser paths to DateTimeModelElements to set timestamp of log events.
+
 
 .. code-block:: yaml
 
-   LogPrefix: ''
+   timestamp_paths: '/model/time'
+
+.. code-block:: yaml
+
+   timestamp_paths: 
+      - '/parser/model/time'
+      - '/parser/model/type/execve/time'
+      - '/parser/model/type/proctitle/time'
+      - '/parser/model/type/syscall/time'
+      - '/parser/model/type/path/time'
+
+multi_source
+~~~~~~~~~~~~
+
+* Type: boolean (True,False)
+* Default: False
+
+Flag to enable chronologicly correct parsing from multiple input-logfiles.
+
+.. code-block:: yaml
+
+   multi_source: True
+
+verbose
+~~~~~~~
+
+* Type: boolean (True,False)
+* Default: False
+
+Flag to enable that detailed information is shown for unparsed loglines.
+
+.. code-block:: yaml
+
+   verbose: True
+
+eol_sep
+~~~~~~~
+
+* Default: '\n'
+
+End of Line seperator for events. 
+
+.. note:: Enables parsing of multiline logs.
+
+.. code-block:: yaml
+
+   eol_sep: '\r\n'
+
+json_format
+~~~~~~~~~~~
+
+* Type: boolean (True,False)
+* Default: False
+
+Enables parsing of logs in json-format.
+
+.. code-block:: yaml
+
+   json_format: True
 
 
 -------

@@ -7,7 +7,7 @@ case "$1" in
 		ln -s ../SECURITY.md
 		ln -s ../LICENSE LICENSE.md
 		
-		git clone https://github.com/ait-aecid/logdata-anomaly-miner.wiki.git Wiki
+		git clone https://github.com/ait-aecid/logdata-anomaly-miner.wiki.git ../Wiki
                 ;;
 
 	"uninstall")
@@ -15,7 +15,7 @@ case "$1" in
 		unlink SECURITY.md
 		unlink LICENSE.md
 
-		test -d wiki && rm -rf Wiki
+		test -d ../Wiki && rm -rf ../Wiki
 		;;
 
 	*)

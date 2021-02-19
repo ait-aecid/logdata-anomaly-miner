@@ -7,14 +7,14 @@ Welcome to logdata-anomaly-miner's documentation!
 =================================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: First Steps:
 
    README.md
    SECURITY.md
 
 .. toctree::
-   ::maxdepth: 3
+   :maxdepth: 1
    :caption: Configuration:
 
    CONFIGURATION.rst
