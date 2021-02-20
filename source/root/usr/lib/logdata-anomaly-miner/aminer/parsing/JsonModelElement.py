@@ -61,7 +61,7 @@ class JsonModelElement(ModelElementInterface):
             return None
         match_context.match_data = b''
         match_context.update(match_context.match_data)
-        return MatchElement(current_path, json_match_data, json_match_data, matches)
+        return MatchElement(current_path, str(json_match_data), json_match_data, matches)
 
     def parse_json_dict(self, json_dict, json_match_data, current_path):
         """Parse a json dictionary."""
