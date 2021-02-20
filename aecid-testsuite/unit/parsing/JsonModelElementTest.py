@@ -1,8 +1,6 @@
 import unittest
 import json
 from aminer.parsing.MatchContext import MatchContext
-from aminer.parsing.FixedDataModelElement import FixedDataModelElement
-from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
 from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
 from aminer.parsing.JsonModelElement import JsonModelElement
 from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
