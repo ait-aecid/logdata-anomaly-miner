@@ -13,6 +13,9 @@ class JsonModelElementTest(unittest.TestCase):
 
     single_line_json = b'{"menu": {"id": "file", "value": "File", "popup": {"menuitem": [{"value": "New", "onclick": "CreateNewDoc()"}, {' \
                        b'"value": "Open", "onclick": "OpenDoc()"}, {"value": "Close", "onclick": "CloseDoc()"}]}}}'
+    single_line_with_optional_key_json = b'{"menu": {"id": "file", "value": "File", "popup": {"menuitem": [{"value": "New", "onclick":' \
+                                         b' "CreateNewDoc()", "clickable": false}, {"value": "Open", "onclick": "OpenDoc()"}, {"value": ' \
+                                         b'"Close", "onclick": "CloseDoc()", "clickable": false}]}}}'
     multi_line_json = b"""{
   "menu": {
     "id": "file",
@@ -56,7 +59,8 @@ class JsonModelElementTest(unittest.TestCase):
         'popup': {
             'menuitem': [{
                 'value': FixedWordlistDataModelElement('buttonNames', [b'New', b'Open', b'Close']),
-                'onclick': FixedWordlistDataModelElement('buttonOnclick', [b'CreateNewDoc()', b'OpenDoc()', b'CloseDoc()'])
+                'onclick': FixedWordlistDataModelElement('buttonOnclick', [b'CreateNewDoc()', b'OpenDoc()', b'CloseDoc()']),
+                'optional_key_clickable': FixedWordlistDataModelElement('clickable', [b'true', b'false'])
             }]
         }}}
 
@@ -68,6 +72,15 @@ class JsonModelElementTest(unittest.TestCase):
 
         match = json_model_element.get_match_element('match', MatchContext(self.multi_line_json))
         self.assertEqual(match.match_object, json.loads(self.multi_line_json))
+
+        match = json_model_element.get_match_element('match', MatchContext(self.everything_new_line_json))
+        self.assertEqual(match.match_object, json.loads(self.everything_new_line_json))
+
+    def test2optional_key_prefix(self):
+        """Validate optional keys with the optional_key_prefix."""
+        json_model_element = JsonModelElement('json', self.key_parser_dict)
+        match = json_model_element.get_match_element('match', MatchContext(self.single_line_with_optional_key_json))
+        self.assertEqual(match.match_object, json.loads(self.single_line_with_optional_key_json))
 
 
 if __name__ == "__main__":

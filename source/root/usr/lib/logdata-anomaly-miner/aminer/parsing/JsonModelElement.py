@@ -74,7 +74,15 @@ class JsonModelElement(ModelElementInterface):
                 for json_object in json_match_data[key]:
                     matches += self.parse_json_dict(value[0], json_object, "%s/%s" % (current_path, key))
             else:
-                match_element = json_dict[key].get_match_element(current_path, MatchContext(json_match_data[key].encode()))
-                if match_element is not None or not key.startswith(self.optional_key_prefix):
+                split_data = key.split(self.optional_key_prefix, 1)
+                if len(split_data) != 1 and split_data[-1] not in json_match_data:
+                    continue
+                data = json_match_data[split_data[-1]]
+                if isinstance(data, str):
+                    data = data.encode()
+                elif not isinstance(data, bytes):
+                    data = str(data).encode()
+                match_element = json_dict[key].get_match_element(current_path, MatchContext(data))
+                if match_element is not None or (match_element is None and not key.startswith(self.optional_key_prefix)):
                     matches.append(match_element)
         return matches
