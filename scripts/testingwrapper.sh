@@ -24,11 +24,6 @@ case "$1" in
 		./${1}.sh ${*:2}
 		exit $?
 		;;
-	runAminerElasticsearchDemo)
-		cd $TESTDIR
-		./${1}.sh ${*:2}
-		exit $?
-		;;
 	runAminerIntegrationTest)
 		cd $TESTDIR
 		./${1}.sh ${*:2}
@@ -67,7 +62,6 @@ case "$1" in
                 ./runAminerDemo.sh demo/aminer/template_config.py
                 ./runAminerDemo.sh demo/aminer/template_config.yml
                 ./runAminerDemo.sh demo/aminer/demo-config.yml
-                ./runAminerElasticsearchDemo.sh
                 ./runAminerIntegrationTest.sh aminerIntegrationTest.sh config.py
                 ./runAminerIntegrationTest.sh aminerIntegrationTest2.sh config21.py config22.py
                 ./runGettingStarted.sh
@@ -80,7 +74,7 @@ case "$1" in
 		exit 0
 		;;
 	*)
-		echo "Usage: [ ALL | SHELL | runSuspendModeTest | runUnittests | runAminerDemo | runAminerElasticsearchDemo "
+		echo "Usage: [ ALL | SHELL | runSuspendModeTest | runUnittests | runAminerDemo "
 		echo "         runAminerIntegrationTest | runCoverageTests | runRemoteControlTest | runTryItOut | runGettingStarted] <options>"
 		exit 1
 		;;
