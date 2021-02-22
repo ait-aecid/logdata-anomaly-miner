@@ -51,7 +51,7 @@ pipeline {
                  }
                  stage("elasticsearch-demo-config") {
                      steps {
-                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runAminerElasticsearchDemo"
+                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runAminerJsonInputDemo"
                      }
                  }
 
