@@ -564,8 +564,7 @@ class YamlConfigTest(TestBase):
         spec.loader.exec_module(aminer_config)
         self.assertRaises(ValueError, aminer_config.load_yaml, 'unit/data/configfiles/wrong_log_resource_list.yml')
 
-        with open(os.path.dirname(os.path.abspath(__file__)) + '/' +
-                  '../../../source/root/usr/lib/logdata-anomaly-miner/aminer/schemas/BaseSchema.py', 'r') as sma:
+        with open('/usr/lib/logdata-anomaly-miner/aminer/schemas/BaseSchema.py', 'r') as sma:
             # skipcq: PYL-W0123
             base_schema = eval(sma.read())
         regex = re.compile(base_schema['LogResourceList']['schema']['regex'])
