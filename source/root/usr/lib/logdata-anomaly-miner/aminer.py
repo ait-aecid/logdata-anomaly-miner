@@ -47,7 +47,7 @@ from aminer.util.PersistenceUtil import clear_persistence, copytree  # skipcq: F
 from aminer.util import SecureOSFunctions  # skipcq: FLK-E402
 from aminer.AnalysisChild import AnalysisChild  # skipcq: FLK-E402
 from aminer.input.LogStream import FileLogDataResource, UnixSocketLogDataResource  # skipcq: FLK-E402
-from metadata import __version_string__  # skipcq: FLK-E402
+from metadata import __version_string__, __version__  # skipcq: FLK-E402
 
 
 child_termination_triggered_flag = False
@@ -201,6 +201,7 @@ def main():
         help_message += flame
     parser = argparse.ArgumentParser(description=help_message, formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-v', '--version', action='version', version=__version_string__)
+    parser.add_argument('-u', '--check-updates', action='store_true', help='check if updates for the aminer are available.')
     parser.add_argument('-c', '--config', default='/etc/aminer/config.yml', type=str, help='path to the config-file')
     parser.add_argument('-D', '--daemon', action='store_false', help='run as a daemon process')
     parser.add_argument('-s', '--stat', choices=[0, 1, 2], type=int, help='set the stat level. Possible stat-levels are 0 for no statistics'
@@ -215,6 +216,26 @@ def main():
     parser.add_argument('-f', '--from-begin', action='store_true', help='removes RepositioningData before starting the aminer')
 
     args = parser.parse_args()
+
+    if args.check_updates:
+        import urllib3
+        url = 'https://raw.githubusercontent.com/ait-aecid/logdata-anomaly-miner/main/source/root/usr/lib/logdata-anomaly-miner/metadata.py'
+        http = urllib3.PoolManager()
+        r = http.request('GET', url, preload_content=True)
+        metadata = r.data.decode()
+        http.clear()
+        lines = metadata.split('\n')
+        curr_version = None
+        for line in lines:
+            if '__version__ = ' in line:
+                curr_version = line.split('__version__ = ')[1].strip('"')
+                break
+        if __version__ == curr_version:
+            print("The current aminer version %s is installed." % curr_version)
+        else:
+            print("A new aminer version exists (%s). Currently version %s is installed." % (curr_version, __version__))
+            print("Use git pull to update the aminer version.")
+        sys.exit(0)
 
     config_file_name = args.config
     run_in_foreground_flag = args.daemon
