@@ -396,6 +396,260 @@ Enables parsing of logs in json-format.
 Parsing
 -------
 
+There are some predefined standard-model-elements like *IpAddressDataModelElement*, *DateTimeModelElement*, *FixedDataModelElement* and so on. They are located in the python-source-tree of logdata-anomaly-miner. A comprehensive list of all possible standard-model-elements can be found below. Using these standard-model-elements it is possible to create custom parser models. Currently there are to methods of doing it:
+
+1. Using a python-script that is located in */etc/aminer/conf-enabled*:
+
+.. code-block:: python
+
+   """ /etc/aminer/conf-enabled/ApacheAccessParsingModel.py"""
+   from aminer.parsing.DateTimeModelElement import DateTimeModelElement
+   from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+   from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
+   from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
+   from aminer.parsing.FixedDataModelElement import FixedDataModelElement
+   from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
+   from aminer.parsing.IpAddressDataModelElement import IpAddressDataModelElement
+   from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
+   from aminer.parsing.SequenceModelElement import SequenceModelElement
+   from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
+   
+   def get_model():
+       """Return a model to parse Apache Access logs from the AIT-LDS."""
+       alphabet = b'!"#$%&\'()*+,-./0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\\^_`abcdefghijklmnopqrstuvwxyz{|}~=[]'
+   
+       model = SequenceModelElement('model', [
+           FirstMatchModelElement('client_ip', [
+               IpAddressDataModelElement('client_ip'),
+               FixedDataModelElement('localhost', b'::1')
+               ]),
+           FixedDataModelElement('sp1', b' '),
+           VariableByteDataModelElement('client_id', alphabet),
+           FixedDataModelElement('sp2', b' '),
+           VariableByteDataModelElement('user_id', alphabet),
+           FixedDataModelElement('sp3', b' ['),
+           DateTimeModelElement('time', b'%d/%b/%Y:%H:%M:%S'),
+           FixedDataModelElement('sp4', b' +'),
+           DecimalIntegerValueModelElement('tz'),
+           FixedDataModelElement('sp5', b'] "'),
+           FirstMatchModelElement('fm', [
+               FixedDataModelElement('dash', b'-'),
+               SequenceModelElement('request', [
+                   FixedWordlistDataModelElement('method', [
+                       b'GET', b'POST', b'PUT', b'HEAD', b'DELETE', b'CONNECT', b'OPTIONS', b'TRACE', b'PATCH']),
+                   FixedDataModelElement('sp6', b' '),
+                   DelimitedDataModelElement('request', b' ', b'\\'),
+                   FixedDataModelElement('sp7', b' '),
+                   DelimitedDataModelElement('version', b'"'),
+                   ])
+               ]),
+           FixedDataModelElement('sp8', b'" '),
+           DecimalIntegerValueModelElement('status_code'),
+           FixedDataModelElement('sp9', b' '),
+           DecimalIntegerValueModelElement('content_size'),
+           OptionalMatchModelElement(
+               'combined', SequenceModelElement('combined', [
+                   FixedDataModelElement('sp10', b' "'),
+                   DelimitedDataModelElement('referer', b'"', b'\\'),
+                   FixedDataModelElement('sp11', b'" "'),
+                   DelimitedDataModelElement('user_agent', b'"', b'\\'),
+                   FixedDataModelElement('sp12', b'"'),
+                   ])),
+           ])
+   
+       return model
+
+This parser can be used as "type" in **/etc/aminer/config.yml**:
+
+.. code-block:: yaml
+
+   Parser:
+        - id: 'apacheModel'
+          type: ApacheAccessModel
+          name: 'apache'
+
+.. warning:: Please do not create files with the ending "ModelElement" in /etc/aminer/conf-enabled!
+
+2. Configuring the parser-model inline in **/etc/aminer/config.yml**
+
+.. code-block:: yaml
+
+   Parser:
+           - id: host_name_model
+             type: VariableByteDataModelElement
+             name: 'host'
+             args: '-.01234567890abcdefghijklmnopqrstuvwxyz:'
+   
+           - id: identity_model
+             type: VariableByteDataModelElement
+             name: 'ident'
+             args: '-.01234567890abcdefghijklmnopqrstuvwxyz:'
+   
+           - id: user_name_model
+             type: VariableByteDataModelElement
+             name: 'user'
+             args: '0123456789abcdefghijklmnopqrstuvwxyz.-'
+   
+           - id: new_time_model
+             type: DateTimeModelElement
+             name: 'time'
+             args: '[%d/%b/%Y:%H:%M:%S +0000]'
+   
+           - id: sq3
+             type: FixedDataModelElement
+             name: 'sq3'
+             args: ' "'
+   
+           - id: request_method_model
+             type: FixedWordlistDataModelElement
+             name: 'method'
+             args:
+                     - 'GET'
+                     - 'POST'
+                     - 'PUT'
+                     - 'HEAD'
+                     - 'DELETE'
+                     - 'CONNECT'
+                     - 'OPTIONS'
+                     - 'TRACE'
+                     - 'PATCH'
+   
+           - id: request_model
+             type: VariableByteDataModelElement
+             name: 'request'
+             args: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-/()[]{}!$%&=<?*+'
+   
+           - id: http1
+             type: FixedDataModelElement
+             name: 'http1'
+             args: ' HTTP/'
+   
+           - id: version_model
+             type: VariableByteDataModelElement
+             name: 'version'
+             args: '0123456789.'
+   
+           - id: sq4
+             type: FixedDataModelElement
+             name: 'sq4'
+             args: '" '
+   
+           - id: status_code_model
+             type: DecimalIntegerValueModelElement
+             name: 'status'
+   
+           - id: size_model
+             type: DecimalIntegerValueModelElement
+             name: 'size'
+   
+           - id: sq5
+             type: FixedDataModelElement
+             name: 'sq5'
+             args: ' "-" "'
+   
+           - id: user_agent_model
+             type: VariableByteDataModelElement
+             name: 'useragent'
+             args: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-/()[]{}!$%&=<?*+;:_ '
+   
+           - id: sq6
+             type: FixedDataModelElement
+             name: 'sq6'
+             args: '"'
+   
+           - id: 'startModel'
+             start: True
+             type: SequenceModelElement
+             name: 'accesslog'
+             args:
+                     - host_name_model
+                     - WHITESPACE
+                     - identity_model
+                     - WHITESPACE
+                     - user_name_model
+                     - WHITESPACE
+                     - new_time_model
+                     - sq3
+                     - request_method_model
+                     - WHITESPACE
+                     - request_model
+                     - http1
+                     - version_model
+                     - sq4
+                     - status_code_model
+                     - WHITESPACE
+                     - size_model
+                     - sq5
+                     - user_agent_model
+                     - sq6
+
+The parsing section in **/etc/aminer/config.yml** starts with the statement "Parser:" followed by a list of parser-models. Every parser-model in this list must have a unique **id** and a **type**. The unique **id** can be used to cascade models by adding the **id** of an parser-model as arguments(**args**). One parser of this list must contain `start: True` that indicates the first parser-model:
+
+.. code-block:: yaml
+
+   Parser:
+        - id: 'apacheModel'
+          type: ApacheAccessModel
+          name: 'apache'
+
+        - id: 'startModel'
+          start: True
+          type: SequenceModelElement
+          name: 'model'
+          args: apacheModel
+
+* **id**: must be a unique string
+* **type**: must be an existing ModelElement
+* **start**: a boolean value that indicates the starting model. Only one parser-model must have enabled this option!
+* **args***: a string or a list of strings containing other parser-models. This option can be used to cascade different parser-models
+
+.. note:: args can contain the constant WHITESPACE which is a preset for spaces
+
+
+AnyByteDataModelElement
+~~~~~~~~~~~~~~~~~~~~~~~
+
+* **name**: string with the element-id
+
+This parsing-element matches any byte but at least one. Thus a match will always span the complete data from beginning to end.
+
+.. code-block:: yaml
+
+   Parser:
+        - id: 'anyModel'
+          type: AnyByteDataModelElement
+          name: 'anymodel'
+
+Base64StringModelElement
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* **name**: string with the element-id
+
+This parsing-element matches base64 strings.
+
+.. code-block:: yaml
+
+   Parser:
+        - id: 'anyModel'
+          type: Base64StringModelElement
+          name: 'b64model'
+
+DateTimeModelElement
+~~~~~~~~~~~~~~~~~~~~
+
+* **name**: string with the element-id
+
+
+This element parses dates using a custom, timezone and locale-aware implementation similar to strptime.
+
+.. code-block:: yaml
+
+   Parser:
+        - id: 'anyModel'
+          type: Base64StringModelElement
+          name: 'b64model'
+
+
 ---------
 Analysing
 ---------
