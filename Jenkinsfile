@@ -49,7 +49,7 @@ pipeline {
                          sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runAminerDemo demo/aminer/jsonConverterHandler-demo-config.py"
                      }
                  }
-                 stage("elasticsearch-demo-config") {
+                 stage("json-input-demo-config") {
                      steps {
                          sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runAminerJsonInputDemo"
                      }
