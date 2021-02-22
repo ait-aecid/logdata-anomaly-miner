@@ -119,7 +119,7 @@ def build_parsing_model():
     # skipcq: PYL-W0603
     global yaml_data
     for item in yaml_data['Parser']:
-        if 'start' in item and item['start'] is True:
+        if 'start' in item and item['start'] is True and item['type'].name != 'JsonModelElement':
             start = item
             continue
         if item['type'].is_model:
@@ -200,6 +200,15 @@ def build_parsing_model():
                     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 parser_model_dict[item['id']] = item['type'].func(item['name'], optional_element)
+            elif item['type'].name == 'DelimitedDataModelElement':
+                delimiter = item['delimiter'].encode()
+                parser_model_dict[item['id']] = item['type'].func(item['name'], delimiter, item['escape'], item['consume_delimiter'])
+            elif item['type'].name == 'JsonModelElement':
+                key_parser_dict = parse_json_yaml(item['key_parser_dict'], parser_model_dict)
+                if 'start' in item and item['start'] is True:
+                    start = item['type'].func(item['name'], key_parser_dict, item['optional_key_prefix'])
+                else:
+                    parser_model_dict[item['id']] = item['type'].func(item['name'], key_parser_dict, item['optional_key_prefix'])
             else:
                 if 'args' in item:
                     parser_model_dict[item['id']] = item['type'].func(item['name'], item['args'])
@@ -209,7 +218,9 @@ def build_parsing_model():
             parser_model_dict[item['id']] = item['type'].func()
 
     args_list = []
-    if 'args' in start:
+    if start.__class__.__name__ == 'JsonModelElement':
+        parsing_model = start
+    elif 'args' in start:
         if isinstance(start['args'], list):
             for i in start['args']:
                 if i == 'WHITESPACE':
@@ -246,12 +257,13 @@ def build_input_pipeline(analysis_context, parsing_model):
     timestamp_paths = yaml_data['Input']['timestamp_paths']
     if isinstance(timestamp_paths, str):
         timestamp_paths = [timestamp_paths]
+    sync_wait_time = yaml_data['Input']['sync_wait_time']
     eol_sep = yaml_data['Input']['eol_sep'].encode()
     json_format = yaml_data['Input']['json_format']
     if yaml_data['Input']['multi_source'] is True:
         from aminer.input.SimpleMultisourceAtomSync import SimpleMultisourceAtomSync
         analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(parsing_model, [SimpleMultisourceAtomSync([
-            atom_filter], sync_wait_time=5)], anomaly_event_handlers, default_timestamp_paths=timestamp_paths, eol_sep=eol_sep,
+            atom_filter], sync_wait_time=sync_wait_time)], anomaly_event_handlers, default_timestamp_paths=timestamp_paths, eol_sep=eol_sep,
             json_format=json_format)
     else:
         analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
@@ -742,3 +754,21 @@ def tuple_transformation_function_demo_print_every_10th_value(match_value_list):
         else:
             enhanced_new_match_path_value_combo_detector_reference.auto_include_flag = True
     return match_value_list
+
+
+def parse_json_yaml(json_dict, parser_model_dict):
+    """Parse an yaml configuration for json."""
+    key_parser_dict = {}
+    for key in json_dict.keys():
+        value = json_dict[key]
+        if isinstance(value, dict):
+            key_parser_dict[key] = parse_json_yaml(value, parser_model_dict)
+        elif isinstance(value, list):
+            key_parser_dict[key] = [parse_json_yaml(value[0], parser_model_dict)]
+        elif parser_model_dict.get(value) is None:
+            msg = 'The parser model %s does not exist!' % value
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        else:
+            key_parser_dict[key] = parser_model_dict.get(value)
+    return key_parser_dict

@@ -19,7 +19,12 @@
                 'value_sign_type': {'type': 'string', 'allowed': ['none', 'optional', 'mandatory'], 'default': 'none'},
                 'value_pad_type': {'type': 'string', 'allowed': ['none', 'zero', 'blank'], 'default': 'none'},
                 'exponent_type': {'type': 'string', 'allowed': ['none', 'optional', 'mandatory'], 'default': 'none'},
-                'start_year': {'type': 'integer', 'nullable': True, 'default': None}
+                'start_year': {'type': 'integer', 'nullable': True, 'default': None},
+                'delimiter': {'type': 'string'},
+                'escape': {'type': 'string', 'nullable': True, 'default': None},
+                'consume_delimiter': {'type': 'boolean', 'default': False},
+                'key_parser_dict': {'type': 'dict'},
+                'optional_key_prefix': {'type': 'string', 'default': 'optional_key_'}
             }
         }
     },
