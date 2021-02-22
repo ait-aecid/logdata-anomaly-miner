@@ -118,7 +118,7 @@
             'required': True,
             'type': 'dict',
             'schema': {
-                'verbose': {'type': 'boolean', 'required': False, 'default': False},
+                'verbose': {'type': 'boolean', 'required': False, 'default': True},
                 'multi_source': {'type': 'boolean', 'required': False, 'default': False},
                 'timestamp_paths': {'type': ['string', 'list']},
                 'eol_sep': {'type': 'string', 'required': False, 'default': '\n'},
