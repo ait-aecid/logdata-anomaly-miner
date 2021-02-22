@@ -37,7 +37,7 @@ fi
 echo "Demo started.."
 echo ""
 
-FILE=/tmp/elasticsearch-demo-config.yml
+FILE=/tmp/json-input-demo-config.yml
 if ! test -f "$FILE"; then
   echo "$FILE does not exist!"
 	exit 1
