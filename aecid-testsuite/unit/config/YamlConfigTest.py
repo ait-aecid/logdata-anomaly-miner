@@ -2,7 +2,6 @@ import unittest
 import importlib
 import yaml
 import sys
-import os
 import re
 import aminer.AminerConfig as AminerConfig
 from datetime import datetime
