@@ -20,17 +20,19 @@ import re
 class DelimitedDataModelElement(ModelElementInterface):
     """Find a string delimited by given non-escaped delimiter string, possibly a match of zero byte length."""
 
-    def __init__(self, element_id, delimiter, escape=None):
+    def __init__(self, element_id, delimiter, escape=None, consume_delimiter=False):
         self.element_id = element_id
         self.delimiter = delimiter
         if isinstance(escape, bytes):
             escape = escape.decode()
         self.escape = escape
+        self.consume_delimiter = consume_delimiter
 
     def get_id(self):
         """Get the element ID."""
         return self.element_id
 
+    # skipcq: PYL-R0201
     def get_child_elements(self):
         """
         Get all possible child model elements of this element.
@@ -55,6 +57,6 @@ class DelimitedDataModelElement(ModelElementInterface):
                 match_len = search.start()
         if match_len < 1:
             return None
-        match_data = data[:match_len]
+        match_data = data[:match_len + len(self.delimiter) * (self.consume_delimiter is True)]
         match_context.update(match_data)
         return MatchElement("%s/%s" % (path, self.element_id), match_data, match_data, None)

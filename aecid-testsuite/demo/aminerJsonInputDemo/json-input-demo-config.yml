@@ -1,0 +1,97 @@
+LearnMode: True
+
+Core.LogDir: '/tmp/lib/aminer/log'
+
+Core.PersistenceDir: '/tmp/lib/aminer'
+
+Core.PersistencePeriod: 600
+
+LogResourceList:
+        - 'file:///tmp/syslog'
+
+MailAlerting.TargetAddress: 'root@localhost'
+
+MailAlerting.FromAddress: 'root@localhost'
+
+MailAlerting.SubjectPrefix: 'aminer Alerts:'
+
+MailAlerting.AlertGraceTime: 0
+
+MailAlerting.EventCollectTime: 0
+
+MailAlerting.MinAlertGap: 0
+
+MailAlerting.MaxAlertGap: 600
+
+MailAlerting.MaxEventsPerMessage: 1000
+
+LogPrefix: 'Original log line: '
+
+Log.StatisticsPeriod: 3600
+
+Log.StatisticsLevel: 1
+
+Log.DebugLevel: 1
+
+Parser:
+       - id: id
+         type: VariableByteDataModelElement
+         name: 'id'
+         args: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789_-.'
+
+       - id: value
+         type: VariableByteDataModelElement
+         name: 'value'
+         args: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789_-.'
+
+       - id: buttonNames
+         type: FixedWordlistDataModelElement
+         name: 'buttonNames'
+         args:
+           - 'New'
+           - 'Open'
+           - 'Close'
+
+       - id: buttonOnclick
+         type: FixedWordlistDataModelElement
+         name: 'buttonOnclick'
+         args:
+           - 'CreateNewDoc()'
+           - 'OpenDoc()'
+           - 'CloseDoc()'
+
+       - id: json
+         start: True
+         type: JsonModelElement
+         name: 'model'
+         key_parser_dict:
+           menu:
+             id: id
+             value: value
+             popup:
+               menuitem:
+                 - value: buttonNames
+                   onclick: buttonOnclick
+
+Input:
+        timestamp_paths: None
+        verbose: False
+        json_format: True
+
+Analysis:
+        - type: NewMatchPathValueComboDetector
+          id: NewMatchPathValueCombo
+          paths:
+            - "/model/menu/id"
+            - "/model/menu/value"
+          learn_mode: True
+        - type: NewMatchPathValueDetector
+          id: NewMatchPathValue
+          paths:
+            - "/model/menu/id"
+            - "/model/menu/value"
+          learn_mode: True
+
+EventHandlers:
+        - id: stpe
+          type: StreamPrinterEventHandler
