@@ -80,7 +80,7 @@ case "$1" in
 		exit 0
 		;;
 	*)
-		echo "Usage: [ ALL | SHELL | runSuspendModeTest | runUnittests | runAminerDemo "
+		echo "Usage: [ ALL | SHELL | runSuspendModeTest | runUnittests | runAminerDemo | runAminerElasticsearchDemo "
 		echo "         runAminerIntegrationTest | runCoverageTests | runRemoteControlTest | runTryItOut | runGettingStarted] <options>"
 		exit 1
 		;;
