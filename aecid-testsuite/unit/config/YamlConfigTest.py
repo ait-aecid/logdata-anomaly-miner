@@ -570,10 +570,10 @@ class YamlConfigTest(TestBase):
 
         valid_paths = ['file:///var/log/access.log', 'unix:///dev/stdin', 'file://access.log']
         for valid_path in valid_paths:
-            self.assertEqual(regex.search(valid_path).group(0), valid_path)
+            self.assertEqual(regex.search(valid_path).group(0), valid_path, 'Failed regex check at %s.' % valid_path)
         invalid_paths = ['/var/log/access.log', 'stream:///dev/stdin', 'file://', 'unix://', '']
         for invalid_path in invalid_paths:
-            self.assertEqual(regex.search(invalid_path), None)
+            self.assertEqual(regex.search(invalid_path), None, 'Failed regex check at %s.' % invalid_path)
 
     def run_empty_components_tests(self, context):
         """Run the empty components tests."""
