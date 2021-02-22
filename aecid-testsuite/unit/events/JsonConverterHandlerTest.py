@@ -27,7 +27,7 @@ class JsonConverterHandlerTest(TestBase):
                       '    "AnalysisComponentType": "%s",\n    "AnalysisComponentName": "%s",\n    "Message": "%s",\n' \
                       '    "PersistenceFileName": "%s",\n    "AffectedParserPaths": [\n      "test/path/1",\n' \
                       '      "test/path/2"\n    ]\n  },\n  "LogData": {\n    "RawLogData": [\n      " pid="\n    ],\n    ' \
-                      '"Timestamps": [\n      %s\n    ],\n    "LogLinesCount": 5,\n' \
+                      '"Timestamps": [\n      %s\n    ],\n    "DetectionTimestamp": %s,\n    "LogLinesCount": 5,\n' \
                       '    "AnnotatedMatchElement": "match/s1: b\' pid=\'"\n  }%s\n}\n\n'
 
     def test1receive_expected_event(self):
@@ -40,7 +40,8 @@ class JsonConverterHandlerTest(TestBase):
         self.assertEqual(
             self.output_stream.getvalue(), self.expected_string % (
                 datetime.fromtimestamp(self.t).strftime("%Y-%m-%d %H:%M:%S"), self.event_message, self.__class__.__name__,
-                self.description, self.__class__.__name__, self.description, self.event_message, self.persistence_id, round(self.t, 2), ""))
+                self.description, self.__class__.__name__, self.description, self.event_message, self.persistence_id, round(self.t, 2),
+                round(time.time(), 2), ""))
 
     def test2receive_event_with_same_event_data_attributes(self):
         """In this test case an attribute of AnalysisComponent is overwritten and an JsonError attribute is expected."""
@@ -54,8 +55,8 @@ class JsonConverterHandlerTest(TestBase):
         self.assertEqual(
             self.output_stream.getvalue(), self.expected_string % (
                 datetime.fromtimestamp(self.t).strftime("%Y-%m-%d %H:%M:%S"), self.event_message, self.__class__.__name__,
-                self.description, self.__class__.__name__, self.description, self.event_message, self.persistence_id,
-                round(float("%.2f" % self.t), 2),
+                self.description, self.__class__.__name__, self.description, self.event_message, self.persistence_id, round(self.t, 2),
+                round(time.time(), 2),
                 ',\n  "JsonError": "AnalysisComponent attribute \'Message\' is already in use and can not be overwritten!\\n"'))
 
 
