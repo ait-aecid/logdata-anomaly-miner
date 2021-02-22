@@ -568,10 +568,10 @@ class YamlConfigTest(TestBase):
             base_schema = eval(sma.read())
         regex = re.compile(base_schema['LogResourceList']['schema']['regex'])
 
-        valid_paths = ['file:///var/log/access.log', 'unix:///dev/stdin']
+        valid_paths = ['file:///var/log/access.log', 'unix:///dev/stdin', 'file://access.log']
         for valid_path in valid_paths:
             self.assertEqual(regex.search(valid_path).group(0), valid_path)
-        invalid_paths = ['/var/log/access.log', 'file://access.log', 'stream:///dev/stdin']
+        invalid_paths = ['/var/log/access.log', 'stream:///dev/stdin']
         for invalid_path in invalid_paths:
             self.assertEqual(regex.search(invalid_path), None)
 
