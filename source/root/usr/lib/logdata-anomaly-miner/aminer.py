@@ -201,7 +201,7 @@ def main():
         help_message += flame
     parser = argparse.ArgumentParser(description=help_message, formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-v', '--version', action='version', version=__version_string__)
-    parser.add_argument('-u', '--check', action='store_true', help='check if updates for the aminer are available.')
+    parser.add_argument('-u', '--check-updates', action='store_true', help='check if updates for the aminer are available.')
     parser.add_argument('-c', '--config', default='/etc/aminer/config.yml', type=str, help='path to the config-file')
     parser.add_argument('-D', '--daemon', action='store_false', help='run as a daemon process')
     parser.add_argument('-s', '--stat', choices=[0, 1, 2], type=int, help='set the stat level. Possible stat-levels are 0 for no statistics'
@@ -217,7 +217,7 @@ def main():
 
     args = parser.parse_args()
 
-    if args.check:
+    if args.check_updates:
         import urllib3
         url = 'https://raw.githubusercontent.com/ait-aecid/logdata-anomaly-miner/main/source/root/usr/lib/logdata-anomaly-miner/metadata.py'
         http = urllib3.PoolManager()
