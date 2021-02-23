@@ -13,7 +13,7 @@ else
 	sudoInstalled=1
 fi
 
-#: <<'END'
+#<<'END'
 AMINER_PERSISTENCE_PATH=/tmp/lib/aminer/*
 if [[ $sudoInstalled == 0 ]]; then
 	sudo mkdir /tmp/lib 2> /dev/null

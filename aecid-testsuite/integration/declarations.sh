@@ -32,6 +32,11 @@ END
 JSON_OUTPUT+=("$VAR")
 read -r -d '' VAR << END
     ],
+    "DetectionTimestamp":
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+,
     "LogLinesCount": 1
   },
   "AnalysisComponent": {
@@ -85,11 +90,15 @@ read -r -d '' VAR << END
  localhost root: System rebooted for hard disk upgrade"
     ],
     "Timestamps": [
-
 END
 JSON_OUTPUT+=("$VAR")
 read -r -d '' VAR << END
     ],
+    "DetectionTimestamp":
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+,
     "LogLinesCount": 1,
     "AnnotatedMatchElement": "/model/DiskUpgrade: b'
 END
@@ -112,11 +121,15 @@ read -r -d '' VAR << END
  localhost root: System rebooted for hard disk upgrad"
     ],
     "Timestamps": [
-
 END
 JSON_OUTPUT+=("$VAR")
 read -r -d '' VAR << END
     ],
+    "DetectionTimestamp":
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+,
     "LogLinesCount": 1
   },
   "AnalysisComponent": {
@@ -137,11 +150,15 @@ read -r -d '' VAR << END
  localhost root: System rebooted for hard disk upgrade"
     ],
     "Timestamps": [
-
 END
 JSON_OUTPUT+=("$VAR")
 read -r -d '' VAR << END
     ],
+    "DetectionTimestamp":
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+,
     "LogLinesCount": 1
   },
   "AnalysisComponent": {
@@ -179,11 +196,15 @@ read -r -d '' VAR << END
       "The Path of the home directory shown by pwd of the user root is: /root"
     ],
     "Timestamps": [
-
 END
 JSON_OUTPUT+=("$VAR")
 read -r -d '' VAR << END
     ],
+    "DetectionTimestamp":
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+,
     "LogLinesCount": 1,
     "AnnotatedMatchElement": "/model/HomePath: b'The Path of the home directory shown by pwd of the user root is: /root'\n  /model/HomePath/Pwd: b'The Path of the home directory shown by pwd of the user '\n  /model/HomePath/Username: b'root'\n  /model/HomePath/Is: b' is: '\n  /model/HomePath/Path: b'/root'"
   }
@@ -216,11 +237,15 @@ read -r -d '' VAR << END
       "The Path of the home directory shown by pwd of the user root is: /root"
     ],
     "Timestamps": [
-
 END
 JSON_OUTPUT+=("$VAR")
 read -r -d '' VAR << END
     ],
+    "DetectionTimestamp":
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+,
     "LogLinesCount": 1,
     "AnnotatedMatchElement": "/model/HomePath: b'The Path of the home directory shown by pwd of the user root is: /root'\n  /model/HomePath/Pwd: b'The Path of the home directory shown by pwd of the user '\n  /model/HomePath/Username: b'root'\n  /model/HomePath/Is: b' is: '\n  /model/HomePath/Path: b'/root'"
   }
@@ -253,11 +278,15 @@ read -r -d '' VAR << END
       "The Path of the home directory shown by pwd of the user user is: /home/user"
     ],
     "Timestamps": [
-
 END
 JSON_OUTPUT+=("$VAR")
 read -r -d '' VAR << END
     ],
+    "DetectionTimestamp":
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+,
     "LogLinesCount": 1,
     "AnnotatedMatchElement": "/model/HomePath: b'The Path of the home directory shown by pwd of the user user is: /home/user'\n  /model/HomePath/Pwd: b'The Path of the home directory shown by pwd of the user '\n  /model/HomePath/Username: b'user'\n  /model/HomePath/Is: b' is: '\n  /model/HomePath/Path: b'/home/user'"
   }
@@ -290,11 +319,15 @@ read -r -d '' VAR << END
       "The Path of the home directory shown by pwd of the user guest is: /home/guest"
     ],
     "Timestamps": [
-
 END
 JSON_OUTPUT+=("$VAR")
 read -r -d '' VAR << END
     ],
+    "DetectionTimestamp":
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+,
     "LogLinesCount": 1,
     "AnnotatedMatchElement": "/model/HomePath: b'The Path of the home directory shown by pwd of the user guest is: /home/guest'\n  /model/HomePath/Pwd: b'The Path of the home directory shown by pwd of the user '\n  /model/HomePath/Username: b'guest'\n  /model/HomePath/Is: b' is: '\n  /model/HomePath/Path: b'/home/guest'"
   }
