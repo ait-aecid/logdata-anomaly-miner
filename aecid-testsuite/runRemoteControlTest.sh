@@ -1,7 +1,7 @@
 sudo mkdir /tmp/lib 2> /dev/null
 sudo mkdir /tmp/lib/aminer 2> /dev/null
-sudo mkdir /tmp/lib/aminer/log 2> /dev/null
 sudo rm -r /tmp/lib/aminer/* 2> /dev/null
+sudo mkdir /tmp/lib/aminer/log 2> /dev/null
 sudo chown -R aminer:aminer /tmp/lib 2> /dev/null
 sudo rm /tmp/syslog 2> /dev/null
 touch /tmp/syslog
@@ -567,6 +567,7 @@ sleep 2 & wait $!
 sudo mkdir /tmp/lib 2> /dev/null
 sudo mkdir /tmp/lib/aminer 2> /dev/null
 sudo rm -r /tmp/lib/aminer/* 2> /dev/null
+sudo mkdir /tmp/lib/aminer/log 2> /dev/null
 sudo chown -R aminer:aminer /tmp/lib 2> /dev/null
 sudo rm /tmp/syslog 2> /dev/null
 touch /tmp/syslog
