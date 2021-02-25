@@ -79,8 +79,7 @@ def load_yaml(config_file):
         filter_config_errors(filtered_errors, 'Parser', v.errors, parser_validation_schema)
         filter_config_errors(filtered_errors, 'EventHandlers', v.errors, event_handler_validation_schema)
 
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(filtered_errors)
-        raise ValueError(filtered_errors)
+        raise ValueError("Config-Error: %s" % filtered_errors)
 
     v = NormalisationValidator(normalisation_schema)
     if v.validate(yaml_data, normalisation_schema):
