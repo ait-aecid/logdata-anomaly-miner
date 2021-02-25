@@ -6,6 +6,13 @@ from aminer.parsing.MatchContext import MatchContext
 class FixedDataModelElementTest(unittest.TestCase):
     """Unittests for the FixedDataModelElement."""
 
+    def test1get_match_element_valid_match(self):
+        """Parse matching substring from MatchContext and check if the MatchContext was updated accordingly."""
+        pass
+    def test2get_match_element_no_match(self):
+        """Parse not matching substring from MatchContext and check if the MatchContext was not changed."""
+        pass
+
     pid = b' pid='
 
     def test1_valid_input_with_match_element_found(self):
