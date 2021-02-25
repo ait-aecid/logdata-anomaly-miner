@@ -77,6 +77,8 @@ class JsonModelElement(ModelElementInterface):
                 split_data = key.split(self.optional_key_prefix, 1)
                 if len(split_data) != 1 and split_data[-1] not in json_match_data:
                     continue
+                if split_data[-1] not in json_match_data:
+                    return [None]
                 data = json_match_data[split_data[-1]]
                 if isinstance(data, str):
                     data = data.encode()
