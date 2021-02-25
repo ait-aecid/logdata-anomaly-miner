@@ -13,6 +13,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import sys
 import logging
+import copy
 from aminer import AminerConfig
 
 
@@ -73,8 +74,12 @@ def load_yaml(config_file):
 
     v = ConfigValidator(validation_schema)
     if not v.validate(yaml_data, validation_schema):
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(v.errors)
-        raise ValueError(v.errors)
+        filtered_errors = copy.deepcopy(v.errors)
+        filter_config_errors(filtered_errors, 'Analysis', v.errors, analysis_validation_schema)
+        filter_config_errors(filtered_errors, 'Parser', v.errors, parser_validation_schema)
+        filter_config_errors(filtered_errors, 'EventHandlers', v.errors, event_handler_validation_schema)
+
+        raise ValueError("Config-Error: %s" % filtered_errors)
 
     v = NormalisationValidator(normalisation_schema)
     if v.validate(yaml_data, normalisation_schema):
@@ -87,6 +92,29 @@ def load_yaml(config_file):
     # Set default values
     for key, val in yaml_data.items():
         config_properties[str(key)] = val
+
+
+def filter_config_errors(filtered_errors, key_name, errors, schema):
+    oneof = schema[key_name]['schema']['oneof']
+    if key_name in errors:
+        for i in range(len(errors[key_name])):
+            err = errors[key_name][i]
+            for key in err:
+                if 'none or more than one rule validate' in err[key]:
+                    for cause in err[key]:
+                        if isinstance(cause, dict):
+                            # we need to copy the dictionary as it is not possible to iterate through it and change the size.
+                            for definition in copy.deepcopy(cause):
+                                if 'type' in cause[definition][0] and cause[definition][0]['type'][0].startswith('unallowed value '):
+                                    del cause[definition]
+                                else:
+                                    oneof_def_pos = int(definition.split(' ')[-1])
+                                    oneof_schema_type = oneof[oneof_def_pos]['schema']['type']
+                                    if 'forbidden' in oneof_schema_type:
+                                        cause[definition][0]['type'] = {'forbidden': oneof_schema_type['forbidden']}
+                                    elif 'allowed' in oneof_schema_type:
+                                        cause[definition][0]['type'] = {'allowed': oneof_schema_type['allowed']}
+            filtered_errors[key_name][i] = err
 
 
 # Add your ruleset here:
