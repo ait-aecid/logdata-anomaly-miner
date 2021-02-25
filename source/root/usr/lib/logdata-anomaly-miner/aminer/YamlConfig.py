@@ -707,10 +707,6 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                 if item['type'].name == 'SyslogWriterEventHandler':
                     ctx = func(analysis_context, item['instance_name'])
                 if item['type'].name == 'KafkaEventHandler':
-                    if 'topic' not in item:
-                        msg = "Kafka-Topic not defined"
-                        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-                        raise ValueError(msg)
                     import configparser
                     import os
                     config = configparser.ConfigParser()
