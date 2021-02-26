@@ -1,0 +1,52 @@
+AminerUser: 'aminer'
+AMinerGroup: 'aminer' # this attribute does not exist
+
+LogResourceList:
+        - 'file:///var/log/apache2/access.log'
+
+RemoteControlSocket: '/var/run/aminer-remote.socket'
+
+Core.PersistenceDir: '/tmp/lib/aminer'
+
+Parser:
+        - id: 'apacheModel'
+          type: ApacheAccessModel
+          name: 'apache'
+          args: 'apache'
+          args2: 'apache2' # this attribute does not exist
+
+        - id: 'START'
+          start: True
+          type: SequenceModelElement
+          name: 'model'
+          args: apacheModel
+
+Input:
+        verbose: True
+        multi_source: False
+        timestamp_paths: "/model/accesslog/time"
+
+Analysis:
+        - type: ParserCount
+          id: ParserCount
+          paths: ["/model/accesslog/status"]
+          report_interval: 10
+          reset_after_report_flag: False # this attribute does not exist
+          learn_mode: True # this attribute does not exist
+
+        - type: NewMatchPathValueComboDetector
+          id: NewMatchPathValueComboDetector1
+          paths: ["/model/accesslog/request","/model/accesslog/method"]
+          learn_mode: True
+          persistence_id: 'accesslog_request'
+          output_logline: False
+          allow_missing_values: False
+
+EventHandlers:
+        - id: stpe
+          type: StreamPrinterEventHandler
+          output_file_path: '/tmp/streamPrinter.txt'
+
+        - id: syslog
+          type: SyslogWriterEventHandler
+          output_file_path: '/tmp/streamPrinter.txt' # this attribute does not exist
