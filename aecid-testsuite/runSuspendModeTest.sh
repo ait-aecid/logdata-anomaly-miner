@@ -33,7 +33,7 @@ if [[ $md5_result == "$SUSPEND_FILE: OK" ]]; then
 	exit_code=1
 fi
 
-find /tmp/lib/aminer -type f ! -path "/tmp/lib/aminer/log/aminerRemoteLog.txt" ! -path "/tmp/lib/aminer/log/aminer.log" -exec md5sum {} \; | tee /tmp/test1.md5 > /dev/null
+find /tmp/lib/aminer -type f ! -path "/tmp/lib/aminer/log/aminerRemoteLog.txt" ! -path "/tmp/lib/aminer/log/aminer.log" ! -path "/tmp/lib/aminer/log/statistics.log" -exec md5sum {} \; | tee /tmp/test1.md5 > /dev/null
 
 sleep 1
 md5sum $SUSPEND_FILE > $SUSPEND_FILE_MD5 2> /dev/null
@@ -46,7 +46,7 @@ if [[ $md5_result != "$SUSPEND_FILE: OK" ]]; then
 fi
 
 sleep 5
-find /tmp/lib/aminer -type f ! -path "/tmp/lib/aminer/log/aminerRemoteLog.txt" ! -path "/tmp/lib/aminer/log/aminer.log" -exec md5sum {} \; | tee /tmp/test2.md5 > /dev/null
+find /tmp/lib/aminer -type f ! -path "/tmp/lib/aminer/log/aminerRemoteLog.txt" ! -path "/tmp/lib/aminer/log/aminer.log" ! -path "/tmp/lib/aminer/log/statistics.log" -exec md5sum {} \; | tee /tmp/test2.md5 > /dev/null
 
 sudo aminerremotecontrol --exec "activate" > /dev/null
 
@@ -56,7 +56,7 @@ if [[ $md5_result == "/tmp/syslog: OK" ]]; then
 fi
 
 sleep 8
-find /tmp/lib/aminer -type f ! -path "/tmp/lib/aminer/log/aminerRemoteLog.txt" ! -path "/tmp/lib/aminer/log/aminer.log" -exec md5sum {} \; | tee /tmp/test3.md5 > /dev/null
+find /tmp/lib/aminer -type f ! -path "/tmp/lib/aminer/log/aminerRemoteLog.txt" ! -path "/tmp/lib/aminer/log/aminer.log" ! -path "/tmp/lib/aminer/log/statistics.log" -exec md5sum {} \; | tee /tmp/test3.md5 > /dev/null
 
 suspend_diff=`diff /tmp/test1.md5 /tmp/test2.md5`
 activate_diff=`diff /tmp/test2.md5 /tmp/test3.md5`
