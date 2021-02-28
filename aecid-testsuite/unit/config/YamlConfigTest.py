@@ -555,6 +555,24 @@ class YamlConfigTest(TestBase):
         aminer_config.load_yaml('unit/data/configfiles/bigger_than_or_equal_valid.yml')
         self.assertRaises(ValueError, aminer_config.load_yaml, 'unit/data/configfiles/bigger_than_or_equal_error.yml')
 
+    def test26_filter_config_errors(self):
+        """Check if errors in multiple sections like Analysis, Parser and EventHandlers are found and filtered properly."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        try:
+            aminer_config.load_yaml('unit/data/configfiles/filter_config_errors.yml')
+        except ValueError as e:
+            msg = "Config-Error: {'AMinerGroup': ['unknown field'], 'Analysis': [{0: ['none or more than one rule validate', {'oneof " \
+                  "definition 21': [{'learn_mode': ['unknown field'], 'reset_after_report_flag': ['unknown field'], 'type': {'allowed': [" \
+                  "'ParserCount']}}]}]}], 'EventHandlers': [{1: ['none or more than one rule validate', {'oneof definition 3': [{" \
+                  "'output_file_path': ['unknown field'], 'type': {'allowed': ['SyslogWriterEventHandler']}}]}]}], 'Parser': [{0: ['none " \
+                  "or more than one rule validate', {'oneof definition 0': [{'args2': ['unknown field'], 'type': {'forbidden': [" \
+                  "'ElementValueBranchModelElement', 'DecimalIntegerValueModelElement', 'DecimalIntegerValueModelElement', " \
+                  "'MultiLocaleDateTimeModelElement', 'DelimitedDataModelElement', 'JsonModelElement']}}]}]}]}"
+            self.assertEqual(msg, str(e))
+        self.assertRaises(ValueError, aminer_config.load_yaml, 'unit/data/configfiles/filter_config_errors.yml')
+
     def run_empty_components_tests(self, context):
         """Run the empty components tests."""
         self.assertTrue(isinstance(context.registered_components[0][0], SubhandlerFilter))
