@@ -7,14 +7,14 @@ import math
 def json_machine(emit, next_func=None):
     def _value(byte_data):
         if not byte_data:
-            return
+            return None
 
-        if byte_data == 0x09 or byte_data == 0x0a or byte_data == 0x0d or byte_data == 0x20:
+        if byte_data in (0x09, 0x0a, 0x0d, 0x20):
             return _value  # Ignore whitespace
 
         # only allow json objects in our case
-        if byte_data != 0x7b and next_func == _value:
-            return
+        if byte_data != 0x7b and next_func is _value:
+            return None
 
         if byte_data == 0x22:  # "
             return string_machine(on_value)
@@ -37,7 +37,7 @@ def json_machine(emit, next_func=None):
         if byte_data == 0x6e:  # n
             return constant_machine(NULL, None, on_value)
 
-        if next_func == _value:
+        if next_func is _value:
             return emit(None)
             # raise Exception("Unexpected 0x" + str(byte_data))
 
@@ -104,7 +104,7 @@ def string_machine(emit):
     def _escaped_string(byte_data):
         nonlocal string
 
-        if byte_data == 0x22 or byte_data == 0x5c or byte_data == 0x2f:  # " \ /
+        if byte_data in (0x22, 0x5c, 0x2f):  # " \ /
             string += chr(byte_data)
             return _string
 
@@ -130,6 +130,8 @@ def string_machine(emit):
 
         if byte_data == 0x75:  # u
             return hex_machine(on_char_code)
+
+        return None
 
     def on_char_code(char_code):
         nonlocal string
@@ -248,7 +250,7 @@ def number_machine(byte_data, emit):
         return _later(byte_data)
 
     def _later(byte_data):
-        if byte_data == 0x45 or byte_data == 0x65:  # E e
+        if byte_data in (0x45, 0x65):  # E e
             return _esign
 
         return _done(byte_data)
@@ -295,7 +297,7 @@ def array_machine(emit):
         array_data.append(value)
 
     def _comma(byte_data):
-        if byte_data == 0x09 or byte_data == 0x0a or byte_data == 0x0d or byte_data == 0x20:
+        if byte_data in (0x09, 0x0a, 0x0d, 0x20):
             return _comma  # Ignore whitespace
 
         if byte_data == 0x2c:  # ,
@@ -321,7 +323,7 @@ def object_machine(emit):
         return _key(byte_data)
 
     def _key(byte_data):
-        if byte_data == 0x09 or byte_data == 0x0a or byte_data == 0x0d or byte_data == 0x20:
+        if byte_data in (0x09, 0x0a, 0x0d, 0x20):
             return _object  # Ignore whitespace
 
         if byte_data == 0x22:
@@ -336,7 +338,7 @@ def object_machine(emit):
         return _colon
 
     def _colon(byte_data):
-        if byte_data == 0x09 or byte_data == 0x0a or byte_data == 0x0d or byte_data == 0x20:
+        if byte_data in (0x09, 0x0a, 0x0d, 0x20):
             return _colon  # Ignore whitespace
 
         if byte_data == 0x3a:  # :
