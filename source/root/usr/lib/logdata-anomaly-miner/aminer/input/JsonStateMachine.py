@@ -38,7 +38,8 @@ def json_machine(emit, next_func=None):
             return constant_machine(NULL, None, on_value)
 
         if next_func == _value:
-            raise Exception("Unexpected 0x" + str(byte_data))
+            return emit(None)
+            # raise Exception("Unexpected 0x" + str(byte_data))
 
         return next_func(byte_data)
 
@@ -67,7 +68,8 @@ def constant_machine(bytes_data, value, emit):
         nonlocal i
         if byte_data != bytes_data[i]:
             i += 1
-            raise Exception("Unexpected 0x" + str(byte_data))
+            return emit(None)
+            # raise Exception("Unexpected 0x" + str(byte_data))
 
         i += 1
         if i < length:
@@ -93,7 +95,8 @@ def string_machine(emit):
             return utf8_machine(byte_data, on_char_code)
 
         if byte_data < 0x20:  # ASCII control character
-            raise Exception("Unexpected control character: 0x" + str(byte_data))
+            return emit(None)
+            # raise Exception("Unexpected control character: 0x" + str(byte_data))
 
         string += chr(byte_data)
         return _string
@@ -144,7 +147,8 @@ def utf8_machine(byte_data, emit):
     def _utf8(byte_data):
         nonlocal num, left
         if (byte_data & 0xc0) != 0x80:
-            raise Exception("Invalid byte in UTF-8 character: 0x" + byte_data.toString(16))
+            return emit(None)
+            # raise Exception("Invalid byte in UTF-8 character: 0x" + byte_data.toString(16))
 
         left = left - 1
 
@@ -168,7 +172,8 @@ def utf8_machine(byte_data, emit):
         num = (byte_data & 0x07) << 18
         return _utf8
 
-    raise Exception("Invalid byte in UTF-8 string: 0x" + str(byte_data))
+    return emit(None)
+    # raise Exception("Invalid byte in UTF-8 string: 0x" + str(byte_data))
 
 
 # Nestable state machine for hex escaped characters
@@ -186,7 +191,8 @@ def hex_machine(emit):
         elif 0x41 <= byte_data <= 0x46:
             i = byte_data - 0x37
         else:
-            raise Exception("Expected hex char in string hex escape")
+            return emit(None)
+            # raise Exception("Expected hex char in string hex escape")
 
         left -= 1
         num |= i << (left * 4)
@@ -226,7 +232,8 @@ def number_machine(byte_data, emit):
         if 0x30 < byte_data < 0x40:
             return _number(byte_data)
 
-        raise Exception("Invalid number: 0x" + str(byte_data))
+        return emit(None)
+        # raise Exception("Invalid number: 0x" + str(byte_data))
 
     if byte_data == 0x2d:  # -
         sign = -1
@@ -297,7 +304,8 @@ def array_machine(emit):
         if byte_data == 0x5d:  # ]
             return emit(array_data)
 
-        raise Exception("Unexpected byte: 0x" + str(byte_data) + " in array body")
+        return emit(None)
+        # raise Exception("Unexpected byte: 0x" + str(byte_data) + " in array body")
 
     return _array
 
@@ -319,7 +327,8 @@ def object_machine(emit):
         if byte_data == 0x22:
             return string_machine(on_key)
 
-        raise Exception("Unexpected byte: 0x" + str(byte_data))
+        return emit(None)
+        # raise Exception("Unexpected byte: 0x" + str(byte_data))
 
     def on_key(result):
         nonlocal key
@@ -333,7 +342,8 @@ def object_machine(emit):
         if byte_data == 0x3a:  # :
             return json_machine(on_value, _comma)
 
-        raise Exception("Unexpected byte: 0x" + str(byte_data))
+        return emit(None)
+        # raise Exception("Unexpected byte: 0x" + str(byte_data))
 
     def on_value(value):
         object_data[key] = value
@@ -348,6 +358,7 @@ def object_machine(emit):
         if byte_data == 0x7d:  #
             return emit(object_data)
 
-        raise Exception("Unexpected byte: 0x" + str(byte_data))
+        return emit(None)
+        # raise Exception("Unexpected byte: 0x" + str(byte_data))
 
     return _object

@@ -23,6 +23,7 @@ from aminer.parsing.ParserMatch import ParserMatch
 
 
 breakout = False
+data = None
 line = None
 
 
@@ -30,6 +31,8 @@ def found_json(_data):
     """Set the breakout variable if the JsonStateMachine finished."""
     global breakout  # skipcq: PYL-W0603
     breakout = True
+    global data  # skipcq: PYL-W0603
+    data = _data
 
 
 class ByteStreamLineAtomizer(StreamAtomizer):
@@ -92,6 +95,8 @@ class ByteStreamLineAtomizer(StreamAtomizer):
             line_end = None
             global breakout  # skipcq: PYL-W0603
             breakout = False
+            global data  # skipcq: PYL-W0603
+            data = None
             valid_json = False
             if self.json_format:
                 state = json_machine(found_json)
@@ -100,7 +105,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                     state = state(char)
                     if breakout or state is None:
                         break
-                if i > 0:
+                if i > 0 and b'{' in stream_data[consumed_length:consumed_length+i+1] and data is not None:
                     line_end = consumed_length + i + 1
                     valid_json = True
 
@@ -153,7 +158,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                             log_atom.set_timestamp(ts_match.match_object)
                             break
             if self.dispatch_atom(log_atom):
-                consumed_length = line_end + len(self.eol_sep)
+                consumed_length = line_end + len(self.eol_sep) - (valid_json and stream_data[line_end:line_end+len(self.eol_sep)] != self.eol_sep)
                 continue
             if consumed_length == 0:
                 # Downstream did not want the data, so tell upstream to block for a while.
