@@ -125,19 +125,97 @@ echo "$VAR" >> /tmp/syslog
 
 # arrays must not be parsed as json + masked "
 read -r -d '' VAR << END
-[
-  {
-    "value": "\"string1\""
-  }
-]
+{
+  "value": "\"string1\""
+}
 END
 echo "$VAR" >> /tmp/syslog
 
 # arrays must not be parsed as json + opening {
 read -r -d '' VAR << END
-  {
-    "value": "string1 {"
-  }
+{
+  "value": "string1 {"
+}
+END
+echo "$VAR" >> /tmp/syslog
+
+# test valid booleans
+read -r -d '' VAR << END
+{
+  "bool": true
+}
+END
+echo "$VAR" >> /tmp/syslog
+
+# test valid booleans
+read -r -d '' VAR << END
+{
+  "bool": false
+}
+END
+echo "$VAR" >> /tmp/syslog
+
+# test invalid booleans
+read -r -d '' VAR << END
+{
+  "bool": True
+}
+END
+echo "$VAR" >> /tmp/syslog
+
+# test invalid booleans
+read -r -d '' VAR << END
+{
+  "bool": False
+}
+END
+echo "$VAR" >> /tmp/syslog
+
+# test invalid booleans
+read -r -d '' VAR << END
+{
+  "bool": TRUE
+}
+END
+echo "$VAR" >> /tmp/syslog
+
+# test invalid booleans
+read -r -d '' VAR << END
+{
+  "bool": FALSE
+}
+END
+echo "$VAR" >> /tmp/syslog
+
+# test invalid booleans
+read -r -d '' VAR << END
+{
+  "bool": d
+}
+END
+echo "$VAR" >> /tmp/syslog
+
+# test invalid booleans
+read -r -d '' VAR << END
+{
+  "bool": tr
+}
+END
+echo "$VAR" >> /tmp/syslog
+
+# test valid integer
+read -r -d '' VAR << END
+{
+  "integer": 1234566
+}
+END
+echo "$VAR" >> /tmp/syslog
+
+# test valid float
+read -r -d '' VAR << END
+{
+  "integer": 1234566.223
+}
 END
 echo "$VAR" >> /tmp/syslog
 

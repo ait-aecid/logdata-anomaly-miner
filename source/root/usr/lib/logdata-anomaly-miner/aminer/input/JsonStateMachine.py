@@ -38,7 +38,7 @@ def json_machine(emit, next_func=None):  # skipcq: PY-D0003
             return constant_machine(NULL, None, on_value)
 
         if next_func is _value:
-            return emit(None)
+            return None
             # raise Exception("Unexpected 0x" + str(byte_data))
 
         return next_func(byte_data)
@@ -68,7 +68,7 @@ def constant_machine(bytes_data, value, emit):  # skipcq: PY-D0003
         nonlocal i
         if byte_data != bytes_data[i]:
             i += 1
-            return emit(None)
+            return None
             # raise Exception("Unexpected 0x" + str(byte_data))
 
         i += 1
@@ -95,7 +95,7 @@ def string_machine(emit):  # skipcq: PY-D0003
             return utf8_machine(byte_data, on_char_code)
 
         if byte_data < 0x20:  # ASCII control character
-            return emit(None)
+            return None
             # raise Exception("Unexpected control character: 0x" + str(byte_data))
 
         string += chr(byte_data)
@@ -149,7 +149,7 @@ def utf8_machine(byte_data, emit):  # skipcq: PY-D0003
     def _utf8(byte_data):  # skipcq: PY-D0003
         nonlocal num, left
         if (byte_data & 0xc0) != 0x80:
-            return emit(None)
+            return None
             # raise Exception("Invalid byte in UTF-8 character: 0x" + byte_data.toString(16))
 
         left = left - 1
@@ -157,7 +157,7 @@ def utf8_machine(byte_data, emit):  # skipcq: PY-D0003
         num |= (byte_data & 0x3f) << (left * 6)
         if left:
             return _utf8
-        return emit(num)
+        return num
 
     if 0xc0 <= byte_data < 0xe0:  # 2-byte UTF-8 Character
         left = 1
@@ -174,7 +174,7 @@ def utf8_machine(byte_data, emit):  # skipcq: PY-D0003
         num = (byte_data & 0x07) << 18
         return _utf8
 
-    return emit(None)
+    return None
     # raise Exception("Invalid byte in UTF-8 string: 0x" + str(byte_data))
 
 
@@ -193,7 +193,7 @@ def hex_machine(emit):  # skipcq: PY-D0003
         elif 0x41 <= byte_data <= 0x46:
             i = byte_data - 0x37
         else:
-            return emit(None)
+            return None
             # raise Exception("Expected hex char in string hex escape")
 
         left -= 1
@@ -201,7 +201,7 @@ def hex_machine(emit):  # skipcq: PY-D0003
 
         if left:
             return _hex
-        return emit(num)
+        return num
 
     return _hex
 
@@ -234,7 +234,7 @@ def number_machine(byte_data, emit):  # skipcq: PY-D0003
         if 0x30 < byte_data < 0x40:
             return _number(byte_data)
 
-        return emit(None)
+        return None
         # raise Exception("Invalid number: 0x" + str(byte_data))
 
     if byte_data == 0x2d:  # -
@@ -306,7 +306,7 @@ def array_machine(emit):  # skipcq: PY-D0003
         if byte_data == 0x5d:  # ]
             return emit(array_data)
 
-        return emit(None)
+        return None
         # raise Exception("Unexpected byte: 0x" + str(byte_data) + " in array body")
 
     return _array
@@ -329,7 +329,7 @@ def object_machine(emit):  # skipcq: PY-D0003
         if byte_data == 0x22:
             return string_machine(on_key)
 
-        return emit(None)
+        return None
         # raise Exception("Unexpected byte: 0x" + str(byte_data))
 
     def on_key(result):  # skipcq: PY-D0003
@@ -344,7 +344,7 @@ def object_machine(emit):  # skipcq: PY-D0003
         if byte_data == 0x3a:  # :
             return json_machine(on_value, _comma)
 
-        return emit(None)
+        return None
         # raise Exception("Unexpected byte: 0x" + str(byte_data))
 
     def on_value(value):  # skipcq: PY-D0003
@@ -360,7 +360,7 @@ def object_machine(emit):  # skipcq: PY-D0003
         if byte_data == 0x7d:  #
             return emit(object_data)
 
-        return emit(None)
+        return None
         # raise Exception("Unexpected byte: 0x" + str(byte_data))
 
     return _object

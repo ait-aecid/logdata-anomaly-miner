@@ -4,6 +4,8 @@ sudo chmod +x demo/aminerJsonInputDemo/aminerJsonInputDemo.sh
 sudo ./demo/aminerJsonInputDemo/aminerJsonInputDemo.sh > /tmp/out.txt
 exit_code=$?
 
+OUTPUT=$(cat /tmp/out.txt)
+
 read -r -d '' VAR << END
 New path(es) detected
 NewMatchPathDetector: "DefaultNewMatchPathDetector" (1 lines)
@@ -19,7 +21,9 @@ NewMatchPathDetector: "DefaultNewMatchPathDetector" (1 lines)
 ['/model', '/model/menu/id', '/model/menu/value', '/model/menu/popup/menuitem/buttonNames', '/model/menu/popup/menuitem/buttonOnclick']
 Original log line: b'{"menu": {\n  "id": "file",\n  "value": "File",\n  "popup": {\n    "menuitem": [\n      {"value": "New", "onclick": "CreateNewDoc()"},\n      {"value": "Open", "onclick": "OpenDoc()"},\n      {"value": "Close", "onclick": "CloseDoc()"}\n    ]\n  }\n}}'
 END
-if ! grep -Fxq "$VAR" /tmp/out.txt; then
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
   exit_code=1
 fi
 
@@ -38,7 +42,9 @@ NewMatchPathValueComboDetector: "NewMatchPathValueCombo" (1 lines)
 (b'file', b'File')
 Original log line: b'{"menu": {\n  "id": "file",\n  "value": "File",\n  "popup": {\n    "menuitem": [\n      {"value": "New", "onclick": "CreateNewDoc()"},\n      {"value": "Open", "onclick": "OpenDoc()"},\n      {"value": "Close", "onclick": "CloseDoc()"}\n    ]\n  }\n}}'
 END
-if ! grep -Fxq "$VAR" /tmp/out.txt; then
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
   exit_code=1
 fi
 
@@ -57,7 +63,9 @@ NewMatchPathValueDetector: "NewMatchPathValue" (1 lines)
 {'/model/menu/id': 'file'}
 Original log line: b'{"menu": {\n  "id": "file",\n  "value": "File",\n  "popup": {\n    "menuitem": [\n      {"value": "New", "onclick": "CreateNewDoc()"},\n      {"value": "Open", "onclick": "OpenDoc()"},\n      {"value": "Close", "onclick": "CloseDoc()"}\n    ]\n  }\n}}'
 END
-if ! grep -Fxq "$VAR" /tmp/out.txt; then
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
   exit_code=1
 fi
 
@@ -76,7 +84,9 @@ NewMatchPathValueDetector: "NewMatchPathValue" (1 lines)
 {'/model/menu/value': 'File'}
 Original log line: b'{"menu": {\n  "id": "file",\n  "value": "File",\n  "popup": {\n    "menuitem": [\n      {"value": "New", "onclick": "CreateNewDoc()"},\n      {"value": "Open", "onclick": "OpenDoc()"},\n      {"value": "Close", "onclick": "CloseDoc()"}\n    ]\n  }\n}}'
 END
-if ! grep -Fxq "$VAR" /tmp/out.txt; then
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
   exit_code=1
 fi
 
@@ -85,7 +95,9 @@ Unparsed atom received
 SimpleUnparsedAtomHandler: "None" (1 lines)
   ["string1", "string2", "string3"]
 END
-if ! grep -Fxq "$VAR" /tmp/out.txt; then
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
   exit_code=1
 fi
 
@@ -94,51 +106,287 @@ Unparsed atom received
 SimpleUnparsedAtomHandler: "None" (1 lines)
   [{"value": "string1"}, {"value": "string2"}, {"value": "string3"}]
 END
-if ! grep -Fxq "$VAR" /tmp/out.txt; then
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
   exit_code=1
 fi
 
 read -r -d '' VAR << END
 Unparsed atom received
 SimpleUnparsedAtomHandler: "None" (1 lines)
-  [
+  {
+  "value": "\"string1\""
+}
 END
-if ! grep -Fxq "$VAR" /tmp/out.txt; then
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
   exit_code=1
 fi
 
 read -r -d '' VAR << END
 Unparsed atom received
 SimpleUnparsedAtomHandler: "None" (1 lines)
-    {
-    "value": "\"string1\""
+  {
+  "value": "string1 {"
+}
+END
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
+  exit_code=1
+fi
+
+read -r -d '' VAR << END
+Unparsed atom received
+SimpleUnparsedAtomHandler: "None" (1 lines)
+  {
+  "bool": true
+}
+END
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
+  exit_code=1
+fi
+
+read -r -d '' VAR << END
+Unparsed atom received
+SimpleUnparsedAtomHandler: "None" (1 lines)
+  {
+  "bool": false
+}
+END
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  exit_code=1
+fi
+
+read -r -d '' VAR << END
+Unparsed atom received
+SimpleUnparsedAtomHandler: "None" (1 lines)
+  {
+END
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
+  exit_code=1
+fi
+
+read -r -d '' VAR << END
+Unparsed atom received
+SimpleUnparsedAtomHandler: "None" (1 lines)
+    "bool": True
+END
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
+  exit_code=1
+fi
+
+read -r -d '' VAR << END
+Unparsed atom received
+SimpleUnparsedAtomHandler: "None" (1 lines)
   }
 END
-if ! grep -Fxq "$VAR" /tmp/out.txt; then
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
   exit_code=1
 fi
 
 read -r -d '' VAR << END
 Unparsed atom received
 SimpleUnparsedAtomHandler: "None" (1 lines)
-  ]
+  {
 END
-if ! grep -Fxq "$VAR" /tmp/out.txt; then
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
   exit_code=1
 fi
 
 read -r -d '' VAR << END
 Unparsed atom received
 SimpleUnparsedAtomHandler: "None" (1 lines)
-    {
-    "value": "string1 {"
+    "bool": False
+END
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
+  exit_code=1
+fi
+
+read -r -d '' VAR << END
+Unparsed atom received
+SimpleUnparsedAtomHandler: "None" (1 lines)
   }
 END
-if ! grep -Fxq "$VAR" /tmp/out.txt; then
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
+  exit_code=1
+fi
+
+read -r -d '' VAR << END
+Unparsed atom received
+SimpleUnparsedAtomHandler: "None" (1 lines)
+  {
+END
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
+  exit_code=1
+fi
+
+read -r -d '' VAR << END
+Unparsed atom received
+SimpleUnparsedAtomHandler: "None" (1 lines)
+    "bool": TRUE
+END
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
+  exit_code=1
+fi
+
+read -r -d '' VAR << END
+Unparsed atom received
+SimpleUnparsedAtomHandler: "None" (1 lines)
+  }
+END
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
+  exit_code=1
+fi
+
+read -r -d '' VAR << END
+Unparsed atom received
+SimpleUnparsedAtomHandler: "None" (1 lines)
+  {
+END
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
+  exit_code=1
+fi
+
+read -r -d '' VAR << END
+Unparsed atom received
+SimpleUnparsedAtomHandler: "None" (1 lines)
+    "bool": FALSE
+END
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
+  exit_code=1
+fi
+
+read -r -d '' VAR << END
+Unparsed atom received
+SimpleUnparsedAtomHandler: "None" (1 lines)
+  }
+END
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
+  exit_code=1
+fi
+
+read -r -d '' VAR << END
+Unparsed atom received
+SimpleUnparsedAtomHandler: "None" (1 lines)
+  {
+END
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
+  exit_code=1
+fi
+
+read -r -d '' VAR << END
+Unparsed atom received
+SimpleUnparsedAtomHandler: "None" (1 lines)
+    "bool": d
+END
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
+  exit_code=1
+fi
+
+read -r -d '' VAR << END
+Unparsed atom received
+SimpleUnparsedAtomHandler: "None" (1 lines)
+  }
+END
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
+  exit_code=1
+fi
+
+read -r -d '' VAR << END
+Unparsed atom received
+SimpleUnparsedAtomHandler: "None" (1 lines)
+  {
+END
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
+  exit_code=1
+fi
+
+read -r -d '' VAR << END
+Unparsed atom received
+SimpleUnparsedAtomHandler: "None" (1 lines)
+    "bool": tr
+END
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
+  exit_code=1
+fi
+
+read -r -d '' VAR << END
+Unparsed atom received
+SimpleUnparsedAtomHandler: "None" (1 lines)
+  }
+END
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
+  exit_code=1
+fi
+
+read -r -d '' VAR << END
+Unparsed atom received
+SimpleUnparsedAtomHandler: "None" (1 lines)
+  {
+  "integer": 1234566
+}
+END
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
+  exit_code=1
+fi
+
+read -r -d '' VAR << END
+Unparsed atom received
+SimpleUnparsedAtomHandler: "None" (1 lines)
+  {
+  "integer": 1234566.223
+}
+END
+if [[ "$OUTPUT" != *"$VAR"* ]]; then
+  echo "$VAR"
+  echo
   exit_code=1
 fi
 
 sudo rm /tmp/json-input-demo-config.yml 2> /dev/null
 sudo rm /tmp/syslog
-sudo rm /tmp/out.txt
+#sudo rm /tmp/out.txt
 exit $exit_code
