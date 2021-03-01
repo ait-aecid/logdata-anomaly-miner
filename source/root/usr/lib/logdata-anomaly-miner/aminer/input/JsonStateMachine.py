@@ -349,7 +349,7 @@ def object_machine(emit):
         object_data[key] = value
 
     def _comma(byte_data):
-        if byte_data == 0x09 or byte_data == 0x0a or byte_data == 0x0d or byte_data == 0x20:
+        if byte_data in (0x09, 0x0a, 0x0d, 0x20):
             return _comma  # Ignore whitespace
 
         if byte_data == 0x2c:  # ,
