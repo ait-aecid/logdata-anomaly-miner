@@ -157,7 +157,7 @@ def utf8_machine(byte_data, emit):  # skipcq: PY-D0003
         num |= (byte_data & 0x3f) << (left * 6)
         if left:
             return _utf8
-        return num
+        return emit(num)
 
     if 0xc0 <= byte_data < 0xe0:  # 2-byte UTF-8 Character
         left = 1
@@ -201,7 +201,7 @@ def hex_machine(emit):  # skipcq: PY-D0003
 
         if left:
             return _hex
-        return num
+        return emit(num)
 
     return _hex
 
