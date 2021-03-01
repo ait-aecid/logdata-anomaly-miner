@@ -158,7 +158,8 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                             log_atom.set_timestamp(ts_match.match_object)
                             break
             if self.dispatch_atom(log_atom):
-                consumed_length = line_end + len(self.eol_sep) - (valid_json and stream_data[line_end:line_end+len(self.eol_sep)] != self.eol_sep)
+                consumed_length = line_end + len(self.eol_sep) - (
+                        valid_json and stream_data[line_end:line_end+len(self.eol_sep)] != self.eol_sep)
                 continue
             if consumed_length == 0:
                 # Downstream did not want the data, so tell upstream to block for a while.
