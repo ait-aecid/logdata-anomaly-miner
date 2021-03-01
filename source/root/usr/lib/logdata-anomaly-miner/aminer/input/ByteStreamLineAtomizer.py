@@ -103,12 +103,11 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                 i = 0
                 for i, char in enumerate(stream_data[consumed_length:]):
                     state = state(char)
-                    if breakout or state is None:
+                    if breakout or state is None or i > self.max_line_length:
                         break
-                if i > 0 and b'{' in stream_data[consumed_length:consumed_length+i+1] and data is not None:
+                if 0 < i <= self.max_line_length and b'{' in stream_data[consumed_length:consumed_length+i+1] and data is not None:
                     line_end = consumed_length + i + 1
                     valid_json = True
-
             if line_end is None:
                 line_end = stream_data.find(self.eol_sep, consumed_length)
 

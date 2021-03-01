@@ -388,5 +388,5 @@ fi
 
 sudo rm /tmp/json-input-demo-config.yml 2> /dev/null
 sudo rm /tmp/syslog
-#sudo rm /tmp/out.txt
+sudo rm /tmp/out.txt
 exit $exit_code
