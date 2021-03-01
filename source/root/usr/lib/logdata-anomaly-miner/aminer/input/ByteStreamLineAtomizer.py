@@ -14,7 +14,6 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import logging
 import sys
-import json
 from aminer import AminerConfig
 from aminer.input.LogAtom import LogAtom
 from aminer.input.InputInterfaces import StreamAtomizer
@@ -27,8 +26,9 @@ breakout = False
 line = None
 
 
-def found_json(data):
-    global breakout
+def found_json(_data):
+    """Set the breakout variable if the JsonStateMachine finished."""
+    global breakout  # skipcq: PYL-W0603
     breakout = True
 
 
@@ -90,7 +90,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                 break
 
             line_end = None
-            global breakout
+            global breakout  # skipcq: PYL-W0603
             breakout = False
             valid_json = False
             if self.json_format:

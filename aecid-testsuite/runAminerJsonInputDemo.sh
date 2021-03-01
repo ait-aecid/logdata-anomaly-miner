@@ -111,7 +111,7 @@ read -r -d '' VAR << END
 Unparsed atom received
 SimpleUnparsedAtomHandler: "None" (1 lines)
     {
-    "value": "string1"
+    "value": "\"string1\""
   }
 END
 if ! grep -Fxq "$VAR" /tmp/out.txt; then
@@ -122,6 +122,17 @@ read -r -d '' VAR << END
 Unparsed atom received
 SimpleUnparsedAtomHandler: "None" (1 lines)
   ]
+END
+if ! grep -Fxq "$VAR" /tmp/out.txt; then
+  exit_code=1
+fi
+
+read -r -d '' VAR << END
+Unparsed atom received
+SimpleUnparsedAtomHandler: "None" (1 lines)
+    {
+    "value": "string1 {"
+  }
 END
 if ! grep -Fxq "$VAR" /tmp/out.txt; then
   exit_code=1

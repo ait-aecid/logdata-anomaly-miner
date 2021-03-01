@@ -123,13 +123,21 @@ read -r -d '' VAR << END
 END
 echo "$VAR" >> /tmp/syslog
 
-# arrays must not be parsed as json
+# arrays must not be parsed as json + masked "
 read -r -d '' VAR << END
 [
   {
-    "value": "string1"
+    "value": "\"string1\""
   }
 ]
+END
+echo "$VAR" >> /tmp/syslog
+
+# arrays must not be parsed as json + opening {
+read -r -d '' VAR << END
+  {
+    "value": "string1 {"
+  }
 END
 echo "$VAR" >> /tmp/syslog
 
