@@ -111,6 +111,28 @@ read -r -d '' VAR << END
 END
 echo "$VAR" >> /tmp/syslog
 
+# arrays must not be parsed as json
+read -r -d '' VAR << END
+["string1", "string2", "string3"]
+END
+echo "$VAR" >> /tmp/syslog
+
+# arrays must not be parsed as json
+read -r -d '' VAR << END
+[{"value": "string1"}, {"value": "string2"}, {"value": "string3"}]
+END
+echo "$VAR" >> /tmp/syslog
+
+# arrays must not be parsed as json
+read -r -d '' VAR << END
+[
+  {
+    "value": "string1"
+  }
+]
+END
+echo "$VAR" >> /tmp/syslog
+
 #stop aminer
 sleep 3 & wait $!
 if [[ $sudoInstalled == 0 ]]; then
