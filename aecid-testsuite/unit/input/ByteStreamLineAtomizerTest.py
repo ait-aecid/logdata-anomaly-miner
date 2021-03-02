@@ -92,12 +92,34 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test7json_max_line_length(self):
         """check if json data is not parsed over the max_line_length."""
-        json_data = b'{\n\t"a": 1,\n\t"b": {\n\t\t"c": 2},\n\t"d": 3}\n{\n"a": 1,\n\t"b": {"c": 2},"d": 3}'
+        json_data = b'{\n\t"a": 1,\n\t"b": {\n\t\t"c": 2},\n\t"d": 3}\n{\n"a": 1,\n\t"b": {"c": 2},"d": 3}\n'
+        single_line_json_data = b'{"a": 1,"b": {"c": 2},"d": 3}{"a": 1,"b": {"c": 2},"d": 3'
         any_dme = AnyByteDataModelElement('s')
         byte_stream_line_atomizer = ByteStreamLineAtomizer(any_dme, [], [self.stream_printer_event_handler], 25, [], json_format=True)
         self.assertEqual(byte_stream_line_atomizer.consume_data(json_data, False), json_data.rfind(b'\n') + 1)
+        self.assertEqual(self.output_stream.getvalue(), '')
+        self.assertEqual(byte_stream_line_atomizer.consume_data(json_data, True), len(json_data))
+        self.assertEqual(self.output_stream.getvalue(), '')
         byte_stream_line_atomizer = ByteStreamLineAtomizer(any_dme, [], [self.stream_printer_event_handler], 100, [], json_format=True)
         self.assertEqual(byte_stream_line_atomizer.consume_data(json_data, False), len(json_data))
+        self.assertEqual(self.output_stream.getvalue(), '')
+        self.assertEqual(byte_stream_line_atomizer.consume_data(json_data, True), len(json_data))
+        self.assertEqual(self.output_stream.getvalue(), '')
+
+        byte_stream_line_atomizer = ByteStreamLineAtomizer(any_dme, [], [self.stream_printer_event_handler], 25, [], json_format=True)
+        self.assertEqual(byte_stream_line_atomizer.consume_data(single_line_json_data, True), len(single_line_json_data))
+        self.assertEqual(self.output_stream.getvalue(), 'Overlong line terminated by end of stream (1 lines)\n  {"a": 1,"b": {"c": 2},"d":'
+                                                        ' 3}{"a": 1,"b": {"c": 2},"d": 3\n\n')
+        self.reset_output_stream()
+        self.assertEqual(byte_stream_line_atomizer.consume_data(single_line_json_data, False), len(single_line_json_data))
+        self.assertEqual(self.output_stream.getvalue(), '')
+        byte_stream_line_atomizer = ByteStreamLineAtomizer(any_dme, [], [self.stream_printer_event_handler], 100, [], json_format=True)
+        self.assertEqual(byte_stream_line_atomizer.consume_data(single_line_json_data, True), len(single_line_json_data))
+        self.assertEqual(self.output_stream.getvalue(), 'Incomplete last line (1 lines)\n  {"a": 1,"b": {"c": 2},"d": 3\n\n')
+        self.reset_output_stream()
+        self.assertEqual(byte_stream_line_atomizer.consume_data(single_line_json_data, False), len(
+            single_line_json_data.rsplit(b'}', 2)[0]) + 1)
+        self.assertEqual(self.output_stream.getvalue(), '')
 
 
 if __name__ == "__main__":

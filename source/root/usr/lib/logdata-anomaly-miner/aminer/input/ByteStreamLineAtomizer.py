@@ -108,6 +108,8 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                 if 0 < i <= self.max_line_length and b'{' in stream_data[consumed_length:consumed_length+i+1] and data is not None:
                     line_end = consumed_length + i + 1
                     valid_json = True
+                elif i > self.max_line_length:
+                    self.in_overlong_line_flag = True
             if line_end is None:
                 line_end = stream_data.find(self.eol_sep, consumed_length)
 
