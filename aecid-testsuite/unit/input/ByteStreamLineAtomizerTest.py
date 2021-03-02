@@ -91,7 +91,7 @@ class ByteStreamLineAtomizerTest(TestBase):
         self.assertEqual(byte_stream_line_atomizer.consume_data(json_data, False), json_data.rfind(b'\n') + 1)
 
     def test7json_max_line_length(self):
-        """check if json data is not parsed over the max_line_length."""
+        """Check if json data is not parsed over the max_line_length."""
         json_data = b'{\n\t"a": 1,\n\t"b": {\n\t\t"c": 2},\n\t"d": 3}\n{\n"a": 1,\n\t"b": {"c": 2},"d": 3}\n'
         single_line_json_data = b'{"a": 1,"b": {"c": 2},"d": 3}{"a": 1,"b": {"c": 2},"d": 3'
         any_dme = AnyByteDataModelElement('s')
