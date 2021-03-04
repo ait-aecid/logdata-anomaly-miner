@@ -1,7 +1,6 @@
 import unittest
 from aminer.input.JsonStateMachine import json_machine, constant_machine, string_machine, utf8_machine, hex_machine, number_machine,\
     array_machine, object_machine
-import sys
 from unit.TestBase import TestBase
 
 
@@ -73,7 +72,7 @@ class ByteStreamLineAtomizerTest(TestBase):
         self.assertIsNone(state)
 
     def test4hex_machine_boundary_values(self):
-        """Test boundary values before and after 0-9, a-f, A-F"""
+        """Test boundary values before and after 0-9, a-f, A-F."""
         def check_value(data):  # skipcq: PY-D0003
             self.assertEqual(data, i)
         allowed_value_list = '0123456789abcdefABCDEF'
@@ -93,9 +92,9 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test5hex_machine_started_from_string_machine(self):
         """Test if the hex_machine is started from the string_machine."""
-        def check_value(_data):  # skipcq: PY-D0003
+        def check_value(_data):  # skipcq: PY-D0003, PTC-W0049
             pass
-        string = b"\u02FF"
+        string = b"\u02FF"  # skipcq: PYL-W1402
         state = string_machine(check_value)
         hex_machine_found = False
         for c in string:
@@ -105,7 +104,7 @@ class ByteStreamLineAtomizerTest(TestBase):
         self.assertIsNone(state(ord(b'"')))
         self.assertTrue(hex_machine_found)
 
-        string = b"\uff02"
+        string = b"\uff02"  # skipcq: PYL-W1402
         state = string_machine(check_value)
         hex_machine_found = False
         for c in string:
@@ -132,7 +131,7 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test7utf8_machine_forbidden_2_byte_boundary_values(self):
         """Test all boundary values for 2 byte utf8 values."""
-        def raise_error(_):
+        def raise_error(_):  # skipcq: PY-D0003
             raise Exception("Valid UTF-8 value found in boundary test!")
         self.assertIsNone(utf8_machine(191, raise_error))
         self.assertIsNone(utf8_machine(192, raise_error)(127))
@@ -159,7 +158,7 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test9utf8_machine_forbidden_3_byte_boundary_values(self):
         """Test all boundary values for 3 byte utf8 values."""
-        def raise_error(_):
+        def raise_error(_):  # skipcq: PY-D0003
             raise Exception("Valid UTF-8 value found in boundary test!")
         self.assertIsNone(utf8_machine(224, raise_error)(127))
         self.assertIsNone(utf8_machine(224, raise_error)(192))
@@ -189,7 +188,7 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test11utf8_machine_forbidden_3_byte_boundary_values(self):
         """Test all boundary values for 4 byte utf8 values."""
-        def raise_error(_):
+        def raise_error(_):  # skipcq: PY-D0003
             raise Exception("Valid UTF-8 value found in boundary test!")
         self.assertIsNone(utf8_machine(240, raise_error)(127))
         self.assertIsNone(utf8_machine(240, raise_error)(192))
@@ -202,7 +201,7 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test12utf8_machine_started_from_string_machine(self):
         """Test if the utf8_machine is started from the string_machine."""
-        def check_value(_data):  # skipcq: PY-D0003
+        def check_value(_data):  # skipcq: PY-D0003, PTC-W0049
             pass
         string = b"File pattern: file\x5f<file-nr>.txt"
         state = string_machine(check_value)
@@ -310,8 +309,6 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test17constant_machine_invalid_values(self):
         """Test if constant_machine fails. The first letter was already handled by the json_machine."""
-        def check_value(data):  # skipcq: PY-D0003
-            self.assertEqual(data, value)
         TRUE = [0x72, 0x75, 0x65]
         TRUE_UPPER = [0x52, 0x55, 0x45]
         FALSE = [0x61, 0x6c, 0x73, 0x65]
@@ -319,16 +316,16 @@ class ByteStreamLineAtomizerTest(TestBase):
         NULL = [0x75, 0x6c, 0x6c]
         NULL_UPPER = [0x55, 0x4c, 0x4c]
         NONE = [0x6f, 0x6e, 0x65]
-        state = constant_machine(TRUE, True, check_value)
+        state = constant_machine(TRUE, True, print)
         self.assertIsNone(state(TRUE_UPPER[0]))
 
-        state = constant_machine(FALSE, False, check_value)
+        state = constant_machine(FALSE, False, print)
         self.assertIsNone(state(FALSE_UPPER[0]))
 
-        state = constant_machine(NULL, None, check_value)
+        state = constant_machine(NULL, None, print)
         self.assertIsNone(state(NULL_UPPER[0]))
 
-        state = constant_machine(NULL, None, check_value)
+        state = constant_machine(NULL, None, print)
         self.assertIsNone(state(NONE[0]))
 
     def test18constant_machine_started_from_json_machine(self):
@@ -357,17 +354,161 @@ class ByteStreamLineAtomizerTest(TestBase):
             state = state(n)
         self.assertEqual(state(ord('}')).__name__, '_value')
 
+    def check_number_machine(self, check_int_value, value, end_sign):
+        state = number_machine(value[0], check_int_value)
+        for c in value[1:]:
+            state = state(c)
+        self.assertIsNone(state(end_sign))
+
     def test19numbers_machine_valid_values(self):
         """Test valid values in the numbers_machine."""
-        pass
+        def check_int_value(data, byte_data):  # skipcq: PY-D0003
+            self.assertEqual(data, int(value))
+            self.assertEqual(end_sign, byte_data)
 
-    def test20numbers_machine_invalid_values(self):
+        def check_float_value(data, byte_data):  # skipcq: PY-D0003
+            self.assertEqual(data, float(value))
+            self.assertEqual(end_sign, byte_data)
+        end_sign = ord(',')
+        value = b'222'
+        self.check_number_machine(check_int_value, value, end_sign)
+
+        value = b'9223372036854775808'  # maxsize 2^64
+        self.check_number_machine(check_int_value, value, end_sign)
+
+        ################ REMOVE THIS AFTER FIX ###############
+        # if block in numbers_machine needs to be moved to the end.
+        # if byte_data == 0x2d:  # -
+        #     sign = -1
+        #     return _start
+        ######################################################
+        value = b'-222'
+        self.check_number_machine(check_int_value, value, end_sign)
+
+        value = b'+222'
+        self.check_number_machine(check_int_value, value, end_sign)
+
+        value = b'21.50'
+        self.check_number_machine(check_float_value, value, end_sign)
+
+        value = b'21.05'
+        self.check_number_machine(check_float_value, value, end_sign)
+
+        value = b'-21.05'
+        self.check_number_machine(check_float_value, value, end_sign)
+
+        value = b'1.56E-5'
+        self.check_number_machine(check_float_value, value, end_sign)
+
+        value = b'1.56e-5'
+        self.check_number_machine(check_float_value, value, end_sign)
+
+    def test20numbers_machine_end_signs(self):
+        """Check if all non numerical signs end the numbers_machine."""
+        def check_int_value(data, byte_data):  # skipcq: PY-D0003
+            self.assertEqual(data, int(value))
+            self.assertEqual(end_sign, byte_data)
+        value = b'222'
+        end_signs = list(range(0x2e)) + list(range(0x3a, 0x45)) + list(range(0x46, 0x65)) + list(range(0x66, 0x80))
+        valid_signs = [0x2e, 0x45, 0x65] + list(range(0x30, 0x39))
+        for end_sign in end_signs:
+            state = number_machine(value[0], check_int_value)
+            for c in value[1:]:
+                state = state(c)
+            self.assertIsNone(state(end_sign))
+        for end_sign in valid_signs:
+            state = number_machine(value[0], check_int_value)
+            for c in value[1:]:
+                state = state(c)
+            self.assertIsNotNone(state(end_sign))
+
+    def test21numbers_machine_invalid_values(self):
         """Test invalid values in the numbers_machine."""
-        pass
+        def raise_error(_data, _byte_data):  # skipcq: PY-D0003
+            print(_data, _byte_data)
+            raise Exception("Invalid number treated as valid!")
+        value = b'- 222'
+        state = number_machine(value[0], raise_error)
+        self.assertIsNone(state(value[1]))
 
-    def test21numbers_machine_started_from_json_machine(self):
-        """Test if the constant_machine is started from the json_machine."""
-        pass
+        ################ REMOVE AFTER FIX #########
+        # change following code in _start
+        # if byte_data == 0x30:
+        #     return _mid
+        # to
+        # if byte_data == 0x30:
+        #     return None
+        ###########################################
+        # octal number
+        value = b'0222'
+        self.assertIsNone(number_machine(value[0], raise_error))
+
+        # negative octal number
+        value = b'-0222'
+        state = number_machine(value[0], raise_error)
+        self.assertIsNone(state(value[1]))
+
+        # hex number
+        value = b'0x80'
+        self.assertIsNone(number_machine(value[0], raise_error))
+
+        value = b'NaN'
+        self.assertIsNone(number_machine(value[0], raise_error))
+
+        value = b'Infinity'
+        self.assertIsNone(number_machine(value[0], raise_error))
+
+        value = b'.1'
+        self.assertIsNone(number_machine(value[0], raise_error))
+
+    def check_number_machine_from_json_machine(self, check_int_value, value, end_sign):
+        state = json_machine(check_int_value)
+        for c in value:
+            state = state(c)
+        self.assertEqual(state(end_sign).__name__, '_value')
+
+    def test22numbers_machine_started_from_json_machine(self):
+        """Test if the numbers_machine is started from the json_machine."""
+        def check_int_value(data):  # skipcq: PY-D0003
+            print(data)
+            self.assertEqual(data, {'value': int(value)})
+
+        def check_float_value(data):  # skipcq: PY-D0003
+            self.assertEqual(data, {'value': float(value)})
+        end_sign = ord('}')
+        object_prefix = b'{"value": '
+        value = b'222'
+        self.check_number_machine_from_json_machine(check_int_value, object_prefix+value, end_sign)
+
+        value = b'9223372036854775808'  # maxsize 2^64
+        self.check_number_machine_from_json_machine(check_int_value, object_prefix+value, end_sign)
+
+        ################ REMOVE THIS AFTER FIX ###############
+        # if block in numbers_machine needs to be moved to the end.
+        # if byte_data == 0x2d:  # -
+        #     sign = -1
+        #     return _start
+        ######################################################
+        value = b'-222'
+        self.check_number_machine_from_json_machine(check_int_value, object_prefix+value, end_sign)
+
+        value = b'+222'
+        self.check_number_machine_from_json_machine(check_int_value, object_prefix+value, end_sign)
+
+        value = b'21.50'
+        self.check_number_machine_from_json_machine(check_float_value, object_prefix+value, end_sign)
+
+        value = b'21.05'
+        self.check_number_machine_from_json_machine(check_float_value, object_prefix+value, end_sign)
+
+        value = b'-21.05'
+        self.check_number_machine_from_json_machine(check_float_value, object_prefix+value, end_sign)
+
+        value = b'1.56E-5'
+        self.check_number_machine_from_json_machine(check_float_value, object_prefix+value, end_sign)
+
+        value = b'1.56e-5'
+        self.check_number_machine_from_json_machine(check_float_value, object_prefix+value, end_sign)
 
 
 if __name__ == "__main__":
