@@ -601,7 +601,7 @@ The parsing section in **/etc/aminer/config.yml** starts with the statement "Par
 * **id**: must be a unique string
 * **type**: must be an existing ModelElement
 * **start**: a boolean value that indicates the starting model. Only one parser-model must have enabled this option!
-* **args***: a string or a list of strings containing other parser-models. This option can be used to cascade different parser-models
+* **args***: a string or a list of strings containing the arguments of the specific parser.
 
 .. note:: args can contain the constant WHITESPACE which is a preset for spaces
 
@@ -637,17 +637,53 @@ This parsing-element matches base64 strings.
 DateTimeModelElement
 ~~~~~~~~~~~~~~~~~~~~
 
-* **name**: string with the element-id
-
-
 This element parses dates using a custom, timezone and locale-aware implementation similar to strptime.
+
+* **name**: string with the element-id (Required)
+* **args**: a string or list containing the following parameters:
+
+  1. date_format:
+       Is a string that represents the date format for parsing, see Python strptime specification for
+       available formats. Supported format specifiers are:
+         * %b: month name in current locale
+         * %d: day in month, can be space or zero padded when followed by separator or at end of string.
+         * %f: fraction of seconds (the digits after the the '.')
+         * %H: hours from 00 to 23
+         * %M: minutes
+         * %m: two digit month number
+         * %S: seconds
+         * %s: seconds since the epoch (1970-01-01)
+         * %Y: 4 digit year number
+         * %z: detect and parse timezone strings like UTC, CET, +0001, etc. automatically.
+
+       Common formats are:
+         * '%b %d %H:%M:%S' e.g. for 'Nov 19 05:08:43'
+
+  2. time_zone:
+      time_zone the timezone for parsing the values. Default: **UTC**.
+
+  3. text_local:
+      the locale to use for parsing the day and month names. Default: **system-locale**
+
+  4. start_year:
+      start_year when parsing date records without any year information, assume this is the year of the first value parsed.
+
+  5. max_time_jump_seconds:
+      max_time_jump_seconds for detection of year wraps with date formats missing year information, also the current time
+      of values has to be tracked. This value defines the window within that the time may jump between two matches. When not
+      within that window, the value is still parsed, corrected to the most likely value but does not change the detection year.
+       
+
+
+The following code simply adds a custom date_format:
 
 .. code-block:: yaml
 
    Parser:
-        - id: 'anyModel'
-          type: Base64StringModelElement
-          name: 'b64model'
+        - id: 'dtm'
+          type: DateTimeModelElement
+          name: 'DTM'
+          args: '%Y-%m-%d %H:%M:%S'
 
 
 ---------
