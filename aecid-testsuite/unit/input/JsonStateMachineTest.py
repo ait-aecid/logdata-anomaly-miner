@@ -261,12 +261,14 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test14string_machine_invalid_values(self):
         """Test the string_machine with some invalid values."""
+        def raise_error(_):  # skipcq: PY-D0003
+            raise Exception("Invalid returned as valid.")
         for c in range(0x20):  # ascii control characters
-            state = string_machine(print)
+            state = string_machine(raise_error)
             self.assertIsNone(state(c))
 
         for c in range(0x80, 0xc0):  # some characters after the ascii table
-            state = string_machine(print)
+            state = string_machine(raise_error)
             self.assertIsNone(state(c))
 
     def test15string_machine_escaped_strings(self):
@@ -309,6 +311,8 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test17constant_machine_invalid_values(self):
         """Test if constant_machine fails. The first letter was already handled by the json_machine."""
+        def raise_error(_):  # skipcq: PY-D0003
+            raise Exception("Invalid returned as valid.")
         TRUE = [0x72, 0x75, 0x65]
         TRUE_UPPER = [0x52, 0x55, 0x45]
         FALSE = [0x61, 0x6c, 0x73, 0x65]
@@ -316,16 +320,16 @@ class ByteStreamLineAtomizerTest(TestBase):
         NULL = [0x75, 0x6c, 0x6c]
         NULL_UPPER = [0x55, 0x4c, 0x4c]
         NONE = [0x6f, 0x6e, 0x65]
-        state = constant_machine(TRUE, True, print)
+        state = constant_machine(TRUE, True, raise_error)
         self.assertIsNone(state(TRUE_UPPER[0]))
 
-        state = constant_machine(FALSE, False, print)
+        state = constant_machine(FALSE, False, raise_error)
         self.assertIsNone(state(FALSE_UPPER[0]))
 
-        state = constant_machine(NULL, None, print)
+        state = constant_machine(NULL, None, raise_error)
         self.assertIsNone(state(NULL_UPPER[0]))
 
-        state = constant_machine(NULL, None, print)
+        state = constant_machine(NULL, None, raise_error)
         self.assertIsNone(state(NONE[0]))
 
     def test18constant_machine_started_from_json_machine(self):
@@ -354,7 +358,7 @@ class ByteStreamLineAtomizerTest(TestBase):
             state = state(n)
         self.assertEqual(state(ord('}')).__name__, '_value')
 
-    def check_number_machine(self, check_int_value, value, end_sign):
+    def check_number_machine(self, check_int_value, value, end_sign):  # skipcq: PY-D0003
         state = number_machine(value[0], check_int_value)
         for c in value[1:]:
             state = state(c)
@@ -425,7 +429,6 @@ class ByteStreamLineAtomizerTest(TestBase):
     def test21numbers_machine_invalid_values(self):
         """Test invalid values in the numbers_machine."""
         def raise_error(_data, _byte_data):  # skipcq: PY-D0003
-            print(_data, _byte_data)
             raise Exception("Invalid number treated as valid!")
         value = b'- 222'
         state = number_machine(value[0], raise_error)
@@ -461,7 +464,7 @@ class ByteStreamLineAtomizerTest(TestBase):
         value = b'.1'
         self.assertIsNone(number_machine(value[0], raise_error))
 
-    def check_number_machine_from_json_machine(self, check_int_value, value, end_sign):
+    def check_number_machine_from_json_machine(self, check_int_value, value, end_sign):  # skipcq: PY-D0003
         state = json_machine(check_int_value)
         for c in value:
             state = state(c)
@@ -470,7 +473,6 @@ class ByteStreamLineAtomizerTest(TestBase):
     def test22numbers_machine_started_from_json_machine(self):
         """Test if the numbers_machine is started from the json_machine."""
         def check_int_value(data):  # skipcq: PY-D0003
-            print(data)
             self.assertEqual(data, {'value': int(value)})
 
         def check_float_value(data):  # skipcq: PY-D0003
@@ -509,6 +511,90 @@ class ByteStreamLineAtomizerTest(TestBase):
 
         value = b'1.56e-5'
         self.check_number_machine_from_json_machine(check_float_value, object_prefix+value, end_sign)
+
+    def test23array_machine_valid_array(self):
+        """Test possible valid arrays."""
+        def check_value(data):  # skipcq: PY-D0003
+            self.assertEqual(data, compare_value)
+        value = b'"string", 22, 22.50, true, false, null]'
+        compare_value = ['string', 22, 22.5, True, False, None]
+        state = array_machine(check_value)
+        for c in value:
+            state = state(c)
+        self.assertIsNone(state)
+
+        value = b'\n\t\t"string",\n\t\t22,\n\t\t22.50,\n\t\ttrue,\n\t\tfalse,\n\t\tnull]'
+        state = array_machine(check_value)
+        for c in value:
+            state = state(c)
+        self.assertIsNone(state)
+
+        value = b'{"value": 22}, {"value": "string"}]'
+        compare_value = [{'value': 22}, {'value': 'string'}]
+        state = array_machine(check_value)
+        for c in value:
+            state = state(c)
+        self.assertIsNone(state)
+
+    def test24array_machine_invalid_formats(self):
+        """Test the array_machine with invalid formats."""
+        def raise_error(_):  # skipcq: PY-D0003
+            raise Exception("Invalid returned as valid.")
+        value = b'"string" 22, 22.50, true, false, null]'
+        state = array_machine(raise_error)
+        for c in value[:value.index(b'2') + 1]:
+            state = state(c)
+        self.assertIsNone(state)
+
+        value = b'"key": {"value": 2}]'
+        state = array_machine(raise_error)
+        for c in value[:value.index(b':') + 1]:
+            state = state(c)
+        self.assertIsNone(state)
+
+    def test25array_machine_started_from_json_machine(self):
+        """Test if the array_machine is started from the json_machine."""
+        def check_value(data):  # skipcq: PY-D0003
+            self.assertEqual(data, compare_value)
+        value = b'{"values_array": ["string", 22, 22.50, true, false, null]}'
+        compare_value = {'values_array': ['string', 22, 22.5, True, False, None]}
+        state = json_machine(check_value)
+        for c in value:
+            state = state(c)
+        self.assertEqual(state.__name__, '_value')
+
+        value = b'{"values_array": [\n\t\t"string",\n\t\t22,\n\t\t22.50,\n\t\ttrue,\n\t\tfalse,\n\t\tnull]}'
+        state = json_machine(check_value)
+        for c in value:
+            state = state(c)
+        self.assertEqual(state.__name__, '_value')
+
+        value = b'{"objects_array": [{"value": 22}, {"value": "string"}]}'
+        compare_value = {'objects_array': [{'value': 22}, {'value': 'string'}]}
+        state = json_machine(check_value)
+        for c in value:
+            state = state(c)
+        self.assertEqual(state.__name__, '_value')
+
+    def test26object_machine_valid_objects(self):
+        """Check if the object_machine can handle different valid formats."""
+        # single line, no spaces
+        value = b'{"string":"Hello World","integer":22,"float":22.23,"bool":true,"array":}'
+        # state = object_machine(print)
+        # for c in value:
+        #     state = state(c)
+        # self.assertEqual(state(end_sign).__name__, '_value')
+        # single line with spaces
+        # multiline with tabs
+
+    def test27object_machine_invalid_values(self):
+        """Test the object_machine with invalid values."""
+        # keys without "
+        # = instead of :
+        # no comma after attribute
+
+    def test28object_machine_started_from_json_machine(self):
+        """Test if the object_machine is started from the json_machine."""
 
 
 if __name__ == "__main__":
