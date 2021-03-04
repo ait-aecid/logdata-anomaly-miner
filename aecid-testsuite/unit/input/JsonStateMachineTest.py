@@ -97,15 +97,23 @@ class ByteStreamLineAtomizerTest(TestBase):
             pass
         string = b"\u02FF"
         state = string_machine(check_value)
+        hex_machine_found = False
         for c in string:
             state = state(c)
+            if state.__name__ == '_hex':
+                hex_machine_found = True
         self.assertIsNone(state(ord(b'"')))
+        self.assertTrue(hex_machine_found)
 
         string = b"\uff02"
         state = string_machine(check_value)
+        hex_machine_found = False
         for c in string:
             state = state(c)
+            if state.__name__ == '_hex':
+                hex_machine_found = True
         self.assertIsNone(state(ord(b'"')))
+        self.assertTrue(hex_machine_found)
 
     def test6utf8_machine_allowed_2_byte_values(self):
         """
@@ -191,6 +199,175 @@ class ByteStreamLineAtomizerTest(TestBase):
         self.assertIsNone(utf8_machine(240, raise_error)(191)(191)(192))
         self.assertRaises(Exception, utf8_machine(240, raise_error)(128)(128), 128)
         self.assertRaises(Exception, utf8_machine(240, raise_error)(191)(191), 191)
+
+    def test12utf8_machine_started_from_string_machine(self):
+        """Test if the utf8_machine is started from the string_machine."""
+        def check_value(_data):  # skipcq: PY-D0003
+            pass
+        string = b"File pattern: file\x5f<file-nr>.txt"
+        state = string_machine(check_value)
+        utf8_machine_found = False
+        for c in string:
+            state = state(c)
+            if state.__name__ == '_utf8':
+                utf8_machine_found = True
+        self.assertIsNone(state(ord(b'"')))
+        self.assertFalse(utf8_machine_found)
+
+        string = b"It is 20\xc2\xb0C"
+        state = string_machine(check_value)
+        utf8_machine_found = False
+        for c in string:
+            state = state(c)
+            if state.__name__ == '_utf8':
+                utf8_machine_found = True
+        self.assertIsNone(state(ord(b'"')))
+        self.assertTrue(utf8_machine_found)
+
+        string = b"This is a foreign letter: \xe0\xa0\xab"
+        state = string_machine(check_value)
+        utf8_machine_found = False
+        for c in string:
+            state = state(c)
+            if state.__name__ == '_utf8':
+                utf8_machine_found = True
+        self.assertIsNone(state(ord(b'"')))
+        self.assertTrue(utf8_machine_found)
+
+        string = b"This is an egyptian hieroglyph: \xf0\x93\x80\x90"
+        state = string_machine(check_value)
+        utf8_machine_found = False
+        for c in string:
+            state = state(c)
+            if state.__name__ == '_utf8':
+                utf8_machine_found = True
+        self.assertIsNone(state(ord(b'"')))
+        self.assertTrue(utf8_machine_found)
+
+    def test13string_machine_valid_values(self):
+        """Test the string_machine with all valid characters."""
+        def check_value(data):  # skipcq: PY-D0003
+            self.assertEqual(data, allowed_chars)
+        allowed_chars = ""
+        for c in range(0x20, 0x80):
+            if c in (0x22, 0x5c):  # skip "\
+                continue
+            allowed_chars += chr(c)
+        state = string_machine(check_value)
+        for c in allowed_chars.encode():
+            state = state(c)
+        self.assertEqual(state.__name__, "_string")
+        state = state(ord('"'))
+        self.assertIsNone(state)
+
+    def test14string_machine_invalid_values(self):
+        """Test the string_machine with some invalid values."""
+        for c in range(0x20):  # ascii control characters
+            state = string_machine(print)
+            self.assertIsNone(state(c))
+
+        for c in range(0x80, 0xc0):  # some characters after the ascii table
+            state = string_machine(print)
+            self.assertIsNone(state(c))
+
+    def test15string_machine_escaped_strings(self):
+        """Test all allowed escape strings in the string_machine."""
+        def check_value(data):  # skipcq: PY-D0003
+            self.assertEqual(data, compare_strings)
+        escape_strings = b"bf\"\\/"
+        compare_strings = "\b\f\"\\/"
+        state = string_machine(check_value)
+        for c in escape_strings:
+            state = state(0x5c)  # \
+            state = state(c)
+        state = state(0x22)  # "
+        self.assertIsNone(state)
+
+    def test16constant_machine_valid_values(self):
+        """Test all allowed values for the constant_machine. The first letter was already handled by the json_machine."""
+        def check_value(data):  # skipcq: PY-D0003
+            self.assertEqual(data, value)
+        TRUE = [0x72, 0x75, 0x65]
+        FALSE = [0x61, 0x6c, 0x73, 0x65]
+        NULL = [0x75, 0x6c, 0x6c]
+        value = True
+        state = constant_machine(TRUE, True, check_value)
+        for t in TRUE:
+            state = state(t)
+        self.assertIsNone(state)
+
+        value = False
+        state = constant_machine(FALSE, False, check_value)
+        for f in FALSE:
+            state = state(f)
+        self.assertIsNone(state)
+
+        value = None
+        state = constant_machine(NULL, None, check_value)
+        for n in NULL:
+            state = state(n)
+        self.assertIsNone(state)
+
+    def test17constant_machine_invalid_values(self):
+        """Test if constant_machine fails. The first letter was already handled by the json_machine."""
+        def check_value(data):  # skipcq: PY-D0003
+            self.assertEqual(data, value)
+        TRUE = [0x72, 0x75, 0x65]
+        TRUE_UPPER = [0x52, 0x55, 0x45]
+        FALSE = [0x61, 0x6c, 0x73, 0x65]
+        FALSE_UPPER = [0x41, 0x4c, 0x53, 0x45]
+        NULL = [0x75, 0x6c, 0x6c]
+        NULL_UPPER = [0x55, 0x4c, 0x4c]
+        NONE = [0x6f, 0x6e, 0x65]
+        state = constant_machine(TRUE, True, check_value)
+        self.assertIsNone(state(TRUE_UPPER[0]))
+
+        state = constant_machine(FALSE, False, check_value)
+        self.assertIsNone(state(FALSE_UPPER[0]))
+
+        state = constant_machine(NULL, None, check_value)
+        self.assertIsNone(state(NULL_UPPER[0]))
+
+        state = constant_machine(NULL, None, check_value)
+        self.assertIsNone(state(NONE[0]))
+
+    def test18constant_machine_started_from_json_machine(self):
+        """Test if the constant_machine is started from the json_machine. Due to changes in the json_machine all values must be objects."""
+        def check_value(data):  # skipcq: PY-D0003
+            self.assertEqual(data, {'var': value})
+        OBJECT_PREFIX = [0x7b, 0x22, 0x76, 0x61, 0x72, 0x22, 0x3a, 0x20]  # {"var":
+        TRUE = [0x74, 0x72, 0x75, 0x65]
+        FALSE = [0x66, 0x61, 0x6c, 0x73, 0x65]
+        NULL = [0x6e, 0x75, 0x6c, 0x6c]
+        value = True
+        state = json_machine(check_value)
+        for t in OBJECT_PREFIX + TRUE:
+            state = state(t)
+        self.assertEqual(state(ord('}')).__name__, '_value')
+
+        value = False
+        state = json_machine(check_value)
+        for f in OBJECT_PREFIX + FALSE:
+            state = state(f)
+        self.assertEqual(state(ord('}')).__name__, '_value')
+
+        value = None
+        state = json_machine(check_value)
+        for n in OBJECT_PREFIX + NULL:
+            state = state(n)
+        self.assertEqual(state(ord('}')).__name__, '_value')
+
+    def test19numbers_machine_valid_values(self):
+        """Test valid values in the numbers_machine."""
+        pass
+
+    def test20numbers_machine_invalid_values(self):
+        """Test invalid values in the numbers_machine."""
+        pass
+
+    def test21numbers_machine_started_from_json_machine(self):
+        """Test if the constant_machine is started from the json_machine."""
+        pass
 
 
 if __name__ == "__main__":
