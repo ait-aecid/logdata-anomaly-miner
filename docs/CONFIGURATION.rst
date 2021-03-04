@@ -645,6 +645,7 @@ This element parses dates using a custom, timezone and locale-aware implementati
   1. date_format:
        Is a string that represents the date format for parsing, see Python strptime specification for
        available formats. Supported format specifiers are:
+
          * %b: month name in current locale
          * %d: day in month, can be space or zero padded when followed by separator or at end of string.
          * %f: fraction of seconds (the digits after the the '.')
@@ -685,6 +686,46 @@ The following code simply adds a custom date_format:
           name: 'DTM'
           args: '%Y-%m-%d %H:%M:%S'
 
+DebugModelElement
+~~~~~~~~~~~~~~~~~
+
+* **name**: string with the element-id
+
+This model element matches any data of length zero at any position. Thus it can never fail to match and can be inserted at any position in the parsing tree, where matching itself does not alter parsing flow (see e.g. FirstMatchModelElement). It will immediately write the current state of the match to stderr for inspection.
+
+.. code-block:: yaml
+
+   Parser:
+        - id: 'dbg1'
+          type: DebugModelElement
+          name: 'DBGM'
+
+DecimalFloatValueModelElement
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This model element parses decimal values with optional signum, padding or exponent. With padding, the signum has to be found before the padding characters.
+
+* **name**: string with the element-id (Required)
+* **value_sign_type**
+
+  Possible values: 'none', 'optional', 'mandatory'
+
+* **value_pad_type**
+
+  Possible values: 'none', 'zero', 'blank'
+
+* **exponent_type**
+
+  Possible values: 'none', 'optional', 'mandatory'
+
+
+.. code-block:: yaml
+  
+     Parser:
+          - id: decimalFloatValueModelElement
+            type: DecimalFloatValueModelElement
+            name: 'DecimalFloatValueModelElement'
+            value_sign_type: 'optional'
 
 ---------
 Analysing
