@@ -146,5 +146,16 @@ class TestBase(unittest.TestCase):
         self.output_stream.truncate(0)
 
 
+class DummyMatchContext:
+    """Dummy class for MatchContext."""
+    def __init__(self, match_data):
+        """Initiate the Dummy class."""
+        self.match_data = match_data
+
+    def update(self, match_string):
+        """Update the data."""
+        self.match_data = match_string
+
+
 if __name__ == "__main__":
     unittest.main()

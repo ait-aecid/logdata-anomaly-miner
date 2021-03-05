@@ -25,10 +25,14 @@ class FixedDataModelElement(ModelElementInterface):
     """
 
     def __init__(self, element_id, fixed_data):
-        if not isinstance(fixed_data, bytes):
-            msg = 'fixedData has to be byte string'
+        if not isinstance(element_id, str) or len(element_id) < 1:
+            msg = 'element_id has to be of the type string and must not be empty.'
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-            raise Exception(msg)
+            raise ValueError(msg)
+        if not isinstance(fixed_data, bytes):
+            msg = 'fixed_data has to be of the type byte string.'
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
         self.element_id = element_id
         self.fixed_data = fixed_data
 
