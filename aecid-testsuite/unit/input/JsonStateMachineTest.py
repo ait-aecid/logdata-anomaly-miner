@@ -512,6 +512,9 @@ class ByteStreamLineAtomizerTest(TestBase):
         value = b'1.56e-5'
         self.check_number_machine_from_json_machine(check_float_value, object_prefix+value, end_sign)
 
+        value = b'1.56e+5'
+        self.check_number_machine_from_json_machine(check_float_value, object_prefix+value, end_sign)
+
     def test23array_machine_valid_array(self):
         """Test possible valid arrays."""
         def check_value(data):  # skipcq: PY-D0003
@@ -578,23 +581,88 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test26object_machine_valid_objects(self):
         """Check if the object_machine can handle different valid formats."""
+        def check_value(data):  # skipcq: PY-D0003
+            self.assertEqual(data, compare_value)
         # single line, no spaces
-        value = b'{"string":"Hello World","integer":22,"float":22.23,"bool":true,"array":}'
-        # state = object_machine(print)
-        # for c in value:
-        #     state = state(c)
-        # self.assertEqual(state(end_sign).__name__, '_value')
+        value = b'"string":"Hello World","integer":22,"float":22.23,"bool":true,"array":["Hello","World"]}'
+        compare_value = {'string': 'Hello World', 'integer': 22, 'float': 22.23, 'bool': True, 'array': ['Hello', 'World']}
+        state = object_machine(check_value)
+        for c in value:
+            state = state(c)
+        self.assertEqual(state.__name__, '_value')
         # single line with spaces
+        value = b'"string": "Hello World", "integer": 22, "float": 22.23, "bool": true, "array": ["Hello", "World"]}'
+        state = object_machine(check_value)
+        for c in value:
+            state = state(c)
+        self.assertEqual(state.__name__, '_value')
         # multiline with tabs
+        value = b'\n\t"string": "Hello World",\n\t"integer": 22,\n\t"float": 22.23,\n\t"bool": true,\n\t"array": [' \
+                b'\n\t\t"Hello",\n\t\t"World"]}'
+        state = object_machine(check_value)
+        for c in value:
+            state = state(c)
+        self.assertEqual(state.__name__, '_value')
 
     def test27object_machine_invalid_values(self):
         """Test the object_machine with invalid values."""
+        def raise_error(_):  # skipcq: PY-D0003
+            raise Exception("Invalid returned as valid.")
         # keys without "
+        value = b'"string":"Hello World",integer:22,"float":22.23,"bool":true,"array":["Hello","World"]}'
+        state = object_machine(raise_error)
+        for c in value[:value.index(b'integer') + 1]:
+            state = state(c)
+        self.assertIsNone(state)
         # = instead of :
-        # no comma after attribute
+        value = b'"string":"Hello World","integer"=22,"float":22.23,"bool":true,"array":["Hello","World"]}'
+        state = object_machine(raise_error)
+        for c in value[:value.index(b'=') + 1]:
+            state = state(c)
+        self.assertIsNone(state)
+        # no comma after attribute. The error is only found after the next :. However this behavior is not problematic, because another
+        # attribute or the end bracket } has to follow.
+        value = b'"string":"Hello World","integer":22 "float":22.23,"bool":true,"array":["Hello","World"]}'
+        state = object_machine(raise_error)
+        for c in value[:value.index(b':22.') + 1]:
+            state = state(c)
+        self.assertIsNone(state)
 
     def test28object_machine_started_from_json_machine(self):
         """Test if the object_machine is started from the json_machine."""
+        def check_value(data):  # skipcq: PY-D0003
+            self.assertEqual(data, compare_value)
+        # single line, no spaces
+        value = b'{"string":"Hello World","integer":22,"float":22.23,"bool":true,"array":["Hello","World"]}'
+        compare_value = {'string': 'Hello World', 'integer': 22, 'float': 22.23, 'bool': True, 'array': ['Hello', 'World']}
+        state = json_machine(check_value)
+        for c in value:
+            state = state(c)
+        self.assertEqual(state.__name__, '_value')
+        # single line with spaces
+        value = b'{"string": "Hello World", "integer": 22, "float": 22.23, "bool": true, "array": ["Hello", "World"]}'
+        state = json_machine(check_value)
+        for c in value:
+            state = state(c)
+        self.assertEqual(state.__name__, '_value')
+        # multiline with tabs
+        value = b'{\n\t"string": "Hello World",\n\t"integer": 22,\n\t"float": 22.23,\n\t"bool": true,\n\t"array": [' \
+                b'\n\t\t"Hello",\n\t\t"World"]}'
+        state = json_machine(check_value)
+        for c in value:
+            state = state(c)
+        self.assertEqual(state.__name__, '_value')
+
+    def test29json_machine_only_allow_objects_at_start(self):
+        """The json_machine must only allow objects at the start."""
+        def raise_error(_):  # skipcq: PY-D0003
+            raise Exception("Invalid returned as valid.")
+        forbidden_values = [0x22, 0x2b, 0x2d, 0x31, 0x5b, 0x74, 0x66, 0x6e]
+        for value in forbidden_values:
+            state = json_machine(raise_error)
+            self.assertIsNone(state(value))
+        state = json_machine(raise_error)
+        self.assertIsNotNone(state(b'{'))
 
 
 if __name__ == "__main__":
