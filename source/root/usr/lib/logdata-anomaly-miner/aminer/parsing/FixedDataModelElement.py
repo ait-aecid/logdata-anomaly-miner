@@ -40,7 +40,7 @@ class FixedDataModelElement(ModelElementInterface):
         """Get the element ID."""
         return self.element_id
 
-    def get_child_elements(self):
+    def get_child_elements(self):  # skipcq: PYL-R0201
         """
         Get all possible child model elements of this element.
         @return None as there are no children of this element.

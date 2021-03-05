@@ -600,7 +600,7 @@ Parser:
 
        - id: fixed
          type: FixedDataModelElement
-         name: ''
+         name: 'fixed'
          args: ' '
 
        - id: se3

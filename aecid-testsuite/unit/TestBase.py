@@ -148,6 +148,7 @@ class TestBase(unittest.TestCase):
 
 class DummyMatchContext:
     """Dummy class for MatchContext."""
+
     def __init__(self, match_data):
         """Initiate the Dummy class."""
         self.match_data = match_data
