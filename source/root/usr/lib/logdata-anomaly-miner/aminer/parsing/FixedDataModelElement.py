@@ -29,8 +29,8 @@ class FixedDataModelElement(ModelElementInterface):
             msg = 'element_id has to be of the type string and must not be empty.'
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
-        if not isinstance(fixed_data, bytes):
-            msg = 'fixed_data has to be of the type byte string.'
+        if not isinstance(fixed_data, bytes) or len(fixed_data) < 1:
+            msg = 'fixed_data has to be of the type byte string and must not be empty.'
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         self.element_id = element_id
