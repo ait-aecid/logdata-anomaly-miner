@@ -77,7 +77,7 @@ class ByteStreamLineAtomizerTest(TestBase):
             self.assertEqual(data, i)
         allowed_value_list = '0123456789abcdefABCDEF'
         forbidden_value_list = [int(hex(j), 16) for j in range(48)] + [int(hex(j), 16) for j in range(58, 65)] + [
-            int(hex(j), 16) for j in range(71, 128)]
+            int(hex(j), 16) for j in range(71, 97)] + [int(hex(j), 16) for j in range(103, 128)]
         for a in allowed_value_list:
             state = hex_machine(check_value)
             string = '0x'+a+a+a+a
@@ -364,14 +364,14 @@ class ByteStreamLineAtomizerTest(TestBase):
             state = state(c)
         self.assertIsNone(state(end_sign))
 
-    def test19numbers_machine_valid_values(self):
-        """Test valid values in the numbers_machine."""
+    def test19number_machine_valid_values(self):
+        """Test valid values in the number_machine."""
         def check_int_value(data, byte_data):  # skipcq: PY-D0003
             self.assertEqual(data, int(value))
             self.assertEqual(end_sign, byte_data)
 
         def check_float_value(data, byte_data):  # skipcq: PY-D0003
-            self.assertEqual(data, float(value))
+            self.assertEqual(round(data, 10), float(value))
             self.assertEqual(end_sign, byte_data)
         end_sign = ord(',')
         value = b'222'
@@ -380,12 +380,6 @@ class ByteStreamLineAtomizerTest(TestBase):
         value = b'9223372036854775808'  # maxsize 2^64
         self.check_number_machine(check_int_value, value, end_sign)
 
-        ################ REMOVE THIS AFTER FIX ###############
-        # if block in numbers_machine needs to be moved to the end.
-        # if byte_data == 0x2d:  # -
-        #     sign = -1
-        #     return _start
-        ######################################################
         value = b'-222'
         self.check_number_machine(check_int_value, value, end_sign)
 
@@ -407,8 +401,8 @@ class ByteStreamLineAtomizerTest(TestBase):
         value = b'1.56e-5'
         self.check_number_machine(check_float_value, value, end_sign)
 
-    def test20numbers_machine_end_signs(self):
-        """Check if all non numerical signs end the numbers_machine."""
+    def test20number_machine_end_signs(self):
+        """Check if all non numerical signs end the number_machine."""
         def check_int_value(data, byte_data):  # skipcq: PY-D0003
             self.assertEqual(data, int(value))
             self.assertEqual(end_sign, byte_data)
@@ -426,22 +420,14 @@ class ByteStreamLineAtomizerTest(TestBase):
                 state = state(c)
             self.assertIsNotNone(state(end_sign))
 
-    def test21numbers_machine_invalid_values(self):
-        """Test invalid values in the numbers_machine."""
+    def test21number_machine_invalid_values(self):
+        """Test invalid values in the number_machine."""
         def raise_error(_data, _byte_data):  # skipcq: PY-D0003
             raise Exception("Invalid number treated as valid!")
         value = b'- 222'
         state = number_machine(value[0], raise_error)
         self.assertIsNone(state(value[1]))
 
-        ################ REMOVE AFTER FIX #########
-        # change following code in _start
-        # if byte_data == 0x30:
-        #     return _mid
-        # to
-        # if byte_data == 0x30:
-        #     return None
-        ###########################################
         # octal number
         value = b'0222'
         self.assertIsNone(number_machine(value[0], raise_error))
@@ -470,12 +456,13 @@ class ByteStreamLineAtomizerTest(TestBase):
             state = state(c)
         self.assertEqual(state(end_sign).__name__, '_value')
 
-    def test22numbers_machine_started_from_json_machine(self):
-        """Test if the numbers_machine is started from the json_machine."""
+    def test22number_machine_started_from_json_machine(self):
+        """Test if the number_machine is started from the json_machine."""
         def check_int_value(data):  # skipcq: PY-D0003
             self.assertEqual(data, {'value': int(value)})
 
         def check_float_value(data):  # skipcq: PY-D0003
+            data['value'] = round(data['value'], 10)
             self.assertEqual(data, {'value': float(value)})
         end_sign = ord('}')
         object_prefix = b'{"value": '
@@ -485,12 +472,6 @@ class ByteStreamLineAtomizerTest(TestBase):
         value = b'9223372036854775808'  # maxsize 2^64
         self.check_number_machine_from_json_machine(check_int_value, object_prefix+value, end_sign)
 
-        ################ REMOVE THIS AFTER FIX ###############
-        # if block in numbers_machine needs to be moved to the end.
-        # if byte_data == 0x2d:  # -
-        #     sign = -1
-        #     return _start
-        ######################################################
         value = b'-222'
         self.check_number_machine_from_json_machine(check_int_value, object_prefix+value, end_sign)
 
@@ -589,20 +570,20 @@ class ByteStreamLineAtomizerTest(TestBase):
         state = object_machine(check_value)
         for c in value:
             state = state(c)
-        self.assertEqual(state.__name__, '_value')
+        self.assertIsNone(state)
         # single line with spaces
         value = b'"string": "Hello World", "integer": 22, "float": 22.23, "bool": true, "array": ["Hello", "World"]}'
         state = object_machine(check_value)
         for c in value:
             state = state(c)
-        self.assertEqual(state.__name__, '_value')
+        self.assertIsNone(state)
         # multiline with tabs
         value = b'\n\t"string": "Hello World",\n\t"integer": 22,\n\t"float": 22.23,\n\t"bool": true,\n\t"array": [' \
                 b'\n\t\t"Hello",\n\t\t"World"]}'
         state = object_machine(check_value)
         for c in value:
             state = state(c)
-        self.assertEqual(state.__name__, '_value')
+        self.assertIsNone(state)
 
     def test27object_machine_invalid_values(self):
         """Test the object_machine with invalid values."""
@@ -662,7 +643,7 @@ class ByteStreamLineAtomizerTest(TestBase):
             state = json_machine(raise_error)
             self.assertIsNone(state(value))
         state = json_machine(raise_error)
-        self.assertIsNotNone(state(b'{'))
+        self.assertIsNotNone(state(ord('{')))
 
 
 if __name__ == "__main__":

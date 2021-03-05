@@ -19,7 +19,7 @@ def json_machine(emit, next_func=None):  # skipcq: PY-D0003
         if byte_data == 0x22:  # "
             return string_machine(on_value)
 
-        if byte_data == 0x2d or (0x30 <= byte_data < 0x40):  # - or 0-9
+        if byte_data in (0x2b, 0x2d) or (0x30 <= byte_data < 0x3a):  # -, + or 0-9
             return number_machine(byte_data, on_number)
 
         if byte_data == 0x7b:  #:
@@ -186,7 +186,7 @@ def hex_machine(emit):  # skipcq: PY-D0003
     def _hex(byte_data):  # skipcq: PY-D0003
         nonlocal num, left
 
-        if 0x30 <= byte_data < 0x40:
+        if 0x30 <= byte_data < 0x3a:
             i = byte_data - 0x30
         elif 0x61 <= byte_data <= 0x66:
             i = byte_data - 0x57
@@ -212,6 +212,7 @@ def number_machine(byte_data, emit):  # skipcq: PY-D0003
     decimal = 0
     esign = 1
     exponent = 0
+    dividend = 10
 
     def _mid(byte_data):  # skipcq: PY-D0003
         if byte_data == 0x2e:  # .
@@ -221,7 +222,7 @@ def number_machine(byte_data, emit):  # skipcq: PY-D0003
 
     def _number(byte_data):  # skipcq: PY-D0003
         nonlocal number
-        if 0x30 <= byte_data < 0x40:
+        if 0x30 <= byte_data < 0x3a:
             number = number * 10 + (byte_data - 0x30)
             return _number
 
@@ -229,22 +230,20 @@ def number_machine(byte_data, emit):  # skipcq: PY-D0003
 
     def _start(byte_data):  # skipcq: PY-D0003
         if byte_data == 0x30:
-            return _mid
+            return None
 
-        if 0x30 < byte_data < 0x40:
+        if 0x30 < byte_data < 0x3a:
             return _number(byte_data)
 
         return None
         # raise Exception("Invalid number: 0x" + str(byte_data))
 
-    if byte_data == 0x2d:  # -
-        sign = -1
-        return _start
-
     def _decimal(byte_data):  # skipcq: PY-D0003
         nonlocal decimal
-        if 0x30 <= byte_data < 0x40:
-            decimal = (decimal + byte_data - 0x30) / 10
+        nonlocal dividend
+        if 0x30 <= byte_data < 0x3a:
+            decimal += (byte_data - 0x30) / dividend
+            dividend *= 10
             return _decimal
 
         return _later(byte_data)
@@ -268,7 +267,7 @@ def number_machine(byte_data, emit):  # skipcq: PY-D0003
 
     def _exponent(byte_data):  # skipcq: PY-D0003
         nonlocal exponent
-        if 0x30 <= byte_data < 0x40:
+        if 0x30 <= byte_data < 0x3a:
             exponent = exponent * 10 + (byte_data - 0x30)
             return _exponent
 
@@ -280,6 +279,13 @@ def number_machine(byte_data, emit):  # skipcq: PY-D0003
             value *= math.pow(10, esign * exponent)
 
         return emit(value, byte_data)
+
+    if byte_data == 0x2d:  # -
+        sign = -1
+        return _start
+
+    if byte_data == 0x2b:  # +
+        return _start
 
     return _start(byte_data)
 
