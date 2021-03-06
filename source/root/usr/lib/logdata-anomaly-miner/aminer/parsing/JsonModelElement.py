@@ -56,23 +56,27 @@ class JsonModelElement(ModelElementInterface):
             json_match_data = json.loads(match_context.match_data)
         except JSONDecodeError:
             return None
-        matches += self.parse_json_dict(self.key_parser_dict, json_match_data, current_path)
+        matches += self.parse_json_dict(self.key_parser_dict, json_match_data, current_path, match_context)
         if None in matches:
             return None
+        # remove all remaining spaces and brackets.
         match_context.match_data = b''
-        match_context.update(match_context.match_data)
         return MatchElement(current_path, str(json_match_data), json_match_data, matches)
 
-    def parse_json_dict(self, json_dict, json_match_data, current_path):
+    def parse_json_dict(self, json_dict, json_match_data, current_path, match_context):
         """Parse a json dictionary."""
         matches = []
         for key in json_dict.keys():
             value = json_dict[key]
             if isinstance(value, dict):
-                matches += self.parse_json_dict(value, json_match_data[key], "%s/%s" % (current_path, key))
+                matches += self.parse_json_dict(value, json_match_data[key], "%s/%s" % (current_path, key), match_context)
+                if matches[-1] is None:
+                    return matches
             elif isinstance(value, list):
                 for json_object in json_match_data[key]:
-                    matches += self.parse_json_dict(value[0], json_object, "%s/%s" % (current_path, key))
+                    matches += self.parse_json_dict(value[0], json_object, "%s/%s" % (current_path, key), match_context)
+                    if matches[-1] is None:
+                        return matches
             else:
                 split_data = key.split(self.optional_key_prefix, 1)
                 if len(split_data) != 1 and split_data[-1] not in json_match_data:
@@ -85,6 +89,14 @@ class JsonModelElement(ModelElementInterface):
                 elif not isinstance(data, bytes):
                     data = str(data).encode()
                 match_element = json_dict[key].get_match_element(current_path, MatchContext(data))
+                if match_element is not None and len(match_element.match_string) != len(data):
+                    match_element = None
+                index = match_context.match_data.find(data)
+                if match_element is None:
+                    index = 0
+                match_context.update(match_context.match_data[:index + len(data)])
                 if match_element is not None or (match_element is None and not key.startswith(self.optional_key_prefix)):
                     matches.append(match_element)
+                    if index == 0:
+                        return matches
         return matches
