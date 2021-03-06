@@ -573,6 +573,51 @@ class YamlConfigTest(TestBase):
             self.assertEqual(msg, str(e))
         self.assertRaises(ValueError, aminer_config.load_yaml, 'unit/data/configfiles/filter_config_errors.yml')
 
+    def test27_same_id_analysis(self):
+        """Check if a ValueError is raised when the same id is used for multiple analysis components."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        try:
+            aminer_config.load_yaml('unit/data/configfiles/same_id_analysis.yml')
+            context = AnalysisContext(aminer_config)
+            context.build_analysis_pipeline()
+        except ValueError as e:
+            msg = "Config-Error: The id \"NewMatchPathValueComboDetector\" occurred multiple times in Analysis!"
+            self.assertEqual(msg, str(e))
+        context = AnalysisContext(aminer_config)
+        self.assertRaises(ValueError, context.build_analysis_pipeline)
+
+    def test28_same_id_event_handlers(self):
+        """Check if a ValueError is raised when the same id is used for multiple event handler components."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        try:
+            aminer_config.load_yaml('unit/data/configfiles/same_id_event_handlers.yml')
+            context = AnalysisContext(aminer_config)
+            context.build_analysis_pipeline()
+        except ValueError as e:
+            msg = "Config-Error: The id \"handler\" occurred multiple times in EventHandlers!"
+            self.assertEqual(msg, str(e))
+        context = AnalysisContext(aminer_config)
+        self.assertRaises(ValueError, context.build_analysis_pipeline)
+
+    def test29_same_id_parser(self):
+        """Check if a ValueError is raised when the same id is used for multiple parser components."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        try:
+            aminer_config.load_yaml('unit/data/configfiles/same_id_parser.yml')
+            context = AnalysisContext(aminer_config)
+            context.build_analysis_pipeline()
+        except ValueError as e:
+            msg = "Config-Error: The id \"apacheModel\" occurred multiple times in Parser!"
+            self.assertEqual(msg, str(e))
+        context = AnalysisContext(aminer_config)
+        self.assertRaises(ValueError, context.build_analysis_pipeline)
+
     def run_empty_components_tests(self, context):
         """Run the empty components tests."""
         self.assertTrue(isinstance(context.registered_components[0][0], SubhandlerFilter))
