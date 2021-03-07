@@ -55,7 +55,7 @@ if [[ $md5_result == "/tmp/syslog: OK" ]]; then
 	exit_code=1
 fi
 
-sleep 8
+sleep 10
 find /tmp/lib/aminer -type f ! -path "/tmp/lib/aminer/aminerRemoteLog.txt" ! -path "/tmp/lib/aminer/aminer.log" ! -path "/tmp/lib/aminer/log/statistics.log" -exec md5sum {} \; | tee /tmp/test3.md5 > /dev/null
 
 suspend_diff=`diff /tmp/test1.md5 /tmp/test2.md5`
