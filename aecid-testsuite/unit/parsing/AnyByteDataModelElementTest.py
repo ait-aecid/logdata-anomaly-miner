@@ -1,6 +1,5 @@
 import unittest
 from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
-from aminer.parsing.MatchContext import MatchContext
 from unit.TestBase import TestBase, DummyMatchContext
 
 
