@@ -118,9 +118,10 @@
             'required': True,
             'type': 'dict',
             'schema': {
-                'verbose': {'type': 'boolean', 'required': False, 'default': False},
+                'verbose': {'type': 'boolean', 'required': False, 'default': True},
                 'multi_source': {'type': 'boolean', 'required': False, 'default': False},
                 'timestamp_paths': {'type': ['string', 'list']},
+                'sync_wait_time': {'type': 'integer', 'min': 1, 'default': 5},
                 'eol_sep': {'type': 'string', 'required': False, 'default': '\n'},
                 'json_format': {'type': 'boolean', 'required': False, 'default': False}
             }

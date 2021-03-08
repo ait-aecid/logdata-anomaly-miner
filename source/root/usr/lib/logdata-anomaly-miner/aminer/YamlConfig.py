@@ -13,6 +13,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import sys
 import logging
+import copy
 from aminer import AminerConfig
 
 
@@ -73,8 +74,12 @@ def load_yaml(config_file):
 
     v = ConfigValidator(validation_schema)
     if not v.validate(yaml_data, validation_schema):
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(v.errors)
-        raise ValueError(v.errors)
+        filtered_errors = copy.deepcopy(v.errors)
+        filter_config_errors(filtered_errors, 'Analysis', v.errors, analysis_validation_schema)
+        filter_config_errors(filtered_errors, 'Parser', v.errors, parser_validation_schema)
+        filter_config_errors(filtered_errors, 'EventHandlers', v.errors, event_handler_validation_schema)
+
+        raise ValueError("Config-Error: %s" % filtered_errors)
 
     v = NormalisationValidator(normalisation_schema)
     if v.validate(yaml_data, normalisation_schema):
@@ -87,6 +92,29 @@ def load_yaml(config_file):
     # Set default values
     for key, val in yaml_data.items():
         config_properties[str(key)] = val
+
+
+def filter_config_errors(filtered_errors, key_name, errors, schema):
+    oneof = schema[key_name]['schema']['oneof']
+    if key_name in errors:
+        for i in range(len(errors[key_name])):
+            err = errors[key_name][i]
+            for key in err:
+                if 'none or more than one rule validate' in err[key]:
+                    for cause in err[key]:
+                        if isinstance(cause, dict):
+                            # we need to copy the dictionary as it is not possible to iterate through it and change the size.
+                            for definition in copy.deepcopy(cause):
+                                if 'type' in cause[definition][0] and cause[definition][0]['type'][0].startswith('unallowed value '):
+                                    del cause[definition]
+                                else:
+                                    oneof_def_pos = int(definition.split(' ')[-1])
+                                    oneof_schema_type = oneof[oneof_def_pos]['schema']['type']
+                                    if 'forbidden' in oneof_schema_type:
+                                        cause[definition][0]['type'] = {'forbidden': oneof_schema_type['forbidden']}
+                                    elif 'allowed' in oneof_schema_type:
+                                        cause[definition][0]['type'] = {'allowed': oneof_schema_type['allowed']}
+            filtered_errors[key_name][i] = err
 
 
 # Add your ruleset here:
@@ -119,7 +147,7 @@ def build_parsing_model():
     # skipcq: PYL-W0603
     global yaml_data
     for item in yaml_data['Parser']:
-        if 'start' in item and item['start'] is True:
+        if 'start' in item and item['start'] is True and item['type'].name != 'JsonModelElement':
             start = item
             continue
         if item['type'].is_model:
@@ -200,6 +228,15 @@ def build_parsing_model():
                     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 parser_model_dict[item['id']] = item['type'].func(item['name'], optional_element)
+            elif item['type'].name == 'DelimitedDataModelElement':
+                delimiter = item['delimiter'].encode()
+                parser_model_dict[item['id']] = item['type'].func(item['name'], delimiter, item['escape'], item['consume_delimiter'])
+            elif item['type'].name == 'JsonModelElement':
+                key_parser_dict = parse_json_yaml(item['key_parser_dict'], parser_model_dict)
+                if 'start' in item and item['start'] is True:
+                    start = item['type'].func(item['name'], key_parser_dict, item['optional_key_prefix'])
+                else:
+                    parser_model_dict[item['id']] = item['type'].func(item['name'], key_parser_dict, item['optional_key_prefix'])
             else:
                 if 'args' in item:
                     parser_model_dict[item['id']] = item['type'].func(item['name'], item['args'])
@@ -209,7 +246,9 @@ def build_parsing_model():
             parser_model_dict[item['id']] = item['type'].func()
 
     args_list = []
-    if 'args' in start:
+    if start.__class__.__name__ == 'JsonModelElement':
+        parsing_model = start
+    elif 'args' in start:
         if isinstance(start['args'], list):
             for i in start['args']:
                 if i == 'WHITESPACE':
@@ -246,12 +285,13 @@ def build_input_pipeline(analysis_context, parsing_model):
     timestamp_paths = yaml_data['Input']['timestamp_paths']
     if isinstance(timestamp_paths, str):
         timestamp_paths = [timestamp_paths]
+    sync_wait_time = yaml_data['Input']['sync_wait_time']
     eol_sep = yaml_data['Input']['eol_sep'].encode()
     json_format = yaml_data['Input']['json_format']
     if yaml_data['Input']['multi_source'] is True:
         from aminer.input.SimpleMultisourceAtomSync import SimpleMultisourceAtomSync
         analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(parsing_model, [SimpleMultisourceAtomSync([
-            atom_filter], sync_wait_time=5)], anomaly_event_handlers, default_timestamp_paths=timestamp_paths, eol_sep=eol_sep,
+            atom_filter], sync_wait_time=sync_wait_time)], anomaly_event_handlers, default_timestamp_paths=timestamp_paths, eol_sep=eol_sep,
             json_format=json_format)
     else:
         analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
@@ -742,3 +782,21 @@ def tuple_transformation_function_demo_print_every_10th_value(match_value_list):
         else:
             enhanced_new_match_path_value_combo_detector_reference.auto_include_flag = True
     return match_value_list
+
+
+def parse_json_yaml(json_dict, parser_model_dict):
+    """Parse an yaml configuration for json."""
+    key_parser_dict = {}
+    for key in json_dict.keys():
+        value = json_dict[key]
+        if isinstance(value, dict):
+            key_parser_dict[key] = parse_json_yaml(value, parser_model_dict)
+        elif isinstance(value, list):
+            key_parser_dict[key] = [parse_json_yaml(value[0], parser_model_dict)]
+        elif parser_model_dict.get(value) is None:
+            msg = 'The parser model %s does not exist!' % value
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        else:
+            key_parser_dict[key] = parser_model_dict.get(value)
+    return key_parser_dict
