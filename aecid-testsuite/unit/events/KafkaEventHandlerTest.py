@@ -31,7 +31,7 @@ class KafkaEventHandlerTest(TestBase):
                       '    "AnalysisComponentType": "%s",\n    "AnalysisComponentName": "%s",\n    "Message": "%s",\n' \
                       '    "PersistenceFileName": "%s",\n    "AffectedParserPaths": [\n      "test/path/1",\n' \
                       '      "test/path/2"\n    ]\n  },\n  "LogData": {\n    "RawLogData": [\n      " pid="\n    ],\n    ' \
-                      '"Timestamps": [\n      %s\n    ],\n    "LogLinesCount": 5,\n' \
+                      '"Timestamps": [\n      %s\n    ],\n    "DetectionTimestamp": %s,\n    "LogLinesCount": 5,\n' \
                       '    "AnnotatedMatchElement": "match/s1: b\' pid=\'"\n  }%s\n}\n\n'
 
     @classmethod
@@ -58,10 +58,15 @@ class KafkaEventHandlerTest(TestBase):
             'bootstrap_servers': ['localhost:9092'], 'api_version': (2, 0, 1)})
         self.assertTrue(kafka_event_handler.receive_event(self.test_detector, self.event_message, self.sorted_log_lines, output, log_atom,
                                                           self))
-
-        self.assertEqual(self.consumer.__next__().value, self.expected_string % (
+        val = self.consumer.__next__().value
+        detection_timestamp = None
+        for line in val.split('\n'):
+            if "DetectionTimestamp" in line:
+                detection_timestamp = line.split(':')[1].strip(' ,')
+        self.assertEqual(val, self.expected_string % (
             datetime.fromtimestamp(self.t).strftime("%Y-%m-%d %H:%M:%S"), self.event_message, self.__class__.__name__, self.description,
-            self.__class__.__name__, self.description, self.event_message, self.persistence_id, round(self.t, 2), ""))
+            self.__class__.__name__, self.description, self.event_message, self.persistence_id, round(self.t, 2), detection_timestamp,
+            ""))
 
     def test2receive_non_serialized_data(self):
         """This unittest tests the receive_event method with not serialized data."""

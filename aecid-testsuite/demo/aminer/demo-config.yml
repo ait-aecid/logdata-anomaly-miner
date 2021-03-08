@@ -42,7 +42,7 @@ Parser:
        - id: data
          type: DelimitedDataModelElement
          name: 'Data'
-         args: '%'
+         delimiter: '%'
 
        - id: rest
          type: AnyByteDataModelElement
@@ -56,7 +56,7 @@ Parser:
        - id: username
          type: DelimitedDataModelElement
          name: 'Username'
-         args: ' '
+         delimiter: ' '
 
        - id: status
          type: FixedWordlistDataModelElement
@@ -105,7 +105,7 @@ Parser:
        - id: uName
          type: DelimitedDataModelElement
          name: 'UName'
-         args: ' '
+         delimiter: ' '
 
        - id: uNameSpace2
          type: FixedDataModelElement
@@ -115,7 +115,7 @@ Parser:
        - id: delimitedUser
          type: DelimitedDataModelElement
          name: 'User'
-         args: ' '
+         delimiter: ' '
 
        - id: cron
          type: FixedDataModelElement
@@ -255,7 +255,7 @@ Parser:
        - id: msg
          type: DelimitedDataModelElement
          name: 'msg'
-         args: ':'
+         delimiter: ':'
 
        - id: placeholder
          type: FixedDataModelElement
@@ -283,7 +283,7 @@ Parser:
        - id: name
          type: DelimitedDataModelElement
          name: 'name'
-         args: '"'
+         delimiter: '"'
 
        - id: inode_string
          type: FixedDataModelElement
@@ -302,7 +302,7 @@ Parser:
        - id: dev
          type: DelimitedDataModelElement
          name: 'dev'
-         args: ' '
+         delimiter: ' '
 
        - id: mode_string
          type: FixedDataModelElement
@@ -339,7 +339,7 @@ Parser:
        - id: rdev
          type: DelimitedDataModelElement
          name: 'rdev'
-         args: ' '
+         delimiter: ' '
 
        - id: nametype_string
          type: FixedDataModelElement
@@ -394,7 +394,7 @@ Parser:
        - id: arch
          type: DelimitedDataModelElement
          name: 'arch'
-         args: ' '
+         delimiter: ' '
 
        - id: syscall_string
          type: FixedDataModelElement
@@ -468,7 +468,7 @@ Parser:
        - id: delimitedDataModelElement
          type: DelimitedDataModelElement
          name: 'DelimitedDataModelElement'
-         args: ';'
+         delimiter: ';'
 
        - id: fixedDataModelElement
          type: FixedDataModelElement
@@ -477,7 +477,7 @@ Parser:
 
        - id: se
          type: SequenceModelElement
-         name: ''
+         name: 'se'
          args:
            - delimitedDataModelElement
            - fixedDataModelElement
@@ -552,7 +552,7 @@ Parser:
 
        - id: se2
          type: SequenceModelElement
-         name: ''
+         name: 'se2'
          args:
            - fixedDataModelElement
            - ipAddressDataModelElement
@@ -600,12 +600,12 @@ Parser:
 
        - id: fixed
          type: FixedDataModelElement
-         name: ''
+         name: 'fixed'
          args: ' '
 
        - id: se3
          type: SequenceModelElement
-         name: ''
+         name: 'se3'
          args:
            - whiteSpaceLimitedDataModelElement
            - fixed
@@ -630,7 +630,7 @@ Parser:
 
        - id: seq4
          type: SequenceModelElement
-         name: ''
+         name: 'se4'
          args:
            - fixedDME
            - any

@@ -118,22 +118,40 @@ class YamlConfigTest(TestBase):
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model, SequenceModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[0], VariableByteDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[1], FixedDataModelElement))
+        self.assertEqual(context.atomizer_factory.parsing_model.children[1].element_id, 'sp0')
+        self.assertEqual(context.atomizer_factory.parsing_model.children[1].fixed_data, b' ')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[2], VariableByteDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[3], FixedDataModelElement))
+        self.assertEqual(context.atomizer_factory.parsing_model.children[3].element_id, 'sp1')
+        self.assertEqual(context.atomizer_factory.parsing_model.children[3].fixed_data, b' ')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[4], VariableByteDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[5], FixedDataModelElement))
+        self.assertEqual(context.atomizer_factory.parsing_model.children[5].element_id, 'sp2')
+        self.assertEqual(context.atomizer_factory.parsing_model.children[5].fixed_data, b' ')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[6], DateTimeModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[7], FixedDataModelElement))
+        self.assertEqual(context.atomizer_factory.parsing_model.children[7].element_id, 'sq3')
+        self.assertEqual(context.atomizer_factory.parsing_model.children[7].fixed_data, b' "')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[8], FixedWordlistDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[9], FixedDataModelElement))
+        self.assertEqual(context.atomizer_factory.parsing_model.children[9].element_id, 'sp3')
+        self.assertEqual(context.atomizer_factory.parsing_model.children[9].fixed_data, b' ')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[10], VariableByteDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[11], FixedDataModelElement))
+        self.assertEqual(context.atomizer_factory.parsing_model.children[11].element_id, 'http1')
+        self.assertEqual(context.atomizer_factory.parsing_model.children[11].fixed_data, b' HTTP/')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[12], VariableByteDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[13], FixedDataModelElement))
+        self.assertEqual(context.atomizer_factory.parsing_model.children[13].element_id, 'sq4')
+        self.assertEqual(context.atomizer_factory.parsing_model.children[13].fixed_data, b'" ')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[14], DecimalIntegerValueModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[15], FixedDataModelElement))
+        self.assertEqual(context.atomizer_factory.parsing_model.children[15].element_id, 'sp4')
+        self.assertEqual(context.atomizer_factory.parsing_model.children[15].fixed_data, b' ')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[16], DecimalIntegerValueModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[17], FixedDataModelElement))
+        self.assertEqual(context.atomizer_factory.parsing_model.children[17].element_id, 'sq5')
+        self.assertEqual(context.atomizer_factory.parsing_model.children[17].fixed_data, b' "-" "')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[18], VariableByteDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[19], FixedDataModelElement))
         self.assertEqual(context.atomizer_factory.parsing_model.element_id, 'accesslog')
@@ -554,6 +572,24 @@ class YamlConfigTest(TestBase):
         spec.loader.exec_module(aminer_config)
         aminer_config.load_yaml('unit/data/configfiles/bigger_than_or_equal_valid.yml')
         self.assertRaises(ValueError, aminer_config.load_yaml, 'unit/data/configfiles/bigger_than_or_equal_error.yml')
+
+    def test26_filter_config_errors(self):
+        """Check if errors in multiple sections like Analysis, Parser and EventHandlers are found and filtered properly."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        try:
+            aminer_config.load_yaml('unit/data/configfiles/filter_config_errors.yml')
+        except ValueError as e:
+            msg = "Config-Error: {'AMinerGroup': ['unknown field'], 'Analysis': [{0: ['none or more than one rule validate', {'oneof " \
+                  "definition 21': [{'learn_mode': ['unknown field'], 'reset_after_report_flag': ['unknown field'], 'type': {'allowed': [" \
+                  "'ParserCount']}}]}]}], 'EventHandlers': [{1: ['none or more than one rule validate', {'oneof definition 3': [{" \
+                  "'output_file_path': ['unknown field'], 'type': {'allowed': ['SyslogWriterEventHandler']}}]}]}], 'Parser': [{0: ['none " \
+                  "or more than one rule validate', {'oneof definition 0': [{'args2': ['unknown field'], 'type': {'forbidden': [" \
+                  "'ElementValueBranchModelElement', 'DecimalIntegerValueModelElement', 'DecimalIntegerValueModelElement', " \
+                  "'MultiLocaleDateTimeModelElement', 'DelimitedDataModelElement', 'JsonModelElement']}}]}]}]}"
+            self.assertEqual(msg, str(e))
+        self.assertRaises(ValueError, aminer_config.load_yaml, 'unit/data/configfiles/filter_config_errors.yml')
 
     def run_empty_components_tests(self, context):
         """Run the empty components tests."""

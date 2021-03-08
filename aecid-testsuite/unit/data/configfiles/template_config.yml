@@ -12,7 +12,6 @@ Parser:
         - id: 'apacheModel'
           type: ApacheAccessModel
           name: 'apache'
-          args: 'apache'
 
         - id: 'START'
           start: True
