@@ -592,7 +592,7 @@ class YamlConfigTest(TestBase):
         invalid_paths = ['/var/log/access.log', 'stream:///dev/stdin', 'file://', 'unix://', '']
         for invalid_path in invalid_paths:
             self.assertEqual(regex.search(invalid_path), None, 'Failed regex check at %s.' % invalid_path)
-            
+
     def test26_filter_config_errors(self):
         """Check if errors in multiple sections like Analysis, Parser and EventHandlers are found and filtered properly."""
         spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
