@@ -51,6 +51,7 @@ class JsonModelElement(ModelElementInterface):
         @return the matchElement or None if model did not match.
         """
         current_path = "%s/%s" % (path, self.element_id)
+        old_match_data = match_context.match_data
         matches = []
         try:
             json_match_data = json.loads(match_context.match_data)
@@ -58,6 +59,7 @@ class JsonModelElement(ModelElementInterface):
             return None
         matches += self.parse_json_dict(self.key_parser_dict, json_match_data, current_path, match_context)
         if None in matches:
+            match_context.match_data = old_match_data
             return None
         # remove all remaining spaces and brackets.
         match_context.match_data = b''
@@ -66,7 +68,19 @@ class JsonModelElement(ModelElementInterface):
     def parse_json_dict(self, json_dict, json_match_data, current_path, match_context):
         """Parse a json dictionary."""
         matches = []
-        for key in json_dict.keys():
+        missing_keys = [x for x in json_dict if x not in json_match_data]
+        for key in missing_keys:
+            if not key.startswith(self.optional_key_prefix):
+                index = match_context.match_data.find(key.encode())
+                match_context.update(match_context.match_data[:index])
+                return [None]
+        for key in json_match_data.keys():
+            if (self.optional_key_prefix + key) in json_dict:
+                key = self.optional_key_prefix + key
+            if key not in json_dict:
+                index = match_context.match_data.find(key.encode())
+                match_context.update(match_context.match_data[:index])
+                return [None]
             value = json_dict[key]
             if isinstance(value, dict):
                 matches += self.parse_json_dict(value, json_match_data[key], "%s/%s" % (current_path, key), match_context)
@@ -99,4 +113,8 @@ class JsonModelElement(ModelElementInterface):
                     matches.append(match_element)
                     if index == 0:
                         return matches
+        missing_keys = [x for x in json_dict if x not in json_match_data]
+        for key in missing_keys:
+            if not key.startswith(self.optional_key_prefix):
+                return [None]
         return matches
