@@ -44,19 +44,26 @@ case "$1" in
 		./${1}.sh ${*:2}
 		exit $?
 		;;
-
 	runGettingStarted)
 		cd $TESTDIR
 		./${1}.sh ${*:2}
 		exit $?
 		;;
-
 	runTryItOut)
 		cd $TESTDIR
 		./${1}.sh ${*:2}
 		exit $?
 		;;
-
+	runHowToCreateYourOwnSequenceDetector)
+		cd $TESTDIR
+		./${1}.sh ${*:2}
+		exit $?
+		;;
+	runHowToCreateYourOwnFrequencyDetector)
+		cd $TESTDIR
+		./${1}.sh ${*:2}
+		exit $?
+		;;
 	ALL)
 		cd $TESTDIR
                 ./runSuspendModeTest.sh
@@ -72,6 +79,8 @@ case "$1" in
                 ./runAminerIntegrationTest.sh aminerIntegrationTest2.sh config21.py config22.py
                 ./runGettingStarted.sh
                 ./runTryItOut.sh
+                ./runHowToCreateYourOwnSequenceDetector.sh
+                ./runHowToCreateYourOwnFrequencyDetector.sh
                 ./runCoverageTests.sh
                 exit $?
 		;;
@@ -81,7 +90,8 @@ case "$1" in
 		;;
 	*)
 		echo "Usage: [ ALL | SHELL | runSuspendModeTest | runUnittests | runAminerDemo | runAminerJsonInputDemo "
-		echo "         runAminerIntegrationTest | runCoverageTests | runRemoteControlTest | runTryItOut | runGettingStarted] <options>"
+		echo "         runAminerIntegrationTest | runCoverageTests | runRemoteControlTest | runTryItOut "
+		echo "         runGettingStarted | runHowToCreateYourOwnSequenceDetector | runHowToCreateYourOwnFrequencyDetector] <options>"
 		exit 1
 		;;
         

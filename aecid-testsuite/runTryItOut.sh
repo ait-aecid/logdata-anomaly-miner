@@ -31,7 +31,7 @@ sudo aminer --config /tmp/tryItOut-config.yml > /dev/null &
 sleep 5 & wait $!
 sudo pkill -x aminer
 exit_code=$?
-#rm /tmp/tryItOut-config.yml
+rm /tmp/tryItOut-config.yml
 rm /tmp/before
 rm /tmp/after
 rm /tmp/commented
