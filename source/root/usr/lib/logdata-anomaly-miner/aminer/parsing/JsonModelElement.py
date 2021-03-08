@@ -75,7 +75,7 @@ class JsonModelElement(ModelElementInterface):
                 match_context.update(match_context.match_data[:index])
                 return [None]
         for key in json_match_data.keys():
-            if (self.optional_key_prefix + key) in json_dict:
+            if self.optional_key_prefix + key in json_dict:
                 key = self.optional_key_prefix + key
             if key not in json_dict:
                 index = match_context.match_data.find(key.encode())
