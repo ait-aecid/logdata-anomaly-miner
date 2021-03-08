@@ -2,6 +2,7 @@ import unittest
 import importlib
 import yaml
 import sys
+import re
 import aminer.AminerConfig as AminerConfig
 from datetime import datetime
 from aminer.AnalysisChild import AnalysisContext
@@ -572,6 +573,25 @@ class YamlConfigTest(TestBase):
         spec.loader.exec_module(aminer_config)
         aminer_config.load_yaml('unit/data/configfiles/bigger_than_or_equal_valid.yml')
         self.assertRaises(ValueError, aminer_config.load_yaml, 'unit/data/configfiles/bigger_than_or_equal_error.yml')
+
+    def test24_check_log_resource_list(self):
+        """Check the functionality of the regex for LogResourceList.."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        self.assertRaises(ValueError, aminer_config.load_yaml, 'unit/data/configfiles/wrong_log_resource_list.yml')
+
+        with open('/usr/lib/logdata-anomaly-miner/aminer/schemas/BaseSchema.py', 'r') as sma:
+            # skipcq: PYL-W0123
+            base_schema = eval(sma.read())
+        regex = re.compile(base_schema['LogResourceList']['schema']['regex'])
+
+        valid_paths = ['file:///var/log/access.log', 'unix:///dev/stdin', 'file://access.log']
+        for valid_path in valid_paths:
+            self.assertEqual(regex.search(valid_path).group(0), valid_path, 'Failed regex check at %s.' % valid_path)
+        invalid_paths = ['/var/log/access.log', 'stream:///dev/stdin', 'file://', 'unix://', '']
+        for invalid_path in invalid_paths:
+            self.assertEqual(regex.search(invalid_path), None, 'Failed regex check at %s.' % invalid_path)
 
     def test26_filter_config_errors(self):
         """Check if errors in multiple sections like Analysis, Parser and EventHandlers are found and filtered properly."""
