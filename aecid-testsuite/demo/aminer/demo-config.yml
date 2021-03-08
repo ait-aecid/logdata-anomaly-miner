@@ -477,7 +477,7 @@ Parser:
 
        - id: se
          type: SequenceModelElement
-         name: ''
+         name: 'se'
          args:
            - delimitedDataModelElement
            - fixedDataModelElement
@@ -552,7 +552,7 @@ Parser:
 
        - id: se2
          type: SequenceModelElement
-         name: ''
+         name: 'se2'
          args:
            - fixedDataModelElement
            - ipAddressDataModelElement
@@ -605,7 +605,7 @@ Parser:
 
        - id: se3
          type: SequenceModelElement
-         name: ''
+         name: 'se3'
          args:
            - whiteSpaceLimitedDataModelElement
            - fixed
@@ -630,7 +630,7 @@ Parser:
 
        - id: seq4
          type: SequenceModelElement
-         name: ''
+         name: 'se4'
          args:
            - fixedDME
            - any

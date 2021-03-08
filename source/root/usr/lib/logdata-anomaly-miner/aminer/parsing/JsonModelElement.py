@@ -68,6 +68,8 @@ class JsonModelElement(ModelElementInterface):
         matches = []
         for key in json_dict.keys():
             value = json_dict[key]
+            if isinstance(value, (dict, list)) and (not isinstance(json_match_data, dict) or key not in json_match_data):
+                return [None]
             if isinstance(value, dict):
                 matches += self.parse_json_dict(value, json_match_data[key], "%s/%s" % (current_path, key))
             elif isinstance(value, list):
@@ -77,6 +79,8 @@ class JsonModelElement(ModelElementInterface):
                 split_data = key.split(self.optional_key_prefix, 1)
                 if len(split_data) != 1 and split_data[-1] not in json_match_data:
                     continue
+                if split_data[-1] not in json_match_data:
+                    return [None]
                 data = json_match_data[split_data[-1]]
                 if isinstance(data, str):
                     data = data.encode()

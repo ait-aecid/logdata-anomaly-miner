@@ -270,7 +270,6 @@ def main():
     try:
         aminer_config = AminerConfig.load_config(config_file_name)
     except ValueError as e:
-        print("Config-Error: %s" % e)
         sys.exit(1)
     persistence_dir = aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_DIR, AminerConfig.DEFAULT_PERSISTENCE_DIR)
 

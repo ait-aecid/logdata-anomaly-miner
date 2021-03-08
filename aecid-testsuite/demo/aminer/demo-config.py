@@ -178,7 +178,7 @@ def build_analysis_pipeline(analysis_context):
         DateTimeModelElement('DateTimeModelElement', b'Current DateTime: %d.%m.%Y %H:%M:%S'),
         DecimalFloatValueModelElement('DecimalFloatValueModelElement', value_sign_type='optional'),
         DecimalIntegerValueModelElement('DecimalIntegerValueModelElement', value_sign_type='optional', value_pad_type='blank'),
-        SequenceModelElement('', [
+        SequenceModelElement('se', [
             DelimitedDataModelElement('DelimitedDataModelElement', b';'), FixedDataModelElement('FixedDataModelElement', b';')])]
 
     # ElementValueBranchModelElement
@@ -193,7 +193,7 @@ def build_analysis_pipeline(analysis_context):
             SequenceModelElement("seq2", [fixed_data_me1, fixed_wordlist_data_model_element, fixed_data_me2])]), "wordlist",
             {0: decimal_integer_value_model_element, 1: fixed_data_me2}))
     service_children_parsing_model_element.append(HexStringModelElement('HexStringModelElement'))
-    service_children_parsing_model_element.append(SequenceModelElement('', [
+    service_children_parsing_model_element.append(SequenceModelElement('se2', [
         FixedDataModelElement('FixedDataModelElement', b'Gateway IP-Address: '), IpAddressDataModelElement('IpAddressDataModelElement')]))
     import locale
     loc = locale.getlocale()
@@ -207,8 +207,8 @@ def build_analysis_pipeline(analysis_context):
             DecimalIntegerValueModelElement('DecimalIntegerValueModelElement')]), 1))
     service_children_parsing_model_element.append(VariableByteDataModelElement('VariableByteDataModelElement', b'-@#'))
     service_children_parsing_model_element.append(
-        SequenceModelElement('', [WhiteSpaceLimitedDataModelElement('WhiteSpaceLimitedDataModelElement'), FixedDataModelElement(
-            'fixed', b' ')]))
+        SequenceModelElement('se', [
+            WhiteSpaceLimitedDataModelElement('WhiteSpaceLimitedDataModelElement'), FixedDataModelElement('fixed', b' ')]))
 
     # The Base64StringModelElement must be just before the AnyByteDataModelElement to avoid unexpected Matches.
     service_children_parsing_model_element.append(Base64StringModelElement('Base64StringModelElement'))
@@ -217,7 +217,7 @@ def build_analysis_pipeline(analysis_context):
     # AnyByteDataModelElement. The AnyByteDataModelElement must be last, because all bytes are accepted.
     service_children_parsing_model_element.append(OptionalMatchModelElement(
         'OptionalMatchModelElement', FirstMatchModelElement('FirstMatchModelElement', [
-            FixedDataModelElement('FixedDataModelElement', b'The-searched-element-was-found!'), SequenceModelElement('', [
+            FixedDataModelElement('FixedDataModelElement', b'The-searched-element-was-found!'), SequenceModelElement('se', [
                 FixedDataModelElement('FixedDME', b'Any:'), AnyByteDataModelElement('AnyByteDataModelElement')])])))
 
     alphabet = b'abcdef'

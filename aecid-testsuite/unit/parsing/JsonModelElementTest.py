@@ -14,6 +14,8 @@ class JsonModelElementTest(unittest.TestCase):
     single_line_with_optional_key_json = b'{"menu": {"id": "file", "value": "File", "popup": {"menuitem": [{"value": "New", "onclick":' \
                                          b' "CreateNewDoc()", "clickable": false}, {"value": "Open", "onclick": "OpenDoc()"}, {"value": ' \
                                          b'"Close", "onclick": "CloseDoc()", "clickable": false}]}}}'
+    single_line_missing_key_json = b'{"menu": {"id": "file", "popup": {"menuitem": [{"value": "New", "onclick": "CreateNewDoc()"}, {' \
+                                   b'"value": "Open", "onclick": "OpenDoc()"}, {"value": "Close", "onclick": "CloseDoc()"}]}}}'
     multi_line_json = b"""{
   "menu": {
     "id": "file",
@@ -79,6 +81,12 @@ class JsonModelElementTest(unittest.TestCase):
         json_model_element = JsonModelElement('json', self.key_parser_dict)
         match = json_model_element.get_match_element('match', MatchContext(self.single_line_with_optional_key_json))
         self.assertEqual(match.match_object, json.loads(self.single_line_with_optional_key_json))
+
+    def test3missing_key(self):
+        """Check if no match is returned if a key is missing."""
+        json_model_element = JsonModelElement('json', self.key_parser_dict)
+        match = json_model_element.get_match_element('match', MatchContext(self.single_line_missing_key_json))
+        self.assertEqual(match, None)
 
 
 if __name__ == "__main__":
