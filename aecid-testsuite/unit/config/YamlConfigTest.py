@@ -594,7 +594,7 @@ class YamlConfigTest(TestBase):
         invalid_emails = ['john_at_example_dot_com', 'john@example.', '@example.com', ' @example.com']
         for email in invalid_emails:
             self.assertEqual(target_address_regex.search(email), None, 'Failed regex check at %s.' % email)
-            
+
     def test26_filter_config_errors(self):
         """Check if errors in multiple sections like Analysis, Parser and EventHandlers are found and filtered properly."""
         spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
