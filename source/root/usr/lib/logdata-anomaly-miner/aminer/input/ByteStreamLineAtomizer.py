@@ -17,8 +17,22 @@ import sys
 from aminer import AminerConfig
 from aminer.input.LogAtom import LogAtom
 from aminer.input.InputInterfaces import StreamAtomizer
+from aminer.input.JsonStateMachine import json_machine
 from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.ParserMatch import ParserMatch
+
+
+breakout = False
+data = None
+line = None
+
+
+def found_json(_data):
+    """Set the breakout variable if the JsonStateMachine finished."""
+    global breakout  # skipcq: PYL-W0603
+    breakout = True
+    global data  # skipcq: PYL-W0603
+    data = _data
 
 
 class ByteStreamLineAtomizer(StreamAtomizer):
@@ -79,44 +93,23 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                 break
 
             line_end = None
-            if self.json_format and stream_data.find(b'{', consumed_length) == consumed_length:
-                bracket_count = 0
-                counted_data_pos = 0
-                while True:
-                    json_end = stream_data.find(b'}', consumed_length + counted_data_pos)
-                    bracket_count += stream_data.count(
-                        b'{', consumed_length+counted_data_pos, json_end + (json_end > 0)) - stream_data.count(
-                        b'}', consumed_length+counted_data_pos, json_end + (json_end > 0))
-                    counted_data_pos = json_end - consumed_length + (json_end > 0)
-                    # break out if the bracket count is 0 (valid json) or if the bracket count is negative (invalid json). That would mean,
-                    # that more closing brackets than opening brackets exist, which is not possible.
-                    if json_end <= 0 or bracket_count <= 0:
+            global breakout  # skipcq: PYL-W0603
+            breakout = False
+            global data  # skipcq: PYL-W0603
+            data = None
+            valid_json = False
+            if self.json_format:
+                state = json_machine(found_json)
+                i = 0
+                for i, char in enumerate(stream_data[consumed_length:]):
+                    state = state(char)
+                    if breakout or state is None or i > self.max_line_length:
                         break
-                if json_end > 0 and bracket_count == 0:
-                    # +1 as the last } was not counted yet.
-                    line_end = json_end + 1
-                    if stream_data.find(self.eol_sep, line_end) != line_end:
-                        line_end -= 1
-                else:
-                    line_end = stream_data.find(self.eol_sep, consumed_length)
-                    if bracket_count < 0:
-                        line = stream_data[consumed_length:counted_data_pos]
-                    else:
-                        line = stream_data[consumed_length:line_end]
-                    line_num = 0
-                    curr_pos = 0
-                    lines = stream_data.splitlines(True)
-                    for line_num, line in enumerate(lines):
-                        if curr_pos + len(line) > consumed_length:
-                            line_num = line_num + 1
-                            break
-                        curr_pos += len(line)
-                    if isinstance(line, bytes):
-                        line = line.decode()
-                    msg = "Invalid JSON received – opening and closing brackets do not match at line %d: %s" % (line_num, line)
-                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
-                    print(msg, file=sys.stderr)
-
+                if 0 < i <= self.max_line_length and b'{' in stream_data[consumed_length:consumed_length+i+1] and data is not None:
+                    line_end = consumed_length + i + 1
+                    valid_json = True
+                elif i > self.max_line_length:
+                    self.in_overlong_line_flag = True
             if line_end is None:
                 line_end = stream_data.find(self.eol_sep, consumed_length)
 
@@ -147,7 +140,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
 
             # This is at least a complete/overlong line.
             line_length = line_end + len(self.eol_sep) - consumed_length
-            if line_length > self.max_line_length:
+            if line_length > self.max_line_length and not valid_json:
                 self.dispatch_event('Overlong line detected', stream_data[consumed_length:line_end])
                 consumed_length = line_end + len(self.eol_sep)
                 continue
@@ -166,7 +159,8 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                             log_atom.set_timestamp(ts_match.match_object)
                             break
             if self.dispatch_atom(log_atom):
-                consumed_length = line_end + len(self.eol_sep)
+                consumed_length = line_end + len(self.eol_sep) - (
+                        valid_json and stream_data[line_end:line_end+len(self.eol_sep)] != self.eol_sep)
                 continue
             if consumed_length == 0:
                 # Downstream did not want the data, so tell upstream to block for a while.

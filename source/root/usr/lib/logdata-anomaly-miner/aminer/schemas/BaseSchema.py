@@ -12,26 +12,31 @@
         'AminerUser': {
             'required': False,
             'type': 'string',
-            'default': 'aminer'
+            'default': 'aminer',
+            'empty': False
         },
         'AminerGroup': {
             'required': False,
             'type': 'string',
-            'default': 'aminer'
+            'default': 'aminer',
+            'empty': False
         },
         'RemoteControlSocket': {
             'required': False,
-            'type': 'string'
+            'type': 'string',
+            'empty': False
         },
         'Core.PersistenceDir': {
             'required': False,
             'type': 'string',
-            'default': '/var/lib/aminer'
+            'default': '/var/lib/aminer',
+            'empty': False
         },
         'Core.LogDir': {
             'required': False,
             'type': 'string',
-            'default': '/var/lib/aminer/log'
+            'default': '/var/lib/aminer/log',
+            'empty': False
         },
         'Core.PersistencePeriod': {
             'required': False,
@@ -43,13 +48,15 @@
             'required': False,
             'type': 'string',
             'regex': '(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-]+$)|^[a-zA-Z0-9]+@localhost$',
-            'default': 'root@localhost'
+            'default': 'root@localhost',
+            'empty': False
         },
         'MailAlerting.FromAddress': {
             'required': False,
             'type': 'string',
             'regex': '(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-]+$)|^[a-zA-Z0-9]+@localhost$',
-            'default': 'root@localhost'
+            'default': 'root@localhost',
+            'empty': False
         },
         'MailAlerting.SubjectPrefix': {
             'required': False,
@@ -93,7 +100,7 @@
         'LogResourceList': {
             'required': True,
             'type': 'list',
-            'schema': {'type': 'string'}
+            'schema': {'type': 'string', 'empty': False}
         },
         'Log.StatisticsPeriod': {
             'required': False,
@@ -117,15 +124,18 @@
         },
         'Log.RemoteControlLogFile': {
             'required': False,
-            'type': 'string'
+            'type': 'string',
+            'empty': False
         },
         'Log.StatisticsFile': {
             'required': False,
-            'type': 'string'
+            'type': 'string',
+            'empty': False
         },
         'Log.DebugFile': {
             'required': False,
-            'type': 'string'
+            'type': 'string',
+            'empty': False
         },
         'Input': {
             'required': True,
@@ -133,9 +143,9 @@
             'schema': {
                 'verbose': {'type': 'boolean', 'required': False, 'default': True},
                 'multi_source': {'type': 'boolean', 'required': False, 'default': False},
-                'timestamp_paths': {'type': ['string', 'list']},
+                'timestamp_paths': {'type': ['string', 'list'], 'empty': False},
                 'sync_wait_time': {'type': 'integer', 'min': 1, 'default': 5},
-                'eol_sep': {'type': 'string', 'required': False, 'default': '\n'},
+                'eol_sep': {'type': 'string', 'required': False, 'default': '\n', 'empty': False},
                 'json_format': {'type': 'boolean', 'required': False, 'default': False}
             }
         }
