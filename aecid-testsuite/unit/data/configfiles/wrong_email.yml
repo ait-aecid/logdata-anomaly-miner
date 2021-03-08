@@ -1,0 +1,31 @@
+LogResourceList:
+        - 'file:///var/log/apache2/access.log'
+
+RemoteControlSocket: '/var/run/aminer-remote.socket'
+
+Core.PersistenceDir: '/tmp/lib/aminer'
+
+MailAlerting.TargetAddress: 'john_at_example_dot_com'
+
+MailAlerting.FromAddress: 'john_at_example_dot_com'
+
+Parser:
+        - id: 'apacheModel'
+          type: ApacheAccessModel
+          name: 'apache'
+          args: 'apache'
+
+        - id: 'START'
+          start: True
+          type: SequenceModelElement
+          name: 'model'
+          args: apacheModel
+
+Input:
+        verbose: True # optional
+        multi_source: False # optional
+        timestamp_paths: "/model/accesslog/time"
+
+EventHandlers:
+        - id: stpe
+          type: StreamPrinterEventHandler
