@@ -11,7 +11,8 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-
+import logging
+from aminer import AminerConfig
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 
@@ -20,6 +21,10 @@ class AnyByteDataModelElement(ModelElementInterface):
     """This class matches any byte but at least one. Thus a match will always span the complete data from beginning to end."""
 
     def __init__(self, element_id):
+        if not isinstance(element_id, str) or len(element_id) < 1:
+            msg = "element_id has to be of the type string and must not be empty."
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
         self.element_id = element_id
 
     def get_id(self):
