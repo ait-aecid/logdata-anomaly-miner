@@ -64,6 +64,11 @@ case "$1" in
 		./${1}.sh ${*:2}
 		exit $?
 		;;
+	runHowToMissingMatchPathValueDetector)
+		cd $TESTDIR
+		./${1}.sh ${*:2}
+		exit $?
+		;;
 	ALL)
 		cd $TESTDIR
                 ./runSuspendModeTest.sh
@@ -81,6 +86,7 @@ case "$1" in
                 ./runTryItOut.sh
                 ./runHowToCreateYourOwnSequenceDetector.sh
                 ./runHowToCreateYourOwnFrequencyDetector.sh
+                ./runHowToMissingMatchPathValueDetector.sh
                 ./runCoverageTests.sh
                 exit $?
 		;;
@@ -91,7 +97,8 @@ case "$1" in
 	*)
 		echo "Usage: [ ALL | SHELL | runSuspendModeTest | runUnittests | runAminerDemo | runAminerJsonInputDemo "
 		echo "         runAminerIntegrationTest | runCoverageTests | runRemoteControlTest | runTryItOut "
-		echo "         runGettingStarted | runHowToCreateYourOwnSequenceDetector | runHowToCreateYourOwnFrequencyDetector] <options>"
+		echo "         runGettingStarted | runHowToCreateYourOwnSequenceDetector | runHowToCreateYourOwnFrequencyDetector"
+		echo "         runHowToMissingMatchPathValueDetector] <options>"
 		exit 1
 		;;
         

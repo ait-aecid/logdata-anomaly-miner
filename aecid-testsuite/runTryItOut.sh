@@ -16,7 +16,7 @@ git clone https://github.com/ait-aecid/logdata-anomaly-miner.wiki.git 2> /dev/nu
 cd logdata-anomaly-miner.wiki 2> /dev/null
 git checkout $BRANCH > /dev/null 2>&1
 cd ..
-awk '/^```python$/ && ++n == 2, /^```$/' < logdata-anomaly-miner.wiki/aminer-TryItOut.md | sed '/^```/ d' | sed '/^```python/ d' > /tmp/tryItOut-config.yml
+awk '/^```python$/ && ++n == 2, /^```$/' < logdata-anomaly-miner.wiki/aminer-TryItOut.md | sed '/^```/ d' > /tmp/tryItOut-config.yml
 # text before comment:
 sed -e '/# commented analysis components/,$d' /tmp/tryItOut-config.yml > /tmp/before
 # text after commented components:
