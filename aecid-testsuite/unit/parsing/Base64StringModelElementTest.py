@@ -120,8 +120,7 @@ class Base64StringModelElementTest(TestBase):
         path_id = ["path"]
         self.assertRaises(ValueError, Base64StringModelElement, path_id)
 
-
-    def test10performance(self):
+    def test10performance(self):  # skipcq: FLK-E303
         """Test the performance of the implementation. Comment this test out in normal cases."""
         import_setup = """
 import copy
