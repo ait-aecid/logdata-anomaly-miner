@@ -11,10 +11,9 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-
-
 import base64
 import logging
+import re
 from aminer import AminerConfig
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
@@ -29,6 +28,7 @@ class Base64StringModelElement(ModelElementInterface):
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         self.path_id = path_id
+        self.regex = re.compile(b"^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?")
 
     def get_id(self):
         """Get the element ID."""
@@ -46,25 +46,11 @@ class Base64StringModelElement(ModelElementInterface):
         Find the maximum number of bytes forming a integer number according to the parameters specified.
         @return a match when at least one byte being a digit was found.
         """
-        data = match_context.match_data
-        match_len = 0
-        at_end_flag = False
-        for test_byte in data:
-            b_val = test_byte
-            if at_end_flag:
-                if ((match_len & 0x3) == 0) or (b_val != 0x3d):
-                    break
-            elif (not (0x30 <= b_val <= 0x39) and not (0x41 <= b_val <= 0x5a) and not (0x61 <= b_val <= 0x7a) and (
-                    b_val not in [0x2b, 0x2f])):
-                if (b_val != 0x3d) or ((match_len & 0x2) == 0):
-                    break
-                at_end_flag = True
-            match_len += 1
-
-        match_len = match_len & (-4)
-        if match_len == 0:
+        match = self.regex.match(match_context.match_data)
+        if match is None or match.span()[1] == 0:
             return None
+        match_len = match.span()[1]
 
-        match_string = data[:match_len]
+        match_string = match_context.match_data[:match_len]
         match_context.update(match_string)
         return MatchElement("%s/%s" % (path, self.path_id), match_string, base64.b64decode(match_string), None)
