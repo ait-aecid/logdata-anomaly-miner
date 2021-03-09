@@ -14,7 +14,8 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 
 import base64
-
+import logging
+from aminer import AminerConfig
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
 
@@ -23,13 +24,17 @@ class Base64StringModelElement(ModelElementInterface):
     """This class just tries to strip off as many base64 bytes as possible from a given data string."""
 
     def __init__(self, path_id):
+        if not isinstance(path_id, str) or len(path_id) < 1:
+            msg = "element_id has to be of the type string and must not be empty."
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
         self.path_id = path_id
 
     def get_id(self):
         """Get the element ID."""
         return self.path_id
 
-    def get_child_elements(self):
+    def get_child_elements(self):  # skipcq: PYL-R0201
         """
         Get all possible child model elements of this element.
         @return None as no children are allowed.
