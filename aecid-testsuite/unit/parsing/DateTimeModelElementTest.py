@@ -1,13 +1,96 @@
 import unittest
 from aminer.parsing.DateTimeModelElement import DateTimeModelElement
 from aminer.parsing.MatchContext import MatchContext
+from unit.TestBase import TestBase, DummyMatchContext
 import datetime
 
 
-class DateTimeModelElementTest(unittest.TestCase):
+class DateTimeModelElementTest(TestBase):
     """Unittests for the DateTimeModelElement."""
 
     __expected_match_context = b': it still works'
+
+    def test1get_id(self):
+        """Test if get_id works properly."""
+        dtme = DateTimeModelElement("s0", b'%d.%m.%Y %H:%M:%S')
+        self.assertEqual(dtme.get_id(), "s0")
+
+    def test2get_child_elements(self):
+        """Test if get_child_elements returns None."""
+        dtme = DateTimeModelElement("s0", b'%d.%m.%Y %H:%M:%S')
+        self.assertEqual(dtme.get_child_elements(), None)
+
+    def test3get_match_element_with_different_date_formats(self):
+        """Test if different date_formats can be used to match data."""
+
+    def test4get_match_element_with_unclean_format_string(self):
+        """This test case checks if unclean format_strings can be used."""
+
+    def test5get_match_element_with_different_time_zones(self):
+        """Test if different time_zones work with the DateTimeModelElement."""
+
+    def test6get_match_element_with_start_year(self):
+        """Test if dates without year can be parsed, when the start_year is defined."""
+
+    def test7get_match_element_without_start_year_defined(self):
+        """Test if dates without year can still be parsed, even without defining the start_year."""
+
+    def test8get_match_element_with_leap_start_year(self):
+        """Check if leap start_years can parse the 29th February."""
+
+    def test9get_match_element_without_leap_start_year(self):
+        """Check if normal start_years can not parse the 29th February."""
+
+    def test10learn_new_start_year(self):
+        """Test if a new year is learned successfully with the start year being set."""
+
+    def test11path_id_input_validation(self):
+        """Check if path_id is validated."""
+        date_format = b'%d.%m.%Y %H:%M:%S'
+        # empty element_id
+        path_id = ""
+        self.assertRaises(ValueError, DateTimeModelElement, path_id, date_format)
+
+        # bytes element_id is not allowed
+        path_id = b"path"
+        self.assertRaises(ValueError, DateTimeModelElement, path_id, date_format)
+
+        # integer element_id is not allowed
+        path_id = 123
+        self.assertRaises(ValueError, DateTimeModelElement, path_id, date_format)
+
+        # float element_id is not allowed
+        path_id = 123.22
+        self.assertRaises(ValueError, DateTimeModelElement, path_id, date_format)
+
+        # dict element_id is not allowed
+        path_id = {"id": "path"}
+        self.assertRaises(ValueError, DateTimeModelElement, path_id, date_format)
+
+        # list element_id is not allowed
+        path_id = ["path"]
+        self.assertRaises(ValueError, DateTimeModelElement, path_id, date_format)
+
+    def test12date_format_input_validation(self):
+        """Check if date_format is validated."""
+
+    def test13time_zone_input_validation(self):
+        """Check if time_zone is validated."""
+
+    def test14text_locale_input_validation(self):
+        """Check if text_locale is validated."""
+        # currently an exception must be raised!
+
+    def test15start_year_input_validation(self):
+        """Check if start_year is validated."""
+
+    def test16max_time_jump_seconds_input_validation(self):
+        """Check if max_time_jump_seconds is validated."""
+
+
+
+
+
 
     def test1date_formats_exceptions(self):
         """This test case verifies, if all date_format qualifiers are valid and exceptions are raised, if they are invalid."""
