@@ -23,28 +23,65 @@ class DateTimeModelElementTest(TestBase):
     def test3get_match_element_with_different_date_formats(self):
         """Test if different date_formats can be used to match data."""
 
-    def test4get_match_element_with_unclean_format_string(self):
-        """This test case checks if unclean format_strings can be used."""
+    def test4wrong_date(self):
+        """Test if wrong input data does not return a match."""
 
-    def test5get_match_element_with_different_time_zones(self):
+    def test5get_match_element_with_unclean_format_string(self):
+        """This test case checks if unclean format_strings can be used."""
+        # example "Date: 09.03.2021, Time: 10:02"
+
+    def test6get_match_element_with_different_time_zones(self):
         """Test if different time_zones work with the DateTimeModelElement."""
 
-    def test6get_match_element_with_start_year(self):
+    def test7get_match_element_with_different_text_locales(self):
+        """Test if data with different text locales can be handled with different text_locale parameters."""
+
+    def test8text_locale_not_installed(self):
+        """Check if an exception is raised when the text_locale is not installed on the system."""
+
+    def test9get_match_element_with_start_year(self):
         """Test if dates without year can be parsed, when the start_year is defined."""
 
-    def test7get_match_element_without_start_year_defined(self):
+    def test10get_match_element_without_start_year_defined(self):
         """Test if dates without year can still be parsed, even without defining the start_year."""
 
-    def test8get_match_element_with_leap_start_year(self):
+    def test11get_match_element_with_leap_start_year(self):
         """Check if leap start_years can parse the 29th February."""
 
-    def test9get_match_element_without_leap_start_year(self):
+    def test12get_match_element_without_leap_start_year(self):
         """Check if normal start_years can not parse the 29th February."""
 
-    def test10learn_new_start_year(self):
+    def test13learn_new_start_year_with_start_year_set(self):
         """Test if a new year is learned successfully with the start year being set."""
 
-    def test11path_id_input_validation(self):
+    def test14learn_new_start_year_without_start_year_set(self):
+        """Test if a new year is learned successfully with the start year being None."""
+
+    def test15max_time_jump_seconds_in_time(self):
+        """Test if the max_time_jump_seconds parameter works if the next date is in time."""
+
+    def test16max_time_jump_seconds_in_time_new_year(self):
+        """Test if the max_time_jump_seconds parameter works if the next date is in time on new year."""
+
+    def test17max_time_jump_seconds_exceeded(self):
+        """Test if an exception is raised, when the next date exceeds the max_time_jump_seconds."""
+
+    def test18time_change_cest_cet(self):
+        """Check if the time change from CEST to CET and vice versa work as expected."""
+
+    def test19unqualified_timestamp_year_wraparound(self):
+        """Check if a warning is returned when an unqualified timestamp year wraparound occurs."""
+
+    def test20time_inconsistencies(self):
+        """Check if a warning is returned when a time inconsistency occurs."""
+
+    def test21same_timestamp_multiple_times(self):
+        """Test if the DateTimeModelElement can handle multiple same timestamps."""
+
+    def test22date_before_unix_timestamps(self):
+        """I don't know what happens if a date before the unix timestamp start is passed...????"""
+
+    def test23path_id_input_validation(self):
         """Check if path_id is validated."""
         date_format = b'%d.%m.%Y %H:%M:%S'
         # empty element_id
@@ -71,20 +108,22 @@ class DateTimeModelElementTest(TestBase):
         path_id = ["path"]
         self.assertRaises(ValueError, DateTimeModelElement, path_id, date_format)
 
-    def test12date_format_input_validation(self):
-        """Check if date_format is validated."""
+    def test24date_format_input_validation(self):
+        """Check if date_format is validated and only valid values can be entered."""
 
-    def test13time_zone_input_validation(self):
-        """Check if time_zone is validated."""
+    def test25time_zone_input_validation(self):
+        """Check if time_zone is validated and only valid values can be entered."""
 
-    def test14text_locale_input_validation(self):
-        """Check if text_locale is validated."""
-        # currently an exception must be raised!
+    def test26text_locale_input_validation(self):
+        """
+        Check if text_locale is validated and only valid values can be entered.
+        An exception has to be raised if the locale is not installed on the system.
+        """
 
-    def test15start_year_input_validation(self):
+    def test27start_year_input_validation(self):
         """Check if start_year is validated."""
 
-    def test16max_time_jump_seconds_input_validation(self):
+    def test28max_time_jump_seconds_input_validation(self):
         """Check if max_time_jump_seconds is validated."""
 
 
