@@ -120,7 +120,7 @@ class Base64StringModelElementTest(TestBase):
         path_id = ["path"]
         self.assertRaises(ValueError, Base64StringModelElement, path_id)
 
-'''
+
     def test10performance(self):
         """Test the performance of the implementation. Comment this test out in normal cases."""
         import timeit
@@ -229,13 +229,12 @@ def run():
     base64_dme.get_match_element("base64", match_context)
 """
 
-        print("All text lengths are given from the original text. Base64 encoding needs 33% more characters."
-              " Every text length is run 100.000 times.")
-        t = timeit.timeit(setup=import_setup + string100_setup + end_setup, stmt="run()", number=times)
-        print("Text length 100: ", t)
-        t = timeit.timeit(setup=import_setup + string4096_setup + end_setup, stmt="run()", number=times)
-        print("Text length 4096: ", t)
-'''
+        # print("All text lengths are given from the original text. Base64 encoding needs 33% more characters."
+        #       " Every text length is run 100.000 times.")
+        # t = timeit.timeit(setup=import_setup + string100_setup + end_setup, stmt="run()", number=times)
+        # print("Text length 100: ", t)
+        # t = timeit.timeit(setup=import_setup + string4096_setup + end_setup, stmt="run()", number=times)
+        # print("Text length 4096: ", t)
 
 
 if __name__ == "__main__":
