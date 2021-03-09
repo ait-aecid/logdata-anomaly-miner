@@ -1,7 +1,6 @@
 import unittest
 from aminer.parsing.Base64StringModelElement import Base64StringModelElement
 from unit.TestBase import TestBase, DummyMatchContext
-import base64
 
 
 class Base64StringModelElementTest(TestBase):

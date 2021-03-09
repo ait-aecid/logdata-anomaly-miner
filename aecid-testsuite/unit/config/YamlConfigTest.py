@@ -566,7 +566,7 @@ class YamlConfigTest(TestBase):
                 self.assertEqual(None, component[0].output_event_handlers)
 
     def test23_check_functionality_of_validate_bigger_than_or_equal(self):
-        """Check the functionality of the _validate_bigger_than_or_equal procedure"""
+        """Check the functionality of the _validate_bigger_than_or_equal procedure."""
         spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
