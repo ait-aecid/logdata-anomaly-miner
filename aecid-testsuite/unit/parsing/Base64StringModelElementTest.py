@@ -66,10 +66,10 @@ class Base64StringModelElementTest(TestBase):
         base64_dme = Base64StringModelElement("s0")
         match_element = base64_dme.get_match_element("base64", dummy_match_context)
         self.assertEqual(match_element.path, "base64/s0")
-        self.assertEqual(match_element.match_string, base64_string[:-(len(base64_string) % 3)])
+        self.assertEqual(match_element.match_string, base64_string[:-(len(base64_string) % 4)])
         self.assertEqual(match_element.match_object, string[:-2])
         self.assertIsNone(match_element.children, None)
-        self.assertEqual(dummy_match_context.match_data, base64_string[:-(len(base64_string) % 3)])
+        self.assertEqual(dummy_match_context.match_data, base64_string[:-(len(base64_string) % 4)])
 
     def test7get_match_element_valid_match_string_with_partial_length(self):
         """Parse matching substring out of the MatchContext and check if the MatchContext was updated accordingly."""
