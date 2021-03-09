@@ -27,7 +27,7 @@ class JsonModelElement(ModelElementInterface):
         Initialize the JsonModelElement.
         @param element_id: The ID of the element.
         @param key_parser_dict: A dictionary of all keys with the according parsers. If a key should be optional, the associated parser must
-            start with the OptionalMatchModelElement.
+            start with the OptionalMatchModelElement. To allow every key in a JSON object use "key": "ALLOW_ALL".
         @param optional_key_prefix: If some key starts with the optional_key_prefix it will be considered optional.
         """
         self.element_id = element_id
@@ -104,9 +104,12 @@ class JsonModelElement(ModelElementInterface):
                     data = data.encode()
                 elif not isinstance(data, bytes):
                     data = str(data).encode()
-                match_element = json_dict[key].get_match_element(current_path, MatchContext(data))
-                if match_element is not None and len(match_element.match_string) != len(data):
-                    match_element = None
+                if json_dict[key] == "ALLOW_ALL":
+                    match_element = MatchElement(current_path, str(data), data, None)
+                else:
+                    match_element = json_dict[key].get_match_element(current_path, MatchContext(data))
+                    if match_element is not None and len(match_element.match_string) != len(data):
+                        match_element = None
                 index = match_context.match_data.find(data)
                 if match_element is None:
                     index = 0

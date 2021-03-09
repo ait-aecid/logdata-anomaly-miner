@@ -102,8 +102,10 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                 state = json_machine(found_json)
                 i = 0
                 for i, char in enumerate(stream_data[consumed_length:]):
+                    print(chr(char), char, i)
                     state = state(char)
                     if breakout or state is None or i > self.max_line_length:
+                        print("BREAKOUT")
                         break
                 if 0 < i <= self.max_line_length and b'{' in stream_data[consumed_length:consumed_length+i+1] and data is not None:
                     line_end = consumed_length + i + 1

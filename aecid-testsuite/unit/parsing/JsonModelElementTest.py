@@ -63,6 +63,11 @@ class JsonModelElementTest(unittest.TestCase):
                 'optional_key_clickable': FixedWordlistDataModelElement('clickable', [b'true', b'false'])
             }]
         }}}
+    key_parser_dict_allow_all = {'menu': {
+        'id': VariableByteDataModelElement('id', alphabet),
+        'value': VariableByteDataModelElement('value', alphabet),
+        'popup': 'ALLOW_ALL'
+    }}
 
     def test1get_valid_match_elements(self):
         """Get valid json elements with different formats."""
@@ -87,6 +92,18 @@ class JsonModelElementTest(unittest.TestCase):
         json_model_element = JsonModelElement('json', self.key_parser_dict)
         match = json_model_element.get_match_element('match', MatchContext(self.single_line_missing_key_json))
         self.assertEqual(match, None)
+
+    def test4allow_all_dict(self):
+        """Test a simplified key_parser_dict with ALLOW_ALL."""
+        json_model_element = JsonModelElement('json', self.key_parser_dict_allow_all)
+        match = json_model_element.get_match_element('match', MatchContext(self.single_line_json))
+        self.assertEqual(match.match_object, json.loads(self.single_line_json))
+
+        match = json_model_element.get_match_element('match', MatchContext(self.multi_line_json))
+        self.assertEqual(match.match_object, json.loads(self.multi_line_json))
+
+        match = json_model_element.get_match_element('match', MatchContext(self.everything_new_line_json))
+        self.assertEqual(match.match_object, json.loads(self.everything_new_line_json))
 
 
 if __name__ == "__main__":
