@@ -78,7 +78,7 @@ Parser:
 
        - id: persistence_name
          type: FixedWordlistDataModelElement
-         name: 'persistence_name'
+         name: persistence_name
          args:
            - 'Default'
            - 'suricata_fileinfo'

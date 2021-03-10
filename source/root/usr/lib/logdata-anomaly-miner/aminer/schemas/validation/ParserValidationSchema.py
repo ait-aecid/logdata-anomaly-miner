@@ -11,7 +11,7 @@
                     'id': {'type': 'string', 'required': True, 'empty': False},
                     'start': {'type': 'boolean'},
                     'type': {'type': 'string', 'empty': False, 'forbidden': [
-                        'ElementValueBranchModelElement', 'DecimalIntegerValueModelElement', 'DecimalIntegerValueModelElement',
+                        'ElementValueBranchModelElement', 'DecimalIntegerValueModelElement', 'DecimalFloatValueModelElement',
                         'MultiLocaleDateTimeModelElement', 'DelimitedDataModelElement', 'JsonModelElement'], 'required': True},
                     'name': {'type': 'string', 'required': True, 'empty': False},
                     'args': {'type': ['string', 'list'], 'schema': {'type': ['string', 'integer']}}

@@ -169,7 +169,7 @@ class DateTimeModelElement(ModelElementInterface):
         """
         parse_pos = 0
         # Year, month, day, hour, minute, second, fraction, gmt-seconds:
-        result = [None, None, None, None, None, None, None, None]
+        result = [0, 0, 0, 0, 0, 0, 0, 0]
         for part_pos in range(len(self.date_format_parts)):
             date_format_part = self.date_format_parts[part_pos]
             if isinstance(date_format_part, bytes):

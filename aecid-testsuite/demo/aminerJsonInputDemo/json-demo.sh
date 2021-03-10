@@ -27,7 +27,7 @@ fi
 echo "Demo started.."
 echo ""
 
-FILE=/tmp/json-aminer-demo.yml
+FILE=$1
 if ! test -f "$FILE"; then
   echo "$FILE does not exist!"
 	exit 1
