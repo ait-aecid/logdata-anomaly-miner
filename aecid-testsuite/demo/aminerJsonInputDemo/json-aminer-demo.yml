@@ -74,12 +74,17 @@ Parser:
        - id: message
          type: VariableByteDataModelElement
          name: 'message'
-         args: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789_-.'
+         args: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789_-.()'
 
        - id: persistence_name
-         type: FixedDataModelElement
+         type: FixedWordlistDataModelElement
          name: persistence_name
-         args: 'Default'
+         args:
+           - 'Default'
+           - 'suricata_fileinfo'
+           - 'syslog_disconnected_user'
+           - 'exim_no_host_name_found_ip'
+           - 'suricata_err'
 
        - id: atom_paths
          type: VariableByteDataModelElement
@@ -94,10 +99,22 @@ Parser:
          type: AnyByteDataModelElement
          name: 'raw_log_data'
 
-       - id: timestamps
+       - id: timestamps_no_milliseconds
          type: DateTimeModelElement
          name: 'timestamps'
          args: '%s'
+
+       - id: timestamps_with_milliseconds
+         type: DateTimeModelElement
+         name: 'timestamps'
+         args: '%s.%f'
+
+       - id: timestamps
+         type: FirstMatchModelElement
+         name: 'timestamps'
+         args:
+           - timestamps_with_milliseconds
+           - timestamps_no_milliseconds
 
        - id: log_lines_count
          type: DecimalIntegerValueModelElement
@@ -117,9 +134,9 @@ Parser:
              PersistenceFileName: persistence_name
              AffectedLogAtomPaths:
                - atom_paths
-             ParsedLogAtom: 'ALLOW_ALL'
              _AffectedLogAtomValues:
                - affected_values
+             ParsedLogAtom: 'ALLOW_ALL'
            LogData:
              RawLogData:
                - raw_log_data
@@ -129,7 +146,7 @@ Parser:
 
 Input:
         timestamp_paths: None
-        verbose: False
+        verbose: True
         json_format: True
 
 EventHandlers:

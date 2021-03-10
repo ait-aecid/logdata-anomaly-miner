@@ -216,7 +216,7 @@ def number_machine(byte_data, emit):  # skipcq: PY-D0003
     start_with_zero = False
 
     def _mid(byte_data):  # skipcq: PY-D0003
-        if start_with_zero and byte_data not in (0x2e, 0x45, 0x65, 0x7d):  # . E e }
+        if start_with_zero and byte_data not in (0x2e, 0x45, 0x65, 0x7d, 0x2c):  # . E e } ,
             return None
 
         if byte_data == 0x2e:  # .

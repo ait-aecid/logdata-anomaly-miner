@@ -74,7 +74,7 @@ class JsonModelElement(ModelElementInterface):
                 index = match_context.match_data.find(key.encode())
                 match_context.update(match_context.match_data[:index])
                 return [None]
-        for key in json_match_data.keys():
+        for i, key in enumerate(json_match_data.keys()):
             if self.optional_key_prefix + key in json_dict:
                 key = self.optional_key_prefix + key
             if key not in json_dict:
@@ -82,17 +82,35 @@ class JsonModelElement(ModelElementInterface):
                 match_context.update(match_context.match_data[:index])
                 return [None]
             value = json_dict[key]
-            if isinstance(value, (dict, list)) and (not isinstance(json_match_data, dict) or key not in json_match_data):
+            if isinstance(value, (dict, list)) and (
+                    not isinstance(json_match_data, dict) or key.lstrip(self.optional_key_prefix) not in json_match_data):
                 return [None]
             if isinstance(value, dict):
                 matches += self.parse_json_dict(value, json_match_data[key], "%s/%s" % (current_path, key), match_context)
                 if matches[-1] is None:
                     return matches
             elif isinstance(value, list):
-                for json_object in json_match_data[key]:
-                    matches += self.parse_json_dict(value[0], json_object, "%s/%s" % (current_path, key), match_context)
+                for data in json_match_data[key.lstrip(self.optional_key_prefix)]:
+                    if isinstance(data, str):
+                        data = data.encode()
+                    elif not isinstance(data, bytes):
+                        data = str(data).encode()
+                    match_element = json_dict[key][0].get_match_element(current_path, MatchContext(data))
+                    if match_element is not None and len(match_element.match_string) != len(data):
+                        match_element = None
+                    index = match_context.match_data.find(data)
+                    if match_element is None:
+                        index = 0
+                    match_context.update(match_context.match_data[:index + len(data)])
+                    if match_element is not None or (match_element is None and not key.startswith(self.optional_key_prefix)):
+                        matches.append(match_element)
+                        if index == 0:
+                            return matches
                     if matches[-1] is None:
                         return matches
+                if len(json_match_data.keys()) > i:
+                    match_context.update(match_context.match_data[:match_context.match_data.find(
+                        list(json_match_data.keys())[i + 1].encode())])
             else:
                 split_data = key.split(self.optional_key_prefix, 1)
                 if len(split_data) != 1 and split_data[-1] not in json_match_data:
@@ -105,7 +123,7 @@ class JsonModelElement(ModelElementInterface):
                 elif not isinstance(data, bytes):
                     data = str(data).encode()
                 if json_dict[key] == "ALLOW_ALL":
-                    match_element = MatchElement(current_path, str(data), data, None)
+                    match_element = MatchElement(current_path, data, data, None)
                 else:
                     match_element = json_dict[key].get_match_element(current_path, MatchContext(data))
                     if match_element is not None and len(match_element.match_string) != len(data):
