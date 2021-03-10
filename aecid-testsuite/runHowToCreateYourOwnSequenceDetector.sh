@@ -16,6 +16,7 @@ YML_CONFIG=/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py
 TMP_YML_CONFIG=/tmp/YamlConfig.py
 TMP_SCHEMA=/tmp/schema.py
 SEQ_DET=/usr/lib/logdata-anomaly-miner/aminer/analysis/SequenceDetector.py
+TMP_SEQ_DET=/tmp/SequenceDetector.py
 CONFIG=/tmp/config.yml
 
 # extract the file from the development branch of the wiki project.
@@ -32,16 +33,17 @@ awk '/^```yaml$/ && ++n == 2, /^```$/' < $SRC_FILE | sed '/^```/ d' | sed '/^Ana
 sed -n -e '/^EventHandlers:$/,$p' /tmp/base-config.yml >> $CONFIG
 
 # create backup of schema.
-cp $VAL_SCHEMA $TMP_VAL_SCHEMA
+sudo cp $VAL_SCHEMA $TMP_VAL_SCHEMA
 awk '/^# skipcq: PYL-W0104$/,/^                }$/' $VAL_SCHEMA > $TMP_SCHEMA
 echo , >> $TMP_SCHEMA
 awk '/^```$/ && ++n == 18, /^```$/ && n++ == 19' < $SRC_FILE | sed '/^```/ d' >> $TMP_SCHEMA
 awk '/^            ]$/,/^}$/' $VAL_SCHEMA >> $TMP_SCHEMA
-cp $TMP_SCHEMA $VAL_SCHEMA
-awk '/^```python$/ && ++n == 1, /^```$/' < $SRC_FILE | sed '/^```/ d' > $SEQ_DET
+sudo cp $TMP_SCHEMA $VAL_SCHEMA
+awk '/^```python$/ && ++n == 1, /^```$/' < $SRC_FILE | sed '/^```/ d' > $TMP_SEQ_DET
+sudo cp $TMP_SEQ_DET $SEQ_DET
 
 # create backup of YamlConfig.py
-cp $YML_CONFIG $TMP_YML_CONFIG
+sudo cp $YML_CONFIG $TMP_YML_CONFIG
 # add code to YamlConfig.py
 printf "            " > $TMP_SCHEMA
 awk '/^```python$/ && ++n == 2, /^```$/' < $SRC_FILE | sed '/^```/ d' >> $TMP_SCHEMA
@@ -52,13 +54,13 @@ sleep 5 & wait $!
 sudo pkill -x aminer
 exit_code=$?
 # reset schema to backup.
-cp $TMP_VAL_SCHEMA $VAL_SCHEMA
-cp $TMP_YML_CONFIG $YML_CONFIG
-rm /tmp/base-config.yml
-rm $TMP_SCHEMA
-rm $TMP_VAL_SCHEMA
-rm $CONFIG
-rm $TMP_YML_CONFIG
-rm $SEQ_DET
+sudo cp $TMP_VAL_SCHEMA $VAL_SCHEMA
+sudo cp $TMP_YML_CONFIG $YML_CONFIG
+sudo rm /tmp/base-config.yml
+sudo rm $TMP_SCHEMA
+sudo rm $TMP_VAL_SCHEMA
+sudo rm $CONFIG
+sudo rm $TMP_YML_CONFIG
+sudo rm $SEQ_DET
 sudo rm -r logdata-anomaly-miner.wiki
 exit $exit_code
