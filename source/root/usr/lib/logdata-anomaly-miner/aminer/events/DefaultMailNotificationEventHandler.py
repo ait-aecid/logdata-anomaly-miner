@@ -54,7 +54,7 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
         self.analysis_context = analysis_context
         aminer_config = analysis_context.aminer_config
         # @see https://emailregex.com/
-        is_email = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)|^[a-zA-Z0-9]+@localhost$")
+        is_email = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-]+$)|^[a-zA-Z0-9]+@localhost$")
         self.recipient_address = shlex.quote(
             aminer_config.config_properties.get(DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS))
         if self.recipient_address is None:

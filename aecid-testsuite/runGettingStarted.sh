@@ -21,7 +21,7 @@ CMD=$(sed -n '5p' < /tmp/gettingStarted-config.yml)
 CMD=${CMD##*#}
 CFG_PATH=/${CMD#*/}
 # test the first yaml config.
-awk '/^```yaml$/ && ++n == 1, /^```$/' < logdata-anomaly-miner.wiki/Getting-started-\(tutorial\).md | sed '/^```/ d' | sed '/^```python/ d' > /tmp/gettingStarted-config.yml
+awk '/^```yaml$/ && ++n == 1, /^```$/' < logdata-anomaly-miner.wiki/Getting-started-\(tutorial\).md | sed '/^```/ d' > /tmp/gettingStarted-config.yml
 sudo cp /tmp/gettingStarted-config.yml $CFG_PATH
 sudo $CMD > /dev/null &
 sleep 5 & wait $!
@@ -31,7 +31,7 @@ if [[ $? != 0 ]]; then
 fi
 
 # test the second yaml config.
-awk '/^```yaml$/ && ++n == 2, /^```$/' < logdata-anomaly-miner.wiki/Getting-started-\(tutorial\).md | sed '/^```/ d' | sed '/^```python/ d' > /tmp/gettingStarted-config.yml
+awk '/^```yaml$/ && ++n == 2, /^```$/' < logdata-anomaly-miner.wiki/Getting-started-\(tutorial\).md | sed '/^```/ d' > /tmp/gettingStarted-config.yml
 sudo cp /tmp/gettingStarted-config.yml $CFG_PATH
 sudo $CMD > /dev/null &
 sleep 5 & wait $!
@@ -41,7 +41,7 @@ if [[ $? != 0 ]]; then
 fi
 
 # test the fifth yaml config.
-awk '/^```yaml$/ && ++n == 5, /^```$/' < logdata-anomaly-miner.wiki/Getting-started-\(tutorial\).md | sed '/^```/ d' | sed '/^```python/ d' > /tmp/gettingStarted-config.yml
+awk '/^```yaml$/ && ++n == 5, /^```$/' < logdata-anomaly-miner.wiki/Getting-started-\(tutorial\).md | sed '/^```/ d' > /tmp/gettingStarted-config.yml
 sudo cp /tmp/gettingStarted-config.yml $CFG_PATH
 sudo $CMD > /dev/null &
 sleep 5 & wait $!

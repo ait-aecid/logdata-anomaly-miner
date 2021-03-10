@@ -82,6 +82,8 @@ class JsonModelElement(ModelElementInterface):
                 match_context.update(match_context.match_data[:index])
                 return [None]
             value = json_dict[key]
+            if isinstance(value, (dict, list)) and (not isinstance(json_match_data, dict) or key not in json_match_data):
+                return [None]
             if isinstance(value, dict):
                 matches += self.parse_json_dict(value, json_match_data[key], "%s/%s" % (current_path, key), match_context)
                 if matches[-1] is None:

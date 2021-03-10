@@ -1,15 +1,5 @@
 #!/bin/bash
 
-#This script should be used as a demo-tool to show different components and their use cases. To show the content just uncomment the needed outputs, which are described in the comment before.
-
-#
-# add the following line to /etc/sudoers.d/<current-user>:
-#    <current-user> ALL=(aminer) /pfad/zum/demo.sh
-#
-# execute demo.sh as aminer:
-#    sudo -u aminer /pfad/zum/demo.sh
-#
-
 sudoInstalled=`dpkg -s sudo | grep Status 2> /dev/null`
 if [[ $sudoInstalled == "Status: install ok installed" ]]; then
 	sudoInstalled=0
@@ -112,7 +102,7 @@ END
 echo "$VAR" >> /tmp/syslog
 
 #stop aminer
-sleep 3 & wait $!
+sleep 8 & wait $!
 if [[ $sudoInstalled == 0 ]]; then
 	sudo pkill -x aminer
 else

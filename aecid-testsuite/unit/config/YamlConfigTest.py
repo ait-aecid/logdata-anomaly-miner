@@ -2,6 +2,7 @@ import unittest
 import importlib
 import yaml
 import sys
+import re
 import aminer.AminerConfig as AminerConfig
 from datetime import datetime
 from aminer.AnalysisChild import AnalysisContext
@@ -118,22 +119,40 @@ class YamlConfigTest(TestBase):
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model, SequenceModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[0], VariableByteDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[1], FixedDataModelElement))
+        self.assertEqual(context.atomizer_factory.parsing_model.children[1].element_id, 'sp0')
+        self.assertEqual(context.atomizer_factory.parsing_model.children[1].fixed_data, b' ')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[2], VariableByteDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[3], FixedDataModelElement))
+        self.assertEqual(context.atomizer_factory.parsing_model.children[3].element_id, 'sp1')
+        self.assertEqual(context.atomizer_factory.parsing_model.children[3].fixed_data, b' ')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[4], VariableByteDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[5], FixedDataModelElement))
+        self.assertEqual(context.atomizer_factory.parsing_model.children[5].element_id, 'sp2')
+        self.assertEqual(context.atomizer_factory.parsing_model.children[5].fixed_data, b' ')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[6], DateTimeModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[7], FixedDataModelElement))
+        self.assertEqual(context.atomizer_factory.parsing_model.children[7].element_id, 'sq3')
+        self.assertEqual(context.atomizer_factory.parsing_model.children[7].fixed_data, b' "')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[8], FixedWordlistDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[9], FixedDataModelElement))
+        self.assertEqual(context.atomizer_factory.parsing_model.children[9].element_id, 'sp3')
+        self.assertEqual(context.atomizer_factory.parsing_model.children[9].fixed_data, b' ')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[10], VariableByteDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[11], FixedDataModelElement))
+        self.assertEqual(context.atomizer_factory.parsing_model.children[11].element_id, 'http1')
+        self.assertEqual(context.atomizer_factory.parsing_model.children[11].fixed_data, b' HTTP/')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[12], VariableByteDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[13], FixedDataModelElement))
+        self.assertEqual(context.atomizer_factory.parsing_model.children[13].element_id, 'sq4')
+        self.assertEqual(context.atomizer_factory.parsing_model.children[13].fixed_data, b'" ')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[14], DecimalIntegerValueModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[15], FixedDataModelElement))
+        self.assertEqual(context.atomizer_factory.parsing_model.children[15].element_id, 'sp4')
+        self.assertEqual(context.atomizer_factory.parsing_model.children[15].fixed_data, b' ')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[16], DecimalIntegerValueModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[17], FixedDataModelElement))
+        self.assertEqual(context.atomizer_factory.parsing_model.children[17].element_id, 'sq5')
+        self.assertEqual(context.atomizer_factory.parsing_model.children[17].fixed_data, b' "-" "')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[18], VariableByteDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[19], FixedDataModelElement))
         self.assertEqual(context.atomizer_factory.parsing_model.element_id, 'accesslog')
@@ -554,6 +573,34 @@ class YamlConfigTest(TestBase):
         spec.loader.exec_module(aminer_config)
         aminer_config.load_yaml('unit/data/configfiles/bigger_than_or_equal_valid.yml')
         self.assertRaises(ValueError, aminer_config.load_yaml, 'unit/data/configfiles/bigger_than_or_equal_error.yml')
+
+    def test24_check_log_resource_list(self):
+        """Check the functionality of the regex for LogResourceList.."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        self.assertRaises(ValueError, aminer_config.load_yaml, 'unit/data/configfiles/wrong_log_resource_list.yml')
+
+    def test25_check_mail_regex(self):
+        """Check the functionality of the regex for MailAlerting.TargetAddress and MailAlerting.FromAddress."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        self.assertRaises(ValueError, aminer_config.load_yaml, 'unit/data/configfiles/wrong_email.yml')
+
+        with open('/usr/lib/logdata-anomaly-miner/aminer/schemas/BaseSchema.py', 'r') as sma:
+            # skipcq: PYL-W0123
+            base_schema = eval(sma.read())
+        self.assertEqual(base_schema['MailAlerting.TargetAddress']['regex'], base_schema['MailAlerting.FromAddress']['regex'])
+
+        target_address_regex = re.compile(base_schema['MailAlerting.TargetAddress']['regex'])
+
+        valid_emails = ['john@example.com', 'john@example.co', 'root@localhost']
+        for email in valid_emails:
+            self.assertEqual(target_address_regex.search(email).group(0), email, 'Failed regex check at %s.' % email)
+        invalid_emails = ['john_at_example_dot_com', 'john@example.', '@example.com', ' @example.com']
+        for email in invalid_emails:
+            self.assertEqual(target_address_regex.search(email), None, 'Failed regex check at %s.' % email)
 
     def test26_filter_config_errors(self):
         """Check if errors in multiple sections like Analysis, Parser and EventHandlers are found and filtered properly."""
