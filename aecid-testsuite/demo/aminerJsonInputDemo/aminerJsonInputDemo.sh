@@ -102,7 +102,7 @@ END
 echo "$VAR" >> /tmp/syslog
 
 #stop aminer
-sleep 3 & wait $!
+sleep 8 & wait $!
 if [[ $sudoInstalled == 0 ]]; then
 	sudo pkill -x aminer
 else
