@@ -25,10 +25,14 @@ class FixedDataModelElement(ModelElementInterface):
     """
 
     def __init__(self, element_id, fixed_data):
-        if not isinstance(fixed_data, bytes):
-            msg = 'fixedData has to be byte string'
+        if not isinstance(element_id, str) or len(element_id) < 1:
+            msg = "element_id has to be of the type string and must not be empty."
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-            raise Exception(msg)
+            raise ValueError(msg)
+        if not isinstance(fixed_data, bytes) or len(fixed_data) < 1:
+            msg = "fixed_data has to be of the type byte string and must not be empty."
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
         self.element_id = element_id
         self.fixed_data = fixed_data
 
@@ -36,7 +40,7 @@ class FixedDataModelElement(ModelElementInterface):
         """Get the element ID."""
         return self.element_id
 
-    def get_child_elements(self):
+    def get_child_elements(self):  # skipcq: PYL-R0201
         """
         Get all possible child model elements of this element.
         @return None as there are no children of this element.

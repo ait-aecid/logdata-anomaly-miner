@@ -432,7 +432,7 @@ class YamlConfigTest(TestBase):
         self.assertEqual(yml_config_properties, py_context.aminer_config.config_properties)
         # there actually is no easy way to compare aminer components as they do not implement the __eq__ method.
         self.assertEqual(len(yml_registered_components), len(py_registered_components))
-        for i in range(2, len(yml_registered_components)):
+        for i in range(2, len(yml_registered_components)):  # skipcq: PTC-W0060
             self.assertEqual(type(yml_registered_components[i]), type(py_registered_components[i]))
         self.assertEqual(yml_registered_components_by_name.keys(), py_registered_components_by_name.keys())
         for name in yml_registered_components_by_name.keys():
