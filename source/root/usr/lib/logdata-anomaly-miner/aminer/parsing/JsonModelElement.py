@@ -58,7 +58,8 @@ class JsonModelElement(ModelElementInterface):
         except JSONDecodeError:
             return None
         matches += self.parse_json_dict(self.key_parser_dict, json_match_data, current_path, match_context)
-        if None in matches:
+        if None in matches or match_context.match_data.strip(b' }]"') != b'':
+            print("RETURN NONE!!!!")
             match_context.match_data = old_match_data
             return None
         # remove all remaining spaces and brackets.
@@ -73,57 +74,67 @@ class JsonModelElement(ModelElementInterface):
             if not key.startswith(self.optional_key_prefix):
                 index = match_context.match_data.find(key.encode())
                 match_context.update(match_context.match_data[:index])
+                print("RET NONE1", key, len(key))
                 return [None]
         for i, key in enumerate(json_match_data.keys()):
+            split_key = key
             if self.optional_key_prefix + key in json_dict:
                 key = self.optional_key_prefix + key
             if key not in json_dict:
                 index = match_context.match_data.find(key.encode())
                 match_context.update(match_context.match_data[:index])
+                print("RET NONE2")
                 return [None]
             value = json_dict[key]
-            if isinstance(value, (dict, list)) and (
-                    not isinstance(json_match_data, dict) or key.split(self.optional_key_prefix, 1)[-1] not in json_match_data):
+            if isinstance(value, (dict, list)) and (not isinstance(json_match_data, dict) or split_key not in json_match_data):
+                print("RET NONE3")
                 return [None]
             if isinstance(value, dict):
-                matches += self.parse_json_dict(value, json_match_data[key], "%s/%s" % (current_path, key), match_context)
+                matches += self.parse_json_dict(value, json_match_data[split_key], "%s/%s" % (current_path, split_key), match_context)
                 if matches[-1] is None:
+                    print("RET5")
                     return matches
             elif isinstance(value, list):
-                for data in json_match_data[key.split(self.optional_key_prefix, 1)[-1]]:
+                for data in json_match_data[split_key]:
                     if isinstance(data, str):
                         data = data.encode()
                     elif not isinstance(data, bytes):
                         data = str(data).encode()
                     if isinstance(json_dict[key][0], dict):
-                        for match_data in json_match_data[key]:
-                            matches += self.parse_json_dict(json_dict[key][0], match_data, "%s/%s" % (current_path, key), match_context)
+                        for match_data in json_match_data[split_key]:
+                            matches += self.parse_json_dict(
+                                json_dict[key][0], match_data, "%s/%s" % (current_path, split_key), match_context)
                             if matches[-1] is None:
+                                print("RET2")
                                 return matches
                     else:
                         match_element = json_dict[key][0].get_match_element(current_path, MatchContext(data))
                         if match_element is not None and len(match_element.match_string) != len(data):
+                            print("EEEEEEEEEE")
                             match_element = None
                         index = match_context.match_data.find(data)
                         if match_element is None:
-                            index = 0
+                            print("HHHHHHHHHHHHHHHHHHHHH")
+                            index = -1
                         match_context.update(match_context.match_data[:index + len(data)])
                         if match_element is not None or (match_element is None and not key.startswith(self.optional_key_prefix)):
                             matches.append(match_element)
-                            if index == 0:
+                            if index == -1:
                                 return matches
                         if matches[-1] is None:
+                            print("RET1")
                             return matches
                 if len(json_match_data.keys()) > i + 1:
+                    print("GGGGGGGGGGGGG", match_context.match_data[:match_context.match_data.find(
+                        list(json_match_data.keys())[i + 1].encode())])
                     match_context.update(match_context.match_data[:match_context.match_data.find(
                         list(json_match_data.keys())[i + 1].encode())])
             else:
-                split_data = key.split(self.optional_key_prefix, 1)
-                if len(split_data) != 1 and split_data[-1] not in json_match_data:
+                if key != split_key and split_key not in json_match_data:
                     continue
-                if split_data[-1] not in json_match_data:
+                if split_key not in json_match_data:
                     return [None]
-                data = json_match_data[split_data[-1]]
+                data = json_match_data[split_key]
                 if isinstance(data, str):
                     data = data.encode()
                 elif isinstance(data, bool):
@@ -135,22 +146,32 @@ class JsonModelElement(ModelElementInterface):
                 else:
                     match_element = json_dict[key].get_match_element(current_path, MatchContext(data))
                     if match_element is not None and len(match_element.match_string) != len(data):
+                        print("FFFFFFF")
                         match_element = None
-                index = match_context.match_data.find(data)
+                index = match_context.match_data.replace(b'\\', b'').find(data)
                 # for example float scientific representation is converted to normal float..
-                if index == -1 and match_element is not None and isinstance(json_match_data[split_data[-1]], float):
+                if index == -1 and match_element is not None and isinstance(json_match_data[split_key], float):
                     indices = [match_context.match_data.find(b',', len(match_element.match_string) // 3),
                                match_context.match_data.find(b']'), match_context.match_data.find(b'}')]
+                    indices = [x for x in indices if x >= 0]
                     index = min(indices)
                 if match_element is None:
                     index = -1
+                #print("UPDATE", index, len(data), data.decode())
                 match_context.update(match_context.match_data[:index + len(data)])
                 if match_element is not None or (match_element is None and not key.startswith(self.optional_key_prefix)):
                     matches.append(match_element)
                     if index == -1:
+                        print("RET6")
+                        print(data.decode())
+                        print(match_context.match_data.replace(b'\\', b'').decode())
+                        print(match_element)
+                        print(isinstance(json_match_data[split_key], float))
+                        print(index)
                         return matches
         missing_keys = [x for x in json_dict if x not in json_match_data]
         for key in missing_keys:
             if not key.startswith(self.optional_key_prefix):
+                print("RET3")
                 return [None]
         return matches

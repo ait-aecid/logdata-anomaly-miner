@@ -785,6 +785,12 @@ def parse_json_yaml(json_dict, parser_model_dict):
     key_parser_dict = {}
     for key in json_dict.keys():
         value = json_dict[key]
+        if key is None:
+            key = 'null'
+        if key is False:
+            key = 'false'
+        if key is True:
+            key = 'true'
         if isinstance(value, dict):
             key_parser_dict[key] = parse_json_yaml(value, parser_model_dict)
         elif isinstance(value, list):
