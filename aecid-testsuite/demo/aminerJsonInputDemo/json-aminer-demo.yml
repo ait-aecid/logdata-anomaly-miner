@@ -95,10 +95,6 @@ Parser:
          type: AnyByteDataModelElement
          name: 'affected_values'
 
-       - id: raw_log_data
-         type: AnyByteDataModelElement
-         name: 'raw_log_data'
-
        - id: timestamps_no_milliseconds
          type: DateTimeModelElement
          name: 'timestamps'
@@ -139,7 +135,7 @@ Parser:
              ParsedLogAtom: 'ALLOW_ALL'
            LogData:
              RawLogData:
-               - raw_log_data
+               - 'ALLOW_ALL'
              Timestamps:
                - timestamps
              LogLinesCount: log_lines_count

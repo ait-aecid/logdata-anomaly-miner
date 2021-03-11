@@ -58,8 +58,8 @@ class JsonModelElement(ModelElementInterface):
         except JSONDecodeError:
             return None
         matches += self.parse_json_dict(self.key_parser_dict, json_match_data, current_path, match_context)
-        if None in matches or match_context.match_data.strip(b' }]"') != b'':
-            print("RETURN NONE!!!!")
+        if None in matches or match_context.match_data.strip(b' }]"\r\n') != b'':
+            print("RETURN NONE!!!!", match_context.match_data.strip(b' }]"\r\n').decode())
             match_context.match_data = old_match_data
             return None
         # remove all remaining spaces and brackets.
@@ -108,15 +108,26 @@ class JsonModelElement(ModelElementInterface):
                                 print("RET2")
                                 return matches
                     else:
-                        match_element = json_dict[key][0].get_match_element(current_path, MatchContext(data))
-                        if match_element is not None and len(match_element.match_string) != len(data):
-                            print("EEEEEEEEEE")
-                            match_element = None
+                        if json_dict[key][0] == "ALLOW_ALL":
+                            print("ALLOW_ALL", data.decode())
+                            match_element = MatchElement(current_path, data, data, None)
+                        else:
+                            match_element = json_dict[key][0].get_match_element(current_path, MatchContext(data))
+                            if match_element is not None and len(match_element.match_string) != len(data):
+                                print("EEEEEEEEEE")
+                                match_element = None
                         index = match_context.match_data.find(data)
+                        print(index)
                         if match_element is None:
                             print("HHHHHHHHHHHHHHHHHHHHH")
                             index = -1
                         match_context.update(match_context.match_data[:index + len(data)])
+                        if index == -1 and json_dict[key][0] == "ALLOW_ALL":
+                            print(match_context.match_data.decode())
+                            print("MMMMMMMMMMMMMM")
+                            index = match_context.match_data.find(b']')
+                            match_context.update(match_context.match_data[:index])
+                        print(match_context.match_data.decode())
                         if match_element is not None or (match_element is None and not key.startswith(self.optional_key_prefix)):
                             matches.append(match_element)
                             if index == -1:
@@ -125,10 +136,14 @@ class JsonModelElement(ModelElementInterface):
                             print("RET1")
                             return matches
                 if len(json_match_data.keys()) > i + 1:
-                    print("GGGGGGGGGGGGG", match_context.match_data[:match_context.match_data.find(
-                        list(json_match_data.keys())[i + 1].encode())])
+                    print("GGGGGGGGGGGGG", len(json_match_data.keys()), i + 1, match_context.match_data[:match_context.match_data.find(
+                        list(json_match_data.keys())[i + 1].encode())].decode())
+                    print(list(json_match_data.keys())[i + 1])
                     match_context.update(match_context.match_data[:match_context.match_data.find(
                         list(json_match_data.keys())[i + 1].encode())])
+                else:
+                    print("LLLLLLLLLLLLLLLLL")
+                    match_context.update(match_context.match_data[:match_context.match_data.find(b']')])
             else:
                 if key != split_key and split_key not in json_match_data:
                     continue
@@ -142,6 +157,7 @@ class JsonModelElement(ModelElementInterface):
                 elif not isinstance(data, bytes):
                     data = str(data).encode()
                 if json_dict[key] == "ALLOW_ALL":
+                    print("ALLOW_ALL", data.decode())
                     match_element = MatchElement(current_path, data, data, None)
                 else:
                     match_element = json_dict[key].get_match_element(current_path, MatchContext(data))
@@ -157,11 +173,17 @@ class JsonModelElement(ModelElementInterface):
                     index = min(indices)
                 if match_element is None:
                     index = -1
-                #print("UPDATE", index, len(data), data.decode())
+                print("UPDATE", index, len(data), data.decode())
                 match_context.update(match_context.match_data[:index + len(data)])
+                if index == -1 and json_dict[key] == "ALLOW_ALL":
+                    print(match_context.match_data.decode())
+                    print("JJJJJJJJJJJJJJ")
+                    match_context.update(match_context.match_data[:match_context.match_data.find(b'}')])
+                print(match_context.match_data.decode())
                 if match_element is not None or (match_element is None and not key.startswith(self.optional_key_prefix)):
                     matches.append(match_element)
-                    if index == -1:
+                    if index == -1 and match_element is None:
+                        print(match_element)
                         print("RET6")
                         print(data.decode())
                         print(match_context.match_data.replace(b'\\', b'').decode())

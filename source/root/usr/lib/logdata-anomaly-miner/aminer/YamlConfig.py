@@ -796,6 +796,8 @@ def parse_json_yaml(json_dict, parser_model_dict):
         elif isinstance(value, list):
             if isinstance(value[0], dict):
                 key_parser_dict[key] = [parse_json_yaml(value[0], parser_model_dict)]
+            elif value[0] == "ALLOW_ALL":
+                key_parser_dict[key] = value
             elif parser_model_dict.get(value[0]) is None:
                 msg = 'The parser model %s does not exist!' % value[0]
                 logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
