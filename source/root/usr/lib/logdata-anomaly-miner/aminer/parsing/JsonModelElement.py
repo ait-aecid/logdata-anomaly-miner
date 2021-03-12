@@ -127,7 +127,7 @@ class JsonModelElement(ModelElementInterface):
                         index = match_context.match_data.find(data)
                         print(index)
                         if match_element is None:
-                            print("HHHHHHHHHHHHHHHHHHHHH")
+                            print("HHHHHHHHHHHHHHHHHHHHH", data.decode())
                             index = -1
                         match_context.update(match_context.match_data[:index + len(data)])
                         if index == -1 and json_dict[key][0] == "ALLOW_ALL":
