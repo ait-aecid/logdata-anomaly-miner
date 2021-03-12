@@ -13,10 +13,14 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import json
+import warnings
 from json import JSONDecodeError
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.ModelElementInterface import ModelElementInterface
+
+
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
 class JsonModelElement(ModelElementInterface):
@@ -55,8 +59,12 @@ class JsonModelElement(ModelElementInterface):
         matches = []
         try:
             json_match_data = json.loads(match_context.match_data)
-        except JSONDecodeError:
+        except JSONDecodeError as e:
+            # TODO: add logging in this class!
+            # But only at specific errors like could not encode character above unicode ...
+            print("JSON ERROR", e)
             return None
+        match_context.match_data = match_context.match_data.decode('unicode-escape').encode()
         matches += self.parse_json_dict(self.key_parser_dict, json_match_data, current_path, match_context)
         if None in matches or match_context.match_data.strip(b' }]"\r\n') != b'':
             print("RETURN NONE!!!!", match_context.match_data.strip(b' }]"\r\n').decode())
@@ -83,7 +91,7 @@ class JsonModelElement(ModelElementInterface):
             if key not in json_dict:
                 index = match_context.match_data.find(key.encode())
                 match_context.update(match_context.match_data[:index])
-                print("RET NONE2")
+                print("RET NONE2", key, json_dict)
                 return [None]
             value = json_dict[key]
             if isinstance(value, (dict, list)) and (not isinstance(json_match_data, dict) or split_key not in json_match_data):
@@ -146,12 +154,15 @@ class JsonModelElement(ModelElementInterface):
                     match_context.update(match_context.match_data[:match_context.match_data.find(b']')])
             else:
                 if key != split_key and split_key not in json_match_data:
+                    print("CONTINUE!!!!")
                     continue
                 if split_key not in json_match_data:
+                    print("SPLIT_KEY not FOUND!!", split_key)
                     return [None]
                 data = json_match_data[split_key]
                 if isinstance(data, str):
-                    data = data.encode()
+                    #print("DATA", data)
+                    data = data.encode('unicode-escape')
                 elif isinstance(data, bool):
                     data = str(data).replace("T", "t").replace("F", "f").encode()
                 elif not isinstance(data, bytes):
@@ -161,10 +172,13 @@ class JsonModelElement(ModelElementInterface):
                     match_element = MatchElement(current_path, data, data, None)
                 else:
                     match_element = json_dict[key].get_match_element(current_path, MatchContext(data))
-                    if match_element is not None and len(match_element.match_string) != len(data):
+                    if match_element is not None and len(match_element.match_string) != len(data) and (
+                            not isinstance(match_element.match_object, bytes) or len(match_element.match_object) != len(data)):
                         print("FFFFFFF")
                         match_element = None
-                index = match_context.match_data.replace(b'\\', b'').find(data)
+                index = max([match_context.match_data.replace(b'\\', b'').find(data), match_context.match_data.find(data),
+                             match_context.match_data.decode().find(data.decode()), match_context.match_data.decode(
+                        'unicode-escape').find(data.decode('unicode-escape'))])
                 # for example float scientific representation is converted to normal float..
                 if index == -1 and match_element is not None and isinstance(json_match_data[split_key], float):
                     indices = [match_context.match_data.find(b',', len(match_element.match_string) // 3),
@@ -173,13 +187,15 @@ class JsonModelElement(ModelElementInterface):
                     index = min(indices)
                 if match_element is None:
                     index = -1
-                print("UPDATE", index, len(data), data.decode())
+                # if isinstance(json_match_data[split_key], bytes):
+                #     print("UPDATE", index, len(data), len(json_match_data[split_key]), data.decode('unicode-escape'), match_element is None)
+                # print("UPDATE!!!!", match_context.match_data.decode('unicode-escape'))
                 match_context.update(match_context.match_data[:index + len(data)])
                 if index == -1 and json_dict[key] == "ALLOW_ALL":
-                    print(match_context.match_data.decode())
+                    #print(match_context.match_data.decode())
                     print("JJJJJJJJJJJJJJ")
                     match_context.update(match_context.match_data[:match_context.match_data.find(b'}')])
-                print(match_context.match_data.decode())
+                #print(match_context.match_data.decode())
                 if match_element is not None or (match_element is None and not key.startswith(self.optional_key_prefix)):
                     matches.append(match_element)
                     if index == -1 and match_element is None:
@@ -191,6 +207,7 @@ class JsonModelElement(ModelElementInterface):
                         print(isinstance(json_match_data[split_key], float))
                         print(index)
                         return matches
+        #print("END!!!")
         missing_keys = [x for x in json_dict if x not in json_match_data]
         for key in missing_keys:
             if not key.startswith(self.optional_key_prefix):
