@@ -19,6 +19,7 @@ from json import JSONDecodeError
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.ModelElementInterface import ModelElementInterface
+from aminer import AminerConfig
 
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
