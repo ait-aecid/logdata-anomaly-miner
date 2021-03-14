@@ -470,7 +470,7 @@ Parser:
          name: 'DelimitedDataModelElement'
          delimiter: ';'
 
-       - id: fixedDataModelElement
+       - id: fixedDataModelElement1
          type: FixedDataModelElement
          name: 'FixedDataModelElement'
          args: ';'
@@ -480,7 +480,7 @@ Parser:
          name: 'se'
          args:
            - delimitedDataModelElement
-           - fixedDataModelElement
+           - fixedDataModelElement1
 
        - id: fixed1
          type: FixedDataModelElement
@@ -541,7 +541,7 @@ Parser:
          type: HexStringModelElement
          name: 'HexStringModelElement'
 
-       - id: fixedDataModelElement
+       - id: fixedDataModelElement2
          type: FixedDataModelElement
          name: 'FixedDataModelElement'
          args: 'Gateway IP-Address: '
@@ -554,7 +554,7 @@ Parser:
          type: SequenceModelElement
          name: 'se2'
          args:
-           - fixedDataModelElement
+           - fixedDataModelElement2
            - ipAddressDataModelElement
 
        - id: multiLocaleDateTimeModelElement
