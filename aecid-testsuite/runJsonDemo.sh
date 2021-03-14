@@ -20,6 +20,8 @@ else
 	chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
 fi
 
+cp -r ./demo/aminerJsonInputDemo/json_logs /tmp/json_logs
+
 sudo chown -R aminer:aminer /tmp/lib 2> /dev/null
 sudo ./demo/aminerJsonInputDemo/json-demo.sh $1 > /tmp/out.txt
 exit_code=$?
@@ -32,3 +34,4 @@ fi
 
 exit $exit_code
 sudo rm /tmp/out.txt
+sudo rm -r /tmp/json_logs
