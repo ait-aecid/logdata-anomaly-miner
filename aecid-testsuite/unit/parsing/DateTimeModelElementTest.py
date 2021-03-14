@@ -22,6 +22,8 @@ class DateTimeModelElementTest(TestBase):
 
     def test3get_match_element_with_different_date_formats(self):
         """Test if different date_formats can be used to match data."""
+        # TODO: also add a test where only a date is defined, but no time.
+        # TODO: add test where only time is defined without date.
 
     def test4wrong_date(self):
         """Test if wrong input data does not return a match."""
