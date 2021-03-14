@@ -47,10 +47,12 @@ class JsonModelElementTest(unittest.TestCase):
         },
         {
           "value": "Open",
-          "onclick": "OpenDoc()"},
+          "onclick": "OpenDoc()"
+        },
         {
           "value": "Close",
-          "onclick": "CloseDoc()"}
+          "onclick": "CloseDoc()"
+        }
       ]
     }
   }
@@ -111,6 +113,10 @@ class JsonModelElementTest(unittest.TestCase):
     def test5different_order_keys(self):
         """Test if keys differently ordered than in the key_parser_dict are parsed properly."""
         json_model_element = JsonModelElement('json', self.key_parser_dict)
+        match = json_model_element.get_match_element('match', MatchContext(self.single_line_different_order_with_optional_key_json))
+        self.assertEqual(match.match_object, json.loads(self.single_line_different_order_with_optional_key_json))
+
+        json_model_element = JsonModelElement('json', self.key_parser_dict_allow_all)
         match = json_model_element.get_match_element('match', MatchContext(self.single_line_different_order_with_optional_key_json))
         self.assertEqual(match.match_object, json.loads(self.single_line_different_order_with_optional_key_json))
 

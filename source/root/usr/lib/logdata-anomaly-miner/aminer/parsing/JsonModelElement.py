@@ -67,7 +67,11 @@ class JsonModelElement(ModelElementInterface):
             return None
         match_context.match_data = match_context.match_data.decode('unicode-escape').encode()
         matches += self.parse_json_dict(self.key_parser_dict, json_match_data, current_path, match_context)
-        if None in matches or match_context.match_data.strip(b' }]"\r\n') != b'':
+        remove_chars = b' }]"\r\n'
+        match_data = match_context.match_data
+        for c in remove_chars:
+            match_data = match_data.replace(bytes(chr(c), encoding="utf-8"), b'')
+        if None in matches or match_data != b'':
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(
                 debug_log_prefix + "get_match_element_main NONE RETURNED", match_context.match_data.strip(b' }]"\r\n').decode())
             #############
@@ -151,7 +155,9 @@ class JsonModelElement(ModelElementInterface):
                                 logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(debug_log_prefix + "MatchElement NONE 1")
                                 match_element = None
                         index = match_context.match_data.find(data)
-                        print(index)
+                        ##########
+                        # print(index)
+                        ##########
                         if match_element is None:
                             ##############
                             print("HHHHHHHHHHHHHHHHHHHHH", data.decode())
@@ -225,6 +231,10 @@ class JsonModelElement(ModelElementInterface):
                     ############
                     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(debug_log_prefix + "ALLOW_ALL (DICT)", data.decode())
                     match_element = MatchElement(current_path, data, data, None)
+                    last_bracket = match_context.match_data.find(b'}', len(data))
+                    while match_context.match_data.count(b'{', 0, last_bracket) - match_context.match_data.count(b'}', 0, last_bracket) > 0:
+                        last_bracket = match_context.match_data.find(b'}', last_bracket) + 1
+                    index = last_bracket - len(data)
                 else:
                     match_element = json_dict[key].get_match_element(current_path, MatchContext(data))
                     if match_element is not None and len(match_element.match_string) != len(data) and (
@@ -236,32 +246,25 @@ class JsonModelElement(ModelElementInterface):
                             debug_log_prefix + "Data length not matching! match_string: %d, data: %d, data: %s" % (
                                 len(match_element.match_string), len(data), data.decode()))
                         match_element = None
-                index = max([match_context.match_data.replace(b'\\', b'').find(data), match_context.match_data.find(data),
-                             match_context.match_data.decode().find(data.decode()), match_context.match_data.decode(
-                        'unicode-escape').find(data.decode('unicode-escape'))])
-                # for example float scientific representation is converted to normal float..
-                if index == -1 and match_element is not None and isinstance(json_match_data[split_key], float):
-                    indices = [match_context.match_data.find(b',', len(match_element.match_string) // 3),
-                               match_context.match_data.find(b']'), match_context.match_data.find(b'}')]
-                    indices = [x for x in indices if x >= 0]
-                    index = min(indices)
-                if match_element is None:
-                    index = -1
-                #################
-                # if isinstance(json_match_data[split_key], bytes):
-                #     print("UPDATE", index, len(data), len(json_match_data[split_key]), data.decode('unicode-escape'), match_element is None)
-                # print("UPDATE!!!!", match_context.match_data.decode('unicode-escape'))
-                ##################
-                match_context.update(match_context.match_data[:index + len(data)])
-                if index == -1 and json_dict[key] == "ALLOW_ALL":
+                    index = max([match_context.match_data.replace(b'\\', b'').find(data), match_context.match_data.find(data),
+                                 match_context.match_data.decode().find(data.decode()), match_context.match_data.decode(
+                            'unicode-escape').find(data.decode('unicode-escape'))])
+                    # for example float scientific representation is converted to normal float..
+                    if index == -1 and match_element is not None and isinstance(json_match_data[split_key], float):
+                        indices = [match_context.match_data.find(b',', len(match_element.match_string) // 3),
+                                   match_context.match_data.find(b']'), match_context.match_data.find(b'}')]
+                        indices = [x for x in indices if x >= 0]
+                        index = min(indices)
+                    if match_element is None:
+                        index = -1
                     #################
-                    #print(match_context.match_data.decode())
-                    print("JJJJJJJJJJJJJJ")
-                    ############
-                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(debug_log_prefix + "ALLOW_ALL search end bracket")
-                    match_context.update(match_context.match_data[:match_context.match_data.find(b'}')])
+                    # if isinstance(json_match_data[split_key], bytes):
+                    #     print("UPDATE", index, len(data), len(json_match_data[split_key]), data.decode('unicode-escape'), match_element is None)
+                    # print("UPDATE!!!!", match_context.match_data.decode('unicode-escape'))
+                    ##################
+                match_context.update(match_context.match_data[:index + len(data)])
                 ############
-                #print(match_context.match_data.decode())
+                # print(match_context.match_data.decode())
                 ############
                 if match_element is not None or (match_element is None and not key.startswith(self.optional_key_prefix)):
                     matches.append(match_element)
