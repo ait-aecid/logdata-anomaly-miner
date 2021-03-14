@@ -170,8 +170,7 @@ class DateTimeModelElement(ModelElementInterface):
         parse_pos = 0
         # Year, month, day, hour, minute, second, fraction, gmt-seconds:
         result = [None, None, None, None, None, None, None, None]
-        for part_pos in range(len(self.date_format_parts)):
-            date_format_part = self.date_format_parts[part_pos]
+        for part_pos, date_format_part in enumerate(self.date_format_parts):
             if isinstance(date_format_part, bytes):
                 if not match_context.match_data[parse_pos:].startswith(date_format_part):
                     return None

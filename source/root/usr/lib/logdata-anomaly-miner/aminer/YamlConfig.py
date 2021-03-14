@@ -97,8 +97,7 @@ def load_yaml(config_file):
 def filter_config_errors(filtered_errors, key_name, errors, schema):
     oneof = schema[key_name]['schema']['oneof']
     if key_name in errors:
-        for i in range(len(errors[key_name])):
-            err = errors[key_name][i]
+        for _, err in enumerate(errors[key_name]):
             for key in err:
                 if 'none or more than one rule validate' in err[key]:
                     for cause in err[key]:
@@ -157,9 +156,9 @@ def build_parsing_model():
                 if isinstance(item['args'], list):  # skipcq: PTC-W0048
                     if item['type'].name not in ('DecimalFloatValueModelElement', 'DecimalIntegerValueModelElement'):
                         # encode string to bytearray
-                        for j in range(len(item['args'])):
-                            if isinstance(item['args'][j], str):
-                                item['args'][j] = item['args'][j].encode()
+                        for j, val in enumerate(item['args']):
+                            if isinstance(val, str):
+                                item['args'][j] = val.encode()
                 else:
                     if item['type'].name not in ('DecimalFloatValueModelElement', 'DecimalIntegerValueModelElement') and isinstance(
                             item['args'], str):
