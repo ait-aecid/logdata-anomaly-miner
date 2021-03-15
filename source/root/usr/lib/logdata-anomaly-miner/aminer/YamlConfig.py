@@ -147,6 +147,8 @@ def build_parsing_model():
     # skipcq: PYL-W0603
     global yaml_data
     for item in yaml_data['Parser']:
+        if item['id'] in parser_model_dict:
+            raise ValueError('Config-Error: The id "%s" occurred multiple times in Parser!' % item['id'])
         if 'start' in item and item['start'] is True and item['type'].name != 'JsonModelElement':
             start = item
             continue
@@ -341,11 +343,13 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 comp_name = None
             else:
                 comp_name = item['id']
+                if analysis_context.get_component_by_name(comp_name) is not None:
+                    raise ValueError('Config-Error: The id "%s" occurred multiple times in Analysis!' % comp_name)
             if 'learn_mode' in item:
                 learn = item['learn_mode']
             else:
                 if 'LearnMode' not in yaml_data:
-                    msg = 'Config error: LearnMode must be defined if an analysis component does not define learn_mode.'
+                    msg = 'Config-Error: LearnMode must be defined if an analysis component does not define learn_mode.'
                     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 learn = yaml_data['LearnMode']
@@ -353,7 +357,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             if item['suppress']:
                 if comp_name is None:
                     raise ValueError(
-                        'Config error: id must be specified for the analysis component %s to enable suppression.' % item['type'])
+                        'Config-Error: id must be specified for the analysis component %s to enable suppression.' % item['type'])
                 suppress_detector_list.append(comp_name)
             if item['type'].name == 'NewMatchPathValueDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn,
@@ -716,6 +720,8 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
         event_handler_id_list = []
         if 'EventHandlers' in yaml_data and yaml_data['EventHandlers'] is not None:
             for item in yaml_data['EventHandlers']:
+                if item['id'] in event_handler_id_list:
+                    raise ValueError('Config-Error: The id "%s" occurred multiple times in EventHandlers!' % item['id'])
                 event_handler_id_list.append(item['id'])
                 func = item['type'].func
                 ctx = None
