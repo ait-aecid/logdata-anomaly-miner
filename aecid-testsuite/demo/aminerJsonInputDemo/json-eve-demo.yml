@@ -58,12 +58,13 @@ Parser:
            - 'stats'
            - 'flow'
            - 'alert'
+           - 'tls'
 
-       - id: ipv4
+       - id: ip_ipv4
          type: IpAddressDataModelElement
          name: 'ipv4'
 
-       - id: ipv6
+       - id: ip_ipv6
          type: VariableByteDataModelElement
          name: 'ipv6'
          args: 'abcdefABCDEF0123456789:'
@@ -72,8 +73,8 @@ Parser:
          type: FirstMatchModelElement
          name: '_src_ip'
          args:
-           - ipv4
-           - ipv6
+           - ip_ipv4
+           - ip_ipv6
 
        - id: _src_port
          type: DecimalIntegerValueModelElement
@@ -83,8 +84,8 @@ Parser:
          type: FirstMatchModelElement
          name: '_dest_ip'
          args:
-           - ipv4
-           - ipv6
+           - ip_ipv4
+           - ip_ipv6
 
        - id: _dest_port
          type: DecimalIntegerValueModelElement
@@ -704,6 +705,75 @@ Parser:
            - '12'
            - '06'
 
+       - id: action
+         type: FixedWordlistDataModelElement
+         name: 'action'
+         args:
+           - 'allowed'
+
+       - id: gid
+         type: DecimalIntegerValueModelElement
+         name: 'gid'
+
+       - id: signature_id
+         type: DecimalIntegerValueModelElement
+         name: 'signature_id'
+
+       - id: rev
+         type: DecimalIntegerValueModelElement
+         name: 'rev'
+
+       - id: signature
+         type: FixedWordlistDataModelElement
+         name: 'signature'
+         args:
+           - 'ET POLICY Http Client Body contains pass= in cleartext'
+
+       - id: category
+         type: FixedWordlistDataModelElement
+         name: 'category'
+         args:
+           - 'Potential Corporate Privacy Violation'
+
+       - id: severity
+         type: DecimalIntegerValueModelElement
+         name: 'severity'
+
+       - id: subject
+         type: FixedDataModelElement
+         name: 'subject'
+         args: 'CN=mail.spiral.com'
+
+       - id: issuerdn
+         type: FixedDataModelElement
+         name: 'issuerdn'
+         args: 'CN=ChangeMe'
+
+       - id: fingerprint
+         type: FixedDataModelElement
+         name: 'fingerprint'
+         args: '4a:cf:f5:f8:ce:55:c7:45:08:c5:21:a0:2d:b6:f5:0f:3c:e0:a3:17'
+
+       - id: sni
+         type: FixedDataModelElement
+         name: 'sni'
+         args: 'mail.spiral.com'
+
+       - id: version
+         type: FixedDataModelElement
+         name: 'version'
+         args: 'TLS 1.2'
+
+       - id: notbefore
+         type: DateTimeModelElement
+         name: 'notbefore'
+         args: '%Y-%m-%dT%H:%M:%S'
+
+       - id: notafter
+         type: DateTimeModelElement
+         name: 'notafter'
+         args: '%Y-%m-%dT%H:%M:%S'
+
        - id: json
          start: True
          type: JsonModelElement
@@ -887,6 +957,22 @@ Parser:
              _psh: bool_wordlist
              ack: bool_wordlist
              state: conn_state
+           _alert:
+             action: action
+             gid: gid
+             signature_id: signature_id
+             rev: rev
+             signature: signature
+             category: category
+             severity: severity
+           _tls:
+             subject: subject
+             issuerdn: issuerdn
+             fingerprint: fingerprint
+             sni: sni
+             version: version
+             notbefore: notbefore
+             notafter: notafter
 
 Input:
         timestamp_paths: None

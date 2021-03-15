@@ -41,7 +41,7 @@ else
 fi
 
 #stop aminer
-sleep 8 & wait $!
+sleep 10 & wait $!
 if [[ $sudoInstalled == 0 ]]; then
 	sudo pkill -x aminer
 else

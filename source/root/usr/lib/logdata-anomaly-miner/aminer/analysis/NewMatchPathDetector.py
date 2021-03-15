@@ -85,8 +85,6 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
                     match_value = match_element.match_object
                     if isinstance(match_value, bytes):
-                        if not match_value.isascii():
-                            match_value = match_element.match_string
                         match_value = match_value.decode()
                     match_paths_values[match_path] = match_value
                 analysis_component['ParsedLogAtom'] = match_paths_values
