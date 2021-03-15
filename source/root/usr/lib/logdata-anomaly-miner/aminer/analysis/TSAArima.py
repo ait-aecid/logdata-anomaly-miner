@@ -6,12 +6,12 @@
 
 import time
 
-from aminer import AMinerConfig
+from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events import EventSourceInterface
 from aminer.input import AtomHandlerInterface
 from aminer.util import TimeTriggeredComponentInterface
-from aminer.util import PersistencyUtil
+from aminer.util import PersistenceUtil
 
 import statsmodels.api as sm_api
 import numpy as np
@@ -22,7 +22,7 @@ import pmdarima as pm
 class TSAArima(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
     """This class is used for testing purposes"""
 
-    def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id='Default'):
+    def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, num_division_time_step=10, persistence_id='Default'):
 
         # event_type_detector. Used to get the eventNumbers and values of the variables, etc.
         self.event_type_detector = event_type_detector
@@ -33,20 +33,53 @@ class TSAArima(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourc
         # List of the time steps
         self.time_step_list = []
         # Number of division of the time window to calculate the time step
-        self.num_division_time_step = 10
+        self.num_division_time_step = num_division_time_step
         # History of the time windows
         self.time_window_history = []
         # List of the the single arima_models
         self.arima_models = []
 
         self.plots = [[], [], []]
+        self.time_history = []
         self.fast = True # True for update, False for new calculation every step
-        self.sum = True # Build the sum of the single windows
+        self.sum = False # Build the sum of the single windows
         return
 
     def receive_atom(self, log_atom):
-        if not self.event_type_detector.total_records % 100:
+        # print(log_atom.parser_match.get_match_dictionary())
+        if not self.event_type_detector.total_records % 10000:
             print(self.event_type_detector.total_records)
+
+        if True:
+            import numpy as np
+            import pmdarima as pm
+            import matplotlib.pyplot as plt
+            import matplotlib.dates as mdates
+            import datetime as dt
+
+            for i in range(15*self.num_division_time_step):
+                self.test_num_appearance(0, i%(self.num_division_time_step) + (i%int((self.num_division_time_step)/2)) + np.random.uniform(low=0.0, high=0.1, size=1)[0], i)
+
+            t = [dt.datetime.fromtimestamp(z) for z in self.time_history]
+            plt.figure()
+            plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%Y'))
+            plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
+
+            plt.plot(t, self.plots[0], 'tab:red')
+            plt.plot(t, self.plots[2], 'tab:red')
+            plt.plot(t, self.plots[1], 'tab:blue')
+
+            for i in range(len(self.plots[0])):
+                if self.plots[0][i] > self.plots[1][i] or self.plots[1][i] > self.plots[2][i]:
+                    plt.plot([t[i]], [self.plots[1][i]], 'or', fillstyle='none', mew=2.5, ms=10.0)
+
+            plt.gcf().autofmt_xdate()
+
+            plt.savefig('/tmp/TSAoutput_test', dpi=1200)
+            print('t=%s'%t)
+            print('y=%s'%self.plots[1])
+            self.end()
+
         return True
 
     def get_time_trigger_class(self):
@@ -93,7 +126,7 @@ class TSAArima(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourc
 
         return time_step_list
 
-    def test_num_appearance(self, event_number, count):
+    def test_num_appearance(self, event_number, count, current_time):
         """This function makes a one step prediction and raises an alert if the count do not match the expected appearance"""
         # Append the list of time_window_history and arima_models if it is to short
         if len(self.time_window_history) <= event_number:
@@ -107,10 +140,10 @@ class TSAArima(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourc
             self.time_window_history[event_number].append(count)
             if len(self.time_window_history[event_number]) > 20 * self.num_division_time_step:
                 self.time_window_history[event_number] = self.time_window_history[event_number][-10*self.num_division_time_step:]
-                print(len(self.time_window_history[event_number]))
+                # print(len(self.time_window_history[event_number]))
 
             # Check if enough values have been stored to initialize the arima_model
-            if self.arima_models[event_number] == None and len(self.time_window_history[event_number]) >= 10*self.num_division_time_step:
+            if len(self.time_window_history[event_number]) >= 10*self.num_division_time_step:
                 print('Ini:')
                 print(self.time_window_history[event_number])
                 
@@ -119,7 +152,7 @@ class TSAArima(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourc
                         # Add the arima_model to the list
                         try:
                             model = pm.auto_arima(self.time_window_history[event_number][-10*self.num_division_time_step:],
-                                    seasonal=True, error_action='ignore', suppress_warnings=True, m=self.num_division_time_step, max_order=2)
+                                    seasonal=True, error_action='ignore', suppress_warnings=True, m=self.num_division_time_step+1, max_order=2)
                             self.arima_models[event_number] = model.fit(self.time_window_history[event_number][-10*self.num_division_time_step:])
                             self.time_window_history[event_number] = []
                         except:
@@ -142,6 +175,7 @@ class TSAArima(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourc
                         self.plots[0].append(lower)
                         self.plots[1].append(count)
                         self.plots[2].append(upper)
+                        self.time_history.append(current_time)
                     except:
                         self.arima_models[event_number] = None
         # Add the new value and make a one step prediction
@@ -151,6 +185,7 @@ class TSAArima(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourc
                 self.plots[0].append(lower)
                 self.plots[1].append(count)
                 self.plots[2].append(upper)
+                self.time_history.append(current_time)
 
                 # Test if count is in boundaries
                 print('EventNumber: %s, Count: %s, Lower: %s, Pred: %s, Upper: %s'%(event_number, count, lower, pred, upper))
@@ -165,6 +200,7 @@ class TSAArima(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourc
                 self.plots[0].append(lower)
                 self.plots[1].append(sum(self.time_window_history[event_number][-self.num_division_time_step:]))
                 self.plots[2].append(upper)
+                self.time_history.append(current_time)
 
                 # Test if count is in boundaries
                 print('EventNumber: %s, Count: %s, Lower: %s, Pred: %s, Upper: %s'%(event_number, sum(self.time_window_history[event_number][-self.num_division_time_step:]), lower, pred, upper))

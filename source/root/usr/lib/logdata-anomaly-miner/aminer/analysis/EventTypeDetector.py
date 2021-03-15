@@ -11,7 +11,6 @@ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
-
 """
 import time
 import copy
@@ -28,8 +27,8 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """This class keeps track of the found eventtypes and the values of each variable."""
 
     def __init__(self, aminer_config, anomaly_event_handlers, persistence_id='Default', path_list=None, min_num_vals=1000,
-                 max_num_vals=1500, save_values=True, track_time_for_TSA=False, waiting_time_for_TSA=300,
-                 num_sections_waiting_time_for_TSA=10):
+                 max_num_vals=1500, save_values=True, track_time_for_TSA=False, waiting_time_for_TSA=1000,
+                 num_sections_waiting_time_for_TSA=100):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
         self.next_persist_time = time.time() + 600.0
         self.anomaly_event_handlers = anomaly_event_handlers
@@ -61,8 +60,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.num_eventlines_TSA_ref = []
         # Index of the eventtype of the current log line
         self.current_index = 0
-        # Number of the values which the list is being reduced to. Be cautious that this is higher than 'num_min_values'
-        # in VarTypeD/Cor!!!
+        # Number of the values which the list is being reduced to.
         self.min_num_vals = min_num_vals
         # Maximum number of lines in the value list before it is reduced. > min_num_vals.
         self.max_num_vals = max_num_vals
@@ -72,7 +70,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.track_time_for_TSA = track_time_for_TSA
         # Time in seconds, until the time windows are being initialized
         self.waiting_time_for_TSA = waiting_time_for_TSA
-        # Number of subdivisions of the initialization window. The length of the input-list of the function_Init-funtion is numSubd+1
+        # Number of sections of the initialization window. The length of the input-list of the calculate_time_steps is this number
         self.num_sections_waiting_time_for_TSA = num_sections_waiting_time_for_TSA
         self.aminer_config = aminer_config
 
@@ -102,6 +100,33 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def receive_atom(self, log_atom):
         """Receives an parsed atom and keeps track of the event types and the values of the variables of them."""
+        # Output for the 'End'-line # !!!
+        if '/firstmatch0/End' in log_atom.parser_match.get_match_dictionary():
+            # self.do_persist()
+            if self.following_modules[-1].__class__.__name__ == 'TSAArima':
+                import matplotlib.pyplot as plt
+                import matplotlib.dates as mdates
+                import datetime as dt
+                t = [dt.datetime.fromtimestamp(z) for z in self.following_modules[0].time_history]
+                plt.figure()
+                plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%Y'))
+                plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
+
+                plt.plot(t, self.following_modules[0].plots[0], 'tab:red')
+                plt.plot(t, self.following_modules[0].plots[2], 'tab:red')
+                plt.plot(t, self.following_modules[0].plots[1], 'tab:blue')
+                
+                for i in range(len(self.following_modules[0].plots[0])):
+                    if self.following_modules[0].plots[0][i] > self.following_modules[0].plots[1][i] or self.following_modules[0].plots[1][i] > self.following_modules[0].plots[2][i]:
+                        plt.plot([t[i]], [self.following_modules[0].plots[1][i]], 'or', fillstyle='none', ms=8.0)
+
+                plt.gcf().autofmt_xdate()
+
+                plt.savefig('/tmp/TSAoutput', dpi=1200)
+                print('t=%s'%t)
+                print('y=%s'%self.following_modules[0].plots[1])
+            self.end()
+
         self.log_total += 1
         # Get the current time
         if self.track_time_for_TSA:
@@ -115,7 +140,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             for i in range(len(self.etd_time_trigger[0])):
                 if self.etd_time_trigger[0][i] == -1:
                     for j in range(self.num_sections_waiting_time_for_TSA-1):
-                        self.etd_time_trigger[0].append(current_time + self.waiting_time_for_TSA*(j+1)/(
+                        self.etd_time_trigger[0].append(current_time + self.waiting_time_for_TSA * (j + 1) / (
                                 self.num_sections_waiting_time_for_TSA))
                         self.etd_time_trigger[1].append(-1)
                         self.etd_time_trigger[2].append(-1)
@@ -129,81 +154,82 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             indices = [i for i in range(len(self.etd_time_trigger[0])) if current_time >= self.etd_time_trigger[0][i]]
 
             # Exectute the triggered functions of the TSA
-            if self.track_time_for_TSA:
-                for i in range(len(indices)-1, -1, -1):
-                    # Checks if trigger is part of the initalisation
-                    if self.etd_time_trigger[1][indices[i]] == -1 and self.etd_time_trigger[2][indices[i]] == -1:
+            for i in range(len(indices)-1, -1, -1):
+                # Checks if trigger is part of the initalisation
+                if self.etd_time_trigger[1][indices[i]] == -1 and self.etd_time_trigger[2][indices[i]] == -1:
 
-                        # Save the number of occured eventtypes for the initialization of the TSA
-                        if self.num_eventlines_TSA_ref == [] or len(
-                                self.num_eventlines_TSA_ref[0]) < self.num_sections_waiting_time_for_TSA-1:
+                    # Save the number of occured eventtypes for the initialization of the TSA
+                    if self.num_eventlines_TSA_ref == [] or len(
+                            self.num_eventlines_TSA_ref[0]) < self.num_sections_waiting_time_for_TSA-1:
 
-                            # Initialize the lists of self.num_eventlines_TSA_ref if not already initialized
-                            if not self.num_eventlines_TSA_ref:
-                                self.num_eventlines_TSA_ref = [[num] for num in self.num_eventlines]
-                            else:
-                                # Expand the lists of self.num_eventlines_TSA_ref
-                                for j in range(len(self.num_eventlines_TSA_ref), len(self.num_eventlines)):
-                                    self.num_eventlines_TSA_ref.append([0]*len(self.num_eventlines_TSA_ref[0]))
-                                # Add the current number of eventlines
-                                for j in range(len(self.num_eventlines)):
-                                    self.num_eventlines_TSA_ref[j].append(self.num_eventlines[j]-sum(self.num_eventlines_TSA_ref[j]))
-
-                            # Delete the initialization trigger
-                            del self.etd_time_trigger[0][indices[i]]
-                            del self.etd_time_trigger[1][indices[i]]
-                            del self.etd_time_trigger[2][indices[i]]
-
-                        # Initialize the trigger for the timewindows
+                        # Initialize the lists of self.num_eventlines_TSA_ref if not already initialized
+                        if not self.num_eventlines_TSA_ref:
+                            self.num_eventlines_TSA_ref = [[num] for num in self.num_eventlines]
                         else:
-                            # Initialize the lists of self.num_eventlines_TSA_ref if not already initialized
-                            if not self.num_eventlines_TSA_ref:
-                                self.num_eventlines_TSA_ref = [[num] for num in self.num_eventlines]
-                            else:
-                                # Expand the lists of self.num_eventlines_TSA_ref
-                                for j in range(len(self.num_eventlines_TSA_ref), len(self.num_eventlines)):
-                                    self.num_eventlines_TSA_ref.append([0]*len(self.num_eventlines_TSA_ref[0]))
-                                # Add the current number of eventlines
-                                for j in range(len(self.num_eventlines)):
-                                    self.num_eventlines_TSA_ref[j].append(self.num_eventlines[j]-sum(self.num_eventlines_TSA_ref[j]))
+                            # Expand the lists of self.num_eventlines_TSA_ref
+                            for j in range(len(self.num_eventlines_TSA_ref), len(self.num_eventlines)):
+                                self.num_eventlines_TSA_ref.append([0]*len(self.num_eventlines_TSA_ref[0]))
+                            # Add the current number of eventlines
+                            for j in range(len(self.num_eventlines)):
+                                self.num_eventlines_TSA_ref[j].append(self.num_eventlines[j]-sum(self.num_eventlines_TSA_ref[j]))
 
-                            # Get the timewindow lengths
-                            time_list = self.following_modules[next(j for j in range(len(
-                                self.following_modules)) if self.following_modules[j].__class__.__name__ == 'TestDetector')].function_Init(
-                                self.num_eventlines_TSA_ref)
-                            self.num_eventlines_TSA_ref = copy.copy(self.num_eventlines)
+                        # Delete the initialization trigger
+                        del self.etd_time_trigger[0][indices[i]]
+                        del self.etd_time_trigger[1][indices[i]]
+                        del self.etd_time_trigger[2][indices[i]]
 
-                            # Add the new triggers
-                            for j in range(len(time_list)):
-                                if time_list[j] != -1:
-                                    self.etd_time_trigger[0].append(self.etd_time_trigger[0][indices[i]] + time_list[j])
-                                    self.etd_time_trigger[1].append(j)
-                                    self.etd_time_trigger[2].append(time_list[j])
-
-                                while current_time >= self.etd_time_trigger[0][-1]:
-                                    self.following_modules[next(j for j in range(len(
-                                        self.following_modules)) if self.following_modules[j].__class__.__name__ == 'TestDetector')].\
-                                        function_Upd(self.etd_time_trigger[1][-1], self.num_eventlines[self.etd_time_trigger[1][
-                                            -1]]-self.num_eventlines_TSA_ref[self.etd_time_trigger[1][-1]])
-                                    self.etd_time_trigger[0][-1] = self.etd_time_trigger[0][-1] + self.etd_time_trigger[2][-1]
-                                    self.num_eventlines_TSA_ref[self.etd_time_trigger[1][-1]] = self.num_eventlines[self.etd_time_trigger[
-                                        1][-1]]
-
-                            # Delete the initialization trigger
-                            del self.etd_time_trigger[0][indices[i]]
-                            del self.etd_time_trigger[1][indices[i]]
-                            del self.etd_time_trigger[2][indices[i]]
-
-                    # Trigger for an reoccuring time window
+                    # Initialize the trigger for the timewindows
                     else:
-                        while current_time >= self.etd_time_trigger[0][indices[i]]:
-                            self.following_modules[next(j for j in range(len(self.following_modules)) if self.following_modules[
-                                j].__class__.__name__ == 'TestDetector')].function_Upd(self.etd_time_trigger[1][indices[
-                                    i]], self.num_eventlines[self.etd_time_trigger[1][indices[i]]]-self.num_eventlines_TSA_ref[
-                                    self.etd_time_trigger[1][indices[i]]])
-                            self.etd_time_trigger[0][indices[i]] += self.etd_time_trigger[2][indices[i]]
-                            self.num_eventlines_TSA_ref[self.etd_time_trigger[1][indices[i]]] = self.num_eventlines[self.etd_time_trigger[
-                                1][indices[i]]]
+                        # Initialize the lists of self.num_eventlines_TSA_ref if not already initialized
+                        if not self.num_eventlines_TSA_ref:
+                            self.num_eventlines_TSA_ref = [[num] for num in self.num_eventlines]
+                        else:
+                            # Expand the lists of self.num_eventlines_TSA_ref
+                            for j in range(len(self.num_eventlines_TSA_ref), len(self.num_eventlines)):
+                                self.num_eventlines_TSA_ref.append([0]*len(self.num_eventlines_TSA_ref[0]))
+                            # Add the current number of eventlines
+                            for j in range(len(self.num_eventlines)):
+                                self.num_eventlines_TSA_ref[j].append(self.num_eventlines[j]-sum(self.num_eventlines_TSA_ref[j]))
+
+                        # Get the timewindow lengths
+                        time_list = self.following_modules[next(j for j in range(len(
+                            self.following_modules)) if self.following_modules[j].__class__.__name__ == 'TSAArima')].calculate_time_steps(
+                            self.num_eventlines_TSA_ref)
+                        self.num_eventlines_TSA_ref = copy.copy(self.num_eventlines)
+
+                        # Add the new triggers
+                        for j in range(len(time_list)):
+                            if time_list[j] != -1:
+                                self.etd_time_trigger[0].append(self.etd_time_trigger[0][indices[i]] + time_list[j] * self.waiting_time_for_TSA / self.num_sections_waiting_time_for_TSA)
+                                self.etd_time_trigger[1].append(j)
+                                self.etd_time_trigger[2].append(time_list[j] * self.waiting_time_for_TSA / self.num_sections_waiting_time_for_TSA)
+
+                        # Delete the initialization trigger
+                        del self.etd_time_trigger[0][indices[i]]
+                        del self.etd_time_trigger[1][indices[i]]
+                        del self.etd_time_trigger[2][indices[i]]
+
+                        # Run the update function for all trigger, which would already have been triggerd
+                        for j in range(len(time_list)):
+                            while current_time >= self.etd_time_trigger[0][-1]:
+                                self.following_modules[next(j for j in range(len(
+                                    self.following_modules)) if self.following_modules[j].__class__.__name__ == 'TSAArima')].\
+                                    test_num_appearance(self.etd_time_trigger[1][-1], self.num_eventlines[self.etd_time_trigger[1][
+                                        -1]]-self.num_eventlines_TSA_ref[self.etd_time_trigger[1][-1]], current_time)
+                                self.etd_time_trigger[0][-1] = self.etd_time_trigger[0][-1] + self.etd_time_trigger[2][-1]
+                                self.num_eventlines_TSA_ref[self.etd_time_trigger[1][-1]] = self.num_eventlines[self.etd_time_trigger[
+                                    1][-1]]
+
+                # Trigger for an reoccuring time window
+                else:
+                    while current_time >= self.etd_time_trigger[0][indices[i]]:
+                        self.following_modules[next(j for j in range(len(self.following_modules)) if self.following_modules[
+                            j].__class__.__name__ == 'TSAArima')].test_num_appearance(self.etd_time_trigger[1][indices[
+                                i]], self.num_eventlines[self.etd_time_trigger[1][indices[i]]]-self.num_eventlines_TSA_ref[
+                                self.etd_time_trigger[1][indices[i]]], current_time)
+                        self.etd_time_trigger[0][indices[i]] += self.etd_time_trigger[2][indices[i]]
+                        self.num_eventlines_TSA_ref[self.etd_time_trigger[1][indices[i]]] = self.num_eventlines[self.etd_time_trigger[
+                            1][indices[i]]]
 
         valid_log_atom = False
         if self.path_list:
