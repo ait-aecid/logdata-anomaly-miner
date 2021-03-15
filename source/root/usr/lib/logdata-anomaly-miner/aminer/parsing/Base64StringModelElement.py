@@ -55,6 +55,7 @@ class Base64StringModelElement(ModelElementInterface):
         match_context.update(match_string)
         try:
             match_value = base64.b64decode(match_string)
+            # we need to check if no exception is raised when decoding the original string.
             match_value.decode()
         except UnicodeDecodeError:
             match_value = match_string
