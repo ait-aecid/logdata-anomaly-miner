@@ -53,4 +53,10 @@ class Base64StringModelElement(ModelElementInterface):
 
         match_string = match_context.match_data[:match_len]
         match_context.update(match_string)
-        return MatchElement("%s/%s" % (path, self.path_id), match_string, base64.b64decode(match_string), None)
+        try:
+            match_value = base64.b64decode(match_string)
+            # we need to check if no exception is raised when decoding the original string.
+            match_value.decode()
+        except UnicodeDecodeError:
+            match_value = match_string
+        return MatchElement("%s/%s" % (path, self.path_id), match_string, match_value, None)
