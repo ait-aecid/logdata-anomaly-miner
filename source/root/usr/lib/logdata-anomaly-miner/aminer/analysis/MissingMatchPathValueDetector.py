@@ -176,7 +176,8 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                     e = {}
                     if self.__class__.__name__ == 'MissingMatchPathValueDetector':
                         e['TargetPath'] = self.target_path_list
-                        message_part.append('  %s: %s overdue %ss (interval %s)' % (self.target_path_list, repr(value), overdue_time, interval))
+                        message_part.append('  %s: %s overdue %ss (interval %s)' % (self.target_path_list, repr(value), overdue_time,
+                                            interval))
                     else:
                         target_paths = ''
                         for target_path in self.target_path_list:

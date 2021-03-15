@@ -124,6 +124,7 @@ class MissingMatchPathValueDetectorTest(TestBase):
         log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme), round(time.time()) + past_time,
                                      other_missing_match_path_value_detector)
         self.assertTrue(other_missing_match_path_value_detector.receive_atom(log_atom_fixed_dme))
+        # skipcq: PYL-R1714
         self.assertTrue((self.output_stream.getvalue() == self.__expected_string % (
             datetime.fromtimestamp(t + past_time).strftime(self.datetime_format_string),
             other_missing_match_path_value_detector.__class__.__name__, description + "2", 1, self.match1_s1_overdue)) or (
@@ -232,6 +233,7 @@ class MissingMatchPathValueDetectorTest(TestBase):
         log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme), round(time.time()) + past_time,
                                      missing_match_path_list_value_detector)
         self.assertTrue(missing_match_path_list_value_detector.receive_atom(log_atom_fixed_dme))
+        # skipcq: PYL-R1714
         self.assertTrue((self.output_stream.getvalue() == self.__expected_string % (
             datetime.fromtimestamp(time.time() + past_time).strftime(self.datetime_format_string),
             missing_match_path_list_value_detector.__class__.__name__, description + "2", 1,
@@ -273,6 +275,7 @@ class MissingMatchPathValueDetectorTest(TestBase):
         log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme), round(time.time()) + past_time,
                                      other_missing_match_path_list_value_detector)
         self.assertTrue(other_missing_match_path_list_value_detector.receive_atom(log_atom_fixed_dme))
+        # skipcq: PYL-R1714
         self.assertTrue((self.output_stream.getvalue() == self.__expected_string % (
             datetime.fromtimestamp(t + past_time).strftime(self.datetime_format_string),
             other_missing_match_path_list_value_detector.__class__.__name__, description + "2", 1,
