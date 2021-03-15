@@ -196,7 +196,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['MissingMatchPathValueDetector'], 'required': True},
-                    'path': {'type': 'string', 'required': True, 'empty': False},
+                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
                     'persistence_id': {'type': 'string', 'empty': False},
                     'learn_mode': {'type': 'boolean'},
                     'check_interval': {'type': 'integer', 'min': 1},

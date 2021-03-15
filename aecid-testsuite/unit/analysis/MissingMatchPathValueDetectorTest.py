@@ -6,6 +6,7 @@ from aminer.input.LogAtom import LogAtom
 from aminer.analysis.MissingMatchPathValueDetector import MissingMatchPathValueDetector, MissingMatchPathListValueDetector
 import time
 from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.SequenceModelElement import SequenceModelElement
 from unit.TestBase import TestBase
 from datetime import datetime
 
@@ -19,7 +20,7 @@ class MissingMatchPathValueDetectorTest(TestBase):
 
     pid = b' pid='
     datetime_format_string = '%Y-%m-%d %H:%M:%S'
-    match1_s1_overdue = "match1/s1: ' pid=' overdue 400s (interval -400)"
+    match1_s1_overdue = "['match1/s1']: \"[' pid=']\" overdue 400s (interval -400)"
     string = b'25537 uid=2'
 
     def test1_receive_atom(self):
@@ -28,7 +29,7 @@ class MissingMatchPathValueDetectorTest(TestBase):
         match_context_fixed_dme = MatchContext(self.pid)
         fixed_dme = FixedDataModelElement('s1', self.pid)
         match_element_fixed_dme = fixed_dme.get_match_element("match1", match_context_fixed_dme)
-        missing_match_path_value_detector = MissingMatchPathValueDetector(self.aminer_config, match_element_fixed_dme.get_path(), [
+        missing_match_path_value_detector = MissingMatchPathValueDetector(self.aminer_config, [match_element_fixed_dme.get_path()], [
             self.stream_printer_event_handler], 'Default', False, self.__default_interval, self.__realert_interval)
         self.analysis_context.register_component(missing_match_path_value_detector, description)
         log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme), 1, missing_match_path_value_detector)
@@ -42,7 +43,7 @@ class MissingMatchPathValueDetectorTest(TestBase):
         match_element_fixed_dme = fixed_dme.get_match_element("match1", match_context_fixed_dme)
         match_context_fixed_dme = MatchContext(self.pid)
         matchElementFixedDME2 = fixed_dme.get_match_element("match2", match_context_fixed_dme)
-        missing_match_path_value_detector = MissingMatchPathValueDetector(self.aminer_config, match_element_fixed_dme.get_path(), [
+        missing_match_path_value_detector = MissingMatchPathValueDetector(self.aminer_config, [match_element_fixed_dme.get_path()], [
             self.stream_printer_event_handler], 'Default', False, self.__default_interval, self.__realert_interval)
         self.analysis_context.register_component(missing_match_path_value_detector, description)
         log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(matchElementFixedDME2), 1, missing_match_path_value_detector)
@@ -54,7 +55,7 @@ class MissingMatchPathValueDetectorTest(TestBase):
         match_context_fixed_dme = MatchContext(self.pid)
         fixed_dme = FixedDataModelElement('s1', self.pid)
         match_element_fixed_dme = fixed_dme.get_match_element("match1", match_context_fixed_dme)
-        missing_match_path_value_detector = MissingMatchPathValueDetector(self.aminer_config, match_element_fixed_dme.get_path(), [
+        missing_match_path_value_detector = MissingMatchPathValueDetector(self.aminer_config, [match_element_fixed_dme.get_path()], [
             self.stream_printer_event_handler], 'Default', True, self.__default_interval, self.__realert_interval)
         self.analysis_context.register_component(missing_match_path_value_detector, description)
         log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme), time.time(),
@@ -62,7 +63,7 @@ class MissingMatchPathValueDetectorTest(TestBase):
         self.assertTrue(missing_match_path_value_detector.receive_atom(log_atom_fixed_dme))
 
         past_time = 3200
-        missing_match_path_value_detector = MissingMatchPathValueDetector(self.aminer_config, match_element_fixed_dme.get_path(), [
+        missing_match_path_value_detector = MissingMatchPathValueDetector(self.aminer_config, [match_element_fixed_dme.get_path()], [
             self.stream_printer_event_handler], 'Default', True, missing_match_path_value_detector.default_interval - past_time,
             self.__realert_interval)
 
@@ -77,7 +78,7 @@ class MissingMatchPathValueDetectorTest(TestBase):
         match_context_fixed_dme = MatchContext(self.pid)
         fixed_dme = FixedDataModelElement('s1', self.pid)
         match_element_fixed_dme = fixed_dme.get_match_element("match1", match_context_fixed_dme)
-        missing_match_path_value_detector = MissingMatchPathValueDetector(self.aminer_config, match_element_fixed_dme.get_path(), [
+        missing_match_path_value_detector = MissingMatchPathValueDetector(self.aminer_config, [match_element_fixed_dme.get_path()], [
             self.stream_printer_event_handler], 'Default', True, self.__default_interval, self.__realert_interval)
         self.analysis_context.register_component(missing_match_path_value_detector, description)
         log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme), time.time(),
@@ -86,7 +87,7 @@ class MissingMatchPathValueDetectorTest(TestBase):
 
         past_time = 4000
         t = time.time()
-        missing_match_path_value_detector = MissingMatchPathValueDetector(self.aminer_config, match_element_fixed_dme.get_path(), [
+        missing_match_path_value_detector = MissingMatchPathValueDetector(self.aminer_config, [match_element_fixed_dme.get_path()], [
             self.stream_printer_event_handler], 'Default', True, missing_match_path_value_detector.default_interval - past_time,
             self.__realert_interval, output_log_line=False)
         self.analysis_context.register_component(missing_match_path_value_detector, description + "2")
@@ -104,7 +105,7 @@ class MissingMatchPathValueDetectorTest(TestBase):
         match_context_fixed_dme = MatchContext(self.pid)
         fixed_dme = FixedDataModelElement('s1', self.pid)
         match_element_fixed_dme = fixed_dme.get_match_element("match1", match_context_fixed_dme)
-        missing_match_path_value_detector = MissingMatchPathValueDetector(self.aminer_config, match_element_fixed_dme.get_path(), [
+        missing_match_path_value_detector = MissingMatchPathValueDetector(self.aminer_config, [match_element_fixed_dme.get_path()], [
             self.stream_printer_event_handler], 'Default', True, self.__default_interval, self.__realert_interval)
         self.analysis_context.register_component(missing_match_path_value_detector, description)
         log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme), round(time.time()),
@@ -114,7 +115,7 @@ class MissingMatchPathValueDetectorTest(TestBase):
 
         past_time = 4000
         t = time.time()
-        other_missing_match_path_value_detector = MissingMatchPathValueDetector(self.aminer_config, match_element_fixed_dme.get_path(), [
+        other_missing_match_path_value_detector = MissingMatchPathValueDetector(self.aminer_config, [match_element_fixed_dme.get_path()], [
             self.stream_printer_event_handler], 'Default', True, self.__default_interval, self.__realert_interval)
         self.analysis_context.register_component(other_missing_match_path_value_detector, description + "2")
         other_missing_match_path_value_detector.set_check_value(other_missing_match_path_value_detector.get_channel_key(
@@ -279,6 +280,22 @@ class MissingMatchPathValueDetectorTest(TestBase):
               datetime.fromtimestamp(t + past_time + 1).strftime(self.datetime_format_string),
               other_missing_match_path_list_value_detector.__class__.__name__, description + "2", 1,
               "match3/s2, match4/d2: ' pid=' overdue 400s (interval -400)")))
+
+    def test11multiple_paths(self):
+        """Test the functionality of the MissingMatchPathValueDetector with multiple paths."""
+        description = "Test11MissingMatchPathValueDetector"
+        match_context = MatchContext(self.pid + b"22")
+        fixed_dme = FixedDataModelElement('s1', self.pid)
+        decimal_integer_value_me = DecimalIntegerValueModelElement('d1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                                                                   DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+        seq = SequenceModelElement('model', [fixed_dme, decimal_integer_value_me])
+        match_element = seq.get_match_element("match", match_context)
+        missing_match_path_value_detector = MissingMatchPathValueDetector(self.aminer_config, [
+            "match/model", "match/model/s1", "match/model/d1"], [self.stream_printer_event_handler], 'Default', False,
+            self.__default_interval, self.__realert_interval)
+        self.analysis_context.register_component(missing_match_path_value_detector, description)
+        log_atom = LogAtom(fixed_dme.fixed_data + b"22", ParserMatch(match_element), 1, missing_match_path_value_detector)
+        self.assertTrue(missing_match_path_value_detector.receive_atom(log_atom))
 
 
 if __name__ == "__main__":
