@@ -170,8 +170,7 @@ class DateTimeModelElement(ModelElementInterface):
         parse_pos = 0
         # Year, month, day, hour, minute, second, fraction, gmt-seconds:
         result = [0, 0, 0, 0, 0, 0, 0, 0]
-        for part_pos in range(len(self.date_format_parts)):
-            date_format_part = self.date_format_parts[part_pos]
+        for part_pos, date_format_part in enumerate(self.date_format_parts):
             if isinstance(date_format_part, bytes):
                 if not match_context.match_data[parse_pos:].startswith(date_format_part):
                     return None
@@ -234,6 +233,9 @@ class DateTimeModelElement(ModelElementInterface):
                 result[0] = self.start_year
             microseconds = int(result[6] * 1000000)
             try:
+                for i, x in enumerate(result):
+                    if x is None:
+                        result[i] = 0
                 parsed_date_time = datetime.datetime(result[0], result[1], result[2], result[3], result[4], result[5], microseconds,
                                                      self.time_zone)
             # skipcq: FLK-E722

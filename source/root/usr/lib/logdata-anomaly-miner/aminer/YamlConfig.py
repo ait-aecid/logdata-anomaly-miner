@@ -97,8 +97,7 @@ def load_yaml(config_file):
 def filter_config_errors(filtered_errors, key_name, errors, schema):
     oneof = schema[key_name]['schema']['oneof']
     if key_name in errors:
-        for i in range(len(errors[key_name])):
-            err = errors[key_name][i]
+        for i, err in enumerate(errors[key_name]):
             for key in err:
                 if 'none or more than one rule validate' in err[key]:
                     for cause in err[key]:
@@ -147,6 +146,8 @@ def build_parsing_model():
     # skipcq: PYL-W0603
     global yaml_data
     for item in yaml_data['Parser']:
+        if item['id'] in parser_model_dict:
+            raise ValueError('Config-Error: The id "%s" occurred multiple times in Parser!' % item['id'])
         if 'start' in item and item['start'] is True and item['type'].name != 'JsonModelElement':
             start = item
             continue
@@ -155,9 +156,9 @@ def build_parsing_model():
                 if isinstance(item['args'], list):  # skipcq: PTC-W0048
                     if item['type'].name not in ('DecimalFloatValueModelElement', 'DecimalIntegerValueModelElement'):
                         # encode string to bytearray
-                        for j in range(len(item['args'])):
-                            if isinstance(item['args'][j], str):
-                                item['args'][j] = item['args'][j].encode()
+                        for j, val in enumerate(item['args']):
+                            if isinstance(val, str):
+                                item['args'][j] = val.encode()
                 else:
                     if item['type'].name not in ('DecimalFloatValueModelElement', 'DecimalIntegerValueModelElement') and isinstance(
                             item['args'], str):
@@ -341,11 +342,13 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 comp_name = None
             else:
                 comp_name = item['id']
+                if analysis_context.get_component_by_name(comp_name) is not None:
+                    raise ValueError('Config-Error: The id "%s" occurred multiple times in Analysis!' % comp_name)
             if 'learn_mode' in item:
                 learn = item['learn_mode']
             else:
                 if 'LearnMode' not in yaml_data:
-                    msg = 'Config error: LearnMode must be defined if an analysis component does not define learn_mode.'
+                    msg = 'Config-Error: LearnMode must be defined if an analysis component does not define learn_mode.'
                     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 learn = yaml_data['LearnMode']
@@ -353,7 +356,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             if item['suppress']:
                 if comp_name is None:
                     raise ValueError(
-                        'Config error: id must be specified for the analysis component %s to enable suppression.' % item['type'])
+                        'Config-Error: id must be specified for the analysis component %s to enable suppression.' % item['type'])
                 suppress_detector_list.append(comp_name)
             if item['type'].name == 'NewMatchPathValueDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn,
@@ -716,6 +719,8 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
         event_handler_id_list = []
         if 'EventHandlers' in yaml_data and yaml_data['EventHandlers'] is not None:
             for item in yaml_data['EventHandlers']:
+                if item['id'] in event_handler_id_list:
+                    raise ValueError('Config-Error: The id "%s" occurred multiple times in EventHandlers!' % item['id'])
                 event_handler_id_list.append(item['id'])
                 func = item['type'].func
                 ctx = None
@@ -785,10 +790,27 @@ def parse_json_yaml(json_dict, parser_model_dict):
     key_parser_dict = {}
     for key in json_dict.keys():
         value = json_dict[key]
+        if key is None:
+            key = 'null'
+        if key is False:
+            key = 'false'
+        if key is True:
+            key = 'true'
         if isinstance(value, dict):
             key_parser_dict[key] = parse_json_yaml(value, parser_model_dict)
         elif isinstance(value, list):
-            key_parser_dict[key] = [parse_json_yaml(value[0], parser_model_dict)]
+            if isinstance(value[0], dict):
+                key_parser_dict[key] = [parse_json_yaml(value[0], parser_model_dict)]
+            elif value[0] == "ALLOW_ALL":
+                key_parser_dict[key] = value
+            elif parser_model_dict.get(value[0]) is None:
+                msg = 'The parser model %s does not exist!' % value[0]
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                raise ValueError(msg)
+            else:
+                key_parser_dict[key] = [parser_model_dict.get(value[0])]
+        elif value == "ALLOW_ALL":
+            key_parser_dict[key] = value
         elif parser_model_dict.get(value) is None:
             msg = 'The parser model %s does not exist!' % value
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)

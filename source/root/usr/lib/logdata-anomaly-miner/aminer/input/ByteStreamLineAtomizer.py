@@ -105,6 +105,9 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                     state = state(char)
                     if breakout or state is None or i > self.max_line_length:
                         break
+                # check if the json is still valid, but the stream_data is at the end
+                if not breakout and state is not None and i + consumed_length == len(stream_data) - 1 and not end_of_stream_flag:
+                    return consumed_length
                 if 0 < i <= self.max_line_length and b'{' in stream_data[consumed_length:consumed_length+i+1] and data is not None:
                     line_end = consumed_length + i + 1
                     valid_json = True

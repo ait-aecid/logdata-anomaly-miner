@@ -2,6 +2,7 @@ import unittest
 import importlib
 import yaml
 import sys
+import re
 import aminer.AminerConfig as AminerConfig
 from datetime import datetime
 from aminer.AnalysisChild import AnalysisContext
@@ -566,12 +567,40 @@ class YamlConfigTest(TestBase):
                 self.assertEqual(None, component[0].output_event_handlers)
 
     def test23_check_functionality_of_validate_bigger_than_or_equal(self):
-        """Check the functionality of the _validate_bigger_than_or_equal procedure"""
+        """Check the functionality of the _validate_bigger_than_or_equal procedure."""
         spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         aminer_config.load_yaml('unit/data/configfiles/bigger_than_or_equal_valid.yml')
         self.assertRaises(ValueError, aminer_config.load_yaml, 'unit/data/configfiles/bigger_than_or_equal_error.yml')
+
+    def test24_check_log_resource_list(self):
+        """Check the functionality of the regex for LogResourceList.."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        self.assertRaises(ValueError, aminer_config.load_yaml, 'unit/data/configfiles/wrong_log_resource_list.yml')
+
+    def test25_check_mail_regex(self):
+        """Check the functionality of the regex for MailAlerting.TargetAddress and MailAlerting.FromAddress."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        self.assertRaises(ValueError, aminer_config.load_yaml, 'unit/data/configfiles/wrong_email.yml')
+
+        with open('/usr/lib/logdata-anomaly-miner/aminer/schemas/BaseSchema.py', 'r') as sma:
+            # skipcq: PYL-W0123
+            base_schema = eval(sma.read())
+        self.assertEqual(base_schema['MailAlerting.TargetAddress']['regex'], base_schema['MailAlerting.FromAddress']['regex'])
+
+        target_address_regex = re.compile(base_schema['MailAlerting.TargetAddress']['regex'])
+
+        valid_emails = ['john@example.com', 'john@example.co', 'root@localhost']
+        for email in valid_emails:
+            self.assertEqual(target_address_regex.search(email).group(0), email, 'Failed regex check at %s.' % email)
+        invalid_emails = ['john_at_example_dot_com', 'john@example.', '@example.com', ' @example.com']
+        for email in invalid_emails:
+            self.assertEqual(target_address_regex.search(email), None, 'Failed regex check at %s.' % email)
 
     def test26_filter_config_errors(self):
         """Check if errors in multiple sections like Analysis, Parser and EventHandlers are found and filtered properly."""
@@ -586,10 +615,55 @@ class YamlConfigTest(TestBase):
                   "'ParserCount']}}]}]}], 'EventHandlers': [{1: ['none or more than one rule validate', {'oneof definition 3': [{" \
                   "'output_file_path': ['unknown field'], 'type': {'allowed': ['SyslogWriterEventHandler']}}]}]}], 'Parser': [{0: ['none " \
                   "or more than one rule validate', {'oneof definition 0': [{'args2': ['unknown field'], 'type': {'forbidden': [" \
-                  "'ElementValueBranchModelElement', 'DecimalIntegerValueModelElement', 'DecimalIntegerValueModelElement', " \
+                  "'ElementValueBranchModelElement', 'DecimalIntegerValueModelElement', 'DecimalFloatValueModelElement', " \
                   "'MultiLocaleDateTimeModelElement', 'DelimitedDataModelElement', 'JsonModelElement']}}]}]}]}"
             self.assertEqual(msg, str(e))
         self.assertRaises(ValueError, aminer_config.load_yaml, 'unit/data/configfiles/filter_config_errors.yml')
+
+    def test27_same_id_analysis(self):
+        """Check if a ValueError is raised when the same id is used for multiple analysis components."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        try:
+            aminer_config.load_yaml('unit/data/configfiles/same_id_analysis.yml')
+            context = AnalysisContext(aminer_config)
+            context.build_analysis_pipeline()
+        except ValueError as e:
+            msg = "Config-Error: The id \"NewMatchPathValueComboDetector\" occurred multiple times in Analysis!"
+            self.assertEqual(msg, str(e))
+        context = AnalysisContext(aminer_config)
+        self.assertRaises(ValueError, context.build_analysis_pipeline)
+
+    def test28_same_id_event_handlers(self):
+        """Check if a ValueError is raised when the same id is used for multiple event handler components."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        try:
+            aminer_config.load_yaml('unit/data/configfiles/same_id_event_handlers.yml')
+            context = AnalysisContext(aminer_config)
+            context.build_analysis_pipeline()
+        except ValueError as e:
+            msg = "Config-Error: The id \"handler\" occurred multiple times in EventHandlers!"
+            self.assertEqual(msg, str(e))
+        context = AnalysisContext(aminer_config)
+        self.assertRaises(ValueError, context.build_analysis_pipeline)
+
+    def test29_same_id_parser(self):
+        """Check if a ValueError is raised when the same id is used for multiple parser components."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        try:
+            aminer_config.load_yaml('unit/data/configfiles/same_id_parser.yml')
+            context = AnalysisContext(aminer_config)
+            context.build_analysis_pipeline()
+        except ValueError as e:
+            msg = "Config-Error: The id \"apacheModel\" occurred multiple times in Parser!"
+            self.assertEqual(msg, str(e))
+        context = AnalysisContext(aminer_config)
+        self.assertRaises(ValueError, context.build_analysis_pipeline)
 
     def run_empty_components_tests(self, context):
         """Run the empty components tests."""

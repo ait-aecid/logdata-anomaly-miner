@@ -1,0 +1,985 @@
+LearnMode: True
+
+Core.LogDir: '/tmp/lib/aminer/log'
+
+Core.PersistenceDir: '/tmp/lib/aminer'
+
+Core.PersistencePeriod: 600
+
+LogResourceList:
+        - 'file:///tmp/json_logs/eve.json'
+
+MailAlerting.TargetAddress: 'root@localhost'
+
+MailAlerting.FromAddress: 'root@localhost'
+
+MailAlerting.SubjectPrefix: 'aminer Alerts:'
+
+MailAlerting.AlertGraceTime: 0
+
+MailAlerting.EventCollectTime: 0
+
+MailAlerting.MinAlertGap: 0
+
+MailAlerting.MaxAlertGap: 600
+
+MailAlerting.MaxEventsPerMessage: 1000
+
+LogPrefix: 'Original log line: '
+
+Log.StatisticsPeriod: 3600
+
+Log.StatisticsLevel: 1
+
+Log.DebugLevel: 1
+
+Parser:
+       - id: timestamp
+         type: DateTimeModelElement
+         name: 'timestamp'
+         args: '%Y-%m-%dT%H:%M:%S.%f%z'
+
+       - id: _flow_id
+         type: DecimalIntegerValueModelElement
+         name: '_flow_id'
+
+       - id: _in_iface
+         type: FixedDataModelElement
+         name: '_in_iface'
+         args: 'eth0'
+
+       - id: event_type
+         type: FixedWordlistDataModelElement
+         name: 'event_type'
+         args:
+           - 'dns'
+           - 'http'
+           - 'fileinfo'
+           - 'stats'
+           - 'flow'
+           - 'alert'
+           - 'tls'
+
+       - id: ip_ipv4
+         type: IpAddressDataModelElement
+         name: 'ipv4'
+
+       - id: ip_ipv6
+         type: VariableByteDataModelElement
+         name: 'ipv6'
+         args: 'abcdefABCDEF0123456789:'
+
+       - id: _src_ip
+         type: FirstMatchModelElement
+         name: '_src_ip'
+         args:
+           - ip_ipv4
+           - ip_ipv6
+
+       - id: _src_port
+         type: DecimalIntegerValueModelElement
+         name: '_src_port'
+
+       - id: _dest_ip
+         type: FirstMatchModelElement
+         name: '_dest_ip'
+         args:
+           - ip_ipv4
+           - ip_ipv6
+
+       - id: _dest_port
+         type: DecimalIntegerValueModelElement
+         name: '_dest_port'
+
+       - id: _proto
+         type: FixedWordlistDataModelElement
+         name: '_proto'
+         args:
+           - 'UDP'
+           - 'TCP'
+           - 'IPv6-ICMP'
+
+       - id: _icmp_type
+         type: DecimalIntegerValueModelElement
+         name: '_icmp_type'
+
+       - id: _icmp_code
+         type: DecimalIntegerValueModelElement
+         name: '_icmp_code'
+
+       - id: type
+         type: FixedWordlistDataModelElement
+         name: 'type'
+         args:
+           - 'answer'
+           - 'query'
+
+       - id: id
+         type: DecimalIntegerValueModelElement
+         name: 'id'
+
+       - id: _rcode
+         type: FixedDataModelElement
+         name: '_rcode'
+         args: 'NXDOMAIN'
+
+       - id: rrname_ip_lower
+         type: DelimitedDataModelElement
+         name: 'rrname_ip_lower'
+         delimiter: '.in-addr.arpa'
+
+       - id: rrname_addr_lower
+         type: FixedDataModelElement
+         name: 'rrname_addr_lower'
+         args: '.in-addr.arpa'
+
+       - id: rrname_lower
+         type: SequenceModelElement
+         name: 'rrname'
+         args:
+           - rrname_ip_lower
+           - rrname_addr_lower
+
+       - id: rrname_ip_upper
+         type: DelimitedDataModelElement
+         name: 'rrname_ip_upper'
+         delimiter: '.IN-ADDR.ARPA'
+
+       - id: rrname_addr_upper
+         type: FixedDataModelElement
+         name: 'rrname_addr_upper'
+         args: '.IN-ADDR.ARPA'
+
+       - id: rrname_upper
+         type: SequenceModelElement
+         name: 'rrname'
+         args:
+           - rrname_ip_upper
+           - rrname_addr_upper
+
+       - id: rrname
+         type: FirstMatchModelElement
+         name: 'rrname'
+         args:
+           - rrname_lower
+           - rrname_upper
+
+       - id: _rrtype
+         type: FixedWordlistDataModelElement
+         name: '_rrtype'
+         args:
+           - 'SOA'
+           - 'PTR'
+
+       - id: _ttl
+         type: DecimalIntegerValueModelElement
+         name: '_ttl'
+
+       - id: _tx_id
+         type: DecimalIntegerValueModelElement
+         name: '_tx_id'
+
+       - id: hostname
+         type: FixedDataModelElement
+         name: 'hostname'
+         args: 'mail.spiral.com'
+
+       - id: url
+         type: VariableByteDataModelElement
+         name: 'url'
+         args: abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.;&=+$,/?%#\
+
+       - id: http_user_agent
+         type: FixedWordlistDataModelElement
+         name: 'http_user_agent'
+         args:
+           - 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:73.0) Gecko/20100101 Firefox/73.0'
+           - 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/77.0.3865.90 HeadlessChrome/77.0.3865.90 Safari/537.36'
+
+       - id: _http_content_type
+         type: FixedWordlistDataModelElement
+         name: '_http_content_type'
+         args:
+           - 'text/html'
+           - 'image/png'
+           - 'application/javascript'
+           - 'text/css'
+           - 'image/vnd.microsoft.icon'
+           - 'application/json'
+           - 'image/gif'
+
+       - id: http_refer_base_url
+         type: FixedDataModelElement
+         name: 'http_refer_base_url'
+         args: 'http://mail.spiral.com/'
+
+       - id: _http_refer
+         type: SequenceModelElement
+         name: '_http_refer'
+         args:
+           - http_refer_base_url
+           - url
+
+       - id: http_method
+         type: FixedWordlistDataModelElement
+         name: 'http_method'
+         args:
+           - 'GET'
+           - 'POST'
+
+       - id: protocol
+         type: FixedDataModelElement
+         name: 'protocol'
+         args: 'HTTP/1.1'
+
+       - id: _status
+         type: DecimalIntegerValueModelElement
+         name: '_status'
+
+       - id: _redirect
+         type: SequenceModelElement
+         name: '_redirect'
+         args:
+           - http_refer_base_url
+           - url
+
+       - id: length
+         type: DecimalIntegerValueModelElement
+         name: 'length'
+
+       - id: _app_proto
+         type: FixedWordlistDataModelElement
+         name: '_app_proto'
+         args:
+           - 'http'
+           - 'failed'
+
+       - id: _app_proto_tc
+         type: FixedDataModelElement
+         name: '_app_proto_tc'
+         args: 'http'
+
+       - id: file_state
+         type: FixedWordlistDataModelElement
+         name: 'state'
+         args:
+           - 'CLOSED'
+           - 'TRUNCATED'
+
+       - id: bool_wordlist
+         type: FixedWordlistDataModelElement
+         name: 'bool'
+         args:
+           - 'true'
+           - 'false'
+
+       - id: size
+         type: DecimalIntegerValueModelElement
+         name: 'size'
+
+       - id: pkts_toserver
+         type: DecimalIntegerValueModelElement
+         name: 'pkts_toserver'
+
+       - id: pkts_toclient
+         type: DecimalIntegerValueModelElement
+         name: 'pkts_toclient'
+
+       - id: bytes_toserver
+         type: DecimalIntegerValueModelElement
+         name: 'bytes_toserver'
+
+       - id: bytes_toclient
+         type: DecimalIntegerValueModelElement
+         name: 'bytes_toclient'
+
+       - id: start
+         type: DateTimeModelElement
+         name: 'start'
+         args: '%Y-%m-%dT%H:%M:%S.%f%z'
+
+       - id: end
+         type: DateTimeModelElement
+         name: 'end'
+         args: '%Y-%m-%dT%H:%M:%S.%f%z'
+
+       - id: age
+         type: DecimalIntegerValueModelElement
+         name: 'age'
+
+       - id: conn_state
+         type: FixedWordlistDataModelElement
+         name: 'state'
+         args:
+           - 'established'
+           - 'closed'
+           - 'fin_wait2'
+           - 'new'
+
+       - id: reason
+         type: FixedWordlistDataModelElement
+         name: 'reason'
+         args:
+           - 'timeout'
+
+       - id: uptime
+         type: DecimalIntegerValueModelElement
+         name: 'uptime'
+
+       - id: kernel_packets
+         type: DecimalIntegerValueModelElement
+         name: 'kernel_packets'
+
+       - id: kernel_drops
+         type: DecimalIntegerValueModelElement
+         name: 'kernel_drops'
+
+       - id: pkts
+         type: DecimalIntegerValueModelElement
+         name: 'pkts'
+
+       - id: bytes
+         type: DecimalIntegerValueModelElement
+         name: 'bytes'
+
+       - id: invalid
+         type: DecimalIntegerValueModelElement
+         name: 'invalid'
+
+       - id: ipv4
+         type: DecimalIntegerValueModelElement
+         name: 'ipv4'
+
+       - id: ipv6
+         type: DecimalIntegerValueModelElement
+         name: 'ipv6'
+
+       - id: ethernet
+         type: DecimalIntegerValueModelElement
+         name: 'ethernet'
+
+       - id: raw
+         type: DecimalIntegerValueModelElement
+         name: 'raw'
+
+       - id: null_counts
+         type: DecimalIntegerValueModelElement
+         name: 'null'
+
+       - id: sll
+         type: DecimalIntegerValueModelElement
+         name: 'sll'
+
+       - id: tcp
+         type: DecimalIntegerValueModelElement
+         name: 'tcp'
+
+       - id: udp
+         type: DecimalIntegerValueModelElement
+         name: 'udp'
+
+       - id: sctp
+         type: DecimalIntegerValueModelElement
+         name: 'sctp'
+
+       - id: icmpv4
+         type: DecimalIntegerValueModelElement
+         name: 'icmpv4'
+
+       - id: icmpv6
+         type: DecimalIntegerValueModelElement
+         name: 'icmpv6'
+
+       - id: ppp
+         type: DecimalIntegerValueModelElement
+         name: 'ppp'
+
+       - id: pppoe
+         type: DecimalIntegerValueModelElement
+         name: 'pppoe'
+
+       - id: gre
+         type: DecimalIntegerValueModelElement
+         name: 'gre'
+
+       - id: vlan
+         type: DecimalIntegerValueModelElement
+         name: 'vlan'
+
+       - id: vlan_qinq
+         type: DecimalIntegerValueModelElement
+         name: 'vlan_qinq'
+
+       - id: teredo
+         type: DecimalIntegerValueModelElement
+         name: 'teredo'
+
+       - id: ipv4_in_ipv6
+         type: DecimalIntegerValueModelElement
+         name: 'ipv4_in_ipv6'
+
+       - id: ipv6_in_ipv6
+         type: DecimalIntegerValueModelElement
+         name: 'ipv6_in_ipv6'
+
+       - id: mpls
+         type: DecimalIntegerValueModelElement
+         name: 'mpls'
+
+       - id: avg_pkt_size
+         type: DecimalIntegerValueModelElement
+         name: 'avg_pkt_size'
+
+       - id: max_pkt_size
+         type: DecimalIntegerValueModelElement
+         name: 'max_pkt_size'
+
+       - id: erspan
+         type: DecimalIntegerValueModelElement
+         name: 'erspan'
+
+       - id: invalid_ip_version
+         type: DecimalIntegerValueModelElement
+         name: 'invalid_ip_version'
+
+       - id: pkt_too_small
+         type: DecimalIntegerValueModelElement
+         name: 'pkt_too_small'
+
+       - id: unsupported_type
+         type: DecimalIntegerValueModelElement
+         name: 'unsupported_type'
+
+       - id: memcap
+         type: DecimalIntegerValueModelElement
+         name: 'memcap'
+
+       - id: spare
+         type: DecimalIntegerValueModelElement
+         name: 'spare'
+
+       - id: emerg_mode_entered
+         type: DecimalIntegerValueModelElement
+         name: 'emerg_mode_entered'
+
+       - id: emerg_mode_over
+         type: DecimalIntegerValueModelElement
+         name: 'emerg_mode_over'
+
+       - id: tcp_reuse
+         type: DecimalIntegerValueModelElement
+         name: 'tcp_reuse'
+
+       - id: memuse
+         type: DecimalIntegerValueModelElement
+         name: 'memuse'
+
+       - id: fragments
+         type: DecimalIntegerValueModelElement
+         name: 'fragments'
+
+       - id: reassembled
+         type: DecimalIntegerValueModelElement
+         name: 'reassembled'
+
+       - id: timeouts
+         type: DecimalIntegerValueModelElement
+         name: 'timeouts'
+
+       - id: max_frag_hits
+         type: DecimalIntegerValueModelElement
+         name: 'max_frag_hits'
+
+       - id: sessions
+         type: DecimalIntegerValueModelElement
+         name: 'sessions'
+
+       - id: ssn_memcap_drop
+         type: DecimalIntegerValueModelElement
+         name: 'ssn_memcap_drop'
+
+       - id: pseudo
+         type: DecimalIntegerValueModelElement
+         name: 'pseudo'
+
+       - id: pseudo_failed
+         type: DecimalIntegerValueModelElement
+         name: 'pseudo_failed'
+
+       - id: invalid_checksum
+         type: DecimalIntegerValueModelElement
+         name: 'invalid_checksum'
+
+       - id: no_flow
+         type: DecimalIntegerValueModelElement
+         name: 'no_flow'
+
+       - id: syn
+         type: DecimalIntegerValueModelElement
+         name: 'syn'
+
+       - id: synack
+         type: DecimalIntegerValueModelElement
+         name: 'synack'
+
+       - id: rst
+         type: DecimalIntegerValueModelElement
+         name: 'rst'
+
+       - id: segment_memcap_drop
+         type: DecimalIntegerValueModelElement
+         name: 'segment_memcap_drop'
+
+       - id: stream_depth_reached
+         type: DecimalIntegerValueModelElement
+         name: 'stream_depth_reached'
+
+       - id: reassembly_gap
+         type: DecimalIntegerValueModelElement
+         name: 'reassembly_gap'
+
+       - id: reassembly_memuse
+         type: DecimalIntegerValueModelElement
+         name: 'reassembly_memuse'
+
+       - id: alert
+         type: DecimalIntegerValueModelElement
+         name: 'alert'
+
+       - id: http
+         type: DecimalIntegerValueModelElement
+         name: 'http'
+
+       - id: ftp
+         type: DecimalIntegerValueModelElement
+         name: 'ftp'
+
+       - id: smtp
+         type: DecimalIntegerValueModelElement
+         name: 'smtp'
+
+       - id: tls
+         type: DecimalIntegerValueModelElement
+         name: 'tls'
+
+       - id: ssh
+         type: DecimalIntegerValueModelElement
+         name: 'ssh'
+
+       - id: imap
+         type: DecimalIntegerValueModelElement
+         name: 'imap'
+
+       - id: msn
+         type: DecimalIntegerValueModelElement
+         name: 'msn'
+
+       - id: smb
+         type: DecimalIntegerValueModelElement
+         name: 'smb'
+
+       - id: dcerpc_tcp
+         type: DecimalIntegerValueModelElement
+         name: 'dcerpc_tcp'
+
+       - id: dns_tcp
+         type: DecimalIntegerValueModelElement
+         name: 'dns_tcp'
+
+       - id: failed_tcp
+         type: DecimalIntegerValueModelElement
+         name: 'failed_tcp'
+
+       - id: dcerpc_udp
+         type: DecimalIntegerValueModelElement
+         name: 'dcerpc_udp'
+
+       - id: dns_udp
+         type: DecimalIntegerValueModelElement
+         name: 'dns_udp'
+
+       - id: failed_udp
+         type: DecimalIntegerValueModelElement
+         name: 'failed_udp'
+
+       - id: closed_pruned
+         type: DecimalIntegerValueModelElement
+         name: 'closed_pruned'
+
+       - id: new_pruned
+         type: DecimalIntegerValueModelElement
+         name: 'new_pruned'
+
+       - id: est_pruned
+         type: DecimalIntegerValueModelElement
+         name: 'est_pruned'
+
+       - id: bypassed_pruned
+         type: DecimalIntegerValueModelElement
+         name: 'bypassed_pruned'
+
+       - id: flows_checked
+         type: DecimalIntegerValueModelElement
+         name: 'flows_checked'
+
+       - id: flows_notimeout
+         type: DecimalIntegerValueModelElement
+         name: 'flows_notimeout'
+
+       - id: flows_timeout
+         type: DecimalIntegerValueModelElement
+         name: 'flows_timeout'
+
+       - id: flows_timeout_inuse
+         type: DecimalIntegerValueModelElement
+         name: 'flows_timeout_inuse'
+
+       - id: flows_removed
+         type: DecimalIntegerValueModelElement
+         name: 'flows_removed'
+
+       - id: rows_checked
+         type: DecimalIntegerValueModelElement
+         name: 'rows_checked'
+
+       - id: rows_skipped
+         type: DecimalIntegerValueModelElement
+         name: 'rows_skipped'
+
+       - id: rows_empty
+         type: DecimalIntegerValueModelElement
+         name: 'rows_empty'
+
+       - id: rows_busy
+         type: DecimalIntegerValueModelElement
+         name: 'rows_busy'
+
+       - id: rows_maxlen
+         type: DecimalIntegerValueModelElement
+         name: 'rows_maxlen'
+
+       - id: memcap_state
+         type: DecimalIntegerValueModelElement
+         name: 'memcap_state'
+
+       - id: memcap_global
+         type: DecimalIntegerValueModelElement
+         name: 'memcap_global'
+
+       - id: tcp_flags
+         type: FixedWordlistDataModelElement
+         name: 'tcp_flags'
+         args:
+           - '1b'
+           - '1f'
+           - '1a'
+           - '17'
+           - '13'
+           - '16'
+           - '12'
+           - '06'
+
+       - id: tcp_flags_ts
+         type: FixedWordlistDataModelElement
+         name: 'tcp_flags_ts'
+         args:
+           - '1b'
+           - '1f'
+           - '1a'
+           - '17'
+           - '13'
+           - '16'
+           - '12'
+           - '06'
+
+       - id: tcp_flags_tc
+         type: FixedWordlistDataModelElement
+         name: 'tcp_flags_tc'
+         args:
+           - '1b'
+           - '1f'
+           - '1a'
+           - '17'
+           - '13'
+           - '16'
+           - '12'
+           - '06'
+
+       - id: action
+         type: FixedWordlistDataModelElement
+         name: 'action'
+         args:
+           - 'allowed'
+
+       - id: gid
+         type: DecimalIntegerValueModelElement
+         name: 'gid'
+
+       - id: signature_id
+         type: DecimalIntegerValueModelElement
+         name: 'signature_id'
+
+       - id: rev
+         type: DecimalIntegerValueModelElement
+         name: 'rev'
+
+       - id: signature
+         type: FixedWordlistDataModelElement
+         name: 'signature'
+         args:
+           - 'ET POLICY Http Client Body contains pass= in cleartext'
+
+       - id: category
+         type: FixedWordlistDataModelElement
+         name: 'category'
+         args:
+           - 'Potential Corporate Privacy Violation'
+
+       - id: severity
+         type: DecimalIntegerValueModelElement
+         name: 'severity'
+
+       - id: subject
+         type: FixedDataModelElement
+         name: 'subject'
+         args: 'CN=mail.spiral.com'
+
+       - id: issuerdn
+         type: FixedDataModelElement
+         name: 'issuerdn'
+         args: 'CN=ChangeMe'
+
+       - id: fingerprint
+         type: FixedDataModelElement
+         name: 'fingerprint'
+         args: '4a:cf:f5:f8:ce:55:c7:45:08:c5:21:a0:2d:b6:f5:0f:3c:e0:a3:17'
+
+       - id: sni
+         type: FixedDataModelElement
+         name: 'sni'
+         args: 'mail.spiral.com'
+
+       - id: version
+         type: FixedDataModelElement
+         name: 'version'
+         args: 'TLS 1.2'
+
+       - id: notbefore
+         type: DateTimeModelElement
+         name: 'notbefore'
+         args: '%Y-%m-%dT%H:%M:%S'
+
+       - id: notafter
+         type: DateTimeModelElement
+         name: 'notafter'
+         args: '%Y-%m-%dT%H:%M:%S'
+
+       - id: json
+         start: True
+         type: JsonModelElement
+         name: 'model'
+         optional_key_prefix: '_'
+         key_parser_dict:
+           timestamp: timestamp
+           _flow_id: _flow_id
+           _in_iface: _in_iface
+           event_type: event_type
+           _src_ip: _src_ip
+           _src_port: _src_port
+           _dest_ip: _dest_ip
+           _dest_port: _dest_port
+           _proto: _proto
+           _icmp_type: _icmp_type
+           _icmp_code: _icmp_code
+           _dns:
+             type: type
+             id: id
+             _rcode: _rcode
+             rrname: rrname
+             _rrtype: _rrtype
+             _ttl: _ttl
+             _tx_id: _tx_id
+           _tx_id: _tx_id
+           _http:
+             hostname: hostname
+             url: url
+             http_user_agent: http_user_agent
+             _http_content_type: _http_content_type
+             _http_refer: _http_refer
+             http_method: http_method
+             protocol: protocol
+             _redirect: _redirect
+             _status: _status
+             length: length
+           _app_proto: _app_proto
+           _app_proto_tc: _app_proto_tc
+           _fileinfo:
+             filename: url
+             state: file_state
+             stored: bool_wordlist
+             size: size
+             _tx_id: _tx_id
+           _flow:
+             pkts_toserver: pkts_toserver
+             pkts_toclient: pkts_toclient
+             bytes_toserver: bytes_toserver
+             bytes_toclient: bytes_toclient
+             start: start
+             end: end
+             age: age
+             state: conn_state
+             reason: reason
+             alerted: bool_wordlist
+           _stats:
+             uptime: uptime
+             capture:
+               kernel_packets: kernel_packets
+               kernel_drops: kernel_drops
+             decoder:
+               pkts: pkts
+               bytes: bytes
+               invalid: invalid
+               ipv4: ipv4
+               ipv6: ipv6
+               ethernet: ethernet
+               raw: raw
+               null: null_counts
+               sll: sll
+               tcp: tcp
+               udp: udp
+               sctp: sctp
+               icmpv4: icmpv4
+               icmpv6: icmpv6
+               ppp: ppp
+               pppoe: pppoe
+               gre: gre
+               vlan: vlan
+               vlan_qinq: vlan_qinq
+               teredo: teredo
+               ipv4_in_ipv6: ipv4_in_ipv6
+               ipv6_in_ipv6: ipv6_in_ipv6
+               mpls: mpls
+               avg_pkt_size: avg_pkt_size
+               max_pkt_size: max_pkt_size
+               erspan: erspan
+               ipraw:
+                 invalid_ip_version: invalid_ip_version
+               ltnull:
+                 pkt_too_small: pkt_too_small
+                 unsupported_type: unsupported_type
+               dce:
+                 pkt_too_small: pkt_too_small
+             flow:
+               memcap: memcap
+               spare: spare
+               emerg_mode_entered: emerg_mode_entered
+               emerg_mode_over: emerg_mode_over
+               tcp_reuse: tcp_reuse
+               memuse: memuse
+             defrag:
+               ipv4:
+                 fragments: fragments
+                 reassembled: reassembled
+                 timeouts: timeouts
+               ipv6:
+                 fragments: fragments
+                 reassembled: reassembled
+                 timeouts: timeouts
+               max_frag_hits: max_frag_hits
+             tcp:
+               sessions: sessions
+               ssn_memcap_drop: ssn_memcap_drop
+               pseudo: pseudo
+               pseudo_failed: pseudo_failed
+               invalid_checksum: invalid_checksum
+               no_flow: no_flow
+               syn: syn
+               synack: synack
+               rst: rst
+               segment_memcap_drop: segment_memcap_drop
+               stream_depth_reached: stream_depth_reached
+               reassembly_gap: reassembly_gap
+               memuse: memuse
+               reassembly_memuse: reassembly_memuse
+             detect:
+               alert: alert
+             app_layer:
+               flow:
+                 http: http
+                 ftp: ftp
+                 smtp: smtp
+                 tls: tls
+                 ssh: ssh
+                 imap: imap
+                 msn: msn
+                 smb: smb
+                 dcerpc_tcp: dcerpc_tcp
+                 dns_tcp: dns_tcp
+                 failed_tcp: failed_tcp
+                 dcerpc_udp: dcerpc_udp
+                 dns_udp: dns_udp
+                 failed_udp: failed_udp
+               tx:
+                 http: http
+                 smtp: smtp
+                 tls: tls
+                 dns_tcp: dns_tcp
+                 dns_udp: dns_udp
+             flow_mgr:
+               closed_pruned: closed_pruned
+               new_pruned: new_pruned
+               est_pruned: est_pruned
+               bypassed_pruned: bypassed_pruned
+               flows_checked: flows_checked
+               flows_notimeout: flows_notimeout
+               flows_timeout: flows_timeout
+               flows_timeout_inuse: flows_timeout_inuse
+               flows_removed: flows_removed
+               rows_checked: rows_checked
+               rows_skipped: rows_skipped
+               rows_empty: rows_empty
+               rows_busy: rows_busy
+               rows_maxlen: rows_maxlen
+             dns:
+               memuse: memuse
+               memcap_state: memcap_state
+               memcap_global: memcap_global
+             http:
+               memuse: memuse
+               memcap: memcap
+           _tcp:
+             tcp_flags: tcp_flags
+             tcp_flags_ts: tcp_flags_ts
+             tcp_flags_tc: tcp_flags_tc
+             syn: bool_wordlist
+             _fin: bool_wordlist
+             _rst: bool_wordlist
+             _psh: bool_wordlist
+             ack: bool_wordlist
+             state: conn_state
+           _alert:
+             action: action
+             gid: gid
+             signature_id: signature_id
+             rev: rev
+             signature: signature
+             category: category
+             severity: severity
+           _tls:
+             subject: subject
+             issuerdn: issuerdn
+             fingerprint: fingerprint
+             sni: sni
+             version: version
+             notbefore: notbefore
+             notafter: notafter
+
+Input:
+        timestamp_paths: None
+        verbose: True
+        json_format: True
+
+EventHandlers:
+        - id: stpe
+          type: StreamPrinterEventHandler
+
