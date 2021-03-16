@@ -1,0 +1,750 @@
+LearnMode: True
+
+Core.LogDir: '/tmp/lib/aminer/log'
+
+Core.PersistenceDir: '/tmp/lib/aminer'
+
+Core.PersistencePeriod: 600
+
+LogResourceList:
+        - 'file:///tmp/json_logs/journal.log'
+
+MailAlerting.TargetAddress: 'root@localhost'
+
+MailAlerting.FromAddress: 'root@localhost'
+
+MailAlerting.SubjectPrefix: 'aminer Alerts:'
+
+MailAlerting.AlertGraceTime: 0
+
+MailAlerting.EventCollectTime: 0
+
+MailAlerting.MinAlertGap: 0
+
+MailAlerting.MaxAlertGap: 600
+
+MailAlerting.MaxEventsPerMessage: 1000
+
+LogPrefix: 'Original log line: '
+
+Log.StatisticsPeriod: 3600
+
+Log.StatisticsLevel: 1
+
+Log.DebugLevel: 1
+
+Parser:
+       - id: delimiter
+         type: DelimitedDataModelElement
+         name: 'delimiter'
+         delimiter: '='
+         consume_delimiter: true
+
+       - id: hex
+         type: HexStringModelElement
+         name: 'hex'
+
+       - id: __CURSOR
+         type: SequenceModelElement
+         name: '__CURSOR'
+         args:
+           - delimiter
+           - hex
+           - delimiter
+           - hex
+           - delimiter
+           - hex
+           - delimiter
+           - hex
+           - delimiter
+           - hex
+           - delimiter
+           - hex
+
+       - id: __REALTIME_TIMESTAMP
+         type: DateTimeModelElement
+         name: '__REALTIME_TIMESTAMP'
+         args: '%s'
+
+       - id: __MONOTONIC_TIMESTAMP
+         type: DateTimeModelElement
+         name: '__MONOTONIC_TIMESTAMP'
+         args: '%s'
+
+       - id: _BOOT_ID
+         type: HexStringModelElement
+         name: '_BOOT_ID'
+
+       - id: optional_key__SOURCE_MONOTONIC_TIMESTAMP
+         type: DateTimeModelElement
+         name: 'optional_key__SOURCE_MONOTONIC_TIMESTAMP'
+         args: '%s'
+
+       - id: _TRANSPORT
+         type: FixedWordlistDataModelElement
+         name: '_TRANSPORT'
+         args:
+           - 'kernel'
+           - 'stdout'
+           - 'driver'
+           - 'journal'
+           - 'audit'
+           - 'syslog'
+
+       - id: optional_key_PRIORITY
+         type: DecimalIntegerValueModelElement
+         name: 'optional_key_PRIORITY'
+
+       - id: optional_key__KERNEL_SUBSYSTEM
+         type: FixedWordlistDataModelElement
+         name: 'optional_key__KERNEL_SUBSYSTEM'
+         args:
+           - 'acpi'
+           - 'pci_bus'
+           - 'pci'
+           - 'ubs'
+
+       - id: optional_key__KERNEL_DEVICE
+         type: FixedWordlistDataModelElement
+         name: 'optional_key__KERNEL_DEVICE'
+         args:
+           - '+acpi:PNP0A03:00'
+           - '+pci_bus:0000:00'
+           - '+pci:0000:00:01.0'
+           - '+pci:0000:00:01.1'
+           - '+pci:0000:00:01.2'
+           - 'c189:0'
+
+       - id: optional_key__UDEV_DEVNODE
+         type: FixedWordlistDataModelElement
+         name: 'optional_key__UDEV_DEVNODE'
+         args:
+           - '/dev/bus/usb/001/001'
+
+       - id: optional_key__UDEV_SYSNAME
+         type: FixedWordlistDataModelElement
+         name: 'optional_key__UDEV_SYSNAME'
+         args:
+           - 'PNP0A03:00'
+           - 'usb1'
+#           - '+pci_bus:0000:00'
+#           - '+pci:0000:00:01.0'
+#           - '+pci:0000:00:01.1'
+#           - '+pci:0000:00:01.2'
+
+       - id: SYSLOG_FACILITY
+         type: DecimalIntegerValueModelElement
+         name: 'SYSLOG_FACILITY'
+
+       - id: optional_key_CODE_FILE
+         type: FixedWordlistDataModelElement
+         name: 'optional_key_CODE_FILE'
+         args:
+           - '../src/modules-load/modules-load.c'
+           - '../src/core/unit.c'
+           - '../src/udev/net/ethtool-util.c'
+           - '../src/network/networkd.c'
+           - '../src/resolve/resolved-dns-trust-anchor.c'
+           - '../src/login/logind-seat.c'
+           - '../src/core/manager.c'
+           - '../src/login/logind-session.c'
+           - '../src/core/job.c'
+
+       - id: optional_key_CODE_LINE
+         type: DecimalIntegerValueModelElement
+         name: 'optional_key_CODE_LINE'
+
+       - id: optional_key_CODE_FUNC
+         type: FixedWordlistDataModelElement
+         name: 'optional_key_CODE_FUNC'
+         args:
+           - 'load_module'
+           - 'unit_status_log_starting_stopping_reloading'
+           - 'job_log_status_message'
+           - 'ethtool_set_glinksettings'
+           - 'main'
+           - 'dns_trust_anchor_dump'
+           - 'seat_start'
+           - 'manager_notify_finished'
+           - 'session_start'
+
+       - id: optional_key_INTERFACE
+         type: FixedWordlistDataModelElement
+         name: 'optional_key_INTERFACE'
+         args:
+           - 'ens3'
+           - 'lo'
+
+       - id: SYSLOG_IDENTIFIER
+         type: FixedWordlistDataModelElement
+         name: 'SYSLOG_IDENTIFIER'
+         args:
+           - 'kernel'
+           - 'stdout'
+           - 'systemd-journald'
+           - 'systemd-modules-load'
+           - 'systemd-udevd'
+           - 'systemd-networkd-wait-online'
+           - 'systemd-timesyncd'
+           - 'systemd-resolved'
+           - 'systemd-networkd'
+           - 'systemd-logind'
+           - 'systemd-hostnamed'
+           - 'systemd'
+           - 'apparmor'
+           - 'audit'
+           - 'dhclient'
+           - 'cloud-init'
+           - 'useradd'
+           - 'rsyslogd'
+           - 'passwd'
+           - 'cron'
+           - '/usr/sbin/irqbalance'
+           - 'apport'
+           - 'pollinate'
+           - 'dbus-daemon'
+           - 'polkitd'
+           - 'grub-common'
+           - 'lxcfs'
+           - 'accounts-daemon'
+           - 'networkd-dispatcher'
+           - 'snapd'
+           - 'sshd'
+           - '/usr/bin/logger'
+           - 'ec2'
+           - 'sudo'
+
+       - id: optional_key_SYSLOG_PID
+         type: DecimalIntegerValueModelElement
+         name: 'optional_key_SYSLOG_PID'
+
+       - id: optional_key_MESSAGE_ID
+         type: HexStringModelElement
+         name: 'optional_key_MESSAGE_ID'
+
+       - id: optional_key_SEAT_ID
+         type: FixedWordlistDataModelElement
+         name: 'optional_key_SEAT_ID'
+         args:
+           - 'seat0'
+
+       - id: msg
+         type: AnyByteDataModelElement
+         name: 'msg'
+
+       - id: MESSAGE
+         type: OptionalMatchModelElement
+         name: 'MESSAGE'
+         args: msg
+
+       - id: optional_key__MACHINE_ID
+         type: HexStringModelElement
+         name: 'optional_key__MACHINE_ID'
+
+       - id: optional_key__HOSTNAME
+         type: FixedWordlistDataModelElement
+         name: 'optional_key__HOSTNAME'
+         args:
+           - 'ubuntu'
+           - 'test-1'
+
+       - id: optional_key__PID
+         type: DecimalIntegerValueModelElement
+         name: 'optional_key__PID'
+
+       - id: optional_key__UID
+         type: DecimalIntegerValueModelElement
+         name: 'optional_key__PID'
+
+       - id: optional_key__GID
+         type: DecimalIntegerValueModelElement
+         name: 'optional_key__PID'
+
+       - id: optional_key__COMM
+         type: FixedWordlistDataModelElement
+         name: 'optional_key__COMM'
+         args:
+           - 'systemd-journal'
+           - 'apparmor_parser'
+           - 'apparmor'
+           - 'systemd-udevd'
+           - 'dhclient'
+           - 'systemd-network'
+           - 'systemd-timesyn'
+           - 'systemd-resolve'
+           - 'useradd'
+           - 'rsyslogd'
+           - 'passwd'
+           - 'cron'
+           - 'dbus-daemon'
+           - 'polkitd'
+           - 'lxcfs'
+           - 'accounts-daemon'
+           - 'systemd-logind'
+           - 'systemd-hostnam'
+           - 'networkd-dispat'
+           - 'snapd'
+           - 'sshd'
+           - 'sudo'
+
+       - id: optional_key__EXE
+         type: FixedWordlistDataModelElement
+         name: 'optional_key__EXE'
+         args:
+           - '/lib/systemd/systemd-journald'
+           - '/bin/dash'
+           - '/lib/systemd/systemd-udevd'
+           - '/var/tmp/cloud-init/cloud-init-dhcp-mxbfugwn/dhclient'
+           - '/usr/bin/python3.6'
+           - '/lib/systemd/systemd-networkd'
+           - '/lib/systemd/systemd-timesyncd'
+           - '/lib/systemd/systemd-resolved'
+           - '/usr/sbin/useradd'
+           - '/usr/sbin/rsyslogd'
+           - '/usr/bin/passwd'
+           - '/usr/sbin/cron'
+           - '/usr/bin/dbus-daemon'
+           - '/usr/lib/policykit-1/polkitd'
+           - '/usr/bin/lxcfs'
+           - '/usr/lib/accountsservice/accounts-daemon'
+           - '/lib/systemd/systemd-logind'
+           - '/lib/systemd/systemd-hostnamed'
+           - '/usr/lib/snapd/snapd'
+           - '/usr/sbin/sshd'
+           - '/usr/bin/logger'
+           - '/usr/bin/sudo'
+
+       - id: optional_key__CMDLINE
+         type: FixedWordlistDataModelElement
+         name: 'optional_key__CMDLINE'
+         args:
+           - '/lib/systemd/systemd-journald'
+           - '/bin/sh /etc/init.d/apparmor start'
+           - '/lib/systemd/systemd-udevd'
+           - '/var/tmp/cloud-init/cloud-init-dhcp-mxbfugwn/dhclient -1 -v -lf /var/tmp/cloud-init/cloud-init-dhcp-mxbfugwn/dhcp.leases -pf /var/tmp/cloud-init/cloud-init-dhcp-mxbfugwn/dhclient.pid ens3 -sf /bin/true'
+           - '/usr/bin/python3 /usr/bin/cloud-init init --local'
+           - '/usr/bin/python3 /usr/bin/cloud-init modules --mode=final'
+           - '/lib/systemd/systemd-networkd'
+           - '/lib/systemd/systemd-timesyncd'
+           - '/lib/systemd/systemd-resolved'
+           - 'useradd ubuntu --comment Ubuntu --groups adm audio cdrom dialout dip floppy lxd netdev plugdev sudo video --shell /bin/bash -m'
+           - '/usr/sbin/rsyslogd -n'
+           - 'passwd -l ubuntu'
+           - '/usr/sbin/cron -f'
+           - '/usr/bin/dbus-daemon --system --address=systemd: --nofork --nopidfile --systemd-activation --syslog-only'
+           - '/usr/lib/policykit-1/polkitd --no-debug'
+           - '/usr/bin/lxcfs /var/lib/lxcfs/'
+           - '/usr/lib/accountsservice/accounts-daemon'
+           - '/lib/systemd/systemd-logind'
+           - '/lib/systemd/systemd-hostnamed'
+           - '/usr/bin/python3 /usr/bin/networkd-dispatcher --run-startup-triggers'
+           - '/usr/lib/snapd/snapd'
+           - '/usr/sbin/sshd -D'
+           - 'logger -p user info -t ec2 -s'
+           - 'sudo -i'
+
+       - id: optional_key__CAP_EFFECTIVE
+         type: HexStringModelElement
+         name: 'optional_key__CAP_EFFECTIVE'
+
+       - id: optional_key__SELINUX_CONTEXT
+         type: FixedWordlistDataModelElement
+         name: 'optional_key__SELINUX_CONTEXT'
+         args:
+           - 'unconfined\n'
+
+       - id: optional_key__SYSTEMD_CGROUP
+         type: FixedWordlistDataModelElement
+         name: 'optional_key__SYSTEMD_CGROUP'
+         args:
+           - '/system.slice/systemd-journald.service'
+           - '/system.slice/apparmor.service'
+           - '/system.slice/systemd-udevd.service'
+           - '/system.slice/cloud-init-local.service'
+           - '/system.slice/systemd-networkd.service'
+           - '/system.slice/systemd-timesyncd.service'
+           - '/system.slice/systemd-resolved.service'
+           - '/system.slice/systemd-networkd-wait-online.service'
+           - '/system.slice/rsyslog.service'
+           - '/system.slice/cron.service'
+           - '/system.slice/dbus.service'
+           - '/system.slice/polkit.service'
+           - '/system.slice/lxcfs.service'
+           - '/system.slice/accounts-daemon.service'
+           - '/system.slice/systemd-logind.service'
+           - '/system.slice/systemd-hostnamed.service'
+           - '/system.slice/networkd-dispatcher.service'
+           - '/system.slice/snapd.service'
+           - '/system.slice/ssh.service'
+           - '/system.slice/cloud-final.service'
+           - '/user.slice/user-1000.slice/session-1.scope'
+
+       - id: optional_key__SYSTEMD_UNIT
+         type: FixedWordlistDataModelElement
+         name: 'optional_key__SYSTEMD_UNIT'
+         args:
+           - 'systemd-journald.service'
+           - 'apparmor.service'
+           - 'systemd-udevd.service'
+           - 'cloud-init-local.service'
+           - 'systemd-networkd.service'
+           - 'systemd-timesyncd.service'
+           - 'systemd-resolved.service'
+           - 'systemd-networkd-wait-online.service'
+           - 'rsyslog.service'
+           - 'cron.service'
+           - 'apport.service'
+           - 'dbus.service'
+           - 'polkit.service'
+           - 'grub-common.service'
+           - 'lxcfs.service'
+           - 'accounts-daemon.service'
+           - 'systemd-logind.service'
+           - 'systemd-hostnamed.service'
+           - 'networkd-dispatcher.service'
+           - 'snapd.service'
+           - 'ssh.service'
+           - 'cloud-final.service'
+           - 'session-1.scope'
+
+       - id: optional_key__SYSTEMD_SLICE
+         type: FixedWordlistDataModelElement
+         name: 'optional_key__SYSTEMD_SLICE'
+         args:
+           - 'system.slice'
+           - '-.slice'
+           - 'user-1000.slice'
+
+       - id: optional_key__SYSTEMD_INVOCATION_ID
+         type: HexStringModelElement
+         name: 'optional_key__SYSTEMD_INVOCATION_ID'
+
+       - id: optional_key_JOURNAL_NAME
+         type: FixedWordlistDataModelElement
+         name: 'optional_key_JOURNAL_NAME'
+         args:
+           - 'Runtime journal'
+
+       - id: fixed_path
+         type: FixedDataModelElement
+         name: 'fixed_path'
+         args: '/run/log/journal/'
+
+       - id: optional_key_JOURNAL_PATH
+         type: SequenceModelElement
+         name: 'optional_key_JOURNAL_PATH'
+         args:
+           - fixed_path
+           - hex
+
+       - id: optional_key_CURRENT_USE
+         type: DecimalIntegerValueModelElement
+         name: 'optional_key_CURRENT_USE'
+
+       - id: float_number
+         type: DecimalFloatValueModelElement
+         name: 'float_number'
+
+       - id: memory
+         type: FixedWordlistDataModelElement
+         name: 'memory'
+         args:
+           - 'M'
+           - 'G'
+           - 'K'
+
+       - id: optional_key_CURRENT_USE_PRETTY
+         type: SequenceModelElement
+         name: 'optional_key_CURRENT_USE_PRETTY'
+         args:
+           - float_number
+           - memory
+
+       - id: optional_key_MAX_USE
+         type: DecimalIntegerValueModelElement
+         name: 'optional_key_MAX_USE'
+
+       - id: optional_key_MAX_USE_PRETTY
+         type: SequenceModelElement
+         name: 'optional_key_MAX_USE_PRETTY'
+         args:
+           - float_number
+           - memory
+
+       - id: optional_key_DISK_KEEP_FREE
+         type: DecimalIntegerValueModelElement
+         name: 'optional_key_DISK_KEEP_FREE'
+
+       - id: optional_key_DISK_KEEP_FREE_PRETTY
+         type: SequenceModelElement
+         name: 'optional_key_DISK_KEEP_FREE_PRETTY'
+         args:
+           - float_number
+           - memory
+
+       - id: optional_key_DISK_AVAILABLE
+         type: DecimalIntegerValueModelElement
+         name: 'optional_key_DISK_AVAILABLE'
+
+       - id: optional_key_DISK_AVAILABLE_PRETTY
+         type: SequenceModelElement
+         name: 'optional_key_DISK_AVAILABLE_PRETTY'
+         args:
+           - float_number
+           - memory
+
+       - id: optional_key_LIMIT
+         type: DecimalIntegerValueModelElement
+         name: 'optional_key_LIMIT'
+
+       - id: optional_key_LIMIT_PRETTY
+         type: SequenceModelElement
+         name: 'optional_key_LIMIT_PRETTY'
+         args:
+           - float_number
+           - memory
+
+       - id: optional_key_AVAILABLE
+         type: DecimalIntegerValueModelElement
+         name: 'optional_key_AVAILABLE'
+
+       - id: optional_key_AVAILABLE_PRETTY
+         type: SequenceModelElement
+         name: 'optional_key_AVAILABLE_PRETTY'
+         args:
+           - float_number
+           - memory
+
+       - id: optional_key__SOURCE_REALTIME_TIMESTAMP
+         type: DecimalIntegerValueModelElement
+         name: 'optional_key__SOURCE_REALTIME_TIMESTAMP'
+
+       - id: optional_key_JOB_TYPE
+         type: FixedWordlistDataModelElement
+         name: 'optional_key_JOB_TYPE'
+         args:
+           - 'start'
+
+       - id: optional_key_JOB_RESULT
+         type: FixedWordlistDataModelElement
+         name: 'optional_key_JOB_RESULT'
+         args:
+           - 'done'
+
+       - id: optional_key_UNIT
+         type: FixedWordlistDataModelElement
+         name: 'optional_key_UNIT'
+         args:
+           - 'systemd-udevd.service'
+
+       - id: optional_key_INVOCATION_ID
+         type: HexStringModelElement
+         name: 'optional_key_INVOCATION_ID'
+
+       - id: optional_key__STREAM_ID
+         type: HexStringModelElement
+         name: 'optional_key__STREAM_ID'
+
+       - id: optional_key__AUDIT_TYPE
+         type: DecimalIntegerValueModelElement
+         name: 'optional_key__AUDIT_TYPE'
+
+       - id: optional_key__AUDIT_ID
+         type: DecimalIntegerValueModelElement
+         name: 'optional_key__AUDIT_ID'
+
+       - id: optional_key__AUDIT_FIELD_APPARMOR
+         type: FixedWordlistDataModelElement
+         name: 'optional_key__AUDIT_FIELD_APPARMOR'
+         args:
+           - '"STATUS"'
+
+       - id: optional_key__AUDIT_FIELD_OPERATION
+         type: FixedWordlistDataModelElement
+         name: 'optional_key__AUDIT_FIELD_OPERATION'
+         args:
+           - '"profile_load"'
+
+       - id: optional_key__AUDIT_FIELD_PROFILE
+         type: FixedWordlistDataModelElement
+         name: 'optional_key__AUDIT_FIELD_PROFILE'
+         args:
+           - '"unconfined"'
+
+       - id: optional_key__AUDIT_FIELD_NAME
+         type: FixedWordlistDataModelElement
+         name: 'optional_key__AUDIT_FIELD_NAME'
+         args:
+           - 'lxc-container-default-cgns'
+           - 'lxc-container-default-with-mounting'
+           - 'lxc-container-default-with-nesting'
+           - 'lxc-container-default'
+           - '/usr/lib/NetworkManager/nm-dhcp-client.action'
+           - '/usr/lib/NetworkManager/nm-dhcp-helper'
+           - '/usr/lib/connman/scripts/dhclient-script'
+           - 'man_filter'
+           - 'man_groff'
+           - '/usr/lib/snapd/snap-confine//mount-namespace-capture-helper'
+
+       - id: optional_key_ADDRESS
+         type: IpAddressDataModelElement
+         name: 'optional_key_ADDRESS'
+
+       - id: optional_key_PREFIXLEN
+         type: DecimalIntegerValueModelElement
+         name: 'optional_key_PREFIXLEN'
+
+       - id: optional_key_GATEWAY
+         type: IpAddressDataModelElement
+         name: 'optional_key_GATEWAY'
+
+       - id: optional_key__AUDIT_SESSION
+         type: DecimalIntegerValueModelElement
+         name: 'optional_key__AUDIT_SESSION'
+
+       - id: optional_key__AUDIT_LOGINUID
+         type: DecimalIntegerValueModelElement
+         name: 'optional_key__AUDIT_LOGINUID'
+
+       - id: optional_key_SESSION_ID
+         type: DecimalIntegerValueModelElement
+         name: 'optional_key_SESSION_ID'
+
+       - id: optional_key_USER_ID
+         type: FixedWordlistDataModelElement
+         name: 'optional_key_USER_ID'
+         args:
+           - 'ubuntu'
+
+       - id: optional_key_LEADER
+         type: DecimalIntegerValueModelElement
+         name: 'optional_key_LEADER'
+
+       - id: optional_key_KERNEL_USEC
+         type: DecimalIntegerValueModelElement
+         name: 'optional_key_KERNEL_USEC'
+
+       - id: optional_key_USERSPACE_USEC
+         type: DecimalIntegerValueModelElement
+         name: 'optional_key_USERSPACE_USEC'
+
+       - id: optional_key__SYSTEMD_OWNER_UID
+         type: DecimalIntegerValueModelElement
+         name: 'optional_key__SYSTEMD_OWNER_UID'
+
+       - id: optional_key_USER_UNIT
+         type: DecimalIntegerValueModelElement
+         name: 'optional_key_USER_UNIT'
+
+       - id: optional_key_USER_INVOCATION_ID
+         type: DecimalIntegerValueModelElement
+         name: 'optional_key_USER_INVOCATION_ID'
+
+       - id: optional_key__SYSTEMD_USER_SLICE
+         type: FixedWordlistDataModelElement
+         name: 'optional_key__SYSTEMD_USER_SLICE'
+         args:
+           - '-.slice'
+
+       - id: optional_key__SYSTEMD_USER_UNIT
+         type: FixedWordlistDataModelElement
+         name: 'optional_key__SYSTEMD_USER_UNIT'
+         args:
+           - 'init.scope'
+
+       - id: optional_key__SYSTEMD_SESSION
+         type: DecimalIntegerValueModelElement
+         name: 'optional_key__SYSTEMD_SESSION'
+
+       - id: json
+         start: True
+         type: JsonModelElement
+         name: 'model'
+         key_parser_dict:
+           __CURSOR: __CURSOR
+           __REALTIME_TIMESTAMP: __REALTIME_TIMESTAMP
+           __MONOTONIC_TIMESTAMP: __MONOTONIC_TIMESTAMP
+           _BOOT_ID: _BOOT_ID
+           optional_key__SOURCE_MONOTONIC_TIMESTAMP: optional_key__SOURCE_MONOTONIC_TIMESTAMP
+           _TRANSPORT: _TRANSPORT
+           optional_key_PRIORITY: optional_key_PRIORITY
+           optional_key__KERNEL_SUBSYSTEM: optional_key__KERNEL_SUBSYSTEM
+           optional_key__KERNEL_DEVICE: optional_key__KERNEL_DEVICE
+           optional_key__UDEV_DEVNODE: optional_key__UDEV_DEVNODE
+           optional_key__UDEV_SYSNAME: optional_key__UDEV_SYSNAME
+           SYSLOG_FACILITY: SYSLOG_FACILITY
+           optional_key_CODE_FILE: optional_key_CODE_FILE
+           optional_key_CODE_LINE: optional_key_CODE_LINE
+           optional_key_CODE_FUNC: optional_key_CODE_FUNC
+           optional_key_INTERFACE: optional_key_INTERFACE
+           SYSLOG_IDENTIFIER: SYSLOG_IDENTIFIER
+           optional_key_SYSLOG_PID: optional_key_SYSLOG_PID
+           optional_key_MESSAGE_ID: optional_key_MESSAGE_ID
+           optional_key_SEAT_ID: optional_key_SEAT_ID
+           MESSAGE: MESSAGE
+           optional_key__MACHINE_ID: optional_key__MACHINE_ID
+           optional_key__HOSTNAME: optional_key__HOSTNAME
+           optional_key__PID: optional_key__PID
+           optional_key__UID: optional_key__UID
+           optional_key__GID: optional_key__GID
+           optional_key__COMM: optional_key__COMM
+           optional_key__EXE: optional_key__EXE
+           optional_key__CMDLINE: optional_key__CMDLINE
+           optional_key__CAP_EFFECTIVE: optional_key__CAP_EFFECTIVE
+           optional_key__SELINUX_CONTEXT: optional_key__SELINUX_CONTEXT
+           optional_key__SYSTEMD_CGROUP: optional_key__SYSTEMD_CGROUP
+           optional_key__SYSTEMD_UNIT: optional_key__SYSTEMD_UNIT
+           optional_key__SYSTEMD_SLICE: optional_key__SYSTEMD_SLICE
+           optional_key__SYSTEMD_INVOCATION_ID: optional_key__SYSTEMD_INVOCATION_ID
+           optional_key_JOURNAL_NAME: optional_key_JOURNAL_NAME
+           optional_key_JOURNAL_PATH: optional_key_JOURNAL_PATH
+           optional_key_CURRENT_USE: optional_key_CURRENT_USE
+           optional_key_CURRENT_USE_PRETTY: optional_key_CURRENT_USE_PRETTY
+           optional_key_MAX_USE: optional_key_MAX_USE
+           optional_key_MAX_USE_PRETTY: optional_key_MAX_USE_PRETTY
+           optional_key_DISK_KEEP_FREE: optional_key_DISK_KEEP_FREE
+           optional_key_DISK_KEEP_FREE_PRETTY: optional_key_DISK_KEEP_FREE_PRETTY
+           optional_key_DISK_AVAILABLE: optional_key_DISK_AVAILABLE
+           optional_key_DISK_AVAILABLE_PRETTY: optional_key_DISK_AVAILABLE_PRETTY
+           optional_key_LIMIT: optional_key_LIMIT
+           optional_key_LIMIT_PRETTY: optional_key_LIMIT_PRETTY
+           optional_key_AVAILABLE: optional_key_AVAILABLE
+           optional_key_AVAILABLE_PRETTY: optional_key_AVAILABLE_PRETTY
+           optional_key__SOURCE_REALTIME_TIMESTAMP: optional_key__SOURCE_REALTIME_TIMESTAMP
+           optional_key_JOB_TYPE: optional_key_JOB_TYPE
+           optional_key_JOB_RESULT: optional_key_JOB_RESULT
+           optional_key_UNIT: optional_key_UNIT
+           optional_key_INVOCATION_ID: optional_key_INVOCATION_ID
+           optional_key__STREAM_ID: optional_key__STREAM_ID
+           optional_key__AUDIT_TYPE: optional_key__AUDIT_TYPE
+           optional_key__AUDIT_ID: optional_key__AUDIT_ID
+           optional_key__AUDIT_FIELD_APPARMOR: optional_key__AUDIT_FIELD_APPARMOR
+           optional_key__AUDIT_FIELD_OPERATION: optional_key__AUDIT_FIELD_OPERATION
+           optional_key__AUDIT_FIELD_PROFILE: optional_key__AUDIT_FIELD_PROFILE
+           optional_key__AUDIT_FIELD_NAME: optional_key__AUDIT_FIELD_NAME
+           optional_key_ADDRESS: optional_key_ADDRESS
+           optional_key_PREFIXLEN: optional_key_PREFIXLEN
+           optional_key_GATEWAY: optional_key_GATEWAY
+           optional_key__AUDIT_SESSION: optional_key__AUDIT_SESSION
+           optional_key__AUDIT_LOGINUID: optional_key__AUDIT_LOGINUID
+           optional_key_SESSION_ID: optional_key_SESSION_ID
+           optional_key_USER_ID: optional_key_USER_ID
+           optional_key_LEADER: optional_key_LEADER
+           optional_key_KERNEL_USEC: optional_key_KERNEL_USEC
+           optional_key_USERSPACE_USEC: optional_key_USERSPACE_USEC
+           optional_key__SYSTEMD_OWNER_UID: optional_key__SYSTEMD_OWNER_UID
+           optional_key_USER_UNIT: optional_key_USER_UNIT
+           optional_key_USER_INVOCATION_ID: optional_key_USER_INVOCATION_ID
+           optional_key__SYSTEMD_USER_SLICE: optional_key__SYSTEMD_USER_SLICE
+           optional_key__SYSTEMD_USER_UNIT: optional_key__SYSTEMD_USER_UNIT
+           optional_key__SYSTEMD_SESSION: optional_key__SYSTEMD_SESSION
+
+Input:
+        timestamp_paths: None
+        verbose: True
+        json_format: True
+
+EventHandlers:
+        - id: stpe
+          type: StreamPrinterEventHandler
+

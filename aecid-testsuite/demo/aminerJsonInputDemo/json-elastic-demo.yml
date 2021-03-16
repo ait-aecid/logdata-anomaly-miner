@@ -1,0 +1,204 @@
+LearnMode: True
+
+Core.LogDir: '/tmp/lib/aminer/log'
+
+Core.PersistenceDir: '/tmp/lib/aminer'
+
+Core.PersistencePeriod: 600
+
+LogResourceList:
+        - 'file:///tmp/json_logs/elastic.log'
+
+MailAlerting.TargetAddress: 'root@localhost'
+
+MailAlerting.FromAddress: 'root@localhost'
+
+MailAlerting.SubjectPrefix: 'aminer Alerts:'
+
+MailAlerting.AlertGraceTime: 0
+
+MailAlerting.EventCollectTime: 0
+
+MailAlerting.MinAlertGap: 0
+
+MailAlerting.MaxAlertGap: 600
+
+MailAlerting.MaxEventsPerMessage: 1000
+
+LogPrefix: 'Original log line: '
+
+Log.StatisticsPeriod: 3600
+
+Log.StatisticsLevel: 1
+
+Log.DebugLevel: 1
+
+Parser:
+       - id: _scroll_id
+         type: Base64StringModelElement
+         name: '_scroll_id'
+
+       - id: took
+         type: DecimalIntegerValueModelElement
+         name: 'took'
+
+       - id: bool_wordlist
+         type: FixedWordlistDataModelElement
+         name: 'timed_out'
+         args:
+           - 'true'
+           - 'false'
+
+       - id: total
+         type: DecimalIntegerValueModelElement
+         name: 'total'
+
+       - id: successful
+         type: DecimalIntegerValueModelElement
+         name: 'successful'
+
+       - id: skipped
+         type: DecimalIntegerValueModelElement
+         name: 'skipped'
+
+       - id: failed
+         type: DecimalIntegerValueModelElement
+         name: 'failed'
+
+       - id: value
+         type: DecimalIntegerValueModelElement
+         name: 'value'
+
+       - id: relation
+         type: FixedDataModelElement
+         name: 'relation'
+         args: 'eq'
+
+       - id: max_score
+         type: DecimalFloatValueModelElement
+         name: 'max_score'
+
+       - id: _index
+         type: DateTimeModelElement
+         name: '_index'
+         args: 'aminer-statusinfo-%Y.%m.%d'
+
+       - id: _type
+         type: FixedDataModelElement
+         name: '_type'
+         args: '_doc'
+
+       - id: _id
+         type: VariableByteDataModelElement
+         name: '_id'
+         args: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_'
+
+       - id: _score
+         type: DecimalFloatValueModelElement
+         name: '_score'
+
+       - id: FromTime
+         type: DecimalFloatValueModelElement
+         name: 'FromTime'
+
+       - id: /parser/model/php
+         type: DecimalIntegerValueModelElement
+         name: '/parser/model/php'
+
+       - id: /parser/model/event_type_str
+         type: DecimalIntegerValueModelElement
+         name: '/parser/model/event_type_str'
+
+       - id: /parser/model/type_str
+         type: DecimalIntegerValueModelElement
+         name: '/parser/model/type_str'
+
+       - id: /parser/model/classification
+         type: DecimalIntegerValueModelElement
+         name: '/parser/model/classification'
+
+       - id: /parser/model/status_code
+         type: DecimalIntegerValueModelElement
+         name: '/parser/model/status_code'
+
+       - id: /parser/model/host
+         type: DecimalIntegerValueModelElement
+         name: '/parser/model/host'
+
+       - id: /parser/model/sp
+         type: DecimalIntegerValueModelElement
+         name: '/parser/model/sp'
+
+       - id: timestamp
+         type: DateTimeModelElement
+         name: 'timestamp'
+         args: '%Y-%m-%dT%H:%M:%S.%fZ'
+
+       - id: ToTime
+         type: DecimalFloatValueModelElement
+         name: 'ToTime'
+
+       - id: fromtimestamp
+         type: DateTimeModelElement
+         name: 'fromtimestamp'
+         args: '%Y-%m-%dT%H:%M:%S.%fZ'
+
+       - id: totimestamp
+         type: DateTimeModelElement
+         name: 'totimestamp'
+         args: '%Y-%m-%dT%H:%M:%S.%fZ'
+
+       - id: version
+         type: FixedDataModelElement
+         name: 'version'
+         args: '1'
+
+       - id: json
+         start: True
+         type: JsonModelElement
+         name: 'model'
+         key_parser_dict:
+           _scroll_id: _scroll_id
+           took: took
+           timed_out: bool_wordlist
+           terminated_early: bool_wordlist
+           _shards:
+             total: total
+             successful: successful
+             skipped: skipped
+             failed: failed
+           hits:
+             total:
+               value: value
+               relation: relation
+             max_score: max_score
+             hits:
+               - _index: _index
+                 _type: _type
+                 _id: _id
+                 _score: _score
+                 _source:
+                   FromTime: FromTime
+                   StatusInfo:
+                     /parser/model/php: /parser/model/php
+                     /parser/model/event_type_str: /parser/model/event_type_str
+                     /parser/model/type_str: /parser/model/type_str
+                     /parser/model/classification: /parser/model/classification
+                     /parser/model/status_code: /parser/model/status_code
+                     /parser/model/host: /parser/model/host
+                     /parser/model/sp: /parser/model/sp
+                   timestamp: timestamp
+                   ToTime: ToTime
+                   fromtimestamp: fromtimestamp
+                   totimestamp: totimestamp
+                   version: version
+
+Input:
+        timestamp_paths: None
+        verbose: True
+        json_format: True
+
+EventHandlers:
+        - id: stpe
+          type: StreamPrinterEventHandler
+
