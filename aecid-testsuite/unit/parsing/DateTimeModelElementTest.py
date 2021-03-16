@@ -24,16 +24,53 @@ class DateTimeModelElementTest(TestBase):
         """Test if different date_formats can be used to match data."""
         # test normal date
         match_context = DummyMatchContext(b'07.02.2019 11:40:00: it still works')
-        date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y %H:%M:%S')
-        self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_string(), b'07.02.2019 11:40:00')
-        self.assertEqual(match_context.match_data, b'07.02.2019 11:40:00')
+        date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y %H:%M:%S', datetime.timezone.utc)
+        match_element = date_time_model_element.get_match_element('match1', match_context)
+        self.assertEqual(match_element.match_string, b'07.02.2019 11:40:00')
+        self.assertEqual(match_element.match_object, 1549539600)
+        self.assertEqual(match_context.match_string, b'07.02.2019 11:40:00')
+
+        # test normal date with T
+        match_context = DummyMatchContext(b'07.02.2019T11:40:00: it still works')
+        date_time_model_element = DateTimeModelElement('path', b'%d.%m.%YT%H:%M:%S', datetime.timezone.utc)
+        match_element = date_time_model_element.get_match_element('match1', match_context)
+        self.assertEqual(match_element.match_string, b'07.02.2019T11:40:00')
+        self.assertEqual(match_element.match_object, 1549539600)
+        self.assertEqual(match_context.match_string, b'07.02.2019T11:40:00')
+
+        # test normal date with fractions
+        match_context = DummyMatchContext(b'07.02.2019 11:40:00.123456: it still works')
+        date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y %H:%M:%S.%f', datetime.timezone.utc)
+        match_element = date_time_model_element.get_match_element('match1', match_context)
+        self.assertEqual(match_element.match_string, b'07.02.2019 11:40:00.123456')
+        self.assertEqual(match_element.match_object, 1549539600.123456)
+        self.assertEqual(match_context.match_string, b'07.02.2019 11:40:00.123456')
+
+        # test normal date with z
+        match_context = DummyMatchContext(b'07.02.2019 11:40:00+0000: it still works')
+        date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y %H:%M:%S%z', datetime.timezone.utc)
+        match_element = date_time_model_element.get_match_element('match1', match_context)
+        self.assertEqual(match_element.match_string, b'07.02.2019 11:40:00+0000')
+        self.assertEqual(match_element.match_object, 1549539600)
+        self.assertEqual(match_context.match_string, b'07.02.2019 11:40:00+0000')
 
         # test with only date defined
         match_context = DummyMatchContext(b'07.02.2019: it still works')
-        date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y')
-        self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_string(), b'07.02.2019')
-        self.assertEqual(match_context.match_data, b'07.02.2019')
-        # TODO: add test where only time is defined without date.
+        date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y', datetime.timezone.utc)
+        match_element = date_time_model_element.get_match_element('match1', match_context)
+        self.assertEqual(match_element.match_string, b'07.02.2019')
+        self.assertEqual(match_element.match_object, 1549497600)
+        self.assertEqual(match_context.match_string, b'07.02.2019')
+
+        # test with only time defined. Here obviously the seconds can not be tested.
+        #################
+        #This test does not work yet. By default the current day/month/year need to be used.
+        #################
+        match_context = DummyMatchContext(b'11:40:23: it still works')
+        date_time_model_element = DateTimeModelElement('path', b'%H:%M:%S', datetime.timezone.utc)
+        match_element = date_time_model_element.get_match_element('match1', match_context)
+        self.assertEqual(match_element.match_string, b'11:40:23')
+        self.assertEqual(match_context.match_string, b'11:40:23')
 
     def test4wrong_date(self):
         """Test if wrong input data does not return a match."""

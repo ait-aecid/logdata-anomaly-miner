@@ -233,9 +233,9 @@ class DateTimeModelElement(ModelElementInterface):
                 result[0] = self.start_year
             microseconds = int(result[6] * 1000000)
             try:
-                for i, x in enumerate(result):
-                    if x is None:
-                        result[i] = 0
+                ###############
+                #TODO: By default the current day/month/year need to be used.
+                ###############
                 parsed_date_time = datetime.datetime(result[0], result[1], result[2], result[3], result[4], result[5], microseconds,
                                                      self.time_zone)
             # skipcq: FLK-E722
@@ -315,7 +315,6 @@ class DateTimeModelElement(ModelElementInterface):
                         msg = "The date_format could not be found."
                         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                         raise Exception(msg)
-
         match_context.update(date_str)
         if self.format_has_tz_specifier:
             if self.tz_specifier_format_length < parse_pos and (b'+' in match_context.match_data or b'-' in match_context.match_data):
