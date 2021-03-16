@@ -1687,9 +1687,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             indices2 = [i for i in range(1000) if i not in indices1]
 
             # Generate the quantiles for the var type with the standardised quantiles
-            self.distr_val[event_index][var_index] = self.distribution_data['betam1'][indices1] * scale + Min
             self.distr_val[event_index][var_index] = np.append(
-                self.distr_val[event_index][var_index], self.distribution_data['betam2'][indices2] * scale + Min)
+                self.distribution_data['betam1'][indices1] * scale + Min, self.distribution_data['betam2'][indices2] * scale + Min)
             self.distr_val[event_index][var_index].sort()
             return
 
@@ -1992,9 +1991,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             len_cur = self.num_var_type_considered_ind
 
             # Appends the positive differnces of the probabilities to diff_list
-            for type_index in range(len(self.var_type_history_list[event_index][var_index])):
-                if self.var_type_history_list_reference[event_index][var_index][1] == len_ref and sum(
-                        self.var_type_history_list[event_index][var_index][1]) < len_cur:
+            for type_index, val in enumerate(self.var_type_history_list[event_index][var_index]):
+                if self.var_type_history_list_reference[event_index][var_index][1] == len_ref and sum(val[1]) < len_cur:
                     diff_list.append(1)
                     break
                 # Differentiation of the entries, which are lists (e.g. discrete, continuously distributed)
@@ -2027,16 +2025,15 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                                 diff_list.append(0)
                     else:
                         tmp_max = 0
-                        for j in range(len(self.var_type_history_list[event_index][var_index][type_index])):
+                        for j, val in enumerate(self.var_type_history_list[event_index][var_index][type_index]):
                             if j == 0 and self.var_type_history_list_reference[event_index][var_index][type_index][j] == 0:
-                                tmp_max = max(tmp_max, (sum(self.var_type_history_list[event_index][var_index][type_index][j][
-                                        -self.num_var_type_considered_ind:]) /
-                                        len_cur - self.var_type_history_list_reference[event_index][var_index][type_index][j] / len_ref))
+                                tmp_max = max(
+                                    tmp_max, (sum(val[-self.num_var_type_considered_ind:]) / len_cur -
+                                              self.var_type_history_list_reference[event_index][var_index][type_index][j] / len_ref))
                             else:
-                                tmp_max = max(tmp_max, (sum(self.var_type_history_list[event_index][var_index][type_index][j][
-                                        -self.num_var_type_considered_ind:]) /
-                                        len_cur - self.var_type_history_list_reference[event_index][var_index][type_index][j] / len_ref) /
-                                        2)
+                                tmp_max = max(
+                                    tmp_max, (sum(val[-self.num_var_type_considered_ind:]) / len_cur -
+                                              self.var_type_history_list_reference[event_index][var_index][type_index][j] / len_ref) / 2)
                         diff_list.append(tmp_max)
 
                 else:
@@ -2081,7 +2078,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
         # Calculate the min_successes normally for each value one by one
         tmp_list = []
-        for i in range(len(self.var_type[event_index][var_index][1])):
+        for i, _ in enumerate(self.var_type[event_index][var_index][1]):
             tmp_list.append(self.bt_min_successes(num_bt, p_list[i], alpha))
         tmp_list = np.array(tmp_list)
         return tmp_list
@@ -2263,9 +2260,9 @@ def get_vt_string(vt):
         return_string = '%s %s' % (vt[0], vt[1])
     elif vt[0] == 'd':
         return_string = vt[0] + ' ['
-        for i in range(len(vt[2])):
-            if vt[2][i] >= 0.1:
-                return_string += '%s(%s%%), ' % (str(vt[1][i]), str(int(vt[2][i]*100)))
+        for i, val in enumerate(vt[2]):
+            if val >= 0.1:
+                return_string += '%s(%s%%), ' % (str(vt[1][i]), str(int(val*100)))
         if any(vt[2][i] < 0.1 for i in range(len(vt[2]))):
             return_string += '...]'
         else:
