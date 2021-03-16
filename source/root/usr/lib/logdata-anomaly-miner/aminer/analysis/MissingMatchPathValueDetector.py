@@ -175,7 +175,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                 for value, overdue_time, interval in missing_value_list:
                     e = {}
                     if self.__class__.__name__ == 'MissingMatchPathValueDetector':
-                        e['TargetPath'] = self.target_path_list
+                        e['TargetPathList'] = self.target_path_list
                         message_part.append('  %s: %s overdue %ss (interval %s)' % (self.target_path_list, repr(value), overdue_time,
                                             interval))
                     else:
@@ -188,7 +188,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                     e['OverdueTime'] = str(overdue_time)
                     e['Interval'] = str(interval)
                     affected_log_atom_values.append(e)
-                analysis_component = {'AffectedLogAtomPathes': list(log_atom.parser_match.get_match_dictionary()),
+                analysis_component = {'AffectedLogAtomPaths': list(log_atom.parser_match.get_match_dictionary()),
                                       'AffectedLogAtomValues': affected_log_atom_values}
                 if self.output_log_line:
                     match_paths_values = {}
@@ -289,9 +289,9 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
 class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
     """
     This detector works similar to the MissingMatchPathValueDetector.
-    It only can lookup values from a list of pathes until one path really exists. It then uses this value as key to detect logAtoms
+    It only can lookup values from a list of paths until one path really exists. It then uses this value as key to detect logAtoms
     belonging to the same data stream. This is useful when e.g. due to different log formats, the hostname, servicename or any other
-    relevant channel identifier has alternative pathes.
+    relevant channel identifier has alternative paths.
     """
 
     def get_channel_key(self, log_atom):
