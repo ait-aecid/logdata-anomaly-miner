@@ -97,8 +97,7 @@ def load_yaml(config_file):
 def filter_config_errors(filtered_errors, key_name, errors, schema):
     oneof = schema[key_name]['schema']['oneof']
     if key_name in errors:
-        for i in range(len(errors[key_name])):
-            err = errors[key_name][i]
+        for i, err in enumerate(errors[key_name]):
             for key in err:
                 if 'none or more than one rule validate' in err[key]:
                     for cause in err[key]:
@@ -157,9 +156,9 @@ def build_parsing_model():
                 if isinstance(item['args'], list):  # skipcq: PTC-W0048
                     if item['type'].name not in ('DecimalFloatValueModelElement', 'DecimalIntegerValueModelElement'):
                         # encode string to bytearray
-                        for j in range(len(item['args'])):
-                            if isinstance(item['args'][j], str):
-                                item['args'][j] = item['args'][j].encode()
+                        for j, val in enumerate(item['args']):
+                            if isinstance(val, str):
+                                item['args'][j] = val.encode()
                 else:
                     if item['type'].name not in ('DecimalFloatValueModelElement', 'DecimalIntegerValueModelElement') and isinstance(
                             item['args'], str):
@@ -791,10 +790,27 @@ def parse_json_yaml(json_dict, parser_model_dict):
     key_parser_dict = {}
     for key in json_dict.keys():
         value = json_dict[key]
+        if key is None:
+            key = 'null'
+        if key is False:
+            key = 'false'
+        if key is True:
+            key = 'true'
         if isinstance(value, dict):
             key_parser_dict[key] = parse_json_yaml(value, parser_model_dict)
         elif isinstance(value, list):
-            key_parser_dict[key] = [parse_json_yaml(value[0], parser_model_dict)]
+            if isinstance(value[0], dict):
+                key_parser_dict[key] = [parse_json_yaml(value[0], parser_model_dict)]
+            elif value[0] == "ALLOW_ALL":
+                key_parser_dict[key] = value
+            elif parser_model_dict.get(value[0]) is None:
+                msg = 'The parser model %s does not exist!' % value[0]
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                raise ValueError(msg)
+            else:
+                key_parser_dict[key] = [parser_model_dict.get(value[0])]
+        elif value == "ALLOW_ALL":
+            key_parser_dict[key] = value
         elif parser_model_dict.get(value) is None:
             msg = 'The parser model %s does not exist!' % value
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)

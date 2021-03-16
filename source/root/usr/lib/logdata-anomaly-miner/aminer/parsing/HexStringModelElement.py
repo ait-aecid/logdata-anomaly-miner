@@ -55,7 +55,10 @@ class HexStringModelElement(ModelElementInterface):
 
         match_object = data[:match_len]
         try:
-            match_string = bytes.fromhex(match_object.decode())
+            pad = ''
+            if len(match_object.decode()) % 2 != 0:
+                pad = '0'
+            match_string = bytes.fromhex(pad + match_object.decode())
         except ValueError:
             return None
 

@@ -1,0 +1,151 @@
+LearnMode: True
+
+Core.LogDir: '/tmp/lib/aminer/log'
+
+Core.PersistenceDir: '/tmp/lib/aminer'
+
+Core.PersistencePeriod: 600
+
+LogResourceList:
+        - 'file:///tmp/json_logs/aminer.log'
+
+MailAlerting.TargetAddress: 'root@localhost'
+
+MailAlerting.FromAddress: 'root@localhost'
+
+MailAlerting.SubjectPrefix: 'aminer Alerts:'
+
+MailAlerting.AlertGraceTime: 0
+
+MailAlerting.EventCollectTime: 0
+
+MailAlerting.MinAlertGap: 0
+
+MailAlerting.MaxAlertGap: 600
+
+MailAlerting.MaxEventsPerMessage: 1000
+
+LogPrefix: 'Original log line: '
+
+Log.StatisticsPeriod: 3600
+
+Log.StatisticsLevel: 1
+
+Log.DebugLevel: 1
+
+Parser:
+       - id: component_id
+         type: DecimalIntegerValueModelElement
+         name: 'component_id'
+
+       - id: component_type
+         type: FixedWordlistDataModelElement
+         name: 'component_type'
+         args:
+           - 'AllowlistViolationDetector'
+           - 'EnhancedNewMatchPathValueComboDetector'
+           - 'EventCorrelationDetector'
+           - 'EventFrequencyDetector'
+           - 'EventSequenceDetector'
+           - 'EventTypeDetector'
+           - 'HistogramAnalysis'
+           - 'PathDependentHistogramAnalysis'
+           - 'MatchFilter'
+           - 'MatchValueAverageChangeDetector'
+           - 'MatchValueStreamWriter'
+           - 'MissingMatchPathValueDetector'
+           - 'MissingMatchPathListValueDetector'
+           - 'NewMatchIdValueComboDetector'
+           - 'NewMatchPathDetector'
+           - 'NewMatchPathValueComboDetector'
+           - 'NewMatchPathValueDetector'
+           - 'ParserCount'
+           - 'TimeCorrelationDetector'
+           - 'TimeCorrelationViolationDetector'
+           - 'TimestampsUnsortedDetector'
+           - 'VariableCorrelationDetector'
+           - 'VariableTypeDetector'
+
+       - id: component_name
+         type: VariableByteDataModelElement
+         name: 'component_name'
+         args: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789_-.'
+
+       - id: message
+         type: VariableByteDataModelElement
+         name: 'message'
+         args: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789_-.()'
+
+       - id: persistence_name
+         type: FixedWordlistDataModelElement
+         name: 'persistence_name'
+         args:
+           - 'Default'
+           - 'suricata_fileinfo'
+           - 'syslog_disconnected_user'
+           - 'exim_no_host_name_found_ip'
+           - 'suricata_err'
+
+       - id: atom_paths
+         type: VariableByteDataModelElement
+         name: 'atom_paths'
+         args: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789_-/'
+
+       - id: affected_values
+         type: AnyByteDataModelElement
+         name: 'affected_values'
+
+       - id: timestamps_no_milliseconds
+         type: DateTimeModelElement
+         name: 'timestamps'
+         args: '%s'
+
+       - id: timestamps_with_milliseconds
+         type: DateTimeModelElement
+         name: 'timestamps'
+         args: '%s.%f'
+
+       - id: timestamps
+         type: FirstMatchModelElement
+         name: 'timestamps'
+         args:
+           - timestamps_with_milliseconds
+           - timestamps_no_milliseconds
+
+       - id: log_lines_count
+         type: DecimalIntegerValueModelElement
+         name: 'log_lines_count'
+
+       - id: json
+         start: True
+         type: JsonModelElement
+         name: 'model'
+         optional_key_prefix: '_'
+         key_parser_dict:
+           AnalysisComponent:
+             AnalysisComponentIdentifier: component_id
+             AnalysisComponentType: component_type
+             AnalysisComponentName: component_name
+             Message: message
+             PersistenceFileName: persistence_name
+             AffectedLogAtomPaths:
+               - atom_paths
+             _AffectedLogAtomValues:
+               - affected_values
+             ParsedLogAtom: 'ALLOW_ALL'
+           LogData:
+             RawLogData:
+               - 'ALLOW_ALL'
+             Timestamps:
+               - timestamps
+             LogLinesCount: log_lines_count
+
+Input:
+        timestamp_paths: None
+        verbose: True
+        json_format: True
+
+EventHandlers:
+        - id: stpe
+          type: StreamPrinterEventHandler
+
