@@ -94,6 +94,19 @@ class Base64StringModelElementTest(TestBase):
         self.assertIsNone(match_element, None)
         self.assertEqual(dummy_match_context.match_data, data)
 
+    def test9get_match_element_unicode_exception(self):
+        """Parse a Base64 string which can not be decoded as UTF-8."""
+        # ² encoded with ISO-8859-1
+        base64_string = b'sg=='
+        dummy_match_context = DummyMatchContext(base64_string)
+        base64_dme = Base64StringModelElement("s0")
+        match_element = base64_dme.get_match_element("base64", dummy_match_context)
+        self.assertEqual(match_element.path, "base64/s0")
+        self.assertEqual(match_element.match_string, base64_string)
+        self.assertEqual(match_element.match_object, base64_string)
+        self.assertIsNone(match_element.children, None)
+        self.assertEqual(dummy_match_context.match_data, base64_string)
+
     def test9path_id_input_validation(self):
         """Check if element_id is validated."""
         # empty element_id
