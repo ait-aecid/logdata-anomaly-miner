@@ -306,7 +306,7 @@ def build_input_pipeline(analysis_context, parsing_model):
         from aminer.input.SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler
         atom_filter.add_handler(SimpleUnparsedAtomHandler(anomaly_event_handlers), stop_when_handled_flag=True)
     if yaml_data['Input']['suppress_unparsed'] is True:
-        analysis_context.suppress_detector_list.append(atom_filter[-1])
+        analysis_context.suppress_detector_list.append(atom_filter.subhandler_list[-1][0])
     from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
     if 'LearnMode' in yaml_data:
         learn = yaml_data['LearnMode']
