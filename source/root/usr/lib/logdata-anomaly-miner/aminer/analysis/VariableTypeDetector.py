@@ -19,7 +19,7 @@ import logging
 import sys
 
 from aminer import AminerConfig
-from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX
+from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
@@ -2108,9 +2108,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     type_info[self.event_type_detector.variable_key_list[event_index][var_index]] = self.var_type[event_index][var_index]
         tmp_string = tmp_string.lstrip('  ')
 
-        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-        if original_log_line_prefix is None:
-            original_log_line_prefix = ''
+        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
         if self.output_log_line:
             sorted_log_lines = [tmp_string + original_log_line_prefix + log_atom.raw_data.decode()]
             analysis_component = {'AffectedLogAtomPaths': list(log_atom.parser_match.get_match_dictionary().keys())}
@@ -2134,9 +2132,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if (self.silence_output_without_confidence and confidence is None) or self.silence_output_except_indicator:
             return
 
-        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-        if original_log_line_prefix is None:
-            original_log_line_prefix = ''
+        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
         if self.output_log_line:
             tmp_str = ''
             for x in list(log_atom.parser_match.get_match_dictionary().keys()):
@@ -2165,9 +2161,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if self.silence_output_without_confidence or self.silence_output_except_indicator:
             return
 
-        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-        if original_log_line_prefix is None:
-            original_log_line_prefix = ''
+        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
         if self.output_log_line:
             tmp_str = ''
             for x in list(log_atom.parser_match.get_match_dictionary().keys()):
@@ -2197,9 +2191,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 self.silence_output_except_indicator and indicator is None):
             return
 
-        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-        if original_log_line_prefix is None:
-            original_log_line_prefix = ''
+        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
         if self.output_log_line:
             tmp_str = ''
             for x in list(log_atom.parser_match.get_match_dictionary().keys()):

@@ -19,7 +19,7 @@ import os
 import logging
 
 from aminer import AminerConfig
-from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX
+from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.EventInterfaces import EventSourceInterface
 from aminer.input.InputInterfaces import AtomHandlerInterface
@@ -157,9 +157,7 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
 
             analysis_component = {'AffectedLogAtomValues': [str(i) for i in list(id_dict_entry.values())]}
             event_data = {'AnalysisComponent': analysis_component}
-            original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-            if original_log_line_prefix is None:
-                original_log_line_prefix = ''
+            original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
             if self.output_log_line:
                 sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + repr(
                     id_dict_entry) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
