@@ -144,7 +144,7 @@ class DateTimeModelElement(ModelElementInterface):
                 date_format_parts.append(new_element)
             scan_pos = next_param_pos
         if (7 in date_format_type_set) and (not date_format_type_set.isdisjoint(set(range(0, 6)))):
-            msg = 'Cannot use %%s (seconds since epoch) with other non-second format types'
+            msg = 'Cannot use %s (seconds since epoch) with other non-second format types'
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         self.date_format_parts = date_format_parts
@@ -169,7 +169,7 @@ class DateTimeModelElement(ModelElementInterface):
         """
         parse_pos = 0
         # Year, month, day, hour, minute, second, fraction, gmt-seconds:
-        result = [None, None, None, None, None, None, None, None]
+        result = [0, 0, 0, 0, 0, 0, 0, 0]
         for part_pos in range(len(self.date_format_parts)):
             date_format_part = self.date_format_parts[part_pos]
             if isinstance(date_format_part, bytes):
@@ -226,16 +226,13 @@ class DateTimeModelElement(ModelElementInterface):
         # Now combine the values and build the final value.
         parsed_date_time = None
         total_seconds = result[7]
-        if total_seconds is not None:  # skipcq: PTC-W0048
-            if result[6] is not None:
-                total_seconds += result[6]
+        if total_seconds != 0:  # skipcq: PTC-W0048
+            total_seconds += result[6]
         # For epoch second formats, the datetime value usually is not important. So stay with parsed_date_time to none.
         else:
             if not self.format_has_year_flag:
                 result[0] = self.start_year
-            microseconds = 0
-            if result[6] is not None:
-                microseconds = int(result[6] * 1000000)
+            microseconds = int(result[6] * 1000000)
             try:
                 parsed_date_time = datetime.datetime(result[0], result[1], result[2], result[3], result[4], result[5], microseconds,
                                                      self.time_zone)

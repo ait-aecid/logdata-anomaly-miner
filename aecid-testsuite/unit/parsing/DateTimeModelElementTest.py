@@ -8,21 +8,31 @@ import datetime
 class DateTimeModelElementTest(TestBase):
     """Unittests for the DateTimeModelElement."""
 
-    __expected_match_context = b': it still works'
+    __expected_match_context = b": it still works"
 
     def test1get_id(self):
         """Test if get_id works properly."""
-        dtme = DateTimeModelElement("s0", b'%d.%m.%Y %H:%M:%S')
+        dtme = DateTimeModelElement("s0", b"%d.%m.%Y %H:%M:%S")
         self.assertEqual(dtme.get_id(), "s0")
 
     def test2get_child_elements(self):
         """Test if get_child_elements returns None."""
-        dtme = DateTimeModelElement("s0", b'%d.%m.%Y %H:%M:%S')
+        dtme = DateTimeModelElement("s0", b"%d.%m.%Y %H:%M:%S")
         self.assertEqual(dtme.get_child_elements(), None)
 
     def test3get_match_element_with_different_date_formats(self):
         """Test if different date_formats can be used to match data."""
-        # TODO: also add a test where only a date is defined, but no time.
+        # test normal date
+        match_context = DummyMatchContext(b'07.02.2019 11:40:00: it still works')
+        date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y %H:%M:%S')
+        self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_string(), b'07.02.2019 11:40:00')
+        self.assertEqual(match_context.match_data, b'07.02.2019 11:40:00')
+
+        # test with only date defined
+        match_context = DummyMatchContext(b'07.02.2019: it still works')
+        date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y')
+        self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_string(), b'07.02.2019')
+        self.assertEqual(match_context.match_data, b'07.02.2019')
         # TODO: add test where only time is defined without date.
 
     def test4wrong_date(self):
@@ -85,7 +95,7 @@ class DateTimeModelElementTest(TestBase):
 
     def test23path_id_input_validation(self):
         """Check if path_id is validated."""
-        date_format = b'%d.%m.%Y %H:%M:%S'
+        date_format = b"%d.%m.%Y %H:%M:%S"
         # empty element_id
         path_id = ""
         self.assertRaises(ValueError, DateTimeModelElement, path_id, date_format)
@@ -112,6 +122,31 @@ class DateTimeModelElementTest(TestBase):
 
     def test24date_format_input_validation(self):
         """Check if date_format is validated and only valid values can be entered."""
+        allowed_format_specifiers = b"bdfHMmSsYz%"
+        # check if allowed values do not raise any exception.
+        format_specifiers = b""
+        for c in allowed_format_specifiers:
+            format_specifiers += b"%" + str(chr(c)).encode()
+            DateTimeModelElement("s0", b"%" + str(chr(c)).encode())
+        # check if all allowed values can not be used together. An exception should be raised, because of multiple month representations
+        # and %s with non-second formats.
+        self.assertRaises(ValueError, DateTimeModelElement, "s0", format_specifiers)
+        DateTimeModelElement("s0", format_specifiers.replace(b"%m", b"").replace(b"%s", b""))
+        DateTimeModelElement("s0", format_specifiers.replace(b"%b", b"").replace(b"%s", b""))
+        DateTimeModelElement("s0", b"%s%z%f")
+        for c in allowed_format_specifiers.replace(b"s", b"").replace(b"z", b"").replace(b"f", b"").replace(b"%", b""):
+            self.assertRaises(ValueError, DateTimeModelElement, "s0", b"%s%" + str(chr(c)).encode())
+
+        # test non-existent specifiers
+        for c in b"aceghijklnopqrtuvwxyABCDEFGIJKLNOPQRTUVWXZ":
+            self.assertRaises(ValueError, DateTimeModelElement, "s0", b"%" + str(chr(c)).encode())
+
+        # test multiple specifiers. % and z specifiers are allowed multiple times.
+        DateTimeModelElement("s0", b"%%%z%z")
+        for c in allowed_format_specifiers.replace(b"%", b"").replace(b"z", b""):
+            self.assertRaises(ValueError, DateTimeModelElement, "s0", b"%" + str(chr(c)).encode() + b"%" + str(chr(c)).encode())
+
+
 
     def test25time_zone_input_validation(self):
         """Check if time_zone is validated and only valid values can be entered."""
