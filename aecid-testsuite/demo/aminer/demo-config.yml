@@ -970,7 +970,8 @@ Analysis:
           learn_mode: True
         - type: MissingMatchPathValueDetector
           id: MissingMatch
-          path: "/model/DiskReport/Space"
+          paths:
+            - "/model/DiskReport/Space"
           check_interval: 2
           realert_interval: 5
           learn_mode: True
