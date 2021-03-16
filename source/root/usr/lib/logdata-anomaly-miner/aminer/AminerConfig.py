@@ -157,10 +157,10 @@ def save_config(analysis_context, new_file):
             break
         i = i - 1
 
-    for i in range(len(logs)):
-        if "REMOTECONTROL change_attribute_of_registered_analysis_component" in logs[i]:
-            logs[i] = logs[i][:logs[i].find('#')]
-            arr = logs[i].split(',', 3)
+    for i, log in enumerate(logs):
+        if "REMOTECONTROL change_attribute_of_registered_analysis_component" in log:
+            log = log[:log.find('#')]
+            arr = log.split(',', 3)
             if arr[1].find("'") != -1:
                 component_name = arr[1].split("'")[1]
             else:
@@ -197,8 +197,8 @@ def save_config(analysis_context, new_file):
                 end = p1
             old = old[:old.find("=", pos) + 1] + "%s" % value + old[end:]
 
-        if "REMOTECONTROL add_handler_to_atom_filter_and_register_analysis_component" in logs[i]:
-            parameters = logs[i].split(",", 2)
+        if "REMOTECONTROL add_handler_to_atom_filter_and_register_analysis_component" in log:
+            parameters = log.split(",", 2)
 
             # find the name of the filter_config variable in the old config.
             pos = old.find(parameters[1].strip())
