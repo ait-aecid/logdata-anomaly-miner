@@ -405,7 +405,7 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis.MissingMatchPathValueDetector import MissingMatchPathValueDetector
     missing_match_path_value_detector = MissingMatchPathValueDetector(
-        analysis_context.aminer_config, '/model/DiskReport/Space', anomaly_event_handlers, auto_include_flag=True, default_interval=2,
+        analysis_context.aminer_config, ['/model/DiskReport/Space'], anomaly_event_handlers, auto_include_flag=True, default_interval=2,
         realert_interval=5, output_log_line=True)
     analysis_context.register_component(missing_match_path_value_detector, component_name="MissingMatch")
     atom_filter.add_handler(missing_match_path_value_detector)

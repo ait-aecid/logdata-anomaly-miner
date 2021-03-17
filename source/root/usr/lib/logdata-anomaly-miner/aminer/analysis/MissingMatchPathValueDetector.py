@@ -27,18 +27,18 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
     """
     This class creates events when an expected value is not seen within a given timespan.
     For example because the service was deactivated or logging disabled unexpectedly. This is complementary to the function provided by
-    NewMatchPathValueDetector. For each unique value extracted by target_path, a tracking record is added to expected_values_dict.
+    NewMatchPathValueDetector. For each unique value extracted by target_path_list, a tracking record is added to expected_values_dict.
     It stores three numbers: the timestamp the extracted value was last seen, the maximum allowed gap between observations and the next
     alerting time when currently in error state. When in normal (alerting) state, the value is zero.
     """
 
-    def __init__(self, aminer_config, target_path, anomaly_event_handlers, persistence_id='Default', auto_include_flag=False,
+    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id='Default', auto_include_flag=False,
                  default_interval=3600, realert_interval=86400, output_log_line=True):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
-        @param target_path to extract a source identification value from each logatom.
+        @param target_path_list to extract a source identification value from each logatom.
         """
-        self.target_path = target_path
+        self.target_path_list = target_path_list
         self.anomaly_event_handlers = anomaly_event_handlers
         self.auto_include_flag = auto_include_flag
         self.default_interval = default_interval
@@ -64,8 +64,8 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         if persistence_data is not None:
             for key in persistence_data:
                 value = persistence_data[key]
-                if self.target_path is not None:  # skipcq: PTC-W0048
-                    if value[3] != self.target_path:
+                if self.target_path_list is not None:  # skipcq: PTC-W0048
+                    if value[3] != self.target_path_list:
                         continue
                 elif self.target_path_list is not None and value[3] not in self.target_path_list:
                     continue
@@ -118,14 +118,17 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
 
     def get_channel_key(self, log_atom):
         """Get the key identifying the channel this log_atom is coming from."""
-        match_element = log_atom.parser_match.get_match_dictionary().get(self.target_path)
-        if match_element is None:
-            return None
-        if isinstance(match_element.match_object, bytes):
-            affected_log_atom_values = match_element.match_object.decode()
-        else:
-            affected_log_atom_values = match_element.match_object
-        return self.target_path, str(affected_log_atom_values)
+        value_list = []
+        for target_path in self.target_path_list:
+            match_element = log_atom.parser_match.get_match_dictionary().get(target_path)
+            if match_element is None:
+                return None
+            if isinstance(match_element.match_object, bytes):
+                affected_log_atom_values = match_element.match_object.decode()
+            else:
+                affected_log_atom_values = match_element.match_object
+            value_list.append(str(affected_log_atom_values))
+        return self.target_path_list, str(value_list)
 
     def check_timeouts(self, timestamp, log_atom):
         """Check if there was any timeout on a channel, thus triggering event dispatching."""
@@ -172,8 +175,9 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                 for value, overdue_time, interval in missing_value_list:
                     e = {}
                     if self.__class__.__name__ == 'MissingMatchPathValueDetector':
-                        e['TargetPath'] = self.target_path
-                        message_part.append('  %s: %s overdue %ss (interval %s)' % (self.target_path, repr(value), overdue_time, interval))
+                        e['TargetPathList'] = self.target_path_list
+                        message_part.append('  %s: %s overdue %ss (interval %s)' % (self.target_path_list, repr(value), overdue_time,
+                                            interval))
                     else:
                         target_paths = ''
                         for target_path in self.target_path_list:
@@ -184,7 +188,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                     e['OverdueTime'] = str(overdue_time)
                     e['Interval'] = str(interval)
                     affected_log_atom_values.append(e)
-                analysis_component = {'AffectedLogAtomPathes': list(log_atom.parser_match.get_match_dictionary()),
+                analysis_component = {'AffectedLogAtomPaths': list(log_atom.parser_match.get_match_dictionary()),
                                       'AffectedLogAtomValues': affected_log_atom_values}
                 if self.output_log_line:
                     match_paths_values = {}
@@ -285,20 +289,10 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
 class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
     """
     This detector works similar to the MissingMatchPathValueDetector.
-    It only can lookup values from a list of pathes until one path really exists. It then uses this value as key to detect logAtoms
+    It only can lookup values from a list of paths until one path really exists. It then uses this value as key to detect logAtoms
     belonging to the same data stream. This is useful when e.g. due to different log formats, the hostname, servicename or any other
-    relevant channel identifier has alternative pathes.
+    relevant channel identifier has alternative paths.
     """
-
-    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id='Default', auto_include_flag=False,
-                 default_interval=3600, realert_interval=86400, output_log_line=True):
-        """
-        Initialize the detector. This will also trigger reading or creation of persistence storage location.
-        @param target_path to extract a source identification value from each logatom.
-        """
-        self.target_path_list = target_path_list
-        super(MissingMatchPathListValueDetector, self).__init__(aminer_config, None, anomaly_event_handlers, persistence_id,
-                                                                auto_include_flag, default_interval, realert_interval, output_log_line)
 
     def get_channel_key(self, log_atom):
         """Get the key identifying the channel this log_atom is coming from."""
