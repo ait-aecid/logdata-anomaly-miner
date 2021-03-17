@@ -61,7 +61,7 @@ class DateTimeModelElement(ModelElementInterface):
         self.path_id = path_id
         self.time_zone = time_zone
         if time_zone is None:
-            self.time_zone = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
+            self.time_zone = datetime.timezone.utc
         # Make sure that dateFormat is valid and extract the relevant parts from it.
         self.format_has_year_flag = False
         self.format_has_tz_specifier = False
