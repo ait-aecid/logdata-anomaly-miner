@@ -1,8 +1,12 @@
 import unittest
+import logging
+from io import StringIO
 from aminer.parsing.DateTimeModelElement import DateTimeModelElement
 from aminer.parsing.MatchContext import MatchContext
-from unit.TestBase import TestBase, DummyMatchContext
+from unit.TestBase import TestBase, DummyMatchContext, initialize_loggers
 from datetime import datetime, timezone, timedelta
+from pwd import getpwnam
+from grp import getgrnam
 
 
 class DateTimeModelElementTest(TestBase):
@@ -142,15 +146,18 @@ class DateTimeModelElementTest(TestBase):
     def test6get_match_element_with_different_time_zones(self):
         """Test if different time_zones work with the DateTimeModelElement."""
         # timedelta returns the difference between two datetimes. Therefore it has to have the opposite sign.
-        match_context = DummyMatchContext(b"07.02.2018 11:40:00 UTC-0012: it still works")
         date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone(timedelta(hours=+12), "IDLW"))
+        match_context = DummyMatchContext(b"07.02.2018 11:40:00 UTC-1200: it still works")
         self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1517960400)
-        self.assertEqual(match_context.match_string, b"07.02.2018 11:40:00 UTC-0012")
+        self.assertEqual(match_context.match_string, b"07.02.2018 11:40:00 UTC-1200")
+        match_context = DummyMatchContext(b"07.02.2018 11:40:00 UTC-12: it still works")
+        self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1517960400)
+        self.assertEqual(match_context.match_string, b"07.02.2018 11:40:00 UTC-12")
 
-        match_context = DummyMatchContext(b"07.02.2018 11:40:00 UTC-0005: it still works")
+        match_context = DummyMatchContext(b"07.02.2018 11:40:00 UTC-0500: it still works")
         date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone(timedelta(hours=+5), "EST"))
         self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1517985600)
-        self.assertEqual(match_context.match_string, b"07.02.2018 11:40:00 UTC-0005")
+        self.assertEqual(match_context.match_string, b"07.02.2018 11:40:00 UTC-0500")
 
         match_context = DummyMatchContext(b"07.02.2018 11:40:00 UTC+0000: it still works")
         date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
@@ -169,9 +176,11 @@ class DateTimeModelElementTest(TestBase):
 
     def test7get_match_element_with_different_text_locales(self):
         """Test if data with different text locales can be handled with different text_locale parameters."""
+        raise Exception()
 
     def test8text_locale_not_installed(self):
         """Check if an exception is raised when the text_locale is not installed on the system."""
+        raise Exception()
 
     def test9get_match_element_with_start_year(self):
         """Test if dates without year can be parsed, when the start_year is defined."""
@@ -207,35 +216,111 @@ class DateTimeModelElementTest(TestBase):
 
     def test13learn_new_start_year_with_start_year_set(self):
         """Test if a new year is learned successfully with the start year being set."""
+        start_year = 2020
+        match_context = DummyMatchContext(b"31.12 23:59:00: it still works")
+        date_time_model_element = DateTimeModelElement('path', b"%d.%m %H:%M:%S", timezone.utc, start_year=start_year)
+        self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1609459140)
+        self.assertEqual(match_context.match_string, b"31.12 23:59:00")
+        self.assertEqual(date_time_model_element.start_year, start_year)
+
+        match_context = DummyMatchContext(b"01.01 11:20:00: it still works")
+        self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1609500000)
+        self.assertEqual(match_context.match_string, b"01.01 11:20:00")
+        self.assertEqual(date_time_model_element.start_year, start_year + 1)
 
     def test14learn_new_start_year_without_start_year_set(self):
         """Test if a new year is learned successfully with the start year being None."""
+        match_context = DummyMatchContext(b"31.12 23:59:00: it still works")
+        date_time_model_element = DateTimeModelElement('path', b"%d.%m %H:%M:%S", timezone.utc)
+        self.assertIsNotNone(date_time_model_element.get_match_element('match1', match_context))
+        self.assertEqual(match_context.match_string, b"31.12 23:59:00")
+
+        start_year = date_time_model_element.start_year
+        match_context = DummyMatchContext(b"01.01 11:20:00: it still works")
+        self.assertIsNotNone(date_time_model_element.get_match_element('match1', match_context))
+        self.assertEqual(match_context.match_string, b"01.01 11:20:00")
+        self.assertEqual(date_time_model_element.start_year, start_year + 1)
 
     def test15max_time_jump_seconds_in_time(self):
-        """Test if the max_time_jump_seconds parameter works if the next date is in time."""
+        """
+        Test if the max_time_jump_seconds parameter works if the next date is in time.
+        Warnings with unqualified timestamp year wraparound.
+        """
+        log_stream = StringIO()
+        logging.basicConfig(stream=log_stream, level=logging.INFO)
+        max_time_jump_seconds = 86400
+        start_year = 2020
+        match_context = DummyMatchContext(b"31.12 23:59:00: it still works")
+        date_time_model_element = DateTimeModelElement(
+            'path', b"%d.%m %H:%M:%S", timezone.utc, start_year=start_year, max_time_jump_seconds=max_time_jump_seconds)
+        self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1609459140)
+        self.assertEqual(match_context.match_string, b"31.12 23:59:00")
+        self.assertEqual(date_time_model_element.start_year, 2020)
 
-    def test16max_time_jump_seconds_in_time_new_year(self):
-        """Test if the max_time_jump_seconds parameter works if the next date is in time on new year."""
+        match_context = DummyMatchContext(b"01.01 23:59:00: it still works")
+        self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1609545540)
+        self.assertEqual(match_context.match_string, b"01.01 23:59:00")
+        self.assertEqual(date_time_model_element.start_year, 2021)
+        self.assertIn("WARNING:DEBUG:DateTimeModelElement unqualified timestamp year wraparound detected from 2021-01-01T23:59:00+00:00 to "
+                      "2021-01-01T23:59:00+00:00", log_stream.getvalue())
+        for handler in logging.root.handlers[:]:
+            logging.root.removeHandler(handler)
+        initialize_loggers(self.aminer_config, getpwnam('aminer').pw_uid, getgrnam('aminer').gr_gid)
 
-    def test17max_time_jump_seconds_exceeded(self):
-        """Test if an exception is raised, when the next date exceeds the max_time_jump_seconds."""
+    def test16max_time_jump_seconds_exceeded(self):
+        """
+        Test if the start_year is not updated, when the next date exceeds the max_time_jump_seconds.
+        A time inconsistency warning must occur.
+        """
+        log_stream = StringIO()
+        logging.basicConfig(stream=log_stream, level=logging.INFO)
+        max_time_jump_seconds = 86400
+        start_year = 2020
+        match_context = DummyMatchContext(b"31.12 23:59:00: it still works")
+        date_time_model_element = DateTimeModelElement(
+            'path', b"%d.%m %H:%M:%S", timezone.utc, start_year=start_year, max_time_jump_seconds=max_time_jump_seconds)
+        self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1609459140)
+        self.assertEqual(match_context.match_string, b"31.12 23:59:00")
+        self.assertEqual(date_time_model_element.start_year, 2020)
+        match_context = DummyMatchContext(b"01.01 23:59:01: it still works")
+        self.assertEqual(date_time_model_element.get_match_element('match1', match_context).get_match_object(), 1577923141)
+        self.assertEqual(match_context.match_string, b"01.01 23:59:01")
+        self.assertEqual(date_time_model_element.start_year, 2020)
+        self.assertIn("WARNING:DEBUG:DateTimeModelElement time inconsistencies parsing b'01.01 23:59:01', expecting value around "
+                      "1609459140. Check your settings!", log_stream.getvalue())
+        for handler in logging.root.handlers[:]:
+            logging.root.removeHandler(handler)
+        initialize_loggers(self.aminer_config, getpwnam('aminer').pw_uid, getgrnam('aminer').gr_gid)
 
-    def test18time_change_cest_cet(self):
-        """Check if the time change from CEST to CET and vice versa work as expected."""
+    def test17time_change_cest_cet(self):
+        """Check if the time change from CET to CEST and vice versa work as expected."""
+        match_context = DummyMatchContext(b"24.03.2018 11:40:00 CET: it still works")
+        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
+        self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1521888000)
+        self.assertEqual(match_context.match_string, b"24.03.2018 11:40:00 CET")
 
-    def test19unqualified_timestamp_year_wraparound(self):
-        """Check if a warning is returned when an unqualified timestamp year wraparound occurs."""
+        match_context = DummyMatchContext(b"25.03.2018 11:40:00 CEST: it still works")
+        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
+        self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1521970800)
+        self.assertEqual(match_context.match_string, b"25.03.2018 11:40:00 CEST")
 
-    def test20time_inconsistencies(self):
-        """Check if a warning is returned when a time inconsistency occurs."""
+        match_context = DummyMatchContext(b"27.10.2018 11:40:00 CEST: it still works")
+        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
+        self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1540633200)
+        self.assertEqual(match_context.match_string, b"27.10.2018 11:40:00 CEST")
 
-    def test21same_timestamp_multiple_times(self):
+        match_context = DummyMatchContext(b"28.10.2018 11:40:00 CET: it still works")
+        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
+        self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1540723200)
+        self.assertEqual(match_context.match_string, b"28.10.2018 11:40:00 CET")
+
+    def test18same_timestamp_multiple_times(self):
         """Test if the DateTimeModelElement can handle multiple same timestamps."""
 
-    def test22date_before_unix_timestamps(self):
+    def test19date_before_unix_timestamps(self):
         """I don't know what happens if a date before the unix timestamp start is passed...????"""
 
-    def test23path_id_input_validation(self):
+    def test20path_id_input_validation(self):
         """Check if path_id is validated."""
         date_format = b"%d.%m.%Y %H:%M:%S"
         # empty element_id
@@ -262,7 +347,7 @@ class DateTimeModelElementTest(TestBase):
         path_id = ["path"]
         self.assertRaises(ValueError, DateTimeModelElement, path_id, date_format)
 
-    def test24date_format_input_validation(self):
+    def test21date_format_input_validation(self):
         """Check if date_format is validated and only valid values can be entered."""
         allowed_format_specifiers = b"bdfHMmSsYz%"
         # check if allowed values do not raise any exception.
@@ -288,20 +373,23 @@ class DateTimeModelElementTest(TestBase):
         for c in allowed_format_specifiers.replace(b"%", b"").replace(b"z", b""):
             self.assertRaises(ValueError, DateTimeModelElement, "s0", b"%" + str(chr(c)).encode() + b"%" + str(chr(c)).encode())
 
-    def test25time_zone_input_validation(self):
+    def test22time_zone_input_validation(self):
         """Check if time_zone is validated and only valid values can be entered."""
 
-    def test26text_locale_input_validation(self):
+    def test23text_locale_input_validation(self):
         """
         Check if text_locale is validated and only valid values can be entered.
         An exception has to be raised if the locale is not installed on the system.
         """
 
-    def test27start_year_input_validation(self):
+    def test24start_year_input_validation(self):
         """Check if start_year is validated."""
 
-    def test28max_time_jump_seconds_input_validation(self):
+    def test25max_time_jump_seconds_input_validation(self):
         """Check if max_time_jump_seconds is validated."""
+
+    def test26performance(self):
+        """Test the performance of the implementation."""
 
     def test4_default_timezone(self):
         """This test case checks if the default Timezone is utc."""
