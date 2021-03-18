@@ -1,5 +1,6 @@
 import unittest
 import logging
+import pytz
 from io import StringIO
 from aminer.parsing.DateTimeModelElement import DateTimeModelElement
 from aminer.parsing.MatchContext import MatchContext
@@ -148,15 +149,15 @@ class DateTimeModelElementTest(TestBase):
         # timedelta returns the difference between two datetimes. Therefore it has to have the opposite sign.
         date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone(timedelta(hours=+12), "IDLW"))
         match_context = DummyMatchContext(b"07.02.2018 11:40:00 UTC-1200: it still works")
-        self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1517960400)
+        self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1518046800)
         self.assertEqual(match_context.match_string, b"07.02.2018 11:40:00 UTC-1200")
         match_context = DummyMatchContext(b"07.02.2018 11:40:00 UTC-12: it still works")
-        self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1517960400)
+        self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1518046800)
         self.assertEqual(match_context.match_string, b"07.02.2018 11:40:00 UTC-12")
 
         match_context = DummyMatchContext(b"07.02.2018 11:40:00 UTC-0500: it still works")
         date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone(timedelta(hours=+5), "EST"))
-        self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1517985600)
+        self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1518021600)
         self.assertEqual(match_context.match_string, b"07.02.2018 11:40:00 UTC-0500")
 
         match_context = DummyMatchContext(b"07.02.2018 11:40:00 UTC+0000: it still works")
@@ -166,12 +167,12 @@ class DateTimeModelElementTest(TestBase):
 
         match_context = DummyMatchContext(b"07.02.2018 11:40:00 UTC+0100: it still works")
         date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone(timedelta(hours=-1), "UTC+1"))
-        self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1518007200)
+        self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1518000000)
         self.assertEqual(match_context.match_string, b"07.02.2018 11:40:00 UTC+0100")
 
         match_context = DummyMatchContext(b"07.02.2018 11:40:00 UTC+1400: it still works")
         date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone(timedelta(hours=-14), "UTC+14"))
-        self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1518054000)
+        self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1517953200)
         self.assertEqual(match_context.match_string, b"07.02.2018 11:40:00 UTC+1400")
 
     def test7get_match_element_with_different_text_locales(self):
@@ -316,9 +317,26 @@ class DateTimeModelElementTest(TestBase):
 
     def test18same_timestamp_multiple_times(self):
         """Test if the DateTimeModelElement can handle multiple same timestamps."""
+        match_context = DummyMatchContext(b"07.02.2019 11:40:00: it still works")
+        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S", timezone.utc)
+        match_element = date_time_model_element.get_match_element("match1", match_context)
+        self.assertEqual(match_element.match_string, b"07.02.2019 11:40:00")
+        self.assertEqual(match_element.match_object, 1549539600)
+        self.assertEqual(match_context.match_string, b"07.02.2019 11:40:00")
+
+        match_context = DummyMatchContext(b"07.02.2019 11:40:00: it still works")
+        match_element = date_time_model_element.get_match_element("match1", match_context)
+        self.assertEqual(match_element.match_string, b"07.02.2019 11:40:00")
+        self.assertEqual(match_element.match_object, 1549539600)
+        self.assertEqual(match_context.match_string, b"07.02.2019 11:40:00")
 
     def test19date_before_unix_timestamps(self):
-        """I don't know what happens if a date before the unix timestamp start is passed...????"""
+        """Check if timestamps before the unix timestamp are processed properly."""
+        match_context = DummyMatchContext(b"01.01.1900 11:40:00: it still works")
+        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S", timezone.utc)
+        match_element = date_time_model_element.get_match_element("match1", match_context)
+        self.assertEqual(match_element.match_string, b"01.01.1900 11:40:00")
+        self.assertEqual(match_element.match_object, -2208946800)
 
     def test20path_id_input_validation(self):
         """Check if path_id is validated."""
@@ -375,15 +393,33 @@ class DateTimeModelElementTest(TestBase):
 
     def test22time_zone_input_validation(self):
         """Check if time_zone is validated and only valid values can be entered."""
+        dtme = DateTimeModelElement("s0", b"%d.%m.%Y %H:%M:%S")
+        self.assertEqual(dtme.time_zone, timezone.utc)
+        DateTimeModelElement("s0", b"%d.%m.%Y %H:%M:%S", timezone.utc)
+        for tz in pytz.all_timezones:
+            DateTimeModelElement("s0", b"%d.%m.%Y %H:%M:%S", pytz.timezone(tz))
+
+        self.assertRaises(TypeError, DateTimeModelElement, "s0", b"%d.%m.%Y %H:%M:%S", "UTC")
+        self.assertRaises(TypeError, DateTimeModelElement, "s0", b"%d.%m.%Y %H:%M:%S", 1)
+        self.assertRaises(TypeError, DateTimeModelElement, "s0", b"%d.%m.%Y %H:%M:%S", 1.25)
+        self.assertRaises(TypeError, DateTimeModelElement, "s0", b"%d.%m.%Y %H:%M:%S", True)
 
     def test23text_locale_input_validation(self):
         """
         Check if text_locale is validated and only valid values can be entered.
         An exception has to be raised if the locale is not installed on the system.
         """
+        raise Exception()
 
     def test24start_year_input_validation(self):
         """Check if start_year is validated."""
+        dtme = DateTimeModelElement("s0", b"%d.%m %H:%M:%S", timezone.utc, None, None)
+        self.assertEqual(dtme.start_year, datetime.now().year)
+        DateTimeModelElement("s0", b"%d.%m.%Y %H:%M:%S", timezone.utc, None, 2020)
+        DateTimeModelElement("s0", b"%d.%m.%Y %H:%M:%S", timezone.utc, None, -630)
+        self.assertRaises(TypeError, DateTimeModelElement, "s0", b"%d.%m.%Y %H:%M:%S", timezone.utc, None, "2020")
+        self.assertRaises(TypeError, DateTimeModelElement, "s0", b"%d.%m.%Y %H:%M:%S", timezone.utc, None, True)
+        self.assertRaises(TypeError, DateTimeModelElement, "s0", b"%d.%m.%Y %H:%M:%S", timezone.utc, None, 1.25)
 
     def test25max_time_jump_seconds_input_validation(self):
         """Check if max_time_jump_seconds is validated."""
