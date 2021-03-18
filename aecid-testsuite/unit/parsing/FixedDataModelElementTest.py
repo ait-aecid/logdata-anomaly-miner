@@ -49,23 +49,23 @@ class FixedDataModelElementTest(TestBase):
 
         # bytes element_id is not allowed
         element_id = b"path"
-        self.assertRaises(ValueError, FixedDataModelElement, element_id, fixed_string)
+        self.assertRaises(TypeError, FixedDataModelElement, element_id, fixed_string)
 
         # integer element_id is not allowed
         element_id = 123
-        self.assertRaises(ValueError, FixedDataModelElement, element_id, fixed_string)
+        self.assertRaises(TypeError, FixedDataModelElement, element_id, fixed_string)
 
         # float element_id is not allowed
         element_id = 123.22
-        self.assertRaises(ValueError, FixedDataModelElement, element_id, fixed_string)
+        self.assertRaises(TypeError, FixedDataModelElement, element_id, fixed_string)
 
         # dict element_id is not allowed
         element_id = {"id": "path"}
-        self.assertRaises(ValueError, FixedDataModelElement, element_id, fixed_string)
+        self.assertRaises(TypeError, FixedDataModelElement, element_id, fixed_string)
 
         # list element_id is not allowed
         element_id = ["path"]
-        self.assertRaises(ValueError, FixedDataModelElement, element_id, fixed_string)
+        self.assertRaises(TypeError, FixedDataModelElement, element_id, fixed_string)
 
     def test6fixed_data_input_validation(self):
         """Check if fixed_data is validated."""
@@ -76,23 +76,23 @@ class FixedDataModelElementTest(TestBase):
 
         # string fixed_string is not allowed
         fixed_string = "path"
-        self.assertRaises(ValueError, FixedDataModelElement, element_id, fixed_string)
+        self.assertRaises(TypeError, FixedDataModelElement, element_id, fixed_string)
 
         # integer fixed_string is not allowed
         fixed_string = 123
-        self.assertRaises(ValueError, FixedDataModelElement, element_id, fixed_string)
+        self.assertRaises(TypeError, FixedDataModelElement, element_id, fixed_string)
 
         # float fixed_string is not allowed
         fixed_string = 123.22
-        self.assertRaises(ValueError, FixedDataModelElement, element_id, fixed_string)
+        self.assertRaises(TypeError, FixedDataModelElement, element_id, fixed_string)
 
         # dict fixed_string is not allowed
         fixed_string = {"string": "string"}
-        self.assertRaises(ValueError, FixedDataModelElement, element_id, fixed_string)
+        self.assertRaises(TypeError, FixedDataModelElement, element_id, fixed_string)
 
         # list fixed_string is not allowed
         fixed_string = ["path"]
-        self.assertRaises(ValueError, FixedDataModelElement, element_id, fixed_string)
+        self.assertRaises(TypeError, FixedDataModelElement, element_id, fixed_string)
 
 
 if __name__ == "__main__":

@@ -115,23 +115,23 @@ class Base64StringModelElementTest(TestBase):
 
         # bytes element_id is not allowed
         path_id = b"path"
-        self.assertRaises(ValueError, Base64StringModelElement, path_id)
+        self.assertRaises(TypeError, Base64StringModelElement, path_id)
 
         # integer element_id is not allowed
         path_id = 123
-        self.assertRaises(ValueError, Base64StringModelElement, path_id)
+        self.assertRaises(TypeError, Base64StringModelElement, path_id)
 
         # float element_id is not allowed
         path_id = 123.22
-        self.assertRaises(ValueError, Base64StringModelElement, path_id)
+        self.assertRaises(TypeError, Base64StringModelElement, path_id)
 
         # dict element_id is not allowed
         path_id = {"id": "path"}
-        self.assertRaises(ValueError, Base64StringModelElement, path_id)
+        self.assertRaises(TypeError, Base64StringModelElement, path_id)
 
         # list element_id is not allowed
         path_id = ["path"]
-        self.assertRaises(ValueError, Base64StringModelElement, path_id)
+        self.assertRaises(TypeError, Base64StringModelElement, path_id)
 
     def test11performance(self):  # skipcq: PYL-R0201
         """Test the performance of the implementation. Comment this test out in normal cases."""

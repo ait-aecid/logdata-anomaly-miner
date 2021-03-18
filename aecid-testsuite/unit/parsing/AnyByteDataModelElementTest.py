@@ -45,23 +45,23 @@ class AnyByteDataModelElementTest(TestBase):
 
         # bytes element_id is not allowed
         element_id = b"path"
-        self.assertRaises(ValueError, AnyByteDataModelElement, element_id)
+        self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
 
         # integer element_id is not allowed
         element_id = 123
-        self.assertRaises(ValueError, AnyByteDataModelElement, element_id)
+        self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
 
         # float element_id is not allowed
         element_id = 123.22
-        self.assertRaises(ValueError, AnyByteDataModelElement, element_id)
+        self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
 
         # dict element_id is not allowed
         element_id = {"id": "path"}
-        self.assertRaises(ValueError, AnyByteDataModelElement, element_id)
+        self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
 
         # list element_id is not allowed
         element_id = ["path"]
-        self.assertRaises(ValueError, AnyByteDataModelElement, element_id)
+        self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
 
 
 if __name__ == "__main__":

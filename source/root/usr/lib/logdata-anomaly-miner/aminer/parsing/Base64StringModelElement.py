@@ -23,8 +23,12 @@ class Base64StringModelElement(ModelElementInterface):
     """This class just tries to strip off as many base64 bytes as possible from a given data string."""
 
     def __init__(self, path_id):
-        if not isinstance(path_id, str) or len(path_id) < 1:
-            msg = "element_id has to be of the type string and must not be empty."
+        if not isinstance(path_id, str):
+            msg = "element_id has to be of the type string."
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if len(path_id) < 1:
+            msg = "element_id must not be empty."
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         self.path_id = path_id

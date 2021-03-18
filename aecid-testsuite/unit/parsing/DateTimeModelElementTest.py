@@ -423,22 +423,48 @@ class DateTimeModelElementTest(TestBase):
 
     def test25max_time_jump_seconds_input_validation(self):
         """Check if max_time_jump_seconds is validated."""
+        dtme = DateTimeModelElement("s0", b"%d.%m %H:%M:%S", timezone.utc, None, None)
+        self.assertEqual(dtme.max_time_jump_seconds, 86400)
+        DateTimeModelElement("s0", b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, 100000)
+        self.assertRaises(ValueError, DateTimeModelElement, "s0", b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, -1)
+        self.assertRaises(TypeError, DateTimeModelElement, "s0", b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, "100000")
+        self.assertRaises(TypeError, DateTimeModelElement, "s0", b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, True)
+        self.assertRaises(TypeError, DateTimeModelElement, "s0", b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, 1.25)
 
     def test26performance(self):
         """Test the performance of the implementation."""
+        import_setup = """
+import copy
+from unit.TestBase import DummyMatchContext
+from aminer.parsing.DateTimeModelElement import DateTimeModelElement
+times = 300000
+"""
+        string_no_z_setup = """
+date = b"18.03.2021 16:12:55"
+dtme = DateTimeModelElement("s0", b"%d.%m.%Y %H:%M:%S")
+"""
+        string_z_setup = """
+date = b"18.03.2021 16:12:55 UTC+0100"
+dtme = DateTimeModelElement("s0", b"%d.%m.%Y %H:%M:%S %z")
+"""
+        end_setup = """
+dummy_match_context = DummyMatchContext(date)
+dummy_match_context_list = [copy.deepcopy(dummy_match_context) for _ in range(times)]
 
-    def test4_default_timezone(self):
-        """This test case checks if the default Timezone is utc."""
-        match_context = MatchContext(b'07.02.2018 11:40:00')
-        date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y %H:%M:%S', timezone.utc)
-        date1 = date_time_model_element.get_match_element('match1', match_context).get_match_object()
-        self.assertEqual(match_context.match_data, b'')
-
-        match_context = MatchContext(b'07.02.2018 11:40:00')
-        date_time_model_element = DateTimeModelElement('path', b'%d.%m.%Y %H:%M:%S')
-        date2 = date_time_model_element.get_match_element('match1', match_context).get_match_object()
-        self.assertEqual(match_context.match_data, b'')
-        self.assertEqual(date1 - date2, 0)
+def run():
+    match_context = dummy_match_context_list.pop(0)
+    dtme.get_match_element("match", match_context)
+"""
+        _no_z_setup = import_setup + string_no_z_setup + end_setup
+        _z_setup = import_setup + string_z_setup + end_setup
+        # import timeit
+        # times = 300000
+        # print()
+        # print("Every date is run 300.000 times.")
+        # t = timeit.timeit(setup=_no_z_setup, stmt="run()", number=times)
+        # print("No %z parameter: ", t)
+        # t = timeit.timeit(setup=_z_setup, stmt="run()", number=times)
+        # print("Date with %z parameter: ", t)
 
 
 if __name__ == "__main__":
