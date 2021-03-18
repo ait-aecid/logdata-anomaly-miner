@@ -51,8 +51,8 @@ class DateTimeModelElement(ModelElementInterface):
         Common formats are:
             * '%b %d %H:%M:%S' e.g. for 'Nov 19 05:08:43'
         @param time_zone the timezone for parsing the values or UTC when None.
-        @param text_locale the locale to use for parsing the day, month names or None to use the default locale. Locale changing is
-        not yet implemented, use locale.setlocale() in global configuration.
+        @param text_locale the locale to use for parsing the day, month names or None to use the default locale. The locale must be a tuple
+        of (locale, encoding).
         @param start_year when parsing date records without any year information, assume this is the year of the first value parsed.
         @param max_time_jump_seconds for detection of year wraps with date formats missing year information, also the current time
         of values has to be tracked. This value defines the window within that the time may jump between two matches. When not
@@ -62,6 +62,24 @@ class DateTimeModelElement(ModelElementInterface):
         self.time_zone = time_zone
         if time_zone is None:
             self.time_zone = datetime.timezone.utc
+        if text_locale is not None:
+            if not isinstance(text_locale, str) and (not isinstance(text_locale, tuple) or isinstance(
+                    text_locale, tuple) and len(text_locale) != 2):
+                msg = "text_locale has to be of the type string or of the type tuple and have the length 2. (locale, encoding)"
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
+            import locale
+            try:
+                old_locale = locale.getdefaultlocale()
+                if old_locale != text_locale:
+                    locale.setlocale(locale.LC_TIME, text_locale)
+                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info("Changed time locale from %s to %s." % (
+                        text_locale, "".join(text_locale)))
+            except locale.Error:
+                print(locale.getdefaultlocale())
+                msg = "text_locale %s is not installed!" % text_locale
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                raise locale.Error(msg)
         # Make sure that dateFormat is valid and extract the relevant parts from it.
         self.format_has_year_flag = False
         self.format_has_tz_specifier = False
