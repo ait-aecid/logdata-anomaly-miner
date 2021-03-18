@@ -148,16 +148,23 @@ class DateTimeModelElementTest(TestBase):
     def test6get_match_element_with_different_time_zones(self):
         """Test if different time_zones work with the DateTimeModelElement."""
         # timedelta returns the difference between two datetimes. Therefore it has to have the opposite sign.
-        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone(timedelta(hours=+12), "IDLW"))
+        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
         match_context = DummyMatchContext(b"07.02.2018 11:40:00 UTC-1200: it still works")
         self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1518046800)
         self.assertEqual(match_context.match_string, b"07.02.2018 11:40:00 UTC-1200")
+
+        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
         match_context = DummyMatchContext(b"07.02.2018 11:40:00 UTC-12: it still works")
         self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1518046800)
         self.assertEqual(match_context.match_string, b"07.02.2018 11:40:00 UTC-12")
 
+        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
+        match_context = DummyMatchContext(b"07.02.2018 11:40:00 UTC-5: it still works")
+        self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1518021600)
+        self.assertEqual(match_context.match_string, b"07.02.2018 11:40:00 UTC-5")
+
+        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
         match_context = DummyMatchContext(b"07.02.2018 11:40:00 UTC-0500: it still works")
-        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone(timedelta(hours=+5), "EST"))
         self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1518021600)
         self.assertEqual(match_context.match_string, b"07.02.2018 11:40:00 UTC-0500")
 
@@ -167,12 +174,12 @@ class DateTimeModelElementTest(TestBase):
         self.assertEqual(match_context.match_string, b"07.02.2018 11:40:00 UTC+0000")
 
         match_context = DummyMatchContext(b"07.02.2018 11:40:00 UTC+0100: it still works")
-        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone(timedelta(hours=-1), "UTC+1"))
+        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
         self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1518000000)
         self.assertEqual(match_context.match_string, b"07.02.2018 11:40:00 UTC+0100")
 
         match_context = DummyMatchContext(b"07.02.2018 11:40:00 UTC+1400: it still works")
-        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone(timedelta(hours=-14), "UTC+14"))
+        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
         self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1517953200)
         self.assertEqual(match_context.match_string, b"07.02.2018 11:40:00 UTC+1400")
 
@@ -296,7 +303,7 @@ class DateTimeModelElementTest(TestBase):
         self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1577923141)
         self.assertEqual(match_context.match_string, b"01.01 23:59:01")
         self.assertEqual(date_time_model_element.start_year, 2020)
-        self.assertIn('WARNING:DEBUG:DateTimeModelElement time inconsistencies parsing b"01.01 23:59:01", expecting value around '
+        self.assertIn("WARNING:DEBUG:DateTimeModelElement time inconsistencies parsing b'01.01 23:59:01', expecting value around "
                       "1609459140. Check your settings!", log_stream.getvalue())
         for handler in logging.root.handlers[:]:
             logging.root.removeHandler(handler)
@@ -356,23 +363,23 @@ class DateTimeModelElementTest(TestBase):
 
         # bytes element_id is not allowed
         path_id = b"path"
-        self.assertRaises(ValueError, DateTimeModelElement, path_id, date_format)
+        self.assertRaises(TypeError, DateTimeModelElement, path_id, date_format)
 
         # integer element_id is not allowed
         path_id = 123
-        self.assertRaises(ValueError, DateTimeModelElement, path_id, date_format)
+        self.assertRaises(TypeError, DateTimeModelElement, path_id, date_format)
 
         # float element_id is not allowed
         path_id = 123.22
-        self.assertRaises(ValueError, DateTimeModelElement, path_id, date_format)
+        self.assertRaises(TypeError, DateTimeModelElement, path_id, date_format)
 
         # dict element_id is not allowed
         path_id = {"id": "path"}
-        self.assertRaises(ValueError, DateTimeModelElement, path_id, date_format)
+        self.assertRaises(TypeError, DateTimeModelElement, path_id, date_format)
 
         # list element_id is not allowed
         path_id = ["path"]
-        self.assertRaises(ValueError, DateTimeModelElement, path_id, date_format)
+        self.assertRaises(TypeError, DateTimeModelElement, path_id, date_format)
 
     def test21date_format_input_validation(self):
         """Check if date_format is validated and only valid values can be entered."""
@@ -443,6 +450,7 @@ class DateTimeModelElementTest(TestBase):
         self.assertEqual(dtme.max_time_jump_seconds, 86400)
         DateTimeModelElement("s0", b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, 100000)
         self.assertRaises(ValueError, DateTimeModelElement, "s0", b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, -1)
+        self.assertRaises(ValueError, DateTimeModelElement, "s0", b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, 0)
         self.assertRaises(TypeError, DateTimeModelElement, "s0", b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, "100000")
         self.assertRaises(TypeError, DateTimeModelElement, "s0", b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, True)
         self.assertRaises(TypeError, DateTimeModelElement, "s0", b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, 1.25)
