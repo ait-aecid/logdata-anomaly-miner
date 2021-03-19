@@ -51,17 +51,42 @@ class DateTimeModelElement(ModelElementInterface):
         Common formats are:
             * '%b %d %H:%M:%S' e.g. for 'Nov 19 05:08:43'
         @param time_zone the timezone for parsing the values or UTC when None.
-        @param text_locale the locale to use for parsing the day, month names or None to use the default locale. Locale changing is
-        not yet implemented, use locale.setlocale() in global configuration.
+        @param text_locale the locale to use for parsing the day, month names or None to use the default locale. The locale must be a tuple
+        of (locale, encoding).
         @param start_year when parsing date records without any year information, assume this is the year of the first value parsed.
         @param max_time_jump_seconds for detection of year wraps with date formats missing year information, also the current time
         of values has to be tracked. This value defines the window within that the time may jump between two matches. When not
         within that window, the value is still parsed, corrected to the most likely value but does not change the detection year.
         """
+        if not isinstance(path_id, str):
+            msg = "path_id has to be of the type string."
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if len(path_id) < 1:
+            msg = "path_id must not be empty."
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
         self.path_id = path_id
         self.time_zone = time_zone
         if time_zone is None:
-            self.time_zone = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
+            self.time_zone = datetime.timezone.utc
+        if text_locale is not None:
+            if not isinstance(text_locale, str) and (not isinstance(text_locale, tuple) or isinstance(
+                    text_locale, tuple) and len(text_locale) != 2):
+                msg = "text_locale has to be of the type string or of the type tuple and have the length 2. (locale, encoding)"
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
+            import locale
+            try:
+                old_locale = locale.getdefaultlocale()
+                if old_locale != text_locale:
+                    locale.setlocale(locale.LC_TIME, text_locale)
+                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info("Changed time locale from %s to %s.", text_locale,
+                                                                        "".join(text_locale))
+            except locale.Error:
+                msg = "text_locale %s is not installed!" % text_locale
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                raise locale.Error(msg)
         # Make sure that dateFormat is valid and extract the relevant parts from it.
         self.format_has_year_flag = False
         self.format_has_tz_specifier = False
@@ -71,9 +96,22 @@ class DateTimeModelElement(ModelElementInterface):
         self.date_format_parts = None
         self.scan_date_format(date_format)
 
+        if start_year is not None and not isinstance(start_year, int) or isinstance(start_year, bool):
+            msg = "start_year has to be of the type integer."
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         self.start_year = start_year
         if (not self.format_has_year_flag) and (start_year is None):
             self.start_year = time.gmtime(None).tm_year
+
+        if max_time_jump_seconds is not None and not isinstance(max_time_jump_seconds, int) or isinstance(max_time_jump_seconds, bool):
+            msg = "max_time_jump_seconds has to be of the type integer."
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if max_time_jump_seconds <= 0:
+            msg = "max_time_jump_seconds must not be lower than 1 second."
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
         self.max_time_jump_seconds = max_time_jump_seconds
         self.last_parsed_seconds = 0
         self.epoch_start_time = datetime.datetime.fromtimestamp(0, self.time_zone)
@@ -129,7 +167,7 @@ class DateTimeModelElement(ModelElementInterface):
                 else:
                     msg = 'Unknown dateformat specifier %s' % repr(param_type_code)
                     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-                    raise Exception(msg)
+                    raise ValueError(msg)
             if isinstance(new_element, bytes):
                 if date_format_parts and (isinstance(date_format_parts[-1], bytes)):
                     date_format_parts[-1] += new_element
@@ -139,21 +177,21 @@ class DateTimeModelElement(ModelElementInterface):
                 if new_element[0] in date_format_type_set:
                     msg = 'Multiple format specifiers for type %d' % new_element[0]
                     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-                    raise Exception(msg)
+                    raise ValueError(msg)
                 date_format_type_set.add(new_element[0])
                 date_format_parts.append(new_element)
             scan_pos = next_param_pos
         if (7 in date_format_type_set) and (not date_format_type_set.isdisjoint(set(range(0, 6)))):
-            msg = 'Cannot use %%s (seconds since epoch) with other non-second format types'
+            msg = 'Cannot use %s (seconds since epoch) with other non-second format types'
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-            raise Exception(msg)
+            raise ValueError(msg)
         self.date_format_parts = date_format_parts
 
     def get_id(self):
         """Get the element ID."""
         return self.path_id
 
-    def get_child_elements(self):
+    def get_child_elements(self):  # skipcq: PYL-R0201
         """
         Get all possible child model elements of this element.
         @return None as no children are allowed.
@@ -167,9 +205,13 @@ class DateTimeModelElement(ModelElementInterface):
         @return None when there is no match, MatchElement otherwise. The matchObject returned is a tuple containing the datetime
         object and the seconds since 1970
         """
+        # whole dates could be parsed like this:
+        # d = dateutil.parser.parse(b"28.10.2018 11:40:00 CET")
+        # print(d)
+        # print((d-datetime.datetime(1970,1,1, tzinfo=datetime.timezone.utc)).total_seconds())
         parse_pos = 0
         # Year, month, day, hour, minute, second, fraction, gmt-seconds:
-        result = [None, None, None, None, None, None, None, None]
+        result = [0, 0, 0, 0, 0, 0, 0, 0]
         for part_pos, date_format_part in enumerate(self.date_format_parts):
             if isinstance(date_format_part, bytes):
                 if not match_context.match_data[parse_pos:].startswith(date_format_part):
@@ -225,20 +267,22 @@ class DateTimeModelElement(ModelElementInterface):
         # Now combine the values and build the final value.
         parsed_date_time = None
         total_seconds = result[7]
-        if total_seconds is not None:  # skipcq: PTC-W0048
-            if result[6] is not None:
-                total_seconds += result[6]
+        if total_seconds != 0:  # skipcq: PTC-W0048
+            total_seconds += result[6]
         # For epoch second formats, the datetime value usually is not important. So stay with parsed_date_time to none.
         else:
             if not self.format_has_year_flag:
                 result[0] = self.start_year
-            microseconds = 0
-            if result[6] is not None:
-                microseconds = int(result[6] * 1000000)
+            microseconds = int(result[6] * 1000000)
             try:
-                for i, x in enumerate(result):
-                    if x is None:
-                        result[i] = 0
+                if 0 in (result[0], result[1], result[2]):
+                    current_date = datetime.datetime.now()
+                    if result[0] == 0:
+                        result[0] = current_date.year
+                    if result[1] == 0:
+                        result[1] = current_date.month
+                    if result[2] == 0:
+                        result[2] = current_date.day
                 parsed_date_time = datetime.datetime(result[0], result[1], result[2], result[3], result[4], result[5], microseconds,
                                                      self.time_zone)
             # skipcq: FLK-E722
@@ -318,7 +362,6 @@ class DateTimeModelElement(ModelElementInterface):
                         msg = "The date_format could not be found."
                         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                         raise Exception(msg)
-
         match_context.update(date_str)
         if self.format_has_tz_specifier:
             if self.tz_specifier_format_length < parse_pos and (b'+' in match_context.match_data or b'-' in match_context.match_data):
@@ -334,31 +377,32 @@ class DateTimeModelElement(ModelElementInterface):
 
             remaining_data = match_context.match_data[:self.tz_specifier_format_length-parse_pos]
             match_context.update(remaining_data)
-            if self.tz_specifier_offset is None:
-                # initialize tz_specifier variables. The first values are expected to match the time_zone argument.
-                self.tz_specifier_offset = 0
-                self.tz_specifier_offset_str = remaining_data
-            # check if the remaining_data has changed
-            elif remaining_data != self.tz_specifier_offset_str:
-                sign = 1
+            self.tz_specifier_offset = 0
+            self.tz_specifier_offset_str = remaining_data
+            # currently only CET and CEST are supported!
+            if b"CET" in remaining_data:
+                self.tz_specifier_offset = -3600
+            elif b"CEST" in remaining_data:
+                self.tz_specifier_offset = -7200
+            else:
+                sign = -1
                 data = remaining_data.split(b'+')
                 if len(data) == 1:
                     data = remaining_data.split(b'-')
-                    sign = -1
+                    sign = 1
                     if len(data) == 1:
                         data = None
                 # only add offset if a + or - sign is used.
                 if data is not None:
-                    old_data = self.tz_specifier_offset_str.split(b'+')
-                    if len(old_data) == 1:
-                        old_data = remaining_data.split(b'-')
-                    self.tz_specifier_offset = (int(data[1]) - int(old_data[1]))*sign
+                    if len(data) == 1:
+                        data = remaining_data.split(b'-')
+                    if len(data[1]) == 4:
+                        self.tz_specifier_offset = (int(data[1][0:2]) * 3600 + int(data[1][2:4]) * 60) * sign
+                    else:
+                        self.tz_specifier_offset = (int(data[1])) * 3600 * sign
                     self.tz_specifier_offset_str = remaining_data
-                # if no + or - sign is found no offset is added.
-                else:
-                    self.tz_specifier_offset = 0
-                    self.tz_specifier_offset_str = remaining_data
-            return MatchElement("%s/%s" % (path, self.path_id), date_str+remaining_data, total_seconds+self.tz_specifier_offset*3600, None)
+            total_seconds += self.tz_specifier_offset
+            return MatchElement("%s/%s" % (path, self.path_id), date_str+remaining_data, total_seconds, None)
         return MatchElement("%s/%s" % (path, self.path_id), date_str, total_seconds, None)
 
     @staticmethod

@@ -152,10 +152,12 @@ class DummyMatchContext:
     def __init__(self, match_data):
         """Initiate the Dummy class."""
         self.match_data = match_data
+        self.match_string = b''
 
     def update(self, match_string):
         """Update the data."""
-        self.match_data = match_string
+        self.match_data = self.match_data[len(match_string):]
+        self.match_string += match_string
 
 
 if __name__ == "__main__":
