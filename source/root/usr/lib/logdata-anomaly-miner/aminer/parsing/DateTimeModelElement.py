@@ -81,8 +81,8 @@ class DateTimeModelElement(ModelElementInterface):
                 old_locale = locale.getdefaultlocale()
                 if old_locale != text_locale:
                     locale.setlocale(locale.LC_TIME, text_locale)
-                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info("Changed time locale from %s to %s." % (
-                        text_locale, "".join(text_locale)))
+                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info("Changed time locale from %s to %s.", text_locale,
+                                                                        "".join(text_locale))
             except locale.Error:
                 msg = "text_locale %s is not installed!" % text_locale
                 logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
@@ -191,7 +191,7 @@ class DateTimeModelElement(ModelElementInterface):
         """Get the element ID."""
         return self.path_id
 
-    def get_child_elements(self):
+    def get_child_elements(self):  # skipcq: PYL-R0201
         """
         Get all possible child model elements of this element.
         @return None as no children are allowed.
@@ -275,7 +275,7 @@ class DateTimeModelElement(ModelElementInterface):
                 result[0] = self.start_year
             microseconds = int(result[6] * 1000000)
             try:
-                if result[0] == 0 or result[1] == 0 or result[2] == 0:
+                if 0 in (result[0], result[1], result[2]):
                     current_date = datetime.datetime.now()
                     if result[0] == 0:
                         result[0] = current_date.year

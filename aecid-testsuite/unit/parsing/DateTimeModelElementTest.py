@@ -4,9 +4,8 @@ import pytz
 import locale
 from io import StringIO
 from aminer.parsing.DateTimeModelElement import DateTimeModelElement
-from aminer.parsing.MatchContext import MatchContext
 from unit.TestBase import TestBase, DummyMatchContext, initialize_loggers
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 from pwd import getpwnam
 from grp import getgrnam
 
@@ -84,9 +83,6 @@ class DateTimeModelElementTest(TestBase):
         self.assertEqual(match_context.match_string, b"07.02.2019")
 
         # test with only time defined. Here obviously the seconds can not be tested.
-        #################
-        #This test does not work yet. By default the current day/month/year need to be used.
-        #################
         match_context = DummyMatchContext(b"11:40:23: it still works")
         date_time_model_element = DateTimeModelElement("path", b"%H:%M:%S", timezone.utc)
         match_element = date_time_model_element.get_match_element("match1", match_context)
@@ -147,7 +143,6 @@ class DateTimeModelElementTest(TestBase):
 
     def test6get_match_element_with_different_time_zones(self):
         """Test if different time_zones work with the DateTimeModelElement."""
-        # timedelta returns the difference between two datetimes. Therefore it has to have the opposite sign.
         date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
         match_context = DummyMatchContext(b"07.02.2018 11:40:00 UTC-1200: it still works")
         self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1518046800)
@@ -456,7 +451,7 @@ class DateTimeModelElementTest(TestBase):
         self.assertRaises(TypeError, DateTimeModelElement, "s0", b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, 1.25)
         self.assertRaises(TypeError, DateTimeModelElement, "s0", b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, {"key": 2020})
 
-    def test26performance(self):
+    def test26performance(self):  # skipcq: PYL-R0201
         """Test the performance of the implementation."""
         import_setup = """
 import copy
