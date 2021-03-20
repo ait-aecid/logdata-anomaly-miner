@@ -16,7 +16,7 @@
                 'learn_mode': {'type': 'boolean'},
                 'time_window': {'type': 'integer', 'required': True, 'default': 3600},
                 'anomaly_score': {'type': 'float', 'required': False, 'default': 0.9},
-                'variance': {'type': 'float', 'required': False, 'default': 0.98}, 
+                'variance': {'type': 'float', 'required': False, 'default': 0.98},
                 'allow_missing_values': {'type': 'boolean', 'default': False},
                 'check_interval': {'type': 'integer', 'default': 3600},
                 'realert_interval': {'type': 'integer', 'default': 36000},
