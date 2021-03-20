@@ -326,6 +326,22 @@ class DateTimeModelElementTest(TestBase):
         self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1540723200)
         self.assertEqual(match_context.match_string, b"28.10.2018 11:40:00 CET")
 
+        match_context = DummyMatchContext(b"27.10.2018 11:40:00 EST: it still works")
+        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
+        self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1540658400)
+        self.assertEqual(match_context.match_string, b"27.10.2018 11:40:00 EST")
+
+        match_context = DummyMatchContext(b"27.10.2018 11:40:00 PDT: it still works")
+        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
+        self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1540665600)
+        self.assertEqual(match_context.match_string, b"27.10.2018 11:40:00 PDT")
+
+        match_context = DummyMatchContext(b"27.10.2018 11:40:00 GMT: it still works")
+        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
+        self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1540640400)
+        self.assertEqual(match_context.match_string, b"27.10.2018 11:40:00 GMT")
+
+
     def test18same_timestamp_multiple_times(self):
         """Test if the DateTimeModelElement can handle multiple same timestamps."""
         match_context = DummyMatchContext(b"07.02.2019 11:40:00: it still works")
