@@ -24,8 +24,9 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """This class creates events when new values for a given data path were found."""
 
+
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, time_window, anomaly_score, variance,
-        persistence_id='Default', auto_include_flag=False, output_log_line=True):
+                    persistence_id='Default', auto_include_flag=False, output_log_line=True):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
         self.target_path_list = target_path_list
         self.anomaly_event_handlers = anomaly_event_handlers
@@ -88,7 +89,7 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             self.eigen_vectors = eigen_vectors
 
             # number of components (nComp): how many components should be used for reconstruction
-            self.nComp = self.get_nComp(eigen_values, variance_threshold)
+            self.nComp = self.get_nComp(eigen_values)
 
             # PCA Inverse with only these components which describes the variance_threshold
             pca_inverse = self.pca_ecm[:, :self.nComp] @ eigen_vectors[:self.nComp, :]
@@ -123,12 +124,13 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     sorted_log_lines = list(log_atom.raw_data)
                     timestamp_from = time.strftime('%d/%b/%Y:%H:%M:%S', time.gmtime(self.start_time))
                     timestamp_to = time.strftime('%d/%b/%Y:%H:%M:%S', time.gmtime(current_time))
-                    analysis_component = {'AffectedTimeWindow': {'from': timestamp_from, 'to': timestamp_to}, 'AnomalyScore': anomalyScore[0]}
+                    analysis_component = {'AffectedTimeWindow': {'from': timestamp_from, 'to': timestamp_to},
+                                            'AnomalyScore': anomalyScore[0]}
                     event_data = {'AnalysisComponent': analysis_component}
                     print(analysis_component)
                     for listener in self.anomaly_event_handlers:
                         listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New anomalous timewindow detected',
-                        sorted_log_lines, event_data, log_atom, self)
+                                                sorted_log_lines, event_data, log_atom, self)
 
             # repair self.event_count_matrix, if new values occured
             self.repair_dict()
