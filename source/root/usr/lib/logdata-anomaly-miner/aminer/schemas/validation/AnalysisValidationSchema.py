@@ -36,6 +36,18 @@
                     'suppress': {'type': 'boolean'}
                 },
                 {
+                  'id': {'type': 'string', 'nullable': True},
+                  'type': {'type': 'string', 'allowed': ['PCADetector'], 'required': True},
+                  'paths': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True},
+                  'time_window': {'type': 'integer', 'min': 1},
+                  'anomaly_score': {'type': 'float'},
+                  'variance': {'type': 'float'},
+                  'persistence_id': {'type': 'string'},
+                  'learn_mode': {'type': 'boolean'},
+                  'output_logline': {'type': 'boolean'},
+                  'output_event_handlers': {'type': 'list', 'nullable': True}
+                },
+                {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['EnhancedNewMatchPathValueComboDetector'], 'required': True},
                     'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True, 'required': True},
