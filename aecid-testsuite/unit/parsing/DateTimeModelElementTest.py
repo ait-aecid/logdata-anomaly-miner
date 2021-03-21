@@ -13,8 +13,6 @@ from grp import getgrnam
 class DateTimeModelElementTest(TestBase):
     """Unittests for the DateTimeModelElement."""
 
-    __expected_match_context = b": it still works"
-
     def test1get_id(self):
         """Test if get_id works properly."""
         dtme = DateTimeModelElement("s0", b"%d.%m.%Y %H:%M:%S")
