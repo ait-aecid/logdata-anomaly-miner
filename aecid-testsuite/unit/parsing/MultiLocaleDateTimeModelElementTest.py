@@ -1,13 +1,43 @@
 import unittest
 from aminer.parsing.MultiLocaleDateTimeModelElement import MultiLocaleDateTimeModelElement
 from aminer.parsing.MatchContext import MatchContext
+from unit.TestBase import TestBase, DummyMatchContext, initialize_loggers
 from datetime import datetime
 import pytz
 
 
-class MultiLocaleDateTimeModelElementTest(unittest.TestCase):
+class MultiLocaleDateTimeModelElementTest(TestBase):
     """Unittests for the MultiLocaleDateTimeModelElement."""
 
+    def test1get_id(self):
+        """Test if get_id works properly."""
+        multi_dtme = MultiLocaleDateTimeModelElement("s0", b"%d.%m.%Y %H:%M:%S")
+        self.assertEqual(dtme.get_id(), "s0")
+
+    def test2get_child_elements(self):
+        """Test if get_child_elements returns None."""
+        dtme = DateTimeModelElement("s0", b"%d.%m.%Y %H:%M:%S")
+        self.assertEqual(dtme.get_child_elements(), None)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     tz_gmt10 = "Etc/GMT+10"
     en_gb_utf8 = "en_GB.utf8"
     de_at_utf8 = "de_AT.utf8"

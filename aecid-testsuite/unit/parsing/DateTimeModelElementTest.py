@@ -13,8 +13,6 @@ from grp import getgrnam
 class DateTimeModelElementTest(TestBase):
     """Unittests for the DateTimeModelElement."""
 
-    __expected_match_context = b": it still works"
-
     def test1get_id(self):
         """Test if get_id works properly."""
         dtme = DateTimeModelElement("s0", b"%d.%m.%Y %H:%M:%S")
@@ -340,7 +338,6 @@ class DateTimeModelElementTest(TestBase):
         date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
         self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1540640400)
         self.assertEqual(match_context.match_string, b"27.10.2018 11:40:00 GMT")
-
 
     def test18same_timestamp_multiple_times(self):
         """Test if the DateTimeModelElement can handle multiple same timestamps."""
