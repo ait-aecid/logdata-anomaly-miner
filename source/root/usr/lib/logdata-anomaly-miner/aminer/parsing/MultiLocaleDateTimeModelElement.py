@@ -340,7 +340,7 @@ class DateFormatComponent:
             self.next_components[lookup_key] = next_component
         else:
             # Merge needed.
-            next_component.mergeComponentData(component_type, component_length, translation_dictionary)
+            next_component.merge_component_data(component_type, component_length, translation_dictionary)
 
         if parse_pos != len(format_string):
             next_component.add_format(format_string[parse_pos:], format_locale, format_timezone)

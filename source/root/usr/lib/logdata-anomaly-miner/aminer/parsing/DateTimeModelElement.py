@@ -115,7 +115,7 @@ class DateTimeModelElement(ModelElementInterface):
             try:
                 old_locale = locale.getdefaultlocale()
                 if old_locale != text_locale:
-                    locale.setlocale(locale.LC_TIME, text_locale)
+                    locale.setlocale(locale.LC_ALL, text_locale)
                     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info("Changed time locale from %s to %s.", text_locale,
                                                                         "".join(text_locale))
             except locale.Error:
