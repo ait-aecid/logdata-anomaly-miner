@@ -128,7 +128,6 @@ class DateTimeModelElementTest(TestBase):
 
     def test5get_match_element_with_unclean_format_string(self):
         """This test case checks if unclean format_strings can be used."""
-        # example "Date: 09.03.2021, Time: 10:02"
         match_context = DummyMatchContext(b"Date %d: 07.02.2018 11:40:00 UTC+0000: it still works")
         date_time_model_element = DateTimeModelElement("path", b"Date %%d: %d.%m.%Y %H:%M:%S%z", timezone.utc)
         self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1518003600)
