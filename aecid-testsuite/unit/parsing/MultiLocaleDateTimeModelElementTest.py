@@ -472,7 +472,7 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         element_id = ["path"]
         self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, element_id, date_formats)
 
-    def test21date_format_input_validation(self):
+    def test21date_formats_input_validation(self):
         """Check if date_format is validated and only valid values can be entered."""
         allowed_format_specifiers = b"bdfHMmSsYz%"
         # check if allowed values do not raise any exception.
@@ -501,37 +501,45 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
 
     def test22time_zone_input_validation(self):
         """Check if time_zone is validated and only valid values can be entered."""
-        dtme = DateTimeModelElement("s0", b"%d.%m.%Y %H:%M:%S")
-        self.assertEqual(dtme.time_zone, timezone.utc)
-        DateTimeModelElement("s0", b"%d.%m.%Y %H:%M:%S", timezone.utc)
+        multi_locale_dtme = MultiLocaleDateTimeModelElement("path", [
+            (b"%d.%m.%Y %H:%M:%S", None, None), (b"%d.%m.%YT%H:%M:%S", None, None), (b"%d.%m.%Y %H:%M:%S.%f", None, None),
+            (b"%d.%m.%Y %H:%M:%S%z", None, None), (b"%d.%m.%Y", None, None), (b"%H:%M:%S", None, None), (b"%d %B %Y", None, en_gb_utf8),
+            (b"%dth %B %Y", None, en_gb_utf8), (b"%d/%m/%Y", None, en_gb_utf8), (b"%m-%d-%Y", None, en_us_utf8),
+            (b"%d.%m. %H:%M:%S:%f", None, de_at_utf8), (b"%H:%M:%S:%f", None, de_at_utf8)])
+        for dtme in multi_locale_dtme.date_time_model_elements:
+            self.assertEqual(dtme.time_zone, timezone.utc)
+        MultiLocaleDateTimeModelElement("s0", [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)])
         for tz in pytz.all_timezones:
-            DateTimeModelElement("s0", b"%d.%m.%Y %H:%M:%S", pytz.timezone(tz))
+            MultiLocaleDateTimeModelElement("s0", [(b"%d.%m.%Y %H:%M:%S", pytz.timezone(tz), None)])
 
-        self.assertRaises(TypeError, DateTimeModelElement, "s0", b"%d.%m.%Y %H:%M:%S", "UTC")
-        self.assertRaises(TypeError, DateTimeModelElement, "s0", b"%d.%m.%Y %H:%M:%S", 1)
-        self.assertRaises(TypeError, DateTimeModelElement, "s0", b"%d.%m.%Y %H:%M:%S", 1.25)
-        self.assertRaises(TypeError, DateTimeModelElement, "s0", b"%d.%m.%Y %H:%M:%S", True)
-        self.assertRaises(TypeError, DateTimeModelElement, "s0", b"%d.%m.%Y %H:%M:%S", {"time_zone": timezone.utc})
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", "UTC", None)])
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", 1, None)])
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", 1.25, None)])
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", True, None)])
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", {"time_zone": timezone.utc}, None)])
 
     def test23text_locale_input_validation(self):
         """
         Check if text_locale is validated and only valid values can be entered.
         An exception has to be raised if the locale is not installed on the system.
         """
-        DateTimeModelElement("path", b"%d.%m %H:%M:%S", timezone.utc, "en_US.UTF-8")
-        DateTimeModelElement("path", b"%d.%m %H:%M:%S", timezone.utc, ("en_US", "UTF-8"))
-        self.assertRaises(TypeError, DateTimeModelElement, "path", b"%d.%m %H:%M:%S", timezone.utc, 1)
-        self.assertRaises(TypeError, DateTimeModelElement, "path", b"%d.%m %H:%M:%S", timezone.utc, 1.2)
-        self.assertRaises(TypeError, DateTimeModelElement, "path", b"%d.%m %H:%M:%S", timezone.utc, ["en_US", "UTF-8"])
-        self.assertRaises(TypeError, DateTimeModelElement, "path", b"%d.%m %H:%M:%S", timezone.utc, {"en_US": "UTF-8"})
+        MultiLocaleDateTimeModelElement("path", [(b"%d.%m %H:%M:%S", timezone.utc, "en_US.UTF-8")])
+        MultiLocaleDateTimeModelElement("path", [(b"%d.%m %H:%M:%S", timezone.utc, ("en_US", "UTF-8"))])
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", None, 1)])
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", None, 1.2)])
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", None, ["en_US", "UTF-8"])])
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", None, {"en_US": "UTF-8"})])
 
     def test24start_year_input_validation(self):
         """Check if start_year is validated."""
-        dtme = DateTimeModelElement("s0", b"%d.%m %H:%M:%S", timezone.utc, None, None)
-        self.assertEqual(dtme.start_year, datetime.now().year)
-        DateTimeModelElement("s0", b"%d.%m.%Y %H:%M:%S", timezone.utc, None, 2020)
-        DateTimeModelElement("s0", b"%d.%m.%Y %H:%M:%S", timezone.utc, None, -630)
-        self.assertRaises(TypeError, DateTimeModelElement, "s0", b"%d.%m.%Y %H:%M:%S", timezone.utc, None, "2020")
+        multi_locale_dtme = MultiLocaleDateTimeModelElement("s0", [(b"%d.%m %H:%M:%S", timezone.utc, None)], None)
+        self.assertEqual(multi_locale_dtme.start_year, datetime.now().year)
+        MultiLocaleDateTimeModelElement("s0", [(b"%d.%m %H:%M:%S", timezone.utc, None)], 2020)
+        MultiLocaleDateTimeModelElement("s0", [(b"%d.%m %H:%M:%S", timezone.utc, None)], -630)
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], "2020")
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], True)
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], 1.25)
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], "2020")
         self.assertRaises(TypeError, DateTimeModelElement, "s0", b"%d.%m.%Y %H:%M:%S", timezone.utc, None, True)
         self.assertRaises(TypeError, DateTimeModelElement, "s0", b"%d.%m.%Y %H:%M:%S", timezone.utc, None, 1.25)
         self.assertRaises(TypeError, DateTimeModelElement, "s0", b"%d.%m.%Y %H:%M:%S", timezone.utc, None, {"key": 2020})
