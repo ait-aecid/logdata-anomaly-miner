@@ -35,7 +35,6 @@ class DateTimeModelElementTest(TestBase):
 
         # test leap year date
         match_context = DummyMatchContext(b"29.02.2020 11:40:00: it still works")
-        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S", timezone.utc)
         match_element = date_time_model_element.get_match_element("match1", match_context)
         self.assertEqual(match_element.match_string, b"29.02.2020 11:40:00")
         self.assertEqual(match_element.match_object, 1582976400)
@@ -66,7 +65,6 @@ class DateTimeModelElementTest(TestBase):
         self.assertEqual(match_context.match_string, b"07.02.2019 11:40:00+0000")
 
         match_context = DummyMatchContext(b"07.02.2019 11:40:00: it still works")
-        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
         match_element = date_time_model_element.get_match_element("match1", match_context)
         self.assertEqual(match_element.match_string, b"07.02.2019 11:40:00")
         self.assertEqual(match_element.match_object, 1549539600)
@@ -98,21 +96,18 @@ class DateTimeModelElementTest(TestBase):
 
         # wrong month
         match_context = DummyMatchContext(b"01.13.2019 11:40:00: it still works")
-        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S", timezone.utc)
         self.assertIsNone(date_time_model_element.get_match_element("match1", match_context))
         self.assertEqual(match_context.match_data, b"01.13.2019 11:40:00: it still works")
         self.assertEqual(match_context.match_string, b"")
 
         # wrong year
         match_context = DummyMatchContext(b"01.01.00 11:40:00: it still works")
-        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S", timezone.utc)
         self.assertIsNone(date_time_model_element.get_match_element("match1", match_context))
         self.assertEqual(match_context.match_data, b"01.01.00 11:40:00: it still works")
         self.assertEqual(match_context.match_string, b"")
 
         # wrong date leap year
         match_context = DummyMatchContext(b"29.02.2019 11:40:00: it still works")
-        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S", timezone.utc)
         self.assertIsNone(date_time_model_element.get_match_element("match1", match_context))
         self.assertEqual(match_context.match_data, b"29.02.2019 11:40:00: it still works")
         self.assertEqual(match_context.match_string, b"")
@@ -146,33 +141,27 @@ class DateTimeModelElementTest(TestBase):
         self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1518046800)
         self.assertEqual(match_context.match_string, b"07.02.2018 11:40:00 UTC-1200")
 
-        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
         match_context = DummyMatchContext(b"07.02.2018 11:40:00 UTC-12: it still works")
         self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1518046800)
         self.assertEqual(match_context.match_string, b"07.02.2018 11:40:00 UTC-12")
 
-        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
         match_context = DummyMatchContext(b"07.02.2018 11:40:00 UTC-5: it still works")
         self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1518021600)
         self.assertEqual(match_context.match_string, b"07.02.2018 11:40:00 UTC-5")
 
-        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
         match_context = DummyMatchContext(b"07.02.2018 11:40:00 UTC-0500: it still works")
         self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1518021600)
         self.assertEqual(match_context.match_string, b"07.02.2018 11:40:00 UTC-0500")
 
         match_context = DummyMatchContext(b"07.02.2018 11:40:00 UTC+0000: it still works")
-        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
         self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1518003600)
         self.assertEqual(match_context.match_string, b"07.02.2018 11:40:00 UTC+0000")
 
         match_context = DummyMatchContext(b"07.02.2018 11:40:00 UTC+0100: it still works")
-        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
         self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1518000000)
         self.assertEqual(match_context.match_string, b"07.02.2018 11:40:00 UTC+0100")
 
         match_context = DummyMatchContext(b"07.02.2018 11:40:00 UTC+1400: it still works")
-        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
         self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1517953200)
         self.assertEqual(match_context.match_string, b"07.02.2018 11:40:00 UTC+1400")
 
@@ -309,33 +298,28 @@ class DateTimeModelElementTest(TestBase):
         self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1521888000)
         self.assertEqual(match_context.match_string, b"24.03.2018 11:40:00 CET")
 
+        # make sure format changes with longer format specifiers also work
         match_context = DummyMatchContext(b"25.03.2018 11:40:00 CEST: it still works")
-        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
         self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1521970800)
         self.assertEqual(match_context.match_string, b"25.03.2018 11:40:00 CEST")
 
         match_context = DummyMatchContext(b"27.10.2018 11:40:00 CEST: it still works")
-        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
         self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1540633200)
         self.assertEqual(match_context.match_string, b"27.10.2018 11:40:00 CEST")
 
         match_context = DummyMatchContext(b"28.10.2018 11:40:00 CET: it still works")
-        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
         self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1540723200)
         self.assertEqual(match_context.match_string, b"28.10.2018 11:40:00 CET")
 
         match_context = DummyMatchContext(b"27.10.2018 11:40:00 EST: it still works")
-        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
         self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1540658400)
         self.assertEqual(match_context.match_string, b"27.10.2018 11:40:00 EST")
 
         match_context = DummyMatchContext(b"27.10.2018 11:40:00 PDT: it still works")
-        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
         self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1540665600)
         self.assertEqual(match_context.match_string, b"27.10.2018 11:40:00 PDT")
 
         match_context = DummyMatchContext(b"27.10.2018 11:40:00 GMT: it still works")
-        date_time_model_element = DateTimeModelElement("path", b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
         self.assertEqual(date_time_model_element.get_match_element("match1", match_context).get_match_object(), 1540640400)
         self.assertEqual(match_context.match_string, b"27.10.2018 11:40:00 GMT")
 

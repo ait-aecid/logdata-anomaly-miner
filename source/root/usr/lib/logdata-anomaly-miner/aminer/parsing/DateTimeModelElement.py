@@ -371,11 +371,11 @@ class DateTimeModelElement(ModelElementInterface):
             if result[6] is not None:
                 total_seconds += result[6]
 
-        if self.format_has_tz_specifier and self.tz_specifier_format_length == -1:
+        if self.format_has_tz_specifier:
             start = 0
             while start < parse_pos:
                 try:
-                    parse(match_context.match_data[start:parse_pos])
+                    parse(match_context.match_data[start:parse_pos], tzinfos=timezone_info)
                     break
                 # skipcq: FLK-E722
                 except:
