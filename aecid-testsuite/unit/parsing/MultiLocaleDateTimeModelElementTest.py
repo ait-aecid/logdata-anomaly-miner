@@ -1,17 +1,13 @@
 import unittest
-from aminer.parsing.MultiLocaleDateTimeModelElement import MultiLocaleDateTimeModelElement
-from aminer.parsing.MatchContext import MatchContext
-from unit.TestBase import TestBase, DummyMatchContext, initialize_loggers
-from datetime import datetime, timezone
-import pytz
-####
-from aminer.parsing.DateTimeModelElement import DateTimeModelElement
 import locale
+import pytz
 from io import StringIO
-import logging
+from io import StringIO
 from pwd import getpwnam
 from grp import getgrnam
-####
+from datetime import datetime, timezone
+from aminer.parsing.MultiLocaleDateTimeModelElement import MultiLocaleDateTimeModelElement
+from unit.TestBase import TestBase, DummyMatchContext, initialize_loggers
 
 
 class MultiLocaleDateTimeModelElementTest(TestBase):
@@ -235,7 +231,7 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         self.assertEqual(match_context.match_string, b"Date %d: 07.02.2018 11:40:00 UTC+0000")
 
     def test6get_match_element_with_different_time_zones(self):
-        """Test if different time_zones work with the DateTimeModelElement."""
+        """Test if different time_zones work with the MultiLocaleDateTimeModelElement."""
         multi_locale_dtme = MultiLocaleDateTimeModelElement("path", [(b"%d.%m.%Y %H:%M:%S%z", None, None)])
         match_context = DummyMatchContext(b"07.02.2018 11:40:00 UTC-1200: it still works")
         self.assertEqual(multi_locale_dtme.get_match_element("match1", match_context).get_match_object(), 1518046800)
@@ -423,7 +419,7 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         self.assertEqual(match_context.match_string, b"27.10.2018 11:40:00 GMT")
 
     def test18same_timestamp_multiple_times(self):
-        """Test if the DateTimeModelElement can handle multiple same timestamps."""
+        """Test if the MultiLocaleDateTimeModelElement can handle multiple same timestamps."""
         multi_locale_dtme = MultiLocaleDateTimeModelElement("path", [(b"%d.%m.%Y %H:%M:%S", None, None)])
         match_context = DummyMatchContext(b"07.02.2019 11:40:00: it still works")
         match_element = multi_locale_dtme.get_match_element("match1", match_context)
@@ -485,7 +481,7 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, "s0", format_specifiers)
         MultiLocaleDateTimeModelElement("s0", [(format_specifiers.replace(b"%m", b"").replace(b"%s", b""), None, None)])
         MultiLocaleDateTimeModelElement("s0", [(format_specifiers.replace(b"%b", b"").replace(b"%s", b""), None, None)])
-        MultiLocaleDateTimeModelElement("s0", b"%s%z%f")
+        MultiLocaleDateTimeModelElement("s0", [(b"%s%z%f", None, None)])
         for c in allowed_format_specifiers.replace(b"s", b"").replace(b"z", b"").replace(b"f", b"").replace(b"%", b""):
             self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, "s0", [(b"%s%" + str(chr(c)).encode(), None, None)])
 
@@ -494,13 +490,16 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
             self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, "s0", [(b"%" + str(chr(c)).encode(), None, None)])
 
         # test multiple specifiers. % and z specifiers are allowed multiple times.
-        DateTimeModelElement("s0", b"%%%z%z")
+        MultiLocaleDateTimeModelElement("s0", [(b"%%%z%z", None, None)])
         for c in allowed_format_specifiers.replace(b"%", b"").replace(b"z", b""):
             self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, "s0", [(
                 b"%" + str(chr(c)).encode() + b"%" + str(chr(c)).encode(), None, None)])
 
     def test22time_zone_input_validation(self):
         """Check if time_zone is validated and only valid values can be entered."""
+        en_gb_utf8 = "en_GB.utf8"
+        en_us_utf8 = "en_US.utf8"
+        de_at_utf8 = "de_AT.utf8"
         multi_locale_dtme = MultiLocaleDateTimeModelElement("path", [
             (b"%d.%m.%Y %H:%M:%S", None, None), (b"%d.%m.%YT%H:%M:%S", None, None), (b"%d.%m.%Y %H:%M:%S.%f", None, None),
             (b"%d.%m.%Y %H:%M:%S%z", None, None), (b"%d.%m.%Y", None, None), (b"%H:%M:%S", None, None), (b"%d %B %Y", None, en_gb_utf8),
