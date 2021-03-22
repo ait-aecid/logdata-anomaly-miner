@@ -13,11 +13,11 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 
-import datetime
 import sys
 import time
 import logging
 from dateutil.parser import parse
+from datetime import timezone, datetime
 
 from aminer import AminerConfig
 from aminer.parsing.ModelElementInterface import ModelElementInterface
@@ -104,7 +104,7 @@ class DateTimeModelElement(ModelElementInterface):
         self.path_id = path_id
         self.time_zone = time_zone
         if time_zone is None:
-            self.time_zone = datetime.timezone.utc
+            self.time_zone = timezone.utc
         if text_locale is not None:
             if not isinstance(text_locale, str) and (not isinstance(text_locale, tuple) or isinstance(
                     text_locale, tuple) and len(text_locale) != 2):
@@ -149,7 +149,7 @@ class DateTimeModelElement(ModelElementInterface):
             raise ValueError(msg)
         self.max_time_jump_seconds = max_time_jump_seconds
         self.last_parsed_seconds = 0
-        self.epoch_start_time = datetime.datetime.fromtimestamp(0, self.time_zone)
+        self.epoch_start_time = datetime.fromtimestamp(0, self.time_zone)
 
     def scan_date_format(self, date_format):
         """Scan the date format."""
@@ -307,14 +307,14 @@ class DateTimeModelElement(ModelElementInterface):
             microseconds = int(result[6] * 1000000)
             try:
                 if 0 in (result[0], result[1], result[2]):
-                    current_date = datetime.datetime.now()
+                    current_date = datetime.now()
                     if result[0] == 0:
                         result[0] = current_date.year
                     if result[1] == 0:
                         result[1] = current_date.month
                     if result[2] == 0:
                         result[2] = current_date.day
-                parsed_date_time = datetime.datetime(result[0], result[1], result[2], result[3], result[4], result[5], microseconds,
+                parsed_date_time = datetime(result[0], result[1], result[2], result[3], result[4], result[5], microseconds,
                                                      self.time_zone)
             # skipcq: FLK-E722
             except:
@@ -348,7 +348,7 @@ class DateTimeModelElement(ModelElementInterface):
                             total_seconds = next_year_total_seconds
                             self.last_parsed_seconds = total_seconds
                             msg = 'DateTimeModelElement unqualified timestamp year wraparound detected from %s to %s' % (
-                                datetime.datetime.fromtimestamp(self.last_parsed_seconds, self.time_zone).isoformat(),
+                                datetime.fromtimestamp(self.last_parsed_seconds, self.time_zone).isoformat(),
                                 parsed_date_time.isoformat())
                             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
                             print('WARNING: ' + msg, file=sys.stderr)
