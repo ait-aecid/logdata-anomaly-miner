@@ -564,6 +564,5 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
                     self.start_year = date_time_model_element.start_year
                     return match_element
             except Exception as e:
-                print(e)
-                pass
+                print("ERROR!", e)
         return None

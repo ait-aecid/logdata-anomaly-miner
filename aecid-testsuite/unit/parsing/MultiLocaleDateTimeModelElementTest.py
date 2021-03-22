@@ -31,9 +31,10 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         de_at_utf8 = "de_AT.utf8"
         multi_locale_dtme = MultiLocaleDateTimeModelElement("path", [
             (b"%d.%m.%Y %H:%M:%S.%f", None, None), (b"%d.%m.%Y %H:%M:%S%z", None, None),  (b"%d.%m.%Y %H:%M:%S", None, None),
-            (b"%d.%m.%YT%H:%M:%S", None, None), (b"%d.%m.%Y", None, None), (b"%H:%M:%S", None, None), (b"%b %d", tz_gmt10, de_at_utf8),
-            (b"%d %b %Y", None, en_gb_utf8), (b"%dth %b %Y", None, en_gb_utf8), (b"%d/%m/%Y", None, en_gb_utf8),
-            (b"%m-%d-%Y", None, en_us_utf8), (b"%d.%m. %H:%M:%S:%f", None, de_at_utf8), (b"%H:%M:%S", None, de_at_utf8)])
+            (b"%d.%m.%YT%H:%M:%S", None, None), (b"%d.%m.%Y", None, None), (b"%H:%M:%S:%f", None, de_at_utf8),
+            (b"%H:%M:%S", None, None), (b"%b %d", tz_gmt10, de_at_utf8), (b"%d %b %Y", None, en_gb_utf8),
+            (b"%dth %b %Y", None, en_gb_utf8), (b"%d/%m/%Y", None, en_gb_utf8), (b"%m-%d-%Y", None, en_us_utf8),
+            (b"%d.%m. %H:%M:%S:%f", None, de_at_utf8)])
 
         # test normal date
         match_context = DummyMatchContext(b"07.02.2019 11:40:00: it still works")
