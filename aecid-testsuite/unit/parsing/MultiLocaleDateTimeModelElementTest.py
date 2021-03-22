@@ -93,29 +93,28 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         string = b"Feb 25"
         match_context = DummyMatchContext(string)
         match_element = multi_locale_dtme.get_match_element("match", match_context)
-        date = datetime(datetime.now().year, 2, 25, tzinfo=pytz.timezone(self.tz_gmt10))
+        date = datetime(datetime.now().year, 2, 25, tzinfo=tz_gmt10)
         # total_seconds should be in UTC, so the timezones are parsed out.
-        total_seconds = (date - datetime(1970, 1, 1, tzinfo=date.tzinfo)).days * 86400 + date.utcoffset().total_seconds()
+        total_seconds = (date - datetime(1970, 1, 1, tzinfo=tz_gmt10)).days * 86400 - date.utcoffset().total_seconds()
         self.assertEqual(match_element.match_string, b"Feb 25")
         self.assertEqual(match_element.match_object, total_seconds)
         self.assertEqual(match_context.match_string, b"Feb 25")
 
-        multi_locale_dtme.latest_parsed_timestamp = None
         # British date
-        string = b"13 April 2019"
+        string = b"13 Apr 2019"
         match_context = DummyMatchContext(string)
         match_element = multi_locale_dtme.get_match_element("match", match_context)
-        self.assertEqual(match_element.match_string, b"13 April 2019")
+        self.assertEqual(match_element.match_string, b"13 Apr 2019")
         self.assertEqual(match_element.match_object, 1555113600)
-        self.assertEqual(match_context.match_string, b"13 April 2019")
+        self.assertEqual(match_context.match_string, b"13 Apr 2019")
 
         # British date 2
-        string = b"13th April 2019"
+        string = b"13th Apr 2019"
         match_context = DummyMatchContext(string)
         match_element = multi_locale_dtme.get_match_element("match", match_context)
-        self.assertEqual(match_element.match_string, b"13th April 2019")
+        self.assertEqual(match_element.match_string, b"13th Apr 2019")
         self.assertEqual(match_element.match_object, 1555113600)
-        self.assertEqual(match_context.match_string, b"13th April 2019")
+        self.assertEqual(match_context.match_string, b"13th Apr 2019")
 
         # British date 3
         string = b"13/04/2019"
@@ -134,11 +133,12 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         self.assertEqual(match_context.match_string, b"04-13-2019")
 
         # Austrian date no year - year should already be learnt.
+        # start year has to be 2021, because all other formats have defined years.
         string = b"13.04. 15:12:54:201"
         match_context = DummyMatchContext(string)
         match_element = multi_locale_dtme.get_match_element("match", match_context)
         self.assertEqual(match_element.match_string, b"13.04. 15:12:54:201")
-        self.assertEqual(match_element.match_object, 1555168374.201)
+        self.assertEqual(match_element.match_object, 1618326774.201)
         self.assertEqual(match_context.match_string, b"13.04. 15:12:54:201")
 
         multi_locale_dtme.latest_parsed_timestamp = None
@@ -161,10 +161,11 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         en_us_utf8 = "en_US.utf8"
         de_at_utf8 = "de_AT.utf8"
         multi_locale_dtme = MultiLocaleDateTimeModelElement("path", [
-            (b"%d.%m.%Y %H:%M:%S", None, None), (b"%d.%m.%YT%H:%M:%S", None, None), (b"%d.%m.%Y %H:%M:%S.%f", None, None),
-            (b"%d.%m.%Y %H:%M:%S%z", None, None), (b"%d.%m.%Y", None, None), (b"%H:%M:%S", None, None), (b"%b %d", tz_gmt10, de_at_utf8),
-            (b"%d %b %Y", None, en_gb_utf8), (b"%dth %b %Y", None, en_gb_utf8), (b"%d/%m/%Y", None, en_gb_utf8),
-            (b"%m-%d-%Y", None, en_us_utf8), (b"%d.%m. %H:%M:%S:%f", None, de_at_utf8), (b"%H:%M:%S:%f", None, de_at_utf8)])
+            (b"%d.%m.%Y %H:%M:%S.%f", None, None), (b"%d.%m.%Y %H:%M:%S%z", None, None),  (b"%d.%m.%Y %H:%M:%S", None, None),
+            (b"%d.%m.%YT%H:%M:%S", None, None), (b"%d.%m.%Y", None, None), (b"%H:%M:%S:%f", None, de_at_utf8),
+            (b"%H:%M:%S", None, None), (b"%b %d", tz_gmt10, de_at_utf8), (b"%d %b %Y", None, en_gb_utf8),
+            (b"%dth %b %Y", None, en_gb_utf8), (b"%d/%m/%Y", None, en_gb_utf8), (b"%m-%d-%Y", None, en_us_utf8),
+            (b"%d.%m. %H:%M:%S:%f", None, de_at_utf8)])
         # wrong day
         match_context = DummyMatchContext(b"32.03.2019 11:40:00: it still works")
         self.assertIsNone(multi_locale_dtme.get_match_element("match1", match_context))
@@ -189,36 +190,8 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         self.assertEqual(match_context.match_data, b"29.02.2019 11:40:00: it still works")
         self.assertEqual(match_context.match_string, b"")
 
-        # missing T
-        match_context = DummyMatchContext(b"07.02.2019 11:40:00: it still works")
-        self.assertIsNone(multi_locale_dtme.get_match_element("match1", match_context))
-        self.assertEqual(match_context.match_data, b"07.02.2019 11:40:00: it still works")
-        self.assertEqual(match_context.match_string, b"")
-
-        # missing fractions
-        match_context = DummyMatchContext(b"07.02.2019 11:40:00.: it still works")
-        self.assertIsNone(multi_locale_dtme.get_match_element("match1", match_context))
-        self.assertEqual(match_context.match_data, b"07.02.2019 11:40:00.: it still works")
-        self.assertEqual(match_context.match_string, b"")
-
         # British date
         string = b"13 Dezember 2019"
-        match_context = DummyMatchContext(string)
-        match_element = multi_locale_dtme.get_match_element("match", match_context)
-        self.assertEqual(match_element, None)
-
-        # British date 3
-        string = b"1/23/2019"
-        match_context = DummyMatchContext(string)
-        self.assertEqual(None, multi_locale_dtme.get_match_element("match", match_context))
-
-        # British date 3
-        string = b"01/23/2019"
-        match_context = DummyMatchContext(string)
-        self.assertRaises(ValueError, multi_locale_dtme, "match", match_context)
-
-        # Austrian date year
-        string = b"13.04.2019 15:12:54:201"
         match_context = DummyMatchContext(string)
         match_element = multi_locale_dtme.get_match_element("match", match_context)
         self.assertEqual(match_element, None)
@@ -505,10 +478,10 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         en_us_utf8 = "en_US.utf8"
         de_at_utf8 = "de_AT.utf8"
         multi_locale_dtme = MultiLocaleDateTimeModelElement("path", [
-            (b"%d.%m.%Y %H:%M:%S", None, None), (b"%d.%m.%YT%H:%M:%S", None, None), (b"%d.%m.%Y %H:%M:%S.%f", None, None),
-            (b"%d.%m.%Y %H:%M:%S%z", None, None), (b"%d.%m.%Y", None, None), (b"%H:%M:%S", None, None), (b"%d %b %Y", None, en_gb_utf8),
-            (b"%dth %b %Y", None, en_gb_utf8), (b"%d/%m/%Y", None, en_gb_utf8), (b"%m-%d-%Y", None, en_us_utf8),
-            (b"%d.%m. %H:%M:%S:%f", None, de_at_utf8), (b"%H:%M:%S:%f", None, de_at_utf8)])
+            (b"%d.%m.%Y %H:%M:%S.%f", None, None), (b"%d.%m.%Y %H:%M:%S%z", None, None),  (b"%d.%m.%Y %H:%M:%S", None, None),
+            (b"%d.%m.%YT%H:%M:%S", None, None), (b"%d.%m.%Y", None, None), (b"%H:%M:%S:%f", None, de_at_utf8),
+            (b"%H:%M:%S", None, None), (b"%d %b %Y", None, en_gb_utf8), (b"%dth %b %Y", None, en_gb_utf8), (b"%d/%m/%Y", None, en_gb_utf8),
+            (b"%m-%d-%Y", None, en_us_utf8), (b"%d.%m. %H:%M:%S:%f", None, de_at_utf8)])
         for dtme in multi_locale_dtme.date_time_model_elements:
             self.assertEqual(dtme.time_zone, timezone.utc)
         MultiLocaleDateTimeModelElement("s0", [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)])

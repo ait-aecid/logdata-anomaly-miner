@@ -130,6 +130,7 @@ class DateTimeModelElement(ModelElementInterface):
         self.tz_specifier_offset_str = None
         self.tz_specifier_format_length = -1
         self.date_format_parts = None
+        self.date_format = date_format
         self.scan_date_format(date_format)
 
         if start_year is not None and not isinstance(start_year, int) or isinstance(start_year, bool):
@@ -316,7 +317,7 @@ class DateTimeModelElement(ModelElementInterface):
                     if result[2] == 0:
                         result[2] = current_date.day
                 parsed_date_time = datetime(result[0], result[1], result[2], result[3], result[4], result[5], microseconds,
-                                                     self.time_zone)
+                                            self.time_zone)
             # skipcq: FLK-E722
             except:
                 # The values did not form a valid datetime object, e.g. when the day of month is out of range. The rare case where dates
@@ -514,9 +515,15 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
                 logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                 raise ValueError(msg)
             date_format, time_zone, text_locale = date_format
+            for date_time_model_element in self.date_time_model_elements:
+                if date_format.startswith(date_time_model_element.date_format):
+                    msg = "Invalid order of date_formats. %s starts with %s. More specific datetimes would be skipped." % (
+                        date_format.decode(), date_time_model_element.date_format.decode())
+                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
             self.date_time_model_elements.append(DateTimeModelElement(
                 path_id + "/format" + str(i), date_format, time_zone, text_locale, start_year, max_time_jump_seconds))
-            format_has_year_flag = format_has_year_flag or self.date_time_model_elements[-1].format_has_year_flag
+            format_has_year_flag = format_has_year_flag and self.date_time_model_elements[-1].format_has_year_flag
 
         # The latest parsed timestamp value.
         self.latest_parsed_timestamp = None
@@ -563,6 +570,6 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
                     self.last_parsed_seconds = date_time_model_element.last_parsed_seconds
                     self.start_year = date_time_model_element.start_year
                     return match_element
-            except Exception as e:
-                print("ERROR!", e)
+            except:
+                pass
         return None
