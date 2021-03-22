@@ -82,7 +82,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
         """Get the element ID."""
         return self.element_id
 
-    def get_child_elements(self):
+    def get_child_elements(self):  # skipcq: PYL-R0201
         """
         Get all possible child model elements of this element.
         @return empty list as there are no children of this element.
@@ -133,23 +133,23 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
                 parsed_fields[COMPONENT_TYPE_YEAR], parsed_fields[COMPONENT_TYPE_MONTH],
                 parsed_fields[COMPONENT_TYPE_DAY], parsed_fields[COMPONENT_TYPE_HOUR], parsed_fields[COMPONENT_TYPE_MINUTE],
                 parsed_fields[COMPONENT_TYPE_SECOND], parsed_fields[COMPONENT_TYPE_MICROSECOND], time_zone_info)
-            if not self.checkTimestampValueInRange(parsed_value):
+            if not self.check_timestamp_value_in_range(parsed_value):
                 parsed_value = datetime.datetime(
                     parsed_fields[COMPONENT_TYPE_YEAR] + 1, parsed_fields[COMPONENT_TYPE_MONTH],
                     parsed_fields[COMPONENT_TYPE_DAY], parsed_fields[COMPONENT_TYPE_HOUR], parsed_fields[COMPONENT_TYPE_MINUTE],
                     parsed_fields[COMPONENT_TYPE_SECOND], parsed_fields[COMPONENT_TYPE_MICROSECOND], time_zone_info)
-                if not self.checkTimestampValueInRange(parsed_value):
+                if not self.check_timestamp_value_in_range(parsed_value):
                     parsed_value = datetime.datetime(
                         parsed_fields[COMPONENT_TYPE_YEAR] - 1, parsed_fields[COMPONENT_TYPE_MONTH],
                         parsed_fields[COMPONENT_TYPE_DAY], parsed_fields[COMPONENT_TYPE_HOUR], parsed_fields[COMPONENT_TYPE_MINUTE],
                         parsed_fields[COMPONENT_TYPE_SECOND], parsed_fields[COMPONENT_TYPE_MICROSECOND], time_zone_info)
-                    if not self.checkTimestampValueInRange(parsed_value):
+                    if not self.check_timestamp_value_in_range(parsed_value):
                         msg = delta_string % repr(date_str)
                         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error('%s: %s', self.__class__.__name__, msg)
                         print(msg, file=sys.stderr)
                         return None
 
-            self.checkTimestampValueInRange(parsed_value)
+            self.check_timestamp_value_in_range(parsed_value)
             if self.latest_parsed_timestamp is not None:
                 delta = (parsed_value - self.latest_parsed_timestamp)
                 delta_seconds = (delta.days * 86400 + delta.seconds + delta.microseconds / 1000)
@@ -164,7 +164,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
                 parsed_fields[COMPONENT_TYPE_YEAR], parsed_fields[COMPONENT_TYPE_MONTH],
                 parsed_fields[COMPONENT_TYPE_DAY], parsed_fields[COMPONENT_TYPE_HOUR], parsed_fields[COMPONENT_TYPE_MINUTE],
                 parsed_fields[COMPONENT_TYPE_SECOND], parsed_fields[COMPONENT_TYPE_MICROSECOND], time_zone_info)
-            if not self.checkTimestampValueInRange(parsed_value):
+            if not self.check_timestamp_value_in_range(parsed_value):
                 msg = delta_string % repr(date_str)
                 logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error('%s: %s', self.__class__.__name__, msg)
                 print(msg, file=sys.stderr)
@@ -178,7 +178,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
             self.latest_parsed_timestamp = parsed_value
         return MatchElement("%s/%s" % (path, self.element_id), date_str, total_seconds, None)
 
-    def checkTimestampValueInRange(self, parsed_value):
+    def check_timestamp_value_in_range(self, parsed_value):
         """Return True if value is None."""
         if self.latest_parsed_timestamp is None:
             return True
@@ -340,7 +340,7 @@ class DateFormatComponent:
             self.next_components[lookup_key] = next_component
         else:
             # Merge needed.
-            next_component.mergeComponentData(component_type, component_length, translation_dictionary)
+            next_component.merge_component_data(component_type, component_length, translation_dictionary)
 
         if parse_pos != len(format_string):
             next_component.add_format(format_string[parse_pos:], format_locale, format_timezone)

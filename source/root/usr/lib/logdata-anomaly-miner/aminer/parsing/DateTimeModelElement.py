@@ -16,6 +16,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import sys
 import time
 import logging
+import locale
 from dateutil.parser import parse
 from datetime import timezone, datetime
 
@@ -105,17 +106,17 @@ class DateTimeModelElement(ModelElementInterface):
         self.time_zone = time_zone
         if time_zone is None:
             self.time_zone = timezone.utc
+        self.text_locale = text_locale
         if text_locale is not None:
             if not isinstance(text_locale, str) and (not isinstance(text_locale, tuple) or isinstance(
                     text_locale, tuple) and len(text_locale) != 2):
                 msg = "text_locale has to be of the type string or of the type tuple and have the length 2. (locale, encoding)"
                 logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)
-            import locale
             try:
                 old_locale = locale.getdefaultlocale()
                 if old_locale != text_locale:
-                    locale.setlocale(locale.LC_TIME, text_locale)
+                    locale.setlocale(locale.LC_ALL, text_locale)
                     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info("Changed time locale from %s to %s.", text_locale,
                                                                         "".join(text_locale))
             except locale.Error:
@@ -439,3 +440,124 @@ class DateTimeModelElement(ModelElementInterface):
     def parse_fraction(value_str):
         """Pass this method as function pointer to the parsing logic."""
         return float(b'0.' + value_str)
+
+
+class MultiLocaleDateTimeModelElement(ModelElementInterface):
+    """
+    This class defines a model element to parse date or datetime values from log sources.
+    The date or datetime can contain timestamps encoded in different locales or on machines, where host/service locale does not match data
+    locale(s).
+    CAVEAT: Unlike other model elements, this element is not completely stateless! As parsing of semiqualified date values without any
+    year information may produce wrong results, e.g. wrong year or 1 day off due to incorrect leap year handling, this object
+    will keep track of the most recent timestamp parsed and will use it to regain information about the year in semiqualified
+    date values. Still this element will not complain when parsed timestamp values are not strictly sorted, this should be done
+    by filtering modules later on. The sorting requirements here are only, that each new timestamp value may not be more than
+    2 days before and 1 month after the most recent one observer.
+
+    Internal operation:
+    * When creating the object, make sure that there are no ambiguous dateFormats in the list, e.g. one with "day month" and another
+    one with "month day".
+    * To avoid decoding of binary input data in all locales before searching for e.g. month names, convert all possible month
+    names to bytes during object creation and just keep the lookup list.
+    """
+
+    def __init__(self, path_id, date_formats, start_year=None, max_time_jump_seconds=86400):
+        """
+        Create a new MultiLocaleDateTimeModelElement object.
+        @param date_formats this parameter is a list of tuples, each tuple containing information about one date format to support.
+        The tuple structure is (format_string, format_locale, format_timezone). The format_string may contain the same elements as supported
+        by strptime from datetime.datetime. The format_locale defines the locale for the string content, e.g. de_DE for german,
+        but also the data IO encoding, e.g. ISO-8859-1. The locale information has to be available, e.g. using "locale-gen" on
+        Debian systems. The format_timezone can be used to define the timezone of the timestamp parsed. When None, UTC is used.
+        The timezone support may only be sufficient for very simple usecases, e.g. all data from one source configured to create
+        timestamps in that timezone. This may still fail, e.g. when daylight savings changes make timestamps ambiguous during
+        a short window of time. In all those cases, timezone should be left empty here and a separate filtering component should
+        be used to apply timestamp corrections afterwards. See the
+        FIXME-Filter component for that. Also having the same format_string for two different timezones
+        will result in an error as correct timezone to apply cannot be distinguished just from format.
+        @param start_year when given, parsing will use this year value for semiqualified timestamps to add correct year information.
+        This is especially relevant for historic datasets as otherwise leap year handling may fail. The startYear parameter will
+        only take effect when the first timestamp to be parsed by this object is also semiqualified. Otherwise the year information
+        is extracted from this record. When empty and first parsing invocation involves a semiqualified date, the current year
+        in UTC timezone is used.
+        """
+        if not isinstance(path_id, str):
+            msg = "path_id has to be of the type string."
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if len(path_id) < 1:
+            msg = "path_id must not be empty."
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        self.path_id = path_id
+        if len(date_formats) is 0:
+            msg = "At least one date_format must be specified."
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+
+        if max_time_jump_seconds is not None and not isinstance(max_time_jump_seconds, int) or isinstance(max_time_jump_seconds, bool):
+            msg = "max_time_jump_seconds has to be of the type integer."
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if max_time_jump_seconds <= 0:
+            msg = "max_time_jump_seconds must not be lower than 1 second."
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        self.max_time_jump_seconds = max_time_jump_seconds
+
+        format_has_year_flag = False
+        default_locale = locale.getdefaultlocale()
+        self.date_time_model_elements = []
+        for i, date_format in enumerate(date_formats):
+            if not isinstance(date_format, tuple) or len(date_format) != 3:
+                msg = "Invalid date_format. Must be tuple with 3 elements."
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                raise ValueError(msg)
+            date_format, time_zone, text_locale = date_format
+            self.date_time_model_elements.append(DateTimeModelElement(
+                path_id + "/format" + str(i), date_format, time_zone, text_locale, start_year, max_time_jump_seconds))
+            format_has_year_flag = format_has_year_flag or self.date_time_model_elements[-1].format_has_year_flag
+
+        # The latest parsed timestamp value.
+        self.latest_parsed_timestamp = None
+
+        # Restore previous locale settings. There seems to be no way in python to get back to the exact same state. Hence perform the
+        # reset only when locale has changed. This would also change the locale from (None, None) to some system-dependent locale.
+        if locale.getlocale() != default_locale:
+            locale.resetlocale()
+
+        if start_year is not None and not isinstance(start_year, int) or isinstance(start_year, bool):
+            msg = "start_year has to be of the type integer."
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        self.start_year = start_year
+        if (not format_has_year_flag) and (start_year is None):
+            self.start_year = time.gmtime(None).tm_year
+        self.last_parsed_seconds = 0
+
+    def get_id(self):
+        """Get the element ID."""
+        return self.path_id
+
+    def get_child_elements(self):  # skipcq: PYL-R0201
+        """
+        Get all possible child model elements of this element.
+        @return empty list as there are no children of this element.
+        """
+        return None
+
+    def get_match_element(self, path, match_context):
+        """
+        Check if the data to match within the content is suitable to be parsed by any of the supplied date formats.
+        @return On match return a matchObject containing a tuple of the datetime object and the seconds since 1970. When not matching,
+        None is returned. When the timestamp data parsed would be far off from the last ones parsed, so that correction may
+        not be applied correctly, then the method will also return None.
+        """
+        for i, date_time_model_element in enumerate(self.date_time_model_elements):
+            locale.setlocale(locale.LC_ALL, date_time_model_element.text_locale)
+            self.date_time_model_elements[i].last_parsed_seconds = self.last_parsed_seconds
+            match_element = date_time_model_element.get_match_element(path, match_context)
+            if match_element is not None:
+                self.last_parsed_seconds = date_time_model_element.last_parsed_seconds
+                return match_element
+        return None
