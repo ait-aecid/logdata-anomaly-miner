@@ -372,7 +372,7 @@ class DateTimeModelElement(ModelElementInterface):
             if result[6] is not None:
                 total_seconds += result[6]
 
-        if self.format_has_tz_specifier and self.tz_specifier_format_length == -1:
+        if self.format_has_tz_specifier:
             start = 0
             while start < parse_pos:
                 try:
@@ -490,7 +490,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         self.path_id = path_id
-        if len(date_formats) is 0:
+        if len(date_formats) == 0:
             msg = "At least one date_format must be specified."
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
@@ -556,8 +556,14 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
         for i, date_time_model_element in enumerate(self.date_time_model_elements):
             locale.setlocale(locale.LC_ALL, date_time_model_element.text_locale)
             self.date_time_model_elements[i].last_parsed_seconds = self.last_parsed_seconds
-            match_element = date_time_model_element.get_match_element(path, match_context)
-            if match_element is not None:
-                self.last_parsed_seconds = date_time_model_element.last_parsed_seconds
-                return match_element
+            self.date_time_model_elements[i].start_year = self.start_year
+            try:
+                match_element = date_time_model_element.get_match_element(path, match_context)
+                if match_element is not None:
+                    self.last_parsed_seconds = date_time_model_element.last_parsed_seconds
+                    self.start_year = date_time_model_element.start_year
+                    return match_element
+            except Exception as e:
+                print(e)
+                pass
         return None
