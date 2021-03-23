@@ -976,7 +976,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
                 for var_index, var_val in enumerate(self.var_type_history_list[event_index]):
                     self.var_type_history_list_reference[event_index].append([])
-                    for type_index, type_val in enumerate(var_val[var_index]):
+                    for type_index, type_val in enumerate(var_val):
                         if len(type_val) >= 1 and isinstance(type_val[0], list):
                             if type_index == 6:  # continuously distributed variable type
                                 self.var_type_history_list_reference[event_index][var_index].append([sum(type_val[0][
