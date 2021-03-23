@@ -1,11 +1,98 @@
 import unittest
+import math
 from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.DecimalFloatValueModelElement import DecimalFloatValueModelElement
-import math
+from unit.TestBase import TestBase, DummyMatchContext
 
 
-class DecimalFloatValueModelElementTest(unittest.TestCase):
+class DecimalFloatValueModelElementTest(TestBase):
     """Unittests for the DecimalFloatValueModelElement."""
+
+    def test1get_id(self):
+        """Test if get_id works properly."""
+        decimal_float_me = DecimalFloatValueModelElement("path",)
+        self.assertEqual(decimal_float_me.get_id(), "path")
+
+    def test2get_child_elements(self):
+        """Test if get_child_elements returns None."""
+        decimal_float_me = DecimalFloatValueModelElement("s0")
+        self.assertEqual(decimal_float_me.get_child_elements(), None)
+
+    def test3get_match_element_valid_matches(self):
+        """Test valid float values with all possible combinations value_sign_type, value_pad_type and exponent_type."""
+        # add test with no decimal .
+        # add test with , instead of decimal .
+
+    def test4get_match_element_no_matches(self):
+        """Test not matching values with all possible combinations value_sign_type, value_pad_type and exponent_type."""
+        # add test with multiple decimal points
+        # add test where decimal point is at position 0
+        # add test where decimal point is at last position without following decimals
+
+    def test5path_id_input_validation(self):
+        """Check if element_id is validated."""
+        # empty element_id
+        path_id = ""
+        self.assertRaises(ValueError, DecimalFloatValueModelElement, path_id)
+
+        # None path_id
+        path_id = None
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id)
+
+        # bytes element_id is not allowed
+        path_id = b"path"
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id)
+
+        # integer element_id is not allowed
+        path_id = 123
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id)
+
+        # float element_id is not allowed
+        path_id = 123.22
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id)
+
+        # dict element_id is not allowed
+        path_id = {"id": "path"}
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id)
+
+        # list element_id is not allowed
+        path_id = ["path"]
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id)
+
+        # empty list element_id is not allowed
+        path_id = []
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id)
+
+    def test6value_sign_type_input_validation(self):
+        """Check if value_sign_type is validated."""
+        # also test if self.start_characters is set correctly.
+
+    def test7value_pad_type_input_validation(self):
+        """Check if value_pad_type is validated."""
+        # also test if self.pad_characters is set correctly.
+
+    def test8exponent_type_input_validation(self):
+        """Check if exponent_type is validated."""
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     positive_string = b'25537.21 uid=2'
     negative_string = b'-25537.21 uid=2'
