@@ -570,6 +570,6 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
                     self.last_parsed_seconds = date_time_model_element.last_parsed_seconds
                     self.start_year = date_time_model_element.start_year
                     return match_element
-            except:
+            except:  # skipcq: FLK-E722
                 pass
         return None

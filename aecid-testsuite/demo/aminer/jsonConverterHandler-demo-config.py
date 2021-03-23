@@ -194,7 +194,7 @@ def build_analysis_pipeline(analysis_context):
     if loc == (None, None):
         loc = ('en_US', 'utf8')
     service_children_parsing_model_element.append(
-        MultiLocaleDateTimeModelElement('MultiLocaleDateTimeModelElement', [(b'%b %d %Y', '%s.%s' % (loc), None)]))
+        MultiLocaleDateTimeModelElement('MultiLocaleDateTimeModelElement', [(b'%b %d %Y', None, '%s.%s' % loc)]))
     service_children_parsing_model_element.append(
         RepeatedElementDataModelElement('RepeatedElementDataModelElement', SequenceModelElement('SequenceModelElement', [
             FixedDataModelElement('FixedDataModelElement', b'drawn number: '),
