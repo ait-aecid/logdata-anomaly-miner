@@ -31,7 +31,7 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
     """This class creates events when new event or value sequences were found."""
 
-    def __init__(self, aminer_config, anomaly_event_handlers, id_path_list, target_path_list=None, seq_len=3, persistence_id='Default',
+    def __init__(self, aminer_config, anomaly_event_handlers, id_path_list=None, target_path_list=None, seq_len=3, persistence_id='Default',
                  auto_include_flag=False, output_log_line=True, ignore_list=None, constraint_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
@@ -57,6 +57,8 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
         self.aminer_config = aminer_config
         self.persistence_id = persistence_id
         self.id_path_list = id_path_list
+        if id_path_list is None:
+            self.id_path_list = []
         self.constraint_list = constraint_list
         if self.constraint_list is None:
             self.constraint_list = []
