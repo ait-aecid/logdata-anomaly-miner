@@ -28,6 +28,7 @@ Input:
         verbose: True # optional
         multi_source: False # optional
         timestamp_paths: "/model/accesslog/time"
+        suppress_unparsed: True
 
 Analysis:
         - type: NewMatchPathValueComboDetector

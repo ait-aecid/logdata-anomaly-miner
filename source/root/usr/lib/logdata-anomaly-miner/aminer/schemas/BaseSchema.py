@@ -146,7 +146,8 @@
                 'timestamp_paths': {'type': ['string', 'list'], 'empty': False},
                 'sync_wait_time': {'type': 'integer', 'min': 1, 'default': 5},
                 'eol_sep': {'type': 'string', 'required': False, 'default': '\n', 'empty': False},
-                'json_format': {'type': 'boolean', 'required': False, 'default': False}
+                'json_format': {'type': 'boolean', 'required': False, 'default': False},
+                'suppress_unparsed': {'type': 'boolean', 'required': False, 'default': False}
             }
         }
 }
