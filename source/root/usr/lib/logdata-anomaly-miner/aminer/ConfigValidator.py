@@ -17,6 +17,8 @@ class ParserModelType:
             module = "aminer.parsing"
             if name == 'DebugMatchContext':
                 module += '.MatchContext'
+            if name == "MultiLocaleDateTimeModelElement":
+                module += ".DateTimeModelElement"
             else:
                 module += '.' + name
             self.func = getattr(__import__(module, fromlist=[name]), name)

@@ -25,8 +25,8 @@
                 'consume_delimiter': {'type': 'boolean', 'default': False},
                 'key_parser_dict': {'type': 'dict'},
                 'optional_key_prefix': {'type': 'string', 'default': 'optional_key_'},
-                'date_format': {'type': 'string'},
-                'text_locale': {'type': 'string', 'nullable': True},
+                'date_format': {'type': 'string', 'minlength': 2},
+                'text_locale': {'type': 'string', 'nullable': True, 'default': None},
                 'max_time_jump_seconds': {'type': 'integer', 'default': 86400}
             }
         }

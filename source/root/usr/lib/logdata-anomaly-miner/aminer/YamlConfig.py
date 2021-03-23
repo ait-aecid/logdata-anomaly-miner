@@ -181,7 +181,8 @@ def build_parsing_model():
                 parser_model_dict[item['id']] = item['type'].func(item['name'], value_model, item['args'][1].decode(), branch_model_dict)
             elif item['type'].name == 'DateTimeModelElement':
                 parser_model_dict[item['id']] = item['type'].func(
-                    item['name'], item['date_format'], None, item['text_locale'], item['start_year'], item['max_time_jump_seconds'])
+                    item['name'], item['date_format'].encode(), None, item['text_locale'], item['start_year'],
+                    item['max_time_jump_seconds'])
             elif item['type'].name == 'MultiLocaleDateTimeModelElement':
                 date_formats = []
                 for date_format in item['date_formats']:
@@ -189,7 +190,9 @@ def build_parsing_model():
                         msg = 'The date_format must have a size of 3!'
                         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
-                    date_formats.append(tuple(i for i in date_format['format']))
+                    fmt = date_format['format']
+                    fmt[0] = fmt[0].encode()
+                    date_formats.append(tuple(fmt))
                 parser_model_dict[item['id']] = item['type'].func(
                     item['name'], date_formats, item['start_year'], item['max_time_jump_seconds'])
             elif item['type'].name == 'RepeatedElementDataModelElement':

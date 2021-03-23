@@ -398,6 +398,8 @@ class DateTimeModelElementTest(TestBase):
         for c in allowed_format_specifiers.replace(b"%", b"").replace(b"z", b""):
             self.assertRaises(ValueError, DateTimeModelElement, "s0", b"%" + str(chr(c)).encode() + b"%" + str(chr(c)).encode())
 
+        self.assertRaises(ValueError, DateTimeModelElement, "s0", b"")
+
     def test22time_zone_input_validation(self):
         """Check if time_zone is validated and only valid values can be entered."""
         dtme = DateTimeModelElement("s0", b"%d.%m.%Y %H:%M:%S")

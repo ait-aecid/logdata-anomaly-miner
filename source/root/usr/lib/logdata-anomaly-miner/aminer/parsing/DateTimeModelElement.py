@@ -131,6 +131,10 @@ class DateTimeModelElement(ModelElementInterface):
         self.tz_specifier_format_length = -1
         self.date_format_parts = None
         self.date_format = date_format
+        if len(date_format) <= 1:
+            msg = "At least one date_format specifier must be defined."
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
         self.scan_date_format(date_format)
 
         if start_year is not None and not isinstance(start_year, int) or isinstance(start_year, bool):

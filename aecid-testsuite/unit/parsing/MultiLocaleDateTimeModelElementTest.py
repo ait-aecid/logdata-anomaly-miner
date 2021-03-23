@@ -471,6 +471,7 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
 
         self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, "s0", [])
         self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, "s0", [(b"%s%z%f", None)])
+        self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, "s0", [(b"", None, None)])
 
     def test22time_zone_input_validation(self):
         """Check if time_zone is validated and only valid values can be entered."""
