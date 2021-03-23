@@ -315,7 +315,7 @@ class DateTimeModelElement(ModelElementInterface):
                     if result[2] == 0:
                         result[2] = current_date.day
                 parsed_date_time = datetime(result[0], result[1], result[2], result[3], result[4], result[5], microseconds,
-                                                     self.time_zone)
+                                            self.time_zone)
             # skipcq: FLK-E722
             except:
                 # The values did not form a valid datetime object, e.g. when the day of month is out of range. The rare case where dates
