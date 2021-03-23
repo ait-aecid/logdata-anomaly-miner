@@ -15,7 +15,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import os
 
 from aminer.input.InputInterfaces import AtomHandlerInterface
-from aminer.AminerConfig import CONFIG_KEY_LOG_LINE_PREFIX
+from aminer.AminerConfig import CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
 
 
 class MatchFilter(AtomHandlerInterface):
@@ -45,9 +45,7 @@ class MatchFilter(AtomHandlerInterface):
                 affected_log_atom_values = match.match_object
             if self.target_value_list is not None and affected_log_atom_values not in self.target_value_list:
                 continue
-            original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-            if original_log_line_prefix is None:
-                original_log_line_prefix = ''
+            original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
             analysis_component = {'AffectedLogAtomPaths': [target_path], 'AffectedLogAtomValues': [str(affected_log_atom_values)]}
             if self.output_log_line:
                 match_paths_values = {}

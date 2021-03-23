@@ -309,6 +309,8 @@ def build_input_pipeline(analysis_context, parsing_model):
     else:
         from aminer.input.SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler
         atom_filter.add_handler(SimpleUnparsedAtomHandler(anomaly_event_handlers), stop_when_handled_flag=True)
+    if yaml_data['Input']['suppress_unparsed'] is True:
+        analysis_context.suppress_detector_list.append(atom_filter.subhandler_list[-1][0])
     from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
     if 'LearnMode' in yaml_data:
         learn = yaml_data['LearnMode']
@@ -323,7 +325,7 @@ def build_input_pipeline(analysis_context, parsing_model):
 
 def build_analysis_components(analysis_context, anomaly_event_handlers, atom_filter):
     """Build the analysis components."""
-    suppress_detector_list = []
+    suppress_detector_list = analysis_context.suppress_detector_list
     if yaml_data['SuppressNewMatchPathDetector']:
         suppress_detector_list.append('DefaultNewMatchPathDetector')
     if 'Analysis' in yaml_data and yaml_data['Analysis'] is not None:
@@ -714,7 +716,6 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 tmp_analyser.output_event_handlers = item['output_event_handlers']
             analysis_context.register_component(tmp_analyser, component_name=comp_name)
             atom_filter.add_handler(tmp_analyser)
-    analysis_context.suppress_detector_list = suppress_detector_list
 
 
 def build_event_handlers(analysis_context, anomaly_event_handlers):
