@@ -1,5 +1,5 @@
 """
-This moduel defines a debug model element that can be used to check whether a specific position in the parsing tree is reached by log atoms.
+This module defines a debug model element that can be used to check whether a specific position in the parsing tree is reached by log atoms.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -27,9 +27,17 @@ class DebugModelElement(ModelElementInterface):
     """
 
     def __init__(self, element_id):
+        if not isinstance(element_id, str):
+            msg = "element_id has to be of the type string."
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if len(element_id) < 1:
+            msg = "element_id must not be empty."
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
         self.element_id = element_id
         # To avoid having those elements hidden in production configuration, write a line every time the class is instantiated.
-        msg = 'DebugModelElement %s added' % element_id
+        msg = "DebugModelElement %s added" % element_id
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info(msg)
         print(msg, file=sys.stderr)
 
@@ -49,4 +57,4 @@ class DebugModelElement(ModelElementInterface):
         msg = 'DebugModelElement path = "%s/%s", unmatched = "%s"' % (path, self.element_id, repr(match_context.match_data))
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info(msg)
         print(msg, file=sys.stderr)
-        return MatchElement('%s/%s' % (path, self.element_id), '', '', None)
+        return MatchElement('%s/%s' % (path, self.element_id), b"", b"", None)
