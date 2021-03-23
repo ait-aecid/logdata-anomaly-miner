@@ -1,13 +1,5 @@
 #!/bin/bash
 
-sudoInstalled=`dpkg -s sudo | grep Status 2>&1 /dev/null`
-
-if [[ $sudoInstalled == "Status: install ok installed" ]]; then
-	sudoInstalled=0
-else
-	sudoInstalled=1
-fi
-
 # declare all expected values without the variable ones. These arrays are used to compare with the incoming log lines.
 declare -a NEW_PATH_HD_REPAIR_1=(" New path(es) detected" "NewMatchPathDetector: \"NewPath\" (1 lines)" "  /model/DiskUpgrade: b'" ": System rebooted for hard disk upgrade'" "  /model/DiskUpgrade/DTM: " "  /model/DiskUpgrade/UNameSpace1: " "  /model/DiskUpgrade/UName: " "  /model/DiskUpgrade/UNameSpace2: " " /model/DiskUpgrade/User: " "  /model/DiskUpgrade/HDRepair: b' System rebooted for hard disk upgrade'" "['/model/DiskUpgrade', '/model/DiskUpgrade/DTM', '/model/DiskUpgrade/UNameSpace1', '/model/DiskUpgrade/UName', '/model/DiskUpgrade/UNameSpace2', '/model/DiskUpgrade/User', '/model/DiskUpgrade/HDRepair']" "Original log line: b'")
 declare -a UNPARSED_ATOM_1=(" Unparsed atom received" "SimpleUnparsedAtomHandler: \"UnparsedHandler\" (1 lines)" " System rebooted for hard disk upgrad")
@@ -586,11 +578,7 @@ function checkAllMails() {
 	dpkg -s mailutils &> /dev/null
 	if [ ! $? -eq 0 ]; then
     	echo -e "\e[31mMailutils-package is not installed! Installing it now..]"
-		if [[ $sudoInstalled == 0 ]]; then
-			sudo apt install mailutils -y
-		else
-			apt install mailutils -y
-		fi
+		sudo apt install mailutils -y
 	fi
 
 	echo ""
@@ -600,11 +588,7 @@ function checkAllMails() {
 	i=1
 	while [ $i -lt $linecount ] 
 	do
-		if [[ $sudoInstalled == 0 ]]; then
-			sudo echo p | mail > /tmp/out
-		else
-			echo p | mail > /tmp/out
-		fi
+		sudo echo p | mail > /tmp/out
 		input="/tmp/out"
 		t=false
 		aminerMail=false
@@ -669,19 +653,11 @@ function checkAllMails() {
 
 # This function checks if the output of the Syslog is as expected.
 function checkAllSyslogs(){
-	if [[ $sudoInstalled == 0 ]]; then
-		sudo tail -n 1000 /var/log/syslog > /tmp/out
-	else
-		tail -n 1000 /var/log/syslog > /tmp/out
-	fi
+	sudo tail -n 1000 /var/log/syslog > /tmp/out
 	
 	lastLine=`tail -n 1 /tmp/output`
 	if [[ $lastLine == "" ]]; then
-		if [[ $sudoInstalled == 0 ]]; then
-			sudo sed -i "$ d" /tmp/output
-		else
-			runuser -u aminer -- sed -i '$ d' /tmp/output
-		fi
+		sudo sed -i "$ d" /tmp/output
 	fi
 	
 	cntr=0
