@@ -979,9 +979,10 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     for type_index, type_val in enumerate(var_val[var_index]):
                         if len(type_val) >= 1 and isinstance(type_val[0], list):
                             if type_index == 6:  # continuously distributed variable type
-                                type_val.append([sum(type_val[0][-self.num_var_type_hist_ref:]) / max(len([1 for x in type_val[0][
-                                    -self.num_var_type_hist_ref:] if x != 0]), 1), sum(type_val[1][-self.num_var_type_hist_ref:]) /
-                                        max(len([1 for x in type_val[1][-self.num_var_type_hist_ref:] if x != 0]), 1)])
+                                self.var_type_history_list_reference[event_index][var_index].append([sum(type_val[0][
+                                    -self.num_var_type_hist_ref:]) / max(len([1 for x in type_val[0][
+                                        -self.num_var_type_hist_ref:] if x != 0]), 1), sum(type_val[1][-self.num_var_type_hist_ref:]) /
+                                    max(len([1 for x in type_val[1][-self.num_var_type_hist_ref:] if x != 0]), 1)])
                             else:
                                 self.var_type_history_list_reference[event_index][var_index].append([sum(x[
                                     -self.num_var_type_hist_ref:]) for x in type_val])
