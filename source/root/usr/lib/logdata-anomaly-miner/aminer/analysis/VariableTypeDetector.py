@@ -1008,7 +1008,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                                 # Differentiation between the entries, which are lists (e.g. discrete) and values
                                 if isinstance(type_val, list):
                                     for i, val in enumerate(type_val):
-                                        type_val[i] = val[-max(self.num_var_type_considered_ind, self.num_var_type_hist_ref):]
+                                        if isinstance(val, list):
+                                            type_val[i] = val[-max(self.num_var_type_considered_ind, self.num_var_type_hist_ref):]
                                 else:
                                     var_val[type_index] = type_val[-max(self.num_var_type_considered_ind, self.num_var_type_hist_ref):]
 
