@@ -2231,9 +2231,9 @@ def get_vt_string(vt):
         return_string = '%s %s' % (vt[0], vt[1])
     elif vt[0] == 'd':
         return_string = vt[0] + ' ['
-        for i in range(len(vt[2])):
-            if vt[2][i] >= 0.1:
-                return_string += '%s(%s%%), ' % (str(vt[1][i]), str(int(vt[2][i]*100)))
+        for i, val in enumerate(vt[2]):
+            if val >= 0.1:
+                return_string += '%s(%s%%), ' % (str(vt[1][i]), str(int(val*100)))
         if any(val < 0.1 for _, val in enumerate(vt[2])):
             return_string += '...]'
         else:
