@@ -37,7 +37,7 @@ class VariableCorrelationDetectorTest(TestBase):
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         if use_vtd:
             vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size,
-                                       div_thres=0.1, test_ks_int=True, sim_thres=0.3, ks_alpha=self.significance_niveau)
+                                       div_thres=0.1, test_gof_int=True, sim_thres=0.3, gof_alpha=self.significance_niveau)
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1)
         for _ in range(self.dataset_size):
             etd.receive_atom(log_atom)
@@ -50,7 +50,7 @@ class VariableCorrelationDetectorTest(TestBase):
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         if use_vtd:
             vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size,
-                                       div_thres=0.1, test_ks_int=False, sim_thres=0.5, ks_alpha=self.significance_niveau)
+                                       div_thres=0.1, test_gof_int=False, sim_thres=0.5, gof_alpha=self.significance_niveau)
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1)
         for i in range(self.dataset_size):
             stat_data = bytes(str((i % 60) * 0.1), 'utf-8')
@@ -65,7 +65,7 @@ class VariableCorrelationDetectorTest(TestBase):
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         if use_vtd:
             vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size,
-                                       div_thres=0.1, test_ks_int=True, sim_thres=0.3, ks_alpha=self.significance_niveau)
+                                       div_thres=0.1, test_gof_int=True, sim_thres=0.3, gof_alpha=self.significance_niveau)
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1)
         values = []
         for i in range(self.dataset_size):
@@ -83,7 +83,7 @@ class VariableCorrelationDetectorTest(TestBase):
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         if use_vtd:
             vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size,
-                                       div_thres=0.1, test_ks_int=True, sim_thres=0.3, ks_alpha=self.significance_niveau)
+                                       div_thres=0.1, test_gof_int=True, sim_thres=0.3, gof_alpha=self.significance_niveau)
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1)
         values = []
         for i in range(self.dataset_size):
@@ -533,7 +533,7 @@ class VariableCorrelationDetectorTest(TestBase):
 
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size, div_thres=0.1,
-                                   test_ks_int=True, sim_thres=0.1, ks_alpha=self.significance_niveau)
+                                   test_gof_int=True, sim_thres=0.1, gof_alpha=self.significance_niveau)
         vcd = VariableCorrelationDetector(
             self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_validate_cor_meth=['distinctDistr'],
             validate_cor_distinct_thres=0.05, num_init=self.dataset_size)
