@@ -31,12 +31,12 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
     This module needs to run after the EventTypeDetector is initialized
     """
 
-    def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id='Default', path_list=None, used_gof_test='CM',
-                 gof_alpha=0.05, s_gof_alpha=0.05, s_gof_bt_alpha=0.05, d_alpha=0.1, d_bt_alpha=0.1, div_thres=0.3, sim_thres=0.1,
-                 indicator_thres=0.4, num_init=100, num_update=50, num_update_unq=200, num_s_gof_values=50, num_s_gof_bt=30, num_d_bt=30,
-                 num_pause_discrete=5, num_pause_others=2, test_gof_int=True, update_var_type_bool=True, num_stop_update=False,
-                 silence_output_without_confidence=False, silence_output_except_indicator=True, num_var_type_hist_ref=10,
-                 num_update_var_type_hist_ref=10,  num_var_type_considered_ind=10, num_stat_stop_update=200,
+    def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id='Default', path_list=None,
+                 used_gof_test='CM', gof_alpha=0.05, s_gof_alpha=0.05, s_gof_bt_alpha=0.05, d_alpha=0.1, d_bt_alpha=0.1, div_thres=0.3,
+                 sim_thres=0.1, indicator_thres=0.4, num_init=100, num_update=50, num_update_unq=200, num_s_gof_values=50,
+                 num_s_gof_bt=30, num_d_bt=30, num_pause_discrete=5, num_pause_others=2, test_gof_int=True, update_var_type_bool=True,
+                 num_stop_update=False, silence_output_without_confidence=False, silence_output_except_indicator=True,
+                 num_var_type_hist_ref=10, num_update_var_type_hist_ref=10,  num_var_type_considered_ind=10, num_stat_stop_update=200,
                  num_updates_until_var_reduction=20, var_reduction_thres=0.6, num_skipped_ind_for_weights=1, num_ind_for_weights=100,
                  used_multinomial_test='Chi', use_empiric_distr=True, save_statistics=True, output_log_line=True, ignore_list=None,
                  constraint_list=None):
@@ -84,7 +84,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         self.num_update_unq = num_update_unq
         # Number of values which are tested in the s_gof-test. The value has to be <= num_init, >= num_update.
         # Recomended values are the implemented values of crit_val_upd_ks
-        self.num_s_gof_values= num_s_gof_values
+        self.num_s_gof_values = num_s_gof_values
         # Number of tested s_gof-Tests for the binomialtest of the testresults of the s_gof tests
         self.num_s_gof_bt = num_s_gof_bt
         # Number of tested discrete samples for the binomialtest of the testresults of the discrete tests
@@ -257,26 +257,27 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 pos_vals = [val for val in self.crit_val_ini_cm if val in self.crit_val_upd_cm]
 
             nearest = pos_vals[0]
-            for i in range(1, len(pos_vals)):
-                if abs(self.gof_alpha - pos_vals[i]) < abs(self.gof_alpha - nearest):
-                    nearest = pos_vals[i]
+            for val in pos_vals[1:]:
+                if abs(self.gof_alpha - val) < abs(self.gof_alpha - nearest):
+                    nearest = val
             msg = 'Changed the parameter gof_alpha of the VTD from %s to %s to use the pregenerated critical values for the gof-tests' % (
                     self.gof_alpha, nearest)
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
             self.gof_alpha = nearest
 
-        if (self.used_gof_test == 'KS' and (num_init not in self.crit_val_ini_ks[self.gof_alpha] or num_init not in self.crit_val_upd_ks[self.gof_alpha])) or (
-                self.used_gof_test == 'CM' and (num_init not in self.crit_val_ini_cm[self.gof_alpha] or num_init not in self.crit_val_upd_cm[self.gof_alpha])):
+        if (self.used_gof_test == 'KS' and (num_init not in self.crit_val_ini_ks[self.gof_alpha] or num_init not in 
+                self.crit_val_upd_ks[self.gof_alpha])) or (self.used_gof_test == 'CM' and (num_init not in 
+                self.crit_val_ini_cm[self.gof_alpha] or num_init not in self.crit_val_upd_cm[self.gof_alpha])):
             if self.used_gof_test == 'KS':
                 pos_vals = [val for val in self.crit_val_ini_ks[self.gof_alpha] if val in self.crit_val_upd_ks[self.gof_alpha]]
             else:
                 pos_vals = [val for val in self.crit_val_ini_cm[self.gof_alpha] if val in self.crit_val_upd_cm[self.gof_alpha]]
 
             nearest = pos_vals[0]
-            for i in range(1, len(pos_vals)):
-                if abs(num_init - pos_vals[i]) < abs(num_init - nearest):
-                    nearest = pos_vals[i]
+            for val in pos_vals[1:]:
+                if abs(num_init - val) < abs(num_init - nearest):
+                    nearest = val
             msg = 'Changed the parameter num_init of the VTD from %s to %s to use the pregenerated critical values for the gof-tests' % (
                     num_init, nearest)
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
@@ -286,29 +287,29 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if (self.used_gof_test == 'KS' and (num_s_gof_values not in self.crit_val_upd_ks[self.gof_alpha][self.num_init])) or (
                 self.used_gof_test == 'CM' and (num_s_gof_values not in self.crit_val_upd_cm[self.gof_alpha][self.num_init])):
             if self.used_gof_test == 'KS':
-                pos_vals = [val for val in self.crit_val_upd_ks[self.gof_alpha][self.num_init]]
+                pos_vals = list(self.crit_val_upd_ks[self.gof_alpha][self.num_init].keys())
             else:
-                pos_vals = [val for val in self.crit_val_upd_cm[self.gof_alpha][self.num_init]]
+                pos_vals = list(self.crit_val_upd_cm[self.gof_alpha][self.num_init].keys())
 
             nearest = pos_vals[0]
-            for i in range(1, len(pos_vals)):
-                if abs(num_s_gof_values - pos_vals[i]) < abs(num_s_gof_values - nearest):
-                    nearest = pos_vals[i]
-            msg = 'Changed the parameter num_s_gof_values of the VTD from %s to %s to use the pregenerated critical values for the gof-tests' % (
+            for val in pos_vals[1:]:
+                if abs(num_s_gof_values - val) < abs(num_s_gof_values - nearest):
+                    nearest = val
+            msg = 'Changed the parameter num_s_gof_values of the VTD from %s to %s to use pregenerated critical values for the gof-test' % (
                     num_s_gof_values, nearest)
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
             self.num_s_gof_values = nearest
 
         if self.event_type_detector.min_num_vals < max(self.num_init, self.num_update, self.num_s_gof_values):
-            msg = 'Changed the parameter min_num_vals of the ETD from %s to %s to prevent errors in the execution of the VTD' % (
+            msg = 'Changed the parameter min_num_vals of the VTD from %s to %s to use pregenerated critical values for the gof-test' % (
                     self.event_type_detector.min_num_vals, max(self.num_init, self.num_update, num_s_gof_values))
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
             self.event_type_detector.min_num_vals = max(self.num_init, self.num_update, self.num_s_gof_values)
 
         if self.event_type_detector.max_num_vals < max(self.num_init, self.num_update, self.num_s_gof_values) + 500:
-            msg = 'Changed the parameter max_num_vals of the ETD from %s to %s to prevent errors in the execution of the VTD' % (
+            msg = 'Changed the parameter max_num_vals of the VTD from %s to %s to use pregenerated critical values for the gof-test' % (
                     self.event_type_detector.max_num_vals, max(self.num_init, self.num_update, self.num_s_gof_values) + 500)
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
@@ -333,17 +334,20 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         self.min_mod_ini_beta1 = self.quantiles['beta1'][max(0.001, int(1/(self.num_init+1)*1000+0.5)/1000)]
         self.min_mod_upd_beta1 = self.quantiles['beta1'][max(0.001, int(1/(self.num_init+self.num_update+1)*1000+0.5)/1000)]
         self.max_mod_ini_beta1 = 1-self.quantiles['beta1'][min(0.999, int(self.num_init/(self.num_init+1)*1000+0.5)/1000)]
-        self.max_mod_upd_beta1 = 1-self.quantiles['beta1'][min(0.999, int((self.num_init+self.num_update)/(self.num_init+self.num_update+1)*1000+0.5)/1000)]
+        self.max_mod_upd_beta1 = 1-self.quantiles['beta1'][min(0.999, int((self.num_init+self.num_update)/(self.num_init+self.num_update+1)
+                *1000+0.5)/1000)]
 
         self.min_mod_ini_beta2 = self.quantiles['beta2'][max(0.001, int(1/(self.num_init+1)*1000+0.5)/1000)]
         self.min_mod_upd_beta2 = self.quantiles['beta2'][max(0.001, int(1/(self.num_init+self.num_update+1)*1000+0.5)/1000)]
         self.max_mod_ini_beta2 = 1-self.quantiles['beta2'][min(0.999, int(self.num_init/(self.num_init+1)*1000+0.5)/1000)]
-        self.max_mod_upd_beta2 = 1-self.quantiles['beta2'][min(0.999, int((self.num_init+self.num_update)/(self.num_init+self.num_update+1)*1000+0.5)/1000)]
+        self.max_mod_upd_beta2 = 1-self.quantiles['beta2'][min(0.999, int((self.num_init+self.num_update)/(self.num_init+self.num_update+1)
+                *1000+0.5)/1000)]
 
         self.min_mod_ini_beta4 = self.quantiles['beta4'][max(0.001, int(1/(self.num_init+1)*1000+0.5)/1000)]
         self.min_mod_upd_beta4 = self.quantiles['beta4'][max(0.001, int(1/(self.num_init+self.num_update+1)*1000+0.5)/1000)]
         self.max_mod_ini_beta4 = 1-self.quantiles['beta4'][min(0.999, int(self.num_init/(self.num_init+1)*1000+0.5)/1000)]
-        self.max_mod_upd_beta4 = 1-self.quantiles['beta4'][min(0.999, int((self.num_init+self.num_update)/(self.num_init+self.num_update+1)*1000+0.5)/1000)]
+        self.max_mod_upd_beta4 = 1-self.quantiles['beta4'][min(0.999, int((self.num_init+self.num_update)/(self.num_init+self.num_update+1)
+                *1000+0.5)/1000)]
 
     def receive_atom(self, log_atom):
         """
@@ -1029,9 +1033,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             [EV, sigma] = norm.fit(values)
 
             # Test for uniform distribution
-            significance.append(cramervonmises((values-Min) / (Max-Min) * (1-self.min_mod_ini_uni-self.max_mod_ini_uni) + self.min_mod_ini_uni, 'uniform') / 
-                    self.crit_val_ini_cm[self.gof_alpha][self.num_init]['uni'])
-            distribution.append(['uni', Min - self.min_mod_ini_uni / (1-self.min_mod_ini_uni-self.max_mod_ini_uni) * (Max-Min), 
+            significance.append(cramervonmises((values-Min) / (Max-Min) * (1-self.min_mod_ini_uni-self.max_mod_ini_uni) +
+                    self.min_mod_ini_uni, 'uniform') / self.crit_val_ini_cm[self.gof_alpha][self.num_init]['uni'])
+            distribution.append(['uni', Min - self.min_mod_ini_uni / (1-self.min_mod_ini_uni-self.max_mod_ini_uni) * (Max-Min),
                     Max + self.max_mod_ini_uni / (1-self.min_mod_ini_uni-self.max_mod_ini_uni) * (Max-Min)])
 
             # Test for normal distribution
@@ -1039,42 +1043,40 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             distribution.append(['nor', EV, sigma, Min, Max])
 
             # Test for beta1 distribution
-            significance.append(cramervonmises((values-Min) / (Max-Min) * (1-self.min_mod_ini_beta1-self.max_mod_ini_beta1) + self.min_mod_ini_beta1, 'beta', args=(0.5, 0.5)) / 
-                    self.crit_val_ini_cm[self.gof_alpha][self.num_init]['beta1'])
-            distribution.append(['beta', EV, sigma, Min - self.min_mod_ini_beta1 / (1-self.min_mod_ini_beta1-self.max_mod_ini_beta1) * (Max-Min), 
-                    Max + self.max_mod_ini_beta1 / (1-self.min_mod_ini_beta1-self.max_mod_ini_beta1) * (Max-Min), 1])
+            significance.append(cramervonmises((values-Min) / (Max-Min) * (1-self.min_mod_ini_beta1-self.max_mod_ini_beta1) +
+                    self.min_mod_ini_beta1, 'beta', args=(0.5, 0.5)) / self.crit_val_ini_cm[self.gof_alpha][self.num_init]['beta1'])
+            distribution.append(['beta', EV, sigma, Min - self.min_mod_ini_beta1 / (1-self.min_mod_ini_beta1-self.max_mod_ini_beta1) *
+                    (Max-Min), Max + self.max_mod_ini_beta1 / (1-self.min_mod_ini_beta1-self.max_mod_ini_beta1) * (Max-Min), 1])
 
             # Test for beta2 distribution
-            significance.append(cramervonmises((values-Min) / (Max-Min) * (1-self.max_mod_ini_beta2-self.min_mod_ini_beta2) + self.min_mod_ini_beta2, 'beta', args=(5, 2)) / 
-                    self.crit_val_ini_cm[self.gof_alpha][self.num_init]['beta2'])
-            distribution.append(['beta', EV, sigma, Min - self.min_mod_ini_beta2 / (1-self.min_mod_ini_beta2-self.max_mod_ini_beta2) * (Max-Min), 
-                    Max + self.max_mod_ini_beta2 / (1-self.min_mod_ini_beta2-self.max_mod_ini_beta2) * (Max-Min), 2])
+            significance.append(cramervonmises((values-Min) / (Max-Min) * (1-self.max_mod_ini_beta2-self.min_mod_ini_beta2) +
+                    self.min_mod_ini_beta2, 'beta', args=(5, 2)) / self.crit_val_ini_cm[self.gof_alpha][self.num_init]['beta2'])
+            distribution.append(['beta', EV, sigma, Min - self.min_mod_ini_beta2 / (1-self.min_mod_ini_beta2-self.max_mod_ini_beta2) *
+                    (Max-Min), Max + self.max_mod_ini_beta2 / (1-self.min_mod_ini_beta2-self.max_mod_ini_beta2) * (Max-Min), 2])
 
             # Test for beta3 distribution
-            significance.append(cramervonmises((values-Min) / (Max-Min) * (1-self.max_mod_ini_beta2-self.min_mod_ini_beta2) + self.max_mod_ini_beta2, 'beta', args=(2, 5)) / 
-                    self.crit_val_ini_cm[self.gof_alpha][self.num_init]['beta2'])
-            distribution.append(['beta', EV, sigma, Min - self.max_mod_ini_beta2 / (1-self.max_mod_ini_beta2-self.min_mod_ini_beta2) * (Max-Min), 
-                    Max + self.min_mod_ini_beta2 / (1-self.max_mod_ini_beta2-self.min_mod_ini_beta2) * (Max-Min), 3])
+            significance.append(cramervonmises((values-Min) / (Max-Min) * (1-self.max_mod_ini_beta2-self.min_mod_ini_beta2) +
+                    self.max_mod_ini_beta2, 'beta', args=(2, 5)) / self.crit_val_ini_cm[self.gof_alpha][self.num_init]['beta2'])
+            distribution.append(['beta', EV, sigma, Min - self.max_mod_ini_beta2 / (1-self.max_mod_ini_beta2-self.min_mod_ini_beta2) *
+                    (Max-Min), Max + self.min_mod_ini_beta2 / (1-self.max_mod_ini_beta2-self.min_mod_ini_beta2) * (Max-Min), 3])
 
             # Test for beta4 distribution
-            significance.append(cramervonmises((values-Min) / (EV-Min) *
-                    (1/6-self.min_mod_ini_beta4) + self.min_mod_ini_beta4, 'beta', args=(1, 5)) / 
-                    self.crit_val_ini_cm[self.gof_alpha][self.num_init]['beta4'])
+            significance.append(cramervonmises((values-Min) / (EV-Min) * (1/6-self.min_mod_ini_beta4) + self.min_mod_ini_beta4, 'beta',
+                    args=(1, 5)) / self.crit_val_ini_cm[self.gof_alpha][self.num_init]['beta4'])
             distribution.append(['beta', EV, sigma, Min, Max, 4])
 
             # Test for beta5 distribution
-            significance.append(cramervonmises((values-Max) / (Max-EV) *
-                    (1/6-self.min_mod_ini_beta4) + 1 - self.min_mod_ini_beta4, 'beta', args=(5, 1)) / 
-                    self.crit_val_ini_cm[self.gof_alpha][self.num_init]['beta4'])
+            significance.append(cramervonmises((values-Max) / (Max-EV) * (1/6-self.min_mod_ini_beta4) + 1 - self.min_mod_ini_beta4, 'beta',
+                    args=(5, 1)) / self.crit_val_ini_cm[self.gof_alpha][self.num_init]['beta4'])
             distribution.append(['beta', EV, sigma, Min, Max, 5])
 
             # Checks if one of the above tested continuous distribution fits
             if min(significance) <= 1:
                 sort_indices = np.argsort(significance)
                 sort_list = []
-                for i in range(1, len(sort_indices)):
-                    if significance[sort_indices[i]] >= self.gof_alpha:
-                        sort_list.append(distribution[sort_indices[i]])
+                for i in sort_indices[1:]:
+                    if significance[i] >= self.gof_alpha:
+                        sort_list.append(distribution[i])
                 return distribution[sort_indices[0]] + [sort_list]
 
         if self.use_empiric_distr:
@@ -1099,7 +1101,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 self.print_changed_var_type(event_index, VT_old, ['others'], var_index, log_atom, 1.0)
                 return
 
-            # Used to test the current distribution with the BT and to discard the alternative distributions if they fail the s_gof-test once
+            # first_distr is used to test the current distribution with the BT and to discard the alternative distributions if they
+            # fail the s_gof-test once
             first_distr = True
             s_gof_result = self.s_gof_test(event_index, var_index, first_distr)
             # Calculate the confidence as the stretched sigmaoid function of the maximal value of the step fct
@@ -1410,7 +1413,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             EV = self.var_type[event_index][var_index][1]
             sigma = self.var_type[event_index][var_index][2]
 
-            indices = 0 + np.array(range(2 * self.num_s_gof_values)) / (2 * self.num_s_gof_values- 1) * (
+            indices = 0 + np.array(range(2 * self.num_s_gof_values)) / (2 * self.num_s_gof_values - 1) * (
                     1000 - 1)
             indices = indices.astype(int)
 
@@ -1435,7 +1438,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
     def s_gof_test(self, event_index, var_index, first_distr):
         """
-        Make a gof-test
+        Make a gof-test.
         @return a list with the first entry True/False and as the second entry the maximal value of the step functions
         """
         num_distr_val = 2 * self.num_s_gof_values
@@ -1503,7 +1506,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     max_val = kstest(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:], 'beta', args=(
                             5, 1, self.var_type[event_index][var_index][1] - mu * self.var_type[event_index][var_index][2] / sigma,
                             self.var_type[event_index][var_index][2] / sigma))[0]
-            else: 
+            else:
                 max_val = ks_2samp(self.distr_val[event_index][var_index], self.event_type_detector.values[event_index][var_index][
                         -self.num_s_gof_values:])[0]
 
@@ -1515,23 +1518,24 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 return [False, 1.0]
             return [True, 0.0]
 
-        elif self.used_gof_test == 'CM':
+        if self.used_gof_test == 'CM':
             # Calculate the critical value for the CM-test
             # The parameters are in the list of the critical values
             distribution = self.var_type[event_index][var_index][0]
             if distribution == 'beta':
                 distribution += str(self.var_type[event_index][var_index][-1])
 
-            if distribution == 'uni' or distribution == 'beta1':
+            if distribution in ['uni', 'beta1']:
                 crit_value = self.crit_val_upd_cm[self.s_gof_alpha][self.num_init][self.num_s_gof_values][distribution]
-            if distribution == 'beta2' or distribution == 'beta3':
+            if distribution in ['beta2', 'beta3']:
                 crit_value = self.crit_val_upd_cm[self.s_gof_alpha][self.num_init][self.num_s_gof_values]['beta2']
             elif distribution == 'nor':
                 crit_value = self.crit_val_upd_cm[self.s_gof_alpha][self.num_init][self.num_s_gof_values][distribution]
-            elif distribution == 'beta4' or distribution == 'beta5':
+            elif distribution in ['beta4', 'beta5']:
                 crit_value = self.crit_val_upd_cm[self.s_gof_alpha][self.num_init][self.num_s_gof_values]['beta4']
             else:
-                crit_value = self.crit_val_hom_cm[self.s_gof_alpha][max(self.num_init, self.num_s_gof_values)][min(self.num_init, self.num_s_gof_values)]
+                crit_value = self.crit_val_hom_cm[self.s_gof_alpha][max(self.num_init, self.num_s_gof_values)][
+                        min(self.num_init, self.num_s_gof_values)]
 
             max_val = 0
 
@@ -1542,22 +1546,20 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 min_upd = Min - self.min_mod_upd_uni / (1-self.min_mod_upd_uni-self.max_mod_upd_uni) * (Max-Min)
                 max_upd = Max + self.max_mod_upd_uni / (1-self.min_mod_upd_uni-self.max_mod_upd_uni) * (Max-Min)
 
-                if (min_upd < 1.5 * self.var_type[event_index][var_index][1] - 
-                              0.5 * self.var_type[event_index][var_index][2]) or (
-                        max_upd > 1.5 * self.var_type[event_index][var_index][2] - 
-                                  0.5 * self.var_type[event_index][var_index][1]):
+                if (min_upd < 1.5 * self.var_type[event_index][var_index][1] - 0.5 * self.var_type[event_index][var_index][2]) or (
+                        max_upd > 1.5 * self.var_type[event_index][var_index][2] - 0.5 * self.var_type[event_index][var_index][1]):
                     return [False, 1]
 
                 estimated_min = min(self.var_type[event_index][var_index][1], min_upd)
                 estimated_max = max(self.var_type[event_index][var_index][2], max_upd)
 
-                max_val = cramervonmises((np.array(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) - estimated_min) /
-                    (estimated_max - estimated_min), 'uniform')
+                max_val = cramervonmises((np.array(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) -
+                        estimated_min) / (estimated_max - estimated_min), 'uniform')
 
             # Two sample CM-test for normal distribution
             elif self.var_type[event_index][var_index][0] == 'nor':
-                max_val = cramervonmises(np.array(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]), 'norm', args=(
-                    self.var_type[event_index][var_index][1], self.var_type[event_index][var_index][2]))
+                max_val = cramervonmises(np.array(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]), 'norm',
+                    args=(self.var_type[event_index][var_index][1], self.var_type[event_index][var_index][2]))
 
             # Two sample CM-test for beta distributions
             elif self.var_type[event_index][var_index][0] == 'beta':
@@ -1567,17 +1569,15 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     min_upd = Min - self.min_mod_upd_beta1 / (1-self.min_mod_upd_beta1-self.max_mod_upd_beta1) * (Max-Min)
                     max_upd = Max + self.max_mod_upd_beta1 / (1-self.min_mod_upd_beta1-self.max_mod_upd_beta1) * (Max-Min)
 
-                    if (min_upd < 1.5 * self.var_type[event_index][var_index][3] - 
-                                  0.5 * self.var_type[event_index][var_index][4]) or (
-                            max_upd > 1.5 * self.var_type[event_index][var_index][4] - 
-                                      0.5 * self.var_type[event_index][var_index][3]):
+                    if (min_upd < 1.5 * self.var_type[event_index][var_index][3] - 0.5 * self.var_type[event_index][var_index][4]) or (
+                            max_upd > 1.5 * self.var_type[event_index][var_index][4] - 0.5 * self.var_type[event_index][var_index][3]):
                         return [False, 1]
 
                     estimated_min = min(self.var_type[event_index][var_index][3], min_upd)
                     estimated_max = max(self.var_type[event_index][var_index][4], max_upd)
 
-                    max_val = cramervonmises((np.array(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) - estimated_min) /
-                        (estimated_max - estimated_min), 'beta', args=(0.5, 0.5))
+                    max_val = cramervonmises((np.array(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) -
+                            estimated_min) / (estimated_max - estimated_min), 'beta', args=(0.5, 0.5))
 
                 elif self.var_type[event_index][var_index][5] == 2:
                     Min = min(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:])
@@ -1585,17 +1585,15 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     min_upd = Min - self.min_mod_upd_beta2 / (1-self.max_mod_upd_beta2-self.min_mod_upd_beta2) * (Max-Min)
                     max_upd = Max + self.max_mod_upd_beta2 / (1-self.max_mod_upd_beta2-self.min_mod_upd_beta2) * (Max-Min)
 
-                    if (min_upd < 1.5 * self.var_type[event_index][var_index][3] - 
-                                  0.5 * self.var_type[event_index][var_index][4]) or (
-                            max_upd > 1.5 * self.var_type[event_index][var_index][4] - 
-                                      0.5 * self.var_type[event_index][var_index][3]):
+                    if (min_upd < 1.5 * self.var_type[event_index][var_index][3] - 0.5 * self.var_type[event_index][var_index][4]) or (
+                            max_upd > 1.5 * self.var_type[event_index][var_index][4] - 0.5 * self.var_type[event_index][var_index][3]):
                         return [False, 1]
 
                     estimated_min = min(self.var_type[event_index][var_index][3], min_upd)
                     estimated_max = max(self.var_type[event_index][var_index][4], max_upd)
 
-                    max_val = cramervonmises((np.array(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) - estimated_min) /
-                        (estimated_max - estimated_min), 'beta', args=(5, 2))
+                    max_val = cramervonmises((np.array(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) -
+                            estimated_min) / (estimated_max - estimated_min), 'beta', args=(5, 2))
 
                 elif self.var_type[event_index][var_index][5] == 3:
                     Min = min(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:])
@@ -1603,37 +1601,37 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     min_upd = Min - self.max_mod_upd_beta2 / (1-self.max_mod_upd_beta2-self.min_mod_upd_beta2) * (Max-Min)
                     max_upd = Max + self.min_mod_upd_beta2 / (1-self.max_mod_upd_beta2-self.min_mod_upd_beta2) * (Max-Min)
 
-                    if (min_upd < 1.5 * self.var_type[event_index][var_index][3] - 
-                                  0.5 * self.var_type[event_index][var_index][4]) or (
-                            max_upd > 1.5 * self.var_type[event_index][var_index][4] - 
-                                      0.5 * self.var_type[event_index][var_index][3]):
+                    if (min_upd < 1.5 * self.var_type[event_index][var_index][3] - 0.5 * self.var_type[event_index][var_index][4]) or (
+                            max_upd > 1.5 * self.var_type[event_index][var_index][4] - 0.5 * self.var_type[event_index][var_index][3]):
                         return [False, 1]
 
                     estimated_min = min(self.var_type[event_index][var_index][3], min_upd)
                     estimated_max = max(self.var_type[event_index][var_index][4], max_upd)
 
-                    max_val = cramervonmises((np.array(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) - estimated_min) /
-                        (estimated_max - estimated_min), 'beta', args=(2, 5))
+                    max_val = cramervonmises((np.array(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) -
+                            estimated_min) / (estimated_max - estimated_min), 'beta', args=(2, 5))
 
                 elif self.var_type[event_index][var_index][5] == 4:
                     EV_upd = (self.var_type[event_index][var_index][1] * self.num_init + np.mean(
                             self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) *
                             self.num_s_gof_values) / (self.num_init + self.num_s_gof_values)
-                    estimated_min = min(min(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]), 
+                    estimated_min = min(min(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]),
                             self.var_type[event_index][var_index][3])
 
-                    max_val = cramervonmises((np.array(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) - estimated_min) / \
-                                (EV_upd-estimated_min) * (1 / (5 + 1)-self.min_mod_upd_beta4) + self.min_mod_upd_beta4, 'beta', args=(1, 5))
+                    max_val = cramervonmises((np.array(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) -
+                            estimated_min) / (EV_upd-estimated_min) * (1 / (5 + 1)-self.min_mod_upd_beta4) + self.min_mod_upd_beta4, 'beta',
+                            args=(1, 5))
 
                 elif self.var_type[event_index][var_index][5] == 5:
                     EV_upd = (self.var_type[event_index][var_index][1] * self.num_init + np.mean(
                             self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) *
                             self.num_s_gof_values) / (self.num_init + self.num_s_gof_values)
-                    estimated_max = max(max(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]), 
+                    estimated_max = max(max(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]),
                             self.var_type[event_index][var_index][4])
 
-                    max_val = cramervonmises((np.array(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) - estimated_max) / \
-                                (estimated_max - EV_upd) * (1 / (5 + 1)-self.min_mod_upd_beta4) + 1 - self.min_mod_upd_beta4, 'beta', args=(5, 1))
+                    max_val = cramervonmises((np.array(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) -
+                            estimated_max) / (estimated_max - EV_upd) * (1 / (5 + 1)-self.min_mod_upd_beta4) + 1 - self.min_mod_upd_beta4,
+                            'beta', args=(5, 1))
 
             else:
                 max_val = cramervonmises2(self.distr_val[event_index][var_index], self.event_type_detector.values[event_index][var_index][
@@ -2111,6 +2109,7 @@ def get_vt_string(vt):
 
 
 def cramervonmises(rvs, cdf, args=()):
+    """Return the cramer von mises gof test statistic."""
     if isinstance(cdf, str):
         cdf = getattr(distributions, cdf).cdf
 
@@ -2132,7 +2131,7 @@ def cramervonmises(rvs, cdf, args=()):
 
 
 def cramervonmises2(rvs1, rvs2):
-
+    """Return the cramer von mises two sample homogeneity test statistic."""
     vals1 = np.sort(np.asarray(rvs1))
     vals2 = np.sort(np.asarray(rvs2))
 
@@ -2143,7 +2142,7 @@ def cramervonmises2(rvs1, rvs2):
 
     n1 = len(vals1)
     n2 = len(vals2)
-    
+
     sum_val = 0
     index1 = 0
     index2 = 0
