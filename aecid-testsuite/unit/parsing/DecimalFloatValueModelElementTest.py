@@ -65,7 +65,30 @@ class DecimalFloatValueModelElementTest(TestBase):
 
     def test6value_sign_type_input_validation(self):
         """Check if value_sign_type is validated."""
-        # also test if self.start_characters is set correctly.
+        path_id = "path"
+        value_sign_type = "None"
+        self.assertRaises(ValueError, DecimalFloatValueModelElement, path_id, value_sign_type=value_sign_type)
+
+        value_sign_type = None
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, value_sign_type=value_sign_type)
+
+        value_sign_type = b"none"
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, value_sign_type=value_sign_type)
+
+        value_sign_type = 123
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, value_sign_type=value_sign_type)
+
+        value_sign_type = 123.22
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, value_sign_type=value_sign_type)
+
+        value_sign_type = {"value_sign_type": "none"}
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, value_sign_type=value_sign_type)
+
+        value_sign_type = ["none"]
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, value_sign_type=value_sign_type)
+
+        value_sign_type = []
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, value_sign_type=value_sign_type)
 
     def test7value_pad_type_input_validation(self):
         """Check if value_pad_type is validated."""

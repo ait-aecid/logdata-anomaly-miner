@@ -19,7 +19,7 @@ import logging
 import sys
 
 from aminer import AminerConfig
-from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
+from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
@@ -757,13 +757,14 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         self.variable_path_num[event_index].append(var_index)
 
             # Initializes the lists for the discrete distribution, or continuous distribution
-            for var_index, var_val in enumerate(self.var_type[event_index]):
-                if len(var_val) > 0:
-                    if var_val[0] in self.distr_list:
+            for var_index in range(len(self.var_type[event_index])):
+                if len(self.var_type[event_index][var_index]) > 0:
+
+                    if self.var_type[event_index][var_index][0] in self.distr_list:
                         self.bt_results[event_index][var_index] = [1] * self.num_s_ks_bt
-                        if var_val[0] in ('betam', 'spec'):
+                        if self.var_type[event_index][var_index][0] in ('betam', 'spec'):
                             self.s_ks_get_quantiles(event_index, var_index)
-                    elif var_val[0] == 'd':
+                    elif self.var_type[event_index][var_index][0] == 'd':
                         self.d_init_bt(event_index, var_index)
 
     def process_ll(self, event_index, log_atom):
@@ -881,18 +882,20 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 else:
                     type_index = -1
 
-                for tmp_type_index, tmp_type_val in enumerate(self.var_type_history_list[event_index][var_index]):
+                for tmp_type_index in range(len(self.var_type_history_list[event_index][var_index])):
                     if tmp_type_index == type_index:
-                        if len(tmp_type_val) >= 1 and isinstance(tmp_type_val[0], list):
-                            tmp_type_val[0].append(1)
-                            for i, val in enumerate(tmp_type_val, start=1):
-                                val.append(0)
+                        if len(self.var_type_history_list[event_index][var_index][type_index]) >= 1 and isinstance(
+                                self.var_type_history_list[event_index][var_index][type_index][0], list):
+                            self.var_type_history_list[event_index][var_index][type_index][0].append(1)
+                            for i in range(1, len(self.var_type_history_list[event_index][var_index][type_index])):
+                                self.var_type_history_list[event_index][var_index][type_index][i].append(0)
                         else:
                             self.var_type_history_list[event_index][var_index][type_index].append(1)
                     else:
-                        if len(tmp_type_val) >= 1 and isinstance(tmp_type_val[0], list):
-                            for i, val in enumerate(tmp_type_val):
-                                val.append(0)
+                        if len(self.var_type_history_list[event_index][var_index][tmp_type_index]) >= 1 and isinstance(
+                                self.var_type_history_list[event_index][var_index][tmp_type_index][0], list):
+                            for i in range(len(self.var_type_history_list[event_index][var_index][tmp_type_index])):
+                                self.var_type_history_list[event_index][var_index][tmp_type_index][i].append(0)
                         else:
                             self.var_type_history_list[event_index][var_index][tmp_type_index].append(0)
 
@@ -912,17 +915,17 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     self.event_type_detector.num_eventlines[event_index] - self.num_init) / self.num_update ==
                     self.num_updates_until_var_reduction - 1):
 
-                for var_index, var_val in enumerate(self.var_type_history_list[event_index]):
+                for var_index in range(len(self.var_type_history_list[event_index])):
                     # Skips the variable if it is already not being checked
                     if not self.event_type_detector.check_variables[event_index][var_index]:
                         continue
 
                     tmp_max = 1
                     exceeded_thresh = False
-                    for type_index, type_val in enumerate(var_val, start=1):
+                    for type_index in range(1, len(self.var_type_history_list[event_index][var_index])):
                         # Continuous Distribution
                         if type_index == 6:  # continuously distributed variable type
-                            num_app = len([1 for x in type_val[1] if x != 0])
+                            num_app = len([1 for x in self.var_type_history_list[event_index][var_index][type_index][1] if x != 0])
                             if num_app / self.num_updates_until_var_reduction >= self.var_reduction_thres:
                                 exceeded_thresh = True
                                 break
@@ -930,15 +933,16 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                                 tmp_max = num_app
                         # Distributions which are not continuous
                         else:
-                            if len(type_val) >= 1 and isinstance(type_val[0], list):
-                                num_app = sum(type_val[0])
+                            if len(self.var_type_history_list[event_index][var_index][type_index]) >= 1 and isinstance(
+                                    self.var_type_history_list[event_index][var_index][type_index][0], list):
+                                num_app = sum(self.var_type_history_list[event_index][var_index][type_index][0])
                                 if num_app / self.num_updates_until_var_reduction >= self.var_reduction_thres:
                                     exceeded_thresh = True
                                     break
                                 if num_app > tmp_max:
                                     tmp_max = num_app
                             else:
-                                num_app = sum(type_val)
+                                num_app = sum(self.var_type_history_list[event_index][var_index][type_index])
                                 if num_app / self.num_updates_until_var_reduction >= self.var_reduction_thres:
                                     exceeded_thresh = True
                                     break
@@ -974,21 +978,25 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     for i in range(event_index + 1 - len(self.var_type_history_list_reference)):
                         self.var_type_history_list_reference.append([])
 
-                for var_index, var_val in enumerate(self.var_type_history_list[event_index]):
+                for var_index in range(len(self.var_type_history_list[event_index])):
                     self.var_type_history_list_reference[event_index].append([])
-                    for type_index, type_val in enumerate(var_val):
-                        if len(type_val) >= 1 and isinstance(type_val[0], list):
+                    for type_index in range(len(self.var_type_history_list[event_index][var_index])):
+                        if len(self.var_type_history_list[event_index][var_index][type_index]) >= 1 and isinstance(
+                                self.var_type_history_list[event_index][var_index][type_index][0], list):
                             if type_index == 6:  # continuously distributed variable type
-                                self.var_type_history_list_reference[event_index][var_index].append([sum(type_val[0][
-                                    -self.num_var_type_hist_ref:]) / max(len([1 for x in type_val[0][
-                                        -self.num_var_type_hist_ref:] if x != 0]), 1), sum(type_val[1][-self.num_var_type_hist_ref:]) /
-                                    max(len([1 for x in type_val[1][-self.num_var_type_hist_ref:] if x != 0]), 1)])
+                                self.var_type_history_list_reference[event_index][var_index].append([sum(
+                                        self.var_type_history_list[event_index][var_index][type_index][0][-self.num_var_type_hist_ref:]) /
+                                        max(len([1 for x in self.var_type_history_list[event_index][var_index][type_index][0][
+                                            -self.num_var_type_hist_ref:] if x != 0]), 1), sum(
+                                        self.var_type_history_list[event_index][var_index][type_index][1][-self.num_var_type_hist_ref:]) /
+                                        max(len([1 for x in self.var_type_history_list[event_index][var_index][type_index][1][
+                                            -self.num_var_type_hist_ref:] if x != 0]), 1)])
                             else:
                                 self.var_type_history_list_reference[event_index][var_index].append([sum(x[
-                                    -self.num_var_type_hist_ref:]) for x in type_val])
+                                    -self.num_var_type_hist_ref:]) for x in self.var_type_history_list[event_index][var_index][type_index]])
                         else:
                             self.var_type_history_list_reference[event_index][var_index].append(
-                                    sum(type_val[-self.num_var_type_hist_ref:]))
+                                    sum(self.var_type_history_list[event_index][var_index][type_index][-self.num_var_type_hist_ref:]))
 
             # Checks the indicator for the varTypes of the Event and generates an output, if it fails
             else:
@@ -1004,13 +1012,14 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     if len(self.var_type_history_list[event_index]) > 0 and len(self.var_type_history_list[event_index][0]) > 0 and len(
                         self.var_type_history_list[event_index][0][0]) > max(
                             self.num_var_type_considered_ind, self.num_var_type_hist_ref):
-                        for var_index, var_val in enumerate(self.var_type_history_list[event_index]):
-                            for type_index, type_val in enumerate(var_val):
+                        for var_index in range(len(self.var_type_history_list[event_index])):
+                            for type_index in range(len(self.var_type_history_list[event_index][var_index])):
                                 # Differentiation between the entries, which are lists (e.g. discrete) and values
-                                if isinstance(type_val, list):
-                                    for i, val in enumerate(type_val):
+                                if type(self.var_type_history_list[event_index][var_index][type_index][i]) is list:
+                                    for i in range(len(self.var_type_history_list[event_index][var_index][type_index])):
                                         self.var_type_history_list[event_index][var_index][type_index][i] = \
-                                            val[-max(self.num_var_type_considered_ind, self.num_var_type_hist_ref):]
+                                            self.var_type_history_list[event_index][var_index][type_index][i][
+                                            -max(self.num_var_type_considered_ind, self.num_var_type_hist_ref):]
                                 else:
                                     self.var_type_history_list[event_index][var_index][type_index] = \
                                         self.var_type_history_list[event_index][var_index][type_index][
@@ -1029,7 +1038,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
                         # indices of the variables, which would have failed the indicator
                         indices_failed_tests = []
-                        for var_index, _ in enumerate(self.var_type[event_index]):
+                        for var_index in range(len(self.var_type[event_index])):
                             if indicator_list[var_index] >= self.indicator_thres:
                                 indices_failed_tests.append(var_index)
                                 self.failed_indicators[event_index][var_index].append(self.event_type_detector.num_eventlines[event_index])
@@ -1046,8 +1055,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                             lower_ind = False  # Index of the lower bound of the considered values of the failed_indicator list
                             upper_ind = False  # Index of the upper bound of the considered values of the failed_indicator list
 
-                            for i, val in enumerate(self.failed_indicators[event_index][var_index]):
-                                if val >= first_line_num:
+                            for i in range(len(self.failed_indicators[event_index][var_index])):
+                                if self.failed_indicators[event_index][var_index][i] >= first_line_num:
                                     lower_ind = i
                                     break
 
@@ -1055,8 +1064,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                                 lower_ind = 0
                                 upper_ind = 0
                             else:
-                                for i, val in enumerate(self.failed_indicators[event_index][var_index], start=lower_ind):
-                                    if val >= last_line_num:
+                                for i in range(lower_ind, len(self.failed_indicators[event_index][var_index])):
+                                    if self.failed_indicators[event_index][var_index][i] >= last_line_num:
                                         upper_ind = i
                                         break
                                 if isinstance(upper_ind, bool):
@@ -1094,19 +1103,23 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         self.event_type_detector.num_eventlines[event_index] - self.num_init) / self.num_update
                         - self.num_var_type_hist_ref) % self.num_update_var_type_hist_ref == 0):
 
-                    for var_index, var_value in enumerate(self.var_type_history_list[event_index]):
+                    for var_index in range(len(self.var_type_history_list[event_index])):
                         self.var_type_history_list_reference[event_index][var_index] = []
-                        for type_index, type_val in enumerate(var_value):
-                            if len(type_val) >= 1 and isinstance(type_val[0], list):
+                        for type_index in range(len(self.var_type_history_list[event_index][var_index])):
+                            if len(self.var_type_history_list[event_index][var_index][type_index]) >= 1 and isinstance(
+                                    self.var_type_history_list[event_index][var_index][type_index][0], list):
                                 if type_index == 6:  # continuously distributed variable type
-                                    self.var_type_history_list_reference[event_index][var_index].append([sum(type_val[0][
-                                        -self.num_var_type_hist_ref:]) / max(len([1 for x in type_val[0][
-                                            -self.num_var_type_hist_ref:] if x != 0]), 1), sum(type_val[1][
-                                                -self.num_var_type_hist_ref:]) / max(len([1 for x in type_val[1][
-                                                    -self.num_var_type_hist_ref:] if x != 0]), 1)])
+                                    self.var_type_history_list_reference[event_index][var_index].append([sum(
+                                            self.var_type_history_list[event_index][var_index][type_index][0][
+                                                -self.num_var_type_hist_ref:]) / max(len([1 for x in self.var_type_history_list[
+                                                    event_index][var_index][type_index][0][-self.num_var_type_hist_ref:] if x != 0]), 1),
+                                            sum(self.var_type_history_list[event_index][var_index][type_index][1][
+                                                -self.num_var_type_hist_ref:]) / max(len([1 for x in self.var_type_history_list[
+                                                    event_index][var_index][type_index][1][-self.num_var_type_hist_ref:] if x != 0]), 1)])
                                 else:
                                     self.var_type_history_list_reference[event_index][var_index].append(
-                                            [sum(x[-self.num_var_type_hist_ref:]) for x in type_val])
+                                            [sum(x[-self.num_var_type_hist_ref:]) for x in
+                                                self.var_type_history_list[event_index][var_index][type_index]])
                             else:
                                 self.var_type_history_list_reference[event_index][var_index].append(sum(
                                         self.var_type_history_list[event_index][var_index][type_index][-self.num_var_type_hist_ref:]))
@@ -1458,9 +1471,10 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 tmp_number = self.var_type[event_index][var_index][3] / (
                         self.num_update + self.var_type[event_index][var_index][3])
                 # Updates the appearance-list in the var type of the discrete variable
-                for j, j_val in enumerate(self.var_type[event_index][var_index][2]):
-                    self.var_type[event_index][var_index][2][j] = j_val * tmp_number + values_app[j] / (self.num_update + self.var_type[
-                        event_index][var_index][3])
+                for j in range(len(self.var_type[event_index][var_index][2])):
+                    self.var_type[event_index][var_index][2][j] = \
+                        self.var_type[event_index][var_index][2][j] * tmp_number + values_app[j] / (
+                            self.num_update + self.var_type[event_index][var_index][3])
 
                 self.var_type[event_index][var_index][3] = self.num_update + self.var_type[event_index][var_index][3]
 
@@ -1499,9 +1513,10 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 tmp_number = self.var_type[event_index][var_index][3] / (
                     self.num_update + self.var_type[event_index][var_index][3])
                 # Updates the appearance-list in the var type of the discrete variable
-                for j, j_val in enumerate(self.var_type[event_index][var_index][2]):
-                    self.var_type[event_index][var_index][2][j] = j_val * tmp_number + values_app[j] / (self.num_update + self.var_type[
-                        event_index][var_index][3])
+                for j in range(len(self.var_type[event_index][var_index][2])):
+                    self.var_type[event_index][var_index][2][j] = \
+                        self.var_type[event_index][var_index][2][j] * tmp_number + values_app[j] / (
+                            self.num_update + self.var_type[event_index][var_index][3])
 
                 self.var_type[event_index][var_index][3] = self.num_update + self.var_type[event_index][var_index][3]
 
@@ -1672,8 +1687,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             indices2 = [i for i in range(1000) if i not in indices1]
 
             # Generate the quantiles for the var type with the standardised quantiles
+            self.distr_val[event_index][var_index] = self.distribution_data['betam1'][indices1] * scale + Min
             self.distr_val[event_index][var_index] = np.append(
-                self.distribution_data['betam1'][indices1] * scale + Min, self.distribution_data['betam2'][indices2] * scale + Min)
+                self.distr_val[event_index][var_index], self.distribution_data['betam2'][indices2] * scale + Min)
             self.distr_val[event_index][var_index].sort()
             return
 
@@ -1905,7 +1921,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
     def init_var_type_history_list(self, event_index):
         """Initialize the history of the variabletypes of the eventType."""
         if len(self.var_type_history_list) < event_index + 1 or self.var_type_history_list[event_index] == []:
-            for _ in range(event_index + 1 - len(self.var_type_history_list)):
+            for i in range(event_index + 1 - len(self.var_type_history_list)):
                 self.var_type_history_list.append([])
 
             # [others, static, [discrete, number of appended steps], asc, desc, unique, EV of continuous distributions]
@@ -1930,20 +1946,22 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 else:
                     type_index = -1
 
-                for tmp_type_index, tmp_type_val in enumerate(self.var_type_history_list[event_index][var_index]):
+                for tmp_type_index in range(len(self.var_type_history_list[event_index][var_index])):
                     if tmp_type_index == type_index:
-                        if len(tmp_type_val) >= 1 and isinstance(tmp_type_val[0], list):
-                            tmp_type_val[0].append(1)
-                            for _, val in enumerate(tmp_type_val, start=1):
-                                val.append(0)
+                        if len(self.var_type_history_list[event_index][var_index][type_index]) >= 1 and isinstance(
+                                self.var_type_history_list[event_index][var_index][type_index][0], list):
+                            self.var_type_history_list[event_index][var_index][type_index][0].append(1)
+                            for i in range(1, len(self.var_type_history_list[event_index][var_index][type_index])):
+                                self.var_type_history_list[event_index][var_index][type_index][i].append(0)
                         else:
-                            tmp_type_val.append(1)
+                            self.var_type_history_list[event_index][var_index][type_index].append(1)
                     else:
-                        if len(tmp_type_val) >= 1 and isinstance(tmp_type_val[0], list):
-                            for _, val in enumerate(tmp_type_val):
-                                val.append(0)
+                        if len(self.var_type_history_list[event_index][var_index][tmp_type_index]) >= 1 and isinstance(
+                                self.var_type_history_list[event_index][var_index][tmp_type_index][0], list):
+                            for i in range(len(self.var_type_history_list[event_index][var_index][tmp_type_index])):
+                                self.var_type_history_list[event_index][var_index][tmp_type_index][i].append(0)
                         else:
-                            tmp_type_val.append(0)
+                            self.var_type_history_list[event_index][var_index][tmp_type_index].append(0)
 
                 if type_index == -1:
                     # Continuously distributed variable type. Index 6 in the history list
@@ -1961,7 +1979,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         # List which stores the single indicators for the variables
         indicator_list = []
 
-        for var_index, _ in enumerate(self.var_type_history_list[event_index]):
+        for var_index in range(len(self.var_type_history_list[event_index])):
             if not self.event_type_detector.check_variables[event_index][var_index]:
                 indicator_list.append(0)
                 continue
@@ -1974,8 +1992,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             len_cur = self.num_var_type_considered_ind
 
             # Appends the positive differnces of the probabilities to diff_list
-            for type_index, type_val in enumerate(self.var_type_history_list[event_index][var_index]):
-                if self.var_type_history_list_reference[event_index][var_index][1] == len_ref and sum(type_val[1]) < len_cur:
+            for type_index in range(len(self.var_type_history_list[event_index][var_index])):
+                if self.var_type_history_list_reference[event_index][var_index][1] == len_ref and sum(
+                        self.var_type_history_list[event_index][var_index][1]) < len_cur:
                     diff_list.append(1)
                     break
                 # Differentiation of the entries, which are lists (e.g. discrete, continuously distributed)
@@ -2008,15 +2027,16 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                                 diff_list.append(0)
                     else:
                         tmp_max = 0
-                        for j, val in enumerate(self.var_type_history_list[event_index][var_index][type_index]):
+                        for j in range(len(self.var_type_history_list[event_index][var_index][type_index])):
                             if j == 0 and self.var_type_history_list_reference[event_index][var_index][type_index][j] == 0:
-                                tmp_max = max(
-                                    tmp_max, (sum(val[-self.num_var_type_considered_ind:]) / len_cur -
-                                              self.var_type_history_list_reference[event_index][var_index][type_index][j] / len_ref))
+                                tmp_max = max(tmp_max, (sum(self.var_type_history_list[event_index][var_index][type_index][j][
+                                        -self.num_var_type_considered_ind:]) /
+                                        len_cur - self.var_type_history_list_reference[event_index][var_index][type_index][j] / len_ref))
                             else:
-                                tmp_max = max(
-                                    tmp_max, (sum(val[-self.num_var_type_considered_ind:]) / len_cur -
-                                              self.var_type_history_list_reference[event_index][var_index][type_index][j] / len_ref) / 2)
+                                tmp_max = max(tmp_max, (sum(self.var_type_history_list[event_index][var_index][type_index][j][
+                                        -self.num_var_type_considered_ind:]) /
+                                        len_cur - self.var_type_history_list_reference[event_index][var_index][type_index][j] / len_ref) /
+                                        2)
                         diff_list.append(tmp_max)
 
                 else:
@@ -2061,7 +2081,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
         # Calculate the min_successes normally for each value one by one
         tmp_list = []
-        for i, _ in enumerate(self.var_type[event_index][var_index][1]):
+        for i in range(len(self.var_type[event_index][var_index][1])):
             tmp_list.append(self.bt_min_successes(num_bt, p_list[i], alpha))
         tmp_list = np.array(tmp_list)
         return tmp_list
@@ -2088,7 +2108,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     type_info[self.event_type_detector.variable_key_list[event_index][var_index]] = self.var_type[event_index][var_index]
         tmp_string = tmp_string.lstrip('  ')
 
-        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
+        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+        if original_log_line_prefix is None:
+            original_log_line_prefix = ''
         if self.output_log_line:
             sorted_log_lines = [tmp_string + original_log_line_prefix + log_atom.raw_data.decode()]
             analysis_component = {'AffectedLogAtomPaths': list(log_atom.parser_match.get_match_dictionary().keys())}
@@ -2112,7 +2134,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if (self.silence_output_without_confidence and confidence is None) or self.silence_output_except_indicator:
             return
 
-        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
+        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+        if original_log_line_prefix is None:
+            original_log_line_prefix = ''
         if self.output_log_line:
             tmp_str = ''
             for x in list(log_atom.parser_match.get_match_dictionary().keys()):
@@ -2141,7 +2165,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if self.silence_output_without_confidence or self.silence_output_except_indicator:
             return
 
-        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
+        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+        if original_log_line_prefix is None:
+            original_log_line_prefix = ''
         if self.output_log_line:
             tmp_str = ''
             for x in list(log_atom.parser_match.get_match_dictionary().keys()):
@@ -2171,7 +2197,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 self.silence_output_except_indicator and indicator is None):
             return
 
-        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
+        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+        if original_log_line_prefix is None:
+            original_log_line_prefix = ''
         if self.output_log_line:
             tmp_str = ''
             for x in list(log_atom.parser_match.get_match_dictionary().keys()):
@@ -2243,9 +2271,9 @@ def get_vt_string(vt):
         return_string = '%s %s' % (vt[0], vt[1])
     elif vt[0] == 'd':
         return_string = vt[0] + ' ['
-        for i, val in enumerate(vt[2]):
-            if val >= 0.1:
-                return_string += '%s(%s%%), ' % (str(vt[1][i]), str(int(val*100)))
+        for i in range(len(vt[2])):
+            if vt[2][i] >= 0.1:
+                return_string += '%s(%s%%), ' % (str(vt[1][i]), str(int(vt[2][i]*100)))
         if any(vt[2][i] < 0.1 for i in range(len(vt[2]))):
             return_string += '...]'
         else:
