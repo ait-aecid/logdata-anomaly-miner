@@ -8,6 +8,8 @@ from unit.TestBase import TestBase, DummyMatchContext
 class DebugModelElementTest(TestBase):
     """Unittests for the DebugModelElement."""
 
+    #TODO: change checks to be done in TestBase.compare_result()
+
     def test1get_id(self):
         """Test if get_id works properly."""
         old_stderr = sys.stderr
