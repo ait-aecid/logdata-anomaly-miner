@@ -1103,26 +1103,22 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         self.event_type_detector.num_eventlines[event_index] - self.num_init) / self.num_update
                         - self.num_var_type_hist_ref) % self.num_update_var_type_hist_ref == 0):
 
-                    for var_index in range(len(self.var_type_history_list[event_index])):
+                    for var_index, var_val in enumerate(self.var_type_history_list[event_index]):
                         self.var_type_history_list_reference[event_index][var_index] = []
-                        for type_index in range(len(self.var_type_history_list[event_index][var_index])):
-                            if len(self.var_type_history_list[event_index][var_index][type_index]) >= 1 and isinstance(
-                                    self.var_type_history_list[event_index][var_index][type_index][0], list):
+                        for type_index, type_val in enumerate(var_val):
+                            if len(type_val) >= 1 and isinstance(type_val[0], list):
                                 if type_index == 6:  # continuously distributed variable type
                                     self.var_type_history_list_reference[event_index][var_index].append([sum(
-                                            self.var_type_history_list[event_index][var_index][type_index][0][
-                                                -self.num_var_type_hist_ref:]) / max(len([1 for x in self.var_type_history_list[
-                                                    event_index][var_index][type_index][0][-self.num_var_type_hist_ref:] if x != 0]), 1),
-                                            sum(self.var_type_history_list[event_index][var_index][type_index][1][
-                                                -self.num_var_type_hist_ref:]) / max(len([1 for x in self.var_type_history_list[
-                                                    event_index][var_index][type_index][1][-self.num_var_type_hist_ref:] if x != 0]), 1)])
+                                        type_val[0][-self.num_var_type_hist_ref:]) / max(len([1 for x in type_val[0][
+                                            -self.num_var_type_hist_ref:] if x != 0]), 1), sum(type_val[1][
+                                                -self.num_var_type_hist_ref:]) / max(len([1 for x in type_val[1][
+                                                    -self.num_var_type_hist_ref:] if x != 0]), 1)])
                                 else:
                                     self.var_type_history_list_reference[event_index][var_index].append(
-                                            [sum(x[-self.num_var_type_hist_ref:]) for x in
-                                                self.var_type_history_list[event_index][var_index][type_index]])
+                                            [sum(x[-self.num_var_type_hist_ref:]) for x in type_val])
                             else:
                                 self.var_type_history_list_reference[event_index][var_index].append(sum(
-                                        self.var_type_history_list[event_index][var_index][type_index][-self.num_var_type_hist_ref:]))
+                                        type_val[-self.num_var_type_hist_ref:]))
 
     def detect_var_type(self, event_index, var_index):
         """Give back the assumed variableType of the variable with the in self.event_type_detector stored values."""
@@ -2022,10 +2018,12 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         for j in range(len(type_val)):
                             if j == 0 and self.var_type_history_list_reference[event_index][var_index][type_index][j] == 0:
                                 tmp_max = max(tmp_max, (sum(type_val[j][-self.num_var_type_considered_ind:]) / len_cur -
-                                    self.var_type_history_list_reference[event_index][var_index][type_index][j] / len_ref))
+                                                        self.var_type_history_list_reference[event_index][var_index][type_index][j] /
+                                                        len_ref))
                             else:
                                 tmp_max = max(tmp_max, (sum(type_val[j][-self.num_var_type_considered_ind:]) / len_cur -
-                                    self.var_type_history_list_reference[event_index][var_index][type_index][j] / len_ref) / 2)
+                                                        self.var_type_history_list_reference[event_index][var_index][type_index][j] /
+                                                        len_ref) / 2)
                         diff_list.append(tmp_max)
 
                 else:
