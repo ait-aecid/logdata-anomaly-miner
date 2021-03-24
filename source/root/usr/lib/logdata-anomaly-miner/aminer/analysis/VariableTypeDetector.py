@@ -1012,18 +1012,14 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     if len(self.var_type_history_list[event_index]) > 0 and len(self.var_type_history_list[event_index][0]) > 0 and len(
                         self.var_type_history_list[event_index][0][0]) > max(
                             self.num_var_type_considered_ind, self.num_var_type_hist_ref):
-                        for var_index in range(len(self.var_type_history_list[event_index])):
-                            for type_index in range(len(self.var_type_history_list[event_index][var_index])):
+                        for var_index, var_val in enumerate(self.var_type_history_list[event_index]):
+                            for type_index, type_val in enumerate(var_val):
                                 # Differentiation between the entries, which are lists (e.g. discrete) and values
-                                if type(self.var_type_history_list[event_index][var_index][type_index][i]) is list:
-                                    for i in range(len(self.var_type_history_list[event_index][var_index][type_index])):
-                                        self.var_type_history_list[event_index][var_index][type_index][i] = \
-                                            self.var_type_history_list[event_index][var_index][type_index][i][
-                                            -max(self.num_var_type_considered_ind, self.num_var_type_hist_ref):]
+                                if isinstance(type_val, list):
+                                    for i, val in enumerate(type_val):
+                                        type_val[i] = val[-max(self.num_var_type_considered_ind, self.num_var_type_hist_ref):]
                                 else:
-                                    self.var_type_history_list[event_index][var_index][type_index] = \
-                                        self.var_type_history_list[event_index][var_index][type_index][
-                                        -max(self.num_var_type_considered_ind, self.num_var_type_hist_ref):]
+                                    var_val[type_index] = type_val[-max(self.num_var_type_considered_ind, self.num_var_type_hist_ref):]
 
                     indicator_list = self.get_indicator(event_index)
 
@@ -1942,17 +1938,17 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 for tmp_type_index, tmp_type_val in enumerate(self.var_type_history_list[event_index][var_index]):
                     if tmp_type_index == type_index:
                         if len(tmp_type_val) >= 1 and isinstance(tmp_type_val[0], list):
-                            self.var_type_history_list[event_index][var_index][type_index][0].append(1)
-                            for i in range(1, len(tmp_type_val)):
-                                self.var_type_history_list[event_index][var_index][type_index][i].append(0)
+                            tmp_type_val[0].append(1)
+                            for i, val in enumerate(tmp_type_val, start=1):
+                                val.append(0)
                         else:
-                            self.var_type_history_list[event_index][var_index][type_index].append(1)
+                            tmp_type_val.append(1)
                     else:
                         if len(tmp_type_val) >= 1 and isinstance(tmp_type_val[0], list):
-                            for i in range(len(tmp_type_val)):
-                                self.var_type_history_list[event_index][var_index][tmp_type_index][i].append(0)
+                            for i, val in enumerate(tmp_type_val):
+                                val.append(0)
                         else:
-                            self.var_type_history_list[event_index][var_index][tmp_type_index].append(0)
+                            tmp_type_val.append(0)
 
                 if type_index == -1:
                     # Continuously distributed variable type. Index 6 in the history list
