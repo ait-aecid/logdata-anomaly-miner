@@ -5,8 +5,6 @@ from aminer.parsing.ParserMatch import ParserMatch
 from aminer.parsing.MatchElement import MatchElement
 from unit.TestBase import TestBase
 
-import sys
-import io
 import time
 import pickle  # skipcq: BAN-B403
 import random
@@ -85,11 +83,11 @@ class VariableTypeDetectorTest(TestBase):
 
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vtd_ks = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=dataset_size,
-                                   div_thres=0.5, test_gof_int=True, sim_thres=0.3, gof_alpha=significance_niveau,
-                                   used_gof_test='KS')
+                                      div_thres=0.5, test_gof_int=True, sim_thres=0.3, gof_alpha=significance_niveau,
+                                      used_gof_test='KS')
         vtd_cm = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=dataset_size,
-                                   div_thres=0.5, test_gof_int=True, sim_thres=0.3, gof_alpha=significance_niveau,
-                                   used_gof_test='CM')
+                                      div_thres=0.5, test_gof_int=True, sim_thres=0.3, gof_alpha=significance_niveau,
+                                      used_gof_test='CM')
 
         result_list_ks = []  # List of the results of the single tests
         result_list_cm = []  # List of the results of the single tests
@@ -672,9 +670,9 @@ class VariableTypeDetectorTest(TestBase):
 
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vtd_ks = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=dataset_size_ini,
-                                   num_update=dataset_size_upd, gof_alpha=significance_niveau, used_gof_test='KS')
+                                      num_update=dataset_size_upd, gof_alpha=significance_niveau, used_gof_test='KS')
         vtd_cm = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=dataset_size_ini,
-                                   num_update=dataset_size_upd, gof_alpha=significance_niveau, used_gof_test='CM')
+                                      num_update=dataset_size_upd, gof_alpha=significance_niveau, used_gof_test='CM')
 
         result_list_ks = []  # List of the results of the single tests
         result_list_cm = []  # List of the results of the single tests
