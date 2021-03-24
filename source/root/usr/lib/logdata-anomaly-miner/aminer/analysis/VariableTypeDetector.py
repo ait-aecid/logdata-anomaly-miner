@@ -266,7 +266,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             print('WARNING: ' + msg, file=sys.stderr)
             self.gof_alpha = nearest
 
-        if (self.used_gof_test == 'KS' and (num_init not in self.crit_val_ini_ks[self.gof_alpha] or num_init not in 
+        if (self.used_gof_test == 'KS' and (num_init not in self.crit_val_ini_ks[self.gof_alpha] or num_init not in
                                             self.crit_val_upd_ks[self.gof_alpha])) or (
                 self.used_gof_test == 'CM' and (num_init not in self.crit_val_ini_cm[self.gof_alpha] or
                                                 num_init not in self.crit_val_upd_cm[self.gof_alpha])):
