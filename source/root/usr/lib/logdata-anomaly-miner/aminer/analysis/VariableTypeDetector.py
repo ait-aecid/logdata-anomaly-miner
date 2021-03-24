@@ -267,8 +267,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             self.gof_alpha = nearest
 
         if (self.used_gof_test == 'KS' and (num_init not in self.crit_val_ini_ks[self.gof_alpha] or num_init not in
-                                            self.crit_val_upd_ks[self.gof_alpha])) or (self.used_gof_test == 'CM' and (num_init not in
-                                            self.crit_val_ini_cm[self.gof_alpha] or num_init not in self.crit_val_upd_cm[self.gof_alpha])):
+                                            self.crit_val_upd_ks[self.gof_alpha])) or (self.used_gof_test == 'CM' and (
+                                            num_init not in self.crit_val_ini_cm[self.gof_alpha] or
+                                            num_init not in self.crit_val_upd_cm[self.gof_alpha])):
             if self.used_gof_test == 'KS':
                 pos_vals = [val for val in self.crit_val_ini_ks[self.gof_alpha] if val in self.crit_val_upd_ks[self.gof_alpha]]
             else:
@@ -1520,132 +1521,131 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             return [True, 0.0]
 
         # Else self.used_gof_test == 'CM'
+        # Calculate the critical value for the CM-test
+        # The parameters are in the list of the critical values
+        distribution = self.var_type[event_index][var_index][0]
+        if distribution == 'beta':
+            distribution += str(self.var_type[event_index][var_index][-1])
+
+        if distribution in ['uni', 'beta1']:
+            crit_value = self.crit_val_upd_cm[self.s_gof_alpha][self.num_init][self.num_s_gof_values][distribution]
+        if distribution in ['beta2', 'beta3']:
+            crit_value = self.crit_val_upd_cm[self.s_gof_alpha][self.num_init][self.num_s_gof_values]['beta2']
+        elif distribution == 'nor':
+            crit_value = self.crit_val_upd_cm[self.s_gof_alpha][self.num_init][self.num_s_gof_values][distribution]
+        elif distribution in ['beta4', 'beta5']:
+            crit_value = self.crit_val_upd_cm[self.s_gof_alpha][self.num_init][self.num_s_gof_values]['beta4']
         else:
-            # Calculate the critical value for the CM-test
-            # The parameters are in the list of the critical values
-            distribution = self.var_type[event_index][var_index][0]
-            if distribution == 'beta':
-                distribution += str(self.var_type[event_index][var_index][-1])
+            crit_value = self.crit_val_hom_cm[self.s_gof_alpha][max(self.num_init, self.num_s_gof_values)][
+                    min(self.num_init, self.num_s_gof_values)]
 
-            if distribution in ['uni', 'beta1']:
-                crit_value = self.crit_val_upd_cm[self.s_gof_alpha][self.num_init][self.num_s_gof_values][distribution]
-            if distribution in ['beta2', 'beta3']:
-                crit_value = self.crit_val_upd_cm[self.s_gof_alpha][self.num_init][self.num_s_gof_values]['beta2']
-            elif distribution == 'nor':
-                crit_value = self.crit_val_upd_cm[self.s_gof_alpha][self.num_init][self.num_s_gof_values][distribution]
-            elif distribution in ['beta4', 'beta5']:
-                crit_value = self.crit_val_upd_cm[self.s_gof_alpha][self.num_init][self.num_s_gof_values]['beta4']
-            else:
-                crit_value = self.crit_val_hom_cm[self.s_gof_alpha][max(self.num_init, self.num_s_gof_values)][
-                        min(self.num_init, self.num_s_gof_values)]
+        max_val = 0
 
-            max_val = 0
+        # Two sample CM-test for uniformal distribution
+        if self.var_type[event_index][var_index][0] == 'uni':
+            Min = min(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:])
+            Max = max(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:])
+            min_upd = Min - self.min_mod_upd_uni / (1-self.min_mod_upd_uni-self.max_mod_upd_uni) * (Max-Min)
+            max_upd = Max + self.max_mod_upd_uni / (1-self.min_mod_upd_uni-self.max_mod_upd_uni) * (Max-Min)
 
-            # Two sample CM-test for uniformal distribution
-            if self.var_type[event_index][var_index][0] == 'uni':
+            if (min_upd < 1.5 * self.var_type[event_index][var_index][1] - 0.5 * self.var_type[event_index][var_index][2]) or (
+                    max_upd > 1.5 * self.var_type[event_index][var_index][2] - 0.5 * self.var_type[event_index][var_index][1]):
+                return [False, 1]
+
+            estimated_min = min(self.var_type[event_index][var_index][1], min_upd)
+            estimated_max = max(self.var_type[event_index][var_index][2], max_upd)
+
+            max_val = cramervonmises((np.array(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) -
+                                     estimated_min) / (estimated_max - estimated_min), 'uniform')
+
+        # Two sample CM-test for normal distribution
+        elif self.var_type[event_index][var_index][0] == 'nor':
+            max_val = cramervonmises(np.array(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]), 'norm',
+                                     args=(self.var_type[event_index][var_index][1], self.var_type[event_index][var_index][2]))
+
+        # Two sample CM-test for beta distributions
+        elif self.var_type[event_index][var_index][0] == 'beta':
+            if self.var_type[event_index][var_index][5] == 1:
                 Min = min(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:])
                 Max = max(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:])
-                min_upd = Min - self.min_mod_upd_uni / (1-self.min_mod_upd_uni-self.max_mod_upd_uni) * (Max-Min)
-                max_upd = Max + self.max_mod_upd_uni / (1-self.min_mod_upd_uni-self.max_mod_upd_uni) * (Max-Min)
+                min_upd = Min - self.min_mod_upd_beta1 / (1-self.min_mod_upd_beta1-self.max_mod_upd_beta1) * (Max-Min)
+                max_upd = Max + self.max_mod_upd_beta1 / (1-self.min_mod_upd_beta1-self.max_mod_upd_beta1) * (Max-Min)
 
-                if (min_upd < 1.5 * self.var_type[event_index][var_index][1] - 0.5 * self.var_type[event_index][var_index][2]) or (
-                        max_upd > 1.5 * self.var_type[event_index][var_index][2] - 0.5 * self.var_type[event_index][var_index][1]):
+                if (min_upd < 1.5 * self.var_type[event_index][var_index][3] - 0.5 * self.var_type[event_index][var_index][4]) or (
+                        max_upd > 1.5 * self.var_type[event_index][var_index][4] - 0.5 * self.var_type[event_index][var_index][3]):
                     return [False, 1]
 
-                estimated_min = min(self.var_type[event_index][var_index][1], min_upd)
-                estimated_max = max(self.var_type[event_index][var_index][2], max_upd)
+                estimated_min = min(self.var_type[event_index][var_index][3], min_upd)
+                estimated_max = max(self.var_type[event_index][var_index][4], max_upd)
 
                 max_val = cramervonmises((np.array(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) -
-                                         estimated_min) / (estimated_max - estimated_min), 'uniform')
+                                         estimated_min) / (estimated_max - estimated_min), 'beta', args=(0.5, 0.5))
 
-            # Two sample CM-test for normal distribution
-            elif self.var_type[event_index][var_index][0] == 'nor':
-                max_val = cramervonmises(np.array(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]), 'norm',
-                                         args=(self.var_type[event_index][var_index][1], self.var_type[event_index][var_index][2]))
+            elif self.var_type[event_index][var_index][5] == 2:
+                Min = min(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:])
+                Max = max(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:])
+                min_upd = Min - self.min_mod_upd_beta2 / (1-self.max_mod_upd_beta2-self.min_mod_upd_beta2) * (Max-Min)
+                max_upd = Max + self.max_mod_upd_beta2 / (1-self.max_mod_upd_beta2-self.min_mod_upd_beta2) * (Max-Min)
 
-            # Two sample CM-test for beta distributions
-            elif self.var_type[event_index][var_index][0] == 'beta':
-                if self.var_type[event_index][var_index][5] == 1:
-                    Min = min(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:])
-                    Max = max(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:])
-                    min_upd = Min - self.min_mod_upd_beta1 / (1-self.min_mod_upd_beta1-self.max_mod_upd_beta1) * (Max-Min)
-                    max_upd = Max + self.max_mod_upd_beta1 / (1-self.min_mod_upd_beta1-self.max_mod_upd_beta1) * (Max-Min)
+                if (min_upd < 1.5 * self.var_type[event_index][var_index][3] - 0.5 * self.var_type[event_index][var_index][4]) or (
+                        max_upd > 1.5 * self.var_type[event_index][var_index][4] - 0.5 * self.var_type[event_index][var_index][3]):
+                    return [False, 1]
 
-                    if (min_upd < 1.5 * self.var_type[event_index][var_index][3] - 0.5 * self.var_type[event_index][var_index][4]) or (
-                            max_upd > 1.5 * self.var_type[event_index][var_index][4] - 0.5 * self.var_type[event_index][var_index][3]):
-                        return [False, 1]
+                estimated_min = min(self.var_type[event_index][var_index][3], min_upd)
+                estimated_max = max(self.var_type[event_index][var_index][4], max_upd)
 
-                    estimated_min = min(self.var_type[event_index][var_index][3], min_upd)
-                    estimated_max = max(self.var_type[event_index][var_index][4], max_upd)
+                max_val = cramervonmises((np.array(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) -
+                                         estimated_min) / (estimated_max - estimated_min), 'beta', args=(5, 2))
 
-                    max_val = cramervonmises((np.array(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) -
-                                             estimated_min) / (estimated_max - estimated_min), 'beta', args=(0.5, 0.5))
+            elif self.var_type[event_index][var_index][5] == 3:
+                Min = min(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:])
+                Max = max(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:])
+                min_upd = Min - self.max_mod_upd_beta2 / (1-self.max_mod_upd_beta2-self.min_mod_upd_beta2) * (Max-Min)
+                max_upd = Max + self.min_mod_upd_beta2 / (1-self.max_mod_upd_beta2-self.min_mod_upd_beta2) * (Max-Min)
 
-                elif self.var_type[event_index][var_index][5] == 2:
-                    Min = min(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:])
-                    Max = max(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:])
-                    min_upd = Min - self.min_mod_upd_beta2 / (1-self.max_mod_upd_beta2-self.min_mod_upd_beta2) * (Max-Min)
-                    max_upd = Max + self.max_mod_upd_beta2 / (1-self.max_mod_upd_beta2-self.min_mod_upd_beta2) * (Max-Min)
+                if (min_upd < 1.5 * self.var_type[event_index][var_index][3] - 0.5 * self.var_type[event_index][var_index][4]) or (
+                        max_upd > 1.5 * self.var_type[event_index][var_index][4] - 0.5 * self.var_type[event_index][var_index][3]):
+                    return [False, 1]
 
-                    if (min_upd < 1.5 * self.var_type[event_index][var_index][3] - 0.5 * self.var_type[event_index][var_index][4]) or (
-                            max_upd > 1.5 * self.var_type[event_index][var_index][4] - 0.5 * self.var_type[event_index][var_index][3]):
-                        return [False, 1]
+                estimated_min = min(self.var_type[event_index][var_index][3], min_upd)
+                estimated_max = max(self.var_type[event_index][var_index][4], max_upd)
 
-                    estimated_min = min(self.var_type[event_index][var_index][3], min_upd)
-                    estimated_max = max(self.var_type[event_index][var_index][4], max_upd)
+                max_val = cramervonmises((np.array(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) -
+                                         estimated_min) / (estimated_max - estimated_min), 'beta', args=(2, 5))
 
-                    max_val = cramervonmises((np.array(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) -
-                                             estimated_min) / (estimated_max - estimated_min), 'beta', args=(5, 2))
+            elif self.var_type[event_index][var_index][5] == 4:
+                EV_upd = (self.var_type[event_index][var_index][1] * self.num_init + np.mean(
+                        self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) *
+                        self.num_s_gof_values) / (self.num_init + self.num_s_gof_values)
+                estimated_min = min(min(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]),
+                                    self.var_type[event_index][var_index][3])
 
-                elif self.var_type[event_index][var_index][5] == 3:
-                    Min = min(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:])
-                    Max = max(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:])
-                    min_upd = Min - self.max_mod_upd_beta2 / (1-self.max_mod_upd_beta2-self.min_mod_upd_beta2) * (Max-Min)
-                    max_upd = Max + self.min_mod_upd_beta2 / (1-self.max_mod_upd_beta2-self.min_mod_upd_beta2) * (Max-Min)
+                max_val = cramervonmises((np.array(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) -
+                                         estimated_min) / (EV_upd-estimated_min) * (1 / (5 + 1)-self.min_mod_upd_beta4) +
+                                         self.min_mod_upd_beta4, 'beta', args=(1, 5))
 
-                    if (min_upd < 1.5 * self.var_type[event_index][var_index][3] - 0.5 * self.var_type[event_index][var_index][4]) or (
-                            max_upd > 1.5 * self.var_type[event_index][var_index][4] - 0.5 * self.var_type[event_index][var_index][3]):
-                        return [False, 1]
+            elif self.var_type[event_index][var_index][5] == 5:
+                EV_upd = (self.var_type[event_index][var_index][1] * self.num_init + np.mean(
+                        self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) *
+                        self.num_s_gof_values) / (self.num_init + self.num_s_gof_values)
+                estimated_max = max(max(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]),
+                                    self.var_type[event_index][var_index][4])
 
-                    estimated_min = min(self.var_type[event_index][var_index][3], min_upd)
-                    estimated_max = max(self.var_type[event_index][var_index][4], max_upd)
+                max_val = cramervonmises((np.array(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) -
+                                         estimated_max) / (estimated_max - EV_upd) * (1 / (5 + 1)-self.min_mod_upd_beta4) + 1 -
+                                         self.min_mod_upd_beta4, 'beta', args=(5, 1))
 
-                    max_val = cramervonmises((np.array(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) -
-                                             estimated_min) / (estimated_max - estimated_min), 'beta', args=(2, 5))
+        else:
+            max_val = cramervonmises2(self.distr_val[event_index][var_index], self.event_type_detector.values[event_index][var_index][
+                    -self.num_s_gof_values:])
 
-                elif self.var_type[event_index][var_index][5] == 4:
-                    EV_upd = (self.var_type[event_index][var_index][1] * self.num_init + np.mean(
-                            self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) *
-                            self.num_s_gof_values) / (self.num_init + self.num_s_gof_values)
-                    estimated_min = min(min(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]),
-                                        self.var_type[event_index][var_index][3])
-
-                    max_val = cramervonmises((np.array(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) -
-                                             estimated_min) / (EV_upd-estimated_min) * (1 / (5 + 1)-self.min_mod_upd_beta4) +
-                                             self.min_mod_upd_beta4, 'beta', args=(1, 5))
-
-                elif self.var_type[event_index][var_index][5] == 5:
-                    EV_upd = (self.var_type[event_index][var_index][1] * self.num_init + np.mean(
-                            self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) *
-                            self.num_s_gof_values) / (self.num_init + self.num_s_gof_values)
-                    estimated_max = max(max(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]),
-                                        self.var_type[event_index][var_index][4])
-
-                    max_val = cramervonmises((np.array(self.event_type_detector.values[event_index][var_index][-self.num_s_gof_values:]) -
-                                             estimated_max) / (estimated_max - EV_upd) * (1 / (5 + 1)-self.min_mod_upd_beta4) + 1 -
-                                             self.min_mod_upd_beta4, 'beta', args=(5, 1))
-
-            else:
-                max_val = cramervonmises2(self.distr_val[event_index][var_index], self.event_type_detector.values[event_index][var_index][
-                        -self.num_s_gof_values:])
-
-            if first_distr:
-                if max_val > crit_value:
-                    return [False, max_val]
-                return [True, max_val]
+        if first_distr:
             if max_val > crit_value:
-                return [False, 1.0]
-            return [True, 0.0]
+                return [False, max_val]
+            return [True, max_val]
+        if max_val > crit_value:
+            return [False, 1.0]
+        return [True, 0.0]
 
     def d_test(self, event_index, var_index):
         """Make a test if the new variables follow the discrete distribution and appends the result to the BT."""
