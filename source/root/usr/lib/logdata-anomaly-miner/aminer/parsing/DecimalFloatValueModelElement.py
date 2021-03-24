@@ -73,7 +73,7 @@ class DecimalFloatValueModelElement(ModelElementInterface):
         """Get the element ID."""
         return self.path_id
 
-    def get_child_elements(self):
+    def get_child_elements(self):  # skipcq: PYL-R0201
         """
         Get all possible child model elements of this element.
         @return empty list as there are no children of this element.
