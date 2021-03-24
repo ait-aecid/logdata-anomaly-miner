@@ -76,7 +76,7 @@ class DateTimeModelElement(ModelElementInterface):
         available formats. Supported format specifiers are:
             * %b: month name in current locale
             * %d: day in month, can be space or zero padded when followed by separator or at end of string.
-            * %f: fraction of seconds (the digits after the the '.')
+            * %f: fraction of seconds (the digits after the the ".")
             * %H: hours from 00 to 23
             * %M: minutes
             * %m: two digit month number
@@ -85,10 +85,10 @@ class DateTimeModelElement(ModelElementInterface):
             * %Y: 4 digit year number
             * %z: detect and parse timezone strings like UTC, CET, +0001, etc. automatically.
         Common formats are:
-            * '%b %d %H:%M:%S' e.g. for 'Nov 19 05:08:43'
+            * "%b %d %H:%M:%S" e.g. for "Nov 19 05:08:43"
         @param time_zone the timezone for parsing the values or UTC when None.
         @param text_locale the locale to use for parsing the day, month names or None to use the default locale. The locale must be a tuple
-        of (locale, encoding).
+        of (locale, encoding) or a string.
         @param start_year when parsing date records without any year information, assume this is the year of the first value parsed.
         @param max_time_jump_seconds for detection of year wraps with date formats missing year information, also the current time
         of values has to be tracked. This value defines the window within that the time may jump between two matches. When not
@@ -108,11 +108,14 @@ class DateTimeModelElement(ModelElementInterface):
             self.time_zone = timezone.utc
         self.text_locale = text_locale
         if text_locale is not None:
-            if not isinstance(text_locale, str) and (not isinstance(text_locale, tuple) or isinstance(
-                    text_locale, tuple) and len(text_locale) != 2):
+            if not isinstance(text_locale, str) and not isinstance(text_locale, tuple):
                 msg = "text_locale has to be of the type string or of the type tuple and have the length 2. (locale, encoding)"
                 logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)
+            if isinstance(text_locale, tuple) and len(text_locale) != 2:
+                msg = "text_locale has to be of the type string or of the type tuple and have the length 2. (locale, encoding)"
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                raise ValueError(msg)
             try:
                 old_locale = locale.getdefaultlocale()
                 if old_locale != text_locale:
@@ -131,6 +134,10 @@ class DateTimeModelElement(ModelElementInterface):
         self.tz_specifier_format_length = -1
         self.date_format_parts = None
         self.date_format = date_format
+        if not isinstance(date_format, bytes):
+            msg = "date_format has to be of the type bytes."
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         if len(date_format) <= 1:
             msg = "At least one date_format specifier must be defined."
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
@@ -160,14 +167,14 @@ class DateTimeModelElement(ModelElementInterface):
     def scan_date_format(self, date_format):
         """Scan the date format."""
         if self.date_format_parts is not None:
-            msg = 'Cannot rescan date format after initialization'
+            msg = "Cannot rescan date format after initialization"
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         date_format_parts = []
         date_format_type_set = set()
         scan_pos = 0
         while scan_pos < len(date_format):
-            next_param_pos = date_format.find(b'%', scan_pos)
+            next_param_pos = date_format.find(b"%", scan_pos)
             if next_param_pos < 0:
                 next_param_pos = len(date_format)
             new_element = None
@@ -176,37 +183,37 @@ class DateTimeModelElement(ModelElementInterface):
             else:
                 param_type_code = date_format[next_param_pos + 1:next_param_pos + 2]
                 next_param_pos = scan_pos + 2
-                if param_type_code == b'%':
-                    new_element = b'%'
-                elif param_type_code == b'b':
+                if param_type_code == b"%":
+                    new_element = b"%"
+                elif param_type_code == b"b":
                     import calendar
                     name_dict = {}
                     for month_pos in range(1, 13):
                         name_dict[calendar.month_name[month_pos][:3].encode()] = month_pos
                     new_element = (1, 3, name_dict)
-                elif param_type_code == b'd':
+                elif param_type_code == b"d":
                     new_element = (2, 2, int)
-                elif param_type_code == b'f':
+                elif param_type_code == b"f":
                     new_element = (6, -1, DateTimeModelElement.parse_fraction)
-                elif param_type_code == b'H':
+                elif param_type_code == b"H":
                     new_element = (3, 2, int)
-                elif param_type_code == b'M':
+                elif param_type_code == b"M":
                     new_element = (4, 2, int)
-                elif param_type_code == b'm':
+                elif param_type_code == b"m":
                     new_element = (1, 2, int)
-                elif param_type_code == b'S':
+                elif param_type_code == b"S":
                     new_element = (5, 2, int)
-                elif param_type_code == b's':
+                elif param_type_code == b"s":
                     new_element = (7, -1, int)
-                elif param_type_code == b'Y':
+                elif param_type_code == b"Y":
                     self.format_has_year_flag = True
                     new_element = (0, 4, int)
-                elif param_type_code == b'z':
+                elif param_type_code == b"z":
                     self.format_has_tz_specifier = True
                     scan_pos = next_param_pos
                     continue
                 else:
-                    msg = 'Unknown dateformat specifier %s' % repr(param_type_code)
+                    msg = "Unknown dateformat specifier %s" % repr(param_type_code)
                     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
             if isinstance(new_element, bytes):
@@ -216,14 +223,14 @@ class DateTimeModelElement(ModelElementInterface):
                     date_format_parts.append(new_element)
             else:
                 if new_element[0] in date_format_type_set:
-                    msg = 'Multiple format specifiers for type %d' % new_element[0]
+                    msg = "Multiple format specifiers for type %d" % new_element[0]
                     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 date_format_type_set.add(new_element[0])
                 date_format_parts.append(new_element)
             scan_pos = next_param_pos
         if (7 in date_format_type_set) and (not date_format_type_set.isdisjoint(set(range(0, 6)))):
-            msg = 'Cannot use %s (seconds since epoch) with other non-second format types'
+            msg = "Cannot use %s (seconds since epoch) with other non-second format types"
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         self.date_format_parts = date_format_parts
@@ -353,11 +360,11 @@ class DateTimeModelElement(ModelElementInterface):
                             parsed_date_time = next_year_date_time
                             total_seconds = next_year_total_seconds
                             self.last_parsed_seconds = total_seconds
-                            msg = 'DateTimeModelElement unqualified timestamp year wraparound detected from %s to %s' % (
+                            msg = "DateTimeModelElement unqualified timestamp year wraparound detected from %s to %s" % (
                                 datetime.fromtimestamp(self.last_parsed_seconds, self.time_zone).isoformat(),
                                 parsed_date_time.isoformat())
                             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
-                            print('WARNING: ' + msg, file=sys.stderr)
+                            print("WARNING: " + msg, file=sys.stderr)
                         else:
                             last_year_date_time = parsed_date_time.replace(self.start_year - 1)
                             delta = last_year_date_time - self.epoch_start_time
@@ -368,10 +375,10 @@ class DateTimeModelElement(ModelElementInterface):
                                 self.last_parsed_seconds = total_seconds
                             else:
                                 # None of both seems correct, just report that.
-                                msg = 'DateTimeModelElement time inconsistencies parsing %s, expecting value around %d. ' \
-                                      'Check your settings!' % (repr(date_str), self.last_parsed_seconds)
+                                msg = "DateTimeModelElement time inconsistencies parsing %s, expecting value around %d. " \
+                                      "Check your settings!" % (repr(date_str), self.last_parsed_seconds)
                                 logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
-                                print('WARNING: ' + msg, file=sys.stderr)
+                                print("WARNING: " + msg, file=sys.stderr)
 
             # We discarded the parsed_date_time microseconds beforehand, use the full float value here instead of the rounded integer.
             if result[6] is not None:
@@ -401,12 +408,12 @@ class DateTimeModelElement(ModelElementInterface):
                         raise Exception(msg)
         match_context.update(date_str)
         if self.format_has_tz_specifier:
-            if self.tz_specifier_format_length < parse_pos and (b'+' in match_context.match_data or b'-' in match_context.match_data):
-                data = match_context.match_data.split(b'+')
+            if self.tz_specifier_format_length < parse_pos and (b"+" in match_context.match_data or b"-" in match_context.match_data):
+                data = match_context.match_data.split(b"+")
                 if len(data) == 1:
-                    data = match_context.match_data.split(b'-')
+                    data = match_context.match_data.split(b"-")
                 for i in range(1, 5):
-                    if not match_context.match_data[i:i+1].decode('utf-8').isdigit():
+                    if not match_context.match_data[i:i+1].decode("utf-8").isdigit():
                         i -= 1
                         break
                 self.tz_specifier_format_length = len(data[0]) + i + 1
@@ -422,16 +429,16 @@ class DateTimeModelElement(ModelElementInterface):
                     self.tz_specifier_offset = -offset.days * 86400 - offset.seconds
             else:
                 sign = -1
-                data = remaining_data.split(b'+')
+                data = remaining_data.split(b"+")
                 if len(data) == 1:
-                    data = remaining_data.split(b'-')
+                    data = remaining_data.split(b"-")
                     sign = 1
                     if len(data) == 1:
                         data = None
                 # only add offset if a + or - sign is used.
                 if data is not None:
                     if len(data) == 1:
-                        data = remaining_data.split(b'-')
+                        data = remaining_data.split(b"-")
                     if len(data[1]) == 4:
                         self.tz_specifier_offset = (int(data[1][0:2]) * 3600 + int(data[1][2:4]) * 60) * sign
                     else:
@@ -444,7 +451,7 @@ class DateTimeModelElement(ModelElementInterface):
     @staticmethod
     def parse_fraction(value_str):
         """Pass this method as function pointer to the parsing logic."""
-        return float(b'0.' + value_str)
+        return float(b"0." + value_str)
 
 
 class MultiLocaleDateTimeModelElement(ModelElementInterface):

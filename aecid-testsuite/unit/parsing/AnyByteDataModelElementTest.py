@@ -69,6 +69,14 @@ class AnyByteDataModelElementTest(TestBase):
         element_id = []
         self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
 
+        # empty tuple element_id is not allowed
+        element_id = ()
+        self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
+
+        # empty set element_id is not allowed
+        element_id = set()
+        self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -70,6 +70,14 @@ class FixedDataModelElementTest(TestBase):
         element_id = []
         self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
 
+        # empty tuple element_id is not allowed
+        element_id = ()
+        self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
+
+        # empty set element_id is not allowed
+        element_id = set()
+        self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
+
     def test6fixed_data_input_validation(self):
         """Check if fixed_data is validated."""
         # empty fixed_string
@@ -102,6 +110,14 @@ class FixedDataModelElementTest(TestBase):
 
         # empty list fixed_string is not allowed
         fixed_string = []
+        self.assertRaises(TypeError, FixedDataModelElement, self.id_, fixed_string)
+
+        # empty tuple fixed_string is not allowed
+        fixed_string = ()
+        self.assertRaises(TypeError, FixedDataModelElement, self.id_, fixed_string)
+
+        # empty set fixed_string is not allowed
+        fixed_string = set()
         self.assertRaises(TypeError, FixedDataModelElement, self.id_, fixed_string)
 
 

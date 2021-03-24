@@ -117,6 +117,14 @@ class Base64StringModelElementTest(TestBase):
         path_id = []
         self.assertRaises(TypeError, Base64StringModelElement, path_id)
 
+        # empty tuple element_id is not allowed
+        path_id = ()
+        self.assertRaises(TypeError, AnyByteDataModelElement, path_id)
+
+        # empty set element_id is not allowed
+        path_id = set()
+        self.assertRaises(TypeError, AnyByteDataModelElement, path_id)
+
     def test11performance(self):  # skipcq: PYL-R0201
         """Test the performance of the implementation. Comment this test out in normal cases."""
         import_setup = """
