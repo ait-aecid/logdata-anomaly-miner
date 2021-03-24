@@ -915,17 +915,17 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     self.event_type_detector.num_eventlines[event_index] - self.num_init) / self.num_update ==
                     self.num_updates_until_var_reduction - 1):
 
-                for var_index in range(len(self.var_type_history_list[event_index])):
+                for var_index, var_val in enumerate(self.var_type_history_list[event_index]):
                     # Skips the variable if it is already not being checked
                     if not self.event_type_detector.check_variables[event_index][var_index]:
                         continue
 
                     tmp_max = 1
                     exceeded_thresh = False
-                    for type_index in range(1, len(self.var_type_history_list[event_index][var_index])):
+                    for type_index in range(1, len(var_val)):  # skipcq: PTC-W0060
                         # Continuous Distribution
                         if type_index == 6:  # continuously distributed variable type
-                            num_app = len([1 for x in self.var_type_history_list[event_index][var_index][type_index][1] if x != 0])
+                            num_app = len([1 for x in var_val[type_index][1] if x != 0])
                             if num_app / self.num_updates_until_var_reduction >= self.var_reduction_thres:
                                 exceeded_thresh = True
                                 break
@@ -933,16 +933,15 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                                 tmp_max = num_app
                         # Distributions which are not continuous
                         else:
-                            if len(self.var_type_history_list[event_index][var_index][type_index]) >= 1 and isinstance(
-                                    self.var_type_history_list[event_index][var_index][type_index][0], list):
-                                num_app = sum(self.var_type_history_list[event_index][var_index][type_index][0])
+                            if len(var_val[type_index]) >= 1 and isinstance(var_val[type_index][0], list):
+                                num_app = sum(var_val[type_index][0])
                                 if num_app / self.num_updates_until_var_reduction >= self.var_reduction_thres:
                                     exceeded_thresh = True
                                     break
                                 if num_app > tmp_max:
                                     tmp_max = num_app
                             else:
-                                num_app = sum(self.var_type_history_list[event_index][var_index][type_index])
+                                num_app = sum(var_val[type_index])
                                 if num_app / self.num_updates_until_var_reduction >= self.var_reduction_thres:
                                     exceeded_thresh = True
                                     break
@@ -984,18 +983,14 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         if len(type_val) >= 1 and isinstance(type_val[0], list):
                             if type_index == 6:  # continuously distributed variable type
                                 self.var_type_history_list_reference[event_index][var_index].append([sum(
-                                        self.var_type_history_list[event_index][var_index][type_index][0][-self.num_var_type_hist_ref:]) /
-                                        max(len([1 for x in self.var_type_history_list[event_index][var_index][type_index][0][
-                                            -self.num_var_type_hist_ref:] if x != 0]), 1), sum(
-                                        self.var_type_history_list[event_index][var_index][type_index][1][-self.num_var_type_hist_ref:]) /
-                                        max(len([1 for x in self.var_type_history_list[event_index][var_index][type_index][1][
-                                            -self.num_var_type_hist_ref:] if x != 0]), 1)])
+                                        type_val[0][-self.num_var_type_hist_ref:]) / max(len([1 for x in type_val[0][
+                                            -self.num_var_type_hist_ref:] if x != 0]), 1), sum(type_val[1][-self.num_var_type_hist_ref:]) /
+                                        max(len([1 for x in type_val[1][-self.num_var_type_hist_ref:] if x != 0]), 1)])
                             else:
                                 self.var_type_history_list_reference[event_index][var_index].append([sum(x[
-                                    -self.num_var_type_hist_ref:]) for x in self.var_type_history_list[event_index][var_index][type_index]])
+                                    -self.num_var_type_hist_ref:]) for x in type_val])
                         else:
-                            self.var_type_history_list_reference[event_index][var_index].append(
-                                    sum(self.var_type_history_list[event_index][var_index][type_index][-self.num_var_type_hist_ref:]))
+                            self.var_type_history_list_reference[event_index][var_index].append(sum(type_val[-self.num_var_type_hist_ref:]))
 
             # Checks the indicator for the varTypes of the Event and generates an output, if it fails
             else:
