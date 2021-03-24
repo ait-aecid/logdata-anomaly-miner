@@ -8,6 +8,8 @@ from unit.TestBase import TestBase, DummyMatchContext
 class DecimalFloatValueModelElementTest(TestBase):
     """Unittests for the DecimalFloatValueModelElement."""
 
+    #TODO: change checks to use TestBase.compare_result()
+
     def test1get_id(self):
         """Test if get_id works properly."""
         decimal_float_me = DecimalFloatValueModelElement("path",)
@@ -66,6 +68,10 @@ class DecimalFloatValueModelElementTest(TestBase):
     def test6value_sign_type_input_validation(self):
         """Check if value_sign_type is validated."""
         path_id = "path"
+        DecimalFloatValueModelElement(path_id, value_sign_type="none")
+        DecimalFloatValueModelElement(path_id, value_sign_type="optional")
+        DecimalFloatValueModelElement(path_id, value_sign_type="mandatory")
+
         value_sign_type = "None"
         self.assertRaises(ValueError, DecimalFloatValueModelElement, path_id, value_sign_type=value_sign_type)
 
@@ -92,24 +98,65 @@ class DecimalFloatValueModelElementTest(TestBase):
 
     def test7value_pad_type_input_validation(self):
         """Check if value_pad_type is validated."""
-        # also test if self.pad_characters is set correctly.
+        path_id = "path"
+        DecimalFloatValueModelElement(path_id, value_pad_type="none")
+        DecimalFloatValueModelElement(path_id, value_pad_type="zero")
+        DecimalFloatValueModelElement(path_id, value_pad_type="blank")
+
+        value_pad_type = "None"
+        self.assertRaises(ValueError, DecimalFloatValueModelElement, path_id, value_pad_type=value_pad_type)
+
+        value_pad_type = None
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, value_pad_type=value_pad_type)
+
+        value_pad_type = b"none"
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, value_pad_type=value_pad_type)
+
+        value_pad_type = 123
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, value_pad_type=value_pad_type)
+
+        value_pad_type = 123.22
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, value_pad_type=value_pad_type)
+
+        value_pad_type = {"value_sign_type": "none"}
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, value_pad_type=value_pad_type)
+
+        value_pad_type = ["none"]
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, value_pad_type=value_pad_type)
+
+        value_pad_type = []
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, value_pad_type=value_pad_type)
 
     def test8exponent_type_input_validation(self):
         """Check if exponent_type is validated."""
+        path_id = "path"
+        DecimalFloatValueModelElement(path_id, exponent_type="none")
+        DecimalFloatValueModelElement(path_id, exponent_type="optional")
+        DecimalFloatValueModelElement(path_id, exponent_type="mandatory")
 
+        exponent_type = "None"
+        self.assertRaises(ValueError, DecimalFloatValueModelElement, path_id, exponent_type=exponent_type)
 
+        exponent_type = None
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, exponent_type=exponent_type)
 
+        exponent_type = b"none"
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, exponent_type=exponent_type)
 
+        exponent_type = 123
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, exponent_type=exponent_type)
 
+        exponent_type = 123.22
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, exponent_type=exponent_type)
 
+        exponent_type = {"value_sign_type": "none"}
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, exponent_type=exponent_type)
 
+        exponent_type = ["none"]
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, exponent_type=exponent_type)
 
-
-
-
-
-
-
+        exponent_type = []
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, exponent_type=exponent_type)
 
 
 
