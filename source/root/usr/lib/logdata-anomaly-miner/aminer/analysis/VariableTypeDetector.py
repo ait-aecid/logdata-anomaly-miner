@@ -757,14 +757,13 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         self.variable_path_num[event_index].append(var_index)
 
             # Initializes the lists for the discrete distribution, or continuous distribution
-            for var_index in range(len(self.var_type[event_index])):
-                if len(self.var_type[event_index][var_index]) > 0:
-
-                    if self.var_type[event_index][var_index][0] in self.distr_list:
+            for var_index, var_val in enumerate(self.var_type[event_index]):
+                if len(var_val) > 0:
+                    if var_val[0] in self.distr_list:
                         self.bt_results[event_index][var_index] = [1] * self.num_s_ks_bt
-                        if self.var_type[event_index][var_index][0] in ('betam', 'spec'):
+                        if var_val[0] in ('betam', 'spec'):
                             self.s_ks_get_quantiles(event_index, var_index)
-                    elif self.var_type[event_index][var_index][0] == 'd':
+                    elif var_val[0] == 'd':
                         self.d_init_bt(event_index, var_index)
 
     def process_ll(self, event_index, log_atom):
@@ -882,22 +881,20 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 else:
                     type_index = -1
 
-                for tmp_type_index in range(len(self.var_type_history_list[event_index][var_index])):
+                for tmp_type_index, tmp_type_val in enumerate(self.var_type_history_list[event_index][var_index]):
                     if tmp_type_index == type_index:
-                        if len(self.var_type_history_list[event_index][var_index][type_index]) >= 1 and isinstance(
-                                self.var_type_history_list[event_index][var_index][type_index][0], list):
-                            self.var_type_history_list[event_index][var_index][type_index][0].append(1)
-                            for i in range(1, len(self.var_type_history_list[event_index][var_index][type_index])):
-                                self.var_type_history_list[event_index][var_index][type_index][i].append(0)
+                        if len(tmp_type_val) >= 1 and isinstance(tmp_type_val[0], list):
+                            tmp_type_val[0].append(1)
+                            for i in range(1, len(tmp_type_val)):  # skipcq: PTC-W0060
+                                tmp_type_val[i].append(0)
                         else:
-                            self.var_type_history_list[event_index][var_index][type_index].append(1)
+                            tmp_type_val.append(1)
                     else:
-                        if len(self.var_type_history_list[event_index][var_index][tmp_type_index]) >= 1 and isinstance(
-                                self.var_type_history_list[event_index][var_index][tmp_type_index][0], list):
-                            for i in range(len(self.var_type_history_list[event_index][var_index][tmp_type_index])):
-                                self.var_type_history_list[event_index][var_index][tmp_type_index][i].append(0)
+                        if len(tmp_type_val) >= 1 and isinstance(tmp_type_val[0], list):
+                            for _, val in enumerate(tmp_type_val):
+                                val.append(0)
                         else:
-                            self.var_type_history_list[event_index][var_index][tmp_type_index].append(0)
+                            tmp_type_val.append(0)
 
                 if type_index == -1:
                     # Continuously distributed variable type. Index 6 in the history list
@@ -977,9 +974,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     for i in range(event_index + 1 - len(self.var_type_history_list_reference)):
                         self.var_type_history_list_reference.append([])
 
-                for var_index, var_type in enumerate(self.var_type_history_list[event_index]):
+                for var_index, var_val in enumerate(self.var_type_history_list[event_index]):
                     self.var_type_history_list_reference[event_index].append([])
-                    for type_index, type_val in enumerate(var_type):
+                    for type_index, type_val in enumerate(var_val):
                         if len(type_val) >= 1 and isinstance(type_val[0], list):
                             if type_index == 6:  # continuously distributed variable type
                                 self.var_type_history_list_reference[event_index][var_index].append([sum(
@@ -1009,7 +1006,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         for var_index, var_val in enumerate(self.var_type_history_list[event_index]):
                             for type_index, type_val in enumerate(var_val):
                                 # Differentiation between the entries, which are lists (e.g. discrete) and values
-                                if isinstance(type_val[i], list):
+                                if isinstance(type_val, list):
                                     for i, val in enumerate(type_val):
                                         type_val[i] = val[-max(self.num_var_type_considered_ind, self.num_var_type_hist_ref):]
                                 else:
@@ -2051,7 +2048,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
         # Calculate the min_successes normally for each value one by one
         tmp_list = []
-        for i in range(len(self.var_type[event_index][var_index][1])):
+        for i in range(len(self.var_type[event_index][var_index][1])):  # skipcq: PTC-W0060
             tmp_list.append(self.bt_min_successes(num_bt, p_list[i], alpha))
         tmp_list = np.array(tmp_list)
         return tmp_list
@@ -2236,7 +2233,7 @@ def get_vt_string(vt):
         for i in range(len(vt[2])):
             if vt[2][i] >= 0.1:
                 return_string += '%s(%s%%), ' % (str(vt[1][i]), str(int(vt[2][i]*100)))
-        if any(vt[2][i] < 0.1 for i in range(len(vt[2]))):
+        if any(val < 0.1 for _, val in enumerate(vt[2])):
             return_string += '...]'
         else:
             return_string = return_string[:-2]
