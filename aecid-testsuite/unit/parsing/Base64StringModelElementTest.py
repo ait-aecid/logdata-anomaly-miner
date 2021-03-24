@@ -6,17 +6,17 @@ from unit.TestBase import TestBase, DummyMatchContext
 class Base64StringModelElementTest(TestBase):
     """Unittests for the Base64StringModelElement."""
 
-    base64_string_model_element = Base64StringModelElement('base64')
-    match_base64 = 'match/base64'
+    id_ = "base64"
+    path = "path"
 
     def test1get_id(self):
         """Test if get_id works properly."""
-        base64_dme = Base64StringModelElement("s0")
-        self.assertEqual(base64_dme.get_id(), "s0")
+        base64_dme = Base64StringModelElement(self.id_)
+        self.assertEqual(base64_dme.get_id(), self.id_)
 
     def test2get_child_elements(self):
         """Test if get_child_elements returns None."""
-        base64_dme = Base64StringModelElement("s0")
+        base64_dme = Base64StringModelElement(self.id_)
         self.assertEqual(base64_dme.get_child_elements(), None)
 
     def test3get_match_element_valid_match_string_with_padding(self):
@@ -24,52 +24,37 @@ class Base64StringModelElementTest(TestBase):
         string = b'This is some string to be encoded.'
         base64_string = b'VGhpcyBpcyBzb21lIHN0cmluZyB0byBiZSBlbmNvZGVkLg=='
         match_context = DummyMatchContext(base64_string)
-        base64_dme = Base64StringModelElement("s0")
-        match_element = base64_dme.get_match_element("base64", match_context)
-        self.assertEqual(match_element.path, "base64/s0")
-        self.assertEqual(match_element.match_string, base64_string)
-        self.assertEqual(match_element.match_object, string)
-        self.assertIsNone(match_element.children, None)
-        self.assertEqual(match_context.match_string, base64_string)
+        base64_dme = Base64StringModelElement(self.id_)
+        match_element = base64_dme.get_match_element(self.path, match_context)
+        self.compare_match_results(base64_string, match_element, match_context, self.id_, self.path, base64_string, string, None)
 
     def test4get_match_element_valid_match_string_with_one_byte_padding(self):
         """Parse matching substring with padding from MatchContext and check if the MatchContext was updated accordingly."""
         string = b'This is some encoded strin'
         base64_string = b'VGhpcyBpcyBzb21lIGVuY29kZWQgc3RyaW4='
         match_context = DummyMatchContext(base64_string)
-        base64_dme = Base64StringModelElement("s0")
-        match_element = base64_dme.get_match_element("base64", match_context)
-        self.assertEqual(match_element.path, "base64/s0")
-        self.assertEqual(match_element.match_string, base64_string)
-        self.assertEqual(match_element.match_object, string)
-        self.assertIsNone(match_element.children, None)
-        self.assertEqual(match_context.match_string, base64_string)
+        base64_dme = Base64StringModelElement(self.id_)
+        match_element = base64_dme.get_match_element(self.path, match_context)
+        self.compare_match_results(base64_string, match_element, match_context, self.id_, self.path, base64_string, string, None)
 
     def test5get_match_element_valid_match_string_without_padding(self):
         """Parse matching substring without padding from MatchContext and check if the MatchContext was updated accordingly."""
         string = b'This is some string to be encoded without the padding character =.'
         base64_string = b'VGhpcyBpcyBzb21lIHN0cmluZyB0byBiZSBlbmNvZGVkIHdpdGhvdXQgdGhlIHBhZGRpbmcgY2hhcmFjdGVyID0u'
         match_context = DummyMatchContext(base64_string)
-        base64_dme = Base64StringModelElement("s0")
-        match_element = base64_dme.get_match_element("base64", match_context)
-        self.assertEqual(match_element.path, "base64/s0")
-        self.assertEqual(match_element.match_string, base64_string)
-        self.assertEqual(match_element.match_object, string)
-        self.assertIsNone(match_element.children, None)
-        self.assertEqual(match_context.match_string, base64_string)
+        base64_dme = Base64StringModelElement(self.id_)
+        match_element = base64_dme.get_match_element(self.path, match_context)
+        self.compare_match_results(base64_string, match_element, match_context, self.id_, self.path, base64_string, string, None)
 
     def test6get_match_element_valid_match_string_without_exact_length(self):
         """Parse matching substring without exact length (divisible by 4) and check if the MatchContext was updated accordingly."""
         string = b'This is some encoded strin'
         base64_string = b'VGhpcyBpcyBzb21lIGVuY29kZWQgc3RyaW4'
         match_context = DummyMatchContext(base64_string)
-        base64_dme = Base64StringModelElement("s0")
-        match_element = base64_dme.get_match_element("base64", match_context)
-        self.assertEqual(match_element.path, "base64/s0")
-        self.assertEqual(match_element.match_string, base64_string[:-(len(base64_string) % 4)])
-        self.assertEqual(match_element.match_object, string[:-2])
-        self.assertIsNone(match_element.children, None)
-        self.assertEqual(match_context.match_string, base64_string[:-(len(base64_string) % 4)])
+        base64_dme = Base64StringModelElement(self.id_)
+        match_element = base64_dme.get_match_element(self.path, match_context)
+        self.compare_match_results(
+            base64_string, match_element, match_context, self.id_, self.path, base64_string[:-(len(base64_string) % 4)], string[:-2], None)
 
     def test7get_match_element_valid_match_string_with_partial_length(self):
         """Parse matching substring out of the MatchContext and check if the MatchContext was updated accordingly."""
@@ -77,41 +62,36 @@ class Base64StringModelElementTest(TestBase):
         base64_string = b'VGhpcyBpcyBzb21lIGVuY29kZWQgc3RyaW4='
         data = base64_string + b'\nContent: Public Key'
         match_context = DummyMatchContext(data)
-        base64_dme = Base64StringModelElement("s0")
-        match_element = base64_dme.get_match_element("base64", match_context)
-        self.assertEqual(match_element.path, "base64/s0")
-        self.assertEqual(match_element.match_string, base64_string)
-        self.assertEqual(match_element.match_object, string)
-        self.assertIsNone(match_element.children, None)
-        self.assertEqual(match_context.match_string, base64_string)
+        base64_dme = Base64StringModelElement(self.id_)
+        match_element = base64_dme.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, base64_string, string, None)
 
     def test8get_match_element_no_match(self):
         """Parse not matching substring from MatchContext and check if the MatchContext was not changed."""
         data = b"!Hello World"
         match_context = DummyMatchContext(data)
-        base64_dme = Base64StringModelElement("s0")
-        match_element = base64_dme.get_match_element("base64", match_context)
-        self.assertIsNone(match_element, None)
-        self.assertEqual(match_context.match_data, data)
+        base64_dme = Base64StringModelElement(self.id_)
+        match_element = base64_dme.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
 
     def test9get_match_element_unicode_exception(self):
         """Parse a Base64 string which can not be decoded as UTF-8."""
         # ² encoded with ISO-8859-1
         base64_string = b'sg=='
         match_context = DummyMatchContext(base64_string)
-        base64_dme = Base64StringModelElement("s0")
-        match_element = base64_dme.get_match_element("base64", match_context)
-        self.assertEqual(match_element.path, "base64/s0")
-        self.assertEqual(match_element.match_string, base64_string)
-        self.assertEqual(match_element.match_object, base64_string)
-        self.assertIsNone(match_element.children, None)
-        self.assertEqual(match_context.match_string, base64_string)
+        base64_dme = Base64StringModelElement(self.id_)
+        match_element = base64_dme.get_match_element(self.path, match_context)
+        self.compare_match_results(base64_string, match_element, match_context, self.id_, self.path, base64_string, base64_string, None)
 
     def test10path_id_input_validation(self):
         """Check if element_id is validated."""
         # empty element_id
         path_id = ""
         self.assertRaises(ValueError, Base64StringModelElement, path_id)
+
+        # None path_id
+        path_id = None
+        self.assertRaises(TypeError, Base64StringModelElement, path_id)
 
         # bytes element_id is not allowed
         path_id = b"path"
@@ -131,6 +111,10 @@ class Base64StringModelElementTest(TestBase):
 
         # list element_id is not allowed
         path_id = ["path"]
+        self.assertRaises(TypeError, Base64StringModelElement, path_id)
+
+        # empty list element_id is not allowed
+        path_id = []
         self.assertRaises(TypeError, Base64StringModelElement, path_id)
 
     def test11performance(self):  # skipcq: PYL-R0201

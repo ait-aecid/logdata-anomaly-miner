@@ -6,34 +6,33 @@ from unit.TestBase import TestBase, DummyMatchContext
 class AnyByteDataModelElementTest(TestBase):
     """Unittests for the AnyByteDataModelElement."""
 
+    id_ = "any"
+    path = "path"
+
     def test1get_id(self):
         """Test if get_id works properly."""
-        any_dme = AnyByteDataModelElement("s0")
-        self.assertEqual(any_dme.get_id(), "s0")
+        any_dme = AnyByteDataModelElement(self.id_)
+        self.assertEqual(any_dme.get_id(), self.id_)
 
     def test2get_child_elements(self):
         """Test if get_child_elements returns None."""
-        any_dme = AnyByteDataModelElement("s0")
+        any_dme = AnyByteDataModelElement(self.id_)
         self.assertEqual(any_dme.get_child_elements(), None)
 
     def test3get_match_element_valid_match(self):
         """Parse matching substring from MatchContext and check if the MatchContext was updated accordingly."""
         data = b'abcdefghijklmnopqrstuvwxyz.!?'
-        id_ = "path"
-        path = "any"
         match_context = DummyMatchContext(data)
-        any_dme = AnyByteDataModelElement(id_)
-        match_element = any_dme.get_match_element(path, match_context)
-        self.compare_match_results(data, match_element, match_context, id_, path, data, data, None)
+        any_dme = AnyByteDataModelElement(self.id_)
+        match_element = any_dme.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, data, data, None)
 
     def test4get_match_element_no_match(self):
         """Parse not matching substring from MatchContext and check if the MatchContext was not changed."""
         data = b""
-        id_ = "path"
-        path = "any"
         match_context = DummyMatchContext(data)
-        any_dme = AnyByteDataModelElement(id_)
-        match_element = any_dme.get_match_element(path, match_context)
+        any_dme = AnyByteDataModelElement(self.id_)
+        match_element = any_dme.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
     def test5element_id_input_validation(self):
