@@ -95,7 +95,10 @@ Parser:
        - id: dtm
          type: DateTimeModelElement
          name: 'DTM'
-         args: '%Y-%m-%d %H:%M:%S'
+         date_format: '%Y-%m-%d %H:%M:%S'
+         start_year: null
+         text_locale: null
+         max_time_jump_seconds: 86400
 
        - id: uNameSpace1
          type: FixedDataModelElement
@@ -452,7 +455,7 @@ Parser:
        - id: dateTimeModelElement
          type: DateTimeModelElement
          name: 'DateTimeModelElement'
-         args: 'Current DateTime: %d.%m.%Y %H:%M:%S'
+         date_format: 'Current DateTime: %d.%m.%Y %H:%M:%S'
 
        - id: decimalFloatValueModelElement
          type: DecimalFloatValueModelElement
@@ -563,8 +566,8 @@ Parser:
          date_formats:
            - format:
              - '%b %d %Y'
-             - 'en_US.utf8'
              - null
+             - 'en_US.utf8'
 
        - id: fixedDataModelElementDrawnNumber
          type: FixedDataModelElement

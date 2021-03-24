@@ -616,7 +616,7 @@ class YamlConfigTest(TestBase):
                   "'output_file_path': ['unknown field'], 'type': {'allowed': ['SyslogWriterEventHandler']}}]}]}], 'Parser': [{0: ['none " \
                   "or more than one rule validate', {'oneof definition 0': [{'args2': ['unknown field'], 'type': {'forbidden': [" \
                   "'ElementValueBranchModelElement', 'DecimalIntegerValueModelElement', 'DecimalFloatValueModelElement', " \
-                  "'MultiLocaleDateTimeModelElement', 'DelimitedDataModelElement', 'JsonModelElement']}}]}]}]}"
+                  "'DateTimeModelElement', 'MultiLocaleDateTimeModelElement', 'DelimitedDataModelElement', 'JsonModelElement']}}]}]}]}"
             self.assertEqual(msg, str(e))
         self.assertRaises(ValueError, aminer_config.load_yaml, 'unit/data/configfiles/filter_config_errors.yml')
 

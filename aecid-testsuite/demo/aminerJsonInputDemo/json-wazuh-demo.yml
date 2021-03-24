@@ -37,7 +37,7 @@ Parser:
        - id: timestamp
          type: DateTimeModelElement
          name: 'timestamp'
-         args: '%Y-%m-%dT%H:%M:%S.%f%z'
+         date_format: '%Y-%m-%dT%H:%M:%S.%f%z'
 
        - id: level
          type: DecimalIntegerValueModelElement
@@ -81,7 +81,7 @@ Parser:
        - id: id_sec
          type: DateTimeModelElement
          name: 'id_sec'
-         args: '%s.%f'
+         date_format: '%s.%f'
 
        - id: full_log
          type: AnyByteDataModelElement
@@ -90,7 +90,7 @@ Parser:
        - id: predecoder_timestamp
          type: DateTimeModelElement
          name: 'timestamp'
-         args: '%d/%m/%Y-%H:%M:%S.%f'
+         date_format: '%d/%m/%Y-%H:%M:%S.%f'
 
        - id: _parent
          type: FixedWordlistDataModelElement

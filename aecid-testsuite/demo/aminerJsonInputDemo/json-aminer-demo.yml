@@ -98,12 +98,12 @@ Parser:
        - id: timestamps_no_milliseconds
          type: DateTimeModelElement
          name: 'timestamps'
-         args: '%s'
+         date_format: '%s'
 
        - id: timestamps_with_milliseconds
          type: DateTimeModelElement
          name: 'timestamps'
-         args: '%s.%f'
+         date_format: '%s.%f'
 
        - id: timestamps
          type: FirstMatchModelElement

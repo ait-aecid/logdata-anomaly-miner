@@ -37,7 +37,7 @@ Parser:
        - id: timestamp
          type: DateTimeModelElement
          name: 'timestamp'
-         args: '%Y-%m-%dT%H:%M:%S.%f%z'
+         date_format: '%Y-%m-%dT%H:%M:%S.%f%z'
 
        - id: _flow_id
          type: DecimalIntegerValueModelElement
@@ -296,12 +296,12 @@ Parser:
        - id: start
          type: DateTimeModelElement
          name: 'start'
-         args: '%Y-%m-%dT%H:%M:%S.%f%z'
+         date_format: '%Y-%m-%dT%H:%M:%S.%f%z'
 
        - id: end
          type: DateTimeModelElement
          name: 'end'
-         args: '%Y-%m-%dT%H:%M:%S.%f%z'
+         date_format: '%Y-%m-%dT%H:%M:%S.%f%z'
 
        - id: age
          type: DecimalIntegerValueModelElement
@@ -767,12 +767,12 @@ Parser:
        - id: notbefore
          type: DateTimeModelElement
          name: 'notbefore'
-         args: '%Y-%m-%dT%H:%M:%S'
+         date_format: '%Y-%m-%dT%H:%M:%S'
 
        - id: notafter
          type: DateTimeModelElement
          name: 'notafter'
-         args: '%Y-%m-%dT%H:%M:%S'
+         date_format: '%Y-%m-%dT%H:%M:%S'
 
        - id: json
          start: True
