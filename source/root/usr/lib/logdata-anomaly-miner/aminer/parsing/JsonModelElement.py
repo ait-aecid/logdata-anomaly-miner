@@ -112,10 +112,10 @@ class JsonModelElement(ModelElementInterface):
                 for data in json_match_data[split_key]:
                     if isinstance(data, str):
                         data = data.encode()
-                    elif not isinstance(data, bytes):
-                        data = str(data).encode()
                     elif data is None:
                         data = b"null"
+                    elif not isinstance(data, bytes):
+                        data = str(data).encode()
                     if isinstance(json_dict[key][0], dict):
                         for match_data in json_match_data[split_key]:
                             matches += self.parse_json_dict(
