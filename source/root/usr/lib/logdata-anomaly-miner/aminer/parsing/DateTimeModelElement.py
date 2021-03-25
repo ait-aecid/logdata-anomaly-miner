@@ -575,12 +575,9 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
             locale.setlocale(locale.LC_ALL, date_time_model_element.text_locale)
             self.date_time_model_elements[i].last_parsed_seconds = self.last_parsed_seconds
             self.date_time_model_elements[i].start_year = self.start_year
-            try:
-                match_element = date_time_model_element.get_match_element(path, match_context)
-                if match_element is not None:
-                    self.last_parsed_seconds = date_time_model_element.last_parsed_seconds
-                    self.start_year = date_time_model_element.start_year
-                    return match_element
-            except:  # skipcq: FLK-E722
-                pass
+            match_element = date_time_model_element.get_match_element(path, match_context)
+            if match_element is not None:
+                self.last_parsed_seconds = date_time_model_element.last_parsed_seconds
+                self.start_year = date_time_model_element.start_year
+                return match_element
         return None

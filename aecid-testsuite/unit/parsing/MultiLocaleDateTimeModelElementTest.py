@@ -13,14 +13,17 @@ from unit.TestBase import TestBase, DummyMatchContext, initialize_loggers
 class MultiLocaleDateTimeModelElementTest(TestBase):
     """Unittests for the MultiLocaleDateTimeModelElement."""
 
+    id_ = "dtme"
+    path = "path"
+
     def test1get_id(self):
         """Test if get_id works properly."""
-        multi_dtme = MultiLocaleDateTimeModelElement("s0", [(b"%d.%m.%Y %H:%M:%S", None, None)])
-        self.assertEqual(multi_dtme.get_id(), "s0")
+        multi_dtme = MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m.%Y %H:%M:%S", None, None)])
+        self.assertEqual(multi_dtme.get_id(), self.id_)
 
     def test2get_child_elements(self):
         """Test if get_child_elements returns None."""
-        multi_dtme = MultiLocaleDateTimeModelElement("s0", [(b"%d.%m.%Y %H:%M:%S", None, None)])
+        multi_dtme = MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m.%Y %H:%M:%S", None, None)])
         self.assertEqual(multi_dtme.get_child_elements(), None)
 
     def test3get_match_element_with_different_date_formats(self):
@@ -29,7 +32,7 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         en_gb_utf8 = "en_GB.utf8"
         en_us_utf8 = "en_US.utf8"
         de_at_utf8 = "de_AT.utf8"
-        multi_locale_dtme = MultiLocaleDateTimeModelElement("path", [
+        multi_locale_dtme = MultiLocaleDateTimeModelElement(self.id_, [
             (b"%d.%m.%Y %H:%M:%S.%f", None, None), (b"%d.%m.%Y %H:%M:%S%z", None, None),  (b"%d.%m.%Y %H:%M:%S", None, None),
             (b"%d.%m.%YT%H:%M:%S", None, None), (b"%d.%m.%Y", None, None), (b"%H:%M:%S:%f", None, de_at_utf8),
             (b"%H:%M:%S", None, None), (b"%b %d", tz_gmt10, de_at_utf8), (b"%d %b %Y", None, en_gb_utf8),
@@ -38,14 +41,14 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
 
         # test normal date
         match_context = DummyMatchContext(b"07.02.2019 11:40:00: it still works")
-        match_element = multi_locale_dtme.get_match_element("match1", match_context)
+        match_element = multi_locale_dtme.get_match_element(self.path, match_context)
         self.assertEqual(match_element.match_string, b"07.02.2019 11:40:00")
         self.assertEqual(match_element.match_object, 1549539600)
         self.assertEqual(match_context.match_string, b"07.02.2019 11:40:00")
 
         # test leap year date
         match_context = DummyMatchContext(b"29.02.2020 11:40:00: it still works")
-        match_element = multi_locale_dtme.get_match_element("match1", match_context)
+        match_element = multi_locale_dtme.get_match_element(self.path, match_context)
         self.assertEqual(match_element.match_string, b"29.02.2020 11:40:00")
         self.assertEqual(match_element.match_object, 1582976400)
         self.assertEqual(match_context.match_string, b"29.02.2020 11:40:00")
@@ -160,7 +163,7 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         en_gb_utf8 = "en_GB.utf8"
         en_us_utf8 = "en_US.utf8"
         de_at_utf8 = "de_AT.utf8"
-        multi_locale_dtme = MultiLocaleDateTimeModelElement("path", [
+        multi_locale_dtme = MultiLocaleDateTimeModelElement(self.id_, [
             (b"%d.%m.%Y %H:%M:%S.%f", None, None), (b"%d.%m.%Y %H:%M:%S%z", None, None),  (b"%d.%m.%Y %H:%M:%S", None, None),
             (b"%d.%m.%YT%H:%M:%S", None, None), (b"%d.%m.%Y", None, None), (b"%H:%M:%S:%f", None, de_at_utf8),
             (b"%H:%M:%S", None, None), (b"%b %d", tz_gmt10, de_at_utf8), (b"%d %b %Y", None, en_gb_utf8),
@@ -200,13 +203,13 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         """This test case checks if unclean format_strings can be used."""
         # example "Date: 09.03.2021, Time: 10:02"
         match_context = DummyMatchContext(b"Date %d: 07.02.2018 11:40:00 UTC+0000: it still works")
-        multi_locale_dtme = MultiLocaleDateTimeModelElement("path", [(b"Date %%d: %d.%m.%Y %H:%M:%S%z", None, None)])
+        multi_locale_dtme = MultiLocaleDateTimeModelElement(self.id_, [(b"Date %%d: %d.%m.%Y %H:%M:%S%z", None, None)])
         self.assertEqual(multi_locale_dtme.get_match_element("match1", match_context).get_match_object(), 1518003600)
         self.assertEqual(match_context.match_string, b"Date %d: 07.02.2018 11:40:00 UTC+0000")
 
     def test6get_match_element_with_different_time_zones(self):
         """Test if different time_zones work with the MultiLocaleDateTimeModelElement."""
-        multi_locale_dtme = MultiLocaleDateTimeModelElement("path", [(b"%d.%m.%Y %H:%M:%S%z", None, None)])
+        multi_locale_dtme = MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m.%Y %H:%M:%S%z", None, None)])
         match_context = DummyMatchContext(b"07.02.2018 11:40:00 UTC-1200: it still works")
         self.assertEqual(multi_locale_dtme.get_match_element("match1", match_context).get_match_object(), 1518046800)
         self.assertEqual(match_context.match_string, b"07.02.2018 11:40:00 UTC-1200")
@@ -237,57 +240,50 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
 
     def test7get_match_element_with_different_text_locales(self):
         """Test if data with different text locales can be handled with different text_locale parameters."""
-        installed = False
-        try:
-            self.assertEqual("de_AT.UTF-8", locale.setlocale(locale.LC_TIME, "de_AT.UTF-8"))
-            installed = True
-        except locale.Error:
-            pass
-        MultiLocaleDateTimeModelElement("path", [(b"%d.%m %H:%M:%S", timezone.utc, "en_US.UTF-8")])
-        if installed:
-            MultiLocaleDateTimeModelElement("path", [(b"%d.%m %H:%M:%S", timezone.utc, "de_AT.UTF-8")])
+        MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m %H:%M:%S", timezone.utc, "en_US.UTF-8")])
+        MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m %H:%M:%S", timezone.utc, "de_AT.UTF-8")])
 
     def test8text_locale_not_installed(self):
         """Check if an exception is raised when the text_locale is not installed on the system."""
-        self.assertRaises(locale.Error, MultiLocaleDateTimeModelElement, "path", [(b"%d.%m %H:%M:%S", timezone.utc, "af-ZA.UTF-8")])
+        self.assertRaises(locale.Error, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m %H:%M:%S", timezone.utc, "af-ZA.UTF-8")])
 
     def test9get_match_element_with_start_year(self):
         """Test if dates without year can be parsed, when the start_year is defined."""
         match_context = DummyMatchContext(b"07.02 11:40:00: it still works")
-        multi_locale_dtme = MultiLocaleDateTimeModelElement("path", [(b"%d.%m %H:%M:%S", None, None)], start_year=2017)
+        multi_locale_dtme = MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m %H:%M:%S", None, None)], start_year=2017)
         self.assertEqual(multi_locale_dtme.get_match_element("match1", match_context).get_match_object(), 1486467600)
         self.assertEqual(match_context.match_string, b"07.02 11:40:00")
 
         match_context = DummyMatchContext(b"07.02 11:40:00: it still works")
-        multi_locale_dtme = MultiLocaleDateTimeModelElement("path", [(b"%d.%m %H:%M:%S", None, None)], start_year=2019)
+        multi_locale_dtme = MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m %H:%M:%S", None, None)], start_year=2019)
         self.assertEqual(multi_locale_dtme.get_match_element("match1", match_context).get_match_object(), 1549539600)
         self.assertEqual(match_context.match_string, b"07.02 11:40:00")
 
     def test10get_match_element_without_start_year_defined(self):
         """Test if dates without year can still be parsed, even without defining the start_year."""
         match_context = DummyMatchContext(b"07.02 11:40:00: it still works")
-        multi_locale_dtme = MultiLocaleDateTimeModelElement("path", [(b"%d.%m %H:%M:%S", None, None)])
+        multi_locale_dtme = MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m %H:%M:%S", None, None)])
         self.assertIsNotNone(multi_locale_dtme.get_match_element("match1", match_context))
         self.assertEqual(match_context.match_string, b"07.02 11:40:00")
 
     def test11get_match_element_with_leap_start_year(self):
         """Check if leap start_years can parse the 29th February."""
         match_context = DummyMatchContext(b"29.02 11:40:00: it still works")
-        multi_locale_dtme = MultiLocaleDateTimeModelElement("path", [(b"%d.%m %H:%M:%S", None, None)], start_year=2020)
+        multi_locale_dtme = MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m %H:%M:%S", None, None)], start_year=2020)
         self.assertEqual(multi_locale_dtme.get_match_element("match1", match_context).get_match_object(), 1582976400)
         self.assertEqual(match_context.match_string, b"29.02 11:40:00")
 
     def test12get_match_element_without_leap_start_year(self):
         """Check if normal start_years can not parse the 29th February."""
         match_context = DummyMatchContext(b"29.02 11:40:00: it still works")
-        multi_locale_dtme = MultiLocaleDateTimeModelElement("path", [(b"%d.%m %H:%M:%S", None, None)], start_year=2019)
+        multi_locale_dtme = MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m %H:%M:%S", None, None)], start_year=2019)
         self.assertIsNone(multi_locale_dtme.get_match_element("match1", match_context))
 
     def test13learn_new_start_year_with_start_year_set(self):
         """Test if a new year is learned successfully with the start year being set."""
         start_year = 2020
         match_context = DummyMatchContext(b"31.12 23:59:00: it still works")
-        multi_locale_dtme = MultiLocaleDateTimeModelElement("path", [(b"%d.%m %H:%M:%S", None, None)], start_year=start_year)
+        multi_locale_dtme = MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m %H:%M:%S", None, None)], start_year=start_year)
         self.assertEqual(multi_locale_dtme.get_match_element("match1", match_context).get_match_object(), 1609459140)
         self.assertEqual(match_context.match_string, b"31.12 23:59:00")
         self.assertEqual(multi_locale_dtme.start_year, start_year)
@@ -300,7 +296,7 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
     def test14learn_new_start_year_without_start_year_set(self):
         """Test if a new year is learned successfully with the start year being None."""
         match_context = DummyMatchContext(b"31.12 23:59:00: it still works")
-        multi_locale_dtme = MultiLocaleDateTimeModelElement("path", [(b"%d.%m %H:%M:%S", None, None)])
+        multi_locale_dtme = MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m %H:%M:%S", None, None)])
         self.assertIsNotNone(multi_locale_dtme.get_match_element("match1", match_context))
         self.assertEqual(match_context.match_string, b"31.12 23:59:00")
 
@@ -320,7 +316,7 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         max_time_jump_seconds = 86400
         start_year = 2020
         match_context = DummyMatchContext(b"31.12 23:59:00: it still works")
-        multi_locale_dtme = MultiLocaleDateTimeModelElement("path", [(b"%d.%m %H:%M:%S", None, None)], start_year=start_year,
+        multi_locale_dtme = MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m %H:%M:%S", None, None)], start_year=start_year,
                                                             max_time_jump_seconds=max_time_jump_seconds)
         self.assertEqual(multi_locale_dtme.get_match_element("match1", match_context).get_match_object(), 1609459140)
         self.assertEqual(match_context.match_string, b"31.12 23:59:00")
@@ -346,7 +342,7 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         max_time_jump_seconds = 86400
         start_year = 2020
         match_context = DummyMatchContext(b"31.12 23:59:00: it still works")
-        multi_locale_dtme = MultiLocaleDateTimeModelElement("path", [(b"%d.%m %H:%M:%S", None, None)], start_year=start_year,
+        multi_locale_dtme = MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m %H:%M:%S", None, None)], start_year=start_year,
                                                             max_time_jump_seconds=max_time_jump_seconds)
         self.assertEqual(multi_locale_dtme.get_match_element("match1", match_context).get_match_object(), 1609459140)
         self.assertEqual(match_context.match_string, b"31.12 23:59:00")
@@ -363,7 +359,7 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
 
     def test17time_change_cest_cet(self):
         """Check if the time change from CET to CEST and vice versa work as expected."""
-        multi_locale_dtme = MultiLocaleDateTimeModelElement("path", [(b"%d.%m.%Y %H:%M:%S%z", None, None)])
+        multi_locale_dtme = MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m.%Y %H:%M:%S%z", None, None)])
         match_context = DummyMatchContext(b"24.03.2018 11:40:00 CET: it still works")
         self.assertEqual(multi_locale_dtme.get_match_element("match1", match_context).get_match_object(), 1521888000)
         self.assertEqual(match_context.match_string, b"24.03.2018 11:40:00 CET")
@@ -394,7 +390,7 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
 
     def test18same_timestamp_multiple_times(self):
         """Test if the MultiLocaleDateTimeModelElement can handle multiple same timestamps."""
-        multi_locale_dtme = MultiLocaleDateTimeModelElement("path", [(b"%d.%m.%Y %H:%M:%S", None, None)])
+        multi_locale_dtme = MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m.%Y %H:%M:%S", None, None)])
         match_context = DummyMatchContext(b"07.02.2019 11:40:00: it still works")
         match_element = multi_locale_dtme.get_match_element("match1", match_context)
         self.assertEqual(match_element.match_string, b"07.02.2019 11:40:00")
@@ -409,7 +405,7 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
 
     def test19date_before_unix_timestamps(self):
         """Check if timestamps before the unix timestamp are processed properly."""
-        multi_locale_dtme = MultiLocaleDateTimeModelElement("path", [(b"%d.%m.%Y %H:%M:%S", None, None)])
+        multi_locale_dtme = MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m.%Y %H:%M:%S", None, None)])
         match_context = DummyMatchContext(b"01.01.1900 11:40:00: it still works")
         match_element = multi_locale_dtme.get_match_element("match1", match_context)
         self.assertEqual(match_element.match_string, b"01.01.1900 11:40:00")
@@ -449,111 +445,111 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         format_specifiers = b""
         for c in allowed_format_specifiers:
             format_specifiers += b"%" + str(chr(c)).encode()
-            MultiLocaleDateTimeModelElement("s0", [(b"%" + str(chr(c)).encode(), None, None)])
+            MultiLocaleDateTimeModelElement(self.id_, [(b"%" + str(chr(c)).encode(), None, None)])
         # check if all allowed values can not be used together. An exception should be raised, because of multiple month representations
         # and %s with non-second formats.
-        self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, "s0", format_specifiers)
-        MultiLocaleDateTimeModelElement("s0", [(format_specifiers.replace(b"%m", b"").replace(b"%s", b""), None, None)])
-        MultiLocaleDateTimeModelElement("s0", [(format_specifiers.replace(b"%b", b"").replace(b"%s", b""), None, None)])
-        MultiLocaleDateTimeModelElement("s0", [(b"%s%z%f", None, None)])
+        self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, self.id_, format_specifiers)
+        MultiLocaleDateTimeModelElement(self.id_, [(format_specifiers.replace(b"%m", b"").replace(b"%s", b""), None, None)])
+        MultiLocaleDateTimeModelElement(self.id_, [(format_specifiers.replace(b"%b", b"").replace(b"%s", b""), None, None)])
+        MultiLocaleDateTimeModelElement(self.id_, [(b"%s%z%f", None, None)])
         for c in allowed_format_specifiers.replace(b"s", b"").replace(b"z", b"").replace(b"f", b"").replace(b"%", b""):
-            self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, "s0", [(b"%s%" + str(chr(c)).encode(), None, None)])
+            self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%s%" + str(chr(c)).encode(), None, None)])
 
         # test non-existent specifiers
         for c in b"aceghijklnopqrtuvwxyABCDEFGIJKLNOPQRTUVWXZ":
-            self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, "s0", [(b"%" + str(chr(c)).encode(), None, None)])
+            self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%" + str(chr(c)).encode(), None, None)])
 
         # test multiple specifiers. % and z specifiers are allowed multiple times.
-        MultiLocaleDateTimeModelElement("s0", [(b"%%%z%z", None, None)])
+        MultiLocaleDateTimeModelElement(self.id_, [(b"%%%z%z", None, None)])
         for c in allowed_format_specifiers.replace(b"%", b"").replace(b"z", b""):
-            self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, "s0", [(
+            self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, self.id_, [(
                 b"%" + str(chr(c)).encode() + b"%" + str(chr(c)).encode(), None, None)])
 
-        self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, "s0", [])
-        self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, "s0", [(b"%s%z%f", None)])
-        self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, "s0", [(b"", None, None)])
+        self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, self.id_, [])
+        self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%s%z%f", None)])
+        self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"", None, None)])
 
     def test22time_zone_input_validation(self):
         """Check if time_zone is validated and only valid values can be entered."""
         en_gb_utf8 = "en_GB.utf8"
         en_us_utf8 = "en_US.utf8"
         de_at_utf8 = "de_AT.utf8"
-        multi_locale_dtme = MultiLocaleDateTimeModelElement("path", [
+        multi_locale_dtme = MultiLocaleDateTimeModelElement(self.id_, [
             (b"%d.%m.%Y %H:%M:%S.%f", None, None), (b"%d.%m.%Y %H:%M:%S%z", None, None),  (b"%d.%m.%Y %H:%M:%S", None, None),
             (b"%d.%m.%YT%H:%M:%S", None, None), (b"%d.%m.%Y", None, None), (b"%H:%M:%S:%f", None, de_at_utf8),
             (b"%H:%M:%S", None, None), (b"%d %b %Y", None, en_gb_utf8), (b"%dth %b %Y", None, en_gb_utf8), (b"%d/%m/%Y", None, en_gb_utf8),
             (b"%m-%d-%Y", None, en_us_utf8), (b"%d.%m. %H:%M:%S:%f", None, de_at_utf8)])
         for dtme in multi_locale_dtme.date_time_model_elements:
             self.assertEqual(dtme.time_zone, timezone.utc)
-        MultiLocaleDateTimeModelElement("s0", [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)])
+        MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)])
         for tz in pytz.all_timezones:
-            MultiLocaleDateTimeModelElement("s0", [(b"%d.%m.%Y %H:%M:%S", pytz.timezone(tz), None)])
+            MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m.%Y %H:%M:%S", pytz.timezone(tz), None)])
 
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", "UTC", None)])
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", 1, None)])
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", 1.25, None)])
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", True, None)])
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", [timezone.utc], None)])
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", {"time_zone": timezone.utc}, None)])
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", "UTC", None)])
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", 1, None)])
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", 1.25, None)])
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", True, None)])
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", [timezone.utc], None)])
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", {"time_zone": timezone.utc}, None)])
 
     def test23text_locale_input_validation(self):
         """
         Check if text_locale is validated and only valid values can be entered.
         An exception has to be raised if the locale is not installed on the system.
         """
-        MultiLocaleDateTimeModelElement("path", [(b"%d.%m %H:%M:%S", timezone.utc, "en_US.UTF-8")])
-        MultiLocaleDateTimeModelElement("path", [(b"%d.%m %H:%M:%S", timezone.utc, ("en_US", "UTF-8"))])
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", None, 1)])
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", None, 1.2)])
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", None, ["en_US", "UTF-8"])])
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", None, {"en_US": "UTF-8"})])
+        MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m %H:%M:%S", timezone.utc, "en_US.UTF-8")])
+        MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m %H:%M:%S", timezone.utc, ("en_US", "UTF-8"))])
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", None, 1)])
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", None, 1.2)])
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", None, ["en_US", "UTF-8"])])
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", None, {"en_US": "UTF-8"})])
 
     def test24start_year_input_validation(self):
         """Check if start_year is validated."""
-        multi_locale_dtme = MultiLocaleDateTimeModelElement("s0", [(b"%d.%m %H:%M:%S", timezone.utc, None)], None)
+        multi_locale_dtme = MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m %H:%M:%S", timezone.utc, None)], None)
         self.assertEqual(multi_locale_dtme.start_year, datetime.now().year)
-        MultiLocaleDateTimeModelElement("s0", [(b"%d.%m %H:%M:%S", timezone.utc, None)], 2020)
-        MultiLocaleDateTimeModelElement("s0", [(b"%d.%m %H:%M:%S", timezone.utc, None)], -630)
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], "2020")
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], True)
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], 1.25)
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], [2020])
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], {"key": 2020})
+        MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m %H:%M:%S", timezone.utc, None)], 2020)
+        MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m %H:%M:%S", timezone.utc, None)], -630)
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], "2020")
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], True)
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], 1.25)
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], [2020])
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], {"key": 2020})
 
     def test25max_time_jump_seconds_input_validation(self):
         """Check if max_time_jump_seconds is validated."""
-        multi_locale_dtme = MultiLocaleDateTimeModelElement("s0", [(b"%d.%m %H:%M:%S", timezone.utc, None)], None)
+        multi_locale_dtme = MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m %H:%M:%S", timezone.utc, None)], None)
         self.assertEqual(multi_locale_dtme.max_time_jump_seconds, 86400)
-        MultiLocaleDateTimeModelElement("s0", [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, 100000)
-        self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, -1)
-        self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, 0)
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, "100000")
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, True)
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, 1.25)
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, {
+        MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, 100000)
+        self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, -1)
+        self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, 0)
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, "100000")
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, True)
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, 1.25)
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, {
             "key": 2020})
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, [100000])
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, [100000])
 
-    # def test26get_match_element_match_context_input_validation(self):
-    #     """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
-    #     model_element = MultiLocaleDateTimeModelElement("s0", [(b"%d.%m.%Y %H:%M:%S", None, None)])
-    #     data = b"07.02.2019 11:40:00: it still works"
-    #     model_element.get_match_element(self.path, DummyMatchContext(data))
-    #     from aminer.parsing.MatchContext import MatchContext
-    #     model_element.get_match_element(self.path, MatchContext(data))
-    #
-    #     from aminer.parsing.MatchElement import MatchElement
-    #     self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(data, None, None, None))
-    #     self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
-    #     self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
-    #     self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123)
-    #     self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123.22)
-    #     self.assertRaises(AttributeError, model_element.get_match_element, self.path, None)
-    #     self.assertRaises(AttributeError, model_element.get_match_element, self.path, [])
-    #     self.assertRaises(AttributeError, model_element.get_match_element, self.path, {"key": MatchContext(data)})
-    #     self.assertRaises(AttributeError, model_element.get_match_element, self.path, set())
-    #     self.assertRaises(AttributeError, model_element.get_match_element, self.path, ())
-    #     self.assertRaises(AttributeError, model_element.get_match_element, self.path, model_element)
+    def test26get_match_element_match_context_input_validation(self):
+        """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
+        model_element = MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m.%Y %H:%M:%S", None, None)])
+        data = b"07.02.2019 11:40:00: it still works"
+        model_element.get_match_element(self.path, DummyMatchContext(data))
+        from aminer.parsing.MatchContext import MatchContext
+        model_element.get_match_element(self.path, MatchContext(data))
+
+        from aminer.parsing.MatchElement import MatchElement
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(data, None, None, None))
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123)
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123.22)
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, None)
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, [])
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, {"key": MatchContext(data)})
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, set())
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, ())
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, model_element)
 
 
 if __name__ == "__main__":
