@@ -29,32 +29,33 @@ LABEL maintainer="wolfgang.hotwagner@ait.ac.at"
 # Install necessary debian packages
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
-	python3 \
-	python3-pip \
-	python3-pip \
-        python3-tz \
-        python3-scipy \
-        python3-pkg-resources \
-        python3-setuptools \
-        python3-dateutil \
-        python3-six \
-        python3-scipy \
-        python3-kafka \
-        python3-cerberus \
-        python3-yaml \
-        python3-pylibacl \
-        python3-urllib3 \
-        libacl1-dev \
-        postfix \
-        procps \ 
-        mailutils \
-        sudo \
-        curl \
-        postfix \
-        openjdk-11-jre \
-        locales \
-        locales-all \
-        rsyslog
+    python3 \
+    python3-pip \
+    python3-pip \
+    python3-tz \
+    python3-scipy \
+    python3-pkg-resources \
+    python3-setuptools \
+    python3-dateutil \
+    python3-six \
+    python3-scipy \
+    python3-kafka \
+    python3-cerberus \
+    python3-yaml \
+    python3-pylibacl \
+    python3-urllib3 \
+    libacl1-dev \
+    postfix \
+    procps \
+    mailutils \
+    sudo \
+    curl \
+    postfix \
+    openjdk-11-jre \
+    locales \
+    locales-all \
+    rsyslog \
+    git
 
 RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
     sed -i -e 's/# de_AT ISO-8859-1/de_AT ISO-8859-1/' /etc/locale.gen && \
@@ -67,7 +68,6 @@ ENV LC_ALL en_US.UTF-8
 
 
 RUN pip3 install coverage
-RUN apt install git -y
 
 # Copy logdata-anomaly-miner-sources
 ADD source/root/usr/lib/logdata-anomaly-miner /usr/lib/logdata-anomaly-miner
