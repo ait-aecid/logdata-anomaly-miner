@@ -269,7 +269,7 @@ class VariableCorrelationDetectorTest(TestBase):
         var3 = ['c']*20 + ['d']*50 + ['e']*30
         var4 = ['c']*50 + ['d']*50
 
-        for i, val in enumerate(len(var1)):
+        for i, val in enumerate(var1):
             children = [MatchElement('2', var2[i], var2[i].encode(), None), MatchElement('3', var3[i], var3[i].encode(), None),
                         MatchElement('4', var4[i], var4[i].encode(), None)]
             log_atom = LogAtom(val.encode(), ParserMatch(MatchElement('/', val, val.encode(), children)), t,
