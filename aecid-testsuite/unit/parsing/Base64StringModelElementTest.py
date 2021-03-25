@@ -83,49 +83,70 @@ class Base64StringModelElementTest(TestBase):
         match_element = base64_dme.get_match_element(self.path, match_context)
         self.compare_match_results(base64_string, match_element, match_context, self.id_, self.path, base64_string, base64_string, None)
 
-    def test10path_id_input_validation(self):
+    def test10element_id_input_validation(self):
         """Check if element_id is validated."""
         # empty element_id
-        path_id = ""
-        self.assertRaises(ValueError, Base64StringModelElement, path_id)
+        element_id = ""
+        self.assertRaises(ValueError, Base64StringModelElement, element_id)
 
-        # None path_id
-        path_id = None
-        self.assertRaises(TypeError, Base64StringModelElement, path_id)
+        # None element_id
+        element_id = None
+        self.assertRaises(TypeError, Base64StringModelElement, element_id)
 
         # bytes element_id is not allowed
-        path_id = b"path"
-        self.assertRaises(TypeError, Base64StringModelElement, path_id)
+        element_id = b"path"
+        self.assertRaises(TypeError, Base64StringModelElement, element_id)
 
         # integer element_id is not allowed
-        path_id = 123
-        self.assertRaises(TypeError, Base64StringModelElement, path_id)
+        element_id = 123
+        self.assertRaises(TypeError, Base64StringModelElement, element_id)
 
         # float element_id is not allowed
-        path_id = 123.22
-        self.assertRaises(TypeError, Base64StringModelElement, path_id)
+        element_id = 123.22
+        self.assertRaises(TypeError, Base64StringModelElement, element_id)
 
         # dict element_id is not allowed
-        path_id = {"id": "path"}
-        self.assertRaises(TypeError, Base64StringModelElement, path_id)
+        element_id = {"id": "path"}
+        self.assertRaises(TypeError, Base64StringModelElement, element_id)
 
         # list element_id is not allowed
-        path_id = ["path"]
-        self.assertRaises(TypeError, Base64StringModelElement, path_id)
+        element_id = ["path"]
+        self.assertRaises(TypeError, Base64StringModelElement, element_id)
 
         # empty list element_id is not allowed
-        path_id = []
-        self.assertRaises(TypeError, Base64StringModelElement, path_id)
+        element_id = []
+        self.assertRaises(TypeError, Base64StringModelElement, element_id)
 
         # empty tuple element_id is not allowed
-        path_id = ()
-        self.assertRaises(TypeError, Base64StringModelElement, path_id)
+        element_id = ()
+        self.assertRaises(TypeError, Base64StringModelElement, element_id)
 
         # empty set element_id is not allowed
-        path_id = set()
-        self.assertRaises(TypeError, Base64StringModelElement, path_id)
+        element_id = set()
+        self.assertRaises(TypeError, Base64StringModelElement, element_id)
 
-    def test11performance(self):  # skipcq: PYL-R0201
+    def test11get_match_element_match_context_input_validation(self):
+        """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
+        model_element = Base64StringModelElement(self.id_)
+        data = b'VGhpcyBpcyBzb21lIHN0cmluZyB0byBiZSBlbmNvZGVkLg=='
+        model_element.get_match_element(self.path, DummyMatchContext(data))
+        from aminer.parsing.MatchContext import MatchContext
+        model_element.get_match_element(self.path, MatchContext(data))
+
+        from aminer.parsing.MatchElement import MatchElement
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(data, None, None, None))
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123)
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123.22)
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, None)
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, [])
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, {"key": MatchContext(data)})
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, set())
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, ())
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, model_element)
+
+    def test12performance(self):  # skipcq: PYL-R0201
         """Test the performance of the implementation. Comment this test out in normal cases."""
         import_setup = """
 import copy

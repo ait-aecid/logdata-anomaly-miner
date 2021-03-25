@@ -69,7 +69,7 @@ class DateTimeModelElement(ModelElementInterface):
     """
 
     # skipcq: PYL-W0613
-    def __init__(self, path_id, date_format, time_zone=None, text_locale=None, start_year=None, max_time_jump_seconds=86400):
+    def __init__(self, element_id, date_format, time_zone=None, text_locale=None, start_year=None, max_time_jump_seconds=86400):
         """
         Create a DateTimeModelElement to parse dates using a custom, timezone and locale-aware implementation similar to strptime.
         @param date_format, is a byte string that represents the date format for parsing, see Python strptime specification for
@@ -94,15 +94,15 @@ class DateTimeModelElement(ModelElementInterface):
         of values has to be tracked. This value defines the window within that the time may jump between two matches. When not
         within that window, the value is still parsed, corrected to the most likely value but does not change the detection year.
         """
-        if not isinstance(path_id, str):
-            msg = "path_id has to be of the type string."
+        if not isinstance(element_id, str):
+            msg = "element_id has to be of the type string."
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
-        if len(path_id) < 1:
-            msg = "path_id must not be empty."
+        if len(element_id) < 1:
+            msg = "element_id must not be empty."
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
-        self.path_id = path_id
+        self.element_id = element_id
         self.time_zone = time_zone
         if time_zone is None:
             self.time_zone = timezone.utc
@@ -237,7 +237,7 @@ class DateTimeModelElement(ModelElementInterface):
 
     def get_id(self):
         """Get the element ID."""
-        return self.path_id
+        return self.element_id
 
     def get_child_elements(self):  # skipcq: PYL-R0201
         """
@@ -445,8 +445,8 @@ class DateTimeModelElement(ModelElementInterface):
                         self.tz_specifier_offset = (int(data[1])) * 3600 * sign
                     self.tz_specifier_offset_str = remaining_data
             total_seconds += self.tz_specifier_offset
-            return MatchElement("%s/%s" % (path, self.path_id), date_str+remaining_data, total_seconds, None)
-        return MatchElement("%s/%s" % (path, self.path_id), date_str, total_seconds, None)
+            return MatchElement("%s/%s" % (path, self.element_id), date_str + remaining_data, total_seconds, None)
+        return MatchElement("%s/%s" % (path, self.element_id), date_str, total_seconds, None)
 
     @staticmethod
     def parse_fraction(value_str):
@@ -473,7 +473,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
     names to bytes during object creation and just keep the lookup list.
     """
 
-    def __init__(self, path_id, date_formats, start_year=None, max_time_jump_seconds=86400):
+    def __init__(self, element_id, date_formats, start_year=None, max_time_jump_seconds=86400):
         """
         Create a new MultiLocaleDateTimeModelElement object.
         @param date_formats this parameter is a list of tuples, each tuple containing information about one date format to support.
@@ -493,15 +493,15 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
         is extracted from this record. When empty and first parsing invocation involves a semiqualified date, the current year
         in UTC timezone is used.
         """
-        if not isinstance(path_id, str):
-            msg = "path_id has to be of the type string."
+        if not isinstance(element_id, str):
+            msg = "element_id has to be of the type string."
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
-        if len(path_id) < 1:
-            msg = "path_id must not be empty."
+        if len(element_id) < 1:
+            msg = "element_id must not be empty."
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
-        self.path_id = path_id
+        self.element_id = element_id
         if len(date_formats) == 0:
             msg = "At least one date_format must be specified."
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
@@ -533,7 +533,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
                     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
             self.date_time_model_elements.append(DateTimeModelElement(
-                path_id + "/format" + str(i), date_format, time_zone, text_locale, start_year, max_time_jump_seconds))
+                element_id + "/format" + str(i), date_format, time_zone, text_locale, start_year, max_time_jump_seconds))
             format_has_year_flag = format_has_year_flag and self.date_time_model_elements[-1].format_has_year_flag
 
         # The latest parsed timestamp value.
@@ -555,7 +555,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
 
     def get_id(self):
         """Get the element ID."""
-        return self.path_id
+        return self.element_id
 
     def get_child_elements(self):  # skipcq: PYL-R0201
         """

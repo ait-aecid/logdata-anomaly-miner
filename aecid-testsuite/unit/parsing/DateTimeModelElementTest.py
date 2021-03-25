@@ -403,48 +403,48 @@ class DateTimeModelElementTest(TestBase):
         match_element = date_time_model_element.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, date, -2208946800, None)
 
-    def test20path_id_input_validation(self):
-        """Check if path_id is validated."""
+    def test20element_id_input_validation(self):
+        """Check if element_id is validated."""
         date_format = b"%d.%m.%Y %H:%M:%S"
         # empty element_id
-        path_id = ""
-        self.assertRaises(ValueError, DateTimeModelElement, path_id, date_format)
+        element_id = ""
+        self.assertRaises(ValueError, DateTimeModelElement, element_id, date_format)
 
         # None element_id
-        path_id = None
-        self.assertRaises(TypeError, DateTimeModelElement, path_id, date_format)
+        element_id = None
+        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
 
         # bytes element_id is not allowed
-        path_id = b"path"
-        self.assertRaises(TypeError, DateTimeModelElement, path_id, date_format)
+        element_id = b"path"
+        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
 
         # integer element_id is not allowed
-        path_id = 123
-        self.assertRaises(TypeError, DateTimeModelElement, path_id, date_format)
+        element_id = 123
+        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
 
         # float element_id is not allowed
-        path_id = 123.22
-        self.assertRaises(TypeError, DateTimeModelElement, path_id, date_format)
+        element_id = 123.22
+        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
 
         # dict element_id is not allowed
-        path_id = {"id": "path"}
-        self.assertRaises(TypeError, DateTimeModelElement, path_id, date_format)
+        element_id = {"id": "path"}
+        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
 
         # list element_id is not allowed
-        path_id = ["path"]
-        self.assertRaises(TypeError, DateTimeModelElement, path_id, date_format)
+        element_id = ["path"]
+        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
 
         # empty list element_id is not allowed
-        path_id = []
-        self.assertRaises(TypeError, DateTimeModelElement, path_id, date_format)
+        element_id = []
+        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
 
         # empty tuple element_id is not allowed
-        path_id = ()
-        self.assertRaises(TypeError, DateTimeModelElement, path_id, date_format)
+        element_id = ()
+        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
 
         # empty set element_id is not allowed
-        path_id = set()
-        self.assertRaises(TypeError, DateTimeModelElement, path_id, date_format)
+        element_id = set()
+        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
 
     def test21date_format_input_validation(self):
         """Check if date_format is validated and only valid values can be entered."""
@@ -569,7 +569,28 @@ class DateTimeModelElementTest(TestBase):
         self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, ())
         self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, set())
 
-    def test26performance(self):  # skipcq: PYL-R0201
+    def test26get_match_element_match_context_input_validation(self):
+        """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
+        model_element = DateTimeModelElement(self.id_, b"%d.%m.%Y %H:%M:%S")
+        data = b"07.02.2019 11:40:00: it still works"
+        model_element.get_match_element(self.path, DummyMatchContext(data))
+        from aminer.parsing.MatchContext import MatchContext
+        model_element.get_match_element(self.path, MatchContext(data))
+
+        from aminer.parsing.MatchElement import MatchElement
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(data, None, None, None))
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123)
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123.22)
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, None)
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, [])
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, {"key": MatchContext(data)})
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, set())
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, ())
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, model_element)
+
+    def test27performance(self):  # skipcq: PYL-R0201
         """Test the performance of the implementation."""
         import_setup = """
 import copy

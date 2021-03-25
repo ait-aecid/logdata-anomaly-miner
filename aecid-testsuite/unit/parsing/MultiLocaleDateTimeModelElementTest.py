@@ -415,8 +415,8 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         self.assertEqual(match_element.match_string, b"01.01.1900 11:40:00")
         self.assertEqual(match_element.match_object, -2208946800)
 
-    def test20path_id_input_validation(self):
-        """Check if path_id is validated."""
+    def test20element_id_input_validation(self):
+        """Check if element_id is validated."""
         date_formats = [(b"%d.%m.%Y %H:%M:%S", None, None)]
         # empty element_id
         element_id = ""
@@ -533,6 +533,27 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, {
             "key": 2020})
         self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, "s0", [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, [100000])
+
+    # def test26get_match_element_match_context_input_validation(self):
+    #     """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
+    #     model_element = MultiLocaleDateTimeModelElement("s0", [(b"%d.%m.%Y %H:%M:%S", None, None)])
+    #     data = b"07.02.2019 11:40:00: it still works"
+    #     model_element.get_match_element(self.path, DummyMatchContext(data))
+    #     from aminer.parsing.MatchContext import MatchContext
+    #     model_element.get_match_element(self.path, MatchContext(data))
+    #
+    #     from aminer.parsing.MatchElement import MatchElement
+    #     self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(data, None, None, None))
+    #     self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
+    #     self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
+    #     self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123)
+    #     self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123.22)
+    #     self.assertRaises(AttributeError, model_element.get_match_element, self.path, None)
+    #     self.assertRaises(AttributeError, model_element.get_match_element, self.path, [])
+    #     self.assertRaises(AttributeError, model_element.get_match_element, self.path, {"key": MatchContext(data)})
+    #     self.assertRaises(AttributeError, model_element.get_match_element, self.path, set())
+    #     self.assertRaises(AttributeError, model_element.get_match_element, self.path, ())
+    #     self.assertRaises(AttributeError, model_element.get_match_element, self.path, model_element)
 
 
 if __name__ == "__main__":
