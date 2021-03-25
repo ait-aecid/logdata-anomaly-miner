@@ -78,132 +78,132 @@ class DecimalFloatValueModelElementTest(TestBase):
         self.assertEqual(match_context.match_data, data)
         # add test where decimal point is at last position without following decimals
 
-    def testXpath_id_input_validation(self):
+    def testXelement_id_input_validation(self):
         """Check if element_id is validated."""
         # empty element_id
-        path_id = ""
-        self.assertRaises(ValueError, DecimalFloatValueModelElement, path_id)
+        element_id = ""
+        self.assertRaises(ValueError, DecimalFloatValueModelElement, element_id)
 
-        # None path_id
-        path_id = None
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id)
+        # None element_id
+        element_id = None
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id)
 
         # bytes element_id is not allowed
-        path_id = b"path"
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id)
+        element_id = b"path"
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id)
 
         # integer element_id is not allowed
-        path_id = 123
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id)
+        element_id = 123
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id)
 
         # float element_id is not allowed
-        path_id = 123.22
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id)
+        element_id = 123.22
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id)
 
         # dict element_id is not allowed
-        path_id = {"id": "path"}
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id)
+        element_id = {"id": "path"}
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id)
 
         # list element_id is not allowed
-        path_id = ["path"]
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id)
+        element_id = ["path"]
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id)
 
         # empty list element_id is not allowed
-        path_id = []
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id)
+        element_id = []
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id)
 
     def testXvalue_sign_type_input_validation(self):
         """Check if value_sign_type is validated."""
-        path_id = "path"
-        DecimalFloatValueModelElement(path_id, value_sign_type="none")
-        DecimalFloatValueModelElement(path_id, value_sign_type="optional")
-        DecimalFloatValueModelElement(path_id, value_sign_type="mandatory")
+        element_id = "path"
+        DecimalFloatValueModelElement(element_id, value_sign_type="none")
+        DecimalFloatValueModelElement(element_id, value_sign_type="optional")
+        DecimalFloatValueModelElement(element_id, value_sign_type="mandatory")
 
         value_sign_type = "None"
-        self.assertRaises(ValueError, DecimalFloatValueModelElement, path_id, value_sign_type=value_sign_type)
+        self.assertRaises(ValueError, DecimalFloatValueModelElement, element_id, value_sign_type=value_sign_type)
 
         value_sign_type = None
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, value_sign_type=value_sign_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, value_sign_type=value_sign_type)
 
         value_sign_type = b"none"
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, value_sign_type=value_sign_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, value_sign_type=value_sign_type)
 
         value_sign_type = 123
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, value_sign_type=value_sign_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, value_sign_type=value_sign_type)
 
         value_sign_type = 123.22
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, value_sign_type=value_sign_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, value_sign_type=value_sign_type)
 
         value_sign_type = {"value_sign_type": "none"}
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, value_sign_type=value_sign_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, value_sign_type=value_sign_type)
 
         value_sign_type = ["none"]
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, value_sign_type=value_sign_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, value_sign_type=value_sign_type)
 
         value_sign_type = []
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, value_sign_type=value_sign_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, value_sign_type=value_sign_type)
 
     def testXvalue_pad_type_input_validation(self):
         """Check if value_pad_type is validated."""
-        path_id = "path"
-        DecimalFloatValueModelElement(path_id, value_pad_type="none")
-        DecimalFloatValueModelElement(path_id, value_pad_type="zero")
-        DecimalFloatValueModelElement(path_id, value_pad_type="blank")
+        element_id = "path"
+        DecimalFloatValueModelElement(element_id, value_pad_type="none")
+        DecimalFloatValueModelElement(element_id, value_pad_type="zero")
+        DecimalFloatValueModelElement(element_id, value_pad_type="blank")
 
         value_pad_type = "None"
-        self.assertRaises(ValueError, DecimalFloatValueModelElement, path_id, value_pad_type=value_pad_type)
+        self.assertRaises(ValueError, DecimalFloatValueModelElement, element_id, value_pad_type=value_pad_type)
 
         value_pad_type = None
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, value_pad_type=value_pad_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, value_pad_type=value_pad_type)
 
         value_pad_type = b"none"
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, value_pad_type=value_pad_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, value_pad_type=value_pad_type)
 
         value_pad_type = 123
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, value_pad_type=value_pad_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, value_pad_type=value_pad_type)
 
         value_pad_type = 123.22
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, value_pad_type=value_pad_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, value_pad_type=value_pad_type)
 
         value_pad_type = {"value_sign_type": "none"}
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, value_pad_type=value_pad_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, value_pad_type=value_pad_type)
 
         value_pad_type = ["none"]
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, value_pad_type=value_pad_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, value_pad_type=value_pad_type)
 
         value_pad_type = []
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, value_pad_type=value_pad_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, value_pad_type=value_pad_type)
 
     def testXexponent_type_input_validation(self):
         """Check if exponent_type is validated."""
-        path_id = "path"
-        DecimalFloatValueModelElement(path_id, exponent_type="none")
-        DecimalFloatValueModelElement(path_id, exponent_type="optional")
-        DecimalFloatValueModelElement(path_id, exponent_type="mandatory")
+        element_id = "path"
+        DecimalFloatValueModelElement(element_id, exponent_type="none")
+        DecimalFloatValueModelElement(element_id, exponent_type="optional")
+        DecimalFloatValueModelElement(element_id, exponent_type="mandatory")
 
         exponent_type = "None"
-        self.assertRaises(ValueError, DecimalFloatValueModelElement, path_id, exponent_type=exponent_type)
+        self.assertRaises(ValueError, DecimalFloatValueModelElement, element_id, exponent_type=exponent_type)
 
         exponent_type = None
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, exponent_type=exponent_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, exponent_type=exponent_type)
 
         exponent_type = b"none"
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, exponent_type=exponent_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, exponent_type=exponent_type)
 
         exponent_type = 123
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, exponent_type=exponent_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, exponent_type=exponent_type)
 
         exponent_type = 123.22
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, exponent_type=exponent_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, exponent_type=exponent_type)
 
         exponent_type = {"value_sign_type": "none"}
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, exponent_type=exponent_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, exponent_type=exponent_type)
 
         exponent_type = ["none"]
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, exponent_type=exponent_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, exponent_type=exponent_type)
 
         exponent_type = []
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, path_id, exponent_type=exponent_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, exponent_type=exponent_type)
 
 
 
