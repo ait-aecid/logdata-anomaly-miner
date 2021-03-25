@@ -94,7 +94,7 @@ class AnyByteDataModelElementTest(TestBase):
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, None)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, [])
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, {"key": MatchContext(data)})
-        self.assertRaises(AttributeError, model_element.get_match_element, self.path, tuple())
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, set())
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, ())
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, model_element)
 
