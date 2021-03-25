@@ -283,7 +283,7 @@ class DateTimeModelElementTest(TestBase):
         max_time_jump_seconds = 86400
         start_year = 2020
         data = b"31.12 23:59:00: it still works"
-        date= b"31.12 23:59:00"
+        date = b"31.12 23:59:00"
         match_context = DummyMatchContext(data)
         date_time_model_element = DateTimeModelElement(
             self.id_, b"%d.%m %H:%M:%S", timezone.utc, start_year=start_year, max_time_jump_seconds=max_time_jump_seconds)
