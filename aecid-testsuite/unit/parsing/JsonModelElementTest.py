@@ -120,6 +120,23 @@ class JsonModelElementTest(unittest.TestCase):
         match = json_model_element.get_match_element('match', MatchContext(self.single_line_different_order_with_optional_key_json))
         self.assertEqual(match.match_object, json.loads(self.single_line_different_order_with_optional_key_json))
 
+    def test6null_value(self):
+        """Test if null values are parsed to "null"."""
+        key_parser_dict = {
+            "works": VariableByteDataModelElement("id", b"abc123"),
+            "problem": FixedWordlistDataModelElement("wordlist", [b"allowed value", b"null"])}
+        data1 = b"""{
+            "works": "abc",
+            "problem": "allowed value"
+        }"""
+        data2 = b"""{
+            "works": "123",
+            "problem": null
+        }"""
+        json_model_element = JsonModelElement('json', key_parser_dict)
+        self.assertIsNotNone(json_model_element.get_match_element('match', MatchContext(data1)))
+        self.assertIsNotNone(json_model_element.get_match_element('match', MatchContext(data2)))
+
 
 if __name__ == "__main__":
     unittest.main()
