@@ -112,6 +112,8 @@ class JsonModelElement(ModelElementInterface):
                 for data in json_match_data[split_key]:
                     if isinstance(data, str):
                         data = data.encode()
+                    elif data is None:
+                        data = b"null"
                     elif not isinstance(data, bytes):
                         data = str(data).encode()
                     if isinstance(json_dict[key][0], dict):
@@ -168,6 +170,8 @@ class JsonModelElement(ModelElementInterface):
                     data = data.encode('unicode-escape')
                 elif isinstance(data, bool):
                     data = str(data).replace("T", "t").replace("F", "f").encode()
+                elif data is None:
+                    data = b"null"
                 elif not isinstance(data, bytes):
                     data = str(data).encode()
                 if json_dict[key] == "ALLOW_ALL":
