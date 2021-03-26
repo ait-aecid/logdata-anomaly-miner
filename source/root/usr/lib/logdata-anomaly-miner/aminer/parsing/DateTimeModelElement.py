@@ -524,7 +524,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
                 msg = "date_format must be of type tuple."
                 logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)
-            elif len(date_format) != 3:
+            if len(date_format) != 3:
                 msg = "date_format consist of 3 elements."
                 logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                 raise ValueError(msg)
