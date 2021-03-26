@@ -146,8 +146,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 if log_ev in self.counts:
                     occurrences = self.counts[log_ev]
                 # Compare log event frequency of previous and current time window
-                if occurrences < self.counts_prev[log_ev] * self.confidence_factor or \
-                   occurrences > self.counts_prev[log_ev] / self.confidence_factor:
+                if occurrences < round(self.counts_prev[log_ev] * self.confidence_factor) or \
+                   occurrences > round(self.counts_prev[log_ev] / self.confidence_factor):
                     if self.output_log_line:
                         original_log_line_prefix = self.aminer_config.config_properties.get(
                             CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
