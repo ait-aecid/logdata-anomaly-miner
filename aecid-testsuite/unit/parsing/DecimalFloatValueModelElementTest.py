@@ -9,76 +9,324 @@ from unit.TestBase import TestBase, DummyMatchContext
 class DecimalFloatValueModelElementTest(TestBase):
     """Unittests for the DecimalFloatValueModelElement."""
 
-    #TODO: change checks to use TestBase.compare_result()
+    id_ = "float"
+    path = "path"
 
     def test1get_id(self):
         """Test if get_id works properly."""
-        decimal_float_me = DecimalFloatValueModelElement("path",)
-        self.assertEqual(decimal_float_me.get_id(), "path")
+        decimal_float_me = DecimalFloatValueModelElement(self.id_)
+        self.assertEqual(decimal_float_me.get_id(), self.id_)
 
     def test2get_child_elements(self):
         """Test if get_child_elements returns None."""
-        decimal_float_me = DecimalFloatValueModelElement("s0")
+        decimal_float_me = DecimalFloatValueModelElement(self.id_)
         self.assertEqual(decimal_float_me.get_child_elements(), None)
 
     def test3get_match_element_default_values(self):
         """Test valid float values with default values of value_sign_type, value_pad_type and exponent_type."""
-        decimal_float_value_me = DecimalFloatValueModelElement("path", SIGN_TYPE_NONE, PAD_TYPE_NONE, EXP_TYPE_NONE)
-        data = b"22.25"
+        decimal_float_value_me = DecimalFloatValueModelElement(self.id_, SIGN_TYPE_NONE, PAD_TYPE_NONE, EXP_TYPE_NONE)
+        data = b"22.25 some string."
+        value = b"22.25"
         match_context = DummyMatchContext(data)
-        match_element = decimal_float_value_me.get_match_element("match", match_context)
-        self.assertEqual(match_element.match_string, data)
-        self.assertEqual(match_element.match_object, 22.25)
-        self.assertEqual(match_context.match_string, data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22.25, None)
 
-        data = b"0.25"
+        data = b"0.25 some string."
+        value = b"0.25"
         match_context = DummyMatchContext(data)
-        match_element = decimal_float_value_me.get_match_element("match", match_context)
-        self.assertEqual(match_element.match_string, data)
-        self.assertEqual(match_element.match_object, 0.25)
-        self.assertEqual(match_context.match_string, data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 0.25, None)
 
-        data = b"22"
+        data = b"22 some string."
+        value = b"22"
         match_context = DummyMatchContext(data)
-        match_element = decimal_float_value_me.get_match_element("match", match_context)
-        self.assertEqual(match_element.match_string, data)
-        self.assertEqual(match_element.match_object, 22)
-        self.assertEqual(match_context.match_string, data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22, None)
 
-        data = b"22.12.2021"
+        data = b"22.12.2021 some string."
+        value = b"22.12"
         match_context = DummyMatchContext(data)
-        match_element = decimal_float_value_me.get_match_element("match", match_context)
-        self.assertEqual(match_element.match_string, b"22.12")
-        self.assertEqual(match_element.match_object, 22.12)
-        self.assertEqual(match_context.match_string, b"22.12")
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22.12, None)
 
         data = b"22. some string"
+        value = b"22."
         match_context = DummyMatchContext(data)
-        match_element = decimal_float_value_me.get_match_element("match", match_context)
-        self.assertEqual(match_element.match_string, b"22.")
-        self.assertEqual(match_element.match_object, 22.0)
-        self.assertEqual(match_context.match_string, b"22.")
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22.0, None)
 
-    def test4get_match_element_default_values(self):
+    def test4get_match_element_default_values_no_match(self):
         """Test not matching values with default values of value_sign_type, value_pad_type and exponent_type."""
-        decimal_float_value_me = DecimalFloatValueModelElement("path", SIGN_TYPE_NONE, PAD_TYPE_NONE, EXP_TYPE_NONE)
+        decimal_float_value_me = DecimalFloatValueModelElement(self.id_, SIGN_TYPE_NONE, PAD_TYPE_NONE, EXP_TYPE_NONE)
         data = b"+22.25"
         match_context = DummyMatchContext(data)
-        self.assertIsNone(decimal_float_value_me.get_match_element("match", match_context))
-        self.assertEqual(match_context.match_data, data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
 
         data = b"-22.25"
         match_context = DummyMatchContext(data)
-        self.assertIsNone(decimal_float_value_me.get_match_element("match", match_context))
-        self.assertEqual(match_context.match_data, data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"22,25"
+        value = b"22"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22, None)
 
         data = b".25"
         match_context = DummyMatchContext(data)
-        self.assertIsNone(decimal_float_value_me.get_match_element("match", match_context))
-        self.assertEqual(match_context.match_data, data)
-        # add test where decimal point is at last position without following decimals
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
 
-    def testXelement_id_input_validation(self):
+        data = b"025"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"0025"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b" 25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"  25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"1e-5"
+        value = b"1"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 1, None)
+
+        data = b"e+10"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"1e+0"
+        value = b"1"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 1, None)
+
+    def test5get_match_element_optional_zero_values(self):
+        """Test valid float values with "optional" or "zero" values of value_sign_type, value_pad_type and exponent_type."""
+        decimal_float_value_me = DecimalFloatValueModelElement(self.id_, SIGN_TYPE_OPTIONAL, PAD_TYPE_ZERO, EXP_TYPE_OPTIONAL)
+        data = b"22.25 some string."
+        value = b"22.25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22.25, None)
+
+        data = b"-22.25 some string."
+        value = b"-22.25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, -22.25, None)
+
+        data = b"0.25 some string."
+        value = b"0.25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 0.25, None)
+
+        data = b"22 some string."
+        value = b"22"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22, None)
+
+        data = b"22.12.2021 some string."
+        value = b"22.12"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22.12, None)
+
+        data = b"22. some string"
+        value = b"22."
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22.0, None)
+
+        data = b"025 some string"
+        value = b"025"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 25, None)
+
+        data = b"0025 some string"
+        value = b"0025"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 25, None)
+
+        data = b"0025.22 some string"
+        value = b"0025"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 25.22, None)
+
+        data = b"1e-5 some string"
+        value = b"1e-5"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 1e-5, None)
+
+        data = b"1e+0 some string"
+        value = b"1e+0"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 1, None)
+
+    def test6get_match_element_optional_zero_values_no_match(self):
+        """Test not matching values with default values of value_sign_type, value_pad_type and exponent_type."""
+        decimal_float_value_me = DecimalFloatValueModelElement(self.id_, SIGN_TYPE_OPTIONAL, PAD_TYPE_ZERO, EXP_TYPE_OPTIONAL)
+        data = b"+22.25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"22,25"
+        value = b"22"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22, None)
+
+        data = b".25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b" 25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"  25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"e+10"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+    def test7get_match_element_mandatory_blank_values(self):
+        """Test valid float values with "mandatory" or "blank" values of value_sign_type, value_pad_type and exponent_type."""
+        decimal_float_value_me = DecimalFloatValueModelElement(self.id_, SIGN_TYPE_MANDATORY, PAD_TYPE_BLANK, EXP_TYPE_MANDATORY)
+        data = b"+22.25 some string."
+        value = b"+22.25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22.25, None)
+
+        data = b"-22.25 some string."
+        value = b"-22.25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, -22.25, None)
+
+        data = b"+0.25 some string."
+        value = b"+0.25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 0.25, None)
+
+        data = b"+22 some string."
+        value = b"+22"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22, None)
+
+        data = b"+22. some string"
+        value = b"+22."
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22.0, None)
+
+        data = b" +25 some string"
+        value = b" +25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 25, None)
+
+        data = b"  -25 some string"
+        value = b"  -25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, -25, None)
+
+        data = b"  +25.22 some string"
+        value = b"  +25.22"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 25.22, None)
+
+        data = b"+1e-5 some string"
+        value = b"+1e-5"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 1e-5, None)
+
+        data = b"+1e+0 some string"
+        value = b"+1e+0"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 1, None)
+
+    def test8get_match_element_mandatory_blank_values_no_match(self):
+        """Test not matching values with default values of value_sign_type, value_pad_type and exponent_type."""
+        decimal_float_value_me = DecimalFloatValueModelElement(self.id_, SIGN_TYPE_MANDATORY, PAD_TYPE_BLANK, EXP_TYPE_MANDATORY)
+        data = b"22.25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"+22,25"
+        value = b"+22"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22, None)
+
+        data = b"22,25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"22.12.2021 some string."
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b".25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"025"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"0025"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"e+10"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+    def test9element_id_input_validation(self):
         """Check if element_id is validated."""
         # empty element_id
         element_id = ""
@@ -112,305 +360,142 @@ class DecimalFloatValueModelElementTest(TestBase):
         element_id = []
         self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id)
 
-    def testXvalue_sign_type_input_validation(self):
+        # empty tuple element_id is not allowed
+        element_id = ()
+        self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
+
+        # empty set element_id is not allowed
+        element_id = set()
+        self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
+
+    def test10value_sign_type_input_validation(self):
         """Check if value_sign_type is validated."""
-        element_id = "path"
-        DecimalFloatValueModelElement(element_id, value_sign_type="none")
-        DecimalFloatValueModelElement(element_id, value_sign_type="optional")
-        DecimalFloatValueModelElement(element_id, value_sign_type="mandatory")
+        DecimalFloatValueModelElement(self.id_, value_sign_type="none")
+        DecimalFloatValueModelElement(self.id_, value_sign_type="optional")
+        DecimalFloatValueModelElement(self.id_, value_sign_type="mandatory")
 
         value_sign_type = "None"
-        self.assertRaises(ValueError, DecimalFloatValueModelElement, element_id, value_sign_type=value_sign_type)
+        self.assertRaises(ValueError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
 
         value_sign_type = None
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, value_sign_type=value_sign_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
 
         value_sign_type = b"none"
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, value_sign_type=value_sign_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
 
         value_sign_type = 123
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, value_sign_type=value_sign_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
 
         value_sign_type = 123.22
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, value_sign_type=value_sign_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
 
         value_sign_type = {"value_sign_type": "none"}
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, value_sign_type=value_sign_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
 
         value_sign_type = ["none"]
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, value_sign_type=value_sign_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
 
         value_sign_type = []
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, value_sign_type=value_sign_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
 
-    def testXvalue_pad_type_input_validation(self):
+        value_sign_type = ()
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
+
+        value_sign_type = set()
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
+
+    def test11value_pad_type_input_validation(self):
         """Check if value_pad_type is validated."""
-        element_id = "path"
-        DecimalFloatValueModelElement(element_id, value_pad_type="none")
-        DecimalFloatValueModelElement(element_id, value_pad_type="zero")
-        DecimalFloatValueModelElement(element_id, value_pad_type="blank")
+        DecimalFloatValueModelElement(self.id_, value_pad_type="none")
+        DecimalFloatValueModelElement(self.id_, value_pad_type="zero")
+        DecimalFloatValueModelElement(self.id_, value_pad_type="blank")
 
         value_pad_type = "None"
-        self.assertRaises(ValueError, DecimalFloatValueModelElement, element_id, value_pad_type=value_pad_type)
+        self.assertRaises(ValueError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
 
         value_pad_type = None
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, value_pad_type=value_pad_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
 
         value_pad_type = b"none"
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, value_pad_type=value_pad_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
 
         value_pad_type = 123
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, value_pad_type=value_pad_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
 
         value_pad_type = 123.22
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, value_pad_type=value_pad_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
 
         value_pad_type = {"value_sign_type": "none"}
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, value_pad_type=value_pad_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
 
         value_pad_type = ["none"]
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, value_pad_type=value_pad_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
 
         value_pad_type = []
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, value_pad_type=value_pad_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
 
-    def testXexponent_type_input_validation(self):
+        value_pad_type = ()
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
+
+        value_pad_type = set()
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
+
+    def test12exponent_type_input_validation(self):
         """Check if exponent_type is validated."""
-        element_id = "path"
-        DecimalFloatValueModelElement(element_id, exponent_type="none")
-        DecimalFloatValueModelElement(element_id, exponent_type="optional")
-        DecimalFloatValueModelElement(element_id, exponent_type="mandatory")
+        DecimalFloatValueModelElement(self.id_, exponent_type="none")
+        DecimalFloatValueModelElement(self.id_, exponent_type="optional")
+        DecimalFloatValueModelElement(self.id_, exponent_type="mandatory")
 
         exponent_type = "None"
-        self.assertRaises(ValueError, DecimalFloatValueModelElement, element_id, exponent_type=exponent_type)
+        self.assertRaises(ValueError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
 
         exponent_type = None
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, exponent_type=exponent_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
 
         exponent_type = b"none"
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, exponent_type=exponent_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
 
         exponent_type = 123
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, exponent_type=exponent_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
 
         exponent_type = 123.22
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, exponent_type=exponent_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
 
         exponent_type = {"value_sign_type": "none"}
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, exponent_type=exponent_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
 
         exponent_type = ["none"]
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, exponent_type=exponent_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
 
         exponent_type = []
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id, exponent_type=exponent_type)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
 
+        exponent_type = ()
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
 
+        exponent_type = set()
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
 
+    def test13get_match_element_match_context_input_validation(self):
+        """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
+        model_element = DecimalFloatValueModelElement(self.id_)
+        data = b'123.22'
+        model_element.get_match_element(self.path, DummyMatchContext(data))
+        from aminer.parsing.MatchContext import MatchContext
+        model_element.get_match_element(self.path, MatchContext(data))
 
-
-
-
-    positive_string = b'25537.21 uid=2'
-    negative_string = b'-25537.21 uid=2'
-    negative_number = b'-25537.21'
-    match_element_should_exist = 'There should exist a MatchElement!'
-    match_element_unexpected_result = 'The MatchElement does not contain the expected result'
-    match_element_unexpected_value = 'The MatchElement Value is not as expected'
-    match_element_should_not_exist = 'There should not exist a MatchElement!'
-
-    def test1positive_number_none_padding(self):
-        """
-        This testcase represents the equivalence class of positive numbers in combination with no padding.
-        It tests the correctness of the path usage for all positive integers without padding.
-        """
-        match_context = MatchContext(self.positive_string)
-        decimal_float_value_me = DecimalFloatValueModelElement(
-            None, SIGN_TYPE_NONE, PAD_TYPE_NONE,
-            EXP_TYPE_NONE)
-        match_element = decimal_float_value_me.get_match_element(None, match_context)
-        self.assertNotEqual(match_element, None, self.match_element_should_exist)
-        self.assertEqual(match_element.get_match_string(), b'25537.21', self.match_element_unexpected_result)
-        self.assertEqual(match_element.get_match_object(), 25537.21, self.match_element_unexpected_value)
-
-    def test2positive_number_none_padding_no_match(self):
-        """
-        This testcase represents the equivalence class of positive numbers in combination with no padding.
-        It tests the correctness of the path usage for all positive integers without padding, when no match is found.
-        """
-        match_context = MatchContext(b' 25537.21 uid=2')
-        decimal_float_value_me = DecimalFloatValueModelElement(
-            None, SIGN_TYPE_NONE, PAD_TYPE_NONE,
-            EXP_TYPE_NONE)
-        match_element = decimal_float_value_me.get_match_element(None, match_context)
-        self.assertEqual(match_element, None, self.match_element_should_not_exist)
-
-    def test3negative_number_none_padding(self):
-        """
-        This testcase represents the equivalence class of negative numbers in combination with no padding.
-        It tests the correctness of the path usage for all negative integers without padding.
-        """
-        match_context = MatchContext(self.negative_string)
-        decimal_float_value_me = DecimalFloatValueModelElement(
-            None, SIGN_TYPE_OPTIONAL, PAD_TYPE_NONE,
-            EXP_TYPE_NONE)
-        match_element = decimal_float_value_me.get_match_element(None, match_context)
-        self.assertNotEqual(match_element, None, self.match_element_should_exist)
-        self.assertEqual(match_element.get_match_string(), self.negative_number, self.match_element_unexpected_result)
-        self.assertEqual(match_element.get_match_object(), -25537.21, self.match_element_unexpected_value)
-
-    def test4negative_number_none_padding_no_match(self):
-        """
-        This testcase represents the equivalence class of negative numbers in combination with no padding.
-        It tests the correctness of the path usage for all negative integers without padding, when no match is found.
-        """
-        match_context = MatchContext(b'- 25537.21 uid=2')
-        decimal_float_value_me = DecimalFloatValueModelElement(
-            None, SIGN_TYPE_NONE, PAD_TYPE_NONE,
-            EXP_TYPE_NONE)
-        match_element = decimal_float_value_me.get_match_element(None, match_context)
-        self.assertEqual(match_element, None, self.match_element_should_not_exist)
-
-    def test5sign_type_mandatory_none_padding(self):
-        """
-        This testcase represents the equivalence class of all numbers with a mandatory sign in combination with no padding.
-        It tests the correctness of the Path usage for all integers with a mandatory sign without padding.
-        """
-        match_context = MatchContext(self.negative_string)
-        decimal_float_value_me = DecimalFloatValueModelElement(
-            None, SIGN_TYPE_MANDATORY, PAD_TYPE_NONE,
-            EXP_TYPE_NONE)
-        match_element = decimal_float_value_me.get_match_element(None, match_context)
-        self.assertNotEqual(match_element, None, self.match_element_should_exist)
-        self.assertEqual(match_element.get_match_string(), self.negative_number, self.match_element_unexpected_result)
-        self.assertEqual(match_element.get_match_object(), -25537.21, self.match_element_unexpected_value)
-
-        match_context = MatchContext(b'+25537 uid=2')
-        match_element = decimal_float_value_me.get_match_element(None, match_context)
-        self.assertNotEqual(match_element, None, self.match_element_should_exist)
-        self.assertEqual(match_element.get_match_string(), b'+25537', self.match_element_unexpected_result)
-        self.assertEqual(match_element.get_match_object(), 25537, self.match_element_unexpected_value)
-
-    def test6sign_type_mandatory_none_padding_no_match(self):
-        """
-        This testcase represents the equivalence class of all numbers with a mandatory sign in combination with no padding.
-        It tests the correctness of the Path usage for all integers with a mandatory sign without padding, when no match is found.
-        """
-        match_context = MatchContext(self.positive_string)
-        decimal_float_value_me = DecimalFloatValueModelElement(
-            None, SIGN_TYPE_MANDATORY, PAD_TYPE_NONE,
-            EXP_TYPE_NONE)
-        match_element = decimal_float_value_me.get_match_element(None, match_context)
-        self.assertEqual(match_element, None, self.match_element_should_not_exist)
-
-    def test7positive_number_zero_padding(self):
-        """In this testcase the positive Integer equivalence class in combination with the zero padding is tested."""
-        match_context = MatchContext(b'00025537.21 uid=2')
-        decimal_float_value_me = DecimalFloatValueModelElement(
-            None, SIGN_TYPE_NONE, PAD_TYPE_ZERO,
-            EXP_TYPE_NONE)
-        match_element = decimal_float_value_me.get_match_element(None, match_context)
-        self.assertNotEqual(match_element, None, self.match_element_should_exist)
-        self.assertEqual(match_element.get_match_string(), b'00025537.21', self.match_element_unexpected_result)
-        self.assertEqual(match_element.get_match_object(), 25537.21, self.match_element_unexpected_value)
-
-        match_context = MatchContext(self.positive_string)
-        match_element = decimal_float_value_me.get_match_element(None, match_context)
-        self.assertNotEqual(match_element, None, self.match_element_should_exist)
-        self.assertEqual(match_element.get_match_string(), b'25537.21', self.match_element_unexpected_result)
-        self.assertEqual(match_element.get_match_object(), 25537.21, self.match_element_unexpected_value)
-
-    def test8positive_number_zero_padding_no_match(self):
-        """In this testcase the positive Integer equivalence class in combination with the zero padding is tested with no match expected."""
-        match_context = MatchContext(b' 00025537.21 uid=2')
-        decimal_float_value_me = DecimalFloatValueModelElement(
-            None, SIGN_TYPE_NONE, PAD_TYPE_ZERO,
-            EXP_TYPE_NONE)
-        match_element = decimal_float_value_me.get_match_element(None, match_context)
-        self.assertEqual(match_element, None, self.match_element_should_not_exist)
-
-    def test9negative_number_blank_padding(self):
-        """In this testcase the negative Integer equivalence class in combination with the blank character padding is tested."""
-        match_context = MatchContext(b'- 25537.21 uid=2')
-        decimal_float_value_me = DecimalFloatValueModelElement(
-            None, SIGN_TYPE_OPTIONAL, PAD_TYPE_BLANK,
-            EXP_TYPE_NONE)
-        match_element = decimal_float_value_me.get_match_element(None, match_context)
-        self.assertNotEqual(match_element, None, self.match_element_should_exist)
-        self.assertEqual(match_element.get_match_string(), b'- 25537.21', self.match_element_unexpected_result)
-        self.assertEqual(match_element.get_match_object(), -25537.21, self.match_element_unexpected_value)
-
-        match_context = MatchContext(self.negative_string)
-        match_element = decimal_float_value_me.get_match_element(None, match_context)
-        self.assertNotEqual(match_element, None, self.match_element_should_exist)
-        self.assertEqual(match_element.get_match_string(), self.negative_number, self.match_element_unexpected_result)
-        self.assertEqual(match_element.get_match_object(), -25537.21, self.match_element_unexpected_value)
-
-    def test10negative_number_blank_padding_no_match(self):
-        """
-        In this testcase the negative Integer equivalence class in combination with the blank character padding is tested.
-        No match expected.
-        """
-        match_context = MatchContext(b' -25537 uid=2')
-        decimal_float_value_me = DecimalFloatValueModelElement(
-            None, SIGN_TYPE_OPTIONAL, PAD_TYPE_BLANK,
-            EXP_TYPE_NONE)
-        match_element = decimal_float_value_me.get_match_element(None, match_context)
-        self.assertEqual(match_element, None, self.match_element_should_not_exist)
-
-    def test11mandatory_zero_padding(self):
-        """In this testcase the mandatory sign equivalence class in combination with the zero padding is tested."""
-        match_context = MatchContext(b'+00025537.21 uid=2')
-        decimal_float_value_me = DecimalFloatValueModelElement(
-            None, SIGN_TYPE_MANDATORY, PAD_TYPE_ZERO,
-            EXP_TYPE_NONE)
-        match_element = decimal_float_value_me.get_match_element(None, match_context)
-        self.assertNotEqual(match_element, None, self.match_element_should_exist)
-        self.assertEqual(match_element.get_match_string(), b'+00025537.21', self.match_element_unexpected_result)
-        self.assertEqual(match_element.get_match_object(), 25537.21, self.match_element_unexpected_value)
-
-        match_context = MatchContext(b'-00025537.21 uid=2')
-        match_element = decimal_float_value_me.get_match_element(None, match_context)
-        self.assertNotEqual(match_element, None, self.match_element_should_exist)
-        self.assertEqual(match_element.get_match_string(), b'-00025537.21', self.match_element_unexpected_result)
-        self.assertEqual(match_element.get_match_object(), -25537.21, self.match_element_unexpected_value)
-
-        match_context = MatchContext(b'+25537.21 uid=2')
-        match_element = decimal_float_value_me.get_match_element(None, match_context)
-        self.assertNotEqual(match_element, None, self.match_element_should_exist)
-        self.assertEqual(match_element.get_match_string(), b'+25537.21', self.match_element_unexpected_result)
-        self.assertEqual(match_element.get_match_object(), 25537.21, self.match_element_unexpected_value)
-
-    def test12mandatory_zero_padding_no_match(self):
-        """In this testcase the mandatory sign equivalence class in combination with the zero padding is tested with no match expected."""
-        match_context = MatchContext(b'00025537.21 uid=2')
-        decimal_float_value_me = DecimalFloatValueModelElement(
-            None, SIGN_TYPE_MANDATORY, PAD_TYPE_ZERO,
-            EXP_TYPE_NONE)
-        match_element = decimal_float_value_me.get_match_element(None, match_context)
-        self.assertEqual(match_element, None, self.match_element_should_not_exist)
-
-        match_context = MatchContext(self.positive_string)
-        match_element = decimal_float_value_me.get_match_element(None, match_context)
-        self.assertEqual(match_element, None, self.match_element_should_not_exist)
-
-    def test13mandatory_none_padding_exponent(self):
-        """In this testcase the mandatory sign equivalence class in combination with the None padding and exponent type mandatory."""
-        match_context = MatchContext(b'+25537.21e10 uid=2')
-        decimal_float_value_me = DecimalFloatValueModelElement(
-            None, SIGN_TYPE_MANDATORY, PAD_TYPE_NONE,
-            EXP_TYPE_MANDATORY)
-        match_element = decimal_float_value_me.get_match_element(None, match_context)
-        self.assertNotEqual(match_element, None, self.match_element_should_exist)
-        self.assertEqual(match_element.get_match_string(), b'+25537.21e10', self.match_element_unexpected_result)
-        self.assertEqual(match_element.get_match_object(), 25537.21 * math.pow(10, 10), self.match_element_unexpected_value)
-
-        match_context = MatchContext(b'+25537.21e uid=2')
-        decimal_float_value_me = DecimalFloatValueModelElement(
-            None, SIGN_TYPE_MANDATORY, PAD_TYPE_NONE,
-            EXP_TYPE_MANDATORY)
-        match_element = decimal_float_value_me.get_match_element(None, match_context)
-        self.assertEqual(match_element, None, self.match_element_should_not_exist)
+        from aminer.parsing.MatchElement import MatchElement
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(data, None, None, None))
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123)
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123.22)
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, None)
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, [])
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, {"key": MatchContext(data)})
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, set())
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, ())
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, model_element)
 
 
 if __name__ == "__main__":
