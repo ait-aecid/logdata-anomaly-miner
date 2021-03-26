@@ -1,5 +1,8 @@
 """
-This module defines a detector for new values in a data path.
+This module defines a PCA-detector by creating an Event-Count-Matrix for given
+time-windows to calculate an anomaly score for new time windows afterwards by
+using the reconstruction error from the inverse-transformation with restricted
+components of the Principal-Component-Analysis (PCA).
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -23,7 +26,10 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 
 
 class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
-    """This class creates events when new values for a given data path were found."""
+    """
+    This class creates an Event-Count-Matrix by counting events in log_atom for a given time-window from which the
+    the eigen-values and -vectors are computed, which are used to calculate an anomaly-score for new time-windows.
+    """
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, time_window, anomaly_score, variance,
                  persistence_id='Default', auto_include_flag=False, output_log_line=True):
@@ -40,7 +46,7 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.block_time = time_window
 
         # threshold for anomaly score
-        self.anomalyScore_threshold = anomaly_score
+        self.anomaly_score_threshold = anomaly_score
 
         # define the threshold for the variance, which is used to get to get the number of components (nComp)
         self.variance_threshold = variance
@@ -50,55 +56,71 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         # define variable for start time of window
         self.start_time = 0
 
+        #define flag, to skip the logic in special cases
+        self.skip = False
+
         self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
 
         # self.auto_include_flag => learn_mode
         if self.auto_include_flag is True:
-            self.event_count_matrix = []
-            self.event_count_vector = {}
+            if persistence_data is None:
+                self.event_count_matrix = []
+                self.event_count_vector = {}
+            else:
+                self.event_count_matrix = list(persistence_data)
+                self.event_count_vector = copy.deepcopy(self.event_count_matrix[0])
+                self.reset_event_count_vector()
         else:
-            self.event_count_matrix = list(persistence_data)
-            self.event_count_vector = copy.deepcopy(self.event_count_matrix[0])
-            self.reset_event_count_vector()
+            if persistence_data is None:
+                msg = 'persistence_data does not exist, please make sure to set the learn_mode properly.'
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
+                self.skip = True
+            else:
+                self.event_count_matrix = list(persistence_data)
+                self.event_count_vector = copy.deepcopy(self.event_count_matrix[0])
+                self.reset_event_count_vector()
 
-            # extract the features out of ecm into a list
-            self.feature_list = []
-            for events in self.event_count_vector.values():
-                for feature in events:
-                    self.feature_list.append(feature)
+                # extract the features out of ecm into a list
+                self.feature_list = []
+                for events in self.event_count_vector.values():
+                    for feature in events:
+                        self.feature_list.append(feature)
 
-            # extract existing event_counts into array
-            matrix = []
-            for event_count in self.event_count_matrix:
-                row = []
-                for event in event_count.values():
-                    row += list(event.values())
-                matrix.append(row)
+                # extract existing event_counts into array
+                matrix = []
+                for event_count in self.event_count_matrix:
+                    row = []
+                    for event in event_count.values():
+                        row += list(event.values())
+                    matrix.append(row)
 
-            # self.ecm => extracted event_count_matrix (array)
-            self.ecm = np.array(matrix)
+                # self.ecm => extracted event_count_matrix (array)
+                self.ecm = np.array(matrix)
 
-            # Principial Component Analysis (PCA)
-            normalized_ecm = (self.ecm - self.ecm.mean()) / self.ecm.std()
-            covariance_matrix = np.cov(normalized_ecm.T)
-            # use np.linalg.eigh for complex hermitian (conjugate symmetric)
-            eigen_values, eigen_vectors = np.linalg.eigh(covariance_matrix)
-            self.pca_ecm = normalized_ecm @ eigen_vectors
-            self.eigen_vectors = eigen_vectors
+                # Principial Component Analysis (PCA)
+                normalized_ecm = (self.ecm - self.ecm.mean()) / self.ecm.std()
+                covariance_matrix = np.cov(normalized_ecm.T)
+                eigen_values, eigen_vectors = np.linalg.eigh(covariance_matrix)
+                self.pca_ecm = normalized_ecm @ eigen_vectors
+                self.eigen_vectors = eigen_vectors
 
-            # number of components (nComp): how many components should be used for reconstruction
-            self.nComp = self.get_nComp(eigen_values)
+                # number of components (nComp): how many components should be used for reconstruction
+                self.nComp = self.get_nComp(eigen_values)
 
-            # PCA Inverse with only these components which describes the variance_threshold
-            pca_inverse = self.pca_ecm[:, :self.nComp] @ eigen_vectors[:self.nComp, :]
+                # PCA Inverse with only these components which describes the variance_threshold
+                pca_inverse = self.pca_ecm[:, :self.nComp] @ eigen_vectors[:self.nComp, :]
 
-            # Calculate Anomaly-Score (Reconstruction Error) for the whole dataset
-            self.loss = np.sum((normalized_ecm - pca_inverse)**2, axis=1)
+                # Calculate Anomaly-Score (Reconstruction Error) for the whole dataset
+                self.loss = np.sum((normalized_ecm - pca_inverse)**2, axis=1)
 
     def receive_atom(self, log_atom):
         """Receive parsed atom and the information about the parser match."""
+        # skip all the logic in special cases
+        if self.skip:
+            return
+
         # get parsed log_atom as dictionary
         match_dict = log_atom.parser_match.get_match_dictionary()
 
@@ -120,11 +142,9 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             if self.auto_include_flag is False:
                 anomalyScore = self.anomalyScore()
                 # if the anomaly score is higher than a given threshold, print out the detection
-                if anomalyScore > self.anomalyScore_threshold:
+                if anomalyScore > self.anomaly_score_threshold:
                     sorted_log_lines = list(log_atom.raw_data)
-                    timestamp_from = time.strftime('%d/%b/%Y:%H:%M:%S', time.gmtime(self.start_time))
-                    timestamp_to = time.strftime('%d/%b/%Y:%H:%M:%S', time.gmtime(current_time))
-                    analysis_component = {'AffectedTimeWindow': {'from': timestamp_from, 'to': timestamp_to},
+                    analysis_component = {'AffectedTimeWindow': {'from': self.start_time, 'to': current_time},
                                           'AnomalyScore': anomalyScore[0]}
                     event_data = {'AnalysisComponent': analysis_component}
                     print(analysis_component)
@@ -156,8 +176,11 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def anomalyScore(self):
         """Calculate the anomalyscore for current event_count_vector."""
+        # convert the event_count_vector into an array
         ecv = self.vector2array()
+        # normalize the ecv with the mean and std of learned ecm
         normalized_ecv = (ecv - self.ecm.mean()) / self.ecm.std()
+        # reshape array into a 1-dimensional array
         normalized_ecv = normalized_ecv.reshape(1, -1)
         # calculate the reduced pca for current log-sequence with given eigen_vectors
         pca_ecv = normalized_ecv @ self.eigen_vectors
