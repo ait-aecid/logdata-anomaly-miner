@@ -477,21 +477,20 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
         """
         Create a new MultiLocaleDateTimeModelElement object.
         @param date_formats this parameter is a list of tuples, each tuple containing information about one date format to support.
-        The tuple structure is (format_string, format_locale, format_timezone). The format_string may contain the same elements as supported
+        The tuple structure is (format_string, format_timezone, format_locale). The format_string may contain the same elements as supported
         by strptime from datetime.datetime. The format_locale defines the locale for the string content, e.g. de_DE for german,
         but also the data IO encoding, e.g. ISO-8859-1. The locale information has to be available, e.g. using "locale-gen" on
         Debian systems. The format_timezone can be used to define the timezone of the timestamp parsed. When None, UTC is used.
         The timezone support may only be sufficient for very simple usecases, e.g. all data from one source configured to create
-        timestamps in that timezone. This may still fail, e.g. when daylight savings changes make timestamps ambiguous during
-        a short window of time. In all those cases, timezone should be left empty here and a separate filtering component should
-        be used to apply timestamp corrections afterwards. See the
-        FIXME-Filter component for that. Also having the same format_string for two different timezones
-        will result in an error as correct timezone to apply cannot be distinguished just from format.
+        timestamps in that timezone.
         @param start_year when given, parsing will use this year value for semiqualified timestamps to add correct year information.
         This is especially relevant for historic datasets as otherwise leap year handling may fail. The startYear parameter will
         only take effect when the first timestamp to be parsed by this object is also semiqualified. Otherwise the year information
         is extracted from this record. When empty and first parsing invocation involves a semiqualified date, the current year
         in UTC timezone is used.
+        @param max_time_jump_seconds for detection of year wraps with date formats missing year information, also the current time
+        of values has to be tracked. This value defines the window within that the time may jump between two matches. When not
+        within that window, the value is still parsed, corrected to the most likely value but does not change the detection year.
         """
         if not isinstance(element_id, str):
             msg = "element_id has to be of the type string."
@@ -521,11 +520,19 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
         default_locale = locale.getdefaultlocale()
         self.date_time_model_elements = []
         for i, date_format in enumerate(date_formats):
-            if not isinstance(date_format, tuple) or len(date_format) != 3:
-                msg = "Invalid date_format. Must be tuple with 3 elements."
+            if not isinstance(date_format, tuple):
+                msg = "date_format must be of type tuple."
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
+            elif len(date_format) != 3:
+                msg = "date_format consist of 3 elements."
                 logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                 raise ValueError(msg)
             date_format, time_zone, text_locale = date_format
+            if isinstance(text_locale, str) and len(text_locale) < 1:
+                msg = "empty text_locale is not allowed."
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                raise ValueError(msg)
             for date_time_model_element in self.date_time_model_elements:
                 if date_format.startswith(date_time_model_element.date_format):
                     msg = "Invalid order of date_formats. %s starts with %s. More specific datetimes would be skipped." % (
@@ -567,7 +574,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
     def get_match_element(self, path, match_context):
         """
         Check if the data to match within the content is suitable to be parsed by any of the supplied date formats.
-        @return On match return a matchObject containing a tuple of the datetime object and the seconds since 1970. When not matching,
+        @return On match return a match_object containing a tuple of the datetime object and the seconds since 1970. When not matching,
         None is returned. When the timestamp data parsed would be far off from the last ones parsed, so that correction may
         not be applied correctly, then the method will also return None.
         """
