@@ -1,6 +1,4 @@
 import unittest
-import math
-from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.DecimalFloatValueModelElement import DecimalFloatValueModelElement, SIGN_TYPE_NONE, SIGN_TYPE_OPTIONAL,\
     SIGN_TYPE_MANDATORY, PAD_TYPE_NONE, PAD_TYPE_ZERO, PAD_TYPE_BLANK, EXP_TYPE_NONE, EXP_TYPE_OPTIONAL, EXP_TYPE_MANDATORY
 from unit.TestBase import TestBase, DummyMatchContext
