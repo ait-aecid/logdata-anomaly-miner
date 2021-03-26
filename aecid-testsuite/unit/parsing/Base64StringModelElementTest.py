@@ -20,36 +20,36 @@ class Base64StringModelElementTest(TestBase):
         self.assertEqual(base64_dme.get_child_elements(), None)
 
     def test3get_match_element_valid_match_string_with_padding(self):
-        """Parse matching substring with padding from MatchContext and check if the MatchContext was updated accordingly."""
-        string = b'This is some string to be encoded.'
-        base64_string = b'VGhpcyBpcyBzb21lIHN0cmluZyB0byBiZSBlbmNvZGVkLg=='
+        """Parse matching substring with padding from MatchContext and check if the MatchContext was updated with all base64 data."""
+        string = b"This is some string to be encoded."
+        base64_string = b"VGhpcyBpcyBzb21lIHN0cmluZyB0byBiZSBlbmNvZGVkLg=="
         match_context = DummyMatchContext(base64_string)
         base64_dme = Base64StringModelElement(self.id_)
         match_element = base64_dme.get_match_element(self.path, match_context)
         self.compare_match_results(base64_string, match_element, match_context, self.id_, self.path, base64_string, string, None)
 
     def test4get_match_element_valid_match_string_with_one_byte_padding(self):
-        """Parse matching substring with padding from MatchContext and check if the MatchContext was updated accordingly."""
-        string = b'This is some encoded strin'
-        base64_string = b'VGhpcyBpcyBzb21lIGVuY29kZWQgc3RyaW4='
+        """Parse matching substring with padding from MatchContext and check if the MatchContext was updated with all base64 data."""
+        string = b"This is some encoded strin"
+        base64_string = b"VGhpcyBpcyBzb21lIGVuY29kZWQgc3RyaW4="
         match_context = DummyMatchContext(base64_string)
         base64_dme = Base64StringModelElement(self.id_)
         match_element = base64_dme.get_match_element(self.path, match_context)
         self.compare_match_results(base64_string, match_element, match_context, self.id_, self.path, base64_string, string, None)
 
     def test5get_match_element_valid_match_string_without_padding(self):
-        """Parse matching substring without padding from MatchContext and check if the MatchContext was updated accordingly."""
-        string = b'This is some string to be encoded without the padding character =.'
-        base64_string = b'VGhpcyBpcyBzb21lIHN0cmluZyB0byBiZSBlbmNvZGVkIHdpdGhvdXQgdGhlIHBhZGRpbmcgY2hhcmFjdGVyID0u'
+        """Parse matching substring without padding from MatchContext and check if the MatchContext was updated with all base64 data."""
+        string = b"This is some string to be encoded without the padding character =."
+        base64_string = b"VGhpcyBpcyBzb21lIHN0cmluZyB0byBiZSBlbmNvZGVkIHdpdGhvdXQgdGhlIHBhZGRpbmcgY2hhcmFjdGVyID0u"
         match_context = DummyMatchContext(base64_string)
         base64_dme = Base64StringModelElement(self.id_)
         match_element = base64_dme.get_match_element(self.path, match_context)
         self.compare_match_results(base64_string, match_element, match_context, self.id_, self.path, base64_string, string, None)
 
     def test6get_match_element_valid_match_string_without_exact_length(self):
-        """Parse matching substring without exact length (divisible by 4) and check if the MatchContext was updated accordingly."""
-        string = b'This is some encoded strin'
-        base64_string = b'VGhpcyBpcyBzb21lIGVuY29kZWQgc3RyaW4'
+        """Parse matching substring without exact length (divisible by 4) and check if the MatchContext was updated with all base64 data."""
+        string = b"This is some encoded strin"
+        base64_string = b"VGhpcyBpcyBzb21lIGVuY29kZWQgc3RyaW4"
         match_context = DummyMatchContext(base64_string)
         base64_dme = Base64StringModelElement(self.id_)
         match_element = base64_dme.get_match_element(self.path, match_context)
@@ -57,10 +57,10 @@ class Base64StringModelElementTest(TestBase):
             base64_string, match_element, match_context, self.id_, self.path, base64_string[:-(len(base64_string) % 4)], string[:-2], None)
 
     def test7get_match_element_valid_match_string_with_partial_length(self):
-        """Parse matching substring out of the MatchContext and check if the MatchContext was updated accordingly."""
-        string = b'This is some encoded strin'
-        base64_string = b'VGhpcyBpcyBzb21lIGVuY29kZWQgc3RyaW4='
-        data = base64_string + b'\nContent: Public Key'
+        """Parse matching substring out of the MatchContext and check if the MatchContext was updated with all base64 data."""
+        string = b"This is some encoded strin"
+        base64_string = b"VGhpcyBpcyBzb21lIGVuY29kZWQgc3RyaW4="
+        data = base64_string + b"\nContent: Public Key"
         match_context = DummyMatchContext(data)
         base64_dme = Base64StringModelElement(self.id_)
         match_element = base64_dme.get_match_element(self.path, match_context)
@@ -68,16 +68,21 @@ class Base64StringModelElementTest(TestBase):
 
     def test8get_match_element_no_match(self):
         """Parse not matching substring from MatchContext and check if the MatchContext was not changed."""
+        base64_dme = Base64StringModelElement(self.id_)
         data = b"!Hello World"
         match_context = DummyMatchContext(data)
-        base64_dme = Base64StringModelElement(self.id_)
+        match_element = base64_dme.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"\x90\x90Hello World"
+        match_context = DummyMatchContext(data)
         match_element = base64_dme.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
     def test9get_match_element_unicode_exception(self):
-        """Parse a Base64 string which can not be decoded as UTF-8."""
+        """Parse a Base64 string which can not be decoded as UTF-8, so it has to be returned base64 encoded."""
         # ² encoded with ISO-8859-1
-        base64_string = b'sg=='
+        base64_string = b"sg=="
         match_context = DummyMatchContext(base64_string)
         base64_dme = Base64StringModelElement(self.id_)
         match_element = base64_dme.get_match_element(self.path, match_context)
@@ -105,6 +110,10 @@ class Base64StringModelElementTest(TestBase):
         element_id = 123.22
         self.assertRaises(TypeError, Base64StringModelElement, element_id)
 
+        # boolean element_id is not allowed
+        element_id = True
+        self.assertRaises(TypeError, Base64StringModelElement, element_id)
+
         # dict element_id is not allowed
         element_id = {"id": "path"}
         self.assertRaises(TypeError, Base64StringModelElement, element_id)
@@ -128,7 +137,7 @@ class Base64StringModelElementTest(TestBase):
     def test11get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = Base64StringModelElement(self.id_)
-        data = b'VGhpcyBpcyBzb21lIHN0cmluZyB0byBiZSBlbmNvZGVkLg=='
+        data = b"VGhpcyBpcyBzb21lIHN0cmluZyB0byBiZSBlbmNvZGVkLg=="
         model_element.get_match_element(self.path, DummyMatchContext(data))
         from aminer.parsing.MatchContext import MatchContext
         model_element.get_match_element(self.path, MatchContext(data))
@@ -139,6 +148,7 @@ class Base64StringModelElementTest(TestBase):
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123.22)
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, True)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, None)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, [])
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, {"key": MatchContext(data)})
@@ -155,43 +165,43 @@ from aminer.parsing.Base64StringModelElement import Base64StringModelElement
 times = 100000
 """
         string100_setup = """
-# b'ASCII stands for American Standard Code for Information Interchange. Computers can only understand.'
-base64_string = b'QVNDSUkgc3RhbmRzIGZvciBBbWVyaWNhbiBTdGFuZGFyZCBDb2RlIGZvciBJbmZvcm1hdGlvbiBJbnRlcmNoYW5nZS4gQ29tcHV0ZXJzIGNhb' \
-                b'iBvbmx5IHVuZGVyc3RhbmQu'
+# b"ASCII stands for American Standard Code for Information Interchange. Computers can only understand."
+base64_string = b"QVNDSUkgc3RhbmRzIGZvciBBbWVyaWNhbiBTdGFuZGFyZCBDb2RlIGZvciBJbmZvcm1hdGlvbiBJbnRlcmNoYW5nZS4gQ29tcHV0ZXJzIGNhb" \
+                b"iBvbmx5IHVuZGVyc3RhbmQu"
 """
         string4096_setup = """
 # b"ASCII stands for American Standard Code for Information Interchange. Computers can only understand numbers, so an ASCII code " \
-# b"is the numerical representation of a character such as 'a' or '@' or an action of some sort. ASCII was developed a long time " \
+# b"is the numerical representation of a character such as "a" or "@" or an action of some sort. ASCII was developed a long time " \
 # b"ago and now the non-printing characters are rarely used for their original purpose. Below is the ASCII character table and " \
 # b"this includes descriptions of the first 32 non-printing characters. ASCII was actually designed for use with teletypes and " \
 # b"so the descriptions are somewhat obscure. If someone says they want your CV however in ASCII format, all this means is they " \
-# b"want 'plain' text with no formatting such as tabs, bold or underscoring - the raw format that any computer can understand. " \
+# b"want "plain" text with no formatting such as tabs, bold or underscoring - the raw format that any computer can understand. " \
 # b"This is usually so they can easily import the file into their own applications without issues. Notepad.exe creates ASCII " \
-# b"text, or in MS Word you can save a file as 'text only'ASCII stands for American Standard Code for Information Interchange. " \
-# b"Computers can only understand numbers, so an ASCII code is the numerical representation of a character such as 'a' or '@' " \
+# b"text, or in MS Word you can save a file as "text only"ASCII stands for American Standard Code for Information Interchange. " \
+# b"Computers can only understand numbers, so an ASCII code is the numerical representation of a character such as "a" or "@" " \
 # b"or an action of some sort. ASCII was developed a long time ago and now the non-printing characters are rarely used for their " \
 # b"original purpose. Below is the ASCII character table and this includes descriptions of the first 32 non-printing characters. " \
 # b"ASCII was actually designed for use with teletypes and so the descriptions are somewhat obscure. If someone says they want " \
-# b"your CV however in ASCII format, all this means is they want 'plain' text with no formatting such as tabs, bold or " \
+# b"your CV however in ASCII format, all this means is they want "plain" text with no formatting such as tabs, bold or " \
 # b"underscoring - the raw format that any computer can understand. This is usually so they can easily import the file into " \
-# b"their own applications without issues. Notepad.exe creates ASCII text, or in MS Word you can save a file as 'text only'" \
+# b"their own applications without issues. Notepad.exe creates ASCII text, or in MS Word you can save a file as "text only"" \
 # b"ASCII stands for American Standard Code for Information Interchange. Computers can only understand numbers, so an ASCII " \
-# b"code is the numerical representation of a character such as 'a' or '@' or an action of some sort. ASCII was developed a " \
+# b"code is the numerical representation of a character such as "a" or "@" or an action of some sort. ASCII was developed a " \
 # b"long time ago and now the non-printing characters are rarely used for their original purpose. Below is the ASCII " \
 # b"character table and this includes descriptions of the first 32 non-printing characters. ASCII was actually designed for " \
 # b"use with teletypes and so the descriptions are somewhat obscure. If someone says they want your CV however in ASCII format, " \
-# b"all this means is they want 'plain' text with no formatting such as tabs, bold or underscoring - the raw format that any " \
+# b"all this means is they want "plain" text with no formatting such as tabs, bold or underscoring - the raw format that any " \
 # b"computer can understand. This is usually so they can easily import the file into their own applications without issues. " \
-# b"Notepad.exe creates ASCII text, or in MS Word you can save a file as 'text only'ASCII stands for American Standard Code for " \
+# b"Notepad.exe creates ASCII text, or in MS Word you can save a file as "text only"ASCII stands for American Standard Code for " \
 # b"Information Interchange. Computers can only understand numbers, so an ASCII code is the numerical representation of a " \
-# b"character such as 'a' or '@' or an action of some sort. ASCII was developed a long time ago and now the non-printing " \
+# b"character such as "a" or "@" or an action of some sort. ASCII was developed a long time ago and now the non-printing " \
 # b"characters are rarely used for their original purpose. Below is the ASCII character table and this includes descriptions " \
 # b"of the first 32 non-printing characters. ASCII was actually designed for use with teletypes and so the descriptions are " \
-# b"somewhat obscure. If someone says they want your CV however in ASCII format, all this means is they want 'plain' text with " \
+# b"somewhat obscure. If someone says they want your CV however in ASCII format, all this means is they want "plain" text with " \
 # b"no formatting such as tabs, bold or underscoring - the raw format that any computer can understand. This is usually so they " \
 # b"can easily import the file into their own applications without issues. Notepad.exe creates ASCII text, or in MS Word you " \
-# b"can save a file as 'text only'ASCII stands for American Standard Code for Information Interchange. Computers can only " \
-# b"understand numbers, so an ASCII code is the numerical representation of a character such as 'a' or '@' or an action of " \
+# b"can save a file as "text only"ASCII stands for American Standard Code for Information Interchange. Computers can only " \
+# b"understand numbers, so an ASCII code is the numerical representation of a character such as "a" or "@" or an action of " \
 # b"some sort. ASCII was developed a long time ago and now the non-printing characters are rarely used for their original " \
 # b"purpose. Below is the ASCII character table and this includes descriptions of the first 32 non-prin"
 base64_string = b"QVNDSUkgc3RhbmRzIGZvciBBbWVyaWNhbiBTdGFuZGFyZCBDb2RlIGZvciBJbmZvcm1hdGlvbiBJbnRlcmNoYW5nZS4gQ29tcHV0ZXJzIGNhbiBvbmx5IHV" \

@@ -21,10 +21,10 @@ class FixedDataModelElementTest(TestBase):
         self.assertEqual(fixed_dme.get_child_elements(), None)
 
     def test3get_match_element_valid_match(self):
-        """Parse matching substring from MatchContext and check if the MatchContext was updated accordingly."""
+        """Parse matching substring from MatchContext and check if the MatchContext was updated with the fixed string."""
         fixed_string = b"fixed data."
-        match_context = DummyMatchContext(self.data)
         fixed_dme = FixedDataModelElement(self.id_, fixed_string)
+        match_context = DummyMatchContext(self.data)
         match_element = fixed_dme.get_match_element(self.path, match_context)
         self.compare_match_results(self.data, match_element, match_context, self.id_, self.path, fixed_string, fixed_string, None)
 
@@ -56,6 +56,10 @@ class FixedDataModelElementTest(TestBase):
 
         # float element_id is not allowed
         element_id = 123.22
+        self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
+
+        # boolean element_id is not allowed
+        element_id = True
         self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
 
         # dict element_id is not allowed
@@ -134,6 +138,7 @@ class FixedDataModelElementTest(TestBase):
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123.22)
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, True)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, None)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, [])
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, {"key": MatchContext(data)})

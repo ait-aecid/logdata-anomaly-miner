@@ -484,6 +484,10 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         element_id = 123.22
         self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, element_id, date_formats)
 
+        # boolean element_id is not allowed
+        element_id = True
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, element_id, date_formats)
+
         # dict element_id is not allowed
         element_id = {"id": "path"}
         self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, element_id, date_formats)
@@ -631,6 +635,7 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123.22)
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, True)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, None)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, [])
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, {"key": MatchContext(data)})

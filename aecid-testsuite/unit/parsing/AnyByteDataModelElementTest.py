@@ -20,7 +20,7 @@ class AnyByteDataModelElementTest(TestBase):
         self.assertEqual(any_dme.get_child_elements(), None)
 
     def test3get_match_element_valid_match(self):
-        """Parse matching substring from MatchContext and check if the MatchContext was updated accordingly."""
+        """Parse matching substring from MatchContext and check if the MatchContext was updated with all characters."""
         data = b'abcdefghijklmnopqrstuvwxyz.!?'
         match_context = DummyMatchContext(data)
         any_dme = AnyByteDataModelElement(self.id_)
@@ -57,6 +57,10 @@ class AnyByteDataModelElementTest(TestBase):
         element_id = 123.22
         self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
 
+        # boolean element_id is not allowed
+        element_id = True
+        self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
+
         # dict element_id is not allowed
         element_id = {"id": "path"}
         self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
@@ -91,6 +95,7 @@ class AnyByteDataModelElementTest(TestBase):
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123.22)
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, True)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, None)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, [])
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, {"key": MatchContext(data)})
