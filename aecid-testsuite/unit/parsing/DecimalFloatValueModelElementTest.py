@@ -168,7 +168,7 @@ class DecimalFloatValueModelElementTest(TestBase):
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 25, None)
 
         data = b"0025.22 some string"
-        value = b"0025"
+        value = b"0025.22"
         match_context = DummyMatchContext(data)
         match_element = decimal_float_value_me.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 25.22, None)
@@ -252,23 +252,17 @@ class DecimalFloatValueModelElementTest(TestBase):
         match_element = decimal_float_value_me.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22.0, None)
 
-        data = b" +25 some string"
-        value = b" +25"
+        data = b"+ 25 some string"
+        value = b"+ 25"
         match_context = DummyMatchContext(data)
         match_element = decimal_float_value_me.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 25, None)
 
-        data = b"  -25 some string"
-        value = b"  -25"
+        data = b"- 25 some string"
+        value = b"- 25"
         match_context = DummyMatchContext(data)
         match_element = decimal_float_value_me.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, -25, None)
-
-        data = b"  +25.22 some string"
-        value = b"  +25.22"
-        match_context = DummyMatchContext(data)
-        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
-        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 25.22, None)
 
         data = b"+1e-5 some string"
         value = b"+1e-5"
@@ -282,10 +276,26 @@ class DecimalFloatValueModelElementTest(TestBase):
         match_element = decimal_float_value_me.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 1, None)
 
+        data = b"+ 1e+0 some string"
+        value = b"+ 1e+0"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 1, None)
+
     def test8get_match_element_mandatory_blank_values_no_match(self):
         """Test not matching values with default values of value_sign_type, value_pad_type and exponent_type."""
         decimal_float_value_me = DecimalFloatValueModelElement(self.id_, SIGN_TYPE_MANDATORY, PAD_TYPE_BLANK, EXP_TYPE_MANDATORY)
         data = b"22.25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"+  22.25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"-  22.25"
         match_context = DummyMatchContext(data)
         match_element = decimal_float_value_me.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
@@ -307,6 +317,16 @@ class DecimalFloatValueModelElementTest(TestBase):
         self.compare_no_match_results(data, match_element, match_context)
 
         data = b".25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b" +25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b" -25"
         match_context = DummyMatchContext(data)
         match_element = decimal_float_value_me.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
@@ -362,11 +382,11 @@ class DecimalFloatValueModelElementTest(TestBase):
 
         # empty tuple element_id is not allowed
         element_id = ()
-        self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id)
 
         # empty set element_id is not allowed
         element_id = set()
-        self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id)
 
     def test10value_sign_type_input_validation(self):
         """Check if value_sign_type is validated."""
