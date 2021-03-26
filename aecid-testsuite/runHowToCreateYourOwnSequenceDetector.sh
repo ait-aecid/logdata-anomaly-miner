@@ -10,8 +10,8 @@ fi
 sudo chown -R aminer:aminer /var/lib/aminer 2> /dev/null
 
 SRC_FILE=logdata-anomaly-miner.wiki/HowTo:-Create-your-own-SequenceDetector.md
-VAL_SCHEMA=/usr/lib/logdata-anomaly-miner/aminer/schemas/validation/AnalysisValidationSchema.py
-TMP_VAL_SCHEMA=/tmp/AnalysisValidationSchema.py
+VAL_SCHEMA=/usr/lib/logdata-anomaly-miner/aminer/schemas/validation/AnalysisValidationSchema.json
+TMP_VAL_SCHEMA=/tmp/AnalysisValidationSchema.json
 YML_CONFIG=/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py
 TMP_YML_CONFIG=/tmp/YamlConfig.py
 TMP_SCHEMA=/tmp/schema.py
