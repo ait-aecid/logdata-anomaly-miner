@@ -1,5 +1,5 @@
 """
-This module defines a PCA-detector by creating an Event-Count-Matrix for given
+This module defines a PCA-detector by creating an Event-Count-Matrix for given.
 time-windows to calculate an anomaly score for new time windows afterwards by
 using the reconstruction error from the inverse-transformation with restricted
 components of the Principal-Component-Analysis (PCA).
