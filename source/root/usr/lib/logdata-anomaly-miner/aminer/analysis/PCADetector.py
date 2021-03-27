@@ -14,10 +14,9 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-import time
 import copy
 import numpy as np
-
+import logging
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.util import PersistenceUtil
@@ -27,8 +26,8 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 
 class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """
-    This class creates an Event-Count-Matrix by counting events in log_atom for a given time-window from which the
-    the eigen-values and -vectors are computed, which are used to calculate an anomaly-score for new time-windows.
+    This class creates an Event-Count-Matrix by counting events in log_atom for a given time-window from which.
+    eigen-values and -vectors are computed, which are used to calculate an anomaly-score for new time-windows.
     """
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, time_window, anomaly_score, variance,
@@ -56,7 +55,7 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         # define variable for start time of window
         self.start_time = 0
 
-        #define flag, to skip the logic in special cases
+        # define flag, to skip the logic in special cases
         self.skip = False
 
         self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
