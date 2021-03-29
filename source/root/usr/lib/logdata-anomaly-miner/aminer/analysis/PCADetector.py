@@ -146,7 +146,6 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     analysis_component = {'AffectedTimeWindow': {'from': self.start_time, 'to': current_time},
                                           'AnomalyScore': anomalyScore[0]}
                     event_data = {'AnalysisComponent': analysis_component}
-                    print(analysis_component)
                     for listener in self.anomaly_event_handlers:
                         listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New anomalous timewindow detected',
                                                sorted_log_lines, event_data, log_atom, self)
