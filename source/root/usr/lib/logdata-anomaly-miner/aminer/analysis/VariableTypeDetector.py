@@ -996,7 +996,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
                 if self.gof_alpha in self.crit_val_ini_ks and self.num_init in self.crit_val_ini_ks[self.gof_alpha]:
                     significance.append(ks_2samp([self.quantiles['betam1'][i] for i in tmp_index] + [self.quantiles['betam2'][
-                        i] for i in range(1000) if i not in tmp_index], (values - min_val) / (max_val - min_val))[0] / max_val * est_penalty)
+                        i] for i in range(1000) if i not in tmp_index], (values - min_val) /
+                        (max_val - min_val))[0] / max_val * est_penalty)
                     distribution.append(['betam', min_val, max_val - min_val, min_val, max_val, proportion])
                 else:
                     significance.append(ks_2samp([self.quantiles['betam1'][i] for i in tmp_index] + [self.quantiles['betam2'][
@@ -1048,28 +1049,31 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                                 self.min_mod_ini_beta1, 'beta', args=(0.5, 0.5)) /
                                 self.crit_val_ini_cm[self.gof_alpha][self.num_init]['beta1'])
             distribution.append(['beta', ev, sigma, min_val - self.min_mod_ini_beta1 / (1-self.min_mod_ini_beta1-self.max_mod_ini_beta1) *
-                                (max_val-min_val), max_val + self.max_mod_ini_beta1 / (1-self.min_mod_ini_beta1-self.max_mod_ini_beta1) * (max_val-min_val), 1])
+                                (max_val-min_val), max_val + self.max_mod_ini_beta1 /
+                                (1-self.min_mod_ini_beta1-self.max_mod_ini_beta1) * (max_val-min_val), 1])
 
             # Test for beta2 distribution
             significance.append(cramervonmises((values-min_val) / (max_val-min_val) * (1-self.max_mod_ini_beta2-self.min_mod_ini_beta2) +
                                 self.min_mod_ini_beta2, 'beta', args=(5, 2)) / self.crit_val_ini_cm[self.gof_alpha][self.num_init]['beta2'])
             distribution.append(['beta', ev, sigma, min_val - self.min_mod_ini_beta2 / (1-self.min_mod_ini_beta2-self.max_mod_ini_beta2) *
-                                (max_val-min_val), max_val + self.max_mod_ini_beta2 / (1-self.min_mod_ini_beta2-self.max_mod_ini_beta2) * (max_val-min_val), 2])
+                                (max_val-min_val), max_val + self.max_mod_ini_beta2 /
+                                (1-self.min_mod_ini_beta2-self.max_mod_ini_beta2) * (max_val-min_val), 2])
 
             # Test for beta3 distribution
             significance.append(cramervonmises((values-min_val) / (max_val-min_val) * (1-self.max_mod_ini_beta2-self.min_mod_ini_beta2) +
                                 self.max_mod_ini_beta2, 'beta', args=(2, 5)) / self.crit_val_ini_cm[self.gof_alpha][self.num_init]['beta2'])
             distribution.append(['beta', ev, sigma, min_val - self.max_mod_ini_beta2 / (1-self.max_mod_ini_beta2-self.min_mod_ini_beta2) *
-                                (max_val-min_val), max_val + self.min_mod_ini_beta2 / (1-self.max_mod_ini_beta2-self.min_mod_ini_beta2) * (max_val-min_val), 3])
+                                (max_val-min_val), max_val + self.min_mod_ini_beta2 /
+                                (1-self.max_mod_ini_beta2-self.min_mod_ini_beta2) * (max_val-min_val), 3])
 
             # Test for beta4 distribution
-            significance.append(cramervonmises((values-min_val) / (ev-min_val) * (1/6-self.min_mod_ini_beta4) + self.min_mod_ini_beta4, 'beta',
-                                args=(1, 5)) / self.crit_val_ini_cm[self.gof_alpha][self.num_init]['beta4'])
+            significance.append(cramervonmises((values-min_val) / (ev-min_val) * (1/6-self.min_mod_ini_beta4) + self.min_mod_ini_beta4,
+                                'beta', args=(1, 5)) / self.crit_val_ini_cm[self.gof_alpha][self.num_init]['beta4'])
             distribution.append(['beta', ev, sigma, min_val, max_val, 4])
 
             # Test for beta5 distribution
-            significance.append(cramervonmises((values-max_val) / (max_val-ev) * (1/6-self.min_mod_ini_beta4) + 1 - self.min_mod_ini_beta4, 'beta',
-                                args=(5, 1)) / self.crit_val_ini_cm[self.gof_alpha][self.num_init]['beta4'])
+            significance.append(cramervonmises((values-max_val) / (max_val-ev) * (1/6-self.min_mod_ini_beta4) + 1 - self.min_mod_ini_beta4,
+                                'beta', args=(5, 1)) / self.crit_val_ini_cm[self.gof_alpha][self.num_init]['beta4'])
             distribution.append(['beta', ev, sigma, min_val, max_val, 5])
 
             # Checks if one of the above tested continuous distribution fits
