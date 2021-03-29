@@ -53,6 +53,12 @@ class DecimalFloatValueModelElementTest(TestBase):
         match_element = decimal_float_value_me.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22.0, None)
 
+        data = b"0 some string"
+        value = b"0"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 0, None)
+
     def test4get_match_element_default_values_no_match(self):
         """Test not matching values with default values of value_sign_type, value_pad_type and exponent_type."""
         decimal_float_value_me = DecimalFloatValueModelElement(self.id_, SIGN_TYPE_NONE, PAD_TYPE_NONE, EXP_TYPE_NONE)
@@ -113,6 +119,11 @@ class DecimalFloatValueModelElementTest(TestBase):
         match_context = DummyMatchContext(data)
         match_element = decimal_float_value_me.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 1, None)
+
+        data = b"00"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
 
     def test5get_match_element_optional_zero_values(self):
         """Test valid float values with "optional" or "zero" values of value_sign_type, value_pad_type and exponent_type."""
@@ -182,6 +193,18 @@ class DecimalFloatValueModelElementTest(TestBase):
         match_context = DummyMatchContext(data)
         match_element = decimal_float_value_me.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 1, None)
+
+        data = b"0 some string"
+        value = b"0"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 0, None)
+
+        data = b"00 some string"
+        value = b"00"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 0, None)
 
     def test6get_match_element_optional_zero_values_no_match(self):
         """Test not matching values with default values of value_sign_type, value_pad_type and exponent_type."""
@@ -280,6 +303,12 @@ class DecimalFloatValueModelElementTest(TestBase):
         match_element = decimal_float_value_me.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 1, None)
 
+        data = b"+0 some string"
+        value = b"+0"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 0, None)
+
     def test8get_match_element_mandatory_blank_values_no_match(self):
         """Test not matching values with default values of value_sign_type, value_pad_type and exponent_type."""
         decimal_float_value_me = DecimalFloatValueModelElement(self.id_, SIGN_TYPE_MANDATORY, PAD_TYPE_BLANK, EXP_TYPE_MANDATORY)
@@ -340,6 +369,11 @@ class DecimalFloatValueModelElementTest(TestBase):
         self.compare_no_match_results(data, match_element, match_context)
 
         data = b"e+10"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_float_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"00"
         match_context = DummyMatchContext(data)
         match_element = decimal_float_value_me.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)

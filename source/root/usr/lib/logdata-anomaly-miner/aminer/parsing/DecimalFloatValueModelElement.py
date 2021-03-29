@@ -113,7 +113,8 @@ class DecimalFloatValueModelElement(ModelElementInterface):
             return None
         match_len = 1
 
-        if self.pad_characters == b"" and data.startswith(b"0") and not data.startswith(b"0."):
+        if self.pad_characters == b"" and data.startswith(b"0") and not data.startswith(b"0.") and len(data) > 1 and \
+                data[1] in b"0123456789":
             return None
 
         allowed_characters = self.pad_characters
@@ -131,7 +132,7 @@ class DecimalFloatValueModelElement(ModelElementInterface):
         if match_len == 1:  # skipcq: PTC-W0048
             if data[0] not in b"0123456789":
                 return None
-        elif num_start_pos == match_len:
+        elif num_start_pos == match_len and match_len == 1:  # only return None if match_len is 1 to allow 00 with zero padding.
             return None
 
         # See if there is decimal part after decimal point.
