@@ -11,7 +11,12 @@ from unit.TestBase import TestBase, DummyMatchContext, initialize_loggers
 
 
 class MultiLocaleDateTimeModelElementTest(TestBase):
-    """Unittests for the MultiLocaleDateTimeModelElement."""
+    """
+    Unittests for the MultiLocaleDateTimeModelElement.
+    To calculate the expected timestamps the timezone shift was added or subtracted from the date and the epoch was calculated on
+    https://www.epochconverter.com/. For example the date 24.03.2018 11:40:00 CET was converted to 24.03.2018 10:40:00 UTC and then the
+    epoch in seconds was calculated (1521888000).
+    """
 
     id_ = "dtme"
     path = "path"
