@@ -1648,7 +1648,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         return [True, 0.0]
 
     def d_test(self, event_index, var_index):
-        """Make a test if the new variables follow the discrete distribution and appends the result to the BT."""
+        """Make a test if the new variables follow the discrete distribution and append the result to the BT."""
         if self.used_multinomial_test == 'MT':
             # Count the appearance of the values
             values_app = [0] * len(self.var_type[event_index][var_index][1])
