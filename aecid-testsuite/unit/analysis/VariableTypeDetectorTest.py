@@ -699,7 +699,7 @@ class VariableTypeDetectorTest(TestBase):
                         variable_type_ini = variable_type_ini[:-1]
                     break
                 if 'beta3' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
-                    for j, val in enumerate(variable_type_ini[-1]):
+                    for _, val in enumerate(variable_type_ini[-1]):
                         if val[0] == 'beta' and val[-1] == 3:
                             variable_type_ini = val
                             break
@@ -724,7 +724,7 @@ class VariableTypeDetectorTest(TestBase):
                         variable_type_ini = variable_type_ini[:-1]
                     break
                 if 'beta4' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
-                    for j, val in enumerate(variable_type_ini[-1]):
+                    for _, val in enumerate(variable_type_ini[-1]):
                         if val[0] == 'beta' and val[-1] == 4:
                             variable_type_ini = val
                             break
@@ -749,7 +749,7 @@ class VariableTypeDetectorTest(TestBase):
                         variable_type_ini = variable_type_ini[:-1]
                     break
                 if 'beta5' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
-                    for j, val in enumerate(variable_type_ini[-1]):
+                    for _, val in enumerate(variable_type_ini[-1]):
                         if val[0] == 'beta' and val[-1] == 5:
                             variable_type_ini = val
                             break
