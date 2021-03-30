@@ -1350,7 +1350,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                         # Variance of the correlations
                         variance_list = [0 for _ in range(len(self.pos_var_val[event_index][pos_var_cor_val[1]]))]
                         # Calculate the variance of the single values
-                        for i in range(len(self.pos_var_val[event_index][pos_var_cor_val[1]])):
+                        for i in range(len(self.pos_var_val[event_index][pos_var_cor_val[1]])):  # skipcq: PTC-W0060
                             variance_list[i] = sum([(distribution_list[i][j] - mean_list[i])**2 * frequency_list[j] / total_frequency for j
                                                    in range(len(frequency_list))])
 
