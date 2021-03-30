@@ -674,7 +674,7 @@ class VariableTypeDetectorTest(TestBase):
                         variable_type_ini = variable_type_ini[:-1]
                     break
                 if 'beta2' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
-                    for j in enumerate(variable_type_ini[-1]):
+                    for _, val in enumerate(variable_type_ini[-1]):
                         if val[0] == 'beta' and val[-1] == 2:
                             variable_type_ini = val
                             break
