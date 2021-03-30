@@ -169,9 +169,9 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
                             try:
                                 # Get the timewindow lengths
-                                time_list = self.following_modules[next(j for j in range(len(
-                                    self.following_modules)) if self.following_modules[j].__class__.__name__ == 'TestDetector')].function_Init(
-                                    self.num_eventlines_TSA_ref)
+                                time_list = self.following_modules[
+                                    next(j for j in range(len(self.following_modules)) if self.following_modules[
+                                        j].__class__.__name__ == 'TestDetector')].function_Init(self.num_eventlines_TSA_ref)
                             except StopIteration:
                                 return False
                             self.num_eventlines_TSA_ref = copy.copy(self.num_eventlines)
@@ -184,10 +184,13 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                                     self.etd_time_trigger[2].append(time_list[j])
 
                                 while current_time >= self.etd_time_trigger[0][-1]:
-                                    self.following_modules[next(j for j in range(len(
-                                        self.following_modules)) if self.following_modules[j].__class__.__name__ == 'TestDetector')].\
-                                        function_Upd(self.etd_time_trigger[1][-1], self.num_eventlines[self.etd_time_trigger[1][
-                                            -1]]-self.num_eventlines_TSA_ref[self.etd_time_trigger[1][-1]])
+                                    try:
+                                        self.following_modules[next(j for j in range(len(
+                                            self.following_modules)) if self.following_modules[j].__class__.__name__ == 'TestDetector')].\
+                                            function_Upd(self.etd_time_trigger[1][-1], self.num_eventlines[self.etd_time_trigger[1][
+                                                -1]]-self.num_eventlines_TSA_ref[self.etd_time_trigger[1][-1]])
+                                    except StopIteration:
+                                        return False
                                     self.etd_time_trigger[0][-1] = self.etd_time_trigger[0][-1] + self.etd_time_trigger[2][-1]
                                     self.num_eventlines_TSA_ref[self.etd_time_trigger[1][-1]] = self.num_eventlines[self.etd_time_trigger[
                                         1][-1]]
@@ -200,10 +203,13 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     # Trigger for an reoccuring time window
                     else:
                         while current_time >= self.etd_time_trigger[0][indices[i]]:
-                            self.following_modules[next(j for j in range(len(self.following_modules)) if self.following_modules[
-                                j].__class__.__name__ == 'TestDetector')].function_Upd(self.etd_time_trigger[1][indices[
-                                    i]], self.num_eventlines[self.etd_time_trigger[1][indices[i]]]-self.num_eventlines_TSA_ref[
-                                    self.etd_time_trigger[1][indices[i]]])
+                            try:
+                                self.following_modules[next(j for j in range(len(self.following_modules)) if self.following_modules[
+                                    j].__class__.__name__ == 'TestDetector')].function_Upd(self.etd_time_trigger[1][indices[
+                                        i]], self.num_eventlines[self.etd_time_trigger[1][indices[i]]]-self.num_eventlines_TSA_ref[
+                                        self.etd_time_trigger[1][indices[i]]])
+                            except StopIteration:
+                                return False
                             self.etd_time_trigger[0][indices[i]] += self.etd_time_trigger[2][indices[i]]
                             self.num_eventlines_TSA_ref[self.etd_time_trigger[1][indices[i]]] = self.num_eventlines[self.etd_time_trigger[
                                 1][indices[i]]]

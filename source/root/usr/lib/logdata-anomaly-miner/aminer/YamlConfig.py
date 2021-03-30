@@ -96,7 +96,6 @@ def load_yaml(config_file):
 
 def filter_config_errors(filtered_errors, key_name, errors, schema):
     """Filter oneof outputs to produce a clear overview of the error."""
-
     oneof = schema[key_name]['schema']['oneof']
     if key_name in errors:
         for i, err in enumerate(errors[key_name]):
