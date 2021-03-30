@@ -36,9 +36,12 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         self.variable_type_detector = None
         if any(self.event_type_detector.following_modules[j].__class__.__name__ == 'VariableTypeDetector' for j in range(
                 len(self.event_type_detector.following_modules))):
-            self.variable_type_detector = self.event_type_detector.following_modules[next(j for j in range(
-                len(self.event_type_detector.following_modules)) if
-                    self.event_type_detector.following_modules[j].__class__.__name__ == 'VariableTypeDetector')]
+            try:
+                self.variable_type_detector = self.event_type_detector.following_modules[next(j for j in range(
+                    len(self.event_type_detector.following_modules)) if
+                        self.event_type_detector.following_modules[j].__class__.__name__ == 'VariableTypeDetector')]
+            except StopIteration:
+                pass
         self.update_rules = []  # List which states for what event types the rules are updated
         self.generate_rules = []  # List which states for what event types new rules are being generated
         self.min_successes_bt = 0  # Minimal number of successes for the binomialtest

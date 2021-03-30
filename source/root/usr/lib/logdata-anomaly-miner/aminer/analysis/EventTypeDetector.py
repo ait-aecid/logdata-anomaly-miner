@@ -167,10 +167,13 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                                 for j in range(len(self.num_eventlines)):
                                     self.num_eventlines_TSA_ref[j].append(self.num_eventlines[j]-sum(self.num_eventlines_TSA_ref[j]))
 
-                            # Get the timewindow lengths
-                            time_list = self.following_modules[next(j for j in range(len(
-                                self.following_modules)) if self.following_modules[j].__class__.__name__ == 'TestDetector')].function_Init(
-                                self.num_eventlines_TSA_ref)
+                            try:
+                                # Get the timewindow lengths
+                                time_list = self.following_modules[next(j for j in range(len(
+                                    self.following_modules)) if self.following_modules[j].__class__.__name__ == 'TestDetector')].function_Init(
+                                    self.num_eventlines_TSA_ref)
+                            except StopIteration:
+                                return False
                             self.num_eventlines_TSA_ref = copy.copy(self.num_eventlines)
 
                             # Add the new triggers
