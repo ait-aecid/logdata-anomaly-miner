@@ -75,7 +75,7 @@ logdata-anomaly-miner (2.1.0) unstable; urgency=low
   * Yamlconfig: added support for more detectors
   * Added new command-line-parameters
   * Renamed executables to aminer.py and aminerremotecontroly.py
-  * Run aminer in forgroundd-mode per default
+  * Run Aminer in forgroundd-mode per default
   * Added various unit-tests
   * Improved yamlconfig and checks
   * Added start-config for parser to yamlconfig
@@ -122,7 +122,7 @@ logdata-anomaly-miner (2.0.1) unstable; urgency=low
   * Updated demos
   * Updated debian files
   * Added copyright headers
-  * Added executable bit to aminer
+  * Added executable bit to AMiner
   
  -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Wed,  24 Jun 2020 17:00:00 +0000
 
@@ -133,7 +133,7 @@ logdata-anomaly-miner (2.0.0) bionic; urgency=low
   * Added functions getNameByComponent and getIdByComponent to
     AnalysisChild.py
   * Update DefaultMailNotificationEventHandler.py to python3
-  * Extended aminerRemoteControl
+  * Extended AMinerRemoteControl
   * Added support for configuration in yaml format
   * Refactoring
   * Added KafkaEventHandler
@@ -212,7 +212,7 @@ logdata-anomaly-miner (0.0.6) xenial; urgency=low
 
   The input IO-handling was redesigned, thus introducing following
   API changes. The changes are flaged with (D)eveloper and (U)ser
-  to indicate if only developers of own aminer addons are affected
+  to indicate if only developers of own AMiner addons are affected
   or also users may need to migrate their configuration.
 
   * Upper layers receive LogAtom objects instead of log lines,
@@ -226,7 +226,7 @@ logdata-anomaly-miner (0.0.6) xenial; urgency=low
       fields (D):
 
   -from aminer.parsing import ParsedAtomHandlerInterface
-  +from aminer.input.InputInterfaces import AtomHandlerInterface
+  +from aminer.input import AtomHandlerInterface
   -class YourHandler(ParsedAtomHandlerInterface, ...
   +class YourHandler(AtomHandlerInterface,
   -  def receiveParsedAtom(self, atom_data, parser_match):
@@ -241,7 +241,7 @@ logdata-anomaly-miner (0.0.6) xenial; urgency=low
       of other classes does not make sense any more (U):
 
   -from aminer.analysis import VolatileLogarithmicBackoffParsedAtomHistory
-  +from aminer.util.History import VolatileLogarithmicBackoffAtomHistory
+  +from aminer.util import VolatileLogarithmicBackoffAtomHistory
   - from aminer.analysis import ParsedAtomFilters
   + from aminer.analysis import AtomFilters
   - match_action=Rules.ParsedAtomFilterMatchAction(...
@@ -286,7 +286,7 @@ logdata-anomaly-miner (0.0.5) xenial; urgency=low
 
   # Now define the AtomizerFactory using the model. A simple line
   # based one is usually sufficient.
-    from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
+    from aminer.input import SimpleByteStreamLineAtomizerFactory
     analysis_context.atomizer_factory=SimpleByteStreamLineAtomizerFactory(
         parsing_model, parsed_atom_handlers, unparsed_atom_handlers,
         anomaly_event_handlers, default_timestamp_paths=['/model/syslog/time'])
@@ -318,7 +318,7 @@ logdata-anomaly-miner (0.0.3) xenial; urgency=low
   * To improve readability of configuration files, main parser,
     analysis and event classes were added to the submodule namespaces.
     After imports directly from the submodule, e.g.
-    "from aminer.parsing.FixedDataModelElement import FixedDataModelElement",
+    "from aminer.parsing import FixedDataModelElement",
     the name duplication "FixedDataModelElement.FixedDataModelElement"
     is not required any more, "FixedDataModelElement" is sufficient.
     Use "sed -i -e 's/Name.Name/Name/g' [files]" to adapt.
