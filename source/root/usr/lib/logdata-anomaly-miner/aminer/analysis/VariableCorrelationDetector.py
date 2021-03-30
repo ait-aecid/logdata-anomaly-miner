@@ -301,7 +301,6 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
             # Else use the variables which are neither unique nor static # !!!
             else:
-                # skipcq: PTC-W0060
                 self.discrete_indices[event_index] = list(range(len(self.event_type_detector.variable_key_list[event_index])))
                 for i in range(len(self.event_type_detector.values[event_index]) - 1, -1, -1):  # skipcq: PTC-W0060
                     tmp_list = list(set(self.event_type_detector.values[event_index][i][-self.num_init:]))
@@ -327,16 +326,14 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                     if self.variable_type_detector is None:
                         variable_values = [[] for _ in range(len(self.discrete_indices[event_index]))]  # skipcq: PTC-W0060
                         variable_distributions = [[] for _ in range(len(self.discrete_indices[event_index]))]  # skipcq: PTC-W0060
-                        for i in range(len(self.discrete_indices[event_index])):
+                        for i, val in enumerate(self.discrete_indices[event_index]):
                             for j in range(-1, -self.num_init-1, -1):
-                                if self.event_type_detector.values[event_index][self.discrete_indices[event_index][i]][j] \
-                                        not in variable_values[i]:
-                                    variable_values[i].append(self.event_type_detector.values[event_index][self.discrete_indices[
-                                        event_index][i]][j])
+                                if self.event_type_detector.values[event_index][val][j] not in variable_values[i]:
+                                    variable_values[i].append(self.event_type_detector.values[event_index][val][j])
                                     variable_distributions[i].append(1)
                                 else:
                                     variable_distributions[i][variable_values[i].index(self.event_type_detector.values[event_index][
-                                        self.discrete_indices[event_index][i]][j])] += 1
+                                        val][j])] += 1
                             tmp_sum = sum(variable_distributions[i])
                             variable_distributions[i] = [variable_distributions[i][j]/tmp_sum for j in range(
                                 len(variable_distributions[i]))]
@@ -397,7 +394,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                         self.pos_var_cor[event_index] = tmp_pos_var_cor
                     # Intercept self.pos_var_cor
                     elif self.intersect_presel_meth:
-                        for i in range(len(self.pos_var_cor[event_index]) - 1, -1, -1):
+                        for i in range(len(self.pos_var_cor[event_index]) - 1, -1, -1):  # skipcq: PTC-W0060
                             if self.pos_var_cor[event_index][i] not in tmp_pos_var_cor:
                                 del self.pos_var_cor[event_index][i]
                     # Append self.pos_var_cor
