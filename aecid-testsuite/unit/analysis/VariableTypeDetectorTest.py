@@ -624,7 +624,7 @@ class VariableTypeDetectorTest(TestBase):
                         variable_type_ini = variable_type_ini[:-1]
                     break
                 if 'nor' in [distr[0] for distr in variable_type_ini[-1]]:
-                    for j, val in enumerate(variable_type_ini[-1]):
+                    for _, val in enumerate(variable_type_ini[-1]):
                         if val[0] == 'nor':
                             variable_type_ini = val
                             break

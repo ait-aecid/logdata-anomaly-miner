@@ -20,7 +20,7 @@ class EventCorrelationDetectorTest(TestBase):
     @classmethod
     def setUpClass(cls):
         """Set up the data for the all tests."""
-        for i, val in enumerate(cls.alphabet):
+        for _, val in enumerate(cls.alphabet):
             char = bytes([val])
             cls.alphabet_model.children.append(FixedDataModelElement(char.decode(), char))
         error_rate = 0.000085
