@@ -239,7 +239,7 @@ class CorrelationRule:
                     break
                 # So time range is OK, see if match parameters are also equal.
                 violation_found = False
-                for check_pos in range(4, len(a_event)):
+                for check_pos in range(4, len(a_event)):  # skipcq: PTC-W0060
                     if a_event[check_pos] != b_event[check_pos]:
                         violation_line = a_event[3].match_element.match_string
                         if isinstance(violation_line, bytes):

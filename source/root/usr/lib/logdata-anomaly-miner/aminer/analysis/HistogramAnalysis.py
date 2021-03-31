@@ -253,8 +253,7 @@ class HistogramData:
         result = '%sProperty "%s" (%d elements):' % (indent, self.property_path, self.total_elements)
         f_elements = float(self.total_elements)
         base_element = self.binned_elements if self.has_outlier_bins_flag else self.total_elements
-        for bin_pos in range(0, len(self.bin_data)):
-            count = self.bin_data[bin_pos]
+        for bin_pos, count in enumerate(self.bin_data):
             if count == 0:
                 continue
             p_value = self.bin_definition.get_bin_p_value(bin_pos, base_element, count)

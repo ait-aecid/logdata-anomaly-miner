@@ -269,7 +269,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
             trigger_count = feature.trigger_count
             result += '%s (%d) e = %d:' % (feature.rule, feature.index, trigger_count)
             stat_pos = (self.parallel_check_count * feature.index) << 1
-            for feature_pos in range(0, len(self.feature_list)):
+            for feature_pos in range(len(self.feature_list)):  # skipcq: PTC-W0060
                 event_count = self.event_count_table[stat_pos]
                 ratio = '-'
                 if trigger_count != 0:
