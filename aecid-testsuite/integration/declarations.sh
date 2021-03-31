@@ -1,13 +1,5 @@
 #!/bin/bash
 
-sudoInstalled=`dpkg -s sudo | grep Status 2>&1 /dev/null`
-
-if [[ $sudoInstalled == "Status: install ok installed" ]]; then
-	sudoInstalled=0
-else
-	sudoInstalled=1
-fi
-
 # declare all expected values without the variable ones. These arrays are used to compare with the incoming log lines.
 declare -a NEW_PATH_HD_REPAIR_1=(" New path(es) detected" "NewMatchPathDetector: \"NewPath\" (1 lines)" "  /model/DiskUpgrade: b'" ": System rebooted for hard disk upgrade'" "  /model/DiskUpgrade/DTM: " "  /model/DiskUpgrade/UNameSpace1: " "  /model/DiskUpgrade/UName: " "  /model/DiskUpgrade/UNameSpace2: " " /model/DiskUpgrade/User: " "  /model/DiskUpgrade/HDRepair: b' System rebooted for hard disk upgrade'" "['/model/DiskUpgrade', '/model/DiskUpgrade/DTM', '/model/DiskUpgrade/UNameSpace1', '/model/DiskUpgrade/UName', '/model/DiskUpgrade/UNameSpace2', '/model/DiskUpgrade/User', '/model/DiskUpgrade/HDRepair']" "Original log line: b'")
 declare -a UNPARSED_ATOM_1=(" Unparsed atom received" "SimpleUnparsedAtomHandler: \"UnparsedHandler\" (1 lines)" " System rebooted for hard disk upgrad")
@@ -16,6 +8,324 @@ declare -a NEW_PATH_HOME_PATH_ROOT_1=(" New path(es) detected" "NewMatchPathDete
 declare -a NEW_VALUE_COMBINATION_HOME_PATH_ROOT_1=(" New value combination(s) detected" "NewMatchPathValueComboDetector: \"NewValueCombo\" (1 lines)" "  /model/HomePath: b'The Path of the home directory shown by pwd of the user root is: /root'" "  /model/HomePath/Pwd: b'The Path of the home directory shown by pwd of the user '" "  /model/HomePath/Username: b'root'" "  /model/HomePath/Is: b' is: '" "  /model/HomePath/Path: b'/root'" "(b'root', b'/root')" "Original log line: b'The Path of the home directory shown by pwd of the user root is: /root'")
 declare -a NEW_VALUE_COMBINATION_HOME_PATH_USER_1=(" New value combination(s) detected" "NewMatchPathValueComboDetector: \"NewValueCombo\" (1 lines)" "  /model/HomePath: b'The Path of the home directory shown by pwd of the user user is: /home/user'" "  /model/HomePath/Pwd: b'The Path of the home directory shown by pwd of the user '" "  /model/HomePath/Username: b'user'" "  /model/HomePath/Is: b' is: '" "  /model/HomePath/Path: b'/home/user'" "(b'user', b'/home/user')" "Original log line: b'The Path of the home directory shown by pwd of the user user is: /home/user'")
 declare -a NEW_VALUE_COMBINATION_HOME_PATH_GUEST_1=(" New value combination(s) detected" "NewMatchPathValueComboDetector: \"NewValueCombo\" (1 lines)" "  /model/HomePath: b'The Path of the home directory shown by pwd of the user guest is: /home/guest'" "  /model/HomePath/Pwd: b'The Path of the home directory shown by pwd of the user '" "  /model/HomePath/Username: b'guest'" "  /model/HomePath/Is: b' is: '" "  /model/HomePath/Path: b'/home/guest'" "(b'guest', b'/home/guest')" "Original log line: b'The Path of the home directory shown by pwd of the user guest is: /home/guest'")
+declare -a JSON_OUTPUT=()
+read -r -d '' VAR << END
+  {
+  "LogData": {
+    "RawLogData": [
+      "
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+ localhost root: System rebooted for hard disk upgrad"
+    ],
+    "Timestamps": [
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+    ],
+    "DetectionTimestamp":
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+,
+    "LogLinesCount": 1
+  },
+  "AnalysisComponent": {
+    "AnalysisComponentIdentifier": 0,
+    "AnalysisComponentType": "SimpleUnparsedAtomHandler",
+    "AnalysisComponentName": "UnparsedHandler",
+    "Message": "Unparsed atom received",
+    "PersistenceFileName": null
+  }
+}
+{
+  "AnalysisComponent": {
+    "AnalysisComponentIdentifier": 1,
+    "AnalysisComponentType": "NewMatchPathDetector",
+    "AnalysisComponentName": "NewPath",
+    "Message": "New path(es) detected",
+    "PersistenceFileName": "Default",
+    "AffectedLogAtomPaths": [
+      "/model/DiskUpgrade",
+      "/model/DiskUpgrade/DTM",
+      "/model/DiskUpgrade/UNameSpace1",
+      "/model/DiskUpgrade/UName",
+      "/model/DiskUpgrade/UNameSpace2",
+      "/model/DiskUpgrade/User",
+      "/model/DiskUpgrade/HDRepair"
+    ],
+    "ParsedLogAtom": {
+      "/model/DiskUpgrade": "
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+ localhost root: System rebooted for hard disk upgrade",
+      "/model/DiskUpgrade/DTM":
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+,
+      "/model/DiskUpgrade/UNameSpace1": " ",
+      "/model/DiskUpgrade/UName": "localhost",
+      "/model/DiskUpgrade/UNameSpace2": " ",
+      "/model/DiskUpgrade/User": "root:",
+      "/model/DiskUpgrade/HDRepair": " System rebooted for hard disk upgrade"
+    }
+  },
+  "LogData": {
+    "RawLogData": [
+      "
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+ localhost root: System rebooted for hard disk upgrade"
+    ],
+    "Timestamps": [
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+    ],
+    "DetectionTimestamp":
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+,
+    "LogLinesCount": 1,
+    "AnnotatedMatchElement": "/model/DiskUpgrade: b'
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+ localhost root: System rebooted for hard disk upgrade'\n  /model/DiskUpgrade/DTM:
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+\n  /model/DiskUpgrade/UNameSpace1: b' '\n  /model/DiskUpgrade/UName: b'localhost'\n  /model/DiskUpgrade/UNameSpace2: b' '\n  /model/DiskUpgrade/User: b'root:'\n  /model/DiskUpgrade/HDRepair: b' System rebooted for hard disk upgrade'"
+  }
+}
+{
+  "LogData": {
+    "RawLogData": [
+      "
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+ localhost root: System rebooted for hard disk upgrad"
+    ],
+    "Timestamps": [
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+    ],
+    "DetectionTimestamp":
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+,
+    "LogLinesCount": 1
+  },
+  "AnalysisComponent": {
+    "AnalysisComponentIdentifier": 0,
+    "AnalysisComponentType": "SimpleUnparsedAtomHandler",
+    "AnalysisComponentName": "UnparsedHandler",
+    "Message": "Unparsed atom received",
+    "PersistenceFileName": null
+  }
+}
+{
+  "LogData": {
+    "RawLogData": [
+      "
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+ localhost root: System rebooted for hard disk upgrade"
+    ],
+    "Timestamps": [
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+    ],
+    "DetectionTimestamp":
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+,
+    "LogLinesCount": 1
+  },
+  "AnalysisComponent": {
+    "AnalysisComponentIdentifier": 0,
+    "AnalysisComponentType": "SimpleUnparsedAtomHandler",
+    "AnalysisComponentName": "UnparsedHandler",
+    "Message": "Unparsed atom received",
+    "PersistenceFileName": null
+  }
+}
+{
+  "AnalysisComponent": {
+    "AnalysisComponentIdentifier": 1,
+    "AnalysisComponentType": "NewMatchPathDetector",
+    "AnalysisComponentName": "NewPath",
+    "Message": "New path(es) detected",
+    "PersistenceFileName": "Default",
+    "AffectedLogAtomPaths": [
+      "/model/HomePath",
+      "/model/HomePath/Pwd",
+      "/model/HomePath/Username",
+      "/model/HomePath/Is",
+      "/model/HomePath/Path"
+    ],
+    "ParsedLogAtom": {
+      "/model/HomePath": "The Path of the home directory shown by pwd of the user root is: /root",
+      "/model/HomePath/Pwd": "The Path of the home directory shown by pwd of the user ",
+      "/model/HomePath/Username": "root",
+      "/model/HomePath/Is": " is: ",
+      "/model/HomePath/Path": "/root"
+    }
+  },
+  "LogData": {
+    "RawLogData": [
+      "The Path of the home directory shown by pwd of the user root is: /root"
+    ],
+    "Timestamps": [
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+    ],
+    "DetectionTimestamp":
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+,
+    "LogLinesCount": 1,
+    "AnnotatedMatchElement": "/model/HomePath: b'The Path of the home directory shown by pwd of the user root is: /root'\n  /model/HomePath/Pwd: b'The Path of the home directory shown by pwd of the user '\n  /model/HomePath/Username: b'root'\n  /model/HomePath/Is: b' is: '\n  /model/HomePath/Path: b'/root'"
+  }
+}
+{
+  "AnalysisComponent": {
+    "AnalysisComponentIdentifier": 2,
+    "AnalysisComponentType": "NewMatchPathValueComboDetector",
+    "AnalysisComponentName": "NewValueCombo",
+    "Message": "New value combination(s) detected",
+    "PersistenceFileName": "Default",
+    "AffectedLogAtomPaths": [
+      "/model/HomePath/Username",
+      "/model/HomePath/Path"
+    ],
+    "AffectedLogAtomValues": [
+      "root",
+      "/root"
+    ],
+    "ParsedLogAtom": {
+      "/model/HomePath": "The Path of the home directory shown by pwd of the user root is: /root",
+      "/model/HomePath/Pwd": "The Path of the home directory shown by pwd of the user ",
+      "/model/HomePath/Username": "root",
+      "/model/HomePath/Is": " is: ",
+      "/model/HomePath/Path": "/root"
+    }
+  },
+  "LogData": {
+    "RawLogData": [
+      "The Path of the home directory shown by pwd of the user root is: /root"
+    ],
+    "Timestamps": [
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+    ],
+    "DetectionTimestamp":
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+,
+    "LogLinesCount": 1,
+    "AnnotatedMatchElement": "/model/HomePath: b'The Path of the home directory shown by pwd of the user root is: /root'\n  /model/HomePath/Pwd: b'The Path of the home directory shown by pwd of the user '\n  /model/HomePath/Username: b'root'\n  /model/HomePath/Is: b' is: '\n  /model/HomePath/Path: b'/root'"
+  }
+}
+{
+  "AnalysisComponent": {
+    "AnalysisComponentIdentifier": 2,
+    "AnalysisComponentType": "NewMatchPathValueComboDetector",
+    "AnalysisComponentName": "NewValueCombo",
+    "Message": "New value combination(s) detected",
+    "PersistenceFileName": "Default",
+    "AffectedLogAtomPaths": [
+      "/model/HomePath/Username",
+      "/model/HomePath/Path"
+    ],
+    "AffectedLogAtomValues": [
+      "user",
+      "/home/user"
+    ],
+    "ParsedLogAtom": {
+      "/model/HomePath": "The Path of the home directory shown by pwd of the user user is: /home/user",
+      "/model/HomePath/Pwd": "The Path of the home directory shown by pwd of the user ",
+      "/model/HomePath/Username": "user",
+      "/model/HomePath/Is": " is: ",
+      "/model/HomePath/Path": "/home/user"
+    }
+  },
+  "LogData": {
+    "RawLogData": [
+      "The Path of the home directory shown by pwd of the user user is: /home/user"
+    ],
+    "Timestamps": [
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+    ],
+    "DetectionTimestamp":
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+,
+    "LogLinesCount": 1,
+    "AnnotatedMatchElement": "/model/HomePath: b'The Path of the home directory shown by pwd of the user user is: /home/user'\n  /model/HomePath/Pwd: b'The Path of the home directory shown by pwd of the user '\n  /model/HomePath/Username: b'user'\n  /model/HomePath/Is: b' is: '\n  /model/HomePath/Path: b'/home/user'"
+  }
+}
+{
+  "AnalysisComponent": {
+    "AnalysisComponentIdentifier": 2,
+    "AnalysisComponentType": "NewMatchPathValueComboDetector",
+    "AnalysisComponentName": "NewValueCombo",
+    "Message": "New value combination(s) detected",
+    "PersistenceFileName": "Default",
+    "AffectedLogAtomPaths": [
+      "/model/HomePath/Username",
+      "/model/HomePath/Path"
+    ],
+    "AffectedLogAtomValues": [
+      "guest",
+      "/home/guest"
+    ],
+    "ParsedLogAtom": {
+      "/model/HomePath": "The Path of the home directory shown by pwd of the user guest is: /home/guest",
+      "/model/HomePath/Pwd": "The Path of the home directory shown by pwd of the user ",
+      "/model/HomePath/Username": "guest",
+      "/model/HomePath/Is": " is: ",
+      "/model/HomePath/Path": "/home/guest"
+    }
+  },
+  "LogData": {
+    "RawLogData": [
+      "The Path of the home directory shown by pwd of the user guest is: /home/guest"
+    ],
+    "Timestamps": [
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+    ],
+    "DetectionTimestamp":
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+,
+    "LogLinesCount": 1,
+    "AnnotatedMatchElement": "/model/HomePath: b'The Path of the home directory shown by pwd of the user guest is: /home/guest'\n  /model/HomePath/Pwd: b'The Path of the home directory shown by pwd of the user '\n  /model/HomePath/Username: b'guest'\n  /model/HomePath/Is: b' is: '\n  /model/HomePath/Path: b'/home/guest'"
+  }
+}
+END
+JSON_OUTPUT+=("$VAR")
 
 # These strings are used in the isExpectedOutput()-function to identify the next array to be compared with.
 NEW_PATH_HD_REPAIR="new_path_hd_repair"
@@ -77,7 +387,7 @@ function startswithPredefinedMarkers() {
 	return 0
 }
 
-# This function reads the output of the AMiner, which is saved at /tmp/output, until an empty line occurs.
+# This function reads the output of the aminer, which is saved at /tmp/output, until an empty line occurs.
 # Every time a paragraph was read, the global variable $COUNTER is set to the iteration variable $i.
 # On the next call of this function all lines until $i equals $COUNTER are skipped.
 # $1 = String identifier for the expected values
@@ -260,8 +570,7 @@ function checkAllOutputs() {
 
 # This function checks if the output of the DefaultMailNotificationEventHandler is as expected.
 # The $linecount variable is the fixed count of log lines and must be changed every time a new log line is added.
-# At each loop run one mail is read into /tmp/out from which further checks are made. 
-
+# At each loop run one mail is read into /tmp/out from which further checks are made.
 function checkAllMails() {
 	res=0
 	linecount=10
@@ -269,11 +578,7 @@ function checkAllMails() {
 	dpkg -s mailutils &> /dev/null
 	if [ ! $? -eq 0 ]; then
     	echo -e "\e[31mMailutils-package is not installed! Installing it now..]"
-		if [[ $sudoInstalled == 0 ]]; then
-			sudo apt install mailutils -y
-		else
-			apt install mailutils -y
-		fi
+		sudo apt install mailutils -y
 	fi
 
 	echo ""
@@ -283,11 +588,7 @@ function checkAllMails() {
 	i=1
 	while [ $i -lt $linecount ] 
 	do
-		if [[ $sudoInstalled == 0 ]]; then
-			sudo echo p | mail > /tmp/out
-		else
-			echo p | mail > /tmp/out
-		fi
+		sudo echo p | mail > /tmp/out
 		input="/tmp/out"
 		t=false
 		aminerMail=false
@@ -302,7 +603,7 @@ function checkAllMails() {
 					break
 				fi
 			fi
-			# If the first empty line was found and the subject equals "AMiner Alerts:" the following paragraph
+			# If the first empty line was found and the subject equals "aminer Alerts:" the following paragraph
 			# must be found in the previously created /tmp/output file.
 			if [[ $t == true && $aminerMail == true ]]; then
 
@@ -316,11 +617,11 @@ function checkAllMails() {
 					fi
 				done < "$expected"
 			# Set the aminerMail boolean to True, when the expected subject was found
-			elif [[ "$searched" == *"Subject: AMiner Alerts:"* ]]; then
+			elif [[ "$searched" == *"Subject: aminer Alerts:"* ]]; then
 				#echo "Subject found!"
 				aminerMail=true
-			# Stop searching, when the subject is not the expected AMiner subject.
-			elif [[ "$searched" != *"Subject: AMiner Alerts:"* && "$searched" == *"Subject:"* ]]; then
+			# Stop searching, when the subject is not the expected aminer subject.
+			elif [[ "$searched" != *"Subject: aminer Alerts:"* && "$searched" == *"Subject:"* ]]; then
 				echo "wrong mail"
 				i=$(($i-1))
 				break
@@ -352,19 +653,11 @@ function checkAllMails() {
 
 # This function checks if the output of the Syslog is as expected.
 function checkAllSyslogs(){
-	if [[ $sudoInstalled == 0 ]]; then
-		sudo tail -n 1000 /var/log/syslog > /tmp/out
-	else
-		tail -n 1000 /var/log/syslog > /tmp/out
-	fi
+	sudo tail -n 1000 /var/log/syslog > /tmp/out
 	
 	lastLine=`tail -n 1 /tmp/output`
 	if [[ $lastLine == "" ]]; then
-		if [[ $sudoInstalled == 0 ]]; then
-			sudo sed -i "$ d" /tmp/output
-		else
-			runuser -u aminer -- sed -i '$ d' /tmp/output
-		fi
+		sudo sed -i "$ d" /tmp/output
 	fi
 	
 	cntr=0
@@ -421,4 +714,19 @@ function checkAllSyslogs(){
 	return 1
 }
 
-
+# This function checks if the output of the Kafka Topic is as expected.
+function checkKafkaTopic(){
+  out=$(kafka_2.12-2.7.0/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test_topic --from-beginning --timeout-ms 3000)
+  for t in "${JSON_OUTPUT[@]}"
+  do
+    if [[ $out != *"$t"* ]]; then
+      echo "searched: $t"
+      echo
+      echo "remaining output: $out"
+      return 1
+    fi
+    # cut the output string to remove timestamps and datetimes.
+    out=${out#*$t}
+  done
+  return 0
+}

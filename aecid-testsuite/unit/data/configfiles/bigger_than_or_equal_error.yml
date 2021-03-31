@@ -1,0 +1,26 @@
+LogResourceList:
+        - 'file:///var/log/apache2/access.log'
+
+Parser:
+        - id: 'apacheModel'
+          type: ApacheAccessModel
+          name: 'apache'
+          args: 'apache'
+
+        - id: 'START'
+          start: True
+          type: SequenceModelElement
+          name: 'model'
+          args: apacheModel
+
+Input:
+        verbose: True # optional
+        multi_source: False # optional
+        timestamp_paths: "/model/accesslog/time"
+
+Analysis:
+        - type: EventTypeDetector
+          id: EventTypeDetector
+          min_num_vals: 100
+          max_num_vals: 99
+          learn_mode: False

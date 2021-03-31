@@ -11,7 +11,7 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 from datetime import datetime
-from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
+from aminer.AminerConfig import CONFIG_KEY_LOG_LINE_PREFIX
 
 
 class EventData:
@@ -45,7 +45,7 @@ class EventData:
         else:
             message += '%s (%d lines)\n' % (self.event_message, len(self.sorted_log_lines))
         for line in self.sorted_log_lines:
-            if isinstance(line, bytes):
+            if isinstance(line, bytes):  # skipcq: PTC-W0048
                 if line != b'':
                     message += '  ' + line.decode() + '\n'
             else:

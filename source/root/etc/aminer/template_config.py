@@ -1,6 +1,6 @@
 # This is a template for the "aminer" logdata-anomaly-miner tool. Copy
 # it to "config.py" and define your ruleset. For more examples of component
-# usage see aecid-testsuite/demo/AMiner/demo-config.py.
+# usage see aecid-testsuite/demo/aminer/demo-config.py.
 
 config_properties = {}
 
@@ -14,15 +14,15 @@ config_properties['LogResourceList'] = ['file:///tmp/syslog']
 
 # Define the uid/gid of the process that runs the calculation
 # after opening the log files:
-config_properties['AMinerUser'] = 'aminer'
-config_properties['AMinerGroup'] = 'aminer'
+config_properties['AminerUser'] = 'aminer'
+config_properties['AminerGroup'] = 'aminer'
 
 learn_mode = True
 
 # Read and store information to be used between multiple invocations
-# of AMiner in this directory. The directory must only be accessible
-# to the 'AMinerUser' but not group/world readable. On violation,
-# AMiner will refuse to start. When undefined, '/var/lib/aminer'
+# of aminer in this directory. The directory must only be accessible
+# to the 'AminerUser' but not group/world readable. On violation,
+# aminer will refuse to start. When undefined, '/var/lib/aminer'
 # is used.
 # config_properties['Core.PersistenceDir'] = '/var/lib/aminer'
 
@@ -32,10 +32,10 @@ learn_mode = True
 def build_analysis_pipeline(analysis_context):
     """
     Define the function to create pipeline for parsing the log data.
-    It has also to define an AtomizerFactory to instruct AMiner how to process incoming data streams to create log atoms from them.
+    It has also to define an AtomizerFactory to instruct aminer how to process incoming data streams to create log atoms from them.
     """
     # Build the parsing model:
-    from aminer.parsing import SequenceModelElement
+    from aminer.parsing.SequenceModelElement import SequenceModelElement
 
     import ApacheAccessModel
     apache_access_model = ApacheAccessModel.get_model()
@@ -53,28 +53,28 @@ def build_analysis_pipeline(analysis_context):
 
     # Now define the AtomizerFactory using the model. A simple line
     # based one is usually sufficient.
-    from aminer.input import SimpleByteStreamLineAtomizerFactory
+    from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
     analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
         parsing_model, [atom_filter], anomaly_event_handlers, default_timestamp_paths='/model/accesslog/time')
 
     # Just report all unparsed atoms to the event handlers.
-    from aminer.input import SimpleUnparsedAtomHandler
+    from aminer.input.SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler
     atom_filter.add_handler(SimpleUnparsedAtomHandler(anomaly_event_handlers), stop_when_handled_flag=True)
 
-    from aminer.analysis import NewMatchPathDetector
+    from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
     new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=learn_mode)
     analysis_context.register_component(new_match_path_detector, component_name=None)
     atom_filter.add_handler(new_match_path_detector)
 
     # Check if status-code changed
-    from aminer.analysis import NewMatchPathValueDetector
+    from aminer.analysis.NewMatchPathValueDetector import NewMatchPathValueDetector
     new_match_path_value_detector = NewMatchPathValueDetector(
         analysis_context.aminer_config, ["/model/accesslog/status"], anomaly_event_handlers, auto_include_flag=learn_mode)
     analysis_context.register_component(new_match_path_value_detector, component_name=None)
     atom_filter.add_handler(new_match_path_value_detector)
 
     # Check if HTTP-Method for a HTTP-Request has changed
-    from aminer.analysis import NewMatchPathValueComboDetector
+    from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
     new_match_path_value_combo_detector = NewMatchPathValueComboDetector(analysis_context.aminer_config, [
         "/model/accesslog/request", "/model/accesslog/method"], anomaly_event_handlers, auto_include_flag=learn_mode)
     analysis_context.register_component(new_match_path_value_combo_detector, component_name=None)
@@ -87,5 +87,5 @@ def build_analysis_pipeline(analysis_context):
     atom_filter.add_handler(new_match_path_value_combo_detector2)
 
     # Add stdout stream printing for debugging, tuning.
-    from aminer.events import StreamPrinterEventHandler
+    from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
     anomaly_event_handlers.append(StreamPrinterEventHandler(analysis_context))

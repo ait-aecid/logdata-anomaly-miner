@@ -1,12 +1,12 @@
 """This module defines a parser for kernelmsg."""
 
-from aminer.parsing import AnyByteDataModelElement
-from aminer.parsing import DelimitedDataModelElement
-from aminer.parsing import FirstMatchModelElement
-from aminer.parsing import FixedDataModelElement
-from aminer.parsing import FixedWordlistDataModelElement
-from aminer.parsing import IpAddressDataModelElement
-from aminer.parsing import SequenceModelElement
+from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
+from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
+from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
+from aminer.parsing.FixedDataModelElement import FixedDataModelElement
+from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
+from aminer.parsing.IpAddressDataModelElement import IpAddressDataModelElement
+from aminer.parsing.SequenceModelElement import SequenceModelElement
 
 
 def get_model():

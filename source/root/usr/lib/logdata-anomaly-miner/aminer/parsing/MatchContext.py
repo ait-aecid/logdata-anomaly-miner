@@ -13,7 +13,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import logging
-from aminer import AMinerConfig
+from aminer import AminerConfig
 from aminer.parsing.MatchElement import MatchElement
 
 
@@ -60,7 +60,7 @@ class DebugMatchContext(MatchContext):
         if not self.match_data.startswith(match_string):
             self.debug_info += '  Current data %s does not start with %s\n' % (repr(self.match_data), repr(match_string))
             msg = 'Illegal state'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         self.match_data = self.match_data[len(match_string):]
         self.last_match_data = self.match_data
@@ -77,7 +77,7 @@ class DebugMatchContext(MatchContext):
         result += '  Shortest unmatched data was %s\n' % repr(self.shortest_unmatched_data)
         return result
 
-    def getshortest_unmatched_data(self):
+    def get_shortest_unmatched_data(self):
         """
         Get shortest match_data found while updating the internal state.
         This is useful to find out where the parsing process has terminated.

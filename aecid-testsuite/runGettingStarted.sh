@@ -15,12 +15,42 @@ git clone https://github.com/ait-aecid/logdata-anomaly-miner.wiki.git 2> /dev/nu
 cd logdata-anomaly-miner.wiki 2> /dev/null
 git checkout $BRANCH > /dev/null 2>&1
 cd ..
-awk '/^```yaml$/ && ++n == 1, /^```$/' < logdata-anomaly-miner.wiki/Getting-started-\(tutorial\).md | sed '/^```/ d' | sed '/^```python/ d' > /tmp/gettingStarted-config.yml
-sudo rm -r logdata-anomaly-miner.wiki
-
-sudo aminer --config /tmp/gettingStarted-config.yml > /dev/null &
+# load the aminer command.
+awk '/^```$/ && ++n == 9, /^```$/ && n++ == 10' < logdata-anomaly-miner.wiki/Getting-started-\(tutorial\).md > /tmp/gettingStarted-config.yml
+CMD=$(sed -n '5p' < /tmp/gettingStarted-config.yml)
+CMD=${CMD##*#}
+CFG_PATH=/${CMD#*/}
+# test the first yaml config.
+awk '/^```yaml$/ && ++n == 1, /^```$/' < logdata-anomaly-miner.wiki/Getting-started-\(tutorial\).md | sed '/^```/ d' > /tmp/gettingStarted-config.yml
+sudo cp /tmp/gettingStarted-config.yml $CFG_PATH
+sudo $CMD > /dev/null &
 sleep 5 & wait $!
 sudo pkill -x aminer
+if [[ $? != 0 ]]; then
+	exit_code=1
+fi
+
+# test the second yaml config.
+awk '/^```yaml$/ && ++n == 2, /^```$/' < logdata-anomaly-miner.wiki/Getting-started-\(tutorial\).md | sed '/^```/ d' > /tmp/gettingStarted-config.yml
+sudo cp /tmp/gettingStarted-config.yml $CFG_PATH
+sudo $CMD > /dev/null &
+sleep 5 & wait $!
+sudo pkill -x aminer
+if [[ $? != 0 ]]; then
+	exit_code=1
+fi
+
+# test the fifth yaml config.
+awk '/^```yaml$/ && ++n == 5, /^```$/' < logdata-anomaly-miner.wiki/Getting-started-\(tutorial\).md | sed '/^```/ d' > /tmp/gettingStarted-config.yml
+sudo cp /tmp/gettingStarted-config.yml $CFG_PATH
+sudo $CMD > /dev/null &
+sleep 5 & wait $!
+sudo pkill -x aminer
+if [[ $? != 0 ]]; then
+	exit_code=1
+fi
+
+sudo rm -r logdata-anomaly-miner.wiki
 rm /tmp/gettingStarted-config.yml
-exit_code=$?
+sudo rm $CFG_PATH
 exit $exit_code

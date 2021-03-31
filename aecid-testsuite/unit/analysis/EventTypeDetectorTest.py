@@ -1,9 +1,17 @@
 import time
 import unittest
 from aminer.analysis.EventTypeDetector import EventTypeDetector
-from aminer.input import LogAtom
-from aminer.parsing import FirstMatchModelElement, SequenceModelElement, FixedDataModelElement, DelimitedDataModelElement, \
-    DecimalIntegerValueModelElement, FixedWordlistDataModelElement, AnyByteDataModelElement, ParserMatch, MatchContext, MatchElement
+from aminer.input.LogAtom import LogAtom
+from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
+from aminer.parsing.SequenceModelElement import SequenceModelElement
+from aminer.parsing.FixedDataModelElement import FixedDataModelElement
+from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
+from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
+from aminer.parsing.ParserMatch import ParserMatch
+from aminer.parsing.MatchContext import MatchContext
+from aminer.parsing.MatchElement import MatchElement
 from unit.TestBase import TestBase
 
 

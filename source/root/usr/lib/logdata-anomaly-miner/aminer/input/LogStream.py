@@ -19,69 +19,12 @@ import os
 import socket
 import stat
 import sys
-import abc
 import logging
 
-from aminer import AMinerConfig
+from aminer import AminerConfig
 from aminer.util import SecureOSFunctions
-from aminer.util import encode_byte_string_as_string
-
-
-class LogDataResource(metaclass=abc.ABCMeta):
-    """
-    This is the superinterface of each logdata resource monitored by AMiner.
-    The interface is designed in a way, that instances of same subclass can be used both on AMiner parent process side for keeping track of
-    the resources and forwarding the file descriptors to the child, but also on child side for the same purpose. The only difference is,
-    that on child side, the stream reading and read continuation features are used also. After creation on child side, this is the sole
-    place for reading and closing the streams. An external process may use the file descriptor only to wait for input via select.
-    """
-
-    @abc.abstractmethod
-    def __init__(self, log_resource_name, log_stream_fd, default_buffer_size=1 << 16, repositioning_data=None):
-        """
-        Create a new LogDataResource. Object creation must not touch the logStreamFd or read any data, unless repositioning_data  was given.
-        In the later case, the stream has to support seek operation to reread data.
-        @param log_resource_name the unique encoded name of this source as byte array.
-        @param log_stream_fd the stream for reading the resource or -1 if not yet opened.
-        @param repositioning_data if not None, attemt to position the the stream using the given data.
-        """
-
-    @abc.abstractmethod
-    def open(self, reopen_flag=False):
-        """
-        Open the given resource.
-        @param reopen_flag when True, attempt to reopen the same resource and check if it differs from the previously opened one.
-        @raise Exception if valid logStreamFd was already provided, is still open and reopenFlag is False.
-        @raise OSError when opening failed with unexpected error.
-        @return True if the resource was really opened or False if opening was not yet possible but should be attempted again.
-        """
-
-    @abc.abstractmethod
-    def get_resource_name(self):
-        """Get the name of this log resource."""
-
-    @abc.abstractmethod
-    def get_file_descriptor(self):
-        """Get the file descriptor of this open resource."""
-
-    @abc.abstractmethod
-    def fill_buffer(self):
-        """
-        Fill the buffer data of this resource. The repositioning information is not updated, update_position() has to be used.
-        @return the number of bytes read or -1 on error or end.
-        """
-
-    @abc.abstractmethod
-    def update_position(self, length):
-        """Update the positioning information and discard the buffer data afterwards."""
-
-    @abc.abstractmethod
-    def get_repositioning_data(self):
-        """Get the data for repositioning the stream. The returned structure has to be JSON serializable."""
-
-    @abc.abstractmethod
-    def close(self):
-        """Close this logdata resource. Data access methods will not work any more afterwards."""
+from aminer.util.StringUtil import encode_byte_string_as_string
+from aminer.input.InputInterfaces import LogDataResource
 
 
 class FileLogDataResource(LogDataResource):
@@ -99,7 +42,7 @@ class FileLogDataResource(LogDataResource):
         """
         if not log_resource_name.startswith(b'file://'):
             msg = 'Attempting to create different type resource as file'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         self.log_resource_name = log_resource_name
         self.log_file_fd = log_stream_fd
@@ -117,11 +60,11 @@ class FileLogDataResource(LogDataResource):
         if (log_stream_fd != -1) and (repositioning_data is not None):
             if repositioning_data[0] != self.stat_data.st_ino:
                 msg = 'Not attempting to reposition on %s, inode number mismatch' % encode_byte_string_as_string(self.log_resource_name)
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
                 print(msg, file=sys.stderr)
             elif repositioning_data[1] > self.stat_data.st_size:
                 msg = 'Not attempting to reposition on %s, file size too small' % encode_byte_string_as_string(self.log_resource_name)
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
                 print(msg, file=sys.stderr)
             else:
                 # skipcq: PTC-W1003
@@ -136,7 +79,7 @@ class FileLogDataResource(LogDataResource):
                     if not block:
                         msg = 'Not attempting to reposition on %s, file shrunk while reading' % encode_byte_string_as_string(
                             self.log_resource_name)
-                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
+                        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
                         print(msg, file=sys.stderr)
                         break
                     hash_algo.update(block)
@@ -149,7 +92,7 @@ class FileLogDataResource(LogDataResource):
                         self.repositioning_digest = hash_algo
                     else:
                         msg = 'Not attempting to reposition on %s, digest changed' % encode_byte_string_as_string(self.log_resource_name)
-                        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
+                        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
                         print(msg, file=sys.stderr)
                         length = -1
                 if length != 0:
@@ -166,7 +109,7 @@ class FileLogDataResource(LogDataResource):
         """
         if not reopen_flag and (self.log_file_fd != -1):
             msg = 'Cannot reopen stream still open when not instructed to do so'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         log_file_fd = -1
         stat_data = None
@@ -175,7 +118,7 @@ class FileLogDataResource(LogDataResource):
             stat_data = os.fstat(log_file_fd)
         except OSError as openOsError:
             msg = 'OSError occurred in FileLogDataResource.open(). Error message: %s' % openOsError
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             if log_file_fd != -1:
                 os.close(log_file_fd)
             if openOsError.errno == errno.ENOENT:
@@ -185,7 +128,7 @@ class FileLogDataResource(LogDataResource):
             os.close(log_file_fd)
             msg = 'Attempting to open non-regular file %s as file' % encode_byte_string_as_string(self.log_resource_name)
             print(msg, file=sys.stderr)
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
         if reopen_flag and (self.stat_data is not None) and (stat_data.st_ino == self.stat_data.st_ino) and (
@@ -247,7 +190,7 @@ class UnixSocketLogDataResource(LogDataResource):
         """
         if not log_resource_name.startswith(b'unix://'):
             msg = 'Attempting to create different type resource as unix'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         self.log_resource_name = log_resource_name
         self.log_stream_fd = log_stream_fd
@@ -263,23 +206,23 @@ class UnixSocketLogDataResource(LogDataResource):
         @raise OSError when opening failed with unexpected error.
         @return True if the resource was really opened or False if opening was not yet possible but should be attempted again.
         """
-        if reopen_flag:
+        if reopen_flag:  # skipcq: PTC-W0048
             if self.log_stream_fd != -1:
                 return False
         elif self.log_stream_fd != -1:
             msg = 'Cannot reopen stream still open when not instructed to do so'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         log_socket = None
         try:
             log_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             log_socket.connect(self.log_resource_name[7:])
         except socket.error as socketError:
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error('OSError occurred in UnixSocketLogDataResource.open(). Error message: %s',
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error('OSError occurred in UnixSocketLogDataResource.open(). Error message: %s',
                                                                  socketError.msg)
             if log_socket is not None:
                 log_socket.close()
-            if (socketError.errno == errno.ENOENT) or (socketError.errno == errno.ECONNREFUSED):
+            if socketError.errno in (errno.ENOENT, errno.ECONNREFUSED):
                 return False
             # Transform exception to OSError as caller does not expect something else.
             raise OSError(socketError[0], socketError[1])
@@ -404,7 +347,7 @@ class LogStream:
 
             # This is a clear protocol violation (see StreamAtomizer documentation): When at EOF, 0 is no valid return value.
             msg = 'Procotol violation by %s detected, flushing data' % self.stream_atomizer.__class__.__name__
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).critical(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).critical(msg)
             print('FATAL: ' + msg, file=sys.stderr)
             consumed_length = len(self.log_data_resource.buffer)
 
@@ -429,3 +372,8 @@ class LogStream:
         if self.log_data_resource is None:
             return None
         return self.log_data_resource.get_repositioning_data()
+
+    def close(self):
+        """Close the log stream."""
+        if self.log_data_resource is not None:
+            self.log_data_resource.close()

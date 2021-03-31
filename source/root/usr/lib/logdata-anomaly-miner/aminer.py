@@ -5,11 +5,11 @@
 This is the main program of the "aminer" logfile miner tool.
 It does not import any local default site packages to decrease the attack surface due to manipulation of unused but available packages.
 
-CAVEAT: This process will keep running with current permissions, no matter what was specified in 'AMinerUser' and 'AMinerGroup'
-configuration properties. This is required to allow the AMiner parent parent process to reopen log files, which might need the
+CAVEAT: This process will keep running with current permissions, no matter what was specified in 'AminerUser' and 'AminerGroup'
+configuration properties. This is required to allow the aminer parent parent process to reopen log files, which might need the
 elevated privileges.
 
-NOTE: This tool is developed to allow secure operation even in hostile environment, e.g. when one directory, where AMiner attempts
+NOTE: This tool is developed to allow secure operation even in hostile environment, e.g. when one directory, where aminer attempts
 to open logfiles is already under full control of an attacker. However it is not intended to be run as SUID-binary, this would
 require code changes to protect also against standard SUID attacks.
 
@@ -35,13 +35,19 @@ import logging
 import shutil
 import warnings
 import argparse
+import stat
+from pwd import getpwnam
+from grp import getgrnam
 
 # As site packages are not included, define from where we need to execute code before loading it.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
-from aminer import AMinerConfig  # skipcq: FLK-E402
-from aminer.util.StringUtil import colflame, flame, supports_color  # skipcq: FLK-E402
+import aminer.AminerConfig as AminerConfig  # skipcq: FLK-E402
+from aminer.util.StringUtil import colflame, flame, supports_color, decode_string_as_byte_string  # skipcq: FLK-E402
 from aminer.util.PersistenceUtil import clear_persistence, copytree  # skipcq: FLK-E402
-from metadata import __version_string__  # skipcq: FLK-E402
+from aminer.util import SecureOSFunctions  # skipcq: FLK-E402
+from aminer.AnalysisChild import AnalysisChild  # skipcq: FLK-E402
+from aminer.input.LogStream import FileLogDataResource, UnixSocketLogDataResource  # skipcq: FLK-E402
+from metadata import __version_string__, __version__  # skipcq: FLK-E402
 
 
 child_termination_triggered_flag = False
@@ -50,21 +56,17 @@ child_termination_triggered_flag = False
 def run_analysis_child(aminer_config, program_name):
     """Run the Analysis Child."""
     # Verify existance and ownership of persistence directory.
-    logging.getLogger(AMinerConfig.REMOTE_CONTROL_LOG_NAME).info('aminer started.')
-    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info('aminer started.')
-    persistence_dir_name = aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
-    from aminer.util import SecureOSFunctions
-    if isinstance(persistence_dir_name, str):
-        persistence_dir_name = persistence_dir_name.encode()
+    logging.getLogger(AminerConfig.REMOTE_CONTROL_LOG_NAME).info('aminer started.')
+    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info('aminer started.')
+    persistence_dir_name = aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_DIR, AminerConfig.DEFAULT_PERSISTENCE_DIR)
     persistence_dir_fd = SecureOSFunctions.secure_open_base_directory(persistence_dir_name, os.O_RDONLY | os.O_DIRECTORY | os.O_PATH)
     stat_result = os.fstat(persistence_dir_fd)
-    import stat
     if ((not stat.S_ISDIR(stat_result.st_mode)) or ((stat_result.st_mode & stat.S_IRWXU) != 0o700) or (
             stat_result.st_uid != os.getuid()) or (stat_result.st_gid != os.getgid())):
         msg = 'FATAL: persistence directory "%s" has to be owned by analysis process (uid %d!=%d, gid %d!=%d) and have access mode 0700 ' \
               'only!' % (repr(persistence_dir_name), stat_result.st_uid, os.getuid(), stat_result.st_gid, os.getgid())
         print(msg, file=sys.stderr)
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).critical(msg)
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).critical(msg)
         sys.exit(1)
     import posix1e
     # O_PATH is problematic when checking ACL. However it is possible to check the ACL using the file name.
@@ -72,9 +74,8 @@ def run_analysis_child(aminer_config, program_name):
         msg = 'WARNING: SECURITY: Extended POSIX ACLs are set in %s, but not supported by the aminer. Backdoor access could be possible.'\
               % persistence_dir_name.decode()
         print(msg, file=sys.stderr)
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
 
-    from aminer.AnalysisChild import AnalysisChild
     child = AnalysisChild(program_name, aminer_config)
     # This function call will only return on error or signal induced normal termination.
     child_return_status = child.run_analysis(3)
@@ -82,39 +83,60 @@ def run_analysis_child(aminer_config, program_name):
         sys.exit(0)
     msg = '%s: run_analysis terminated with unexpected status %d' % (program_name, child_return_status)
     print(msg, file=sys.stderr)
-    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
     sys.exit(1)
 
 
-def initialize_loggers(aminer_config, aminer_user, aminer_grp):
+def initialize_loggers(aminer_config, aminer_user_id, aminer_grp_id):
     """Initialize all loggers."""
     datefmt = '%d/%b/%Y:%H:%M:%S %z'
 
-    log_dir = aminer_config.config_properties.get(AMinerConfig.KEY_LOG_DIR, AMinerConfig.DEFAULT_LOG_DIR)
-    if log_dir == AMinerConfig.DEFAULT_LOG_DIR:
+    log_dir = aminer_config.config_properties.get(AminerConfig.KEY_LOG_DIR, AminerConfig.DEFAULT_LOG_DIR)
+    if log_dir == AminerConfig.DEFAULT_LOG_DIR:
         try:
             if not os.path.isdir(log_dir):
-                os.makedirs(log_dir)
-                from pwd import getpwnam
-                from grp import getgrnam
-                os.chown(log_dir,
-                         getpwnam(aminer_user).pw_uid,
-                         getgrnam(aminer_grp).gr_gid)
+                persistence_dir_path = aminer_config.config_properties.get(
+                    AminerConfig.KEY_PERSISTENCE_DIR, AminerConfig.DEFAULT_PERSISTENCE_DIR)
+                persistence_dir_fd = SecureOSFunctions.secure_open_base_directory(
+                    persistence_dir_path, os.O_RDONLY | os.O_DIRECTORY | os.O_PATH)
+                if SecureOSFunctions.base_dir_path.decode() == AminerConfig.DEFAULT_PERSISTENCE_DIR:
+                    relative_path_log_dir = os.path.split(AminerConfig.DEFAULT_LOG_DIR)[1]
+                    os.mkdir(relative_path_log_dir, dir_fd=persistence_dir_fd)
+                    os.chown(relative_path_log_dir, aminer_user_id, aminer_grp_id, dir_fd=persistence_dir_fd, follow_symlinks=False)
         except OSError as e:
             if e.errno != errno.EEXIST:
                 msg = 'Unable to create log-directory: %s' % log_dir
             else:
                 msg = e
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg.strip('\n'))
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg.strip('\n'))
             print(msg, file=sys.stderr)
 
-    rc_logger = logging.getLogger(AMinerConfig.REMOTE_CONTROL_LOG_NAME)
+    tmp_value = aminer_config.config_properties.get(AminerConfig.KEY_REMOTE_CONTROL_LOG_FILE)
+    if tmp_value is not None and b'/' in tmp_value:
+        print('%s attribute must not contain a full directory path, but only the filename.' % AminerConfig.KEY_REMOTE_CONTROL_LOG_FILE,
+              file=sys.stderr)
+        sys.exit(1)
+    tmp_value = aminer_config.config_properties.get(AminerConfig.KEY_STAT_LOG_FILE)
+    if tmp_value is not None and b'/' in tmp_value:
+        print('%s attribute must not contain a full directory path, but only the filename.' % AminerConfig.KEY_STAT_LOG_FILE,
+              file=sys.stderr)
+        sys.exit(1)
+    tmp_value = aminer_config.config_properties.get(AminerConfig.KEY_DEBUG_LOG_FILE)
+    if tmp_value is not None and b'/' in tmp_value:
+        print('%s attribute must not contain a full directory path, but only the filename.' % AminerConfig.KEY_DEBUG_LOG_FILE,
+              file=sys.stderr)
+        sys.exit(1)
+
+    log_dir_fd = SecureOSFunctions.secure_open_log_directory(log_dir, os.O_RDONLY | os.O_DIRECTORY | os.O_PATH)
+    rc_logger = logging.getLogger(AminerConfig.REMOTE_CONTROL_LOG_NAME)
     rc_logger.setLevel(logging.DEBUG)
     remote_control_log_file = aminer_config.config_properties.get(
-        AMinerConfig.KEY_REMOTE_CONTROL_LOG_FILE, os.path.join(log_dir, AMinerConfig.DEFAULT_REMOTE_CONTROL_LOG_FILE))
+        AminerConfig.KEY_REMOTE_CONTROL_LOG_FILE, os.path.join(log_dir, AminerConfig.DEFAULT_REMOTE_CONTROL_LOG_FILE))
+    if not remote_control_log_file.startswith(log_dir):
+        remote_control_log_file = os.path.join(log_dir, remote_control_log_file)
     try:
         rc_file_handler = logging.FileHandler(remote_control_log_file)
-        shutil.chown(remote_control_log_file, aminer_user, aminer_grp)
+        os.chown(remote_control_log_file, aminer_user_id, aminer_grp_id, dir_fd=log_dir_fd, follow_symlinks=False)
     except OSError as e:
         print('Could not create or open %s: %s. Stopping..' % (remote_control_log_file, e), file=sys.stderr)
         sys.exit(1)
@@ -122,31 +144,35 @@ def initialize_loggers(aminer_config, aminer_user, aminer_grp):
     rc_logger.addHandler(rc_file_handler)
     logging.addLevelName(15, "REMOTECONTROL")
 
-    stat_logger = logging.getLogger(AMinerConfig.STAT_LOG_NAME)
+    stat_logger = logging.getLogger(AminerConfig.STAT_LOG_NAME)
     stat_logger.setLevel(logging.INFO)
     stat_log_file = aminer_config.config_properties.get(
-        AMinerConfig.KEY_STAT_LOG_FILE, os.path.join(log_dir, AMinerConfig.DEFAULT_STAT_LOG_FILE))
+        AminerConfig.KEY_STAT_LOG_FILE, os.path.join(log_dir, AminerConfig.DEFAULT_STAT_LOG_FILE))
+    if not stat_log_file.startswith(log_dir):
+        stat_log_file = os.path.join(log_dir, stat_log_file)
     try:
         stat_file_handler = logging.FileHandler(stat_log_file)
-        shutil.chown(stat_log_file, aminer_user, aminer_grp)
+        os.chown(stat_log_file, aminer_user_id, aminer_grp_id, dir_fd=log_dir_fd, follow_symlinks=False)
     except OSError as e:
         print('Could not create or open %s: %s. Stopping..' % (stat_log_file, e), file=sys.stderr)
         sys.exit(1)
     stat_file_handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(message)s', datefmt=datefmt))
     stat_logger.addHandler(stat_file_handler)
 
-    debug_logger = logging.getLogger(AMinerConfig.DEBUG_LOG_NAME)
-    if AMinerConfig.DEBUG_LEVEL == 0:
+    debug_logger = logging.getLogger(AminerConfig.DEBUG_LOG_NAME)
+    if AminerConfig.DEBUG_LEVEL == 0:
         debug_logger.setLevel(logging.ERROR)
-    elif AMinerConfig.DEBUG_LEVEL == 1:
+    elif AminerConfig.DEBUG_LEVEL == 1:
         debug_logger.setLevel(logging.INFO)
     else:
         debug_logger.setLevel(logging.DEBUG)
     debug_log_file = aminer_config.config_properties.get(
-        AMinerConfig.KEY_DEBUG_LOG_FILE, os.path.join(log_dir, AMinerConfig.DEFAULT_DEBUG_LOG_FILE))
+        AminerConfig.KEY_DEBUG_LOG_FILE, os.path.join(log_dir, AminerConfig.DEFAULT_DEBUG_LOG_FILE))
+    if not debug_log_file.startswith(log_dir):
+        debug_log_file = os.path.join(log_dir, debug_log_file)
     try:
         debug_file_handler = logging.FileHandler(debug_log_file)
-        shutil.chown(debug_log_file, aminer_user, aminer_grp)
+        os.chown(debug_log_file, aminer_user_id, aminer_grp_id, dir_fd=log_dir_fd, follow_symlinks=False)
     except OSError as e:
         print('Could not create or open %s: %s. Stopping..' % (debug_log_file, e), file=sys.stderr)
         sys.exit(1)
@@ -175,6 +201,7 @@ def main():
         help_message += flame
     parser = argparse.ArgumentParser(description=help_message, formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-v', '--version', action='version', version=__version_string__)
+    parser.add_argument('-u', '--check-updates', action='store_true', help='check if updates for the aminer are available.')
     parser.add_argument('-c', '--config', default='/etc/aminer/config.yml', type=str, help='path to the config-file')
     parser.add_argument('-D', '--daemon', action='store_false', help='run as a daemon process')
     parser.add_argument('-s', '--stat', choices=[0, 1, 2], type=int, help='set the stat level. Possible stat-levels are 0 for no statistics'
@@ -189,6 +216,26 @@ def main():
     parser.add_argument('-f', '--from-begin', action='store_true', help='removes RepositioningData before starting the aminer')
 
     args = parser.parse_args()
+
+    if args.check_updates:
+        import urllib3
+        url = 'https://raw.githubusercontent.com/ait-aecid/logdata-anomaly-miner/main/source/root/usr/lib/logdata-anomaly-miner/metadata.py'
+        http = urllib3.PoolManager()
+        r = http.request('GET', url, preload_content=True)
+        metadata = r.data.decode()
+        http.clear()
+        lines = metadata.split('\n')
+        curr_version = None
+        for line in lines:
+            if '__version__ = ' in line:
+                curr_version = line.split('__version__ = ')[1].strip('"')
+                break
+        if __version__ == curr_version:
+            print("The current aminer version %s is installed." % curr_version)
+        else:
+            print("A new aminer version exists (%s). Currently version %s is installed." % (curr_version, __version__))
+            print("Use git pull to update the aminer version.")
+        sys.exit(0)
 
     config_file_name = args.config
     run_in_foreground_flag = args.daemon
@@ -221,66 +268,63 @@ def main():
 
     # Minimal import to avoid loading too much within the privileged process.
     try:
-        aminer_config = AMinerConfig.load_config(config_file_name)
+        aminer_config = AminerConfig.load_config(config_file_name)
     except ValueError as e:
-        print("Config-Error: %s" % e)
         sys.exit(1)
-    persistence_dir = aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
+    persistence_dir = aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_DIR, AminerConfig.DEFAULT_PERSISTENCE_DIR)
 
-    child_user_name = aminer_config.config_properties.get(AMinerConfig.KEY_AMINER_USER)
-    child_group_name = aminer_config.config_properties.get(AMinerConfig.KEY_AMINER_GROUP)
+    child_user_name = aminer_config.config_properties.get(AminerConfig.KEY_AMINER_USER)
+    child_group_name = aminer_config.config_properties.get(AminerConfig.KEY_AMINER_GROUP)
     child_user_id = -1
     child_group_id = -1
     try:
         if child_user_name is not None:
-            from pwd import getpwnam
             child_user_id = getpwnam(child_user_name).pw_uid
         if child_group_name is not None:
-            from grp import getgrnam
             child_group_id = getgrnam(child_user_name).gr_gid
     except:  # skipcq: FLK-E722
-        print('Failed to resolve %s or %s' % (AMinerConfig.KEY_AMINER_USER, AMinerConfig.KEY_AMINER_GROUP), file=sys.stderr)
+        print('Failed to resolve %s or %s' % (AminerConfig.KEY_AMINER_USER, AminerConfig.KEY_AMINER_GROUP), file=sys.stderr)
         sys.exit(1)
 
-    initialize_loggers(aminer_config, child_user_name, child_group_name)
+    initialize_loggers(aminer_config, child_user_id, child_group_id)
 
     if restore_relative_persistence_path is not None and (clear_persistence_flag or remove_persistence_dirs):
         msg = 'The --restore parameter removes all persistence files. Do not use this parameter with --Clear or --Remove!'
         print(msg, sys.stderr)
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
         sys.exit(1)
 
-    if not stat_level_console_flag and AMinerConfig.KEY_LOG_STAT_LEVEL in aminer_config.config_properties:
-        stat_level = aminer_config.config_properties[AMinerConfig.KEY_LOG_STAT_LEVEL]
-    if not debug_level_console_flag and AMinerConfig.KEY_LOG_DEBUG_LEVEL in aminer_config.config_properties:
-        debug_level = aminer_config.config_properties[AMinerConfig.KEY_LOG_DEBUG_LEVEL]
+    if not stat_level_console_flag and AminerConfig.KEY_LOG_STAT_LEVEL in aminer_config.config_properties:
+        stat_level = aminer_config.config_properties[AminerConfig.KEY_LOG_STAT_LEVEL]
+    if not debug_level_console_flag and AminerConfig.KEY_LOG_DEBUG_LEVEL in aminer_config.config_properties:
+        debug_level = aminer_config.config_properties[AminerConfig.KEY_LOG_DEBUG_LEVEL]
 
-    AMinerConfig.STAT_LEVEL = stat_level
-    AMinerConfig.DEBUG_LEVEL = debug_level
+    AminerConfig.STAT_LEVEL = stat_level
+    AminerConfig.DEBUG_LEVEL = debug_level
 
     if clear_persistence_flag:
         if remove_persistence_dirs:
             msg = 'The --clear and --remove arguments must not be used together!'
             print(msg, file=sys.stderr)
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             sys.exit(1)
         clear_persistence(persistence_dir)
 
     if remove_persistence_dirs:
-        persistence_dir_name = aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR)
+        persistence_dir_name = aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_DIR, AminerConfig.DEFAULT_PERSISTENCE_DIR)
         for filename in os.listdir(persistence_dir_name):
             file_path = os.path.join(persistence_dir_name, filename)
             try:
                 if not os.path.isdir(file_path):
                     msg = 'The aminer persistence directory should not contain any files.'
                     print(msg, file=sys.stderr)
-                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
+                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
                     continue
                 shutil.rmtree(file_path)
             except OSError as e:
                 msg = 'Failed to delete %s. Reason: %s' % (file_path, e)
                 print(msg, file=sys.stderr)
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
 
         for filename in remove_persistence_dirs:
             file_path = os.path.join(persistence_dir, filename)
@@ -290,33 +334,33 @@ def main():
                 if not os.path.isdir(file_path):
                     msg = 'The aminer persistence directory should not contain any files.'
                     print(msg, file=sys.stderr)
-                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
+                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
                     continue
                 shutil.rmtree(file_path)
             except OSError as e:
                 msg = 'Failed to delete %s. Reason: %s' % (file_path, e)
                 print(msg, file=sys.stderr)
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
 
     if restore_relative_persistence_path is not None:
         absolute_persistence_path = os.path.join(persistence_dir, 'backup', restore_relative_persistence_path)
         if not os.path.exists(absolute_persistence_path):
             msg = '%s does not exist. Continuing without restoring persistence.' % absolute_persistence_path
             print(msg, file=sys.stderr)
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
         else:
             clear_persistence(persistence_dir)
             copytree(absolute_persistence_path, persistence_dir)
-            aminer_user = aminer_config.config_properties.get(AMinerConfig.KEY_AMINER_USER)
-            aminer_grp = aminer_config.config_properties.get(AMinerConfig.KEY_AMINER_GROUP)
+            persistence_dir_fd = SecureOSFunctions.secure_open_base_directory(persistence_dir, os.O_RDONLY | os.O_DIRECTORY | os.O_PATH)
             for dirpath, _dirnames, filenames in os.walk(persistence_dir):
-                shutil.chown(dirpath, aminer_user, aminer_grp)
+                os.chown(dirpath, child_user_id, child_group_id, dir_fd=persistence_dir_fd, follow_symlinks=False)
                 for filename in filenames:
-                    shutil.chown(os.path.join(dirpath, filename), aminer_user, aminer_grp)
+                    os.chown(os.path.join(dirpath, filename), child_user_id, child_user_id, dir_fd=persistence_dir_fd,
+                             follow_symlinks=False)
 
     if from_begin_flag:
         repositioning_data_path = os.path.join(aminer_config.config_properties.get(
-            AMinerConfig.KEY_PERSISTENCE_DIR, AMinerConfig.DEFAULT_PERSISTENCE_DIR), 'AnalysisChild', 'RepositioningData')
+            AminerConfig.KEY_PERSISTENCE_DIR, AminerConfig.DEFAULT_PERSISTENCE_DIR), 'AnalysisChild', 'RepositioningData')
         if os.path.exists(repositioning_data_path):
             os.remove(repositioning_data_path)
 
@@ -326,13 +370,11 @@ def main():
 
     # Start importing of aminer specific components after reading of "config.py" to allow replacement of components via sys.path
     # from within configuration.
-    from aminer.util import SecureOSFunctions
-    from aminer.util import decode_string_as_byte_string
-    log_sources_list = aminer_config.config_properties.get(AMinerConfig.KEY_LOG_SOURCES_LIST)
+    log_sources_list = aminer_config.config_properties.get(AminerConfig.KEY_LOG_SOURCES_LIST)
     if (log_sources_list is None) or not log_sources_list:
-        msg = '%s: %s not defined' % (program_name, AMinerConfig.KEY_LOG_SOURCES_LIST)
+        msg = '%s: %s not defined' % (program_name, AminerConfig.KEY_LOG_SOURCES_LIST)
         print(msg, file=sys.stderr)
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
         sys.exit(1)
 
     # Now create the management entries for each logfile.
@@ -342,39 +384,37 @@ def main():
         log_resource_name = decode_string_as_byte_string(log_resource_name)
         log_resource = None
         if log_resource_name.startswith(b'file://'):
-            from aminer.input.LogStream import FileLogDataResource
             log_resource = FileLogDataResource(log_resource_name, -1)
         elif log_resource_name.startswith(b'unix://'):
-            from aminer.input.LogStream import UnixSocketLogDataResource
             log_resource = UnixSocketLogDataResource(log_resource_name, -1)
         else:
-            msg = 'Unsupported schema in %s: %s' % (AMinerConfig.KEY_LOG_SOURCES_LIST, repr(log_resource_name))
+            msg = 'Unsupported schema in %s: %s' % (AminerConfig.KEY_LOG_SOURCES_LIST, repr(log_resource_name))
             print(msg, file=sys.stderr)
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             sys.exit(1)
         if not os.path.exists(log_resource_name[7:].decode()):
             msg = "WARNING: file or socket '%s' does not exist (yet)!" % log_resource_name[7:].decode()
             print(msg, file=sys.stderr)
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).warning(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
         try:
             log_resource.open()
         except OSError as open_os_error:
             if open_os_error.errno == errno.EACCES:
                 msg = '%s: no permission to access %s' % (program_name, repr(log_resource_name))
                 print(msg, file=sys.stderr)
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                 sys.exit(1)
             else:
                 msg = '%s: unexpected error opening %s: %d (%s)' % (
                     program_name, repr(log_resource_name), open_os_error.errno, os.strerror(open_os_error.errno))
                 print(msg, file=sys.stderr)
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                 sys.exit(1)
         log_data_resource_dict[log_resource_name] = log_resource
 
     # Create the remote control socket, if any. Do this in privileged mode to allow binding it at arbitrary locations and support restricted
     # permissions of any type for current (privileged) uid.
-    remote_control_socket_name = aminer_config.config_properties.get(AMinerConfig.KEY_REMOTE_CONTROL_SOCKET_PATH, None)
+    remote_control_socket_name = aminer_config.config_properties.get(AminerConfig.KEY_REMOTE_CONTROL_SOCKET_PATH, None)
     remote_control_socket = None
     if remote_control_socket_name is not None:
         if os.path.exists(remote_control_socket_name):
@@ -383,7 +423,7 @@ def main():
             except OSError:
                 msg = 'Failed to clean up old remote control socket at %s' % remote_control_socket_name
                 print(msg, file=sys.stderr)
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                 sys.exit(1)
         # Create the local socket: there is no easy way to create it with correct permissions, hence a fork is needed, setting umask,
         # bind the socket. It is also recommended to create the socket in a directory having the correct permissions already.
@@ -407,7 +447,7 @@ def main():
         except Exception as fork_exception:  # skipcq: PYL-W0703
             msg = 'Failed to daemonize: %s' % fork_exception
             print(msg, file=sys.stderr)
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             sys.exit(1)
         if child_pid != 0:
             # This is the parent.
@@ -420,7 +460,7 @@ def main():
         except Exception as fork_exception:  # skipcq: PYL-W0703
             msg = 'Failed to daemonize: %s' % fork_exception
             print(msg, file=sys.stderr)
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             sys.exit(1)
         if child_pid != 0:
             # This is the parent.
@@ -439,7 +479,7 @@ def main():
         """React on typical shutdown signals."""
         msg = '%s: caught signal, shutting down' % program_name
         print(msg, file=sys.stderr)
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info(msg)
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info(msg)
         # Just set the flag. It is likely, that child received same signal also so avoid multiple signaling, which could interrupt the
         # shutdown procedure again.
         # skipcq: PYL-W0603
@@ -481,10 +521,10 @@ def main():
             msg = 'INFO: No privilege separation when started as unprivileged user'
             print(msg, file=sys.stderr)
             initialize_loggers(aminer_config, 'aminer', 'aminer')
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).info(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info(msg)
 
         # Now resolve the specific analysis configuration file (if any).
-        analysis_config_file_name = aminer_config.config_properties.get(AMinerConfig.KEY_ANALYSIS_CONFIG_FILE, None)
+        analysis_config_file_name = aminer_config.config_properties.get(AminerConfig.KEY_ANALYSIS_CONFIG_FILE, None)
         if analysis_config_file_name is None:
             analysis_config_file_name = config_file_name
         elif not os.path.isabs(analysis_config_file_name):
@@ -499,7 +539,7 @@ def main():
                     continue
                 msg = '%s: unexpected exception closing file descriptors: %s' % (program_name, open_os_error)
                 print(msg, file=sys.stderr)
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                 # Flush stderr before exit without any cleanup.
                 sys.stderr.flush()
                 os._exit(1)  # skipcq: PYL-W0212
@@ -507,12 +547,12 @@ def main():
         # Now execute the very same program again, but user might have moved or renamed it meanwhile. This would be problematic with
         # SUID-binaries (which we do not yet support). Do NOT just fork but also exec to avoid child circumventing
         # parent's ALSR due to cloned kernel VMA.
-        execArgs = ['AMinerChild', '--run-analysis', '--config', analysis_config_file_name, '--stat', str(stat_level), '--debug',
+        execArgs = ['aminerChild', '--run-analysis', '--config', analysis_config_file_name, '--stat', str(stat_level), '--debug',
                     str(debug_level)]
         os.execve(sys.argv[0], execArgs, {})  # skipcq: BAN-B606
         msg = 'Failed to execute child process'
         print(msg, file=sys.stderr)
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
         sys.stderr.flush()
         os._exit(1)  # skipcq: PYL-W0212
     child_socket.close()
@@ -547,13 +587,13 @@ def main():
                     break
                 msg = '%s: Analysis child process %d terminated unexpectedly with signal 0x%x' % (program_name, sig_child_pid, sig_status)
                 print(msg, file=sys.stderr)
-                logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                 exit_status = 1
                 break
             # So the child has been cloned, the clone has terminated. This should not happen either.
             msg = '%s: untracked child %d terminated with with signal 0x%x' % (program_name, sig_child_pid, sig_status)
             print(msg, file=sys.stderr)
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             exit_status = 1
 
         # Child information handled, scan for rotated logfiles or other resources, where reopening might make sense.
@@ -565,12 +605,12 @@ def main():
                 if open_os_error.errno == errno.EACCES:
                     msg = '%s: no permission to access %s' % (program_name, log_resouce_name)
                     print(msg, file=sys.stderr)
-                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                 else:
                     msg = '%s: unexpected error reopening %s: %d (%s)' % (
                         program_name, log_resouce_name, open_os_error.errno, os.strerror(open_os_error.errno))
                     print(msg, file=sys.stderr)
-                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                 exit_status = 2
                 continue
             SecureOSFunctions.send_logstream_descriptor(parent_socket, log_data_resource.get_file_descriptor(), log_resouce_name)
@@ -578,6 +618,7 @@ def main():
         time.sleep(1)
     parent_socket.close()
     SecureOSFunctions.close_base_directory()
+    SecureOSFunctions.close_log_directory()
     sys.exit(exit_status)
 
 

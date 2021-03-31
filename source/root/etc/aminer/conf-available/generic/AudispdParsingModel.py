@@ -1,20 +1,20 @@
 """This module contains functions and classes to create the parsing model."""
 
-from aminer.parsing import AnyByteDataModelElement
-from aminer.parsing import DecimalIntegerValueModelElement
-from aminer.parsing import DelimitedDataModelElement
-from aminer.parsing import ElementValueBranchModelElement
-from aminer.parsing import FirstMatchModelElement
-from aminer.parsing import FixedDataModelElement
-from aminer.parsing import FixedWordlistDataModelElement
-from aminer.parsing import HexStringModelElement
-from aminer.parsing import IpAddressDataModelElement
-from aminer.parsing import MatchElement
-from aminer.parsing import OptionalMatchModelElement
-from aminer.parsing import RepeatedElementDataModelElement
-from aminer.parsing import SequenceModelElement
-from aminer.parsing import VariableByteDataModelElement
-from aminer.parsing import WhiteSpaceLimitedDataModelElement
+from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
+from aminer.parsing.ElementValueBranchModelElement import ElementValueBranchModelElement
+from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
+from aminer.parsing.FixedDataModelElement import FixedDataModelElement
+from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
+from aminer.parsing.HexStringModelElement import HexStringModelElement
+from aminer.parsing.IpAddressDataModelElement import IpAddressDataModelElement
+from aminer.parsing.MatchElement import MatchElement
+from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
+from aminer.parsing.RepeatedElementDataModelElement import RepeatedElementDataModelElement
+from aminer.parsing.SequenceModelElement import SequenceModelElement
+from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
+from aminer.parsing.WhiteSpaceLimitedDataModelElement import WhiteSpaceLimitedDataModelElement
 
 
 def get_model():

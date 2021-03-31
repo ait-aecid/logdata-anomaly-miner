@@ -15,12 +15,12 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import time
 import logging
 
-from aminer import AMinerConfig
+from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
-from aminer.input import AtomHandlerInterface
-from aminer.util import LogarithmicBackoffHistory
+from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.util.History import LogarithmicBackoffHistory
 from aminer.util import PersistenceUtil
-from aminer.util import TimeTriggeredComponentInterface
+from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 from aminer.analysis import Rules
 
 
@@ -39,7 +39,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
         self.event_classification_ruleset = ruleset
         self.anomaly_event_handlers = anomaly_event_handlers
         self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-            AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
+            AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
         self.persistence_id = persistence_id
         self.output_log_line = output_log_line
         self.last_log_atom = None
@@ -52,9 +52,8 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
                 event_correlation_set |= set(rule.match_action.artefact_b_rules)
         self.event_correlation_ruleset = list(event_correlation_set)
 
+        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
-        self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, 'TimeCorrelationViolationDetector',
-                                                                              persistence_id)
 
     def receive_atom(self, log_atom):
         """Receive a parsed atom and evaluate all the classification rules and event triggering on violations."""
@@ -113,8 +112,8 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
     def do_persist(self):
         """Immediately write persistence data to storage."""
         self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-            AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+            AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def log_statistics(self, component_name):
         """
@@ -240,7 +239,7 @@ class CorrelationRule:
                     break
                 # So time range is OK, see if match parameters are also equal.
                 violation_found = False
-                for check_pos in range(4, len(a_event)):
+                for check_pos in range(4, len(a_event)):  # skipcq: PTC-W0060
                     if a_event[check_pos] != b_event[check_pos]:
                         violation_line = a_event[3].match_element.match_string
                         if isinstance(violation_line, bytes):
@@ -319,7 +318,7 @@ class CorrelationRule:
 
         if result[0] < self.last_timestamp_seen:
             msg = 'Timestamps unsorted!'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         self.last_timestamp_seen = result[0]
 

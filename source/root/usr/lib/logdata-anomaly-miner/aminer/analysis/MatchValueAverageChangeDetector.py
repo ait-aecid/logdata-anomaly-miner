@@ -16,11 +16,11 @@ import time
 import os
 import logging
 
-from aminer import AMinerConfig
+from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
-from aminer.input import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util import PersistenceUtil
-from aminer.util import TimeTriggeredComponentInterface
+from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
 
 class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
@@ -36,7 +36,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         @param timestamp_path if not None, use this path value for timestamp based bins.
         @param analyze_path_list list of match paths to analyze in this detector.
         @param min_bin_elements evaluate the latest bin only after at least that number of elements was added to it.
-        @param min_bin_time evaluate the latest bin only when the first element is received after minBinTime has elapsed.
+        @param min_bin_time evaluate the latest bin only when the first element is received after min_bin_time has elapsed.
         @param debug_mode if true, generate an analysis report even when average of last bin was within expected range.
         """
         self.anomaly_event_handlers = anomaly_event_handlers
@@ -49,9 +49,8 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         self.output_log_line = output_log_line
         self.aminer_config = aminer_config
 
+        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
-        self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, 'MatchValueAverageChangeDetector',
-                                                                              persistence_id)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         self.stat_data = []
         for path in analyze_path_list:
@@ -131,7 +130,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
 
             if self.next_persist_time is None:
                 self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                    AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
+                    AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
 
         if analysis_summary:
             res = [''] * stat_data[2][0]
@@ -150,19 +149,19 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted."""
         if self.next_persist_time is None:
-            return self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
+            return self.aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
         if delta < 0:
             self.next_persist_time = None
-            delta = self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
+            delta = self.aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
         return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
         PersistenceUtil.store_json(self.persistence_file_name, self.stat_data)
         self.next_persist_time = None
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def update(self, stat_data, timestamp_value, value):
         """
@@ -196,7 +195,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         Perform the analysis and progress from the last bin to the next one.
         @return None when statistical data was as expected and debugging is disabled.
         """
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s performs analysis.', self.__class__.__name__)
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s performs analysis.', self.__class__.__name__)
         current_bin = stat_data[3]
         current_average = current_bin[1] / current_bin[0]
         current_variance = (current_bin[2] - (current_bin[1] * current_bin[1]) / current_bin[0]) / (current_bin[0] - 1)

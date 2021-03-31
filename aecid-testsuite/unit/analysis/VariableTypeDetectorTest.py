@@ -1,7 +1,8 @@
 from aminer.analysis.EventTypeDetector import EventTypeDetector
 from aminer.analysis.VariableTypeDetector import VariableTypeDetector, convert_to_floats, consists_of_ints, consists_of_floats
-from aminer.input import LogAtom
-from aminer.parsing import ParserMatch, MatchElement
+from aminer.input.LogAtom import LogAtom
+from aminer.parsing.ParserMatch import ParserMatch
+from aminer.parsing.MatchElement import MatchElement
 from unit.TestBase import TestBase
 
 import time
@@ -600,9 +601,9 @@ class VariableTypeDetectorTest(TestBase):
                         variable_type_ini = variable_type_ini[:-1]
                     break
                 if 'uni' in [distr[0] for distr in variable_type_ini[-1]]:
-                    for j in range(len(variable_type_ini[-1])):
-                        if variable_type_ini[-1][j][0] == 'uni':
-                            variable_type_ini = variable_type_ini[-1][j]
+                    for _, val in enumerate(variable_type_ini[-1]):
+                        if val[0] == 'uni':
+                            variable_type_ini = val
                             break
 
             # Test and save the result of the sKS-Test
@@ -623,9 +624,9 @@ class VariableTypeDetectorTest(TestBase):
                         variable_type_ini = variable_type_ini[:-1]
                     break
                 if 'nor' in [distr[0] for distr in variable_type_ini[-1]]:
-                    for j in range(len(variable_type_ini[-1])):
-                        if variable_type_ini[-1][j][0] == 'nor':
-                            variable_type_ini = variable_type_ini[-1][j]
+                    for _, val in enumerate(variable_type_ini[-1]):
+                        if val[0] == 'nor':
+                            variable_type_ini = val
                             break
 
             # Test and save the result of the sKS-Test
@@ -648,9 +649,9 @@ class VariableTypeDetectorTest(TestBase):
                         variable_type_ini = variable_type_ini[:-1]
                     break
                 if 'beta1' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
-                    for j in range(len(variable_type_ini[-1])):
-                        if variable_type_ini[-1][j][0] == 'beta' and variable_type_ini[-1][j][-1] == 1:
-                            variable_type_ini = variable_type_ini[-1][j]
+                    for _, val in enumerate(variable_type_ini[-1]):
+                        if val[0] == 'beta' and val[-1] == 1:
+                            variable_type_ini = val
                             break
 
             # Test and save the result of the sKS-Test
@@ -673,9 +674,9 @@ class VariableTypeDetectorTest(TestBase):
                         variable_type_ini = variable_type_ini[:-1]
                     break
                 if 'beta2' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
-                    for j in range(len(variable_type_ini[-1])):
-                        if variable_type_ini[-1][j][0] == 'beta' and variable_type_ini[-1][j][-1] == 2:
-                            variable_type_ini = variable_type_ini[-1][j]
+                    for _, val in enumerate(variable_type_ini[-1]):
+                        if val[0] == 'beta' and val[-1] == 2:
+                            variable_type_ini = val
                             break
 
             # Test and save the result of the sKS-Test
@@ -698,9 +699,9 @@ class VariableTypeDetectorTest(TestBase):
                         variable_type_ini = variable_type_ini[:-1]
                     break
                 if 'beta3' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
-                    for j in range(len(variable_type_ini[-1])):
-                        if variable_type_ini[-1][j][0] == 'beta' and variable_type_ini[-1][j][-1] == 3:
-                            variable_type_ini = variable_type_ini[-1][j]
+                    for _, val in enumerate(variable_type_ini[-1]):
+                        if val[0] == 'beta' and val[-1] == 3:
+                            variable_type_ini = val
                             break
 
             # Test and save the result of the sKS-Test
@@ -723,9 +724,9 @@ class VariableTypeDetectorTest(TestBase):
                         variable_type_ini = variable_type_ini[:-1]
                     break
                 if 'beta4' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
-                    for j in range(len(variable_type_ini[-1])):
-                        if variable_type_ini[-1][j][0] == 'beta' and variable_type_ini[-1][j][-1] == 4:
-                            variable_type_ini = variable_type_ini[-1][j]
+                    for _, val in enumerate(variable_type_ini[-1]):
+                        if val[0] == 'beta' and val[-1] == 4:
+                            variable_type_ini = val
                             break
 
             # Test and save the result of the sKS-Test
@@ -748,9 +749,9 @@ class VariableTypeDetectorTest(TestBase):
                         variable_type_ini = variable_type_ini[:-1]
                     break
                 if 'beta5' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
-                    for j in range(len(variable_type_ini[-1])):
-                        if variable_type_ini[-1][j][0] == 'beta' and variable_type_ini[-1][j][-1] == 5:
-                            variable_type_ini = variable_type_ini[-1][j]
+                    for _, val in enumerate(variable_type_ini[-1]):
+                        if val[0] == 'beta' and val[-1] == 5:
+                            variable_type_ini = val
                             break
 
             # Test and save the result of the sKS-Test

@@ -13,7 +13,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import random
 import abc
-from aminer.input import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface
 
 
 def get_log_int(max_bits):

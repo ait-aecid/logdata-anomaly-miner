@@ -1,11 +1,10 @@
 #!/usr/bin/python3 -BbbEIsSttW all
 import sys
 import os
-import shutil
 import re
 import argparse
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
-from aminer.AMinerConfig import load_config, KEY_AMINER_USER, KEY_AMINER_GROUP, KEY_PERSISTENCE_DIR  # skipcq: FLK-E402
+from aminer.AminerConfig import load_config, KEY_AMINER_USER, KEY_AMINER_GROUP, KEY_PERSISTENCE_DIR  # skipcq: FLK-E402
 from aminer.util.StringUtil import colflame, flame, supports_color  # skipcq: FLK-E402
 from aminer.util.PersistenceUtil import clear_persistence, copytree  # skipcq: FLK-E402
 from metadata import __version_string__  # skipcq: FLK-E402
@@ -24,7 +23,7 @@ def main():
         help_message += colflame
     else:
         help_message += flame
-    help_message += 'For further information read the man pages running "man AMinerRemoteControl".'
+    help_message += 'For further information read the man pages running "man aminerRemoteControl".'
     parser = argparse.ArgumentParser(description=help_message, formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-v', '--version', action='version', version=__version_string__)
     parser.add_argument('-c', '--config', type=str, help='path to the config-file')
@@ -83,12 +82,16 @@ def main():
         if not os.path.exists(absolute_persistence_path):
             print('%s does not exist.' % absolute_persistence_path, file=sys.stderr)
         else:
+            from pwd import getpwnam
+            from grp import getgrnam
+            child_user_id = getpwnam(aminer_user).pw_uid
+            child_group_id = getgrnam(aminer_grp).gr_gid
             clear_persistence(persistence_dir)
             copytree(absolute_persistence_path, persistence_dir)
             for dirpath, _dirnames, filenames in os.walk(persistence_dir):
-                shutil.chown(dirpath, aminer_user, aminer_grp)
+                os.chown(dirpath, child_user_id, child_group_id)
                 for filename in filenames:
-                    shutil.chown(os.path.join(dirpath, filename), aminer_user, aminer_grp)
+                    os.chown(os.path.join(dirpath, filename), child_user_id, child_group_id)
             print('Restored persistence from %s successfully.' % absolute_persistence_path)
 
 

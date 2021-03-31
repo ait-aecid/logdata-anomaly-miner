@@ -1,4 +1,5 @@
 import unittest
+import sys
 from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.FixedDataModelElement import FixedDataModelElement
 from time import time, sleep
@@ -14,7 +15,7 @@ from datetime import datetime
 class DefaultMailNotificationEventHandlerTest(TestBase):
     """Unittests for the DefaultMailNotificationEventHandler."""
 
-    __expected_string = '%s New value for pathes %s: %s\n%s: "%s" (%d lines)\n  %s'
+    __expected_string = ' New value for pathes %s: %s\n%s: "%s" (%d lines)\n  %s'
     mail_call = 'echo p | mail -u mail'
     mail_delete_call = 'echo d | mail -u mail'
 
@@ -59,19 +60,21 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
         # skipcq: PYL-W1510, BAN-B602
         subprocess.run(self.mail_delete_call, shell=True, stdout=subprocess.PIPE)
 
-        self.assertTrue(self.__expected_string % (
-            datetime.fromtimestamp(t - 600).strftime(self.datetime_format_string), "" + match_element.get_path() + ", " +
-            match_element2.get_path(), match_element.get_match_object(), self.__class__.__name__, description, 2,
-            match_element.get_match_string().decode() + "\n  " + match_element2.get_match_string().decode()) in
-            str(result.stdout, 'utf-8'), msg="%s vs \n %s" % (self.__expected_string % (
-                datetime.fromtimestamp(t).strftime(self.datetime_format_string), match_element.get_path(), match_element.get_match_object(),
-                self.__class__.__name__, description, 1, match_element.get_match_string().decode() + "\n\n"),
-                str(result.stdout, 'utf-8')))
+        if datetime.fromtimestamp(t - 600).strftime(self.datetime_format_string) not in str(result.stdout, 'utf-8'):
+            print("ERROR: %s t-600 not found in mail!" % description, file=sys.stderr)
+        if datetime.fromtimestamp(t).strftime(self.datetime_format_string) not in str(result.stdout, 'utf-8'):
+            print("ERROR: %s t not found in mail!" % description, file=sys.stderr)
 
         self.assertTrue(self.__expected_string % (
-            datetime.fromtimestamp(t).strftime(self.datetime_format_string), "" + match_element.get_path() + ", " +
-            match_element2.get_path(), match_element.get_match_object(), self.__class__.__name__, description, 2,
-            match_element.get_match_string().decode() + "\n  " + match_element2.get_match_string().decode() + "\n\n") in
+            "" + match_element.get_path() + ", " + match_element2.get_path(), match_element.get_match_object(), self.__class__.__name__,
+            description, 2, match_element.get_match_string().decode() + "\n  " + match_element2.get_match_string().decode()) in
+            str(result.stdout, 'utf-8'), msg="%s vs \n %s" % (self.__expected_string % (
+                match_element.get_path(), match_element.get_match_object(), self.__class__.__name__, description, 1,
+                match_element.get_match_string().decode() + "\n\n"), str(result.stdout, 'utf-8')))
+
+        self.assertTrue(self.__expected_string % (
+            "" + match_element.get_path() + ", " + match_element2.get_path(), match_element.get_match_object(), self.__class__.__name__,
+            description, 2, match_element.get_match_string().decode() + "\n  " + match_element2.get_match_string().decode() + "\n\n") in
                 str(result.stdout, 'utf-8'))
 
     def test2do_timer(self):
@@ -96,8 +99,8 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
         result = subprocess.run(self.mail_call, shell=True, stdout=subprocess.PIPE)
 
         self.assertFalse(self.__expected_string % (
-            datetime.fromtimestamp(t).strftime(self.datetime_format_string), match_element.get_path(), match_element.get_match_object(),
-            self.__class__.__name__, description, 1, match_element.get_match_string().decode() + "\n\n") in str(result.stdout, 'utf-8'))
+            match_element.get_path(), match_element.get_match_object(), self.__class__.__name__, description, 1,
+            match_element.get_match_string().decode() + "\n\n") in str(result.stdout, 'utf-8'))
 
         t = time()
         default_mail_notification_event_handler.next_alert_time = t + 500
@@ -106,8 +109,8 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
         # skipcq: PYL-W1510, BAN-B602
         result = subprocess.run(self.mail_call, shell=True, stdout=subprocess.PIPE)
         self.assertFalse(self.__expected_string % (
-            datetime.fromtimestamp(t).strftime(self.datetime_format_string), match_element.get_path(), match_element.get_match_object(),
-            self.__class__.__name__, description, 1, match_element.get_match_string().decode() + "\n\n") in str(result.stdout, 'utf-8'))
+            match_element.get_path(), match_element.get_match_object(), self.__class__.__name__, description, 1,
+            match_element.get_match_string().decode() + "\n\n") in str(result.stdout, 'utf-8'))
 
         default_mail_notification_event_handler.next_alert_time = t
         default_mail_notification_event_handler.do_timer(t)
@@ -117,12 +120,16 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
         result = subprocess.run(self.mail_call, shell=True, stdout=subprocess.PIPE)
         # skipcq: PYL-W1510, BAN-B602
         subprocess.run(self.mail_delete_call, shell=True, stdout=subprocess.PIPE)
+
+        if datetime.fromtimestamp(t).strftime(self.datetime_format_string) not in str(result.stdout, 'utf-8'):
+            print("ERROR: %s t not found in mail!" % description, file=sys.stderr)
+
         self.assertTrue(self.__expected_string % (
-            datetime.fromtimestamp(t).strftime(self.datetime_format_string), match_element.get_path(), match_element.get_match_object(),
-            self.__class__.__name__, description, 1, match_element.get_match_string().decode() + "\n\n") in
-            str(result.stdout, 'utf-8'), msg="%s vs \n %s" % (self.__expected_string % (
-                datetime.fromtimestamp(t).strftime(self.datetime_format_string), match_element.get_path(), match_element.get_match_object(),
-                self.__class__.__name__, description, 1, match_element.get_match_string().decode() + "\n\n"), str(result.stdout, 'utf-8')))
+            match_element.get_path(), match_element.get_match_object(), self.__class__.__name__, description, 1,
+            match_element.get_match_string().decode() + "\n\n") in str(result.stdout, 'utf-8'), msg="%s vs \n %s" % (
+            self.__expected_string % (
+                match_element.get_path(), match_element.get_match_object(), self.__class__.__name__, description, 1,
+                match_element.get_match_string().decode() + "\n\n"), str(result.stdout, 'utf-8')))
 
     def test3check_email_addresses(self):
         """Test if mail addresses are validated as expected."""

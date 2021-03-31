@@ -25,14 +25,13 @@ import math
 import time
 import logging
 
-from aminer import AMinerConfig
-from aminer.AMinerConfig import STAT_LEVEL, STAT_LOG_NAME
+from aminer import AminerConfig
+from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
 from aminer.AnalysisChild import AnalysisContext
-from aminer.events import EventSourceInterface
-from aminer.input import AtomHandlerInterface
+from aminer.events.EventInterfaces import EventSourceInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util import PersistenceUtil
-from aminer.util import TimeTriggeredComponentInterface
-from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
+from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
 
 class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
@@ -123,8 +122,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         self.log_new_forward_rules = []
         self.log_new_back_rules = []
 
+        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
-        self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, 'EventCorrelationDetector', persistence_id)
         self.persistence_id = persistence_id
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
 
@@ -155,7 +154,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                         self.forward_rules_inv[implied_event].append(rule)
                     else:
                         self.forward_rules_inv[implied_event] = [rule]
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     # skipcq: PYL-R1710
     def get_min_eval_true(self, max_observations, p0, alpha):
@@ -273,9 +272,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     rule.rule_trigger_timestamps.popleft()
                     self.forward_rule_queue.popleft()
                     if not rule.evaluate_rule():
-                        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-                        if original_log_line_prefix is None:
-                            original_log_line_prefix = ''
+                        original_log_line_prefix = self.aminer_config.config_properties.get(
+                            CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
                         tmp_string = 'Rule: %s -> %s\n  Expected: %s/%s\n  Observed: %s/%s' % (
                                         str(rule.trigger_event), str(rule.implied_event), str(rule.min_eval_true),
                                         str(rule.max_observations), str(sum(rule.rule_observations)),
@@ -327,9 +325,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     else:
                         rule.add_rule_observation(0)
                         if not rule.evaluate_rule():
-                            original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-                            if original_log_line_prefix is None:
-                                original_log_line_prefix = ''
+                            original_log_line_prefix = self.aminer_config.config_properties.get(
+                                CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
                             tmp_string = 'Rule: %s <- %s\n  Expected: %s/%s\n  Observed: %s/%s' % (
                                             str(rule.implied_event), str(rule.trigger_event), str(rule.min_eval_true),
                                             str(rule.max_observations), str(sum(rule.rule_observations)),
@@ -446,17 +443,16 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     # Too much time has elapsed; append negative evaluation.
                     implication.hypothesis_trigger_timestamps.popleft()
                     implication.add_hypothesis_observation(0, log_atom.atom_time)
-                    if implication.compute_hypothesis_stability() == -1:
-                        if implication.trigger_event in self.forward_hypotheses and implication in self.forward_hypotheses[
-                                implication.trigger_event]:
-                            # This check is required if a hypothesis was already removed, but triggered hypotheses are still in the queue.
-                            self.sum_unstable_unknown_hypotheses = self.sum_unstable_unknown_hypotheses - 1
-                            self.forward_hypotheses[implication.trigger_event].remove(implication)
-                            self.forward_hypotheses_inv[implication.implied_event].remove(implication)
-                            if len(self.forward_hypotheses[implication.trigger_event]) == 0:
-                                del self.forward_hypotheses[implication.trigger_event]
-                            if len(self.forward_hypotheses_inv[implication.implied_event]) == 0:
-                                del self.forward_hypotheses_inv[implication.implied_event]
+                    if implication.compute_hypothesis_stability() == -1 and implication.trigger_event in self.forward_hypotheses and \
+                            implication in self.forward_hypotheses[implication.trigger_event]:
+                        # This check is required if a hypothesis was already removed, but triggered hypotheses are still in the queue.
+                        self.sum_unstable_unknown_hypotheses = self.sum_unstable_unknown_hypotheses - 1
+                        self.forward_hypotheses[implication.trigger_event].remove(implication)
+                        self.forward_hypotheses_inv[implication.implied_event].remove(implication)
+                        if len(self.forward_hypotheses[implication.trigger_event]) == 0:
+                            del self.forward_hypotheses[implication.trigger_event]
+                        if len(self.forward_hypotheses_inv[implication.implied_event]) == 0:
+                            del self.forward_hypotheses_inv[implication.implied_event]
                     self.forward_hypotheses_queue.popleft()
                     continue
                 break
@@ -667,12 +663,11 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                 break
 
             # Add new hypothesis candidates
-            if len(self.hypothesis_candidates) < self.candidates_size:
-                if random.uniform(0.0, 1.0) < self.generation_probability:
-                    self.hypothesis_candidates.append((log_event, log_atom.atom_time))
+            if len(self.hypothesis_candidates) < self.candidates_size and random.uniform(0.0, 1.0) < self.generation_probability:
+                self.hypothesis_candidates.append((log_event, log_atom.atom_time))
         self.log_success += 1
 
-    def get_time_trigger_class(self):
+    def get_time_trigger_class(self):  # skipcq: PYL-R0201
         """
         Get the trigger class this component should be registered for.
         This trigger is used only for persistence, so real-time triggering is needed.
@@ -682,12 +677,12 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
     def do_timer(self, trigger_time):
         """Check if current ruleset should be persisted."""
         if self.next_persist_time is None:
-            return self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
+            return self.aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
         if delta < 0:
             self.do_persist()
-            delta = self.aminer_config.config_properties.get(AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
+            delta = self.aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
         return delta
 
     def do_persist(self):
@@ -703,7 +698,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     ('forward', tuple(event_a), tuple(implication.implied_event), implication.max_observations, implication.min_eval_true))
         PersistenceUtil.store_json(self.persistence_file_name, list(known_path_set))
         self.next_persist_time = None
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def log_statistics(self, component_name):
         """
@@ -735,11 +730,11 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         """
         if event_type != 'Analysis.%s' % self.__class__.__name__:
             msg = 'Event not from this source'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if allowlisting_data is not None:
             msg = 'Allowlisting data not understood by this detector'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if event_data not in self.constraint_list:
             self.constraint_list.append(event_data)
@@ -753,11 +748,11 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         """
         if event_type != 'Analysis.%s' % self.__class__.__name__:
             msg = 'Event not from this source'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if blocklisting_data is not None:
             msg = 'Blocklisting data not understood by this detector'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if event_data not in self.ignore_list:
             self.ignore_list.append(event_data)

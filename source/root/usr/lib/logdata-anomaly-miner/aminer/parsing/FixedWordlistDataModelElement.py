@@ -13,8 +13,8 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import logging
-from aminer import AMinerConfig
-from aminer.parsing import ModelElementInterface
+from aminer import AminerConfig
+from aminer.parsing.ModelElementInterface import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
 
 
@@ -38,7 +38,7 @@ class FixedWordlistDataModelElement(ModelElementInterface):
             for test_word in wordlist[test_pos + 1:]:
                 if test_word.startswith(ref_word):
                     msg = 'Word %s would be shadowed by word %s at lower position' % (repr(test_word), repr(ref_word))
-                    logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                     raise Exception(msg)
 
     def get_id(self):

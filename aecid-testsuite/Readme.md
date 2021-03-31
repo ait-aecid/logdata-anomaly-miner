@@ -4,12 +4,51 @@ This project includes all kinds of tests for *AECID* and *aminer*. We used Docke
 The aminer was successfully tested with all tests in **Ubuntu 20.04** and **Debian Bullseye**.
 In order to execute test classes the current path must be the *logdata-anomaly-miner* directory and the project structure must be as following:
 
+## Guidelines for testing
+
+To provide the best quality of code possible we use the guidelines described in this chapter for all unittests.
+
+Before writing the unittests, a complete index should be created with all test cases for the component. This index must be reviewed with at least another person who knows the component.
+
+If the rules are followed, a reviewer should be able to see very clearly:
+  * What is being tested?
+  * Which INPUT is used for testing?
+  * Which OUTPUT was expected?
+
+### General Rules
+
+- Unittest classes must be named \<tested class name\>Test.py
+- Parameter initialization: every test has to initialize it's own values to prevent unintentional changes in different test cases.
+- Input values must not be initialized in setup methods or as global variables.
+- It should be clear what input an unittest uses and what output is expected.
+- An unittest may only fullfill one case and no more.
+- Wherever possible, a test should only deliver an assert, unless the state that arises in the test is explicitly checked.
+- Unittests must fullfill following naming pattern (for every test class the numbering is reset): test\<#number of test\>\_\<method name\>\_\<input value description\>
+- Unittests must contain a description in form of a docstring in which the structure of the test, tested input value and expected output are described.
+- Unittests must not have any dependencies with each other and any global changes must be reset after every test case. Every test case must run independently from other tests.
+- Unittest cases must only contain the tested components and only necessary input values.
+- Cases must test only one component. Dependencies to other classes or handlers must be solved by dummy classes without functionality.
+- Test cases must be as short as possible. If test cases fail it should be clear what the error is.
+- Test code should be readable to be able to see the input and expected output values.
+- Tests should be as simple as possible. If this is not possible, we should think again about the structure of our code. This
+  can be a clear indication that the code is not clear and simple.
+- Helper functions should also be tested separately.
+
+### Rules for input values
+
+- All or as many as possible / meaningful parameters must be tested. If it is not possible to test all cases at least edge cases must be tested.
+- Correlations between parameters must be examined and combinations must be tested extensively.
+- Expected error cases must be tested.
+- All paths that lead to exceptions must be tested separately.
+- Different return values must also be tested.
+- Inputs must not be random or time based. Unittests must always lead to the same expected outputs.
+
 ## Unit-Tests
 
 ```logdata-anomaly-miner/
 ├── aminer
 │    ├── __init__.py
-│    ├── AMinerConfig.py
+│    ├── AminerConfig.py
 │    ├── AnalysisChild.py
 │    ├── analysis
 │        ├── ...
@@ -116,10 +155,10 @@ The created mails under */var/spool/mail/root* should be deleted.
 ## Integration Testing:
 To prepare every test the associated configuration file(s) first must be copied to */tmp*. The test-scripts **MUST NOT** be run as root. In addition, **declarations.sh** must be in the **same folder** as the integration test being run.
 
-Please note that the script needs root privileges for running the *AMiner* and all **persistent data is deleted** from */tmp/lib/aminer*!
+Please note that the script needs root privileges for running the *aminer* and all **persistent data is deleted** from */tmp/lib/aminer*!
 
 ### Integration Test 1:
-In this integration test the learning phase of the AMiner is tested. Multiple log-lines are used to be learned and checked. Some analysis components are used and all other lines are handled by the *SimpleUnparsedAtomHandler*. The Events are received by a *DefaultMailNotificationEventHandler* and a *StreamPrinterEventHandler*. Other lines are used to check if the pathes were learned and persisted in the persistence directory of the *AMiner*. In this test case the *SubhandlerFilter* is suitable, because only one file, */tmp/syslog*, is monitored.
+In this integration test the learning phase of the aminer is tested. Multiple log-lines are used to be learned and checked. Some analysis components are used and all other lines are handled by the *SimpleUnparsedAtomHandler*. The Events are received by a *DefaultMailNotificationEventHandler* and a *StreamPrinterEventHandler*. Other lines are used to check if the pathes were learned and persisted in the persistence directory of the *aminer*. In this test case the *SubhandlerFilter* is suitable, because only one file, */tmp/syslog*, is monitored.
 
 Following command makes the script executeable:
   ```
@@ -145,7 +184,7 @@ Following command makes the script executeable:
   ```
 
 ## Demo:
-The goal of this demo is to create a representative output of all the different *analysis*-components of the *AMiner*. Every component has its own comment section, which starts with **:<<Comment** and ends with **Comment**. Just comment these two lines with an **'#'** to use the wished component.
+The goal of this demo is to create a representative output of all the different *analysis*-components of the *aminer*. Every component has its own comment section, which starts with **:<<Comment** and ends with **Comment**. Just comment these two lines with an **'#'** to use the wished component.
 
 Following command makes the script executeable:
   ```
@@ -228,9 +267,9 @@ For better comparison every test uses the same input logfile.
 
 The results of these tests are a CSV file with measurements of the ressource usage of the system and the number of processed log lines in a predefined timeframe. For better documentation the name of the CSV file must contain the exact name of the computer, CPU and disk in the first line.
 
-Before these tests can be run, it is necessary to copy the provided *AnalysisChild* and *ByteStreamLineAtomizer* classes into the *AMiner* installation folder. These classes are adapted to contain a counter of every log line processed and are necessary to be able to evaluate the results.
+Before these tests can be run, it is necessary to copy the provided *AnalysisChild* and *ByteStreamLineAtomizer* classes into the *aminer* installation folder. These classes are adapted to contain a counter of every log line processed and are necessary to be able to evaluate the results.
 
-The *AMiner* requires a config file under */tmp/performance-config.py*. As there are multiple config files for every of the three tests, they must be renamed to *performance-config.py* in the */tmp* folder.
+The *aminer* requires a config file under */tmp/performance-config.py*. As there are multiple config files for every of the three tests, they must be renamed to *performance-config.py* in the */tmp* folder.
 
 Following commands make the scripts executeable:
   ```

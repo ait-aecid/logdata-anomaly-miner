@@ -12,8 +12,8 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import logging
-from aminer import AMinerConfig
-from aminer.parsing import ModelElementInterface
+from aminer import AminerConfig
+from aminer.parsing.ModelElementInterface import ModelElementInterface
 
 
 class FirstMatchModelElement(ModelElementInterface):
@@ -24,7 +24,7 @@ class FirstMatchModelElement(ModelElementInterface):
         self.children = children
         if (children is None) or (None in children):
             msg = 'Invalid children list'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
     def get_id(self):

@@ -43,6 +43,7 @@ RUN apt-get update && apt-get install -y \
         python3-cerberus \
         python3-yaml \
         python3-pylibacl \
+        python3-urllib3 \
         libacl1-dev \
         postfix \
         procps \ 
@@ -92,6 +93,7 @@ RUN ln -s /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerr
 	&& ln -s /usr/lib/python3/dist-packages/pytz /usr/lib/logdata-anomaly-miner/pytz \
 	&& ln -s /usr/lib/python3/dist-packages/dateutil /usr/lib/logdata-anomaly-miner/dateutil \
 	&& ln -s /usr/lib/python3/dist-packages/six.py /usr/lib/logdata-anomaly-miner/six.py \
+	&& ln -s /usr/lib/python3/dist-packages/urllib3 /usr/lib/logdata-anomaly-miner/urllib3 \
 	&& useradd -ms /usr/sbin/nologin aminer && mkdir -p /var/lib/aminer/log && chmod 0755 /aminerwrapper.sh \
         && chown aminer.aminer -R /var/lib/aminer
 
@@ -105,8 +107,8 @@ ADD aecid-testsuite /home/aminer/aecid-testsuite
 
 RUN chown aminer.aminer -R /home/aminer \
     && ln -s /usr/lib/logdata-anomaly-miner/aminer /home/aminer/aecid-testsuite/aminer \
-    && ln -s /etc/aminer/template_config.py /home/aminer/aecid-testsuite/demo/AMiner/template_config.py \
-    && ln -s /etc/aminer/template_config.yml /home/aminer/aecid-testsuite/demo/AMiner/template_config.yml \
+    && ln -s /etc/aminer/template_config.py /home/aminer/aecid-testsuite/demo/aminer/template_config.py \
+    && ln -s /etc/aminer/template_config.yml /home/aminer/aecid-testsuite/demo/aminer/template_config.yml \
     && chmod +x /home/aminer/aecid-testsuite/*.sh \
     && echo "aminer ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/aminer
 

@@ -2,7 +2,8 @@ import unittest
 import importlib
 import yaml
 import sys
-import aminer.AMinerConfig as AMinerConfig
+import re
+import aminer.AminerConfig as AminerConfig
 from datetime import datetime
 from aminer.AnalysisChild import AnalysisContext
 from aminer.analysis.AtomFilters import SubhandlerFilter
@@ -118,22 +119,40 @@ class YamlConfigTest(TestBase):
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model, SequenceModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[0], VariableByteDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[1], FixedDataModelElement))
+        self.assertEqual(context.atomizer_factory.parsing_model.children[1].element_id, 'sp0')
+        self.assertEqual(context.atomizer_factory.parsing_model.children[1].fixed_data, b' ')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[2], VariableByteDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[3], FixedDataModelElement))
+        self.assertEqual(context.atomizer_factory.parsing_model.children[3].element_id, 'sp1')
+        self.assertEqual(context.atomizer_factory.parsing_model.children[3].fixed_data, b' ')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[4], VariableByteDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[5], FixedDataModelElement))
+        self.assertEqual(context.atomizer_factory.parsing_model.children[5].element_id, 'sp2')
+        self.assertEqual(context.atomizer_factory.parsing_model.children[5].fixed_data, b' ')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[6], DateTimeModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[7], FixedDataModelElement))
+        self.assertEqual(context.atomizer_factory.parsing_model.children[7].element_id, 'sq3')
+        self.assertEqual(context.atomizer_factory.parsing_model.children[7].fixed_data, b' "')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[8], FixedWordlistDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[9], FixedDataModelElement))
+        self.assertEqual(context.atomizer_factory.parsing_model.children[9].element_id, 'sp3')
+        self.assertEqual(context.atomizer_factory.parsing_model.children[9].fixed_data, b' ')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[10], VariableByteDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[11], FixedDataModelElement))
+        self.assertEqual(context.atomizer_factory.parsing_model.children[11].element_id, 'http1')
+        self.assertEqual(context.atomizer_factory.parsing_model.children[11].fixed_data, b' HTTP/')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[12], VariableByteDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[13], FixedDataModelElement))
+        self.assertEqual(context.atomizer_factory.parsing_model.children[13].element_id, 'sq4')
+        self.assertEqual(context.atomizer_factory.parsing_model.children[13].fixed_data, b'" ')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[14], DecimalIntegerValueModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[15], FixedDataModelElement))
+        self.assertEqual(context.atomizer_factory.parsing_model.children[15].element_id, 'sp4')
+        self.assertEqual(context.atomizer_factory.parsing_model.children[15].fixed_data, b' ')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[16], DecimalIntegerValueModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[17], FixedDataModelElement))
+        self.assertEqual(context.atomizer_factory.parsing_model.children[17].element_id, 'sq5')
+        self.assertEqual(context.atomizer_factory.parsing_model.children[17].fixed_data, b' "-" "')
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[18], VariableByteDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[19], FixedDataModelElement))
         self.assertEqual(context.atomizer_factory.parsing_model.element_id, 'accesslog')
@@ -370,11 +389,11 @@ class YamlConfigTest(TestBase):
         spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
-        aminer_config.load_yaml('demo/AMiner/demo-config.yml')
+        aminer_config.load_yaml('demo/aminer/demo-config.yml')
         yml_context = AnalysisContext(aminer_config)
         yml_context.build_analysis_pipeline()
 
-        aminer_config = AMinerConfig.load_config('demo/AMiner/demo-config.py')
+        aminer_config = AminerConfig.load_config('demo/aminer/demo-config.py')
         py_context = AnalysisContext(aminer_config)
         py_context.build_analysis_pipeline()
 
@@ -411,9 +430,9 @@ class YamlConfigTest(TestBase):
         del yml_registered_components_by_name['AtomFilter']
 
         self.assertEqual(yml_config_properties, py_context.aminer_config.config_properties)
-        # there actually is no easy way to compare AMiner components as they do not implement the __eq__ method.
+        # there actually is no easy way to compare aminer components as they do not implement the __eq__ method.
         self.assertEqual(len(yml_registered_components), len(py_registered_components))
-        for i in range(2, len(yml_registered_components)):
+        for i in range(2, len(yml_registered_components)):  # skipcq: PTC-W0060
             self.assertEqual(type(yml_registered_components[i]), type(py_registered_components[i]))
         self.assertEqual(yml_registered_components_by_name.keys(), py_registered_components_by_name.keys())
         for name in yml_registered_components_by_name.keys():
@@ -546,6 +565,105 @@ class YamlConfigTest(TestBase):
                 self.assertEqual(StreamPrinterEventHandler, type(component[0].output_event_handlers[0]))
             else:
                 self.assertEqual(None, component[0].output_event_handlers)
+
+    def test23_check_functionality_of_validate_bigger_than_or_equal(self):
+        """Check the functionality of the _validate_bigger_than_or_equal procedure."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        aminer_config.load_yaml('unit/data/configfiles/bigger_than_or_equal_valid.yml')
+        self.assertRaises(ValueError, aminer_config.load_yaml, 'unit/data/configfiles/bigger_than_or_equal_error.yml')
+
+    def test24_check_log_resource_list(self):
+        """Check the functionality of the regex for LogResourceList.."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        self.assertRaises(ValueError, aminer_config.load_yaml, 'unit/data/configfiles/wrong_log_resource_list.yml')
+
+    def test25_check_mail_regex(self):
+        """Check the functionality of the regex for MailAlerting.TargetAddress and MailAlerting.FromAddress."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        self.assertRaises(ValueError, aminer_config.load_yaml, 'unit/data/configfiles/wrong_email.yml')
+
+        with open('/usr/lib/logdata-anomaly-miner/aminer/schemas/BaseSchema.json', 'r') as sma:
+            # skipcq: PYL-W0123
+            base_schema = eval(sma.read())
+        self.assertEqual(base_schema['MailAlerting.TargetAddress']['regex'], base_schema['MailAlerting.FromAddress']['regex'])
+
+        target_address_regex = re.compile(base_schema['MailAlerting.TargetAddress']['regex'])
+
+        valid_emails = ['john@example.com', 'john@example.co', 'root@localhost']
+        for email in valid_emails:
+            self.assertEqual(target_address_regex.search(email).group(0), email, 'Failed regex check at %s.' % email)
+        invalid_emails = ['john_at_example_dot_com', 'john@example.', '@example.com', ' @example.com']
+        for email in invalid_emails:
+            self.assertEqual(target_address_regex.search(email), None, 'Failed regex check at %s.' % email)
+
+    def test26_filter_config_errors(self):
+        """Check if errors in multiple sections like Analysis, Parser and EventHandlers are found and filtered properly."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        try:
+            aminer_config.load_yaml('unit/data/configfiles/filter_config_errors.yml')
+        except ValueError as e:
+            msg = "Config-Error: {'AMinerGroup': ['unknown field'], 'Analysis': [{0: ['none or more than one rule validate', {'oneof " \
+                  "definition 21': [{'learn_mode': ['unknown field'], 'reset_after_report_flag': ['unknown field'], 'type': {'allowed': [" \
+                  "'ParserCount']}}]}]}], 'EventHandlers': [{1: ['none or more than one rule validate', {'oneof definition 3': [{" \
+                  "'output_file_path': ['unknown field'], 'type': {'allowed': ['SyslogWriterEventHandler']}}]}]}], 'Parser': [{0: ['none " \
+                  "or more than one rule validate', {'oneof definition 0': [{'args2': ['unknown field'], 'type': {'forbidden': [" \
+                  "'ElementValueBranchModelElement', 'DecimalIntegerValueModelElement', 'DecimalFloatValueModelElement', " \
+                  "'DateTimeModelElement', 'MultiLocaleDateTimeModelElement', 'DelimitedDataModelElement', 'JsonModelElement']}}]}]}]}"
+            self.assertEqual(msg, str(e))
+        self.assertRaises(ValueError, aminer_config.load_yaml, 'unit/data/configfiles/filter_config_errors.yml')
+
+    def test27_same_id_analysis(self):
+        """Check if a ValueError is raised when the same id is used for multiple analysis components."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        try:
+            aminer_config.load_yaml('unit/data/configfiles/same_id_analysis.yml')
+            context = AnalysisContext(aminer_config)
+            context.build_analysis_pipeline()
+        except ValueError as e:
+            msg = "Config-Error: The id \"NewMatchPathValueComboDetector\" occurred multiple times in Analysis!"
+            self.assertEqual(msg, str(e))
+        context = AnalysisContext(aminer_config)
+        self.assertRaises(ValueError, context.build_analysis_pipeline)
+
+    def test28_same_id_event_handlers(self):
+        """Check if a ValueError is raised when the same id is used for multiple event handler components."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        try:
+            aminer_config.load_yaml('unit/data/configfiles/same_id_event_handlers.yml')
+            context = AnalysisContext(aminer_config)
+            context.build_analysis_pipeline()
+        except ValueError as e:
+            msg = "Config-Error: The id \"handler\" occurred multiple times in EventHandlers!"
+            self.assertEqual(msg, str(e))
+        context = AnalysisContext(aminer_config)
+        self.assertRaises(ValueError, context.build_analysis_pipeline)
+
+    def test29_same_id_parser(self):
+        """Check if a ValueError is raised when the same id is used for multiple parser components."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        try:
+            aminer_config.load_yaml('unit/data/configfiles/same_id_parser.yml')
+            context = AnalysisContext(aminer_config)
+            context.build_analysis_pipeline()
+        except ValueError as e:
+            msg = "Config-Error: The id \"apacheModel\" occurred multiple times in Parser!"
+            self.assertEqual(msg, str(e))
+        context = AnalysisContext(aminer_config)
+        self.assertRaises(ValueError, context.build_analysis_pipeline)
 
     def run_empty_components_tests(self, context):
         """Run the empty components tests."""

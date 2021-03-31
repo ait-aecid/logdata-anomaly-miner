@@ -16,14 +16,13 @@ import time
 import os
 import logging
 
-from aminer import AMinerConfig
-from aminer.AMinerConfig import STAT_LEVEL, STAT_LOG_NAME
+from aminer import AminerConfig
+from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
 from aminer.AnalysisChild import AnalysisContext
-from aminer.events import EventSourceInterface
-from aminer.input import AtomHandlerInterface
+from aminer.events.EventInterfaces import EventSourceInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util import PersistenceUtil
-from aminer.util import TimeTriggeredComponentInterface
-from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
+from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
 
 class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
@@ -45,14 +44,14 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         self.log_learned_path_values = 0
         self.log_new_learned_values = []
 
+        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
-        self.persistence_file_name = AMinerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is None:
             self.known_values_set = set()
         else:
             self.known_values_set = set(persistence_data)
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
@@ -69,7 +68,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                     self.log_new_learned_values.append(match.match_object)
                     if self.next_persist_time is None:
                         self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                            AMinerConfig.KEY_PERSISTENCE_PERIOD, AMinerConfig.DEFAULT_PERSISTENCE_PERIOD)
+                            AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
 
                 if isinstance(match.match_object, bytes):
                     affected_log_atom_values = [match.match_object.decode()]
@@ -80,9 +79,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                     res = {target_path: match.match_object.decode()}
                 else:
                     res = {target_path: match.match_object}
-                original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-                if original_log_line_prefix is None:
-                    original_log_line_prefix = ''
+                original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
                 if self.output_log_line:
                     match_paths_values = {}
                     for match_path, match_element in match_dict.items():
@@ -101,7 +98,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                                            log_atom, self)
                 self.log_success += 1
 
-    def get_time_trigger_class(self):
+    def get_time_trigger_class(self):  # skipcq: PYL-R0201
         """
         Get the trigger class this component should be registered for.
         This trigger is used only for persistence, so real-time triggering is needed.
@@ -123,7 +120,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         """Immediately write persistence data to storage."""
         PersistenceUtil.store_json(self.persistence_file_name, list(self.known_values_set))
         self.next_persist_time = None
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """
@@ -133,11 +130,11 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         """
         if event_type != 'Analysis.%s' % self.__class__.__name__:
             msg = 'Event not from this source'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if allowlisting_data is not None:
             msg = 'Allowlisting data not understood by this detector'
-            logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         self.known_values_set.add(event_data)
         return 'Allowlisted path(es) %s with %s.' % (', '.join(self.target_path_list), event_data)

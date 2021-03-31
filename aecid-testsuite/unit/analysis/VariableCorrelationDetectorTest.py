@@ -1,8 +1,9 @@
 from aminer.analysis.EventTypeDetector import EventTypeDetector
 from aminer.analysis.VariableTypeDetector import VariableTypeDetector
 from aminer.analysis.VariableCorrelationDetector import VariableCorrelationDetector
-from aminer.input import LogAtom
-from aminer.parsing import ParserMatch, MatchElement
+from aminer.input.LogAtom import LogAtom
+from aminer.parsing.ParserMatch import ParserMatch
+from aminer.parsing.MatchElement import MatchElement
 from unit.TestBase import TestBase
 
 from time import time
@@ -171,31 +172,31 @@ class VariableCorrelationDetectorTest(TestBase):
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1)
         values_set1 = [i*0.1 for i in range(10)]
-        values_set2 = [i*0.3 for i in range(7)]
+        values_set2 = [i*0.2 for i in range(7)]
         # an correlation should be detected even if the second list contains less values than the first.
         self.assertTrue(vcd.pick_cor_match_disc_vals(values_set1, values_set2))
 
-        values_set2 = [i*0.2 for i in range(7)]
+        values_set2 = [i*0.3 for i in range(7)]
         # an correlation should not be detected if too many values are different.
         self.assertFalse(vcd.pick_cor_match_disc_vals(values_set1, values_set2))
 
         values = []
         for i in range(58):
-            stat_data = bytes(str((i % 60) * 0.1), 'utf-8')
+            stat_data = bytes(str(i * 0.1), 'utf-8')
             values.append(float(stat_data))
         values_set1 = values
 
         values = []
-        for i in range(42):
-            stat_data = bytes(str((i % 42) * 0.2), 'utf-8')
+        for i in range(41):
+            stat_data = bytes(str(i * 0.2), 'utf-8')
             values.append(float(stat_data))
         values_set2 = values
         # an correlation should be detected if not too many values are different.
         self.assertTrue(vcd.pick_cor_match_disc_vals(values_set1, values_set2))
 
         values = []
-        for i in range(41):
-            stat_data = bytes(str((i % 43) * 0.2), 'utf-8')
+        for i in range(42):
+            stat_data = bytes(str(i * 0.2), 'utf-8')
             values.append(float(stat_data))
         values_set2 = values
         # an correlation should not be detected if too many values are different.
@@ -268,10 +269,10 @@ class VariableCorrelationDetectorTest(TestBase):
         var3 = ['c']*20 + ['d']*50 + ['e']*30
         var4 = ['c']*50 + ['d']*50
 
-        for i in range(len(var1)):
+        for i, val in enumerate(var1):
             children = [MatchElement('2', var2[i], var2[i].encode(), None), MatchElement('3', var3[i], var3[i].encode(), None),
                         MatchElement('4', var4[i], var4[i].encode(), None)]
-            log_atom = LogAtom(var1[i].encode(), ParserMatch(MatchElement('/', var1[i], var1[i].encode(), children)), t,
+            log_atom = LogAtom(val.encode(), ParserMatch(MatchElement('/', val, val.encode(), children)), t,
                                self.__class__.__name__)
             etd.receive_atom(log_atom)
         vcd_union.init_cor(0)
@@ -350,7 +351,7 @@ class VariableCorrelationDetectorTest(TestBase):
         for rel in rel_list[0]:
             for r in rel:
                 step = 2
-                for i in range(len(r)):
+                for i in range(len(r)):  # skipcq: PTC-W0060
                     key = (i % 20 >= 10)*10 + ((i % 10) * step)
                     # search for the key k in the relation r or convert key to float if applicable.
                     for k in r:
@@ -388,7 +389,7 @@ class VariableCorrelationDetectorTest(TestBase):
                     cnt_half += 1
                 else:
                     cnt_double += 1
-                for i in range(len(r)):
+                for i in range(len(r)):  # skipcq: PTC-W0060
                     key = (i % 20 >= 10)*10 + ((i % 10) * step)
                     value = r[key]
                     # there is no difference between the first half and the second half of the data, when value = 0.
@@ -450,7 +451,7 @@ class VariableCorrelationDetectorTest(TestBase):
             vcd.validate_cor()
             self.assertEqual(len(old_rel_list), len(vcd.rel_list[0]))
             self.assertEqual(len(old_w_rel_list), len(vcd.w_rel_list[0]))
-            for i in range(len(vcd.rel_list[0])):
+            for i, i_val in enumerate(vcd.rel_list[0]):
                 for r in old_rel_list[i]:
                     cnt = 0
                     for key in r:
@@ -459,12 +460,12 @@ class VariableCorrelationDetectorTest(TestBase):
                     # when the count is smaller than validate_cor_cover_vals_thres in percent, then there should not be any correlations.
                     # h must be multiplied by 10 as it represents 10% steps.
                     if cnt < h * 10:
-                        for val in vcd.rel_list[0][i]:
+                        for val in i_val:
                             self.assertEqual({}, val)
                     else:
                         self.assertEqual(vcd.rel_list[0], old_rel_list)
 
-            for i in range(len(vcd.w_rel_list[0])):
+            for i, i_val in enumerate(vcd.w_rel_list[0]):
                 for r in old_w_rel_list[i]:
                     cnt = 0
                     for key in r:
@@ -473,7 +474,7 @@ class VariableCorrelationDetectorTest(TestBase):
                     # when the count is smaller than validate_cor_cover_vals_thres in percent, then there should not be any correlations.
                     # h must be multiplied by 10 as it represents 10% steps.
                     if cnt < h * 10:
-                        for val in vcd.w_rel_list[0][i]:
+                        for val in i_val:
                             self.assertEqual({}, val)
                     else:
                         self.assertEqual(vcd.w_rel_list[0], old_w_rel_list)
@@ -519,10 +520,10 @@ class VariableCorrelationDetectorTest(TestBase):
         for w_rel in vcd.w_rel_list[0]:
             for cor in w_rel:
                 deleted = False
-                for i in range(len(expected_similar_correlations)):
-                    if cor in expected_similar_correlations[i]:
-                        index = expected_similar_correlations[i].index(cor)
-                        del expected_similar_correlations[i][index]
+                for i, val in enumerate(expected_similar_correlations):
+                    if cor in val:
+                        index = val.index(cor)
+                        del val[index]
                         deleted = True
                         break
                 # if the correlation was not deleted an error is raised and the test fails.
@@ -555,10 +556,10 @@ class VariableCorrelationDetectorTest(TestBase):
         for w_rel in vcd.w_rel_list[0]:
             for cor in w_rel:
                 deleted = False
-                for i in range(len(expected_unsimilar_correlations)):
-                    if cor in expected_unsimilar_correlations[i]:
-                        index = expected_unsimilar_correlations[i].index(cor)
-                        del expected_unsimilar_correlations[i][index]
+                for i, val in enumerate(expected_unsimilar_correlations):
+                    if cor in val:
+                        index = val.index(cor)
+                        del val[index]
                         deleted = True
                         break
                 # if the correlation was not deleted an error is raised and the test fails.
@@ -929,7 +930,7 @@ class VariableCorrelationDetectorTest(TestBase):
                 self.assertEqual(vcd.pos_var_val, old_pos_var_val)
                 self.assertEqual(vcd.w_rel_list, old_w_rel_list)
                 self.assertEqual(vcd.rel_list, old_rel_list)
-        # no new values are expected as num_steps_create_new_rules is False by default.
+        # no new values are expected as num_steps_create_new_rules is -1 by default.
         self.assertEqual(vcd.pos_var_cor, old_pos_var_cor)
         self.assertEqual(vcd.pos_var_val, old_pos_var_val)
         self.assertNotEqual(vcd.w_rel_list, old_w_rel_list)

@@ -10,8 +10,8 @@ config_properties['LogResourceList'] = ['file:///tmp/syslog']
 
 # Define the uid/gid of the process that runs the calculation
 # after opening the log files:
-config_properties['AMinerUser'] = 'aminer'
-config_properties['AMinerGroup'] = 'aminer'
+config_properties['AminerUser'] = 'aminer'
+config_properties['AminerGroup'] = 'aminer'
 
 # Define the path, where aminer will listen for incoming remote
 # control connections. When missing, no remote control socket
@@ -27,9 +27,9 @@ config_properties['AMinerGroup'] = 'aminer'
 # config_properties['AnalysisConfigFile'] = 'analysis.py'
 
 # Read and store information to be used between multiple invocations
-# of AMiner in this directory. The directory must only be accessible
-# to the 'AMinerUser' but not group/world readable. On violation,
-# AMiner will refuse to start. When undefined, '/var/lib/aminer'
+# of aminer in this directory. The directory must only be accessible
+# to the 'AminerUser' but not group/world readable. On violation,
+# aminer will refuse to start. When undefined, '/var/lib/aminer'
 # is used.
 config_properties['Core.PersistenceDir'] = '/tmp/lib/aminer'
 
@@ -41,8 +41,8 @@ config_properties['MailAlerting.TargetAddress'] = 'root@localhost'
 # be used.
 config_properties['MailAlerting.FromAddress'] = 'root@localhost'
 # Define, which text should be prepended to the standard aminer
-# subject. Defaults to "AMiner Alerts:"
-config_properties['MailAlerting.SubjectPrefix'] = 'AMiner Alerts:'
+# subject. Defaults to "aminer Alerts:"
+config_properties['MailAlerting.SubjectPrefix'] = 'aminer Alerts:'
 # Define a grace time after startup before aminer will react to
 # an event and send the first alert e-mail. Defaults to 0 (any
 # event can immediately trigger alerting).
@@ -74,15 +74,15 @@ config_properties['LogPrefix'] = 'Original log line: '
 def build_analysis_pipeline(analysis_context):
     """
     Define the function to create pipeline for parsing the log data.
-    It has also to define an AtomizerFactory to instruct AMiner how to process incoming data streams to create log atoms from them.
+    It has also to define an AtomizerFactory to instruct aminer how to process incoming data streams to create log atoms from them.
     """
     # Build the parsing model:
-    from aminer.parsing import FirstMatchModelElement
-    from aminer.parsing import SequenceModelElement
+    from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
+    from aminer.parsing.SequenceModelElement import SequenceModelElement
     from aminer.parsing.DateTimeModelElement import DateTimeModelElement
-    from aminer.parsing import FixedDataModelElement
+    from aminer.parsing.FixedDataModelElement import FixedDataModelElement
     from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
-    from aminer.parsing import AnyByteDataModelElement
+    from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
 
     service_children_disk_upgrade = [
         DateTimeModelElement('DTM', b'%Y-%m-%d %H:%M:%S'), FixedDataModelElement('UNameSpace1', b' '),
@@ -108,28 +108,28 @@ def build_analysis_pipeline(analysis_context):
     anomaly_event_handlers = [stream_printer_event_handler]
 
     # Now define the AtomizerFactory using the model. A simple line based one is usually sufficient.
-    from aminer.input import SimpleByteStreamLineAtomizerFactory
+    from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
     analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(parsing_model, [atom_filter], anomaly_event_handlers)
 
     # Just report all unparsed atoms to the event handlers.
-    from aminer.input import SimpleUnparsedAtomHandler
+    from aminer.input.SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler
     simple_unparsed_atom_handler = SimpleUnparsedAtomHandler(anomaly_event_handlers)
     atom_filter.add_handler(simple_unparsed_atom_handler, stop_when_handled_flag=True)
     analysis_context.register_component(simple_unparsed_atom_handler, component_name="UnparsedHandler")
 
-    from aminer.analysis import NewMatchPathDetector
+    from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
     new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=True)
     analysis_context.register_component(new_match_path_detector, component_name="NewPath")
     atom_filter.add_handler(new_match_path_detector)
 
-    from aminer.analysis import NewMatchPathValueComboDetector
+    from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
     new_match_path_value_combo_detector = NewMatchPathValueComboDetector(analysis_context.aminer_config, [
         '/model/HomePath/Username', '/model/HomePath/Path'], anomaly_event_handlers, auto_include_flag=True)
     analysis_context.register_component(new_match_path_value_combo_detector, component_name="NewValueCombo")
     atom_filter.add_handler(new_match_path_value_combo_detector)
 
     # Include the e-mail notification handler only if the configuration parameter was set.
-    from aminer.events import DefaultMailNotificationEventHandler
+    from aminer.events.DefaultMailNotificationEventHandler import DefaultMailNotificationEventHandler
     if DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS in analysis_context.aminer_config.config_properties:
         mail_notification_handler = DefaultMailNotificationEventHandler(analysis_context)
         analysis_context.register_component(mail_notification_handler, component_name="MailHandler")

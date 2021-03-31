@@ -14,9 +14,9 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
 
-from aminer.input import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface
 from datetime import datetime
-from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
+from aminer.AminerConfig import CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
 
 
 class TimestampsUnsortedDetector(AtomHandlerInterface):
@@ -44,9 +44,7 @@ class TimestampsUnsortedDetector(AtomHandlerInterface):
         if log_atom.get_timestamp() is None:
             return False
         if log_atom.get_timestamp() < self.last_timestamp:
-            original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-            if original_log_line_prefix is None:
-                original_log_line_prefix = ''
+            original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
             if self.output_log_line:
                 sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix + repr(
                     log_atom.raw_data)]

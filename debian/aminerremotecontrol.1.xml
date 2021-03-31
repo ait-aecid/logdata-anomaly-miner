@@ -112,7 +112,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
     <para>This manual page documents briefly the
       <command>aminerremotecontrol</command> command. The command
       executes arbitrary remote control commands in a running
-      AMiner child process. As child process is usually running
+      aminer child process. As child process is usually running
       with lowered privileges or SELinux/AppArmor confinement,
       you may observe unexpected results when accessing resources
       outside the child process, e.g. files. For more details
@@ -123,7 +123,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
       <variablelist>
         <varlistentry>
           <term>
-            <option>Print a property of the running AMinerConfig:</option>
+            <option>Print a property of the running AminerConfig:</option>
           </term>
           <listitem>
             <para>/usr/bin/aminerremotecontrol --data &apos;[&quot;LogResourceList&quot;]&apos; --exec &apos;
@@ -132,7 +132,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         </varlistentry>
         <varlistentry>
           <term>
-            <option>Print the complete AMinerConfig:</option>
+            <option>Print the complete AminerConfig:</option>
           </term>
           <listitem>
             <para>/usr/bin/aminerremotecontrol --exec &apos;print_current_config(analysis_context)&apos;</para>
@@ -140,7 +140,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         </varlistentry>
         <varlistentry>
           <term>
-            <option>Print a property of the running AMinerConfig, change it and confirm the changed value by printing it again:</option>
+            <option>Print a property of the running AminerConfig, change it and confirm the changed value by printing it again:</option>
           </term>
           <listitem>
             <para>/usr/bin/aminerremotecontrol --data &apos;[&quot;Resources.MaxMemoryUsage&quot;, -1]&apos; --exec &apos;
@@ -170,7 +170,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         <listitem>
           <para>Specify the Unix domain remote control socket
           path, otherwise /var/run/aminer-remote.socket is used.
-          The socket is opened by AMiner when &apos;RemoteControlSocket&apos;
+          The socket is opened by aminer when &apos;RemoteControlSocket&apos;
           feature is enabled in configuration. As the socket is
           of SOCK_STREAM type, it may also be forwarded via any
           other stream forwarders, e.g. socat (see UNIX-CONNECT
@@ -250,7 +250,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
           </term>
           <listitem>
             <para>This method allows you to change properties from the 
-            AMinerConfig at runtime. For every property to be changed 
+            AminerConfig at runtime. For every property to be changed 
             this method must be used. The method prints 
             &quot;<replaceable>property_name</replaceable> changed to
             <replaceable>value</replaceable> successfully.&quot; if the 
@@ -266,7 +266,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
           </term>
           <listitem>
             <para>This method allows you to change attributes from components of the 
-            AMinerConfig at runtime. For every attribute to be changed this method 
+            AminerConfig at runtime. For every attribute to be changed this method 
             must be used. The method prints &quot;<replaceable>component_name.attribute </replaceable> changed to <replaceable>value</replaceable> successfully.
             &quot; if the changes were successful and an individual message if the changes failed.
             The type of the new <replaceable>value</replaceable> must be the same like the
@@ -313,7 +313,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
           </term>
           <listitem>
             <para>Prints the property with the <replaceable>property_name</replaceable>
-            from the current AMinerConfig.</para>
+            from the current AminerConfig.</para>
             <para><replaceable>example</replaceable>: aminerremotecontrol --exec 
             &quot;print_config_property(analysis_context,&apos;LogResourceList&apos;)&quot;</para>
           </listitem>
@@ -338,7 +338,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             </option>
           </term>
           <listitem>
-            <para>Prints the current AMinerConfig. It is strongly recommended to use the 
+            <para>Prints the current AminerConfig. It is strongly recommended to use the 
             <option>--string-response</option> parameter for better readability.</para>
             <para><replaceable>example</replaceable>: aminerremotecontrol --exec 
             &quot;print_current_config(analysis_context)&quot; --string-response</para>
@@ -351,7 +351,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             </option>
           </term>
           <listitem>
-            <para>Saves the current AMinerConfig into <replaceable>destination_file</replaceable>.
+            <para>Saves the current AminerConfig into <replaceable>destination_file</replaceable>.
             <replaceable>destination_file</replaceable> must have write permissions by the
              aminerremotecontrol process or it returns an <option>PermissionError</option>.</para>
             <para><replaceable>example</replaceable>: aminerremotecontrol --exec
@@ -523,9 +523,9 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             <para><replaceable>Value</replaceable>: &apos;String&apos;</para>
             <para><replaceable>Example</replaceable>: aminerremotecontrol --exec 
             &quot;change_config_property(analysis_context, &apos;MailAlerting.SubjectPrefix&apos;,
-            &apos;AMiner Alerts:&apos;)&quot;</para>
+            &apos;aminer Alerts:&apos;)&quot;</para>
             <para>Define, which text should be prepended to the standard aminer subject. 
-            Defaults to &quot;AMiner Alerts:&quot;</para>
+            Defaults to &quot;aminer Alerts:&quot;</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -601,7 +601,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             (Integer: 32-maxSystemRAM)&apos;</para>
             <para><replaceable>Example</replaceable>: aminerremotecontrol --exec 
             &quot;change_config_property(analysis_context, &apos;Resources.MaxMemoryUsage&apos;, -1)&quot;</para>
-            <para>This property limits the maximal possible RAM in MB which the AMiner process can use. 
+            <para>This property limits the maximal possible RAM in MB which the aminer process can use. 
             Be careful at choosing the value, as a shortage of memory causes a MemoryError. This defaults to 
            -1, which means that there is no limit.</para>
           </listitem>

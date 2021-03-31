@@ -1,9 +1,18 @@
 import unittest
-from aminer.analysis import NewMatchPathDetector, MatchValueAverageChangeDetector, MatchValueStreamWriter, \
-    MissingMatchPathListValueDetector, NewMatchPathValueComboDetector, NewMatchPathValueDetector, TimeCorrelationDetector, \
-    TimestampsUnsortedDetector, Rules, AllowlistViolationDetector
+from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
+from aminer.analysis.MatchValueAverageChangeDetector import MatchValueAverageChangeDetector
+from aminer.analysis.MatchValueStreamWriter import MatchValueStreamWriter
+from aminer.analysis.MissingMatchPathValueDetector import MissingMatchPathListValueDetector
+from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
+from aminer.analysis.NewMatchPathValueDetector import NewMatchPathValueDetector
+from aminer.analysis.TimeCorrelationDetector import TimeCorrelationDetector
+from aminer.analysis.TimestampsUnsortedDetector import TimestampsUnsortedDetector
+from aminer.analysis import Rules
+from aminer.analysis.AllowlistViolationDetector import AllowlistViolationDetector
 from aminer.analysis.AtomFilters import MatchPathFilter, SubhandlerFilter, MatchValueFilter
 from aminer.analysis.EventTypeDetector import EventTypeDetector
+from aminer.analysis.EventFrequencyDetector import EventFrequencyDetector
+from aminer.analysis.EventSequenceDetector import EventSequenceDetector
 from aminer.analysis.HistogramAnalysis import ModuloTimeBinDefinition, HistogramData, HistogramAnalysis
 from aminer.analysis.TimeCorrelationViolationDetector import CorrelationRule, EventClassSelector, TimeCorrelationViolationDetector
 from aminer.analysis.TimestampCorrectionFilters import SimpleMonotonicTimestampAdjust
@@ -16,9 +25,17 @@ from aminer.analysis.MatchFilter import MatchFilter
 from aminer.analysis.VariableTypeDetector import VariableTypeDetector
 from aminer.analysis.VariableCorrelationDetector import VariableCorrelationDetector
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
-from aminer.input import LogAtom
-from aminer.parsing import ParserMatch, MatchContext, MatchElement, DecimalIntegerValueModelElement, FirstMatchModelElement, \
-    DelimitedDataModelElement, FixedWordlistDataModelElement, AnyByteDataModelElement, SequenceModelElement, FixedDataModelElement
+from aminer.input.LogAtom import LogAtom
+from aminer.parsing.ParserMatch import ParserMatch
+from aminer.parsing.MatchContext import MatchContext
+from aminer.parsing.MatchElement import MatchElement
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
+from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
+from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
+from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
+from aminer.parsing.SequenceModelElement import SequenceModelElement
+from aminer.parsing.FixedDataModelElement import FixedDataModelElement
 from unit.TestBase import TestBase
 import time
 import random
@@ -1103,6 +1120,86 @@ class AnalysisComponentsPerformanceTest(TestBase):
         type(self).result = self.result + self.result_string % (
             variable_correlation_detector.__class__.__name__, avg, results, '%s different path(es).' % (str(number_of_paths)))
 
+    def run_event_frequency_detector(self, number_of_paths):
+        """Run the performance tests for EventFrequencyDetector."""
+        results = [None] * self.iterations
+        avg = 0
+        z = 0
+        while z < self.iterations:
+            new_match_path_detector = NewMatchPathDetector(self.aminer_config, [
+                self.stream_printer_event_handler], 'Default', True)
+            target_path_list = None
+            if number_of_paths is not None:
+                target_path_list = ['d' + str(i) for i in range(number_of_paths)]
+            efd = EventFrequencyDetector(self.aminer_config, [self.stream_printer_event_handler], target_path_list=target_path_list)
+
+            seconds = time.time()
+            i = 0
+            measured_time = 0
+            while measured_time < self.waiting_time / 10:
+                if number_of_paths is None:
+                    path = 'd' + str(i)
+                else:
+                    path = 'd' + str(i % number_of_paths)
+                decimal_integer_value_me = DecimalIntegerValueModelElement(
+                    path, DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                    DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+                p = process_time()
+                r = random.randint(1, 1000000)
+                seconds = seconds + process_time() - p
+                match_context = MatchContext(str(i).encode())
+                match_element = decimal_integer_value_me.get_match_element('integer', match_context)
+                log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), seconds - r, efd)
+                measured_time += timeit.timeit(lambda: efd.receive_atom(log_atom), number=1)
+                i = i + 1
+            results[z] = i * 10
+            z = z + 1
+            avg = avg + i * 10
+        avg = avg / self.iterations
+        type(self).result = self.result + self.result_string % (
+            efd.__class__.__name__, avg, results,
+            'a %s and %s different path(es).' % (new_match_path_detector.__class__.__name__, str(number_of_paths)))
+
+    def run_event_sequence_detector(self, number_of_paths):
+        """Run the performance tests for EventFrequencyDetector."""
+        results = [None] * self.iterations
+        avg = 0
+        z = 0
+        while z < self.iterations:
+            new_match_path_detector = NewMatchPathDetector(self.aminer_config, [
+                self.stream_printer_event_handler], 'Default', True)
+            id_path_list = None
+            if number_of_paths is not None:
+                id_path_list = ['d' + str(i) for i in range(number_of_paths)]
+            esd = EventSequenceDetector(self.aminer_config, [self.stream_printer_event_handler], id_path_list=id_path_list)
+
+            seconds = time.time()
+            i = 0
+            measured_time = 0
+            while measured_time < self.waiting_time / 10:
+                if number_of_paths is None:
+                    path = 'd' + str(i)
+                else:
+                    path = 'd' + str(i % number_of_paths)
+                decimal_integer_value_me = DecimalIntegerValueModelElement(
+                    path, DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                    DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+                p = process_time()
+                r = random.randint(1, 1000000)
+                seconds = seconds + process_time() - p
+                match_context = MatchContext(str(i).encode())
+                match_element = decimal_integer_value_me.get_match_element('integer', match_context)
+                log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), seconds - r, esd)
+                measured_time += timeit.timeit(lambda: esd.receive_atom(log_atom), number=1)
+                i = i + 1
+            results[z] = i * 10
+            z = z + 1
+            avg = avg + i * 10
+        avg = avg / self.iterations
+        type(self).result = self.result + self.result_string % (
+            esd.__class__.__name__, avg, results,
+            'a %s and %s different path(es).' % (new_match_path_detector.__class__.__name__, str(number_of_paths)))
+
     def test01atom_filters(self):
         """Start performance tests for AtomFilters."""
         self.run_atom_filters_match_path_filter(1)
@@ -1284,6 +1381,19 @@ class AnalysisComponentsPerformanceTest(TestBase):
         self.run_variable_correlation_detector(1)
         self.run_variable_correlation_detector(10)
         self.run_variable_correlation_detector(100)
+
+    def test22event_frequency_detector(self):
+        """Start performance tests for EventFrequencyDetector."""
+        self.run_event_frequency_detector(None)
+        self.run_event_frequency_detector(1)
+        self.run_event_frequency_detector(10)
+        self.run_event_frequency_detector(100)
+
+    def test23event_frequency_detector(self):
+        """Start performance tests for EventSequenceDetector."""
+        self.run_event_sequence_detector(1)
+        self.run_event_sequence_detector(10)
+        self.run_event_sequence_detector(100)
 
 
 if __name__ == '__main__':

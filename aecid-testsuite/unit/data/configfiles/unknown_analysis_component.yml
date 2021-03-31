@@ -1,5 +1,5 @@
-AMinerUser: 'aminer'  # optional default: aminer
-AMinerGroup: 'aminer' # optional default: aminer
+AminerUser: 'aminer'  # optional default: aminer
+AminerGroup: 'aminer' # optional default: aminer
 
 LogResourceList:
         - 'file:///var/log/apache2/access.log'
@@ -10,7 +10,7 @@ Parser:
          - id: 'timeModel'
            type: DateTimeModelElement
            name: 'time'
-           args: '%Y-%m-%dT%H:%M:%S.%f'
+           date_format: '%Y-%m-%dT%H:%M:%S.%f'
 
          - id: 'hostModel'
            type: VariableByteDataModelElement
