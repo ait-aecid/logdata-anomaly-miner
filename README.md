@@ -4,6 +4,12 @@ This tool parses log data and allows to define analysis pipelines for anomaly de
 
 [![AECID Demo – Anomaly Detection with aminer and Reporting to IBM QRadar](https://img.youtube.com/vi/tL7KiMf8NfE/0.jpg)](https://www.youtube.com/watch?v=tL7KiMf8NfE)
 
+## Requirements
+
+In order to install logdata-anomaly-miner a **Linux system** with **python >= 3.6** is required. **Debian-based** distributions are currently recommended. 
+
+_See [requirements.txt](requirements.txt) for further module dependencies_
+
 
 ## Installation
 
@@ -31,7 +37,7 @@ chmod +x aminer_install.sh
 Here are some resources to read in order to get started with configurations:
 
 * [Getting started](https://github.com/ait-aecid/logdata-anomaly-miner/wiki/Getting-started-(tutorial))
-* [Some available configurations](https://github.com/ait-aecid/logdata-anomaly-miner/tree/main/source/root/etc/aminer/conf-available/generic)
+* [Some available configurations](https://github.com/ait-aecid/logdata-anomaly-miner/tree/main/source/root/etc/aminer/)
 * [Documentation](https://github.com/ait-aecid/logdata-anomaly-miner/tree/main/source/root/usr/share/doc/logdata-anomaly-miner)
 
 ## Publications
