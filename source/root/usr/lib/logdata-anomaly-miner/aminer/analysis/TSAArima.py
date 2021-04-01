@@ -22,18 +22,18 @@ import pmdarima as pm
 class TSAArima(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
     """This class is used for testing purposes"""
 
-    def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, num_division_time_step=10, persistence_id='Default'):
+    def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, num_division_time_step=10, alpha=0.05, persistence_id='Default'):
 
         # event_type_detector. Used to get the eventNumbers and values of the variables, etc.
         self.event_type_detector = event_type_detector
         # Add the varTypeDetector to the list of the modules, which use the event_type_detector.
         self.event_type_detector.add_following_modules(self)
-        # Significance level of the estimatedd values
-        self.alpha = 0.05
         # List of the time steps
         self.time_step_list = []
         # Number of division of the time window to calculate the time step
         self.num_division_time_step = num_division_time_step
+        # Significance level of the estimatedd values
+        self.alpha = alpha
         # History of the time windows
         self.time_window_history = []
         # List of the the single arima_models
@@ -50,7 +50,7 @@ class TSAArima(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourc
         if not self.event_type_detector.total_records % 10000:
             print(self.event_type_detector.total_records)
 
-        if True:
+        if False:
             import numpy as np
             import pmdarima as pm
             import matplotlib.pyplot as plt
@@ -140,7 +140,6 @@ class TSAArima(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourc
             self.time_window_history[event_number].append(count)
             if len(self.time_window_history[event_number]) > 20 * self.num_division_time_step:
                 self.time_window_history[event_number] = self.time_window_history[event_number][-10*self.num_division_time_step:]
-                # print(len(self.time_window_history[event_number]))
 
             # Check if enough values have been stored to initialize the arima_model
             if len(self.time_window_history[event_number]) >= 10*self.num_division_time_step:
@@ -151,8 +150,9 @@ class TSAArima(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourc
                     if not self.sum:
                         # Add the arima_model to the list
                         try:
+                            #self.arima_models[event_number] = pm.auto_arima(train, seasonal=True, m=self.num_division_time_step+1)
                             model = pm.auto_arima(self.time_window_history[event_number][-10*self.num_division_time_step:],
-                                    seasonal=True, error_action='ignore', suppress_warnings=True, m=self.num_division_time_step+1, max_order=2)
+                                    seasonal=True, error_action='ignore', suppress_warnings=True, m=self.num_division_time_step, max_order=2)
                             self.arima_models[event_number] = model.fit(self.time_window_history[event_number][-10*self.num_division_time_step:])
                             self.time_window_history[event_number] = []
                         except:
