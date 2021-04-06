@@ -64,12 +64,12 @@ Parser:
        - id: __REALTIME_TIMESTAMP
          type: DateTimeModelElement
          name: '__REALTIME_TIMESTAMP'
-         args: '%s'
+         date_format: '%s'
 
        - id: __MONOTONIC_TIMESTAMP
          type: DateTimeModelElement
          name: '__MONOTONIC_TIMESTAMP'
-         args: '%s'
+         date_format: '%s'
 
        - id: _BOOT_ID
          type: HexStringModelElement
@@ -78,7 +78,7 @@ Parser:
        - id: optional_key__SOURCE_MONOTONIC_TIMESTAMP
          type: DateTimeModelElement
          name: 'optional_key__SOURCE_MONOTONIC_TIMESTAMP'
-         args: '%s'
+         date_format: '%s'
 
        - id: _TRANSPORT
          type: FixedWordlistDataModelElement

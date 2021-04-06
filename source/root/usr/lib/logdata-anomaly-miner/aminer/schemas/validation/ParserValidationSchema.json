@@ -12,7 +12,8 @@
                     'start': {'type': 'boolean'},
                     'type': {'type': 'string', 'empty': False, 'forbidden': [
                         'ElementValueBranchModelElement', 'DecimalIntegerValueModelElement', 'DecimalFloatValueModelElement',
-                        'MultiLocaleDateTimeModelElement', 'DelimitedDataModelElement', 'JsonModelElement'], 'required': True},
+                        'DateTimeModelElement', 'MultiLocaleDateTimeModelElement', 'DelimitedDataModelElement', 'JsonModelElement'],
+                        'required': True},
                     'name': {'type': 'string', 'required': True, 'empty': False},
                     'args': {'type': ['string', 'list'], 'schema': {'type': ['string', 'integer']}}
                 },
@@ -45,11 +46,22 @@
                 {
                     'id': {'type': 'string', 'required': True, 'empty': False},
                     'start': {'type': 'boolean'},
+                    'type': {'type': 'string', 'allowed': ['DateTimeModelElement'], 'required': True},
+                    'name': {'type': 'string', 'required': True, 'empty': False},
+                    'date_format': {'type': 'string', 'required': True},
+                    'start_year': {'type': 'integer', 'nullable': True},
+                    'text_locale': {'type': 'string', 'nullable': True},
+                    'max_time_jump_seconds': {'type': 'integer', 'min': 1}
+                },
+                {
+                    'id': {'type': 'string', 'required': True, 'empty': False},
+                    'start': {'type': 'boolean'},
                     'type': {'type': 'string', 'allowed': ['MultiLocaleDateTimeModelElement'], 'required': True},
                     'name': {'type': 'string', 'required': True, 'empty': False},
                     'date_formats': {'type': 'list', 'schema': {'type': 'dict', 'schema': {'format': {'type': 'list', 'schema': {
                         'type': 'string', 'nullable': True, 'empty': False}, 'maxlength': 3, 'minlength': 3}}}, 'required': True},
-                    'start_year': {'type': 'integer', 'nullable': True}
+                    'start_year': {'type': 'integer', 'nullable': True},
+                    'max_time_jump_seconds': {'type': 'integer', 'min': 1}
                 },
                 {
                     'id': {'type': 'string', 'required': True, 'empty': False},

@@ -112,6 +112,8 @@ class JsonModelElement(ModelElementInterface):
                 for data in json_match_data[split_key]:
                     if isinstance(data, str):
                         data = data.encode()
+                    elif data is None:
+                        data = b"null"
                     elif not isinstance(data, bytes):
                         data = str(data).encode()
                     if isinstance(json_dict[key][0], dict):
@@ -168,6 +170,8 @@ class JsonModelElement(ModelElementInterface):
                     data = data.encode('unicode-escape')
                 elif isinstance(data, bool):
                     data = str(data).replace("T", "t").replace("F", "f").encode()
+                elif data is None:
+                    data = b"null"
                 elif not isinstance(data, bytes):
                     data = str(data).encode()
                 if json_dict[key] == "ALLOW_ALL":
@@ -196,7 +200,6 @@ class JsonModelElement(ModelElementInterface):
                         index = min(indices)
                     if match_element is None:
                         index = -1
-                match_context.update(match_context.match_data[:index + len(data)])
                 if match_element is not None or (match_element is None and not key.startswith(self.optional_key_prefix)):
                     matches.append(match_element)
                     if index == -1 and match_element is None:
@@ -206,6 +209,7 @@ class JsonModelElement(ModelElementInterface):
                                 match_element, data.decode(), match_context.match_data.replace(b'\\', b'').decode(),
                                 isinstance(json_match_data[split_key], float), index))
                         return matches
+                match_context.update(match_context.match_data[:index + len(data)])
         missing_keys = [x for x in json_dict if x not in json_match_data]
         for key in missing_keys:
             if not key.startswith(self.optional_key_prefix):

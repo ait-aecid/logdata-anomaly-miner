@@ -10,7 +10,7 @@ Parser:
          - id: 'timeModel'
            type: DateTimeModelElement
            name: 'time'
-           args: '%Y-%m-%dT%H:%M:%S.%f'
+           date_format: '%Y-%m-%dT%H:%M:%S.%f'
 
          - id: 'hostModel'
            type: VariableByteDataModelElement

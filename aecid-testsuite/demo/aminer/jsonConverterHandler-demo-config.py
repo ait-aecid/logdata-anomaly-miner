@@ -6,12 +6,11 @@ from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
 from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
 from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
 from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
-from aminer.parsing.DateTimeModelElement import DateTimeModelElement
+from aminer.parsing.DateTimeModelElement import DateTimeModelElement, MultiLocaleDateTimeModelElement
 from aminer.parsing.IpAddressDataModelElement import IpAddressDataModelElement
 from aminer.parsing.Base64StringModelElement import Base64StringModelElement
 from aminer.parsing.ElementValueBranchModelElement import ElementValueBranchModelElement
 from aminer.parsing.HexStringModelElement import HexStringModelElement
-from aminer.parsing.MultiLocaleDateTimeModelElement import MultiLocaleDateTimeModelElement
 from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
 from aminer.parsing.RepeatedElementDataModelElement import RepeatedElementDataModelElement
 from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
@@ -194,7 +193,7 @@ def build_analysis_pipeline(analysis_context):
     if loc == (None, None):
         loc = ('en_US', 'utf8')
     service_children_parsing_model_element.append(
-        MultiLocaleDateTimeModelElement('MultiLocaleDateTimeModelElement', [(b'%b %d %Y', '%s.%s' % (loc), None)]))
+        MultiLocaleDateTimeModelElement('MultiLocaleDateTimeModelElement', [(b'%b %d %Y', None, '%s.%s' % loc)]))
     service_children_parsing_model_element.append(
         RepeatedElementDataModelElement('RepeatedElementDataModelElement', SequenceModelElement('SequenceModelElement', [
             FixedDataModelElement('FixedDataModelElement', b'drawn number: '),

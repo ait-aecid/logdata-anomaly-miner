@@ -45,26 +45,26 @@ def load_yaml(config_file):
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(exception)
             raise exception
 
-    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/BaseSchema.py', 'r') as sma:
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/BaseSchema.json', 'r') as sma:
         # skipcq: PYL-W0123
         base_schema = eval(sma.read())
-    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/ParserNormalisationSchema.py', 'r') as sma:
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/ParserNormalisationSchema.json', 'r') as sma:
         # skipcq: PYL-W0123
         parser_normalisation_schema = eval(sma.read())
-    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/AnalysisNormalisationSchema.py', 'r') as sma:
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/AnalysisNormalisationSchema.json', 'r') as sma:
         # skipcq: PYL-W0123
         analysis_normalisation_schema = eval(sma.read())
-    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/EventHandlerNormalisationSchema.py', 'r') as sma:
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/EventHandlerNormalisationSchema.json', 'r') as sma:
         # skipcq: PYL-W0123
         event_handler_normalisation_schema = eval(sma.read())
 
-    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/ParserValidationSchema.py', 'r') as sma:
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/ParserValidationSchema.json', 'r') as sma:
         # skipcq: PYL-W0123
         parser_validation_schema = eval(sma.read())
-    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/AnalysisValidationSchema.py', 'r') as sma:
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/AnalysisValidationSchema.json', 'r') as sma:
         # skipcq: PYL-W0123
         analysis_validation_schema = eval(sma.read())
-    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/EventHandlerValidationSchema.py', 'r') as sma:
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/EventHandlerValidationSchema.json', 'r') as sma:
         # skipcq: PYL-W0123
         event_handler_validation_schema = eval(sma.read())
 
@@ -95,6 +95,7 @@ def load_yaml(config_file):
 
 
 def filter_config_errors(filtered_errors, key_name, errors, schema):
+    """Filter oneof outputs to produce a clear overview of the error."""
     oneof = schema[key_name]['schema']['oneof']
     if key_name in errors:
         for i, err in enumerate(errors[key_name]):
@@ -179,6 +180,10 @@ def build_parsing_model():
                         raise ValueError(msg)
                     branch_model_dict[key] = parser_model_dict.get(model)
                 parser_model_dict[item['id']] = item['type'].func(item['name'], value_model, item['args'][1].decode(), branch_model_dict)
+            elif item['type'].name == 'DateTimeModelElement':
+                parser_model_dict[item['id']] = item['type'].func(
+                    item['name'], item['date_format'].encode(), None, item['text_locale'], item['start_year'],
+                    item['max_time_jump_seconds'])
             elif item['type'].name == 'MultiLocaleDateTimeModelElement':
                 date_formats = []
                 for date_format in item['date_formats']:
@@ -186,11 +191,11 @@ def build_parsing_model():
                         msg = 'The date_format must have a size of 3!'
                         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
-                    date_formats.append(tuple(i for i in date_format['format']))
-                if 'args' in item:
-                    parser_model_dict[item['id']] = item['type'].func(item['name'], date_formats, item['args'])
-                else:
-                    parser_model_dict[item['id']] = item['type'].func(item['name'], date_formats)
+                    fmt = date_format['format']
+                    fmt[0] = fmt[0].encode()
+                    date_formats.append(tuple(fmt))
+                parser_model_dict[item['id']] = item['type'].func(
+                    item['name'], date_formats, item['start_year'], item['max_time_jump_seconds'])
             elif item['type'].name == 'RepeatedElementDataModelElement':
                 model = item['args'][0].decode()
                 if parser_model_dict.get(model) is None:
@@ -667,12 +672,13 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     raise ValueError(msg)
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, etd, persistence_id=item['persistence_id'],
-                    path_list=item['paths'], ks_alpha=item['ks_alpha'], s_ks_alpha=item['s_ks_alpha'], s_ks_bt_alpha=item['s_ks_bt_alpha'],
-                    d_alpha=item['d_alpha'], d_bt_alpha=item['d_bt_alpha'], div_thres=item['div_thres'], sim_thres=item['sim_thres'],
-                    indicator_thres=item['indicator_thres'], num_init=item['num_init'], num_update=item['num_update'],
-                    num_update_unq=item['num_update_unq'], num_s_ks_values=item['num_s_ks_values'], num_s_ks_bt=item['num_s_ks_bt'],
-                    num_d_bt=item['num_d_bt'], num_pause_discrete=item['num_pause_discrete'], num_pause_others=item['num_pause_others'],
-                    test_ks_int=item['test_ks_int'], update_var_type_bool=item['update_var_type_bool'],
+                    path_list=item['paths'], gof_alpha=item['gof_alpha'], s_gof_alpha=item['s_gof_alpha'],
+                    s_gof_bt_alpha=item['s_gof_bt_alpha'], d_alpha=item['d_alpha'], d_bt_alpha=item['d_bt_alpha'],
+                    div_thres=item['div_thres'], sim_thres=item['sim_thres'], indicator_thres=item['indicator_thres'],
+                    num_init=item['num_init'], num_update=item['num_update'], num_update_unq=item['num_update_unq'],
+                    num_s_gof_values=item['num_s_gof_values'], num_s_gof_bt=item['num_s_gof_bt'], num_d_bt=item['num_d_bt'],
+                    num_pause_discrete=item['num_pause_discrete'], num_pause_others=item['num_pause_others'],
+                    test_gof_int=item['test_gof_int'], update_var_type_bool=item['update_var_type_bool'],
                     num_stop_update=item['num_stop_update'], silence_output_without_confidence=item['silence_output_without_confidence'],
                     silence_output_except_indicator=item['silence_output_except_indicator'],
                     num_var_type_hist_ref=item['num_var_type_hist_ref'], num_update_var_type_hist_ref=item['num_update_var_type_hist_ref'],

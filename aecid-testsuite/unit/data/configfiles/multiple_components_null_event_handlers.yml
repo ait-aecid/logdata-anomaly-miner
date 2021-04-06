@@ -23,7 +23,7 @@ Parser:
         - id: new_time_model
           type: DateTimeModelElement
           name: 'time'
-          args: '[%d/%b/%Y:%H:%M:%S +0000]'
+          date_format: '[%d/%b/%Y:%H:%M:%S +0000]'
 
         - id: sq3
           type: FixedDataModelElement

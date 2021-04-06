@@ -17,6 +17,8 @@ class ParserModelType:
             module = "aminer.parsing"
             if name == 'DebugMatchContext':
                 module += '.MatchContext'
+            if name == "MultiLocaleDateTimeModelElement":
+                module += ".DateTimeModelElement"
             else:
                 module += '.' + name
             self.func = getattr(__import__(module, fromlist=[name]), name)
@@ -93,6 +95,7 @@ event_handler_type = TypeDefinition('eventhandlertype', (EventHandlerType, str),
 
 class ConfigValidator(Validator):
     """Validates values from the configs."""
+
     def _validate_has_start(self, has_start, field, value):
         """
         Test if there is a key named 'has_start'.
