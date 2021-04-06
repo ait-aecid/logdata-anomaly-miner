@@ -145,6 +145,21 @@ class TestBase(unittest.TestCase):
         self.output_stream.seek(0)
         self.output_stream.truncate(0)
 
+    def compare_match_results(self, data, match_element, match_context, id_, path, match_string, match_object, children):
+        """Compare the results of get_match_element() if match_element is not None."""
+        self.assertEqual(match_element.path, "%s/%s" % (path, id_))
+        self.assertEqual(match_element.match_string, match_string)
+        self.assertEqual(match_element.match_object, match_object)
+        self.assertIsNone(match_element.children, children)
+        self.assertEqual(match_context.match_string, match_string)
+        self.assertEqual(match_context.match_data, data[len(match_string):])
+
+    def compare_no_match_results(self, data, match_element, match_context):
+        """Compare the results of get_match_element() if match_element is not None."""
+        self.assertIsNone(match_element, None)
+        self.assertEqual(match_context.match_data, data)
+        self.assertEqual(match_context.match_string, b"")
+
 
 class DummyMatchContext:
     """Dummy class for MatchContext."""
