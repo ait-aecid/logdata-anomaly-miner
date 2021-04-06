@@ -124,7 +124,7 @@ class TestBase(unittest.TestCase):
             shutil.rmtree(persistence_dir_name)
         if not os.path.exists(persistence_dir_name):
             os.makedirs(persistence_dir_name)
-        initialize_loggers(self.aminer_config, getpwnam('aminer').pw_uid, getgrnam('aminer').gr_gid)
+        initialize_loggers(self.aminer_config, os.getuid(), os.getgid())
         if isinstance(persistence_dir_name, str):
             persistence_dir_name = persistence_dir_name.encode()
         SecureOSFunctions.secure_open_base_directory(persistence_dir_name, os.O_RDONLY | os.O_DIRECTORY | os.O_PATH)
