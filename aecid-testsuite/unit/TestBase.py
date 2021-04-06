@@ -10,8 +10,6 @@ from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
 from aminer.util import PersistenceUtil
 from aminer.util import SecureOSFunctions
 from _io import StringIO
-from pwd import getpwnam
-from grp import getgrnam
 
 
 def initialize_loggers(aminer_config, aminer_user_id, aminer_grp_id):
