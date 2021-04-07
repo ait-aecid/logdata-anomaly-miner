@@ -51,7 +51,7 @@ class AllowlistViolationDetectorTest(TestBase):
         self.assertTrue(not allowlist_violation_detector.receive_atom(log_atom))
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
             datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S"), allowlist_violation_detector.__class__.__name__, description, 1,
-            "b'fixed String'"))
+            "fixed String"))
 
 
 if __name__ == "__main__":

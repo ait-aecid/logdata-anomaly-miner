@@ -40,7 +40,7 @@ class TimestampsUnsortedDetectorTest(TestBase):
             datetime.fromtimestamp(t - 10000).strftime(self.datetime_format_string),
             datetime.fromtimestamp(t - 10000).strftime(self.datetime_format_string),
             datetime.fromtimestamp(t).strftime(self.datetime_format_string), timestamp_unsorted_detector.__class__.__name__,
-            description + "2", 1, "b' pid='"))
+            description + "2", 1, " pid="))
 
     def test2timestamp_lower_than_last_timestamp_exit_on_error(self):
         """This test case checks if the program exits, when the timestamp is lower than the last one and the exitOnError flag is set."""
@@ -67,7 +67,7 @@ class TimestampsUnsortedDetectorTest(TestBase):
             datetime.fromtimestamp(t - 10000).strftime(self.datetime_format_string),
             datetime.fromtimestamp(t - 10000).strftime(self.datetime_format_string),
             datetime.fromtimestamp(t).strftime(self.datetime_format_string), timestamp_unsorted_detector.__class__.__name__,
-            description + "2", 1, "b' pid='"))
+            description + "2", 1, " pid="))
 
     def test3timestamp_higher_than_last_timestamp(self):
         """This test case checks if nothing happens, when the timestamp is, as expected, higher than the last one."""

@@ -172,7 +172,7 @@ class EventFrequencyDetectorTest(TestBase):
         # Expected output: Anomalies for unexpected low counts of a (1 instead of 4) and b (0 instead of 1), frequency of a is 1 in new
         # time window count, old count remains unchanged
         event_frequency_detector.receive_atom(log_atom_10)
-        print(test_handler.anomalies)
+        print(test_handler.anomalies)  # this is bad.
         self.assertEqual(test_handler.anomalies, [
             {'AnalysisComponent':
                 {'AffectedLogAtomPaths': ['/value'],
