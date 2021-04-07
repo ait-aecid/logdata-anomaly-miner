@@ -34,7 +34,14 @@ class VerboseUnparsedAtomHandler(AtomHandlerInterface):
         for line in debug_info.split('\n'):
             debug_lines.append(line.strip())
         event_data = {'DebugLog': debug_lines}
+        try:
+            if isinstance(log_atom.raw_data, bytes):
+                data = log_atom.raw_data.decode()
+            else:
+                data = repr(log_atom.raw_data)
+        except UnicodeError:
+            data = repr(log_atom.raw_data)
         for listener in self.event_handlers:
-            listener.receive_event('Input.VerboseUnparsedAtomHandler', 'Unparsed atom received', [debug_info + log_atom.raw_data.decode()],
+            listener.receive_event('Input.VerboseUnparsedAtomHandler', 'Unparsed atom received', [debug_info + data],
                                    event_data, log_atom, self)
         return True

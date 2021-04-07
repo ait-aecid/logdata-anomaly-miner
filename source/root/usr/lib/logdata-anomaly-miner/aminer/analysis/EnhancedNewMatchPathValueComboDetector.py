@@ -121,8 +121,15 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         event_data = {'AnalysisComponent': analysis_component}
         if (self.auto_include_flag and self.known_values_dict.get(match_value_tuple)[2] == 1) or not self.auto_include_flag:
             self.log_learned_path_value_combos += 1
+            try:
+                if isinstance(log_atom.raw_data, bytes):
+                    data = log_atom.raw_data.decode()
+                else:
+                    data = repr(log_atom.raw_data)
+            except UnicodeError:
+                data = repr(log_atom.raw_data)
+            original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
             for listener in self.anomaly_event_handlers:
-                original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
                 if self.output_log_line:
                     match_paths_values = {}
                     for match_path, match_element in match_dict.items():
@@ -132,9 +139,9 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
                         match_paths_values[match_path] = match_value
                     analysis_component['ParsedLogAtom'] = match_paths_values
                     sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + str(
-                        self.known_values_dict) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
+                        self.known_values_dict) + os.linesep + original_log_line_prefix + data]
                 else:
-                    sorted_log_lines = [str(self.known_values_dict) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
+                    sorted_log_lines = [str(self.known_values_dict) + os.linesep + original_log_line_prefix + data]
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected', sorted_log_lines,
                                        event_data, log_atom, self)
         if self.auto_include_flag and self.next_persist_time is None:

@@ -45,6 +45,13 @@ class MatchFilter(AtomHandlerInterface):
                 affected_log_atom_values = match.match_object
             if self.target_value_list is not None and affected_log_atom_values not in self.target_value_list:
                 continue
+            try:
+                if isinstance(log_atom.raw_data, bytes):
+                    data = log_atom.raw_data.decode()
+                else:
+                    data = repr(log_atom.raw_data)
+            except UnicodeError:
+                data = repr(log_atom.raw_data)
             original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
             analysis_component = {'AffectedLogAtomPaths': [target_path], 'AffectedLogAtomValues': [str(affected_log_atom_values)]}
             if self.output_log_line:
@@ -55,10 +62,9 @@ class MatchFilter(AtomHandlerInterface):
                         match_value = match_value.decode()
                     match_paths_values[match_path] = match_value
                 analysis_component['ParsedLogAtom'] = match_paths_values
-                sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix + repr(
-                    log_atom.raw_data)]
+                sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix + data]
             else:
-                sorted_log_lines = [original_log_line_prefix + repr(log_atom.raw_data)]
+                sorted_log_lines = [original_log_line_prefix + data]
             event_data = {'AnalysisComponent': analysis_component}
             for listener in self.anomaly_event_handlers:
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Log Atom Filtered',

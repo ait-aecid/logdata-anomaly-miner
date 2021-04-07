@@ -174,16 +174,23 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                 affected_log_atom_values = []
                 for value, overdue_time, interval in missing_value_list:
                     e = {}
+                    try:
+                        if isinstance(value, bytes):
+                            data = value.decode()
+                        else:
+                            data = repr(value)
+                    except UnicodeError:
+                        data = repr(value)
                     if self.__class__.__name__ == 'MissingMatchPathValueDetector':
                         e['TargetPathList'] = self.target_path_list
-                        message_part.append('  %s: %s overdue %ss (interval %s)' % (self.target_path_list, repr(value), overdue_time,
+                        message_part.append('  %s: %s overdue %ss (interval %s)' % (self.target_path_list, data, overdue_time,
                                             interval))
                     else:
                         target_paths = ''
                         for target_path in self.target_path_list:
                             target_paths += target_path + ', '
                         e['TargetPathList'] = self.target_path_list
-                        message_part.append('  %s: %s overdue %ss (interval %s)' % (target_paths[:-2], repr(value), overdue_time, interval))
+                        message_part.append('  %s: %s overdue %ss (interval %s)' % (target_paths[:-2], data, overdue_time, interval))
                     e['Value'] = str(value)
                     e['OverdueTime'] = str(overdue_time)
                     e['Interval'] = str(interval)

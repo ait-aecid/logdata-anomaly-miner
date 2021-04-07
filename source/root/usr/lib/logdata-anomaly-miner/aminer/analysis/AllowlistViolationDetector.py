@@ -52,6 +52,13 @@ class AllowlistViolationDetector(AtomHandlerInterface):
         analysis_component = {'AffectedLogAtomPathes': list(log_atom.parser_match.get_match_dictionary()),
                               'AffectedLogAtomValues': [log_atom.raw_data.decode()]}
         original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
+        try:
+            if isinstance(log_atom.raw_data, bytes):
+                data = log_atom.raw_data.decode()
+            else:
+                data = repr(log_atom.raw_data)
+        except UnicodeError:
+            data = repr(log_atom.raw_data)
         if self.output_log_line:
             match_paths_values = {}
             for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
@@ -69,9 +76,9 @@ class AllowlistViolationDetector(AtomHandlerInterface):
                 match_paths_values[match_path] = match_value
             analysis_component['ParsedLogAtom'] = match_paths_values
             sorted_log_lines = [
-                log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
+                log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix + data]
         else:
-            sorted_log_lines = [original_log_line_prefix + repr(log_atom.raw_data)]
+            sorted_log_lines = [original_log_line_prefix + data]
         event_data['AnalysisComponent'] = analysis_component
         for listener in self.anomaly_event_handlers:
             listener.receive_event('Analysis.%s' % self.__class__.__name__, 'No allowlisting for current atom', sorted_log_lines,

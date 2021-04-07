@@ -156,12 +156,19 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
 
             analysis_component = {'AffectedLogAtomValues': [str(i) for i in list(id_dict_entry.values())]}
             event_data = {'AnalysisComponent': analysis_component}
+            try:
+                if isinstance(log_atom.raw_data, bytes):
+                    data = log_atom.raw_data.decode()
+                else:
+                    data = repr(log_atom.raw_data)
+            except UnicodeError:
+                data = repr(log_atom.raw_data)
             original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
             if self.output_log_line:
                 sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + repr(
-                    id_dict_entry) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
+                    id_dict_entry) + os.linesep + original_log_line_prefix + data]
             else:
-                sorted_log_lines = [repr(id_dict_entry) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
+                sorted_log_lines = [repr(id_dict_entry) + os.linesep + original_log_line_prefix + data]
             for listener in self.anomaly_event_handlers:
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected', sorted_log_lines,
                                        event_data, log_atom, self)

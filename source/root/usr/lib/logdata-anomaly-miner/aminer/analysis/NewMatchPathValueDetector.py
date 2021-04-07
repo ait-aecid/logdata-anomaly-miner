@@ -79,6 +79,13 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                     res = {target_path: match.match_object.decode()}
                 else:
                     res = {target_path: match.match_object}
+                try:
+                    if isinstance(log_atom.raw_data, bytes):
+                        data = log_atom.raw_data.decode()
+                    else:
+                        data = repr(log_atom.raw_data)
+                except UnicodeError:
+                    data = repr(log_atom.raw_data)
                 original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
                 if self.output_log_line:
                     match_paths_values = {}
@@ -89,9 +96,9 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                         match_paths_values[match_path] = match_value
                     analysis_component['ParsedLogAtom'] = match_paths_values
                     sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + str(
-                        res) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
+                        res) + os.linesep + original_log_line_prefix + data]
                 else:
-                    sorted_log_lines = [str(res) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
+                    sorted_log_lines = [str(res) + os.linesep + original_log_line_prefix + data]
                 event_data = {'AnalysisComponent': analysis_component}
                 for listener in self.anomaly_event_handlers:
                     listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New value(s) detected', sorted_log_lines, event_data,

@@ -27,6 +27,13 @@ class SimpleUnparsedAtomHandler(AtomHandlerInterface):
         if log_atom.is_parsed():
             return False
         event_data = {}
+        try:
+            if isinstance(log_atom.raw_data, bytes):
+                data = log_atom.raw_data.decode()
+            else:
+                data = repr(log_atom.raw_data)
+        except UnicodeError:
+            data = repr(log_atom.raw_data)
         for listener in self.event_handlers:
-            listener.receive_event('Input.UnparsedAtomHandler', 'Unparsed atom received', [log_atom.raw_data], event_data, log_atom, self)
+            listener.receive_event('Input.UnparsedAtomHandler', 'Unparsed atom received', [data], event_data, log_atom, self)
         return True

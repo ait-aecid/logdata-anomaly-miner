@@ -272,6 +272,13 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     rule.rule_trigger_timestamps.popleft()
                     self.forward_rule_queue.popleft()
                     if not rule.evaluate_rule():
+                        try:
+                            if isinstance(log_atom.raw_data, bytes):
+                                data = log_atom.raw_data.decode()
+                            else:
+                                data = repr(log_atom.raw_data)
+                        except UnicodeError:
+                            data = repr(log_atom.raw_data)
                         original_log_line_prefix = self.aminer_config.config_properties.get(
                             CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
                         tmp_string = 'Rule: %s -> %s\n  Expected: %s/%s\n  Observed: %s/%s' % (
@@ -279,9 +286,9 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                                         str(rule.max_observations), str(sum(rule.rule_observations)),
                                         str(len(rule.rule_observations)))
                         if self.output_log_line:
-                            sorted_log_lines = [tmp_string + '\n' + original_log_line_prefix + repr(log_atom.raw_data)]
+                            sorted_log_lines = [tmp_string + '\n' + original_log_line_prefix + data]
                         else:
-                            sorted_log_lines = [tmp_string + repr(log_atom.raw_data)]
+                            sorted_log_lines = [tmp_string + data]
                         for listener in self.anomaly_event_handlers:
                             implied_event = None
                             trigger_event = None
@@ -325,6 +332,13 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     else:
                         rule.add_rule_observation(0)
                         if not rule.evaluate_rule():
+                            try:
+                                if isinstance(log_atom.raw_data, bytes):
+                                    data = log_atom.raw_data.decode()
+                                else:
+                                    data = repr(log_atom.raw_data)
+                            except UnicodeError:
+                                data = repr(log_atom.raw_data)
                             original_log_line_prefix = self.aminer_config.config_properties.get(
                                 CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
                             tmp_string = 'Rule: %s <- %s\n  Expected: %s/%s\n  Observed: %s/%s' % (
@@ -332,9 +346,9 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                                             str(rule.max_observations), str(sum(rule.rule_observations)),
                                             str(len(rule.rule_observations)))
                             if self.output_log_line:
-                                sorted_log_lines = [tmp_string + '\n' + original_log_line_prefix + repr(log_atom.raw_data)]
+                                sorted_log_lines = [tmp_string + '\n' + original_log_line_prefix + data]
                             else:
-                                sorted_log_lines = [tmp_string + repr(log_atom.raw_data)]
+                                sorted_log_lines = [tmp_string + data]
                             for listener in self.anomaly_event_handlers:
                                 implied_event = None
                                 trigger_event = None

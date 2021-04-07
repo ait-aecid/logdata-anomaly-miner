@@ -148,13 +148,20 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 # Compare log event frequency of previous and current time window
                 if occurrences < round(self.counts_prev[log_ev] * self.confidence_factor) or \
                    occurrences > round(self.counts_prev[log_ev] / self.confidence_factor):
+                    try:
+                        if isinstance(log_atom.raw_data, bytes):
+                            data = log_atom.raw_data.decode()
+                        else:
+                            data = repr(log_atom.raw_data)
+                    except UnicodeError:
+                        data = repr(log_atom.raw_data)
                     if self.output_log_line:
                         original_log_line_prefix = self.aminer_config.config_properties.get(
                             CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
                         sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix +
-                                            repr(log_atom.raw_data)]
+                                            data]
                     else:
-                        sorted_log_lines = [repr(log_atom.raw_data)]
+                        sorted_log_lines = [data]
                     confidence = 1 - min(occurrences, self.counts_prev[log_ev]) / max(occurrences, self.counts_prev[log_ev])
                     analysis_component = {'AffectedLogAtomPaths': self.target_path_list, 'AffectedLogAtomValues': list(log_ev)}
                     frequency_info = {'ExpectedLogAtomValuesFrequency': self.counts_prev[log_ev], 'LogAtomValuesFrequency': occurrences,

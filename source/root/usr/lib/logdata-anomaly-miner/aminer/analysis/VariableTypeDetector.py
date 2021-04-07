@@ -1910,7 +1910,14 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         """Print the initial variable types."""
         if self.silence_output_without_confidence or self.silence_output_except_indicator:
             return
-        message = 'Initial detection of varTypes in lines like %s:' % repr(log_atom.raw_data)
+        try:
+            if isinstance(log_atom.raw_data, bytes):
+                data = log_atom.raw_data.decode()
+            else:
+                data = repr(log_atom.raw_data)
+        except UnicodeError:
+            data = repr(log_atom.raw_data)
+        message = 'Initial detection of varTypes in lines like %s:' % data
         tmp_string = ''
         type_info = {}
 
