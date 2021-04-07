@@ -564,7 +564,8 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
         """
         return None
 
-    def get_match_element(self, path, match_context):
+    @typic.al(strict=True)
+    def get_match_element(self, path: str, match_context):
         """
         Check if the data to match within the content is suitable to be parsed by any of the supplied date formats.
         @return On match return a match_object containing a tuple of the datetime object and the seconds since 1970. When not matching,
