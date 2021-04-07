@@ -13,6 +13,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import base64
 import logging
+import typic
 import re
 from aminer import AminerConfig
 from aminer.parsing.ModelElementInterface import ModelElementInterface
@@ -22,11 +23,8 @@ from aminer.parsing.MatchElement import MatchElement
 class Base64StringModelElement(ModelElementInterface):
     """This class just tries to strip off as many base64 bytes as possible from a given data string."""
 
-    def __init__(self, element_id):
-        if not isinstance(element_id, str):
-            msg = "element_id has to be of the type string."
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
+    @typic.al(strict=True)
+    def __init__(self, element_id: str):
         if len(element_id) < 1:
             msg = "element_id must not be empty."
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
@@ -45,7 +43,8 @@ class Base64StringModelElement(ModelElementInterface):
         """
         return None
 
-    def get_match_element(self, path, match_context):
+    @typic.al(strict=True)
+    def get_match_element(self, path: str, match_context):
         """
         Find the maximum number of bytes forming a integer number according to the parameters specified.
         @return a match when at least one byte being a digit was found.

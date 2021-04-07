@@ -1,4 +1,5 @@
 import unittest
+from typic import ConstraintValueError
 from aminer.parsing.Base64StringModelElement import Base64StringModelElement
 from unit.TestBase import TestBase, DummyMatchContext
 
@@ -96,43 +97,43 @@ class Base64StringModelElementTest(TestBase):
 
         # None element_id
         element_id = None
-        self.assertRaises(TypeError, Base64StringModelElement, element_id)
+        self.assertRaises(ConstraintValueError, Base64StringModelElement, element_id)
 
         # bytes element_id is not allowed
         element_id = b"path"
-        self.assertRaises(TypeError, Base64StringModelElement, element_id)
+        self.assertRaises(ConstraintValueError, Base64StringModelElement, element_id)
 
         # integer element_id is not allowed
         element_id = 123
-        self.assertRaises(TypeError, Base64StringModelElement, element_id)
+        self.assertRaises(ConstraintValueError, Base64StringModelElement, element_id)
 
         # float element_id is not allowed
         element_id = 123.22
-        self.assertRaises(TypeError, Base64StringModelElement, element_id)
+        self.assertRaises(ConstraintValueError, Base64StringModelElement, element_id)
 
         # boolean element_id is not allowed
         element_id = True
-        self.assertRaises(TypeError, Base64StringModelElement, element_id)
+        self.assertRaises(ConstraintValueError, Base64StringModelElement, element_id)
 
         # dict element_id is not allowed
         element_id = {"id": "path"}
-        self.assertRaises(TypeError, Base64StringModelElement, element_id)
+        self.assertRaises(ConstraintValueError, Base64StringModelElement, element_id)
 
         # list element_id is not allowed
         element_id = ["path"]
-        self.assertRaises(TypeError, Base64StringModelElement, element_id)
+        self.assertRaises(ConstraintValueError, Base64StringModelElement, element_id)
 
         # empty list element_id is not allowed
         element_id = []
-        self.assertRaises(TypeError, Base64StringModelElement, element_id)
+        self.assertRaises(ConstraintValueError, Base64StringModelElement, element_id)
 
         # empty tuple element_id is not allowed
         element_id = ()
-        self.assertRaises(TypeError, Base64StringModelElement, element_id)
+        self.assertRaises(ConstraintValueError, Base64StringModelElement, element_id)
 
         # empty set element_id is not allowed
         element_id = set()
-        self.assertRaises(TypeError, Base64StringModelElement, element_id)
+        self.assertRaises(ConstraintValueError, Base64StringModelElement, element_id)
 
     def test11get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""

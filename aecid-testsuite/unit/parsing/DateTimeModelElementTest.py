@@ -2,6 +2,7 @@ import unittest
 import logging
 import pytz
 import locale
+from typic import ConstraintValueError
 from io import StringIO
 from aminer.parsing.DateTimeModelElement import DateTimeModelElement
 from unit.TestBase import TestBase, DummyMatchContext, initialize_loggers
@@ -417,47 +418,47 @@ class DateTimeModelElementTest(TestBase):
         date_format = b"%d.%m.%Y %H:%M:%S"
         # empty element_id
         element_id = ""
-        self.assertRaises(ValueError, DateTimeModelElement, element_id, date_format)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, element_id, date_format)
 
         # None element_id
         element_id = None
-        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, element_id, date_format)
 
         # bytes element_id is not allowed
         element_id = b"path"
-        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, element_id, date_format)
 
         # integer element_id is not allowed
         element_id = 123
-        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, element_id, date_format)
 
         # float element_id is not allowed
         element_id = 123.22
-        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, element_id, date_format)
 
         # boolean element_id is not allowed
         element_id = True
-        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, element_id, date_format)
 
         # dict element_id is not allowed
         element_id = {"id": "path"}
-        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, element_id, date_format)
 
         # list element_id is not allowed
         element_id = ["path"]
-        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, element_id, date_format)
 
         # empty list element_id is not allowed
         element_id = []
-        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, element_id, date_format)
 
         # empty tuple element_id is not allowed
         element_id = ()
-        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, element_id, date_format)
 
         # empty set element_id is not allowed
         element_id = set()
-        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, element_id, date_format)
 
     def test21date_format_input_validation(self):
         """Check if date_format is validated and only valid values can be entered."""
@@ -485,17 +486,17 @@ class DateTimeModelElementTest(TestBase):
         for c in allowed_format_specifiers.replace(b"%", b"").replace(b"z", b""):
             self.assertRaises(ValueError, DateTimeModelElement, self.id_, b"%" + str(chr(c)).encode() + b"%" + str(chr(c)).encode())
 
-        self.assertRaises(ValueError, DateTimeModelElement, self.id_, b"")  # empty date_format
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, None)  # None date_format
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, "")  # string date_format is not allowed
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, 123)  # integer date_format is not allowed
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, 123.22)  # float date_format is not allowed
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, True)  # boolean date_format is not allowed
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, {"id": "path"})  # dict date_format is not allowed
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, ["path"])  # list date_format is not allowed
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, [])  # empty list date_format is not allowed
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, ())  # empty tuple date_format is not allowed
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, set())  # empty set date_format is not allowed
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"")  # empty date_format
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, None)  # None date_format
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, "")  # string date_format is not allowed
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, 123)  # integer date_format is not allowed
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, 123.22)  # float date_format is not allowed
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, True)  # boolean date_format is not allowed
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, {"id": "path"})  # dict date_format is not allowed
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, ["path"])  # list date_format is not allowed
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, [])  # empty list date_format is not allowed
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, ())  # empty tuple date_format is not allowed
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, set())  # empty set date_format is not allowed
 
     def test22time_zone_input_validation(self):
         """Check if time_zone is validated and only valid values can be entered."""
@@ -505,16 +506,16 @@ class DateTimeModelElementTest(TestBase):
         for tz in pytz.all_timezones:
             DateTimeModelElement(self.id_, b"%d.%m.%Y %H:%M:%S", pytz.timezone(tz))
 
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", b"UTC")
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", "UTC")
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", 1)
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", 1.25)
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", True)
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", {"time_zone": timezone.utc})
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", [timezone.utc])
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", [])
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", set())
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", ())
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", b"UTC")
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", "UTC")
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", 1)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", 1.25)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", True)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", {"time_zone": timezone.utc})
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", [timezone.utc])
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", [])
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", set())
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", ())
 
     def test23text_locale_input_validation(self):
         """
@@ -523,15 +524,15 @@ class DateTimeModelElementTest(TestBase):
         """
         DateTimeModelElement(self.id_, b"%d.%m %H:%M:%S", timezone.utc, "en_US.UTF-8")
         DateTimeModelElement(self.id_, b"%d.%m %H:%M:%S", timezone.utc, ("en_US", "UTF-8"))
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m %H:%M:%S", timezone.utc, 1)
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m %H:%M:%S", timezone.utc, 1.2)
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m %H:%M:%S", timezone.utc, True)
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m %H:%M:%S", timezone.utc, ["en_US", "UTF-8"])
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m %H:%M:%S", timezone.utc, {"en_US": "UTF-8"})
-        self.assertRaises(ValueError, DateTimeModelElement, self.id_, b"%d.%m %H:%M:%S", timezone.utc, tuple("en_US.UTF-8"))
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m %H:%M:%S", timezone.utc, set())
-        self.assertRaises(ValueError, DateTimeModelElement, self.id_, b"%d.%m %H:%M:%S", timezone.utc, ())
-        self.assertRaises(ValueError, DateTimeModelElement, self.id_, b"%d.%m %H:%M:%S", timezone.utc, ("en_US", "UTF-8", "de_AT", "UTF-8"))
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m %H:%M:%S", timezone.utc, 1)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m %H:%M:%S", timezone.utc, 1.2)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m %H:%M:%S", timezone.utc, True)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m %H:%M:%S", timezone.utc, ["en_US", "UTF-8"])
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m %H:%M:%S", timezone.utc, {"en_US": "UTF-8"})
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m %H:%M:%S", timezone.utc, tuple("en_US.UTF-8"))
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m %H:%M:%S", timezone.utc, set())
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m %H:%M:%S", timezone.utc, ())
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m %H:%M:%S", timezone.utc, ("en_US", "UTF-8", "de_AT", "UTF-8"))
 
     def test24start_year_input_validation(self):
         """Check if start_year is validated."""
@@ -539,30 +540,30 @@ class DateTimeModelElementTest(TestBase):
         self.assertEqual(dtme.start_year, datetime.now().year)
         DateTimeModelElement(self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, 2020)
         DateTimeModelElement(self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, -630)
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, "2020")
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, True)
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, 1.25)
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, [2020])
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, [])
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, {"key": 2020})
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, set())
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, ())
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, "2020")
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, True)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, 1.25)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, [2020])
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, [])
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, {"key": 2020})
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, set())
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, ())
 
     def test25max_time_jump_seconds_input_validation(self):
         """Check if max_time_jump_seconds is validated."""
         dtme = DateTimeModelElement(self.id_, b"%d.%m %H:%M:%S", timezone.utc, None, None)
         self.assertEqual(dtme.max_time_jump_seconds, 86400)
         DateTimeModelElement(self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, 100000)
-        self.assertRaises(ValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, -1)
-        self.assertRaises(ValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, 0)
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, "100000")
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, True)
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, 1.25)
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, [2020])
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, [])
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, {"key": 2020})
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, ())
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, set())
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, -1)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, 0)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, "100000")
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, True)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, 1.25)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, [2020])
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, [])
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, {"key": 2020})
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, ())
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, set())
 
     def test26get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""

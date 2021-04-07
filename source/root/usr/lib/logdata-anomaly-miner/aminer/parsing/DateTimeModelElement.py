@@ -17,8 +17,10 @@ import sys
 import time
 import logging
 import locale
+import typic
+from typing import Union
 from dateutil.parser import parse
-from datetime import timezone, datetime
+from datetime import timezone, datetime, tzinfo
 
 from aminer import AminerConfig
 from aminer.parsing.ModelElementInterface import ModelElementInterface
@@ -68,8 +70,10 @@ class DateTimeModelElement(ModelElementInterface):
     determine the length of the parsed string.
     """
 
+    @typic.al(strict=True)
     # skipcq: PYL-W0613
-    def __init__(self, element_id, date_format, time_zone=None, text_locale=None, start_year=None, max_time_jump_seconds=86400):
+    def __init__(self, element_id: str, date_format: bytes, time_zone: tzinfo = None, text_locale: Union[str, tuple] = None,
+                 start_year: int = None, max_time_jump_seconds: int = 86400):
         """
         Create a DateTimeModelElement to parse dates using a custom, timezone and locale-aware implementation similar to strptime.
         @param date_format, is a byte string that represents the date format for parsing, see Python strptime specification for
@@ -94,28 +98,20 @@ class DateTimeModelElement(ModelElementInterface):
         of values has to be tracked. This value defines the window within that the time may jump between two matches. When not
         within that window, the value is still parsed, corrected to the most likely value but does not change the detection year.
         """
-        if not isinstance(element_id, str):
-            msg = "element_id has to be of the type string."
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
         if len(element_id) < 1:
             msg = "element_id must not be empty."
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
+            raise typic.constraints.error.ConstraintValueError(msg)
         self.element_id = element_id
         self.time_zone = time_zone
         if time_zone is None:
             self.time_zone = timezone.utc
         self.text_locale = text_locale
         if text_locale is not None:
-            if not isinstance(text_locale, str) and not isinstance(text_locale, tuple):
-                msg = "text_locale has to be of the type string or of the type tuple and have the length 2. (locale, encoding)"
-                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
             if isinstance(text_locale, tuple) and len(text_locale) != 2:
                 msg = "text_locale has to be of the type string or of the type tuple and have the length 2. (locale, encoding)"
                 logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-                raise ValueError(msg)
+                raise typic.constraints.error.ConstraintValueError(msg)
             try:
                 old_locale = locale.getdefaultlocale()
                 if old_locale != text_locale:
@@ -134,32 +130,28 @@ class DateTimeModelElement(ModelElementInterface):
         self.tz_specifier_format_length = -1
         self.date_format_parts = None
         self.date_format = date_format
-        if not isinstance(date_format, bytes):
-            msg = "date_format has to be of the type bytes."
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
         if len(date_format) <= 1:
             msg = "At least one date_format specifier must be defined."
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
+            raise typic.constraints.error.ConstraintValueError(msg)
         self.scan_date_format(date_format)
 
-        if start_year is not None and not isinstance(start_year, int) or isinstance(start_year, bool):
+        if start_year is not None and isinstance(start_year, bool):
             msg = "start_year has to be of the type integer."
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
+            raise typic.constraints.error.ConstraintValueError(msg)
         self.start_year = start_year
         if (not self.format_has_year_flag) and (start_year is None):
             self.start_year = time.gmtime(None).tm_year
 
-        if max_time_jump_seconds is not None and not isinstance(max_time_jump_seconds, int) or isinstance(max_time_jump_seconds, bool):
+        if max_time_jump_seconds is not None and isinstance(max_time_jump_seconds, bool):
             msg = "max_time_jump_seconds has to be of the type integer."
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
+            raise typic.constraints.error.ConstraintValueError(msg)
         if max_time_jump_seconds <= 0:
             msg = "max_time_jump_seconds must not be lower than 1 second."
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
+            raise typic.constraints.error.ConstraintValueError(msg)
         self.max_time_jump_seconds = max_time_jump_seconds
         self.last_parsed_seconds = 0
         self.epoch_start_time = datetime.fromtimestamp(0, self.time_zone)
