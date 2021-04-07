@@ -90,7 +90,8 @@ class EventSequenceDetectorTest(TestBase):
         # Expected output: New sequence (a, b) detected, added to known sequences
         event_sequence_detector.receive_atom(log_atom_2)
         self.assertEqual(test_handler.anomaly, {'AnalysisComponent': {'AffectedLogAtomPaths': ['/model/value'],
-                                                                      'AffectedLogAtomValues': [('a',), ('b',)]}})
+                                                                      'AffectedLogAtomValues': [('a',), ('b',)],
+                                                                      'AffectedIdValues': ['1']}})
         sequences_set.add((('a',), ('b',)))
         self.assertEqual(event_sequence_detector.sequences, sequences_set)
         test_handler.anomaly = None
@@ -107,7 +108,8 @@ class EventSequenceDetectorTest(TestBase):
         # Expected output: New sequence (b, c) detected, added to known sequences
         event_sequence_detector.receive_atom(log_atom_4)
         self.assertEqual(test_handler.anomaly, {'AnalysisComponent': {'AffectedLogAtomPaths': ['/model/value'],
-                                                                      'AffectedLogAtomValues': [('b',), ('c',)]}})
+                                                                      'AffectedLogAtomValues': [('b',), ('c',)],
+                                                                      'AffectedIdValues': ['1']}})
         sequences_set.add((('b',), ('c',)))
         self.assertEqual(event_sequence_detector.sequences, sequences_set)
         test_handler.anomaly = None
