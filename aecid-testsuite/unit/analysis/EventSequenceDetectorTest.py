@@ -32,8 +32,8 @@ class EventSequenceDetectorTest(TestBase):
 
         # Initialize detector for sequence length 2
         test_handler = TestHandler()
-        event_sequence_detector = EventSequenceDetector(self.aminer_config, [test_handler], ['/model/id'], ['/model/value'], 2, 'Default',
-                                                        True, output_log_line=False)
+        event_sequence_detector = EventSequenceDetector(self.aminer_config, [test_handler], ['/model/id'], ['/model/value'], 2, False, -1,
+                                                        'Default', True, output_log_line=False)
         self.analysis_context.register_component(event_sequence_detector, description)
 
         # Prepare log atoms that represent two users (id) that produce interleaved sequence a, b, c
