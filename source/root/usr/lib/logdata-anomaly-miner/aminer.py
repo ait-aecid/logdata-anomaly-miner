@@ -281,7 +281,7 @@ def main():
         if child_user_name is not None:
             child_user_id = getpwnam(child_user_name).pw_uid
         if child_group_name is not None:
-            child_group_id = getgrnam(child_user_name).gr_gid
+            child_group_id = getgrnam(child_group_name).gr_gid
     except:  # skipcq: FLK-E722
         print('Failed to resolve %s or %s' % (AminerConfig.KEY_AMINER_USER, AminerConfig.KEY_AMINER_GROUP), file=sys.stderr)
         sys.exit(1)
