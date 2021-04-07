@@ -520,7 +520,20 @@ def main():
         else:
             msg = 'INFO: No privilege separation when started as unprivileged user'
             print(msg, file=sys.stderr)
-            initialize_loggers(aminer_config, 'aminer', 'aminer')
+            tmp_username = aminer_config.config_properties.get(AminerConfig.KEY_AMINER_USER)
+            tmp_group = aminer_config.config_properties.get(AminerConfig.KEY_AMINER_GROUP)
+            aminer_user_id = -1
+            aminer_group_id = -1
+            try:
+                if tmp_username is not None:
+                    aminer_user_id = getpwnam(tmp_username).pw_uid
+                if tmp_group is not None:
+                    aminer_group_id = getgrnam(tmp_group).gr_gid
+            except:  # skipcq: FLK-E722
+                print('Failed to resolve %s or %s' % (AminerConfig.KEY_AMINER_USER, AminerConfig.KEY_AMINER_GROUP), file=sys.stderr)
+                sys.exit(1)
+
+            initialize_loggers(aminer_config, aminer_user_id, aminer_group_id)
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info(msg)
 
         # Now resolve the specific analysis configuration file (if any).
