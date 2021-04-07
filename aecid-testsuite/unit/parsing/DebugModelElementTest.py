@@ -1,5 +1,6 @@
 import unittest
 import sys
+from typic import ConstraintValueError
 from _io import StringIO
 from aminer.parsing.DebugModelElement import DebugModelElement
 from unit.TestBase import TestBase, DummyMatchContext
@@ -65,43 +66,43 @@ class DebugModelElementTest(TestBase):
         """Check if element_id is validated."""
         # empty element_id
         element_id = ""
-        self.assertRaises(ValueError, DebugModelElement, element_id)
+        self.assertRaises(ConstraintValueError, DebugModelElement, element_id)
 
         # None element_id
         element_id = None
-        self.assertRaises(TypeError, DebugModelElement, element_id)
+        self.assertRaises(ConstraintValueError, DebugModelElement, element_id)
 
         # bytes element_id is not allowed
         element_id = b"path"
-        self.assertRaises(TypeError, DebugModelElement, element_id)
+        self.assertRaises(ConstraintValueError, DebugModelElement, element_id)
 
         # integer element_id is not allowed
         element_id = 123
-        self.assertRaises(TypeError, DebugModelElement, element_id)
+        self.assertRaises(ConstraintValueError, DebugModelElement, element_id)
 
         # float element_id is not allowed
         element_id = 123.22
-        self.assertRaises(TypeError, DebugModelElement, element_id)
+        self.assertRaises(ConstraintValueError, DebugModelElement, element_id)
 
         # dict element_id is not allowed
         element_id = {"id": "path"}
-        self.assertRaises(TypeError, DebugModelElement, element_id)
+        self.assertRaises(ConstraintValueError, DebugModelElement, element_id)
 
         # list element_id is not allowed
         element_id = ["path"]
-        self.assertRaises(TypeError, DebugModelElement, element_id)
+        self.assertRaises(ConstraintValueError, DebugModelElement, element_id)
 
         # empty list element_id is not allowed
         element_id = []
-        self.assertRaises(TypeError, DebugModelElement, element_id)
+        self.assertRaises(ConstraintValueError, DebugModelElement, element_id)
 
         # empty tuple element_id is not allowed
         element_id = ()
-        self.assertRaises(TypeError, DebugModelElement, element_id)
+        self.assertRaises(ConstraintValueError, DebugModelElement, element_id)
 
         # empty set element_id is not allowed
         element_id = set()
-        self.assertRaises(TypeError, DebugModelElement, element_id)
+        self.assertRaises(ConstraintValueError, DebugModelElement, element_id)
 
     def test5get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""

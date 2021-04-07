@@ -14,6 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import sys
 import logging
+import typic
 from aminer import AminerConfig
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.ModelElementInterface import ModelElementInterface
@@ -26,15 +27,12 @@ class DebugModelElement(ModelElementInterface):
     flow (see e.g. FirstMatchModelElement). It will immediately write the current state of the match to stderr for inspection.
     """
 
-    def __init__(self, element_id):
-        if not isinstance(element_id, str):
-            msg = "element_id has to be of the type string."
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
+    @typic.al(strict=True)
+    def __init__(self, element_id: str):
         if len(element_id) < 1:
             msg = "element_id must not be empty."
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
+            raise typic.constraints.error.ConstraintValueError(msg)
         self.element_id = element_id
         # To avoid having those elements hidden in production configuration, write a line every time the class is instantiated.
         msg = "DebugModelElement %s added" % element_id
@@ -52,7 +50,8 @@ class DebugModelElement(ModelElementInterface):
         """
         return None
 
-    def get_match_element(self, path, match_context):
+    @typic.al(strict=True)
+    def get_match_element(self, path: str, match_context):
         """@return Always return a match."""
         msg = 'DebugModelElement path = "%s/%s", unmatched = "%s"' % (path, self.element_id, repr(match_context.match_data))
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info(msg)

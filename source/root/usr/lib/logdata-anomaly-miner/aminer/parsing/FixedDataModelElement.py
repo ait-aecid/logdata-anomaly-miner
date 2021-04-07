@@ -13,6 +13,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import logging
+import typic
 from aminer import AminerConfig
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.ModelElementInterface import ModelElementInterface
@@ -24,23 +25,16 @@ class FixedDataModelElement(ModelElementInterface):
     The model element is considered a match if the fixed string is found at this position in the log atom.
     """
 
-    def __init__(self, element_id, fixed_data):
-        if not isinstance(element_id, str):
-            msg = "element_id has to be of the type string."
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
+    @typic.al(strict=True)
+    def __init__(self, element_id: str, fixed_data: bytes):
         if len(element_id) < 1:
             msg = "element_id must not be empty."
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        if not isinstance(fixed_data, bytes):
-            msg = "fixed_data has to be of the type byte string."
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
+            raise typic.constraints.error.ConstraintValueError(msg)
         if len(fixed_data) < 1:
             msg = "fixed_data must not be empty."
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
+            raise typic.constraints.error.ConstraintValueError(msg)
         self.element_id = element_id
         self.fixed_data = fixed_data
 
@@ -55,7 +49,8 @@ class FixedDataModelElement(ModelElementInterface):
         """
         return None
 
-    def get_match_element(self, path, match_context):
+    @typic.al(strict=True)
+    def get_match_element(self, path: str, match_context):
         """@return None when there is no match, MatchElement otherwise."""
         if not match_context.match_data.startswith(self.fixed_data):
             return None

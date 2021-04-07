@@ -1,4 +1,5 @@
 import unittest
+from typic import ConstraintValueError
 from aminer.parsing.DecimalFloatValueModelElement import DecimalFloatValueModelElement, SIGN_TYPE_NONE, SIGN_TYPE_OPTIONAL,\
     SIGN_TYPE_MANDATORY, PAD_TYPE_NONE, PAD_TYPE_ZERO, PAD_TYPE_BLANK, EXP_TYPE_NONE, EXP_TYPE_OPTIONAL, EXP_TYPE_MANDATORY
 from unit.TestBase import TestBase, DummyMatchContext
@@ -382,43 +383,43 @@ class DecimalFloatValueModelElementTest(TestBase):
         """Check if element_id is validated."""
         # empty element_id
         element_id = ""
-        self.assertRaises(ValueError, DecimalFloatValueModelElement, element_id)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, element_id)
 
         # None element_id
         element_id = None
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, element_id)
 
         # bytes element_id is not allowed
         element_id = b"path"
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, element_id)
 
         # integer element_id is not allowed
         element_id = 123
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, element_id)
 
         # float element_id is not allowed
         element_id = 123.22
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, element_id)
 
         # dict element_id is not allowed
         element_id = {"id": "path"}
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, element_id)
 
         # list element_id is not allowed
         element_id = ["path"]
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, element_id)
 
         # empty list element_id is not allowed
         element_id = []
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, element_id)
 
         # empty tuple element_id is not allowed
         element_id = ()
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, element_id)
 
         # empty set element_id is not allowed
         element_id = set()
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, element_id)
 
     def test10value_sign_type_input_validation(self):
         """Check if value_sign_type is validated."""
@@ -427,34 +428,34 @@ class DecimalFloatValueModelElementTest(TestBase):
         DecimalFloatValueModelElement(self.id_, value_sign_type="mandatory")
 
         value_sign_type = "None"
-        self.assertRaises(ValueError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
 
         value_sign_type = None
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
 
         value_sign_type = b"none"
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
 
         value_sign_type = 123
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
 
         value_sign_type = 123.22
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
 
         value_sign_type = {"value_sign_type": "none"}
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
 
         value_sign_type = ["none"]
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
 
         value_sign_type = []
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
 
         value_sign_type = ()
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
 
         value_sign_type = set()
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
 
     def test11value_pad_type_input_validation(self):
         """Check if value_pad_type is validated."""
@@ -463,34 +464,34 @@ class DecimalFloatValueModelElementTest(TestBase):
         DecimalFloatValueModelElement(self.id_, value_pad_type="blank")
 
         value_pad_type = "None"
-        self.assertRaises(ValueError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
 
         value_pad_type = None
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
 
         value_pad_type = b"none"
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
 
         value_pad_type = 123
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
 
         value_pad_type = 123.22
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
 
         value_pad_type = {"value_sign_type": "none"}
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
 
         value_pad_type = ["none"]
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
 
         value_pad_type = []
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
 
         value_pad_type = ()
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
 
         value_pad_type = set()
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
 
     def test12exponent_type_input_validation(self):
         """Check if exponent_type is validated."""
@@ -499,34 +500,34 @@ class DecimalFloatValueModelElementTest(TestBase):
         DecimalFloatValueModelElement(self.id_, exponent_type="mandatory")
 
         exponent_type = "None"
-        self.assertRaises(ValueError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
 
         exponent_type = None
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
 
         exponent_type = b"none"
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
 
         exponent_type = 123
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
 
         exponent_type = 123.22
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
 
         exponent_type = {"value_sign_type": "none"}
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
 
         exponent_type = ["none"]
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
 
         exponent_type = []
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
 
         exponent_type = ()
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
 
         exponent_type = set()
-        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
+        self.assertRaises(ConstraintValueError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
 
     def test13get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""

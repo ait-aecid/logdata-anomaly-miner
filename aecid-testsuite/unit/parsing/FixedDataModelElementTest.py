@@ -1,4 +1,5 @@
 import unittest
+from typic import ConstraintValueError
 from aminer.parsing.FixedDataModelElement import FixedDataModelElement
 from unit.TestBase import TestBase, DummyMatchContext
 
@@ -40,89 +41,89 @@ class FixedDataModelElementTest(TestBase):
         """Check if element_id is validated."""
         # empty element_id
         element_id = ""
-        self.assertRaises(ValueError, FixedDataModelElement, element_id, self.data)
+        self.assertRaises(ConstraintValueError, FixedDataModelElement, element_id, self.data)
 
         # None element_id
         element_id = None
-        self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
+        self.assertRaises(ConstraintValueError, FixedDataModelElement, element_id, self.data)
 
         # bytes element_id is not allowed
         element_id = b"path"
-        self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
+        self.assertRaises(ConstraintValueError, FixedDataModelElement, element_id, self.data)
 
         # integer element_id is not allowed
         element_id = 123
-        self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
+        self.assertRaises(ConstraintValueError, FixedDataModelElement, element_id, self.data)
 
         # float element_id is not allowed
         element_id = 123.22
-        self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
+        self.assertRaises(ConstraintValueError, FixedDataModelElement, element_id, self.data)
 
         # boolean element_id is not allowed
         element_id = True
-        self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
+        self.assertRaises(ConstraintValueError, FixedDataModelElement, element_id, self.data)
 
         # dict element_id is not allowed
         element_id = {"id": "path"}
-        self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
+        self.assertRaises(ConstraintValueError, FixedDataModelElement, element_id, self.data)
 
         # list element_id is not allowed
         element_id = ["path"]
-        self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
+        self.assertRaises(ConstraintValueError, FixedDataModelElement, element_id, self.data)
 
         # empty list element_id is not allowed
         element_id = []
-        self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
+        self.assertRaises(ConstraintValueError, FixedDataModelElement, element_id, self.data)
 
         # empty tuple element_id is not allowed
         element_id = ()
-        self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
+        self.assertRaises(ConstraintValueError, FixedDataModelElement, element_id, self.data)
 
         # empty set element_id is not allowed
         element_id = set()
-        self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
+        self.assertRaises(ConstraintValueError, FixedDataModelElement, element_id, self.data)
 
     def test6fixed_data_input_validation(self):
         """Check if fixed_data is validated."""
         # empty fixed_string
         fixed_string = b""
-        self.assertRaises(ValueError, FixedDataModelElement, self.id_, fixed_string)
+        self.assertRaises(ConstraintValueError, FixedDataModelElement, self.id_, fixed_string)
 
         # None fixed_string
         fixed_string = None
-        self.assertRaises(TypeError, FixedDataModelElement, self.id_, fixed_string)
+        self.assertRaises(ConstraintValueError, FixedDataModelElement, self.id_, fixed_string)
 
         # string fixed_string is not allowed
         fixed_string = "path"
-        self.assertRaises(TypeError, FixedDataModelElement, self.id_, fixed_string)
+        self.assertRaises(ConstraintValueError, FixedDataModelElement, self.id_, fixed_string)
 
         # integer fixed_string is not allowed
         fixed_string = 123
-        self.assertRaises(TypeError, FixedDataModelElement, self.id_, fixed_string)
+        self.assertRaises(ConstraintValueError, FixedDataModelElement, self.id_, fixed_string)
 
         # float fixed_string is not allowed
         fixed_string = 123.22
-        self.assertRaises(TypeError, FixedDataModelElement, self.id_, fixed_string)
+        self.assertRaises(ConstraintValueError, FixedDataModelElement, self.id_, fixed_string)
 
         # dict fixed_string is not allowed
         fixed_string = {"string": "string"}
-        self.assertRaises(TypeError, FixedDataModelElement, self.id_, fixed_string)
+        self.assertRaises(ConstraintValueError, FixedDataModelElement, self.id_, fixed_string)
 
         # list fixed_string is not allowed
         fixed_string = ["path"]
-        self.assertRaises(TypeError, FixedDataModelElement, self.id_, fixed_string)
+        self.assertRaises(ConstraintValueError, FixedDataModelElement, self.id_, fixed_string)
 
         # empty list fixed_string is not allowed
         fixed_string = []
-        self.assertRaises(TypeError, FixedDataModelElement, self.id_, fixed_string)
+        self.assertRaises(ConstraintValueError, FixedDataModelElement, self.id_, fixed_string)
 
         # empty tuple fixed_string is not allowed
         fixed_string = ()
-        self.assertRaises(TypeError, FixedDataModelElement, self.id_, fixed_string)
+        self.assertRaises(ConstraintValueError, FixedDataModelElement, self.id_, fixed_string)
 
         # empty set fixed_string is not allowed
         fixed_string = set()
-        self.assertRaises(TypeError, FixedDataModelElement, self.id_, fixed_string)
+        self.assertRaises(ConstraintValueError, FixedDataModelElement, self.id_, fixed_string)
 
     def test7get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""

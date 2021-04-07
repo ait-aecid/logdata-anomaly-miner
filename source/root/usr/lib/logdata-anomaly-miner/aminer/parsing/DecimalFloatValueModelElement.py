@@ -13,6 +13,8 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import logging
+import typic
+from typing import Literal
 from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
@@ -36,58 +38,32 @@ class DecimalFloatValueModelElement(ModelElementInterface):
     With padding, the signum has to be found before the padding characters.
     """
 
-    def __init__(self, element_id, value_sign_type=SIGN_TYPE_NONE, value_pad_type=PAD_TYPE_NONE, exponent_type=EXP_TYPE_NONE):
-        if not isinstance(element_id, str):
-            msg = "element_id has to be of the type string."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
+    @typic.al(strict=True)
+    def __init__(self, element_id: str, value_sign_type: Literal["none", "optional", "mandatory"] = SIGN_TYPE_NONE,
+                 value_pad_type: Literal["none", "zero", "blank"] = PAD_TYPE_NONE,
+                 exponent_type: Literal["none", "optional", "mandatory"] = EXP_TYPE_NONE):
         if len(element_id) < 1:
             msg = "element_id must not be empty."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
+            raise typic.constraints.error.ConstraintValueError(msg)
         self.element_id = element_id
 
         self.start_characters = None
-        if not isinstance(value_sign_type, str):
-            msg = 'value_sign_type must be of type string.' % value_sign_type
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
         if value_sign_type == SIGN_TYPE_NONE:
             self.start_characters = b"0123456789"
         elif value_sign_type == SIGN_TYPE_OPTIONAL:
             self.start_characters = b"-0123456789"
         elif value_sign_type == SIGN_TYPE_MANDATORY:
             self.start_characters = b"+-"
-        else:
-            msg = 'Invalid value_sign_type "%s"' % value_sign_type
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
 
         self.pad_characters = b""
-        if not isinstance(value_pad_type, str):
-            msg = 'value_pad_type must be of type string.' % value_sign_type
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
         if value_pad_type == PAD_TYPE_NONE:
             pass
         elif value_pad_type == PAD_TYPE_ZERO:
             self.pad_characters = b"0"
         elif value_pad_type == PAD_TYPE_BLANK:
             self.pad_characters = b" "
-        else:
-            msg = 'Invalid value_pad_type "%s"' % value_sign_type
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
         self.value_pad_type = value_pad_type
-
-        if not isinstance(exponent_type, str):
-            msg = 'exponent_type must be of type string.' % value_sign_type
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if exponent_type not in [EXP_TYPE_NONE, EXP_TYPE_OPTIONAL, EXP_TYPE_MANDATORY]:
-            msg = 'Invalid exponent_type "%s"' % exponent_type
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
         self.exponent_type = exponent_type
 
     def get_id(self):
@@ -101,7 +77,8 @@ class DecimalFloatValueModelElement(ModelElementInterface):
         """
         return None
 
-    def get_match_element(self, path, match_context):
+    @typic.al(strict=True)
+    def get_match_element(self, path: str, match_context):
         """
         Find the maximum number of bytes forming a decimal number according to the parameters specified.
         @return a match when at least one byte being a digit was found
