@@ -522,17 +522,18 @@ class DateTimeModelElementTest(TestBase):
         Check if text_locale is validated and only valid values can be entered.
         An exception has to be raised if the locale is not installed on the system.
         """
-        DateTimeModelElement(self.id_, b"%d.%m %H:%M:%S", timezone.utc, "en_US.UTF-8")
-        DateTimeModelElement(self.id_, b"%d.%m %H:%M:%S", timezone.utc, ("en_US", "UTF-8"))
-        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m %H:%M:%S", timezone.utc, 1)
-        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m %H:%M:%S", timezone.utc, 1.2)
-        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m %H:%M:%S", timezone.utc, True)
-        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m %H:%M:%S", timezone.utc, ["en_US", "UTF-8"])
-        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m %H:%M:%S", timezone.utc, {"en_US": "UTF-8"})
-        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m %H:%M:%S", timezone.utc, tuple("en_US.UTF-8"))
-        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m %H:%M:%S", timezone.utc, set())
-        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m %H:%M:%S", timezone.utc, ())
-        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m %H:%M:%S", timezone.utc, ("en_US", "UTF-8", "de_AT", "UTF-8"))
+        df = b"%d.%m.%Y %H:%M:%S"
+        DateTimeModelElement(self.id_, df, timezone.utc, "en_US.UTF-8")
+        DateTimeModelElement(self.id_, df, timezone.utc, ("en_US", "UTF-8"))
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, df, timezone.utc, 1)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, df, timezone.utc, 1.2)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, df, timezone.utc, True)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, df, timezone.utc, ["en_US", "UTF-8"])
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, df, timezone.utc, {"en_US": "UTF-8"})
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, df, timezone.utc, tuple("en_US.UTF-8"))
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, df, timezone.utc, set())
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, df, timezone.utc, ())
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, df, timezone.utc, ("en_US", "UTF-8", "de_AT", "UTF-8"))
 
     def test24start_year_input_validation(self):
         """Check if start_year is validated."""
@@ -551,19 +552,20 @@ class DateTimeModelElementTest(TestBase):
 
     def test25max_time_jump_seconds_input_validation(self):
         """Check if max_time_jump_seconds is validated."""
-        dtme = DateTimeModelElement(self.id_, b"%d.%m %H:%M:%S", timezone.utc, None, None)
+        df = b"%d.%m.%Y %H:%M:%S"
+        dtme = DateTimeModelElement(self.id_, df, timezone.utc, None, None)
         self.assertEqual(dtme.max_time_jump_seconds, 86400)
-        DateTimeModelElement(self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, 100000)
-        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, -1)
-        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, 0)
-        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, "100000")
-        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, True)
-        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, 1.25)
-        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, [2020])
-        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, [])
-        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, {"key": 2020})
-        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, ())
-        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, b"%d.%m.%Y %H:%M:%S", timezone.utc, None, None, set())
+        DateTimeModelElement(self.id_, df, timezone.utc, None, None, 100000)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, df, timezone.utc, None, None, -1)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, df, timezone.utc, None, None, 0)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, df, timezone.utc, None, None, "100000")
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, df, timezone.utc, None, None, True)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, df, timezone.utc, None, None, 1.25)
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, df, timezone.utc, None, None, [2020])
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, df, timezone.utc, None, None, [])
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, df, timezone.utc, None, None, {"key": 2020})
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, df, timezone.utc, None, None, ())
+        self.assertRaises(ConstraintValueError, DateTimeModelElement, self.id_, df, timezone.utc, None, None, set())
 
     def test26get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""

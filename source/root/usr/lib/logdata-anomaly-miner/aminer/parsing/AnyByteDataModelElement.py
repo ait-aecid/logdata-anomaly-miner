@@ -15,7 +15,6 @@ import logging
 import typic
 from aminer import AminerConfig
 from aminer.parsing.MatchElement import MatchElement
-from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 
 
