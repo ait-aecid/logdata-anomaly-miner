@@ -93,7 +93,7 @@ class Base64StringModelElementTest(TestBase):
         """Check if element_id is validated."""
         # empty element_id
         element_id = ""
-        self.assertRaises(ValueError, Base64StringModelElement, element_id)
+        self.assertRaises(ConstraintValueError, Base64StringModelElement, element_id)
 
         # None element_id
         element_id = None

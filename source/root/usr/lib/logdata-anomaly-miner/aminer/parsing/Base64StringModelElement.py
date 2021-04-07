@@ -28,7 +28,7 @@ class Base64StringModelElement(ModelElementInterface):
         if len(element_id) < 1:
             msg = "element_id must not be empty."
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
+            raise typic.constraints.error.ConstraintValueError(msg)
         self.element_id = element_id
         self.regex = re.compile(b"^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?")
 

@@ -27,7 +27,7 @@ class AnyByteDataModelElement(ModelElementInterface):
         if len(element_id) < 1:
             msg = "element_id must not be empty."
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
+            raise typic.constraints.error.ConstraintValueError(msg)
         self.element_id = element_id
 
     def get_id(self):

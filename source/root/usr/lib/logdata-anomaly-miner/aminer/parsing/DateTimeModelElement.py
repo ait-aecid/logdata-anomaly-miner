@@ -26,6 +26,7 @@ from aminer import AminerConfig
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
 
+
 timezone_info = {
     "A": 1 * 3600, "ACDT": 10.5 * 3600, "ACST": 9.5 * 3600, "ACT": -5 * 3600, "ACWST": 8.75 * 3600, "ADT": 4 * 3600,
     "AEDT": 11 * 3600, "AEST": 10 * 3600, "AET": 10 * 3600, "AFT": 4.5 * 3600, "AKDT": -8 * 3600, "AKST": -9 * 3600, "ALMT": 6 * 3600,
@@ -156,7 +157,8 @@ class DateTimeModelElement(ModelElementInterface):
         self.last_parsed_seconds = 0
         self.epoch_start_time = datetime.fromtimestamp(0, self.time_zone)
 
-    def scan_date_format(self, date_format):
+    @typic.al(strict=True)
+    def scan_date_format(self, date_format: bytes):
         """Scan the date format."""
         if self.date_format_parts is not None:
             msg = "Cannot rescan date format after initialization"
@@ -238,7 +240,8 @@ class DateTimeModelElement(ModelElementInterface):
         """
         return None
 
-    def get_match_element(self, path, match_context):
+    @typic.al(strict=True)
+    def get_match_element(self, path: str, match_context):
         """
         Try to find a match on given data for this model element and all its children.
         When a match is found, the matchContext is updated accordingly.
@@ -441,7 +444,8 @@ class DateTimeModelElement(ModelElementInterface):
         return MatchElement("%s/%s" % (path, self.element_id), date_str, total_seconds, None)
 
     @staticmethod
-    def parse_fraction(value_str):
+    @typic.al(strict=True)
+    def parse_fraction(value_str: bytes):
         """Pass this method as function pointer to the parsing logic."""
         return float(b"0." + value_str)
 
@@ -465,7 +469,8 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
     names to bytes during object creation and just keep the lookup list.
     """
 
-    def __init__(self, element_id, date_formats, start_year=None, max_time_jump_seconds=86400):
+    @typic.al(strict=True)
+    def __init__(self, element_id: str, date_formats: list, start_year: int = None, max_time_jump_seconds: int = 86400):
         """
         Create a new MultiLocaleDateTimeModelElement object.
         @param date_formats this parameter is a list of tuples, each tuple containing information about one date format to support.
@@ -484,28 +489,24 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
         of values has to be tracked. This value defines the window within that the time may jump between two matches. When not
         within that window, the value is still parsed, corrected to the most likely value but does not change the detection year.
         """
-        if not isinstance(element_id, str):
-            msg = "element_id has to be of the type string."
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
         if len(element_id) < 1:
             msg = "element_id must not be empty."
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
+            raise typic.constraints.error.ConstraintValueError(msg)
         self.element_id = element_id
         if len(date_formats) == 0:
             msg = "At least one date_format must be specified."
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
+            raise typic.constraints.error.ConstraintValueError(msg)
 
-        if max_time_jump_seconds is not None and not isinstance(max_time_jump_seconds, int) or isinstance(max_time_jump_seconds, bool):
+        if max_time_jump_seconds is not None and isinstance(max_time_jump_seconds, bool):
             msg = "max_time_jump_seconds has to be of the type integer."
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
+            raise typic.constraints.error.ConstraintValueError(msg)
         if max_time_jump_seconds <= 0:
             msg = "max_time_jump_seconds must not be lower than 1 second."
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
+            raise typic.constraints.error.ConstraintValueError(msg)
         self.max_time_jump_seconds = max_time_jump_seconds
 
         format_has_year_flag = False
@@ -515,22 +516,22 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
             if not isinstance(date_format, tuple):
                 msg = "date_format must be of type tuple."
                 logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
+                raise typic.constraints.error.ConstraintValueError(msg)
             if len(date_format) != 3:
                 msg = "date_format consist of 3 elements."
                 logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-                raise ValueError(msg)
+                raise typic.constraints.error.ConstraintValueError(msg)
             date_format, time_zone, text_locale = date_format
             if isinstance(text_locale, str) and len(text_locale) < 1:
                 msg = "empty text_locale is not allowed."
                 logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-                raise ValueError(msg)
+                raise typic.constraints.error.ConstraintValueError(msg)
             for date_time_model_element in self.date_time_model_elements:
                 if date_format.startswith(date_time_model_element.date_format):
                     msg = "Invalid order of date_formats. %s starts with %s. More specific datetimes would be skipped." % (
                         date_format.decode(), date_time_model_element.date_format.decode())
                     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-                    raise ValueError(msg)
+                    raise typic.constraints.error.ConstraintValueError(msg)
             self.date_time_model_elements.append(DateTimeModelElement(
                 element_id + "/format" + str(i), date_format, time_zone, text_locale, start_year, max_time_jump_seconds))
             format_has_year_flag = format_has_year_flag and self.date_time_model_elements[-1].format_has_year_flag

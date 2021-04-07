@@ -472,47 +472,47 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         date_formats = [(b"%d.%m.%Y %H:%M:%S", None, None)]
         # empty element_id
         element_id = ""
-        self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, element_id, date_formats)
+        self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, element_id, date_formats)
 
         # None element_id
         element_id = None
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, element_id, date_formats)
+        self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, element_id, date_formats)
 
         # bytes element_id is not allowed
         element_id = b"path"
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, element_id, date_formats)
+        self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, element_id, date_formats)
 
         # integer element_id is not allowed
         element_id = 123
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, element_id, date_formats)
+        self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, element_id, date_formats)
 
         # float element_id is not allowed
         element_id = 123.22
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, element_id, date_formats)
+        self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, element_id, date_formats)
 
         # boolean element_id is not allowed
         element_id = True
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, element_id, date_formats)
+        self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, element_id, date_formats)
 
         # dict element_id is not allowed
         element_id = {"id": "path"}
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, element_id, date_formats)
+        self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, element_id, date_formats)
 
         # list element_id is not allowed
         element_id = ["path"]
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, element_id, date_formats)
+        self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, element_id, date_formats)
 
         # empty list element_id is not allowed
         element_id = []
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, element_id, date_formats)
+        self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, element_id, date_formats)
 
         # empty tuple element_id is not allowed
         element_id = ()
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, element_id, date_formats)
+        self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, element_id, date_formats)
 
         # empty set element_id is not allowed
         element_id = set()
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, element_id, date_formats)
+        self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, element_id, date_formats)
 
     def test21date_formats_input_validation(self):
         """Check if date_format is validated and only valid values can be entered."""
@@ -541,8 +541,8 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
             self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, self.id_, [(
                 b"%" + str(chr(c)).encode() + b"%" + str(chr(c)).encode(), None, None)])
 
-        self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%s%z%f", None)])
-        self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"", None, None)])  # empty
+        self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%s%z%f", None)])
+        self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"", None, None)])  # empty
         self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, self.id_, [(None, None, None)])  # None
         self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, self.id_, [("", None, None)])   # string
         self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, self.id_, [(123, None, None)])  # integer
@@ -553,11 +553,11 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, self.id_, [([], None, None)])  # empty list
         self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, self.id_, [((), None, None)])  # empty tuple
         self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, self.id_, [(set(), None, None)])  # empty set
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, self.id_, [[b"%d.%m.%Y %H:%M:%S", None, None]])  # list inst of tuple
-        self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, self.id_, [()])  # empty tuple
-        self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, self.id_, [tuple(b"%d.%m.%Y %H:%M:%S")])  # 1 tuple
-        self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", None)])  # 2 tuple
-        self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", None, None, None)])  # 4 tuple
+        self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, self.id_, [[b"%d.%m.%Y %H:%M:%S", None, None]])  # list inst of tuple
+        self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, self.id_, [()])  # empty tuple
+        self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, self.id_, [tuple(b"%d.%m.%Y %H:%M:%S")])  # 1 tuple
+        self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", None)])  # 2 tuple
+        self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", None, None, None)])  # 4 tuple
 
     def test22time_zone_input_validation(self):
         """Check if time_zone is validated and only valid values can be entered."""
@@ -590,9 +590,9 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         """
         MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m %H:%M:%S", timezone.utc, "en_US.UTF-8")])
         MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m %H:%M:%S", timezone.utc, ("en_US", "UTF-8"))])
-        self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", None, "")])
-        self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", None, tuple("en_US.UTF-8"))])
-        self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", None, ("en_US", "UTF-8", "t"))])
+        self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", None, "")])
+        self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", None, tuple("en_US.UTF-8"))])
+        self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", None, ("en_US", "UTF-8", "t"))])
         self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", None, b"")])
         self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", None, 1)])
         self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", None, 1.2)])
@@ -618,14 +618,14 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         self.assertEqual(multi_locale_dtme.max_time_jump_seconds, 86400)
         MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, 100000)
         MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, 1)
-        self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, -1)
-        self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, 0)
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, "1000")
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, True)
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, 1.25)
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, {
+        self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, -1)
+        self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, 0)
+        self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, "1000")
+        self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, True)
+        self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, 1.25)
+        self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, {
             "key": 2020})
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, [1000])
+        self.assertRaises(ConstraintValueError, MultiLocaleDateTimeModelElement, self.id_, [(b"%d.%m.%Y %H:%M:%S", timezone.utc, None)], None, [1000])
 
     def test26get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""

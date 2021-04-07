@@ -40,7 +40,7 @@ class AnyByteDataModelElementTest(TestBase):
         """Check if element_id is validated."""
         # empty element_id
         element_id = ""
-        self.assertRaises(ValueError, AnyByteDataModelElement, element_id)
+        self.assertRaises(ConstraintValueError, AnyByteDataModelElement, element_id)
 
         # None element_id
         element_id = None
