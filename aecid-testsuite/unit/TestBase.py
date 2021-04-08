@@ -10,8 +10,6 @@ from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
 from aminer.util import PersistenceUtil
 from aminer.util import SecureOSFunctions
 from _io import StringIO
-from pwd import getpwnam
-from grp import getgrnam
 
 
 def initialize_loggers(aminer_config, aminer_user_id, aminer_grp_id):
@@ -124,7 +122,7 @@ class TestBase(unittest.TestCase):
             shutil.rmtree(persistence_dir_name)
         if not os.path.exists(persistence_dir_name):
             os.makedirs(persistence_dir_name)
-        initialize_loggers(self.aminer_config, getpwnam('aminer').pw_uid, getgrnam('aminer').gr_gid)
+        initialize_loggers(self.aminer_config, os.getuid(), os.getgid())
         if isinstance(persistence_dir_name, str):
             persistence_dir_name = persistence_dir_name.encode()
         SecureOSFunctions.secure_open_base_directory(persistence_dir_name, os.O_RDONLY | os.O_DIRECTORY | os.O_PATH)
@@ -144,6 +142,21 @@ class TestBase(unittest.TestCase):
         """Reset the output stream."""
         self.output_stream.seek(0)
         self.output_stream.truncate(0)
+
+    def compare_match_results(self, data, match_element, match_context, id_, path, match_string, match_object, children):
+        """Compare the results of get_match_element() if match_element is not None."""
+        self.assertEqual(match_element.path, "%s/%s" % (path, id_))
+        self.assertEqual(match_element.match_string, match_string)
+        self.assertEqual(match_element.match_object, match_object)
+        self.assertIsNone(match_element.children, children)
+        self.assertEqual(match_context.match_string, match_string)
+        self.assertEqual(match_context.match_data, data[len(match_string):])
+
+    def compare_no_match_results(self, data, match_element, match_context):
+        """Compare the results of get_match_element() if match_element is not None."""
+        self.assertIsNone(match_element, None)
+        self.assertEqual(match_context.match_data, data)
+        self.assertEqual(match_context.match_string, b"")
 
 
 class DummyMatchContext:

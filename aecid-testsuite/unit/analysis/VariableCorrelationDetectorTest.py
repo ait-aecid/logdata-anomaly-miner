@@ -37,7 +37,7 @@ class VariableCorrelationDetectorTest(TestBase):
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         if use_vtd:
             vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size,
-                                       div_thres=0.1, test_ks_int=True, sim_thres=0.3, ks_alpha=self.significance_niveau)
+                                       div_thres=0.1, test_gof_int=True, sim_thres=0.3, gof_alpha=self.significance_niveau)
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1)
         for _ in range(self.dataset_size):
             etd.receive_atom(log_atom)
@@ -50,7 +50,7 @@ class VariableCorrelationDetectorTest(TestBase):
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         if use_vtd:
             vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size,
-                                       div_thres=0.1, test_ks_int=False, sim_thres=0.5, ks_alpha=self.significance_niveau)
+                                       div_thres=0.1, test_gof_int=False, sim_thres=0.5, gof_alpha=self.significance_niveau)
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1)
         for i in range(self.dataset_size):
             stat_data = bytes(str((i % 60) * 0.1), 'utf-8')
@@ -65,7 +65,7 @@ class VariableCorrelationDetectorTest(TestBase):
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         if use_vtd:
             vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size,
-                                       div_thres=0.1, test_ks_int=True, sim_thres=0.3, ks_alpha=self.significance_niveau)
+                                       div_thres=0.1, test_gof_int=True, sim_thres=0.3, gof_alpha=self.significance_niveau)
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1)
         values = []
         for i in range(self.dataset_size):
@@ -83,7 +83,7 @@ class VariableCorrelationDetectorTest(TestBase):
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         if use_vtd:
             vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size,
-                                       div_thres=0.1, test_ks_int=True, sim_thres=0.3, ks_alpha=self.significance_niveau)
+                                       div_thres=0.1, test_gof_int=True, sim_thres=0.3, gof_alpha=self.significance_niveau)
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1)
         values = []
         for i in range(self.dataset_size):
@@ -451,7 +451,7 @@ class VariableCorrelationDetectorTest(TestBase):
             vcd.validate_cor()
             self.assertEqual(len(old_rel_list), len(vcd.rel_list[0]))
             self.assertEqual(len(old_w_rel_list), len(vcd.w_rel_list[0]))
-            for i, i_val in enumerate(vcd.rel_list[0]):
+            for i, rel in enumerate(vcd.rel_list[0]):
                 for r in old_rel_list[i]:
                     cnt = 0
                     for key in r:
@@ -460,12 +460,12 @@ class VariableCorrelationDetectorTest(TestBase):
                     # when the count is smaller than validate_cor_cover_vals_thres in percent, then there should not be any correlations.
                     # h must be multiplied by 10 as it represents 10% steps.
                     if cnt < h * 10:
-                        for val in i_val:
+                        for val in rel:
                             self.assertEqual({}, val)
                     else:
                         self.assertEqual(vcd.rel_list[0], old_rel_list)
 
-            for i, i_val in enumerate(vcd.w_rel_list[0]):
+            for i, rel in enumerate(vcd.w_rel_list[0]):
                 for r in old_w_rel_list[i]:
                     cnt = 0
                     for key in r:
@@ -474,7 +474,7 @@ class VariableCorrelationDetectorTest(TestBase):
                     # when the count is smaller than validate_cor_cover_vals_thres in percent, then there should not be any correlations.
                     # h must be multiplied by 10 as it represents 10% steps.
                     if cnt < h * 10:
-                        for val in i_val:
+                        for val in rel:
                             self.assertEqual({}, val)
                     else:
                         self.assertEqual(vcd.w_rel_list[0], old_w_rel_list)
@@ -520,10 +520,10 @@ class VariableCorrelationDetectorTest(TestBase):
         for w_rel in vcd.w_rel_list[0]:
             for cor in w_rel:
                 deleted = False
-                for i, val in enumerate(expected_similar_correlations):
-                    if cor in val:
-                        index = val.index(cor)
-                        del val[index]
+                for expected_similar_correlation in expected_similar_correlations:
+                    if cor in expected_similar_correlation:
+                        index = expected_similar_correlation.index(cor)
+                        del expected_similar_correlation[index]
                         deleted = True
                         break
                 # if the correlation was not deleted an error is raised and the test fails.
@@ -533,7 +533,7 @@ class VariableCorrelationDetectorTest(TestBase):
 
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size, div_thres=0.1,
-                                   test_ks_int=True, sim_thres=0.1, ks_alpha=self.significance_niveau)
+                                   test_gof_int=True, sim_thres=0.1, gof_alpha=self.significance_niveau)
         vcd = VariableCorrelationDetector(
             self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_validate_cor_meth=['distinctDistr'],
             validate_cor_distinct_thres=0.05, num_init=self.dataset_size)
@@ -556,10 +556,10 @@ class VariableCorrelationDetectorTest(TestBase):
         for w_rel in vcd.w_rel_list[0]:
             for cor in w_rel:
                 deleted = False
-                for i, val in enumerate(expected_unsimilar_correlations):
-                    if cor in val:
-                        index = val.index(cor)
-                        del val[index]
+                for expected_unsimilar_correlation in expected_unsimilar_correlations:
+                    if cor in expected_unsimilar_correlation:
+                        index = expected_unsimilar_correlation.index(cor)
+                        del expected_unsimilar_correlation[index]
                         deleted = True
                         break
                 # if the correlation was not deleted an error is raised and the test fails.
