@@ -36,7 +36,8 @@ class DecimalFloatValueModelElement(ModelElementInterface):
     With padding, the signum has to be found before the padding characters.
     """
 
-    def __init__(self, element_id, value_sign_type=SIGN_TYPE_NONE, value_pad_type=PAD_TYPE_NONE, exponent_type=EXP_TYPE_NONE):
+    def __init__(self, element_id: str, value_sign_type: str = SIGN_TYPE_NONE, value_pad_type: str = PAD_TYPE_NONE,
+                 exponent_type: str = EXP_TYPE_NONE):
         if not isinstance(element_id, str):
             msg = "element_id has to be of the type string."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -101,7 +102,7 @@ class DecimalFloatValueModelElement(ModelElementInterface):
         """
         return None
 
-    def get_match_element(self, path, match_context):
+    def get_match_element(self, path: str, match_context):
         """
         Find the maximum number of bytes forming a decimal number according to the parameters specified.
         @return a match when at least one byte being a digit was found

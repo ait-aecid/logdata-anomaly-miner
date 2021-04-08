@@ -26,7 +26,7 @@ class DebugModelElement(ModelElementInterface):
     flow (see e.g. FirstMatchModelElement). It will immediately write the current state of the match to stderr for inspection.
     """
 
-    def __init__(self, element_id):
+    def __init__(self, element_id: str):
         if not isinstance(element_id, str):
             msg = "element_id has to be of the type string."
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
@@ -52,7 +52,7 @@ class DebugModelElement(ModelElementInterface):
         """
         return None
 
-    def get_match_element(self, path, match_context):
+    def get_match_element(self, path: str, match_context):
         """@return Always return a match."""
         msg = 'DebugModelElement path = "%s/%s", unmatched = "%s"' % (path, self.element_id, repr(match_context.match_data))
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info(msg)
