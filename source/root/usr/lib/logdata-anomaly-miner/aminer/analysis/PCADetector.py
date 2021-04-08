@@ -30,8 +30,8 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     eigen-values and -vectors are computed, which are used to calculate an anomaly-score for new time-windows.
     """
 
-    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, time_window, anomaly_score, variance,
-                 persistence_id='Default', auto_include_flag=False, output_log_line=True):
+    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, window_size, min_anomaly_score, min_variance, num_windows,
+                 persistence_id='Default', auto_include_flag=False, output_log_line=True, ignore_list=None, constraint_list=None):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
         self.target_path_list = target_path_list
         self.anomaly_event_handlers = anomaly_event_handlers
@@ -40,107 +40,98 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.output_log_line = output_log_line
         self.aminer_config = aminer_config
         self.persistence_id = persistence_id
-
-        # window size in seconds
-        self.block_time = time_window
-
-        # threshold for anomaly score
-        self.anomaly_score_threshold = anomaly_score
-
-        # define the threshold for the variance, which is used to get to get the number of components (nComp)
-        self.variance_threshold = variance
-
-        # define flag for first log
+        self.block_time = window_size
+        self.anomaly_score_threshold = min_anomaly_score
+        self.variance_threshold = min_variance
+        self.num_windows = num_windows
         self.first_log = True
-        # define variable for start time of window
         self.start_time = 0
-
-        # define flag, to skip the logic in special cases
-        self.skip = False
+        self.constraint_list = constraint_list
+        self.event_count_matrix = []
+        self.feature_list = []
+        self.ecm = None
+        if self.constraint_list is None:
+            self.constraint_list = []
+        self.ignore_list = ignore_list
+        if self.ignore_list is None:
+            self.ignore_list = []
+        self.log_total = 0
+        self.log_success = 0
+        self.log_windows = 0
 
         self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
 
-        # self.auto_include_flag => learn_mode
-        if self.auto_include_flag is True:
-            if persistence_data is None:
-                self.event_count_matrix = []
-                self.event_count_vector = {}
-            else:
-                self.event_count_matrix = list(persistence_data)
-                self.event_count_vector = copy.deepcopy(self.event_count_matrix[0])
-                self.reset_event_count_vector()
+        if persistence_data is not None:
+            self.event_count_matrix = list(persistence_data)
+            self.compute_pca()
+            self.event_count_vector = copy.deepcopy(self.event_count_matrix[0])
+            self.reset_event_count_vector()
         else:
-            if persistence_data is None:
-                msg = 'persistence_data does not exist, please make sure to set the learn_mode properly.'
-                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
-                self.skip = True
+            if self.target_path_list is None or len(self.target_path_list) == 0:
+                # Only one dimension when events are used instead of values; use empty string as placeholder
+                self.event_count_vector = {'': {}}
             else:
-                self.event_count_matrix = list(persistence_data)
-                self.event_count_vector = copy.deepcopy(self.event_count_matrix[0])
-                self.reset_event_count_vector()
-
-                # extract the features out of ecm into a list
-                self.feature_list = []
-                for events in self.event_count_vector.values():
-                    for feature in events:
-                        self.feature_list.append(feature)
-
-                # extract existing event_counts into array
-                matrix = []
-                for event_count in self.event_count_matrix:
-                    row = []
-                    for event in event_count.values():
-                        row += list(event.values())
-                    matrix.append(row)
-
-                # self.ecm => extracted event_count_matrix (array)
-                self.ecm = np.array(matrix)
-
-                # Principial Component Analysis (PCA)
-                normalized_ecm = (self.ecm - self.ecm.mean()) / self.ecm.std()
-                covariance_matrix = np.cov(normalized_ecm.T)
-                eigen_values, eigen_vectors = np.linalg.eigh(covariance_matrix)
-                self.pca_ecm = normalized_ecm @ eigen_vectors
-                self.eigen_vectors = eigen_vectors
-
-                # number of components (nComp): how many components should be used for reconstruction
-                self.nComp = self.get_nComp(eigen_values)
-
-                # PCA Inverse with only these components which describes the variance_threshold
-                pca_inverse = self.pca_ecm[:, :self.nComp] @ eigen_vectors[:self.nComp, :]
-
-                # Calculate Anomaly-Score (Reconstruction Error) for the whole dataset
-                self.loss = np.sum((normalized_ecm - pca_inverse)**2, axis=1)
+                self.event_count_vector = {}
 
     def receive_atom(self, log_atom):
         """Receive parsed atom and the information about the parser match."""
-        # skip all the logic in special cases
-        if self.skip:
-            return
+        parser_match = log_atom.parser_match
+        self.log_total += 1
 
-        # get parsed log_atom as dictionary
-        match_dict = log_atom.parser_match.get_match_dictionary()
+        # Skip paths from ignore list.
+        for ignore_path in self.ignore_list:
+            if ignore_path in parser_match.get_match_dictionary().keys():
+                return
+
+        if self.target_path_list is None or len(self.target_path_list) == 0:
+            # Event is defined by the full path of log atom.
+            constraint_path_flag = False
+            for constraint_path in self.constraint_list:
+                if parser_match.get_match_dictionary().get(constraint_path) is not None:
+                    constraint_path_flag = True
+                    break
+            if not constraint_path_flag and self.constraint_list != []:
+                return
+            log_event = tuple(parser_match.get_match_dictionary().keys())
+            if log_event in self.event_count_vector['']:
+                self.event_count_vector[''][log_event] += 1
+            else:
+                self.event_count_vector[''][log_event] = 1
+        else:
+            # Event is defined by value combos in paths
+            all_values_none = True
+            for path in self.target_path_list:
+                match = parser_match.get_match_dictionary().get(path)
+                if match is None:
+                    continue
+                if isinstance(match.match_object, bytes):
+                    value = match.match_object.decode()
+                else:
+                    value = str(match.match_object)
+                if value is not None:
+                    all_values_none = False
+                if path in self.event_count_vector:
+                    if value in self.event_count_vector[path]:
+                        self.event_count_vector[path][value] += 1
+                    else:
+                        self.event_count_vector[path][value] = 1
+                else:
+                    self.event_count_vector[path] = {value: 1}
+            if all_values_none is True:
+                return
 
         # get the timestamp of the first log to start the time-window-process (flag)
         if self.first_log:
             self.start_time = log_atom.get_timestamp()
             self.first_log = False
 
-        # get the timestamp (in seconds) of the receveived log_atom.object
         current_time = log_atom.get_timestamp()
-
-        # Build Time-Windows (window_size = block_time)
         while current_time >= (self.start_time + self.block_time):
-
-            # append event_count_vector into event_count_matrix (deepcopy)
-            self.event_count_matrix.append(copy.deepcopy(self.event_count_vector))
-
-            # if learn_mode == False: calculate anomaly-score
-            if self.auto_include_flag is False:
+            # PCA computation only possible when at least 3 vectors are present
+            if len(self.event_count_matrix) > 2:
                 anomalyScore = self.anomalyScore()
-                # if the anomaly score is higher than a given threshold, print out the detection
                 if anomalyScore > self.anomaly_score_threshold:
                     sorted_log_lines = list(log_atom.raw_data)
                     analysis_component = {'AffectedTimeWindow': {'from': self.start_time, 'to': current_time},
@@ -149,28 +140,57 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     for listener in self.anomaly_event_handlers:
                         listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New anomalous timewindow detected',
                                                sorted_log_lines, event_data, log_atom, self)
+            self.log_windows += 1
 
-            # repair self.event_count_matrix, if new values occured
-            self.repair_dict()
-            # set time window to next block_time
+            # Add new values to matrix in learn mode
+            if self.auto_include_flag is True:
+                if len(self.event_count_matrix) >= self.num_windows:
+                    del self.event_count_matrix[0]
+                self.event_count_matrix.append(copy.deepcopy(self.event_count_vector))
+                # PCA computation only possible when at least 3 vectors are present
+                if len(self.event_count_matrix) > 2:
+                    self.repair_dict()
+                    self.compute_pca()
+
+            # Set window end time for next iteration
             self.start_time += self.block_time
-            # reset self.event_count_vector for new time window
+            # Reset count vector for next time window
             self.reset_event_count_vector()
+        self.log_success += 1
 
-        # Let's go through the received log_atom and build the event_count_vector
-        for path, match in match_dict.items():
-            # go trough all features in paths (specified in /etc/aminer/config.yml)
-            if path in self.target_path_list:
-                # create a dict of dicts = {path:{value:counter}}
-                if path not in self.event_count_vector:
-                    self.event_count_vector.update({path: {match.match_string.decode(): 1}})
-                else:
-                    # if value does exist, increment counter
-                    if match.match_string.decode() in self.event_count_vector[path]:
-                        self.event_count_vector[path][match.match_string.decode()] += 1
-                    # if value does not exist, create new value
-                    else:
-                        self.event_count_vector[path][match.match_string.decode()] = 1
+    def compute_pca(self):
+        # extract the features out of ecm into a list
+        self.feature_list = []
+        for events in self.event_count_matrix[0].values():
+            for feature in events:
+                self.feature_list.append(feature)
+
+        # extract existing event_counts into array
+        matrix = []
+        for event_count in self.event_count_matrix:
+            row = []
+            for event in event_count.values():
+                row += list(event.values())
+            matrix.append(row)
+
+        # self.ecm => extracted event_count_matrix (array)
+        self.ecm = np.array(matrix)
+
+        # Principial Component Analysis (PCA)
+        normalized_ecm = (self.ecm - self.ecm.mean()) / self.ecm.std()
+        covariance_matrix = np.cov(normalized_ecm.T)
+        eigen_values, eigen_vectors = np.linalg.eigh(covariance_matrix)
+        self.pca_ecm = normalized_ecm @ eigen_vectors
+        self.eigen_vectors = eigen_vectors
+
+        # number of components (nComp): how many components should be used for reconstruction
+        self.nComp = self.get_nComp(eigen_values)
+
+        # PCA Inverse with only these components which describes the variance_threshold
+        pca_inverse = self.pca_ecm[:, :self.nComp] @ eigen_vectors[:self.nComp, :]
+
+        # Calculate Anomaly-Score (Reconstruction Error) for the whole dataset
+        self.loss = np.sum((normalized_ecm - pca_inverse)**2, axis=1)
 
     def anomalyScore(self):
         """Calculate the anomalyscore for current event_count_vector."""
@@ -188,6 +208,7 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         loss = np.sum((normalized_ecv - pca_inverse_ecv)**2, axis=1)
         # scale the reconstruction error with the min, max of ecm-loss
         loss = (loss - np.min(self.loss)) / (np.max(self.loss) - np.min(self.loss))
+
         return loss
 
     def vector2array(self):
@@ -197,6 +218,7 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             for feature, value in event.items():
                 if feature in self.feature_list:
                     vector.append(value)
+
         return np.array(vector)
 
     def get_nComp(self, eigen_values):
@@ -210,6 +232,7 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         for n, i in enumerate(cumulative_variance_explained):
             if i > (self.variance_threshold*100):
                 return n
+
         return None
 
     def repair_dict(self):
@@ -246,6 +269,7 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         if delta < 0:
             self.do_persist()
             delta = 600
+
         return delta
 
     def do_persist(self):
@@ -253,3 +277,56 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         if self.auto_include_flag is True:
             PersistenceUtil.store_json(self.persistence_file_name, list(self.event_count_matrix))
         self.next_persist_time = None
+
+    def allowlist_event(self, event_type, event_data, allowlisting_data):
+        """
+        Allowlist an event generated by this source using the information emitted when generating the event.
+        @return a message with information about allowlisting
+        @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
+        """
+        if event_type != 'Analysis.%s' % self.__class__.__name__:
+            msg = 'Event not from this source'
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+        if allowlisting_data is not None:
+            msg = 'Allowlisting data not understood by this detector'
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+        if event_data not in self.constraint_list:
+            self.constraint_list.append(event_data)
+        return 'Allowlisted path %s.' % event_data
+
+    def blocklist_event(self, event_type, event_data, blocklisting_data):
+        """
+        Blocklist an event generated by this source using the information emitted when generating the event.
+        @return a message with information about blocklisting
+        @throws Exception when blocklisting of this special event using given blocklisting_data was not possible.
+        """
+        if event_type != 'Analysis.%s' % self.__class__.__name__:
+            msg = 'Event not from this source'
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+        if blocklisting_data is not None:
+            msg = 'Blocklisting data not understood by this detector'
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+        if event_data not in self.ignore_list:
+            self.ignore_list.append(event_data)
+        return 'Blocklisted path %s.' % event_data
+
+    def log_statistics(self, component_name):
+        """
+        Log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
+        @param component_name the name of the component which is printed in the log line.
+        """
+        if STAT_LEVEL == 1:
+            logging.getLogger(STAT_LOG_NAME).info(
+                "'%s' processed %d out of %d log atoms successfully in %d time windows in the last 60"
+                " minutes.", component_name, self.log_success, self.log_total, self.log_windows)
+        elif STAT_LEVEL == 2:
+            logging.getLogger(STAT_LOG_NAME).info(
+                "'%s' processed %d out of %d log atoms successfully in %d time windows in the last 60"
+                " minutes.", component_name, self.log_success, self.log_total, self.log_windows)
+        self.log_success = 0
+        self.log_total = 0
+        self.log_windows = 0

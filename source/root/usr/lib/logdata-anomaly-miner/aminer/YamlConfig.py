@@ -404,9 +404,10 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 tmp_analyser = func(item['path'], parsed_atom_handler_dict, default_parsed_atom_handler=default_parsed_atom_handler)
             elif item['type'].name == 'PCADetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers,
-                                    persistence_id=item['persistence_id'], time_window=item['time_window'],
-                                    anomaly_score=item['anomaly_score'], variance=item['variance'], auto_include_flag=learn,
-                                    output_log_line=item['output_logline'])
+                                    persistence_id=item['persistence_id'], window_size=item['window_size'],
+                                    min_anomaly_score=item['min_anomaly_score'], min_variance=item['min_variance'],
+                                    num_windows=item['num_windows'], auto_include_flag=learn, output_log_line=item['output_logline'],
+                                    ignore_list=item['ignore_list'], constraint_list=item['constraint_list'])
             elif item['type'].name == 'NewMatchPathValueComboDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn,
                                     persistence_id=item['persistence_id'], allow_missing_values_flag=item['allow_missing_values'],
