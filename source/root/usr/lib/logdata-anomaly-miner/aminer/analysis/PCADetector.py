@@ -1,5 +1,6 @@
 """
-This module defines a PCA-detector by creating an Event-Count-Matrix for given.
+This module defines a PCA-detector for event and value counts.
+The component detects anomalies by creating an Event-Count-Matrix for given
 time-windows to calculate an anomaly score for new time windows afterwards by
 using the reconstruction error from the inverse-transformation with restricted
 components of the Principal-Component-Analysis (PCA).
@@ -28,13 +29,29 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 
 class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """
-    This class creates an Event-Count-Matrix by counting events in log_atom for a given time-window from which.
-    eigen-values and -vectors are computed, which are used to calculate an anomaly-score for new time-windows.
+    This class creates events if event or value occurrence counts are outliers in PCA space.
     """
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, window_size, min_anomaly_score, min_variance, num_windows,
                  persistence_id='Default', auto_include_flag=False, output_log_line=True, ignore_list=None, constraint_list=None):
-        """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
+        """
+        Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        @param aminer_config configuration from analysis_context.
+        @param target_path_list parser paths of values to be analyzed. Multiple paths mean that values are analyzed as separate
+        dimensions. When no paths are specified, the events given by the full path list are analyzed (one dimension).
+        @param anomaly_event_handlers for handling events, e.g., print events to stdout.
+        @param window_size the length of the time window for counting in seconds.
+        @param min_anomaly_score the minimum computed outlier score for reporting anomalies. Scores are scaled by training data, i.e.,
+        reasonable minimum scores are >1 to detect outliers with respect to currently trained PCA matrix.
+        @param min_variance the minimum variance covered by the principal components in range [0, 1].
+        @param num_windows the number of time windows in the sliding window approach. Total covered time span = window_size * num_windows.
+        @param persistence_id name of persistency document.
+        @param auto_include_flag specifies whether new count measurements are added to the PCA count matrix.
+        @param output_log_line specifies whether the full parsed log atom should be provided in the output.
+        @param ignore_list list of paths that are not considered for analysis, i.e., events that contain one of these paths are
+        omitted. The default value is [] as None is not iterable.
+        @param constrain_list list of paths that have to be present in the log atom to be analyzed.
+        """
         self.target_path_list = target_path_list
         self.anomaly_event_handlers = anomaly_event_handlers
         self.auto_include_flag = auto_include_flag
@@ -194,8 +211,6 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             for event in event_count.values():
                 row += list(event.values())
             matrix.append(row)
-
-        # self.ecm => extracted event_count_matrix (array)
         self.ecm = np.array(matrix)
 
         # Principial Component Analysis (PCA)
