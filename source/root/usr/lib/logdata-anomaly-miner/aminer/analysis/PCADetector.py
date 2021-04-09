@@ -17,7 +17,9 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import copy
 import numpy as np
 import logging
+import os
 from aminer import AminerConfig
+from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
 from aminer.AnalysisChild import AnalysisContext
 from aminer.util import PersistenceUtil
 from aminer.input.InputInterfaces import AtomHandlerInterface
@@ -43,7 +45,11 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.block_time = window_size
         self.anomaly_score_threshold = min_anomaly_score
         self.variance_threshold = min_variance
-        self.num_windows = num_windows
+        if num_windows < 3:
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning('num_windows must be >= 3!')
+            self.num_windows = 3
+        else:
+            self.num_windows = num_windows
         self.first_log = True
         self.start_time = 0
         self.constraint_list = constraint_list
@@ -66,6 +72,7 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         if persistence_data is not None:
             self.event_count_matrix = list(persistence_data)
             self.compute_pca()
+            # Copy feature list into event count vector and reset counts of each feature
             self.event_count_vector = copy.deepcopy(self.event_count_matrix[0])
             self.reset_event_count_vector()
         else:
@@ -85,6 +92,54 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             if ignore_path in parser_match.get_match_dictionary().keys():
                 return
 
+        # get the timestamp of the first log to start the time-window-process (flag)
+        if self.first_log:
+            self.start_time = log_atom.get_timestamp()
+            self.first_log = False
+
+        current_time = log_atom.get_timestamp()
+        while current_time >= (self.start_time + self.block_time):
+            # PCA computation only possible when at least 3 vectors are present
+            if len(self.event_count_matrix) >= 3:
+                anomalyScore = self.anomalyScore()
+                if anomalyScore > self.anomaly_score_threshold:
+                    if self.output_log_line:
+                        original_log_line_prefix = self.aminer_config.config_properties.get(
+                            CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
+                        sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix +
+                                            repr(log_atom.raw_data)]
+                    else:
+                        sorted_log_lines = [repr(log_atom.raw_data)]
+                    affected_paths = []
+                    affected_values = []
+                    affected_counts = []
+                    for path, count_dict in self.event_count_vector.items():
+                        affected_paths.append(path)
+                        affected_values.append(list(count_dict.keys()))
+                        affected_counts.append(list(count_dict.values()))
+                    analysis_component = {'AffectedLogAtomPaths': affected_paths, 'AffectedLogAtomValues': affected_values,
+                                          'AffectedValueCounts': affected_counts, 'AnomalyScore': anomalyScore[0]}
+                    event_data = {'AnalysisComponent': analysis_component}
+                    for listener in self.anomaly_event_handlers:
+                        listener.receive_event('Analysis.%s' % self.__class__.__name__, 'PCA anomaly detected',
+                                               sorted_log_lines, event_data, log_atom, self)
+            self.log_windows += 1
+
+            # Add new values to matrix in learn mode
+            if self.auto_include_flag is True:
+                if len(self.event_count_matrix) >= self.num_windows:
+                    del self.event_count_matrix[0]
+                self.event_count_matrix.append(copy.deepcopy(self.event_count_vector))
+                # PCA computation only possible when at least 3 vectors are present
+                if len(self.event_count_matrix) >= 3:
+                    self.repair_dict()
+                    self.compute_pca()
+
+            # Set window end time for next iteration
+            self.start_time += self.block_time
+            # Reset count vector for next time window
+            self.reset_event_count_vector()
+
         if self.target_path_list is None or len(self.target_path_list) == 0:
             # Event is defined by the full path of log atom.
             constraint_path_flag = False
@@ -100,7 +155,7 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             else:
                 self.event_count_vector[''][log_event] = 1
         else:
-            # Event is defined by value combos in paths
+            # Event is defined by values in paths
             all_values_none = True
             for path in self.target_path_list:
                 match = parser_match.get_match_dictionary().get(path)
@@ -122,43 +177,10 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             if all_values_none is True:
                 return
 
-        # get the timestamp of the first log to start the time-window-process (flag)
-        if self.first_log:
-            self.start_time = log_atom.get_timestamp()
-            self.first_log = False
-
-        current_time = log_atom.get_timestamp()
-        while current_time >= (self.start_time + self.block_time):
-            # PCA computation only possible when at least 3 vectors are present
-            if len(self.event_count_matrix) > 2:
-                anomalyScore = self.anomalyScore()
-                if anomalyScore > self.anomaly_score_threshold:
-                    sorted_log_lines = list(log_atom.raw_data)
-                    analysis_component = {'AffectedTimeWindow': {'from': self.start_time, 'to': current_time},
-                                          'AnomalyScore': anomalyScore[0]}
-                    event_data = {'AnalysisComponent': analysis_component}
-                    for listener in self.anomaly_event_handlers:
-                        listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New anomalous timewindow detected',
-                                               sorted_log_lines, event_data, log_atom, self)
-            self.log_windows += 1
-
-            # Add new values to matrix in learn mode
-            if self.auto_include_flag is True:
-                if len(self.event_count_matrix) >= self.num_windows:
-                    del self.event_count_matrix[0]
-                self.event_count_matrix.append(copy.deepcopy(self.event_count_vector))
-                # PCA computation only possible when at least 3 vectors are present
-                if len(self.event_count_matrix) > 2:
-                    self.repair_dict()
-                    self.compute_pca()
-
-            # Set window end time for next iteration
-            self.start_time += self.block_time
-            # Reset count vector for next time window
-            self.reset_event_count_vector()
         self.log_success += 1
 
     def compute_pca(self):
+        """Carry out PCA on current event count matrix."""
         # extract the features out of ecm into a list
         self.feature_list = []
         for events in self.event_count_matrix[0].values():
