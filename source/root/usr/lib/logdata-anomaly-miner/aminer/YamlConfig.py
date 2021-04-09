@@ -34,7 +34,6 @@ def load_yaml(config_file):
     global yaml_data
 
     import yaml
-    from cerberus import Validator
     from aminer.ConfigValidator import ConfigValidator, NormalisationValidator
     import os
     with open(config_file) as yamlfile:

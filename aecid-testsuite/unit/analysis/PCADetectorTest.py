@@ -22,9 +22,7 @@ class PCADetectorTest(TestBase):
     """Unittests for the PCADetector."""
 
     def test1_normal_pca_detection(self):
-        """
-        This test case checks the normal detection of value frequencies using PCA.
-        """
+        """This test case checks the normal detection of value frequencies using PCA."""
         description = "Test1PCADetector"
 
         # Initialize detector for analyzing values in one path in time windows of 10 seconds
@@ -126,8 +124,8 @@ class PCADetectorTest(TestBase):
         pca_detector.receive_atom(log_atom_11)
         self.assertFalse(test_handler.anomalies)
         # At this point, the event count matrix contains the counts from the first three windows
-        self.assertEqual(pca_detector.event_count_matrix, 
-            [{'/value': {'a': 2, 'b': 1}}, {'/value': {'a': 1, 'b': 1}}, {'/value': {'a': 1, 'b': 0}}])
+        self.assertEqual(pca_detector.event_count_matrix,
+                         [{'/value': {'a': 2, 'b': 1}}, {'/value': {'a': 1, 'b': 1}}, {'/value': {'a': 1, 'b': 0}}])
         # The count vector contains the counts of the fourth window
         self.assertEqual(pca_detector.event_count_vector, {'/value': {'a': 4, 'b': 1}})
 
@@ -135,11 +133,12 @@ class PCADetectorTest(TestBase):
         # Input: log atoms of window 5
         # Expected output: Anomaly reported on count vector of fourth window
         pca_detector.receive_atom(log_atom_12)
-        self.assertEqual(test_handler.anomalies, [{'AnalysisComponent': {'AffectedLogAtomPaths': ['/value'], 
-            'AffectedLogAtomValues': [['a', 'b']], 'AffectedValueCounts': [[4, 1]], 'AnomalyScore': 9.0}}])
+        self.assertEqual(test_handler.anomalies, [{'AnalysisComponent': {'AffectedLogAtomPaths': ['/value'],
+                         'AffectedLogAtomValues': [['a', 'b']], 'AffectedValueCounts': [[4, 1]], 'AnomalyScore': 9.0}}])
         # Event count matrix is shifted by 1 so that window 0 is removed and window 4 is appended
-        self.assertEqual(pca_detector.event_count_matrix, 
-            [{'/value': {'a': 1, 'b': 1}}, {'/value': {'a': 1, 'b': 0}}, {'/value': {'a': 4, 'b': 1}}])
+        self.assertEqual(pca_detector.event_count_matrix,
+                         [{'/value': {'a': 1, 'b': 1}}, {'/value': {'a': 1, 'b': 0}}, {'/value': {'a': 4, 'b': 1}}])
+
 
 if __name__ == "__main__":
     unittest.main()

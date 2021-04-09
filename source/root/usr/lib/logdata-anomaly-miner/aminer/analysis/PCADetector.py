@@ -28,9 +28,7 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 
 
 class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
-    """
-    This class creates events if event or value occurrence counts are outliers in PCA space.
-    """
+    """This class creates events if event or value occurrence counts are outliers in PCA space."""
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, window_size, min_anomaly_score, min_variance, num_windows,
                  persistence_id='Default', auto_include_flag=False, output_log_line=True, ignore_list=None, constraint_list=None):
