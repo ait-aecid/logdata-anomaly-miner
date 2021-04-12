@@ -351,8 +351,8 @@ class DateTimeModelElement(ModelElementInterface):
                     # There cannot be a wraparound if we do not know any previous time values yet.
                     self.last_parsed_seconds = total_seconds
                 else:
-                    delta = self.last_parsed_seconds - total_seconds
-                    if abs(delta.total_seconds()) <= self.max_time_jump_seconds:
+                    delta_seconds = self.last_parsed_seconds - total_seconds
+                    if abs(delta_seconds) <= self.max_time_jump_seconds:
                         self.last_parsed_seconds = total_seconds
                     else:
                         # This might be the first date value for the next year or one from the previous.
