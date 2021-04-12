@@ -17,8 +17,8 @@ import os
 import logging
 import sys
 
-from aminer import AminerConfig
-from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
+from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
+    STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX, ENCODING
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
@@ -179,7 +179,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
         # Initialize lists used for the tracking of the indicator
         if self.save_statistics:
-            self.statistics_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, 'statistics')
+            self.statistics_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, 'statistics')
             # List of the numbers of total parsed log lines, when an indicator failed. Only used for the statistics
             self.failed_indicators_total = []
             # List of the confidences of the indicators
@@ -262,7 +262,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     nearest = val
             msg = 'Changed the parameter gof_alpha of the VTD from %s to %s to use the pregenerated critical values for the gof-tests' % (
                     self.gof_alpha, nearest)
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
+            logging.getLogger(DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
             self.gof_alpha = nearest
 
@@ -281,7 +281,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     nearest = val
             msg = 'Changed the parameter num_init of the VTD from %s to %s to use the pregenerated critical values for the gof-tests' % (
                     num_init, nearest)
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
+            logging.getLogger(DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
             self.num_init = nearest
 
@@ -298,34 +298,34 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     nearest = val
             msg = 'Changed the parameter num_s_gof_values of the VTD from %s to %s to use pregenerated critical values for the gof-test' % (
                     num_s_gof_values, nearest)
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
+            logging.getLogger(DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
             self.num_s_gof_values = nearest
 
         if self.event_type_detector.min_num_vals < max(self.num_init, self.num_update, self.num_s_gof_values):
             msg = 'Changed the parameter min_num_vals of the VTD from %s to %s to use pregenerated critical values for the gof-test' % (
                     self.event_type_detector.min_num_vals, max(self.num_init, self.num_update, num_s_gof_values))
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
+            logging.getLogger(DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
             self.event_type_detector.min_num_vals = max(self.num_init, self.num_update, self.num_s_gof_values)
 
         if self.event_type_detector.max_num_vals < max(self.num_init, self.num_update, self.num_s_gof_values) + 500:
             msg = 'Changed the parameter max_num_vals of the VTD from %s to %s to use pregenerated critical values for the gof-test' % (
                     self.event_type_detector.max_num_vals, max(self.num_init, self.num_update, self.num_s_gof_values) + 500)
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
+            logging.getLogger(DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
             self.event_type_detector.max_num_vals = max(self.num_init, self.num_update, self.num_s_gof_values) + 500
 
         # Loads the persistence
         self.persistence_id = persistence_id
-        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
+        self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
 
         # Imports the persistence
         if persistence_data is not None:
             self.load_persistence_data(persistence_data)
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
         self.min_mod_ini_uni = 1 / (self.num_init + 1)
         self.min_mod_upd_uni = 1 / (self.num_init + self.num_update + 1)
@@ -417,12 +417,12 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
     def do_timer(self, trigger_time):
         """Check if current ruleset should be persisted."""
         if self.next_persist_time is None:
-            return self.aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
+            return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
         if delta < 0:
             self.do_persist()
-            delta = self.aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
+            delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         return delta
 
     def do_persist(self):
@@ -437,7 +437,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if self.save_statistics:
             PersistenceUtil.store_json(self.statistics_file_name, [
                 self.failed_indicators_total, self.failed_indicators_values, self.failed_indicators_paths, self.failed_indicators])
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def load_persistence_data(self, persistence_data):
         """Extract the persistence data and appends various lists to create a consistent state."""
@@ -486,7 +486,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if self.event_type_detector.num_eventlines[event_index] == self.num_init and self.var_type[event_index][0] == []:
             # Test all variables
 
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s started initial detection of var types.', self.__class__.__name__)
+            logging.getLogger(DEBUG_LOG_NAME).debug('%s started initial detection of var types.', self.__class__.__name__)
             if self.path_list is None:
                 for var_index in range(self.length[event_index]):
                     tmp_var_type = self.detect_var_type(event_index, var_index)
@@ -559,7 +559,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         elif self.event_type_detector.num_eventlines[event_index] > self.num_init and (
                 self.event_type_detector.num_eventlines[event_index] - self.num_init) % self.num_update == 0:
 
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s started update phase of var types.', self.__class__.__name__)
+            logging.getLogger(DEBUG_LOG_NAME).debug('%s started update phase of var types.', self.__class__.__name__)
             # Checks if the updates of the varTypes should be stopped
             if self.update_var_type_bool and (not isinstance(self.num_stop_update, bool)) and (
                     self.event_type_detector.total_records >= self.num_stop_update):
@@ -1912,7 +1912,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             return
         try:
             if isinstance(log_atom.raw_data, bytes):
-                data = log_atom.raw_data.decode()
+                data = log_atom.raw_data.decode(ENCODING)
             else:
                 data = repr(log_atom.raw_data)
         except UnicodeError:
@@ -1937,10 +1937,10 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
         original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
         if self.output_log_line:
-            sorted_log_lines = [tmp_string + original_log_line_prefix + log_atom.raw_data.decode()]
+            sorted_log_lines = [tmp_string + original_log_line_prefix + data]
             analysis_component = {'AffectedLogAtomPaths': list(log_atom.parser_match.get_match_dictionary().keys())}
         else:
-            sorted_log_lines = [tmp_string + log_atom.raw_data.decode()]
+            sorted_log_lines = [tmp_string + data]
             analysis_component = {'AffectedLogAtomPaths': [self.event_type_detector.variable_key_list[event_index][var_index]]}
 
         event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
@@ -1958,6 +1958,13 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
         if (self.silence_output_without_confidence and confidence is None) or self.silence_output_except_indicator:
             return
+        try:
+            if isinstance(log_atom.raw_data, bytes):
+                data = log_atom.raw_data.decode(ENCODING)
+            else:
+                data = repr(log_atom.raw_data)
+        except UnicodeError:
+            data = repr(log_atom.raw_data)
 
         original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
         if self.output_log_line:
@@ -1965,11 +1972,11 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             for x in list(log_atom.parser_match.get_match_dictionary().keys()):
                 tmp_str += '  ' + x + os.linesep
             tmp_str = tmp_str.lstrip('  ')
-            sorted_log_lines = [tmp_str + original_log_line_prefix + log_atom.raw_data.decode()]
+            sorted_log_lines = [tmp_str + original_log_line_prefix + data]
             analysis_component = {'AffectedLogAtomPaths': list(log_atom.parser_match.get_match_dictionary().keys())}
         else:
             sorted_log_lines = [
-                '  ' + self.event_type_detector.variable_key_list[event_index][var_index] + os.linesep + log_atom.raw_data.decode()]
+                '  ' + self.event_type_detector.variable_key_list[event_index][var_index] + os.linesep + data]
             analysis_component = {'AffectedLogAtomPaths': [self.event_type_detector.variable_key_list[event_index][var_index]]}
 
         event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
@@ -1987,6 +1994,13 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         """Print the changed variable types."""
         if self.silence_output_without_confidence or self.silence_output_except_indicator:
             return
+        try:
+            if isinstance(log_atom.raw_data, bytes):
+                data = log_atom.raw_data.decode(ENCODING)
+            else:
+                data = repr(log_atom.raw_data)
+        except UnicodeError:
+            data = repr(log_atom.raw_data)
 
         original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
         if self.output_log_line:
@@ -1994,11 +2008,11 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             for x in list(log_atom.parser_match.get_match_dictionary().keys()):
                 tmp_str += '  ' + x + os.linesep
             tmp_str = tmp_str.lstrip('  ')
-            sorted_log_lines = [tmp_str + original_log_line_prefix + log_atom.raw_data.decode()]
+            sorted_log_lines = [tmp_str + original_log_line_prefix + data]
             analysis_component = {'AffectedLogAtomPaths': list(log_atom.parser_match.get_match_dictionary().keys())}
         else:
             sorted_log_lines = [
-                '  ' + self.event_type_detector.variable_key_list[event_index][var_index] + os.linesep + log_atom.raw_data.decode()]
+                '  ' + self.event_type_detector.variable_key_list[event_index][var_index] + os.linesep + data]
             analysis_component = {'AffectedLogAtomPaths': [self.event_type_detector.variable_key_list[event_index][var_index]]}
 
         event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
@@ -2017,6 +2031,13 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if (self.silence_output_without_confidence and confidence is None) or (
                 self.silence_output_except_indicator and indicator is None):
             return
+        try:
+            if isinstance(log_atom.raw_data, bytes):
+                data = log_atom.raw_data.decode(ENCODING)
+            else:
+                data = repr(log_atom.raw_data)
+        except UnicodeError:
+            data = repr(log_atom.raw_data)
 
         original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
         if self.output_log_line:
@@ -2024,14 +2045,14 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             for x in list(log_atom.parser_match.get_match_dictionary().keys()):
                 tmp_str += '  ' + x + os.linesep
             tmp_str = tmp_str.lstrip('  ')
-            sorted_log_lines = [tmp_str + original_log_line_prefix + log_atom.raw_data.decode()]
+            sorted_log_lines = [tmp_str + original_log_line_prefix + data]
             analysis_component = {'AffectedLogAtomPaths': list(log_atom.parser_match.get_match_dictionary().keys())}
         else:
             tmp_str = ''
             for x in affected_path:
                 tmp_str += '  ' + x + os.linesep
             tmp_str = tmp_str.lstrip('  ')
-            sorted_log_lines = [tmp_str + log_atom.raw_data.decode()]
+            sorted_log_lines = [tmp_str + data]
             analysis_component = {'AffectedLogAtomPaths': affected_path}
 
         event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,

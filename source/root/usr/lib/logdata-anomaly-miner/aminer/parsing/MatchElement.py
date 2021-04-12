@@ -13,7 +13,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import logging
-from aminer import AminerConfig
+from aminer.AminerConfig import DEBUG_LOG_NAME, ENCODING
 
 
 class MatchElement:
@@ -29,7 +29,7 @@ class MatchElement:
         """
         if (not path) and children:
             msg = "Anonymous match may not have children"
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         self.path = path
         self.match_string = match_string
@@ -68,7 +68,7 @@ class MatchElement:
         next_indent = None
         try:
             if isinstance(self.match_object, bytes):
-                data = self.match_object.decode()
+                data = self.match_object.decode(ENCODING)
             else:
                 data = repr(self.match_object)
         except UnicodeError:
@@ -103,9 +103,9 @@ class MatchElement:
         if self.children is not None:
             num_children = len(self.children)
         try:
-            match_string = self.match_string.decode()
+            match_string = self.match_string.decode(ENCODING)
             if isinstance(self.match_object, bytes):
-                match_object = self.match_object.decode()
+                match_object = self.match_object.decode(ENCODING)
             else:
                 match_object = repr(self.match_object)
         except UnicodeError:

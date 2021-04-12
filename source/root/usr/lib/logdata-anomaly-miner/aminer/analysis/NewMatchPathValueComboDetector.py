@@ -17,8 +17,8 @@ import time
 import os
 import logging
 
-from aminer import AminerConfig
-from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
+from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
+    STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX, ENCODING
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.EventInterfaces import EventSourceInterface
 from aminer.input.InputInterfaces import AtomHandlerInterface
@@ -52,7 +52,7 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
         self.log_learned_path_value_combos = 0
         self.log_new_learned_values = []
 
-        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
+        self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         self.next_persist_time = None
         self.known_values_set = set()
         self.load_persistence_data()
@@ -64,7 +64,7 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
         if persistence_data is not None:
             # Set and tuples were stored as list of lists. Transform the inner lists to tuples to allow hash operation needed by set.
             self.known_values_set = {tuple(record) for record in persistence_data}
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     def receive_atom(self, log_atom):
         """
@@ -88,7 +88,7 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
         affected_log_atom_values = []
         for match_value in match_value_list:
             if isinstance(match_value, bytes):
-                match_value = match_value.decode()
+                match_value = match_value.decode(ENCODING)
             affected_log_atom_values.append(str(match_value))
         if match_value_tuple not in self.known_values_set:
             if self.auto_include_flag:
@@ -97,13 +97,13 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
                 self.log_new_learned_values.append(match_value_tuple)
                 if self.next_persist_time is None:
                     self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                        AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
+                        KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
             analysis_component = {'AffectedLogAtomPaths': self.target_path_list, 'AffectedLogAtomValues': affected_log_atom_values}
             event_data = {'AnalysisComponent': analysis_component}
             try:
                 if isinstance(log_atom.raw_data, bytes):
-                    data = log_atom.raw_data.decode()
+                    data = log_atom.raw_data.decode(ENCODING)
                 else:
                     data = repr(log_atom.raw_data)
             except UnicodeError:
@@ -114,7 +114,7 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
                 for match_path, match_element in match_dict.items():
                     match_value = match_element.match_object
                     if isinstance(match_value, bytes):
-                        match_value = match_value.decode()
+                        match_value = match_value.decode(ENCODING)
                     match_paths_values[match_path] = match_value
                 analysis_component['ParsedLogAtom'] = match_paths_values
                 sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + str(
@@ -137,19 +137,19 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted."""
         if self.next_persist_time is None:
-            return self.aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
+            return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
         if delta < 0:
             self.do_persist()
-            delta = self.aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
+            delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
         PersistenceUtil.store_json(self.persistence_file_name, list(self.known_values_set))
         self.next_persist_time = None
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """
@@ -159,11 +159,11 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
         """
         if event_type != 'Analysis.%s' % self.__class__.__name__:
             msg = 'Event not from this source'
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if allowlisting_data is not None:
             msg = 'Allowlisting data not understood by this detector'
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         self.known_values_set.add(event_data)
         return 'Allowlisted path(es) %s with %s.' % (', '.join(self.target_path_list), event_data)

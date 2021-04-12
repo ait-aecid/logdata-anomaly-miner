@@ -57,7 +57,8 @@ import abc
 import logging
 from datetime import datetime
 
-from aminer import AminerConfig
+from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
+    DEBUG_LOG_NAME, ENCODING
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util import PersistenceUtil
@@ -290,12 +291,12 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.output_log_line = output_log_line
         self.aminer_config = aminer_config
 
-        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
+        self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is not None:
             msg = 'No data reading, def merge yet'
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
     def receive_atom(self, log_atom):
@@ -323,7 +324,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
         if self.next_persist_time is None and data_updated_flag:
             self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
+                KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
     def get_time_trigger_class(self):
         """
@@ -335,18 +336,18 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted."""
         if self.next_persist_time is None:
-            return self.aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
+            return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
         if delta < 0:
             self.do_persist()
-            delta = self.aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
+            delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
         self.next_persist_time = None
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def send_report(self, log_atom, timestamp):
         """Send a report to the event handlers."""
@@ -385,7 +386,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
                     match_value = match_element.match_object
                     if isinstance(match_value, bytes):
-                        match_value = match_value.decode()
+                        match_value = match_value.decode(ENCODING)
                     match_paths_values[match_path] = match_value
                 analysis_component['ParsedLogAtom'] = match_paths_values
             d['PropertyPath'] = data_item.property_path
@@ -407,7 +408,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
         self.last_report_time = timestamp
         self.next_report_time = timestamp + self.report_interval
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s sent report.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug('%s sent report.', self.__class__.__name__)
 
 
 class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
@@ -438,12 +439,12 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
         self.output_log_line = output_log_line
         self.aminer_config = aminer_config
 
-        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
+        self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is not None:
             msg = 'No data reading, def merge yet'
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
     def receive_atom(self, log_atom):
@@ -481,7 +482,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
                 match = match_dict.get(mapped_path, None)
                 match_value = match.match_object
                 if isinstance(match.match_object, bytes):
-                    match.match_object = match.match_object.decode()
+                    match.match_object = match.match_object.decode(ENCODING)
                 histogram_mapping[1].property_path = mapped_path
                 histogram_mapping[1].add_value(match_value)
                 histogram_mapping[2] = log_atom.parser_match
@@ -521,7 +522,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
 
         if self.next_persist_time is None:
             self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
+                KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.log_success += 1
 
     def get_time_trigger_class(self):
@@ -534,18 +535,18 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted."""
         if self.next_persist_time is None:
-            return self.aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
+            return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
         if delta < 0:
             self.do_persist()
-            delta = self.aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
+            delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
         self.next_persist_time = None
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def send_report(self, log_atom, timestamp):
         """Send report to event handlers."""
@@ -578,7 +579,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
                     if isinstance(match_value, datetime):
                         match_value = match_value.timestamp()
                     if isinstance(match_value, bytes):
-                        match_value = match_value.decode()
+                        match_value = match_value.decode(ENCODING)
                     match_paths_values[match_path] = match_value
                 analysis_component['ParsedLogAtom'] = match_paths_values
                 bin_definition = {
@@ -593,7 +594,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
             d['PropertyPath'] = data_item.property_path
             report_str += os.linesep + 'Path values "%s":' % '", "'.join(histogram_mapping[0])
             if isinstance(histogram_mapping[2].match_element.match_string, bytes):
-                histogram_mapping[2].match_element.match_string = histogram_mapping[2].match_element.match_string.decode()
+                histogram_mapping[2].match_element.match_string = histogram_mapping[2].match_element.match_string.decode(ENCODING)
             report_str += os.linesep + 'Example: %s' % histogram_mapping[2].match_element.match_string
             if len(res) < histogram_mapping[1].total_elements:
                 res = [''] * histogram_mapping[1].total_elements
@@ -616,4 +617,4 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
 
         self.last_report_time = timestamp
         self.next_report_time = timestamp + self.report_interval
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s sent report.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug('%s sent report.', self.__class__.__name__)

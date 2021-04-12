@@ -15,7 +15,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import os
 
 from aminer.input.InputInterfaces import AtomHandlerInterface
-from aminer.AminerConfig import CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
+from aminer.AminerConfig import CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX, ENCODING
 
 
 class MatchFilter(AtomHandlerInterface):
@@ -40,14 +40,14 @@ class MatchFilter(AtomHandlerInterface):
                 continue
             event_data = {}
             if isinstance(match.match_object, bytes):
-                affected_log_atom_values = match.match_object.decode()
+                affected_log_atom_values = match.match_object.decode(ENCODING)
             else:
                 affected_log_atom_values = match.match_object
             if self.target_value_list is not None and affected_log_atom_values not in self.target_value_list:
                 continue
             try:
                 if isinstance(log_atom.raw_data, bytes):
-                    data = log_atom.raw_data.decode()
+                    data = log_atom.raw_data.decode(ENCODING)
                 else:
                     data = repr(log_atom.raw_data)
             except UnicodeError:
@@ -59,7 +59,7 @@ class MatchFilter(AtomHandlerInterface):
                 for match_path, match_element in match_dict.items():
                     match_value = match_element.match_object
                     if isinstance(match_value, bytes):
-                        match_value = match_value.decode()
+                        match_value = match_value.decode(ENCODING)
                     match_paths_values[match_path] = match_value
                 analysis_component['ParsedLogAtom'] = match_paths_values
                 sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix + data]

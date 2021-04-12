@@ -16,7 +16,7 @@ import os
 
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from datetime import datetime
-from aminer.AminerConfig import CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
+from aminer.AminerConfig import CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX, ENCODING
 
 
 class TimestampsUnsortedDetector(AtomHandlerInterface):
@@ -46,7 +46,7 @@ class TimestampsUnsortedDetector(AtomHandlerInterface):
         if log_atom.get_timestamp() < self.last_timestamp:
             try:
                 if isinstance(log_atom.raw_data, bytes):
-                    data = log_atom.raw_data.decode()
+                    data = log_atom.raw_data.decode(ENCODING)
                 else:
                     data = repr(log_atom.raw_data)
             except UnicodeError:

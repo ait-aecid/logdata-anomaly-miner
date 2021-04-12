@@ -13,7 +13,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import logging
-from aminer import AminerConfig
+from aminer.AminerConfig import DEBUG_LOG_NAME, ENCODING
 from aminer.parsing.MatchElement import MatchElement
 
 
@@ -54,8 +54,8 @@ class DebugMatchContext(MatchContext):
         """Update the context and store debugging information."""
         try:
             if isinstance(self.match_data, bytes):
-                match_data = self.match_data.decode()
-                m_string = match_string.decode()
+                match_data = self.match_data.decode(ENCODING)
+                m_string = match_string.decode(ENCODING)
             else:
                 match_data = repr(self.match_data)
                 m_string = repr(match_string)
@@ -70,7 +70,7 @@ class DebugMatchContext(MatchContext):
         if not self.match_data.startswith(match_string):
             self.debug_info += '  Current data %s does not start with %s\n' % (match_data, m_string)
             msg = 'Illegal state'
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         self.match_data = self.match_data[len(match_string):]
         self.last_match_data = self.match_data
@@ -86,7 +86,7 @@ class DebugMatchContext(MatchContext):
         self.debug_info = ''
         try:
             if isinstance(self.shortest_unmatched_data, bytes):
-                data = self.shortest_unmatched_data.decode()
+                data = self.shortest_unmatched_data.decode(ENCODING)
             else:
                 data = repr(self.shortest_unmatched_data)
         except UnicodeError:

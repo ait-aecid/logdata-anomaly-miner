@@ -13,6 +13,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.parsing.MatchContext import DebugMatchContext
+from aminer.AminerConfig import ENCODING
 
 
 class VerboseUnparsedAtomHandler(AtomHandlerInterface):
@@ -36,7 +37,7 @@ class VerboseUnparsedAtomHandler(AtomHandlerInterface):
         event_data = {'DebugLog': debug_lines}
         try:
             if isinstance(log_atom.raw_data, bytes):
-                data = log_atom.raw_data.decode()
+                data = log_atom.raw_data.decode(ENCODING)
             else:
                 data = repr(log_atom.raw_data)
         except UnicodeError:

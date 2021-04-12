@@ -18,10 +18,9 @@ import time
 import os
 import logging
 
-from aminer import AminerConfig
 from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
 from aminer.util import PersistenceUtil
-from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
+from aminer.AminerConfig import DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX, ENCODING
 
 
 class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
@@ -69,7 +68,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
             # the first lists to tuples to allow hash operation needed by set.
             for value_tuple, extra_data in persistence_data:
                 self.known_values_dict[tuple(value_tuple)] = extra_data
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     def receive_atom(self, log_atom):
         """
@@ -109,7 +108,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         metadata = {}
         for match_value in list(match_value_tuple):
             if isinstance(match_value, bytes):
-                match_value = match_value.decode()
+                match_value = match_value.decode(ENCODING)
             affected_log_atom_values.append(str(match_value))
         values = self.known_values_dict.get(match_value_tuple)
         metadata['TimeFirstOccurrence'] = str(values[0])
@@ -123,7 +122,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
             self.log_learned_path_value_combos += 1
             try:
                 if isinstance(log_atom.raw_data, bytes):
-                    data = log_atom.raw_data.decode()
+                    data = log_atom.raw_data.decode(ENCODING)
                 else:
                     data = repr(log_atom.raw_data)
             except UnicodeError:
@@ -135,7 +134,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
                     for match_path, match_element in match_dict.items():
                         match_value = match_element.match_object
                         if isinstance(match_value, bytes):
-                            match_value = match_value.decode()
+                            match_value = match_value.decode(ENCODING)
                         match_paths_values[match_path] = match_value
                     analysis_component['ParsedLogAtom'] = match_paths_values
                     sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + str(
@@ -146,7 +145,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
                                        event_data, log_atom, self)
         if self.auto_include_flag and self.next_persist_time is None:
             self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
+                KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.log_success += 1
         return True
 
@@ -157,7 +156,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
             persistence_data.append(dict_record)
         PersistenceUtil.store_json(self.persistence_file_name, persistence_data)
         self.next_persist_time = None
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """
@@ -167,11 +166,11 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         """
         if event_type != 'Analysis.%s' % self.__class__.__name__:
             msg = 'Event not from this source'
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if allowlisting_data is not None:
             msg = 'Allowlisting data not understood by this detector'
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         current_timestamp = event_data[0]
         self.known_values_dict[event_data[1]] = [current_timestamp, current_timestamp, 1]

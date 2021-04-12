@@ -13,6 +13,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.AminerConfig import ENCODING
 
 
 class SimpleUnparsedAtomHandler(AtomHandlerInterface):
@@ -29,7 +30,7 @@ class SimpleUnparsedAtomHandler(AtomHandlerInterface):
         event_data = {}
         try:
             if isinstance(log_atom.raw_data, bytes):
-                data = log_atom.raw_data.decode()
+                data = log_atom.raw_data.decode(ENCODING)
             else:
                 data = repr(log_atom.raw_data)
         except UnicodeError:
