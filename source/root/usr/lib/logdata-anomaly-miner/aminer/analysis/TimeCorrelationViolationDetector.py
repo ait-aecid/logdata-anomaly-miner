@@ -15,7 +15,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import time
 import logging
 
-from aminer.AminerConfig import KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, build_persistence_file_name
+from aminer.AminerConfig import KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, build_persistence_file_name, DEBUG_LOG_NAME
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util.History import LogarithmicBackoffHistory

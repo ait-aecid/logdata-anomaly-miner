@@ -17,8 +17,7 @@ import random
 import time
 import logging
 
-from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
-    DEBUG_LOG_NAME, ENCODING
+from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, ENCODING
 from aminer.AnalysisChild import AnalysisContext
 from aminer.analysis import Rules
 from aminer.input.InputInterfaces import AtomHandlerInterface

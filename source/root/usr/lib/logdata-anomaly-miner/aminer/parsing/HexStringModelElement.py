@@ -15,6 +15,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.ModelElementInterface import ModelElementInterface
+from aminer.AminerConfig import ENCODING
 
 
 class HexStringModelElement(ModelElementInterface):

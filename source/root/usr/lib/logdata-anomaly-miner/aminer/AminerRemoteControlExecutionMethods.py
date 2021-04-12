@@ -22,8 +22,7 @@ from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util import PersistenceUtil
 from aminer import AnalysisChild, AminerConfig
 from aminer.AminerConfig import KEY_PERSISTENCE_PERIOD, KEY_LOG_STAT_LEVEL, KEY_LOG_DEBUG_LEVEL, KEY_LOG_STAT_PERIOD,\
-    KEY_RESOURCES_MAX_MEMORY_USAGE, KEY_LOG_PREFIX, KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR, KEY_LOG_SOURCES_LIST, KEY_LOG_STAT_LEVEL,\
-    KEY_LOG_DEBUG_LEVEL, DEBUG_LOG_NAME
+    KEY_RESOURCES_MAX_MEMORY_USAGE, KEY_LOG_PREFIX, KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR, KEY_LOG_SOURCES_LIST, DEBUG_LOG_NAME
 
 attr_str = '"%s": %s,\n'
 component_not_found = 'Event history component not found.'
