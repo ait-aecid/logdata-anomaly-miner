@@ -6,7 +6,7 @@ import sys
 import errno
 from aminer.AminerConfig import KEY_LOG_DIR, DEFAULT_LOG_DIR, KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR, DEBUG_LOG_NAME,\
     KEY_REMOTE_CONTROL_LOG_FILE, KEY_STAT_LOG_FILE, KEY_DEBUG_LOG_FILE, REMOTE_CONTROL_LOG_NAME, DEFAULT_REMOTE_CONTROL_LOG_FILE,\
-    STAT_LOG_NAME, DEFAULT_STAT_LOG_FILE, DEBUG_LEVEL, load_config, build_persistence_file_name
+    STAT_LOG_NAME, DEFAULT_STAT_LOG_FILE, DEBUG_LEVEL, load_config, build_persistence_file_name, DEFAULT_DEBUG_LOG_FILE
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
 from aminer.util import PersistenceUtil

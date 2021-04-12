@@ -12,7 +12,7 @@ else
 fi
 sudo chown -R aminer:aminer /tmp/lib 2> /dev/null
 sudo chmod +x demo/aminer/aminerDemo.sh
-sudo ./demo/aminer/aminerDemo.sh #> /dev/null 2> $ERR
+sudo ./demo/aminer/aminerDemo.sh > /dev/null 2> $ERR
 exit_code=$?
 
 OUTPUT=$(cat $ERR)
