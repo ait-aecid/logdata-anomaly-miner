@@ -20,7 +20,7 @@ from aminer.parsing.ModelElementInterface import ModelElementInterface
 class AnyByteDataModelElement(ModelElementInterface):
     """This class matches any byte but at least one. Thus a match will always span the complete data from beginning to end."""
 
-    def __init__(self, element_id: str) :
+    def __init__(self, element_id: str):
         if not isinstance(element_id, str):
             msg = "element_id has to be of the type string."
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)

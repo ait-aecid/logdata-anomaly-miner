@@ -17,7 +17,7 @@ import sys
 import time
 import logging
 import locale
-from typing import Union, List, Set
+from typing import Union, List, Set, Optional
 from dateutil.parser import parse
 from datetime import timezone, datetime
 
@@ -131,10 +131,10 @@ class DateTimeModelElement(ModelElementInterface):
         # Make sure that dateFormat is valid and extract the relevant parts from it.
         self.format_has_year_flag = False
         self.format_has_tz_specifier = False
-        self.tz_specifier_offset = None
+        self.tz_specifier_offset = 0
         self.tz_specifier_offset_str = None
         self.tz_specifier_format_length = -1
-        self.date_format_parts: Union[List[Union[bytes, tuple]], None] = None
+        self.date_format_parts: Union[List[Union[bytes, tuple]]] = []
         self.date_format = date_format
         if not isinstance(date_format, bytes):
             msg = "date_format has to be of the type bytes."
@@ -150,9 +150,12 @@ class DateTimeModelElement(ModelElementInterface):
             msg = "start_year has to be of the type integer."
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
-        self.start_year = start_year
         if (not self.format_has_year_flag) and (start_year is None):
             self.start_year = time.gmtime(None).tm_year
+        elif start_year is None:  # this is needed so start_year is at any point an integer. (instead of being None)
+            self.start_year = 0
+        else:
+            self.start_year = start_year
 
         if max_time_jump_seconds is not None and not isinstance(max_time_jump_seconds, int) or isinstance(max_time_jump_seconds, bool):
             msg = "max_time_jump_seconds has to be of the type integer."
@@ -168,7 +171,7 @@ class DateTimeModelElement(ModelElementInterface):
 
     def scan_date_format(self, date_format: bytes):
         """Scan the date format."""
-        if self.date_format_parts is not None:
+        if len(self.date_format_parts) > 0:
             msg = "Cannot rescan date format after initialization"
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
@@ -257,7 +260,7 @@ class DateTimeModelElement(ModelElementInterface):
         """
         parse_pos = 0
         # Year, month, day, hour, minute, second, fraction, gmt-seconds:
-        result = [0, 0, 0, 0, 0, 0, 0, 0]
+        result: List = [0, 0, 0, 0, 0, 0, 0, 0]
         for part_pos, date_format_part in enumerate(self.date_format_parts):
             if isinstance(date_format_part, bytes):
                 if not match_context.match_data[parse_pos:].startswith(date_format_part):
@@ -349,7 +352,7 @@ class DateTimeModelElement(ModelElementInterface):
                     self.last_parsed_seconds = total_seconds
                 else:
                     delta = self.last_parsed_seconds - total_seconds
-                    if abs(delta) <= self.max_time_jump_seconds:
+                    if abs(delta.total_seconds()) <= self.max_time_jump_seconds:
                         self.last_parsed_seconds = total_seconds
                     else:
                         # This might be the first date value for the next year or one from the previous.
@@ -520,7 +523,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
 
         format_has_year_flag = False
         default_locale = locale.getdefaultlocale()
-        self.date_time_model_elements = []
+        self.date_time_model_elements: List[DateTimeModelElement] = []
         for i, date_format in enumerate(date_formats):
             if not isinstance(date_format, tuple):
                 msg = "date_format must be of type tuple."
@@ -557,9 +560,12 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
             msg = "start_year has to be of the type integer."
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
-        self.start_year = start_year
         if (not format_has_year_flag) and (start_year is None):
             self.start_year = time.gmtime(None).tm_year
+        elif start_year is None:   # this is needed so start_year is at any point an integer. (instead of being None)
+            self.start_year = 0
+        else:
+            self.start_year = start_year
         self.last_parsed_seconds = 0
 
     def get_id(self):

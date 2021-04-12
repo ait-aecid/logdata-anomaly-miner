@@ -48,7 +48,6 @@ class DecimalFloatValueModelElement(ModelElementInterface):
             raise ValueError(msg)
         self.element_id = element_id
 
-        self.start_characters = None
         if not isinstance(value_sign_type, str):
             msg = 'value_sign_type must be of type string.' % value_sign_type
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
