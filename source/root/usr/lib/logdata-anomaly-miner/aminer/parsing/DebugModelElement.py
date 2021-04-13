@@ -14,7 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import sys
 import logging
-from aminer import AminerConfig
+from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 
@@ -29,16 +29,16 @@ class DebugModelElement(ModelElementInterface):
     def __init__(self, element_id):
         if not isinstance(element_id, str):
             msg = "element_id has to be of the type string."
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
         if len(element_id) < 1:
             msg = "element_id must not be empty."
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         self.element_id = element_id
         # To avoid having those elements hidden in production configuration, write a line every time the class is instantiated.
         msg = "DebugModelElement %s added" % element_id
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info(msg)
+        logging.getLogger(DEBUG_LOG_NAME).info(msg)
         print(msg, file=sys.stderr)
 
     def get_id(self):
@@ -55,6 +55,6 @@ class DebugModelElement(ModelElementInterface):
     def get_match_element(self, path, match_context):
         """@return Always return a match."""
         msg = 'DebugModelElement path = "%s/%s", unmatched = "%s"' % (path, self.element_id, repr(match_context.match_data))
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info(msg)
+        logging.getLogger(DEBUG_LOG_NAME).info(msg)
         print(msg, file=sys.stderr)
         return MatchElement('%s/%s' % (path, self.element_id), b"", b"", None)

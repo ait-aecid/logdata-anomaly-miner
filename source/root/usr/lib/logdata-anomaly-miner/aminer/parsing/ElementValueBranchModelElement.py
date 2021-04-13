@@ -15,6 +15,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
+from aminer import AminerConfig
 
 
 class ElementValueBranchModelElement(ModelElementInterface):
@@ -89,7 +90,7 @@ class ElementValueBranchModelElement(ModelElementInterface):
         branch_match = None
         if test_match is not None:
             if isinstance(test_match.get_match_object(), bytes):
-                branch_model = self.branch_model_dict.get(test_match.get_match_object().decode(), self.default_branch)
+                branch_model = self.branch_model_dict.get(test_match.get_match_object().decode(AminerConfig.ENCODING), self.default_branch)
             else:
                 branch_model = self.branch_model_dict.get(test_match.get_match_object(), self.default_branch)
             if branch_model is not None:

@@ -19,8 +19,9 @@ import time
 import os
 import logging
 
+from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
+    STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
 from aminer import AminerConfig
-from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.EventInterfaces import EventSourceInterface
 from aminer.input.InputInterfaces import AtomHandlerInterface
@@ -73,7 +74,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
         self.log_learned = 0
         self.log_learned_sequences = []
 
-        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
+        self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
 
         # Persisted data contains lists of sequences, i.e., [[<seq1_elem1>, <seq1_elem2>], [<seq2_elem1, ...], ...]
@@ -85,7 +86,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
                 for sequence_elem in sequence:
                     sequence_elem_tuple.append(tuple(sequence_elem))
                 self.sequences.add(tuple(sequence_elem_tuple))
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
@@ -116,7 +117,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
                 if match is None:
                     continue
                 if isinstance(match.match_object, bytes):
-                    value = match.match_object.decode()
+                    value = match.match_object.decode(AminerConfig.ENCODING)
                 else:
                     value = str(match.match_object)
                 if value is not None:
@@ -158,13 +159,17 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
                 self.log_learned_sequences.append(self.current_sequences[id_tuple])
                 if self.next_persist_time is None:
                     self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                        AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
+                        KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+            try:
+                data = log_atom.raw_data.decode(AminerConfig.ENCODING)
+            except UnicodeError:
+                data = repr(log_atom.raw_data)
             original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
             if self.output_log_line:
                 sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix +
-                                    repr(log_atom.raw_data)]
+                                    data]
             else:
-                sorted_log_lines = [repr(log_atom.raw_data)]
+                sorted_log_lines = [data]
             if self.target_path_list is None or len(self.target_path_list) == 0:
                 analysis_component = {'AffectedLogAtomPaths': self.current_sequences[id_tuple]}
             else:
@@ -198,7 +203,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
         """Immediately write persistence data to storage."""
         PersistenceUtil.store_json(self.persistence_file_name, list(self.sequences))
         self.next_persist_time = None
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """
@@ -208,11 +213,11 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
         """
         if event_type != 'Analysis.%s' % self.__class__.__name__:
             msg = 'Event not from this source'
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if allowlisting_data is not None:
             msg = 'Allowlisting data not understood by this detector'
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if event_data not in self.constraint_list:
             self.constraint_list.append(event_data)
@@ -226,11 +231,11 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
         """
         if event_type != 'Analysis.%s' % self.__class__.__name__:
             msg = 'Event not from this source'
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if blocklisting_data is not None:
             msg = 'Blocklisting data not understood by this detector'
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if event_data not in self.ignore_list:
             self.ignore_list.append(event_data)

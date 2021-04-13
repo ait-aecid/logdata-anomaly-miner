@@ -24,9 +24,9 @@ class MatchElementTest(unittest.TestCase):
 
         root_element = MatchElement('root', b'root', b'root', [a1, b1])
 
-        self.assertEqual(root_element.annotate_match(None), "root: b'root' a1: b'a1' a2: b'a2' a3: b'a3' b1: b'b1' b2: b'b2' b3: b'b3'")
-        self.assertEqual(root_element.annotate_match(''), "root: b'root'\n  a1: b'a1'\n    a2: b'a2'\n      a3: b'a3'\n  b1: b'b1'\n"
-                                                          "    b2: b'b2'\n      b3: b'b3'")
+        self.assertEqual(root_element.annotate_match(None), "root: root a1: a1 a2: a2 a3: a3 b1: b1 b2: b2 b3: b3")
+        self.assertEqual(root_element.annotate_match(''), "root: root\n  a1: a1\n    a2: a2\n      a3: a3\n  b1: b1\n    b2: b2\n      "
+                                                          "b3: b3")
 
     def test3serialize_object(self):
         """This test case checks if all child objects are serialized correctly."""

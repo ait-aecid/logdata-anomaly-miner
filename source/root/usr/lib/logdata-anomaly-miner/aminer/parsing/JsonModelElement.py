@@ -19,7 +19,7 @@ from json import JSONDecodeError
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.ModelElementInterface import ModelElementInterface
-from aminer import AminerConfig
+from aminer.AminerConfig import DEBUG_LOG_NAME
 
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -63,7 +63,7 @@ class JsonModelElement(ModelElementInterface):
         try:
             json_match_data = json.loads(match_context.match_data)
         except JSONDecodeError as e:
-            logging.getLogger(debug_log_prefix + AminerConfig.DEBUG_LOG_NAME).debug(e)
+            logging.getLogger(debug_log_prefix + DEBUG_LOG_NAME).debug(e)
             return None
         match_context.match_data = match_context.match_data.decode('unicode-escape').encode()
         matches += self.parse_json_dict(self.key_parser_dict, json_match_data, current_path, match_context)
@@ -72,7 +72,7 @@ class JsonModelElement(ModelElementInterface):
         for c in remove_chars:
             match_data = match_data.replace(bytes(chr(c), encoding="utf-8"), b'')
         if None in matches or match_data != b'':
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(
+            logging.getLogger(DEBUG_LOG_NAME).debug(
                 debug_log_prefix + "get_match_element_main NONE RETURNED", match_context.match_data.strip(b' }]"\r\n').decode())
             match_context.match_data = old_match_data
             return None
@@ -88,7 +88,7 @@ class JsonModelElement(ModelElementInterface):
             if not key.startswith(self.optional_key_prefix):
                 index = match_context.match_data.find(key.encode())
                 match_context.update(match_context.match_data[:index])
-                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 1", key)
+                logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 1", key)
                 return [None]
         for i, key in enumerate(json_match_data.keys()):
             split_key = key
@@ -97,16 +97,16 @@ class JsonModelElement(ModelElementInterface):
             if key not in json_dict:
                 index = match_context.match_data.find(key.encode())
                 match_context.update(match_context.match_data[:index])
-                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 2", key, json_dict)
+                logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 2", key, json_dict)
                 return [None]
             value = json_dict[key]
             if isinstance(value, (dict, list)) and (not isinstance(json_match_data, dict) or split_key not in json_match_data):
-                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 3")
+                logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 3")
                 return [None]
             if isinstance(value, dict):
                 matches += self.parse_json_dict(value, json_match_data[split_key], "%s/%s" % (current_path, split_key), match_context)
                 if matches[-1] is None:
-                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN MATCHES 1")
+                    logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN MATCHES 1")
                     return matches
             elif isinstance(value, list):
                 for data in json_match_data[split_key]:
@@ -121,24 +121,24 @@ class JsonModelElement(ModelElementInterface):
                             matches += self.parse_json_dict(
                                 json_dict[key][0], match_data, "%s/%s" % (current_path, split_key), match_context)
                             if matches[-1] is None:
-                                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN MATCHES 2")
+                                logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN MATCHES 2")
                                 return matches
                     else:
                         if json_dict[key][0] == "ALLOW_ALL":
-                            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(debug_log_prefix + "ALLOW_ALL (LIST)")
+                            logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "ALLOW_ALL (LIST)")
                             match_element = MatchElement(current_path, data, data, None)
                         else:
                             match_element = json_dict[key][0].get_match_element(current_path, MatchContext(data))
                             if match_element is not None and len(match_element.match_string) != len(data):
-                                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(debug_log_prefix + "MatchElement NONE 1")
+                                logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "MatchElement NONE 1")
                                 match_element = None
                         index = match_context.match_data.find(data)
                         if match_element is None:
-                            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(debug_log_prefix + "MatchElement NONE 2", data.decode())
+                            logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "MatchElement NONE 2", data.decode())
                             index = -1
                         match_context.update(match_context.match_data[:index + len(data)])
                         if index == -1 and json_dict[key][0] == "ALLOW_ALL":
-                            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(
+                            logging.getLogger(DEBUG_LOG_NAME).debug(
                                 debug_log_prefix + "ALLOW_ALL (LIST-ELEMENT)", match_context.match_data.decode())
                             index = match_context.match_data.find(b']')
                             match_context.update(match_context.match_data[:index])
@@ -147,22 +147,21 @@ class JsonModelElement(ModelElementInterface):
                             if index == -1:
                                 return matches
                         if matches[-1] is None:
-                            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN MATCHES 3")
+                            logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN MATCHES 3")
                             return matches
                 if len(json_match_data.keys()) > i + 1:
-                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(debug_log_prefix + "LIST - Searching next key")
+                    logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "LIST - Searching next key")
                     match_context.update(match_context.match_data[:match_context.match_data.find(
                         list(json_match_data.keys())[i + 1].encode())])
                 else:
-                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(debug_log_prefix + "LIST - No more keys found")
+                    logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "LIST - No more keys found")
                     match_context.update(match_context.match_data[:match_context.match_data.find(b']')])
             else:
                 if key != split_key and split_key not in json_match_data:
-                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(
-                        debug_log_prefix + "Optional Key %s not found in json_match_data" % key)
+                    logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "Optional Key %s not found in json_match_data" % key)
                     continue
                 if split_key not in json_match_data:
-                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(
+                    logging.getLogger(DEBUG_LOG_NAME).debug(
                         debug_log_prefix + "Key %s not found in json_match_data. RETURN [NONE] 4" % split_key)
                     return [None]
                 data = json_match_data[split_key]
@@ -175,7 +174,7 @@ class JsonModelElement(ModelElementInterface):
                 elif not isinstance(data, bytes):
                     data = str(data).encode()
                 if json_dict[key] == "ALLOW_ALL":
-                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(debug_log_prefix + "ALLOW_ALL (DICT)", data.decode())
+                    logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "ALLOW_ALL (DICT)", data.decode())
                     match_element = MatchElement(current_path, data, data, None)
                     last_bracket = match_context.match_data.find(b'}', len(data))
                     while match_context.match_data.count(b'{', 0, last_bracket) - match_context.match_data.count(b'}', 0, last_bracket) > 0:
@@ -185,7 +184,7 @@ class JsonModelElement(ModelElementInterface):
                     match_element = json_dict[key].get_match_element(current_path, MatchContext(data))
                     if match_element is not None and len(match_element.match_string) != len(data) and (
                             not isinstance(match_element.match_object, bytes) or len(match_element.match_object) != len(data)):
-                        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(
+                        logging.getLogger(DEBUG_LOG_NAME).debug(
                             debug_log_prefix + "Data length not matching! match_string: %d, data: %d, data: %s" % (
                                 len(match_element.match_string), len(data), data.decode()))
                         match_element = None
@@ -203,7 +202,7 @@ class JsonModelElement(ModelElementInterface):
                 if match_element is not None or (match_element is None and not key.startswith(self.optional_key_prefix)):
                     matches.append(match_element)
                     if index == -1 and match_element is None:
-                        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(
+                        logging.getLogger(DEBUG_LOG_NAME).debug(
                             debug_log_prefix +
                             "Necessary element did not match! MatchElement: %s\nData: %s\nMatchContext: %s\nIsFloat %s, Index: %d" % (
                                 match_element, data.decode(), match_context.match_data.replace(b'\\', b'').decode(),
@@ -213,6 +212,6 @@ class JsonModelElement(ModelElementInterface):
         missing_keys = [x for x in json_dict if x not in json_match_data]
         for key in missing_keys:
             if not key.startswith(self.optional_key_prefix):
-                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(debug_log_prefix + "Missing Key:", key)
+                logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "Missing Key:", key)
                 return [None]
         return matches
