@@ -183,7 +183,7 @@ def initialize_loggers(aminer_config, aminer_user_id, aminer_grp_id):
 
 def parse_var(s):
     """
-    Parse a key, value pair, separated by "="
+    Parse a key, value pair, separated by "=".
     That's the reverse of ShellArgs.
 
     On the command line (argparse) a declaration will typically look like:
@@ -200,9 +200,7 @@ def parse_var(s):
 
 
 def parse_vars(items):
-    """
-    Parse a series of key-value pairs and return a dictionary
-    """
+    """Parse a series of key-value pairs and return a dictionary."""
     d = {}
 
     if items:
@@ -246,11 +244,11 @@ def main():
     parser.add_argument('-r', '--remove', action='append', type=str, help='removes a specific persistence directory')
     parser.add_argument('-R', '--restore', type=str, help='restore a persistence backup')
     parser.add_argument('-f', '--from-begin', action='store_true', help='removes RepositioningData before starting the aminer')
-    parser.add_argument("--config-properties", metavar="KEY=VALUE", nargs='+', help=
-                        "Set a number of config_properties by using key-value pairs (do not put spaces before or after the = sign). If a "
-                        "value contains spaces, you should define it with double quotes: 'foo=\"this is a sentence\". Note that values are "
-                        "always treated as strings. If values are already defined in the config_properties, the input types are converted "
-                        "to the ones already existing.")
+    parser.add_argument("--config-properties", metavar="KEY=VALUE", nargs='+',
+                        help="Set a number of config_properties by using key-value pairs (do not put spaces before or after the = sign). "
+                             "If a value contains spaces, you should define it with double quotes: 'foo=\"this is a sentence\". Note that "
+                             "values are always treated as strings. If values are already defined in the config_properties, the input "
+                             "types are converted to the ones already existing.")
 
     args = parser.parse_args()
 
@@ -307,25 +305,24 @@ def main():
     # https://stackoverflow.com/questions/27146262/create-variable-key-value-pairs-with-argparse-python
     use_temp_config = False
     config_properties = parse_vars(args.config_properties)
-    if args.config_properties:
-        if "LearnMode" in config_properties:
-            ymlext = [".YAML", ".YML", ".yaml", ".yml"]
-            extension = os.path.splitext(config_file_name)[1]
-            if extension in ymlext:
-                use_temp_config = True
-                fd, temp_config = tempfile.mkstemp(suffix=".yml")
-                with open(config_file_name) as f:
-                    for line in f:
-                        if "LearnMode" in line:
-                            line = "LearnMode: %s" % config_properties["LearnMode"]
-                        os.write(fd, line.encode())
-                config_file_name = temp_config
-                os.close(fd)
-            else:
-                msg = "The LearnMode parameter does not exist in .py configs!"
-                print(msg, sys.stderr)
-                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-                sys.exit(1)
+    if args.config_properties and "LearnMode" in config_properties:
+        ymlext = [".YAML", ".YML", ".yaml", ".yml"]
+        extension = os.path.splitext(config_file_name)[1]
+        if extension in ymlext:
+            use_temp_config = True
+            fd, temp_config = tempfile.mkstemp(suffix=".yml")
+            with open(config_file_name) as f:
+                for line in f:
+                    if "LearnMode" in line:
+                        line = "LearnMode: %s" % config_properties["LearnMode"]
+                    os.write(fd, line.encode())
+            config_file_name = temp_config
+            os.close(fd)
+        else:
+            msg = "The LearnMode parameter does not exist in .py configs!"
+            print(msg, sys.stderr)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            sys.exit(1)
 
     # Minimal import to avoid loading too much within the privileged process.
     try:
