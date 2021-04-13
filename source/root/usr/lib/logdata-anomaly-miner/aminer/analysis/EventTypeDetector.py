@@ -114,23 +114,15 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
                 plt.plot(t, self.following_modules[0].plots[0], 'red')
                 plt.plot(t, self.following_modules[0].plots[2], 'red')
-                plt.plot(t, self.following_modules[0].plots[3], 'orange')
-                plt.plot(t, self.following_modules[0].plots[4], 'orange')
                 plt.plot(t, self.following_modules[0].plots[1], 'blue')
                 
                 for i in range(len(self.following_modules[0].plots[0])):
                     if self.following_modules[0].plots[0][i] > self.following_modules[0].plots[1][i] or self.following_modules[0].plots[1][i] > self.following_modules[0].plots[2][i]:
                         plt.plot([t[i]], [self.following_modules[0].plots[1][i]], 'or', fillstyle='none', ms=8.0)
 
-                for i in range(len(self.following_modules[0].plots[0])):
-                    if self.following_modules[0].plots[3][i] > self.following_modules[0].plots[1][i] or self.following_modules[0].plots[1][i] > self.following_modules[0].plots[4][i]:
-                        plt.plot([t[i]], [self.following_modules[0].plots[1][i]+3], 'ob', fillstyle='none', ms=8.0)
-
                 plt.gcf().autofmt_xdate()
 
                 plt.savefig('/tmp/TSAoutput', dpi=1200)
-                #print('t=%s'%t)
-                #print('y=%s'%self.following_modules[0].plots[1])
             self.end()
 
         self.log_total += 1
