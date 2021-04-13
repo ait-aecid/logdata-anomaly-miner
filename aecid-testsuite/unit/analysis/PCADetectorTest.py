@@ -50,57 +50,57 @@ class PCADetectorTest(TestBase):
         #  window 5:
         #   value a: 1 time
         # Start of window 1:
-        m_1 = MatchElement('/value', 'a', 'a', None)
+        m_1 = MatchElement('/value', b'a', b'a', None)
         parser_match_1 = ParserMatch(m_1)
-        log_atom_1 = LogAtom('a', parser_match_1, 1, None)
+        log_atom_1 = LogAtom(b'a', parser_match_1, 1, None)
 
-        m_2 = MatchElement('/value', 'b', 'b', None)
+        m_2 = MatchElement('/value', b'b', b'b', None)
         parser_match_2 = ParserMatch(m_2)
-        log_atom_2 = LogAtom('b', parser_match_2, 3, None)
+        log_atom_2 = LogAtom(b'b', parser_match_2, 3, None)
 
-        m_3 = MatchElement('/value', 'a', 'a', None)
+        m_3 = MatchElement('/value', b'a', b'a', None)
         parser_match_3 = ParserMatch(m_3)
-        log_atom_3 = LogAtom('a', parser_match_3, 7, None)
+        log_atom_3 = LogAtom(b'a', parser_match_3, 7, None)
 
         # Start of window 2:
-        m_4 = MatchElement('/value', 'a', 'a', None)
+        m_4 = MatchElement('/value', b'a', b'a', None)
         parser_match_4 = ParserMatch(m_4)
-        log_atom_4 = LogAtom('a', parser_match_4, 13, None)
+        log_atom_4 = LogAtom(b'a', parser_match_4, 13, None)
 
-        m_5 = MatchElement('/value', 'b', 'b', None)
+        m_5 = MatchElement('/value', b'b', b'b', None)
         parser_match_5 = ParserMatch(m_5)
-        log_atom_5 = LogAtom('b', parser_match_5, 15, None)
+        log_atom_5 = LogAtom(b'b', parser_match_5, 15, None)
 
         # Start of window 3:
-        m_6 = MatchElement('/value', 'a', 'a', None)
+        m_6 = MatchElement('/value', b'a', b'a', None)
         parser_match_6 = ParserMatch(m_6)
-        log_atom_6 = LogAtom('b', parser_match_6, 27, None)
+        log_atom_6 = LogAtom(b'b', parser_match_6, 27, None)
 
         # Start of window 4:
-        m_7 = MatchElement('/value', 'a', 'a', None)
+        m_7 = MatchElement('/value', b'a', b'a', None)
         parser_match_7 = ParserMatch(m_7)
-        log_atom_7 = LogAtom('a', parser_match_7, 33, None)
+        log_atom_7 = LogAtom(b'a', parser_match_7, 33, None)
 
-        m_8 = MatchElement('/value', 'a', 'a', None)
+        m_8 = MatchElement('/value', b'a', b'a', None)
         parser_match_8 = ParserMatch(m_8)
-        log_atom_8 = LogAtom('a', parser_match_8, 34, None)
+        log_atom_8 = LogAtom(b'a', parser_match_8, 34, None)
 
-        m_9 = MatchElement('/value', 'a', 'a', None)
+        m_9 = MatchElement('/value', b'a', b'a', None)
         parser_match_9 = ParserMatch(m_9)
-        log_atom_9 = LogAtom('a', parser_match_9, 36, None)
+        log_atom_9 = LogAtom(b'a', parser_match_9, 36, None)
 
-        m_10 = MatchElement('/value', 'a', 'a', None)
+        m_10 = MatchElement('/value', b'a', b'a', None)
         parser_match_10 = ParserMatch(m_10)
-        log_atom_10 = LogAtom('a', parser_match_10, 37, None)
+        log_atom_10 = LogAtom(b'a', parser_match_10, 37, None)
 
-        m_11 = MatchElement('/value', 'b', 'b', None)
+        m_11 = MatchElement('/value', b'b', b'b', None)
         parser_match_11 = ParserMatch(m_11)
-        log_atom_11 = LogAtom('b', parser_match_11, 38, None)
+        log_atom_11 = LogAtom(b'b', parser_match_11, 38, None)
 
         # Start of window 5:
-        m_12 = MatchElement('/value', 'a', 'a', None)
+        m_12 = MatchElement('/value', b'a', b'a', None)
         parser_match_12 = ParserMatch(m_12)
-        log_atom_12 = LogAtom('a', parser_match_12, 45, None)
+        log_atom_12 = LogAtom(b'a', parser_match_12, 45, None)
 
         # Forward log atoms to detector
         # Log atoms of windows 1 to 3 build up the count matrix
