@@ -137,6 +137,11 @@
             'type': 'string',
             'empty': False
         },
+        'Log.Encoding': {
+            'required': False,
+            'type': 'string',
+            'empty': False
+        },
         'Input': {
             'required': True,
             'type': 'dict',
