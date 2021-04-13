@@ -112,19 +112,25 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%Y'))
                 plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
 
-                plt.plot(t, self.following_modules[0].plots[0], 'tab:red')
-                plt.plot(t, self.following_modules[0].plots[2], 'tab:red')
-                plt.plot(t, self.following_modules[0].plots[1], 'tab:blue')
+                plt.plot(t, self.following_modules[0].plots[0], 'red')
+                plt.plot(t, self.following_modules[0].plots[2], 'red')
+                plt.plot(t, self.following_modules[0].plots[3], 'orange')
+                plt.plot(t, self.following_modules[0].plots[4], 'orange')
+                plt.plot(t, self.following_modules[0].plots[1], 'blue')
                 
                 for i in range(len(self.following_modules[0].plots[0])):
                     if self.following_modules[0].plots[0][i] > self.following_modules[0].plots[1][i] or self.following_modules[0].plots[1][i] > self.following_modules[0].plots[2][i]:
                         plt.plot([t[i]], [self.following_modules[0].plots[1][i]], 'or', fillstyle='none', ms=8.0)
 
+                for i in range(len(self.following_modules[0].plots[0])):
+                    if self.following_modules[0].plots[3][i] > self.following_modules[0].plots[1][i] or self.following_modules[0].plots[1][i] > self.following_modules[0].plots[4][i]:
+                        plt.plot([t[i]], [self.following_modules[0].plots[1][i]+3], 'ob', fillstyle='none', ms=8.0)
+
                 plt.gcf().autofmt_xdate()
 
                 plt.savefig('/tmp/TSAoutput', dpi=1200)
-                print('t=%s'%t)
-                print('y=%s'%self.following_modules[0].plots[1])
+                #print('t=%s'%t)
+                #print('y=%s'%self.following_modules[0].plots[1])
             self.end()
 
         self.log_total += 1
@@ -194,7 +200,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                         # Get the timewindow lengths
                         time_list = self.following_modules[next(j for j in range(len(
                             self.following_modules)) if self.following_modules[j].__class__.__name__ == 'TSAArima')].calculate_time_steps(
-                            self.num_eventlines_TSA_ref)
+                            self.num_eventlines_TSA_ref, log_atom)
                         self.num_eventlines_TSA_ref = copy.copy(self.num_eventlines)
 
                         # Add the new triggers
@@ -215,7 +221,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                                 self.following_modules[next(j for j in range(len(
                                     self.following_modules)) if self.following_modules[j].__class__.__name__ == 'TSAArima')].\
                                     test_num_appearance(self.etd_time_trigger[1][-1], self.num_eventlines[self.etd_time_trigger[1][
-                                        -1]]-self.num_eventlines_TSA_ref[self.etd_time_trigger[1][-1]], current_time)
+                                        -1]]-self.num_eventlines_TSA_ref[self.etd_time_trigger[1][-1]], current_time, log_atom)
                                 self.etd_time_trigger[0][-1] = self.etd_time_trigger[0][-1] + self.etd_time_trigger[2][-1]
                                 self.num_eventlines_TSA_ref[self.etd_time_trigger[1][-1]] = self.num_eventlines[self.etd_time_trigger[
                                     1][-1]]
@@ -226,7 +232,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                         self.following_modules[next(j for j in range(len(self.following_modules)) if self.following_modules[
                             j].__class__.__name__ == 'TSAArima')].test_num_appearance(self.etd_time_trigger[1][indices[
                                 i]], self.num_eventlines[self.etd_time_trigger[1][indices[i]]]-self.num_eventlines_TSA_ref[
-                                self.etd_time_trigger[1][indices[i]]], current_time)
+                                self.etd_time_trigger[1][indices[i]]], current_time, log_atom)
                         self.etd_time_trigger[0][indices[i]] += self.etd_time_trigger[2][indices[i]]
                         self.num_eventlines_TSA_ref[self.etd_time_trigger[1][indices[i]]] = self.num_eventlines[self.etd_time_trigger[
                             1][indices[i]]]
