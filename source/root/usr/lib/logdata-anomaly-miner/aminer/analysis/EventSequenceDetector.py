@@ -146,7 +146,10 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
                     # Omit log atom if one of the id paths is not found.
                     return
             else:
-                id_tuple += (id_match.match_object,)
+            	if isinstance(match.match_object, bytes):
+            		id_tuple += (id_match.match_object.decode(AminerConfig.ENCODING),)
+            	else:
+                	id_tuple += (id_match.match_object,)
 
         # Create entry for the id_tuple in the current_sequences dict if it did not occur before.
         if id_tuple not in self.current_sequences:
