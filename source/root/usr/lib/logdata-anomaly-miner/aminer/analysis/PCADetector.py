@@ -118,13 +118,17 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             if len(self.event_count_matrix) >= 3:
                 anomalyScore = self.anomalyScore()
                 if anomalyScore > self.anomaly_score_threshold:
+                    try:
+                        data = log_atom.raw_data.decode(AminerConfig.ENCODING)
+                    except UnicodeError:
+                        data = repr(log_atom.raw_data)
                     if self.output_log_line:
                         original_log_line_prefix = self.aminer_config.config_properties.get(
                             CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
                         sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix +
-                                            repr(log_atom.raw_data)]
+                                            data]
                     else:
-                        sorted_log_lines = [repr(log_atom.raw_data)]
+                        sorted_log_lines = [data]
                     affected_paths = []
                     affected_values = []
                     affected_counts = []
@@ -177,7 +181,7 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 if match is None:
                     continue
                 if isinstance(match.match_object, bytes):
-                    value = match.match_object.decode()
+                    value = match.match_object.decode(AminerConfig.ENCODING)
                 else:
                     value = str(match.match_object)
                 if value is not None:
