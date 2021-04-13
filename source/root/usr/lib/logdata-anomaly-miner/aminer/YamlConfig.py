@@ -712,6 +712,17 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     validate_cor_cover_vals_thres=item['validate_cor_cover_vals_thres'],
                     validate_cor_distinct_thres=item['validate_cor_distinct_thres'], ignore_list=item['ignore_list'],
                     constraint_list=item['constraint_list'])
+            elif item['type'].name == 'TSAArima':
+                etd = analysis_context.get_component_by_name(item['event_type_detector'])
+                if etd is None:
+                    msg = 'The defined EventTypeDetector %s does not exist!' % item['event_type_detector']
+                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
+                tmp_analyser = func(
+                    analysis_context.aminer_config, anomaly_event_handlers, etd, persistence_id=item['persistence_id'],
+                    build_sum_over_values=item['build_sum_over_values'], num_division_time_step=item['num_division_time_step'], alpha=item['alpha'],
+                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
+                    constraint_list=item['constraint_list'])
             else:
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn)
             if item['output_event_handlers'] is not None:

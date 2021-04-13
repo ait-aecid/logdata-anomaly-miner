@@ -166,7 +166,9 @@
                 'validate_cor_cover_vals_thres': {'type': 'float', 'default': 0.7},
                 'validate_cor_distinct_thres': {'type': 'float', 'default': 0.05},
                 'output_event_handlers': {'type': 'list', 'nullable': True, 'default': None},
-                'suppress': {'type': 'boolean', 'default': False}
+                'suppress': {'type': 'boolean', 'default': False},
+                'build_sum_over_values': {'type': 'boolean', 'default': False},
+                'num_division_time_step': {'type': 'integer', 'default': 10}
             }
         }
     }

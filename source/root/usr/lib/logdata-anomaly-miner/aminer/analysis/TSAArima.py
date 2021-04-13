@@ -6,6 +6,7 @@
 # x) Cleanup
 # x) Add Module to the lists in the AMiner
 # x) Improvement for the acf (not as dependent on min_lag or ETD.waiting_time_for_TSA)
+# x) Contraint/ignore/pathlist without use
 
 import time
 import os
@@ -17,7 +18,6 @@ from aminer.input import AtomHandlerInterface
 from aminer.util import TimeTriggeredComponentInterface
 from aminer.util import PersistenceUtil
 
-import statsmodels.api as sm_api
 import numpy as np
 from scipy.signal import savgol_filter
 import statsmodels
@@ -25,7 +25,7 @@ import statsmodels
 class TSAArima(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
     """This class is used for testing purposes"""
 
-    def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, build_sum_TSA=False, num_division_time_step=10,
+    def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, build_sum_over_values=False, num_division_time_step=10,
                  alpha=0.05, persistence_id='Default', output_log_line=True, ignore_list=None, constraint_list=None):
         self.next_persist_time = None
         self.anomaly_event_handlers = anomaly_event_handlers
@@ -37,7 +37,7 @@ class TSAArima(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourc
         # Add the varTypeDetector to the list of the modules, which use the event_type_detector.
         self.event_type_detector.add_following_modules(self)
         # States if the sum of a series of counts is build before applieing the TSA
-        self.build_sum_TSA = build_sum_TSA
+        self.build_sum_over_values = build_sum_over_values
         # Number of division of the time window to calculate the time step
         self.num_division_time_step = num_division_time_step
         # Significance level of the estimatedd values
@@ -128,7 +128,7 @@ class TSAArima(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourc
                 affected_path = self.event_type_detector.variable_key_list[event_number]
                 self.print(message, log_atom, affected_path)
                 
-                if not self.build_sum_TSA:
+                if not self.build_sum_over_values:
                     # Add the arima_model to the list
                     try:
                         model = statsmodels.tsa.arima.model.ARIMA(self.time_window_history[event_number][-10*self.num_division_time_step:],
@@ -148,7 +148,7 @@ class TSAArima(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourc
                         self.arima_models_statsmodels[event_number] = None
         # Add the new value and make a one step prediction
         else:
-            if not self.build_sum_TSA:
+            if not self.build_sum_over_values:
                 lower_limit, upper_limit = self.one_step_prediction(event_number)
                 self.plots[0].append(lower_limit)
                 self.plots[1].append(count)
