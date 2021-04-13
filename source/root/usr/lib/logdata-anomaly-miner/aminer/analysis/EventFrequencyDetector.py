@@ -149,10 +149,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 if occurrences < round(self.counts_prev[log_ev] * self.confidence_factor) or \
                    occurrences > round(self.counts_prev[log_ev] / self.confidence_factor):
                     try:
-                        if isinstance(log_atom.raw_data, bytes):
-                            data = log_atom.raw_data.decode(ENCODING)
-                        else:
-                            data = repr(log_atom.raw_data)
+                        data = log_atom.raw_data.decode(ENCODING)
                     except UnicodeError:
                         data = repr(log_atom.raw_data)
                     if self.output_log_line:

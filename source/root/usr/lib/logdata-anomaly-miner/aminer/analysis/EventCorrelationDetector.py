@@ -273,10 +273,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     self.forward_rule_queue.popleft()
                     if not rule.evaluate_rule():
                         try:
-                            if isinstance(log_atom.raw_data, bytes):
-                                data = log_atom.raw_data.decode(ENCODING)
-                            else:
-                                data = repr(log_atom.raw_data)
+                            data = log_atom.raw_data.decode(ENCODING)
                         except UnicodeError:
                             data = repr(log_atom.raw_data)
                         original_log_line_prefix = self.aminer_config.config_properties.get(
@@ -333,10 +330,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                         rule.add_rule_observation(0)
                         if not rule.evaluate_rule():
                             try:
-                                if isinstance(log_atom.raw_data, bytes):
-                                    data = log_atom.raw_data.decode(ENCODING)
-                                else:
-                                    data = repr(log_atom.raw_data)
+                                data = log_atom.raw_data.decode(ENCODING)
                             except UnicodeError:
                                 data = repr(log_atom.raw_data)
                             original_log_line_prefix = self.aminer_config.config_properties.get(

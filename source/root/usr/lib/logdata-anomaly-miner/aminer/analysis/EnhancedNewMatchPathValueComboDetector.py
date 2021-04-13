@@ -122,10 +122,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         if (self.auto_include_flag and self.known_values_dict.get(match_value_tuple)[2] == 1) or not self.auto_include_flag:
             self.log_learned_path_value_combos += 1
             try:
-                if isinstance(log_atom.raw_data, bytes):
-                    data = log_atom.raw_data.decode(ENCODING)
-                else:
-                    data = repr(log_atom.raw_data)
+                data = log_atom.raw_data.decode(ENCODING)
             except UnicodeError:
                 data = repr(log_atom.raw_data)
             original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)

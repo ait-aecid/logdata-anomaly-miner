@@ -80,10 +80,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                 else:
                     res = {target_path: match.match_object}
                 try:
-                    if isinstance(log_atom.raw_data, bytes):
-                        data = log_atom.raw_data.decode(ENCODING)
-                    else:
-                        data = repr(log_atom.raw_data)
+                    data = log_atom.raw_data.decode(ENCODING)
                 except UnicodeError:
                     data = repr(log_atom.raw_data)
                 original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)

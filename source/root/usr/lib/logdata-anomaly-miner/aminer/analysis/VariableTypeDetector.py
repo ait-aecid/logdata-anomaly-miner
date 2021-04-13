@@ -1911,10 +1911,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if self.silence_output_without_confidence or self.silence_output_except_indicator:
             return
         try:
-            if isinstance(log_atom.raw_data, bytes):
-                data = log_atom.raw_data.decode(ENCODING)
-            else:
-                data = repr(log_atom.raw_data)
+            data = log_atom.raw_data.decode(ENCODING)
         except UnicodeError:
             data = repr(log_atom.raw_data)
         message = 'Initial detection of varTypes in lines like %s:' % data
@@ -1959,10 +1956,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if (self.silence_output_without_confidence and confidence is None) or self.silence_output_except_indicator:
             return
         try:
-            if isinstance(log_atom.raw_data, bytes):
-                data = log_atom.raw_data.decode(ENCODING)
-            else:
-                data = repr(log_atom.raw_data)
+            data = log_atom.raw_data.decode(ENCODING)
         except UnicodeError:
             data = repr(log_atom.raw_data)
 
@@ -1995,10 +1989,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if self.silence_output_without_confidence or self.silence_output_except_indicator:
             return
         try:
-            if isinstance(log_atom.raw_data, bytes):
-                data = log_atom.raw_data.decode(ENCODING)
-            else:
-                data = repr(log_atom.raw_data)
+            data = log_atom.raw_data.decode(ENCODING)
         except UnicodeError:
             data = repr(log_atom.raw_data)
 
@@ -2032,10 +2023,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 self.silence_output_except_indicator and indicator is None):
             return
         try:
-            if isinstance(log_atom.raw_data, bytes):
-                data = log_atom.raw_data.decode(ENCODING)
-            else:
-                data = repr(log_atom.raw_data)
+            data = log_atom.raw_data.decode(ENCODING)
         except UnicodeError:
             data = repr(log_atom.raw_data)
 
