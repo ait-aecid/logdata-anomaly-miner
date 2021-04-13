@@ -42,7 +42,7 @@
                     'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                 'id_path_list': {'type': 'list', 'default': []},
                 'seq_len': {'type': 'integer', 'default': 3},
-	        'timeout': {'type': ['integer', 'float'], 'default': -1},
+                'timeout': {'type': ['integer', 'float'], 'default': -1},
                 'allow_missing_id': {'type': 'boolean', 'default': False},
                 'window_size': {'type': ['integer', 'float'], 'default': 600},
                 'confidence_factor': {'type': 'float', 'default': 0.5},
