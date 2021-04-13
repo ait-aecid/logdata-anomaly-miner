@@ -15,7 +15,8 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import os
 
 from aminer.input.InputInterfaces import AtomHandlerInterface
-from aminer.AminerConfig import CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX, ENCODING
+from aminer.AminerConfig import CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
+from aminer import AminerConfig
 from datetime import datetime
 
 
@@ -51,7 +52,7 @@ class AllowlistViolationDetector(AtomHandlerInterface):
                 return True
         original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
         try:
-            data = log_atom.raw_data.decode(ENCODING)
+            data = log_atom.raw_data.decode(AminerConfig.ENCODING)
         except UnicodeError:
             data = repr(log_atom.raw_data)
         analysis_component = {'AffectedLogAtomPathes': list(log_atom.parser_match.get_match_dictionary()), 'AffectedLogAtomValues': [data]}
@@ -68,7 +69,7 @@ class AllowlistViolationDetector(AtomHandlerInterface):
                             tmp_list.append(val)
                     match_value = tmp_list
                 if isinstance(match_value, bytes):
-                    match_value = match_value.decode(ENCODING)
+                    match_value = match_value.decode(AminerConfig.ENCODING)
                 match_paths_values[match_path] = match_value
             analysis_component['ParsedLogAtom'] = match_paths_values
             sorted_log_lines = [

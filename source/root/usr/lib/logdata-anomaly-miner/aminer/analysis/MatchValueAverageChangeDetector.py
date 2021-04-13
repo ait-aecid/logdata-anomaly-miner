@@ -16,7 +16,8 @@ import time
 import os
 import logging
 
-from aminer.AminerConfig import build_persistence_file_name, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, DEBUG_LOG_NAME, ENCODING
+from aminer.AminerConfig import build_persistence_file_name, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, DEBUG_LOG_NAME
+from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util import PersistenceUtil
@@ -119,7 +120,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
                 for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
                     match_value = match_element.match_object
                     if isinstance(match_value, bytes):
-                        match_value = match_value.decode(ENCODING)
+                        match_value = match_value.decode(AminerConfig.ENCODING)
                     match_paths_values[match_path] = match_value
                 analysis_component['ParsedLogAtom'] = match_paths_values
             analysis_component['AnomalyScores'] = anomaly_scores

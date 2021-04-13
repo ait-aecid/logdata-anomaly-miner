@@ -17,7 +17,8 @@ import random
 import time
 import logging
 
-from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, ENCODING
+from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD
+from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.analysis import Rules
 from aminer.input.InputInterfaces import AtomHandlerInterface
@@ -119,7 +120,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
             result[0] = self.analysis_status_to_string()
 
             analysis_component = {'AffectedLogAtomPathes': list(log_atom.parser_match.get_match_dictionary()),
-                                  'AffectedLogAtomValues': [log_atom.raw_data.decode(ENCODING)]}
+                                  'AffectedLogAtomValues': [log_atom.raw_data.decode(AminerConfig.ENCODING)]}
             if self.output_log_line:
                 match_paths_values = {}
                 for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
@@ -133,7 +134,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
                                 tmp_list.append(val)
                         match_value = tmp_list
                     if isinstance(match_value, bytes):
-                        match_value = match_value.decode(ENCODING)
+                        match_value = match_value.decode(AminerConfig.ENCODING)
                     match_paths_values[match_path] = match_value
                 analysis_component['ParsedLogAtom'] = match_paths_values
                 feature_list = []

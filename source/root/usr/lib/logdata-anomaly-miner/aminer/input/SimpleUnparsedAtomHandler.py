@@ -13,7 +13,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 from aminer.input.InputInterfaces import AtomHandlerInterface
-from aminer.AminerConfig import ENCODING
+from aminer import AminerConfig
 
 
 class SimpleUnparsedAtomHandler(AtomHandlerInterface):
@@ -29,7 +29,7 @@ class SimpleUnparsedAtomHandler(AtomHandlerInterface):
             return False
         event_data = {}
         try:
-            data = log_atom.raw_data.decode(ENCODING)
+            data = log_atom.raw_data.decode(AminerConfig.ENCODING)
         except UnicodeError:
             data = repr(log_atom.raw_data)
         for listener in self.event_handlers:

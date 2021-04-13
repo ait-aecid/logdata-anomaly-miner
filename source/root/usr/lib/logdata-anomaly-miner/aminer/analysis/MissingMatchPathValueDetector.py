@@ -15,7 +15,8 @@ import time
 import logging
 
 from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
-    STAT_LEVEL, STAT_LOG_NAME, ENCODING
+    STAT_LEVEL, STAT_LOG_NAME
+from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.EventInterfaces import EventSourceInterface
 from aminer.input.InputInterfaces import AtomHandlerInterface
@@ -124,7 +125,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
             if match_element is None:
                 return None
             if isinstance(match_element.match_object, bytes):
-                affected_log_atom_values = match_element.match_object.decode(ENCODING)
+                affected_log_atom_values = match_element.match_object.decode(AminerConfig.ENCODING)
             else:
                 affected_log_atom_values = match_element.match_object
             value_list.append(str(affected_log_atom_values))
@@ -176,7 +177,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                     e = {}
                     try:
                         if isinstance(value, bytes):
-                            data = value.decode(ENCODING)
+                            data = value.decode(AminerConfig.ENCODING)
                         else:
                             data = repr(value)
                     except UnicodeError:
@@ -202,7 +203,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                     for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
                         match_value = match_element.match_object
                         if isinstance(match_value, bytes):
-                            match_value = match_value.decode(ENCODING)
+                            match_value = match_value.decode(AminerConfig.ENCODING)
                         match_paths_values[match_path] = match_value
                     analysis_component['ParsedLogAtom'] = match_paths_values
                 event_data = {'AnalysisComponent': analysis_component}
@@ -308,7 +309,7 @@ class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
             if match_element is None:
                 continue
             if isinstance(match_element.match_object, bytes):
-                affected_log_atom_values = match_element.match_object.decode(ENCODING)
+                affected_log_atom_values = match_element.match_object.decode(AminerConfig.ENCODING)
             else:
                 affected_log_atom_values = match_element.match_object
             return target_path, str(affected_log_atom_values)

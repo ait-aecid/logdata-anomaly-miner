@@ -18,7 +18,8 @@ import logging
 import sys
 
 from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
-    STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX, ENCODING
+    STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
+from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
@@ -1911,7 +1912,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if self.silence_output_without_confidence or self.silence_output_except_indicator:
             return
         try:
-            data = log_atom.raw_data.decode(ENCODING)
+            data = log_atom.raw_data.decode(AminerConfig.ENCODING)
         except UnicodeError:
             data = repr(log_atom.raw_data)
         message = 'Initial detection of varTypes in lines like %s:' % data
@@ -1956,7 +1957,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if (self.silence_output_without_confidence and confidence is None) or self.silence_output_except_indicator:
             return
         try:
-            data = log_atom.raw_data.decode(ENCODING)
+            data = log_atom.raw_data.decode(AminerConfig.ENCODING)
         except UnicodeError:
             data = repr(log_atom.raw_data)
 
@@ -1989,7 +1990,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if self.silence_output_without_confidence or self.silence_output_except_indicator:
             return
         try:
-            data = log_atom.raw_data.decode(ENCODING)
+            data = log_atom.raw_data.decode(AminerConfig.ENCODING)
         except UnicodeError:
             data = repr(log_atom.raw_data)
 
@@ -2023,7 +2024,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 self.silence_output_except_indicator and indicator is None):
             return
         try:
-            data = log_atom.raw_data.decode(ENCODING)
+            data = log_atom.raw_data.decode(AminerConfig.ENCODING)
         except UnicodeError:
             data = repr(log_atom.raw_data)
 

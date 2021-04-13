@@ -26,7 +26,8 @@ import time
 import logging
 
 from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
-    STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX, ENCODING
+    STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
+from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.EventInterfaces import EventSourceInterface
 from aminer.input.InputInterfaces import AtomHandlerInterface
@@ -216,7 +217,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                 if match is None:
                     continue
                 if isinstance(match.match_object, bytes):
-                    value = match.match_object.decode(ENCODING)
+                    value = match.match_object.decode(AminerConfig.ENCODING)
                 else:
                     value = str(match.match_object)
                 if value is not None:
@@ -273,7 +274,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     self.forward_rule_queue.popleft()
                     if not rule.evaluate_rule():
                         try:
-                            data = log_atom.raw_data.decode(ENCODING)
+                            data = log_atom.raw_data.decode(AminerConfig.ENCODING)
                         except UnicodeError:
                             data = repr(log_atom.raw_data)
                         original_log_line_prefix = self.aminer_config.config_properties.get(
@@ -330,7 +331,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                         rule.add_rule_observation(0)
                         if not rule.evaluate_rule():
                             try:
-                                data = log_atom.raw_data.decode(ENCODING)
+                                data = log_atom.raw_data.decode(AminerConfig.ENCODING)
                             except UnicodeError:
                                 data = repr(log_atom.raw_data)
                             original_log_line_prefix = self.aminer_config.config_properties.get(

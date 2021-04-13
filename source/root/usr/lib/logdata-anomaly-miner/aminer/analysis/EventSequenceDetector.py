@@ -20,7 +20,8 @@ import os
 import logging
 
 from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
-    STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX, ENCODING
+    STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
+from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.EventInterfaces import EventSourceInterface
 from aminer.input.InputInterfaces import AtomHandlerInterface
@@ -116,7 +117,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
                 if match is None:
                     continue
                 if isinstance(match.match_object, bytes):
-                    value = match.match_object.decode(ENCODING)
+                    value = match.match_object.decode(AminerConfig.ENCODING)
                 else:
                     value = str(match.match_object)
                 if value is not None:
@@ -160,7 +161,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
                     self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
                         KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
             try:
-                data = log_atom.raw_data.decode(ENCODING)
+                data = log_atom.raw_data.decode(AminerConfig.ENCODING)
             except UnicodeError:
                 data = repr(log_atom.raw_data)
             original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)

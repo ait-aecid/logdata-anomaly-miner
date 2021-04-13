@@ -19,7 +19,8 @@ import os
 import logging
 
 from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
-    STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX, ENCODING
+    STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
+from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.EventInterfaces import EventSourceInterface
 from aminer.input.InputInterfaces import AtomHandlerInterface
@@ -131,7 +132,7 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
             match_element = match_dict.get(target_path, None)
             if match_element is not None:
                 if isinstance(match_element.match_object, bytes):
-                    id_dict[id_match_object][target_path] = match_element.match_object.decode(ENCODING)
+                    id_dict[id_match_object][target_path] = match_element.match_object.decode(AminerConfig.ENCODING)
                 else:
                     id_dict[id_match_object][target_path] = match_element.match_object
 
@@ -157,7 +158,7 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
             analysis_component = {'AffectedLogAtomValues': [str(i) for i in list(id_dict_entry.values())]}
             event_data = {'AnalysisComponent': analysis_component}
             try:
-                data = log_atom.raw_data.decode(ENCODING)
+                data = log_atom.raw_data.decode(AminerConfig.ENCODING)
             except UnicodeError:
                 data = repr(log_atom.raw_data)
             original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)

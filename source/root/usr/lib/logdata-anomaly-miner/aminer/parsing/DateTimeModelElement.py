@@ -20,7 +20,8 @@ import locale
 from dateutil.parser import parse
 from datetime import timezone, datetime
 
-from aminer.AminerConfig import DEBUG_LOG_NAME, ENCODING
+from aminer.AminerConfig import DEBUG_LOG_NAME
+from aminer import AminerConfig
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
 
@@ -412,7 +413,7 @@ class DateTimeModelElement(ModelElementInterface):
                 if len(data) == 1:
                     data = match_context.match_data.split(b"-")
                 for i in range(1, 5):
-                    if not match_context.match_data[i:i+1].decode(ENCODING).isdigit():
+                    if not match_context.match_data[i:i+1].decode(AminerConfig.ENCODING).isdigit():
                         i -= 1
                         break
                 self.tz_specifier_format_length = len(data[0]) + i + 1

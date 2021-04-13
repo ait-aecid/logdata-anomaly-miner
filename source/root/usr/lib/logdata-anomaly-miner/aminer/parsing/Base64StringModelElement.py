@@ -14,7 +14,8 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import base64
 import logging
 import re
-from aminer.AminerConfig import DEBUG_LOG_NAME, ENCODING
+from aminer.AminerConfig import DEBUG_LOG_NAME
+from aminer import AminerConfig
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
 
@@ -60,7 +61,7 @@ class Base64StringModelElement(ModelElementInterface):
         try:
             match_value = base64.b64decode(match_string)
             # we need to check if no exception is raised when decoding the original string.
-            match_value.decode(ENCODING)
+            match_value.decode(AminerConfig.ENCODING)
         except UnicodeDecodeError:
             match_value = match_string
         return MatchElement("%s/%s" % (path, self.element_id), match_string, match_value, None)

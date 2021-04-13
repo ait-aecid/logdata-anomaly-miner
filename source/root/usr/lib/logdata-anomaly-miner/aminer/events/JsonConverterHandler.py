@@ -15,7 +15,7 @@ import json
 import time
 
 from aminer.events.EventInterfaces import EventHandlerInterface
-from aminer.AminerConfig import ENCODING
+from aminer import AminerConfig
 
 
 class JsonConverterHandler(EventHandlerInterface):
@@ -40,7 +40,7 @@ class JsonConverterHandler(EventHandlerInterface):
             json_error = ''
             log_data = {}
             try:
-                data = log_atom.raw_data.decode(ENCODING)
+                data = log_atom.raw_data.decode(AminerConfig.ENCODING)
             except UnicodeError:
                 data = repr(log_atom.raw_data)
             log_data['RawLogData'] = [data]

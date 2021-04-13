@@ -18,7 +18,8 @@ import os
 import logging
 
 from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
-    STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX, ENCODING
+    STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
+from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.EventInterfaces import EventSourceInterface
 from aminer.input.InputInterfaces import AtomHandlerInterface
@@ -88,7 +89,7 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
         affected_log_atom_values = []
         for match_value in match_value_list:
             if isinstance(match_value, bytes):
-                match_value = match_value.decode(ENCODING)
+                match_value = match_value.decode(AminerConfig.ENCODING)
             affected_log_atom_values.append(str(match_value))
         if match_value_tuple not in self.known_values_set:
             if self.auto_include_flag:
@@ -102,7 +103,7 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
             analysis_component = {'AffectedLogAtomPaths': self.target_path_list, 'AffectedLogAtomValues': affected_log_atom_values}
             event_data = {'AnalysisComponent': analysis_component}
             try:
-                data = log_atom.raw_data.decode(ENCODING)
+                data = log_atom.raw_data.decode(AminerConfig.ENCODING)
             except UnicodeError:
                 data = repr(log_atom.raw_data)
             original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
@@ -111,7 +112,7 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
                 for match_path, match_element in match_dict.items():
                     match_value = match_element.match_object
                     if isinstance(match_value, bytes):
-                        match_value = match_value.decode(ENCODING)
+                        match_value = match_value.decode(AminerConfig.ENCODING)
                     match_paths_values[match_path] = match_value
                 analysis_component['ParsedLogAtom'] = match_paths_values
                 sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + str(

@@ -57,7 +57,8 @@ import abc
 import logging
 from datetime import datetime
 
-from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, ENCODING
+from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD
+from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util import PersistenceUtil
@@ -385,7 +386,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
                     match_value = match_element.match_object
                     if isinstance(match_value, bytes):
-                        match_value = match_value.decode(ENCODING)
+                        match_value = match_value.decode(AminerConfig.ENCODING)
                     match_paths_values[match_path] = match_value
                 analysis_component['ParsedLogAtom'] = match_paths_values
             d['PropertyPath'] = data_item.property_path
@@ -481,7 +482,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
                 match = match_dict.get(mapped_path, None)
                 match_value = match.match_object
                 if isinstance(match.match_object, bytes):
-                    match.match_object = match.match_object.decode(ENCODING)
+                    match.match_object = match.match_object.decode(AminerConfig.ENCODING)
                 histogram_mapping[1].property_path = mapped_path
                 histogram_mapping[1].add_value(match_value)
                 histogram_mapping[2] = log_atom.parser_match
@@ -578,7 +579,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
                     if isinstance(match_value, datetime):
                         match_value = match_value.timestamp()
                     if isinstance(match_value, bytes):
-                        match_value = match_value.decode(ENCODING)
+                        match_value = match_value.decode(AminerConfig.ENCODING)
                     match_paths_values[match_path] = match_value
                 analysis_component['ParsedLogAtom'] = match_paths_values
                 bin_definition = {
@@ -593,7 +594,8 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
             d['PropertyPath'] = data_item.property_path
             report_str += os.linesep + 'Path values "%s":' % '", "'.join(histogram_mapping[0])
             if isinstance(histogram_mapping[2].match_element.match_string, bytes):
-                histogram_mapping[2].match_element.match_string = histogram_mapping[2].match_element.match_string.decode(ENCODING)
+                histogram_mapping[2].match_element.match_string = histogram_mapping[2].match_element.match_string.decode(
+                    AminerConfig.ENCODING)
             report_str += os.linesep + 'Example: %s' % histogram_mapping[2].match_element.match_string
             if len(res) < histogram_mapping[1].total_elements:
                 res = [''] * histogram_mapping[1].total_elements

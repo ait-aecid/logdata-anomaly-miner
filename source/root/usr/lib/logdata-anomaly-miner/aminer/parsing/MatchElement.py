@@ -13,7 +13,8 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import logging
-from aminer.AminerConfig import DEBUG_LOG_NAME, ENCODING
+from aminer.AminerConfig import DEBUG_LOG_NAME
+from aminer import AminerConfig
 
 
 class MatchElement:
@@ -68,7 +69,7 @@ class MatchElement:
         next_indent = None
         try:
             if isinstance(self.match_object, bytes):
-                data = self.match_object.decode(ENCODING)
+                data = self.match_object.decode(AminerConfig.ENCODING)
             else:
                 data = repr(self.match_object)
         except UnicodeError:
@@ -103,9 +104,9 @@ class MatchElement:
         if self.children is not None:
             num_children = len(self.children)
         try:
-            match_string = self.match_string.decode(ENCODING)
+            match_string = self.match_string.decode(AminerConfig.ENCODING)
             if isinstance(self.match_object, bytes):
-                match_object = self.match_object.decode(ENCODING)
+                match_object = self.match_object.decode(AminerConfig.ENCODING)
             else:
                 match_object = repr(self.match_object)
         except UnicodeError:

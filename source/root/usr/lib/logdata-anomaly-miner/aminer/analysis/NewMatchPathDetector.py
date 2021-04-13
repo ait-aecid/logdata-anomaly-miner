@@ -17,7 +17,8 @@ import os
 import logging
 
 from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
-    STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX, ENCODING
+    STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
+from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.EventInterfaces import EventSourceInterface
 from aminer.input.InputInterfaces import AtomHandlerInterface
@@ -73,7 +74,7 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
             original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
             try:
-                data = log_atom.raw_data.decode(ENCODING)
+                data = log_atom.raw_data.decode(AminerConfig.ENCODING)
             except UnicodeError:
                 data = repr(log_atom.raw_data)
             if self.output_log_line:
@@ -87,7 +88,7 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
                     match_value = match_element.match_object
                     if isinstance(match_value, bytes):
-                        match_value = match_value.decode(ENCODING)
+                        match_value = match_value.decode(AminerConfig.ENCODING)
                     match_paths_values[match_path] = match_value
                 analysis_component['ParsedLogAtom'] = match_paths_values
             event_data = {'AnalysisComponent': analysis_component}

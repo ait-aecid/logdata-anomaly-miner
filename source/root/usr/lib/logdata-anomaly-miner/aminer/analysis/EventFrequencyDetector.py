@@ -16,7 +16,8 @@ import os
 import logging
 
 from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
-    STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX, ENCODING
+    STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
+from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.EventInterfaces import EventSourceInterface
 from aminer.input.InputInterfaces import AtomHandlerInterface
@@ -111,7 +112,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 if match is None:
                     continue
                 if isinstance(match.match_object, bytes):
-                    value = match.match_object.decode(ENCODING)
+                    value = match.match_object.decode(AminerConfig.ENCODING)
                 else:
                     value = str(match.match_object)
                 if value is not None:
@@ -149,7 +150,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 if occurrences < round(self.counts_prev[log_ev] * self.confidence_factor) or \
                    occurrences > round(self.counts_prev[log_ev] / self.confidence_factor):
                     try:
-                        data = log_atom.raw_data.decode(ENCODING)
+                        data = log_atom.raw_data.decode(AminerConfig.ENCODING)
                     except UnicodeError:
                         data = repr(log_atom.raw_data)
                     if self.output_log_line:
