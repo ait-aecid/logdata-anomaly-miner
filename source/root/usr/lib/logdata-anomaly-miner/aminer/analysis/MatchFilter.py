@@ -16,6 +16,7 @@ import os
 
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.AminerConfig import CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
+from aminer import AminerConfig
 
 
 class MatchFilter(AtomHandlerInterface):
@@ -40,11 +41,15 @@ class MatchFilter(AtomHandlerInterface):
                 continue
             event_data = {}
             if isinstance(match.match_object, bytes):
-                affected_log_atom_values = match.match_object.decode()
+                affected_log_atom_values = match.match_object.decode(AminerConfig.ENCODING)
             else:
                 affected_log_atom_values = match.match_object
             if self.target_value_list is not None and affected_log_atom_values not in self.target_value_list:
                 continue
+            try:
+                data = log_atom.raw_data.decode(AminerConfig.ENCODING)
+            except UnicodeError:
+                data = repr(log_atom.raw_data)
             original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
             analysis_component = {'AffectedLogAtomPaths': [target_path], 'AffectedLogAtomValues': [str(affected_log_atom_values)]}
             if self.output_log_line:
@@ -52,13 +57,12 @@ class MatchFilter(AtomHandlerInterface):
                 for match_path, match_element in match_dict.items():
                     match_value = match_element.match_object
                     if isinstance(match_value, bytes):
-                        match_value = match_value.decode()
+                        match_value = match_value.decode(AminerConfig.ENCODING)
                     match_paths_values[match_path] = match_value
                 analysis_component['ParsedLogAtom'] = match_paths_values
-                sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix + repr(
-                    log_atom.raw_data)]
+                sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix + data]
             else:
-                sorted_log_lines = [original_log_line_prefix + repr(log_atom.raw_data)]
+                sorted_log_lines = [original_log_line_prefix + data]
             event_data = {'AnalysisComponent': analysis_component}
             for listener in self.anomaly_event_handlers:
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Log Atom Filtered',

@@ -15,7 +15,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import time
 import logging
 
-from aminer import AminerConfig
+from aminer.AminerConfig import KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, build_persistence_file_name, DEBUG_LOG_NAME
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util.History import LogarithmicBackoffHistory
@@ -38,8 +38,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
         self.aminer_config = aminer_config
         self.event_classification_ruleset = ruleset
         self.anomaly_event_handlers = anomaly_event_handlers
-        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-            AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.persistence_id = persistence_id
         self.output_log_line = output_log_line
         self.last_log_atom = None
@@ -52,7 +51,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
                 event_correlation_set |= set(rule.match_action.artefact_b_rules)
         self.event_correlation_ruleset = list(event_correlation_set)
 
-        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
+        self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
 
     def receive_atom(self, log_atom):
@@ -111,9 +110,8 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-            AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def log_statistics(self, component_name):
         """
@@ -295,7 +293,8 @@ class CorrelationRule:
         if num_violations != 0 and len(self.correlation_history.get_history()) > 0:
             violation_message += 'Historic examples:\n'
             for record in self.correlation_history.get_history():
-                violation_message += '  "%s" (%s) ==> "%s" (%s)\n' % (record[0].decode(), record[1], record[2].decode(), record[3])
+                violation_message += '  "%s" (%s) ==> "%s" (%s)\n' % (
+                    record[0].decode(), record[1], record[2].decode(), record[3])
 
         if num_violations == 0:
             return None
@@ -318,7 +317,7 @@ class CorrelationRule:
 
         if result[0] < self.last_timestamp_seen:
             msg = 'Timestamps unsorted!'
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         self.last_timestamp_seen = result[0]
 

@@ -479,7 +479,7 @@ class YamlConfigTest(TestBase):
         log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme), t, 'DefaultNewMatchPathDetector')
         datetime_format_string = '%Y-%m-%d %H:%M:%S'
         match_path_s1 = "['/s1']"
-        pid = "b' pid='"
+        pid = " pid="
         __expected_string2 = '%s New value combination(s) detected\n%s: "%s" (%d lines)\n%s\n\n'
         fixed_dme2 = FixedDataModelElement('s1', b'25537 uid=')
         decimal_integer_value_me = DecimalIntegerValueModelElement(
@@ -487,7 +487,7 @@ class YamlConfigTest(TestBase):
         match_context_sequence_me = MatchContext(b'25537 uid=2')
         seq = SequenceModelElement('seq', [fixed_dme2, decimal_integer_value_me])
         match_element_sequence_me = seq.get_match_element('first', match_context_sequence_me)
-        string2 = "  (b'25537 uid=', 2)\nb'25537 uid=2'"
+        string2 = "  (b'25537 uid=', 2)\n25537 uid=2"
 
         spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
@@ -588,7 +588,7 @@ class YamlConfigTest(TestBase):
         spec.loader.exec_module(aminer_config)
         self.assertRaises(ValueError, aminer_config.load_yaml, 'unit/data/configfiles/wrong_email.yml')
 
-        with open('/usr/lib/logdata-anomaly-miner/aminer/schemas/BaseSchema.json', 'r') as sma:
+        with open('/usr/lib/logdata-anomaly-miner/aminer/schemas/BaseSchema.yml', 'r') as sma:
             # skipcq: PYL-W0123
             base_schema = eval(sma.read())
         self.assertEqual(base_schema['MailAlerting.TargetAddress']['regex'], base_schema['MailAlerting.FromAddress']['regex'])

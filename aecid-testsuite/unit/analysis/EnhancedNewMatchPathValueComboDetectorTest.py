@@ -33,9 +33,9 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
     first_seq_s1 = 'first/seq/s1'
     first_seq_d1 = 'first/seq/d1'
     datetime_format_string = '%Y-%m-%d %H:%M:%S'
-    exp_str = "  first/seq: b'25537 uid=2'\n  " + first_seq_s1 + ": b'25537 uid='\n  " + first_seq_d1 + \
+    exp_str = "  first/seq: 25537 uid=2\n  " + first_seq_s1 + ": 25537 uid=\n  " + first_seq_d1 + \
               ": 2\n{(b'25537 uid=', 2): [%s, %s, 1]}"
-    exp_str2 = "  {(b'25537 uid=', 2): [%s, %s, 1]}\nb'25537 uid=2'"
+    exp_str2 = "  {(b'25537 uid=', 2): [%s, %s, 1]}\n25537 uid=2"
 
     def test1_log_atom_not_known(self):
         """
@@ -66,7 +66,7 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
             datetime.fromtimestamp(t + 2).strftime(self.datetime_format_string),
             enhanced_new_match_path_value_combo_detector.__class__.__name__, description, 1,
-            "  {(b'25537 uid=', 2): [%s, %s, 2]}\nb'25537 uid=2'" % (t, t + 2)))
+            "  {(b'25537 uid=', 2): [%s, %s, 2]}\n25537 uid=2" % (t, t + 2)))
         self.reset_output_stream()
 
         enhanced_new_match_path_value_combo_detector2 = EnhancedNewMatchPathValueComboDetector(self.aminer_config, [
@@ -81,7 +81,7 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
             datetime.fromtimestamp(t).strftime(self.datetime_format_string),
             enhanced_new_match_path_value_combo_detector.__class__.__name__, description + "2", 1,
-            "  {(25537, b' uid=2'): [%s, %s, 1]}\nb'25537 uid=2'" % (t, t)))
+            "  {(25537, b' uid=2'): [%s, %s, 1]}\n25537 uid=2" % (t, t)))
 
     def test2_log_atom_known(self):
         """
@@ -124,7 +124,7 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
             datetime.fromtimestamp(t).strftime(self.datetime_format_string),
             enhanced_new_match_path_value_combo_detector.__class__.__name__, description + "2", 1,
-            "  {(25537, b' uid=2'): [%s, %s, 1]}\nb'25537 uid=2'" % (t, t)))
+            "  {(25537, b' uid=2'): [%s, %s, 1]}\n25537 uid=2" % (t, t)))
 
     def test3_log_atom_known_from_persisted_data(self):
         """The persisting and reading of permitted log lines should be checked with this test."""
@@ -154,7 +154,7 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
             datetime.fromtimestamp(t + 2).strftime(self.datetime_format_string),
             enhanced_new_match_path_value_combo_detector.__class__.__name__, description + "2", 1,
-            "  {(b'25537 uid=', 2): [%s, %s, 2]}\nb'25537 uid=2'" % (t, t + 2)))
+            "  {(b'25537 uid=', 2): [%s, %s, 2]}\n25537 uid=2" % (t, t + 2)))
         self.reset_output_stream()
 
         other_log_atom_sequence_me = LogAtom(self.match_element_sequence_me.get_match_string(), ParserMatch(self.match_element_sequence_me),
@@ -164,7 +164,7 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
             datetime.fromtimestamp(t + 5).strftime(self.datetime_format_string),
             enhanced_new_match_path_value_combo_detector.__class__.__name__, description + "2", 1,
-            "  {(b'25537 uid=', 2): [%s, %s, 3]}\nb'25537 uid=2'" % (t, t + 5)))
+            "  {(b'25537 uid=', 2): [%s, %s, 3]}\n25537 uid=2" % (t, t + 5)))
 
     def test4_allowlist_event_with_known_and_unknown_paths(self):
         """This test case checks in which cases an event is triggered and compares with expected results."""

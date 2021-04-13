@@ -298,6 +298,8 @@ def main():
         stat_level = aminer_config.config_properties[AminerConfig.KEY_LOG_STAT_LEVEL]
     if not debug_level_console_flag and AminerConfig.KEY_LOG_DEBUG_LEVEL in aminer_config.config_properties:
         debug_level = aminer_config.config_properties[AminerConfig.KEY_LOG_DEBUG_LEVEL]
+    if AminerConfig.CONFIG_KEY_ENCODING in aminer_config.config_properties:
+        AminerConfig.ENCODING = aminer_config.config_properties[AminerConfig.CONFIG_KEY_ENCODING]
 
     AminerConfig.STAT_LEVEL = stat_level
     AminerConfig.DEBUG_LEVEL = debug_level
