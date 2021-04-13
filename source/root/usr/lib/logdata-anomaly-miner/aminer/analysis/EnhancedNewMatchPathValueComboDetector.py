@@ -13,7 +13,7 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-
+import sys
 import time
 import os
 import logging
@@ -61,16 +61,6 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         self.log_learned_path_value_combos = 0
         self.log_new_learned_values = []
         self.next_persist_time = None
-
-    def load_persistence_data(self):
-        """Load the persistence data from storage."""
-        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
-        if persistence_data is not None:
-            # Dictionary and tuples were stored as list of lists. Transform
-            # the first lists to tuples to allow hash operation needed by set.
-            for value_tuple, extra_data in persistence_data:
-                self.known_values_dict[tuple(value_tuple)] = extra_data
-            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     def receive_atom(self, log_atom):
         """
@@ -148,12 +138,16 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         self.log_success += 1
         return True
 
+    def load_persistence_data(self):
+        """Load the persistence data from storage."""
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        if persistence_data is not None:
+            self.known_values_dict = persistence_data
+        logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        persistence_data = []
-        for dict_record in self.known_values_dict.items():
-            persistence_data.append(dict_record)
-        PersistenceUtil.store_json(self.persistence_file_name, persistence_data)
+        PersistenceUtil.store_json(self.persistence_file_name, self.known_values_dict)
         self.next_persist_time = None
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 

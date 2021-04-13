@@ -13,6 +13,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import json
 import logging
+import ast
 
 from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.util.StringUtil import encode_byte_string_as_string, decode_string_as_byte_string
@@ -40,7 +41,8 @@ def encode_object(term):
     elif isinstance(term, dict):
         encoded_object = {}
         for key, var in term.items():
-            key = encode_object(key)
+            if isinstance(key, tuple):
+                key = str(key)
             var = encode_object(var)
             encoded_object[key] = var
     elif isinstance(term, (bool, int, float)) or term is None:
@@ -65,7 +67,8 @@ def decode_object(term):
     elif isinstance(term, dict):
         decoded_object = {}
         for key, var in term.items():
-            key = decode_object(key)
+            if key.startswith("(") and key.endswith(")"):
+                key = ast.literal_eval(key)
             var = decode_object(var)
             decoded_object[key] = var
     else:
