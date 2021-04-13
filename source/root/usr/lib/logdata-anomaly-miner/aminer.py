@@ -281,7 +281,7 @@ def main():
         if child_user_name is not None:
             child_user_id = getpwnam(child_user_name).pw_uid
         if child_group_name is not None:
-            child_group_id = getgrnam(child_user_name).gr_gid
+            child_group_id = getgrnam(child_group_name).gr_gid
     except:  # skipcq: FLK-E722
         print('Failed to resolve %s or %s' % (AminerConfig.KEY_AMINER_USER, AminerConfig.KEY_AMINER_GROUP), file=sys.stderr)
         sys.exit(1)
@@ -298,6 +298,8 @@ def main():
         stat_level = aminer_config.config_properties[AminerConfig.KEY_LOG_STAT_LEVEL]
     if not debug_level_console_flag and AminerConfig.KEY_LOG_DEBUG_LEVEL in aminer_config.config_properties:
         debug_level = aminer_config.config_properties[AminerConfig.KEY_LOG_DEBUG_LEVEL]
+    if AminerConfig.CONFIG_KEY_ENCODING in aminer_config.config_properties:
+        AminerConfig.ENCODING = aminer_config.config_properties[AminerConfig.CONFIG_KEY_ENCODING]
 
     AminerConfig.STAT_LEVEL = stat_level
     AminerConfig.DEBUG_LEVEL = debug_level
@@ -520,7 +522,20 @@ def main():
         else:
             msg = 'INFO: No privilege separation when started as unprivileged user'
             print(msg, file=sys.stderr)
-            initialize_loggers(aminer_config, 'aminer', 'aminer')
+            tmp_username = aminer_config.config_properties.get(AminerConfig.KEY_AMINER_USER)
+            tmp_group = aminer_config.config_properties.get(AminerConfig.KEY_AMINER_GROUP)
+            aminer_user_id = -1
+            aminer_group_id = -1
+            try:
+                if tmp_username is not None:
+                    aminer_user_id = getpwnam(tmp_username).pw_uid
+                if tmp_group is not None:
+                    aminer_group_id = getgrnam(tmp_group).gr_gid
+            except:  # skipcq: FLK-E722
+                print('Failed to resolve %s or %s' % (AminerConfig.KEY_AMINER_USER, AminerConfig.KEY_AMINER_GROUP), file=sys.stderr)
+                sys.exit(1)
+
+            initialize_loggers(aminer_config, aminer_user_id, aminer_group_id)
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info(msg)
 
         # Now resolve the specific analysis configuration file (if any).

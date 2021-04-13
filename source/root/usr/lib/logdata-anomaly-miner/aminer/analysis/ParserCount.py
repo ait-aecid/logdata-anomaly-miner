@@ -15,7 +15,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import datetime
 import time
 import logging
-from aminer import AminerConfig
+from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
@@ -41,11 +41,11 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.next_report_time = None
         if (target_path_list is None or target_path_list == []) and (target_label_list is not None and target_label_list != []):
             msg = 'Target labels cannot be used without specifying target paths.'
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         if target_path_list is not None and target_label_list is not None and len(target_path_list) != len(target_label_list):
             msg = 'Every path must have a target label if target labels are used.'
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         if self.target_path_list is None:
             self.target_path_list = []
@@ -55,7 +55,7 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 target_path = self.target_label_list[self.target_path_list.index(target_path)]
             self.count_dict[target_path] = {current_processed_lines_str: 0, total_processed_lines_str: 0}
 
-    def get_time_trigger_class(self):
+    def get_time_trigger_class(self):  # skipcq: PYL-R0201
         """Get the trigger class this component can be registered for. This detector only needs persisteny triggers in real time."""
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
@@ -107,6 +107,7 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
             for k in self.count_dict:
                 c = self.count_dict[k]
                 output_string += '\t' + str(k) + ': ' + str(c) + '\n'
+                self.count_dict[k][current_processed_lines_str] = 0
             output_string = output_string[:-1]
             event_data = {'StatusInfo': self.count_dict, 'FromTime': datetime.datetime.utcnow().timestamp() - self.report_interval,
                           'ToTime': datetime.datetime.utcnow().timestamp()}
@@ -120,13 +121,9 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 status_info = {k: {
                     current_processed_lines_str: c[current_processed_lines_str],
                     total_processed_lines_str: c[total_processed_lines_str]}}
+                self.count_dict[k][current_processed_lines_str] = 0
                 event_data = {'StatusInfo': status_info, 'FromTime': datetime.datetime.utcnow().timestamp() - self.report_interval,
                               'ToTime': datetime.datetime.utcnow().timestamp()}
                 for listener in self.report_event_handlers:
                     listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Count report', [output_string], event_data, None, self)
-
-        for target_path in self.target_path_list:
-            if self.target_label_list:
-                target_path = self.target_label_list[self.target_path_list.index(target_path)]
-            self.count_dict[target_path][current_processed_lines_str] = 0
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s sent report.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug('%s sent report.', self.__class__.__name__)

@@ -15,6 +15,7 @@ import json
 import time
 
 from aminer.events.EventInterfaces import EventHandlerInterface
+from aminer import AminerConfig
 
 
 class JsonConverterHandler(EventHandlerInterface):
@@ -37,12 +38,12 @@ class JsonConverterHandler(EventHandlerInterface):
             pass
         else:
             json_error = ''
-
             log_data = {}
-            if isinstance(log_atom.raw_data, bytes):
-                log_data['RawLogData'] = [bytes.decode(log_atom.raw_data)]
-            else:
-                log_data['RawLogData'] = [log_atom.raw_data]
+            try:
+                data = log_atom.raw_data.decode(AminerConfig.ENCODING)
+            except UnicodeError:
+                data = repr(log_atom.raw_data)
+            log_data['RawLogData'] = [data]
             if log_atom.get_timestamp() is None:
                 log_atom.set_timestamp(time.time())
             log_data['Timestamps'] = [round(log_atom.atom_time, 2)]

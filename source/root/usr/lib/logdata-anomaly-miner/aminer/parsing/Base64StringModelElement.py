@@ -14,6 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import base64
 import logging
 import re
+from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer import AminerConfig
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
@@ -22,21 +23,21 @@ from aminer.parsing.MatchElement import MatchElement
 class Base64StringModelElement(ModelElementInterface):
     """This class just tries to strip off as many base64 bytes as possible from a given data string."""
 
-    def __init__(self, path_id):
-        if not isinstance(path_id, str):
+    def __init__(self, element_id):
+        if not isinstance(element_id, str):
             msg = "element_id has to be of the type string."
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
-        if len(path_id) < 1:
+        if len(element_id) < 1:
             msg = "element_id must not be empty."
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
-        self.path_id = path_id
+        self.element_id = element_id
         self.regex = re.compile(b"^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?")
 
     def get_id(self):
         """Get the element ID."""
-        return self.path_id
+        return self.element_id
 
     def get_child_elements(self):  # skipcq: PYL-R0201
         """
@@ -60,7 +61,7 @@ class Base64StringModelElement(ModelElementInterface):
         try:
             match_value = base64.b64decode(match_string)
             # we need to check if no exception is raised when decoding the original string.
-            match_value.decode()
+            match_value.decode(AminerConfig.ENCODING)
         except UnicodeDecodeError:
             match_value = match_string
-        return MatchElement("%s/%s" % (path, self.path_id), match_string, match_value, None)
+        return MatchElement("%s/%s" % (path, self.element_id), match_string, match_value, None)

@@ -14,7 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import json
 import logging
 
-from aminer import AminerConfig
+from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.util.StringUtil import encode_byte_string_as_string, decode_string_as_byte_string
 
 
@@ -47,7 +47,7 @@ def encode_object(term):
         encoded_object = term
     else:
         msg = 'Unencodeable object %s' % type(term)
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+        logging.getLogger(DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
     return encoded_object
 

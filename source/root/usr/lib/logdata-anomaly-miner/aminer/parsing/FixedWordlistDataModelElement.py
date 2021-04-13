@@ -13,7 +13,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import logging
-from aminer import AminerConfig
+from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
 
@@ -26,26 +26,26 @@ class FixedWordlistDataModelElement(ModelElementInterface):
     could never be detected.
     """
 
-    def __init__(self, path_id, wordlist):
+    def __init__(self, element_id, wordlist):
         """
         Create the model element.
         @param wordlist the list of words to search for. If it does not fulfill the sorting criteria mentioned in the class documentation,
         an Exception will be raised.
         """
-        self.path_id = path_id
+        self.element_id = element_id
         self.wordlist = wordlist
         for test_pos, ref_word in enumerate(wordlist):
             for test_word in wordlist[test_pos + 1:]:
                 if test_word.startswith(ref_word):
                     msg = 'Word %s would be shadowed by word %s at lower position' % (repr(test_word), repr(ref_word))
-                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise Exception(msg)
 
     def get_id(self):
         """Get the element ID."""
-        return self.path_id
+        return self.element_id
 
-    def get_child_elements(self):
+    def get_child_elements(self):  # skipcq: PYL-R0201
         """
         Get all possible child model elements of this element.
         @return None as there are no children of this element.
@@ -67,4 +67,4 @@ class FixedWordlistDataModelElement(ModelElementInterface):
             return None
 
         match_context.update(match_data)
-        return MatchElement("%s/%s" % (path, self.path_id), match_data, word_pos, None)
+        return MatchElement("%s/%s" % (path, self.element_id), match_data, word_pos, None)
