@@ -14,7 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import json
 import time
 
-from aminer.events import EventHandlerInterface
+from aminer.events.EventInterfaces import EventHandlerInterface
 
 
 class JsonConverterHandler(EventHandlerInterface):
@@ -46,6 +46,7 @@ class JsonConverterHandler(EventHandlerInterface):
             if log_atom.get_timestamp() is None:
                 log_atom.set_timestamp(time.time())
             log_data['Timestamps'] = [round(log_atom.atom_time, 2)]
+            log_data['DetectionTimestamp'] = round(time.time(), 2)
             log_data['LogLinesCount'] = len(sorted_log_lines)
             if log_atom.parser_match is not None and hasattr(event_source, 'output_log_line') and event_source.output_log_line:
                 log_data['AnnotatedMatchElement'] = log_atom.parser_match.match_element.annotate_match('')

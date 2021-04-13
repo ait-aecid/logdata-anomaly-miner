@@ -59,9 +59,9 @@ from datetime import datetime
 
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
-from aminer.input import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util import PersistenceUtil
-from aminer.util import TimeTriggeredComponentInterface
+from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
 binomial_test = None
 try:
@@ -206,7 +206,7 @@ class ModuloTimeBinDefinition(LinearNumericBinDefinition):
         return super(ModuloTimeBinDefinition, self).get_bin(time_value)
 
 
-class HistogramData():
+class HistogramData:
     """
     This class defines the properties of one histogram to create and performs the accounting and reporting.
     When the Python scipy package is available, reports will also include probability score created using binomial testing.
@@ -253,8 +253,7 @@ class HistogramData():
         result = '%sProperty "%s" (%d elements):' % (indent, self.property_path, self.total_elements)
         f_elements = float(self.total_elements)
         base_element = self.binned_elements if self.has_outlier_bins_flag else self.total_elements
-        for bin_pos in range(0, len(self.bin_data)):
-            count = self.bin_data[bin_pos]
+        for bin_pos, count in enumerate(self.bin_data):
             if count == 0:
                 continue
             p_value = self.bin_definition.get_bin_p_value(bin_pos, base_element, count)
@@ -291,9 +290,9 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.output_log_line = output_log_line
         self.aminer_config = aminer_config
 
+        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
-        self.persistenceFileName = AminerConfig.build_persistence_file_name(aminer_config, 'HistogramAnalysis', persistence_id)
-        persistence_data = PersistenceUtil.load_json(self.persistenceFileName)
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is not None:
             msg = 'No data reading, def merge yet'
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
@@ -439,9 +438,8 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
         self.output_log_line = output_log_line
         self.aminer_config = aminer_config
 
+        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
-        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, 'PathDependentHistogramAnalysis',
-                                                                              persistence_id)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is not None:
             msg = 'No data reading, def merge yet'

@@ -12,7 +12,6 @@ Parser:
         - id: 'apacheModel'
           type: ApacheAccessModel
           name: 'apache'
-          args: 'apache'
 
         - id: 'START'
           start: True
@@ -48,6 +47,8 @@ Analysis:
 
         - type: EventTypeDetector
           id: EventTypeDetector
+          min_num_vals: 100
+          max_num_vals: 200
           learn_mode: False
           output_event_handlers:
             - stpe

@@ -32,8 +32,8 @@ class EventSequenceDetectorTest(TestBase):
 
         # Initialize detector for sequence length 2
         test_handler = TestHandler()
-        event_sequence_detector = EventSequenceDetector(self.aminer_config, ['/model/value'], [
-            test_handler], ['/model/id'], 2, 'Default', True, output_log_line=False)
+        event_sequence_detector = EventSequenceDetector(self.aminer_config, [test_handler], ['/model/id'], ['/model/value'], 2, 'Default',
+                                                        True, output_log_line=False)
         self.analysis_context.register_component(event_sequence_detector, description)
 
         # Prepare log atoms that represent two users (id) that produce interleaved sequence a, b, c
@@ -89,7 +89,7 @@ class EventSequenceDetectorTest(TestBase):
         # Input: id: 1 value: b
         # Expected output: New sequence (a, b) detected, added to known sequences
         event_sequence_detector.receive_atom(log_atom_2)
-        self.assertEqual(test_handler.anomaly, {'AnalysisComponent': {'AffectedLogAtomPaths': [['/model/value']],
+        self.assertEqual(test_handler.anomaly, {'AnalysisComponent': {'AffectedLogAtomPaths': ['/model/value'],
                                                                       'AffectedLogAtomValues': [('a',), ('b',)]}})
         sequences_set.add((('a',), ('b',)))
         self.assertEqual(event_sequence_detector.sequences, sequences_set)
@@ -106,7 +106,7 @@ class EventSequenceDetectorTest(TestBase):
         # Input: id: 1 value: c
         # Expected output: New sequence (b, c) detected, added to known sequences
         event_sequence_detector.receive_atom(log_atom_4)
-        self.assertEqual(test_handler.anomaly, {'AnalysisComponent': {'AffectedLogAtomPaths': [['/model/value']],
+        self.assertEqual(test_handler.anomaly, {'AnalysisComponent': {'AffectedLogAtomPaths': ['/model/value'],
                                                                       'AffectedLogAtomValues': [('b',), ('c',)]}})
         sequences_set.add((('b',), ('c',)))
         self.assertEqual(event_sequence_detector.sequences, sequences_set)

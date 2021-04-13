@@ -78,14 +78,13 @@ def build_analysis_pipeline(analysis_context):
     It has also to define an AtomizerFactory to instruct aminer how to process incoming data streams to create log atoms from them.
     """
     # Build the parsing model:
-    from aminer.parsing import FirstMatchModelElement
-    from aminer.parsing import SequenceModelElement
-
+    from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
+    from aminer.parsing.SequenceModelElement import SequenceModelElement
     from aminer.parsing.DateTimeModelElement import DateTimeModelElement
     import datetime
-    from aminer.parsing import FixedDataModelElement
+    from aminer.parsing.FixedDataModelElement import FixedDataModelElement
     from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
-    from aminer.parsing import AnyByteDataModelElement
+    from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
 
     service_children_disk_upgrade = [
         DateTimeModelElement('DTM', b'%Y-%m-%d %H:%M:%S', datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo),
@@ -110,36 +109,41 @@ def build_analysis_pipeline(analysis_context):
     stream_printer_event_handler = StreamPrinterEventHandler(analysis_context)
     from aminer.events.SyslogWriterEventHandler import SyslogWriterEventHandler
     syslog_writer_event_handler = SyslogWriterEventHandler(analysis_context)
-    anomaly_event_handlers = [stream_printer_event_handler, syslog_writer_event_handler]
+    from aminer.events.KafkaEventHandler import KafkaEventHandler
+    kafka_event_handler = KafkaEventHandler(analysis_context, 'test_topic', {
+        'bootstrap_servers': ['localhost:9092'], 'api_version': (2, 0, 1)})
+    from aminer.events.JsonConverterHandler import JsonConverterHandler
+    json_converter_handler = JsonConverterHandler([kafka_event_handler], analysis_context)
+    anomaly_event_handlers = [stream_printer_event_handler, syslog_writer_event_handler, json_converter_handler]
 
-    from aminer.input import SimpleMultisourceAtomSync
+    from aminer.input.SimpleMultisourceAtomSync import SimpleMultisourceAtomSync
     simple_multisource_atom_sync = SimpleMultisourceAtomSync([atom_filter], 9)
 
     # Now define the AtomizerFactory using the model. A simple line
     # based one is usually sufficient.
-    from aminer.input import SimpleByteStreamLineAtomizerFactory
+    from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
     analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
         parsing_model, [simple_multisource_atom_sync], anomaly_event_handlers, default_timestamp_paths=['model/DiskUpgrade/Date'])
 
     # Just report all unparsed atoms to the event handlers.
-    from aminer.input import SimpleUnparsedAtomHandler
+    from aminer.input.SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler
     simple_unparsed_atom_handler = SimpleUnparsedAtomHandler(anomaly_event_handlers)
     atom_filter.add_handler(simple_unparsed_atom_handler, stop_when_handled_flag=True)
     analysis_context.register_component(simple_unparsed_atom_handler, component_name="UnparsedHandler")
 
-    from aminer.analysis import NewMatchPathDetector
+    from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
     new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=True)
     analysis_context.register_component(new_match_path_detector, component_name="NewPath")
     atom_filter.add_handler(new_match_path_detector)
 
-    from aminer.analysis import NewMatchPathValueComboDetector
+    from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
     new_match_path_value_combo_detector = NewMatchPathValueComboDetector(analysis_context.aminer_config, [
         '/model/HomePath/Username', '/model/HomePath/Path'], anomaly_event_handlers, auto_include_flag=True)
     analysis_context.register_component(new_match_path_value_combo_detector, component_name="NewValueCombo")
     atom_filter.add_handler(new_match_path_value_combo_detector)
 
     # Include the e-mail notification handler only if the configuration parameter was set.
-    from aminer.events import DefaultMailNotificationEventHandler
+    from aminer.events.DefaultMailNotificationEventHandler import DefaultMailNotificationEventHandler
     if DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS in analysis_context.aminer_config.config_properties:
         mail_notification_handler = DefaultMailNotificationEventHandler(analysis_context)
         analysis_context.register_component(mail_notification_handler, component_name="MailHandler")

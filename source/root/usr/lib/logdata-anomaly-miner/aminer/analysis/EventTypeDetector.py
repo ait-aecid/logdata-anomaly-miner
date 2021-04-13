@@ -18,8 +18,8 @@ import logging
 
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
-from aminer.input import AtomHandlerInterface
-from aminer.util import TimeTriggeredComponentInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 from aminer.util import PersistenceUtil
 
 
@@ -75,8 +75,8 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.aminer_config = aminer_config
 
         # Loads the persistence
-        PersistenceUtil.add_persistable_component(self)
         self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
+        PersistenceUtil.add_persistable_component(self)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
 
         # Imports the persistence
@@ -135,8 +135,8 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
         # Check if TSA should be initialized
         if self.track_time_for_TSA and -1 in self.etd_time_trigger[0]:
-            for i in range(len(self.etd_time_trigger[0])):
-                if self.etd_time_trigger[0][i] == -1:
+            for i, val in enumerate(self.etd_time_trigger[0]):
+                if val == -1:
                     for j in range(self.num_sections_waiting_time_for_TSA-1):
                         self.etd_time_trigger[0].append(current_time + self.waiting_time_for_TSA * (j + 1) / (
                                 self.num_sections_waiting_time_for_TSA))
@@ -378,7 +378,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         # Reduce the numbers of entries in the value_list
         if len(self.variable_key_list[current_index]) > 0 and len([i for i in self.check_variables[current_index] if i]) > 0 and \
                 len(self.values[current_index][self.check_variables[current_index].index(True)]) > self.max_num_vals:
-            for var_index in range(len(self.variable_key_list[current_index])):
+            for var_index in range(len(self.variable_key_list[current_index])):  # skipcq: PTC-W0060
                 # Skips the variable if check_variable is False
                 if not self.check_variables[current_index][var_index]:
                     continue

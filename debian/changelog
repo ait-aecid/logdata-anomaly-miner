@@ -1,9 +1,27 @@
+logdata-anomaly-miner (2.3.1-1) unstable; urgency=low
+
+ * New upstream release V2.3.1, see
+    https://github.com/ait-aecid/logdata-anomaly-miner/releases/tag/V2.3.1
+
+ -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Thu,  08 Apr 2021 12:00:00 +0000
+
+logdata-anomaly-miner (2.3.0-1) unstable; urgency=low
+
+ * New upstream release V2.3.0, see
+    https://github.com/ait-aecid/logdata-anomaly-miner/releases/tag/V2.3.0
+
+ -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Mon,  29 Mar 2021 12:00:00 +0000
+
 logdata-anomaly-miner (2.2.1-1) unstable; urgency=low
 
- * New upstream release V2.2.1, see
+  [ Markus Wurzenberger ]
+  * New upstream release V2.2.1, see
     https://github.com/ait-aecid/logdata-anomaly-miner/releases/tag/V2.2.1
 
- -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Mon,  25 Jan 2021 12:00:00 +0000
+  [ Sebastian Ramacher ]
+  * debian/patches: Removed, integrated upstream
+
+ -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Mon, 25 Jan 2021 12:00:00 +0000
 
 logdata-anomaly-miner (2.2.0-1) unstable; urgency=low
 

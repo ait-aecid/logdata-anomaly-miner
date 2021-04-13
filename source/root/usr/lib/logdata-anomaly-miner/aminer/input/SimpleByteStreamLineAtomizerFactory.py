@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
-from aminer.input import AtomizerFactory
+from aminer.input.InputInterfaces import AtomizerFactory
 from aminer.input.ByteStreamLineAtomizer import ByteStreamLineAtomizer
 
 
@@ -22,7 +22,8 @@ class SimpleByteStreamLineAtomizerFactory(AtomizerFactory):
     All parsed and unparsed atoms are delivered via two lists of handlers.
     """
 
-    def __init__(self, parsing_model, atom_handler_list, event_handler_list, default_timestamp_paths=None):
+    def __init__(
+            self, parsing_model, atom_handler_list, event_handler_list, default_timestamp_paths=None, eol_sep=b'\n', json_format=False):
         """
         Create the factory to forward data and events to the given lists for each newly created atomizer.
         @param default_timestamp_paths if not empty list, the value of this timestamp field is extracted from parsed atoms and stored
@@ -35,6 +36,8 @@ class SimpleByteStreamLineAtomizerFactory(AtomizerFactory):
             self.default_timestamp_paths = []
         else:
             self.default_timestamp_paths = default_timestamp_paths
+        self.eol_sep = eol_sep
+        self.json_format = json_format
 
     def get_atomizer_for_resource(self, resource_name):
         """
@@ -43,4 +46,4 @@ class SimpleByteStreamLineAtomizerFactory(AtomizerFactory):
         @return a StreamAtomizer object
         """
         return ByteStreamLineAtomizer(self.parsing_model, self.atom_handler_list, self.event_handler_list, 1 << 16,
-                                      self.default_timestamp_paths)
+                                      self.default_timestamp_paths, self.eol_sep, self.json_format)

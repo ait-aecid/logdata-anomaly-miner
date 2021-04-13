@@ -22,8 +22,10 @@ from aminer import AminerConfig
 
 base_dir_fd = None
 tmp_base_dir_fd = None
+log_dir_fd = None
 base_dir_path = None
 tmp_base_dir_path = None
+log_dir_path = None
 
 
 def secure_open_base_directory(directory_name=None, flags=0):
@@ -32,6 +34,8 @@ def secure_open_base_directory(directory_name=None, flags=0):
     global base_dir_path  # skipcq: PYL-W0603
     global tmp_base_dir_fd  # skipcq: PYL-W0603
     global tmp_base_dir_path  # skipcq: PYL-W0603
+    if directory_name is not None and isinstance(directory_name, str):
+        directory_name = directory_name.encode()
     if base_dir_path is None and (directory_name is None or not directory_name.startswith(b'/')):
         msg = 'Secure open on relative path not supported'
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
@@ -68,6 +72,45 @@ def close_base_directory():
         raise Exception(msg)
 
 
+def secure_open_log_directory(log_directory_name=None, flags=0):
+    """Open the base log directory in a secure way."""
+    global log_dir_fd  # skipcq: PYL-W0603
+    global log_dir_path  # skipcq: PYL-W0603
+    if log_directory_name is not None and isinstance(log_directory_name, str):
+        log_directory_name = log_directory_name.encode()
+    if log_dir_path is None and (log_directory_name is None or not log_directory_name.startswith(b'/')):
+        msg = 'Secure open on relative path not supported'
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+        raise Exception(msg)
+    if log_dir_path is None and (flags & os.O_DIRECTORY) == 0:
+        msg = 'Opening directory but O_DIRECTORY flag missing'
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+        raise Exception(msg)
+    if log_dir_fd is None:
+        if base_dir_path is not None and base_dir_path.startswith(os.path.split(log_directory_name)[0]):
+            log_dir_fd = os.open(log_directory_name, flags | os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY, dir_fd=base_dir_fd)
+            log_dir_path = log_directory_name
+        else:
+            log_dir_fd = os.open(log_directory_name, flags | os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY)
+            log_dir_path = log_directory_name
+    return log_dir_fd
+
+
+def close_log_directory():
+    """Close the base directory at program shutdown."""
+    global log_dir_fd  # skipcq: PYL-W0603
+    global log_dir_path  # skipcq: PYL-W0603
+    try:
+        if log_dir_fd is not None:
+            os.close(log_dir_fd)
+            log_dir_fd = None
+            log_dir_path = None
+    except OSError as e:
+        msg = 'Could not close the base log directory. Error: %s' % e
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+        raise Exception(msg)
+
+
 def secure_open_file(file_name, flags):
     """
     Secure opening of a file with given flags. This call will refuse to open files where any path component is a symlink.
@@ -75,6 +118,8 @@ def secure_open_file(file_name, flags):
     flags as controlling TTY logics as this is just an additional risk and does not make sense for opening of log files.
     @param file_name is the file name as byte string
     """
+    if isinstance(file_name, str):
+        file_name = file_name.encode()
     if not file_name.startswith(b'/'):
         msg = 'Secure open on relative path not supported'
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
@@ -95,7 +140,9 @@ def secure_open_file(file_name, flags):
     dir_name = os.path.dirname(file_name)
     base_name = os.path.basename(file_name)
     dir_fd = os.open(dir_name, flags | os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY)
-    return os.open(base_name, flags | os.O_NOFOLLOW | os.O_NOCTTY, dir_fd=dir_fd)
+    ret_fd = os.open(base_name, flags | os.O_NOFOLLOW | os.O_NOCTTY, dir_fd=dir_fd)
+    os.close(dir_fd)
+    return ret_fd
 
 
 def send_annotated_file_descriptor(send_socket, send_fd, type_info, annotation_data):

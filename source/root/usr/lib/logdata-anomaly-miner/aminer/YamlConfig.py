@@ -13,6 +13,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import sys
 import logging
+import copy
 from aminer import AminerConfig
 
 
@@ -22,13 +23,19 @@ enhanced_new_match_path_value_combo_detector_reference = None
 
 
 def load_yaml(config_file):
-    """Load the yaml configuration from file."""
+    """
+    Load the yaml configuration from files. Basically there are two schema types: validation schemas and normalisation schemas.
+    The validation schemas validate together with the BaseSchema all inputs as specifically as possible. Due to the limitations of
+    oneof_schemas and the not functional normalisation in the validation schemas, the normalisation schemas are used to set default values
+    and convert the date in right data types with coerce procedures.
+    """
     # We might be able to remove this and us it like the config_properties
     # skipcq: PYL-W0603
     global yaml_data
 
     import yaml
-    from aminer.ConfigValidator import ConfigValidator
+    from cerberus import Validator
+    from aminer.ConfigValidator import ConfigValidator, NormalisationValidator
     import os
     with open(config_file) as yamlfile:
         try:
@@ -38,13 +45,44 @@ def load_yaml(config_file):
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(exception)
             raise exception
 
-    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'YamlSchema.py', 'r') as sma:
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/BaseSchema.json', 'r') as sma:
         # skipcq: PYL-W0123
-        schema = eval(sma.read())
-    sma.close()
+        base_schema = eval(sma.read())
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/ParserNormalisationSchema.json', 'r') as sma:
+        # skipcq: PYL-W0123
+        parser_normalisation_schema = eval(sma.read())
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/AnalysisNormalisationSchema.json', 'r') as sma:
+        # skipcq: PYL-W0123
+        analysis_normalisation_schema = eval(sma.read())
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/EventHandlerNormalisationSchema.json', 'r') as sma:
+        # skipcq: PYL-W0123
+        event_handler_normalisation_schema = eval(sma.read())
 
-    v = ConfigValidator(schema)
-    if v.validate(yaml_data, schema):
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/ParserValidationSchema.json', 'r') as sma:
+        # skipcq: PYL-W0123
+        parser_validation_schema = eval(sma.read())
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/AnalysisValidationSchema.json', 'r') as sma:
+        # skipcq: PYL-W0123
+        analysis_validation_schema = eval(sma.read())
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/EventHandlerValidationSchema.json', 'r') as sma:
+        # skipcq: PYL-W0123
+        event_handler_validation_schema = eval(sma.read())
+
+    normalisation_schema = {
+        **base_schema, **parser_normalisation_schema, **analysis_normalisation_schema, **event_handler_normalisation_schema}
+    validation_schema = {**base_schema, **parser_validation_schema, **analysis_validation_schema, **event_handler_validation_schema}
+
+    v = ConfigValidator(validation_schema)
+    if not v.validate(yaml_data, validation_schema):
+        filtered_errors = copy.deepcopy(v.errors)
+        filter_config_errors(filtered_errors, 'Analysis', v.errors, analysis_validation_schema)
+        filter_config_errors(filtered_errors, 'Parser', v.errors, parser_validation_schema)
+        filter_config_errors(filtered_errors, 'EventHandlers', v.errors, event_handler_validation_schema)
+
+        raise ValueError("Config-Error: %s" % filtered_errors)
+
+    v = NormalisationValidator(normalisation_schema)
+    if v.validate(yaml_data, normalisation_schema):
         test = v.normalized(yaml_data)
         yaml_data = test
     else:
@@ -54,6 +92,29 @@ def load_yaml(config_file):
     # Set default values
     for key, val in yaml_data.items():
         config_properties[str(key)] = val
+
+
+def filter_config_errors(filtered_errors, key_name, errors, schema):
+    """Filter oneof outputs to produce a clear overview of the error."""
+    oneof = schema[key_name]['schema']['oneof']
+    if key_name in errors:
+        for i, err in enumerate(errors[key_name]):
+            for key in err:
+                if 'none or more than one rule validate' in err[key]:
+                    for cause in err[key]:
+                        if isinstance(cause, dict):
+                            # we need to copy the dictionary as it is not possible to iterate through it and change the size.
+                            for definition in copy.deepcopy(cause):
+                                if 'type' in cause[definition][0] and cause[definition][0]['type'][0].startswith('unallowed value '):
+                                    del cause[definition]
+                                else:
+                                    oneof_def_pos = int(definition.split(' ')[-1])
+                                    oneof_schema_type = oneof[oneof_def_pos]['schema']['type']
+                                    if 'forbidden' in oneof_schema_type:
+                                        cause[definition][0]['type'] = {'forbidden': oneof_schema_type['forbidden']}
+                                    elif 'allowed' in oneof_schema_type:
+                                        cause[definition][0]['type'] = {'allowed': oneof_schema_type['allowed']}
+            filtered_errors[key_name][i] = err
 
 
 # Add your ruleset here:
@@ -86,7 +147,9 @@ def build_parsing_model():
     # skipcq: PYL-W0603
     global yaml_data
     for item in yaml_data['Parser']:
-        if 'start' in item and item['start'] is True:
+        if item['id'] in parser_model_dict:
+            raise ValueError('Config-Error: The id "%s" occurred multiple times in Parser!' % item['id'])
+        if 'start' in item and item['start'] is True and item['type'].name != 'JsonModelElement':
             start = item
             continue
         if item['type'].is_model:
@@ -94,9 +157,9 @@ def build_parsing_model():
                 if isinstance(item['args'], list):  # skipcq: PTC-W0048
                     if item['type'].name not in ('DecimalFloatValueModelElement', 'DecimalIntegerValueModelElement'):
                         # encode string to bytearray
-                        for j in range(len(item['args'])):
-                            if isinstance(item['args'][j], str):
-                                item['args'][j] = item['args'][j].encode()
+                        for j, val in enumerate(item['args']):
+                            if isinstance(val, str):
+                                item['args'][j] = val.encode()
                 else:
                     if item['type'].name not in ('DecimalFloatValueModelElement', 'DecimalIntegerValueModelElement') and isinstance(
                             item['args'], str):
@@ -117,6 +180,10 @@ def build_parsing_model():
                         raise ValueError(msg)
                     branch_model_dict[key] = parser_model_dict.get(model)
                 parser_model_dict[item['id']] = item['type'].func(item['name'], value_model, item['args'][1].decode(), branch_model_dict)
+            elif item['type'].name == 'DateTimeModelElement':
+                parser_model_dict[item['id']] = item['type'].func(
+                    item['name'], item['date_format'].encode(), None, item['text_locale'], item['start_year'],
+                    item['max_time_jump_seconds'])
             elif item['type'].name == 'MultiLocaleDateTimeModelElement':
                 date_formats = []
                 for date_format in item['date_formats']:
@@ -124,11 +191,11 @@ def build_parsing_model():
                         msg = 'The date_format must have a size of 3!'
                         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
-                    date_formats.append(tuple(i for i in date_format['format']))
-                if 'args' in item:
-                    parser_model_dict[item['id']] = item['type'].func(item['name'], date_formats, item['args'])
-                else:
-                    parser_model_dict[item['id']] = item['type'].func(item['name'], date_formats)
+                    fmt = date_format['format']
+                    fmt[0] = fmt[0].encode()
+                    date_formats.append(tuple(fmt))
+                parser_model_dict[item['id']] = item['type'].func(
+                    item['name'], date_formats, item['start_year'], item['max_time_jump_seconds'])
             elif item['type'].name == 'RepeatedElementDataModelElement':
                 model = item['args'][0].decode()
                 if parser_model_dict.get(model) is None:
@@ -167,6 +234,15 @@ def build_parsing_model():
                     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 parser_model_dict[item['id']] = item['type'].func(item['name'], optional_element)
+            elif item['type'].name == 'DelimitedDataModelElement':
+                delimiter = item['delimiter'].encode()
+                parser_model_dict[item['id']] = item['type'].func(item['name'], delimiter, item['escape'], item['consume_delimiter'])
+            elif item['type'].name == 'JsonModelElement':
+                key_parser_dict = parse_json_yaml(item['key_parser_dict'], parser_model_dict)
+                if 'start' in item and item['start'] is True:
+                    start = item['type'].func(item['name'], key_parser_dict, item['optional_key_prefix'])
+                else:
+                    parser_model_dict[item['id']] = item['type'].func(item['name'], key_parser_dict, item['optional_key_prefix'])
             else:
                 if 'args' in item:
                     parser_model_dict[item['id']] = item['type'].func(item['name'], item['args'])
@@ -176,11 +252,13 @@ def build_parsing_model():
             parser_model_dict[item['id']] = item['type'].func()
 
     args_list = []
-    if 'args' in start:
+    if start.__class__.__name__ == 'JsonModelElement':
+        parsing_model = start
+    elif 'args' in start:
         if isinstance(start['args'], list):
             for i in start['args']:
                 if i == 'WHITESPACE':
-                    from aminer.parsing import FixedDataModelElement
+                    from aminer.parsing.FixedDataModelElement import FixedDataModelElement
                     sp = 'sp%d' % ws_count
                     args_list.append(FixedDataModelElement(sp, whitespace_str))
                     ws_count += 1
@@ -209,25 +287,32 @@ def build_input_pipeline(analysis_context, parsing_model):
     analysis_context.register_component(atom_filter, component_name="AtomFilter")
     anomaly_event_handlers = []
     # Now define the AtomizerFactory using the model. A simple line based one is usually sufficient.
-    from aminer.input import SimpleByteStreamLineAtomizerFactory
+    from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
     timestamp_paths = yaml_data['Input']['timestamp_paths']
     if isinstance(timestamp_paths, str):
         timestamp_paths = [timestamp_paths]
+    sync_wait_time = yaml_data['Input']['sync_wait_time']
+    eol_sep = yaml_data['Input']['eol_sep'].encode()
+    json_format = yaml_data['Input']['json_format']
     if yaml_data['Input']['multi_source'] is True:
-        from aminer.input import SimpleMultisourceAtomSync
+        from aminer.input.SimpleMultisourceAtomSync import SimpleMultisourceAtomSync
         analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(parsing_model, [SimpleMultisourceAtomSync([
-            atom_filter], sync_wait_time=5)], anomaly_event_handlers, default_timestamp_paths=timestamp_paths)
+            atom_filter], sync_wait_time=sync_wait_time)], anomaly_event_handlers, default_timestamp_paths=timestamp_paths, eol_sep=eol_sep,
+            json_format=json_format)
     else:
         analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
-            parsing_model, [atom_filter], anomaly_event_handlers, default_timestamp_paths=timestamp_paths)
+            parsing_model, [atom_filter], anomaly_event_handlers, default_timestamp_paths=timestamp_paths, eol_sep=eol_sep,
+            json_format=json_format)
     # Just report all unparsed atoms to the event handlers.
     if yaml_data['Input']['verbose'] is True:
-        from aminer.input import VerboseUnparsedAtomHandler
+        from aminer.input.VerboseUnparsedAtomHandler import VerboseUnparsedAtomHandler
         atom_filter.add_handler(VerboseUnparsedAtomHandler(anomaly_event_handlers, parsing_model), stop_when_handled_flag=True)
     else:
-        from aminer.input import SimpleUnparsedAtomHandler
+        from aminer.input.SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler
         atom_filter.add_handler(SimpleUnparsedAtomHandler(anomaly_event_handlers), stop_when_handled_flag=True)
-    from aminer.analysis import NewMatchPathDetector
+    if yaml_data['Input']['suppress_unparsed'] is True:
+        analysis_context.suppress_detector_list.append(atom_filter.subhandler_list[-1][0])
+    from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
     if 'LearnMode' in yaml_data:
         learn = yaml_data['LearnMode']
     else:
@@ -241,7 +326,7 @@ def build_input_pipeline(analysis_context, parsing_model):
 
 def build_analysis_components(analysis_context, anomaly_event_handlers, atom_filter):
     """Build the analysis components."""
-    suppress_detector_list = []
+    suppress_detector_list = analysis_context.suppress_detector_list
     if yaml_data['SuppressNewMatchPathDetector']:
         suppress_detector_list.append('DefaultNewMatchPathDetector')
     if 'Analysis' in yaml_data and yaml_data['Analysis'] is not None:
@@ -264,11 +349,13 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 comp_name = None
             else:
                 comp_name = item['id']
+                if analysis_context.get_component_by_name(comp_name) is not None:
+                    raise ValueError('Config-Error: The id "%s" occurred multiple times in Analysis!' % comp_name)
             if 'learn_mode' in item:
                 learn = item['learn_mode']
             else:
                 if 'LearnMode' not in yaml_data:
-                    msg = 'Config error: LearnMode must be defined if an analysis component does not define learn_mode.'
+                    msg = 'Config-Error: LearnMode must be defined if an analysis component does not define learn_mode.'
                     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 learn = yaml_data['LearnMode']
@@ -276,7 +363,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             if item['suppress']:
                 if comp_name is None:
                     raise ValueError(
-                        'Config error: id must be specified for the analysis component %s to enable suppression.' % item['type'])
+                        'Config-Error: id must be specified for the analysis component %s to enable suppression.' % item['type'])
                 suppress_detector_list.append(comp_name)
             if item['type'].name == 'NewMatchPathValueDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn,
@@ -320,7 +407,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     persistence_id=item['persistence_id'], allow_missing_values_flag=item['allow_missing_values'],
                                     output_log_line=item['output_logline'])
             elif item['type'].name == 'MissingMatchPathValueDetector':
-                tmp_analyser = func(analysis_context.aminer_config, item['path'], anomaly_event_handlers, auto_include_flag=learn,
+                tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn,
                                     persistence_id=item['persistence_id'], default_interval=item['check_interval'],
                                     realert_interval=item['realert_interval'], output_log_line=item['output_logline'])
             elif item['type'].name == 'MissingMatchPathListValueDetector':
@@ -328,14 +415,16 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     persistence_id=item['persistence_id'], default_interval=item['check_interval'],
                                     realert_interval=item['realert_interval'], output_log_line=item['output_logline'])
             elif item['type'].name == 'EventSequenceDetector':
-                tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers,
-                                    persistence_id=item['persistence_id'], id_path_list=item['id_path_list'], seq_len=item['seq_len'],
-                                    auto_include_flag=learn, output_log_line=item['output_logline'])
+                tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['id_path_list'],
+                                    target_path_list=item['paths'], persistence_id=item['persistence_id'], seq_len=item['seq_len'],
+                                    auto_include_flag=learn, output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
+                                    constraint_list=item['constraint_list'])
             elif item['type'].name == 'EventFrequencyDetector':
-                tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers,
+                tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
                                     persistence_id=item['persistence_id'], window_size=item['window_size'],
                                     confidence_factor=item['confidence_factor'], auto_include_flag=learn,
-                                    output_log_line=item['output_logline'])
+                                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
+                                    constraint_list=item['constraint_list'])
             elif item['type'].name == 'TimeCorrelationDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['parallel_check_count'],
                                     persistence_id=item['persistence_id'], record_count_before_event=item['record_count_before_event'],
@@ -583,12 +672,13 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     raise ValueError(msg)
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, etd, persistence_id=item['persistence_id'],
-                    path_list=item['paths'], ks_alpha=item['ks_alpha'], s_ks_alpha=item['s_ks_alpha'], s_ks_bt_alpha=item['s_ks_bt_alpha'],
-                    d_alpha=item['d_alpha'], d_bt_alpha=item['d_bt_alpha'], div_thres=item['div_thres'], sim_thres=item['sim_thres'],
-                    indicator_thres=item['indicator_thres'], num_init=item['num_init'], num_update=item['num_update'],
-                    num_update_unq=item['num_update_unq'], num_s_ks_values=item['num_s_ks_values'], num_s_ks_bt=item['num_s_ks_bt'],
-                    num_d_bt=item['num_d_bt'], num_pause_discrete=item['num_pause_discrete'], num_pause_others=item['num_pause_others'],
-                    test_ks_int=item['test_ks_int'], update_var_type_bool=item['update_var_type_bool'],
+                    path_list=item['paths'], gof_alpha=item['gof_alpha'], s_gof_alpha=item['s_gof_alpha'],
+                    s_gof_bt_alpha=item['s_gof_bt_alpha'], d_alpha=item['d_alpha'], d_bt_alpha=item['d_bt_alpha'],
+                    div_thres=item['div_thres'], sim_thres=item['sim_thres'], indicator_thres=item['indicator_thres'],
+                    num_init=item['num_init'], num_update=item['num_update'], num_update_unq=item['num_update_unq'],
+                    num_s_gof_values=item['num_s_gof_values'], num_s_gof_bt=item['num_s_gof_bt'], num_d_bt=item['num_d_bt'],
+                    num_pause_discrete=item['num_pause_discrete'], num_pause_others=item['num_pause_others'],
+                    test_gof_int=item['test_gof_int'], update_var_type_bool=item['update_var_type_bool'],
                     num_stop_update=item['num_stop_update'], silence_output_without_confidence=item['silence_output_without_confidence'],
                     silence_output_except_indicator=item['silence_output_except_indicator'],
                     num_var_type_hist_ref=item['num_var_type_hist_ref'], num_update_var_type_hist_ref=item['num_update_var_type_hist_ref'],
@@ -628,7 +718,6 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 tmp_analyser.output_event_handlers = item['output_event_handlers']
             analysis_context.register_component(tmp_analyser, component_name=comp_name)
             atom_filter.add_handler(tmp_analyser)
-    analysis_context.suppress_detector_list = suppress_detector_list
 
 
 def build_event_handlers(analysis_context, anomaly_event_handlers):
@@ -637,6 +726,8 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
         event_handler_id_list = []
         if 'EventHandlers' in yaml_data and yaml_data['EventHandlers'] is not None:
             for item in yaml_data['EventHandlers']:
+                if item['id'] in event_handler_id_list:
+                    raise ValueError('Config-Error: The id "%s" occurred multiple times in EventHandlers!' % item['id'])
                 event_handler_id_list.append(item['id'])
                 func = item['type'].func
                 ctx = None
@@ -656,20 +747,13 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                 if item['type'].name == 'SyslogWriterEventHandler':
                     ctx = func(analysis_context, item['instance_name'])
                 if item['type'].name == 'KafkaEventHandler':
-                    if 'topic' not in item:
-                        msg = "Kafka-Topic not defined"
-                        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-                        raise ValueError(msg)
                     import configparser
                     import os
                     config = configparser.ConfigParser()
-                    kafkacfg = '/etc/aminer/kafka-client.conf'
-                    if 'cfgfile' in item:
-                        kafkacfg = item['cfgfile']
-                    if os.access(kafkacfg, os.R_OK):
-                        config.read(kafkacfg)
+                    if os.access(item['cfgfile'], os.R_OK):
+                        config.read(item['cfgfile'])
                     else:
-                        msg = "%s does not exist or is not readable" % kafkacfg
+                        msg = "%s does not exist or is not readable" % item['cfgfile']
                         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     options = dict(config.items("DEFAULT"))
@@ -684,14 +768,14 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                 if ctx is None:
                     ctx = func(analysis_context)
                 if item['json'] is True or item['type'].name == 'KafkaEventHandler':
-                    from aminer.events import JsonConverterHandler
+                    from aminer.events.JsonConverterHandler import JsonConverterHandler
                     ctx = JsonConverterHandler([ctx], analysis_context)
                 anomaly_event_handlers.append(ctx)
             return event_handler_id_list
         raise KeyError()
     except KeyError:
         # Add stdout stream printing for debugging, tuning.
-        from aminer.events import StreamPrinterEventHandler
+        from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
         anomaly_event_handlers.append(StreamPrinterEventHandler(analysis_context, stream=sys.stderr))
     return None
 
@@ -706,3 +790,38 @@ def tuple_transformation_function_demo_print_every_10th_value(match_value_list):
         else:
             enhanced_new_match_path_value_combo_detector_reference.auto_include_flag = True
     return match_value_list
+
+
+def parse_json_yaml(json_dict, parser_model_dict):
+    """Parse an yaml configuration for json."""
+    key_parser_dict = {}
+    for key in json_dict.keys():
+        value = json_dict[key]
+        if key is None:
+            key = 'null'
+        if key is False:
+            key = 'false'
+        if key is True:
+            key = 'true'
+        if isinstance(value, dict):
+            key_parser_dict[key] = parse_json_yaml(value, parser_model_dict)
+        elif isinstance(value, list):
+            if isinstance(value[0], dict):
+                key_parser_dict[key] = [parse_json_yaml(value[0], parser_model_dict)]
+            elif value[0] == "ALLOW_ALL":
+                key_parser_dict[key] = value
+            elif parser_model_dict.get(value[0]) is None:
+                msg = 'The parser model %s does not exist!' % value[0]
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                raise ValueError(msg)
+            else:
+                key_parser_dict[key] = [parser_model_dict.get(value[0])]
+        elif value == "ALLOW_ALL":
+            key_parser_dict[key] = value
+        elif parser_model_dict.get(value) is None:
+            msg = 'The parser model %s does not exist!' % value
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        else:
+            key_parser_dict[key] = parser_model_dict.get(value)
+    return key_parser_dict

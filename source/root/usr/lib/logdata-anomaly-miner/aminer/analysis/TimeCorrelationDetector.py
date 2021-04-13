@@ -20,10 +20,10 @@ import logging
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.analysis import Rules
-from aminer.input import AtomHandlerInterface
-from aminer.util import get_log_int
+from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.util.History import get_log_int
 from aminer.util import PersistenceUtil
-from aminer.util import TimeTriggeredComponentInterface
+from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
 
 class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
@@ -60,8 +60,8 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
         self.use_value_match = use_value_match
         self.aminer_config = aminer_config
 
+        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
-        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, 'TimeCorrelationDetector', persistence_id)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is None:
             self.feature_list = []
@@ -269,7 +269,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
             trigger_count = feature.trigger_count
             result += '%s (%d) e = %d:' % (feature.rule, feature.index, trigger_count)
             stat_pos = (self.parallel_check_count * feature.index) << 1
-            for feature_pos in range(0, len(self.feature_list)):
+            for feature_pos in range(len(self.feature_list)):  # skipcq: PTC-W0060
                 event_count = self.event_count_table[stat_pos]
                 ratio = '-'
                 if trigger_count != 0:

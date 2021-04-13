@@ -1,8 +1,21 @@
-from aminer.parsing import FirstMatchModelElement, SequenceModelElement, DecimalFloatValueModelElement, FixedDataModelElement, \
-    DelimitedDataModelElement, AnyByteDataModelElement, FixedWordlistDataModelElement, DecimalIntegerValueModelElement, \
-    DateTimeModelElement, IpAddressDataModelElement, Base64StringModelElement, ElementValueBranchModelElement, HexStringModelElement, \
-    MultiLocaleDateTimeModelElement, OptionalMatchModelElement, RepeatedElementDataModelElement, VariableByteDataModelElement, \
-    WhiteSpaceLimitedDataModelElement
+from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
+from aminer.parsing.SequenceModelElement import SequenceModelElement
+from aminer.parsing.DecimalFloatValueModelElement import DecimalFloatValueModelElement
+from aminer.parsing.FixedDataModelElement import FixedDataModelElement
+from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
+from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
+from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.DateTimeModelElement import DateTimeModelElement
+from aminer.parsing.IpAddressDataModelElement import IpAddressDataModelElement
+from aminer.parsing.Base64StringModelElement import Base64StringModelElement
+from aminer.parsing.ElementValueBranchModelElement import ElementValueBranchModelElement
+from aminer.parsing.HexStringModelElement import HexStringModelElement
+from aminer.parsing.MultiLocaleDateTimeModelElement import MultiLocaleDateTimeModelElement
+from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
+from aminer.parsing.RepeatedElementDataModelElement import RepeatedElementDataModelElement
+from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
+from aminer.parsing.WhiteSpaceLimitedDataModelElement import WhiteSpaceLimitedDataModelElement
 
 # This is a template for the "aminer" logfile miner tool. Copy
 # it to "config.py" and define your ruleset.
@@ -203,19 +216,19 @@ def build_analysis_pipeline(analysis_context):
     stream_printer_event_handler = StreamPrinterEventHandler(analysis_context)
     from aminer.events.SyslogWriterEventHandler import SyslogWriterEventHandler
     syslog_event_handler = SyslogWriterEventHandler(analysis_context)
-    from aminer.events import DefaultMailNotificationEventHandler
+    from aminer.events.DefaultMailNotificationEventHandler import DefaultMailNotificationEventHandler
     if DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS in analysis_context.aminer_config.config_properties:
         mail_notification_handler = DefaultMailNotificationEventHandler(analysis_context)
         analysis_context.register_component(mail_notification_handler, component_name="MailHandler")
     anomaly_event_handlers = [stream_printer_event_handler, syslog_event_handler, mail_notification_handler]
 
     # Now define the AtomizerFactory using the model. A simple line based one is usually sufficient.
-    from aminer.input import SimpleByteStreamLineAtomizerFactory
+    from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
     analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(parsing_model, [simple_monotonic_timestamp_adjust],
                                                                             anomaly_event_handlers)
 
     # Just report all unparsed atoms to the event handlers.
-    from aminer.input import SimpleUnparsedAtomHandler
+    from aminer.input.SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler
     simple_unparsed_atom_handler = SimpleUnparsedAtomHandler(anomaly_event_handlers)
     atom_filter.add_handler(simple_unparsed_atom_handler, stop_when_handled_flag=True)
     analysis_context.register_component(simple_unparsed_atom_handler, component_name="UnparsedHandler")
@@ -226,7 +239,7 @@ def build_analysis_pipeline(analysis_context):
     analysis_context.register_component(timestamps_unsorted_detector, component_name="TimestampsUnsortedDetector")
 
     from aminer.analysis import Rules
-    from aminer.analysis import AllowlistViolationDetector
+    from aminer.analysis.AllowlistViolationDetector import AllowlistViolationDetector
     allowlist_rules = [
         Rules.OrMatchRule([
             Rules.AndMatchRule([
@@ -243,7 +256,7 @@ def build_analysis_pipeline(analysis_context):
     analysis_context.register_component(allowlist_violation_detector, component_name="Allowlist")
     atom_filter.add_handler(allowlist_violation_detector)
 
-    from aminer.analysis import NewMatchPathDetector
+    from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
     new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=True)
     analysis_context.register_component(new_match_path_detector, component_name="NewMatchPath")
     atom_filter.add_handler(new_match_path_detector)
@@ -308,7 +321,7 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis.MissingMatchPathValueDetector import MissingMatchPathValueDetector
     missing_match_path_value_detector = MissingMatchPathValueDetector(
-        analysis_context.aminer_config, '/model/DiskReport/Space', anomaly_event_handlers, auto_include_flag=True, default_interval=2,
+        analysis_context.aminer_config, ['/model/DiskReport/Space'], anomaly_event_handlers, auto_include_flag=True, default_interval=2,
         realert_interval=5)
     analysis_context.register_component(missing_match_path_value_detector, component_name="MissingMatch")
     atom_filter.add_handler(missing_match_path_value_detector)

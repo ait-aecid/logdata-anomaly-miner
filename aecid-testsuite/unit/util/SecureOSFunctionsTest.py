@@ -41,7 +41,7 @@ class SecureOSFunctionsTestLocal(TestBase):
         secure_open_file(directory, os.O_DIRECTORY)
         SecureOSFunctions.no_secure_open_warn_once_flag = True
         self.assertTrue(
-            error.getvalue() == 'WARNING: SECURITY: No secure open yet due to missing openat in python!\n' or error.getvalue() == '')
+            error.getvalue() in ['WARNING: SECURITY: No secure open yet due to missing openat in python!\n', ''])
 
     def test4sendAnnotatedFileDescriptor(self):
         """A valid annotated file descriptor is to be sent by a socket."""

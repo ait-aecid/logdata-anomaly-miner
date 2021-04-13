@@ -21,8 +21,8 @@ import sys
 
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
-from aminer.util import TimeTriggeredComponentInterface
-from aminer.events import EventHandlerInterface
+from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
+from aminer.events.EventInterfaces import EventHandlerInterface
 from aminer.events.EventData import EventData
 
 
@@ -54,7 +54,7 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
         self.analysis_context = analysis_context
         aminer_config = analysis_context.aminer_config
         # @see https://emailregex.com/
-        is_email = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)|^[a-zA-Z0-9]+@localhost$")
+        is_email = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-]+$)|^[a-zA-Z0-9]+@localhost$")
         self.recipient_address = shlex.quote(
             aminer_config.config_properties.get(DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS))
         if self.recipient_address is None:
@@ -133,7 +133,7 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
         if (self.next_alert_time != 0) and (current_time >= self.next_alert_time):
             self.send_notification(current_time)
 
-    def get_time_trigger_class(self):
+    def get_time_trigger_class(self):  # skipcq: PYL-R0201
         """
         Get the trigger class this component can be registered for.
         See AnalysisContext class for different trigger classes available.

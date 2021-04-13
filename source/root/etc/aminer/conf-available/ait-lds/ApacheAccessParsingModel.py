@@ -1,15 +1,15 @@
 """This module defines a generated parser model."""
 
-from aminer.parsing import DateTimeModelElement
-from aminer.parsing import DecimalIntegerValueModelElement
-from aminer.parsing import DelimitedDataModelElement
-from aminer.parsing import FirstMatchModelElement
-from aminer.parsing import FixedDataModelElement
-from aminer.parsing import FixedWordlistDataModelElement
-from aminer.parsing import IpAddressDataModelElement
-from aminer.parsing import OptionalMatchModelElement
-from aminer.parsing import SequenceModelElement
-from aminer.parsing import VariableByteDataModelElement
+from aminer.parsing.DateTimeModelElement import DateTimeModelElement
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
+from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
+from aminer.parsing.FixedDataModelElement import FixedDataModelElement
+from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
+from aminer.parsing.IpAddressDataModelElement import IpAddressDataModelElement
+from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
+from aminer.parsing.SequenceModelElement import SequenceModelElement
+from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
 
 
 def get_model():

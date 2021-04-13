@@ -17,10 +17,10 @@ import logging
 
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
-from aminer.input import AtomHandlerInterface
-from aminer.util import LogarithmicBackoffHistory
+from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.util.History import LogarithmicBackoffHistory
 from aminer.util import PersistenceUtil
-from aminer.util import TimeTriggeredComponentInterface
+from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 from aminer.analysis import Rules
 
 
@@ -52,9 +52,8 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
                 event_correlation_set |= set(rule.match_action.artefact_b_rules)
         self.event_correlation_ruleset = list(event_correlation_set)
 
+        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
-        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, 'TimeCorrelationViolationDetector',
-                                                                              persistence_id)
 
     def receive_atom(self, log_atom):
         """Receive a parsed atom and evaluate all the classification rules and event triggering on violations."""
@@ -240,7 +239,7 @@ class CorrelationRule:
                     break
                 # So time range is OK, see if match parameters are also equal.
                 violation_found = False
-                for check_pos in range(4, len(a_event)):
+                for check_pos in range(4, len(a_event)):  # skipcq: PTC-W0060
                     if a_event[check_pos] != b_event[check_pos]:
                         violation_line = a_event[3].match_element.match_string
                         if isinstance(violation_line, bytes):

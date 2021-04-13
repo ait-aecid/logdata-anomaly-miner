@@ -13,11 +13,26 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import logging
+import sys
 from aminer import AminerConfig
 from aminer.input.LogAtom import LogAtom
-from aminer.input import StreamAtomizer
-from aminer.parsing import MatchContext
-from aminer.parsing import ParserMatch
+from aminer.input.InputInterfaces import StreamAtomizer
+from aminer.input.JsonStateMachine import json_machine
+from aminer.parsing.MatchContext import MatchContext
+from aminer.parsing.ParserMatch import ParserMatch
+
+
+breakout = False
+data = None
+line = None
+
+
+def found_json(_data):
+    """Set the breakout variable if the JsonStateMachine finished."""
+    global breakout  # skipcq: PYL-W0603
+    breakout = True
+    global data  # skipcq: PYL-W0603
+    data = _data
 
 
 class ByteStreamLineAtomizer(StreamAtomizer):
@@ -30,7 +45,8 @@ class ByteStreamLineAtomizer(StreamAtomizer):
 
     COUNTER = 0
 
-    def __init__(self, parsing_model, atom_handler_list, event_handler_list, max_line_length, default_timestamp_paths):
+    def __init__(self, parsing_model, atom_handler_list, event_handler_list, max_line_length, default_timestamp_paths, eol_sep=b'\n',
+                 json_format=False):
         """
         Create the atomizer.
         @param event_handler_list when not None, send events to those handlers. The list might be empty at invocation and populated
@@ -42,6 +58,13 @@ class ByteStreamLineAtomizer(StreamAtomizer):
         self.event_handler_list = event_handler_list
         self.max_line_length = max_line_length
         self.default_timestamp_paths = default_timestamp_paths
+        if not isinstance(eol_sep, bytes):
+            msg = '%s eol_sep parameter must be of type bytes!' % self.__class__.__name__
+            print(msg, file=sys.stderr)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            sys.exit(-1)
+        self.eol_sep = eol_sep
+        self.json_format = json_format
 
         self.in_overlong_line_flag = False
         # If consuming of data was already attempted but the downstream handlers refused to handle it, keep the data and the parsed
@@ -62,14 +85,37 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                 # Keep length before dispatching: dispatch will reset the field.
                 data_length = len(self.last_unconsumed_log_atom.raw_data)
                 if self.dispatch_atom(self.last_unconsumed_log_atom):
-                    consumed_length += data_length + 1
+                    consumed_length += data_length + len(self.eol_sep)
                     continue
                 # Nothing consumed, tell upstream to wait if appropriate.
                 if consumed_length == 0:
                     consumed_length = -1
                 break
 
-            line_end = stream_data.find(b'\n', consumed_length)
+            line_end = None
+            global breakout  # skipcq: PYL-W0603
+            breakout = False
+            global data  # skipcq: PYL-W0603
+            data = None
+            valid_json = False
+            if self.json_format:
+                state = json_machine(found_json)
+                i = 0
+                for i, char in enumerate(stream_data[consumed_length:]):
+                    state = state(char)
+                    if breakout or state is None or i > self.max_line_length:
+                        break
+                # check if the json is still valid, but the stream_data is at the end
+                if not breakout and state is not None and i + consumed_length == len(stream_data) - 1 and not end_of_stream_flag:
+                    return consumed_length
+                if 0 < i <= self.max_line_length and b'{' in stream_data[consumed_length:consumed_length+i+1] and data is not None:
+                    line_end = consumed_length + i + 1
+                    valid_json = True
+                elif i > self.max_line_length:
+                    self.in_overlong_line_flag = True
+            if line_end is None:
+                line_end = stream_data.find(self.eol_sep, consumed_length)
+
             if self.in_overlong_line_flag:
                 if line_end < 0:
                     consumed_length = len(stream_data)
@@ -77,7 +123,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                         self.dispatch_event('Overlong line terminated by end of stream', stream_data)
                         self.in_overlong_line_flag = False
                     break
-                consumed_length = line_end + 1
+                consumed_length = line_end + len(self.eol_sep)
                 self.in_overlong_line_flag = False
                 continue
 
@@ -96,10 +142,10 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                 break
 
             # This is at least a complete/overlong line.
-            line_length = line_end + 1 - consumed_length
-            if line_length > self.max_line_length:
+            line_length = line_end + len(self.eol_sep) - consumed_length
+            if line_length > self.max_line_length and not valid_json:
                 self.dispatch_event('Overlong line detected', stream_data[consumed_length:line_end])
-                consumed_length = line_end + 1
+                consumed_length = line_end + len(self.eol_sep)
                 continue
 
             # This is a normal line.
@@ -116,7 +162,8 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                             log_atom.set_timestamp(ts_match.match_object)
                             break
             if self.dispatch_atom(log_atom):
-                consumed_length = line_end + 1
+                consumed_length = line_end + len(self.eol_sep) - (
+                        valid_json and stream_data[line_end:line_end+len(self.eol_sep)] != self.eol_sep)
                 continue
             if consumed_length == 0:
                 # Downstream did not want the data, so tell upstream to block for a while.

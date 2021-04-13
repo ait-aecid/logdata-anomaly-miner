@@ -15,7 +15,7 @@ import json
 import logging
 
 from aminer import AminerConfig
-from aminer.util import encode_byte_string_as_string, decode_string_as_byte_string
+from aminer.util.StringUtil import encode_byte_string_as_string, decode_string_as_byte_string
 
 
 def dump_as_json(input_object):

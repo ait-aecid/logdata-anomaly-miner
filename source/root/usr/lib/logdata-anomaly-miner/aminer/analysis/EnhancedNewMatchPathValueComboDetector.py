@@ -21,8 +21,7 @@ import logging
 from aminer import AminerConfig
 from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
 from aminer.util import PersistenceUtil
-from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
-from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME
+from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
 
 
 class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
@@ -60,6 +59,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         self.log_total = 0
         self.log_learned_path_value_combos = 0
         self.log_new_learned_values = []
+        self.next_persist_time = None
 
     def load_persistence_data(self):
         """Load the persistence data from storage."""
@@ -122,9 +122,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         if (self.auto_include_flag and self.known_values_dict.get(match_value_tuple)[2] == 1) or not self.auto_include_flag:
             self.log_learned_path_value_combos += 1
             for listener in self.anomaly_event_handlers:
-                original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-                if original_log_line_prefix is None:
-                    original_log_line_prefix = ''
+                original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
                 if self.output_log_line:
                     match_paths_values = {}
                     for match_path, match_element in match_dict.items():

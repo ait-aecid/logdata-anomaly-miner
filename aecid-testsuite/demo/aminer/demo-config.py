@@ -88,11 +88,23 @@ def build_analysis_pipeline(analysis_context):
     cron = b' cron['
 
     # Build the parsing model:
-    from aminer.parsing import FirstMatchModelElement, SequenceModelElement, DecimalFloatValueModelElement, FixedDataModelElement, \
-        DelimitedDataModelElement, AnyByteDataModelElement, FixedWordlistDataModelElement, DecimalIntegerValueModelElement, \
-        DateTimeModelElement, IpAddressDataModelElement, Base64StringModelElement, ElementValueBranchModelElement, HexStringModelElement, \
-        MultiLocaleDateTimeModelElement, OptionalMatchModelElement, RepeatedElementDataModelElement, VariableByteDataModelElement, \
-        WhiteSpaceLimitedDataModelElement
+    from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
+    from aminer.parsing.SequenceModelElement import SequenceModelElement
+    from aminer.parsing.DecimalFloatValueModelElement import DecimalFloatValueModelElement
+    from aminer.parsing.FixedDataModelElement import FixedDataModelElement
+    from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
+    from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
+    from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
+    from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+    from aminer.parsing.DateTimeModelElement import DateTimeModelElement, MultiLocaleDateTimeModelElement
+    from aminer.parsing.IpAddressDataModelElement import IpAddressDataModelElement
+    from aminer.parsing.Base64StringModelElement import Base64StringModelElement
+    from aminer.parsing.ElementValueBranchModelElement import ElementValueBranchModelElement
+    from aminer.parsing.HexStringModelElement import HexStringModelElement
+    from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
+    from aminer.parsing.RepeatedElementDataModelElement import RepeatedElementDataModelElement
+    from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
+    from aminer.parsing.WhiteSpaceLimitedDataModelElement import WhiteSpaceLimitedDataModelElement
 
     service_children_disk_report = [
         FixedDataModelElement('Space', b' Current Disk Data is: Filesystem     Type  Size  Used Avail Use%'),
@@ -165,7 +177,7 @@ def build_analysis_pipeline(analysis_context):
         DateTimeModelElement('DateTimeModelElement', b'Current DateTime: %d.%m.%Y %H:%M:%S'),
         DecimalFloatValueModelElement('DecimalFloatValueModelElement', value_sign_type='optional'),
         DecimalIntegerValueModelElement('DecimalIntegerValueModelElement', value_sign_type='optional', value_pad_type='blank'),
-        SequenceModelElement('', [
+        SequenceModelElement('se', [
             DelimitedDataModelElement('DelimitedDataModelElement', b';'), FixedDataModelElement('FixedDataModelElement', b';')])]
 
     # ElementValueBranchModelElement
@@ -180,21 +192,22 @@ def build_analysis_pipeline(analysis_context):
             SequenceModelElement("seq2", [fixed_data_me1, fixed_wordlist_data_model_element, fixed_data_me2])]), "wordlist",
             {0: decimal_integer_value_model_element, 1: fixed_data_me2}))
     service_children_parsing_model_element.append(HexStringModelElement('HexStringModelElement'))
-    service_children_parsing_model_element.append(SequenceModelElement('', [
+    service_children_parsing_model_element.append(SequenceModelElement('se2', [
         FixedDataModelElement('FixedDataModelElement', b'Gateway IP-Address: '), IpAddressDataModelElement('IpAddressDataModelElement')]))
     import locale
     loc = locale.getlocale()
     if loc == (None, None):
         loc = ('en_US', 'utf8')
     service_children_parsing_model_element.append(
-        MultiLocaleDateTimeModelElement('MultiLocaleDateTimeModelElement', [(b'%b %d %Y', '%s.%s' % (loc), None)]))
+        MultiLocaleDateTimeModelElement('MultiLocaleDateTimeModelElement', [(b'%b %d %Y', None, '%s.%s' % loc)]))
     service_children_parsing_model_element.append(
         RepeatedElementDataModelElement('RepeatedElementDataModelElement', SequenceModelElement('SequenceModelElement', [
             FixedDataModelElement('FixedDataModelElement', b'drawn number: '),
             DecimalIntegerValueModelElement('DecimalIntegerValueModelElement')]), 1))
     service_children_parsing_model_element.append(VariableByteDataModelElement('VariableByteDataModelElement', b'-@#'))
     service_children_parsing_model_element.append(
-        SequenceModelElement('', [WhiteSpaceLimitedDataModelElement('WhiteSpaceLimitedDataModelElement'), FixedDataModelElement('', b' ')]))
+        SequenceModelElement('se', [
+            WhiteSpaceLimitedDataModelElement('WhiteSpaceLimitedDataModelElement'), FixedDataModelElement('fixed', b' ')]))
 
     # The Base64StringModelElement must be just before the AnyByteDataModelElement to avoid unexpected Matches.
     service_children_parsing_model_element.append(Base64StringModelElement('Base64StringModelElement'))
@@ -203,7 +216,7 @@ def build_analysis_pipeline(analysis_context):
     # AnyByteDataModelElement. The AnyByteDataModelElement must be last, because all bytes are accepted.
     service_children_parsing_model_element.append(OptionalMatchModelElement(
         'OptionalMatchModelElement', FirstMatchModelElement('FirstMatchModelElement', [
-            FixedDataModelElement('FixedDataModelElement', b'The-searched-element-was-found!'), SequenceModelElement('', [
+            FixedDataModelElement('FixedDataModelElement', b'The-searched-element-was-found!'), SequenceModelElement('se', [
                 FixedDataModelElement('FixedDME', b'Any:'), AnyByteDataModelElement('AnyByteDataModelElement')])])))
 
     alphabet = b'abcdef'
@@ -238,12 +251,13 @@ def build_analysis_pipeline(analysis_context):
 
     # Now define the AtomizerFactory using the model. A simple line
     # based one is usually sufficient.
-    from aminer.input import SimpleByteStreamLineAtomizerFactory
+    from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
     analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
         parsing_model, [simple_monotonic_timestamp_adjust], anomaly_event_handlers, default_timestamp_paths=["/model/DailyCron/DTM"])
 
     # Just report all unparsed atoms to the event handlers.
-    from aminer.input import SimpleUnparsedAtomHandler, VerboseUnparsedAtomHandler
+    from aminer.input.SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler
+    from aminer.input.VerboseUnparsedAtomHandler import VerboseUnparsedAtomHandler
     simple_unparsed_atom_handler = SimpleUnparsedAtomHandler(anomaly_event_handlers)
     atom_filter.add_handler(simple_unparsed_atom_handler, stop_when_handled_flag=False)
     analysis_context.register_component(simple_unparsed_atom_handler, component_name="SimpleUnparsedHandler")
@@ -258,7 +272,7 @@ def build_analysis_pipeline(analysis_context):
     analysis_context.register_component(timestamps_unsorted_detector, component_name="TimestampsUnsortedDetector")
 
     from aminer.analysis import Rules
-    from aminer.analysis import AllowlistViolationDetector
+    from aminer.analysis.AllowlistViolationDetector import AllowlistViolationDetector
 
     # This rule list should trigger, when the line does not look like: User root (logged in, logged out)
     # or User 'username' (logged in, logged out) x minutes ago.
@@ -277,7 +291,7 @@ def build_analysis_pipeline(analysis_context):
     analysis_context.register_component(allowlist_violation_detector, component_name="Allowlist")
     atom_filter.add_handler(allowlist_violation_detector)
 
-    from aminer.analysis import ParserCount
+    from aminer.analysis.ParserCount import ParserCount
     parser_count = ParserCount(analysis_context.aminer_config, None, anomaly_event_handlers, 10)
     analysis_context.register_component(parser_count, component_name="ParserCount")
     atom_filter.add_handler(parser_count)
@@ -298,19 +312,31 @@ def build_analysis_pipeline(analysis_context):
     analysis_context.register_component(vtd, component_name="VariableCorrelationDetector")
     atom_filter.add_handler(vtd)
 
-    from aminer.analysis import EventCorrelationDetector
+    from aminer.analysis.EventCorrelationDetector import EventCorrelationDetector
     ecd = EventCorrelationDetector(analysis_context.aminer_config, anomaly_event_handlers, check_rules_flag=True,
                                    hypothesis_max_delta_time=1.0, auto_include_flag=True)
     analysis_context.register_component(ecd, component_name="EventCorrelationDetector")
     atom_filter.add_handler(ecd)
 
-    from aminer.analysis import MatchFilter
+    from aminer.analysis.EventFrequencyDetector import EventFrequencyDetector
+    efd = EventFrequencyDetector(analysis_context.aminer_config, anomaly_event_handlers, window_size=0.5)
+    analysis_context.register_component(efd, component_name="EventFrequencyDetector")
+    atom_filter.add_handler(efd)
+
+    from aminer.analysis.EventSequenceDetector import EventSequenceDetector
+    esd = EventSequenceDetector(analysis_context.aminer_config, anomaly_event_handlers, ['/model/ParsingME'], ignore_list=[
+        '/model/ECD/a', '/model/ECD/b', '/model/ECD/c', '/model/ECD/d', '/model/ECD/e', '/model/ECD/f', '/model/Random',
+        '/model/RandomTime', '/model/DailyCron'])
+    analysis_context.register_component(esd, component_name="EventSequenceDetector")
+    atom_filter.add_handler(esd)
+
+    from aminer.analysis.MatchFilter import MatchFilter
     match_filter = MatchFilter(analysis_context.aminer_config, ['/model/Random'], anomaly_event_handlers, target_value_list=[
         1, 10, 100], output_log_line=True)
     analysis_context.register_component(match_filter, component_name="MatchFilter")
     atom_filter.add_handler(match_filter)
 
-    from aminer.analysis import NewMatchPathDetector
+    from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
     new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=True,
                                                    output_log_line=True)
     analysis_context.register_component(new_match_path_detector, component_name="NewMatchPath")
@@ -385,7 +411,7 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis.MissingMatchPathValueDetector import MissingMatchPathValueDetector
     missing_match_path_value_detector = MissingMatchPathValueDetector(
-        analysis_context.aminer_config, '/model/DiskReport/Space', anomaly_event_handlers, auto_include_flag=True, default_interval=2,
+        analysis_context.aminer_config, ['/model/DiskReport/Space'], anomaly_event_handlers, auto_include_flag=True, default_interval=2,
         realert_interval=5, output_log_line=True)
     analysis_context.register_component(missing_match_path_value_detector, component_name="MissingMatch")
     atom_filter.add_handler(missing_match_path_value_detector)

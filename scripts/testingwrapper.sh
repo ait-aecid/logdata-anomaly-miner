@@ -24,6 +24,11 @@ case "$1" in
 		./${1}.sh ${*:2}
 		exit $?
 		;;
+	runAminerJsonInputDemo)
+		cd $TESTDIR
+		./${1}.sh ${*:2}
+		exit $?
+		;;
 	runAminerIntegrationTest)
 		cd $TESTDIR
 		./${1}.sh ${*:2}
@@ -39,19 +44,36 @@ case "$1" in
 		./${1}.sh ${*:2}
 		exit $?
 		;;
-
 	runGettingStarted)
 		cd $TESTDIR
 		./${1}.sh ${*:2}
 		exit $?
 		;;
-
 	runTryItOut)
 		cd $TESTDIR
 		./${1}.sh ${*:2}
 		exit $?
 		;;
-
+	runHowToCreateYourOwnSequenceDetector)
+		cd $TESTDIR
+		./${1}.sh ${*:2}
+		exit $?
+		;;
+	runHowToCreateYourOwnFrequencyDetector)
+		cd $TESTDIR
+		./${1}.sh ${*:2}
+		exit $?
+		;;
+	runHowToMissingMatchPathValueDetector)
+		cd $TESTDIR
+		./${1}.sh ${*:2}
+		exit $?
+		;;
+	runJsonDemo)
+		cd $TESTDIR
+		./${1}.sh ${*:2}
+		exit $?
+		;;
 	ALL)
 		cd $TESTDIR
                 ./runSuspendModeTest.sh
@@ -62,10 +84,19 @@ case "$1" in
                 ./runAminerDemo.sh demo/aminer/template_config.py
                 ./runAminerDemo.sh demo/aminer/template_config.yml
                 ./runAminerDemo.sh demo/aminer/demo-config.yml
+                ./runAminerJsonInputDemo.sh
+                ./runJsonDemo.sh demo/aminerJsonInputDemo/json-aminer-demo.yml
+                ./runJsonDemo.sh demo/aminerJsonInputDemo/json-elastic-demo.yml
+                ./runJsonDemo.sh demo/aminerJsonInputDemo/json-eve-demo.yml
+                ./runJsonDemo.sh demo/aminerJsonInputDemo/json-journal-demo.yml
+                ./runJsonDemo.sh demo/aminerJsonInputDemo/json-wazuh-demo.yml
                 ./runAminerIntegrationTest.sh aminerIntegrationTest.sh config.py
                 ./runAminerIntegrationTest.sh aminerIntegrationTest2.sh config21.py config22.py
                 ./runGettingStarted.sh
                 ./runTryItOut.sh
+                ./runHowToCreateYourOwnSequenceDetector.sh
+                ./runHowToCreateYourOwnFrequencyDetector.sh
+                ./runHowToMissingMatchPathValueDetector.sh
                 ./runCoverageTests.sh
                 exit $?
 		;;
@@ -74,8 +105,10 @@ case "$1" in
 		exit 0
 		;;
 	*)
-		echo "Usage: [ ALL | SHELL | runSuspendModeTest | runUnittests | runAminerDemo "
-		echo "         runAminerIntegrationTest | runCoverageTests | runRemoteControlTest | runTryItOut | runGettingStarted] <options>"
+		echo "Usage: [ ALL | SHELL | runSuspendModeTest | runUnittests | runAminerDemo | runJsonDemo | runAminerJsonInputDemo "
+		echo "         runAminerIntegrationTest | runCoverageTests | runRemoteControlTest | runTryItOut "
+		echo "         runGettingStarted | runHowToCreateYourOwnSequenceDetector | runHowToCreateYourOwnFrequencyDetector"
+		echo "         runHowToMissingMatchPathValueDetector] <options>"
 		exit 1
 		;;
         

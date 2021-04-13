@@ -26,13 +26,12 @@ import time
 import logging
 
 from aminer import AminerConfig
-from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME
+from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
 from aminer.AnalysisChild import AnalysisContext
-from aminer.events import EventSourceInterface
-from aminer.input import AtomHandlerInterface
+from aminer.events.EventInterfaces import EventSourceInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util import PersistenceUtil
-from aminer.util import TimeTriggeredComponentInterface
-from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
+from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
 
 class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
@@ -123,8 +122,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         self.log_new_forward_rules = []
         self.log_new_back_rules = []
 
+        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
-        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, 'EventCorrelationDetector', persistence_id)
         self.persistence_id = persistence_id
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
 
@@ -273,9 +272,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     rule.rule_trigger_timestamps.popleft()
                     self.forward_rule_queue.popleft()
                     if not rule.evaluate_rule():
-                        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-                        if original_log_line_prefix is None:
-                            original_log_line_prefix = ''
+                        original_log_line_prefix = self.aminer_config.config_properties.get(
+                            CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
                         tmp_string = 'Rule: %s -> %s\n  Expected: %s/%s\n  Observed: %s/%s' % (
                                         str(rule.trigger_event), str(rule.implied_event), str(rule.min_eval_true),
                                         str(rule.max_observations), str(sum(rule.rule_observations)),
@@ -327,9 +325,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     else:
                         rule.add_rule_observation(0)
                         if not rule.evaluate_rule():
-                            original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-                            if original_log_line_prefix is None:
-                                original_log_line_prefix = ''
+                            original_log_line_prefix = self.aminer_config.config_properties.get(
+                                CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
                             tmp_string = 'Rule: %s <- %s\n  Expected: %s/%s\n  Observed: %s/%s' % (
                                             str(rule.implied_event), str(rule.trigger_event), str(rule.min_eval_true),
                                             str(rule.max_observations), str(sum(rule.rule_observations)),
@@ -670,7 +667,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                 self.hypothesis_candidates.append((log_event, log_atom.atom_time))
         self.log_success += 1
 
-    def get_time_trigger_class(self):
+    def get_time_trigger_class(self):  # skipcq: PYL-R0201
         """
         Get the trigger class this component should be registered for.
         This trigger is used only for persistence, so real-time triggering is needed.

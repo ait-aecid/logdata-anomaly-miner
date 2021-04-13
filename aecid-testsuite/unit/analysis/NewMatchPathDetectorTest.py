@@ -4,8 +4,10 @@ from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComb
 from aminer.input.LogAtom import LogAtom
 import time
 from datetime import datetime
-from aminer.parsing import FixedDataModelElement, MatchContext, ParserMatch
+from aminer.parsing.FixedDataModelElement import FixedDataModelElement
 from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.MatchContext import MatchContext
+from aminer.parsing.ParserMatch import ParserMatch
 from unit.TestBase import TestBase
 
 

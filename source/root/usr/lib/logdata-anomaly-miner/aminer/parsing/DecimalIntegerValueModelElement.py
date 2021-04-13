@@ -14,7 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import logging
 from aminer import AminerConfig
-from aminer.parsing import ModelElementInterface
+from aminer.parsing.ModelElementInterface import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
 
 
@@ -32,8 +32,8 @@ class DecimalIntegerValueModelElement(ModelElementInterface):
     PAD_TYPE_ZERO = 'zero'
     PAD_TYPE_BLANK = 'blank'
 
-    def __init__(self, path_id, value_sign_type=SIGN_TYPE_NONE, value_pad_type=PAD_TYPE_NONE):
-        self.path_id = path_id
+    def __init__(self, element_id, value_sign_type=SIGN_TYPE_NONE, value_pad_type=PAD_TYPE_NONE):
+        self.element_id = element_id
         self.start_characters = None
         if value_sign_type == DecimalIntegerValueModelElement.SIGN_TYPE_NONE:
             self.start_characters = b'0123456789'
@@ -61,9 +61,9 @@ class DecimalIntegerValueModelElement(ModelElementInterface):
 
     def get_id(self):
         """Get the element ID."""
-        return self.path_id
+        return self.element_id
 
-    def get_child_elements(self):
+    def get_child_elements(self):  # skipcq: PYL-R0201
         """
         Get all possible child model elements of this element.
         @return empty list as there are no children of this element.
@@ -106,4 +106,4 @@ class DecimalIntegerValueModelElement(ModelElementInterface):
         else:
             match_value = int(match_string)
         match_context.update(match_string)
-        return MatchElement('%s/%s' % (path, self.path_id), match_string, match_value, None)
+        return MatchElement('%s/%s' % (path, self.element_id), match_string, match_value, None)

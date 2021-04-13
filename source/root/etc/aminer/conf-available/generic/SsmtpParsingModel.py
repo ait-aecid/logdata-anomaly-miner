@@ -1,10 +1,10 @@
 """This module defines a parser for ssmtp."""
 
-from aminer.parsing import DecimalIntegerValueModelElement
-from aminer.parsing import DelimitedDataModelElement
-from aminer.parsing import FirstMatchModelElement
-from aminer.parsing import FixedDataModelElement
-from aminer.parsing import SequenceModelElement
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
+from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
+from aminer.parsing.FixedDataModelElement import FixedDataModelElement
+from aminer.parsing.SequenceModelElement import SequenceModelElement
 
 
 def get_model():

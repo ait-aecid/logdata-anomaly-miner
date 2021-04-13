@@ -47,6 +47,8 @@ KEY_LOG_STAT_PERIOD = 'Log.StatisticsPeriod'
 DEFAULT_STAT_PERIOD = 3600
 KEY_LOG_STAT_LEVEL = 'Log.StatisticsLevel'
 KEY_LOG_DEBUG_LEVEL = 'Log.DebugLevel'
+CONFIG_KEY_LOG_LINE_PREFIX = 'LogPrefix'
+DEFAULT_LOG_LINE_PREFIX = ''
 
 
 def load_config(config_file_name):
@@ -155,10 +157,10 @@ def save_config(analysis_context, new_file):
             break
         i = i - 1
 
-    for i in range(len(logs)):
-        if "REMOTECONTROL change_attribute_of_registered_analysis_component" in logs[i]:
-            logs[i] = logs[i][:logs[i].find('#')]
-            arr = logs[i].split(',', 3)
+    for i, log in enumerate(logs):
+        if "REMOTECONTROL change_attribute_of_registered_analysis_component" in log:
+            log = log[:log.find('#')]
+            arr = log.split(',', 3)
             if arr[1].find("'") != -1:
                 component_name = arr[1].split("'")[1]
             else:
@@ -182,7 +184,7 @@ def save_config(analysis_context, new_file):
             pos = old.find(attr, pos)
             p1 = old.find(")", pos)
             p2 = old.find(",", pos)
-            if p1 != -1 and p2 != -1:
+            if -1 not in (p1, p2):
                 end = min(old.find(")", pos), old.find(",", pos))
             elif p1 == -1 and p2 == -1:
                 msg += "WARNING: '%s.%s' could not be found in the current config!\n" % (component_name, attr)
@@ -195,8 +197,8 @@ def save_config(analysis_context, new_file):
                 end = p1
             old = old[:old.find("=", pos) + 1] + "%s" % value + old[end:]
 
-        if "REMOTECONTROL add_handler_to_atom_filter_and_register_analysis_component" in logs[i]:
-            parameters = logs[i].split(",", 2)
+        if "REMOTECONTROL add_handler_to_atom_filter_and_register_analysis_component" in log:
+            parameters = log.split(",", 2)
 
             # find the name of the filter_config variable in the old config.
             pos = old.find(parameters[1].strip())

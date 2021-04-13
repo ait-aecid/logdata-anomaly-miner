@@ -19,13 +19,12 @@ import os
 import logging
 
 from aminer import AminerConfig
-from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME
+from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
 from aminer.AnalysisChild import AnalysisContext
-from aminer.events import EventSourceInterface
-from aminer.input import AtomHandlerInterface
+from aminer.events.EventInterfaces import EventSourceInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util import PersistenceUtil
-from aminer.util import TimeTriggeredComponentInterface
-from aminer.analysis import CONFIG_KEY_LOG_LINE_PREFIX
+from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
 
 class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
@@ -135,7 +134,6 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
                     id_dict[id_match_object][target_path] = match_element.match_object.decode()
                 else:
                     id_dict[id_match_object][target_path] = match_element.match_object
-                break
 
         if len(id_dict[id_match_object]) == len(self.target_path_list):
             # Found value for all target paths. No need to wait more.
@@ -158,9 +156,7 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
 
             analysis_component = {'AffectedLogAtomValues': [str(i) for i in list(id_dict_entry.values())]}
             event_data = {'AnalysisComponent': analysis_component}
-            original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-            if original_log_line_prefix is None:
-                original_log_line_prefix = ''
+            original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
             if self.output_log_line:
                 sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + repr(
                     id_dict_entry) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
@@ -170,7 +166,7 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected', sorted_log_lines,
                                        event_data, log_atom, self)
 
-    def get_time_trigger_class(self):
+    def get_time_trigger_class(self):  # skipcq: PYL-R0201
         """
         Get the trigger class this component should be registered for.
         This trigger is used only for persistence, so real-time triggering is needed.
