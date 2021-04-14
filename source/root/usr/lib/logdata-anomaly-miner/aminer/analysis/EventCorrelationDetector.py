@@ -671,13 +671,13 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
             for rule in persistence_data["back_rules"]:
                 self.back_rules[rule] = []
                 for implication_dict in persistence_data["back_rules"][rule]:
-                    implication = Implication((), (), (), 0, 0)
+                    implication = Implication((), (), (), self.max_observations, self.min_eval_true)
                     implication.load_from_json_dictionary_repr(implication_dict)
                     self.back_rules[rule].append(implication)
             for rule in persistence_data["forward_rules"]:
                 self.forward_rules[rule] = []
                 for implication_dict in persistence_data["forward_rules"][rule]:
-                    implication = Implication((), (), (), 0, 0)
+                    implication = Implication((), (), (), self.max_observations, self.min_eval_true)
                     implication.load_from_json_dictionary_repr(implication_dict)
                     self.forward_rules[rule].append(implication)
             logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
@@ -818,22 +818,16 @@ class Implication:
     def get_dictionary_repr(self):
         """Return the dictionary representation of an Implication."""
         return {'trigger_event': self.trigger_event, 'implied_event': self.implied_event, 'stable': self.stable,
-                'max_observations': self.max_observations, 'min_eval_true': self.min_eval_true,
-                'most_recent_observation_timestamp': self.most_recent_observation_timestamp,
-                'hypothesis_trigger_timestamps': list(self.hypothesis_trigger_timestamps),
-                'rule_trigger_timestamps': list(self.rule_trigger_timestamps), 'rule_observations': list(self.rule_observations),
-                'hypothesis_observations': self.hypothesis_observations, 'hypothesis_evaluated_true': self.hypothesis_evaluated_true}
+                'rule_observations': list(self.rule_observations), 'hypothesis_observations': self.hypothesis_observations,
+                'hypothesis_evaluated_true': self.hypothesis_evaluated_true}
 
     def load_from_json_dictionary_repr(self, dict_repr):
         """Load the Implication from persisted data in a json dictionary format."""
         self.trigger_event = tuple(dict_repr["trigger_event"])
         self.implied_event = tuple(dict_repr["implied_event"])
         self.stable = dict_repr["stable"]
-        self.max_observations = dict_repr["max_observations"]
-        self.min_eval_true = dict_repr["min_eval_true"]
-        self.most_recent_observation_timestamp = dict_repr["most_recent_observation_timestamp"]
-        self.hypothesis_trigger_timestamps = deque(dict_repr["hypothesis_trigger_timestamps"])
-        self.rule_trigger_timestamps = deque(dict_repr["rule_trigger_timestamps"])
+        self.hypothesis_trigger_timestamps = deque([])
+        self.rule_trigger_timestamps = deque([])
         self.rule_observations = deque(dict_repr["rule_observations"])
         self.hypothesis_observations = dict_repr["hypothesis_observations"]
         self.hypothesis_evaluated_true = dict_repr["hypothesis_evaluated_true"]
