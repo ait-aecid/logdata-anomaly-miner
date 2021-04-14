@@ -18,7 +18,7 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-
+import sys
 from collections import deque
 import random
 import math
@@ -126,36 +126,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
         self.persistence_id = persistence_id
-        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
-
-        if persistence_data is not None:
-            for record in persistence_data:
-                implication_direction = record[0]
-                trigger_event = tuple(record[1])
-                implied_event = tuple(record[2])
-                max_obs = record[3]
-                min_eval_t = record[4]
-                rule = Implication(trigger_event, implied_event, None, max_obs, min_eval_t)
-                rule.stable = 1
-                if implication_direction == 'back':
-                    if trigger_event in self.back_rules:
-                        self.back_rules[trigger_event].append(rule)
-                    else:
-                        self.back_rules[trigger_event] = [rule]
-                    if implied_event in self.back_rules_inv:
-                        self.back_rules_inv[implied_event].append(rule)
-                    else:
-                        self.back_rules_inv[implied_event] = [rule]
-                elif implication_direction == 'forward':
-                    if trigger_event in self.forward_rules:
-                        self.forward_rules[trigger_event].append(rule)
-                    else:
-                        self.forward_rules[trigger_event] = [rule]
-                    if implied_event in self.forward_rules_inv:
-                        self.forward_rules_inv[implied_event].append(rule)
-                    else:
-                        self.forward_rules_inv[implied_event] = [rule]
-            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+        self.load_persistence_data()
 
     # skipcq: PYL-R1710
     def get_min_eval_true(self, max_observations, p0, alpha):
@@ -694,20 +665,82 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         return delta
 
+    def load_persistence_data(self):
+        """Load the persistence data from storage."""
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        if persistence_data is not None:
+            for rule in persistence_data["back_rules"]:
+                self.back_rules[rule] = []
+                for implication_dict in persistence_data["back_rules"][rule]:
+                    implication = Implication((), (), (), 0, 0)
+                    implication.load_from_json_dictionary_repr(implication_dict)
+                    self.back_rules[rule].append(implication)
+            for rule in persistence_data["forward_rules"]:
+                self.forward_rules[rule] = []
+                for implication_dict in persistence_data["forward_rules"][rule]:
+                    implication = Implication((), (), (), 0, 0)
+                    implication.load_from_json_dictionary_repr(implication_dict)
+                    self.forward_rules[rule].append(implication)
+        logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+
+        # persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        # if persistence_data is not None:
+        #     for record in persistence_data:
+        #         implication_direction = record[0]
+        #         trigger_event = tuple(record[1])
+        #         implied_event = tuple(record[2])
+        #         max_obs = record[3]
+        #         min_eval_t = record[4]
+        #         rule = Implication(trigger_event, implied_event, None, max_obs, min_eval_t)
+        #         rule.stable = 1
+        #         if implication_direction == 'back':
+        #             if trigger_event in self.back_rules:
+        #                 self.back_rules[trigger_event].append(rule)
+        #             else:
+        #                 self.back_rules[trigger_event] = [rule]
+        #             if implied_event in self.back_rules_inv:
+        #                 self.back_rules_inv[implied_event].append(rule)
+        #             else:
+        #                 self.back_rules_inv[implied_event] = [rule]
+        #         elif implication_direction == 'forward':
+        #             if trigger_event in self.forward_rules:
+        #                 self.forward_rules[trigger_event].append(rule)
+        #             else:
+        #                 self.forward_rules[trigger_event] = [rule]
+        #             if implied_event in self.forward_rules_inv:
+        #                 self.forward_rules_inv[implied_event].append(rule)
+        #             else:
+        #                 self.forward_rules_inv[implied_event] = [rule]
+        #     logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        known_path_set = set()
-        for event_a in self.back_rules:
-            for implication in self.back_rules[event_a]:
-                known_path_set.add(
-                    ('back', tuple(event_a), tuple(implication.implied_event), implication.max_observations, implication.min_eval_true))
-        for event_a in self.forward_rules:
-            for implication in self.forward_rules[event_a]:
-                known_path_set.add(
-                    ('forward', tuple(event_a), tuple(implication.implied_event), implication.max_observations, implication.min_eval_true))
-        PersistenceUtil.store_json(self.persistence_file_name, list(known_path_set))
+        back_rules = {}
+        for rule in self.back_rules:
+            back_rules[rule] = []
+            for implication in self.back_rules[rule]:
+                back_rules[rule].append(implication.get_dictionary_repr())
+        forward_rules = {}
+        for rule in self.forward_rules:
+            forward_rules[rule] = []
+            for implication in self.forward_rules[rule]:
+                forward_rules[rule].append(implication.get_dictionary_repr())
+        PersistenceUtil.store_json(self.persistence_file_name, {"back_rules": back_rules, "forward_rules": forward_rules})
         self.next_persist_time = None
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+
+        # known_path_set = set()
+        # for event_a in self.back_rules:
+        #     for implication in self.back_rules[event_a]:
+        #         known_path_set.add(
+        #             ('back', tuple(event_a), tuple(implication.implied_event), implication.max_observations, implication.min_eval_true))
+        # for event_a in self.forward_rules:
+        #     for implication in self.forward_rules[event_a]:
+        #         known_path_set.add(
+        #             ('forward', tuple(event_a), tuple(implication.implied_event), implication.max_observations, implication.min_eval_true))
+        # PersistenceUtil.store_json(self.persistence_file_name, list(known_path_set))
+        # self.next_persist_time = None
+        # logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def log_statistics(self, component_name):
         """
@@ -834,6 +867,19 @@ class Implication:
                 'hypothesis_trigger_timestamps': list(self.hypothesis_trigger_timestamps),
                 'rule_trigger_timestamps': list(self.rule_trigger_timestamps), 'rule_observations': list(self.rule_observations),
                 'hypothesis_observations': self.hypothesis_observations, 'hypothesis_evaluated_true': self.hypothesis_evaluated_true}
+
+    def load_from_json_dictionary_repr(self, dict_repr):
+        self.trigger_event = tuple(dict_repr["trigger_event"])
+        self.implied_event = tuple(dict_repr["implied_event"])
+        self.stable = dict_repr["stable"]
+        self.max_observations = dict_repr["max_observations"]
+        self.min_eval_true = dict_repr["min_eval_true"]
+        self.most_recent_observation_timestamp = dict_repr["most_recent_observation_timestamp"]
+        self.hypothesis_trigger_timestamps = deque(dict_repr["hypothesis_trigger_timestamps"])
+        self.rule_trigger_timestamps = deque(dict_repr["rule_trigger_timestamps"])
+        self.rule_observations = deque(dict_repr["rule_observations"])
+        self.hypothesis_observations = dict_repr["hypothesis_observations"]
+        self.hypothesis_evaluated_true = dict_repr["hypothesis_evaluated_true"]
 
 
 def set_random_seed(seed):
