@@ -37,6 +37,7 @@ import warnings
 import argparse
 import stat
 import tempfile
+import ast
 from pwd import getpwnam
 from grp import getgrnam
 
@@ -353,6 +354,8 @@ def main():
                 value = int(value)
             elif isinstance(old_value, float):
                 value = float(value)
+            elif isinstance(old_value, list):
+                value = ast.literal_eval(value)
         aminer_config.config_properties[config_property] = value
 
     persistence_dir = aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_DIR, AminerConfig.DEFAULT_PERSISTENCE_DIR)
