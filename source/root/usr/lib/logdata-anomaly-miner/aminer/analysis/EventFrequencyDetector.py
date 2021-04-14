@@ -73,15 +73,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
-
-        # Persisted data contains lists of event-frequency pairs, i.e., [[<ev1, ev2>, <freq>], [<ev1, ev2>, <freq>], ...]
-        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
-        if persistence_data is not None:
-            for entry in persistence_data:
-                log_event = entry[0]
-                frequency = entry[1]
-                self.counts_prev[tuple(log_event)] = frequency
-            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+        self.load_persistence_data()
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
@@ -199,12 +191,17 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        persist_data = []
-        for log_ev, freq in self.counts_prev.items():
-            persist_data.append((log_ev, freq))
-        PersistenceUtil.store_json(self.persistence_file_name, persist_data)
+        PersistenceUtil.store_json(self.persistence_file_name, {"counts": self.counts, "counts_prev": self.counts_prev})
         self.next_persist_time = None
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+
+    def load_persistence_data(self):
+        """Load the persistence data from storage."""
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        if persistence_data is not None:
+            self.counts = persistence_data["counts"]
+            self.counts_prev = persistence_data["counts_prev"]
+            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """

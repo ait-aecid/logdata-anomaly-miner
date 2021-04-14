@@ -36,7 +36,7 @@ def encode_object(term):
         encoded_object = 'string:' + term
     elif isinstance(term, bytes):
         encoded_object = 'bytes:' + encode_byte_string_as_string(term)
-    elif isinstance(term, (list, tuple)):
+    elif isinstance(term, (list, tuple, set)):
         encoded_object = [encode_object(item) for item in term]
     elif isinstance(term, dict):
         encoded_object = {}
@@ -68,7 +68,10 @@ def decode_object(term):
         decoded_object = {}
         for key, var in term.items():
             if key.startswith("(") and key.endswith(")"):
-                key = ast.literal_eval(key)
+                try:
+                    key = ast.literal_eval(key)
+                except ValueError:
+                    pass
             var = decode_object(var)
             decoded_object[key] = var
     else:

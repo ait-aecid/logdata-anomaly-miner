@@ -13,7 +13,6 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-import sys
 import time
 import os
 import logging
@@ -143,7 +142,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is not None:
             self.known_values_dict = persistence_data
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     def do_persist(self):
         """Immediately write persistence data to storage."""

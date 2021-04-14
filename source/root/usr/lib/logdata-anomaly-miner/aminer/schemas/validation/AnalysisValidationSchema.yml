@@ -172,7 +172,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['MatchValueAverageChangeDetector'], 'required': True},
-                    'timestamp_path': {'type': 'string', 'required': True, 'empty': False},
+                    'timestamp_path': {'type': 'string', 'nullable': True, 'empty': False},
                     'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
                     'min_bin_elements': {'type': 'integer', 'required': True, 'min': 1},
                     'min_bin_time': {'type': 'integer', 'required': True, 'min': 1},

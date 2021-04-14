@@ -49,29 +49,11 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         self.persistence_id = persistence_id
         self.output_log_line = output_log_line
         self.aminer_config = aminer_config
+        self.stat_data = []
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
-        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
-        self.stat_data = []
-        for path in analyze_path_list:
-            self.stat_data.append((path, [],))
-        if persistence_data is not None:
-            for val in persistence_data:
-                if isinstance(val, str):
-                    val = val.strip('[').strip(']').split(',', 2)
-                    path = val[0].strip('"')
-                    values = val[1].strip(' ').strip('[').strip(']')
-                else:
-                    path = val[0]
-                    values = val[1]
-                index = 0
-                for p, _ in self.stat_data:
-                    if p == path:
-                        break
-                    index += 1
-                for value in values:
-                    self.stat_data[index][1].append(value)
+        self.load_persistence_data(analyze_path_list)
 
     def receive_atom(self, log_atom):
         """Send summary to all event handlers."""
@@ -157,6 +139,19 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             self.next_persist_time = None
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         return delta
+
+    def load_persistence_data(self, analyze_path_list):
+        """Load the persistence data from storage."""
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        if persistence_data is not None:
+            for stat_data in persistence_data:
+                for i, val in enumerate(stat_data[1]):
+                    if isinstance(val, list):
+                        stat_data[1][i] = tuple(val)
+                self.stat_data.append(tuple(stat_data))
+        else:
+            for path in analyze_path_list:
+                self.stat_data.append((path, []))
 
     def do_persist(self):
         """Immediately write persistence data to storage."""

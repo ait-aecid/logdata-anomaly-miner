@@ -319,14 +319,14 @@ def build_analysis_pipeline(analysis_context):
     atom_filter.add_handler(ecd)
 
     from aminer.analysis.EventFrequencyDetector import EventFrequencyDetector
-    efd = EventFrequencyDetector(analysis_context.aminer_config, anomaly_event_handlers, window_size=0.5)
+    efd = EventFrequencyDetector(analysis_context.aminer_config, anomaly_event_handlers, window_size=0.5, auto_include_flag=True)
     analysis_context.register_component(efd, component_name="EventFrequencyDetector")
     atom_filter.add_handler(efd)
 
     from aminer.analysis.EventSequenceDetector import EventSequenceDetector
     esd = EventSequenceDetector(analysis_context.aminer_config, anomaly_event_handlers, ['/model/ParsingME'], ignore_list=[
         '/model/ECD/a', '/model/ECD/b', '/model/ECD/c', '/model/ECD/d', '/model/ECD/e', '/model/ECD/f', '/model/Random',
-        '/model/RandomTime', '/model/DailyCron'])
+        '/model/RandomTime', '/model/DailyCron'], auto_include_flag=True)
     analysis_context.register_component(esd, component_name="EventSequenceDetector")
     atom_filter.add_handler(esd)
 

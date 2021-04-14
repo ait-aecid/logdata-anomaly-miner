@@ -57,7 +57,7 @@
                 'tuple_transformation_function': {'type': 'string', 'allowed': ['demo'], 'nullable': True, 'default': None},
                 'value_list': {
                     'type': 'list', 'schema': {'type': ['boolean', 'float', 'integer', 'string']}, 'nullable': True, 'default': None},
-                'timestamp_path': {'type': 'string'},
+                'timestamp_path': {'type': 'string', 'nullable': True},
                 'min_bin_elements': {'type': 'integer'},
                 'min_bin_time': {'type': 'integer'},
                 'debug_mode': {'type': 'boolean', 'default': False},

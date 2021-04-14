@@ -18,7 +18,6 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-import sys
 from collections import deque
 import random
 import math
@@ -681,37 +680,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     implication = Implication((), (), (), 0, 0)
                     implication.load_from_json_dictionary_repr(implication_dict)
                     self.forward_rules[rule].append(implication)
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
-
-        # persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
-        # if persistence_data is not None:
-        #     for record in persistence_data:
-        #         implication_direction = record[0]
-        #         trigger_event = tuple(record[1])
-        #         implied_event = tuple(record[2])
-        #         max_obs = record[3]
-        #         min_eval_t = record[4]
-        #         rule = Implication(trigger_event, implied_event, None, max_obs, min_eval_t)
-        #         rule.stable = 1
-        #         if implication_direction == 'back':
-        #             if trigger_event in self.back_rules:
-        #                 self.back_rules[trigger_event].append(rule)
-        #             else:
-        #                 self.back_rules[trigger_event] = [rule]
-        #             if implied_event in self.back_rules_inv:
-        #                 self.back_rules_inv[implied_event].append(rule)
-        #             else:
-        #                 self.back_rules_inv[implied_event] = [rule]
-        #         elif implication_direction == 'forward':
-        #             if trigger_event in self.forward_rules:
-        #                 self.forward_rules[trigger_event].append(rule)
-        #             else:
-        #                 self.forward_rules[trigger_event] = [rule]
-        #             if implied_event in self.forward_rules_inv:
-        #                 self.forward_rules_inv[implied_event].append(rule)
-        #             else:
-        #                 self.forward_rules_inv[implied_event] = [rule]
-        #     logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
@@ -728,19 +697,6 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         PersistenceUtil.store_json(self.persistence_file_name, {"back_rules": back_rules, "forward_rules": forward_rules})
         self.next_persist_time = None
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
-
-        # known_path_set = set()
-        # for event_a in self.back_rules:
-        #     for implication in self.back_rules[event_a]:
-        #         known_path_set.add(
-        #             ('back', tuple(event_a), tuple(implication.implied_event), implication.max_observations, implication.min_eval_true))
-        # for event_a in self.forward_rules:
-        #     for implication in self.forward_rules[event_a]:
-        #         known_path_set.add(
-        #             ('forward', tuple(event_a), tuple(implication.implied_event), implication.max_observations, implication.min_eval_true))
-        # PersistenceUtil.store_json(self.persistence_file_name, list(known_path_set))
-        # self.next_persist_time = None
-        # logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def log_statistics(self, component_name):
         """
@@ -869,6 +825,7 @@ class Implication:
                 'hypothesis_observations': self.hypothesis_observations, 'hypothesis_evaluated_true': self.hypothesis_evaluated_true}
 
     def load_from_json_dictionary_repr(self, dict_repr):
+        """Load the Implication from persisted data in a json dictionary format."""
         self.trigger_event = tuple(dict_repr["trigger_event"])
         self.implied_event = tuple(dict_repr["implied_event"])
         self.stable = dict_repr["stable"]

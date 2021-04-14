@@ -79,26 +79,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         # Loads the persistence
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
-        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
-
-        # Imports the persistence
-        if persistence_data is not None:
-            for key in persistence_data[0]:
-                self.found_keys.append(set(key))
-            self.variable_key_list = persistence_data[1]
-            self.values = persistence_data[2]
-            self.longest_path = persistence_data[3]
-            self.check_variables = persistence_data[4]
-            self.num_eventlines = persistence_data[5]
-            self.etd_time_trigger = persistence_data[6]
-            self.num_eventlines_TSA_ref = persistence_data[7]
-
-            self.num_events = len(self.found_keys)
-        else:
-            if self.track_time_for_TSA:
-                self.etd_time_trigger[0].append(-1)
-                self.etd_time_trigger[1].append(-1)
-                self.etd_time_trigger[2].append(-1)
+        self.load_persistence_data()
 
     def receive_atom(self, log_atom):
         """Receives an parsed atom and keeps track of the event types and the values of the variables of them."""
@@ -295,19 +276,32 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         return delta
 
+    def load_persistence_data(self):
+        """Load the persistence data from storage."""
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        if persistence_data is not None:
+            for key in persistence_data["found_keys"]:
+                self.found_keys.append(set(key))
+            self.variable_key_list = persistence_data["variable_key_list"]
+            self.values = persistence_data["values"]
+            self.longest_path = persistence_data["longest_path"]
+            self.check_variables = persistence_data["check_variables"]
+            self.num_eventlines = persistence_data["num_eventlines"]
+            self.etd_time_trigger = persistence_data["etd_time_trigger"]
+            self.num_eventlines_TSA_ref = persistence_data["num_eventlines_TSA_ref"]
+            self.num_events = len(self.found_keys)
+        else:
+            if self.track_time_for_TSA:
+                self.etd_time_trigger[0].append(-1)
+                self.etd_time_trigger[1].append(-1)
+                self.etd_time_trigger[2].append(-1)
+
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        tmp_list = [[]]
-        for key in self.found_keys:
-            tmp_list[0].append(list(key))
-        tmp_list.append(self.variable_key_list)
-        tmp_list.append(self.values)
-        tmp_list.append(self.longest_path)
-        tmp_list.append(self.check_variables)
-        tmp_list.append(self.num_eventlines)
-        tmp_list.append(self.etd_time_trigger)
-        tmp_list.append(self.num_eventlines_TSA_ref)
-        PersistenceUtil.store_json(self.persistence_file_name, tmp_list)
+        persist_dict = {"found_keys": self.found_keys, "variable_key_list": self.variable_key_list, "values": self.values,
+                        "longest_path": self.longest_path, "check_variables": self.check_variables, "num_eventlines": self.num_eventlines,
+                        "etd_time_trigger": self.etd_time_trigger, "num_eventlines_TSA_ref": self.num_eventlines_TSA_ref}
+        PersistenceUtil.store_json(self.persistence_file_name, persist_dict)
 
         for following_module in self.following_modules:
             following_module.do_persist()
