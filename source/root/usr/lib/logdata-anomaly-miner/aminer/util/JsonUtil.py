@@ -42,7 +42,9 @@ def encode_object(term):
         encoded_object = {}
         for key, var in term.items():
             if isinstance(key, tuple):
-                key = str(key)
+                key = "tuple:" + str(key)
+            else:
+                key = encode_object(key)
             var = encode_object(var)
             encoded_object[key] = var
     elif isinstance(term, (bool, int, float)) or term is None:
@@ -67,11 +69,13 @@ def decode_object(term):
     elif isinstance(term, dict):
         decoded_object = {}
         for key, var in term.items():
-            if key.startswith("(") and key.endswith(")"):
+            if key.startswith("tuple:"):
                 try:
-                    key = ast.literal_eval(key)
+                    key = ast.literal_eval(key[6:])
                 except ValueError:
                     pass
+            else:
+                key = decode_object(key)
             var = decode_object(var)
             decoded_object[key] = var
     else:
