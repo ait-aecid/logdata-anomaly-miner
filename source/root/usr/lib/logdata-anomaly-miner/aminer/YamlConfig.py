@@ -167,7 +167,7 @@ def build_parsing_model():
                 value_model = parser_model_dict.get(item['args'][0].decode())
                 if value_model is None:
                     msg = 'The parser model %s does not exist!' % item['args'][0].decode()
-                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 branch_model_dict = {}
                 for i in item['branch_model_dict']:
@@ -175,7 +175,7 @@ def build_parsing_model():
                     model = i['model']
                     if parser_model_dict.get(model) is None:
                         msg = 'The parser model %s does not exist!' % key
-                        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                        logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     branch_model_dict[key] = parser_model_dict.get(model)
                 parser_model_dict[item['id']] = item['type'].func(item['name'], value_model, item['args'][1].decode(), branch_model_dict)
@@ -221,7 +221,7 @@ def build_parsing_model():
                 for child in item['args']:
                     if parser_model_dict.get(child.decode()) is None:
                         msg = 'The parser model %s does not exist!' % child.decode()
-                        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                        logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     children.append(parser_model_dict.get(child.decode()))
                 parser_model_dict[item['id']] = item['type'].func(item['name'], children)
@@ -229,7 +229,7 @@ def build_parsing_model():
                 optional_element = parser_model_dict.get(item['args'].decode())
                 if optional_element is None:
                     msg = 'The parser model %s does not exist!' % item['args'].decode()
-                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 parser_model_dict[item['id']] = item['type'].func(item['name'], optional_element)
             elif item['type'].name == 'DelimitedDataModelElement':
@@ -264,7 +264,7 @@ def build_parsing_model():
                     model = parser_model_dict.get(i)
                     if model is None:
                         msg = 'The parser model %s does not exist!' % i
-                        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                        logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     args_list.append(model)
             parsing_model = start['type'].func(start['name'], args_list)
