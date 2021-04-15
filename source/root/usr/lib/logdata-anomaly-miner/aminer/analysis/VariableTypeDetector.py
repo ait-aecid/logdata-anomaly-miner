@@ -16,6 +16,7 @@ from scipy.stats import kstest, ks_2samp, norm, multinomial, distributions, chis
 import os
 import logging
 import sys
+import time
 
 from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
     STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
@@ -321,12 +322,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         self.persistence_id = persistence_id
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
-        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
-
-        # Imports the persistence
-        if persistence_data is not None:
-            self.load_persistence_data(persistence_data)
-            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+        self.load_persistence_data()
 
         self.min_mod_ini_uni = 1 / (self.num_init + 1)
         self.min_mod_upd_uni = 1 / (self.num_init + self.num_update + 1)
@@ -378,6 +374,10 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             if not constraint_path_flag and self.constraint_list != []:
                 return False
 
+        if self.next_persist_time is None:
+            self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
+                KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+
         # Initialize new entries in lists for a new eventType if necessary
         if len(self.length) < event_index + 1 or self.var_type[event_index] == []:
             for _ in range(event_index + 1 - len(self.length)):
@@ -426,55 +426,67 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         return delta
 
+    def load_persistence_data(self):
+        """Extract the persistence data and appends various lists to create a consistent state."""
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        if persistence_data is not None:
+            # Import the lists of the persistence
+            self.var_type = persistence_data["var_type"]
+            self.alternative_distribution_types = persistence_data["alternative_distribution_types"]
+            self.var_type_history_list = persistence_data["var_type_history_list"]
+            self.var_type_history_list_reference = persistence_data["var_type_history_list_reference"]
+            self.failed_indicators = persistence_data["failed_indicators"]
+            self.distr_val = persistence_data["distr_val"]
+            self.num_events = len(self.var_type)
+
+            # Create the initial lists which derive from the persistence
+            # Number of variables of the single events
+            self.length = [len(self.event_type_detector.variable_key_list[event_index]) for event_index in range(self.num_events)]
+            self.variable_path_num = [[] for _ in range(self.num_events)]
+            # List of the successes of the binomialtest for the rejection in the s_gof or variables of discrete type
+            self.bt_results = [[[] for var_index in range(self.length[event_index])] for event_index in range(self.num_events)]
+
+            # Updates the lists for each eventType individually
+            for event_index in range(self.num_events):
+                # Adds the variable indices to the variable_path_num-list if the path_list is not empty
+                if self.path_list is not None:
+                    for var_index in range(self.length[event_index]):
+                        if self.event_type_detector.variable_key_list[event_index][var_index] in self.path_list:
+                            self.variable_path_num[event_index].append(var_index)
+
+                # Initializes the lists for the discrete distribution, or continuous distribution
+                for var_index, var_val in enumerate(self.var_type[event_index]):
+                    if len(var_val) > 0:
+                        if var_val[0] in self.distr_list:
+                            self.bt_results[event_index][var_index] = [1] * self.num_s_gof_bt
+                            if var_val[0] in ('betam', 'spec'):
+                                self.s_gof_get_quantiles(event_index, var_index)
+                        elif var_val[0] == 'd':
+                            self.d_init_bt(event_index, var_index)
+            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        tmp_list = [self.var_type, self.alternative_distribution_types, self.var_type_history_list,
-                    self.var_type_history_list_reference, self.failed_indicators, [[self.distr_val[event_index][var_index] if (
-                        len(self.distr_val[event_index][var_index]) > 0 and self.var_type[event_index][var_index][0] == 'emp') else [] for
-                            var_index in range(len(self.distr_val[event_index]))] for event_index in range(len(self.distr_val))]]
-        PersistenceUtil.store_json(self.persistence_file_name, tmp_list)
+        distr_val = []
+        for event_index in range(len(self.distr_val)):
+            val_list = []
+            for var_index in range(len(self.distr_val[event_index])):
+                if len(self.distr_val[event_index][var_index]) > 0 and self.var_type[event_index][var_index][0] == 'emp':
+                    val_list.append(self.distr_val[event_index][var_index])
+                else:
+                    val_list.append([])
+            distr_val.append(val_list)
+        persistence_data = {
+            "var_type": self.var_type, "alternative_distribution_types": self.alternative_distribution_types,
+            "var_type_history_list": self.var_type_history_list, "var_type_history_list_reference": self.var_type_history_list_reference,
+            "failed_indicators": self.failed_indicators, "distr_val": distr_val}
+        PersistenceUtil.store_json(self.persistence_file_name, persistence_data)
         self.next_persist_time = None
 
         if self.save_statistics:
             PersistenceUtil.store_json(self.statistics_file_name, [
                 self.failed_indicators_total, self.failed_indicators_values, self.failed_indicators_paths, self.failed_indicators])
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
-
-    def load_persistence_data(self, persistence_data):
-        """Extract the persistence data and appends various lists to create a consistent state."""
-        # Import the lists of the persistence
-        self.var_type = persistence_data[0]
-        self.alternative_distribution_types = persistence_data[1]
-        self.var_type_history_list = persistence_data[2]
-        self.var_type_history_list_reference = persistence_data[3]
-        self.failed_indicators = persistence_data[4]
-        self.distr_val = persistence_data[5]
-        self.num_events = len(self.var_type)
-
-        # Create the initial lists which derive from the persistence
-        # Number of variables of the single events
-        self.length = [len(self.event_type_detector.variable_key_list[event_index]) for event_index in range(self.num_events)]
-        self.variable_path_num = [[] for _ in range(self.num_events)]
-        # List of the successes of the binomialtest for the rejection in the s_gof or variables of discrete type
-        self.bt_results = [[[] for var_index in range(self.length[event_index])] for event_index in range(self.num_events)]
-
-        # Updates the lists for each eventType individually
-        for event_index in range(self.num_events):
-            # Adds the variable indices to the variable_path_num-list if the path_list is not empty
-            if self.path_list is not None:
-                for var_index in range(self.length[event_index]):
-                    if self.event_type_detector.variable_key_list[event_index][var_index] in self.path_list:
-                        self.variable_path_num[event_index].append(var_index)
-
-            # Initializes the lists for the discrete distribution, or continuous distribution
-            for var_index, var_val in enumerate(self.var_type[event_index]):
-                if len(var_val) > 0:
-                    if var_val[0] in self.distr_list:
-                        self.bt_results[event_index][var_index] = [1] * self.num_s_gof_bt
-                        if var_val[0] in ('betam', 'spec'):
-                            self.s_gof_get_quantiles(event_index, var_index)
-                    elif var_val[0] == 'd':
-                        self.d_init_bt(event_index, var_index)
 
     def process_ll(self, event_index, log_atom):
         """Process the log line. Extracts and appends the values of the log line to the values-list."""

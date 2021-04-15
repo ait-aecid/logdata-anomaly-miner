@@ -2,9 +2,10 @@
 import numpy as np
 import logging
 import sys
+import time
 from scipy.stats import chi2
 
-from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name
+from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.EventInterfaces import EventSourceInterface
 from aminer.input.InputInterfaces import AtomHandlerInterface
@@ -29,6 +30,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                  match_disc_distr_threshold=0.5, used_cor_meth=None, used_validate_cor_meth=None, validate_cor_cover_vals_thres=0.7,
                  validate_cor_distinct_thres=0.05, ignore_list=None, constraint_list=None):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
+        self.aminer_config = aminer_config
         self.next_persist_time = None
         self.event_type_detector = event_type_detector
         self.event_type_detector.add_following_modules(self)
@@ -172,11 +174,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         self.persistence_id = persistence_id
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
-        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
-
-        # Imports the persistence if self.event_type_detector.load_persistence_data is True
-        if persistence_data is not None:
-            self.load_persistence_data(persistence_data)
+        self.load_persistence_data()
 
     # skipcq: PYL-W0613
     def receive_atom(self, log_atom):
@@ -200,6 +198,11 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                 break
         if not constraint_path_flag and self.constraint_list != []:
             return False
+
+        if self.next_persist_time is None:
+            self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
+                KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+
         self.log_atom = log_atom
         if self.event_type_detector.num_eventlines[event_index] == self.num_init:  # Initialisation Phase
             self.init_cor(event_index)  # Initialise the correlations
@@ -247,26 +250,37 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
     # skipcq: PYL-W0613, PYL-R0201
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted."""
-        return 600
+        if self.next_persist_time is None:
+            return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+
+        delta = self.next_persist_time - trigger_time
+        if delta < 0:
+            self.do_persist()
+            delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+        return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        persistence_data = [self.pos_var_cor, self.pos_var_val, self.discrete_indices, self.update_rules, self.generate_rules,
-                            self.rel_list, self.w_rel_list, self.w_rel_num_ll_to_vals, self.w_rel_ht_results, self.w_rel_confidences]
+        persistence_data = {"pos_var_cor": self.pos_var_cor, "pos_var_val": self.pos_var_val, "discrete_indices": self.discrete_indices,
+                            "update_rules": self.update_rules, "generate_rules": self.generate_rules, "rel_list": self.rel_list,
+                            "w_rel_list": self.w_rel_list, "w_rel_num_ll_to_vals": self.w_rel_num_ll_to_vals,
+                            "w_rel_ht_results": self.w_rel_ht_results, "w_rel_confidences": self.w_rel_confidences}
         PersistenceUtil.store_json(self.persistence_file_name, persistence_data)
 
-    def load_persistence_data(self, persistence_data):
+    def load_persistence_data(self):
         """Extract the persistence data and appends various lists to create a consistent state."""
-        self.pos_var_cor = persistence_data[0]
-        self.pos_var_val = persistence_data[1]
-        self.discrete_indices = persistence_data[2]
-        self.update_rules = persistence_data[3]
-        self.generate_rules = persistence_data[4]
-        self.rel_list = persistence_data[5]
-        self.w_rel_list = persistence_data[6]
-        self.w_rel_num_ll_to_vals = persistence_data[7]
-        self.w_rel_ht_results = persistence_data[8]
-        self.w_rel_confidences = persistence_data[9]
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        if persistence_data is not None:
+            self.pos_var_cor = persistence_data["pos_var_cor"]
+            self.pos_var_val = persistence_data["pos_var_val"]
+            self.discrete_indices = persistence_data["discrete_indices"]
+            self.update_rules = persistence_data["update_rules"]
+            self.generate_rules = persistence_data["generate_rules"]
+            self.rel_list = persistence_data["rel_list"]
+            self.w_rel_list = persistence_data["w_rel_list"]
+            self.w_rel_num_ll_to_vals = persistence_data["w_rel_num_ll_to_vals"]
+            self.w_rel_ht_results = persistence_data["w_rel_ht_results"]
+            self.w_rel_confidences = persistence_data["w_rel_confidences"]
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """
