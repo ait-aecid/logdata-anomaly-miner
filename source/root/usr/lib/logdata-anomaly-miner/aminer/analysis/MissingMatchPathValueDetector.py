@@ -60,21 +60,8 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
-        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         self.expected_values_dict = {}
-        if persistence_data is not None:
-            for key in persistence_data:
-                value = persistence_data[key]
-                if self.target_path_list is not None:  # skipcq: PTC-W0048
-                    if value[3] != self.target_path_list:
-                        continue
-                elif self.target_path_list is not None and value[3] not in self.target_path_list:
-                    continue
-                if value[1] != default_interval:
-                    value[1] = default_interval
-                    value[2] = value[0] + default_interval
-                self.expected_values_dict[key] = value
-            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+
         self.analysis_string = 'Analysis.%s'
 
     def receive_atom(self, log_atom):
@@ -128,8 +115,8 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                 affected_log_atom_values = match_element.match_object.decode(AminerConfig.ENCODING)
             else:
                 affected_log_atom_values = match_element.match_object
-            value_list.append(str(affected_log_atom_values))
-        return self.target_path_list, str(value_list)
+            value_list.append(affected_log_atom_values)
+        return self.target_path_list, tuple(value_list)
 
     def check_timeouts(self, timestamp, log_atom):
         """Check if there was any timeout on a channel, thus triggering event dispatching."""
@@ -238,13 +225,30 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted."""
         if self.next_persist_time is None:
-            return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+            self.next_persist_time = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+            return self.next_persist_time
         delta = self.next_persist_time - trigger_time
         if delta < 0:
-            PersistenceUtil.store_json(self.persistence_file_name, self.expected_values_dict)
-            self.next_persist_time = None
+            self.do_persist()
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         return delta
+
+    def load_persistence_data(self):
+        """Load the persistence data from storage."""
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        if persistence_data is not None:
+            for key in persistence_data:
+                value = persistence_data[key]
+                if self.target_path_list is not None:  # skipcq: PTC-W0048
+                    if value[3] != self.target_path_list:
+                        continue
+                elif self.target_path_list is not None and value[3] not in self.target_path_list:
+                    continue
+                if value[1] != default_interval:
+                    value[1] = default_interval
+                    value[2] = value[0] + default_interval
+                self.expected_values_dict[key] = value
+            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
@@ -312,7 +316,7 @@ class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
                 affected_log_atom_values = match_element.match_object.decode(AminerConfig.ENCODING)
             else:
                 affected_log_atom_values = match_element.match_object
-            return target_path, str(affected_log_atom_values)
+            return target_path, affected_log_atom_values
         return None
 
     def send_event_to_handlers(self, anomaly_event_handler, event_data, log_atom, message_part):
