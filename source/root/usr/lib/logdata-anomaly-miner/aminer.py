@@ -340,22 +340,32 @@ def main():
         old_value = aminer_config.config_properties.get(config_property)
         value = config_properties[config_property]
         if old_value is not None:
-            if isinstance(old_value, bool):
-                if value == "True":
-                    value = True
-                elif value == "False":
-                    value = False
-                else:
-                    msg = "The %s parameter must be of type %s!" % (config_property, type(old_value))
-                    print(msg, sys.stderr)
-                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-                    sys.exit(1)
-            elif isinstance(old_value, int):
-                value = int(value)
-            elif isinstance(old_value, float):
-                value = float(value)
-            elif isinstance(old_value, list):
-                value = ast.literal_eval(value)
+            try:
+                if isinstance(old_value, bool):
+                    if value == "True":
+                        value = True
+                    elif value == "False":
+                        value = False
+                    else:
+                        msg = "The %s parameter must be of type %s!" % (config_property, type(old_value))
+                        print(msg, sys.stderr)
+                        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                        sys.exit(1)
+                elif isinstance(old_value, int):
+                    value = int(value)
+                elif isinstance(old_value, float):
+                    value = float(value)
+                elif isinstance(old_value, list):
+                    value = ast.literal_eval(value)
+            except ValueError:
+                msg = "The %s parameter must be of type %s!" % (config_property, type(old_value))
+                print(msg, sys.stderr)
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                sys.exit(1)
+        else:
+            msg = "The %s parameter is not set in the config. It will be treated as a string!" % config_property
+            print("WARNING: " + msg, sys.stderr)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
         aminer_config.config_properties[config_property] = value
 
     persistence_dir = aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_DIR, AminerConfig.DEFAULT_PERSISTENCE_DIR)
