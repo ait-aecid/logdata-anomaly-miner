@@ -62,25 +62,15 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
         self.log_total = 0
         self.log_learned_path_value_combos = 0
         self.log_new_learned_values = []
-
-        self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
-        self.next_persist_time = None
-        self.load_persistence_data()
-        PersistenceUtil.add_persistable_component(self)
-
         self.id_dict_current = {}
         self.id_dict_old = {}
         self.next_shift_time = None
 
-    def load_persistence_data(self):
-        """Load the persistence data from storage."""
-        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
+        self.next_persist_time = None
         self.known_values = []
-        if persistence_data is not None:
-            # Combinations are stored as list of dictionaries
-            for record in persistence_data:
-                self.known_values.append(record)
-            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+        self.load_persistence_data()
+        PersistenceUtil.add_persistable_component(self)
 
     def receive_atom(self, log_atom):
         """
@@ -188,6 +178,13 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
             self.do_persist()
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         return delta
+
+    def load_persistence_data(self):
+        """Load the persistence data from storage."""
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        if persistence_data is not None:
+            self.known_values = persistence_data
+            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     def do_persist(self):
         """Immediately write persistence data to storage."""

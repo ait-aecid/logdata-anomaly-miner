@@ -59,14 +59,6 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
         self.load_persistence_data()
         PersistenceUtil.add_persistable_component(self)
 
-    def load_persistence_data(self):
-        """Load the persistence data from storage."""
-        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
-        if persistence_data is not None:
-            # Set and tuples were stored as list of lists. Transform the inner lists to tuples to allow hash operation needed by set.
-            self.known_values_set = {tuple(record) for record in persistence_data}
-            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
-
     def receive_atom(self, log_atom):
         """
         Receive on parsed atom and the information about the parser match.
@@ -143,9 +135,17 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         return delta
 
+    def load_persistence_data(self):
+        """Load the persistence data from storage."""
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        if persistence_data is not None:
+            # Set and tuples were stored as list of lists. Transform the inner lists to tuples to allow hash operation needed by set.
+            self.known_values_set = {tuple(record) for record in persistence_data}
+            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        PersistenceUtil.store_json(self.persistence_file_name, list(self.known_values_set))
+        PersistenceUtil.store_json(self.persistence_file_name, self.known_values_set)
         self.next_persist_time = None
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 

@@ -42,15 +42,11 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         self.log_total = 0
         self.log_learned_paths = 0
         self.log_new_learned_paths = []
+        self.known_path_set = set()
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
-        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
-        if persistence_data is None:
-            self.known_path_set = set()
-        else:
-            self.known_path_set = set(persistence_data)
-            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+        self.load_persistence_data()
 
     def receive_atom(self, log_atom):
         """
@@ -113,9 +109,16 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         return delta
 
+    def load_persistence_data(self):
+        """Load the persistence data from storage."""
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        if persistence_data is not None:
+            self.known_path_set = set(persistence_data)
+            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        PersistenceUtil.store_json(self.persistence_file_name, list(self.known_path_set))
+        PersistenceUtil.store_json(self.persistence_file_name, self.known_path_set)
         self.next_persist_time = None
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
