@@ -1,7 +1,7 @@
 import unittest
 from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.FixedDataModelElement import FixedDataModelElement
-from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement, SIGN_TYPE_NONE, PAD_TYPE_NONE
 from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
 from aminer.parsing.SequenceModelElement import SequenceModelElement
 
@@ -11,8 +11,7 @@ class SequenceModelElementTest(unittest.TestCase):
 
     sequence_start = b'The sequence starts with a number: '
     fixed_data_model_element = FixedDataModelElement('fixed', sequence_start)
-    decimal_integer_value_model_element = DecimalIntegerValueModelElement(
-        'decimal', DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+    decimal_integer_value_model_element = DecimalIntegerValueModelElement('decimal', SIGN_TYPE_NONE, PAD_TYPE_NONE)
     fixed_wordlist_data_model_element = FixedWordlistDataModelElement('wordlist', [b' Euro', b' Dollar', b' Pfund'])
     sequence_model_element = SequenceModelElement(
         'sequence', [fixed_data_model_element, decimal_integer_value_model_element, fixed_wordlist_data_model_element])

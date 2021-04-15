@@ -5,7 +5,7 @@ from aminer.analysis.Rules import EventGenerationMatchAction, PathExistsMatchRul
     ValueRangeMatchRule, StringRegexMatchRule, ModuloTimeMatchRule, ValueDependentModuloTimeMatchRule, IPv4InRFC1918MatchRule, \
     AndMatchRule, OrMatchRule, ValueDependentDelegatedMatchRule, NegationMatchRule
 from aminer.parsing.MatchContext import MatchContext
-from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement, SIGN_TYPE_NONE, PAD_TYPE_NONE
 from aminer.parsing.ParserMatch import ParserMatch
 from aminer.input.LogAtom import LogAtom
 from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
@@ -47,8 +47,7 @@ class RuleTest(TestBase):
         message = 'This message was generated, when the unit were successful.'
 
         match_context = MatchContext(b'25537')
-        decimal_integer_value_me = DecimalIntegerValueModelElement('d1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
-                                                                   DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+        decimal_integer_value_me = DecimalIntegerValueModelElement('d1', SIGN_TYPE_NONE, PAD_TYPE_NONE)
         match_element = decimal_integer_value_me.get_match_element('match', match_context)
         stream_printer_event_handler2 = StreamPrinterEventHandler(self.analysis_context, output_stream2)
 
@@ -119,8 +118,7 @@ class RuleTest(TestBase):
         description = "Test5Rules"
         value_list_match_rule = ValueListMatchRule('match/d1', [1, 2, 4, 8, 16, 32, 64, 128, 256, 512], None)
         self.analysis_context.register_component(value_list_match_rule, description)
-        decimal_integer_value_me = DecimalIntegerValueModelElement('d1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
-                                                                   DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+        decimal_integer_value_me = DecimalIntegerValueModelElement('d1', SIGN_TYPE_NONE, PAD_TYPE_NONE)
 
         match_context = MatchContext(b'64')
         match_element = decimal_integer_value_me.get_match_element('match', match_context)
@@ -137,8 +135,7 @@ class RuleTest(TestBase):
         description = "Test6Rules"
         value_range_match_rule = ValueRangeMatchRule('match/d1', 1, 1000, None)
         self.analysis_context.register_component(value_range_match_rule, description)
-        decimal_integer_value_me = DecimalIntegerValueModelElement('d1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
-                                                                   DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+        decimal_integer_value_me = DecimalIntegerValueModelElement('d1', SIGN_TYPE_NONE, PAD_TYPE_NONE)
 
         match_context = MatchContext(b'1')
         match_element = decimal_integer_value_me.get_match_element('match', match_context)

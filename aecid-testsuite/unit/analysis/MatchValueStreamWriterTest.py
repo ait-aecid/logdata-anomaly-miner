@@ -1,7 +1,7 @@
 import unittest
 from _io import BytesIO
 from aminer.parsing.MatchContext import MatchContext
-from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement, SIGN_TYPE_NONE, PAD_TYPE_NONE
 from aminer.analysis.MatchValueStreamWriter import MatchValueStreamWriter
 from aminer.parsing.ParserMatch import ParserMatch
 from aminer.input.LogAtom import LogAtom
@@ -22,8 +22,7 @@ class MatchValueStreamWriterTest(TestBase):
         description = "Test1MatchValueStreamWriter"
         output_stream = BytesIO()
         match_context = MatchContext(b'25537Euro 25538Euro 25539Euro 25540Euro ')
-        decimal_integer_value_me = DecimalIntegerValueModelElement('d1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
-                                                                   DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+        decimal_integer_value_me = DecimalIntegerValueModelElement('d1', SIGN_TYPE_NONE, PAD_TYPE_NONE)
         fixed_dme = FixedDataModelElement('s1', self.euro)
         sequence_model_element = SequenceModelElement('sequence', [decimal_integer_value_me, fixed_dme])
         match_value_stream_writer = MatchValueStreamWriter(output_stream, [self.match_sequence_d1, self.match_sequence_s1], b';', b'-')
@@ -55,8 +54,7 @@ class MatchValueStreamWriterTest(TestBase):
         description = "Test2MatchValueStreamWriter"
         output_stream = BytesIO()
         match_context = MatchContext(b'25537Euro 25538Euro 25539Euro 25540Euro ')
-        decimal_integer_value_me = DecimalIntegerValueModelElement('d1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
-                                                                   DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+        decimal_integer_value_me = DecimalIntegerValueModelElement('d1', SIGN_TYPE_NONE, PAD_TYPE_NONE)
 
         fixed_dme = FixedDataModelElement('s1', self.euro)
         sequence_model_element = SequenceModelElement('sequence', [decimal_integer_value_me, fixed_dme])
@@ -89,8 +87,7 @@ class MatchValueStreamWriterTest(TestBase):
         description = "Test3MatchValueStreamWriter"
         output_stream = BytesIO()
         match_context = MatchContext(b'25537Euro 25538Euro 25539Euro 25540Pfund ')
-        decimal_integer_value_me = DecimalIntegerValueModelElement('d1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
-                                                                   DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+        decimal_integer_value_me = DecimalIntegerValueModelElement('d1', SIGN_TYPE_NONE, PAD_TYPE_NONE)
 
         fixed_dme = FixedDataModelElement('s1', self.euro)
         sequence_model_element = SequenceModelElement('sequence', [decimal_integer_value_me, fixed_dme])
@@ -124,8 +121,7 @@ class MatchValueStreamWriterTest(TestBase):
         description = "Test4MatchValueStreamWriter"
         output_stream = BytesIO()
         match_context = MatchContext(b'25537Euro 25538Euro 25539Euro 25540Pfund ')
-        decimal_integer_value_me = DecimalIntegerValueModelElement('d1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
-                                                                   DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+        decimal_integer_value_me = DecimalIntegerValueModelElement('d1', SIGN_TYPE_NONE, PAD_TYPE_NONE)
 
         fixed_dme = FixedDataModelElement('s1', self.euro)
         sequence_model_element = SequenceModelElement('sequence', [decimal_integer_value_me, fixed_dme])

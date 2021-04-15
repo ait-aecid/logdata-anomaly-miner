@@ -1,7 +1,7 @@
 import unittest
 from unit.TestBase import TestBase
 from aminer.parsing.FixedDataModelElement import FixedDataModelElement
-from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement, SIGN_TYPE_NONE, PAD_TYPE_NONE
 from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
 from aminer.parsing.MatchContext import MatchContext
 from aminer.analysis.TimeCorrelationDetector import TimeCorrelationDetector
@@ -20,8 +20,7 @@ class TimeCorrelationDetectorTest(TestBase):
     datetime_format_string = '%Y-%m-%d %H:%M:%S'
 
     fixed_dme = FixedDataModelElement('s1', string)
-    decimal_integer_value_me = DecimalIntegerValueModelElement('d1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
-                                                               DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+    decimal_integer_value_me = DecimalIntegerValueModelElement('d1', SIGN_TYPE_NONE, PAD_TYPE_NONE)
 
     match_context_first_match_me = MatchContext(string)
     first_match_me = FirstMatchModelElement('f1', [fixed_dme, decimal_integer_value_me])

@@ -8,7 +8,7 @@ import time
 from aminer.util import PersistenceUtil
 from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.FixedDataModelElement import FixedDataModelElement
-from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement, SIGN_TYPE_NONE, PAD_TYPE_NONE
 from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
 from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
 from unit.TestBase import TestBase
@@ -24,14 +24,12 @@ class PersistenceUtilTest(TestBase):
     match_element_fixed_dme = fixed_dme.get_match_element("", match_context_fixed_dme)
 
     match_context_decimal_integer_value_me = MatchContext(string)
-    decimal_integer_value_me = DecimalIntegerValueModelElement('d1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
-                                                               DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+    decimal_integer_value_me = DecimalIntegerValueModelElement('d1', SIGN_TYPE_NONE, PAD_TYPE_NONE)
     match_element_decimal_integer_value_me = decimal_integer_value_me.get_match_element("", match_context_decimal_integer_value_me)
 
     fixed_dme = FixedDataModelElement('s1', string)
 
-    decimal_integer_value_me = DecimalIntegerValueModelElement('d1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
-                                                               DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+    decimal_integer_value_me = DecimalIntegerValueModelElement('d1', SIGN_TYPE_NONE, PAD_TYPE_NONE)
 
     match_context_first_match_me = MatchContext(string)
     first_match_me = FirstMatchModelElement('f1', [fixed_dme, decimal_integer_value_me])

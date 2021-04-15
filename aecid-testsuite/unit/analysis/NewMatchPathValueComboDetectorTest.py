@@ -1,7 +1,7 @@
 import unittest
 from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.FixedDataModelElement import FixedDataModelElement
-from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement, SIGN_TYPE_NONE, PAD_TYPE_NONE
 from aminer.parsing.ParserMatch import ParserMatch
 from aminer.parsing.SequenceModelElement import SequenceModelElement
 from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
@@ -23,8 +23,7 @@ class NewMatchPathValueComboDetectorTest(TestBase):
     string = "  first/seq: b'25537 uid=2'\n  " + first_seq_s1 + ": 25537 uid=\n  " + first_seq_d1 + ": 2\n(b'25537 uid=', 2)"
     string2 = "  (b'25537 uid=', 2)\n25537 uid=2"
 
-    decimal_integer_value_me = DecimalIntegerValueModelElement('d1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
-                                                               DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+    decimal_integer_value_me = DecimalIntegerValueModelElement('d1', SIGN_TYPE_NONE, PAD_TYPE_NONE)
 
     match_context_sequence_me = MatchContext(b'25537 uid=2')
     seq = SequenceModelElement('seq', [fixed_dme, decimal_integer_value_me])

@@ -106,7 +106,7 @@ def initialize_loggers(aminer_config, aminer_user_id, aminer_grp_id):
 class TestBase(unittest.TestCase):
     """This is the base class for all unittests."""
 
-    __configFilePath = os.getcwd()+'/unit/config/config.py'
+    __configFilePath = os.getcwd()+'/unit/data/config.py'
 
     def setUp(self):
         """Set up all needed variables and remove persisted data."""

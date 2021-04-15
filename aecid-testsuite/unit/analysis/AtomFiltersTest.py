@@ -6,7 +6,7 @@ from aminer.parsing.MatchContext import MatchContext
 from aminer.input.LogAtom import LogAtom
 from aminer.parsing.ParserMatch import ParserMatch
 import time
-from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement, SIGN_TYPE_NONE, PAD_TYPE_NONE
 from unit.TestBase import TestBase
 
 
@@ -18,8 +18,7 @@ class AtomFiltersTest(TestBase):
     match_element_fixed_dme = fixed_dme.get_match_element("fixed", match_context_fixed_dme)
 
     match_context_decimal_integer_value_me = MatchContext(b'25000')
-    decimal_integer_value_me = DecimalIntegerValueModelElement('d1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
-                                                               DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+    decimal_integer_value_me = DecimalIntegerValueModelElement('d1', SIGN_TYPE_NONE, PAD_TYPE_NONE)
     match_element_decimal_integer_value_me = decimal_integer_value_me.get_match_element("integer", match_context_decimal_integer_value_me)
 
     def test1_no_list_or_no_atom_handler_list(self):
