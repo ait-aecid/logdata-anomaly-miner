@@ -166,7 +166,7 @@ def build_parsing_model():
             if item['type'].name == 'ElementValueBranchModelElement':
                 value_model = parser_model_dict.get(item['args'][0].decode())
                 if value_model is None:
-                    msg = 'The parser model %s does not exist!' % value_model
+                    msg = 'The parser model %s does not exist!' % item['args'][0].decode()
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 branch_model_dict = {}
@@ -174,7 +174,7 @@ def build_parsing_model():
                     key = i['id']
                     model = i['model']
                     if parser_model_dict.get(model) is None:
-                        msg = 'The parser model %s does not exist!' % model
+                        msg = 'The parser model %s does not exist!' % key
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     branch_model_dict[key] = parser_model_dict.get(model)
@@ -219,17 +219,16 @@ def build_parsing_model():
             elif item['type'].name in ('FirstMatchModelElement', 'SequenceModelElement'):
                 children = []
                 for child in item['args']:
-                    child = parser_model_dict.get(child.decode())
-                    if child is None:
-                        msg = 'The parser model %s does not exist!' % child
+                    if parser_model_dict.get(child.decode()) is None:
+                        msg = 'The parser model %s does not exist!' % child.decode()
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
-                    children.append(child)
+                    children.append(parser_model_dict.get(child.decode()))
                 parser_model_dict[item['id']] = item['type'].func(item['name'], children)
             elif item['type'].name == 'OptionalMatchModelElement':
                 optional_element = parser_model_dict.get(item['args'].decode())
                 if optional_element is None:
-                    msg = 'The parser model %s does not exist!' % optional_element
+                    msg = 'The parser model %s does not exist!' % item['args'].decode()
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 parser_model_dict[item['id']] = item['type'].func(item['name'], optional_element)
@@ -264,7 +263,7 @@ def build_parsing_model():
                 else:
                     model = parser_model_dict.get(i)
                     if model is None:
-                        msg = 'The parser model %s does not exist!' % model
+                        msg = 'The parser model %s does not exist!' % i
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     args_list.append(model)
