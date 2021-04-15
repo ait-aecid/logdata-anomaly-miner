@@ -34,7 +34,6 @@ def load_yaml(config_file):
     global yaml_data
 
     import yaml
-    from cerberus import Validator
     from aminer.ConfigValidator import ConfigValidator, NormalisationValidator
     import os
     with open(config_file) as yamlfile:
@@ -167,7 +166,7 @@ def build_parsing_model():
             if item['type'].name == 'ElementValueBranchModelElement':
                 value_model = parser_model_dict.get(item['args'][0].decode())
                 if value_model is None:
-                    msg = 'The parser model %s does not exist!' % value_model
+                    msg = 'The parser model %s does not exist!' % item['args'][0].decode()
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 branch_model_dict = {}
@@ -175,7 +174,7 @@ def build_parsing_model():
                     key = i['id']
                     model = i['model']
                     if parser_model_dict.get(model) is None:
-                        msg = 'The parser model %s does not exist!' % model
+                        msg = 'The parser model %s does not exist!' % key
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     branch_model_dict[key] = parser_model_dict.get(model)
@@ -220,17 +219,16 @@ def build_parsing_model():
             elif item['type'].name in ('FirstMatchModelElement', 'SequenceModelElement'):
                 children = []
                 for child in item['args']:
-                    child = parser_model_dict.get(child.decode())
-                    if child is None:
-                        msg = 'The parser model %s does not exist!' % child
+                    if parser_model_dict.get(child.decode()) is None:
+                        msg = 'The parser model %s does not exist!' % child.decode()
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
-                    children.append(child)
+                    children.append(parser_model_dict.get(child.decode()))
                 parser_model_dict[item['id']] = item['type'].func(item['name'], children)
             elif item['type'].name == 'OptionalMatchModelElement':
                 optional_element = parser_model_dict.get(item['args'].decode())
                 if optional_element is None:
-                    msg = 'The parser model %s does not exist!' % optional_element
+                    msg = 'The parser model %s does not exist!' % item['args'].decode()
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 parser_model_dict[item['id']] = item['type'].func(item['name'], optional_element)
@@ -265,7 +263,7 @@ def build_parsing_model():
                 else:
                     model = parser_model_dict.get(i)
                     if model is None:
-                        msg = 'The parser model %s does not exist!' % model
+                        msg = 'The parser model %s does not exist!' % i
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     args_list.append(model)
@@ -402,6 +400,12 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                         raise ValueError(msg)
                     default_parsed_atom_handler = analysis_context.get_component_by_name(default_parsed_atom_handler)
                 tmp_analyser = func(item['path'], parsed_atom_handler_dict, default_parsed_atom_handler=default_parsed_atom_handler)
+            elif item['type'].name == 'PCADetector':
+                tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers,
+                                    persistence_id=item['persistence_id'], window_size=item['window_size'],
+                                    min_anomaly_score=item['min_anomaly_score'], min_variance=item['min_variance'],
+                                    num_windows=item['num_windows'], auto_include_flag=learn, output_log_line=item['output_logline'],
+                                    ignore_list=item['ignore_list'], constraint_list=item['constraint_list'])
             elif item['type'].name == 'NewMatchPathValueComboDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn,
                                     persistence_id=item['persistence_id'], allow_missing_values_flag=item['allow_missing_values'],
@@ -417,7 +421,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             elif item['type'].name == 'EventSequenceDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['id_path_list'],
                                     target_path_list=item['paths'], persistence_id=item['persistence_id'], seq_len=item['seq_len'],
-                                    auto_include_flag=learn, output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
+                                    auto_include_flag=learn, timeout=item['timeout'], allow_missing_id=item['allow_missing_id'],
+                                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
                                     constraint_list=item['constraint_list'])
             elif item['type'].name == 'EventFrequencyDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
