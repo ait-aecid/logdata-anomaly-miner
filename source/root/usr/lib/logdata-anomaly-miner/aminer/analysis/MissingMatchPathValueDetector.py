@@ -243,9 +243,9 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                         continue
                 elif self.target_path_list is not None and value[3] not in self.target_path_list:
                     continue
-                if value[1] != default_interval:
-                    value[1] = default_interval
-                    value[2] = value[0] + default_interval
+                if value[1] != self.default_interval:
+                    value[1] = self.default_interval
+                    value[2] = value[0] + self.default_interval
                 self.expected_values_dict[key] = value
             logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
