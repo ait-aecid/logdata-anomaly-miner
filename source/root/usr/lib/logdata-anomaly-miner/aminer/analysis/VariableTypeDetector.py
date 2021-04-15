@@ -468,11 +468,11 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
     def do_persist(self):
         """Immediately write persistence data to storage."""
         distr_val = []
-        for event_index in range(len(self.distr_val)):
+        for event_index, event_val in enumerate(self.distr_val):
             val_list = []
-            for var_index in range(len(self.distr_val[event_index])):
-                if len(self.distr_val[event_index][var_index]) > 0 and self.var_type[event_index][var_index][0] == 'emp':
-                    val_list.append(self.distr_val[event_index][var_index])
+            for var_index, var_val in enumerate(event_val):
+                if len(var_val) > 0 and self.var_type[event_index][var_index][0] == 'emp':
+                    val_list.append(var_val)
                 else:
                     val_list.append([])
             distr_val.append(val_list)

@@ -19,7 +19,6 @@ import logging
 
 from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer import AminerConfig
-from aminer.AnalysisChild import AnalysisContext
 from aminer.analysis import Rules
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util.History import get_log_int
