@@ -15,11 +15,10 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import time
 import logging
 
-from aminer.AminerConfig import KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, build_persistence_file_name, DEBUG_LOG_NAME
+from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util.History import LogarithmicBackoffHistory
-from aminer.util import PersistenceUtil
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 from aminer.analysis import Rules
 
@@ -30,16 +29,14 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
     This is used to implement checks as depicted in http://dx.doi.org/10.1016/j.cose.2014.09.006
     """
 
-    def __init__(self, aminer_config, ruleset, anomaly_event_handlers, persistence_id='Default', output_log_line=True):
+    def __init__(self, aminer_config, ruleset, anomaly_event_handlers, output_log_line=True):
         """
-        Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        Initialize the detector.
         @param ruleset a list of MatchRule rules with appropriate CorrelationRules attached as actions.
         """
         self.aminer_config = aminer_config
         self.event_classification_ruleset = ruleset
         self.anomaly_event_handlers = anomaly_event_handlers
-        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-        self.persistence_id = persistence_id
         self.output_log_line = output_log_line
         self.last_log_atom = None
 
@@ -50,9 +47,6 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
             if rule.match_action.artefact_b_rules is not None:
                 event_correlation_set |= set(rule.match_action.artefact_b_rules)
         self.event_correlation_ruleset = list(event_correlation_set)
-
-        self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
-        PersistenceUtil.add_persistable_component(self)
 
     def receive_atom(self, log_atom):
         """Receive a parsed atom and evaluate all the classification rules and event triggering on violations."""
@@ -71,13 +65,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
-        """Check for any rule violations and if the current ruleset should be persisted."""
-        # Persist the state only quite infrequently: As most correlation rules react in timeline of seconds, the persisted data will most
-        # likely be unsuitable to catch lost events. So persistence is mostly to capture the correlation rule context, e.g. the history
-        # of loglines matched before.
-        if self.next_persist_time - trigger_time < 0:
-            self.do_persist()
-
+        """Check for any rule violations."""
         # Check all correlation rules, generate single events for each violated rule, possibly containing multiple records. As we might
         # be processing historic data, the timestamp last seen is unknown here. Hence rules not receiving newer events might not notice
         # for a long time, that they hold information about correlation impossible to fulfil. Take the newest timestamp of any rule
@@ -107,11 +95,6 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Correlation rule "%s" violated' % rule.rule_id,
                                        [check_result[0]], event_data, self.last_log_atom, self)
         return 10.0
-
-    def do_persist(self):
-        """Immediately write persistence data to storage."""
-        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def log_statistics(self, component_name):
         """

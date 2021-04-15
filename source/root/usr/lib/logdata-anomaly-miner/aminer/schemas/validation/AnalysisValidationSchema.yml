@@ -370,7 +370,6 @@
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['TimeCorrelationViolationDetector'], 'required': True},
                     'ruleset': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
-                    'persistence_id': {'type': 'string', 'empty': False},
                     'output_logline': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'suppress': {'type': 'boolean'}
