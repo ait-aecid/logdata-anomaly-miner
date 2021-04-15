@@ -35,6 +35,21 @@
                     'suppress': {'type': 'boolean'}
                 },
                 {
+                    'id': {'type': 'string', 'nullable': True},
+                    'type': {'type': 'string', 'allowed': ['PCADetector'], 'required': True},
+                    'paths': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True},
+                    'window_size': {'type': ['integer', 'float'], 'min': 0.001},
+                    'min_anomaly_score': {'type': 'float'},
+                    'min_variance': {'type': 'float'},
+                    'num_windows': {'type': 'float'},
+                    'persistence_id': {'type': 'string'},
+                    'learn_mode': {'type': 'boolean'},
+                    'output_logline': {'type': 'boolean'},
+                    'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'output_event_handlers': {'type': 'list', 'nullable': True}
+                },
+                {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['EnhancedNewMatchPathValueComboDetector'], 'required': True},
                     'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True, 'required': True},
@@ -90,6 +105,8 @@
                     'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'id_path_list': {'type': 'list', 'nullable': True},
                     'seq_len': {'type': 'integer', 'min': 1},
+                    'timeout': {'type': 'integer', 'min': -1},
+                    'allow_missing_id': {'type': 'boolean'},
                     'persistence_id': {'type': 'string', 'empty': False},
                     'learn_mode': {'type': 'boolean'},
                     'output_logline': {'type': 'boolean'},
