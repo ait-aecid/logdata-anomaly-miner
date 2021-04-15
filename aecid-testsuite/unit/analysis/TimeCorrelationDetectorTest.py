@@ -44,9 +44,9 @@ class TimeCorrelationDetectorTest(TestBase):
         use_value_match = True
         min_rule_attributes = 1
         max_rule_attributes = 5
-        time_correlation_detector = TimeCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], parallel_check_count,
-                                                            'Default', record_count_before_event, output_logline, use_path_match,
-                                                            use_value_match, min_rule_attributes, max_rule_attributes)
+        time_correlation_detector = TimeCorrelationDetector(
+            self.aminer_config, [self.stream_printer_event_handler], parallel_check_count, record_count_before_event, output_logline,
+            use_path_match, use_value_match, min_rule_attributes, max_rule_attributes)
         self.analysis_context.register_component(time_correlation_detector, component_name=description)
 
         t = time.time()
