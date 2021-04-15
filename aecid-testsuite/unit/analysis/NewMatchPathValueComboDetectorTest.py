@@ -20,8 +20,8 @@ class NewMatchPathValueComboDetectorTest(TestBase):
     datetime_format_string = '%Y-%m-%d %H:%M:%S'
     first_seq_s1 = 'first/seq/s1'
     first_seq_d1 = 'first/seq/d1'
-    string = "  first/seq: b'25537 uid=2'\n  " + first_seq_s1 + ": b'25537 uid='\n  " + first_seq_d1 + ": 2\n(b'25537 uid=', 2)"
-    string2 = "  (b'25537 uid=', 2)\nb'25537 uid=2'"
+    string = "  first/seq: b'25537 uid=2'\n  " + first_seq_s1 + ": 25537 uid=\n  " + first_seq_d1 + ": 2\n(b'25537 uid=', 2)"
+    string2 = "  (b'25537 uid=', 2)\n25537 uid=2"
 
     decimal_integer_value_me = DecimalIntegerValueModelElement('d1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
                                                                DecimalIntegerValueModelElement.PAD_TYPE_NONE)
@@ -73,7 +73,7 @@ class NewMatchPathValueComboDetectorTest(TestBase):
         self.assertTrue(new_match_path_value_combo_detector2.receive_atom(log_atom_sequence_me2))
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
             datetime.fromtimestamp(t).strftime(self.datetime_format_string), new_match_path_value_combo_detector.__class__.__name__,
-            description + "2", 1, "  (25537, b' uid=2')\nb'25537 uid=2'"))
+            description + "2", 1, "  (25537, b' uid=2')\n25537 uid=2"))
 
     def test2_log_atom_known(self):
         """
@@ -111,7 +111,7 @@ class NewMatchPathValueComboDetectorTest(TestBase):
         self.assertTrue(new_match_path_value_combo_detector2.receive_atom(log_atom_sequence_me2))
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
             datetime.fromtimestamp(t).strftime(self.datetime_format_string), new_match_path_value_combo_detector.__class__.__name__,
-            description + "2", 1, "  (25537, b' uid=2')\nb'25537 uid=2'"))
+            description + "2", 1, "  (25537, b' uid=2')\n25537 uid=2"))
 
     def test3_log_atom_known_from_persisted_data(self):
         """The persisting and reading of permitted log lines should be checked with this test."""

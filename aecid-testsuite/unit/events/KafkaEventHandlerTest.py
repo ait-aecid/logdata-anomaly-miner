@@ -32,7 +32,7 @@ class KafkaEventHandlerTest(TestBase):
                       '    "PersistenceFileName": "%s",\n    "AffectedParserPaths": [\n      "test/path/1",\n' \
                       '      "test/path/2"\n    ]\n  },\n  "LogData": {\n    "RawLogData": [\n      " pid="\n    ],\n    ' \
                       '"Timestamps": [\n      %s\n    ],\n    "DetectionTimestamp": %s,\n    "LogLinesCount": 5,\n' \
-                      '    "AnnotatedMatchElement": "match/s1: b\' pid=\'"\n  }%s\n}\n\n'
+                      '    "AnnotatedMatchElement": "match/s1:  pid="\n  }%s\n}\n\n'
 
     @classmethod
     def setUpClass(cls):

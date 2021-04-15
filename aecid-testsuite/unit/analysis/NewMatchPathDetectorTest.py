@@ -20,8 +20,8 @@ class NewMatchPathDetectorTest(TestBase):
 
     datetime_format_string = '%Y-%m-%d %H:%M:%S'
     analysis = 'Analysis.%s'
-    pid = "b' pid='"
-    uid = "b' uid=2'"
+    pid = " pid="
+    uid = " uid=2"
 
     match_context_fixed_dme = MatchContext(b' pid=')
     fixed_dme = FixedDataModelElement('s1', b' pid=')

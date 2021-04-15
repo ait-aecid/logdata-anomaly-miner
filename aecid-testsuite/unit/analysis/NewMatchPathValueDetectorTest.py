@@ -19,7 +19,7 @@ class NewMatchPathValueDetectorTest(TestBase):
     datetime_format_string = '%Y-%m-%d %H:%M:%S'
     string = b'25537 uid=2'
     first_f1_s1 = 'first/f1/s1'
-    string2 = "{'first/f1/s1': '25537 uid=2'}\nb'25537 uid=2'"
+    string2 = "{'first/f1/s1': '25537 uid=2'}\n25537 uid=2"
 
     fixed_dme = FixedDataModelElement('s1', string)
     decimal_integer_value_me = DecimalIntegerValueModelElement('d1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
@@ -69,7 +69,7 @@ class NewMatchPathValueDetectorTest(TestBase):
         new_match_path_value_detector2.receive_atom(log_atom_sequence_me2)
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
             datetime.fromtimestamp(t).strftime(self.datetime_format_string), new_match_path_value_detector.__class__.__name__,
-            description + "2", 1, "{'second/f2/d1': 25537}\nb'25537'"))
+            description + "2", 1, "{'second/f2/d1': 25537}\n25537"))
 
     def test2_log_atom_known(self):
         """
@@ -104,7 +104,7 @@ class NewMatchPathValueDetectorTest(TestBase):
         new_match_path_value_detector2.receive_atom(log_atom_sequence_me2)
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
             datetime.fromtimestamp(t).strftime(self.datetime_format_string), new_match_path_value_detector.__class__.__name__,
-            description + "2", 1, "{'second/f2/d1': 25537}\nb'25537'"))
+            description + "2", 1, "{'second/f2/d1': 25537}\n25537"))
 
     def test3log_atom_known_from_persisted_data(self):
         """The persisting and reading of permitted log lines should be checked with this test."""
