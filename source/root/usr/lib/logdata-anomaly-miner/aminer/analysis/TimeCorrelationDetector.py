@@ -17,28 +17,25 @@ import random
 import time
 import logging
 
-from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD
+from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.analysis import Rules
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util.History import get_log_int
-from aminer.util import PersistenceUtil
-from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
 
-class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
+class TimeCorrelationDetector(AtomHandlerInterface):
     """
     This class tries to find time correlation patterns between different log atoms.
     When a possible correlation rule is detected, it creates an event including the rules. This is useful to implement checks as depicted
     in http://dx.doi.org/10.1016/j.cose.2014.09.006.
     """
 
-    def __init__(self, aminer_config, anomaly_event_handlers, parallel_check_count, persistence_id='Default',
-                 record_count_before_event=10000, output_log_line=True, use_path_match=True, use_value_match=True,
-                 min_rule_attributes=1, max_rule_attributes=5):
+    def __init__(self, aminer_config, anomaly_event_handlers, parallel_check_count, record_count_before_event=10000, output_log_line=True,
+                 use_path_match=True, use_value_match=True, min_rule_attributes=1, max_rule_attributes=5):
         """
-        Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        Initialize the detector.
         @param parallel_check_count number of rule detection checks to run in parallel.
         @param record_count_before_event number of events used to calculate statistics (i.e., window size)
         @param min_rule_attributes minimum number of attributes forming a rule
@@ -52,24 +49,15 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
         self.min_rule_attributes = min_rule_attributes
         self.max_rule_attributes = max_rule_attributes
         self.last_unhandled_match = None
-        self.next_persist_time = None
         self.total_records = 0
         self.record_count_before_event = record_count_before_event
-        self.persistence_id = persistence_id
         self.output_log_line = output_log_line
         self.use_path_match = use_path_match
         self.use_value_match = use_value_match
         self.aminer_config = aminer_config
-
-        self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
-        PersistenceUtil.add_persistable_component(self)
-        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
-        if persistence_data is None:
-            self.feature_list = []
-            self.event_count_table = [0] * parallel_check_count * parallel_check_count * 2
-            self.event_delta_table = [0] * parallel_check_count * parallel_check_count * 2
-        else:
-            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+        self.feature_list = []
+        self.event_count_table = [0] * parallel_check_count * parallel_check_count * 2
+        self.event_delta_table = [0] * parallel_check_count * parallel_check_count * 2
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
@@ -111,9 +99,6 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
 
         if not features_found_list:
             self.last_unhandled_match = log_atom
-        elif self.next_persist_time is None:
-            self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         if (self.total_records % self.record_count_before_event) == 0:
             result = self.total_records * ['']
@@ -175,29 +160,6 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
             else:
                 r[var] = attr
         return r
-
-    def get_time_trigger_class(self):
-        """
-        Get the trigger class this component should be registered for.
-        This trigger is used only for persistence, so real-time triggering is needed.
-        """
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
-
-    def do_timer(self, trigger_time):
-        """Check current ruleset should be persisted."""
-        if self.next_persist_time is None:
-            return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-
-        delta = self.next_persist_time - trigger_time
-        if delta < 0:
-            self.next_persist_time = None
-            delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-        return delta
-
-    def do_persist(self):
-        """Immediately write persistence data to storage."""
-        self.next_persist_time = None
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def create_random_rule(self, log_atom):
         """Create a random existing path rule or value match rule."""

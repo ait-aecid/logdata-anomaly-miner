@@ -358,7 +358,6 @@
                     'type': {'type': 'string', 'allowed': ['TimeCorrelationDetector'], 'required': True},
                     'parallel_check_count': {'type': 'integer', 'required': True, 'min': 1},
                     'record_count_before_event': {'type': 'integer', 'min': 1},
-                    'persistence_id': {'type': 'string', 'empty': False},
                     'output_logline': {'type': 'boolean'},
                     'use_path_match': {'type': 'boolean'},
                     'use_value_match': {'type': 'boolean'},

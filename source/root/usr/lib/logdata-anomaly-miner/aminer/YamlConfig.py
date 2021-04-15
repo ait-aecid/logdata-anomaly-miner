@@ -427,10 +427,9 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     constraint_list=item['constraint_list'])
             elif item['type'].name == 'TimeCorrelationDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['parallel_check_count'],
-                                    persistence_id=item['persistence_id'], record_count_before_event=item['record_count_before_event'],
-                                    output_log_line=item['output_logline'], use_path_match=item['use_path_match'],
-                                    use_value_match=item['use_value_match'], min_rule_attributes=item['min_rule_attributes'],
-                                    max_rule_attributes=item['max_rule_attributes'])
+                                    record_count_before_event=item['record_count_before_event'], output_log_line=item['output_logline'],
+                                    use_path_match=item['use_path_match'], use_value_match=item['use_value_match'],
+                                    min_rule_attributes=item['min_rule_attributes'], max_rule_attributes=item['max_rule_attributes'])
             elif item['type'].name == 'ParserCount':
                 tmp_analyser = func(
                     analysis_context.aminer_config,
