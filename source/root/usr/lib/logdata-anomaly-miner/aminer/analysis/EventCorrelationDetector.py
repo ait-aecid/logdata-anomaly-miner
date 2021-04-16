@@ -818,8 +818,7 @@ class Implication:
     def get_dictionary_repr(self):
         """Return the dictionary representation of an Implication."""
         return {'trigger_event': self.trigger_event, 'implied_event': self.implied_event, 'stable': self.stable,
-                'rule_observations': list(self.rule_observations), 'hypothesis_observations': self.hypothesis_observations,
-                'hypothesis_evaluated_true': self.hypothesis_evaluated_true}
+                'hypothesis_observations': self.hypothesis_observations, 'hypothesis_evaluated_true': self.hypothesis_evaluated_true}
 
     def load_from_json_dictionary_repr(self, dict_repr):
         """Load the Implication from persisted data in a json dictionary format."""
@@ -828,7 +827,7 @@ class Implication:
         self.stable = dict_repr["stable"]
         self.hypothesis_trigger_timestamps = deque([])
         self.rule_trigger_timestamps = deque([])
-        self.rule_observations = deque(dict_repr["rule_observations"])
+        self.rule_observations = deque([])
         self.hypothesis_observations = dict_repr["hypothesis_observations"]
         self.hypothesis_evaluated_true = dict_repr["hypothesis_evaluated_true"]
 
