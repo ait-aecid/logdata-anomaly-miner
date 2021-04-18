@@ -251,7 +251,7 @@ class DecimalFloatValueModelElementTest(TestBase):
         """Test valid float values with "mandatory" or "blank" values of value_sign_type, value_pad_type and exponent_type."""
         decimal_float_value_me = DecimalFloatValueModelElement(
             self.id_, DecimalFloatValueModelElement.SIGN_TYPE_MANDATORY, DecimalFloatValueModelElement.PAD_TYPE_BLANK,
-            DecimalFloatValueModelElement-EXP_TYPE_MANDATORY)
+            DecimalFloatValueModelElement.EXP_TYPE_MANDATORY)
         data = b"+22.25 some string."
         value = b"+22.25"
         match_context = DummyMatchContext(data)

@@ -23,6 +23,7 @@ class DecimalFloatValueModelElement(ModelElementInterface):
     This class defines a model to parse decimal values with optional signum, padding or exponent.
     With padding, the signum has to be found before the padding characters.
     """
+
     SIGN_TYPE_NONE = "none"
     SIGN_TYPE_OPTIONAL = "optional"
     SIGN_TYPE_MANDATORY = "mandatory"
