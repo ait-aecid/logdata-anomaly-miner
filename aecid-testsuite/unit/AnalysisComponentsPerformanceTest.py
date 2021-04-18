@@ -29,7 +29,7 @@ from aminer.input.LogAtom import LogAtom
 from aminer.parsing.ParserMatch import ParserMatch
 from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.MatchElement import MatchElement
-from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement, SIGN_TYPE_NONE, PAD_TYPE_NONE
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
 from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
 from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
 from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
@@ -86,14 +86,16 @@ class AnalysisComponentsPerformanceTest(TestBase):
             t = round(time.time(), 3)
 
             # worst case
-            decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(number_of_paths), SIGN_TYPE_NONE, PAD_TYPE_NONE)
+            decimal_integer_value_me = DecimalIntegerValueModelElement(
+                'd' + str(number_of_paths), DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
             match_context = MatchContext(str(123456789).encode())
             match_element = decimal_integer_value_me.get_match_element('integer', match_context)
             log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, match_path_filter)
             worst_case = self.waiting_time / (timeit.timeit(lambda: subhandler_filter.receive_atom(log_atom), number=10000) / 10000)
 
             # best case
-            decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(0), SIGN_TYPE_NONE, PAD_TYPE_NONE)
+            decimal_integer_value_me = DecimalIntegerValueModelElement(
+                'd' + str(0), DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
             match_context = MatchContext(str(123456789).encode())
             match_element = decimal_integer_value_me.get_match_element('integer', match_context)
             log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, match_path_filter)
@@ -129,14 +131,16 @@ class AnalysisComponentsPerformanceTest(TestBase):
             t = round(time.time(), 3)
 
             # worst case
-            decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(number_of_paths), SIGN_TYPE_NONE, PAD_TYPE_NONE)
+            decimal_integer_value_me = DecimalIntegerValueModelElement(
+                'd' + str(number_of_paths), DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
             match_context = MatchContext(str(123456789).encode())
             match_element = decimal_integer_value_me.get_match_element('integer', match_context)
             log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, match_value_filter)
             worst_case = self.waiting_time / (timeit.timeit(lambda: subhandler_filter.receive_atom(log_atom), number=10000) / 10000)
 
             # best case
-            decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(0), SIGN_TYPE_NONE, PAD_TYPE_NONE)
+            decimal_integer_value_me = DecimalIntegerValueModelElement(
+                'd' + str(0), DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
             match_context = MatchContext(str(123456789).encode())
             match_element = decimal_integer_value_me.get_match_element('integer', match_context)
             log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, match_value_filter)
@@ -162,7 +166,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
             measured_time = 0
             i = 0
             while measured_time < self.waiting_time / 10:
-                decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(i % number_of_paths), SIGN_TYPE_NONE, PAD_TYPE_NONE)
+                decimal_integer_value_me = DecimalIntegerValueModelElement(
+                    'd' + str(i % number_of_paths), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                    DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
                 log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, new_match_path_detector)
@@ -192,7 +198,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
             t = round(time.time(), 3)
 
             # worst case
-            decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(number_of_paths), SIGN_TYPE_NONE, PAD_TYPE_NONE)
+            decimal_integer_value_me = DecimalIntegerValueModelElement(
+                'd' + str(number_of_paths), DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
             match_context = MatchContext(str(123456789).encode())
             match_element = decimal_integer_value_me.get_match_element('integer', match_context)
             log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, enhanced_new_match_path_value_combo_detector)
@@ -200,7 +207,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
                     timeit.timeit(lambda: enhanced_new_match_path_value_combo_detector.receive_atom(log_atom), number=10000) / 10000)
 
             # best case
-            decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(0), SIGN_TYPE_NONE, PAD_TYPE_NONE)
+            decimal_integer_value_me = DecimalIntegerValueModelElement(
+                'd' + str(0), DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
             match_context = MatchContext(str(123456789).encode())
             match_element = decimal_integer_value_me.get_match_element('integer', match_context)
             log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, enhanced_new_match_path_value_combo_detector)
@@ -313,7 +321,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
             while i < number_of_paths / 2:
                 path_list.append('match/integer/d' + str(i % number_of_paths))
                 path_list.append('match/integer/s' + str(i % number_of_paths))
-                parsing_model.append(DecimalIntegerValueModelElement('d' + str(i % number_of_paths), SIGN_TYPE_NONE, PAD_TYPE_NONE))
+                parsing_model.append(DecimalIntegerValueModelElement(
+                    'd' + str(i % number_of_paths), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                    DecimalIntegerValueModelElement.PAD_TYPE_NONE))
                 parsing_model.append(FixedDataModelElement('s' + str(i % number_of_paths), b' Euro '))
                 i = i + 1
             sequence_model_element = SequenceModelElement('integer', parsing_model)
@@ -351,7 +361,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
             t = time.time()
 
             # worst case
-            decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(number_of_paths - 1), SIGN_TYPE_NONE, PAD_TYPE_NONE)
+            decimal_integer_value_me = DecimalIntegerValueModelElement(
+                'd' + str(number_of_paths - 1), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                DecimalIntegerValueModelElement.PAD_TYPE_NONE)
             match_context = MatchContext(str(1).encode())
             match_element = decimal_integer_value_me.get_match_element('integer', match_context)
             log_atom = LogAtom(match_element.match_object, ParserMatch(match_element), t, missing_match_path_list_value_detector)
@@ -359,7 +371,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
                     timeit.timeit(lambda: missing_match_path_list_value_detector.receive_atom(log_atom), number=10000) / 10000)
 
             # best case
-            decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(0), SIGN_TYPE_NONE, PAD_TYPE_NONE)
+            decimal_integer_value_me = DecimalIntegerValueModelElement(
+                'd' + str(0), DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
             match_context = MatchContext(str(1).encode())
             match_element = decimal_integer_value_me.get_match_element('integer', match_context)
             log_atom = LogAtom(match_element.match_object, ParserMatch(match_element), t, missing_match_path_list_value_detector)
@@ -390,7 +403,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
             measured_time = 0
             i = 0
             while measured_time < self.waiting_time / 10:
-                decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(i % number_of_paths), SIGN_TYPE_NONE, PAD_TYPE_NONE)
+                decimal_integer_value_me = DecimalIntegerValueModelElement(
+                    'd' + str(i % number_of_paths), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                    DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i % 100).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
                 log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, new_match_path_value_combo_detector)
@@ -420,7 +435,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
             measured_time = 0
             i = 0
             while measured_time < self.waiting_time / 10:
-                decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(i % number_of_paths), SIGN_TYPE_NONE, PAD_TYPE_NONE)
+                decimal_integer_value_me = DecimalIntegerValueModelElement(
+                    'd' + str(i % number_of_paths), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                    DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i % 100).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
                 log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, new_match_path_value_detector)
@@ -445,7 +462,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
             measured_time = 0
             i = 0
             while measured_time < self.waiting_time / 10:
-                decimal_integer_value_me = DecimalIntegerValueModelElement('d', SIGN_TYPE_NONE, PAD_TYPE_NONE)
+                decimal_integer_value_me = DecimalIntegerValueModelElement(
+                    'd', DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i % 100).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
                 log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, time_correlation_detector)
@@ -475,11 +493,13 @@ class AnalysisComponentsPerformanceTest(TestBase):
             s = time.time()
             measured_time = 0
             i = 0
-            decimal_integer_value_me = DecimalIntegerValueModelElement('d0', SIGN_TYPE_NONE, PAD_TYPE_NONE)
+            decimal_integer_value_me = DecimalIntegerValueModelElement(
+                'd0', DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
             while measured_time < self.waiting_time / 10:
                 integer = '/integer'
                 r = random.randint(1, 100)
-                decimal_integer_value_me1 = DecimalIntegerValueModelElement('d1', SIGN_TYPE_NONE, PAD_TYPE_NONE)
+                decimal_integer_value_me1 = DecimalIntegerValueModelElement(
+                    'd1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i).encode())
                 match_element = decimal_integer_value_me.get_match_element(integer, match_context)
                 log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), s, time_correlation_violation_detector)
@@ -521,7 +541,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
             i = 0
             measured_time = 0
             while measured_time < self.waiting_time / 10:
-                decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(i % number_of_paths), SIGN_TYPE_NONE, PAD_TYPE_NONE)
+                decimal_integer_value_me = DecimalIntegerValueModelElement(
+                    'd' + str(i % number_of_paths), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                    DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 p = process_time()
                 r = random.randint(1, 1000000)
                 seconds = seconds + process_time() - p
@@ -551,7 +573,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
             measured_time = 0
             mini = 100
             while measured_time < self.waiting_time / 10:
-                decimal_integer_value_me = DecimalIntegerValueModelElement('d', SIGN_TYPE_NONE, PAD_TYPE_NONE)
+                decimal_integer_value_me = DecimalIntegerValueModelElement(
+                    'd', DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 r = random.randint(1, 100)
                 match_context = MatchContext(str(i).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
@@ -591,7 +614,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 else:
                     r = 1
                 decimal_integer_value_me = DecimalIntegerValueModelElement(
-                    'd' + str(i % (number_of_paths * r)), SIGN_TYPE_NONE, PAD_TYPE_NONE)
+                    'd' + str(i % (number_of_paths * r)), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                    DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 match_context = MatchContext(str(i % 100).encode())
                 match_element = decimal_integer_value_me.get_match_element('integer', match_context)
                 log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, allowlist_violation_detector)
@@ -893,7 +917,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
             i = 0
             measured_time = 0
             while measured_time < self.waiting_time / 10:
-                decimal_integer_value_me = DecimalIntegerValueModelElement('d' + str(i % number_of_paths), SIGN_TYPE_NONE, PAD_TYPE_NONE)
+                decimal_integer_value_me = DecimalIntegerValueModelElement(
+                    'd' + str(i % number_of_paths), DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                    DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 p = process_time()
                 r = random.randint(1, 1000000)
                 seconds = seconds + process_time() - p
@@ -1112,7 +1138,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
                     path = 'd' + str(i)
                 else:
                     path = 'd' + str(i % number_of_paths)
-                decimal_integer_value_me = DecimalIntegerValueModelElement(path, SIGN_TYPE_NONE, PAD_TYPE_NONE)
+                decimal_integer_value_me = DecimalIntegerValueModelElement(
+                    path, DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 p = process_time()
                 r = random.randint(1, 1000000)
                 seconds = seconds + process_time() - p
@@ -1150,7 +1177,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
                     path = 'd' + str(i)
                 else:
                     path = 'd' + str(i % number_of_paths)
-                decimal_integer_value_me = DecimalIntegerValueModelElement(path, SIGN_TYPE_NONE, PAD_TYPE_NONE)
+                decimal_integer_value_me = DecimalIntegerValueModelElement(
+                    path, DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
                 p = process_time()
                 r = random.randint(1, 1000000)
                 seconds = seconds + process_time() - p
