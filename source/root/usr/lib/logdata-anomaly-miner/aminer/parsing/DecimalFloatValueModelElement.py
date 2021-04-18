@@ -36,8 +36,7 @@ class DecimalFloatValueModelElement(ModelElementInterface):
     EXP_TYPE_OPTIONAL = "optional"
     EXP_TYPE_MANDATORY = "mandatory"
 
-    def __init__(self, element_id, value_sign_type=DecimalFloatValueModelElement.SIGN_TYPE_NONE,
-                 value_pad_type=DecimalFloatValueModelElement.PAD_TYPE_NONE, exponent_type=DecimalFloatValueModelElement.EXP_TYPE_NONE):
+    def __init__(self, element_id, value_sign_type=SIGN_TYPE_NONE, value_pad_type=PAD_TYPE_NONE, exponent_type=EXP_TYPE_NONE):
         if not isinstance(element_id, str):
             msg = "element_id has to be of the type string."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
