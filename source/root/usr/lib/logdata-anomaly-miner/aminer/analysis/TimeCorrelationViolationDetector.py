@@ -81,7 +81,6 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
             self.last_log_atom.set_timestamp(trigger_time)
             r = {'RuleId': rule.rule_id, 'MinTimeDelta': rule.min_time_delta, 'MaxTimeDelta': rule.max_time_delta,
                  'MaxArtefactsAForSingleB': rule.max_artefacts_a_for_single_b, 'ArtefactMatchParameters': rule.artefact_match_parameters,
-                 'HistoryAEvents': rule.history_a_events, 'HistoryBEvents': rule.history_b_events,
                  'LastTimestampSeen': rule.last_timestamp_seen}
             history = {'MaxItems': rule.correlation_history.max_items}
             h = []
