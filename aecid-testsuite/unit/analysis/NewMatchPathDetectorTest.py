@@ -5,7 +5,7 @@ from aminer.input.LogAtom import LogAtom
 import time
 from datetime import datetime
 from aminer.parsing.FixedDataModelElement import FixedDataModelElement
-from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement, SIGN_TYPE_NONE, PAD_TYPE_NONE
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
 from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.ParserMatch import ParserMatch
 from unit.TestBase import TestBase
@@ -28,7 +28,8 @@ class NewMatchPathDetectorTest(TestBase):
     match_element_fixed_dme = fixed_dme.get_match_element("", match_context_fixed_dme)
 
     match_context_decimal_integer_value_me = MatchContext(b'25537 uid=2')
-    decimal_integer_value_me = DecimalIntegerValueModelElement('d1', SIGN_TYPE_NONE, PAD_TYPE_NONE)
+    decimal_integer_value_me = DecimalIntegerValueModelElement('d1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                                                               DecimalIntegerValueModelElement.PAD_TYPE_NONE)
     match_element_decimal_integer_value_me = decimal_integer_value_me.get_match_element("", match_context_decimal_integer_value_me)
 
     def test1_log_atom_not_known(self):

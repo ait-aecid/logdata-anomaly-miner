@@ -5,7 +5,7 @@ from aminer.parsing.ParserMatch import ParserMatch
 from aminer.input.LogAtom import LogAtom
 from aminer.analysis.MissingMatchPathValueDetector import MissingMatchPathValueDetector, MissingMatchPathListValueDetector
 import time
-from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement, SIGN_TYPE_NONE, PAD_TYPE_NONE
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
 from aminer.parsing.SequenceModelElement import SequenceModelElement
 from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
 from unit.TestBase import TestBase
@@ -139,7 +139,8 @@ class MissingMatchPathValueDetectorTest(TestBase):
         fixed_dme = FixedDataModelElement('s1', self.pid)
         match_element_fixed_dme = fixed_dme.get_match_element("match1", match_context_fixed_dme)
         match_context_decimal_integer_value_me = MatchContext(self.string)
-        decimal_integer_value_me = DecimalIntegerValueModelElement('d1', SIGN_TYPE_NONE, PAD_TYPE_NONE)
+        decimal_integer_value_me = DecimalIntegerValueModelElement('d1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                                                                   DecimalIntegerValueModelElement.PAD_TYPE_NONE)
         match_element_decimal_integer_value_me = decimal_integer_value_me.get_match_element(
             "match2", match_context_decimal_integer_value_me)
 
@@ -157,7 +158,8 @@ class MissingMatchPathValueDetectorTest(TestBase):
         fixed_dme = FixedDataModelElement('s1', self.pid)
         match_element_fixed_dme = fixed_dme.get_match_element("match1", match_context_fixed_dme)
         match_context_decimal_integer_value_me = MatchContext(self.string)
-        decimal_integer_value_me = DecimalIntegerValueModelElement('d1', SIGN_TYPE_NONE, PAD_TYPE_NONE)
+        decimal_integer_value_me = DecimalIntegerValueModelElement('d1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                                                                   DecimalIntegerValueModelElement.PAD_TYPE_NONE)
         match_element_decimal_integer_value_me = decimal_integer_value_me.get_match_element(
             "match2", match_context_decimal_integer_value_me)
 
@@ -179,7 +181,8 @@ class MissingMatchPathValueDetectorTest(TestBase):
         match_element_fixed_dme = fixed_dme.get_match_element("match1", match_context_fixed_dme)
 
         match_context_decimal_integer_value_me = MatchContext(self.string)
-        decimal_integer_value_me = DecimalIntegerValueModelElement('d1', SIGN_TYPE_NONE, PAD_TYPE_NONE)
+        decimal_integer_value_me = DecimalIntegerValueModelElement('d1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                                                                   DecimalIntegerValueModelElement.PAD_TYPE_NONE)
         match_element_decimal_integer_value_me = decimal_integer_value_me.get_match_element(
             "match2", match_context_decimal_integer_value_me)
 
@@ -209,7 +212,8 @@ class MissingMatchPathValueDetectorTest(TestBase):
         fixed_dme = FixedDataModelElement('s1', self.pid)
         match_element_fixed_dme = fixed_dme.get_match_element("match1", match_context_fixed_dme)
         match_context_decimal_integer_value_me = MatchContext(self.string)
-        decimal_integer_value_me = DecimalIntegerValueModelElement('d1', SIGN_TYPE_NONE, PAD_TYPE_NONE)
+        decimal_integer_value_me = DecimalIntegerValueModelElement('d1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                                                                   DecimalIntegerValueModelElement.PAD_TYPE_NONE)
         match_element_decimal_integer_value_me = decimal_integer_value_me.get_match_element(
             "match2", match_context_decimal_integer_value_me)
 
@@ -249,7 +253,8 @@ class MissingMatchPathValueDetectorTest(TestBase):
         match_element_fixed_dme = fixed_dme.get_match_element("match3", match_context_fixed_dme)
 
         match_context_decimal_integer_value_me = MatchContext(self.string)
-        decimal_integer_value_me = DecimalIntegerValueModelElement('d2', SIGN_TYPE_NONE, PAD_TYPE_NONE)
+        decimal_integer_value_me = DecimalIntegerValueModelElement('d2', DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                                                                   DecimalIntegerValueModelElement.PAD_TYPE_NONE)
         match_element_decimal_integer_value_me = decimal_integer_value_me.get_match_element(
             "match4", match_context_decimal_integer_value_me)
         missing_match_path_list_value_detector = MissingMatchPathListValueDetector(self.aminer_config, [
@@ -286,7 +291,8 @@ class MissingMatchPathValueDetectorTest(TestBase):
         description = "Test11MissingMatchPathValueDetector"
         match_context = MatchContext(self.pid + b"22")
         fixed_dme = FixedDataModelElement('s1', self.pid)
-        decimal_integer_value_me = DecimalIntegerValueModelElement('d1', SIGN_TYPE_NONE, PAD_TYPE_NONE)
+        decimal_integer_value_me = DecimalIntegerValueModelElement('d1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                                                                   DecimalIntegerValueModelElement.PAD_TYPE_NONE)
         seq = SequenceModelElement('model', [fixed_dme, decimal_integer_value_me])
         match_element = seq.get_match_element("match", match_context)
         missing_match_path_value_detector = MissingMatchPathValueDetector(self.aminer_config, [

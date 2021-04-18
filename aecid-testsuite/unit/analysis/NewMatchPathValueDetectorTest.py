@@ -1,6 +1,6 @@
 import unittest
 from aminer.parsing.FixedDataModelElement import FixedDataModelElement
-from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement, SIGN_TYPE_NONE, PAD_TYPE_NONE
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
 from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
 from aminer.analysis.NewMatchPathValueDetector import NewMatchPathValueDetector
@@ -22,7 +22,8 @@ class NewMatchPathValueDetectorTest(TestBase):
     string2 = "{'first/f1/s1': '25537 uid=2'}\n25537 uid=2"
 
     fixed_dme = FixedDataModelElement('s1', string)
-    decimal_integer_value_me = DecimalIntegerValueModelElement('d1', SIGN_TYPE_NONE, PAD_TYPE_NONE)
+    decimal_integer_value_me = DecimalIntegerValueModelElement('d1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                                                               DecimalIntegerValueModelElement.PAD_TYPE_NONE)
 
     match_context_first_match_me = MatchContext(string)
     first_match_me = FirstMatchModelElement('f1', [fixed_dme, decimal_integer_value_me])

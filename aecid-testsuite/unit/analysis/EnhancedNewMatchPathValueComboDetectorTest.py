@@ -1,6 +1,6 @@
 import unittest
 from aminer.parsing.FixedDataModelElement import FixedDataModelElement
-from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement, SIGN_TYPE_NONE, PAD_TYPE_NONE
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
 from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.ParserMatch import ParserMatch
 from aminer.parsing.SequenceModelElement import SequenceModelElement
@@ -19,7 +19,8 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
     fixed_dme = FixedDataModelElement('s1', b'25537 uid=')
     fixed_dme2 = FixedDataModelElement('s2', b' uid=2')
 
-    decimal_integer_value_me = DecimalIntegerValueModelElement('d1', SIGN_TYPE_NONE, PAD_TYPE_NONE)
+    decimal_integer_value_me = DecimalIntegerValueModelElement('d1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
+                                                               DecimalIntegerValueModelElement.PAD_TYPE_NONE)
 
     match_context_sequence_me = MatchContext(b'25537 uid=2')
     seq = SequenceModelElement('seq', [fixed_dme, decimal_integer_value_me])

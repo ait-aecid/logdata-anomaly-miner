@@ -17,14 +17,6 @@ from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
 
-SIGN_TYPE_NONE = 'none'
-SIGN_TYPE_OPTIONAL = 'optional'
-SIGN_TYPE_MANDATORY = 'mandatory'
-
-PAD_TYPE_NONE = 'none'
-PAD_TYPE_ZERO = 'zero'
-PAD_TYPE_BLANK = 'blank'
-
 
 class DecimalIntegerValueModelElement(ModelElementInterface):
     """
@@ -32,14 +24,22 @@ class DecimalIntegerValueModelElement(ModelElementInterface):
     If both are present, it is signum has to be before the padding characters.
     """
 
+    SIGN_TYPE_NONE = 'none'
+    SIGN_TYPE_OPTIONAL = 'optional'
+    SIGN_TYPE_MANDATORY = 'mandatory'
+
+    PAD_TYPE_NONE = 'none'
+    PAD_TYPE_ZERO = 'zero'
+    PAD_TYPE_BLANK = 'blank'
+
     def __init__(self, element_id, value_sign_type=SIGN_TYPE_NONE, value_pad_type=PAD_TYPE_NONE):
         self.element_id = element_id
         self.start_characters = None
-        if value_sign_type == SIGN_TYPE_NONE:
+        if value_sign_type == DecimalIntegerValueModelElement.SIGN_TYPE_NONE:
             self.start_characters = b'0123456789'
-        elif value_sign_type == SIGN_TYPE_OPTIONAL:
+        elif value_sign_type == DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL:
             self.start_characters = b'-0123456789'
-        elif value_sign_type == SIGN_TYPE_MANDATORY:
+        elif value_sign_type == DecimalIntegerValueModelElement.SIGN_TYPE_MANDATORY:
             self.start_characters = b'+-'
         else:
             msg = 'Invalid valueSignType "%s"' % value_sign_type
@@ -47,11 +47,11 @@ class DecimalIntegerValueModelElement(ModelElementInterface):
             raise Exception(msg)
 
         self.pad_characters = b''
-        if value_pad_type == PAD_TYPE_NONE:
+        if value_pad_type == DecimalIntegerValueModelElement.PAD_TYPE_NONE:
             pass
-        elif value_pad_type == PAD_TYPE_ZERO:
+        elif value_pad_type == DecimalIntegerValueModelElement.PAD_TYPE_ZERO:
             self.pad_characters = b'0'
-        elif value_pad_type == PAD_TYPE_BLANK:
+        elif value_pad_type == DecimalIntegerValueModelElement.PAD_TYPE_BLANK:
             self.pad_characters = b' '
         else:
             msg = 'Invalid valuePadType "%s"' % value_sign_type
