@@ -142,9 +142,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         return True
 
     def insert_and_reduce_time_intervals(self, match_value_tuple, new_time):
-        """
-        Add the new time to the time list and reduce the time list after num_reduce_time_list of times have been appended.
-        """
+        """Add the new time to the time list and reduce the time list after num_reduce_time_list of times have been appended."""
         # Increase the counter of new times since last reduction
         self.counter_reduce_time_intervals[match_value_tuple] += 1
 
@@ -152,14 +150,12 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         if new_time > self.appeared_time_list[match_value_tuple][-1]:
             time_index = len(self.appeared_time_list[match_value_tuple])
         else:
-            try:
-                time_index = next(index for index, time in enumerate(self.appeared_time_list[match_value_tuple]) if time > new_time)
-            except:
-                time_index = len(self.appeared_time_list[match_value_tuple])
+            time_index = next(index for index, time in enumerate(self.appeared_time_list[match_value_tuple])
+                              if time > new_time)  # dsfal
 
         # Insert the new time
         self.appeared_time_list[match_value_tuple] = self.appeared_time_list[match_value_tuple][:time_index] + [new_time] +\
-                                                     self.appeared_time_list[match_value_tuple][time_index:]
+            self.appeared_time_list[match_value_tuple][time_index:]
 
         # Reduce the time intervals, by removing the obsolete entries
         if self.counter_reduce_time_intervals[match_value_tuple] == self.num_reduce_time_list:
