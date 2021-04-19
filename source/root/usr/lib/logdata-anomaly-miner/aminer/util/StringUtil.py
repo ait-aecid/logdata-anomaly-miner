@@ -14,7 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import logging
 import sys
 import os
-from aminer import AminerConfig
+from aminer.AminerConfig import DEBUG_LOG_NAME
 
 
 colflame = ("\033[31m"
@@ -67,7 +67,7 @@ def decode_string_as_byte_string(string):
             count += 3
         else:
             msg = 'Invalid encoded character'
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
     return decoded
 

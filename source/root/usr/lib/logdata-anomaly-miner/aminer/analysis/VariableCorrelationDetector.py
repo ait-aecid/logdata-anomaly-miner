@@ -4,7 +4,7 @@ import logging
 import sys
 from scipy.stats import chi2
 
-from aminer import AminerConfig
+from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.EventInterfaces import EventSourceInterface
 from aminer.input.InputInterfaces import AtomHandlerInterface
@@ -67,13 +67,13 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         if self.event_type_detector.min_num_vals < max(num_init, num_update):
             msg = 'Changed the parameter min_num_vals of the ETD from %s to %s to prevent errors in the execution of the VCD' % (
                     self.event_type_detector.min_num_vals, max(num_init, num_update))
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
+            logging.getLogger(DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
             self.event_type_detector.min_num_vals = max(num_init, num_update)
         if self.event_type_detector.max_num_vals < max(num_init, num_update) + 500:
             msg = 'Changed the parameter max_num_vals of the ETD from %s to %s to prevent errors in the execution of the VCD' % (
                     self.event_type_detector.max_num_vals, max(num_init, num_update) + 500)
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
+            logging.getLogger(DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
             self.event_type_detector.max_num_vals = max(num_init, num_update) + 500
         # Threshold for the number of allowed different values of the distribution to be considderd a correlation
@@ -170,7 +170,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
         # Loads the persistence
         self.persistence_id = persistence_id
-        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
+        self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
 

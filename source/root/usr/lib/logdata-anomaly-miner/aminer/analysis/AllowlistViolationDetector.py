@@ -16,6 +16,7 @@ import os
 
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.AminerConfig import CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
+from aminer import AminerConfig
 from datetime import datetime
 
 
@@ -41,7 +42,7 @@ class AllowlistViolationDetector(AtomHandlerInterface):
         """
         Receive on parsed atom and the information about the parser match.
         @param log_atom atom with parsed data to check
-        @return True when logAtom is allowlisted, False otherwise.
+        @return True when log_atom is allowlisted, False otherwise.
         """
         self.log_total += 1
         event_data = {}
@@ -49,9 +50,12 @@ class AllowlistViolationDetector(AtomHandlerInterface):
             if rule.match(log_atom):
                 self.log_success += 1
                 return True
-        analysis_component = {'AffectedLogAtomPathes': list(log_atom.parser_match.get_match_dictionary()),
-                              'AffectedLogAtomValues': [log_atom.raw_data.decode()]}
         original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
+        try:
+            data = log_atom.raw_data.decode(AminerConfig.ENCODING)
+        except UnicodeError:
+            data = repr(log_atom.raw_data)
+        analysis_component = {'AffectedLogAtomPathes': list(log_atom.parser_match.get_match_dictionary()), 'AffectedLogAtomValues': [data]}
         if self.output_log_line:
             match_paths_values = {}
             for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
@@ -65,13 +69,13 @@ class AllowlistViolationDetector(AtomHandlerInterface):
                             tmp_list.append(val)
                     match_value = tmp_list
                 if isinstance(match_value, bytes):
-                    match_value = match_value.decode()
+                    match_value = match_value.decode(AminerConfig.ENCODING)
                 match_paths_values[match_path] = match_value
             analysis_component['ParsedLogAtom'] = match_paths_values
             sorted_log_lines = [
-                log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
+                log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix + data]
         else:
-            sorted_log_lines = [original_log_line_prefix + repr(log_atom.raw_data)]
+            sorted_log_lines = [original_log_line_prefix + data]
         event_data['AnalysisComponent'] = analysis_component
         for listener in self.anomaly_event_handlers:
             listener.receive_event('Analysis.%s' % self.__class__.__name__, 'No allowlisting for current atom', sorted_log_lines,
