@@ -1,6 +1,5 @@
 import unittest
-from aminer.parsing.DecimalFloatValueModelElement import DecimalFloatValueModelElement, SIGN_TYPE_NONE, SIGN_TYPE_OPTIONAL,\
-    SIGN_TYPE_MANDATORY, PAD_TYPE_NONE, PAD_TYPE_ZERO, PAD_TYPE_BLANK, EXP_TYPE_NONE, EXP_TYPE_OPTIONAL, EXP_TYPE_MANDATORY
+from aminer.parsing.DecimalFloatValueModelElement import DecimalFloatValueModelElement
 from unit.TestBase import TestBase, DummyMatchContext
 
 
@@ -22,7 +21,9 @@ class DecimalFloatValueModelElementTest(TestBase):
 
     def test3get_match_element_default_values(self):
         """Test valid float values with default values of value_sign_type, value_pad_type and exponent_type."""
-        decimal_float_value_me = DecimalFloatValueModelElement(self.id_, SIGN_TYPE_NONE, PAD_TYPE_NONE, EXP_TYPE_NONE)
+        decimal_float_value_me = DecimalFloatValueModelElement(
+            self.id_, DecimalFloatValueModelElement.SIGN_TYPE_NONE, DecimalFloatValueModelElement.PAD_TYPE_NONE,
+            DecimalFloatValueModelElement.EXP_TYPE_NONE)
         data = b"22.25 some string."
         value = b"22.25"
         match_context = DummyMatchContext(data)
@@ -61,7 +62,9 @@ class DecimalFloatValueModelElementTest(TestBase):
 
     def test4get_match_element_default_values_no_match(self):
         """Test not matching values with default values of value_sign_type, value_pad_type and exponent_type."""
-        decimal_float_value_me = DecimalFloatValueModelElement(self.id_, SIGN_TYPE_NONE, PAD_TYPE_NONE, EXP_TYPE_NONE)
+        decimal_float_value_me = DecimalFloatValueModelElement(
+            self.id_, DecimalFloatValueModelElement.SIGN_TYPE_NONE, DecimalFloatValueModelElement.PAD_TYPE_NONE,
+            DecimalFloatValueModelElement.EXP_TYPE_NONE)
         data = b"+22.25"
         match_context = DummyMatchContext(data)
         match_element = decimal_float_value_me.get_match_element(self.path, match_context)
@@ -127,7 +130,9 @@ class DecimalFloatValueModelElementTest(TestBase):
 
     def test5get_match_element_optional_zero_values(self):
         """Test valid float values with "optional" or "zero" values of value_sign_type, value_pad_type and exponent_type."""
-        decimal_float_value_me = DecimalFloatValueModelElement(self.id_, SIGN_TYPE_OPTIONAL, PAD_TYPE_ZERO, EXP_TYPE_OPTIONAL)
+        decimal_float_value_me = DecimalFloatValueModelElement(
+            self.id_, DecimalFloatValueModelElement.SIGN_TYPE_OPTIONAL, DecimalFloatValueModelElement.PAD_TYPE_ZERO,
+            DecimalFloatValueModelElement.EXP_TYPE_OPTIONAL)
         data = b"22.25 some string."
         value = b"22.25"
         match_context = DummyMatchContext(data)
@@ -208,7 +213,9 @@ class DecimalFloatValueModelElementTest(TestBase):
 
     def test6get_match_element_optional_zero_values_no_match(self):
         """Test not matching values with default values of value_sign_type, value_pad_type and exponent_type."""
-        decimal_float_value_me = DecimalFloatValueModelElement(self.id_, SIGN_TYPE_OPTIONAL, PAD_TYPE_ZERO, EXP_TYPE_OPTIONAL)
+        decimal_float_value_me = DecimalFloatValueModelElement(
+            self.id_, DecimalFloatValueModelElement.SIGN_TYPE_OPTIONAL, DecimalFloatValueModelElement.PAD_TYPE_ZERO,
+            DecimalFloatValueModelElement.EXP_TYPE_OPTIONAL)
         data = b"+22.25"
         match_context = DummyMatchContext(data)
         match_element = decimal_float_value_me.get_match_element(self.path, match_context)
@@ -242,7 +249,9 @@ class DecimalFloatValueModelElementTest(TestBase):
 
     def test7get_match_element_mandatory_blank_values(self):
         """Test valid float values with "mandatory" or "blank" values of value_sign_type, value_pad_type and exponent_type."""
-        decimal_float_value_me = DecimalFloatValueModelElement(self.id_, SIGN_TYPE_MANDATORY, PAD_TYPE_BLANK, EXP_TYPE_MANDATORY)
+        decimal_float_value_me = DecimalFloatValueModelElement(
+            self.id_, DecimalFloatValueModelElement.SIGN_TYPE_MANDATORY, DecimalFloatValueModelElement.PAD_TYPE_BLANK,
+            DecimalFloatValueModelElement.EXP_TYPE_MANDATORY)
         data = b"+22.25 some string."
         value = b"+22.25"
         match_context = DummyMatchContext(data)
@@ -311,7 +320,9 @@ class DecimalFloatValueModelElementTest(TestBase):
 
     def test8get_match_element_mandatory_blank_values_no_match(self):
         """Test not matching values with default values of value_sign_type, value_pad_type and exponent_type."""
-        decimal_float_value_me = DecimalFloatValueModelElement(self.id_, SIGN_TYPE_MANDATORY, PAD_TYPE_BLANK, EXP_TYPE_MANDATORY)
+        decimal_float_value_me = DecimalFloatValueModelElement(
+            self.id_, DecimalFloatValueModelElement.SIGN_TYPE_MANDATORY, DecimalFloatValueModelElement.PAD_TYPE_BLANK,
+            DecimalFloatValueModelElement.EXP_TYPE_MANDATORY)
         data = b"22.25"
         match_context = DummyMatchContext(data)
         match_element = decimal_float_value_me.get_match_element(self.path, match_context)
