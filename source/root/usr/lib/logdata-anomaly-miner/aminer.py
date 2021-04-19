@@ -53,6 +53,7 @@ from metadata import __version_string__, __version__  # skipcq: FLK-E402
 
 
 child_termination_triggered_flag = False
+offline_mode = False
 
 
 def run_analysis_child(aminer_config, program_name):
@@ -79,6 +80,7 @@ def run_analysis_child(aminer_config, program_name):
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
 
     child = AnalysisChild(program_name, aminer_config)
+    child.offline_mode = offline_mode
     # This function call will only return on error or signal induced normal termination.
     child_return_status = child.run_analysis(3)
     if child_return_status == 0:
@@ -245,6 +247,7 @@ def main():
     parser.add_argument('-r', '--remove', action='append', type=str, help='removes a specific persistence directory')
     parser.add_argument('-R', '--restore', type=str, help='restore a persistence backup')
     parser.add_argument('-f', '--from-begin', action='store_true', help='removes RepositioningData before starting the aminer')
+    parser.add_argument('-o', '--offline-mode', action='store_true', help='stop the aminer after all logs have been processed.')
     parser.add_argument("--config-properties", metavar="KEY=VALUE", nargs='+',
                         help="Set a number of config_properties by using key-value pairs (do not put spaces before or after the = sign). "
                              "If a value contains spaces, you should define it with double quotes: 'foo=\"this is a sentence\". Note that "
@@ -279,6 +282,8 @@ def main():
     clear_persistence_flag = args.clear
     remove_persistence_dirs = args.remove
     from_begin_flag = args.from_begin
+    global offline_mode
+    offline_mode = args.offline_mode
     if args.restore is not None and ('.' in args.restore or '/' in args.restore):
         parser.error('The restore path %s must not contain any . or /' % args.restore)
     if args.remove is not None:
@@ -660,6 +665,8 @@ def main():
         # parent's ALSR due to cloned kernel VMA.
         exec_args = ['aminerChild', '--run-analysis', '--config', analysis_config_file_name, '--stat', str(stat_level), '--debug',
                      str(debug_level)]
+        if offline_mode:
+            exec_args.append("--offline-mode")
         if args.config_properties:
             exec_args.append("--config-properties")
             for config_property in args.config_properties:
@@ -697,7 +704,7 @@ def main():
         (sig_child_pid, sig_status) = os.waitpid(-1, os.WNOHANG)
         if sig_child_pid != 0:
             if sig_child_pid == child_pid:
-                if child_termination_triggered_flag:
+                if child_termination_triggered_flag or offline_mode:
                     # This was expected, just terminate.
                     break
                 msg = '%s: Analysis child process %d terminated unexpectedly with signal 0x%x' % (program_name, sig_child_pid, sig_status)
