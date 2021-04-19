@@ -10,16 +10,12 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-import numpy as np
-import copy
-from scipy.stats import kstest, ks_2samp, norm, multinomial, distributions, chisquare
 import os
 import logging
-import sys
 from time import strftime, gmtime
 
 from aminer import AminerConfig
-from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
+from aminer.AminerConfig import CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
@@ -85,7 +81,6 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         @param log_atom the parsed log atom
         @return True if this handler was really able to handle and process the match.
         """
-
         match_dict = log_atom.parser_match.get_match_dictionary()
         # Skip paths from ignore_list.
         for ignore_path in self.ignore_list:
@@ -117,8 +112,8 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         # Check if the combination of values and prints an message if it is new.
         if match_value_tuple not in self.appeared_time_list:
             msg = 'New observed combination: ['
-            for index in range(len(match_value_tuple)):
-                msg += str(repr(match_value_tuple[index])) + ', '
+            for match_value in match_value_tuple:
+                msg += str(repr(match_value)) + ', '
             msg = msg[:-2] + ']'
             self.print(msg, log_atom=log_atom, affected_path=self.target_path_list)
             self.appeared_time_list[match_value_tuple] = [log_atom.atom_time % 86400]
@@ -130,24 +125,26 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
                 if all((abs(log_atom.atom_time % 86400 - time) > self.max_time_diff) and
                        (abs(log_atom.atom_time % 86400 - time) < 86400 - self.max_time_diff)
                         for time in self.appeared_time_list[match_value_tuple]):
-                    msg = 'New time (%s) out of range of previously observed times (%s) detected in the combination: ['%(strftime(
-                            '%H:%M:%S', gmtime(log_atom.atom_time)), [strftime('%H:%M:%S', gmtime(time)) for time in
-                            self.appeared_time_list[match_value_tuple]])
-                    for index in range(len(match_value_tuple)):
-                        msg += str(repr(match_value_tuple[index])) + ', '
+                    msg = 'New time (%s) out of range of previously observed times (%s) detected in the combination: [' % (strftime(
+                            '%H:%M:%S', gmtime(log_atom.atom_time)), [
+                            strftime('%H:%M:%S', gmtime(time)) for time in self.appeared_time_list[match_value_tuple]])
+                    for match_value in match_value_tuple:
+                        msg += str(repr(match_value)) + ', '
                     msg = msg[:-2] + ']'
                     self.print(msg, log_atom=log_atom, affected_path=self.target_path_list)
 
                     if not self.auto_include_flag:
                         return True
 
-                # Adds the new time to the time list and reduces the time list after num_reduce_time_list of times have been appended
+                # Add the new time to the time list and reduces the time list after num_reduce_time_list of times have been appended
                 self.insert_and_reduce_time_intervals(match_value_tuple, log_atom.atom_time % 86400)
 
         return True
 
     def insert_and_reduce_time_intervals(self, match_value_tuple, new_time):
-        '''Adds the new time to the time list and reduces the time list after num_reduce_time_list of times have been appended'''
+        """
+        Add the new time to the time list and reduce the time list after num_reduce_time_list of times have been appended.
+        """
         # Increase the counter of new times since last reduction
         self.counter_reduce_time_intervals[match_value_tuple] += 1
 
@@ -155,11 +152,14 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         if new_time > self.appeared_time_list[match_value_tuple][-1]:
             time_index = len(self.appeared_time_list[match_value_tuple])
         else:
-            time_index = next(index for index, time in enumerate(self.appeared_time_list[match_value_tuple]) if time > new_time)
-        
+            try:
+                time_index = next(index for index, time in enumerate(self.appeared_time_list[match_value_tuple]) if time > new_time)
+            except:
+                time_index = len(self.appeared_time_list[match_value_tuple])
+
         # Insert the new time
         self.appeared_time_list[match_value_tuple] = self.appeared_time_list[match_value_tuple][:time_index] + [new_time] +\
-                self.appeared_time_list[match_value_tuple][time_index:]
+                                                     self.appeared_time_list[match_value_tuple][time_index:]
 
         # Reduce the time intervals, by removing the obsolete entries
         if self.counter_reduce_time_intervals[match_value_tuple] == self.num_reduce_time_list:
@@ -168,14 +168,15 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
             # Check every entry if it enlarges the time intervals, and remove it, if not.
             last_accepted_time = self.appeared_time_list[match_value_tuple][0] + 86400
             for index in range(len(self.appeared_time_list[match_value_tuple])-1, 0, -1):
-                if (last_accepted_time - self.appeared_time_list[match_value_tuple][index-1] < 2 * self.max_time_diff):
+                if last_accepted_time - self.appeared_time_list[match_value_tuple][index-1] < 2 * self.max_time_diff:
                     del self.appeared_time_list[match_value_tuple][index]
                 else:
                     last_accepted_time = self.appeared_time_list[match_value_tuple][index]
 
             # Checks the last and first two time of the time list, and removes the obsolete entries
-            if (len(self.appeared_time_list[match_value_tuple]) >= 4) and (86400 + self.appeared_time_list[match_value_tuple][1] -
-                    self.appeared_time_list[match_value_tuple][-2] < 2 * self.max_time_diff):
+            if (len(self.appeared_time_list[match_value_tuple]) >= 4) and (
+                    86400 + self.appeared_time_list[match_value_tuple][1] - self.appeared_time_list[match_value_tuple][-2] <
+                    2 * self.max_time_diff):
                 self.appeared_time_list[match_value_tuple] = self.appeared_time_list[match_value_tuple][1:len(self.appeared_time_list[
                         match_value_tuple])-1]
             elif 86400 + self.appeared_time_list[match_value_tuple][0] - self.appeared_time_list[match_value_tuple][-2] <\
@@ -222,7 +223,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
                 self.counter_reduce_time_intervals[tuple(match_value_tuple)] = counter
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
-    def print(self, message, log_atom, affected_path, confidence=None, indicator=None):
+    def print(self, message, log_atom, affected_path):
         """Print the message."""
         if isinstance(affected_path, str):
             affected_path = [affected_path]
