@@ -31,7 +31,7 @@ from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelEle
 from aminer.parsing.FixedDataModelElement import FixedDataModelElement
 from aminer.parsing.DateTimeModelElement import DateTimeModelElement
 from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
-from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement, SIGN_TYPE_NONE, PAD_TYPE_NONE
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
 from aminer.parsing.RepeatedElementDataModelElement import RepeatedElementDataModelElement
 from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
 from aminer.parsing.ElementValueBranchModelElement import ElementValueBranchModelElement
@@ -482,7 +482,8 @@ class YamlConfigTest(TestBase):
         pid = " pid="
         __expected_string2 = '%s New value combination(s) detected\n%s: "%s" (%d lines)\n%s\n\n'
         fixed_dme2 = FixedDataModelElement('s1', b'25537 uid=')
-        decimal_integer_value_me = DecimalIntegerValueModelElement('d1', SIGN_TYPE_NONE, PAD_TYPE_NONE)
+        decimal_integer_value_me = DecimalIntegerValueModelElement(
+            'd1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
         match_context_sequence_me = MatchContext(b'25537 uid=2')
         seq = SequenceModelElement('seq', [fixed_dme2, decimal_integer_value_me])
         match_element_sequence_me = seq.get_match_element('first', match_context_sequence_me)
