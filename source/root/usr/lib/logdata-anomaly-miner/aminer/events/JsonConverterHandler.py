@@ -65,7 +65,7 @@ class JsonConverterHandler(EventHandlerInterface):
             detector_analysis_component = event_data.get('AnalysisComponent')
             if detector_analysis_component is not None:
                 for key in detector_analysis_component:
-                    if analysis_component.get(key) is None:
+                    if key in analysis_component.keys():
                         continue
                     analysis_component[key] = detector_analysis_component.get(key)
 
