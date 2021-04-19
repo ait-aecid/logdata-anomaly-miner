@@ -59,7 +59,7 @@ class JsonConverterHandler(EventHandlerInterface):
             analysis_component['AnalysisComponentName'] = self.analysis_context.get_name_by_component(event_source)
             analysis_component['Message'] = event_message
             analysis_component['PersistenceFileName'] = event_source.persistence_id
-            if hasattr(event_source, 'auto_include_flag'):
+            if hasattr(event_source, 'autoIncludeFlag'):
                 analysis_component['TrainingMode'] = event_source.auto_include_flag
 
             detector_analysis_component = event_data.get('AnalysisComponent')
