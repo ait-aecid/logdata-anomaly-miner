@@ -282,7 +282,7 @@ def main():
     clear_persistence_flag = args.clear
     remove_persistence_dirs = args.remove
     from_begin_flag = args.from_begin
-    global offline_mode
+    global offline_mode  # skipcq: PYL-W0603
     offline_mode = args.offline_mode
     if args.restore is not None and ('.' in args.restore or '/' in args.restore):
         parser.error('The restore path %s must not contain any . or /' % args.restore)
