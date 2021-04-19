@@ -13,7 +13,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import logging
-from aminer import AminerConfig
+from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 
@@ -27,19 +27,19 @@ class FixedDataModelElement(ModelElementInterface):
     def __init__(self, element_id: str, fixed_data: bytes):
         if not isinstance(element_id, str):
             msg = "element_id has to be of the type string."
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
         if len(element_id) < 1:
             msg = "element_id must not be empty."
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         if not isinstance(fixed_data, bytes):
             msg = "fixed_data has to be of the type byte string."
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
         if len(fixed_data) < 1:
             msg = "fixed_data must not be empty."
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         self.element_id = element_id
         self.fixed_data = fixed_data

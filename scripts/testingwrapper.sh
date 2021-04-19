@@ -74,6 +74,11 @@ case "$1" in
 		./${1}.sh ${*:2}
 		exit $?
 		;;
+	runAminerEncodingDemo)
+		cd $TESTDIR
+		./${1}.sh ${*:2}
+		exit $?
+		;;
 	ALL)
 		cd $TESTDIR
                 ./runSuspendModeTest.sh
@@ -84,6 +89,8 @@ case "$1" in
                 ./runAminerDemo.sh demo/aminer/template_config.py
                 ./runAminerDemo.sh demo/aminer/template_config.yml
                 ./runAminerDemo.sh demo/aminer/demo-config.yml
+                ./runAminerEncodingDemo.sh demo/aminer/demo-config.py
+                ./runAminerEncodingDemo.sh demo/aminer/demo-config.yml
                 ./runAminerJsonInputDemo.sh
                 ./runJsonDemo.sh demo/aminerJsonInputDemo/json-aminer-demo.yml
                 ./runJsonDemo.sh demo/aminerJsonInputDemo/json-elastic-demo.yml
@@ -108,7 +115,7 @@ case "$1" in
 		echo "Usage: [ ALL | SHELL | runSuspendModeTest | runUnittests | runAminerDemo | runJsonDemo | runAminerJsonInputDemo "
 		echo "         runAminerIntegrationTest | runCoverageTests | runRemoteControlTest | runTryItOut "
 		echo "         runGettingStarted | runHowToCreateYourOwnSequenceDetector | runHowToCreateYourOwnFrequencyDetector"
-		echo "         runHowToMissingMatchPathValueDetector] <options>"
+		echo "         runHowToMissingMatchPathValueDetector | runAminerEncodingDemo] <options>"
 		exit 1
 		;;
         

@@ -25,8 +25,8 @@ from aminer.util.History import LogarithmicBackoffHistory
 from aminer.util.History import ObjectHistory
 
 from aminer.analysis.AtomFilters import SubhandlerFilter
+from aminer.AminerConfig import DEBUG_LOG_NAME, STAT_LOG_NAME
 from aminer import AminerConfig
-from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME
 
 result_string = '%s(%s)'
 
@@ -87,7 +87,7 @@ class MatchRule(metaclass=abc.ABCMeta):
 
     def log_statistics(self, rule_id):
         """Log statistics of an MatchRule. Override this method for more sophisticated statistics output of the MatchRule."""
-        if STAT_LEVEL > 0:
+        if AminerConfig.STAT_LEVEL > 0:
             logging.getLogger(STAT_LOG_NAME).info("Rule '%s' processed %d out of %d log atoms successfully in the last 60"
                                                   " minutes.", rule_id, self.log_success, self.log_total)
         self.log_success = 0
@@ -583,7 +583,7 @@ class DebugHistoryMatchRule(MatchRule):
             object_history = LogarithmicBackoffHistory(10)
         elif not isinstance(object_history, ObjectHistory):
             msg = 'object_history is not an instance of ObjectHistory'
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         self.object_history = object_history
         self.debug_match_result = debug_match_result

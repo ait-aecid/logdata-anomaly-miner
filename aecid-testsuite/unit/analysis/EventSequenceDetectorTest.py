@@ -32,8 +32,8 @@ class EventSequenceDetectorTest(TestBase):
 
         # Initialize detector for sequence length 2
         test_handler = TestHandler()
-        event_sequence_detector = EventSequenceDetector(self.aminer_config, [test_handler], ['/model/id'], ['/model/value'], 2, 'Default',
-                                                        True, output_log_line=False)
+        event_sequence_detector = EventSequenceDetector(self.aminer_config, [test_handler], ['/model/id'], ['/model/value'], 2, False, -1,
+                                                        'Default', True, output_log_line=False)
         self.analysis_context.register_component(event_sequence_detector, description)
 
         # Prepare log atoms that represent two users (id) that produce interleaved sequence a, b, c
@@ -46,35 +46,35 @@ class EventSequenceDetectorTest(TestBase):
         #  id: 2 value: a
         #  id: 1 value: c
         #  id: 2 value: b
-        m_1 = MatchElement('/model/id', '1', '1', None)
-        m_2 = MatchElement('/model/value', 'a', 'a', None)
-        match_element_1 = MatchElement('/model', '1a', '1a', [m_1, m_2])
+        m_1 = MatchElement('/model/id', b'1', b'1', None)
+        m_2 = MatchElement('/model/value', b'a', b'a', None)
+        match_element_1 = MatchElement('/model', b'1a', b'1a', [m_1, m_2])
         parser_match_1 = ParserMatch(match_element_1)
-        log_atom_1 = LogAtom('1a', parser_match_1, 1, None)
+        log_atom_1 = LogAtom(b'1a', parser_match_1, 1, None)
 
-        m_3 = MatchElement('/model/id', '1', '1', None)
-        m_4 = MatchElement('/model/value', 'b', 'b', None)
-        match_element_2 = MatchElement('/model', '1b', '1b', [m_3, m_4])
+        m_3 = MatchElement('/model/id', b'1', b'1', None)
+        m_4 = MatchElement('/model/value', b'b', b'b', None)
+        match_element_2 = MatchElement('/model', b'1b', b'1b', [m_3, m_4])
         parser_match_2 = ParserMatch(match_element_2)
-        log_atom_2 = LogAtom('1b', parser_match_2, 2, None)
+        log_atom_2 = LogAtom(b'1b', parser_match_2, 2, None)
 
-        m_5 = MatchElement('/model/id', '2', '2', None)
-        m_6 = MatchElement('/model/value', 'a', 'a', None)
-        match_element_3 = MatchElement('/model', '2a', '2a', [m_5, m_6])
+        m_5 = MatchElement('/model/id', b'2', b'2', None)
+        m_6 = MatchElement('/model/value', b'a', b'a', None)
+        match_element_3 = MatchElement('/model', b'2a', b'2a', [m_5, m_6])
         parser_match_3 = ParserMatch(match_element_3)
-        log_atom_3 = LogAtom('2a', parser_match_3, 3, None)
+        log_atom_3 = LogAtom(b'2a', parser_match_3, 3, None)
 
-        m_7 = MatchElement('/model/id', '1', '1', None)
-        m_8 = MatchElement('/model/value', 'c', 'c', None)
-        match_element_4 = MatchElement('/model', '1c', '1c', [m_7, m_8])
+        m_7 = MatchElement('/model/id', b'1', b'1', None)
+        m_8 = MatchElement('/model/value', b'c', b'c', None)
+        match_element_4 = MatchElement('/model', b'1c', b'1c', [m_7, m_8])
         parser_match_4 = ParserMatch(match_element_4)
-        log_atom_4 = LogAtom('1c', parser_match_4, 4, None)
+        log_atom_4 = LogAtom(b'1c', parser_match_4, 4, None)
 
-        m_9 = MatchElement('/model/id', '2', '2', None)
-        m_10 = MatchElement('/model/value', 'b', 'b', None)
-        match_element_5 = MatchElement('/model', '2b', '2b', [m_9, m_10])
+        m_9 = MatchElement('/model/id', b'2', b'2', None)
+        m_10 = MatchElement('/model/value', b'b', b'b', None)
+        match_element_5 = MatchElement('/model', b'2b', b'2b', [m_9, m_10])
         parser_match_5 = ParserMatch(match_element_5)
-        log_atom_5 = LogAtom('2b', parser_match_5, 5, None)
+        log_atom_5 = LogAtom(b'2b', parser_match_5, 5, None)
 
         # Forward log atoms to detector
         # Since sequence length is 2, first atom should not have any effect
@@ -90,7 +90,8 @@ class EventSequenceDetectorTest(TestBase):
         # Expected output: New sequence (a, b) detected, added to known sequences
         event_sequence_detector.receive_atom(log_atom_2)
         self.assertEqual(test_handler.anomaly, {'AnalysisComponent': {'AffectedLogAtomPaths': ['/model/value'],
-                                                                      'AffectedLogAtomValues': [('a',), ('b',)]}})
+                                                                      'AffectedLogAtomValues': [('a',), ('b',)],
+                                                                      'AffectedIdValues': ['1']}})
         sequences_set.add((('a',), ('b',)))
         self.assertEqual(event_sequence_detector.sequences, sequences_set)
         test_handler.anomaly = None
@@ -107,7 +108,8 @@ class EventSequenceDetectorTest(TestBase):
         # Expected output: New sequence (b, c) detected, added to known sequences
         event_sequence_detector.receive_atom(log_atom_4)
         self.assertEqual(test_handler.anomaly, {'AnalysisComponent': {'AffectedLogAtomPaths': ['/model/value'],
-                                                                      'AffectedLogAtomValues': [('b',), ('c',)]}})
+                                                                      'AffectedLogAtomValues': [('b',), ('c',)],
+                                                                      'AffectedIdValues': ['1']}})
         sequences_set.add((('b',), ('c',)))
         self.assertEqual(event_sequence_detector.sequences, sequences_set)
         test_handler.anomaly = None

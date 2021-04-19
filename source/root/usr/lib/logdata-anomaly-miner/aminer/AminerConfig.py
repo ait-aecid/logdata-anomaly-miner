@@ -49,6 +49,8 @@ KEY_LOG_STAT_LEVEL = 'Log.StatisticsLevel'
 KEY_LOG_DEBUG_LEVEL = 'Log.DebugLevel'
 CONFIG_KEY_LOG_LINE_PREFIX = 'LogPrefix'
 DEFAULT_LOG_LINE_PREFIX = ''
+CONFIG_KEY_ENCODING = 'Log.Encoding'
+ENCODING = 'utf-8'
 
 
 def load_config(config_file_name):

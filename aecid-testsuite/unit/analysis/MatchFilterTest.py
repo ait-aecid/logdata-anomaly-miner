@@ -22,8 +22,8 @@ class MatchFilterTest(TestBase):
         self.analysis_context.register_component(match_filter, description)
         t = time.time()
         for val in range(1000):
-            log_atom = LogAtom(val, ParserMatch(decimal_integer_me.get_match_element('', MatchContext(str(val).encode('utf-8')))), t,
-                               match_filter)
+            val_str = str(val).encode('utf-8')
+            log_atom = LogAtom(val_str, ParserMatch(decimal_integer_me.get_match_element('', MatchContext(val_str))), t, match_filter)
             match_filter.receive_atom(log_atom)
             self.assertEqual(self.__expected_string % (
                 datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S"), description, val, val), self.output_stream.getvalue())
@@ -37,8 +37,8 @@ class MatchFilterTest(TestBase):
         self.analysis_context.register_component(match_filter, description)
         t = time.time()
         for val in range(1000):
-            log_atom = LogAtom(val, ParserMatch(decimal_integer_me.get_match_element('', MatchContext(str(val).encode('utf-8')))), t,
-                               match_filter)
+            val_str = str(val).encode('utf-8')
+            log_atom = LogAtom(val_str, ParserMatch(decimal_integer_me.get_match_element('', MatchContext(val_str))), t, match_filter)
             match_filter.receive_atom(log_atom)
             self.assertEqual('', self.output_stream.getvalue())
 
@@ -51,8 +51,8 @@ class MatchFilterTest(TestBase):
         self.analysis_context.register_component(match_filter, description)
         t = time.time()
         for val in range(1000):
-            log_atom = LogAtom(val, ParserMatch(decimal_integer_me.get_match_element('', MatchContext(str(val).encode('utf-8')))), t,
-                               match_filter)
+            val_str = str(val).encode('utf-8')
+            log_atom = LogAtom(val_str, ParserMatch(decimal_integer_me.get_match_element('', MatchContext(val_str))), t, match_filter)
             match_filter.receive_atom(log_atom)
             self.assertEqual(self.__expected_string % (datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S"), description, val, val),
                              self.output_stream.getvalue())
@@ -70,8 +70,8 @@ class MatchFilterTest(TestBase):
         self.analysis_context.register_component(match_filter, description)
         t = time.time()
         for val in range(1000):
-            log_atom = LogAtom(val, ParserMatch(decimal_integer_me.get_match_element('', MatchContext(str(val).encode('utf-8')))), t,
-                               match_filter)
+            val_str = str(val).encode('utf-8')
+            log_atom = LogAtom(val_str, ParserMatch(decimal_integer_me.get_match_element('', MatchContext(val_str))), t, match_filter)
             match_filter.receive_atom(log_atom)
             if val <= 500:
                 self.assertEqual(self.__expected_string % (datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S"), description, val, val),

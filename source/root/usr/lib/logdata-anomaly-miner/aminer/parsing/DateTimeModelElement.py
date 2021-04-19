@@ -21,6 +21,7 @@ from typing import Union, List, Set, Optional
 from dateutil.parser import parse
 from datetime import timezone, datetime
 
+from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer import AminerConfig
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
@@ -98,11 +99,11 @@ class DateTimeModelElement(ModelElementInterface):
         """
         if not isinstance(element_id, str):
             msg = "element_id has to be of the type string."
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
         if len(element_id) < 1:
             msg = "element_id must not be empty."
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         self.element_id = element_id
         self.time_zone = time_zone
@@ -112,21 +113,20 @@ class DateTimeModelElement(ModelElementInterface):
         if text_locale is not None:
             if not isinstance(text_locale, str) and not isinstance(text_locale, tuple):
                 msg = "text_locale has to be of the type string or of the type tuple and have the length 2. (locale, encoding)"
-                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)
             if isinstance(text_locale, tuple) and len(text_locale) != 2:
                 msg = "text_locale has to be of the type string or of the type tuple and have the length 2. (locale, encoding)"
-                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise ValueError(msg)
             try:
                 old_locale = locale.getdefaultlocale()
                 if old_locale != text_locale:
                     locale.setlocale(locale.LC_ALL, text_locale)
-                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info("Changed time locale from %s to %s.", text_locale,
-                                                                        "".join(text_locale))
+                    logging.getLogger(DEBUG_LOG_NAME).info("Changed time locale from %s to %s.", text_locale, "".join(text_locale))
             except locale.Error:
                 msg = "text_locale %s is not installed!" % text_locale
-                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise locale.Error(msg)
         # Make sure that dateFormat is valid and extract the relevant parts from it.
         self.format_has_year_flag = False
@@ -138,17 +138,17 @@ class DateTimeModelElement(ModelElementInterface):
         self.date_format = date_format
         if not isinstance(date_format, bytes):
             msg = "date_format has to be of the type bytes."
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
         if len(date_format) <= 1:
             msg = "At least one date_format specifier must be defined."
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         self.scan_date_format(date_format)
 
         if start_year is not None and not isinstance(start_year, int) or isinstance(start_year, bool):
             msg = "start_year has to be of the type integer."
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
         if (not self.format_has_year_flag) and (start_year is None):
             self.start_year = time.gmtime(None).tm_year
@@ -159,11 +159,11 @@ class DateTimeModelElement(ModelElementInterface):
 
         if max_time_jump_seconds is not None and not isinstance(max_time_jump_seconds, int) or isinstance(max_time_jump_seconds, bool):
             msg = "max_time_jump_seconds has to be of the type integer."
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
         if max_time_jump_seconds <= 0:
             msg = "max_time_jump_seconds must not be lower than 1 second."
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         self.max_time_jump_seconds = max_time_jump_seconds
         self.last_parsed_seconds = 0
@@ -173,7 +173,7 @@ class DateTimeModelElement(ModelElementInterface):
         """Scan the date format."""
         if len(self.date_format_parts) > 0:
             msg = "Cannot rescan date format after initialization"
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         date_format_parts: List[Union[bytes, tuple]] = []
         date_format_type_set: Set[int] = set()
@@ -219,7 +219,7 @@ class DateTimeModelElement(ModelElementInterface):
                     continue
                 else:
                     msg = "Unknown dateformat specifier %s" % repr(param_type_code)
-                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
             if isinstance(new_element, bytes):
                 if date_format_parts and (isinstance(date_format_parts[-1], bytes)):
@@ -229,14 +229,14 @@ class DateTimeModelElement(ModelElementInterface):
             else:
                 if new_element[0] in date_format_type_set:
                     msg = "Multiple format specifiers for type %d" % new_element[0]
-                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 date_format_type_set.add(new_element[0])
                 date_format_parts.append(new_element)
             scan_pos = next_param_pos
         if (7 in date_format_type_set) and (not date_format_type_set.isdisjoint(set(range(0, 6)))):
             msg = "Cannot use %s (seconds since epoch) with other non-second format types"
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         self.date_format_parts = date_format_parts
 
@@ -368,7 +368,7 @@ class DateTimeModelElement(ModelElementInterface):
                             msg = "DateTimeModelElement unqualified timestamp year wraparound detected from %s to %s" % (
                                 datetime.fromtimestamp(self.last_parsed_seconds, self.time_zone).isoformat(),
                                 parsed_date_time.isoformat())
-                            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
+                            logging.getLogger(DEBUG_LOG_NAME).warning(msg)
                             print("WARNING: " + msg, file=sys.stderr)
                         else:
                             last_year_date_time = parsed_date_time.replace(self.start_year - 1)
@@ -382,7 +382,7 @@ class DateTimeModelElement(ModelElementInterface):
                                 # None of both seems correct, just report that.
                                 msg = "DateTimeModelElement time inconsistencies parsing %s, expecting value around %d. " \
                                       "Check your settings!" % (repr(date_str), self.last_parsed_seconds)
-                                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
+                                logging.getLogger(DEBUG_LOG_NAME).warning(msg)
                                 print("WARNING: " + msg, file=sys.stderr)
 
             # We discarded the parsed_date_time microseconds beforehand, use the full float value here instead of the rounded integer.
@@ -409,7 +409,7 @@ class DateTimeModelElement(ModelElementInterface):
                     self.tz_specifier_format_length -= 1
                     if self.tz_specifier_format_length <= 0:
                         msg = "The date_format could not be found."
-                        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                        logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise Exception(msg)
         match_context.update(date_str)
         if self.format_has_tz_specifier:
@@ -418,7 +418,7 @@ class DateTimeModelElement(ModelElementInterface):
                 if len(data) == 1:
                     data = match_context.match_data.split(b"-")
                 for i in range(1, 5):
-                    if not match_context.match_data[i:i+1].decode("utf-8").isdigit():
+                    if not match_context.match_data[i:i+1].decode(AminerConfig.ENCODING).isdigit():
                         i -= 1
                         break
                 self.tz_specifier_format_length = len(data[0]) + i + 1
@@ -499,25 +499,25 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
         """
         if not isinstance(element_id, str):
             msg = "element_id has to be of the type string."
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
         if len(element_id) < 1:
             msg = "element_id must not be empty."
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         self.element_id = element_id
         if len(date_formats) == 0:
             msg = "At least one date_format must be specified."
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
 
         if max_time_jump_seconds is not None and not isinstance(max_time_jump_seconds, int) or isinstance(max_time_jump_seconds, bool):
             msg = "max_time_jump_seconds has to be of the type integer."
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
         if max_time_jump_seconds <= 0:
             msg = "max_time_jump_seconds must not be lower than 1 second."
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         self.max_time_jump_seconds = max_time_jump_seconds
 
@@ -527,22 +527,22 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
         for i, date_format in enumerate(date_formats):
             if not isinstance(date_format, tuple):
                 msg = "date_format must be of type tuple."
-                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)
             if len(date_format) != 3:
                 msg = "date_format consist of 3 elements."
-                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise ValueError(msg)
             date_format, time_zone, text_locale = date_format
             if isinstance(text_locale, str) and len(text_locale) < 1:
                 msg = "empty text_locale is not allowed."
-                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise ValueError(msg)
             for date_time_model_element in self.date_time_model_elements:
                 if date_format.startswith(date_time_model_element.date_format):
                     msg = "Invalid order of date_formats. %s starts with %s. More specific datetimes would be skipped." % (
                         date_format.decode(), date_time_model_element.date_format.decode())
-                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
             self.date_time_model_elements.append(DateTimeModelElement(
                 element_id + "/format" + str(i), date_format, time_zone, text_locale, start_year, max_time_jump_seconds))
@@ -558,7 +558,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
 
         if start_year is not None and not isinstance(start_year, int) or isinstance(start_year, bool):
             msg = "start_year has to be of the type integer."
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
         if (not format_has_year_flag) and (start_year is None):
             self.start_year = time.gmtime(None).tm_year
