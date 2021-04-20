@@ -84,8 +84,14 @@ case "$1" in
 		./${1}.sh ${*:2}
 		exit $?
 		;;
+	runMypy)
+		cd $TESTDIR
+		./${1}.sh ${*:2}
+		exit $?
+		;;
 	ALL)
 		cd $TESTDIR
+		        ./runMypy.sh
                 ./runSuspendModeTest.sh
                 ./runUnittests.sh
                 ./runRemoteControlTest.sh
@@ -121,7 +127,7 @@ case "$1" in
 		echo "Usage: [ ALL | SHELL | runSuspendModeTest | runUnittests | runAminerDemo | runJsonDemo | runAminerJsonInputDemo "
 		echo "         runAminerIntegrationTest | runOfflineMode | runCoverageTests | runRemoteControlTest | runTryItOut "
 		echo "         runGettingStarted | runHowToCreateYourOwnSequenceDetector | runHowToCreateYourOwnFrequencyDetector"
-		echo "         runHowToMissingMatchPathValueDetector | runAminerEncodingDemo] <options>"
+		echo "         runHowToMissingMatchPathValueDetector | runAminerEncodingDemo | runMypy] <options>"
 		exit 1
 		;;
         

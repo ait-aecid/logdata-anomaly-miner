@@ -25,20 +25,15 @@ pipeline {
 
          stage("Mypy Static Code Analysis"){
              steps {
-                 sh "mypy source/root/usr/lib/logdata-anomaly-miner/aminer/analysis/ --ignore-missing-imports"
-                 sh "mypy source/root/usr/lib/logdata-anomaly-miner/aminer/events/ --ignore-missing-imports"
-                 sh "mypy source/root/usr/lib/logdata-anomaly-miner/aminer/input/ --ignore-missing-imports"
-                 sh "mypy source/root/usr/lib/logdata-anomaly-miner/aminer/parsing/ --ignore-missing-imports"
-                 sh "mypy source/root/usr/lib/logdata-anomaly-miner/aminer/util/ --ignore-missing-imports"
-                 sh "mypy source/root/usr/lib/logdata-anomaly-miner/aminer/ --ignore-missing-imports"
+                 sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runMypy"
              }
          }
          
          stage("UnitTest"){
              steps {
                  sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runUnittests"
-                 sh 'docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runSuspendModeTest'
-                 sh 'docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runRemoteControlTest'
+                 sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runSuspendModeTest"
+                 sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runRemoteControlTest"
              }
          }
          stage("Run Demo-Configs"){
@@ -95,7 +90,7 @@ pipeline {
 
          stage("Wiki Tests - development"){
              when {
-                 branch 'development'
+                 branch "development"
              }
              steps {
                  sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runTryItOut development"
@@ -108,7 +103,7 @@ pipeline {
 
     stage("Wiki Tests - main"){
              when {
-                 branch 'main'
+                 branch "main"
              }
              steps {
                  sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runTryItOut main"
@@ -118,7 +113,7 @@ pipeline {
 
 /*         stage("Coverage Tests"){
              when {
-                 branch 'development'
+                 branch "development"
              }
              steps {
                  sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runCoverageTests"
@@ -160,7 +155,7 @@ pipeline {
         stage("Test Ubuntu 18.04") {
                     when {
                        expression {
-                            BRANCH_NAME == 'main' || BRANCH_NAME == 'development'
+                            BRANCH_NAME == "main" || BRANCH_NAME == "development"
                        }
                     }
                     steps {
@@ -175,7 +170,7 @@ pipeline {
         stage("Test Ubuntu 20.04") {
                     when {
                        expression {
-                            BRANCH_NAME == 'main' || BRANCH_NAME == 'development'
+                            BRANCH_NAME == "main" || BRANCH_NAME == "development"
                        }
                     }
                     steps {
