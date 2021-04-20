@@ -17,6 +17,7 @@ import sys
 import time
 import logging
 import locale
+from typing import Union, List, Set, Optional
 from dateutil.parser import parse
 from datetime import timezone, datetime
 
@@ -70,7 +71,8 @@ class DateTimeModelElement(ModelElementInterface):
     """
 
     # skipcq: PYL-W0613
-    def __init__(self, element_id, date_format, time_zone=None, text_locale=None, start_year=None, max_time_jump_seconds=86400):
+    def __init__(self, element_id: str, date_format: bytes, time_zone: timezone = None, text_locale: Union[str, tuple] = None,
+                 start_year: int = None, max_time_jump_seconds: int = 86400):
         """
         Create a DateTimeModelElement to parse dates using a custom, timezone and locale-aware implementation similar to strptime.
         @param date_format, is a byte string that represents the date format for parsing, see Python strptime specification for
@@ -129,10 +131,10 @@ class DateTimeModelElement(ModelElementInterface):
         # Make sure that dateFormat is valid and extract the relevant parts from it.
         self.format_has_year_flag = False
         self.format_has_tz_specifier = False
-        self.tz_specifier_offset = None
+        self.tz_specifier_offset = 0
         self.tz_specifier_offset_str = None
         self.tz_specifier_format_length = -1
-        self.date_format_parts = None
+        self.date_format_parts: Union[List[Union[bytes, tuple]]] = []
         self.date_format = date_format
         if not isinstance(date_format, bytes):
             msg = "date_format has to be of the type bytes."
@@ -148,9 +150,12 @@ class DateTimeModelElement(ModelElementInterface):
             msg = "start_year has to be of the type integer."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
-        self.start_year = start_year
         if (not self.format_has_year_flag) and (start_year is None):
             self.start_year = time.gmtime(None).tm_year
+        elif start_year is None:  # this is needed so start_year is at any point an integer. (instead of being None)
+            self.start_year = 0
+        else:
+            self.start_year = start_year
 
         if max_time_jump_seconds is not None and not isinstance(max_time_jump_seconds, int) or isinstance(max_time_jump_seconds, bool):
             msg = "max_time_jump_seconds has to be of the type integer."
@@ -164,20 +169,20 @@ class DateTimeModelElement(ModelElementInterface):
         self.last_parsed_seconds = 0
         self.epoch_start_time = datetime.fromtimestamp(0, self.time_zone)
 
-    def scan_date_format(self, date_format):
+    def scan_date_format(self, date_format: bytes):
         """Scan the date format."""
-        if self.date_format_parts is not None:
+        if len(self.date_format_parts) > 0:
             msg = "Cannot rescan date format after initialization"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
-        date_format_parts = []
-        date_format_type_set = set()
+        date_format_parts: List[Union[bytes, tuple]] = []
+        date_format_type_set: Set[int] = set()
         scan_pos = 0
         while scan_pos < len(date_format):
             next_param_pos = date_format.find(b"%", scan_pos)
             if next_param_pos < 0:
                 next_param_pos = len(date_format)
-            new_element = None
+            new_element: Union[bytes, tuple, None] = None
             if next_param_pos != scan_pos:
                 new_element = date_format[scan_pos:next_param_pos]
             else:
@@ -246,7 +251,7 @@ class DateTimeModelElement(ModelElementInterface):
         """
         return None
 
-    def get_match_element(self, path, match_context):
+    def get_match_element(self, path: str, match_context):
         """
         Try to find a match on given data for this model element and all its children.
         When a match is found, the matchContext is updated accordingly.
@@ -255,7 +260,7 @@ class DateTimeModelElement(ModelElementInterface):
         """
         parse_pos = 0
         # Year, month, day, hour, minute, second, fraction, gmt-seconds:
-        result = [0, 0, 0, 0, 0, 0, 0, 0]
+        result: List = [0, 0, 0, 0, 0, 0, 0, 0]
         for part_pos, date_format_part in enumerate(self.date_format_parts):
             if isinstance(date_format_part, bytes):
                 if not match_context.match_data[parse_pos:].startswith(date_format_part):
@@ -346,8 +351,8 @@ class DateTimeModelElement(ModelElementInterface):
                     # There cannot be a wraparound if we do not know any previous time values yet.
                     self.last_parsed_seconds = total_seconds
                 else:
-                    delta = self.last_parsed_seconds - total_seconds
-                    if abs(delta) <= self.max_time_jump_seconds:
+                    delta_seconds = self.last_parsed_seconds - total_seconds
+                    if abs(delta_seconds) <= self.max_time_jump_seconds:
                         self.last_parsed_seconds = total_seconds
                     else:
                         # This might be the first date value for the next year or one from the previous.
@@ -449,7 +454,7 @@ class DateTimeModelElement(ModelElementInterface):
         return MatchElement("%s/%s" % (path, self.element_id), date_str, total_seconds, None)
 
     @staticmethod
-    def parse_fraction(value_str):
+    def parse_fraction(value_str: bytes):
         """Pass this method as function pointer to the parsing logic."""
         return float(b"0." + value_str)
 
@@ -473,7 +478,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
     names to bytes during object creation and just keep the lookup list.
     """
 
-    def __init__(self, element_id, date_formats, start_year=None, max_time_jump_seconds=86400):
+    def __init__(self, element_id: str, date_formats: list, start_year: int = None, max_time_jump_seconds: int = 86400):
         """
         Create a new MultiLocaleDateTimeModelElement object.
         @param date_formats this parameter is a list of tuples, each tuple containing information about one date format to support.
@@ -518,7 +523,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
 
         format_has_year_flag = False
         default_locale = locale.getdefaultlocale()
-        self.date_time_model_elements = []
+        self.date_time_model_elements: List[DateTimeModelElement] = []
         for i, date_format in enumerate(date_formats):
             if not isinstance(date_format, tuple):
                 msg = "date_format must be of type tuple."
@@ -555,9 +560,12 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
             msg = "start_year has to be of the type integer."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
-        self.start_year = start_year
         if (not format_has_year_flag) and (start_year is None):
             self.start_year = time.gmtime(None).tm_year
+        elif start_year is None:   # this is needed so start_year is at any point an integer. (instead of being None)
+            self.start_year = 0
+        else:
+            self.start_year = start_year
         self.last_parsed_seconds = 0
 
     def get_id(self):
@@ -571,7 +579,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
         """
         return None
 
-    def get_match_element(self, path, match_context):
+    def get_match_element(self, path: str, match_context):
         """
         Check if the data to match within the content is suitable to be parsed by any of the supplied date formats.
         @return On match return a match_object containing a tuple of the datetime object and the seconds since 1970. When not matching,

@@ -22,6 +22,17 @@ pipeline {
                  sh "docker build -f aecid-testsuite/Dockerfile -t aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID ."
              }
          }
+
+         stage("Mypy Static Code Analysis"){
+             steps {
+                 sh "mypy source/root/usr/lib/logdata-anomaly-miner/aminer/analysis/ --ignore-missing-imports"
+                 sh "mypy source/root/usr/lib/logdata-anomaly-miner/aminer/events/ --ignore-missing-imports"
+                 sh "mypy source/root/usr/lib/logdata-anomaly-miner/aminer/input/ --ignore-missing-imports"
+                 sh "mypy source/root/usr/lib/logdata-anomaly-miner/aminer/parsing/ --ignore-missing-imports"
+                 sh "mypy source/root/usr/lib/logdata-anomaly-miner/aminer/util/ --ignore-missing-imports"
+                 sh "mypy source/root/usr/lib/logdata-anomaly-miner/aminer/ --ignore-missing-imports"
+             }
+         }
          
          stage("UnitTest"){
              steps {
