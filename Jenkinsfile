@@ -77,6 +77,7 @@ pipeline {
              steps {
                  sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runAminerIntegrationTest aminerIntegrationTest.sh config.py"
                  sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runAminerIntegrationTest aminerIntegrationTest2.sh config21.py config22.py"
+                 sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runOfflineMode"
              }
          }
 
