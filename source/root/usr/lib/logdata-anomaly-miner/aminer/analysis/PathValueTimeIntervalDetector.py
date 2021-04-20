@@ -1,4 +1,6 @@
-"""This module defines a detector for variable type.
+"""
+This module defines a detector for time intervals of the appearance of log lines depending on the combination of values in the
+target_paths of target_path_list.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -12,7 +14,6 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import os
 import logging
-from time import strftime, gmtime
 
 from aminer import AminerConfig
 from aminer.AminerConfig import CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
@@ -24,20 +25,31 @@ from aminer.util import PersistenceUtil
 
 class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """
-    This class tests each variable of the event_types for the implemented variable types.
-    This module needs to run after the EventTypeDetector is initialized
+    This class analyzes the time intervals of the appearance of log_atoms.
+    The considered time intervals depend on the combination of values in the target_paths of target_path_list.
     """
 
-    def __init__(self, aminer_config, anomaly_event_handlers, persistence_id='Default', path_list=None, allow_missing_values_flag=True,
-                 ignore_list=None, constraint_list=None, target_path_list=None, output_log_line=True, auto_include_flag=False,
-                 max_time_diff=360, num_reduce_time_list=10):
+    def __init__(self, aminer_config, anomaly_event_handlers, persistence_id='Default', target_path_list=None, allow_missing_values_flag=True,
+                 ignore_list=None, output_log_line=True, auto_include_flag=False,
+                 time_window_length=86400, max_time_diff=360, num_reduce_time_list=10):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
-        @param target_path_list the list of values to extract from each match to create the value combination to be checked.
+        @param aminer_config configuration from analysis_context.
+        @param anomaly_event_handlers for handling events, e.g., print events to stdout.
+        @param persistence_id name of persistency document.
+        @param target_path_list parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined
+        occurrences. When no paths are specified, the events given by the full path list are analyzed.
         @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the pathes from target_path_list
         does not refer to an existing parsed data object.
-        @param auto_include_flag when set to True, this detector will report a new time only the first time before including it
-        in the known values set automatically.
+        @param ignore_list list of paths that are not considered for correlation, i.e., events that contain one of these paths are
+        omitted. The default value is [] as None is not iterable.
+        @param output_log_line specifies whether the full parsed log atom should be provided in the output.
+        @param auto_include_flag specifies whether new frequency measurements override ground truth frequencies.
+        @param time_window_length length of the time window for which the appearances of log lines are identified with each other.
+        Value of 86400 specfies a day and 604800 a week.
+        @param max_time_diff maximal time difference in seconds for new times. If the difference of the new time to all previous times is
+        greater than max_time_diff the new time is considered an anomaly.
+        @param num_reduce_time_list number of new time entries appended to the time list, before the list is being reduced.
         """
         self.next_persist_time = None
         self.anomaly_event_handlers = anomaly_event_handlers
@@ -45,26 +57,21 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         self.allow_missing_values_flag = allow_missing_values_flag
         self.aminer_config = aminer_config
         self.output_log_line = output_log_line
-        self.path_list = path_list
         self.ignore_list = ignore_list
         if self.ignore_list is None:
             self.ignore_list = []
-        self.constraint_list = constraint_list
-        if self.constraint_list is None:
-            self.constraint_list = []
         self.target_path_list = target_path_list
         if self.target_path_list is None:
             self.target_path_list = []
 
-        # Maximal time difference in seconds for new times.
-        # If the distance of the new time to all previous times is greater than max_time_diff the new time is considdered an anomaly.
+        self.time_window_length = time_window_length
         self.max_time_diff = max_time_diff
-        # Number of new time entries appended to the time list, before the list is being reduced.
+        # 
         self.num_reduce_time_list = num_reduce_time_list
 
         # Keys: Tuple of values of the paths of target_path_list, Entries: List of all appeared times to the tuple.
         self.appeared_time_list = {}
-        # Keys: Tuple of values of the paths of target_path_list, Entries: Counter of appended times to the time list since last rediction.
+        # Keys: Tuple of values of the paths of target_path_list, Entries: Counter of appended times to the time list since last reduction.
         self.counter_reduce_time_intervals = {}
 
         # Loads the persistence
@@ -77,7 +84,8 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
 
     def receive_atom(self, log_atom):
         """
-        Receive an parsed atom and the information about the parser match. Initializes Variables for new eventTypes.
+        Analyze if the time of the log_atom appeared in the time interval of a previously appeared times.
+        The considered time intervals originate of events with the same combination of values in the target_paths of target_path_list.
         @param log_atom the parsed log atom
         @return True if this handler was really able to handle and process the match.
         """
@@ -85,16 +93,6 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         # Skip paths from ignore_list.
         for ignore_path in self.ignore_list:
             if ignore_path in match_dict.keys():
-                return False
-
-        if self.path_list is None or len(self.path_list) == 0:
-            # Event is defined by the full path of log atom.
-            constraint_path_flag = False
-            for constraint_path in self.constraint_list:
-                if match_dict.get(constraint_path) is not None:
-                    constraint_path_flag = True
-                    break
-            if not constraint_path_flag and self.constraint_list != []:
                 return False
 
         # Save the values of the target paths in match_value_list and build a tuple of them
@@ -109,25 +107,25 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
                 match_value_list.append(match_element.match_object)
         match_value_tuple = tuple(match_value_list)
 
-        # Check if the combination of values and prints an message if it is new.
+        # Print message if combination of values is new
         if match_value_tuple not in self.appeared_time_list:
             msg = 'New observed combination: ['
             for match_value in match_value_tuple:
                 msg += str(repr(match_value)) + ', '
             msg = msg[:-2] + ']'
             self.print(msg, log_atom=log_atom, affected_path=self.target_path_list)
-            self.appeared_time_list[match_value_tuple] = [log_atom.atom_time % 86400]
+            self.appeared_time_list[match_value_tuple] = [log_atom.atom_time % self.time_window_length]
             self.counter_reduce_time_intervals[match_value_tuple] = 0
         else:
             # Checks if the time has already been observed
-            if log_atom.atom_time % 86400 not in self.appeared_time_list[match_value_tuple]:
+            if log_atom.atom_time % self.time_window_length not in self.appeared_time_list[match_value_tuple]:
                 # Check and prints an message if the new time is out of range of the observed times
-                if all((abs(log_atom.atom_time % 86400 - time) > self.max_time_diff) and
-                       (abs(log_atom.atom_time % 86400 - time) < 86400 - self.max_time_diff)
+                # The second query is needed when time intevals exceed over 0/self.time_window_length
+                if all((abs(log_atom.atom_time % self.time_window_length - time) > self.max_time_diff) and
+                       (abs(log_atom.atom_time % self.time_window_length - time) < self.time_window_length - self.max_time_diff)
                         for time in self.appeared_time_list[match_value_tuple]):
-                    msg = 'New time (%s) out of range of previously observed times (%s) detected in the combination: [' % (strftime(
-                            '%H:%M:%S', gmtime(log_atom.atom_time)), [
-                            strftime('%H:%M:%S', gmtime(time)) for time in self.appeared_time_list[match_value_tuple]])
+                    msg = 'New time (%s) out of range of previously observed times (%s) detected in the combination: [' % (
+                            log_atom.atom_time % self.time_window_length, self.appeared_time_list[match_value_tuple])
                     for match_value in match_value_tuple:
                         msg += str(repr(match_value)) + ', '
                     msg = msg[:-2] + ']'
@@ -137,7 +135,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
                         return True
 
                 # Add the new time to the time list and reduces the time list after num_reduce_time_list of times have been appended
-                self.insert_and_reduce_time_intervals(match_value_tuple, log_atom.atom_time % 86400)
+                self.insert_and_reduce_time_intervals(match_value_tuple, log_atom.atom_time % self.time_window_length)
 
         return True
 
@@ -158,11 +156,11 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
             self.appeared_time_list[match_value_tuple][time_index:]
 
         # Reduce the time intervals, by removing the obsolete entries
-        if self.counter_reduce_time_intervals[match_value_tuple] == self.num_reduce_time_list:
+        if self.counter_reduce_time_intervals[match_value_tuple] >= self.num_reduce_time_list:
             # Reset the counter
             self.counter_reduce_time_intervals[match_value_tuple] = 0
             # Check every entry if it enlarges the time intervals, and remove it, if not.
-            last_accepted_time = self.appeared_time_list[match_value_tuple][0] + 86400
+            last_accepted_time = self.appeared_time_list[match_value_tuple][0] + self.time_window_length
             for index in range(len(self.appeared_time_list[match_value_tuple])-1, 0, -1):
                 if last_accepted_time - self.appeared_time_list[match_value_tuple][index-1] < 2 * self.max_time_diff:
                     del self.appeared_time_list[match_value_tuple][index]
@@ -171,15 +169,15 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
 
             # Checks the last and first two time of the time list, and removes the obsolete entries
             if (len(self.appeared_time_list[match_value_tuple]) >= 4) and (
-                    86400 + self.appeared_time_list[match_value_tuple][1] - self.appeared_time_list[match_value_tuple][-2] <
-                    2 * self.max_time_diff):
+                    self.time_window_length + self.appeared_time_list[match_value_tuple][1] -
+                    self.appeared_time_list[match_value_tuple][-2] < 2 * self.max_time_diff):
                 self.appeared_time_list[match_value_tuple] = self.appeared_time_list[match_value_tuple][1:len(self.appeared_time_list[
                         match_value_tuple])-1]
-            elif 86400 + self.appeared_time_list[match_value_tuple][0] - self.appeared_time_list[match_value_tuple][-2] <\
+            elif self.time_window_length + self.appeared_time_list[match_value_tuple][0] - self.appeared_time_list[match_value_tuple][-2] <\
                     2 * self.max_time_diff:
                 self.appeared_time_list[match_value_tuple] = self.appeared_time_list[match_value_tuple][:len(self.appeared_time_list[
                         match_value_tuple])-1]
-            elif 86400 + self.appeared_time_list[match_value_tuple][1] - self.appeared_time_list[match_value_tuple][-1] <\
+            elif self.time_window_length + self.appeared_time_list[match_value_tuple][1] - self.appeared_time_list[match_value_tuple][-1] <\
                     2 * self.max_time_diff:
                 self.appeared_time_list[match_value_tuple] = self.appeared_time_list[match_value_tuple][1:]
 
@@ -230,14 +228,14 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
             for x in list(log_atom.parser_match.get_match_dictionary().keys()):
                 tmp_str += '  ' + x + os.linesep
             tmp_str = tmp_str.lstrip('  ')
-            sorted_log_lines = [tmp_str + original_log_line_prefix + log_atom.raw_data.decode()]
+            sorted_log_lines = [tmp_str + original_log_line_prefix + log_atom.raw_data.decode(AminerConfig.ENCODING)]
             analysis_component = {'AffectedLogAtomPaths': list(log_atom.parser_match.get_match_dictionary().keys())}
         else:
             tmp_str = ''
             for x in affected_path:
                 tmp_str += '  ' + x + os.linesep
             tmp_str = tmp_str.lstrip('  ')
-            sorted_log_lines = [tmp_str + log_atom.raw_data.decode()]
+            sorted_log_lines = [tmp_str + log_atom.raw_data.decode(AminerConfig.ENCODING)]
             analysis_component = {'AffectedLogAtomPaths': affected_path}
 
         event_data = {'AnalysisComponent': analysis_component}

@@ -78,6 +78,7 @@ def load_yaml(config_file):
         filter_config_errors(filtered_errors, 'Parser', v.errors, parser_validation_schema)
         filter_config_errors(filtered_errors, 'EventHandlers', v.errors, event_handler_validation_schema)
 
+        print(v.errors)
         raise ValueError("Config-Error: %s" % filtered_errors)
 
     v = NormalisationValidator(normalisation_schema)
@@ -405,7 +406,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     persistence_id=item['persistence_id'], window_size=item['window_size'],
                                     min_anomaly_score=item['min_anomaly_score'], min_variance=item['min_variance'],
                                     num_windows=item['num_windows'], auto_include_flag=learn, output_log_line=item['output_logline'],
-                                    ignore_list=item['ignore_list'], constraint_list=item['constraint_list'])
+                                    ignore_list=item['ignore_list'])
             elif item['type'].name == 'NewMatchPathValueComboDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn,
                                     persistence_id=item['persistence_id'], allow_missing_values_flag=item['allow_missing_values'],
@@ -720,10 +721,10 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             elif item['type'].name == 'PathValueTimeIntervalDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
-                    path_list=item['paths'], ignore_list=item['ignore_list'], constraint_list=item['constraint_list'],
-                    allow_missing_values_flag=item['allow_missing_values'], target_path_list=item['target_path_list'],
-                    output_log_line=item['output_logline'], max_time_diff=item['max_time_diff'],
-                    num_reduce_time_list=item['num_reduce_time_list'], auto_include_flag=learn)
+                    target_path_list=item['paths'], ignore_list=item['ignore_list'],
+                    allow_missing_values_flag=item['allow_missing_values'],
+                    output_log_line=item['output_logline'], time_window_length=item['time_window_length'],
+                    max_time_diff=item['max_time_diff'], num_reduce_time_list=item['num_reduce_time_list'], auto_include_flag=learn)
             else:
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn)
             if item['output_event_handlers'] is not None:

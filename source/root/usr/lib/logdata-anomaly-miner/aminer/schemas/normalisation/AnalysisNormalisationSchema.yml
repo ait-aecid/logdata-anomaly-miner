@@ -169,10 +169,10 @@
                     'coverVals', 'distinctDistr']}, 'nullable': True, 'default': None},
                 'validate_cor_cover_vals_thres': {'type': 'float', 'default': 0.7},
                 'validate_cor_distinct_thres': {'type': 'float', 'default': 0.05},
-                'target_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                 'allow_missing_values_flag': {'type': 'boolean'},
-                'max_time_diff': {'type': 'integer', 'min': 1},
-                'num_reduce_time_list': {'type': 'integer', 'min': 1},
+                'time_window_length': {'type': 'integer', 'min': 1, 'required': True, 'default': 86400},
+                'max_time_diff': {'type': 'integer', 'min': 1, 'required': True, 'default': 360},
+                'num_reduce_time_list': {'type': 'integer', 'min': 1, 'required': True, 'default': 10},
                 'output_event_handlers': {'type': 'list', 'nullable': True, 'default': None},
                 'suppress': {'type': 'boolean', 'default': False}
             }
