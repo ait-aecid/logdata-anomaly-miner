@@ -493,7 +493,6 @@ class DateTimeModelElementTest(TestBase):
         self.assertRaises(TypeError, DateTimeModelElement, self.id_, None)  # None date_format
         self.assertRaises(TypeError, DateTimeModelElement, self.id_, "")  # string date_format is not allowed
         self.assertRaises(TypeError, DateTimeModelElement, self.id_, 123)  # integer date_format is not allowed
-        self.assertRaises(TypeError, DateTimeModelElement, self.id_, True)  # bool date_format is not allowed
         self.assertRaises(TypeError, DateTimeModelElement, self.id_, 123.22)  # float date_format is not allowed
         self.assertRaises(TypeError, DateTimeModelElement, self.id_, True)  # boolean date_format is not allowed
         self.assertRaises(TypeError, DateTimeModelElement, self.id_, {"id": "path"})  # dict date_format is not allowed
