@@ -49,6 +49,10 @@ class AnyByteDataModelElementTest(TestBase):
         element_id = b"path"
         self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
 
+        # bytes element_id is not allowed
+        element_id = True
+        self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
+
         # integer element_id is not allowed
         element_id = 123
         self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
