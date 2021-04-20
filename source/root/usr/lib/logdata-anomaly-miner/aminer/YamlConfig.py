@@ -78,7 +78,6 @@ def load_yaml(config_file):
         filter_config_errors(filtered_errors, 'Parser', v.errors, parser_validation_schema)
         filter_config_errors(filtered_errors, 'EventHandlers', v.errors, event_handler_validation_schema)
 
-        print(v.errors)
         raise ValueError("Config-Error: %s" % filtered_errors)
 
     v = NormalisationValidator(normalisation_schema)
@@ -406,7 +405,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     persistence_id=item['persistence_id'], window_size=item['window_size'],
                                     min_anomaly_score=item['min_anomaly_score'], min_variance=item['min_variance'],
                                     num_windows=item['num_windows'], auto_include_flag=learn, output_log_line=item['output_logline'],
-                                    ignore_list=item['ignore_list'])
+                                    ignore_list=item['ignore_list'], constraint_list=item['constraint_list'])
             elif item['type'].name == 'NewMatchPathValueComboDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn,
                                     persistence_id=item['persistence_id'], allow_missing_values_flag=item['allow_missing_values'],
