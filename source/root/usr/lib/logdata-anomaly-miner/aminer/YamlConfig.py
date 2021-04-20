@@ -103,8 +103,10 @@ def filter_config_errors(filtered_errors, key_name, errors, schema):
                     for cause in err[key]:
                         if isinstance(cause, dict):
                             # we need to copy the dictionary as it is not possible to iterate through it and change the size.
+                            last_error = None
                             for definition in copy.deepcopy(cause):
                                 if 'type' in cause[definition][0] and cause[definition][0]['type'][0].startswith('unallowed value '):
+                                    last_error = cause[definition][0]['type'][0]
                                     del cause[definition]
                                 else:
                                     oneof_def_pos = int(definition.split(' ')[-1])
@@ -113,6 +115,8 @@ def filter_config_errors(filtered_errors, key_name, errors, schema):
                                         cause[definition][0]['type'] = {'forbidden': oneof_schema_type['forbidden']}
                                     elif 'allowed' in oneof_schema_type:
                                         cause[definition][0]['type'] = {'allowed': oneof_schema_type['allowed']}
+                            if len(cause) == 0 and last_error is not None:
+                                cause[key_name + ' error'] = last_error
             filtered_errors[key_name][i] = err
 
 

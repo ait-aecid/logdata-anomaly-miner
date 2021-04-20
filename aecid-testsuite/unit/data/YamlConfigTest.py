@@ -180,6 +180,10 @@ class YamlConfigTest(TestBase):
         spec.loader.exec_module(aminer_config)
         with self.assertRaises(ValueError):
             aminer_config.load_yaml('unit/data/configfiles/unknown_parser_config.yml')
+        try:
+            aminer_config.load_yaml('unit/data/configfiles/unknown_parser_config.yml')
+        except ValueError as e:
+            self.assertEqual("{'Parser': [{0: [{'type': [\"field 'type' cannot be coerced: No module named 'UnknownModel'\"]}]}]}", str(e))
 
     def test9_analysis_pipeline_working_config_without_analysis_components(self):
         """This test checks if the config can be loaded without any analysis components."""
@@ -203,6 +207,11 @@ class YamlConfigTest(TestBase):
         spec.loader.exec_module(aminer_config)
         with self.assertRaises(ValueError):
             aminer_config.load_yaml('unit/data/configfiles/unknown_analysis_component.yml')
+        try:
+            aminer_config.load_yaml('unit/data/configfiles/unknown_analysis_component.yml')
+        except ValueError as e:
+            self.assertEqual("Config-Error: {'Analysis': [{2: ['none or more than one rule validate', {'Analysis error': 'unallowed value"
+                             " UnknownDetector'}]}]}", str(e))
 
     def test11_analysis_fail_with_unknown_event_handler(self):
         """This test checks if the config-schema-validator raises an error if an unknown event handler is configured."""
@@ -211,6 +220,11 @@ class YamlConfigTest(TestBase):
         spec.loader.exec_module(aminer_config)
         with self.assertRaises(ValueError):
             aminer_config.load_yaml('unit/data/configfiles/unknown_event_handler.yml')
+        try:
+            aminer_config.load_yaml('unit/data/configfiles/unknown_event_handler.yml')
+        except ValueError as e:
+            self.assertEqual("{'EventHandlers': [{0: [{'type': [\"field 'type' cannot be coerced: No module named "
+                             "'aminer.events.UnknownPrinterEventHandler'\"]}]}]}", str(e))
 
     def test12_analysis_pipeline_working_config_without_event_handler_components(self):
         """
