@@ -1,6 +1,5 @@
 """
-This module defines a detector for time intervals of the appearance of log lines depending on the combination of values in the
-target_paths of target_path_list.
+This module defines a detector for time intervals of the appearance of log lines.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -29,8 +28,8 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
     The considered time intervals depend on the combination of values in the target_paths of target_path_list.
     """
 
-    def __init__(self, aminer_config, anomaly_event_handlers, persistence_id='Default', target_path_list=None, allow_missing_values_flag=True,
-                 ignore_list=None, output_log_line=True, auto_include_flag=False,
+    def __init__(self, aminer_config, anomaly_event_handlers, persistence_id='Default', target_path_list=None,
+                 allow_missing_values_flag=True, ignore_list=None, output_log_line=True, auto_include_flag=False,
                  time_window_length=86400, max_time_diff=360, num_reduce_time_list=10):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
@@ -63,10 +62,8 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         self.target_path_list = target_path_list
         if self.target_path_list is None:
             self.target_path_list = []
-
         self.time_window_length = time_window_length
         self.max_time_diff = max_time_diff
-        # 
         self.num_reduce_time_list = num_reduce_time_list
 
         # Keys: Tuple of values of the paths of target_path_list, Entries: List of all appeared times to the tuple.
