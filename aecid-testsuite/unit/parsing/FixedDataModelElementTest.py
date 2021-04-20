@@ -50,6 +50,10 @@ class FixedDataModelElementTest(TestBase):
         element_id = b"path"
         self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
 
+        # bool element_id is not allowed
+        element_id = True
+        self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
+
         # integer element_id is not allowed
         element_id = 123
         self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
@@ -96,6 +100,10 @@ class FixedDataModelElementTest(TestBase):
         fixed_string = "path"
         self.assertRaises(TypeError, FixedDataModelElement, self.id_, fixed_string)
 
+        # bool fixed_string is not allowed
+        fixed_string = True
+        self.assertRaises(TypeError, FixedDataModelElement, self.id_, fixed_string)
+
         # integer fixed_string is not allowed
         fixed_string = 123
         self.assertRaises(TypeError, FixedDataModelElement, self.id_, fixed_string)
@@ -136,6 +144,7 @@ class FixedDataModelElementTest(TestBase):
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(data, None, None, None))
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, True)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123.22)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, True)

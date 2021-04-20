@@ -102,6 +102,10 @@ class Base64StringModelElementTest(TestBase):
         element_id = b"path"
         self.assertRaises(TypeError, Base64StringModelElement, element_id)
 
+        # bytes element_id is not allowed
+        element_id = True
+        self.assertRaises(TypeError, Base64StringModelElement, element_id)
+
         # integer element_id is not allowed
         element_id = 123
         self.assertRaises(TypeError, Base64StringModelElement, element_id)
@@ -146,6 +150,7 @@ class Base64StringModelElementTest(TestBase):
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(data, None, None, None))
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, True)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123.22)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, True)

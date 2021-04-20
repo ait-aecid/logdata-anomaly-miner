@@ -403,6 +403,10 @@ class DecimalFloatValueModelElementTest(TestBase):
         element_id = b"path"
         self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id)
 
+        # bool element_id is not allowed
+        element_id = True
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id)
+
         # integer element_id is not allowed
         element_id = 123
         self.assertRaises(TypeError, DecimalFloatValueModelElement, element_id)
@@ -446,6 +450,9 @@ class DecimalFloatValueModelElementTest(TestBase):
         value_sign_type = b"none"
         self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
 
+        value_sign_type = True
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
+
         value_sign_type = 123
         self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_sign_type=value_sign_type)
 
@@ -480,6 +487,9 @@ class DecimalFloatValueModelElementTest(TestBase):
         self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
 
         value_pad_type = b"none"
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
+
+        value_pad_type = True
         self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_pad_type=value_pad_type)
 
         value_pad_type = 123
@@ -518,6 +528,9 @@ class DecimalFloatValueModelElementTest(TestBase):
         exponent_type = b"none"
         self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
 
+        exponent_type = True
+        self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
+
         exponent_type = 123
         self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, exponent_type=exponent_type)
 
@@ -551,6 +564,7 @@ class DecimalFloatValueModelElementTest(TestBase):
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(data, None, None, None))
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, True)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123.22)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, None)

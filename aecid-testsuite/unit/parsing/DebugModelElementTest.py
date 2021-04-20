@@ -75,6 +75,10 @@ class DebugModelElementTest(TestBase):
         element_id = b"path"
         self.assertRaises(TypeError, DebugModelElement, element_id)
 
+        # bool element_id is not allowed
+        element_id = True
+        self.assertRaises(TypeError, DebugModelElement, element_id)
+
         # integer element_id is not allowed
         element_id = 123
         self.assertRaises(TypeError, DebugModelElement, element_id)
