@@ -24,7 +24,7 @@ from aminer.util import SecureOSFunctions
 from aminer.util import JsonUtil
 
 # Have a registry of all persistable components. Those might be happy to be invoked before python process is terminating.
-persistable_components = []
+persistable_components: list = []
 SKIP_PERSISTENCE_ID_WARNING = False
 
 

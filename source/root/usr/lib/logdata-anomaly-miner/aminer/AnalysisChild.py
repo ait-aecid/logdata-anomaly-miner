@@ -179,6 +179,8 @@ class AnalysisChild(TimeTriggeredComponentInterface):
     When splitting privileges between analysis and monitor  process, this class should only be initialized within the analysis process!
     """
 
+    offline_mode = False
+
     def __init__(self, program_name, aminer_config):
         self.program_name = program_name
         self.analysis_context = AnalysisContext(aminer_config)
@@ -351,6 +353,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                     remote_control_handler = AnalysisChildRemoteControlHandler(control_client_socket)
                     self.tracked_fds_dict[control_client_socket.fileno()] = remote_control_handler
                     continue
+
                 msg = 'Unhandled object type %s' % type(fd_handler_object)
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise Exception(msg)
@@ -424,6 +427,9 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                     shutil.copytree(persistence_dir, backup_path_with_date, ignore=shutil.ignore_patterns('backup*'))
                     logging.getLogger(DEBUG_LOG_NAME).info('Persistence backup created in %s.', backup_path_with_date)
                 next_backup_time_trigger_time = backup_time + next_trigger_offset
+
+            if len(self.tracked_fds_dict) == 1 and self.offline_mode:
+                self.run_analysis_loop_flag = False
 
         # Analysis loop is only left on shutdown. Try to persist everything and leave.
         PersistenceUtil.persist_all()

@@ -180,6 +180,10 @@ class YamlConfigTest(TestBase):
         spec.loader.exec_module(aminer_config)
         with self.assertRaises(ValueError):
             aminer_config.load_yaml('unit/data/configfiles/unknown_parser_config.yml')
+        try:
+            aminer_config.load_yaml('unit/data/configfiles/unknown_parser_config.yml')
+        except ValueError as e:
+            self.assertEqual("{'Parser': [{0: [{'type': [\"field 'type' cannot be coerced: No module named 'UnknownModel'\"]}]}]}", str(e))
 
     def test9_analysis_pipeline_working_config_without_analysis_components(self):
         """This test checks if the config can be loaded without any analysis components."""
@@ -203,6 +207,11 @@ class YamlConfigTest(TestBase):
         spec.loader.exec_module(aminer_config)
         with self.assertRaises(ValueError):
             aminer_config.load_yaml('unit/data/configfiles/unknown_analysis_component.yml')
+        try:
+            aminer_config.load_yaml('unit/data/configfiles/unknown_analysis_component.yml')
+        except ValueError as e:
+            self.assertEqual("Config-Error: {'Analysis': [{2: ['none or more than one rule validate', {'Analysis error': 'unallowed value"
+                             " UnknownDetector'}]}]}", str(e))
 
     def test11_analysis_fail_with_unknown_event_handler(self):
         """This test checks if the config-schema-validator raises an error if an unknown event handler is configured."""
@@ -211,6 +220,11 @@ class YamlConfigTest(TestBase):
         spec.loader.exec_module(aminer_config)
         with self.assertRaises(ValueError):
             aminer_config.load_yaml('unit/data/configfiles/unknown_event_handler.yml')
+        try:
+            aminer_config.load_yaml('unit/data/configfiles/unknown_event_handler.yml')
+        except ValueError as e:
+            self.assertEqual("{'EventHandlers': [{0: [{'type': [\"field 'type' cannot be coerced: No module named "
+                             "'aminer.events.UnknownPrinterEventHandler'\"]}]}]}", str(e))
 
     def test12_analysis_pipeline_working_config_without_event_handler_components(self):
         """
@@ -497,8 +511,7 @@ class YamlConfigTest(TestBase):
         context.build_analysis_pipeline()
 
         context.aminer_config.yaml_data['SuppressNewMatchPathDetector'] = False
-        self.stream_printer_event_handler = context.atomizer_factory.event_handler_list[0]
-        self.stream_printer_event_handler.stream = self.output_stream
+        context.atomizer_factory.event_handler_list[0].stream = self.output_stream
         default_nmpd = context.registered_components[1][0]
         default_nmpd.output_log_line = False
         self.assertTrue(default_nmpd.receive_atom(log_atom_fixed_dme))
@@ -510,8 +523,7 @@ class YamlConfigTest(TestBase):
         context.aminer_config.yaml_data['SuppressNewMatchPathDetector'] = True
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        self.stream_printer_event_handler = context.atomizer_factory.event_handler_list[0]
-        self.stream_printer_event_handler.stream = self.output_stream
+        context.atomizer_factory.event_handler_list[0].stream = self.output_stream
         default_nmpd = context.registered_components[1][0]
         default_nmpd.output_log_line = False
         self.assertTrue(default_nmpd.receive_atom(log_atom_fixed_dme))
@@ -521,8 +533,7 @@ class YamlConfigTest(TestBase):
         value_combo_det = context.registered_components[2][0]
         log_atom_sequence_me = LogAtom(match_element_sequence_me.get_match_string(), ParserMatch(match_element_sequence_me), t,
                                        value_combo_det)
-        self.stream_printer_event_handler = context.atomizer_factory.event_handler_list[0]
-        self.stream_printer_event_handler.stream = self.output_stream
+        context.atomizer_factory.event_handler_list[0].stream = self.output_stream
         self.assertTrue(value_combo_det.receive_atom(log_atom_sequence_me))
         self.assertEqual(self.output_stream.getvalue(), __expected_string2 % (
             datetime.fromtimestamp(t).strftime(datetime_format_string), value_combo_det.__class__.__name__,
@@ -533,8 +544,7 @@ class YamlConfigTest(TestBase):
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
         value_combo_det = context.registered_components[1][0]
-        self.stream_printer_event_handler = context.atomizer_factory.event_handler_list[0]
-        self.stream_printer_event_handler.stream = self.output_stream
+        context.atomizer_factory.event_handler_list[0].stream = self.output_stream
         self.assertTrue(value_combo_det.receive_atom(log_atom_sequence_me))
         self.assertEqual(self.output_stream.getvalue(), "")
         self.reset_output_stream()

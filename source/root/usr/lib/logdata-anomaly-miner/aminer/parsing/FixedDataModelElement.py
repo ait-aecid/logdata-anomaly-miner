@@ -24,7 +24,7 @@ class FixedDataModelElement(ModelElementInterface):
     The model element is considered a match if the fixed string is found at this position in the log atom.
     """
 
-    def __init__(self, element_id, fixed_data):
+    def __init__(self, element_id: str, fixed_data: bytes):
         if not isinstance(element_id, str):
             msg = "element_id has to be of the type string."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -55,7 +55,7 @@ class FixedDataModelElement(ModelElementInterface):
         """
         return None
 
-    def get_match_element(self, path, match_context):
+    def get_match_element(self, path: str, match_context):
         """@return None when there is no match, MatchElement otherwise."""
         if not match_context.match_data.startswith(self.fixed_data):
             return None
