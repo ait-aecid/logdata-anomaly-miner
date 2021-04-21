@@ -44,7 +44,7 @@ class DecimalIntegerValueModelElement(ModelElementInterface):
         self.element_id = element_id
 
         if not isinstance(value_sign_type, str):
-            msg = 'value_sign_type must be of type string.' % value_sign_type
+            msg = "value_sign_type must be of type string." % value_sign_type
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
         if value_sign_type == DecimalIntegerValueModelElement.SIGN_TYPE_NONE:
@@ -60,7 +60,7 @@ class DecimalIntegerValueModelElement(ModelElementInterface):
 
         self.pad_characters = b""
         if not isinstance(value_pad_type, str):
-            msg = 'value_pad_type must be of type string.' % value_sign_type
+            msg = "value_pad_type must be of type string." % value_sign_type
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
         if value_pad_type == DecimalIntegerValueModelElement.PAD_TYPE_NONE:
