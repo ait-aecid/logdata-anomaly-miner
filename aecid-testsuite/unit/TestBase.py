@@ -233,7 +233,6 @@ class DummyFirstMatchModelElement(ModelElementInterface):
         for child_element in self.children:
             child_match = child_element.get_match_element(current_path, match_context)
             if child_match is not None:
-                child_match
                 return child_match
             match_context.match_data = match_data
         return None

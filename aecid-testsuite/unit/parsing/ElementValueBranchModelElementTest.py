@@ -1,12 +1,6 @@
 import unittest
-from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.ElementValueBranchModelElement import ElementValueBranchModelElement
-from aminer.parsing.FixedDataModelElement import FixedDataModelElement
-from aminer.parsing.SequenceModelElement import SequenceModelElement
-from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
-from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
-from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
 from unit.TestBase import TestBase, DummyMatchContext, DummyFixedDataModelElement, DummyFirstMatchModelElement
 
 
