@@ -21,7 +21,7 @@ class AnyByteDataModelElementTest(TestBase):
 
     def test3get_match_element_valid_match(self):
         """Parse matching substring from MatchContext and check if the MatchContext was updated with all characters."""
-        data = b'abcdefghijklmnopqrstuvwxyz.!?'
+        data = b"abcdefghijklmnopqrstuvwxyz.!?"
         match_context = DummyMatchContext(data)
         any_dme = AnyByteDataModelElement(self.id_)
         match_element = any_dme.get_match_element(self.path, match_context)
@@ -88,7 +88,7 @@ class AnyByteDataModelElementTest(TestBase):
     def test6get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = AnyByteDataModelElement(self.id_)
-        data = b'abcdefghijklmnopqrstuvwxyz.!?'
+        data = b"abcdefghijklmnopqrstuvwxyz.!?"
         model_element.get_match_element(self.path, DummyMatchContext(data))
         from aminer.parsing.MatchContext import MatchContext
         model_element.get_match_element(self.path, MatchContext(data))

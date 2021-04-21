@@ -109,7 +109,19 @@ class ElementValueBranchModelElementTest(TestBase):
         element_id = set()
         self.assertRaises(TypeError, ElementValueBranchModelElement, element_id, self.value_model, None, branch_model_dict)
 
-    def test6get_match_element_match_context_input_validation(self):
+    def test6value_model_input_validation(self):
+        """Check if value_model is validated."""
+
+    def test7value_path_input_validation(self):
+        """Check if value_path is validated."""
+
+    def test8branch_model_dict_input_validation(self):
+        """Check if value_path is validated."""
+
+    def test9default_branch_input_validation(self):
+        """Check if value_path is validated."""
+
+    def test10get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = ElementValueBranchModelElement(self.id_, self.value_model, None, {"path: ": self.path_me, "data: ": self.data_me})
         data = b'abcdefghijklmnopqrstuvwxyz.!?'

@@ -37,7 +37,7 @@ class DebugModelElementTest(TestBase):
         output = StringIO()
         sys.stderr = output
         debug_model_element = DebugModelElement(self.id_)
-        self.assertEqual(output.getvalue(), 'DebugModelElement %s added\n' % self.id_)
+        self.assertEqual(output.getvalue(), "DebugModelElement %s added\n" % self.id_)
 
         output.seek(0)
         output.truncate(0)
@@ -46,7 +46,7 @@ class DebugModelElementTest(TestBase):
         match_context = DummyMatchContext(data)
         match_element = debug_model_element.get_match_element(self.path, match_context)
         self.assertEqual(
-            output.getvalue(), 'DebugModelElement path = "%s", unmatched = "%s"\n' % (match_element.get_path(), match_context.match_data))
+            output.getvalue(), "DebugModelElement path = "%s", unmatched = "%s"\n" % (match_element.get_path(), match_context.match_data))
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, b"", b"", None)
 
         output.seek(0)
@@ -56,7 +56,7 @@ class DebugModelElementTest(TestBase):
         match_context = DummyMatchContext(data)
         match_element = debug_model_element.get_match_element(self.path, match_context)
         self.assertEqual(
-            output.getvalue(), 'DebugModelElement path = "%s", unmatched = "%s"\n' % (match_element.get_path(), match_context.match_data))
+            output.getvalue(), "DebugModelElement path = "%s", unmatched = "%s"\n" % (match_element.get_path(), match_context.match_data))
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, b"", b"", None)
 
         sys.stderr = old_stderr
@@ -110,7 +110,7 @@ class DebugModelElementTest(TestBase):
     def test5get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = DebugModelElement(self.id_)
-        data = b'abcdefghijklmnopqrstuvwxyz.!?'
+        data = b"abcdefghijklmnopqrstuvwxyz.!?"
         model_element.get_match_element(self.path, DummyMatchContext(data))
         from aminer.parsing.MatchContext import MatchContext
         model_element.get_match_element(self.path, MatchContext(data))
