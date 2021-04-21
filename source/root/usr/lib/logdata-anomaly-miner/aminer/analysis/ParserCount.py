@@ -107,7 +107,6 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
             for k in self.count_dict:
                 c = self.count_dict[k]
                 output_string += '\t' + str(k) + ': ' + str(c) + '\n'
-                self.count_dict[k][current_processed_lines_str] = 0
             output_string = output_string[:-1]
             event_data = {'StatusInfo': self.count_dict, 'FromTime': datetime.datetime.utcnow().timestamp() - self.report_interval,
                           'ToTime': datetime.datetime.utcnow().timestamp()}
@@ -121,9 +120,10 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 status_info = {k: {
                     current_processed_lines_str: c[current_processed_lines_str],
                     total_processed_lines_str: c[total_processed_lines_str]}}
-                self.count_dict[k][current_processed_lines_str] = 0
                 event_data = {'StatusInfo': status_info, 'FromTime': datetime.datetime.utcnow().timestamp() - self.report_interval,
                               'ToTime': datetime.datetime.utcnow().timestamp()}
                 for listener in self.report_event_handlers:
                     listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Count report', [output_string], event_data, None, self)
+        for k in self.count_dict:
+            self.count_dict[k][current_processed_lines_str] = 0
         logging.getLogger(DEBUG_LOG_NAME).debug('%s sent report.', self.__class__.__name__)
