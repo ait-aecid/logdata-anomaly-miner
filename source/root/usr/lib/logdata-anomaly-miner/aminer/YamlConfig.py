@@ -721,6 +721,13 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     validate_cor_cover_vals_thres=item['validate_cor_cover_vals_thres'],
                     validate_cor_distinct_thres=item['validate_cor_distinct_thres'], ignore_list=item['ignore_list'],
                     constraint_list=item['constraint_list'])
+            elif item['type'].name == 'PathValueTimeIntervalDetector':
+                tmp_analyser = func(
+                    analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
+                    target_path_list=item['paths'], ignore_list=item['ignore_list'],
+                    allow_missing_values_flag=item['allow_missing_values'],
+                    output_log_line=item['output_logline'], time_window_length=item['time_window_length'],
+                    max_time_diff=item['max_time_diff'], num_reduce_time_list=item['num_reduce_time_list'], auto_include_flag=learn)
             else:
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn)
             if item['output_event_handlers'] is not None:
