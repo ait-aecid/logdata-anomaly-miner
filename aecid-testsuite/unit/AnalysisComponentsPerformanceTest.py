@@ -844,10 +844,11 @@ class AnalysisComponentsPerformanceTest(TestBase):
                                        hypothesis_eval_delta_time, delta_time_to_discard_hypothesis):
         """Run the performance tests for EventCorrelationDetector."""
         alphabet = b'abcdefghijklmnopqrstuvwxyz'
-        alphabet_model = FirstMatchModelElement('first', [])
+        children = []
         for i, char in enumerate(alphabet):
             char = bytes([char])
-            alphabet_model.children.append(FixedDataModelElement(char.decode(), char))
+            children.append(FixedDataModelElement(char.decode(), char))
+        alphabet_model = FirstMatchModelElement('first', children)
 
         # training phase
         results = [None] * self.iterations
