@@ -32,14 +32,37 @@ class FixedWordlistDataModelElement(ModelElementInterface):
         @param wordlist the list of words to search for. If it does not fulfill the sorting criteria mentioned in the class documentation,
         an Exception will be raised.
         """
+        if not isinstance(element_id, str):
+            msg = "element_id has to be of the type string."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if len(element_id) < 1:
+            msg = "element_id must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
         self.element_id = element_id
-        self.wordlist = wordlist
+
+        if not isinstance(wordlist, list):
+            msg = "wordlist has to be of the type list."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if len(wordlist) < 2:
+            msg = "wordlist must have two or more elements."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        for word in wordlist:
+            if not isinstance(word, bytes):
+                msg = "words from the wordlist must be of the type bytes."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
+
         for test_pos, ref_word in enumerate(wordlist):
             for test_word in wordlist[test_pos + 1:]:
                 if test_word.startswith(ref_word):
-                    msg = 'Word %s would be shadowed by word %s at lower position' % (repr(test_word), repr(ref_word))
+                    msg = "Word %s would be shadowed by word %s at lower position" % (repr(test_word), repr(ref_word))
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                    raise Exception(msg)
+                    raise ValueError(msg)
+        self.wordlist = wordlist
 
     def get_id(self):
         """Get the element ID."""
