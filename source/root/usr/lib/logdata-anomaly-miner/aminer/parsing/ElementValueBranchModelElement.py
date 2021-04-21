@@ -50,10 +50,15 @@ class ElementValueBranchModelElement(ModelElementInterface):
             raise TypeError(msg)
         self.value_model = value_model
 
-        if value_path is not None and not isinstance(value_path, str):
-            msg = "value_path has to be of the type string or None."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
+        if value_path is not None:
+            if not isinstance(value_path, str):
+                msg = "value_path has to be of the type string or None."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
+            if len(value_path) < 1:
+                msg = "value_path must not be empty."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise ValueError(msg)
         self.value_path = value_path
 
         if not isinstance(branch_model_dict, dict):
