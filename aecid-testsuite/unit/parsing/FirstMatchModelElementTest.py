@@ -1,8 +1,5 @@
 import unittest
-from aminer.parsing.MatchContext import MatchContext
-from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
 from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
-from aminer.parsing.FixedDataModelElement import FixedDataModelElement
 from unit.TestBase import TestBase, DummyMatchContext, DummyFixedDataModelElement
 
 
