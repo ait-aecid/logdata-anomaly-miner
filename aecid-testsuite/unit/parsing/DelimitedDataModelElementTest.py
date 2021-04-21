@@ -1,6 +1,5 @@
 import unittest
 from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
-from aminer.parsing.MatchContext import MatchContext
 from unit.TestBase import TestBase, DummyMatchContext
 
 
