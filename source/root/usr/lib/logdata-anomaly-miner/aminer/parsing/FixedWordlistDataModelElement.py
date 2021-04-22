@@ -26,7 +26,7 @@ class FixedWordlistDataModelElement(ModelElementInterface):
     could never be detected.
     """
 
-    def __init__(self, element_id, wordlist):
+    def __init__(self, element_id: str, wordlist: list):
         """
         Create the model element.
         @param wordlist the list of words to search for. If it does not fulfill the sorting criteria mentioned in the class documentation,
@@ -75,7 +75,7 @@ class FixedWordlistDataModelElement(ModelElementInterface):
         """
         return None
 
-    def get_match_element(self, path, match_context):
+    def get_match_element(self, path: str, match_context):
         """@return None when there is no match, MatchElement otherwise."""
         data = match_context.match_data
         match_data = None
