@@ -11,8 +11,8 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-
-
+import logging
+from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 from aminer import AminerConfig
@@ -22,7 +22,16 @@ class HexStringModelElement(ModelElementInterface):
     """This class just tries to strip off as many hex bytes as possible from a given data string."""
 
     def __init__(self, element_id, upper_case=False):
+        if not isinstance(element_id, str):
+            msg = "element_id has to be of the type string."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if len(element_id) < 1:
+            msg = "element_id must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
         self.element_id = element_id
+
         if upper_case:
             self.char_start = ord('A')
         else:
