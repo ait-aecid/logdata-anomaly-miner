@@ -398,6 +398,10 @@ class DecimalIntegerValueModelElementTest(TestBase):
         self.assertRaises(TypeError, DecimalIntegerValueModelElement, element_id)
 
         # integer element_id is not allowed
+        element_id = True
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, element_id)
+
+        # integer element_id is not allowed
         element_id = 123
         self.assertRaises(TypeError, DecimalIntegerValueModelElement, element_id)
 
@@ -440,6 +444,9 @@ class DecimalIntegerValueModelElementTest(TestBase):
         value_sign_type = b"none"
         self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=value_sign_type)
 
+        value_sign_type = True
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=value_sign_type)
+
         value_sign_type = 123
         self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=value_sign_type)
 
@@ -476,6 +483,9 @@ class DecimalIntegerValueModelElementTest(TestBase):
         value_pad_type = b"none"
         self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=value_pad_type)
 
+        value_pad_type = True
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=value_pad_type)
+
         value_pad_type = 123
         self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=value_pad_type)
 
@@ -509,6 +519,7 @@ class DecimalIntegerValueModelElementTest(TestBase):
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(data, None, None, None))
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, True)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123.22)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, None)
