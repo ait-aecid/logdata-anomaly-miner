@@ -94,7 +94,7 @@ class ElementValueBranchModelElement(ModelElementInterface):
             all_children.append(self.default_branch)
         return all_children
 
-    def get_match_element(self, path, match_context):
+    def get_match_element(self, path: str, match_context):
         """
         Try to find a match on given data for the test model and the selected branch.
         @param path the model path to the parent model element invoking this method.
