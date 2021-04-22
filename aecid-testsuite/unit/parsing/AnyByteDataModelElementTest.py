@@ -49,7 +49,7 @@ class AnyByteDataModelElementTest(TestBase):
         element_id = b"path"
         self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
 
-        # bytes element_id is not allowed
+        # boolean element_id is not allowed
         element_id = True
         self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
 
@@ -59,10 +59,6 @@ class AnyByteDataModelElementTest(TestBase):
 
         # float element_id is not allowed
         element_id = 123.22
-        self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
-
-        # boolean element_id is not allowed
-        element_id = True
         self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
 
         # dict element_id is not allowed

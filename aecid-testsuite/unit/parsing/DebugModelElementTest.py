@@ -119,6 +119,7 @@ class DebugModelElementTest(TestBase):
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(data, None, None, None))
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, True)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123.22)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, None)

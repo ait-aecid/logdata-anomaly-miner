@@ -94,7 +94,7 @@ class ElementValueBranchModelElementTest(TestBase):
         element_id = b"path"
         self.assertRaises(TypeError, ElementValueBranchModelElement, element_id, self.value_model, None, branch_model_dict)
 
-        # bytes element_id is not allowed
+        # boolean element_id is not allowed
         element_id = True
         self.assertRaises(TypeError, ElementValueBranchModelElement, element_id, self.value_model, None, branch_model_dict)
 
@@ -104,10 +104,6 @@ class ElementValueBranchModelElementTest(TestBase):
 
         # float element_id is not allowed
         element_id = 123.22
-        self.assertRaises(TypeError, ElementValueBranchModelElement, element_id, self.value_model, None, branch_model_dict)
-
-        # boolean element_id is not allowed
-        element_id = True
         self.assertRaises(TypeError, ElementValueBranchModelElement, element_id, self.value_model, None, branch_model_dict)
 
         # dict element_id is not allowed
@@ -184,47 +180,43 @@ class ElementValueBranchModelElementTest(TestBase):
     def test7value_path_input_validation(self):
         """Check if value_path is validated."""
         branch_model_dict = {"path: ": self.path_me, "data: ": self.data_me}
-        # empty element_id
+        # empty value_path
         value_path = ""
         self.assertRaises(ValueError, ElementValueBranchModelElement, self.id_, self.value_model, value_path, branch_model_dict)
 
-        # bytes element_id is not allowed
+        # bytes value_path is not allowed
         value_path = b"path"
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, value_path, branch_model_dict)
 
-        # bytes element_id is not allowed
+        # boolean value_path is not allowed
         value_path = True
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, value_path, branch_model_dict)
 
-        # integer element_id is not allowed
+        # integer value_path is not allowed
         value_path = 123
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, value_path, branch_model_dict)
 
-        # float element_id is not allowed
+        # float value_path is not allowed
         value_path = 123.22
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, value_path, branch_model_dict)
 
-        # boolean element_id is not allowed
-        value_path = True
-        self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, value_path, branch_model_dict)
-
-        # dict element_id is not allowed
+        # dict value_path is not allowed
         value_path = {"id": "path"}
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, value_path, branch_model_dict)
 
-        # list element_id is not allowed
+        # list value_path is not allowed
         value_path = ["path"]
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, value_path, branch_model_dict)
 
-        # empty list element_id is not allowed
+        # empty list value_path is not allowed
         value_path = []
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, value_path, branch_model_dict)
 
-        # empty tuple element_id is not allowed
+        # empty tuple value_path is not allowed
         value_path = ()
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, value_path, branch_model_dict)
 
-        # empty set element_id is not allowed
+        # empty set value_path is not allowed
         value_path = set()
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, value_path, branch_model_dict)
 
@@ -242,7 +234,7 @@ class ElementValueBranchModelElementTest(TestBase):
         branch_model_dict = b"path"
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, None, branch_model_dict)
 
-        # bytes branch_model_dict is not allowed
+        # boolean branch_model_dict is not allowed
         branch_model_dict = True
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, None, branch_model_dict)
 
@@ -252,10 +244,6 @@ class ElementValueBranchModelElementTest(TestBase):
 
         # float branch_model_dict is not allowed
         branch_model_dict = 123.22
-        self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, None, branch_model_dict)
-
-        # boolean branch_model_dict is not allowed
-        branch_model_dict = True
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, None, branch_model_dict)
 
         # dict branch_model_dict without ModelElementInterface values is not allowed
@@ -289,7 +277,7 @@ class ElementValueBranchModelElementTest(TestBase):
         default_branch = b"path"
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, None, branch_model_dict, default_branch)
 
-        # bytes default_branch is not allowed
+        # boolean default_branch is not allowed
         default_branch = True
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, None, branch_model_dict, default_branch)
 
@@ -299,10 +287,6 @@ class ElementValueBranchModelElementTest(TestBase):
 
         # float default_branch is not allowed
         default_branch = 123.22
-        self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, None, branch_model_dict, default_branch)
-
-        # boolean default_branch is not allowed
-        default_branch = True
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, None, branch_model_dict, default_branch)
 
         # dict default_branch is not allowed
