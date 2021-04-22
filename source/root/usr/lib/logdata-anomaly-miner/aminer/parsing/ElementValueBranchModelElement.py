@@ -24,7 +24,7 @@ import logging
 class ElementValueBranchModelElement(ModelElementInterface):
     """This class defines an element that selects a branch path based on a previous model value."""
 
-    def __init__(self, element_id: str, value_model: ModelElementInterface, value_path: str, branch_model_dict: dict,
+    def __init__(self, element_id: str, value_model: ModelElementInterface, value_path: Union[str, None], branch_model_dict: dict,
                  default_branch: Union[str, int] = None):
         """
         Create the branch model element.
