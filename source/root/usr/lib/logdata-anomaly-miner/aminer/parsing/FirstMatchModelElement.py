@@ -19,7 +19,7 @@ from aminer.parsing.ModelElementInterface import ModelElementInterface
 class FirstMatchModelElement(ModelElementInterface):
     """This class defines a model element to return the match from the the first matching child model within a given list."""
 
-    def __init__(self, element_id, children):
+    def __init__(self, element_id: str, children: list):
         if not isinstance(element_id, str):
             msg = "element_id has to be of the type string."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -53,7 +53,7 @@ class FirstMatchModelElement(ModelElementInterface):
         """Get all possible child model elements of this element."""
         return self.children
 
-    def get_match_element(self, path, match_context):
+    def get_match_element(self, path: str, match_context):
         """@return None when there is no match, MatchElement otherwise."""
         current_path = "%s/%s" % (path, self.element_id)
 
