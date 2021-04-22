@@ -19,10 +19,10 @@ from aminer.parsing.ModelElementInterface import ModelElementInterface
 
 
 class IpAddressDataModelElement(ModelElementInterface):
-    """This class defines a model element that matches an IPv4 IP address."""
+    """This class defines a model element that matches an IP address."""
 
-    def __init__(self, element_id: str):
-        """Create an element to match IPv4 IP addresses."""
+    def __init__(self, element_id: str, ipv6: bool = False):
+        """Create an element to match IP addresses."""
         if not isinstance(element_id, str):
             msg = "element_id has to be of the type string."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -32,9 +32,31 @@ class IpAddressDataModelElement(ModelElementInterface):
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         self.element_id = element_id
-        # self.regex = re.compile(br"((2[0-4][0-9]|1[0-9][0-9]|25[0-5]|[1-9]?[0-9])\.){3}(2[0-4][0-9]|1[0-9][0-9]|25[0-5]|[1-9]?[0-9])")
-        # use a simpler regex to improve the performance.
-        self.regex = re.compile(br"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}")
+
+        if not isinstance(ipv6, bool):
+            msg = "ipv6 has to be of the type bool."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if not ipv6:
+            # self.regex = re.compile(br"((2[0-4][0-9]|1[0-9][0-9]|25[0-5]|[1-9]?[0-9])\.){3}(2[0-4][0-9]|1[0-9][0-9]|25[0-5]|[1-9]?[0-9])")
+            # use a simpler regex to improve the performance.
+            self.regex = re.compile(br"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}")
+            self.extract = extract_ipv4_address
+        else:
+            # modified regex from https://community.helpsystems.com/forums/intermapper/miscellaneous-topics/
+            # 5acc4fcf-fa83-e511-80cf-0050568460e4?_ga=2.113564423.1432958022.1523882681-2146416484.1523557976
+            self.regex = re.compile(
+                br"((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]"
+                br"?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]"
+                br"\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:"
+                br"[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}"
+                br":){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d"
+                br"\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d"
+                br"|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:["
+                br"0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f"
+                br"]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:"
+                br")))(%.+)?")
+            self.extract = extract_ipv6_address
 
     def get_id(self):
         """Get the element ID."""
@@ -50,16 +72,26 @@ class IpAddressDataModelElement(ModelElementInterface):
     def get_match_element(self, path: str, match_context):
         """Read an IP address at the current data position. When found, the match_object will be."""
         m = self.regex.match(match_context.match_data)
+        print(m)
         if m is None:
             return None
         match_len = m.span(0)[1]
-        data = match_context.match_data
-        numbers = data[:match_len].split(b".")
-        numbers = [int(number) for number in numbers]
-        for number in numbers:
-            if number > 255:
-                return None
-        extracted_address = (numbers[0] << 24) + (numbers[1] << 16) + (numbers[2] << 8) + numbers[3]
-        match_string = data[:match_len]
+        extracted_address = self.extract(match_context.match_data, match_len)
+        if extracted_address is None:
+            return None
+        match_string = match_context.match_data[:match_len]
         match_context.update(match_string)
         return MatchElement("%s/%s" % (path, self.element_id), match_string, extracted_address, None)
+
+
+def extract_ipv4_address(data: bytes, match_len: int):
+    numbers = data[:match_len].split(b".")
+    numbers = [int(number) for number in numbers]
+    for number in numbers:
+        if number > 255:
+            return None
+    return (numbers[0] << 24) + (numbers[1] << 16) + (numbers[2] << 8) + numbers[3]
+
+
+def extract_ipv6_address(data: bytes, match_len: int):
+    return True

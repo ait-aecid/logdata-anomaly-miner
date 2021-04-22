@@ -19,7 +19,7 @@ class IpAddressDataModelElementTest(TestBase):
         ip_addr_dme = IpAddressDataModelElement(self.id_)
         self.assertEqual(ip_addr_dme.get_child_elements(), None)
 
-    def test3get_match_element_valid_match(self):
+    def test3get_match_element_valid_ipv4_match(self):
         """
         This test case checks the functionality by parsing a real IP-addresses.
         The boundary values for IP-addresses is 0.0.0.0 - 255.255.255.255
@@ -50,7 +50,7 @@ class IpAddressDataModelElementTest(TestBase):
         match_element = ip_addr_dme.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 3232235675, None)
 
-    def test4get_match_element_no_match(self):
+    def test4get_match_element_no_match_ipv4(self):
         """
         Test if wrong formats are determined and boundary values are checked.
         Also check if hexadecimal ip addresses are not parsed as these are not allowed.
@@ -72,7 +72,90 @@ class IpAddressDataModelElementTest(TestBase):
         match_element = ip_addr_dme.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
-    def test5element_id_input_validation(self):
+    def test5get_match_element_valid_ipv6_match(self):
+        """
+        This test case checks the functionality by parsing a real IP-addresses.
+        The numerical representation of the ip address was calculated with the help of https://www.ipaddressguide.com/ipv6-to-decimal.
+        """
+        ip_addr_dme = IpAddressDataModelElement(self.id_, True)
+        data = b"2001:4860:4860::8888 followed by some text"
+        value = b"2001:4860:4860::8888"
+        match_context = DummyMatchContext(data)
+        match_element = ip_addr_dme.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 3232235675, None)
+
+        # full form of IPv6
+        data = b"fe80:0000:0000:0000:0204:61ff:fe9d:f156."
+        value = b"fe80:0000:0000:0000:0204:61ff:fe9d:f156"
+        match_context = DummyMatchContext(data)
+        match_element = ip_addr_dme.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 0, None)
+
+        # drop leading zeroes
+        data = b"fe80:0:0:0:204:61ff:fe9d:f156."
+        value = b"fe80:0:0:0:204:61ff:fe9d:f156"
+        match_context = DummyMatchContext(data)
+        match_element = ip_addr_dme.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 4294967295, None)
+
+        # collapse multiple zeroes to :: in the IPv6 address
+        data = b"fe80::204:61ff:fe9d:f156 followed by some text"
+        value = b"fe80::204:61ff:fe9d:f156"
+        match_context = DummyMatchContext(data)
+        match_element = ip_addr_dme.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 3232235675, None)
+
+        # localhost
+        data = b"::1 followed by some text"
+        value = b"::1"
+        match_context = DummyMatchContext(data)
+        match_element = ip_addr_dme.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 3232235675, None)
+
+        # link-local prefix
+        data = b"fe80:: followed by some text"
+        value = b"fe80::"
+        match_context = DummyMatchContext(data)
+        match_element = ip_addr_dme.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 3232235675, None)
+
+        # global unicast prefix
+        data = b"2001:: followed by some text"
+        value = b"2001::"
+        match_context = DummyMatchContext(data)
+        match_element = ip_addr_dme.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 3232235675, None)
+
+    def test6get_match_element_no_match_ipv6(self):
+        """
+        Test if wrong formats are determined and boundary values are checked.
+        """
+        ip_addr_dme = IpAddressDataModelElement(self.id_)
+        # IPv4 dotted quad at the end
+        data = b"fe80:0000:0000:0000:0204:61ff:254.157.241.86"
+        match_context = DummyMatchContext(data)
+        match_element = ip_addr_dme.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        # drop leading zeroes, IPv4 dotted quad at the end
+        data = b"fe80:0:0:0:0204:61ff:254.157.241.86"
+        match_context = DummyMatchContext(data)
+        match_element = ip_addr_dme.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        # dotted quad at the end, multiple zeroes collapsed
+        data = b"fe80::204:61ff:254.157.241.86"
+        match_context = DummyMatchContext(data)
+        match_element = ip_addr_dme.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        # multiple :: in the IPv6 address
+        data = b"fe80::204:61ff::fe9d:f156"
+        match_context = DummyMatchContext(data)
+        match_element = ip_addr_dme.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+    def test7element_id_input_validation(self):
         """Check if element_id is validated."""
         # empty element_id
         element_id = ""
@@ -118,7 +201,49 @@ class IpAddressDataModelElementTest(TestBase):
         element_id = set()
         self.assertRaises(TypeError, IpAddressDataModelElement, element_id)
 
-    def test6get_match_element_match_context_input_validation(self):
+    def test8ipv6_input_validation(self):
+        """Check if ipv6 is validated."""
+        # string ipv6
+        ipv6 = "path"
+        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, ipv6)
+
+        # None ipv6
+        ipv6 = None
+        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, ipv6)
+
+        # bytes ipv6 is not allowed
+        ipv6 = b"path"
+        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, ipv6)
+
+        # integer ipv6 is not allowed
+        ipv6 = 123
+        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, ipv6)
+
+        # float ipv6 is not allowed
+        ipv6 = 123.22
+        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, ipv6)
+
+        # dict ipv6 is not allowed
+        ipv6 = {"id": "path"}
+        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, ipv6)
+
+        # list ipv6 is not allowed
+        ipv6 = ["path"]
+        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, ipv6)
+
+        # empty list ipv6 is not allowed
+        ipv6 = []
+        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, ipv6)
+
+        # empty tuple ipv6 is not allowed
+        ipv6 = ()
+        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, ipv6)
+
+        # empty set ipv6 is not allowed
+        ipv6 = set()
+        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, ipv6)
+
+    def test9get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = IpAddressDataModelElement(self.id_)
         data = b"abcdefghijklmnopqrstuvwxyz.!?"
@@ -140,7 +265,7 @@ class IpAddressDataModelElementTest(TestBase):
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, ())
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, model_element)
 
-    def test7performance(self):  # skipcq: PYL-R0201
+    def test10performance(self):  # skipcq: PYL-R0201
         """Test the performance of the implementation."""
         import_setup = """
 import copy
