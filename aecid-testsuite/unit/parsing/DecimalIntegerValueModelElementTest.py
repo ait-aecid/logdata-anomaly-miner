@@ -397,7 +397,7 @@ class DecimalIntegerValueModelElementTest(TestBase):
         element_id = b"path"
         self.assertRaises(TypeError, DecimalIntegerValueModelElement, element_id)
 
-        # integer element_id is not allowed
+        # boolean element_id is not allowed
         element_id = True
         self.assertRaises(TypeError, DecimalIntegerValueModelElement, element_id)
 
