@@ -45,16 +45,13 @@ class IpAddressDataModelElement(ModelElementInterface):
         else:
             # modified regex from https://community.helpsystems.com/forums/intermapper/miscellaneous-topics/
             # 5acc4fcf-fa83-e511-80cf-0050568460e4?_ga=2.113564423.1432958022.1523882681-2146416484.1523557976
+            i4 = br"((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})"
             self.regex = re.compile(
-                br"((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]"
-                br"?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]"
-                br"\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:"
-                br"[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}"
-                br":){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d"
-                br"\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d"
-                br"|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:["
-                br"0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f"
-                br"]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:"
+                br"((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|"+i4+br"|:))|(([0-9A-Fa-f]{1,4}:"
+                br"){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:"+i4+br"|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?"
+                br":"+i4+br")|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:"+i4+br")|:))|(([0-9A-Fa-f]{"
+                br"1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:"+i4+br")|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{"
+                br"1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:"+i4+br")|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:"+i4+br")|:"
                 br")))(%.+)?")
             self.extract = extract_ipv6_address
 
@@ -71,12 +68,17 @@ class IpAddressDataModelElement(ModelElementInterface):
 
     def get_match_element(self, path: str, match_context):
         """Read an IP address at the current data position. When found, the match_object will be."""
+        #create variable for match_context.match_data!!
         m = self.regex.match(match_context.match_data)
         print(m)
         if m is None:
             return None
         match_len = m.span(0)[1]
-        extracted_address = self.extract(match_context.match_data, match_len)
+        #last one does not work yet..
+        if self.extract == extract_ipv6_address and (b"." in m.group()[:match_len].split(b":")[-1] or (len(
+                match_context.match_data) > match_len and (match_context.match_data[match_len] == ord(b".") or match_context.match_data[match_len] == ord(b":")))):
+            return None
+        extracted_address = self.extract(m.group(), match_len)
         if extracted_address is None:
             return None
         match_string = match_context.match_data[:match_len]
@@ -95,6 +97,9 @@ def extract_ipv4_address(data: bytes, match_len: int):
 
 def extract_ipv6_address(data: bytes, match_len: int):
     numbers = data[:match_len].split(b":")
+    print(numbers)
+    # if b"" in numbers[-1]:
+    #     return None
     if b"" in numbers:
         index = numbers.index(b"")
         # addresses can start or end with ::. Handle this special case.
