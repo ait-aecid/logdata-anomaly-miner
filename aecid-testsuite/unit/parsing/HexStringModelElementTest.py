@@ -1,5 +1,4 @@
 import unittest
-from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.HexStringModelElement import HexStringModelElement
 from unit.TestBase import TestBase, DummyMatchContext
 
@@ -21,12 +20,53 @@ class HexStringModelElementTest(TestBase):
         self.assertEqual(hex_me.get_child_elements(), None)
 
     def test3get_match_element_valid_match(self):
-        """Parse matching substring from MatchContext and check if the MatchContext was updated with all characters."""
-        data = b"abcdefghijklmnopqrstuvwxyz.!?"
-        match_context = DummyMatchContext(data)
-        hex_me = HexStringModelElement(self.id_)
-        match_element = hex_me.get_match_element(self.path, match_context)
-        self.compare_match_results(data, match_element, match_context, self.id_, self.path, data, data, None)
+        """Try all values and check if the desired results are produced."""
+        # data = b"abcdefghijklmnopqrstuvwxyz.!?"
+        # match_context = DummyMatchContext(data)
+        # hex_me = HexStringModelElement(self.id_)
+        # match_element = hex_me.get_match_element(self.path, match_context)
+        # self.compare_match_results(data, match_element, match_context, self.id_, self.path, data, data, None)
+
+        allowed_chars = [b"0", b"1", b"2", b"3", b"4", b"5", b"6", b"7", b"8", b"9", b"a", b"b", b"c", b"d", b"e", b"f"]
+        char1 = b"\x00"
+        char2 = b"\x00"
+        hex_string_model_element = HexStringModelElement(self.id_)
+
+        while ord(char2) < ord(b"\x7F"):
+            match_context = DummyMatchContext(char2 + char1)
+            match_element = hex_string_model_element.get_match_element(self.path, match_context)
+            if char2 in allowed_chars and char1 in allowed_chars:
+                self.assertEqual(match_element.get_match_object(), char2 + char1)
+            # commented out these parts of the test, as the HexStringModelElement currently is not working properly.
+            # These tests need to be rewritten!
+            else:
+                print(char2, char1)
+                self.assertEqual(match_element, None)
+            if ord(char1) == 0x7f:
+                char1 = b"\x00"
+                char2 = bytes(chr(ord(char2) + 1), "utf-8")
+            else:
+                char1 = bytes(chr(ord(char1) + 1), "utf-8")
+
+        allowed_chars = [b"0", b"1", b"2", b"3", b"4", b"5", b"6", b"7", b"8", b"9", b"A", b"B", b"C", b"D", b"E", b"F"]
+        char1 = b"\x00"
+        char2 = b"\x00"
+        hex_string_model_element = HexStringModelElement(self.id_, True)
+
+        while ord(char2) < ord(b"\x7F"):
+            match_context = DummyMatchContext(char2 + char1)
+            match_element = hex_string_model_element.get_match_element(self.path, match_context)
+            if char2 in allowed_chars and char1 in allowed_chars:
+                self.assertEqual(match_element.get_match_object(), char2 + char1)
+            # commented out these parts of the test, as the HexStringModelElement currently is not working properly.
+            # These tests need to be rewritten!
+            else:
+                self.assertEqual(match_element, None)
+            if ord(char1) == 0x7f:
+                char1 = b"\x00"
+                char2 = bytes(chr(ord(char2) + 1), "utf-8")
+            else:
+                char1 = bytes(chr(ord(char1) + 1), "utf-8")
 
     def test4get_match_element_no_match(self):
         """Parse not matching substring from MatchContext and check if the MatchContext was not changed."""
@@ -50,7 +90,7 @@ class HexStringModelElementTest(TestBase):
         element_id = b"path"
         self.assertRaises(TypeError, HexStringModelElement, element_id)
 
-        # bytes element_id is not allowed
+        # boolean element_id is not allowed
         element_id = True
         self.assertRaises(TypeError, HexStringModelElement, element_id)
 
@@ -60,10 +100,6 @@ class HexStringModelElementTest(TestBase):
 
         # float element_id is not allowed
         element_id = 123.22
-        self.assertRaises(TypeError, HexStringModelElement, element_id)
-
-        # boolean element_id is not allowed
-        element_id = True
         self.assertRaises(TypeError, HexStringModelElement, element_id)
 
         # dict element_id is not allowed
@@ -100,10 +136,6 @@ class HexStringModelElementTest(TestBase):
         upper_case = b"path"
         self.assertRaises(TypeError, HexStringModelElement, self.id_, upper_case)
 
-        # bytes upper_case is not allowed
-        upper_case = True
-        self.assertRaises(TypeError, HexStringModelElement, self.id_, upper_case)
-
         # integer upper_case is not allowed
         upper_case = 123
         self.assertRaises(TypeError, HexStringModelElement, self.id_, upper_case)
@@ -132,7 +164,7 @@ class HexStringModelElementTest(TestBase):
         upper_case = set()
         self.assertRaises(TypeError, HexStringModelElement, self.id_, upper_case)
 
-    def test6get_match_element_match_context_input_validation(self):
+    def test7get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = HexStringModelElement(self.id_)
         data = b"abcdefghijklmnopqrstuvwxyz.!?"
@@ -153,55 +185,6 @@ class HexStringModelElementTest(TestBase):
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, set())
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, ())
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, model_element)
-
-
-
-
-
-
-
-
-    def test1check_all_values(self):
-        """Try all values and check if the desired results are produced."""
-        allowed_chars = [b'0', b'1', b'2', b'3', b'4', b'5', b'6', b'7', b'8', b'9', b'a', b'b', b'c', b'd', b'e', b'f']
-        char1 = b'\x00'
-        char2 = b'\x00'
-        hex_string_model_element = HexStringModelElement('id')
-
-        while ord(char2) < ord(b'\x7F'):
-            match_context = MatchContext(char2 + char1)
-            match_element = hex_string_model_element.get_match_element('match', match_context)
-            if char2 in allowed_chars and char1 in allowed_chars:
-                self.assertEqual(match_element.get_match_object(), char2 + char1)
-            # commented out these parts of the test, as the HexStringModelElement currently is not working properly.
-            # These tests need to be rewritten!
-            # else:
-            #     self.assertEqual(match_element, None)
-            if ord(char1) == 0x7f:
-                char1 = b'\x00'
-                char2 = bytes(chr(ord(char2) + 1), 'utf-8')
-            else:
-                char1 = bytes(chr(ord(char1) + 1), 'utf-8')
-
-        allowed_chars = [b'0', b'1', b'2', b'3', b'4', b'5', b'6', b'7', b'8', b'9', b'A', b'B', b'C', b'D', b'E', b'F']
-        char1 = b'\x00'
-        char2 = b'\x00'
-        hex_string_model_element = HexStringModelElement('id', True)
-
-        while ord(char2) < ord(b'\x7F'):
-            match_context = MatchContext(char2 + char1)
-            match_element = hex_string_model_element.get_match_element('match', match_context)
-            if char2 in allowed_chars and char1 in allowed_chars:
-                self.assertEqual(match_element.get_match_object(), char2 + char1)
-            # commented out these parts of the test, as the HexStringModelElement currently is not working properly.
-            # These tests need to be rewritten!
-            # else:
-            #     self.assertEqual(match_element, None)
-            if ord(char1) == 0x7f:
-                char1 = b'\x00'
-                char2 = bytes(chr(ord(char2) + 1), 'utf-8')
-            else:
-                char1 = bytes(chr(ord(char1) + 1), 'utf-8')
 
 
 if __name__ == "__main__":

@@ -21,7 +21,7 @@ from aminer import AminerConfig
 class HexStringModelElement(ModelElementInterface):
     """This class just tries to strip off as many hex bytes as possible from a given data string."""
 
-    def __init__(self, element_id, upper_case=False):
+    def __init__(self, element_id: str, upper_case: bool = False):
         if not isinstance(element_id, str):
             msg = "element_id has to be of the type string."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -32,6 +32,10 @@ class HexStringModelElement(ModelElementInterface):
             raise ValueError(msg)
         self.element_id = element_id
 
+        if not isinstance(upper_case, bool):
+            msg = "upper_case has to be of the type bool."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         if upper_case:
             self.char_start = ord('A')
         else:
@@ -48,7 +52,7 @@ class HexStringModelElement(ModelElementInterface):
         """
         return None
 
-    def get_match_element(self, path, match_context):
+    def get_match_element(self, path: str, match_context):
         """
         Find the maximum number of bytes forming a integer number according to the parameters specified.
         @return a match when at least one byte being a digit was found
