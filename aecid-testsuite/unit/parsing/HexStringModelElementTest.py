@@ -196,6 +196,39 @@ class HexStringModelElementTest(TestBase):
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, ())
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, model_element)
 
+    def test12performance(self):  # skipcq: PYL-R0201
+        """Test the performance of the implementation. Comment this test out in normal cases."""
+        import_setup = """
+import copy
+from unit.TestBase import DummyMatchContext
+from aminer.parsing.HexStringModelElement import HexStringModelElement
+times = 100000
+"""
+        string_short_setup = """
+hex_string = b"100"
+"""
+        string_long_setup = """
+hex_string = b"23999EA30A3430DA"
+"""
+        end_setup = """
+dummy_match_context = DummyMatchContext(hex_string)
+dummy_match_context_list = [copy.deepcopy(dummy_match_context) for _ in range(times)]
+hex_string_dme = HexStringModelElement("s0")
+
+def run():
+    match_context = dummy_match_context_list.pop(0)
+    hex_string_dme.get_match_element("hex", match_context)
+"""
+        _setup_short = import_setup + string_short_setup + end_setup
+        _setup_long = import_setup + string_long_setup + end_setup
+        # import timeit
+        # times = 100000
+        # print("Every hex string is run 100.000 times.")
+        # t = timeit.timeit(setup=_setup_short, stmt="run()", number=times)
+        # print("Hex string 100: ", t)
+        # t = timeit.timeit(setup=_setup_long, stmt="run()", number=times)
+        # print("Hex string 23999EA30A3430DA: ", t)
+
 
 if __name__ == "__main__":
     unittest.main()

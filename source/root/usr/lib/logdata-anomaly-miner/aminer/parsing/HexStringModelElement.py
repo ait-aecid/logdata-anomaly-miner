@@ -12,6 +12,7 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import logging
+import re
 from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.ModelElementInterface import ModelElementInterface
@@ -37,9 +38,9 @@ class HexStringModelElement(ModelElementInterface):
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
         if upper_case:
-            self.char_start = ord("A")
+            self.hex_regex = re.compile(rb"[0-9A-F]+")
         else:
-            self.char_start = ord("a")
+            self.hex_regex = re.compile(rb"[0-9a-f]+")
 
     def get_id(self):
         """Get the element ID."""
@@ -57,17 +58,12 @@ class HexStringModelElement(ModelElementInterface):
         Find the maximum number of bytes forming a integer number according to the parameters specified.
         @return a match when at least one byte being a digit was found
         """
-        data = match_context.match_data
-        match_len = 0
-        for b_val in data:
-            if ((b_val < 0x30) or (b_val > 0x39)) and ((b_val < self.char_start) or (b_val - self.char_start > 5)):
-                break
-            match_len += 1
-
-        if match_len == 0:
+        m = self.hex_regex.match(match_context.match_data)
+        if m is None:
             return None
+        match_len = m.span(0)[1]
 
-        match_object = data[:match_len]
+        match_object = match_context.match_data[:match_len]
         try:
             pad = ""
             if len(match_object.decode(AminerConfig.ENCODING)) % 2 != 0:
