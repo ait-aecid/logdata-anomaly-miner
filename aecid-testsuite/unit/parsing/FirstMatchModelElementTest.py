@@ -87,16 +87,16 @@ class FirstDataModelElementTest(TestBase):
         element_id = b"path"
         self.assertRaises(TypeError, FirstMatchModelElement, element_id, self.children)
 
+        # boolean element_id is not allowed
+        element_id = True
+        self.assertRaises(TypeError, FirstMatchModelElement, element_id, self.children)
+
         # integer element_id is not allowed
         element_id = 123
         self.assertRaises(TypeError, FirstMatchModelElement, element_id, self.children)
 
         # float element_id is not allowed
         element_id = 123.22
-        self.assertRaises(TypeError, FirstMatchModelElement, element_id, self.children)
-
-        # boolean element_id is not allowed
-        element_id = True
         self.assertRaises(TypeError, FirstMatchModelElement, element_id, self.children)
 
         # dict element_id is not allowed
@@ -133,16 +133,16 @@ class FirstDataModelElementTest(TestBase):
         children = b"path"
         self.assertRaises(TypeError, FirstMatchModelElement, self.id_, children)
 
+        # boolean children is not allowed
+        children = True
+        self.assertRaises(TypeError, FirstMatchModelElement, self.id_, children)
+
         # integer children is not allowed
         children = 123
         self.assertRaises(TypeError, FirstMatchModelElement, self.id_, children)
 
         # float children is not allowed
         children = 123.22
-        self.assertRaises(TypeError, FirstMatchModelElement, self.id_, children)
-
-        # boolean children is not allowed
-        children = True
         self.assertRaises(TypeError, FirstMatchModelElement, self.id_, children)
 
         # dict children is not allowed
