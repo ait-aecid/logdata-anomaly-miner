@@ -148,8 +148,16 @@ from unit.TestBase import DummyMatchContext
 from aminer.parsing.IpAddressDataModelElement import IpAddressDataModelElement
 times = 300000
 """
-        ip_setup = """
+        ip_192_setup = """
 ip = b"192.168.0.155"
+dme = IpAddressDataModelElement("s0")
+"""
+        ip_0_setup = """
+ip = b"0.0.0.0"
+dme = IpAddressDataModelElement("s0")
+"""
+        ip_255_setup = """
+ip = b"255.255.255.255"
 dme = IpAddressDataModelElement("s0")
 """
         end_setup = """
@@ -160,13 +168,23 @@ def run():
     match_context = dummy_match_context_list.pop(0)
     dme.get_match_element("match", match_context)
 """
-        _setup = import_setup + ip_setup + end_setup
+        _setup192 = import_setup + ip_192_setup + end_setup
+        _setup0 = import_setup + ip_0_setup + end_setup
+        _setup255 = import_setup + ip_255_setup + end_setup
         import timeit
         times = 300000
-        print()
-        print("192.168.0.155 is run 300.000 times.")
-        t = timeit.timeit(setup=_setup, stmt="run()", number=times)
-        print("time: ", t)
+        # print()
+        # print("192.168.0.155 is run 300.000 times.")
+        # t = timeit.timeit(setup=_setup192, stmt="run()", number=times)
+        # print("time: ", t)
+        # print()
+        # print("0.0.0.0 is run 300.000 times.")
+        # t = timeit.timeit(setup=_setup0, stmt="run()", number=times)
+        # print("time: ", t)
+        # print()
+        # print("255.255.255.255 is run 300.000 times.")
+        # t = timeit.timeit(setup=_setup255, stmt="run()", number=times)
+        # print("time: ", t)
 
 
 if __name__ == "__main__":

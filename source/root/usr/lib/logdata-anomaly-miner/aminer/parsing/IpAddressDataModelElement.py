@@ -12,6 +12,7 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import logging
+import re
 from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.ModelElementInterface import ModelElementInterface
@@ -31,6 +32,9 @@ class IpAddressDataModelElement(ModelElementInterface):
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         self.element_id = element_id
+        # self.regex = re.compile(br"((2[0-4][0-9]|1[0-9][0-9]|25[0-5]|[1-9]?[0-9])\.){3}(2[0-4][0-9]|1[0-9][0-9]|25[0-5]|[1-9]?[0-9])")
+        # use a simpler regex to improve the performance.
+        self.regex = re.compile(br"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}")
 
     def get_id(self):
         """Get the element ID."""
@@ -44,40 +48,18 @@ class IpAddressDataModelElement(ModelElementInterface):
         return None
 
     def get_match_element(self, path: str, match_context):
-        """Read an IP address at the current data position. When found, the matchObject will be."""
+        """Read an IP address at the current data position. When found, the match_object will be."""
+        m = self.regex.match(match_context.match_data)
+        if m is None:
+            return None
+        match_len = m.span(0)[1]
         data = match_context.match_data
-
-        number_count = 0
-        digit_count = 0
-        match_len = 0
-        extracted_address = 0
-        for test_byte in data:
-            match_len += 1
-            if test_byte in b'0123456789':
-                digit_count += 1
-                continue
-            if digit_count == 0:
+        numbers = data[:match_len].split(b".")
+        numbers = [int(number) for number in numbers]
+        for number in numbers:
+            if number > 255:
                 return None
-
-            ip_bits = int(data[match_len - digit_count - 1:match_len - 1])
-            if ip_bits > 0xff:
-                return None
-            extracted_address = (extracted_address << 8) | ip_bits
-            digit_count = 0
-            number_count += 1
-            if number_count == 4:
-                # We are now after the first byte not belonging to the IP. So go back one step
-                match_len -= 1
-                break
-            if test_byte != ord(b'.'):
-                return None
-
-        if digit_count != 0:
-            ip_bits = int(data[match_len - digit_count:match_len])
-            if ip_bits > 0xff:
-                return None
-            extracted_address = (extracted_address << 8) | ip_bits
-
+        extracted_address = (numbers[0] << 24) + (numbers[1] << 16) + (numbers[2] << 8) + numbers[3]
         match_string = data[:match_len]
         match_context.update(match_string)
         return MatchElement("%s/%s" % (path, self.element_id), match_string, extracted_address, None)
