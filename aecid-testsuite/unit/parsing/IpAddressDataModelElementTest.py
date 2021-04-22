@@ -80,57 +80,62 @@ class IpAddressDataModelElementTest(TestBase):
         ip_addr_dme = IpAddressDataModelElement(self.id_, True)
         data = b"2001:4860:4860::8888 followed by some text"
         value = b"2001:4860:4860::8888"
+        number = 42541956123769884636017138956568135816
         match_context = DummyMatchContext(data)
         match_element = ip_addr_dme.get_match_element(self.path, match_context)
-        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 3232235675, None)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, number, None)
 
         # full form of IPv6
         data = b"fe80:0000:0000:0000:0204:61ff:fe9d:f156."
         value = b"fe80:0000:0000:0000:0204:61ff:fe9d:f156"
+        number = 338288524927261089654164245681446711638
         match_context = DummyMatchContext(data)
         match_element = ip_addr_dme.get_match_element(self.path, match_context)
-        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 0, None)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, number, None)
 
         # drop leading zeroes
         data = b"fe80:0:0:0:204:61ff:fe9d:f156."
         value = b"fe80:0:0:0:204:61ff:fe9d:f156"
         match_context = DummyMatchContext(data)
         match_element = ip_addr_dme.get_match_element(self.path, match_context)
-        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 4294967295, None)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, number, None)
 
         # collapse multiple zeroes to :: in the IPv6 address
         data = b"fe80::204:61ff:fe9d:f156 followed by some text"
         value = b"fe80::204:61ff:fe9d:f156"
         match_context = DummyMatchContext(data)
         match_element = ip_addr_dme.get_match_element(self.path, match_context)
-        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 3232235675, None)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, number, None)
 
         # localhost
         data = b"::1 followed by some text"
         value = b"::1"
+        number = 1
         match_context = DummyMatchContext(data)
         match_element = ip_addr_dme.get_match_element(self.path, match_context)
-        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 3232235675, None)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, number, None)
 
         # link-local prefix
         data = b"fe80:: followed by some text"
         value = b"fe80::"
+        number = 338288524927261089654018896841347694592
         match_context = DummyMatchContext(data)
         match_element = ip_addr_dme.get_match_element(self.path, match_context)
-        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 3232235675, None)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, number, None)
 
         # global unicast prefix
         data = b"2001:: followed by some text"
         value = b"2001::"
+        number = 42540488161975842760550356425300246528
         match_context = DummyMatchContext(data)
         match_element = ip_addr_dme.get_match_element(self.path, match_context)
-        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 3232235675, None)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, number, None)
 
     def test6get_match_element_no_match_ipv6(self):
         """
         Test if wrong formats are determined and boundary values are checked.
         """
-        ip_addr_dme = IpAddressDataModelElement(self.id_)
+        ip_addr_dme = IpAddressDataModelElement(self.id_, True)
         # IPv4 dotted quad at the end
         data = b"fe80:0000:0000:0000:0204:61ff:254.157.241.86"
         match_context = DummyMatchContext(data)
@@ -151,6 +156,12 @@ class IpAddressDataModelElementTest(TestBase):
 
         # multiple :: in the IPv6 address
         data = b"fe80::204:61ff::fe9d:f156"
+        match_context = DummyMatchContext(data)
+        match_element = ip_addr_dme.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        # IPv4 address with ipv6 being True
+        data = b"254.157.241.86"
         match_context = DummyMatchContext(data)
         match_element = ip_addr_dme.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)

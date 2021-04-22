@@ -94,4 +94,15 @@ def extract_ipv4_address(data: bytes, match_len: int):
 
 
 def extract_ipv6_address(data: bytes, match_len: int):
-    return True
+    numbers = data[:match_len].split(b":")
+    if b"" in numbers:
+        index = numbers.index(b"")
+        # addresses can start or end with ::. Handle this special case.
+        numbers = [number for number in numbers if number != b""]
+        numbers = numbers[:index] + [b"0"] * (8 - len(numbers)) + numbers[index:]
+    numbers = [int(b"0x" + number, 16) for number in numbers]
+    for number in numbers:
+        if number > 65535:
+            return None
+    return (numbers[0] << 112) + (numbers[1] << 96) + (numbers[2] << 80) + (numbers[3] << 64) + (numbers[4] << 48) + (numbers[5] << 32)\
+        + (numbers[6] << 16) + (numbers[7])
