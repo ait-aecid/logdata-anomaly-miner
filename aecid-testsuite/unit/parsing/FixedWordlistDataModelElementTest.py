@@ -78,7 +78,7 @@ class FixedWordlistDataModelElementTest(TestBase):
         element_id = b"path"
         self.assertRaises(TypeError, FixedWordlistDataModelElement, element_id, self.wordlist)
 
-        # bytes element_id is not allowed
+        # boolean element_id is not allowed
         element_id = True
         self.assertRaises(TypeError, FixedWordlistDataModelElement, element_id, self.wordlist)
 
@@ -88,10 +88,6 @@ class FixedWordlistDataModelElementTest(TestBase):
 
         # float element_id is not allowed
         element_id = 123.22
-        self.assertRaises(TypeError, FixedWordlistDataModelElement, element_id, self.wordlist)
-
-        # boolean element_id is not allowed
-        element_id = True
         self.assertRaises(TypeError, FixedWordlistDataModelElement, element_id, self.wordlist)
 
         # dict element_id is not allowed
@@ -128,7 +124,7 @@ class FixedWordlistDataModelElementTest(TestBase):
         wordlist = b"path"
         self.assertRaises(TypeError, FixedWordlistDataModelElement, self.id_, wordlist)
 
-        # bytes wordlist is not allowed
+        # boolean wordlist is not allowed
         wordlist = True
         self.assertRaises(TypeError, FixedWordlistDataModelElement, self.id_, wordlist)
 
@@ -138,10 +134,6 @@ class FixedWordlistDataModelElementTest(TestBase):
 
         # float wordlist is not allowed
         wordlist = 123.22
-        self.assertRaises(TypeError, FixedWordlistDataModelElement, self.id_, wordlist)
-
-        # boolean wordlist is not allowed
-        wordlist = True
         self.assertRaises(TypeError, FixedWordlistDataModelElement, self.id_, wordlist)
 
         # dict wordlist is not allowed
