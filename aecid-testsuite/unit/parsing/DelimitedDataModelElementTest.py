@@ -248,7 +248,7 @@ class DelimitedDataModelElementTest(TestBase):
         element_id = b"path"
         self.assertRaises(TypeError, DelimitedDataModelElement, element_id, self.delimiter)
 
-        # bool element_id is not allowed
+        # boolean element_id is not allowed
         element_id = True
         self.assertRaises(TypeError, DelimitedDataModelElement, element_id, self.delimiter)
 
@@ -290,7 +290,7 @@ class DelimitedDataModelElementTest(TestBase):
         escape = "\\"
         self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, escape=escape)
 
-        # bool escape is not allowed
+        # boolean escape is not allowed
         escape = True
         self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, escape=escape)
 
