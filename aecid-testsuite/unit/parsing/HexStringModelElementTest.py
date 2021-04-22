@@ -33,15 +33,23 @@ class HexStringModelElementTest(TestBase):
         hex_string_model_element = HexStringModelElement(self.id_)
 
         while ord(char2) < ord(b"\x7F"):
-            match_context = DummyMatchContext(char2 + char1)
+            data = char2 + char1
+            match_context = DummyMatchContext(data)
             match_element = hex_string_model_element.get_match_element(self.path, match_context)
-            if char2 in allowed_chars and char1 in allowed_chars:
-                self.assertEqual(match_element.get_match_object(), char2 + char1)
-            # commented out these parts of the test, as the HexStringModelElement currently is not working properly.
-            # These tests need to be rewritten!
+            if char2 in allowed_chars:
+                if char1 in allowed_chars:
+                    match_context.match_string = bytes.fromhex(data.decode())  # match_context.match_string check has to be skipped.
+                    match_context.match_data = data[len(match_context.match_string):]  # match_context.match_data has to be rewritten.
+                    self.compare_match_results(
+                        data, match_element, match_context, self.id_, self.path, bytes.fromhex(data.decode()), data, None)
+                    self.assertEqual(match_element.get_match_object(), data)
+                else:
+                    match_context.match_string = bytes.fromhex("0" + char2.decode())  # match_context.match_string check has to be skipped.
+                    self.compare_match_results(
+                        data, match_element, match_context, self.id_, self.path, bytes.fromhex("0" + char2.decode()), char2, None)
+                    self.assertEqual(match_element.get_match_object(), char2)
             else:
-                print(char2, char1)
-                self.assertEqual(match_element, None)
+                self.compare_no_match_results(data, match_element, match_context)
             if ord(char1) == 0x7f:
                 char1 = b"\x00"
                 char2 = bytes(chr(ord(char2) + 1), "utf-8")
@@ -54,14 +62,16 @@ class HexStringModelElementTest(TestBase):
         hex_string_model_element = HexStringModelElement(self.id_, True)
 
         while ord(char2) < ord(b"\x7F"):
-            match_context = DummyMatchContext(char2 + char1)
+            data = char2 + char1
+            match_context = DummyMatchContext(data)
             match_element = hex_string_model_element.get_match_element(self.path, match_context)
-            if char2 in allowed_chars and char1 in allowed_chars:
-                self.assertEqual(match_element.get_match_object(), char2 + char1)
-            # commented out these parts of the test, as the HexStringModelElement currently is not working properly.
-            # These tests need to be rewritten!
+            if char2 in allowed_chars:
+                if char1 in allowed_chars:
+                    self.assertEqual(match_element.get_match_object(), data)
+                else:
+                    self.assertEqual(match_element.get_match_object(), char2)
             else:
-                self.assertEqual(match_element, None)
+                self.compare_no_match_results(data, match_element, match_context)
             if ord(char1) == 0x7f:
                 char1 = b"\x00"
                 char2 = bytes(chr(ord(char2) + 1), "utf-8")

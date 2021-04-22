@@ -37,9 +37,9 @@ class HexStringModelElement(ModelElementInterface):
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
         if upper_case:
-            self.char_start = ord('A')
+            self.char_start = ord("A")
         else:
-            self.char_start = ord('a')
+            self.char_start = ord("a")
 
     def get_id(self):
         """Get the element ID."""
@@ -69,9 +69,9 @@ class HexStringModelElement(ModelElementInterface):
 
         match_object = data[:match_len]
         try:
-            pad = ''
+            pad = ""
             if len(match_object.decode(AminerConfig.ENCODING)) % 2 != 0:
-                pad = '0'
+                pad = "0"
             match_string = bytes.fromhex(pad + match_object.decode(AminerConfig.ENCODING))
         except ValueError:
             return None
