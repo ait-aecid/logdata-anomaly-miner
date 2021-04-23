@@ -132,9 +132,7 @@ class IpAddressDataModelElementTest(TestBase):
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, number, None)
 
     def test6get_match_element_no_match_ipv6(self):
-        """
-        Test if wrong formats are determined and boundary values are checked.
-        """
+        """Test if wrong formats are determined and boundary values are checked."""
         ip_addr_dme = IpAddressDataModelElement(self.id_, True)
         # IPv4 dotted quad at the end
         data = b"fe80:0000:0000:0000:0204:61ff:254.157.241.86"

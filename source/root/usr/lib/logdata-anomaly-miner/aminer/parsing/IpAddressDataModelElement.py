@@ -77,7 +77,7 @@ class IpAddressDataModelElement(ModelElementInterface):
         if m is None:
             return None
         match_len = m.span(0)[1]
-        if self.extract == extract_ipv6_address and (b"." in m.group()[:match_len].split(b":")[-1] or (len(data) > match_len and (
+        if self.extract is extract_ipv6_address and (b"." in m.group()[:match_len].split(b":")[-1] or (len(data) > match_len and (
                 re.compile(br"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}").match(data[data.rfind(b":", 0, match_len) + 1:]) is not None or (
                 data.find(b"::", match_len) == match_len and b"::" in data)))):
             return None
@@ -90,6 +90,7 @@ class IpAddressDataModelElement(ModelElementInterface):
 
 
 def extract_ipv4_address(data: bytes, match_len: int):
+    """Calculate integer values from ipv4 addresses."""
     numbers = data[:match_len].split(b".")
     numbers = [int(number) for number in numbers]
     for number in numbers:
@@ -99,6 +100,7 @@ def extract_ipv4_address(data: bytes, match_len: int):
 
 
 def extract_ipv6_address(data: bytes, match_len: int):
+    """Calculate integer values from ipv6 addresses."""
     numbers = data[:match_len].split(b":")
     if b"" in numbers:
         index = numbers.index(b"")
