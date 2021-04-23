@@ -67,21 +67,24 @@ class IpAddressDataModelElement(ModelElementInterface):
         return None
 
     def get_match_element(self, path: str, match_context):
-        """Read an IP address at the current data position. When found, the match_object will be."""
-        #create variable for match_context.match_data!!
-        m = self.regex.match(match_context.match_data)
-        print(m)
+        """
+        Read an IP address at the current data position. When found, the match_object will be.
+        Allowed formats for IPv6 addresses are defined in RFC4291 section 2.2.
+        However, trailing IPv4 addresses (for example ::FFFF:129.144.52.38) are not allowed.
+        """
+        data = match_context.match_data
+        m = self.regex.match(data)
         if m is None:
             return None
         match_len = m.span(0)[1]
-        #last one does not work yet..
-        if self.extract == extract_ipv6_address and (b"." in m.group()[:match_len].split(b":")[-1] or (len(
-                match_context.match_data) > match_len and (match_context.match_data[match_len] == ord(b".") or match_context.match_data[match_len] == ord(b":")))):
+        if self.extract == extract_ipv6_address and (b"." in m.group()[:match_len].split(b":")[-1] or (len(data) > match_len and (
+                re.compile(br"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}").match(data[data.rfind(b":", 0, match_len) + 1:]) is not None or (
+                data.find(b"::", match_len) == match_len and b"::" in data)))):
             return None
         extracted_address = self.extract(m.group(), match_len)
         if extracted_address is None:
             return None
-        match_string = match_context.match_data[:match_len]
+        match_string = data[:match_len]
         match_context.update(match_string)
         return MatchElement("%s/%s" % (path, self.element_id), match_string, extracted_address, None)
 
@@ -97,9 +100,6 @@ def extract_ipv4_address(data: bytes, match_len: int):
 
 def extract_ipv6_address(data: bytes, match_len: int):
     numbers = data[:match_len].split(b":")
-    print(numbers)
-    # if b"" in numbers[-1]:
-    #     return None
     if b"" in numbers:
         index = numbers.index(b"")
         # addresses can start or end with ::. Handle this special case.
