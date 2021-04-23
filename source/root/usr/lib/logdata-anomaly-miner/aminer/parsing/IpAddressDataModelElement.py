@@ -91,8 +91,7 @@ class IpAddressDataModelElement(ModelElementInterface):
 
 def extract_ipv4_address(data: bytes, match_len: int):
     """Calculate integer values from ipv4 addresses."""
-    numbers = data[:match_len].split(b".")
-    numbers = [int(number) for number in numbers]
+    numbers = [int(number) for number in data[:match_len].split(b".")]
     for number in numbers:
         if number > 255:
             return None
@@ -101,13 +100,13 @@ def extract_ipv4_address(data: bytes, match_len: int):
 
 def extract_ipv6_address(data: bytes, match_len: int):
     """Calculate integer values from ipv6 addresses."""
-    numbers = data[:match_len].split(b":")
-    if b"" in numbers:
-        index = numbers.index(b"")
+    parts = data[:match_len].split(b":")
+    if b"" in parts:
+        index = parts.index(b"")
         # addresses can start or end with ::. Handle this special case.
-        numbers = [number for number in numbers if number != b""]
-        numbers = numbers[:index] + [b"0"] * (8 - len(numbers)) + numbers[index:]
-    numbers = [int(b"0x" + number, 16) for number in numbers]
+        parts = [number for number in parts if number != b""]
+        parts = parts[:index] + [b"0"] * (8 - len(parts)) + parts[index:]
+    numbers = [int(b"0x" + number, 16) for number in parts]
     for number in numbers:
         if number > 65535:
             return None
