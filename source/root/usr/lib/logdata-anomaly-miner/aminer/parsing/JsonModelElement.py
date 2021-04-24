@@ -15,6 +15,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import json
 import warnings
 import logging
+from typing import List, Union
 from json import JSONDecodeError
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.MatchContext import MatchContext
@@ -29,7 +30,7 @@ debug_log_prefix = "JsonModelElement: "
 class JsonModelElement(ModelElementInterface):
     """Parse single- or multi-lined JSON data."""
 
-    def __init__(self, element_id, key_parser_dict, optional_key_prefix="optional_key_"):
+    def __init__(self, element_id: str, key_parser_dict: dict, optional_key_prefix: str = "optional_key_"):
         """
         Initialize the JsonModelElement.
         @param element_id: The ID of the element.
@@ -51,7 +52,7 @@ class JsonModelElement(ModelElementInterface):
             msg = "key_parser_dict has to be of the type dict."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
-        self.children = []
+        self.children: List[dict] = []
         self.find_children_in_dict(key_parser_dict, self.children)
         self.key_parser_dict = key_parser_dict
 
@@ -82,7 +83,7 @@ class JsonModelElement(ModelElementInterface):
                     msg = "lists in key_parser_dict must have exactly one entry."
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
-                value_list = []
+                value_list: List[dict] = []
                 for v in value:
                     self.find_children_in_dict(v, value_list)
                 children.append(value_list)
@@ -93,7 +94,7 @@ class JsonModelElement(ModelElementInterface):
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)
 
-    def get_match_element(self, path, match_context):
+    def get_match_element(self, path: str, match_context):
         """
         Try to parse all of the match_context against JSON.
         When a match is found, the match_context is updated accordingly.
@@ -103,7 +104,7 @@ class JsonModelElement(ModelElementInterface):
         """
         current_path = "%s/%s" % (path, self.element_id)
         old_match_data = match_context.match_data
-        matches = []
+        matches: List[Union[MatchElement, None]] = []
         try:
             json_match_data = json.loads(match_context.match_data)
         except JSONDecodeError as e:
@@ -124,9 +125,9 @@ class JsonModelElement(ModelElementInterface):
         match_context.match_data = b""
         return MatchElement(current_path, str(json_match_data), json_match_data, matches)
 
-    def parse_json_dict(self, json_dict, json_match_data, current_path, match_context):
+    def parse_json_dict(self, json_dict: dict, json_match_data: dict, current_path: str, match_context):
         """Parse a json dictionary."""
-        matches = []
+        matches: List[Union[MatchElement, None]] = []
         missing_keys = [x for x in json_dict if x not in json_match_data]
         for key in missing_keys:
             if not key.startswith(self.optional_key_prefix):
