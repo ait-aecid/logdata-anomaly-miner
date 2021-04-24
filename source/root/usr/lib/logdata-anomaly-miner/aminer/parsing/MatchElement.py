@@ -11,8 +11,8 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-
 import logging
+from typing import Any, List, Union
 from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer import AminerConfig
 
@@ -20,13 +20,14 @@ from aminer import AminerConfig
 class MatchElement:
     """This class allows storage and handling of data related to a match found by a model element."""
 
-    def __init__(self, path, match_string, match_object, children):
+    def __init__(self, path: str, match_string: bytes, match_object: Any, children: Union[List["MatchElement"], None]):
         """
         Initialize the MatchElement.
         @param path when None, this element is anonymous. Hence it cannot be added to the result data and cannot have children.
         @param match_string the part of the input bytes string covered by the given match.
         @param match_object the matchString converted to an object for matchers detecting more complex data types, e.g., integer
         numbers or IP addresses.
+        @param children list of MatchElements which matched in the process.
         """
         if (not path) and children:
             msg = "Anonymous match may not have children"
@@ -38,10 +39,7 @@ class MatchElement:
         self.children = children
 
     def get_path(self):
-        """
-        Get the path of this element.
-        @return the path string.
-        """
+        """Get the path of this element."""
         return self.path
 
     def get_match_string(self):
@@ -53,13 +51,10 @@ class MatchElement:
         return self.match_object
 
     def get_children(self):
-        """
-        Get the submatch children of this match, if any.
-        @return a list of submatches or None
-        """
+        """Get the submatch children of this match, if any."""
         return self.children
 
-    def annotate_match(self, indent_str):
+    def annotate_match(self, indent_str: Union[str, None]):
         """
         Annotate a given match element showing the match path elements and the parsed values.
         @param indent_str if None, all elements are separated just with a single space, no matter how deep the nesting level
@@ -75,16 +70,16 @@ class MatchElement:
         except UnicodeError:
             data = repr(self.match_object)
         if indent_str is None:
-            result = '%s: %s' % (self.path, data)
+            result = "%s: %s" % (self.path, data)
         else:
-            result = '%s%s: %s' % (indent_str, self.path, data)
-            next_indent = indent_str + '  '
+            result = "%s%s: %s" % (indent_str, self.path, data)
+            next_indent = indent_str + "  "
         if self.children is not None:
             for child_match in self.children:
                 if next_indent is None:
-                    result += ' ' + child_match.annotate_match(None)
+                    result += " " + child_match.annotate_match(None)
                 else:
-                    result += '\n' + child_match.annotate_match(next_indent)
+                    result += "\n" + child_match.annotate_match(next_indent)
         return result
 
     def serialize_object(self):
@@ -112,4 +107,4 @@ class MatchElement:
         except UnicodeError:
             match_string = repr(self.match_string)
             match_object = repr(self.match_object)
-        return 'MatchElement: path = %s, string = %s, object = %s, children = %d' % (self.path, match_string, match_object, num_children)
+        return "MatchElement: path = %s, string = %s, object = %s, children = %d" % (self.path, match_string, match_object, num_children)
