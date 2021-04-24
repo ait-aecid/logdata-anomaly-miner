@@ -8,55 +8,31 @@ class MatchContextTest(TestBase):
 
     def test1update_successful(self):
         """Update the MatchContext and DebugMatchContext with allowed values."""
+        data = b"this is an example of a log line."
+        match_context = MatchContext(data)
+        match_context.update(b"this is an example")
+        self.assertEqual(match_context.match_data, b" of a log line.")
+
+        match_context = MatchContext(data)
+        match_context.update([b"t", b"h", b"i", b"s"])
+        self.assertEqual(match_context.match_data, b" is an example of a log line.")
 
     def test2update_fail(self):
         """Update the MatchContext and DebugMatchContext with not allowed values."""
 
     def test3_match_context_init_input_validation(self):
         """Check if input is validated for MatchContext.__init__()."""
-        # empty match_data
-        match_data = b""
-        self.assertRaises(ValueError, MatchContext, match_data)
-
-        # None match_data
-        match_data = None
-        self.assertRaises(TypeError, MatchContext, match_data)
-
-        # string match_data is not allowed
-        match_data = "path"
-        self.assertRaises(TypeError, MatchContext, match_data)
-
-        # boolean match_data is not allowed
-        match_data = True
-        self.assertRaises(TypeError, MatchContext, match_data)
-
-        # integer match_data is not allowed
-        match_data = 123
-        self.assertRaises(TypeError, MatchContext, match_data)
-
-        # float match_data is not allowed
-        match_data = 123.22
-        self.assertRaises(TypeError, MatchContext, match_data)
-
-        # dict match_data is not allowed
-        match_data = {"id": "path"}
-        self.assertRaises(TypeError, MatchContext, match_data)
-
-        # list match_data is not allowed
-        match_data = ["path"]
-        self.assertRaises(TypeError, MatchContext, match_data)
-
-        # empty list match_data is not allowed
-        match_data = []
-        self.assertRaises(TypeError, MatchContext, match_data)
-
-        # empty tuple match_data is not allowed
-        match_data = ()
-        self.assertRaises(TypeError, MatchContext, match_data)
-
-        # empty set match_data is not allowed
-        match_data = set()
-        self.assertRaises(TypeError, MatchContext, match_data)
+        self.assertRaises(ValueError, MatchContext, b"")
+        self.assertRaises(TypeError, MatchContext, None)
+        self.assertRaises(TypeError, MatchContext, "path")
+        self.assertRaises(TypeError, MatchContext, True)
+        self.assertRaises(TypeError, MatchContext, 123)
+        self.assertRaises(TypeError, MatchContext, 123.22)
+        self.assertRaises(TypeError, MatchContext, {"id": "path"})
+        self.assertRaises(TypeError, MatchContext, ["path"])
+        self.assertRaises(TypeError, MatchContext, [])
+        self.assertRaises(TypeError, MatchContext, ())
+        self.assertRaises(TypeError, MatchContext, set())
 
     def test4_match_context_update_input_validation(self):
         """Check if MatchContext.update() fails if len(match_string) does not work."""
@@ -66,56 +42,22 @@ class MatchContextTest(TestBase):
         self.assertRaises(TypeError, match_context.update, True)
         self.assertRaises(TypeError, match_context.update, 123)
         self.assertRaises(TypeError, match_context.update, 123.22)
+        self.assertRaises(TypeError, match_context.update, match_context)
 
     def test5_debug_match_context_init_input_validation(self):
         """Check if input is validated for DebugMatchContext.__init__()."""
-        # empty match_data
-        match_data = b""
-        self.assertRaises(ValueError, DebugMatchContext, match_data)
-
-        # None match_data
-        match_data = None
-        self.assertRaises(TypeError, DebugMatchContext, match_data)
-
-        # string match_data is not allowed
-        match_data = "path"
-        self.assertRaises(TypeError, DebugMatchContext, match_data)
-
-        # bytes match_data is not allowed
-        match_data = True
-        self.assertRaises(TypeError, DebugMatchContext, match_data)
-
-        # integer match_data is not allowed
-        match_data = 123
-        self.assertRaises(TypeError, DebugMatchContext, match_data)
-
-        # float match_data is not allowed
-        match_data = 123.22
-        self.assertRaises(TypeError, DebugMatchContext, match_data)
-
-        # boolean match_data is not allowed
-        match_data = True
-        self.assertRaises(TypeError, DebugMatchContext, match_data)
-
-        # dict match_data is not allowed
-        match_data = {"id": "path"}
-        self.assertRaises(TypeError, DebugMatchContext, match_data)
-
-        # list match_data is not allowed
-        match_data = ["path"]
-        self.assertRaises(TypeError, DebugMatchContext, match_data)
-
-        # empty list match_data is not allowed
-        match_data = []
-        self.assertRaises(TypeError, DebugMatchContext, match_data)
-
-        # empty tuple match_data is not allowed
-        match_data = ()
-        self.assertRaises(TypeError, DebugMatchContext, match_data)
-
-        # empty set match_data is not allowed
-        match_data = set()
-        self.assertRaises(TypeError, DebugMatchContext, match_data)
+        self.assertRaises(ValueError, DebugMatchContext, b"")
+        self.assertRaises(TypeError, DebugMatchContext, None)
+        self.assertRaises(TypeError, DebugMatchContext, "path")
+        self.assertRaises(TypeError, DebugMatchContext, True)
+        self.assertRaises(TypeError, DebugMatchContext, 123)
+        self.assertRaises(TypeError, DebugMatchContext, 123.22)
+        self.assertRaises(TypeError, DebugMatchContext, True)
+        self.assertRaises(TypeError, DebugMatchContext, {"id": "path"})
+        self.assertRaises(TypeError, DebugMatchContext, ["path"])
+        self.assertRaises(TypeError, DebugMatchContext, [])
+        self.assertRaises(TypeError, DebugMatchContext, ())
+        self.assertRaises(TypeError, DebugMatchContext, set())
 
     def test6_debug_match_context_update_input_validation(self):
         """Check if input is validated for DebugMatchContext.update()."""
