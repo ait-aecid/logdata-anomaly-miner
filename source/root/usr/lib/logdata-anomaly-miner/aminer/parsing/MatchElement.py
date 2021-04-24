@@ -20,7 +20,7 @@ from aminer import AminerConfig
 class MatchElement:
     """This class allows storage and handling of data related to a match found by a model element."""
 
-    def __init__(self, path: str, match_string: bytes, match_object: Any, children: Union[List["MatchElement"], None]):
+    def __init__(self, path: Union[str, None], match_string: bytes, match_object: Any, children: Union[List["MatchElement"], None]):
         """
         Initialize the MatchElement.
         @param path when None, this element is anonymous. Hence it cannot be added to the result data and cannot have children.
@@ -29,13 +29,45 @@ class MatchElement:
         numbers or IP addresses.
         @param children list of MatchElements which matched in the process.
         """
+        if not isinstance(path, str) and path is not None:
+            msg = "path has to be of the type string or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if isinstance(path, str) and len(path) < 1:
+            msg = "path must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
         if (not path) and children:
             msg = "Anonymous match may not have children"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise Exception(msg)
+            raise ValueError(msg)
         self.path = path
+
+        if not isinstance(match_string, bytes):
+            msg = "match_string has to be of the type bytes."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if len(match_string) < 1:
+            msg = "match_string must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
         self.match_string = match_string
         self.match_object = match_object
+
+        if not isinstance(children, list) and children is not None:
+            msg = "children has to be of the type list or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if isinstance(children, list):
+            if len(children) < 1:
+                msg = "children must not be empty."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise ValueError(msg)
+            for child in children:
+                if not isinstance(child, MatchElement):
+                    msg = "children have to be of the type MatchElement."
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise TypeError(msg)
         self.children = children
 
     def get_path(self):
@@ -58,10 +90,14 @@ class MatchElement:
         """
         Annotate a given match element showing the match path elements and the parsed values.
         @param indent_str if None, all elements are separated just with a single space, no matter how deep the nesting level
-        of those elements is. If not None, all elements are put into an own lines, that is prefixed by the given indent_str and
+        of those elements is. If not None, all elements are put into an own line, that is prefixed by the given indent_str and
         indenting is increased by two spaces for each level.
         """
         next_indent = None
+        if not isinstance(indent_str, str) and indent_str is not None:
+            msg = "indent_str has to be of the type string or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         try:
             if isinstance(self.match_object, bytes):
                 data = self.match_object.decode(AminerConfig.ENCODING)
@@ -87,11 +123,11 @@ class MatchElement:
         Create a serialization of this match element and all the children.
         With sane and unique path elements, the serialized object will also be unique.
         """
-        chld = []
+        children = []
         if self.children:
             for child_match in self.children:
-                chld.append(child_match.serialize_object())
-        return {"path": self.path, "matchobject": self.match_object, "matchString": self.match_string, "children": chld}
+                children.append(child_match.serialize_object())
+        return {"path": self.path, "match_object": self.match_object, "match_string": self.match_string, "children": children}
 
     def __str__(self):
         """Get a string representation of this match element excluding the children."""
