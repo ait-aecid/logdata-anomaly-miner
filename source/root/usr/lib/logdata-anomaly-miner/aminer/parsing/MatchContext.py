@@ -11,11 +11,10 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-
 import logging
+from typing import Union
 from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer import AminerConfig
-from aminer.parsing.MatchElement import MatchElement
 
 
 class MatchContext:
@@ -54,7 +53,7 @@ class DebugMatchContext(MatchContext):
 
     def __init__(self, match_data: bytes):
         self.debug_info = ""
-        self.last_match_data = None
+        self.last_match_data: Union[None, bytes] = None
         self.shortest_unmatched_data = match_data
         super(DebugMatchContext, self).__init__(match_data)
 

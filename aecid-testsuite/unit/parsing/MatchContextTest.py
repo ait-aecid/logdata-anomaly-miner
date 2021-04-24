@@ -91,4 +91,3 @@ class MatchContextTest(TestBase):
         self.assertRaises(TypeError, match_context.update, True)
         self.assertRaises(TypeError, match_context.update, 123)
         self.assertRaises(TypeError, match_context.update, 123.22)
-
