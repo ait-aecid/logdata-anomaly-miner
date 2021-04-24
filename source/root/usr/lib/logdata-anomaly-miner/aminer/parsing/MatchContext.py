@@ -30,6 +30,14 @@ class MatchContext:
         Create a MatchContext with the full unmatched string data.
         @param match_data the data that will be tested by the next model element.
         """
+        if not isinstance(match_data, bytes):
+            msg = "match_data has to be of the type bytes."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if len(match_data) < 1:
+            msg = "match_data must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
         self.match_data = match_data
 
     def update(self, match_string: bytes):
