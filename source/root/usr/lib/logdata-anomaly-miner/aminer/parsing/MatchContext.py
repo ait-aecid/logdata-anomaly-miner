@@ -15,7 +15,6 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import logging
 from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer import AminerConfig
-from aminer.parsing.MatchElement import MatchElement
 
 
 class MatchContext:
