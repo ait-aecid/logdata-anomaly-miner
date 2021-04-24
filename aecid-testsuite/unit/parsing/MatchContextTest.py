@@ -1,3 +1,4 @@
+import unittest
 from aminer.parsing.MatchContext import MatchContext, DebugMatchContext
 from unit.TestBase import TestBase
 
@@ -90,3 +91,7 @@ class MatchContextTest(TestBase):
         self.assertRaises(TypeError, match_context.update, True)
         self.assertRaises(TypeError, match_context.update, 123)
         self.assertRaises(TypeError, match_context.update, 123.22)
+
+
+if __name__ == "__main__":
+    unittest.main()
