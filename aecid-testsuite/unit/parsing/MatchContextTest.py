@@ -1,4 +1,3 @@
-import unittest
 from aminer.parsing.MatchContext import MatchContext, DebugMatchContext
 from unit.TestBase import TestBase
 
