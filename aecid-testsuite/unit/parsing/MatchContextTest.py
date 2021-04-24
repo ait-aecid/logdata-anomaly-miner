@@ -17,8 +17,32 @@ class MatchContextTest(TestBase):
         match_context.update([b"t", b"h", b"i", b"s"])
         self.assertEqual(match_context.match_data, b" is an example of a log line.")
 
+        match_context = MatchContext(data)
+        match_context.update(b"some other text")
+        self.assertEqual(match_context.match_data, b"ple of a log line.")
+
+        match_context = DebugMatchContext(data)
+        match_context.update(b"this is an example ")
+        self.assertEqual(match_context.match_data, b"of a log line.")
+        self.assertEqual(match_context.get_debug_info(),
+                         'Starting match update on "this is an example of a log line."\n  Removed: "this is an example ", remaining 14'
+                         ' bytes\n  Shortest unmatched data: "of a log line."\n')
+        self.assertEqual(match_context.get_debug_info(), '  Shortest unmatched data: "of a log line."\n')
+        match_context.update(b"of")
+        self.assertEqual(match_context.get_debug_info(), '  Removed: "of", remaining 12 bytes\n  Shortest unmatched data: " a log line."\n')
+        match_context.update(b" a log line.")
+        self.assertEqual(match_context.get_debug_info(), '  Removed: " a log line.", remaining 0 bytes\n  Shortest unmatched data: ""\n')
+        self.assertRaises(ValueError, match_context.update, b" a log line.")
+        self.assertEqual(
+            match_context.get_debug_info(), '  Current data  does not start with " a log line."\n  Shortest unmatched data: ""\n')
+
     def test2update_fail(self):
-        """Update the MatchContext and DebugMatchContext with not allowed values."""
+        """Update the DebugMatchContext with not allowed values."""
+        match_context = DebugMatchContext(b"this is an example of a log line.")
+        self.assertRaises(TypeError, match_context.update, "this is an example")
+        self.assertRaises(TypeError, match_context.update, [b"t", b"h", b"i", b"s"])
+        self.assertRaises(ValueError, match_context.update, b"some other text")
+        self.assertRaises(ValueError, match_context.update, b"")
 
     def test3_match_context_init_input_validation(self):
         """Check if input is validated for MatchContext.__init__()."""
