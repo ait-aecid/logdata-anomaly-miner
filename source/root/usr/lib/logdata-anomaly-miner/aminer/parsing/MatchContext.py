@@ -25,15 +25,14 @@ class MatchContext:
     element will not return a match. In that case, those non-atomic model elements have to care to restore the context before returning.
     """
 
-    def __init__(self, match_data):
+    def __init__(self, match_data: bytes):
         """
         Create a MatchContext with the full unmatched string data.
         @param match_data the data that will be tested by the next model element.
         """
         self.match_data = match_data
-        self.root_match_element = MatchElement('/', None, None, [])
 
-    def update(self, match_string):
+    def update(self, match_string: bytes):
         """
         Update the match context by removing the given matched string data from the context data still to be matched.
         This method does not check, if the removed data is the same as the trailing match data for performance reasons. This is done
@@ -45,13 +44,13 @@ class MatchContext:
 class DebugMatchContext(MatchContext):
     """This class defines a slower MatchContext for debugging purposes."""
 
-    def __init__(self, match_data):
+    def __init__(self, match_data: bytes):
         self.debug_info = ''
         self.last_match_data = None
         self.shortest_unmatched_data = match_data
         super(DebugMatchContext, self).__init__(match_data)
 
-    def update(self, match_string):
+    def update(self, match_string: bytes):
         """Update the context and store debugging information."""
         try:
             if isinstance(self.match_data, bytes):
