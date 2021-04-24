@@ -33,7 +33,7 @@ class VariableCorrelationDetectorTest(TestBase):
         """Run the filter variables code with or without the VariableTypeDetector."""
         t = time()
         stat_data = b'5.3.0-55-generic'
-        log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+        log_atom = LogAtom(stat_data, ParserMatch(MatchElement(None, stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         if use_vtd:
             vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size,
@@ -54,7 +54,7 @@ class VariableCorrelationDetectorTest(TestBase):
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1)
         for i in range(self.dataset_size):
             stat_data = bytes(str((i % 60) * 0.1), 'utf-8')
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(None, stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)
             if use_vtd:
                 vtd.receive_atom(log_atom)
@@ -71,7 +71,7 @@ class VariableCorrelationDetectorTest(TestBase):
         for i in range(self.dataset_size):
             stat_data = bytes(str((i % 10) * 0.1), 'utf-8')
             values.append(float(stat_data))
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(None, stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)
             if use_vtd:
                 vtd.receive_atom(log_atom)
@@ -89,7 +89,7 @@ class VariableCorrelationDetectorTest(TestBase):
         for i in range(self.dataset_size):
             stat_data = bytes(str((i % 11) * 0.1), 'utf-8')
             values.append(float(stat_data))
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(None, stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)
             if use_vtd:
                 vtd.receive_atom(log_atom)
@@ -920,7 +920,7 @@ class VariableCorrelationDetectorTest(TestBase):
         for i in range(self.dataset_size):
             stat_data = bytes(str((i % 10) * 1), 'utf-8')
             values.append(float(stat_data))
-            children = [MatchElement(str(0), stat_data.decode(), stat_data, None)]
+            children = [MatchElement(str(0), stat_data, stat_data, None)]
             log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', bytes(str((i % 10) * 1), 'utf-8').decode(), bytes(
                 str((i % 10) * 1), 'utf-8'), children)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)

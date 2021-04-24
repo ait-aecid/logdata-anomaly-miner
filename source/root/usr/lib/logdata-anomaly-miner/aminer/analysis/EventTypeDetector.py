@@ -259,8 +259,8 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             tmp_int = 0
             if self.path_list is None:
                 for var_key in self.variable_key_list[current_index]:
-                    if var_key.count('/') > tmp_int or (var_key.count('/') ==
-                                                        tmp_int and len(self.longest_path[current_index]) < len(var_key)):
+                    if var_key is not None and (var_key.count('/') > tmp_int or (
+                            var_key.count('/') == tmp_int and len(self.longest_path[current_index]) < len(var_key))):
                         self.longest_path[current_index] = var_key
                         tmp_int = var_key.count('/')
             else:
