@@ -1,3 +1,4 @@
+import unittest
 from aminer.parsing.MatchElement import MatchElement
 from unit.TestBase import TestBase
 
@@ -46,7 +47,6 @@ class MatchElementTest(TestBase):
                                                             "--    b2: b2\n--      b3: b3")
 
     def test6serialize_object(self):
-        """Test if different MatchElements are serialized correctly."""
         """This test case checks if all child objects are serialized correctly."""
         a3 = MatchElement("a3", b"a3", b"a3", None)
         a2 = MatchElement("a2", b"a2", b"a2", [a3])
