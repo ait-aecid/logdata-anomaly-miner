@@ -47,10 +47,6 @@ class MatchElement:
             msg = "match_string has to be of the type bytes."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
-        if len(match_string) < 1:
-            msg = "match_string must not be empty."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
         self.match_string = match_string
         self.match_object = match_object
 

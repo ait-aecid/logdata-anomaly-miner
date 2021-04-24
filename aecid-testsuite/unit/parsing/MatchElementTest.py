@@ -93,7 +93,6 @@ class MatchElementTest(TestBase):
 
     def test9init_match_string_input_validation(self):
         """Check if match_string is validated in __init__()."""
-        self.assertRaises(ValueError, MatchElement, self.path, b"", self.match_object, None)
         self.assertRaises(TypeError, MatchElement, self.path, "path", self.match_object, None)
         self.assertRaises(TypeError, MatchElement, self.path, True, self.match_object, None)
         self.assertRaises(TypeError, MatchElement, self.path, 123, self.match_object, None)

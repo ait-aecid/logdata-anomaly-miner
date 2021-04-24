@@ -20,7 +20,7 @@ class OptionalMatchModelElementTest(unittest.TestCase):
         match_context = MatchContext(b'Another String.')
         fixed_data_model_element = FixedDataModelElement('fixed', b'This')
         optional_match_model_element = OptionalMatchModelElement('optional', fixed_data_model_element)
-        self.assertEqual(optional_match_model_element.get_match_element('match', match_context).get_match_string(), '')
+        self.assertEqual(optional_match_model_element.get_match_element('match', match_context).get_match_string(), b'')
         self.assertEqual(match_context.match_data, b'Another String.')
 
 

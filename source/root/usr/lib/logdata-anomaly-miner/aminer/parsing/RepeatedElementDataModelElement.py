@@ -19,7 +19,7 @@ from aminer.parsing.ModelElementInterface import ModelElementInterface
 class RepeatedElementDataModelElement(ModelElementInterface):
     """Objects of this class match on repeats of a given element."""
 
-    def __init__(self, element_id, repeated_element, min_repeat=0, max_repeat=0x100000):
+    def __init__(self, element_id, repeated_element, min_repeat=1, max_repeat=0x100000):
         self.element_id = element_id
         self.repeated_element = repeated_element
         self.min_repeat = min_repeat

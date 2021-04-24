@@ -22,7 +22,7 @@ class RepeatedElementDataModelElementTest(unittest.TestCase):
             'match', match_context).get_match_string(), b'fixed log line. fixed log line. fixed log line. fixed log line. ')
 
         match_context = MatchContext(b'A different line follows.')
-        self.assertEqual(repeated_element_data_model_element.get_match_element('match', match_context).get_match_string(), b'')
+        self.assertEqual(repeated_element_data_model_element.get_match_element('match', match_context), None)
 
     def test2_min_max_repeats(self):
         """This test case verifies the functionality of setting the minimal and maximal repeats."""

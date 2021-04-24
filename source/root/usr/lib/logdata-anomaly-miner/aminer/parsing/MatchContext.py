@@ -31,7 +31,6 @@ class MatchContext:
         @param match_data the data that will be tested by the next model element.
         """
         self.match_data = match_data
-        self.root_match_element = MatchElement('/', None, None, [])
 
     def update(self, match_string):
         """
