@@ -37,7 +37,6 @@ class MatchElementTest(TestBase):
         b3 = MatchElement("b3", b"b3", b"b3", None)
         b2 = MatchElement("b2", b"b2", b"b2", [b3])
         b1 = MatchElement("b1", b"b1", b"b1", [b2])
-
         root_element = MatchElement("root", b"root", b"root", [a1, b1])
 
         self.assertEqual(root_element.annotate_match(None), "root: root a1: a1 a2: a2 a3: a3 b1: b1 b2: b2 b3: b3")
@@ -48,9 +47,36 @@ class MatchElementTest(TestBase):
 
     def test6serialize_object(self):
         """Test if different MatchElements are serialized correctly."""
+        """This test case checks if all child objects are serialized correctly."""
+        a3 = MatchElement("a3", b"a3", b"a3", None)
+        a2 = MatchElement("a2", b"a2", b"a2", [a3])
+        a1 = MatchElement("a1", b"a1", b"a1", [a2])
+        b3 = MatchElement("b3", b"b3", b"b3", None)
+        b2 = MatchElement("b2", b"b2", b"b2", [b3])
+        b1 = MatchElement("b1", b"b1", b"b1", [b2])
+        root_element = MatchElement("root", b"root", b"root", [a1, b1])
+
+        self.assertEqual(root_element.serialize_object(), {"path": "root", "match_object": b"root", "match_string": b"root", "children": [
+            {"path": "a1", "match_object": b"a1", "match_string": b"a1", "children": [
+                {"path": "a2", "match_object": b"a2", "match_string": b"a2",
+                    "children": [{"path": "a3", "match_object": b"a3", "match_string": b"a3", "children": []}]}]},
+            {"path": "b1", "match_object": b"b1", "match_string": b"b1", "children": [
+                {"path": "b2", "match_object": b"b2", "match_string": b"b2",
+                    "children": [{"path": "b3", "match_object": b"b3", "match_string": b"b3", "children": []}]}]}]})
 
     def test7str(self):
         """Test the string representation of the MatchElements."""
+        a3 = MatchElement("a3", b"a3", b"a3", None)
+        a2 = MatchElement("a2", b"a2", b"a2", [a3])
+        a1 = MatchElement("a1", b"a1", b"a1", [a2])
+        b3 = MatchElement("b3", b"b3", b"b3", None)
+        b2 = MatchElement("b2", b"b2", b"b2", [b3])
+        b1 = MatchElement("b1", b"b1", b"b1", [b2])
+        root_element = MatchElement("root", b"root", b"root", [a1, b1])
+        self.assertEqual(root_element.__str__(), "MatchElement: path = root, string = root, object = root, children = 2")
+
+        root_element = MatchElement("match", b"string", 2, None)
+        self.assertEqual(root_element.__str__(), "MatchElement: path = match, string = string, object = 2, children = 0")
 
     def test8init_path_input_validation(self):
         """Check if path is validated in __init__()."""
@@ -122,27 +148,6 @@ class MatchElementTest(TestBase):
         self.assertRaises(TypeError, match_element.annotate_match, [])
         self.assertRaises(TypeError, match_element.annotate_match, ())
         self.assertRaises(TypeError, match_element.annotate_match, set())
-
-
-
-    def test3serialize_object(self):
-        """This test case checks if all child objects are serialized correctly."""
-        a3 = MatchElement("a3", b"a3", b"a3", None)
-        a2 = MatchElement("a2", b"a2", b"a2", [a3])
-        a1 = MatchElement("a1", b"a1", b"a1", [a2])
-        b3 = MatchElement("b3", b"b3", b"b3", None)
-        b2 = MatchElement("b2", b"b2", b"b2", [b3])
-        b1 = MatchElement("b1", b"b1", b"b1", [b2])
-
-        root_element = MatchElement("root", b"root", b"root", [a1, b1])
-
-        self.assertEqual(root_element.serialize_object(), {"path": "root", "match_object": b"root", "match_string": b"root", "children": [
-            {"path": "a1", "match_object": b"a1", "match_string": b"a1", "children": [
-                {"path": "a2", "match_object": b"a2", "match_string": b"a2",
-                    "children": [{"path": "a3", "match_object": b"a3", "match_string": b"a3", "children": []}]}]},
-            {"path": "b1", "match_object": b"b1", "match_string": b"b1", "children": [
-                {"path": "b2", "match_object": b"b2", "match_string": b"b2",
-                    "children": [{"path": "b3", "match_object": b"b3", "match_string": b"b3", "children": []}]}]}]})
 
 
 if __name__ == "__main__":
