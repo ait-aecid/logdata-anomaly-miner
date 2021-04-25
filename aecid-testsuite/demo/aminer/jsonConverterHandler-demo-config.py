@@ -171,7 +171,7 @@ def build_analysis_pipeline(analysis_context):
         DateTimeModelElement('DateTimeModelElement', b'Current DateTime: %d.%m.%Y %H:%M:%S'),
         DecimalFloatValueModelElement('DecimalFloatValueModelElement', value_sign_type='optional'),
         DecimalIntegerValueModelElement('DecimalIntegerValueModelElement', value_sign_type='optional', value_pad_type='blank'),
-        SequenceModelElement('', [
+        SequenceModelElement('se', [
             DelimitedDataModelElement('DelimitedDataModelElement', b';'), FixedDataModelElement('FixedDataModelElement', b';')])]
 
     # ElementValueBranchModelElement
