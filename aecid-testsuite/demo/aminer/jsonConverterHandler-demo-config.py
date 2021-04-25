@@ -186,7 +186,7 @@ def build_analysis_pipeline(analysis_context):
             SequenceModelElement("seq2", [fixed_data_me1, fixed_wordlist_data_model_element, fixed_data_me2])]), "wordlist",
                                  {0: decimal_integer_value_model_element, 1: fixed_data_me2}))
     service_children_parsing_model_element.append(HexStringModelElement('HexStringModelElement'))
-    service_children_parsing_model_element.append(SequenceModelElement('', [
+    service_children_parsing_model_element.append(SequenceModelElement('se2', [
         FixedDataModelElement('FixedDataModelElement', b'Gateway IP-Address: '), IpAddressDataModelElement('IpAddressDataModelElement')]))
     import locale
     loc = locale.getlocale()
@@ -199,7 +199,7 @@ def build_analysis_pipeline(analysis_context):
             FixedDataModelElement('FixedDataModelElement', b'drawn number: '),
             DecimalIntegerValueModelElement('DecimalIntegerValueModelElement')]), 1))
     service_children_parsing_model_element.append(VariableByteDataModelElement('VariableByteDataModelElement', b'-@#'))
-    service_children_parsing_model_element.append(SequenceModelElement('', [
+    service_children_parsing_model_element.append(SequenceModelElement('se', [
         WhiteSpaceLimitedDataModelElement('WhiteSpaceLimitedDataModelElement'), FixedDataModelElement('fixed', b' ')]))
 
     # The Base64StringModelElement must be just before the AnyByteDataModelElement to avoid unexpected Matches.
@@ -209,7 +209,7 @@ def build_analysis_pipeline(analysis_context):
     # to the AnyByteDataModelElement. The AnyByteDataModelElement must be last, because all bytes are accepted.
     service_children_parsing_model_element.append(
         OptionalMatchModelElement('OptionalMatchModelElement', FirstMatchModelElement('FirstMatchModelElement', [
-            FixedDataModelElement('FixedDataModelElement', b'The-searched-element-was-found!'), SequenceModelElement('', [
+            FixedDataModelElement('FixedDataModelElement', b'The-searched-element-was-found!'), SequenceModelElement('se', [
                 FixedDataModelElement('FixedDME', b'Any:'), AnyByteDataModelElement('AnyByteDataModelElement')])])))
 
     alphabet = b'abcdef'
