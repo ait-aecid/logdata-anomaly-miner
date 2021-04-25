@@ -1,5 +1,4 @@
 import unittest
-from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.SequenceModelElement import SequenceModelElement
 from unit.TestBase import TestBase, DummyMatchContext, DummyFixedDataModelElement
 
