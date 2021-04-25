@@ -1,6 +1,4 @@
 import unittest
-from aminer.parsing.MatchContext import MatchContext
-from aminer.parsing.FixedDataModelElement import FixedDataModelElement
 from aminer.parsing.RepeatedElementDataModelElement import RepeatedElementDataModelElement
 from unit.TestBase import TestBase, DummyMatchContext, DummyFixedDataModelElement
 
