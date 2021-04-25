@@ -21,7 +21,7 @@ class AnyByteDataModelElementTest(TestBase):
 
     def test3get_match_element_valid_match(self):
         """Parse matching substring from MatchContext and check if the MatchContext was updated with all characters."""
-        data = b'abcdefghijklmnopqrstuvwxyz.!?'
+        data = b"abcdefghijklmnopqrstuvwxyz.!?"
         match_context = DummyMatchContext(data)
         any_dme = AnyByteDataModelElement(self.id_)
         match_element = any_dme.get_match_element(self.path, match_context)
