@@ -21,7 +21,7 @@ class DelimitedDataModelElementTest(TestBase):
         self.assertEqual(delimited_data_me.get_child_elements(), None)
 
     def test3get_match_element_single_char(self):
-        """A single character is used as delimiter."""
+        """A single character is used as delimiter and not consumed (consume_delimiter=False)."""
         data = b"this is a match context.\n"
 
         delimited_data_model_element = DelimitedDataModelElement(self.id_, b"a")
@@ -58,7 +58,7 @@ class DelimitedDataModelElementTest(TestBase):
             self.compare_no_match_results(data, match_element, match_context)
 
     def test5delimiter_string(self):
-        """In this test case a whole string is searched for in the match_data."""
+        """In this test case a whole string is searched for in the match_data and  it is not consumed (consume_delimiter=False)."""
         data = b"this is a match context.\n"
 
         value = b"this"
@@ -110,7 +110,7 @@ class DelimitedDataModelElementTest(TestBase):
         self.compare_no_match_results(data, match_element, match_context)
 
     def test7special_characters_escape(self):
-        """In this test case special character escaping is tested."""
+        """In this test case special character escaping is tested. The delimiter is not consumed (consume_delimiter=False)."""
         data = b'error: the command \\"python run.py\\" was not found" '
         value = b'error: the command \\"python run.py\\" was not found'
         match_context = DummyMatchContext(data)
