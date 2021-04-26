@@ -21,12 +21,6 @@ class HexStringModelElementTest(TestBase):
 
     def test3get_match_element_valid_match(self):
         """Try all values and check if the desired results are produced."""
-        # data = b"abcdefghijklmnopqrstuvwxyz.!?"
-        # match_context = DummyMatchContext(data)
-        # hex_me = HexStringModelElement(self.id_)
-        # match_element = hex_me.get_match_element(self.path, match_context)
-        # self.compare_match_results(data, match_element, match_context, self.id_, self.path, data, data, None)
-
         allowed_chars = [b"0", b"1", b"2", b"3", b"4", b"5", b"6", b"7", b"8", b"9", b"a", b"b", b"c", b"d", b"e", b"f"]
         char1 = b"\x00"
         char2 = b"\x00"
