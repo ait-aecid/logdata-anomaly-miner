@@ -9,6 +9,8 @@ from aminer.AminerConfig import KEY_LOG_DIR, DEFAULT_LOG_DIR, KEY_PERSISTENCE_DI
     STAT_LOG_NAME, DEFAULT_STAT_LOG_FILE, DEBUG_LEVEL, load_config, build_persistence_file_name, DEFAULT_DEBUG_LOG_FILE
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
+from aminer.parsing.ModelElementInterface import ModelElementInterface
+from aminer.parsing.MatchElement import MatchElement
 from aminer.util import PersistenceUtil
 from aminer.util import SecureOSFunctions
 from _io import StringIO
@@ -146,7 +148,15 @@ class TestBase(unittest.TestCase):
         self.assertEqual(match_element.path, "%s/%s" % (path, id_))
         self.assertEqual(match_element.match_string, match_string)
         self.assertEqual(match_element.match_object, match_object)
-        self.assertIsNone(match_element.children, children)
+        if children is None:
+            self.assertIsNone(match_element.children, children)
+        else:
+            self.assertEqual(len(children), len(match_element.children))
+            for i, child in enumerate(children):
+                self.assertEqual(match_element.children[i].path, child.path)
+                self.assertEqual(match_element.children[i].match_string, child.match_string)
+                self.assertEqual(match_element.children[i].match_object, child.match_object)
+                self.assertIsNone(match_element.children[i].children, children)
         self.assertEqual(match_context.match_string, match_string)
         self.assertEqual(match_context.match_data, data[len(match_string):])
 
@@ -154,21 +164,78 @@ class TestBase(unittest.TestCase):
         """Compare the results of get_match_element() if match_element is not None."""
         self.assertIsNone(match_element, None)
         self.assertEqual(match_context.match_data, data)
-        self.assertEqual(match_context.match_string, b"")
 
 
 class DummyMatchContext:
     """Dummy class for MatchContext."""
 
-    def __init__(self, match_data):
+    def __init__(self, match_data: bytes):
         """Initiate the Dummy class."""
         self.match_data = match_data
         self.match_string = b''
 
-    def update(self, match_string):
+    def update(self, match_string: bytes):
         """Update the data."""
         self.match_data = self.match_data[len(match_string):]
         self.match_string += match_string
+
+
+class DummyFixedDataModelElement(ModelElementInterface):
+    """Dummy class for fixed string ModelElements."""
+
+    def __init__(self, element_id: str, data: bytes):
+        self.element_id = element_id
+        self.data = data
+
+    def get_id(self):
+        """Get the element ID."""
+        return self.element_id
+
+    def get_child_elements(self):  # skipcq: PYL-R0201
+        """
+        Get all possible child model elements of this element.
+        @return None as there are no children of this element.
+        """
+        return None
+
+    def get_match_element(self, path: str, match_context):
+        """@return None when there is no match, MatchElement otherwise."""
+        if not match_context.match_data.startswith(self.data):
+            return None
+        match_context.update(self.data)
+        return MatchElement("%s/%s" % (path, self.element_id), self.data, self.data, None)
+
+
+class DummyFirstMatchModelElement(ModelElementInterface):
+    """This class defines a model element to return the match from the the first matching child model within a given list."""
+
+    def __init__(self, element_id, children):
+        self.element_id = element_id
+        self.children = children
+        if (children is None) or (None in children):
+            msg = 'Invalid children list'
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+
+    def get_id(self):
+        """Get the element ID."""
+        return self.element_id
+
+    def get_child_elements(self):
+        """Get all possible child model elements of this element."""
+        return self.children
+
+    def get_match_element(self, path, match_context):
+        """@return None when there is no match, MatchElement otherwise."""
+        current_path = "%s/%s" % (path, self.element_id)
+
+        match_data = match_context.match_data
+        for child_element in self.children:
+            child_match = child_element.get_match_element(current_path, match_context)
+            if child_match is not None:
+                return child_match
+            match_context.match_data = match_data
+        return None
 
 
 if __name__ == "__main__":

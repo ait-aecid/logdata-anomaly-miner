@@ -50,7 +50,7 @@ class FixedDataModelElementTest(TestBase):
         element_id = b"path"
         self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
 
-        # bool element_id is not allowed
+        # boolean element_id is not allowed
         element_id = True
         self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
 
@@ -60,10 +60,6 @@ class FixedDataModelElementTest(TestBase):
 
         # float element_id is not allowed
         element_id = 123.22
-        self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
-
-        # boolean element_id is not allowed
-        element_id = True
         self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
 
         # dict element_id is not allowed
