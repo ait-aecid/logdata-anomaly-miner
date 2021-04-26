@@ -126,6 +126,11 @@ class DecimalIntegerValueModelElementTest(TestBase):
         match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
+        data = b"no number 22 some string."
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
     def test5get_match_element_optional_zero_values(self):
         """Test valid float values with "optional" or "zero" values of value_sign_type and value_pad_type."""
         decimal_integer_value_me = DecimalIntegerValueModelElement(
@@ -239,6 +244,11 @@ class DecimalIntegerValueModelElementTest(TestBase):
         self.compare_no_match_results(data, match_element, match_context)
 
         data = b"e+10"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"no number 22 some string."
         match_context = DummyMatchContext(data)
         match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
@@ -379,6 +389,11 @@ class DecimalIntegerValueModelElementTest(TestBase):
         self.compare_no_match_results(data, match_element, match_context)
 
         data = b"00"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"no number 22 some string."
         match_context = DummyMatchContext(data)
         match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
