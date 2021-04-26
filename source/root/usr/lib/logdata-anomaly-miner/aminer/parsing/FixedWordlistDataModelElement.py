@@ -46,8 +46,8 @@ class FixedWordlistDataModelElement(ModelElementInterface):
             msg = "wordlist has to be of the type list."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
-        if len(wordlist) < 2:
-            msg = "wordlist must have two or more elements."
+        if len(wordlist) < 1:
+            msg = "wordlist must have at least one element."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         for word in wordlist:
