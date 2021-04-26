@@ -144,10 +144,6 @@ class FixedWordlistDataModelElementTest(TestBase):
         wordlist = ["path", "path2"]
         self.assertRaises(TypeError, FixedWordlistDataModelElement, self.id_, wordlist)
 
-        # list wordlist with only one element is not allowed
-        wordlist = [b"path"]
-        self.assertRaises(ValueError, FixedWordlistDataModelElement, self.id_, wordlist)
-
         # wrong word order
         wordlist = [b"word", b"path", b"path-like"]
         self.assertRaises(ValueError, FixedWordlistDataModelElement, self.id_, wordlist)
