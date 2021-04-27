@@ -53,6 +53,7 @@ Parser:
        - id: id
          type: DecimalIntegerValueModelElement
          name: 'id'
+         value_pad_type: 'zero'
 
        - id: firedtimes
          type: DecimalIntegerValueModelElement
