@@ -48,6 +48,27 @@ class WhiteSpaceLimitedDataModelElementTest(TestBase):
         match_element = whitespace_dme.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, value, None)
 
+        data = b"space:  ,tab:\t"
+        value = b"space:"
+        match_context = DummyMatchContext(data)
+        whitespace_dme = WhiteSpaceLimitedDataModelElement(self.id_)
+        match_element = whitespace_dme.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, value, None)
+
+        data = b"tab:\t\t,space: "
+        value = b"tab:"
+        match_context = DummyMatchContext(data)
+        whitespace_dme = WhiteSpaceLimitedDataModelElement(self.id_)
+        match_element = whitespace_dme.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, value, None)
+
+        data = b"spacetab: \t,tab:\t"
+        value = b"spacetab:"
+        match_context = DummyMatchContext(data)
+        whitespace_dme = WhiteSpaceLimitedDataModelElement(self.id_)
+        match_element = whitespace_dme.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, value, None)
+
     def test4get_match_element_no_match(self):
         """Parse not matching substring from MatchContext and check if the MatchContext was not changed."""
         data = b""
