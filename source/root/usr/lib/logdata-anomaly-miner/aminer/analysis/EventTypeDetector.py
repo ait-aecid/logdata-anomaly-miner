@@ -166,11 +166,10 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                                 self.num_eventlines_TSA_ref[j].append(val-sum(self.num_eventlines_TSA_ref[j]))
 
                         # Get the timewindow lengths
-                        # skipcq: PTC-W0063
                         time_list = self.following_modules[
                             next(j for j in range(len(self.following_modules)) if
                             self.following_modules[j].__class__.__name__ == 'TSAArima')].calculate_time_steps(
-                            self.num_eventlines_TSA_ref, log_atom)
+                            self.num_eventlines_TSA_ref, log_atom)  # skipcq: PTC-W0063
                         self.num_eventlines_TSA_ref = copy.copy(self.num_eventlines)
 
                         num_added_trigger = 0
@@ -192,12 +191,11 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                         # Run the update function for all trigger, which would already have been triggerd
                         for k in range(1, num_added_trigger+1):
                             while current_time >= self.etd_time_trigger[0][-k]:
-                                # skipcq: PTC-W0063
                                 self.following_modules[
-                                    next(j for j in range(len(self.following_modules)) if self.following_modules[
-                                    j].__class__.__name__ == 'TSAArima')].test_num_appearance(self.etd_time_trigger[1][-k],
-                                    self.num_eventlines[self.etd_time_trigger[1][-k]]-self.num_eventlines_TSA_ref[
-                                        self.etd_time_trigger[1][-k]], current_time, log_atom)
+                                    next(j for j in range(len(self.following_modules)) if self.following_modules[j].__class__.__name__ ==
+                                    'TSAArima')].test_num_appearance(self.etd_time_trigger[1][-k], self.num_eventlines[
+                                    self.etd_time_trigger[1][-k]]-self.num_eventlines_TSA_ref[self.etd_time_trigger[1][-k]],
+                                    current_time, log_atom)  # skipcq: PTC-W0063
                                 self.etd_time_trigger[0][-k] += self.etd_time_trigger[2][-k]
                                 self.num_eventlines_TSA_ref[self.etd_time_trigger[1][-k]] = self.num_eventlines[self.etd_time_trigger[
                                     1][-k]]
@@ -205,12 +203,11 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 # Trigger for an reoccuring time window
                 else:
                     while current_time >= self.etd_time_trigger[0][indices[i]]:
-                        # skipcq: PTC-W0063
                         self.following_modules[
-                            next(j for j in range(len(self.following_modules)) if self.following_modules[
-                            j].__class__.__name__ == 'TSAArima')].test_num_appearance(self.etd_time_trigger[1][indices[
-                            i]], self.num_eventlines[self.etd_time_trigger[1][indices[i]]]-self.num_eventlines_TSA_ref[
-                            self.etd_time_trigger[1][indices[i]]], current_time, log_atom)
+                            next(j for j in range(len(self.following_modules)) if self.following_modules[j].__class__.__name__ ==
+                            'TSAArima')].test_num_appearance(self.etd_time_trigger[1][indices[i]], self.num_eventlines[
+                            self.etd_time_trigger[1][indices[i]]]-self.num_eventlines_TSA_ref[
+                            self.etd_time_trigger[1][indices[i]]], current_time, log_atom)  # skipcq: PTC-W0063
                         self.etd_time_trigger[0][indices[i]] += self.etd_time_trigger[2][indices[i]]
                         self.num_eventlines_TSA_ref[self.etd_time_trigger[1][indices[i]]] = self.num_eventlines[self.etd_time_trigger[
                             1][indices[i]]]

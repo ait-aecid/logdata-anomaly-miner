@@ -732,7 +732,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
                     msg = 'The defined EventTypeDetector %s does not exist!' % item['event_type_detector']
-                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, etd, persistence_id=item['persistence_id'],
