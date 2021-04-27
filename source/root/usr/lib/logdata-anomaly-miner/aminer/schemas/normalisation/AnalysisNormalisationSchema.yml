@@ -178,7 +178,9 @@
                 'build_sum_over_values': {'type': 'boolean', 'default': False},
                 'num_division_time_step': {'type': 'integer', 'default': 10},
                 'num_min_time_history': {'type': 'integer', 'default': 20},
-                'num_max_time_history': {'type': 'integer', 'default': 30}
+                'num_max_time_history': {'type': 'integer', 'default': 30},
+                'num_results_bt': {'type': 'integer', 'default': 15},
+                'alpha_bt': {'type': 'float', 'default': 0.05}
             }
         }
     }

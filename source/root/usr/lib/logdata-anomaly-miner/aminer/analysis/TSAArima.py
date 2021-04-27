@@ -1,13 +1,4 @@
-"""This module is a detector for testing purposes of the ETD"""
-
-# ToDo:
-# x) Remove unwanted dependency on packages (statsmodels, scipy.signal)
-# x) Persistency TSA + ETD
-# x) Cleanup
-# x) Update Module to the nor/val lists in the AMiner
-# x) Improvement for the acf (not as dependent on min_lag or ETD.waiting_time_for_TSA)
-# x) Contraint/ignore/pathlist without use
-# x) Remove unsuitable events for an TSA? (corrfit > threshold)
+"""This module is a detector which uses a tsa-arima modle to track appearance frequencies of events"""
 
 import time
 import os
@@ -29,36 +20,50 @@ class TSAArima(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourc
     """This class is used for an arima time series analysis of the appearances of log lines to events."""
 
     def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, build_sum_over_values=False, num_division_time_step=10,
-                 alpha=0.05, num_min_time_history=20, num_max_time_history=30, persistence_id='Default', output_log_line=True, ignore_list=None, constraint_list=None, auto_include_flag=True):
+                 alpha=0.05, num_min_time_history=20, num_max_time_history=30, num_results_bt=15, alpha_bt=0.05, persistence_id='Default',
+                 path_list=None, ignore_list=None, output_log_line=True, auto_include_flag=True):
+        """
+        Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        @param aminer_config configuration from analysis_context.
+        @param anomaly_event_handlers for handling events, e.g., print events to stdout.
+        @param event_type_detector used to track the number of events in the time windows.
+        @param build_sum_over_values states if the sum of a series of counts is build before applieing the TSA.
+        @param num_division_time_step Number of division of the time window to calculate the time step.
+        @param alpha significance level of the estimatedd values.
+        @param num_min_time_history minimal number of values of the time_history after it is initialised.
+        @param num_max_time_history maximal number of values of the time_history.
+        @param num_results_bt number of results which are used in the binomial test.
+        @param alpha_bt significance level for the bt test.
+        @param persistence_id name of persistency document.
+        @param path_list At least one of the parser paths in this list needs to appear in the event to be analysed
+        @param ignore_list list of paths that are not considered for correlation, i.e., events that contain one of these paths are
+        omitted. The default value is [] as None is not iterable.
+        @param output_log_line specifies whether the full parsed log atom should be provided in the output.
+        @param auto_include_flag specifies whether new frequency measurements override ground truth frequencies.
+        """
         self.next_persist_time = None
-        self.anomaly_event_handlers = anomaly_event_handlers
         self.aminer_config = aminer_config
+        self.anomaly_event_handlers = anomaly_event_handlers
         self.output_log_line = output_log_line
         self.auto_include_flag = auto_include_flag
+        self.path_list = path_list
+        if self.path_list is None:
+            self.path_list = []
+        self.ignore_list = ignore_list
+        if self.ignore_list is None:
+            self.ignore_list = []
 
-        # event_type_detector. Used to get the eventNumbers and values of the variables, etc.
         self.event_type_detector = event_type_detector
-        # Add the varTypeDetector to the list of the modules, which use the event_type_detector.
-        self.event_type_detector.add_following_modules(self)
-        # States if the sum of a series of counts is build before applieing the TSA
         self.build_sum_over_values = build_sum_over_values
-        # Number of division of the time window to calculate the time step
         self.num_division_time_step = num_division_time_step
-        # Significance level of the estimatedd values
         self.alpha = alpha
-        # Minimal number of values of the time_history after it is initialised
         self.num_min_time_history = num_min_time_history
-        # Maximal number of values of the time_history
         self.num_max_time_history = num_max_time_history
+        self.num_results_bt = num_results_bt
+        self.alpha_bt = alpha_bt
 
-
-        # Number of results which are used in the binomial test
-        self.num_results_bt = 15
-        # Significance level for the bt test
-        self.alpha_bt = 0.02
-        # Minimal number of successes for the binomial test
-        self.bt_min_suc = self.bt_min_successes(self.num_results_bt, self.alpha, self.alpha_bt)
-
+        # Add the TSAArima-module to the list of the modules, which use the event_type_detector.
+        self.event_type_detector.add_following_modules(self)
 
         # History of the time windows
         self.time_window_history = []
@@ -70,6 +75,8 @@ class TSAArima(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourc
         self.time_history = []
         # List of the the results if th value was in the limits of the one step predictions
         self.result_list =[]
+        # Minimal number of successes for the binomial test
+        self.bt_min_suc = self.bt_min_successes(self.num_results_bt, self.alpha, self.alpha_bt)
 
         # Load the persistence
         self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
@@ -81,18 +88,18 @@ class TSAArima(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourc
             self.time_window_history = persistence_data[0]
             
             self.arima_models_statsmodels = [None for _ in self.time_window_history]
-            for event_number, arima_models_statsmodel in enumerate(self.arima_models_statsmodels):
-                if len(self.time_window_history[event_number]) >= 10*self.num_division_time_step:
+            for event_index, arima_models_statsmodel in enumerate(self.arima_models_statsmodels):
+                if len(self.time_window_history[event_index]) >= 10*self.num_division_time_step:
                     try:
-                        model = statsmodels.tsa.arima.model.ARIMA(self.time_window_history[event_number][-10*self.num_division_time_step:],
+                        model = statsmodels.tsa.arima.model.ARIMA(self.time_window_history[event_index][-10*self.num_division_time_step:],
                                 order=(self.num_division_time_step, 0, 0), seasonal_order=(0,0,0,self.num_division_time_step))
-                        self.arima_models_statsmodels[event_number] = model.fit()
+                        self.arima_models_statsmodels[event_index] = model.fit()
                     except:
-                        self.arima_models_statsmodels[event_number] = None
-                        self.time_window_history[event_number] = []
+                        self.arima_models_statsmodels[event_index] = None
+                        self.time_window_history[event_index] = []
                 else:
-                    self.arima_models_statsmodels[event_number] = None
-                    self.time_window_history[event_number] = []
+                    self.arima_models_statsmodels[event_index] = None
+                    self.time_window_history[event_index] = []
 
             self.prediction_history = persistence_data[1]
             self.time_history = persistence_data[2]
@@ -164,155 +171,163 @@ class TSAArima(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourc
         self.result_list = [[1]*self.num_results_bt for _ in range(len(counts))]
         # Minimal size of the time step
         min_lag = max(int(0.2*self.event_type_detector.num_sections_waiting_time_for_TSA),1)
-        for data in counts:
-            # Apply the autocorrelation function to the data of the single event types.
-            corr = list(map(abs, sm.tsa.acf(data, nlags=len(data), fft=True)[min_lag:]))
-            corr = np.array(corr)
-            # Apply the Savitzky-Golay-Filter to the list corr, to smooth the curve and get better results
-            corrfit = savgol_filter(corr, min(max(3,int(len(corr)/10)-int(int(len(corr)/10) % 2 == 0)), 101), 1)
-            
-            # Find the highest peak and set the time-step as the index + lag
-            highest_peak_index = np.argmax(corrfit)
-            time_step_list.append((highest_peak_index + min_lag) / self.num_division_time_step)
+        for event_index, data in enumerate(counts):
+            if (self.path_list != [] and all(path not in self.event_type_detector.found_keys[event_index] for path in self.path_list)) or (
+                    self.ignore_list != [] and any(ignore_path in self.event_type_detector.found_keys[event_index] for ignore_path in
+                    self.ignore_list)):
+                time_step_list.append(-1)
+            else:
+                # Apply the autocorrelation function to the data of the single event types.
+                corr = list(map(abs, sm.tsa.acf(data, nlags=len(data), fft=True)[min_lag:]))
+                corr = np.array(corr)
+                # Apply the Savitzky-Golay-Filter to the list corr, to smooth the curve and get better results
+                corrfit = savgol_filter(corr, min(max(3,int(len(corr)/10)-int(int(len(corr)/10) % 2 == 0)), 101), 1)
+
+                # Find the highest peak and set the time-step as the index + lag
+                highest_peak_index = np.argmax(corrfit)
+                time_step_list.append((highest_peak_index + min_lag) / self.num_division_time_step)
 
         # Print a message of the length of the time steps
         message = 'Calculated the time steps for the single event types in seconds: %s'%[time_step * self.num_division_time_step *
-                self.event_type_detector.waiting_time_for_TSA / self.event_type_detector.num_sections_waiting_time_for_TSA
-                for time_step in time_step_list]
+                self.event_type_detector.waiting_time_for_TSA / self.event_type_detector.num_sections_waiting_time_for_TSA if
+                time_step != -1 else time_step for time_step in time_step_list]
         affected_path = None
         self.print(message, log_atom, affected_path)
 
         return time_step_list
 
-    def test_num_appearance(self, event_number, count, current_time, log_atom):
+    def test_num_appearance(self, event_index, count, current_time, log_atom):
         """This function makes a one step prediction and raises an alert if the count do not match the expected appearance"""
         # Append the list of time_window_history and arima_models if it is to short
-        if len(self.time_window_history) <= event_number:
-            self.time_window_history += [[] for _ in range(event_number + 1 - len(self.time_window_history))]
-            self.arima_models_statsmodels += [None for _ in range(event_number + 1 - len(self.arima_models_statsmodels))]
-            self.prediction_history += [[[], [], []] for _ in range(event_number + 1 - len(self.arima_models_statsmodels))]
-            self.time_history += [[] for _ in range(event_number + 1 - len(self.arima_models_statsmodels))]
-            self.result_list += [[1]*self.num_results_bt for _ in range(event_number + 1 - len(self.arima_models_statsmodels))]
+        if len(self.time_window_history) <= event_index:
+            self.time_window_history += [[] for _ in range(event_index + 1 - len(self.time_window_history))]
+            self.arima_models_statsmodels += [None for _ in range(event_index + 1 - len(self.arima_models_statsmodels))]
+            self.prediction_history += [[[], [], []] for _ in range(event_index + 1 - len(self.arima_models_statsmodels))]
+            self.time_history += [[] for _ in range(event_index + 1 - len(self.arima_models_statsmodels))]
+            self.result_list += [[1]*self.num_results_bt for _ in range(event_index + 1 - len(self.arima_models_statsmodels))]
 
         # Initialize the arima_model if needed
-        if self.auto_include_flag and self.arima_models_statsmodels[event_number] == None:
+        if self.auto_include_flag and self.arima_models_statsmodels[event_index] == None:
 
             # Add the new count to the history and shorten it, if neccessary
-            self.time_window_history[event_number].append(count)
-            if len(self.time_window_history[event_number]) > 20 * self.num_division_time_step:
-                self.time_window_history[event_number] = self.time_window_history[event_number][-10*self.num_division_time_step:]
+            self.time_window_history[event_index].append(count)
+            if len(self.time_window_history[event_index]) > 20 * self.num_division_time_step:
+                self.time_window_history[event_index] = self.time_window_history[event_index][-10*self.num_division_time_step:]
 
             # Check if enough values have been stored to initialize the arima_model
-            if len(self.time_window_history[event_number]) >= 10*self.num_division_time_step:
-                message = 'Initializing the TSA for the eventtype %s'%event_number
-                affected_path = self.event_type_detector.variable_key_list[event_number]
+            if len(self.time_window_history[event_index]) >= 10*self.num_division_time_step:
+                message = 'Initializing the TSA for the eventtype %s'%event_index
+                affected_path = self.event_type_detector.variable_key_list[event_index]
                 self.print(message, log_atom, affected_path)
 
                 if not self.build_sum_over_values:
                     # Add the arima_model to the list
                     try:
-                        model = statsmodels.tsa.arima.model.ARIMA(self.time_window_history[event_number][-10*self.num_division_time_step:],
+                        model = statsmodels.tsa.arima.model.ARIMA(self.time_window_history[event_index][-10*self.num_division_time_step:],
                                 order=(self.num_division_time_step, 0, 0), seasonal_order=(0,0,0,self.num_division_time_step))
-                        self.arima_models_statsmodels[event_number] = model.fit()
+                        self.arima_models_statsmodels[event_index] = model.fit()
                     except:
-                        self.arima_models_statsmodels[event_number] = None
+                        self.arima_models_statsmodels[event_index] = None
                 else:
                     # Add the arima_model to the list
                     try:
-                        model = statsmodels.tsa.arima.model.ARIMA([sum(self.time_window_history[event_number][-10*self.num_division_time_step+i:-9*self.num_division_time_step+i]) for i in range(9*self.num_division_time_step)]+[sum(self.time_window_history[event_number][-self.num_division_time_step:])],
+                        model = statsmodels.tsa.arima.model.ARIMA([sum(self.time_window_history[event_index][
+                                -10*self.num_division_time_step+i:-9*self.num_division_time_step+i]) for i in
+                                range(9*self.num_division_time_step)]+[
+                                sum(self.time_window_history[event_index][-self.num_division_time_step:])],
                                 order=(self.num_division_time_step, 0, 0), seasonal_order=(0,0,0,self.num_division_time_step))
-                        self.arima_models_statsmodels[event_number] = model.fit()
+                        self.arima_models_statsmodels[event_index] = model.fit()
                     except:
-                        self.arima_models_statsmodels[event_number] = None
-                        self.time_window_history[event_number] = []
+                        self.arima_models_statsmodels[event_index] = None
+                        self.time_window_history[event_index] = []
         # Add the new value and make a one step prediction
-        elif self.arima_models_statsmodels[event_number] != None:
+        elif self.arima_models_statsmodels[event_index] != None:
             if not self.build_sum_over_values:
                 # Add the predction and time to the lists
-                lower_limit, upper_limit = self.one_step_prediction(event_number)
-                if self.test_pause != None and len(self.test_pause) > event_number and self.test_pause[event_number] != None:
-                    self.prediction_history[event_number][0].append(0)
-                    self.prediction_history[event_number][1].append(count)
-                    self.prediction_history[event_number][2].append(0)
-                    self.time_history[event_number].append(current_time)
+                lower_limit, upper_limit = self.one_step_prediction(event_index)
+                if self.test_pause != None and len(self.test_pause) > event_index and self.test_pause[event_index] != None:
+                    self.prediction_history[event_index][0].append(0)
+                    self.prediction_history[event_index][1].append(count)
+                    self.prediction_history[event_index][2].append(0)
+                    self.time_history[event_index].append(current_time)
                 else:
-                    self.prediction_history[event_number][0].append(lower_limit)
-                    self.prediction_history[event_number][1].append(count)
-                    self.prediction_history[event_number][2].append(upper_limit)
-                    self.time_history[event_number].append(current_time)
+                    self.prediction_history[event_index][0].append(lower_limit)
+                    self.prediction_history[event_index][1].append(count)
+                    self.prediction_history[event_index][2].append(upper_limit)
+                    self.time_history[event_index].append(current_time)
                 # Shorten the lists if neccessary
-                if len(self.time_history[event_number]) > self.num_max_time_history:
-                    self.prediction_history[event_number][0] = self.prediction_history[event_number][0][-self.num_min_time_history:]
-                    self.prediction_history[event_number][1] = self.prediction_history[event_number][1][-self.num_min_time_history:]
-                    self.prediction_history[event_number][2] = self.prediction_history[event_number][2][-self.num_min_time_history:]
-                    self.time_history[event_number] = self.time_history[event_number][-self.num_min_time_history:]
+                if len(self.time_history[event_index]) > self.num_max_time_history:
+                    self.prediction_history[event_index][0] = self.prediction_history[event_index][0][-self.num_min_time_history:]
+                    self.prediction_history[event_index][1] = self.prediction_history[event_index][1][-self.num_min_time_history:]
+                    self.prediction_history[event_index][2] = self.prediction_history[event_index][2][-self.num_min_time_history:]
+                    self.time_history[event_index] = self.time_history[event_index][-self.num_min_time_history:]
 
-                if self.test_pause != None and len(self.test_pause) > event_number and self.test_pause[event_number] != None:
-                    if self.test_pause[event_number] == 1:
-                        self.test_pause[event_number] = None
+                if self.test_pause != None and len(self.test_pause) > event_index and self.test_pause[event_index] != None:
+                    if self.test_pause[event_index] == 1:
+                        self.test_pause[event_index] = None
                         # If all entries are None set the variable to None
                         if all(entry == None for entry in self.test_pause):
                             self.test_pause = None
                     else:
-                        self.test_pause[event_number] -= 1
+                        self.test_pause[event_index] -= 1
                 else:
                     # Test if count is in boundaries
                     if count < lower_limit or count > upper_limit:
-                        message = 'EventNumber: %s, Lower: %s, Count: %s, Upper: %s'%(event_number, lower_limit, count, upper_limit)
-                        affected_path = self.event_type_detector.variable_key_list[event_number]
+                        message = 'EventNumber: %s, Lower: %s, Count: %s, Upper: %s'%(event_index, lower_limit, count, upper_limit)
+                        affected_path = self.event_type_detector.variable_key_list[event_index]
                         confidence = 1 - min(count / lower_limit, upper_limit / count)
                         self.print(message, log_atom, affected_path, confidence=confidence)
-                        self.result_list[event_number].append(0)
+                        self.result_list[event_index].append(0)
                     else:
-                        self.result_list[event_number].append(1)
+                        self.result_list[event_index].append(1)
 
-                    if len(self.result_list[event_number]) >= 2 * self.num_results_bt:
-                        self.result_list[event_number] = self.result_list[event_number][-self.num_results_bt:]
+                    if len(self.result_list[event_index]) >= 2 * self.num_results_bt:
+                        self.result_list[event_index] = self.result_list[event_index][-self.num_results_bt:]
 
                 # Discard or update the model, for the next step
-                if self.auto_include_flag and sum(self.result_list[event_number][-self.num_results_bt:]) < self.bt_min_suc:
-                    message = 'Discard the TSA model for the eventtype %s'%event_number
-                    affected_path = self.event_type_detector.variable_key_list[event_number]
+                if self.auto_include_flag and sum(self.result_list[event_index][-self.num_results_bt:]) < self.bt_min_suc:
+                    message = 'Discard the TSA model for the eventtype %s'%event_index
+                    affected_path = self.event_type_detector.variable_key_list[event_index]
                     self.print(message, log_atom, affected_path)
 
                     # Discard the trained model and reset the result_list
-                    self.arima_models_statsmodels[event_number] = None
-                    self.result_list[event_number] = [1]*self.num_results_bt
+                    self.arima_models_statsmodels[event_index] = None
+                    self.result_list[event_index] = [1]*self.num_results_bt
                 else:
                     # Update the model
-                    self.arima_models_statsmodels[event_number] = self.arima_models_statsmodels[event_number].append([count])
+                    self.arima_models_statsmodels[event_index] = self.arima_models_statsmodels[event_index].append([count])
 
             else:
                 # Add the new count to the history and shorten it, if neccessary
-                self.time_window_history[event_number].append(count)
-                count_sum = sum(self.time_window_history[event_number][-self.num_division_time_step:])
+                self.time_window_history[event_index].append(count)
+                count_sum = sum(self.time_window_history[event_index][-self.num_division_time_step:])
 
                 # Add the predction and time to the lists
-                lower_limit, upper_limit = self.one_step_prediction(event_number)
-                self.prediction_history[event_number][0].append(lower_limit)
-                self.prediction_history[event_number][1].append(count_sum)
-                self.prediction_history[event_number][2].append(upper_limit)
-                self.time_history[event_number].append(current_time)
+                lower_limit, upper_limit = self.one_step_prediction(event_index)
+                self.prediction_history[event_index][0].append(lower_limit)
+                self.prediction_history[event_index][1].append(count_sum)
+                self.prediction_history[event_index][2].append(upper_limit)
+                self.time_history[event_index].append(current_time)
                 # Shorten the lists if neccessary
-                if len(self.time_history[event_number]) > self.num_max_time_history:
-                    self.prediction_history[event_number][0] = self.prediction_history[event_number][0][-self.num_min_time_history:]
-                    self.prediction_history[event_number][1] = self.prediction_history[event_number][1][-self.num_min_time_history:]
-                    self.prediction_history[event_number][2] = self.prediction_history[event_number][2][-self.num_min_time_history:]
-                    self.time_history[event_number] = self.time_history[event_number][-self.num_min_time_history:]
+                if len(self.time_history[event_index]) > self.num_max_time_history:
+                    self.prediction_history[event_index][0] = self.prediction_history[event_index][0][-self.num_min_time_history:]
+                    self.prediction_history[event_index][1] = self.prediction_history[event_index][1][-self.num_min_time_history:]
+                    self.prediction_history[event_index][2] = self.prediction_history[event_index][2][-self.num_min_time_history:]
+                    self.time_history[event_index] = self.time_history[event_index][-self.num_min_time_history:]
 
                 # Test if count_sum is in boundaries
                 if count_sum < lower_limit or count_sum > upper_limit:
-                    message = 'EventNumber: %s, Lower: %s, Count: %s, Upper: %s'%(event_number, lower_limit, count_sum, upper_limit)
-                    affected_path = self.event_type_detector.variable_key_list[event_number]
+                    message = 'EventNumber: %s, Lower: %s, Count: %s, Upper: %s'%(event_index, lower_limit, count_sum, upper_limit)
+                    affected_path = self.event_type_detector.variable_key_list[event_index]
                     confidence = 1 - min(count_sum / lower_limit, upper_limit / count_sum)
                     self.print(message, log_atom, affected_path, confidence=confidence)
 
                 # Update the model, for the next step
-                self.arima_models_statsmodels[event_number] = self.arima_models_statsmodels[event_number].append([count_sum])
+                self.arima_models_statsmodels[event_index] = self.arima_models_statsmodels[event_index].append([count_sum])
 
-    def one_step_prediction(self, event_number):
+    def one_step_prediction(self, event_index):
         """Make a one step prediction with the Arima model"""
-        prediction = self.arima_models_statsmodels[event_number].get_forecast(1)
+        prediction = self.arima_models_statsmodels[event_index].get_forecast(1)
         prediction = prediction.conf_int(alpha=self.alpha)
 
         # return in the order: pred, lower_limit, upper_limit
@@ -339,7 +354,8 @@ class TSAArima(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourc
         if isinstance(affected_path, str):
             affected_path = [affected_path]
 
-        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
+        original_log_line_prefix = self.aminer_config.config_properties.get(AminerConfig.CONFIG_KEY_LOG_LINE_PREFIX,
+                AminerConfig.DEFAULT_LOG_LINE_PREFIX)
         if original_log_line_prefix is None:
             original_log_line_prefix = ''
 

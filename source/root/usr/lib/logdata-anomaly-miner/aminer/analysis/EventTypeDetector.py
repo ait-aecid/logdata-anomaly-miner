@@ -100,33 +100,6 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def receive_atom(self, log_atom):
         """Receives an parsed atom and keeps track of the event types and the values of the variables of them."""
-        # Output for the 'End'-line # !!!
-        if '/firstmatch0/End' in log_atom.parser_match.get_match_dictionary():
-            if self.following_modules[-1].__class__.__name__ == 'TSAArima':
-                import matplotlib.pyplot as plt
-                import matplotlib.dates as mdates
-                import datetime as dt
-                t = [dt.datetime.fromtimestamp(z) for z in self.following_modules[0].time_history[0]]
-                plt.figure()
-                plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%Y'))
-                plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
-
-                plt.plot(t, self.following_modules[0].prediction_history[0][0], 'red')
-                plt.plot(t, self.following_modules[0].prediction_history[0][2], 'red')
-                plt.plot(t, self.following_modules[0].prediction_history[0][1], 'blue')
-                
-                for i in range(len(self.following_modules[0].prediction_history[0][0])):
-                    if self.following_modules[0].prediction_history[0][0][i] != self.following_modules[0].prediction_history[0][2][i] and (
-                            self.following_modules[0].prediction_history[0][0][i] > self.following_modules[0].prediction_history[0][1][i] or
-                            self.following_modules[0].prediction_history[0][1][i] > self.following_modules[0].prediction_history[0][2][i]):
-                        plt.plot([t[i]], [self.following_modules[0].prediction_history[0][1][i]], 'or', fillstyle='none', ms=8.0)
-
-                plt.gcf().autofmt_xdate()
-
-                plt.savefig('/tmp/TSAoutput', dpi=1200)
-            self.do_persist()
-            self.end()
-
         self.log_total += 1
         # Get the current time
         if self.track_time_for_TSA:
@@ -151,7 +124,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         # Check if a trigger has been triggered
         if self.track_time_for_TSA and len(self.etd_time_trigger[0]) > 0 and current_time >= min(self.etd_time_trigger[0]):
             # Get the indices of the triggered events
-            indices = [i for i in range(len(self.etd_time_trigger[0])) if current_time >= self.etd_time_trigger[0][i]]
+            indices = [i for i, time_trigger in enumerate(self.etd_time_trigger[0]) if current_time >= time_trigger]
 
             # Exectute the triggered functions of the TSA
             for i in range(len(indices)-1, -1, -1):
@@ -170,8 +143,8 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                             for j in range(len(self.num_eventlines_TSA_ref), len(self.num_eventlines)):
                                 self.num_eventlines_TSA_ref.append([0]*len(self.num_eventlines_TSA_ref[0]))
                             # Add the current number of eventlines
-                            for j in range(len(self.num_eventlines)):
-                                self.num_eventlines_TSA_ref[j].append(self.num_eventlines[j]-sum(self.num_eventlines_TSA_ref[j]))
+                            for j, val in enumerate(self.num_eventlines):
+                                self.num_eventlines_TSA_ref[j].append(val-sum(self.num_eventlines_TSA_ref[j]))
 
                         # Delete the initialization trigger
                         del self.etd_time_trigger[0][indices[i]]
@@ -188,21 +161,26 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                             for j in range(len(self.num_eventlines_TSA_ref), len(self.num_eventlines)):
                                 self.num_eventlines_TSA_ref.append([0]*len(self.num_eventlines_TSA_ref[0]))
                             # Add the current number of eventlines
-                            for j in range(len(self.num_eventlines)):
-                                self.num_eventlines_TSA_ref[j].append(self.num_eventlines[j]-sum(self.num_eventlines_TSA_ref[j]))
+                            for j, val in enumerate(self.num_eventlines):
+                                self.num_eventlines_TSA_ref[j].append(val-sum(self.num_eventlines_TSA_ref[j]))
 
                         # Get the timewindow lengths
-                        time_list = self.following_modules[next(j for j in range(len(
-                            self.following_modules)) if self.following_modules[j].__class__.__name__ == 'TSAArima')].calculate_time_steps(
+                        time_list = self.following_modules[next(j for j in range(len(self.following_modules)) if
+                            self.following_modules[j].__class__.__name__ == 'TSAArima')].calculate_time_steps(
                             self.num_eventlines_TSA_ref, log_atom)
                         self.num_eventlines_TSA_ref = copy.copy(self.num_eventlines)
 
+                        num_added_trigger = 0
+
                         # Add the new triggers
-                        for j in range(len(time_list)):
-                            if time_list[j] != -1:
-                                self.etd_time_trigger[0].append(self.etd_time_trigger[0][indices[i]] + time_list[j] * self.waiting_time_for_TSA / self.num_sections_waiting_time_for_TSA)
+                        for j, val in enumerate(time_list):
+                            if val != -1:
+                                num_added_trigger += 1
+                                self.etd_time_trigger[0].append(self.etd_time_trigger[0][indices[i]] + val * self.waiting_time_for_TSA /
+                                        self.num_sections_waiting_time_for_TSA)
                                 self.etd_time_trigger[1].append(j)
-                                self.etd_time_trigger[2].append(time_list[j] * self.waiting_time_for_TSA / self.num_sections_waiting_time_for_TSA)
+                                self.etd_time_trigger[2].append(val * self.waiting_time_for_TSA /
+                                        self.num_sections_waiting_time_for_TSA)
 
                         # Delete the initialization trigger
                         del self.etd_time_trigger[0][indices[i]]
@@ -210,15 +188,15 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                         del self.etd_time_trigger[2][indices[i]]
 
                         # Run the update function for all trigger, which would already have been triggerd
-                        for j in range(len(time_list)):
-                            while current_time >= self.etd_time_trigger[0][-1]:
-                                self.following_modules[next(j for j in range(len(
-                                    self.following_modules)) if self.following_modules[j].__class__.__name__ == 'TSAArima')].\
-                                    test_num_appearance(self.etd_time_trigger[1][-1], self.num_eventlines[self.etd_time_trigger[1][
-                                        -1]]-self.num_eventlines_TSA_ref[self.etd_time_trigger[1][-1]], current_time, log_atom)
-                                self.etd_time_trigger[0][-1] = self.etd_time_trigger[0][-1] + self.etd_time_trigger[2][-1]
-                                self.num_eventlines_TSA_ref[self.etd_time_trigger[1][-1]] = self.num_eventlines[self.etd_time_trigger[
-                                    1][-1]]
+                        for k in range(1, num_added_trigger+1):
+                            while current_time >= self.etd_time_trigger[0][-k]:
+                                self.following_modules[next(j for j in range(len(self.following_modules)) if self.following_modules[
+                                    j].__class__.__name__ == 'TSAArima')].test_num_appearance(self.etd_time_trigger[1][-k],
+                                    self.num_eventlines[self.etd_time_trigger[1][-k]]-self.num_eventlines_TSA_ref[
+                                        self.etd_time_trigger[1][-k]], current_time, log_atom)
+                                self.etd_time_trigger[0][-k] += self.etd_time_trigger[2][-k]
+                                self.num_eventlines_TSA_ref[self.etd_time_trigger[1][-k]] = self.num_eventlines[self.etd_time_trigger[
+                                    1][-k]]
 
                 # Trigger for an reoccuring time window
                 else:
