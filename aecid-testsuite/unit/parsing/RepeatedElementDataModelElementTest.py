@@ -56,14 +56,22 @@ class RepeatedElementDataModelElementTest(TestBase):
         """This test case verifies the functionality of setting the minimal and maximal repeats."""
         fixed_dme = DummyFixedDataModelElement(self.fixed_id, self.fixed_data)
         repeated_dme = RepeatedElementDataModelElement(self.id_, fixed_dme, min_repeat=2, max_repeat=5)
+        same_min_max_repeat_dme = RepeatedElementDataModelElement(self.id_, fixed_dme, min_repeat=3, max_repeat=3)
         data = b"other data"
         match_context = DummyMatchContext(data)
         match_element = repeated_dme.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+        match_context = DummyMatchContext(data)
+        match_element = same_min_max_repeat_dme.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
         data = b"fixed data "
         match_context = DummyMatchContext(data)
         match_element = repeated_dme.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        match_context = DummyMatchContext(data)
+        match_element = same_min_max_repeat_dme.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
         data = b"fixed data fixed data "
@@ -73,9 +81,20 @@ class RepeatedElementDataModelElementTest(TestBase):
             fixed_dme.get_match_element("%s/%s/0" % (self.path, self.id_), DummyMatchContext(data)),
             fixed_dme.get_match_element("%s/%s/1" % (self.path, self.id_), DummyMatchContext(data))])
 
+        match_context = DummyMatchContext(data)
+        match_element = same_min_max_repeat_dme.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
         data = b"fixed data fixed data fixed data "
         match_context = DummyMatchContext(data)
         match_element = repeated_dme.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, data, data, [
+            fixed_dme.get_match_element("%s/%s/0" % (self.path, self.id_), DummyMatchContext(data)),
+            fixed_dme.get_match_element("%s/%s/1" % (self.path, self.id_), DummyMatchContext(data)),
+            fixed_dme.get_match_element("%s/%s/2" % (self.path, self.id_), DummyMatchContext(data))])
+
+        match_context = DummyMatchContext(data)
+        match_element = same_min_max_repeat_dme.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, data, data, [
             fixed_dme.get_match_element("%s/%s/0" % (self.path, self.id_), DummyMatchContext(data)),
             fixed_dme.get_match_element("%s/%s/1" % (self.path, self.id_), DummyMatchContext(data)),
@@ -90,6 +109,10 @@ class RepeatedElementDataModelElementTest(TestBase):
             fixed_dme.get_match_element("%s/%s/2" % (self.path, self.id_), DummyMatchContext(data)),
             fixed_dme.get_match_element("%s/%s/3" % (self.path, self.id_), DummyMatchContext(data))])
 
+        match_context = DummyMatchContext(data)
+        match_element = same_min_max_repeat_dme.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
         data = b"fixed data fixed data fixed data fixed data fixed data "
         match_context = DummyMatchContext(data)
         match_element = repeated_dme.get_match_element(self.path, match_context)
@@ -100,9 +123,17 @@ class RepeatedElementDataModelElementTest(TestBase):
             fixed_dme.get_match_element("%s/%s/3" % (self.path, self.id_), DummyMatchContext(data)),
             fixed_dme.get_match_element("%s/%s/4" % (self.path, self.id_), DummyMatchContext(data))])
 
+        match_context = DummyMatchContext(data)
+        match_element = same_min_max_repeat_dme.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
         data = b"fixed data fixed data fixed data fixed data fixed data fixed data "
         match_context = DummyMatchContext(data)
         match_element = repeated_dme.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        match_context = DummyMatchContext(data)
+        match_element = same_min_max_repeat_dme.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
     def test5element_id_input_validation(self):
