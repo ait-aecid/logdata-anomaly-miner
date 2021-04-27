@@ -721,6 +721,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, etd, persistence_id=item['persistence_id'],
                     build_sum_over_values=item['build_sum_over_values'], num_division_time_step=item['num_division_time_step'], alpha=item['alpha'],
+                    num_min_time_history=item['num_min_time_history'], num_max_time_history=item['num_max_time_history'],
                     output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
                     constraint_list=item['constraint_list'])
             else:

@@ -102,27 +102,29 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         """Receives an parsed atom and keeps track of the event types and the values of the variables of them."""
         # Output for the 'End'-line # !!!
         if '/firstmatch0/End' in log_atom.parser_match.get_match_dictionary():
-            # self.do_persist()
             if self.following_modules[-1].__class__.__name__ == 'TSAArima':
                 import matplotlib.pyplot as plt
                 import matplotlib.dates as mdates
                 import datetime as dt
-                t = [dt.datetime.fromtimestamp(z) for z in self.following_modules[0].time_history]
+                t = [dt.datetime.fromtimestamp(z) for z in self.following_modules[0].time_history[0]]
                 plt.figure()
                 plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%Y'))
                 plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
 
-                plt.plot(t, self.following_modules[0].plots[0], 'red')
-                plt.plot(t, self.following_modules[0].plots[2], 'red')
-                plt.plot(t, self.following_modules[0].plots[1], 'blue')
+                plt.plot(t, self.following_modules[0].prediction_history[0][0], 'red')
+                plt.plot(t, self.following_modules[0].prediction_history[0][2], 'red')
+                plt.plot(t, self.following_modules[0].prediction_history[0][1], 'blue')
                 
-                for i in range(len(self.following_modules[0].plots[0])):
-                    if self.following_modules[0].plots[0][i] > self.following_modules[0].plots[1][i] or self.following_modules[0].plots[1][i] > self.following_modules[0].plots[2][i]:
-                        plt.plot([t[i]], [self.following_modules[0].plots[1][i]], 'or', fillstyle='none', ms=8.0)
+                for i in range(len(self.following_modules[0].prediction_history[0][0])):
+                    if self.following_modules[0].prediction_history[0][0][i] != self.following_modules[0].prediction_history[0][2][i] and (
+                            self.following_modules[0].prediction_history[0][0][i] > self.following_modules[0].prediction_history[0][1][i] or
+                            self.following_modules[0].prediction_history[0][1][i] > self.following_modules[0].prediction_history[0][2][i]):
+                        plt.plot([t[i]], [self.following_modules[0].prediction_history[0][1][i]], 'or', fillstyle='none', ms=8.0)
 
                 plt.gcf().autofmt_xdate()
 
                 plt.savefig('/tmp/TSAoutput', dpi=1200)
+            self.do_persist()
             self.end()
 
         self.log_total += 1
@@ -312,7 +314,9 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        return
+        for following_module in self.following_modules:
+            following_module.do_persist()
+
         tmp_list = [[]]
         for key in self.found_keys:
             tmp_list[0].append(list(key))

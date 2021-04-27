@@ -501,6 +501,8 @@
                     'build_sum_over_values': {'type': 'boolean'},
                     'num_division_time_step': {'type': 'integer', 'min': 1},
                     'd_bt_alpha': {'type': 'float', 'min': 0.000001, 'max': 1.0},
+                    'num_min_time_history': {'type': 'integer', 'min': 1},
+                    'num_max_time_history': {'type': 'integer', 'min': 2},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True}
                 }
             ]

@@ -168,7 +168,9 @@
                 'output_event_handlers': {'type': 'list', 'nullable': True, 'default': None},
                 'suppress': {'type': 'boolean', 'default': False},
                 'build_sum_over_values': {'type': 'boolean', 'default': False},
-                'num_division_time_step': {'type': 'integer', 'default': 10}
+                'num_division_time_step': {'type': 'integer', 'default': 10},
+                'num_min_time_history': {'type': 'integer', 'default': 20},
+                'num_max_time_history': {'type': 'integer', 'default': 30}
             }
         }
     }
