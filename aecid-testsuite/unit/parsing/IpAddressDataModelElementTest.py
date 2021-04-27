@@ -164,6 +164,12 @@ class IpAddressDataModelElementTest(TestBase):
         match_element = ip_addr_dme.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
+        # g in ip address
+        data = b"2001:4860:48g0::8888 followed by some text"
+        match_context = DummyMatchContext(data)
+        match_element = ip_addr_dme.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
     def test7element_id_input_validation(self):
         """Check if element_id is validated."""
         # empty element_id

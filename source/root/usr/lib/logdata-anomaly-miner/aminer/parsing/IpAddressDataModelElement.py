@@ -78,8 +78,7 @@ class IpAddressDataModelElement(ModelElementInterface):
             return None
         match_len = m.span(0)[1]
         if self.extract is extract_ipv6_address and (b"." in m.group()[:match_len].split(b":")[-1] or (len(data) > match_len and (
-                re.compile(br"((2[0-4][0-9]|1[0-9][0-9]|25[0-5]|[1-9]?[0-9])\.){3}(2[0-4][0-9]|1[0-9][0-9]|25[0-5]|[1-9]?[0-9])").match(
-                    data[data.rfind(b":", 0, match_len) + 1:]) is not None or (
+                re.compile(br"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}").match(data[data.rfind(b":", 0, match_len) + 1:]) is not None or (
                 data.find(b"::", match_len) == match_len and b"::" in data)))):
             return None
         extracted_address = self.extract(m.group(), match_len)
