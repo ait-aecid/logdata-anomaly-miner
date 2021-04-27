@@ -27,13 +27,15 @@ class AnyByteDataModelElementTest(TestBase):
         match_element = any_dme.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, data, data, None)
 
+    def test4get_match_element_no_match(self):
+        """Parse not matching substring from MatchContext and check if the MatchContext was not changed."""
         data = b""
         match_context = DummyMatchContext(data)
         any_dme = AnyByteDataModelElement(self.id_)
         match_element = any_dme.get_match_element(self.path, match_context)
-        self.compare_match_results(data, match_element, match_context, self.id_, self.path, data, data, None)
+        self.compare_no_match_results(data, match_element, match_context)
 
-    def test4element_id_input_validation(self):
+    def test5element_id_input_validation(self):
         """Check if element_id is validated."""
         # empty element_id
         element_id = ""
@@ -79,7 +81,7 @@ class AnyByteDataModelElementTest(TestBase):
         element_id = set()
         self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
 
-    def test5get_match_element_match_context_input_validation(self):
+    def test6get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = AnyByteDataModelElement(self.id_)
         data = b"abcdefghijklmnopqrstuvwxyz.!?"

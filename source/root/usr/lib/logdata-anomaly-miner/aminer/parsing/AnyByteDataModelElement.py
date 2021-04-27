@@ -45,5 +45,7 @@ class AnyByteDataModelElement(ModelElementInterface):
     def get_match_element(self, path: str, match_context):
         """Just return a match including all data from the context."""
         match_data = match_context.match_data
+        if not match_data:
+            return None
         match_context.update(match_data)
         return MatchElement("%s/%s" % (path, self.element_id), match_data, match_data, None)
