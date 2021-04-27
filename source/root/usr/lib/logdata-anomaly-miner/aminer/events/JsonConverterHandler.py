@@ -15,6 +15,7 @@ import json
 import time
 
 from aminer.events.EventInterfaces import EventHandlerInterface
+from aminer import AminerConfig
 
 
 class JsonConverterHandler(EventHandlerInterface):
@@ -36,13 +37,12 @@ class JsonConverterHandler(EventHandlerInterface):
             # No anomaly; do nothing on purpose
             pass
         else:
-            json_error = ''
-
             log_data = {}
-            if isinstance(log_atom.raw_data, bytes):
-                log_data['RawLogData'] = [bytes.decode(log_atom.raw_data)]
-            else:
-                log_data['RawLogData'] = [log_atom.raw_data]
+            try:
+                data = log_atom.raw_data.decode(AminerConfig.ENCODING)
+            except UnicodeError:
+                data = repr(log_atom.raw_data)
+            log_data['RawLogData'] = [data]
             if log_atom.get_timestamp() is None:
                 log_atom.set_timestamp(time.time())
             log_data['Timestamps'] = [round(log_atom.atom_time, 2)]
@@ -62,19 +62,16 @@ class JsonConverterHandler(EventHandlerInterface):
             if hasattr(event_source, 'autoIncludeFlag'):
                 analysis_component['TrainingMode'] = event_source.auto_include_flag
 
-            detector_analysis_component = event_data.get('AnalysisComponent', None)
+            detector_analysis_component = event_data.get('AnalysisComponent')
             if detector_analysis_component is not None:
                 for key in detector_analysis_component:
                     if key in analysis_component.keys():
-                        json_error += "AnalysisComponent attribute '%s' is already in use and can not be overwritten!\n" % key
                         continue
-                    analysis_component[key] = detector_analysis_component.get(key, None)
+                    analysis_component[key] = detector_analysis_component.get(key)
 
             if 'LogData' not in event_data:
                 event_data['LogData'] = log_data
             event_data['AnalysisComponent'] = analysis_component
-            if json_error != '':
-                event_data['JsonError'] = json_error
 
         json_data = json.dumps(event_data, indent=2)
         res = [''] * len(sorted_log_lines)

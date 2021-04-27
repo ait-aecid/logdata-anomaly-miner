@@ -427,16 +427,16 @@ class DateTimeModelElementTest(TestBase):
         element_id = b"path"
         self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
 
+        # boolean element_id is not allowed
+        element_id = True
+        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
+
         # integer element_id is not allowed
         element_id = 123
         self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
 
         # float element_id is not allowed
         element_id = 123.22
-        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
-
-        # boolean element_id is not allowed
-        element_id = True
         self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
 
         # dict element_id is not allowed

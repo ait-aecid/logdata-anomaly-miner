@@ -37,7 +37,7 @@ class DebugModelElementTest(TestBase):
         output = StringIO()
         sys.stderr = output
         debug_model_element = DebugModelElement(self.id_)
-        self.assertEqual(output.getvalue(), 'DebugModelElement %s added\n' % self.id_)
+        self.assertEqual(output.getvalue(), "DebugModelElement %s added\n" % self.id_)
 
         output.seek(0)
         output.truncate(0)
@@ -75,6 +75,10 @@ class DebugModelElementTest(TestBase):
         element_id = b"path"
         self.assertRaises(TypeError, DebugModelElement, element_id)
 
+        # bool element_id is not allowed
+        element_id = True
+        self.assertRaises(TypeError, DebugModelElement, element_id)
+
         # integer element_id is not allowed
         element_id = 123
         self.assertRaises(TypeError, DebugModelElement, element_id)
@@ -106,7 +110,7 @@ class DebugModelElementTest(TestBase):
     def test5get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = DebugModelElement(self.id_)
-        data = b'abcdefghijklmnopqrstuvwxyz.!?'
+        data = b"abcdefghijklmnopqrstuvwxyz.!?"
         model_element.get_match_element(self.path, DummyMatchContext(data))
         from aminer.parsing.MatchContext import MatchContext
         model_element.get_match_element(self.path, MatchContext(data))
@@ -115,6 +119,7 @@ class DebugModelElementTest(TestBase):
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(data, None, None, None))
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, True)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123.22)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, None)

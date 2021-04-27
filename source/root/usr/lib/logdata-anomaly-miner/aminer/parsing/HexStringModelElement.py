@@ -15,6 +15,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.ModelElementInterface import ModelElementInterface
+from aminer import AminerConfig
 
 
 class HexStringModelElement(ModelElementInterface):
@@ -56,9 +57,9 @@ class HexStringModelElement(ModelElementInterface):
         match_object = data[:match_len]
         try:
             pad = ''
-            if len(match_object.decode()) % 2 != 0:
+            if len(match_object.decode(AminerConfig.ENCODING)) % 2 != 0:
                 pad = '0'
-            match_string = bytes.fromhex(pad + match_object.decode())
+            match_string = bytes.fromhex(pad + match_object.decode(AminerConfig.ENCODING))
         except ValueError:
             return None
 

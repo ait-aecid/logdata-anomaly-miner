@@ -13,7 +13,7 @@ from datetime import datetime
 class TimestampCorrectionFiltersTest(TestBase):
     """Unittests for the TimestampCorrectionFilters."""
 
-    __expected_string = '%s New path(es) detected\n%s: "%s" (%d lines)\n  %s\nb\' pid=\'\n\n'
+    __expected_string = '%s New path(es) detected\n%s: "%s" (%d lines)\n  %s\n pid=\n\n'
     match_path = "['match/s1']"
 
     def test1simple_monotonic_timestamp_adjust_test(self):

@@ -102,16 +102,16 @@ class Base64StringModelElementTest(TestBase):
         element_id = b"path"
         self.assertRaises(TypeError, Base64StringModelElement, element_id)
 
+        # boolean element_id is not allowed
+        element_id = True
+        self.assertRaises(TypeError, Base64StringModelElement, element_id)
+
         # integer element_id is not allowed
         element_id = 123
         self.assertRaises(TypeError, Base64StringModelElement, element_id)
 
         # float element_id is not allowed
         element_id = 123.22
-        self.assertRaises(TypeError, Base64StringModelElement, element_id)
-
-        # boolean element_id is not allowed
-        element_id = True
         self.assertRaises(TypeError, Base64StringModelElement, element_id)
 
         # dict element_id is not allowed

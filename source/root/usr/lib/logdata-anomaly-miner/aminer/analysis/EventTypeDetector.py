@@ -16,7 +16,7 @@ import time
 import copy
 import logging
 
-from aminer import AminerConfig
+from aminer.AminerConfig import build_persistence_file_name, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, DEBUG_LOG_NAME
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
@@ -75,7 +75,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.aminer_config = aminer_config
 
         # Loads the persistence
-        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
+        self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
 
@@ -304,12 +304,12 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     def do_timer(self, trigger_time):
         """Check if current ruleset should be persisted."""
         if self.next_persist_time is None:
-            return self.aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
+            return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
         if delta <= 0:
             self.do_persist()
-            delta = self.aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
+            delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         return delta
 
     def do_persist(self):
@@ -333,13 +333,13 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             following_module.do_persist()
 
         self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-            AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+            KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def add_following_modules(self, following_module):
         """Add the given Module to the following module list."""
         self.following_modules.append(following_module)
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(
+        logging.getLogger(DEBUG_LOG_NAME).debug(
             '%s added following module %s.', self.__class__.__name__, following_module.__class__.__name__)
 
     def init_values(self, current_index):
