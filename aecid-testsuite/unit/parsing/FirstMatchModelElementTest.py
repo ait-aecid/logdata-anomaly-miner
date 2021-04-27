@@ -15,7 +15,7 @@ class FirstDataModelElementTest(unittest.TestCase):
         """This test case proves the intended functionality of single Matches."""
         match_context = MatchContext(self.string)
         decimal_integer_value_me = DecimalIntegerValueModelElement(
-            None, DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+            "id", DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
         fixed_dme = FixedDataModelElement('s0', b'pid=')
         first_match_model_element = FirstMatchModelElement('first', [decimal_integer_value_me, fixed_dme])
         self.assertEqual(
@@ -30,7 +30,7 @@ class FirstDataModelElementTest(unittest.TestCase):
         """This test case checks if no match is returned when no child element matches."""
         match_context = MatchContext(b'pid = 25537 uid=2')
         decimal_integer_value_me = DecimalIntegerValueModelElement(
-            None, DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+            "id", DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
         fixed_dme = FixedDataModelElement('s0', b'pid=')
         first_match_model_element = FirstMatchModelElement('first', [decimal_integer_value_me, fixed_dme])
         self.assertEqual(first_match_model_element.get_match_element('first', match_context), None, 'No MatchElement was expected')
@@ -39,7 +39,7 @@ class FirstDataModelElementTest(unittest.TestCase):
         """This test case checks if the first match is returned, when multiple children match."""
         match_context = MatchContext(self.string)
         decimal_integer_value_me = DecimalIntegerValueModelElement(
-            None, DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+            "id", DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
         fixed_dme = FixedDataModelElement('s0', self.string)
         first_match_model_element = FirstMatchModelElement('first', [decimal_integer_value_me, fixed_dme])
         self.assertEqual(
@@ -53,7 +53,7 @@ class FirstDataModelElementTest(unittest.TestCase):
     def test4child_elements(self):
         """This test case checks if all child elements are added as expected."""
         decimal_integer_value_me = DecimalIntegerValueModelElement(
-            None, DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+            "id", DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
         fixed_dme = FixedDataModelElement('s0', self.string)
         first_match_model_element = FirstMatchModelElement('first', [decimal_integer_value_me, fixed_dme])
         self.assertEqual(
