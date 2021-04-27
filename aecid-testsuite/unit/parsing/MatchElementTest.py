@@ -80,7 +80,6 @@ class MatchElementTest(TestBase):
 
     def test8init_path_input_validation(self):
         """Check if path is validated in __init__()."""
-        self.assertRaises(ValueError, MatchElement, "", self.match_string, self.match_object, None)
         self.assertRaises(TypeError, MatchElement, b"path", self.match_string, self.match_object, None)
         self.assertRaises(TypeError, MatchElement, True, self.match_string, self.match_object, None)
         self.assertRaises(TypeError, MatchElement, 123, self.match_string, self.match_object, None)

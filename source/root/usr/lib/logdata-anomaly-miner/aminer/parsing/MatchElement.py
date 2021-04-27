@@ -33,10 +33,6 @@ class MatchElement:
             msg = "path has to be of the type string or None."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
-        if isinstance(path, str) and len(path) < 1:
-            msg = "path must not be empty."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
         if (not path) and children:
             msg = "Anonymous match may not have children"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
