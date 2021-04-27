@@ -181,6 +181,8 @@ class JsonModelElement(ModelElementInterface):
                         last_bracket = match_context.match_data.find(b'}', last_bracket) + 1
                     index = last_bracket - len(data)
                 else:
+                    if data == b"":
+                        return [None]
                     match_element = json_dict[key].get_match_element(current_path, MatchContext(data))
                     if match_element is not None and len(match_element.match_string) != len(data) and (
                             not isinstance(match_element.match_object, bytes) or len(match_element.match_object) != len(data)):
