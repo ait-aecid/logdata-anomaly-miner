@@ -39,8 +39,7 @@ class OptionalMatchModelElement(ModelElementInterface):
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
         self.optional_element = optional_element
-        self.empty_match_element = MatchElement("%s/%s" % ("None", self.element_id), b"None", None, None)
-        self.empty_match_element.match_string = b""
+        self.empty_match_element = MatchElement("%s/%s" % ("None", self.element_id), b"", None, None)
 
     def get_id(self):
         """Get the element ID."""
