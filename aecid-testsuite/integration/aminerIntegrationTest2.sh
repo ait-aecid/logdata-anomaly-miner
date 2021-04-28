@@ -113,7 +113,7 @@ sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
 sudo rm /tmp/syslog 2> /dev/null
 sudo rm /tmp/auth.log 2> /dev/null
 sudo rm /tmp/output 2> /dev/null
-sudo cp ../unit/config/kafka-client.conf /etc/aminer/kafka-client.conf
+sudo cp ../unit/data/kafka-client.conf /etc/aminer/kafka-client.conf
 curl https://mirror.klaus-uwe.me/apache/kafka/2.7.0/kafka_2.12-2.7.0.tgz --output kafka.tgz
 tar xvf kafka.tgz > /dev/null
 rm kafka.tgz
