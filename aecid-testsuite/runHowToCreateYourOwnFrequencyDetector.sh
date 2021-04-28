@@ -50,7 +50,7 @@ exit_code=$?
 # reset schema to backup.
 sudo cp $TMP_VAL_SCHEMA $VAL_SCHEMA
 sudo cp $TMP_YML_CONFIG $YML_CONFIG
-#sudo rm $TMP_VAL_SCHEMA
+sudo rm $TMP_VAL_SCHEMA
 sudo rm $CONFIG
 sudo rm $TMP_YML_CONFIG
 sudo rm $FREQ_DET
