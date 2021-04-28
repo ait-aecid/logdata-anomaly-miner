@@ -80,7 +80,8 @@ class EventTypeDetectorTest(TestBase):
         FixedDataModelElement('name_string', b' name="'), DelimitedDataModelElement('name', b'"'),
         FixedDataModelElement('inode_string', b'" inode='), DecimalIntegerValueModelElement('inode'),
         FixedDataModelElement('dev_string', b' dev='), DelimitedDataModelElement('dev', b' '),
-        FixedDataModelElement('mode_string', b' mode='), DecimalIntegerValueModelElement('mode'),
+        FixedDataModelElement('mode_string', b' mode='), DecimalIntegerValueModelElement(
+            'mode', value_pad_type=DecimalIntegerValueModelElement.PAD_TYPE_ZERO),
         FixedDataModelElement('ouid_string', b' ouid='), DecimalIntegerValueModelElement('ouid'),
         FixedDataModelElement('ogid_string', b' ogid='), DecimalIntegerValueModelElement('ogid'),
         FixedDataModelElement('rdev_string', b' rdev='), DelimitedDataModelElement('rdev', b' '),

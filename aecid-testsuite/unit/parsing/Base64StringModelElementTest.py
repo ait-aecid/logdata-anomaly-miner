@@ -102,7 +102,7 @@ class Base64StringModelElementTest(TestBase):
         element_id = b"path"
         self.assertRaises(TypeError, Base64StringModelElement, element_id)
 
-        # bytes element_id is not allowed
+        # boolean element_id is not allowed
         element_id = True
         self.assertRaises(TypeError, Base64StringModelElement, element_id)
 
@@ -112,10 +112,6 @@ class Base64StringModelElementTest(TestBase):
 
         # float element_id is not allowed
         element_id = 123.22
-        self.assertRaises(TypeError, Base64StringModelElement, element_id)
-
-        # boolean element_id is not allowed
-        element_id = True
         self.assertRaises(TypeError, Base64StringModelElement, element_id)
 
         # dict element_id is not allowed
@@ -150,7 +146,6 @@ class Base64StringModelElementTest(TestBase):
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(self.path, data, None, None))
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
-        self.assertRaises(AttributeError, model_element.get_match_element, self.path, True)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123.22)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, True)

@@ -1,219 +1,548 @@
 import unittest
-from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from unit.TestBase import TestBase, DummyMatchContext
 
 
-class DecimalIntegerValueModelElementTest(unittest.TestCase):
+class DecimalIntegerValueModelElementTest(TestBase):
     """Unittests for the DecimalIntegerValueModelElement."""
 
-    positive_string = b'25537 uid=2'
-    negative_string = b'-25537 uid=2'
-    zero_number = b'00025537 uid=2'
-    match_element_should_exist = 'There should exist a MatchElement!'
-    match_element_unexpected_result = 'The MatchElement does not contain the expected result'
-    match_element_unexpected_value = 'The MatchElement Value is not as expected'
-    match_element_should_not_exist = 'There should not exist a MatchElement!'
+    id_ = "integer"
+    path = "path"
 
-    def test1positive_number_none_padding(self):
-        """
-        This testcase represents the equivalence class of positive numbers in combination with no padding.
-        It tests the correctness of the Path usage for all positive integers without padding.
-        """
-        match_context = MatchContext(self.positive_string)
+    def test1get_id(self):
+        """Test if get_id works properly."""
+        decimal_integer_me = DecimalIntegerValueModelElement(self.id_)
+        self.assertEqual(decimal_integer_me.get_id(), self.id_)
+
+    def test2get_child_elements(self):
+        """Test if get_child_elements returns None."""
+        decimal_integer_me = DecimalIntegerValueModelElement(self.id_)
+        self.assertEqual(decimal_integer_me.get_child_elements(), None)
+
+    def test3get_match_element_default_values(self):
+        """Test valid integer values with default values of value_sign_type and value_pad_type."""
         decimal_integer_value_me = DecimalIntegerValueModelElement(
-            None, DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
-        match_element = decimal_integer_value_me.get_match_element(None, match_context)
-        self.assertNotEqual(match_element, None, self.match_element_should_exist)
-        self.assertEqual(match_element.get_match_string(), b'25537', self.match_element_unexpected_result)
-        self.assertEqual(match_element.get_match_object(), 25537, self.match_element_unexpected_value)
+            self.id_, DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+        data = b"22.25 some string."
+        value = b"22"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22, None)
 
-    def test2positive_number_none_padding_no_match(self):
-        """
-        This testcase represents the equivalence class of positive numbers in combination with no padding.
-        It tests the correctness of the Path usage for all positive integers without padding, when no match is found.
-        """
-        match_context = MatchContext(b' 25537 uid=2')
+        data = b"0.25 some string."
+        value = b"0"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 0, None)
+
+        data = b"22 some string."
+        value = b"22"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22, None)
+
+        data = b"22.12.2021 some string."
+        value = b"22"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22, None)
+
+        data = b"22. some string"
+        value = b"22"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22, None)
+
+        data = b"0 some string"
+        value = b"0"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 0, None)
+
+    def test4get_match_element_default_values_no_match(self):
+        """Test not matching values with default values of value_sign_type and value_pad_type."""
         decimal_integer_value_me = DecimalIntegerValueModelElement(
-            None, DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
-        match_element = decimal_integer_value_me.get_match_element(None, match_context)
-        self.assertEqual(match_element, None, self.match_element_should_not_exist)
+            self.id_, DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+        data = b"+22.25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
 
-    def test3negative_number_none_padding(self):
-        """
-        This testcase represents the equivalence class of negative numbers in combination with no padding.
-        It tests the correctness of the Path usage for all negative integers without padding.
-        """
-        match_context = MatchContext(self.negative_string)
+        data = b"-22.25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"22,25"
+        value = b"22"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22, None)
+
+        data = b".25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"025"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"0025"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b" 25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"  25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"1e-5"
+        value = b"1"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 1, None)
+
+        data = b"e+10"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"1e+0"
+        value = b"1"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 1, None)
+
+        data = b"00"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"no number 22 some string."
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+    def test5get_match_element_optional_zero_values(self):
+        """Test valid float values with "optional" or "zero" values of value_sign_type and value_pad_type."""
         decimal_integer_value_me = DecimalIntegerValueModelElement(
-            None, DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
-        match_element = decimal_integer_value_me.get_match_element(None, match_context)
-        self.assertNotEqual(match_element, None, self.match_element_should_exist)
-        self.assertEqual(match_element.get_match_string(), b'-25537', self.match_element_unexpected_result)
-        self.assertEqual(match_element.get_match_object(), -25537, self.match_element_unexpected_value)
+            self.id_, DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL, DecimalIntegerValueModelElement.PAD_TYPE_ZERO)
+        data = b"22.25 some string."
+        value = b"22"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22, None)
 
-    def test4negative_number_none_padding_no_match(self):
-        """
-        This testcase represents the equivalence class of negative numbers in combination with no padding.
-        It tests the correctness of the Path usage for all negative integers without padding, when no match is found.
-        """
-        match_context = MatchContext(b'- 25537 uid=2')
+        data = b"-22.25 some string."
+        value = b"-22"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, -22, None)
+
+        data = b"0.25 some string."
+        value = b"0"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 0, None)
+
+        data = b"22 some string."
+        value = b"22"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22, None)
+
+        data = b"22.12.2021 some string."
+        value = b"22"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22, None)
+
+        data = b"22. some string"
+        value = b"22"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22, None)
+
+        data = b"025 some string"
+        value = b"025"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 25, None)
+
+        data = b"0025 some string"
+        value = b"0025"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 25, None)
+
+        data = b"0025.22 some string"
+        value = b"0025"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 25, None)
+
+        data = b"1e-5 some string"
+        value = b"1"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 1, None)
+
+        data = b"1e+0 some string"
+        value = b"1"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 1, None)
+
+        data = b"0 some string"
+        value = b"0"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 0, None)
+
+        data = b"00 some string"
+        value = b"00"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 0, None)
+
+    def test6get_match_element_optional_zero_values_no_match(self):
+        """Test not matching values with default values of value_sign_type and value_pad_type."""
         decimal_integer_value_me = DecimalIntegerValueModelElement(
-            None, DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
-        match_element = decimal_integer_value_me.get_match_element(None, match_context)
-        self.assertEqual(match_element, None, self.match_element_should_not_exist)
+            self.id_, DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL, DecimalIntegerValueModelElement.PAD_TYPE_ZERO)
+        data = b"+22.25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
 
-    def test5sign_type_mandatory_none_padding(self):
-        """
-        This testcase represents the equivalence class of all numbers with a mandatory sign in combination with no padding.
-        It tests the correctness of the Path usage for all integers with a mandatory sign without padding.
-        """
-        match_context = MatchContext(self.negative_string)
+        data = b"22,25"
+        value = b"22"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22, None)
+
+        data = b".25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b" 25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"  25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"e+10"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b"no number 22 some string."
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+    def test7get_match_element_mandatory_blank_values(self):
+        """Test valid float values with "mandatory" or "blank" values of value_sign_type and value_pad_type."""
         decimal_integer_value_me = DecimalIntegerValueModelElement(
-            None, DecimalIntegerValueModelElement.SIGN_TYPE_MANDATORY, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
-        match_element = decimal_integer_value_me.get_match_element(None, match_context)
-        self.assertNotEqual(match_element, None, self.match_element_should_exist)
-        self.assertEqual(match_element.get_match_string(), b'-25537', self.match_element_unexpected_result)
-        self.assertEqual(match_element.get_match_object(), -25537, self.match_element_unexpected_value)
+            self.id_, DecimalIntegerValueModelElement.SIGN_TYPE_MANDATORY, DecimalIntegerValueModelElement.PAD_TYPE_BLANK)
+        data = b"+22.25 some string."
+        value = b"+22"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22, None)
 
-        match_context = MatchContext(b'+25537 uid=2')
-        match_element = decimal_integer_value_me.get_match_element(None, match_context)
-        self.assertNotEqual(match_element, None, self.match_element_should_exist)
-        self.assertEqual(match_element.get_match_string(), b'+25537', self.match_element_unexpected_result)
-        self.assertEqual(match_element.get_match_object(), 25537, self.match_element_unexpected_value)
+        data = b"-22.25 some string."
+        value = b"-22"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, -22, None)
 
-    def test6sign_type_mandatory_none_padding_no_match(self):
-        """
-        This testcase represents the equivalence class of all numbers with a mandatory sign in combination with no padding.
-        It tests the correctness of the Path usage for all integers with a mandatory sign without padding, when no match is found.
-        """
-        match_context = MatchContext(self.positive_string)
+        data = b"+0.25 some string."
+        value = b"+0"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 0, None)
+
+        data = b"+22 some string."
+        value = b"+22"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22, None)
+
+        data = b"+22. some string"
+        value = b"+22"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22, None)
+
+        data = b"+ 25 some string"
+        value = b"+ 25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 25, None)
+
+        data = b"- 25 some string"
+        value = b"- 25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, -25, None)
+
+        data = b"+1e-5 some string"
+        value = b"+1"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 1, None)
+
+        data = b"+1e+0 some string"
+        value = b"+1"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 1, None)
+
+        data = b"+ 1e+0 some string"
+        value = b"+ 1"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 1, None)
+
+        data = b"+0 some string"
+        value = b"+0"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 0, None)
+
+    def test8get_match_element_mandatory_blank_values_no_match(self):
+        """Test not matching values with default values of value_sign_type and value_pad_type."""
         decimal_integer_value_me = DecimalIntegerValueModelElement(
-            None, DecimalIntegerValueModelElement.SIGN_TYPE_MANDATORY, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
-        match_element = decimal_integer_value_me.get_match_element(None, match_context)
-        self.assertEqual(match_element, None, self.match_element_should_not_exist)
+            self.id_, DecimalIntegerValueModelElement.SIGN_TYPE_MANDATORY, DecimalIntegerValueModelElement.PAD_TYPE_BLANK)
+        data = b"22.25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
 
-    def test7positive_number_zero_padding(self):
-        """In this testcase the positive Integer equivalence class in combination with the zero padding is tested."""
-        match_context = MatchContext(self.zero_number)
-        decimal_integer_value_me = DecimalIntegerValueModelElement(
-            None, DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_ZERO)
-        match_element = decimal_integer_value_me.get_match_element(None, match_context)
-        self.assertNotEqual(match_element, None, self.match_element_should_exist)
-        self.assertEqual(match_element.get_match_string(), b'00025537', self.match_element_unexpected_result)
-        self.assertEqual(match_element.get_match_object(), 25537, self.match_element_unexpected_value)
+        data = b"+  22.25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
 
-        match_context = MatchContext(self.positive_string)
-        match_element = decimal_integer_value_me.get_match_element(None, match_context)
-        self.assertNotEqual(match_element, None, self.match_element_should_exist)
-        self.assertEqual(match_element.get_match_string(), b'25537', self.match_element_unexpected_result)
-        self.assertEqual(match_element.get_match_object(), 25537, self.match_element_unexpected_value)
+        data = b"-  22.25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
 
-    def test8positive_number_zero_padding_no_match(self):
-        """In this testcase the positive Integer equivalence class in combination with the zero padding is tested with no match expected."""
-        match_context = MatchContext(b' 00025537 uid=2')
-        decimal_integer_value_me = DecimalIntegerValueModelElement(
-            None, DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_ZERO)
-        match_element = decimal_integer_value_me.get_match_element(None, match_context)
-        self.assertEqual(match_element, None, self.match_element_should_not_exist)
+        data = b"+22,25"
+        value = b"+22"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 22, None)
 
-    def test9negative_number_blank_padding(self):
-        """In this testcase the negative Integer equivalence class in combination with the blank character padding is tested."""
-        match_context = MatchContext(b'- 25537 uid=2')
-        decimal_integer_value_me = DecimalIntegerValueModelElement(
-            None, DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL, DecimalIntegerValueModelElement.PAD_TYPE_BLANK)
-        match_element = decimal_integer_value_me.get_match_element(None, match_context)
-        self.assertNotEqual(match_element, None, self.match_element_should_exist)
-        self.assertEqual(match_element.get_match_string(), b'- 25537', self.match_element_unexpected_result)
-        self.assertEqual(match_element.get_match_object(), -25537, self.match_element_unexpected_value)
+        data = b"22,25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
 
-        match_context = MatchContext(self.negative_string)
-        match_element = decimal_integer_value_me.get_match_element(None, match_context)
-        self.assertNotEqual(match_element, None, self.match_element_should_exist)
-        self.assertEqual(match_element.get_match_string(), b'-25537', self.match_element_unexpected_result)
-        self.assertEqual(match_element.get_match_object(), -25537, self.match_element_unexpected_value)
+        data = b"22.12.2021 some string."
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
 
-    def test10negative_number_blank_padding_no_match(self):
-        """
-        In this testcase the negative Integer equivalence class in combination with the blank character padding is tested.
-        No match expected.
-        """
-        match_context = MatchContext(b' -25537 uid=2')
-        decimal_integer_value_me = DecimalIntegerValueModelElement(
-            None, DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL, DecimalIntegerValueModelElement.PAD_TYPE_BLANK)
-        match_element = decimal_integer_value_me.get_match_element(None, match_context)
-        self.assertEqual(match_element, None, self.match_element_should_not_exist)
+        data = b".25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
 
-    def test11mandatory_zero_padding(self):
-        """In this testcase the mandatory sign equivalence class in combination with the zero padding is tested."""
-        match_context = MatchContext(b'+00025537 uid=2')
-        decimal_integer_value_me = DecimalIntegerValueModelElement(
-            None, DecimalIntegerValueModelElement.SIGN_TYPE_MANDATORY, DecimalIntegerValueModelElement.PAD_TYPE_ZERO)
-        match_element = decimal_integer_value_me.get_match_element(None, match_context)
-        self.assertNotEqual(match_element, None, self.match_element_should_exist)
-        self.assertEqual(match_element.get_match_string(), b'+00025537', self.match_element_unexpected_result)
-        self.assertEqual(match_element.get_match_object(), 25537, self.match_element_unexpected_value)
+        data = b" +25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
 
-        match_context = MatchContext(b'-00025537 uid=2')
-        match_element = decimal_integer_value_me.get_match_element(None, match_context)
-        self.assertNotEqual(match_element, None, self.match_element_should_exist)
-        self.assertEqual(match_element.get_match_string(), b'-00025537', self.match_element_unexpected_result)
-        self.assertEqual(match_element.get_match_object(), -25537, self.match_element_unexpected_value)
+        data = b" -25"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
 
-        match_context = MatchContext(b'+25537 uid=2')
-        match_element = decimal_integer_value_me.get_match_element(None, match_context)
-        self.assertNotEqual(match_element, None, self.match_element_should_exist)
-        self.assertEqual(match_element.get_match_string(), b'+25537', self.match_element_unexpected_result)
-        self.assertEqual(match_element.get_match_object(), 25537, self.match_element_unexpected_value)
+        data = b"025"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
 
-    def test12mandatory_zero_padding_no_match(self):
-        """In this testcase the mandatory sign equivalence class in combination with the zero padding is tested with no match expected."""
-        match_context = MatchContext(self.zero_number)
-        decimal_integer_value_me = DecimalIntegerValueModelElement(
-            None, DecimalIntegerValueModelElement.SIGN_TYPE_MANDATORY, DecimalIntegerValueModelElement.PAD_TYPE_ZERO)
-        match_element = decimal_integer_value_me.get_match_element(None, match_context)
-        self.assertEqual(match_element, None, self.match_element_should_not_exist)
+        data = b"0025"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
 
-        match_context = MatchContext(self.positive_string)
-        match_element = decimal_integer_value_me.get_match_element(None, match_context)
-        self.assertEqual(match_element, None, self.match_element_should_not_exist)
+        data = b"e+10"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
 
-    def test13_no_number_input(self):
-        """This test checks whether the input is validated against the datatype."""
-        match_context = MatchContext(b'This is no number')
-        decimal_integer_value_me = DecimalIntegerValueModelElement(
-            None, DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
-        match_element = decimal_integer_value_me.get_match_element(None, match_context)
-        self.assertEqual(match_element, None, self.match_element_should_not_exist)
+        data = b"00"
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
 
-    def test14_valid_padding_no_match(self):
-        """If the input is valid, but only padding characters can be found, the result should be no match."""
-        match_context = MatchContext(b'    ')
-        decimal_integer_value_me = DecimalIntegerValueModelElement(
-            None, DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL, DecimalIntegerValueModelElement.PAD_TYPE_BLANK)
-        match_element = decimal_integer_value_me.get_match_element(None, match_context)
-        self.assertEqual(match_element, None, self.match_element_should_not_exist)
+        data = b"no number 22 some string."
+        match_context = DummyMatchContext(data)
+        match_element = decimal_integer_value_me.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
 
-        match_context = MatchContext(b'00000')
-        decimal_integer_value_me = DecimalIntegerValueModelElement(
-            None, DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL, DecimalIntegerValueModelElement.PAD_TYPE_ZERO)
-        match_element = decimal_integer_value_me.get_match_element(None, match_context)
-        self.assertEqual(match_element, None, self.match_element_should_not_exist)
+    def test9element_id_input_validation(self):
+        """Check if element_id is validated."""
+        # empty element_id
+        element_id = ""
+        self.assertRaises(ValueError, DecimalIntegerValueModelElement, element_id)
 
-    def test15_invalid_sign_type(self):
-        """An exception must be raised, when the sign type is not valid."""
-        self.assertRaises(
-            Exception, DecimalIntegerValueModelElement, None, 'other sign type', DecimalIntegerValueModelElement.PAD_TYPE_ZERO)
+        # None element_id
+        element_id = None
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, element_id)
 
-    def test16_invalid_padding_type(self):
-        """An exception must be raised, when the padding type does not exist."""
-        self.assertRaises(Exception, DecimalIntegerValueModelElement, None, DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL, 'tab')
+        # bytes element_id is not allowed
+        element_id = b"path"
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, element_id)
 
-    # skipcq: PYL-W0105
-    '''
-    def test17NoBytestringInput(self):
-        """An exception must be raised, when the input is no bytestring. Another possiblity is to convert the string into a bytestring."""
-        self.assertRaises(Exception, MatchContext, '00025537 uid=2')
-    '''
+        # boolean element_id is not allowed
+        element_id = True
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, element_id)
+
+        # integer element_id is not allowed
+        element_id = 123
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, element_id)
+
+        # float element_id is not allowed
+        element_id = 123.22
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, element_id)
+
+        # dict element_id is not allowed
+        element_id = {"id": "path"}
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, element_id)
+
+        # list element_id is not allowed
+        element_id = ["path"]
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, element_id)
+
+        # empty list element_id is not allowed
+        element_id = []
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, element_id)
+
+        # empty tuple element_id is not allowed
+        element_id = ()
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, element_id)
+
+        # empty set element_id is not allowed
+        element_id = set()
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, element_id)
+
+    def test10value_sign_type_input_validation(self):
+        """Check if value_sign_type is validated."""
+        DecimalIntegerValueModelElement(self.id_, value_sign_type="none")
+        DecimalIntegerValueModelElement(self.id_, value_sign_type="optional")
+        DecimalIntegerValueModelElement(self.id_, value_sign_type="mandatory")
+
+        value_sign_type = "None"
+        self.assertRaises(ValueError, DecimalIntegerValueModelElement, self.id_, value_sign_type=value_sign_type)
+
+        value_sign_type = None
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=value_sign_type)
+
+        value_sign_type = b"none"
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=value_sign_type)
+
+        value_sign_type = True
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=value_sign_type)
+
+        value_sign_type = 123
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=value_sign_type)
+
+        value_sign_type = 123.22
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=value_sign_type)
+
+        value_sign_type = {"value_sign_type": "none"}
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=value_sign_type)
+
+        value_sign_type = ["none"]
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=value_sign_type)
+
+        value_sign_type = []
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=value_sign_type)
+
+        value_sign_type = ()
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=value_sign_type)
+
+        value_sign_type = set()
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=value_sign_type)
+
+    def test11value_pad_type_input_validation(self):
+        """Check if value_pad_type is validated."""
+        DecimalIntegerValueModelElement(self.id_, value_pad_type="none")
+        DecimalIntegerValueModelElement(self.id_, value_pad_type="zero")
+        DecimalIntegerValueModelElement(self.id_, value_pad_type="blank")
+
+        value_pad_type = "None"
+        self.assertRaises(ValueError, DecimalIntegerValueModelElement, self.id_, value_pad_type=value_pad_type)
+
+        value_pad_type = None
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=value_pad_type)
+
+        value_pad_type = b"none"
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=value_pad_type)
+
+        value_pad_type = True
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=value_pad_type)
+
+        value_pad_type = 123
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=value_pad_type)
+
+        value_pad_type = 123.22
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=value_pad_type)
+
+        value_pad_type = {"value_sign_type": "none"}
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=value_pad_type)
+
+        value_pad_type = ["none"]
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=value_pad_type)
+
+        value_pad_type = []
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=value_pad_type)
+
+        value_pad_type = ()
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=value_pad_type)
+
+        value_pad_type = set()
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=value_pad_type)
+
+    def test12get_match_element_match_context_input_validation(self):
+        """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
+        model_element = DecimalIntegerValueModelElement(self.id_)
+        data = b"123.22"
+        model_element.get_match_element(self.path, DummyMatchContext(data))
+        from aminer.parsing.MatchContext import MatchContext
+        model_element.get_match_element(self.path, MatchContext(data))
+
+        from aminer.parsing.MatchElement import MatchElement
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(data, None, None, None))
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, True)
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123)
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123.22)
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, None)
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, [])
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, {"key": MatchContext(data)})
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, set())
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, ())
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, model_element)
 
 
 if __name__ == "__main__":

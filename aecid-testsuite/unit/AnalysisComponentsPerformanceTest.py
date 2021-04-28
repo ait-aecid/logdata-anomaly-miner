@@ -696,7 +696,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
             DelimitedDataModelElement('name', b'"'), FixedDataModelElement('inode_string', b'" inode='),
             DecimalIntegerValueModelElement('inode'), FixedDataModelElement('dev_string', b' dev='),
             DelimitedDataModelElement('dev', b' '), FixedDataModelElement('mode_string', b' mode='),
-            DecimalIntegerValueModelElement('mode'), FixedDataModelElement('ouid_string', b' ouid='),
+            DecimalIntegerValueModelElement('mode', value_pad_type=DecimalIntegerValueModelElement.PAD_TYPE_ZERO),
+            FixedDataModelElement('ouid_string', b' ouid='),
             DecimalIntegerValueModelElement('ouid'), FixedDataModelElement('ogid_string', b' ogid='),
             DecimalIntegerValueModelElement('ogid'), FixedDataModelElement('rdev_string', b' rdev='),
             DelimitedDataModelElement('rdev', b' '), FixedDataModelElement('nametype_string', b' nametype='),
@@ -800,7 +801,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
             DelimitedDataModelElement('name', b'"'), FixedDataModelElement('inode_string', b'" inode='),
             DecimalIntegerValueModelElement('inode'), FixedDataModelElement('dev_string', b' dev='),
             DelimitedDataModelElement('dev', b' '), FixedDataModelElement('mode_string', b' mode='),
-            DecimalIntegerValueModelElement('mode'), FixedDataModelElement('ouid_string', b' ouid='),
+            DecimalIntegerValueModelElement('mode', value_pad_type=DecimalIntegerValueModelElement.PAD_TYPE_ZERO),
+            FixedDataModelElement('ouid_string', b' ouid='),
             DecimalIntegerValueModelElement('ouid'), FixedDataModelElement('ogid_string', b' ogid='),
             DecimalIntegerValueModelElement('ogid'), FixedDataModelElement('rdev_string', b' rdev='),
             DelimitedDataModelElement('rdev', b' '), FixedDataModelElement('nametype_string', b' nametype='),
@@ -844,10 +846,11 @@ class AnalysisComponentsPerformanceTest(TestBase):
                                        hypothesis_eval_delta_time, delta_time_to_discard_hypothesis):
         """Run the performance tests for EventCorrelationDetector."""
         alphabet = b'abcdefghijklmnopqrstuvwxyz'
-        alphabet_model = FirstMatchModelElement('first', [])
+        children = []
         for i, char in enumerate(alphabet):
             char = bytes([char])
-            alphabet_model.children.append(FixedDataModelElement(char.decode(), char))
+            children.append(FixedDataModelElement(char.decode(), char))
+        alphabet_model = FirstMatchModelElement('first', children)
 
         # training phase
         results = [None] * self.iterations
