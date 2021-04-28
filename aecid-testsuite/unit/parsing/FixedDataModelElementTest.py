@@ -1,5 +1,7 @@
 import unittest
 from aminer.parsing.FixedDataModelElement import FixedDataModelElement
+from aminer.parsing.MatchContext import MatchContext
+from aminer.parsing.MatchElement import MatchElement
 from unit.TestBase import TestBase, DummyMatchContext
 
 
@@ -38,105 +40,39 @@ class FixedDataModelElementTest(TestBase):
 
     def test5element_id_input_validation(self):
         """Check if element_id is validated."""
-        # empty element_id
-        element_id = ""
-        self.assertRaises(ValueError, FixedDataModelElement, element_id, self.data)
-
-        # None element_id
-        element_id = None
-        self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
-
-        # bytes element_id is not allowed
-        element_id = b"path"
-        self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
-
-        # boolean element_id is not allowed
-        element_id = True
-        self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
-
-        # integer element_id is not allowed
-        element_id = 123
-        self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
-
-        # float element_id is not allowed
-        element_id = 123.22
-        self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
-
-        # dict element_id is not allowed
-        element_id = {"id": "path"}
-        self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
-
-        # list element_id is not allowed
-        element_id = ["path"]
-        self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
-
-        # empty list element_id is not allowed
-        element_id = []
-        self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
-
-        # empty tuple element_id is not allowed
-        element_id = ()
-        self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
-
-        # empty set element_id is not allowed
-        element_id = set()
-        self.assertRaises(TypeError, FixedDataModelElement, element_id, self.data)
+        self.assertRaises(ValueError, FixedDataModelElement, "", self.data)  # empty element_id
+        self.assertRaises(TypeError, FixedDataModelElement, None, self.data)  # None element_id
+        self.assertRaises(TypeError, FixedDataModelElement, b"path", self.data)  # bytes element_id is not allowed
+        self.assertRaises(TypeError, FixedDataModelElement, True, self.data)  # boolean element_id is not allowed
+        self.assertRaises(TypeError, FixedDataModelElement, 123, self.data)  # integer element_id is not allowed
+        self.assertRaises(TypeError, FixedDataModelElement, 123.22, self.data)  # float element_id is not allowed
+        self.assertRaises(TypeError, FixedDataModelElement, {"id": "path"}, self.data)  # dict element_id is not allowed
+        self.assertRaises(TypeError, FixedDataModelElement, ["path"], self.data)  # list element_id is not allowed
+        self.assertRaises(TypeError, FixedDataModelElement, [], self.data)  # empty list element_id is not allowed
+        self.assertRaises(TypeError, FixedDataModelElement, (), self.data)  # empty tuple element_id is not allowed
+        self.assertRaises(TypeError, FixedDataModelElement, set(), self.data)  # empty set element_id is not allowed
 
     def test6fixed_data_input_validation(self):
         """Check if fixed_data is validated."""
-        # empty fixed_string
-        fixed_string = b""
-        self.assertRaises(ValueError, FixedDataModelElement, self.id_, fixed_string)
-
-        # None fixed_string
-        fixed_string = None
-        self.assertRaises(TypeError, FixedDataModelElement, self.id_, fixed_string)
-
-        # string fixed_string is not allowed
-        fixed_string = "path"
-        self.assertRaises(TypeError, FixedDataModelElement, self.id_, fixed_string)
-
-        # bool fixed_string is not allowed
-        fixed_string = True
-        self.assertRaises(TypeError, FixedDataModelElement, self.id_, fixed_string)
-
-        # integer fixed_string is not allowed
-        fixed_string = 123
-        self.assertRaises(TypeError, FixedDataModelElement, self.id_, fixed_string)
-
-        # float fixed_string is not allowed
-        fixed_string = 123.22
-        self.assertRaises(TypeError, FixedDataModelElement, self.id_, fixed_string)
-
-        # dict fixed_string is not allowed
-        fixed_string = {"string": "string"}
-        self.assertRaises(TypeError, FixedDataModelElement, self.id_, fixed_string)
-
-        # list fixed_string is not allowed
-        fixed_string = ["path"]
-        self.assertRaises(TypeError, FixedDataModelElement, self.id_, fixed_string)
-
-        # empty list fixed_string is not allowed
-        fixed_string = []
-        self.assertRaises(TypeError, FixedDataModelElement, self.id_, fixed_string)
-
-        # empty tuple fixed_string is not allowed
-        fixed_string = ()
-        self.assertRaises(TypeError, FixedDataModelElement, self.id_, fixed_string)
-
-        # empty set fixed_string is not allowed
-        fixed_string = set()
-        self.assertRaises(TypeError, FixedDataModelElement, self.id_, fixed_string)
+        self.assertRaises(ValueError, FixedDataModelElement, self.id_, b"")  # empty fixed_string
+        self.assertRaises(TypeError, FixedDataModelElement, self.id_, None)  # None fixed_string
+        self.assertRaises(TypeError, FixedDataModelElement, self.id_, "path")  # string fixed_string is not allowed
+        self.assertRaises(TypeError, FixedDataModelElement, self.id_, True)  # boolean fixed_string is not allowed
+        self.assertRaises(TypeError, FixedDataModelElement, self.id_, 123)  # integer fixed_string is not allowed
+        self.assertRaises(TypeError, FixedDataModelElement, self.id_, 123.22)  # float fixed_string is not allowed
+        self.assertRaises(TypeError, FixedDataModelElement, self.id_, {"string": "string"})  # dict fixed_string is not allowed
+        self.assertRaises(TypeError, FixedDataModelElement, self.id_, ["path"])  # list fixed_string is not allowed
+        self.assertRaises(TypeError, FixedDataModelElement, self.id_, [])  # empty list fixed_string is not allowed
+        self.assertRaises(TypeError, FixedDataModelElement, self.id_, ())  # empty tuple fixed_string is not allowed
+        self.assertRaises(TypeError, FixedDataModelElement, self.id_, set())  # empty set fixed_string is not allowed
 
     def test7get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = FixedDataModelElement(self.id_, self.data)
         data = self.data
         model_element.get_match_element(self.path, DummyMatchContext(data))
-        from aminer.parsing.MatchContext import MatchContext
         model_element.get_match_element(self.path, MatchContext(data))
 
-        from aminer.parsing.MatchElement import MatchElement
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(self.path, data, None, None))
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
