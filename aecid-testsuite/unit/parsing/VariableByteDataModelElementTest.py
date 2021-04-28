@@ -25,12 +25,12 @@ class VariableByteDataModelElementTest(unittest.TestCase):
         self.assertEqual(match_context.match_data, b'.this sentence started with a dot.')
 
     def test3match_data_empty(self):
-        """The match_context is empty and no match_element is expected."""
-        match_context = MatchContext(b'')
+        """No match_element is expected."""
+        match_context = MatchContext(b'!')
         variable_byte_data_model_element = VariableByteDataModelElement('variable', self.alphabet)
         match_element = variable_byte_data_model_element.get_match_element('match', match_context)
         self.assertEqual(match_element, None)
-        self.assertEqual(match_context.match_data, b'')
+        self.assertEqual(match_context.match_data, b'!')
 
 
 if __name__ == "__main__":
