@@ -1,5 +1,7 @@
 import unittest
 from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
+from aminer.parsing.MatchContext import MatchContext
+from aminer.parsing.MatchElement import MatchElement
 from unit.TestBase import TestBase, DummyMatchContext
 
 
@@ -37,59 +39,25 @@ class AnyByteDataModelElementTest(TestBase):
 
     def test5element_id_input_validation(self):
         """Check if element_id is validated."""
-        # empty element_id
-        element_id = ""
-        self.assertRaises(ValueError, AnyByteDataModelElement, element_id)
-
-        # None element_id
-        element_id = None
-        self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
-
-        # bytes element_id is not allowed
-        element_id = b"path"
-        self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
-
-        # boolean element_id is not allowed
-        element_id = True
-        self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
-
-        # integer element_id is not allowed
-        element_id = 123
-        self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
-
-        # float element_id is not allowed
-        element_id = 123.22
-        self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
-
-        # dict element_id is not allowed
-        element_id = {"id": "path"}
-        self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
-
-        # list element_id is not allowed
-        element_id = ["path"]
-        self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
-
-        # empty list element_id is not allowed
-        element_id = []
-        self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
-
-        # empty tuple element_id is not allowed
-        element_id = ()
-        self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
-
-        # empty set element_id is not allowed
-        element_id = set()
-        self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
+        self.assertRaises(ValueError, AnyByteDataModelElement, "")  # empty element_id
+        self.assertRaises(TypeError, AnyByteDataModelElement, None)  # None element_id
+        self.assertRaises(TypeError, AnyByteDataModelElement, b"path")  # bytes element_id is not allowed
+        self.assertRaises(TypeError, AnyByteDataModelElement, True)  # boolean element_id is not allowed
+        self.assertRaises(TypeError, AnyByteDataModelElement, 123)  # integer element_id is not allowed
+        self.assertRaises(TypeError, AnyByteDataModelElement, 123.22)  # float element_id is not allowed
+        self.assertRaises(TypeError, AnyByteDataModelElement, {"id": "path"})  # dict element_id is not allowed
+        self.assertRaises(TypeError, AnyByteDataModelElement, ["path"])  # list element_id is not allowed
+        self.assertRaises(TypeError, AnyByteDataModelElement, [])  # empty list element_id is not allowed
+        self.assertRaises(TypeError, AnyByteDataModelElement, ())  # empty tuple element_id is not allowed
+        self.assertRaises(TypeError, AnyByteDataModelElement, set())  # empty set element_id is not allowed
 
     def test6get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = AnyByteDataModelElement(self.id_)
         data = b"abcdefghijklmnopqrstuvwxyz.!?"
         model_element.get_match_element(self.path, DummyMatchContext(data))
-        from aminer.parsing.MatchContext import MatchContext
         model_element.get_match_element(self.path, MatchContext(data))
 
-        from aminer.parsing.MatchElement import MatchElement
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(self.path, data, None, None))
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())

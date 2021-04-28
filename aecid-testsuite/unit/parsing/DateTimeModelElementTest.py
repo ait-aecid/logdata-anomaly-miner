@@ -4,6 +4,8 @@ import pytz
 import locale
 from io import StringIO
 from aminer.parsing.DateTimeModelElement import DateTimeModelElement
+from aminer.parsing.MatchElement import MatchElement
+from aminer.parsing.MatchContext import MatchContext
 from unit.TestBase import TestBase, DummyMatchContext, initialize_loggers
 from datetime import datetime, timezone
 from pwd import getpwnam
@@ -415,49 +417,17 @@ class DateTimeModelElementTest(TestBase):
     def test20element_id_input_validation(self):
         """Check if element_id is validated."""
         date_format = b"%d.%m.%Y %H:%M:%S"
-        # empty element_id
-        element_id = ""
-        self.assertRaises(ValueError, DateTimeModelElement, element_id, date_format)
-
-        # None element_id
-        element_id = None
-        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
-
-        # bytes element_id is not allowed
-        element_id = b"path"
-        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
-
-        # boolean element_id is not allowed
-        element_id = True
-        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
-
-        # integer element_id is not allowed
-        element_id = 123
-        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
-
-        # float element_id is not allowed
-        element_id = 123.22
-        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
-
-        # dict element_id is not allowed
-        element_id = {"id": "path"}
-        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
-
-        # list element_id is not allowed
-        element_id = ["path"]
-        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
-
-        # empty list element_id is not allowed
-        element_id = []
-        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
-
-        # empty tuple element_id is not allowed
-        element_id = ()
-        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
-
-        # empty set element_id is not allowed
-        element_id = set()
-        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
+        self.assertRaises(ValueError, DateTimeModelElement, "", date_format)  # empty element_id
+        self.assertRaises(TypeError, DateTimeModelElement, None, date_format)  # None element_id
+        self.assertRaises(TypeError, DateTimeModelElement, b"path", date_format)  # bytes element_id is not allowed
+        self.assertRaises(TypeError, DateTimeModelElement, True, date_format)  # boolean element_id is not allowed
+        self.assertRaises(TypeError, DateTimeModelElement, 123, date_format)  # integer element_id is not allowed
+        self.assertRaises(TypeError, DateTimeModelElement, 123.22, date_format)  # float element_id is not allowed
+        self.assertRaises(TypeError, DateTimeModelElement, {"id": "path"}, date_format)  # dict element_id is not allowed
+        self.assertRaises(TypeError, DateTimeModelElement, ["path"], date_format)  # list element_id is not allowed
+        self.assertRaises(TypeError, DateTimeModelElement, [], date_format)  # empty list element_id is not allowed
+        self.assertRaises(TypeError, DateTimeModelElement, (), date_format)  # empty tuple element_id is not allowed
+        self.assertRaises(TypeError, DateTimeModelElement, set(), date_format)  # empty set element_id is not allowed
 
     def test21date_format_input_validation(self):
         """Check if date_format is validated and only valid values can be entered."""
@@ -569,10 +539,8 @@ class DateTimeModelElementTest(TestBase):
         model_element = DateTimeModelElement(self.id_, b"%d.%m.%Y %H:%M:%S")
         data = b"07.02.2019 11:40:00: it still works"
         model_element.get_match_element(self.path, DummyMatchContext(data))
-        from aminer.parsing.MatchContext import MatchContext
         model_element.get_match_element(self.path, MatchContext(data))
 
-        from aminer.parsing.MatchElement import MatchElement
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(self.path, data, None, None))
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
