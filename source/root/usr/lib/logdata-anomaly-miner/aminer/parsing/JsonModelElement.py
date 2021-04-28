@@ -75,6 +75,7 @@ class JsonModelElement(ModelElementInterface):
         return self.children
 
     def find_children_in_dict(self, dictionary: dict, children: list):
+        """Find all children and append them to the children list."""
         for value in dictionary.values():
             if isinstance(value, ModelElementInterface):
                 children.append(value)
@@ -152,7 +153,9 @@ class JsonModelElement(ModelElementInterface):
                     logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN MATCHES 1")
                     return matches
             elif isinstance(value, list):
-                self.parse_json_list(json_dict, json_match_data, key, split_key, current_path, matches, match_context, i)
+                res = self.parse_json_list(json_dict, json_match_data, key, split_key, current_path, matches, match_context, i)
+                if res is not None:
+                    return res
             else:
                 if key != split_key and split_key not in json_match_data:
                     logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "Optional Key %s not found in json_match_data" % key)
@@ -249,6 +252,7 @@ class JsonModelElement(ModelElementInterface):
         else:
             logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "LIST - No more keys found")
             match_context.update(match_context.match_data[:match_context.match_data.find(b"]")])
+        return None
 
     def parse_json_object(self, json_dict, json_match_data, key, split_key, current_path, match_context):  # skipcq: PYL-R0201
         """Parse a literal from the json object."""
@@ -277,14 +281,14 @@ class JsonModelElement(ModelElementInterface):
                         len(match_element.match_string), len(data), data.decode()))
                 match_element = None
             index = max([match_context.match_data.replace(b"\\", b"").find(data), match_context.match_data.find(data),
-                            match_context.match_data.decode().find(data.decode()), match_context.match_data.decode(
-                    "unicode-escape").find(data.decode("unicode-escape"))])
+                         match_context.match_data.decode().find(data.decode()), match_context.match_data.decode("unicode-escape").find(
+                    data.decode("unicode-escape"))])
             if match_context.match_data[index:].find(data + b'": ' + data) == 0:
                 index += len(data + b'": ')
             # for example float scientific representation is converted to normal float..
             if index == -1 and match_element is not None and isinstance(json_match_data[split_key], float):
                 indices = [match_context.match_data.find(b",", len(match_element.match_string) // 3),
-                    match_context.match_data.find(b"]"), match_context.match_data.find(b"}")]
+                           match_context.match_data.find(b"]"), match_context.match_data.find(b"}")]
                 indices = [x for x in indices if x >= 0]
                 index = min(indices)
             if match_element is None:
