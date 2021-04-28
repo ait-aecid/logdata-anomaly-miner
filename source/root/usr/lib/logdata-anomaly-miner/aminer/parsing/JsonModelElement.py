@@ -105,7 +105,7 @@ class JsonModelElement(ModelElementInterface):
         """
         current_path = "%s/%s" % (path, self.element_id)
         old_match_data = match_context.match_data
-        matches: Union[List[Union[MatchElement, None]], None] = []
+        matches: Union[List[Union[MatchElement, None]]] = []
         try:
             json_match_data = json.loads(match_context.match_data)
             if not isinstance(json_match_data, dict):
@@ -127,8 +127,10 @@ class JsonModelElement(ModelElementInterface):
         # remove all remaining spaces and brackets.
         match_context.match_data = b""
         if len(matches) == 0:
-            matches = None
-        return MatchElement(current_path, str(json_match_data).encode(), json_match_data, matches)
+            resulting_matches = None
+        else:
+            resulting_matches = matches
+        return MatchElement(current_path, str(json_match_data).encode(), json_match_data, resulting_matches)
 
     def parse_json_dict(self, json_dict: dict, json_match_data: dict, current_path: str, match_context):
         """Parse a json dictionary."""
