@@ -35,6 +35,7 @@ class MatchContextTest(TestBase):
         self.assertRaises(ValueError, match_context.update, b" a log line.")
         self.assertEqual(
             match_context.get_debug_info(), '  Current data  does not start with " a log line."\n  Shortest unmatched data: ""\n')
+        match_context.update(b"")
 
     def test2update_fail(self):
         """Update the DebugMatchContext with not allowed values."""
@@ -42,11 +43,9 @@ class MatchContextTest(TestBase):
         self.assertRaises(TypeError, match_context.update, "this is an example")
         self.assertRaises(TypeError, match_context.update, [b"t", b"h", b"i", b"s"])
         self.assertRaises(ValueError, match_context.update, b"some other text")
-        self.assertRaises(ValueError, match_context.update, b"")
 
     def test3_match_context_init_input_validation(self):
         """Check if input is validated for MatchContext.__init__()."""
-        self.assertRaises(ValueError, MatchContext, b"")
         self.assertRaises(TypeError, MatchContext, None)
         self.assertRaises(TypeError, MatchContext, "path")
         self.assertRaises(TypeError, MatchContext, True)
@@ -70,7 +69,6 @@ class MatchContextTest(TestBase):
 
     def test5_debug_match_context_init_input_validation(self):
         """Check if input is validated for DebugMatchContext.__init__()."""
-        self.assertRaises(ValueError, DebugMatchContext, b"")
         self.assertRaises(TypeError, DebugMatchContext, None)
         self.assertRaises(TypeError, DebugMatchContext, "path")
         self.assertRaises(TypeError, DebugMatchContext, True)
