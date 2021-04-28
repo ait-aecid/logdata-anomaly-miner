@@ -105,42 +105,47 @@ class JsonModelElementTest(TestBase):
         value = json.loads(data)
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
-        match_context.match_string = str(json.loads(match_context.match_string))
-        self.compare_match_results(data, match_element, match_context, self.id_, self.path, str(value), value, match_element.children)
+        match_context.match_string = str(json.loads(match_context.match_string)).encode()
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
         data = self.multi_line_json
         value = json.loads(data)
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
-        match_context.match_string = str(json.loads(match_context.match_string))
+        match_context.match_string = str(json.loads(match_context.match_string)).encode()
         match_context.match_data = data[len(match_context.match_string):]
-        self.compare_match_results(data, match_element, match_context, self.id_, self.path, str(value), value, match_element.children)
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
         data = self.everything_new_line_json
         value = json.loads(data)
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
-        match_context.match_string = str(json.loads(match_context.match_string))
+        match_context.match_string = str(json.loads(match_context.match_string)).encode()
         match_context.match_data = data[len(match_context.match_string):]
-        self.compare_match_results(data, match_element, match_context, self.id_, self.path, str(value), value, match_element.children)
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
         # Test if keys differently ordered than in the key_parser_dict are parsed properly.
         data = self.single_line_different_order_with_optional_key_json
         value = json.loads(data)
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
-        match_context.match_string = str(json.loads(match_context.match_string))
+        match_context.match_string = str(json.loads(match_context.match_string)).encode()
         match_context.match_data = data[len(match_context.match_string):]
-        self.compare_match_results(data, match_element, match_context, self.id_, self.path, str(value), value, match_element.children)
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
         json_model_element = JsonModelElement("json", self.key_parser_dict_allow_all)
         data = self.single_line_different_order_with_optional_key_json
         value = json.loads(data)
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
-        match_context.match_string = str(value)
+        match_context.match_string = str(value).encode()
         match_context.match_data = data[len(match_context.match_string):]
-        self.compare_match_results(data, match_element, match_context, self.id_, self.path, str(value), value, match_element.children)
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
     def test4get_match_element_with_optional_key(self):
         """Validate optional keys with the optional_key_prefix."""
@@ -149,18 +154,20 @@ class JsonModelElementTest(TestBase):
         value = json.loads(data)
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
-        match_context.match_string = str(json.loads(match_context.match_string))
+        match_context.match_string = str(json.loads(match_context.match_string)).encode()
         match_context.match_data = data[len(match_context.match_string):]
-        self.compare_match_results(data, match_element, match_context, self.id_, self.path, str(value), value, match_element.children)
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
         json_model_element = JsonModelElement(self.id_, self.empty_key_parser_dict)
         data = b"{}"
         value = json.loads(data)
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
-        match_context.match_string = str(json.loads(data))
+        match_context.match_string = str(json.loads(data)).encode()
         match_context.match_data = data[len(match_context.match_string):]
-        self.compare_match_results(data, match_element, match_context, self.id_, self.path, str(value), value, match_element.children)
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
     def test5get_match_element_with_allow_all(self):
         """Test a simplified key_parser_dict with ALLOW_ALL."""
@@ -169,25 +176,28 @@ class JsonModelElementTest(TestBase):
         value = json.loads(data)
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
-        match_context.match_string = str(value)
+        match_context.match_string = str(value).encode()
         match_context.match_data = data[len(match_context.match_string):]
-        self.compare_match_results(data, match_element, match_context, self.id_, self.path, str(value), value, match_element.children)
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
         data = self.multi_line_json
         value = json.loads(data)
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
-        match_context.match_string = str(value)
+        match_context.match_string = str(value).encode()
         match_context.match_data = data[len(match_context.match_string):]
-        self.compare_match_results(data, match_element, match_context, self.id_, self.path, str(value), value, match_element.children)
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
         data = self.everything_new_line_json
         value = json.loads(data)
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
-        match_context.match_string = str(value)
+        match_context.match_string = str(value).encode()
         match_context.match_data = data[len(match_context.match_string):]
-        self.compare_match_results(data, match_element, match_context, self.id_, self.path, str(value), value, match_element.children)
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
     def test6get_match_element_null_value(self):
         """Test if null values are parsed to "null"."""
@@ -209,17 +219,19 @@ class JsonModelElementTest(TestBase):
         value = json.loads(data)
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
-        match_context.match_string = str(value)
+        match_context.match_string = str(value).encode()
         match_context.match_data = data[len(match_context.match_string):]
-        self.compare_match_results(data, match_element, match_context, self.id_, self.path, str(value), value, match_element.children)
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
         data = data2
         value = json.loads(data)
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
-        match_context.match_string = str(value)
+        match_context.match_string = str(value).encode()
         match_context.match_data = data[len(match_context.match_string):]
-        self.compare_match_results(data, match_element, match_context, self.id_, self.path, str(value), value, match_element.children)
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
     def test7get_match_element_no_match(self):
         """Parse not matching substring from MatchContext and check if the MatchContext was not changed."""
@@ -418,7 +430,7 @@ class JsonModelElementTest(TestBase):
         model_element.get_match_element(self.path, MatchContext(data))
 
         from aminer.parsing.MatchElement import MatchElement
-        self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(data, None, None, None))
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(None, data, None, None))
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123)
