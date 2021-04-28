@@ -28,7 +28,7 @@ awk '/^```yaml$/ && ++n == 1, /^```$/' < $SRC_FILE | sed '/^```/ d' > $CONFIG
 
 # create backup of schema.
 sudo cp $VAL_SCHEMA $TMP_VAL_SCHEMA
-awk '/^# skipcq: PYL-W0104$/,/^                }$/' $VAL_SCHEMA > $TMP_SCHEMA
+awk '/^{$/,/^                }$/' $VAL_SCHEMA > $TMP_SCHEMA
 echo , >> $TMP_SCHEMA
 awk '/^```$/ && ++n == 6, /^```$/ && n++ == 7' < $SRC_FILE | sed '/^```/ d' >> $TMP_SCHEMA
 awk '/^            ]$/,/^}$/' $VAL_SCHEMA >> $TMP_SCHEMA
@@ -50,7 +50,7 @@ exit_code=$?
 # reset schema to backup.
 sudo cp $TMP_VAL_SCHEMA $VAL_SCHEMA
 sudo cp $TMP_YML_CONFIG $YML_CONFIG
-sudo rm $TMP_VAL_SCHEMA
+#sudo rm $TMP_VAL_SCHEMA
 sudo rm $CONFIG
 sudo rm $TMP_YML_CONFIG
 sudo rm $FREQ_DET
