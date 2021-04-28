@@ -523,7 +523,7 @@
                 },
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
-                    'type': {'type': 'string', 'allowed': ['TSAArima'], 'required': True},
+                    'type': {'type': 'string', 'allowed': ['TSAArimaDetector'], 'required': True},
                     'event_type_detector': {'type': 'string', 'required': True, 'empty': False},
                     'persistence_id': {'type': 'string', 'empty': False},
                     'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},

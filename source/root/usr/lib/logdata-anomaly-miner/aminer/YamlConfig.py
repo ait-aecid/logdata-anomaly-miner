@@ -728,7 +728,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     allow_missing_values_flag=item['allow_missing_values'],
                     output_log_line=item['output_logline'], time_window_length=item['time_window_length'],
                     max_time_diff=item['max_time_diff'], num_reduce_time_list=item['num_reduce_time_list'], auto_include_flag=learn)
-            elif item['type'].name == 'TSAArima':
+            elif item['type'].name == 'TSAArimaDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
                     msg = 'The defined EventTypeDetector %s does not exist!' % item['event_type_detector']
