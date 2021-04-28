@@ -531,7 +531,7 @@ class DecimalIntegerValueModelElementTest(TestBase):
         model_element.get_match_element(self.path, MatchContext(data))
 
         from aminer.parsing.MatchElement import MatchElement
-        self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(data, None, None, None))
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(None, data, None, None))
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, True)
