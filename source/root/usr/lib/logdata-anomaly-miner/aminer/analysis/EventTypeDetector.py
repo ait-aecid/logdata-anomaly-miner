@@ -110,7 +110,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
         # Check if TSA should be initialized
         if self.track_time_for_TSA and -1 in self.etd_time_trigger[0] and 'TSAArimaDetector' in [module.__class__.__name__ for module in
-                                                                                         self.following_modules]:
+                                                                                                 self.following_modules]:
             for i, val in enumerate(self.etd_time_trigger[0]):
                 if val == -1:
                     for j in range(self.num_sections_waiting_time_for_TSA-1):
