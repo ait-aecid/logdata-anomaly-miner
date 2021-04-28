@@ -14,15 +14,17 @@ class EventCorrelationDetectorTest(TestBase):
     """Unittests for the EventCorrelationDetector."""
 
     alphabet = b'abcdefghijklmnopqrstuvwxyz'
-    alphabet_model = FirstMatchModelElement('first', [])
+    alphabet_model = None
     analysis = 'Analysis.%s'
 
     @classmethod
     def setUpClass(cls):
         """Set up the data for the all tests."""
+        children = []
         for _, val in enumerate(cls.alphabet):
             char = bytes([val])
-            cls.alphabet_model.children.append(FixedDataModelElement(char.decode(), char))
+            children.append(FixedDataModelElement(char.decode(), char))
+        cls.alphabet_model = FirstMatchModelElement('first', children)
         error_rate = 0.000085
         cls.perfect_data_diff5 = cls.generate_perfect_data(cls, 30000, 5)
         cls.perfect_data_diff1 = cls.generate_perfect_data(cls, 30000, 1)
