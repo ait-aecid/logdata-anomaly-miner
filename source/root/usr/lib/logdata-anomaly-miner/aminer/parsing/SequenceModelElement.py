@@ -11,7 +11,9 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-
+import logging
+from typing import List
+from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 
@@ -19,8 +21,26 @@ from aminer.parsing.ModelElementInterface import ModelElementInterface
 class SequenceModelElement(ModelElementInterface):
     """This class defines an element to find matches that comprise matches of all given child model elements."""
 
-    def __init__(self, element_id, children):
+    def __init__(self, element_id: str, children: List["ModelElementInterface"]):
+        if not isinstance(element_id, str):
+            msg = "element_id has to be of the type string."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if len(element_id) < 1:
+            msg = "element_id must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
         self.element_id = element_id
+
+        if not isinstance(children, list):
+            msg = "children has to be of the type list."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        for child in children:
+            if not isinstance(child, ModelElementInterface):
+                msg = "every child has to be of the type ModelElementInterface."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
         self.children = children
 
     def get_id(self):

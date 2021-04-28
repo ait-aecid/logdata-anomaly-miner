@@ -126,7 +126,7 @@ class JsonModelElement(ModelElementInterface):
             return None
         # remove all remaining spaces and brackets.
         match_context.match_data = b""
-        return MatchElement(current_path, str(json_match_data), json_match_data, matches)
+        return MatchElement(current_path, str(json_match_data).encode(), json_match_data, matches)
 
     def parse_json_dict(self, json_dict: dict, json_match_data: dict, current_path: str, match_context):
         """Parse a json dictionary."""

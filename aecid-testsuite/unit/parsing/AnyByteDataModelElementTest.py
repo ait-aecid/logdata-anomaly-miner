@@ -21,7 +21,7 @@ class AnyByteDataModelElementTest(TestBase):
 
     def test3get_match_element_valid_match(self):
         """Parse matching substring from MatchContext and check if the MatchContext was updated with all characters."""
-        data = b'abcdefghijklmnopqrstuvwxyz.!?'
+        data = b"abcdefghijklmnopqrstuvwxyz.!?"
         match_context = DummyMatchContext(data)
         any_dme = AnyByteDataModelElement(self.id_)
         match_element = any_dme.get_match_element(self.path, match_context)
@@ -49,7 +49,7 @@ class AnyByteDataModelElementTest(TestBase):
         element_id = b"path"
         self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
 
-        # bytes element_id is not allowed
+        # boolean element_id is not allowed
         element_id = True
         self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
 
@@ -59,10 +59,6 @@ class AnyByteDataModelElementTest(TestBase):
 
         # float element_id is not allowed
         element_id = 123.22
-        self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
-
-        # boolean element_id is not allowed
-        element_id = True
         self.assertRaises(TypeError, AnyByteDataModelElement, element_id)
 
         # dict element_id is not allowed
@@ -88,13 +84,13 @@ class AnyByteDataModelElementTest(TestBase):
     def test6get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = AnyByteDataModelElement(self.id_)
-        data = b'abcdefghijklmnopqrstuvwxyz.!?'
+        data = b"abcdefghijklmnopqrstuvwxyz.!?"
         model_element.get_match_element(self.path, DummyMatchContext(data))
         from aminer.parsing.MatchContext import MatchContext
         model_element.get_match_element(self.path, MatchContext(data))
 
         from aminer.parsing.MatchElement import MatchElement
-        self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(data, None, None, None))
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(self.path, data, None, None))
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123)

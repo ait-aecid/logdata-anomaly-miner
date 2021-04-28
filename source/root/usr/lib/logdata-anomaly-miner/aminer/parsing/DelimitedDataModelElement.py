@@ -14,18 +14,49 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.ModelElementInterface import ModelElementInterface
+from aminer.AminerConfig import DEBUG_LOG_NAME
 import re
+import logging
 
 
 class DelimitedDataModelElement(ModelElementInterface):
     """Find a string delimited by given non-escaped delimiter string, possibly a match of zero byte length."""
 
-    def __init__(self, element_id, delimiter, escape=None, consume_delimiter=False):
+    def __init__(self, element_id: str, delimiter: bytes, escape: bytes = None, consume_delimiter: bool = False):
+        if not isinstance(element_id, str):
+            msg = "element_id has to be of the type string."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if len(element_id) < 1:
+            msg = "element_id must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
         self.element_id = element_id
+
+        if not isinstance(delimiter, bytes):
+            msg = "delimiter has to be of the type bytes."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if len(delimiter) < 1:
+            msg = "delimiter must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
         self.delimiter = delimiter
-        if isinstance(escape, bytes):
-            escape = escape.decode()
+
+        if escape is not None:
+            if not isinstance(escape, bytes):
+                msg = "escape has to be of the type bytes."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
+            if len(escape) < 1:
+                msg = "escape must not be empty."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise ValueError(msg)
         self.escape = escape
+        if not isinstance(consume_delimiter, bool):
+            msg = "consume_delimiter has to be of the type bool."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         self.consume_delimiter = consume_delimiter
 
     def get_id(self):
@@ -40,7 +71,7 @@ class DelimitedDataModelElement(ModelElementInterface):
         """
         return None
 
-    def get_match_element(self, path, match_context):
+    def get_match_element(self, path: str, match_context):
         """
         Find the maximum number of bytes before encountering the non-escaped delimiter.
         @return a match when at least one byte was found but not the delimiter itself.
@@ -52,7 +83,7 @@ class DelimitedDataModelElement(ModelElementInterface):
             if search is not None:
                 match_len = search.start()
         else:
-            search = re.search(rb'(?<!' + re.escape(self.escape).encode() + rb')' + re.escape(self.delimiter), data)
+            search = re.search(rb"(?<!" + re.escape(self.escape) + rb")" + re.escape(self.delimiter), data)
             if search is not None:
                 match_len = search.start()
         if match_len < 1:

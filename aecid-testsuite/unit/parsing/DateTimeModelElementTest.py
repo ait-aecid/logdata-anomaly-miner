@@ -427,7 +427,7 @@ class DateTimeModelElementTest(TestBase):
         element_id = b"path"
         self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
 
-        # bytes element_id is not allowed
+        # boolean element_id is not allowed
         element_id = True
         self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
 
@@ -437,10 +437,6 @@ class DateTimeModelElementTest(TestBase):
 
         # float element_id is not allowed
         element_id = 123.22
-        self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
-
-        # boolean element_id is not allowed
-        element_id = True
         self.assertRaises(TypeError, DateTimeModelElement, element_id, date_format)
 
         # dict element_id is not allowed
@@ -577,7 +573,7 @@ class DateTimeModelElementTest(TestBase):
         model_element.get_match_element(self.path, MatchContext(data))
 
         from aminer.parsing.MatchElement import MatchElement
-        self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(data, None, None, None))
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(self.path, data, None, None))
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123)
