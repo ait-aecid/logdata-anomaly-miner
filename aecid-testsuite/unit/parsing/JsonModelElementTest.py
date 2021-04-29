@@ -24,6 +24,7 @@ class JsonModelElementTest(TestBase):
     single_line_different_order_with_optional_key_json = \
         b'{"menu": {"value": "File","popup": {"menuitem": [{"clickable": false, "value": "New", "onclick": "CreateNewDoc()"}, {' \
         b'"onclick": "OpenDoc()", "value": "Open"}, {"value": "Close", "onclick": "CloseDoc()", "clickable": false}]}, "id": "file"}}'
+    single_line_json_list = b'{"menu": {"id": "file", "value": "File", "popup": ["value", "value", "value"]}}'
     multi_line_json = b"""{
   "menu": {
     "id": "file",
@@ -82,6 +83,13 @@ class JsonModelElementTest(TestBase):
         "value": DummyFixedDataModelElement("value", b"File"),
         "popup": "ALLOW_ALL"
     }}
+    key_parser_dict_list = {"menu": {
+        "id": DummyFixedDataModelElement("id", b"file"),
+        "value": DummyFixedDataModelElement("value", b"File"),
+        "popup": [
+            DummyFixedDataModelElement("value", b"value")
+        ]
+    }}
 
     empty_key_parser_dict = {"optional_key_key": DummyFixedDataModelElement("key", b"value")}
 
@@ -137,8 +145,18 @@ class JsonModelElementTest(TestBase):
         self.compare_match_results(
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
-        json_model_element = JsonModelElement("json", self.key_parser_dict_allow_all)
+        json_model_element = JsonModelElement(self.id_, self.key_parser_dict_allow_all)
         data = self.single_line_different_order_with_optional_key_json
+        value = json.loads(data)
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        match_context.match_string = str(value).encode()
+        match_context.match_data = data[len(match_context.match_string):]
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
+
+        json_model_element = JsonModelElement(self.id_, self.key_parser_dict_list)
+        data = self.single_line_json_list
         value = json.loads(data)
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
