@@ -49,7 +49,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Ev
         @param num_max_time_history maximal number of values of the time_history.
         @param num_results_bt number of results which are used in the binomial test.
         @param alpha_bt significance level for the bt test.
-        @param acf_threshold Threshold, which has to be exceeded by the highest peak of the cdf function of the time series, to be analysed.
+        @param acf_threshold threshold, which has to be exceeded by the highest peak of the cdf function of the time series, to be analysed.
         @param persistence_id name of persistency document.
         @param path_list At least one of the parser paths in this list needs to appear in the event to be analysed.
         @param ignore_list list of paths that are not considered for correlation, i.e., events that contain one of these paths are
