@@ -520,6 +520,24 @@
                     'auto_include_flag': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'suppress': {'type': 'boolean'}
+                },
+                {
+                    'id': {'type': 'string', 'nullable': True, 'empty': False},
+                    'type': {'type': 'string', 'allowed': ['TSAArimaDetector'], 'required': True},
+                    'event_type_detector': {'type': 'string', 'required': True, 'empty': False},
+                    'persistence_id': {'type': 'string', 'empty': False},
+                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'output_logline': {'type': 'boolean'},
+                    'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'build_sum_over_values': {'type': 'boolean'},
+                    'num_division_time_step': {'type': 'integer', 'min': 1},
+                    'alpha': {'type': 'float', 'min': 0.000001, 'max': 1.0},
+                    'num_min_time_history': {'type': 'integer', 'min': 1},
+                    'num_max_time_history': {'type': 'integer', 'min': 2},
+                    'num_results_bt': {'type': 'integer', 'min': 1},
+                    'alpha_bt': {'type': 'float', 'min': 0.000001, 'max': 1.0},
+                    'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'suppress': {'type': 'boolean'}
                 }
             ]
         }

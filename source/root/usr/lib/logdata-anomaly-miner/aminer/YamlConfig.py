@@ -728,6 +728,19 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     allow_missing_values_flag=item['allow_missing_values'],
                     output_log_line=item['output_logline'], time_window_length=item['time_window_length'],
                     max_time_diff=item['max_time_diff'], num_reduce_time_list=item['num_reduce_time_list'], auto_include_flag=learn)
+            elif item['type'].name == 'TSAArimaDetector':
+                etd = analysis_context.get_component_by_name(item['event_type_detector'])
+                if etd is None:
+                    msg = 'The defined EventTypeDetector %s does not exist!' % item['event_type_detector']
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
+                tmp_analyser = func(
+                    analysis_context.aminer_config, anomaly_event_handlers, etd, persistence_id=item['persistence_id'],
+                    path_list=item['paths'], build_sum_over_values=item['build_sum_over_values'],
+                    num_division_time_step=item['num_division_time_step'], alpha=item['alpha'],
+                    num_min_time_history=item['num_min_time_history'], num_max_time_history=item['num_max_time_history'],
+                    num_results_bt=item['num_results_bt'], alpha_bt=item['alpha_bt'],
+                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'])
             else:
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn)
             if item['output_event_handlers'] is not None:
