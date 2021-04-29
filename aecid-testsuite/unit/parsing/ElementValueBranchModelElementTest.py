@@ -138,7 +138,7 @@ class ElementValueBranchModelElementTest(TestBase):
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, None, ["path"])
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, None, [])
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, None, ())
-        self.assertRaises(TypeError, ElementValueBranchModelElement, branch_model_dict, self.value_model, None, set())
+        self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, None, set())
 
     def test9default_branch_input_validation(self):
         """Check if value_path is validated."""
