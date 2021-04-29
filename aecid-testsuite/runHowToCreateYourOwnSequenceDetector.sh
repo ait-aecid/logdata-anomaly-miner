@@ -34,7 +34,7 @@ sed -n -e '/^EventHandlers:$/,$p' /tmp/base-config.yml >> $CONFIG
 
 # create backup of schema.
 sudo cp $VAL_SCHEMA $TMP_VAL_SCHEMA
-awk '/^# skipcq: PYL-W0104$/,/^                }$/' $VAL_SCHEMA > $TMP_SCHEMA
+awk '/^{$/,/^                }$/' $VAL_SCHEMA > $TMP_SCHEMA
 echo , >> $TMP_SCHEMA
 awk '/^```$/ && ++n == 18, /^```$/ && n++ == 19' < $SRC_FILE | sed '/^```/ d' >> $TMP_SCHEMA
 awk '/^            ]$/,/^}$/' $VAL_SCHEMA >> $TMP_SCHEMA
