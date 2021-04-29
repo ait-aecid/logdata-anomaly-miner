@@ -1,5 +1,7 @@
 import unittest
 from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
+from aminer.parsing.MatchContext import MatchContext
+from aminer.parsing.MatchElement import MatchElement
 from unit.TestBase import TestBase, DummyMatchContext, DummyFixedDataModelElement
 
 
@@ -75,105 +77,40 @@ class FirstDataModelElementTest(TestBase):
 
     def test5element_id_input_validation(self):
         """Check if element_id is validated."""
-        # empty element_id
-        element_id = ""
-        self.assertRaises(ValueError, FirstMatchModelElement, element_id, self.children)
-
-        # None element_id
-        element_id = None
-        self.assertRaises(TypeError, FirstMatchModelElement, element_id, self.children)
-
-        # bytes element_id is not allowed
-        element_id = b"path"
-        self.assertRaises(TypeError, FirstMatchModelElement, element_id, self.children)
-
-        # boolean element_id is not allowed
-        element_id = True
-        self.assertRaises(TypeError, FirstMatchModelElement, element_id, self.children)
-
-        # integer element_id is not allowed
-        element_id = 123
-        self.assertRaises(TypeError, FirstMatchModelElement, element_id, self.children)
-
-        # float element_id is not allowed
-        element_id = 123.22
-        self.assertRaises(TypeError, FirstMatchModelElement, element_id, self.children)
-
-        # dict element_id is not allowed
-        element_id = {"id": "path"}
-        self.assertRaises(TypeError, FirstMatchModelElement, element_id, self.children)
-
-        # list element_id is not allowed
-        element_id = ["path"]
-        self.assertRaises(TypeError, FirstMatchModelElement, element_id, self.children)
-
-        # empty list element_id is not allowed
-        element_id = []
-        self.assertRaises(TypeError, FirstMatchModelElement, element_id, self.children)
-
-        # empty tuple element_id is not allowed
-        element_id = ()
-        self.assertRaises(TypeError, FirstMatchModelElement, element_id, self.children)
-
-        # empty set element_id is not allowed
-        element_id = set()
-        self.assertRaises(TypeError, FirstMatchModelElement, element_id, self.children)
+        self.assertRaises(ValueError, FirstMatchModelElement, "", self.children)  # empty element_id
+        self.assertRaises(TypeError, FirstMatchModelElement, None, self.children)  # None element_id
+        self.assertRaises(TypeError, FirstMatchModelElement, b"path", self.children)  # bytes element_id is not allowed
+        self.assertRaises(TypeError, FirstMatchModelElement, True, self.children)  # boolean element_id is not allowed
+        self.assertRaises(TypeError, FirstMatchModelElement, 123, self.children)  # integer element_id is not allowed
+        self.assertRaises(TypeError, FirstMatchModelElement, 123.22, self.children)  # float element_id is not allowed
+        self.assertRaises(TypeError, FirstMatchModelElement, {"id": "path"}, self.children)  # dict element_id is not allowed
+        self.assertRaises(TypeError, FirstMatchModelElement, ["path"], self.children)  # list element_id is not allowed
+        self.assertRaises(TypeError, FirstMatchModelElement, [], self.children)  # empty list element_id is not allowed
+        self.assertRaises(TypeError, FirstMatchModelElement, (), self.children)  # empty tuple element_id is not allowed
+        self.assertRaises(TypeError, FirstMatchModelElement, set(), self.children)  # empty set element_id is not allowed
 
     def test6children_input_validation(self):
         """Check if children is validated."""
-        # string children
-        children = "path"
-        self.assertRaises(TypeError, FirstMatchModelElement, self.id_, children)
-
-        # None children
-        children = None
-        self.assertRaises(TypeError, FirstMatchModelElement, self.id_, children)
-
-        # bytes children is not allowed
-        children = b"path"
-        self.assertRaises(TypeError, FirstMatchModelElement, self.id_, children)
-
-        # boolean children is not allowed
-        children = True
-        self.assertRaises(TypeError, FirstMatchModelElement, self.id_, children)
-
-        # integer children is not allowed
-        children = 123
-        self.assertRaises(TypeError, FirstMatchModelElement, self.id_, children)
-
-        # float children is not allowed
-        children = 123.22
-        self.assertRaises(TypeError, FirstMatchModelElement, self.id_, children)
-
-        # dict children is not allowed
-        children = {"id": "path"}
-        self.assertRaises(TypeError, FirstMatchModelElement, self.id_, children)
-
+        self.assertRaises(TypeError, FirstMatchModelElement, self.id_, "path")  # string children
+        self.assertRaises(TypeError, FirstMatchModelElement, self.id_, None)  # None children
+        self.assertRaises(TypeError, FirstMatchModelElement, self.id_, b"path")  # bytes children is not allowed
+        self.assertRaises(TypeError, FirstMatchModelElement, self.id_, True)  # boolean children is not allowed
+        self.assertRaises(TypeError, FirstMatchModelElement, self.id_, 123)  # integer children is not allowed
+        self.assertRaises(TypeError, FirstMatchModelElement, self.id_, 123.22)  # float children is not allowed
+        self.assertRaises(TypeError, FirstMatchModelElement, self.id_, {"id": "path"})  # dict children is not allowed
         # list children with no ModelElementInterface elements is not allowed
-        children = ["path"]
-        self.assertRaises(TypeError, FirstMatchModelElement, self.id_, children)
-
-        # empty list children is not allowed
-        children = []
-        self.assertRaises(ValueError, FirstMatchModelElement, self.id_, children)
-
-        # empty tuple children is not allowed
-        children = ()
-        self.assertRaises(TypeError, FirstMatchModelElement, self.id_, children)
-
-        # empty set children is not allowed
-        children = set()
-        self.assertRaises(TypeError, FirstMatchModelElement, self.id_, children)
+        self.assertRaises(TypeError, FirstMatchModelElement, self.id_, ["path"])
+        self.assertRaises(ValueError, FirstMatchModelElement, self.id_, [])  # empty list children is not allowed
+        self.assertRaises(TypeError, FirstMatchModelElement, self.id_, ())  # empty tuple children is not allowed
+        self.assertRaises(TypeError, FirstMatchModelElement, self.id_, set())  # empty set children is not allowed
 
     def test7get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = FirstMatchModelElement(self.id_, self.children)
         data = b"abcdefghijklmnopqrstuvwxyz.!?"
         model_element.get_match_element(self.path, DummyMatchContext(data))
-        from aminer.parsing.MatchContext import MatchContext
         model_element.get_match_element(self.path, MatchContext(data))
 
-        from aminer.parsing.MatchElement import MatchElement
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(None, data, None, None))
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
