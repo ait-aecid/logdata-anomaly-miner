@@ -2,6 +2,8 @@ import copy
 import unittest
 import json
 from aminer.parsing.JsonModelElement import JsonModelElement
+from aminer.parsing.MatchContext import MatchContext
+from aminer.parsing.MatchElement import MatchElement
 from unit.TestBase import TestBase, DummyMatchContext, DummyFixedDataModelElement, DummyFirstMatchModelElement
 
 
@@ -278,158 +280,60 @@ class JsonModelElementTest(TestBase):
 
     def test8element_id_input_validation(self):
         """Check if element_id is validated."""
-        # empty element_id
-        element_id = ""
-        self.assertRaises(ValueError, JsonModelElement, element_id, self.key_parser_dict)
-
-        # None element_id
-        element_id = None
-        self.assertRaises(TypeError, JsonModelElement, element_id, self.key_parser_dict)
-
-        # bytes element_id is not allowed
-        element_id = b"path"
-        self.assertRaises(TypeError, JsonModelElement, element_id, self.key_parser_dict)
-
-        # boolean element_id is not allowed
-        element_id = True
-        self.assertRaises(TypeError, JsonModelElement, element_id, self.key_parser_dict)
-
-        # integer element_id is not allowed
-        element_id = 123
-        self.assertRaises(TypeError, JsonModelElement, element_id, self.key_parser_dict)
-
-        # float element_id is not allowed
-        element_id = 123.22
-        self.assertRaises(TypeError, JsonModelElement, element_id, self.key_parser_dict)
-
-        # dict element_id is not allowed
-        element_id = {"id": "path"}
-        self.assertRaises(TypeError, JsonModelElement, element_id, self.key_parser_dict)
-
-        # list element_id is not allowed
-        element_id = ["path"]
-        self.assertRaises(TypeError, JsonModelElement, element_id, self.key_parser_dict)
-
-        # empty list element_id is not allowed
-        element_id = []
-        self.assertRaises(TypeError, JsonModelElement, element_id, self.key_parser_dict)
-
-        # empty tuple element_id is not allowed
-        element_id = ()
-        self.assertRaises(TypeError, JsonModelElement, element_id, self.key_parser_dict)
-
-        # empty set element_id is not allowed
-        element_id = set()
-        self.assertRaises(TypeError, JsonModelElement, element_id, self.key_parser_dict)
+        self.assertRaises(ValueError, JsonModelElement, "", self.key_parser_dict)  # empty element_id
+        self.assertRaises(TypeError, JsonModelElement, None, self.key_parser_dict)  # None element_id
+        self.assertRaises(TypeError, JsonModelElement, b"path", self.key_parser_dict)  # bytes element_id is not allowed
+        self.assertRaises(TypeError, JsonModelElement, True, self.key_parser_dict)  # boolean element_id is not allowed
+        self.assertRaises(TypeError, JsonModelElement, 123, self.key_parser_dict)  # integer element_id is not allowed
+        self.assertRaises(TypeError, JsonModelElement, 123.22, self.key_parser_dict)  # float element_id is not allowed
+        self.assertRaises(TypeError, JsonModelElement, {"id": "path"}, self.key_parser_dict)  # dict element_id is not allowed
+        self.assertRaises(TypeError, JsonModelElement, ["path"], self.key_parser_dict)  # list element_id is not allowed
+        self.assertRaises(TypeError, JsonModelElement, [], self.key_parser_dict)  # empty list element_id is not allowed
+        self.assertRaises(TypeError, JsonModelElement, (), self.key_parser_dict)  # empty tuple element_id is not allowed
+        self.assertRaises(TypeError, JsonModelElement, set(), self.key_parser_dict)  # empty set element_id is not allowed
 
     def test9key_parser_dict_input_validation(self):
         """Check if key_parser_dict is validated."""
-        # string key_parser_dict
-        key_parser_dict = "path"
-        self.assertRaises(TypeError, JsonModelElement, self.id_, key_parser_dict)
-
-        # None key_parser_dict
-        key_parser_dict = None
-        self.assertRaises(TypeError, JsonModelElement, self.id_, key_parser_dict)
-
-        # bytes key_parser_dict is not allowed
-        key_parser_dict = b"path"
-        self.assertRaises(TypeError, JsonModelElement, self.id_, key_parser_dict)
-
-        # boolean key_parser_dict is not allowed
-        key_parser_dict = True
-        self.assertRaises(TypeError, JsonModelElement, self.id_, key_parser_dict)
-
-        # integer key_parser_dict is not allowed
-        key_parser_dict = 123
-        self.assertRaises(TypeError, JsonModelElement, self.id_, key_parser_dict)
-
-        # float key_parser_dict is not allowed
-        key_parser_dict = 123.22
-        self.assertRaises(TypeError, JsonModelElement, self.id_, key_parser_dict)
-
+        self.assertRaises(TypeError, JsonModelElement, self.id_, "path")  # string key_parser_dict
+        self.assertRaises(TypeError, JsonModelElement, self.id_, None)  # None key_parser_dict
+        self.assertRaises(TypeError, JsonModelElement, self.id_, b"path")  # bytes key_parser_dict is not allowed
+        self.assertRaises(TypeError, JsonModelElement, self.id_, True)  # boolean key_parser_dict is not allowed
+        self.assertRaises(TypeError, JsonModelElement, self.id_, 123)  # integer key_parser_dict is not allowed
+        self.assertRaises(TypeError, JsonModelElement, self.id_, 123.22)  # float key_parser_dict is not allowed
         # dict key_parser_dict with no ModelElementInterface values is not allowed
-        key_parser_dict = {"id": "path"}
-        self.assertRaises(TypeError, JsonModelElement, self.id_, key_parser_dict)
-
+        self.assertRaises(TypeError, JsonModelElement, self.id_, {"id": "path"})
         # dict key_parser_dict with list of other lengths than 1 is not allowed.
         key_parser_dict = copy.deepcopy(self.key_parser_dict)
         key_parser_dict["menu"]["popup"]["menuitem"].append(key_parser_dict["menu"]["popup"]["menuitem"][0])
         self.assertRaises(ValueError, JsonModelElement, self.id_, key_parser_dict)
         key_parser_dict["menu"]["popup"]["menuitem"] = []
         self.assertRaises(ValueError, JsonModelElement, self.id_, key_parser_dict)
-
-        # list key_parser_dict is not allowed
-        key_parser_dict = ["path"]
-        self.assertRaises(TypeError, JsonModelElement, self.id_, key_parser_dict)
-
-        # empty list key_parser_dict is not allowed
-        key_parser_dict = []
-        self.assertRaises(TypeError, JsonModelElement, self.id_, key_parser_dict)
-
-        # empty tuple key_parser_dict is not allowed
-        key_parser_dict = ()
-        self.assertRaises(TypeError, JsonModelElement, self.id_, key_parser_dict)
-
-        # empty set key_parser_dict is not allowed
-        key_parser_dict = set()
-        self.assertRaises(TypeError, JsonModelElement, self.id_, key_parser_dict)
+        self.assertRaises(TypeError, JsonModelElement, self.id_, ["path"])  # list key_parser_dict is not allowed
+        self.assertRaises(TypeError, JsonModelElement, self.id_, [])  # empty list key_parser_dict is not allowed
+        self.assertRaises(TypeError, JsonModelElement, self.id_, ())  # empty tuple key_parser_dict is not allowed
+        self.assertRaises(TypeError, JsonModelElement, self.id_, set())  # empty set key_parser_dict is not allowed
 
     def test10optional_key_prefix_input_validation(self):
         """Check if optional_key_prefix is validated."""
-        # empty optional_key_prefix
-        optional_key_prefix = ""
-        self.assertRaises(ValueError, JsonModelElement, self.id_, self.key_parser_dict, optional_key_prefix)
-
-        # None optional_key_prefix
-        optional_key_prefix = None
-        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, optional_key_prefix)
-
-        # bytes optional_key_prefix is not allowed
-        optional_key_prefix = b"path"
-        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, optional_key_prefix)
-
-        # boolean optional_key_prefix is not allowed
-        optional_key_prefix = True
-        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, optional_key_prefix)
-
-        # integer optional_key_prefix is not allowed
-        optional_key_prefix = 123
-        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, optional_key_prefix)
-
-        # float optional_key_prefix is not allowed
-        optional_key_prefix = 123.22
-        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, optional_key_prefix)
-
-        # dict optional_key_prefix is not allowed
-        optional_key_prefix = {"id": "path"}
-        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, optional_key_prefix)
-
-        # list optional_key_prefix is not allowed
-        optional_key_prefix = ["path"]
-        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, optional_key_prefix)
-
-        # empty list optional_key_prefix is not allowed
-        optional_key_prefix = []
-        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, optional_key_prefix)
-
-        # empty tuple optional_key_prefix is not allowed
-        optional_key_prefix = ()
-        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, optional_key_prefix)
-
-        # empty set optional_key_prefix is not allowed
-        optional_key_prefix = set()
-        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, optional_key_prefix)
+        self.assertRaises(ValueError, JsonModelElement, self.id_, self.key_parser_dict, "")  # empty optional_key_prefix
+        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, None)  # None optional_key_prefix
+        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, b"path")  # bytes optional_key_prefix is not allowed
+        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, True)  # boolean optional_key_prefix is not allowed
+        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, 123)  # integer optional_key_prefix is not allowed
+        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, 123.22)  # float optional_key_prefix is not allowed
+        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, {"id": "path"})  # dict not allowed
+        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, ["path"])  # list optional_key_prefix is not allowed
+        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, [])  # empty list optional_key_prefix is not allowed
+        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, ())  # empty tuple optional_key_prefix is not allowed
+        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, set())  # empty set optional_key_prefix not allowed
 
     def test11get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = JsonModelElement(self.id_, self.key_parser_dict)
         data = b"abcdefghijklmnopqrstuvwxyz.!?"
         model_element.get_match_element(self.path, DummyMatchContext(data))
-        from aminer.parsing.MatchContext import MatchContext
         model_element.get_match_element(self.path, MatchContext(data))
 
-        from aminer.parsing.MatchElement import MatchElement
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(None, data, None, None))
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())

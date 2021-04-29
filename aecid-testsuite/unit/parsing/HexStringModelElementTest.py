@@ -1,5 +1,7 @@
 import unittest
 from aminer.parsing.HexStringModelElement import HexStringModelElement
+from aminer.parsing.MatchContext import MatchContext
+from aminer.parsing.MatchElement import MatchElement
 from unit.TestBase import TestBase, DummyMatchContext
 
 
@@ -82,101 +84,38 @@ class HexStringModelElementTest(TestBase):
 
     def test5element_id_input_validation(self):
         """Check if element_id is validated."""
-        # empty element_id
-        element_id = ""
-        self.assertRaises(ValueError, HexStringModelElement, element_id)
-
-        # None element_id
-        element_id = None
-        self.assertRaises(TypeError, HexStringModelElement, element_id)
-
-        # bytes element_id is not allowed
-        element_id = b"path"
-        self.assertRaises(TypeError, HexStringModelElement, element_id)
-
-        # boolean element_id is not allowed
-        element_id = True
-        self.assertRaises(TypeError, HexStringModelElement, element_id)
-
-        # integer element_id is not allowed
-        element_id = 123
-        self.assertRaises(TypeError, HexStringModelElement, element_id)
-
-        # float element_id is not allowed
-        element_id = 123.22
-        self.assertRaises(TypeError, HexStringModelElement, element_id)
-
-        # dict element_id is not allowed
-        element_id = {"id": "path"}
-        self.assertRaises(TypeError, HexStringModelElement, element_id)
-
-        # list element_id is not allowed
-        element_id = ["path"]
-        self.assertRaises(TypeError, HexStringModelElement, element_id)
-
-        # empty list element_id is not allowed
-        element_id = []
-        self.assertRaises(TypeError, HexStringModelElement, element_id)
-
-        # empty tuple element_id is not allowed
-        element_id = ()
-        self.assertRaises(TypeError, HexStringModelElement, element_id)
-
-        # empty set element_id is not allowed
-        element_id = set()
-        self.assertRaises(TypeError, HexStringModelElement, element_id)
+        self.assertRaises(ValueError, HexStringModelElement, "")  # empty element_id
+        self.assertRaises(TypeError, HexStringModelElement, None)  # None element_id
+        self.assertRaises(TypeError, HexStringModelElement, b"path")  # bytes element_id is not allowed
+        self.assertRaises(TypeError, HexStringModelElement, True)  # boolean element_id is not allowed
+        self.assertRaises(TypeError, HexStringModelElement, 123)  # integer element_id is not allowed
+        self.assertRaises(TypeError, HexStringModelElement, 123.22)  # float element_id is not allowed
+        self.assertRaises(TypeError, HexStringModelElement, {"id": "path"})  # dict element_id is not allowed
+        self.assertRaises(TypeError, HexStringModelElement, ["path"])  # list element_id is not allowed
+        self.assertRaises(TypeError, HexStringModelElement, [])  # empty list element_id is not allowed
+        self.assertRaises(TypeError, HexStringModelElement, ())  # empty tuple element_id is not allowed
+        self.assertRaises(TypeError, HexStringModelElement, set())  # empty set element_id is not allowed
 
     def test6upper_case_input_validation(self):
         """Check if element_id is validated."""
-        # string upper_case
-        upper_case = "path"
-        self.assertRaises(TypeError, HexStringModelElement, self.id_, upper_case)
-
-        # None upper_case
-        upper_case = None
-        self.assertRaises(TypeError, HexStringModelElement, self.id_, upper_case)
-
-        # bytes upper_case is not allowed
-        upper_case = b"path"
-        self.assertRaises(TypeError, HexStringModelElement, self.id_, upper_case)
-
-        # integer upper_case is not allowed
-        upper_case = 123
-        self.assertRaises(TypeError, HexStringModelElement, self.id_, upper_case)
-
-        # float upper_case is not allowed
-        upper_case = 123.22
-        self.assertRaises(TypeError, HexStringModelElement, self.id_, upper_case)
-
-        # dict upper_case is not allowed
-        upper_case = {"id": "path"}
-        self.assertRaises(TypeError, HexStringModelElement, self.id_, upper_case)
-
-        # list upper_case is not allowed
-        upper_case = ["path"]
-        self.assertRaises(TypeError, HexStringModelElement, self.id_, upper_case)
-
-        # empty list upper_case is not allowed
-        upper_case = []
-        self.assertRaises(TypeError, HexStringModelElement, self.id_, upper_case)
-
-        # empty tuple upper_case is not allowed
-        upper_case = ()
-        self.assertRaises(TypeError, HexStringModelElement, self.id_, upper_case)
-
-        # empty set upper_case is not allowed
-        upper_case = set()
-        self.assertRaises(TypeError, HexStringModelElement, self.id_, upper_case)
+        self.assertRaises(TypeError, HexStringModelElement, self.id_, "path")  # string upper_case
+        self.assertRaises(TypeError, HexStringModelElement, self.id_, None)  # None upper_case
+        self.assertRaises(TypeError, HexStringModelElement, self.id_, b"path")  # bytes upper_case is not allowed
+        self.assertRaises(TypeError, HexStringModelElement, self.id_, 123)  # integer upper_case is not allowed
+        self.assertRaises(TypeError, HexStringModelElement, self.id_, 123.22)  # float upper_case is not allowed
+        self.assertRaises(TypeError, HexStringModelElement, self.id_, {"id": "path"})  # dict upper_case is not allowed
+        self.assertRaises(TypeError, HexStringModelElement, self.id_, ["path"])  # list upper_case is not allowed
+        self.assertRaises(TypeError, HexStringModelElement, self.id_, [])  # empty list upper_case is not allowed
+        self.assertRaises(TypeError, HexStringModelElement, self.id_, ())  # empty tuple upper_case is not allowed
+        self.assertRaises(TypeError, HexStringModelElement, self.id_, set())  # empty set upper_case is not allowed
 
     def test7get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = HexStringModelElement(self.id_)
         data = b"abcdefghijklmnopqrstuvwxyz.!?"
         model_element.get_match_element(self.path, DummyMatchContext(data))
-        from aminer.parsing.MatchContext import MatchContext
         model_element.get_match_element(self.path, MatchContext(data))
 
-        from aminer.parsing.MatchElement import MatchElement
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(None, data, None, None))
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
