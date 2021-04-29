@@ -50,8 +50,8 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Ev
         @param num_max_time_history maximal number of values of the time_history.
         @param num_results_bt number of results which are used in the binomial test.
         @param alpha_bt significance level for the bt test.
-        @param round_time_inteval_threshold Threshold for the rounding of the time_windows to the times in self.assumed_time_windows.
-        The higher the thresshold the easier the time is rounded to the next time in the list.
+        @param round_time_inteval_threshold Threshold for the rounding of the time_steps to the times in self.assumed_time_steps.
+        The higher the threshold the easier the time is rounded to the next time in the list.
         @param persistence_id name of persistency document.
         @param path_list At least one of the parser paths in this list needs to appear in the event to be analysed.
         @param ignore_list list of paths that are not considered for correlation, i.e., events that contain one of these paths are
@@ -96,8 +96,8 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Ev
         self.result_list = []
         # Minimal number of successes for the binomial test
         self.bt_min_suc = self.bt_min_successes(self.num_results_bt, self.alpha, self.alpha_bt)
-        # Assumed occuring time windows in seconds. 1 minute: 60, 1 hour: 3600, 12 hours: 43200, 1 day: 86400, 1 week: 604800.
-        self.assumed_time_windows = [60, 3600, 43200, 86400, 604800]
+        # Assumed occuring time steps in seconds. 1 minute: 60, 1 hour: 3600, 12 hours: 43200, 1 day: 86400, 1 week: 604800.
+        self.assumed_time_steps = [60, 3600, 43200, 86400, 604800]
 
         # Load the persistence
         self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
@@ -217,14 +217,15 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Ev
                 highest_peak_index = np.argmax(corrfit)
                 time_step_list.append((highest_peak_index + min_lag) / self.num_division_time_step)
 
-        # Round the time_steps if they are similar to the times in self.assumed_time_windows
+        # Round the time_steps if they are similar to the times in self.assumed_time_steps
         for index, time_step in enumerate(time_step_list):
             if time_step != -1:
-                for time in self.assumed_time_windows:
-                    if abs(time - time_step * self.num_division_time_step * self.event_type_detector.waiting_time_for_TSA /
-                            self.event_type_detector.num_sections_waiting_time_for_TSA) / time < self.round_time_inteval_threshold:
-                        time_step_list[index] = time / self.num_division_time_step / self.event_type_detector.waiting_time_for_TSA *\
-                            self.event_type_detector.num_sections_waiting_time_for_TSA
+                for assumed_time_step in self.assumed_time_steps:
+                    if abs(assumed_time_step - time_step * self.num_division_time_step * self.event_type_detector.waiting_time_for_TSA /
+                            self.event_type_detector.num_sections_waiting_time_for_TSA) / assumed_time_step <\
+                            self.round_time_inteval_threshold:
+                        time_step_list[index] = assumed_time_step / self.num_division_time_step /\
+                            self.event_type_detector.waiting_time_for_TSA * self.event_type_detector.num_sections_waiting_time_for_TSA
                         break
 
         # Print a message of the length of the time steps
