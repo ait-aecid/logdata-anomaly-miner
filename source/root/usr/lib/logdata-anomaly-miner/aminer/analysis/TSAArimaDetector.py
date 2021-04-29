@@ -35,8 +35,8 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Ev
     """This class is used for an arima time series analysis of the appearances of log lines to events."""
 
     def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, build_sum_over_values=False, num_division_time_step=10,
-                 alpha=0.05, num_min_time_history=20, num_max_time_history=30, num_results_bt=15, alpha_bt=0.05, persistence_id='Default',
-                 path_list=None, ignore_list=None, output_log_line=True, auto_include_flag=True):
+                 alpha=0.05, num_min_time_history=20, num_max_time_history=30, num_results_bt=15, alpha_bt=0.05, acf_threshold=0.2,
+                 persistence_id='Default', path_list=None, ignore_list=None, output_log_line=True, auto_include_flag=True):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -49,6 +49,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Ev
         @param num_max_time_history maximal number of values of the time_history.
         @param num_results_bt number of results which are used in the binomial test.
         @param alpha_bt significance level for the bt test.
+        @param acf_threshold Threshold, which has to be exceeded by the highest peak of the cdf function of the time series, to be analysed.
         @param persistence_id name of persistency document.
         @param path_list At least one of the parser paths in this list needs to appear in the event to be analysed.
         @param ignore_list list of paths that are not considered for correlation, i.e., events that contain one of these paths are
@@ -76,6 +77,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Ev
         self.num_max_time_history = num_max_time_history
         self.num_results_bt = num_results_bt
         self.alpha_bt = alpha_bt
+        self.acf_threshold = acf_threshold
 
         # Add the TSAArimaDetector-module to the list of the modules, which use the event_type_detector.
         self.event_type_detector.add_following_modules(self)
@@ -209,7 +211,10 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Ev
 
                 # Find the highest peak and set the time-step as the index + lag
                 highest_peak_index = np.argmax(corrfit)
-                time_step_list.append((highest_peak_index + min_lag) / self.num_division_time_step)
+                if corrfit[highest_peak_index] > self.acf_threshold:
+                    time_step_list.append((highest_peak_index + min_lag) / self.num_division_time_step)
+                else:
+                    time_step_list.append(-1)
 
         # Print a message of the length of the time steps
         message = 'Calculated the time steps for the single event types in seconds: %s' % [
