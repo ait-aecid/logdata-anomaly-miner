@@ -33,10 +33,6 @@ class MatchContext:
             msg = "match_data has to be of the type bytes."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
-        if len(match_data) < 1:
-            msg = "match_data must not be empty."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
         self.match_data = match_data
 
     def update(self, match_string: bytes):
@@ -64,9 +60,7 @@ class DebugMatchContext(MatchContext):
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
         if len(match_string) < 1:
-            msg = "match_string must not be empty."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
+            return
         try:
             match_data = self.match_data.decode(AminerConfig.ENCODING)
             m_string = match_string.decode(AminerConfig.ENCODING)

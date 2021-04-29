@@ -13,6 +13,8 @@ import random
 class VariableTypeDetectorTest(TestBase):
     """Unittests for the VariableTypeDetector."""
 
+    path = "path"
+
     def test1convert_to_floats(self):
         """This unittest tests possible inputs of the convert_to_floats function."""
         # use a list full of floats
@@ -269,7 +271,7 @@ class VariableTypeDetectorTest(TestBase):
         t = time.time()
         # test the 'static' path of detect_var_type
         stat_data = b'5.3.0-55-generic'
-        log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+        log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
         # check what happens if less than numMinAppearance values are available
         for i in range(num_init):
             self.assertTrue(etd.receive_atom(log_atom))
@@ -284,7 +286,7 @@ class VariableTypeDetectorTest(TestBase):
         # test ascending with float values
         for i in range(num_init):
             stat_data = bytes(str(i * 0.1), 'utf-8')
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
             self.assertTrue(etd.receive_atom(log_atom))
         result = vtd.detect_var_type(0, 0)
         self.assertEqual(['asc', 'float'], result)
@@ -297,7 +299,7 @@ class VariableTypeDetectorTest(TestBase):
         # test ascending with integer values
         for i in range(num_init):
             stat_data = bytes(str(i), 'utf-8')
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
             self.assertTrue(etd.receive_atom(log_atom))
         result = vtd.detect_var_type(0, 0)
         self.assertEqual(['asc', 'int'], result)
@@ -310,7 +312,7 @@ class VariableTypeDetectorTest(TestBase):
         # test descending with float values
         for i in range(num_init, 0, -1):
             stat_data = bytes(str(i * 0.1), 'utf-8')
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
             self.assertTrue(etd.receive_atom(log_atom))
         result = vtd.detect_var_type(0, 0)
         self.assertEqual(['desc', 'float'], result)
@@ -323,7 +325,7 @@ class VariableTypeDetectorTest(TestBase):
         # test descending with integer values
         for i in range(num_init, 0, -1):
             stat_data = bytes(str(i), 'utf-8')
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
             self.assertTrue(etd.receive_atom(log_atom))
         result = vtd.detect_var_type(0, 0)
         self.assertEqual(['desc', 'int'], result)
@@ -336,13 +338,13 @@ class VariableTypeDetectorTest(TestBase):
         # test 'num_init' and 'div_thres'
         # prevent results from becoming asc or desc
         stat_data = bytes(str(99), 'utf-8')
-        log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+        log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
         etd.receive_atom(log_atom)
         values = [float(stat_data)]
         for i in range(99):
             stat_data = bytes(str(i), 'utf-8')
             values.append(float(stat_data))
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
             self.assertTrue(etd.receive_atom(log_atom))
         result = vtd.detect_var_type(0, 0)
         # this means that the uniformal distribution must be detected.
@@ -367,7 +369,7 @@ class VariableTypeDetectorTest(TestBase):
         for i in range(100):
             stat_data = bytes(str((i % 50) * 0.1), 'utf-8')
             values.append(float(stat_data))
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
             self.assertTrue(etd.receive_atom(log_atom))
         result = vtd.detect_var_type(0, 0)
         # at least (1 - 'simThresh') * 'numMinAppearance' and maximal 'numMinAppearance' * 'divThres' - 1 unique values must exist.
@@ -380,7 +382,7 @@ class VariableTypeDetectorTest(TestBase):
         for i in range(num_init):
             stat_data = bytes(str((i % 50) * 0.1), 'utf-8')
             values.append(float(stat_data))
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
             self.assertTrue(etd.receive_atom(log_atom))
         result = vtd.detect_var_type(0, 0)
         values_set = list(set(values))
@@ -429,7 +431,7 @@ class VariableTypeDetectorTest(TestBase):
                                        num_s_gof_values=update, div_thres=0.45, sim_thres=0.75, num_pause_others=0)
             t = time.time()
             stat_data = b'True'
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
             # initialize data
             for i in range(init):
                 self.assertTrue(etd.receive_atom(log_atom))
@@ -446,7 +448,8 @@ class VariableTypeDetectorTest(TestBase):
 
             # static -> uni
             for uni_data in [((i+1) % update) / update for i in range(2*update)]:
-                log_atom = LogAtom(uni_data, ParserMatch(MatchElement('', uni_data, str(uni_data), None)), t, self.__class__.__name__)
+                log_atom = LogAtom(uni_data, ParserMatch(MatchElement(self.path, str(uni_data).encode(), str(uni_data), None)), t,
+                                   self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -456,8 +459,7 @@ class VariableTypeDetectorTest(TestBase):
             # uni -> others
             for i in range(update):
                 stat_data = bytes(str((i % int(update / 5))), 'utf-8')
-                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
-                                   self.__class__.__name__)
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -466,8 +468,7 @@ class VariableTypeDetectorTest(TestBase):
             # others -> d
             for i in range(update):
                 stat_data = bytes(str((i % int(update / 5))), 'utf-8')
-                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
-                                   self.__class__.__name__)
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -481,8 +482,7 @@ class VariableTypeDetectorTest(TestBase):
             # initialize with d
             for i in range(init):
                 stat_data = bytes(str((i % int(update / 5))), 'utf-8')
-                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
-                                   self.__class__.__name__)
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -490,7 +490,8 @@ class VariableTypeDetectorTest(TestBase):
 
             # discrete to others with new values
             for uni_data in [i / update for i in range(update)]:
-                log_atom = LogAtom(uni_data, ParserMatch(MatchElement('', uni_data, str(uni_data), None)), t, self.__class__.__name__)
+                log_atom = LogAtom(uni_data, ParserMatch(MatchElement(self.path, str(uni_data).encode(), str(uni_data), None)), t,
+                                   self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -504,8 +505,7 @@ class VariableTypeDetectorTest(TestBase):
             # initialize with d
             for i in range(init):
                 stat_data = bytes(str((i % int(update / 5))), 'utf-8')
-                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
-                                   self.__class__.__name__)
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -514,8 +514,7 @@ class VariableTypeDetectorTest(TestBase):
             # discrete to others without new values, low num_d_bt
             for i in range(update):
                 stat_data = bytes(str((i % int(update / 20))), 'utf-8')
-                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
-                                   self.__class__.__name__)
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -529,8 +528,7 @@ class VariableTypeDetectorTest(TestBase):
             # initialize with d
             for i in range(init):
                 stat_data = bytes(str((i % int(update / 5))), 'utf-8')
-                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
-                                   self.__class__.__name__)
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -539,8 +537,7 @@ class VariableTypeDetectorTest(TestBase):
             # discrete to others without new values, high num_d_bt
             for i in range(update):
                 stat_data = bytes(str((i % int(update / 20))), 'utf-8')
-                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
-                                   self.__class__.__name__)
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -552,7 +549,7 @@ class VariableTypeDetectorTest(TestBase):
                                        num_s_gof_values=update, div_thres=0.45, sim_thres=0.75, num_pause_others=0)
             t = time.time()
             stat_data = b'True'
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
             # initialize data
             for i in range(init):
                 self.assertTrue(etd.receive_atom(log_atom))
@@ -563,8 +560,7 @@ class VariableTypeDetectorTest(TestBase):
             # static -> asc
             for i in range(2*update):
                 stat_data = bytes(str(i * 0.1), 'utf-8')
-                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
-                                   self.__class__.__name__)
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -573,8 +569,7 @@ class VariableTypeDetectorTest(TestBase):
             # asc -> desc
             for i in range(2*update, 0, -1):
                 stat_data = bytes(str(i * 0.1), 'utf-8')
-                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
-                                   self.__class__.__name__)
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -586,7 +581,7 @@ class VariableTypeDetectorTest(TestBase):
                                        num_s_gof_values=update, div_thres=0.45, sim_thres=0.75, num_pause_others=0)
             t = time.time()
             stat_data = b'True'
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
             # initialize data
             for i in range(init):
                 self.assertTrue(etd.receive_atom(log_atom))
@@ -596,7 +591,8 @@ class VariableTypeDetectorTest(TestBase):
 
             # static -> nor
             for nor_data in nor_data_list[:2*update]:
-                log_atom = LogAtom(nor_data, ParserMatch(MatchElement('', nor_data, str(nor_data), None)), t, self.__class__.__name__)
+                log_atom = LogAtom(nor_data, ParserMatch(MatchElement(self.path, str(nor_data).encode(), str(nor_data), None)), t,
+                                   self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -605,7 +601,8 @@ class VariableTypeDetectorTest(TestBase):
 
             # nor -> beta1
             for beta1_data in beta1_data_list[:2*update]:
-                log_atom = LogAtom(beta1_data, ParserMatch(MatchElement('', beta1_data, str(beta1_data), None)), t, self.__class__.__name__)
+                log_atom = LogAtom(beta1_data, ParserMatch(MatchElement(self.path, str(beta1_data).encode(), str(beta1_data), None)), t,
+                                   self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -619,7 +616,8 @@ class VariableTypeDetectorTest(TestBase):
                                        num_s_gof_values=update, div_thres=0.45, sim_thres=0.75, num_pause_others=0)
             t = time.time()
             stat_data = b'True'
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t,
+                               self.__class__.__name__)
             # initialize data
             for i in range(init):
                 self.assertTrue(etd.receive_atom(log_atom))
@@ -632,7 +630,7 @@ class VariableTypeDetectorTest(TestBase):
             unq_data_list = [bytes(str(i), 'utf-8') for i in range(2*update)]
             random.shuffle(unq_data_list)
             for unq_data in unq_data_list:
-                log_atom = LogAtom(unq_data, ParserMatch(MatchElement('', unq_data, unq_data, None)), t, self.__class__.__name__)
+                log_atom = LogAtom(unq_data, ParserMatch(MatchElement(self.path, unq_data, unq_data, None)), t, self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
