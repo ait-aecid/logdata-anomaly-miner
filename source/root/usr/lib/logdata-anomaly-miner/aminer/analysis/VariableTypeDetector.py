@@ -1922,7 +1922,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         for var_index in range(self.length[event_index]):
             if self.var_type[event_index][var_index]:
                 tmp_string += "  Path '%s': %s\n" % (
-                    self.event_type_detector.variable_key_list[event_index][var_index], get_vt_string(self.var_type[event_index][var_index]))
+                    self.event_type_detector.variable_key_list[event_index][var_index],
+                    get_vt_string(self.var_type[event_index][var_index]))
                 type_info[self.event_type_detector.variable_key_list[event_index][var_index]] = self.var_type[event_index][var_index]
         tmp_string = tmp_string.lstrip('  ')
 
