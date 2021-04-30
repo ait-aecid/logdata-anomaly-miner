@@ -1,5 +1,7 @@
 import unittest
 from aminer.parsing.IpAddressDataModelElement import IpAddressDataModelElement
+from aminer.parsing.MatchContext import MatchContext
+from aminer.parsing.MatchElement import MatchElement
 from unit.TestBase import TestBase, DummyMatchContext
 
 
@@ -172,101 +174,38 @@ class IpAddressDataModelElementTest(TestBase):
 
     def test7element_id_input_validation(self):
         """Check if element_id is validated."""
-        # empty element_id
-        element_id = ""
-        self.assertRaises(ValueError, IpAddressDataModelElement, element_id)
-
-        # None element_id
-        element_id = None
-        self.assertRaises(TypeError, IpAddressDataModelElement, element_id)
-
-        # bytes element_id is not allowed
-        element_id = b"path"
-        self.assertRaises(TypeError, IpAddressDataModelElement, element_id)
-
-        # boolean element_id is not allowed
-        element_id = True
-        self.assertRaises(TypeError, IpAddressDataModelElement, element_id)
-
-        # integer element_id is not allowed
-        element_id = 123
-        self.assertRaises(TypeError, IpAddressDataModelElement, element_id)
-
-        # float element_id is not allowed
-        element_id = 123.22
-        self.assertRaises(TypeError, IpAddressDataModelElement, element_id)
-
-        # dict element_id is not allowed
-        element_id = {"id": "path"}
-        self.assertRaises(TypeError, IpAddressDataModelElement, element_id)
-
-        # list element_id is not allowed
-        element_id = ["path"]
-        self.assertRaises(TypeError, IpAddressDataModelElement, element_id)
-
-        # empty list element_id is not allowed
-        element_id = []
-        self.assertRaises(TypeError, IpAddressDataModelElement, element_id)
-
-        # empty tuple element_id is not allowed
-        element_id = ()
-        self.assertRaises(TypeError, IpAddressDataModelElement, element_id)
-
-        # empty set element_id is not allowed
-        element_id = set()
-        self.assertRaises(TypeError, IpAddressDataModelElement, element_id)
+        self.assertRaises(ValueError, IpAddressDataModelElement, "")  # empty element_id
+        self.assertRaises(TypeError, IpAddressDataModelElement, None)  # None element_id
+        self.assertRaises(TypeError, IpAddressDataModelElement, b"path")  # bytes element_id is not allowed
+        self.assertRaises(TypeError, IpAddressDataModelElement, True)  # boolean element_id is not allowed
+        self.assertRaises(TypeError, IpAddressDataModelElement, 123)  # integer element_id is not allowed
+        self.assertRaises(TypeError, IpAddressDataModelElement, 123.22)  # float element_id is not allowed
+        self.assertRaises(TypeError, IpAddressDataModelElement, {"id": "path"})  # dict element_id is not allowed
+        self.assertRaises(TypeError, IpAddressDataModelElement, ["path"])  # list element_id is not allowed
+        self.assertRaises(TypeError, IpAddressDataModelElement, [])  # empty list element_id is not allowed
+        self.assertRaises(TypeError, IpAddressDataModelElement, ())  # empty tuple element_id is not allowed
+        self.assertRaises(TypeError, IpAddressDataModelElement, set())  # empty set element_id is not allowed
 
     def test8ipv6_input_validation(self):
         """Check if ipv6 is validated."""
-        # string ipv6
-        ipv6 = "path"
-        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, ipv6)
-
-        # None ipv6
-        ipv6 = None
-        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, ipv6)
-
-        # bytes ipv6 is not allowed
-        ipv6 = b"path"
-        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, ipv6)
-
-        # integer ipv6 is not allowed
-        ipv6 = 123
-        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, ipv6)
-
-        # float ipv6 is not allowed
-        ipv6 = 123.22
-        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, ipv6)
-
-        # dict ipv6 is not allowed
-        ipv6 = {"id": "path"}
-        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, ipv6)
-
-        # list ipv6 is not allowed
-        ipv6 = ["path"]
-        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, ipv6)
-
-        # empty list ipv6 is not allowed
-        ipv6 = []
-        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, ipv6)
-
-        # empty tuple ipv6 is not allowed
-        ipv6 = ()
-        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, ipv6)
-
-        # empty set ipv6 is not allowed
-        ipv6 = set()
-        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, ipv6)
+        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, "path")  # string ipv6
+        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, None)  # None ipv6
+        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, b"path")  # bytes ipv6 is not allowed
+        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, 123)  # integer ipv6 is not allowed
+        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, 123.22)  # float ipv6 is not allowed
+        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, {"id": "path"})  # dict ipv6 is not allowed
+        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, ["path"])  # list ipv6 is not allowed
+        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, [])  # empty list ipv6 is not allowed
+        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, ())  # empty tuple ipv6 is not allowed
+        self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, set())  # empty set ipv6 is not allowed
 
     def test9get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = IpAddressDataModelElement(self.id_)
         data = b"abcdefghijklmnopqrstuvwxyz.!?"
         model_element.get_match_element(self.path, DummyMatchContext(data))
-        from aminer.parsing.MatchContext import MatchContext
         model_element.get_match_element(self.path, MatchContext(data))
 
-        from aminer.parsing.MatchElement import MatchElement
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(None, data, None, None))
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())

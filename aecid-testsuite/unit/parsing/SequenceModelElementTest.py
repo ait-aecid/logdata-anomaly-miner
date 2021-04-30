@@ -1,4 +1,5 @@
 import unittest
+from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.SequenceModelElement import SequenceModelElement
 from unit.TestBase import TestBase, DummyMatchContext, DummyFixedDataModelElement
@@ -85,7 +86,6 @@ class SequenceModelElementTest(TestBase):
         model_element = SequenceModelElement(self.id_, self.children)
         data = b"string0 string1 string2"
         model_element.get_match_element(self.path, DummyMatchContext(data))
-        from aminer.parsing.MatchContext import MatchContext
         model_element.get_match_element(self.path, MatchContext(data))
 
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(None, data, None, None))

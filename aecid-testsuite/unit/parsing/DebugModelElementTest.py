@@ -2,6 +2,8 @@ import unittest
 import sys
 from _io import StringIO
 from aminer.parsing.DebugModelElement import DebugModelElement
+from aminer.parsing.MatchContext import MatchContext
+from aminer.parsing.MatchElement import MatchElement
 from unit.TestBase import TestBase, DummyMatchContext
 
 
@@ -63,59 +65,25 @@ class DebugModelElementTest(TestBase):
 
     def test4element_id_input_validation(self):
         """Check if element_id is validated."""
-        # empty element_id
-        element_id = ""
-        self.assertRaises(ValueError, DebugModelElement, element_id)
-
-        # None element_id
-        element_id = None
-        self.assertRaises(TypeError, DebugModelElement, element_id)
-
-        # bytes element_id is not allowed
-        element_id = b"path"
-        self.assertRaises(TypeError, DebugModelElement, element_id)
-
-        # bool element_id is not allowed
-        element_id = True
-        self.assertRaises(TypeError, DebugModelElement, element_id)
-
-        # integer element_id is not allowed
-        element_id = 123
-        self.assertRaises(TypeError, DebugModelElement, element_id)
-
-        # float element_id is not allowed
-        element_id = 123.22
-        self.assertRaises(TypeError, DebugModelElement, element_id)
-
-        # dict element_id is not allowed
-        element_id = {"id": "path"}
-        self.assertRaises(TypeError, DebugModelElement, element_id)
-
-        # list element_id is not allowed
-        element_id = ["path"]
-        self.assertRaises(TypeError, DebugModelElement, element_id)
-
-        # empty list element_id is not allowed
-        element_id = []
-        self.assertRaises(TypeError, DebugModelElement, element_id)
-
-        # empty tuple element_id is not allowed
-        element_id = ()
-        self.assertRaises(TypeError, DebugModelElement, element_id)
-
-        # empty set element_id is not allowed
-        element_id = set()
-        self.assertRaises(TypeError, DebugModelElement, element_id)
+        self.assertRaises(ValueError, DebugModelElement, "")  # empty element_id
+        self.assertRaises(TypeError, DebugModelElement, None)  # None element_id
+        self.assertRaises(TypeError, DebugModelElement, b"path")  # bytes element_id is not allowed
+        self.assertRaises(TypeError, DebugModelElement, True)  # bool element_id is not allowed
+        self.assertRaises(TypeError, DebugModelElement, 123)  # integer element_id is not allowed
+        self.assertRaises(TypeError, DebugModelElement, 123.22)  # float element_id is not allowed
+        self.assertRaises(TypeError, DebugModelElement, {"id": "path"})  # dict element_id is not allowed
+        self.assertRaises(TypeError, DebugModelElement, ["path"])  # list element_id is not allowed
+        self.assertRaises(TypeError, DebugModelElement, [])  # empty list element_id is not allowed
+        self.assertRaises(TypeError, DebugModelElement, ())  # empty tuple element_id is not allowed
+        self.assertRaises(TypeError, DebugModelElement, set())  # empty set element_id is not allowed
 
     def test5get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = DebugModelElement(self.id_)
         data = b"abcdefghijklmnopqrstuvwxyz.!?"
         model_element.get_match_element(self.path, DummyMatchContext(data))
-        from aminer.parsing.MatchContext import MatchContext
         model_element.get_match_element(self.path, MatchContext(data))
 
-        from aminer.parsing.MatchElement import MatchElement
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(self.path, data, None, None))
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())

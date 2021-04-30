@@ -1,5 +1,7 @@
 import unittest
 from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
+from aminer.parsing.MatchContext import MatchContext
+from aminer.parsing.MatchElement import MatchElement
 from unit.TestBase import TestBase, DummyMatchContext
 
 
@@ -236,139 +238,50 @@ class DelimitedDataModelElementTest(TestBase):
 
     def test11element_id_input_validation(self):
         """Check if element_id is validated."""
-        # empty element_id
-        element_id = ""
-        self.assertRaises(ValueError, DelimitedDataModelElement, element_id, self.delimiter)
-
-        # None element_id
-        element_id = None
-        self.assertRaises(TypeError, DelimitedDataModelElement, element_id, self.delimiter)
-
-        # bytes element_id is not allowed
-        element_id = b"path"
-        self.assertRaises(TypeError, DelimitedDataModelElement, element_id, self.delimiter)
-
-        # boolean element_id is not allowed
-        element_id = True
-        self.assertRaises(TypeError, DelimitedDataModelElement, element_id, self.delimiter)
-
-        # integer element_id is not allowed
-        element_id = 123
-        self.assertRaises(TypeError, DelimitedDataModelElement, element_id, self.delimiter)
-
-        # float element_id is not allowed
-        element_id = 123.22
-        self.assertRaises(TypeError, DelimitedDataModelElement, element_id, self.delimiter)
-
-        # dict element_id is not allowed
-        element_id = {"id": "path"}
-        self.assertRaises(TypeError, DelimitedDataModelElement, element_id, self.delimiter)
-
-        # list element_id is not allowed
-        element_id = ["path"]
-        self.assertRaises(TypeError, DelimitedDataModelElement, element_id, self.delimiter)
-
-        # empty list element_id is not allowed
-        element_id = []
-        self.assertRaises(TypeError, DelimitedDataModelElement, element_id, self.delimiter)
-
-        # empty tuple element_id is not allowed
-        element_id = ()
-        self.assertRaises(TypeError, DelimitedDataModelElement, element_id, self.delimiter)
-
-        # empty set element_id is not allowed
-        element_id = set()
-        self.assertRaises(TypeError, DelimitedDataModelElement, element_id, self.delimiter)
+        self.assertRaises(ValueError, DelimitedDataModelElement, "", self.delimiter)  # empty element_id
+        self.assertRaises(TypeError, DelimitedDataModelElement, None, self.delimiter)  # None element_id
+        self.assertRaises(TypeError, DelimitedDataModelElement, b"path", self.delimiter)  # bytes element_id is not allowed
+        self.assertRaises(TypeError, DelimitedDataModelElement, True, self.delimiter)  # boolean element_id is not allowed
+        self.assertRaises(TypeError, DelimitedDataModelElement, 123, self.delimiter)  # integer element_id is not allowed
+        self.assertRaises(TypeError, DelimitedDataModelElement, 123.22, self.delimiter)  # float element_id is not allowed
+        self.assertRaises(TypeError, DelimitedDataModelElement, {"id": "path"}, self.delimiter)  # dict element_id is not allowed
+        self.assertRaises(TypeError, DelimitedDataModelElement, ["path"], self.delimiter)  # list element_id is not allowed
+        self.assertRaises(TypeError, DelimitedDataModelElement, [], self.delimiter)  # empty list element_id is not allowed
+        self.assertRaises(TypeError, DelimitedDataModelElement, (), self.delimiter)  # empty tuple element_id is not allowed
+        self.assertRaises(TypeError, DelimitedDataModelElement, set(), self.delimiter)  # empty set element_id is not allowed
 
     def test12escape_input_validation(self):
         """Check if escape is validated."""
-        # empty escape
-        escape = b""
-        self.assertRaises(ValueError, DelimitedDataModelElement, self.id_, self.delimiter, escape=escape)
-
-        # string escape is not allowed
-        escape = "\\"
-        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, escape=escape)
-
-        # boolean escape is not allowed
-        escape = True
-        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, escape=escape)
-
-        # integer escape is not allowed
-        escape = 123
-        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, escape=escape)
-
-        # float escape is not allowed
-        escape = 123.22
-        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, escape=escape)
-
-        # dict escape is not allowed
-        escape = {"id": "path"}
-        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, escape=escape)
-
-        # list escape is not allowed
-        escape = ["path"]
-        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, escape=escape)
-
-        # empty list escape is not allowed
-        escape = []
-        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, escape=escape)
-
-        # empty tuple escape is not allowed
-        escape = ()
-        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, escape=escape)
-
-        # empty set escape is not allowed
-        escape = set()
-        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, escape=escape)
+        self.assertRaises(ValueError, DelimitedDataModelElement, self.id_, self.delimiter, escape=b"")  # empty escape
+        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, escape="\\")  # string escape is not allowed
+        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, escape=True)  # boolean escape is not allowed
+        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, escape=123)  # integer escape is not allowed
+        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, escape=123.22)  # float escape is not allowed
+        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, escape={"id": "path"})  # dict escape not allowed
+        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, escape=["path"])  # list escape is not allowed
+        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, escape=[])  # empty list escape is not allowed
+        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, escape=())  # empty tuple escape is not allowed
+        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, escape=set())  # empty set escape is not allowed
 
     def test13consume_delimiter_input_validation(self):
         """Check if consume_delimiter is validated."""
-        # bytes consume_delimiter is not allowed
-        consume_delimiter = b""
-        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, consume_delimiter=consume_delimiter)
-
-        # string consume_delimiter is not allowed
-        consume_delimiter = "\\"
-        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, consume_delimiter=consume_delimiter)
-
-        # integer consume_delimiter is not allowed
-        consume_delimiter = 123
-        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, consume_delimiter=consume_delimiter)
-
-        # float consume_delimiter is not allowed
-        consume_delimiter = 123.22
-        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, consume_delimiter=consume_delimiter)
-
-        # dict consume_delimiter is not allowed
-        consume_delimiter = {"id": "path"}
-        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, consume_delimiter=consume_delimiter)
-
-        # list consume_delimiter is not allowed
-        consume_delimiter = ["path"]
-        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, consume_delimiter=consume_delimiter)
-
-        # empty list consume_delimiter is not allowed
-        consume_delimiter = []
-        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, consume_delimiter=consume_delimiter)
-
-        # empty tuple consume_delimiter is not allowed
-        consume_delimiter = ()
-        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, consume_delimiter=consume_delimiter)
-
-        # empty set consume_delimiter is not allowed
-        consume_delimiter = set()
-        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, consume_delimiter=consume_delimiter)
+        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, consume_delimiter=b"")
+        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, consume_delimiter="\\")
+        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, consume_delimiter=123)
+        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, consume_delimiter=123.22)
+        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, consume_delimiter={"id": "path"})
+        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, consume_delimiter=["path"])
+        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, consume_delimiter=[])
+        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, consume_delimiter=())
+        self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, consume_delimiter=set())
 
     def test14get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = DelimitedDataModelElement(self.id_, self.delimiter)
         data = b"one, two, three"
         model_element.get_match_element(self.path, DummyMatchContext(data))
-        from aminer.parsing.MatchContext import MatchContext
         model_element.get_match_element(self.path, MatchContext(data))
 
-        from aminer.parsing.MatchElement import MatchElement
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(None, data, None, None))
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())

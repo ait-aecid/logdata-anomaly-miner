@@ -1,5 +1,7 @@
 import unittest
 from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
+from aminer.parsing.MatchContext import MatchContext
+from aminer.parsing.MatchElement import MatchElement
 from unit.TestBase import TestBase, DummyMatchContext, DummyFixedDataModelElement
 
 
@@ -81,10 +83,8 @@ class OptionalMatchModelElementTest(TestBase):
         model_element = OptionalMatchModelElement(self.id_, DummyFixedDataModelElement(self.fixed_id, self.fixed_data))
         data = b"fixed data"
         model_element.get_match_element(self.path, DummyMatchContext(data))
-        from aminer.parsing.MatchContext import MatchContext
         model_element.get_match_element(self.path, MatchContext(data))
 
-        from aminer.parsing.MatchElement import MatchElement
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(None, data, None, None))
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())

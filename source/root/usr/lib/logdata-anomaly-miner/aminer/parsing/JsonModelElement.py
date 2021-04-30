@@ -86,7 +86,10 @@ class JsonModelElement(ModelElementInterface):
                     raise ValueError(msg)
                 value_list: List[dict] = []
                 for v in value:
-                    self.find_children_in_dict(v, value_list)
+                    if isinstance(v, dict):
+                        self.find_children_in_dict(v, value_list)
+                    else:
+                        value_list.append(v)
                 children.append(value_list)
             elif isinstance(value, dict):
                 self.find_children_in_dict(value, children)

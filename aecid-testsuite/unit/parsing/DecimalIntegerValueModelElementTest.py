@@ -1,5 +1,7 @@
 import unittest
 from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.MatchContext import MatchContext
+from aminer.parsing.MatchElement import MatchElement
 from unit.TestBase import TestBase, DummyMatchContext
 
 
@@ -400,49 +402,17 @@ class DecimalIntegerValueModelElementTest(TestBase):
 
     def test9element_id_input_validation(self):
         """Check if element_id is validated."""
-        # empty element_id
-        element_id = ""
-        self.assertRaises(ValueError, DecimalIntegerValueModelElement, element_id)
-
-        # None element_id
-        element_id = None
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, element_id)
-
-        # bytes element_id is not allowed
-        element_id = b"path"
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, element_id)
-
-        # boolean element_id is not allowed
-        element_id = True
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, element_id)
-
-        # integer element_id is not allowed
-        element_id = 123
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, element_id)
-
-        # float element_id is not allowed
-        element_id = 123.22
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, element_id)
-
-        # dict element_id is not allowed
-        element_id = {"id": "path"}
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, element_id)
-
-        # list element_id is not allowed
-        element_id = ["path"]
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, element_id)
-
-        # empty list element_id is not allowed
-        element_id = []
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, element_id)
-
-        # empty tuple element_id is not allowed
-        element_id = ()
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, element_id)
-
-        # empty set element_id is not allowed
-        element_id = set()
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, element_id)
+        self.assertRaises(ValueError, DecimalIntegerValueModelElement, "")  # empty element_id
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, None)  # None element_id
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, b"path")  # bytes element_id is not allowed
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, True)  # boolean element_id is not allowed
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, 123)  # integer element_id is not allowed
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, 123.22)  # float element_id is not allowed
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, {"id": "path"})  # dict element_id is not allowed
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, ["path"])  # list element_id is not allowed
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, [])  # empty list element_id is not allowed
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, ())  # empty tuple element_id is not allowed
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, set())  # empty set element_id is not allowed
 
     def test10value_sign_type_input_validation(self):
         """Check if value_sign_type is validated."""
@@ -450,38 +420,17 @@ class DecimalIntegerValueModelElementTest(TestBase):
         DecimalIntegerValueModelElement(self.id_, value_sign_type="optional")
         DecimalIntegerValueModelElement(self.id_, value_sign_type="mandatory")
 
-        value_sign_type = "None"
-        self.assertRaises(ValueError, DecimalIntegerValueModelElement, self.id_, value_sign_type=value_sign_type)
-
-        value_sign_type = None
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=value_sign_type)
-
-        value_sign_type = b"none"
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=value_sign_type)
-
-        value_sign_type = True
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=value_sign_type)
-
-        value_sign_type = 123
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=value_sign_type)
-
-        value_sign_type = 123.22
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=value_sign_type)
-
-        value_sign_type = {"value_sign_type": "none"}
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=value_sign_type)
-
-        value_sign_type = ["none"]
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=value_sign_type)
-
-        value_sign_type = []
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=value_sign_type)
-
-        value_sign_type = ()
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=value_sign_type)
-
-        value_sign_type = set()
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=value_sign_type)
+        self.assertRaises(ValueError, DecimalIntegerValueModelElement, self.id_, value_sign_type="None")
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=None)
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=b"none")
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=True)
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=123)
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=123.22)
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type={"value_sign_type": "none"})
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=["none"])
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=[])
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=())
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_sign_type=set())
 
     def test11value_pad_type_input_validation(self):
         """Check if value_pad_type is validated."""
@@ -489,48 +438,25 @@ class DecimalIntegerValueModelElementTest(TestBase):
         DecimalIntegerValueModelElement(self.id_, value_pad_type="zero")
         DecimalIntegerValueModelElement(self.id_, value_pad_type="blank")
 
-        value_pad_type = "None"
-        self.assertRaises(ValueError, DecimalIntegerValueModelElement, self.id_, value_pad_type=value_pad_type)
-
-        value_pad_type = None
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=value_pad_type)
-
-        value_pad_type = b"none"
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=value_pad_type)
-
-        value_pad_type = True
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=value_pad_type)
-
-        value_pad_type = 123
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=value_pad_type)
-
-        value_pad_type = 123.22
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=value_pad_type)
-
-        value_pad_type = {"value_sign_type": "none"}
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=value_pad_type)
-
-        value_pad_type = ["none"]
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=value_pad_type)
-
-        value_pad_type = []
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=value_pad_type)
-
-        value_pad_type = ()
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=value_pad_type)
-
-        value_pad_type = set()
-        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=value_pad_type)
+        self.assertRaises(ValueError, DecimalIntegerValueModelElement, self.id_, value_pad_type="None")
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=None)
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=b"none")
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=True)
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=123)
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=123.22)
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type={"value_sign_type": "none"})
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=["none"])
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=[])
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=())
+        self.assertRaises(TypeError, DecimalIntegerValueModelElement, self.id_, value_pad_type=set())
 
     def test12get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = DecimalIntegerValueModelElement(self.id_)
         data = b"123.22"
         model_element.get_match_element(self.path, DummyMatchContext(data))
-        from aminer.parsing.MatchContext import MatchContext
         model_element.get_match_element(self.path, MatchContext(data))
 
-        from aminer.parsing.MatchElement import MatchElement
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(None, data, None, None))
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
