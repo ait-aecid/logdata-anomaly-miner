@@ -181,6 +181,7 @@
                 'num_max_time_history': {'type': 'integer', 'default': 30},
                 'num_results_bt': {'type': 'integer', 'default': 15},
                 'alpha_bt': {'type': 'float', 'default': 0.05},
+                'round_time_inteval_threshold': {'type': 'float', 'default': 0.02},
                 'acf_threshold': {'type': 'float', 'default': 0.2}
             }
         }

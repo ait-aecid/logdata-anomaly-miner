@@ -36,7 +36,8 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Ev
 
     def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, build_sum_over_values=False, num_division_time_step=10,
                  alpha=0.05, num_min_time_history=20, num_max_time_history=30, num_results_bt=15, alpha_bt=0.05, acf_threshold=0.2,
-                 persistence_id='Default', path_list=None, ignore_list=None, output_log_line=True, auto_include_flag=True):
+                 round_time_inteval_threshold=0.02, persistence_id='Default', path_list=None, ignore_list=None, output_log_line=True,
+                 auto_include_flag=True):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -49,6 +50,8 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Ev
         @param num_max_time_history maximal number of values of the time_history.
         @param num_results_bt number of results which are used in the binomial test.
         @param alpha_bt significance level for the bt test.
+        @param round_time_inteval_threshold Threshold for the rounding of the time_steps to the times in self.assumed_time_steps.
+        The higher the threshold the easier the time is rounded to the next time in the list.
         @param acf_threshold threshold, which has to be exceeded by the highest peak of the cdf function of the time series, to be analysed.
         @param persistence_id name of persistency document.
         @param path_list At least one of the parser paths in this list needs to appear in the event to be analysed.
@@ -77,6 +80,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Ev
         self.num_max_time_history = num_max_time_history
         self.num_results_bt = num_results_bt
         self.alpha_bt = alpha_bt
+        self.round_time_inteval_threshold = round_time_inteval_threshold
         self.acf_threshold = acf_threshold
 
         # Add the TSAArimaDetector-module to the list of the modules, which use the event_type_detector.
@@ -94,6 +98,8 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Ev
         self.result_list = []
         # Minimal number of successes for the binomial test
         self.bt_min_suc = self.bt_min_successes(self.num_results_bt, self.alpha, self.alpha_bt)
+        # Assumed occuring time steps in seconds. 1 minute: 60, 1 hour: 3600, 12 hours: 43200, 1 day: 86400, 1 week: 604800.
+        self.assumed_time_steps = [60, 3600, 43200, 86400, 604800]
 
         # Load the persistence
         self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
@@ -215,6 +221,17 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Ev
                     time_step_list.append((highest_peak_index + min_lag) / self.num_division_time_step)
                 else:
                     time_step_list.append(-1)
+
+        # Round the time_steps if they are similar to the times in self.assumed_time_steps
+        for index, time_step in enumerate(time_step_list):
+            if time_step != -1:
+                for assumed_time_step in self.assumed_time_steps:
+                    if abs(assumed_time_step - time_step * self.num_division_time_step * self.event_type_detector.waiting_time_for_TSA /
+                            self.event_type_detector.num_sections_waiting_time_for_TSA) / assumed_time_step <\
+                            self.round_time_inteval_threshold:
+                        time_step_list[index] = assumed_time_step / self.num_division_time_step /\
+                            self.event_type_detector.waiting_time_for_TSA * self.event_type_detector.num_sections_waiting_time_for_TSA
+                        break
 
         # Print a message of the length of the time steps
         message = 'Calculated the time steps for the single event types in seconds: %s' % [
