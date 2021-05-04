@@ -2,7 +2,7 @@
 Overview
 ========
 
-The logdata-anomaly-miner can be configured in two different formats: **yaml** and **python**. The preferred format is yaml and the default configuration file for it is */etc/aminer/config.yaml*. The python format can be configured in */etc/aminer/config..py* and offers more different ways to configure the logdata-anomaly-miner. However, this is only recommended for experts, as no errors are caught in the python configuration, which can make debugging very difficult. For both formats there are template configurations in */etc/aminer/template\_config.yaml* and */etc/aminer/template\_config.py*.
+The logdata-anomaly-miner can be configured in two different formats: **yaml** and **python**. The preferred format is yaml and the default configuration file for it is */etc/aminer/config.yaml*. The python format can be configured in */etc/aminer/config.py* and offers advanced possibilities to configure the logdata-anomaly-miner. However, this is only recommended for experts, as no errors are caught in the python configuration, which can make debugging very difficult. For both formats there are template configurations in */etc/aminer/template\_config.yaml* and */etc/aminer/template\_config.py*.
 
 The basic structure of the logdata-anomaly-miner is illustrated in the folloging diagram:
 
@@ -13,7 +13,7 @@ The basic structure of the logdata-anomaly-miner is illustrated in the folloging
 Analysis Pipeline
 -----------------
 
-The core component of the logdata-anomaly-miner is the "analysis pipeline". It consists of the parts INPUT, ANALYSIS and OUTPUT
+The core component of the logdata-anomaly-miner is the "analysis pipeline". It consists of the parts INPUT, ANALYSIS and OUTPUT.
 
 .. image:: images/analysis-pipeline.png
    :alt: Parts of the analysis-pipeline
@@ -25,8 +25,6 @@ Configuration Reference
 ---------------------
 General Configuration
 ---------------------
-
-Supported settings:
 
 LearnMode
 ~~~~~~~~~
@@ -68,7 +66,7 @@ This option defines the system-group that owns the aminer-process.
 RemoteControlSocket
 ~~~~~~~~~~~~~~~~~~~
 
-This option controls where the unix-domain-socket for the RemoteControl should be created. The socket will not be created if this option was not set.
+This option controls where the unix-domain-socket for the RemoteControl should be created. The socket will not be created if this option is not set.
 
 .. code-block:: yaml
 
@@ -80,11 +78,11 @@ SuppressNewMatchPathDetector
 * Default: False
 * Type: boolean (True,False)
 
-Disable the NewMatchPathDetector which detects new paths for logtypes.
+Disable the output of the NewMatchPathDetector which detects new paths for logtypes.
 
 .. code-block:: yaml
 
-   SuppressNewMatchPathDetector: 'False'
+   SuppressNewMatchPathDetector: False
 
 
 LogResourceList
@@ -114,7 +112,7 @@ Core.PersistenceDir
 
 * Default: /var/lib/aminer
 
-Read and store information to be used between multiple invocations of aminer in this directory. The directory must only be accessible to the 'AminerUser' but not group/world readable. On violation, aminer will refuse to start.
+Read and store information to be used between multiple executions of aminer in this directory. The directory must only be accessible to the 'AminerUser' but not group/world readable. On violation, aminer will refuse to start.
 
 .. code-block:: yaml
 
@@ -126,7 +124,7 @@ Core.PersistencePeriod
 * Type: Number of seconds
 * Default: 600
 
-This options controls the logdata-anomaly-miner should write it's persistency to disk.
+This options controls whether the logdata-anomaly-miner should write its persistency to disk.
 
 .. code-block:: yaml
 
@@ -149,7 +147,7 @@ MailAlerting.TargetAddress
 
 * Default: disabled
 
-Define a target e-mail address to send alerts to. When undefined no e-mail notification hooks are added.
+Define a target e-mail address to send alerts to. When undefined, no e-mail notification hooks are added.
 
 .. code-block:: yaml
 
@@ -348,7 +346,7 @@ multi_source
 * Type: boolean (True,False)
 * Default: False
 
-Flag to enable chronologicly correct parsing from multiple input-logfiles.
+Flag to enable chronologically correct parsing from multiple input-logfiles.
 
 .. code-block:: yaml
 
@@ -360,7 +358,7 @@ verbose
 * Type: boolean (True,False)
 * Default: False
 
-Flag to enable that detailed information is shown for unparsed loglines.
+Flag to enable that detailed parsing information is shown for unparsed loglines.
 
 .. code-block:: yaml
 
@@ -396,7 +394,7 @@ Enables parsing of logs in json-format.
 Parsing
 -------
 
-There are some predefined standard-model-elements like *IpAddressDataModelElement*, *DateTimeModelElement*, *FixedDataModelElement* and so on. They are located in the python-source-tree of logdata-anomaly-miner. A comprehensive list of all possible standard-model-elements can be found below. Using these standard-model-elements it is possible to create custom parser models. Currently there are to methods of doing it:
+There are some predefined standard-model-elements like *IpAddressDataModelElement*, *DateTimeModelElement*, *FixedDataModelElement* and so on. They are located in the python-source-tree of logdata-anomaly-miner. A comprehensive list of all possible standard-model-elements can be found below. Using these standard-model-elements it is possible to create custom parser models. Currently there are two methods of doing it:
 
 1. Using a python-script that is located in */etc/aminer/conf-enabled*:
 
@@ -468,7 +466,7 @@ This parser can be used as "type" in **/etc/aminer/config.yml**:
           type: ApacheAccessModel
           name: 'apache'
 
-.. warning:: Please do not create files with the ending "ModelElement" in /etc/aminer/conf-enabled!
+.. warning:: Please do not create files with the ending "ModelElement.py" in /etc/aminer/conf-enabled!
 
 2. Configuring the parser-model inline in **/etc/aminer/config.yml**
 
@@ -583,7 +581,7 @@ This parser can be used as "type" in **/etc/aminer/config.yml**:
                      - user_agent_model
                      - sq6
 
-The parsing section in **/etc/aminer/config.yml** starts with the statement "Parser:" followed by a list of parser-models. Every parser-model in this list must have a unique **id** and a **type**. The unique **id** can be used to cascade models by adding the **id** of an parser-model as arguments(**args**). One parser of this list must contain `start: True` that indicates the first parser-model:
+The parsing section in **/etc/aminer/config.yml** starts with the statement "Parser:" followed by a list of parser-models. Every parser-model in this list must have a unique **id** and a **type**. The unique **id** can be used to cascade models by adding the **id** of an parser-model as arguments(**args**). One parser of this list must contain `start: True` that indicates the root of the parser tree:
 
 .. code-block:: yaml
 
@@ -600,6 +598,7 @@ The parsing section in **/etc/aminer/config.yml** starts with the statement "Par
 
 * **id**: must be a unique string
 * **type**: must be an existing ModelElement
+* **name**: string with the element name
 * **start**: a boolean value that indicates the starting model. Only one parser-model must have enabled this option!
 * **args***: a string or a list of strings containing the arguments of the specific parser.
 
@@ -608,8 +607,6 @@ The parsing section in **/etc/aminer/config.yml** starts with the statement "Par
 
 AnyByteDataModelElement
 ~~~~~~~~~~~~~~~~~~~~~~~
-
-* **name**: string with the element-id
 
 This parsing-element matches any byte but at least one. Thus a match will always span the complete data from beginning to end.
 
@@ -622,8 +619,6 @@ This parsing-element matches any byte but at least one. Thus a match will always
 
 Base64StringModelElement
 ~~~~~~~~~~~~~~~~~~~~~~~~
-
-* **name**: string with the element-id
 
 This parsing-element matches base64 strings.
 
@@ -639,7 +634,6 @@ DateTimeModelElement
 
 This element parses dates using a custom, timezone and locale-aware implementation similar to strptime.
 
-* **name**: string with the element-id (Required)
 * **args**: a string or list containing the following parameters:
 
   1. date_format:
@@ -689,8 +683,6 @@ The following code simply adds a custom date_format:
 DebugModelElement
 ~~~~~~~~~~~~~~~~~
 
-* **name**: string with the element-id
-
 This model element matches any data of length zero at any position. Thus it can never fail to match and can be inserted at any position in the parsing tree, where matching itself does not alter parsing flow (see e.g. FirstMatchModelElement). It will immediately write the current state of the match to stderr for inspection.
 
 .. code-block:: yaml
@@ -705,12 +697,11 @@ DecimalFloatValueModelElement
 
 This model element parses decimal values with optional signum, padding or exponent. With padding, the signum has to be found before the padding characters.
 
-* **name**: string with the element-id (Required)
 * **value_sign_type**: Defines if a value sign is required
 
   Possible values: 'none', 'optional', 'mandatory'
 
-* **value_pad_type**: Defines the padding for example: "0041"
+* **value_pad_type**: Defines the padding, for example: "0041"
 
   Possible values: 'none', 'zero', 'blank'
 
@@ -732,11 +723,11 @@ DelimitedDataModelElement
 
 This model element takes any string up to a specific delimiter string.
 
-* **name**: string with the element-id (Required)
 * **args**: a string or list containing the following parameters:
 
   1. delimiter: defines which delimiter to use
-  2. escape: defines which escape bytes should be used Default: non-escaped
+  2. escape: defines which escape bytes should be used, default is non-escaped
+  3. consume_delimiter: defines whether the delimiter should be processed with the match, default is False
 
 .. code-block:: yaml
    
@@ -744,12 +735,22 @@ This model element takes any string up to a specific delimiter string.
        - id: delimitedDataModelElement
          type: DelimitedDataModelElement
          name: 'DelimitedDataModelElement'
-         args: ';'
+         delimiter: ';'
 
 ElementValueBranchModelElement
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This model element selects a branch path based on a previous model value.
+
+* **args**: a string or list containing the following parameters:
+
+  1. value_model: defines the parsing model holding the element used for branching
+  2. value_path: the path of the element within the value_model used for branching
+
+* **branch_model_dict**: a dictionary containing the following key-value pairs:
+
+  1. id: all possible values that can occur at the element belonging to the value_path
+  2. model: the parsing model to use for the matching id
 
 .. code-block:: yaml
 
@@ -805,6 +806,255 @@ This model element selects a branch path based on a previous model value.
            - id: 1
              model: fixed2
 
+FirstMatchModelElement
+~~~~~~~~~~~~~~~~~~~~~~
+
+This model element defines branches in the parser tree, where branches are checked from start to end of the list and the first matching branch is taken.
+
+* **args**: a list of id's of parsing elements that are possible branches.
+
+.. code-block:: yaml
+
+     Parser:
+       - id: fixed3
+         type: FixedDataModelElement
+         name: 'FixedDataModelElement'
+         args: 'The-searched-element-was-found!'
+
+       - id: fixedDME
+         type: FixedDataModelElement
+         name: 'fixedDME'
+         args: 'Any:'
+
+       - id: any
+         type: AnyByteDataModelElement
+         name: 'AnyByteDataModelElement'
+
+       - id: seq4
+         type: SequenceModelElement
+         name: 'se4'
+         args:
+           - fixedDME
+           - any
+
+       - id: firstMatchModelElement
+         type: FirstMatchModelElement
+         name: 'FirstMatchModelElement'
+         args:
+           - fixed3
+           - seq4
+
+FixedDataModelElement
+~~~~~~~~~~~~~~~~~~~~~
+
+This model defines a fixed string.
+
+* **args**: a string to be matched.
+
+.. code-block:: yaml
+
+     Parser:
+       - id: user
+         type: FixedDataModelElement
+         name: 'User'
+         args: 'User '
+
+FixedWordlistDataModelElement
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This model defines a choice of fixed strings from a list.
+
+* **args**: a list of strings of which any can match.
+
+.. code-block:: yaml
+
+     Parser:
+       - id: status
+         type: FixedWordlistDataModelElement
+         name: 'Status'
+         args:
+           - ' logged in'
+           - ' logged out'
+
+HexStringModelElement
+~~~~~~~~~~~~~~~~~~~~~
+
+This model defines a hex string of arbitrary length.
+
+* **args**: upper_case: a bool that defines whether the characters in the hex string are upper or lower case, default is False (lower case)
+
+.. code-block:: yaml
+
+     Parser:
+       - id: hexStringModelElement
+         type: HexStringModelElement
+         name: 'HexStringModelElement'
+
+IpAddressDataModelElement
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This model defines an IP address.
+
+* **args**: ipv6: a bool that defines whether the IP address is of IPv4 or IPv6 format, default is False (IPv4)
+
+.. code-block:: yaml
+
+     Parser:
+       - id: ipAddressDataModelElement
+         type: IpAddressDataModelElement
+         name: 'IpAddressDataModelElement'
+
+JsonModelElement
+~~~~~~~~~~~~~~~~
+
+This model defines a json-formatted log line. This model is usually used as a start element and with json_format: True set in the Input section of the config.yml.
+
+* **args**: key_parser_dict: a dictionary of keys as defined in the json-formatted logs and appropriate parser models as values
+
+.. code-block:: yaml
+
+     Parser:
+       - id: _scroll_id
+         type: Base64StringModelElement
+         name: '_scroll_id'
+
+       - id: took
+         type: DecimalIntegerValueModelElement
+         name: 'took'
+
+       - id: value
+         type: DecimalIntegerValueModelElement
+         name: 'value'
+
+       - id: _index
+         type: DateTimeModelElement
+         name: '_index'
+         date_format: 'aminer-statusinfo-%Y.%m.%d'
+
+       - id: _type
+         type: FixedDataModelElement
+         name: '_type'
+         args: '_doc'
+
+       - id: json
+         start: True
+         type: JsonModelElement
+         name: 'model'
+         key_parser_dict:
+           _scroll_id: _scroll_id
+           took: took
+           hits:
+             total:
+               value: value
+             hits:
+               - _index: _index
+                 _type: _type
+
+OptionalMatchModelElement
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This model allows to define optional model elements.
+
+* **args**: the id of the optional element that will be skipped if it does not match
+
+.. code-block:: yaml
+
+     Parser:
+       - id: user
+         type: FixedDataModelElement
+         name: 'User'
+         args: 'User '
+
+       - id: opt
+         type: OptionalMatchModelElement
+         name: 'opt'
+         args: user
+
+RepeatedElementDataModelElement
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This model allows to define elements that repeat a number of times.
+
+* **args**: the id of the optional element that will be skipped if it does not match
+
+  1. repeated_element: id of element which is repeated
+  2. min_repeat: minimum amount of times the repeated element has to occur, default is 1
+  3. max_repeat: minimum amount of times the repeated element has to occur, default is 1048576
+
+.. code-block:: yaml
+
+     Parser:
+       - id: delimitedDataModelElement
+         type: DelimitedDataModelElement
+         name: 'DelimitedDataModelElement'
+         consume_delimiter: True
+         delimiter: ';'
+
+       - id: repeatedElementDataModelElement
+         type: RepeatedElementDataModelElement
+         name: 'RepeatedElementDataModelElement'
+         args:
+           - sequenceModelElement
+           - 1
+
+SequenceModelElement
+~~~~~~~~~~~~~~~~~~~~
+
+This model defines a sequence of elements that all have to match.
+
+* **args**: a list of elements that form the sequence
+
+.. code-block:: yaml
+
+     Parser:
+       - id: user
+         type: FixedDataModelElement
+         name: 'User'
+         args: 'User '
+
+       - id: username
+         type: DelimitedDataModelElement
+         name: 'Username'
+         delimiter: ' '
+
+       - id: ip
+         type: IpAddressDataModelElement
+         name: 'IP'
+
+       - id: seq
+         type: SequenceModelElement
+         name: 'seq'
+         args:
+           - user
+           - username
+           - ip
+
+VariableByteDataModelElement
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This model defines a string of character bytes with variable length from a given alphabet.
+
+* **args**: string specifying the allowed characters
+
+.. code-block:: yaml
+
+     Parser:
+       - id: version
+         type: VariableByteDataModelElement
+         name: 'version'
+         args: '0123456789.'
+
+WhiteSpaceLimitedDataModelElement
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This model defines a string that is delimited by a white space.
+
+.. code-block:: yaml
+
+     Parser:
+       - id: whiteSpaceLimitedDataModelElement
+         type: WhiteSpaceLimitedDataModelElement
+         name: 'WhiteSpaceLimitedDataModelElement'
 
 ---------
 Analysing
