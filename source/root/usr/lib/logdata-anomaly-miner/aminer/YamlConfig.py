@@ -143,8 +143,6 @@ def build_parsing_model():
     """Build the parsing model."""
     parser_model_dict = {}
     start = None
-    ws_count = 0
-    whitespace_str = b' '
 
     # We might be able to remove this and us it like the config_properties
     # skipcq: PYL-W0603
