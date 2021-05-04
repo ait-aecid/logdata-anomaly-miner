@@ -975,7 +975,7 @@ RepeatedElementDataModelElement
 
 This model allows to define elements that repeat a number of times.
 
-* **args**: the id of the optional element that will be skipped if it does not match
+* **args**: a string or list containing the following parameters:
 
   1. repeated_element: id of element which is repeated
   2. min_repeat: minimum amount of times the repeated element has to occur, default is 1
