@@ -143,6 +143,7 @@ def build_parsing_model():
     """Build the parsing model."""
     parser_model_dict = {}
     start = None
+    ws_count = 0
 
     # We might be able to remove this and us it like the config_properties
     # skipcq: PYL-W0603
@@ -155,6 +156,12 @@ def build_parsing_model():
         if item['type'].is_model:
             if 'args' in item:
                 if isinstance(item['args'], list):  # skipcq: PTC-W0048
+                    for i, value in enumerate(item["args"]):
+                        if value == "WHITESPACE":
+                            from aminer.parsing.FixedDataModelElement import FixedDataModelElement
+                            sp = "sp%d" % ws_count
+                            item["args"][i] = FixedDataModelElement(sp, b' ')
+                            ws_count += 1
                     if item['type'].name not in ('DecimalFloatValueModelElement', 'DecimalIntegerValueModelElement'):
                         # encode string to bytearray
                         for j, val in enumerate(item['args']):
@@ -220,11 +227,16 @@ def build_parsing_model():
             elif item['type'].name in ('FirstMatchModelElement', 'SequenceModelElement'):
                 children = []
                 for child in item['args']:
-                    if parser_model_dict.get(child.decode()) is None:
-                        msg = 'The parser model %s does not exist!' % child.decode()
-                        logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                        raise ValueError(msg)
-                    children.append(parser_model_dict.get(child.decode()))
+                    if isinstance(child, bytes):
+                        child = child.decode()
+                    if isinstance(child, str):
+                        if parser_model_dict.get(child) is None:
+                            msg = 'The parser model %s does not exist!' % child
+                            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                            raise ValueError(msg)
+                        children.append(parser_model_dict.get(child))
+                    else:
+                        children.append(child)
                 parser_model_dict[item['id']] = item['type'].func(item['name'], children)
             elif item['type'].name == 'OptionalMatchModelElement':
                 optional_element = parser_model_dict.get(item['args'].decode())
