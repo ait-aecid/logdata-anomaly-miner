@@ -706,15 +706,15 @@ DecimalFloatValueModelElement
 This model element parses decimal values with optional signum, padding or exponent. With padding, the signum has to be found before the padding characters.
 
 * **name**: string with the element-id (Required)
-* **value_sign_type**
+* **value_sign_type**: Defines if a value sign is required
 
   Possible values: 'none', 'optional', 'mandatory'
 
-* **value_pad_type**
+* **value_pad_type**: Defines the padding for example: "0041"
 
   Possible values: 'none', 'zero', 'blank'
 
-* **exponent_type**
+* **exponent_type**: Defines if an exponent is required
 
   Possible values: 'none', 'optional', 'mandatory'
 
@@ -726,6 +726,85 @@ This model element parses decimal values with optional signum, padding or expone
             type: DecimalFloatValueModelElement
             name: 'DecimalFloatValueModelElement'
             value_sign_type: 'optional'
+
+DelimitedDataModelElement
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This model element takes any string up to a specific delimiter string.
+
+* **name**: string with the element-id (Required)
+* **args**: a string or list containing the following parameters:
+
+  1. delimiter: defines which delimiter to use
+  2. escape: defines which escape bytes should be used Default: non-escaped
+
+.. code-block:: yaml
+   
+     Parser:
+       - id: delimitedDataModelElement
+         type: DelimitedDataModelElement
+         name: 'DelimitedDataModelElement'
+         args: ';'
+
+ElementValueBranchModelElement
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This model element selects a branch path based on a previous model value.
+
+.. code-block:: yaml
+
+     Parser:
+       - id: fixed1
+         type: FixedDataModelElement
+         name: 'fixed1'
+         args: 'match '
+
+       - id: fixed2
+         type: FixedDataModelElement
+         name: 'fixed2'
+         args: 'fixed String'
+
+       - id: wordlist
+         type: FixedWordlistDataModelElement
+         name: 'wordlist'
+         args:
+           - 'data: '
+           - 'string: '
+
+       - id: seq1
+         type: SequenceModelElement
+         name: 'seq1'
+         args:
+           - fixed1
+           - wordlist
+
+       - id: seq2
+         type: SequenceModelElement
+         name: 'seq2'
+         args:
+           - fixed1
+           - wordlist
+           - fixed2
+
+       - id: first
+         type: FirstMatchModelElement
+         name: 'first'
+         args:
+           - seq1
+           - seq2
+
+       - id: elementValueBranchModelElement
+         type: ElementValueBranchModelElement
+         name: 'ElementValueBranchModelElement'
+         args:
+           - first
+           - 'wordlist'
+         branch_model_dict:
+           - id: 0
+             model: decimal
+           - id: 1
+             model: fixed2
+
 
 ---------
 Analysing
