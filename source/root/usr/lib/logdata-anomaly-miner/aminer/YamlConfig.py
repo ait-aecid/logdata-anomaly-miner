@@ -154,7 +154,6 @@ def build_parsing_model():
             raise ValueError('Config-Error: The id "%s" occurred multiple times in Parser!' % item['id'])
         if 'start' in item and item['start'] is True and item['type'].name != 'JsonModelElement':
             start = item
-            continue
         if item['type'].is_model:
             if 'args' in item:
                 if isinstance(item['args'], list):  # skipcq: PTC-W0048
@@ -253,29 +252,10 @@ def build_parsing_model():
         else:
             parser_model_dict[item['id']] = item['type'].func()
 
-    args_list = []
     if start.__class__.__name__ == 'JsonModelElement':
         parsing_model = start
-    elif 'args' in start:
-        if isinstance(start['args'], list):
-            for i in start['args']:
-                if i == 'WHITESPACE':
-                    from aminer.parsing.FixedDataModelElement import FixedDataModelElement
-                    sp = 'sp%d' % ws_count
-                    args_list.append(FixedDataModelElement(sp, whitespace_str))
-                    ws_count += 1
-                else:
-                    model = parser_model_dict.get(i)
-                    if model is None:
-                        msg = 'The parser model %s does not exist!' % i
-                        logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                        raise ValueError(msg)
-                    args_list.append(model)
-            parsing_model = start['type'].func(start['name'], args_list)
-        else:
-            parsing_model = start['type'].func(start['name'], [parser_model_dict[start['args']]])
     else:
-        parsing_model = start['type'].func()
+        parsing_model = parser_model_dict[start['id']]
     return parsing_model
 
 
