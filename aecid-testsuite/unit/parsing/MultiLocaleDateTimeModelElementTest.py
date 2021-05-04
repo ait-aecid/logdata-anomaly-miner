@@ -7,6 +7,8 @@ from pwd import getpwnam
 from grp import getgrnam
 from datetime import datetime, timezone
 from aminer.parsing.DateTimeModelElement import MultiLocaleDateTimeModelElement
+from aminer.parsing.MatchContext import MatchContext
+from aminer.parsing.MatchElement import MatchElement
 from unit.TestBase import TestBase, DummyMatchContext, initialize_loggers
 
 
@@ -469,49 +471,17 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
     def test20element_id_input_validation(self):
         """Check if element_id is validated."""
         date_formats = [(b"%d.%m.%Y %H:%M:%S", None, None)]
-        # empty element_id
-        element_id = ""
-        self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, element_id, date_formats)
-
-        # None element_id
-        element_id = None
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, element_id, date_formats)
-
-        # bytes element_id is not allowed
-        element_id = b"path"
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, element_id, date_formats)
-
-        # integer element_id is not allowed
-        element_id = 123
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, element_id, date_formats)
-
-        # float element_id is not allowed
-        element_id = 123.22
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, element_id, date_formats)
-
-        # boolean element_id is not allowed
-        element_id = True
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, element_id, date_formats)
-
-        # dict element_id is not allowed
-        element_id = {"id": "path"}
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, element_id, date_formats)
-
-        # list element_id is not allowed
-        element_id = ["path"]
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, element_id, date_formats)
-
-        # empty list element_id is not allowed
-        element_id = []
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, element_id, date_formats)
-
-        # empty tuple element_id is not allowed
-        element_id = ()
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, element_id, date_formats)
-
-        # empty set element_id is not allowed
-        element_id = set()
-        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, element_id, date_formats)
+        self.assertRaises(ValueError, MultiLocaleDateTimeModelElement, "", date_formats)  # empty element_id
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, None, date_formats)  # None element_id
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, b"path", date_formats)  # bytes element_id is not allowed
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, 123, date_formats)  # integer element_id is not allowed
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, 123.22, date_formats)  # float element_id is not allowed
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, True, date_formats)  # boolean element_id is not allowed
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, {"id": "path"}, date_formats)  # dict element_id is not allowed
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, ["path"], date_formats)  # list element_id is not allowed
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, [], date_formats)  # empty list element_id is not allowed
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, (), date_formats)  # empty tuple element_id is not allowed
+        self.assertRaises(TypeError, MultiLocaleDateTimeModelElement, set(), date_formats)  # empty set element_id is not allowed
 
     def test21date_formats_input_validation(self):
         """Check if date_format is validated and only valid values can be entered."""
@@ -631,11 +601,9 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         model_element = MultiLocaleDateTimeModelElement(self.id_, [(b"%d.%m.%Y %H:%M:%S", None, None)])
         data = b"07.02.2019 11:40:00: it still works"
         model_element.get_match_element(self.path, DummyMatchContext(data))
-        from aminer.parsing.MatchContext import MatchContext
         model_element.get_match_element(self.path, MatchContext(data))
 
-        from aminer.parsing.MatchElement import MatchElement
-        self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(data, None, None, None))
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(self.path, data, None, None))
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123)

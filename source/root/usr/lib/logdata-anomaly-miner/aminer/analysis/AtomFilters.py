@@ -13,7 +13,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import logging
-from aminer import AminerConfig
+from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.input.InputInterfaces import AtomHandlerInterface
 
 
@@ -31,7 +31,7 @@ class SubhandlerFilter(AtomHandlerInterface):
             if (not isinstance(subhandler_list, list)) or \
                     (not all(isinstance(handler, AtomHandlerInterface) for handler in subhandler_list)):
                 msg = 'Only subclasses of AtomHandlerInterface allowed in subhandlerList'
-                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise Exception(msg)
             self.subhandler_list = [None] * len(subhandler_list)
             for handler_pos, handler_element in enumerate(subhandler_list):
