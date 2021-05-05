@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+
+
 # C extensions
 *.so
 
@@ -65,6 +67,11 @@ instance/
 
 # Sphinx documentation
 docs/_build/
+docs/Wiki
+docs/SECURITY.md
+docs/README.md
+docs/LICENSE.md
+
 
 # PyBuilder
 .pybuilder/
