@@ -93,6 +93,7 @@ event_handler_type = TypeDefinition('eventhandlertype', (EventHandlerType, str),
 
 class ConfigValidator(Validator):
     """Validates values from the configs."""
+
     def _validate_has_start(self, has_start, field, value):
         """
         Test if there is a key named 'has_start'.
