@@ -1,0 +1,1029 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Overview &mdash; logdata-anomaly-miner 2.3.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Security Policy" href="SECURITY.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> logdata-anomaly-miner
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">First Steps:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="README.html">logdata-anomaly-miner  </a></li>
+<li class="toctree-l1"><a class="reference internal" href="SECURITY.html">Security Policy</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Configuration:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#analysis-pipeline">Analysis Pipeline</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#configuration-reference">Configuration Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#general-configuration">General Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#learnmode">LearnMode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#amineruser">AminerUser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#aminergroup">AminerGroup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#remotecontrolsocket">RemoteControlSocket</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#suppressnewmatchpathdetector">SuppressNewMatchPathDetector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#logresourcelist">LogResourceList</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#core-persistencedir">Core.PersistenceDir</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#core-persistenceperiod">Core.PersistencePeriod</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#core-logdir">Core.LogDir</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mailalerting-targetaddress">MailAlerting.TargetAddress</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mailalerting-fromaddress">MailAlerting.FromAddress</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mailalerting-subjectprefix">MailAlerting.SubjectPrefix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mailalerting-alertgracetime">MailAlerting.AlertGraceTime</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mailalerting-eventcollecttime">MailAlerting.EventCollectTime</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mailalerting-minalertgap">MailAlerting.MinAlertGap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mailalerting-maxalertgap">MailAlerting.MaxAlertGap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mailalerting-maxeventspermessage">MailAlerting.MaxEventsPerMessage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#logprefix">LogPrefix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#log-statisticsperiod">Log.StatisticsPeriod</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#log-statisticslevel">Log.StatisticsLevel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#log-debuglevel">Log.DebugLevel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#log-remotecontrollogfile">Log.RemoteControlLogFile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#log-statisticsfile">Log.StatisticsFile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#log-debugfile">Log.DebugFile</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#input">Input</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#timestamp-paths">timestamp_paths</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#multi-source">multi_source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#verbose">verbose</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#eol-sep">eol_sep</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#json-format">json_format</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#parsing">Parsing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#anybytedatamodelelement">AnyByteDataModelElement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#base64stringmodelelement">Base64StringModelElement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#datetimemodelelement">DateTimeModelElement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#debugmodelelement">DebugModelElement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#decimalfloatvaluemodelelement">DecimalFloatValueModelElement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#delimiteddatamodelelement">DelimitedDataModelElement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#elementvaluebranchmodelelement">ElementValueBranchModelElement</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#analysing">Analysing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#eventhandling">EventHandling</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">logdata-anomaly-miner</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Overview</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/CONFIGURATION.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="overview">
+<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
+<p>The logdata-anomaly-miner can be configured in two different formats: <strong>yaml</strong> and <strong>python</strong>. The preferred format is yaml and the default configuration file for it is <em>/etc/aminer/config.yaml</em>. The python format can be configured in <em>/etc/aminer/config..py</em> and offers more different ways to configure the logdata-anomaly-miner. However, this is only recommended for experts, as no errors are caught in the python configuration, which can make debugging very difficult. For both formats there are template configurations in <em>/etc/aminer/template_config.yaml</em> and <em>/etc/aminer/template_config.py</em>.</p>
+<p>The basic structure of the logdata-anomaly-miner is illustrated in the folloging diagram:</p>
+<img alt="Structure of the configuration-file: GENERAL, INPUT, PARSING, ANALYSING, EVENTHANDLING" src="_images/aminer-config-color.png" />
+<div class="section" id="analysis-pipeline">
+<h2>Analysis Pipeline<a class="headerlink" href="#analysis-pipeline" title="Permalink to this headline">¶</a></h2>
+<p>The core component of the logdata-anomaly-miner is the “analysis pipeline”. It consists of the parts INPUT, ANALYSIS and OUTPUT</p>
+<img alt="Parts of the analysis-pipeline" src="_images/analysis-pipeline.png" />
+</div>
+</div>
+<div class="section" id="configuration-reference">
+<h1>Configuration Reference<a class="headerlink" href="#configuration-reference" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="general-configuration">
+<h2>General Configuration<a class="headerlink" href="#general-configuration" title="Permalink to this headline">¶</a></h2>
+<p>Supported settings:</p>
+<div class="section" id="learnmode">
+<h3>LearnMode<a class="headerlink" href="#learnmode" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Type: boolean (True,False)</p></li>
+<li><p>Default: False</p></li>
+</ul>
+<p>This options turns the LearnMode on globally.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This option can be overruled by the learn_mode that is configurable per analysis component.</p>
+</div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">LearnMode</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="amineruser">
+<h3>AminerUser<a class="headerlink" href="#amineruser" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Default: aminer</p></li>
+</ul>
+<p>This option defines the system-user that owns the aminer-process.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">AminerUser</span><span class="p">:</span> <span class="s">&#39;aminer&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="aminergroup">
+<h3>AminerGroup<a class="headerlink" href="#aminergroup" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Default: aminer</p></li>
+</ul>
+<p>This option defines the system-group that owns the aminer-process.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">AminerGroup</span><span class="p">:</span> <span class="s">&#39;aminer&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="remotecontrolsocket">
+<h3>RemoteControlSocket<a class="headerlink" href="#remotecontrolsocket" title="Permalink to this headline">¶</a></h3>
+<p>This option controls where the unix-domain-socket for the RemoteControl should be created. The socket will not be created if this option was not set.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">RemoteControlSocket</span><span class="p">:</span> <span class="s">&#39;/var/lib/aminer/remcontrol.sock&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="suppressnewmatchpathdetector">
+<h3>SuppressNewMatchPathDetector<a class="headerlink" href="#suppressnewmatchpathdetector" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Default: False</p></li>
+<li><p>Type: boolean (True,False)</p></li>
+</ul>
+<p>Disable the NewMatchPathDetector which detects new paths for logtypes.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">SuppressNewMatchPathDetector</span><span class="p">:</span> <span class="s">&#39;False&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="logresourcelist">
+<h3>LogResourceList<a class="headerlink" href="#logresourcelist" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Required: <strong>True</strong></p></li>
+<li><p>Resource-Types: <code class="docutils literal notranslate"><span class="pre">file://</span></code>, <code class="docutils literal notranslate"><span class="pre">unix://</span></code></p></li>
+</ul>
+<p>Define the list of log resources to read from: the resources named here do not need to exist when aminer is started. This will just result in a warning. However if they exist, they have to be readable by the aminer process!</p>
+<p>Supported types are:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="file://[path">file://[path</a>]: Read data from file, reopen it after rollover</p></li>
+<li><p>unix://[path]: Open the path as UNIX local socket for reading</p></li>
+</ul>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">LogResourceList</span><span class="p">:</span>
+    <span class="p p-Indicator">-</span> <span class="s">&#39;file:///var/log/apache2/access.log&#39;</span>
+    <span class="p p-Indicator">-</span> <span class="s">&#39;file:///home/ubuntu/data/mail.cup.com-train/daemon.log&#39;</span>
+    <span class="p p-Indicator">-</span> <span class="s">&#39;file:///home/ubuntu/data/mail.cup.com-train/auth.log&#39;</span>
+    <span class="p p-Indicator">-</span> <span class="s">&#39;file:///home/ubuntu/data/mail.cup.com-train/suricata/eve.json&#39;</span>
+    <span class="p p-Indicator">-</span> <span class="s">&#39;file:///home/ubuntu/data/mail.cup.com-train/suricata/fast.log&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="core-persistencedir">
+<h3>Core.PersistenceDir<a class="headerlink" href="#core-persistencedir" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Default: /var/lib/aminer</p></li>
+</ul>
+<p>Read and store information to be used between multiple invocations of aminer in this directory. The directory must only be accessible to the ‘AminerUser’ but not group/world readable. On violation, aminer will refuse to start.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">Core.PersistenceDir</span><span class="p">:</span> <span class="s">&#39;/var/lib/aminer&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="core-persistenceperiod">
+<h3>Core.PersistencePeriod<a class="headerlink" href="#core-persistenceperiod" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Type: Number of seconds</p></li>
+<li><p>Default: 600</p></li>
+</ul>
+<p>This options controls the logdata-anomaly-miner should write it’s persistency to disk.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">Core.PersistencePeriod</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">600</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="core-logdir">
+<h3>Core.LogDir<a class="headerlink" href="#core-logdir" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Default: /var/lib/aminer/log</p></li>
+</ul>
+<p>Directory for logfiles. This directory must be writeable to the ‘AminerUser’.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">Core.LogDir</span><span class="p">:</span> <span class="s">&#39;/var/lib/aminer/log&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="mailalerting-targetaddress">
+<h3>MailAlerting.TargetAddress<a class="headerlink" href="#mailalerting-targetaddress" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Default: disabled</p></li>
+</ul>
+<p>Define a target e-mail address to send alerts to. When undefined no e-mail notification hooks are added.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">MailAlerting.TargetAddress</span><span class="p">:</span> <span class="s">&#39;root@localhost&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="mailalerting-fromaddress">
+<h3>MailAlerting.FromAddress<a class="headerlink" href="#mailalerting-fromaddress" title="Permalink to this headline">¶</a></h3>
+<p>Sender address of e-mail alerts. When undefined, “sendmail” implementation on host will decide, which sender address should be used.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">MailAlerting.FromAddress</span><span class="p">:</span> <span class="s">&#39;root@localhost&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="mailalerting-subjectprefix">
+<h3>MailAlerting.SubjectPrefix<a class="headerlink" href="#mailalerting-subjectprefix" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Default: “aminer Alerts”</p></li>
+</ul>
+<p>Define, which text should be prepended to the standard aminer subject.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">MailAlerting.SubjectPrefix</span><span class="p">:</span> <span class="s">&#39;aminer</span><span class="nv"> </span><span class="s">Alerts:&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="mailalerting-alertgracetime">
+<h3>MailAlerting.AlertGraceTime<a class="headerlink" href="#mailalerting-alertgracetime" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Type: Number of seconds</p></li>
+<li><p>Default: 0 (any event can immediately trigger alerting)</p></li>
+</ul>
+<p>Define a grace time after startup before aminer will react to an event and send the first alert e-mail.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">MailAlerting.AlertGraceTime</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="mailalerting-eventcollecttime">
+<h3>MailAlerting.EventCollectTime<a class="headerlink" href="#mailalerting-eventcollecttime" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Type: Number of seconds</p></li>
+<li><p>Default: 10</p></li>
+</ul>
+<p>Define how many seconds to wait after a first event triggered the alerting procedure before really sending out the e-mail. In that timespan, events are collected and will be sent all using a single e-mail.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">MailAlerting.EventCollectTime</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="mailalerting-minalertgap">
+<h3>MailAlerting.MinAlertGap<a class="headerlink" href="#mailalerting-minalertgap" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Type: Number of seconds</p></li>
+<li><p>Default: 600</p></li>
+</ul>
+<p>Define the minimum time between two alert e-mails in seconds to avoid spamming. All events during this timespan are collected and sent out with the next report.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">MailAlerting.MinAlertGap</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">600</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="mailalerting-maxalertgap">
+<h3>MailAlerting.MaxAlertGap<a class="headerlink" href="#mailalerting-maxalertgap" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Type: Number of seconds</p></li>
+<li><p>Default: 600</p></li>
+</ul>
+<p>Define the maximum time between two alert e-mails in seconds. When undefined this defaults to “MailAlerting.MinAlertGap”. Otherwise this will activate an exponential backoff to reduce messages during permanent error states by increasing the alert gap by 50% when more alert-worthy events were recorded while the previous gap time was not yet elapsed.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">MailAlerting.MaxAlertGap</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">600</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="mailalerting-maxeventspermessage">
+<h3>MailAlerting.MaxEventsPerMessage<a class="headerlink" href="#mailalerting-maxeventspermessage" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Type: Number of events</p></li>
+<li><p>Default: 1000</p></li>
+</ul>
+<p>Define how many events should be included in one alert mail at most.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">MailAlerting.MaxEventsPerMessage</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="logprefix">
+<h3>LogPrefix<a class="headerlink" href="#logprefix" title="Permalink to this headline">¶</a></h3>
+<p>This option defines the prefix for the output of each anomaly.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">LogPrefix</span><span class="p">:</span> <span class="s">&#39;&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="log-statisticsperiod">
+<h3>Log.StatisticsPeriod<a class="headerlink" href="#log-statisticsperiod" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Type: Number of seconds</p></li>
+<li><p>Default: 3600</p></li>
+</ul>
+<p>Defines how often to write into stat-logfiles.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">Log.StatisticsPeriod</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3600</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="log-statisticslevel">
+<h3>Log.StatisticsLevel<a class="headerlink" href="#log-statisticslevel" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Type: Number of loglevel</p></li>
+<li><p>Default: 1</p></li>
+</ul>
+<p>Defines the loglevel for the stat logs.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">Log.StatisticsLevel</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="log-debuglevel">
+<h3>Log.DebugLevel<a class="headerlink" href="#log-debuglevel" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Type: Number of loglevel</p></li>
+<li><p>Default: 1</p></li>
+</ul>
+<p>Defines the loglevel of the aminer debug-logfile.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">Log.DebugLevel</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="log-remotecontrollogfile">
+<h3>Log.RemoteControlLogFile<a class="headerlink" href="#log-remotecontrollogfile" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Default: ‘/var/lib/aminer/log/aminerRemoteLog.txt’</p></li>
+<li><p>Type: string (path to the logfile)</p></li>
+</ul>
+<p>Defines the path of the logfile for the RemoteControl.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">Log.RemoteControlLogFile</span><span class="p">:</span> <span class="s">&#39;/var/log/aminerremotecontrol.log&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="log-statisticsfile">
+<h3>Log.StatisticsFile<a class="headerlink" href="#log-statisticsfile" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Default: ‘/var/lib/aminer/log/statistics.log’</p></li>
+<li><p>Type: string (path to the logfile)</p></li>
+</ul>
+<p>Defines the path of the stats-file.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">Log.StatisticsFile</span><span class="p">:</span> <span class="s">&#39;/var/log/aminer-stats.log&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="log-debugfile">
+<h3>Log.DebugFile<a class="headerlink" href="#log-debugfile" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Default: ‘/var/lib/aminer/log/aminer.log’</p></li>
+<li><p>Type: string (path to the logfile)</p></li>
+</ul>
+<p>Defines the path of the debug-log-file.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">Log.DebugFile</span><span class="p">:</span> <span class="s">&#39;/var/log/aminer.log&#39;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="input">
+<h2>Input<a class="headerlink" href="#input" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="timestamp-paths">
+<h3>timestamp_paths<a class="headerlink" href="#timestamp-paths" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Type: string or list of strings</p></li>
+</ul>
+<p>Parser paths to DateTimeModelElements to set timestamp of log events.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">timestamp_paths</span><span class="p">:</span> <span class="s">&#39;/model/time&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">timestamp_paths</span><span class="p">:</span>
+   <span class="p p-Indicator">-</span> <span class="s">&#39;/parser/model/time&#39;</span>
+   <span class="p p-Indicator">-</span> <span class="s">&#39;/parser/model/type/execve/time&#39;</span>
+   <span class="p p-Indicator">-</span> <span class="s">&#39;/parser/model/type/proctitle/time&#39;</span>
+   <span class="p p-Indicator">-</span> <span class="s">&#39;/parser/model/type/syscall/time&#39;</span>
+   <span class="p p-Indicator">-</span> <span class="s">&#39;/parser/model/type/path/time&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="multi-source">
+<h3>multi_source<a class="headerlink" href="#multi-source" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Type: boolean (True,False)</p></li>
+<li><p>Default: False</p></li>
+</ul>
+<p>Flag to enable chronologicly correct parsing from multiple input-logfiles.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">multi_source</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="verbose">
+<h3>verbose<a class="headerlink" href="#verbose" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Type: boolean (True,False)</p></li>
+<li><p>Default: False</p></li>
+</ul>
+<p>Flag to enable that detailed information is shown for unparsed loglines.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">verbose</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="eol-sep">
+<h3>eol_sep<a class="headerlink" href="#eol-sep" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Default: ‘n’</p></li>
+</ul>
+<p>End of Line seperator for events.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Enables parsing of multiline logs.</p>
+</div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">eol_sep</span><span class="p">:</span> <span class="s">&#39;\r\n&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="json-format">
+<h3>json_format<a class="headerlink" href="#json-format" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Type: boolean (True,False)</p></li>
+<li><p>Default: False</p></li>
+</ul>
+<p>Enables parsing of logs in json-format.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">json_format</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="parsing">
+<h2>Parsing<a class="headerlink" href="#parsing" title="Permalink to this headline">¶</a></h2>
+<p>There are some predefined standard-model-elements like <em>IpAddressDataModelElement</em>, <em>DateTimeModelElement</em>, <em>FixedDataModelElement</em> and so on. They are located in the python-source-tree of logdata-anomaly-miner. A comprehensive list of all possible standard-model-elements can be found below. Using these standard-model-elements it is possible to create custom parser models. Currently there are to methods of doing it:</p>
+<ol class="arabic simple">
+<li><p>Using a python-script that is located in <em>/etc/aminer/conf-enabled</em>:</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot; /etc/aminer/conf-enabled/ApacheAccessParsingModel.py&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">aminer.parsing.DateTimeModelElement</span> <span class="kn">import</span> <span class="n">DateTimeModelElement</span>
+<span class="kn">from</span> <span class="nn">aminer.parsing.DecimalIntegerValueModelElement</span> <span class="kn">import</span> <span class="n">DecimalIntegerValueModelElement</span>
+<span class="kn">from</span> <span class="nn">aminer.parsing.DelimitedDataModelElement</span> <span class="kn">import</span> <span class="n">DelimitedDataModelElement</span>
+<span class="kn">from</span> <span class="nn">aminer.parsing.FirstMatchModelElement</span> <span class="kn">import</span> <span class="n">FirstMatchModelElement</span>
+<span class="kn">from</span> <span class="nn">aminer.parsing.FixedDataModelElement</span> <span class="kn">import</span> <span class="n">FixedDataModelElement</span>
+<span class="kn">from</span> <span class="nn">aminer.parsing.FixedWordlistDataModelElement</span> <span class="kn">import</span> <span class="n">FixedWordlistDataModelElement</span>
+<span class="kn">from</span> <span class="nn">aminer.parsing.IpAddressDataModelElement</span> <span class="kn">import</span> <span class="n">IpAddressDataModelElement</span>
+<span class="kn">from</span> <span class="nn">aminer.parsing.OptionalMatchModelElement</span> <span class="kn">import</span> <span class="n">OptionalMatchModelElement</span>
+<span class="kn">from</span> <span class="nn">aminer.parsing.SequenceModelElement</span> <span class="kn">import</span> <span class="n">SequenceModelElement</span>
+<span class="kn">from</span> <span class="nn">aminer.parsing.VariableByteDataModelElement</span> <span class="kn">import</span> <span class="n">VariableByteDataModelElement</span>
+
+<span class="k">def</span> <span class="nf">get_model</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Return a model to parse Apache Access logs from the AIT-LDS.&quot;&quot;&quot;</span>
+    <span class="n">alphabet</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;!&quot;#$%&amp;</span><span class="se">\&#39;</span><span class="s1">()*+,-./0123456789:;&lt;&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ</span><span class="se">\\</span><span class="s1">^_`abcdefghijklmnopqrstuvwxyz{|}~=[]&#39;</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">SequenceModelElement</span><span class="p">(</span><span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="p">[</span>
+        <span class="n">FirstMatchModelElement</span><span class="p">(</span><span class="s1">&#39;client_ip&#39;</span><span class="p">,</span> <span class="p">[</span>
+            <span class="n">IpAddressDataModelElement</span><span class="p">(</span><span class="s1">&#39;client_ip&#39;</span><span class="p">),</span>
+            <span class="n">FixedDataModelElement</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;::1&#39;</span><span class="p">)</span>
+            <span class="p">]),</span>
+        <span class="n">FixedDataModelElement</span><span class="p">(</span><span class="s1">&#39;sp1&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39; &#39;</span><span class="p">),</span>
+        <span class="n">VariableByteDataModelElement</span><span class="p">(</span><span class="s1">&#39;client_id&#39;</span><span class="p">,</span> <span class="n">alphabet</span><span class="p">),</span>
+        <span class="n">FixedDataModelElement</span><span class="p">(</span><span class="s1">&#39;sp2&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39; &#39;</span><span class="p">),</span>
+        <span class="n">VariableByteDataModelElement</span><span class="p">(</span><span class="s1">&#39;user_id&#39;</span><span class="p">,</span> <span class="n">alphabet</span><span class="p">),</span>
+        <span class="n">FixedDataModelElement</span><span class="p">(</span><span class="s1">&#39;sp3&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39; [&#39;</span><span class="p">),</span>
+        <span class="n">DateTimeModelElement</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">/%b/%Y:%H:%M:%S&#39;</span><span class="p">),</span>
+        <span class="n">FixedDataModelElement</span><span class="p">(</span><span class="s1">&#39;sp4&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39; +&#39;</span><span class="p">),</span>
+        <span class="n">DecimalIntegerValueModelElement</span><span class="p">(</span><span class="s1">&#39;tz&#39;</span><span class="p">),</span>
+        <span class="n">FixedDataModelElement</span><span class="p">(</span><span class="s1">&#39;sp5&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;] &quot;&#39;</span><span class="p">),</span>
+        <span class="n">FirstMatchModelElement</span><span class="p">(</span><span class="s1">&#39;fm&#39;</span><span class="p">,</span> <span class="p">[</span>
+            <span class="n">FixedDataModelElement</span><span class="p">(</span><span class="s1">&#39;dash&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;-&#39;</span><span class="p">),</span>
+            <span class="n">SequenceModelElement</span><span class="p">(</span><span class="s1">&#39;request&#39;</span><span class="p">,</span> <span class="p">[</span>
+                <span class="n">FixedWordlistDataModelElement</span><span class="p">(</span><span class="s1">&#39;method&#39;</span><span class="p">,</span> <span class="p">[</span>
+                    <span class="sa">b</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;PUT&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;HEAD&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;DELETE&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;CONNECT&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;OPTIONS&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;TRACE&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;PATCH&#39;</span><span class="p">]),</span>
+                <span class="n">FixedDataModelElement</span><span class="p">(</span><span class="s1">&#39;sp6&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39; &#39;</span><span class="p">),</span>
+                <span class="n">DelimitedDataModelElement</span><span class="p">(</span><span class="s1">&#39;request&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">),</span>
+                <span class="n">FixedDataModelElement</span><span class="p">(</span><span class="s1">&#39;sp7&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39; &#39;</span><span class="p">),</span>
+                <span class="n">DelimitedDataModelElement</span><span class="p">(</span><span class="s1">&#39;version&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;&quot;&#39;</span><span class="p">),</span>
+                <span class="p">])</span>
+            <span class="p">]),</span>
+        <span class="n">FixedDataModelElement</span><span class="p">(</span><span class="s1">&#39;sp8&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;&quot; &#39;</span><span class="p">),</span>
+        <span class="n">DecimalIntegerValueModelElement</span><span class="p">(</span><span class="s1">&#39;status_code&#39;</span><span class="p">),</span>
+        <span class="n">FixedDataModelElement</span><span class="p">(</span><span class="s1">&#39;sp9&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39; &#39;</span><span class="p">),</span>
+        <span class="n">DecimalIntegerValueModelElement</span><span class="p">(</span><span class="s1">&#39;content_size&#39;</span><span class="p">),</span>
+        <span class="n">OptionalMatchModelElement</span><span class="p">(</span>
+            <span class="s1">&#39;combined&#39;</span><span class="p">,</span> <span class="n">SequenceModelElement</span><span class="p">(</span><span class="s1">&#39;combined&#39;</span><span class="p">,</span> <span class="p">[</span>
+                <span class="n">FixedDataModelElement</span><span class="p">(</span><span class="s1">&#39;sp10&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39; &quot;&#39;</span><span class="p">),</span>
+                <span class="n">DelimitedDataModelElement</span><span class="p">(</span><span class="s1">&#39;referer&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">),</span>
+                <span class="n">FixedDataModelElement</span><span class="p">(</span><span class="s1">&#39;sp11&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;&quot; &quot;&#39;</span><span class="p">),</span>
+                <span class="n">DelimitedDataModelElement</span><span class="p">(</span><span class="s1">&#39;user_agent&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">),</span>
+                <span class="n">FixedDataModelElement</span><span class="p">(</span><span class="s1">&#39;sp12&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;&quot;&#39;</span><span class="p">),</span>
+                <span class="p">])),</span>
+        <span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">model</span>
+</pre></div>
+</div>
+<p>This parser can be used as “type” in <strong>/etc/aminer/config.yml</strong>:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">Parser</span><span class="p">:</span>
+     <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="s">&#39;apacheModel&#39;</span>
+       <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ApacheAccessModel</span>
+       <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;apache&#39;</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Please do not create files with the ending “ModelElement” in /etc/aminer/conf-enabled!</p>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Configuring the parser-model inline in <strong>/etc/aminer/config.yml</strong></p></li>
+</ol>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">Parser</span><span class="p">:</span>
+        <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">host_name_model</span>
+          <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">VariableByteDataModelElement</span>
+          <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;host&#39;</span>
+          <span class="nt">args</span><span class="p">:</span> <span class="s">&#39;-.01234567890abcdefghijklmnopqrstuvwxyz:&#39;</span>
+
+        <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">identity_model</span>
+          <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">VariableByteDataModelElement</span>
+          <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;ident&#39;</span>
+          <span class="nt">args</span><span class="p">:</span> <span class="s">&#39;-.01234567890abcdefghijklmnopqrstuvwxyz:&#39;</span>
+
+        <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">user_name_model</span>
+          <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">VariableByteDataModelElement</span>
+          <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;user&#39;</span>
+          <span class="nt">args</span><span class="p">:</span> <span class="s">&#39;0123456789abcdefghijklmnopqrstuvwxyz.-&#39;</span>
+
+        <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">new_time_model</span>
+          <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DateTimeModelElement</span>
+          <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;time&#39;</span>
+          <span class="nt">args</span><span class="p">:</span> <span class="s">&#39;[%d/%b/%Y:%H:%M:%S</span><span class="nv"> </span><span class="s">+0000]&#39;</span>
+
+        <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">sq3</span>
+          <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">FixedDataModelElement</span>
+          <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;sq3&#39;</span>
+          <span class="nt">args</span><span class="p">:</span> <span class="s">&#39;</span><span class="nv"> </span><span class="s">&quot;&#39;</span>
+
+        <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">request_method_model</span>
+          <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">FixedWordlistDataModelElement</span>
+          <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;method&#39;</span>
+          <span class="nt">args</span><span class="p">:</span>
+                  <span class="p p-Indicator">-</span> <span class="s">&#39;GET&#39;</span>
+                  <span class="p p-Indicator">-</span> <span class="s">&#39;POST&#39;</span>
+                  <span class="p p-Indicator">-</span> <span class="s">&#39;PUT&#39;</span>
+                  <span class="p p-Indicator">-</span> <span class="s">&#39;HEAD&#39;</span>
+                  <span class="p p-Indicator">-</span> <span class="s">&#39;DELETE&#39;</span>
+                  <span class="p p-Indicator">-</span> <span class="s">&#39;CONNECT&#39;</span>
+                  <span class="p p-Indicator">-</span> <span class="s">&#39;OPTIONS&#39;</span>
+                  <span class="p p-Indicator">-</span> <span class="s">&#39;TRACE&#39;</span>
+                  <span class="p p-Indicator">-</span> <span class="s">&#39;PATCH&#39;</span>
+
+        <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">request_model</span>
+          <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">VariableByteDataModelElement</span>
+          <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;request&#39;</span>
+          <span class="nt">args</span><span class="p">:</span> <span class="s">&#39;0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-/()[]{}!$%&amp;=&lt;?*+&#39;</span>
+
+        <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">http1</span>
+          <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">FixedDataModelElement</span>
+          <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;http1&#39;</span>
+          <span class="nt">args</span><span class="p">:</span> <span class="s">&#39;</span><span class="nv"> </span><span class="s">HTTP/&#39;</span>
+
+        <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">version_model</span>
+          <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">VariableByteDataModelElement</span>
+          <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;version&#39;</span>
+          <span class="nt">args</span><span class="p">:</span> <span class="s">&#39;0123456789.&#39;</span>
+
+        <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">sq4</span>
+          <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">FixedDataModelElement</span>
+          <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;sq4&#39;</span>
+          <span class="nt">args</span><span class="p">:</span> <span class="s">&#39;&quot;</span><span class="nv"> </span><span class="s">&#39;</span>
+
+        <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">status_code_model</span>
+          <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DecimalIntegerValueModelElement</span>
+          <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;status&#39;</span>
+
+        <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">size_model</span>
+          <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DecimalIntegerValueModelElement</span>
+          <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;size&#39;</span>
+
+        <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">sq5</span>
+          <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">FixedDataModelElement</span>
+          <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;sq5&#39;</span>
+          <span class="nt">args</span><span class="p">:</span> <span class="s">&#39;</span><span class="nv"> </span><span class="s">&quot;-&quot;</span><span class="nv"> </span><span class="s">&quot;&#39;</span>
+
+        <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">user_agent_model</span>
+          <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">VariableByteDataModelElement</span>
+          <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;useragent&#39;</span>
+          <span class="nt">args</span><span class="p">:</span> <span class="s">&#39;0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-/()[]{}!$%&amp;=&lt;?*+;:_</span><span class="nv"> </span><span class="s">&#39;</span>
+
+        <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">sq6</span>
+          <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">FixedDataModelElement</span>
+          <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;sq6&#39;</span>
+          <span class="nt">args</span><span class="p">:</span> <span class="s">&#39;&quot;&#39;</span>
+
+        <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="s">&#39;startModel&#39;</span>
+          <span class="nt">start</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+          <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SequenceModelElement</span>
+          <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;accesslog&#39;</span>
+          <span class="nt">args</span><span class="p">:</span>
+                  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">host_name_model</span>
+                  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">WHITESPACE</span>
+                  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">identity_model</span>
+                  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">WHITESPACE</span>
+                  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">user_name_model</span>
+                  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">WHITESPACE</span>
+                  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">new_time_model</span>
+                  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">sq3</span>
+                  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">request_method_model</span>
+                  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">WHITESPACE</span>
+                  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">request_model</span>
+                  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">http1</span>
+                  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">version_model</span>
+                  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">sq4</span>
+                  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">status_code_model</span>
+                  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">WHITESPACE</span>
+                  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">size_model</span>
+                  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">sq5</span>
+                  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">user_agent_model</span>
+                  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">sq6</span>
+</pre></div>
+</div>
+<p>The parsing section in <strong>/etc/aminer/config.yml</strong> starts with the statement “Parser:” followed by a list of parser-models. Every parser-model in this list must have a unique <strong>id</strong> and a <strong>type</strong>. The unique <strong>id</strong> can be used to cascade models by adding the <strong>id</strong> of an parser-model as arguments(<strong>args</strong>). One parser of this list must contain <cite>start: True</cite> that indicates the first parser-model:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">Parser</span><span class="p">:</span>
+     <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="s">&#39;apacheModel&#39;</span>
+       <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ApacheAccessModel</span>
+       <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;apache&#39;</span>
+
+     <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="s">&#39;startModel&#39;</span>
+       <span class="nt">start</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+       <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SequenceModelElement</span>
+       <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;model&#39;</span>
+       <span class="nt">args</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">apacheModel</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>id</strong>: must be a unique string</p></li>
+<li><p><strong>type</strong>: must be an existing ModelElement</p></li>
+<li><p><strong>start</strong>: a boolean value that indicates the starting model. Only one parser-model must have enabled this option!</p></li>
+<li><p><strong>args*</strong>: a string or a list of strings containing the arguments of the specific parser.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>args can contain the constant WHITESPACE which is a preset for spaces</p>
+</div>
+<div class="section" id="anybytedatamodelelement">
+<h3>AnyByteDataModelElement<a class="headerlink" href="#anybytedatamodelelement" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p><strong>name</strong>: string with the element-id</p></li>
+</ul>
+<p>This parsing-element matches any byte but at least one. Thus a match will always span the complete data from beginning to end.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">Parser</span><span class="p">:</span>
+     <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="s">&#39;anyModel&#39;</span>
+       <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">AnyByteDataModelElement</span>
+       <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;anymodel&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="base64stringmodelelement">
+<h3>Base64StringModelElement<a class="headerlink" href="#base64stringmodelelement" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p><strong>name</strong>: string with the element-id</p></li>
+</ul>
+<p>This parsing-element matches base64 strings.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">Parser</span><span class="p">:</span>
+     <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="s">&#39;anyModel&#39;</span>
+       <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Base64StringModelElement</span>
+       <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;b64model&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="datetimemodelelement">
+<h3>DateTimeModelElement<a class="headerlink" href="#datetimemodelelement" title="Permalink to this headline">¶</a></h3>
+<p>This element parses dates using a custom, timezone and locale-aware implementation similar to strptime.</p>
+<ul>
+<li><p><strong>name</strong>: string with the element-id (Required)</p></li>
+<li><p><strong>args</strong>: a string or list containing the following parameters:</p>
+<ol class="arabic">
+<li><dl>
+<dt>date_format:</dt><dd><p>Is a string that represents the date format for parsing, see Python strptime specification for
+available formats. Supported format specifiers are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>%b: month name in current locale</p></li>
+<li><p>%d: day in month, can be space or zero padded when followed by separator or at end of string.</p></li>
+<li><p>%f: fraction of seconds (the digits after the the ‘.’)</p></li>
+<li><p>%H: hours from 00 to 23</p></li>
+<li><p>%M: minutes</p></li>
+<li><p>%m: two digit month number</p></li>
+<li><p>%S: seconds</p></li>
+<li><p>%s: seconds since the epoch (1970-01-01)</p></li>
+<li><p>%Y: 4 digit year number</p></li>
+<li><p>%z: detect and parse timezone strings like UTC, CET, +0001, etc. automatically.</p></li>
+</ul>
+</div></blockquote>
+<dl class="simple">
+<dt>Common formats are:</dt><dd><ul class="simple">
+<li><p>‘%b %d %H:%M:%S’ e.g. for ‘Nov 19 05:08:43’</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>time_zone:</dt><dd><p>time_zone the timezone for parsing the values. Default: <strong>UTC</strong>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>text_local:</dt><dd><p>the locale to use for parsing the day and month names. Default: <strong>system-locale</strong></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>start_year:</dt><dd><p>start_year when parsing date records without any year information, assume this is the year of the first value parsed.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>max_time_jump_seconds:</dt><dd><p>max_time_jump_seconds for detection of year wraps with date formats missing year information, also the current time
+of values has to be tracked. This value defines the window within that the time may jump between two matches. When not
+within that window, the value is still parsed, corrected to the most likely value but does not change the detection year.</p>
+</dd>
+</dl>
+</li>
+</ol>
+</li>
+</ul>
+<p>The following code simply adds a custom date_format:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">Parser</span><span class="p">:</span>
+     <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="s">&#39;dtm&#39;</span>
+       <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DateTimeModelElement</span>
+       <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;DTM&#39;</span>
+       <span class="nt">args</span><span class="p">:</span> <span class="s">&#39;%Y-%m-%d</span><span class="nv"> </span><span class="s">%H:%M:%S&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="debugmodelelement">
+<h3>DebugModelElement<a class="headerlink" href="#debugmodelelement" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p><strong>name</strong>: string with the element-id</p></li>
+</ul>
+<p>This model element matches any data of length zero at any position. Thus it can never fail to match and can be inserted at any position in the parsing tree, where matching itself does not alter parsing flow (see e.g. FirstMatchModelElement). It will immediately write the current state of the match to stderr for inspection.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">Parser</span><span class="p">:</span>
+     <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="s">&#39;dbg1&#39;</span>
+       <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DebugModelElement</span>
+       <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;DBGM&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="decimalfloatvaluemodelelement">
+<h3>DecimalFloatValueModelElement<a class="headerlink" href="#decimalfloatvaluemodelelement" title="Permalink to this headline">¶</a></h3>
+<p>This model element parses decimal values with optional signum, padding or exponent. With padding, the signum has to be found before the padding characters.</p>
+<ul>
+<li><p><strong>name</strong>: string with the element-id (Required)</p></li>
+<li><p><strong>value_sign_type</strong>: Defines if a value sign is required</p>
+<p>Possible values: ‘none’, ‘optional’, ‘mandatory’</p>
+</li>
+<li><p><strong>value_pad_type</strong>: Defines the padding for example: “0041”</p>
+<p>Possible values: ‘none’, ‘zero’, ‘blank’</p>
+</li>
+<li><p><strong>exponent_type</strong>: Defines if an exponent is required</p>
+<p>Possible values: ‘none’, ‘optional’, ‘mandatory’</p>
+</li>
+</ul>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">Parser</span><span class="p">:</span>
+     <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">decimalFloatValueModelElement</span>
+       <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DecimalFloatValueModelElement</span>
+       <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;DecimalFloatValueModelElement&#39;</span>
+       <span class="nt">value_sign_type</span><span class="p">:</span> <span class="s">&#39;optional&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="delimiteddatamodelelement">
+<h3>DelimitedDataModelElement<a class="headerlink" href="#delimiteddatamodelelement" title="Permalink to this headline">¶</a></h3>
+<p>This model element takes any string up to a specific delimiter string.</p>
+<ul class="simple">
+<li><p><strong>name</strong>: string with the element-id (Required)</p></li>
+<li><p><strong>args</strong>: a string or list containing the following parameters:</p>
+<ol class="arabic simple">
+<li><p>delimiter: defines which delimiter to use</p></li>
+<li><p>escape: defines which escape bytes should be used Default: non-escaped</p></li>
+</ol>
+</li>
+</ul>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">Parser</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">delimitedDataModelElement</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DelimitedDataModelElement</span>
+    <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;DelimitedDataModelElement&#39;</span>
+    <span class="nt">args</span><span class="p">:</span> <span class="s">&#39;;&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="elementvaluebranchmodelelement">
+<h3>ElementValueBranchModelElement<a class="headerlink" href="#elementvaluebranchmodelelement" title="Permalink to this headline">¶</a></h3>
+<p>This model element selects a branch path based on a previous model value.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">Parser</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">fixed1</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">FixedDataModelElement</span>
+    <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;fixed1&#39;</span>
+    <span class="nt">args</span><span class="p">:</span> <span class="s">&#39;match</span><span class="nv"> </span><span class="s">&#39;</span>
+
+  <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">fixed2</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">FixedDataModelElement</span>
+    <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;fixed2&#39;</span>
+    <span class="nt">args</span><span class="p">:</span> <span class="s">&#39;fixed</span><span class="nv"> </span><span class="s">String&#39;</span>
+
+  <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">wordlist</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">FixedWordlistDataModelElement</span>
+    <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;wordlist&#39;</span>
+    <span class="nt">args</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="s">&#39;data:</span><span class="nv"> </span><span class="s">&#39;</span>
+      <span class="p p-Indicator">-</span> <span class="s">&#39;string:</span><span class="nv"> </span><span class="s">&#39;</span>
+
+  <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">seq1</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SequenceModelElement</span>
+    <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;seq1&#39;</span>
+    <span class="nt">args</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">fixed1</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">wordlist</span>
+
+  <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">seq2</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SequenceModelElement</span>
+    <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;seq2&#39;</span>
+    <span class="nt">args</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">fixed1</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">wordlist</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">fixed2</span>
+
+  <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">first</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">FirstMatchModelElement</span>
+    <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;first&#39;</span>
+    <span class="nt">args</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">seq1</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">seq2</span>
+
+  <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">elementValueBranchModelElement</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ElementValueBranchModelElement</span>
+    <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;ElementValueBranchModelElement&#39;</span>
+    <span class="nt">args</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">first</span>
+      <span class="p p-Indicator">-</span> <span class="s">&#39;wordlist&#39;</span>
+    <span class="nt">branch_model_dict</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
+        <span class="nt">model</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">decimal</span>
+      <span class="p p-Indicator">-</span> <span class="nt">id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+        <span class="nt">model</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">fixed2</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="analysing">
+<h2>Analysing<a class="headerlink" href="#analysing" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="eventhandling">
+<h2>EventHandling<a class="headerlink" href="#eventhandling" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="SECURITY.html" class="btn btn-neutral float-left" title="Security Policy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Florian Skopik, Markus Wurzenberger, Max Landauer, Roman Fiedler, Wolfgang Hotwagner, Ernst Leierzopf, Georg Hoeld.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

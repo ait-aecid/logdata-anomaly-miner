@@ -1,7 +1,7 @@
 # logdata-anomaly-miner Dockerfile
 #
 # Build:
-#    docker build -t aecid/logdata-anomaly-miner:latest -t aecid/logdata-anomaly-miner:$(grep '__version__ =' source/root/usr/lib/logdata-anomaly-miner/aminer.py | awk -F '"' '{print $2}') .
+#    docker build -t aecid/logdata-anomaly-miner:latest -t aecid/logdata-anomaly-miner:$(grep '__version__ =' source/root/usr/lib/logdata-anomaly-miner/metadata.py | awk -F '"' '{print $2}') .
 #
 # See: https://github.com/ait-aecid/logdata-anomaly-miner/wiki/Deployment-with-Docker
 #
@@ -35,6 +35,20 @@ RUN apt-get update && apt-get install -y \
         python3-urllib3 \
         libacl1-dev
 
+# Docs
+RUN apt-get update && apt-get install -y \
+        python3-sphinx \
+        python3-sphinx-rtd-theme \
+        python3-recommonmark \
+        make
+
+# For Docs
+ADD docs /docs
+ADD README.md /docs
+ADD SECURITY.md /docs
+ADD LICENSE /docs/LICENSE.md
+
+
 # Copy logdata-anomaly-miner-sources
 ADD source/root/usr/lib/logdata-anomaly-miner /usr/lib/logdata-anomaly-miner
 
@@ -58,6 +72,7 @@ RUN ln -s /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerr
 	&& ln -s /usr/lib/python3/dist-packages/urllib3 /usr/lib/logdata-anomaly-miner/urllib3 \
 	&& useradd -ms /usr/sbin/nologin aminer && mkdir -p /var/lib/aminer/logs && mkdir /etc/aminer \
         && chown aminer.aminer -R /var/lib/aminer \
+        && chown aminer.aminer -R /docs \
         && chmod 0755 /aminerwrapper.sh
 
 RUN PACK=$(find /usr/lib/python3/dist-packages -name posix1e.cpython\*.so) && FILE=$(echo $PACK | awk -F '/' '{print $NF}') ln -s $PACK /usr/lib/logdata-anomaly-miner/$FILE
