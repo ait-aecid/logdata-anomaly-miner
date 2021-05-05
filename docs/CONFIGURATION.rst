@@ -995,7 +995,7 @@ This model allows to define elements that repeat a number of times.
          name: 'RepeatedElementDataModelElement'
          args:
            - sequenceModelElement
-           - 1
+           - 3
 
 SequenceModelElement
 ~~~~~~~~~~~~~~~~~~~~
@@ -1015,6 +1015,7 @@ This model defines a sequence of elements that all have to match.
        - id: username
          type: DelimitedDataModelElement
          name: 'Username'
+         consume_delimiter: True
          delimiter: ' '
 
        - id: ip
@@ -1059,6 +1060,130 @@ This model defines a string that is delimited by a white space.
 ---------
 Analysing
 ---------
+
+AllowlistViolationDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This module defines a detector for log atoms not matching any allowlisted rule (see Rules analysis component for a list of rules).
+
+.. code-block:: yaml
+
+        - type: PathExistsMatchRule
+          id: path_exists_match_rule1
+          path: "/model/LoginDetails/PastTime/Time/Minutes"
+
+        - type: ValueMatchRule
+          id: value_match_rule
+          path: "/model/LoginDetails/Username"
+          value: "root"
+
+        - type: OrMatchRule
+          id: or_match_rule
+          sub_rules:
+            - "path_exists_match_rule1"
+            - "value_match_rule"
+
+        - type: AllowlistViolationDetector
+          id: Allowlist
+          allowlist_rules:
+            - "or_match_rule"
+
+EnhancedNewMatchPathValueComboDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In addition to detecting new value combination (see NewMatchPathValueComboDetector), this detector also stores combo occurrence times and amounts, and allows to execute functions on tuples that need to be defined in the python code first.
+
+.. code-block:: yaml
+
+        - type: EnhancedNewMatchPathValueComboDetector
+          id: EnhancedNewValueCombo
+          paths:
+            - "/model/DailyCron/UName"
+            - "/model/DailyCron/JobNumber"
+          tuple_transformation_function: "demo"
+          learn_mode: True
+
+EventCorrelationDetector
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+This detector 
+
+.. code-block:: yaml
+
+        - type: EventCorrelationDetector
+          id: EventCorrelationDetector
+          check_rules_flag: True
+          hypothesis_max_delta_time: 1.0
+          learn_mode: True
+
+EventFrequencyDetector
+~~~~~~~~~~~~~~~~~~~~~~
+
+EventSequenceDetector
+~~~~~~~~~~~~~~~~~~~~~
+
+EventTypeDetector
+~~~~~~~~~~~~~~~~~
+
+HistogramAnalysis
+~~~~~~~~~~~~~~~~~
+
+MatchFilter
+~~~~~~~~~~~
+
+MatchValueAverageChangeDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+MatchValueStreamWriter
+~~~~~~~~~~~~~~~~~~~~~~
+
+MissingMatchPathValueDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+NewMatchIdValueComboDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+NewMatchPathDetector
+~~~~~~~~~~~~~~~~~~~~
+
+NewMatchPathValueComboDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+NewMatchPathValueDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+PCADetector
+~~~~~~~~~~~
+
+ParserCount
+~~~~~~~~~~~
+
+PathValueTimeIntervalDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Rules
+~~~~~
+
+TSAArimaDetector
+~~~~~~~~~~~~~~~~
+
+TimeCorrelationDetector
+~~~~~~~~~~~~~~~~~~~~~~~
+
+TimeCorrelationViolationDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+TimestampCorrectionFilters
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+TimestampsUnsortedDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+VariableCorrelationDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+VariableTypeDetector
+~~~~~~~~~~~~~~~~~~~~
 
 -------------
 EventHandling
