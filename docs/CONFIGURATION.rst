@@ -718,16 +718,37 @@ This model element parses decimal values with optional signum, padding or expone
             name: 'DecimalFloatValueModelElement'
             value_sign_type: 'optional'
 
+DecimalIntegerValueModelElement
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This model element parses integer values with optional signum or padding. With padding, the signum has to be found before the padding characters.
+
+* **value_sign_type**: Defines if a value sign is required
+
+  Possible values: 'none', 'optional', 'mandatory'
+
+* **value_pad_type**: Defines the padding, for example: "0041"
+
+  Possible values: 'none', 'zero', 'blank'
+
+
+.. code-block:: yaml
+  
+     Parser:
+       - id: minutes
+         type: DecimalIntegerValueModelElement
+         name: 'Minutes'       - id: minutes
+         type: DecimalIntegerValueModelElement
+         name: 'Minutes'
+
 DelimitedDataModelElement
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This model element takes any string up to a specific delimiter string.
 
-* **args**: a string or list containing the following parameters:
-
-  1. delimiter: defines which delimiter to use
-  2. escape: defines which escape bytes should be used, default is non-escaped
-  3. consume_delimiter: defines whether the delimiter should be processed with the match, default is False
+* **delimiter**: defines which delimiter to use
+* **escape**: defines which escape bytes should be used, default is non-escaped
+* **consume_delimiter**: defines whether the delimiter should be processed with the match, default is False
 
 .. code-block:: yaml
    
@@ -909,7 +930,9 @@ JsonModelElement
 
 This model defines a json-formatted log line. This model is usually used as a start element and with json_format: True set in the Input section of the config.yml.
 
-* **args**: key_parser_dict: a dictionary of keys as defined in the json-formatted logs and appropriate parser models as values
+* **key_parser_dict**: a dictionary of keys as defined in the json-formatted logs and appropriate parser models as values
+
+* **optional_key_prefix**: a string that can be used as a prefix for keys that are optional in the json schema.
 
 .. code-block:: yaml
 
