@@ -389,6 +389,16 @@ Enables parsing of logs in json-format.
 
    json_format: True
 
+suppress_unparsed
+~~~~~~~~~~~~~~~~~
+
+* Default: False
+
+Boolean value that allows to suppress anomaly output about unparsed log atoms.
+
+.. code-block:: yaml
+
+   suppress_unparsed: True
 
 -------
 Parsing
@@ -718,16 +728,37 @@ This model element parses decimal values with optional signum, padding or expone
             name: 'DecimalFloatValueModelElement'
             value_sign_type: 'optional'
 
+DecimalIntegerValueModelElement
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This model element parses integer values with optional signum or padding. With padding, the signum has to be found before the padding characters.
+
+* **value_sign_type**: Defines if a value sign is required
+
+  Possible values: 'none', 'optional', 'mandatory'
+
+* **value_pad_type**: Defines the padding, for example: "0041"
+
+  Possible values: 'none', 'zero', 'blank'
+
+
+.. code-block:: yaml
+  
+     Parser:
+       - id: minutes
+         type: DecimalIntegerValueModelElement
+         name: 'Minutes'       - id: minutes
+         type: DecimalIntegerValueModelElement
+         name: 'Minutes'
+
 DelimitedDataModelElement
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This model element takes any string up to a specific delimiter string.
 
-* **args**: a string or list containing the following parameters:
-
-  1. delimiter: defines which delimiter to use
-  2. escape: defines which escape bytes should be used, default is non-escaped
-  3. consume_delimiter: defines whether the delimiter should be processed with the match, default is False
+* **delimiter**: defines which delimiter to use
+* **escape**: defines which escape bytes should be used, default is non-escaped
+* **consume_delimiter**: defines whether the delimiter should be processed with the match, default is False
 
 .. code-block:: yaml
    
@@ -909,7 +940,9 @@ JsonModelElement
 
 This model defines a json-formatted log line. This model is usually used as a start element and with json_format: True set in the Input section of the config.yml.
 
-* **args**: key_parser_dict: a dictionary of keys as defined in the json-formatted logs and appropriate parser models as values
+* **key_parser_dict**: a dictionary of keys as defined in the json-formatted logs and appropriate parser models as values
+
+* **optional_key_prefix**: a string that can be used as a prefix for keys that are optional in the json schema.
 
 .. code-block:: yaml
 
@@ -995,7 +1028,7 @@ This model allows to define elements that repeat a number of times.
          name: 'RepeatedElementDataModelElement'
          args:
            - sequenceModelElement
-           - 1
+           - 3
 
 SequenceModelElement
 ~~~~~~~~~~~~~~~~~~~~
@@ -1015,6 +1048,7 @@ This model defines a sequence of elements that all have to match.
        - id: username
          type: DelimitedDataModelElement
          name: 'Username'
+         consume_delimiter: True
          delimiter: ' '
 
        - id: ip
@@ -1059,6 +1093,197 @@ This model defines a string that is delimited by a white space.
 ---------
 Analysing
 ---------
+
+All detectors have the following parameters and may have additional specific parameters that are defined in the respective sections. 
+
+* **id**: must be a unique string
+* **type**: must be an existing Analysis component
+
+AllowlistViolationDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This module defines a detector for log atoms not matching any allowlisted rule.
+
+* **allowlist_rules**: list of rules executed in same way as inside Rules.OrMatchRule.list of rules executed in same way as inside Rules.OrMatchRule.
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True
+* **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to
+* **output_logline**: a boolean that specifies whether full log event parsing information should be appended to the anomaly when set to True
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: PathExistsMatchRule
+          id: path_exists_match_rule1
+          path: "/model/LoginDetails/PastTime/Time/Minutes"
+
+        - type: ValueMatchRule
+          id: value_match_rule
+          path: "/model/LoginDetails/Username"
+          value: "root"
+
+        - type: OrMatchRule
+          id: or_match_rule
+          sub_rules:
+            - "path_exists_match_rule1"
+            - "value_match_rule"
+
+        - type: AllowlistViolationDetector
+          id: Allowlist
+          allowlist_rules:
+            - "or_match_rule"
+
+EnhancedNewMatchPathValueComboDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In addition to detecting new value combination (see NewMatchPathValueComboDetector), this detector also stores combo occurrence times and amounts, and allows to execute functions on tuples that need to be defined in the python code first.
+
+* **paths**: the list of values to extract from each match to create the value combination to be checked.
+* **allow_missing_values_flag**: when set to True, the detector will also use matches, where one of the pathes from target_path_list does not refer to an existing parsed data object.
+* **tuple_transformation_function**: when not None, this function will be invoked on each extracted value combination list to transform it. It may modify the list directly or create a new one to return it.
+* **learn_mode**: when set to True, this detector will report a new value only the first time before including it in the known values set automatically.
+* **persistence_id**: the name of the file where the learned models are stored
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True
+* **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to
+* **output_logline**: a boolean that specifies whether full log event parsing information should be appended to the anomaly when set to True
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: EnhancedNewMatchPathValueComboDetector
+          id: EnhancedNewValueCombo
+          paths:
+            - "/model/DailyCron/UName"
+            - "/model/DailyCron/JobNumber"
+          tuple_transformation_function: "demo"
+          learn_mode: True
+
+EventCorrelationDetector
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+This module defines an evaluator and generator for event rules. The overall idea of generation is
+1. For each processed event A, randomly select another event B occurring within queue_delta_time.
+2. If B chronologically occurs after A, create the hypothesis A => B (observing event A implies that event B must be observed within current_time+queue_delta_time). If B chronologically occurs before A, create the hypothesis B <= A (observing event A implies that event B must be observed within currentTime-queueDeltaTime).
+3. Observe for a long time (max_observations) whether the hypothesis holds.
+4. If the hypothesis holds, transform it to a rule. Otherwise, discard the hypothesis.
+
+* **paths**: a list of paths where values or value combinations used for correlation occur. If this parameter is not available, correlation is done on event types instead.
+* **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to
+* **max_hypotheses** maximum amount of hypotheses and rules hold in memory.
+* **hypothesis_max_delta_time** time span of events considered for hypothesis generation.
+* **generation_probability** probability in [0, 1] that currently processed log line is considered for hypothesis with each of the candidates.
+* **generation_factor** likelihood in [0, 1] that currently processed log line is added to the set of candidates for hypothesis generation.
+* **max_observations** maximum amount of evaluations before hypothesis is transformed into a rule or discarded or rule is evaluated.
+* **p0** expected value for hypothesis evaluation distribution.
+* **alpha** confidence value for hypothesis evaluation.
+* **candidates_size** maximum number of stored candidates used for hypothesis generation.
+* **hypotheses_eval_delta_time** duration between hypothesis evaluation phases that remove old hypotheses that are likely to remain unused.
+* **delta_time_to_discard_hypothesis** time span required for old hypotheses to be discarded.
+* **check_rules_flag** specifies whether existing rules are evaluated.
+* **ignore_list**: a list of parser paths that are ignored for analysis by this detector
+* **constraint_list**: a list of parser paths that the detector will be constrained to, i.e., other branches of the parser tree are ignored
+* **output_logline**: a boolean that specifies whether full log event parsing information should be appended to the anomaly when set to True
+* **persistence_id**: the name of the file where the learned models are stored
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True
+* **learn_mode**: specifies whether new hypotheses and rules are generated.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: EventCorrelationDetector
+          id: EventCorrelationDetector
+          check_rules_flag: True
+          hypothesis_max_delta_time: 1.0
+          learn_mode: True
+
+EventFrequencyDetector
+~~~~~~~~~~~~~~~~~~~~~~
+
+This module defines an detector for event and value frequency deviations.
+
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed.
+* **output_event_handlers** for handling events, e.g., print events to stdout.
+* **window_size** the length of the time window for counting in seconds.
+* **confidence_factor** defines range of tolerable deviation of measured frequency from ground truth frequency gt by [gf * confidence_factor, gf / confidence_factor]. confidence_factor must be in range [0, 1].
+* **persistence_id name** of persistency document.
+* **learn_mode** specifies whether new frequency measurements override ground truth frequencies.
+* **output_log_line** specifies whether the full parsed log atom should be provided in the output.
+* **ignore_list** list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable.
+* **constraint_list** list of paths that have to be present in the log atom to be analyzed.
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True
+* **persistence_id**: the name of the file where the learned models are stored
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: EventFrequencyDetector
+          id: EventFrequencyDetector
+          window_size: 10
+
+EventSequenceDetector
+~~~~~~~~~~~~~~~~~~~~~
+
+EventTypeDetector
+~~~~~~~~~~~~~~~~~
+
+HistogramAnalysis
+~~~~~~~~~~~~~~~~~
+
+MatchFilter
+~~~~~~~~~~~
+
+MatchValueAverageChangeDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+MatchValueStreamWriter
+~~~~~~~~~~~~~~~~~~~~~~
+
+MissingMatchPathValueDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+NewMatchIdValueComboDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+NewMatchPathDetector
+~~~~~~~~~~~~~~~~~~~~
+
+NewMatchPathValueComboDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+NewMatchPathValueDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+PCADetector
+~~~~~~~~~~~
+
+ParserCount
+~~~~~~~~~~~
+
+PathValueTimeIntervalDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Rules
+~~~~~
+
+TSAArimaDetector
+~~~~~~~~~~~~~~~~
+
+TimeCorrelationDetector
+~~~~~~~~~~~~~~~~~~~~~~~
+
+TimeCorrelationViolationDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+TimestampCorrectionFilters
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+TimestampsUnsortedDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+VariableCorrelationDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+VariableTypeDetector
+~~~~~~~~~~~~~~~~~~~~
 
 -------------
 EventHandling
