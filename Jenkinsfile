@@ -196,7 +196,7 @@ pipeline {
                  sh "chmod 777 ${env.BUILDDOCSDIR}"
                  sh "chmod g+s ${env.BUILDDOCSDIR}"
                  sh "docker run --rm -v ${env.BUILDDOCSDIR}:/docs/_build aecid/aminer-docs:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID mkdocs"
-                 sh "scripts/deploydocs.sh main ${env.BUILDDOCSDIR}/html /var/www/aeciddocs/logdata-anomaly-miner"
+                 sh "scripts/deploydocs.sh ${env.BRANCH_NAME} ${env.BUILDDOCSDIR}/html /var/www/aeciddocs/logdata-anomaly-miner"
              }
          }
 
