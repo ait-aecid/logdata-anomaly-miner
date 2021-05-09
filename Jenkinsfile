@@ -181,6 +181,25 @@ pipeline {
                      sh "docker run --rm aecid/aminer-ubuntu-1804:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
                    }
                  }
+
+          stage("Build Documentation") {
+             when {
+                 expression {
+                    BRANCH_NAME == "main" || BRANCH_NAME == "development"
+                 }
+             }
+             environment {
+                 BUILDDOCSDIR = sh(script: 'mktemp -p $WORKSPACE_TMP -d | tr -d [:space:]', returnStdout: true)
+             }
+             steps {
+                 sh "docker build -f Dockerfile -t aecid/aminer-docs:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID ."
+                 sh "chmod 777 ${env.BUILDDOCSDIR}"
+                 sh "chmod g+s ${env.BUILDDOCSDIR}"
+                 sh "docker run --rm -v ${env.BUILDDOCSDIR}:/docs/_build aecid/aminer-docs:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID mkdocs"
+                 sh "scripts/deploydocs.sh ${env.BRANCH_NAME} ${env.BUILDDOCSDIR}/html /var/www/aeciddocs/logdata-anomaly-miner"
+             }
+         }
+
     }
     post {
         always {
@@ -200,6 +219,8 @@ pipeline {
            if( ubuntu20image == true ){
                sh "docker rmi aecid/aminer-ubuntu-2004:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
            }
+           // The following line is experimental. if it works, the code above can be deleted
+           sh "docker system prune -a"
          }
         }
  
