@@ -66,6 +66,7 @@ instance/
 .scrapy
 
 # Sphinx documentation
+_build
 docs/_build/
 docs/Wiki
 docs/SECURITY.md

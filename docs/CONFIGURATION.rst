@@ -1,3 +1,5 @@
+.. _Overview:
+
 ========
 Overview
 ========
@@ -17,6 +19,102 @@ The core component of the logdata-anomaly-miner is the "analysis pipeline". It c
 
 .. image:: images/analysis-pipeline.png
    :alt: Parts of the analysis-pipeline
+
+=======================
+Command-line Parameters
+=======================
+
+----------
+-h, --help
+----------
+
+Show the help message and exit.
+
+-------------
+-v, --version
+-------------
+
+Show program's version number and exit.
+
+-------------------
+-u, --check-updates
+-------------------
+
+Check if updates for the aminer are available and exit.
+
+--------------------------
+-c CONFIG, --config CONFIG
+--------------------------
+
+* Default: /etc/aminer/config.yml
+
+Use the settings of the file CONFIG on startup. Two config-variants are allowed: python and yaml.
+
+.. seealso::
+
+   :ref:`Overview`
+
+------------
+-D, --daemon
+------------
+
+Run aminer as a daemon process.
+
+--------------------------
+-s {0,1,2}, --stat {0,1,2}
+--------------------------
+
+Set the stat level. Possible stat-levels are 0 for no statistics, 1 for normal statistic level and 2 for verbose statistics.
+
+---------------------------
+-d {0,1,2}, --debug {0,1,2}
+---------------------------
+
+Set the debug level. Possible debug-levels are 0 for no debugging, 1 for normal output (INFO and above), 2 for printing all debug information.
+
+--------------
+--run-analysis
+--------------
+
+Run aminer analysis-child.
+
+-----------
+-C, --clear
+-----------
+
+Remove all persistence directories and run aminer.
+
+--------------------------
+-r REMOVE, --remove REMOVE
+--------------------------
+
+Remove a specific persistence directory. REMOVE must be the name of the directory and must not contain '/' or '.'. Usually this directory can be found in '/var/lib/aminer'.
+
+-----------------------------
+-R RESTORE, --restore RESTORE
+-----------------------------
+
+Restore a persistence backup. RESTORE must be the name of the directory and must not contain '/' or '.'. Usually t
+  his directory can be found in '/var/lib/aminer'.
+
+----------------
+-f, --from-begin
+----------------
+
+Removes repositioning data before starting the aminer.
+
+------------------
+-o, --offline-mode
+------------------
+
+Stop the aminer after all logs have been processed.
+
+---------------------------------------------
+--config-properties KEY=VALUE [KEY=VALUE ...]
+---------------------------------------------
+
+Set a number of config_properties by using key-value pairs (do not put spaces before or after the = sign). If a value contains spaces, you should define it with double quotes: 'foo="this is a sentence". Note that values are always treated as strings. If values are already defined in the config_properties, the input types are converted to the ones already existing.
+
 
 =======================
 Configuration Reference
