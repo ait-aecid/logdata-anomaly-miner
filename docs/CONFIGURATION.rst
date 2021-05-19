@@ -78,6 +78,8 @@ Set the debug level. Possible debug-levels are 0 for no debugging, 1 for normal 
 
 Run aminer analysis-child.
 
+.. note:: This parameter is for internal use only.
+
 -----------
 -C, --clear
 -----------
@@ -94,20 +96,21 @@ Remove a specific persistence directory. REMOVE must be the name of the director
 -R RESTORE, --restore RESTORE
 -----------------------------
 
-Restore a persistence backup. RESTORE must be the name of the directory and must not contain '/' or '.'. Usually t
-  his directory can be found in '/var/lib/aminer'.
+Restore a persistence backup. RESTORE must be the name of the directory and must not contain '/' or '.'. Usually this directory can be found in '/var/lib/aminer'.
 
 ----------------
 -f, --from-begin
 ----------------
 
-Removes repositioning data before starting the aminer.
+Removes repositioning data before starting the aminer so that all input files will be analyzed starting from the first line in the file rather than the last previously analyzed line.
 
 ------------------
 -o, --offline-mode
 ------------------
 
 Stop the aminer after all logs have been processed.
+
+.. note:: This parameter is useful for forensic analysis.
 
 ---------------------------------------------
 --config-properties KEY=VALUE [KEY=VALUE ...]
