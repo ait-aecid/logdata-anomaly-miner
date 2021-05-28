@@ -1206,9 +1206,9 @@ AllowlistViolationDetector
 This module defines a detector for log atoms not matching any allowlisted rule.
 
 * **allowlist_rules**: list of rules executed in same way as inside Rules.OrMatchRule.list of rules executed in same way as inside Rules.OrMatchRule.
-* **suppress**: a boolean that suppresses anomaly output of that detector when set to True
-* **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to
-* **output_logline**: a boolean that specifies whether full log event parsing information should be appended to the anomaly when set to True
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True.
+* **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to.
+* **output_logline**: a boolean that specifies whether full log event parsing information should be appended to the anomaly when set to True.
 
 .. code-block:: yaml
 
@@ -1239,13 +1239,13 @@ EnhancedNewMatchPathValueComboDetector
 In addition to detecting new value combination (see NewMatchPathValueComboDetector), this detector also stores combo occurrence times and amounts, and allows to execute functions on tuples that need to be defined in the python code first.
 
 * **paths**: the list of values to extract from each match to create the value combination to be checked.
-* **allow_missing_values_flag**: when set to True, the detector will also use matches, where one of the pathes from target_path_list does not refer to an existing parsed data object.
+* **allow_missing_values**: when set to True, the detector will also use matches, where one of the pathes from target_path_list does not refer to an existing parsed data object.
 * **tuple_transformation_function**: when not None, this function will be invoked on each extracted value combination list to transform it. It may modify the list directly or create a new one to return it.
 * **learn_mode**: when set to True, this detector will report a new value only the first time before including it in the known values set automatically.
-* **persistence_id**: the name of the file where the learned models are stored
-* **suppress**: a boolean that suppresses anomaly output of that detector when set to True
-* **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to
-* **output_logline**: a boolean that specifies whether full log event parsing information should be appended to the anomaly when set to True
+* **persistence_id**: the name of the file where the learned models are stored.
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True.
+* **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to.
+* **output_logline**: a boolean that specifies whether full log event parsing information should be appended to the anomaly when set to True.
 
 .. code-block:: yaml
 
@@ -1267,7 +1267,7 @@ This module defines an evaluator and generator for event rules. The overall idea
 3. Observe for a long time (max_observations) whether the hypothesis holds.
 4. If the hypothesis holds, transform it to a rule. Otherwise, discard the hypothesis.
 
-* **paths**: a list of paths where values or value combinations used for correlation occur. If this parameter is not available, correlation is done on event types instead.
+* **paths**: a list of paths where values or value combinations used for correlation occur. If this parameter is not set, correlation is done on event types instead.
 * **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to
 * **max_hypotheses** maximum amount of hypotheses and rules hold in memory.
 * **hypothesis_max_delta_time** time span of events considered for hypothesis generation.
@@ -1280,11 +1280,11 @@ This module defines an evaluator and generator for event rules. The overall idea
 * **hypotheses_eval_delta_time** duration between hypothesis evaluation phases that remove old hypotheses that are likely to remain unused.
 * **delta_time_to_discard_hypothesis** time span required for old hypotheses to be discarded.
 * **check_rules_flag** specifies whether existing rules are evaluated.
-* **ignore_list**: a list of parser paths that are ignored for analysis by this detector
-* **constraint_list**: a list of parser paths that the detector will be constrained to, i.e., other branches of the parser tree are ignored
-* **output_logline**: a boolean that specifies whether full log event parsing information should be appended to the anomaly when set to True
-* **persistence_id**: the name of the file where the learned models are stored
-* **suppress**: a boolean that suppresses anomaly output of that detector when set to True
+* **ignore_list**: a list of parser paths that are ignored for analysis by this detector.
+* **constraint_list**: a list of parser paths that the detector will be constrained to, i.e., other branches of the parser tree are ignored.
+* **output_logline**: a boolean that specifies whether full log event parsing information should be appended to the anomaly when set to True.
+* **persistence_id**: the name of the file where the learned models are stored.
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True.
 * **learn_mode**: specifies whether new hypotheses and rules are generated.
 
 .. code-block:: yaml
@@ -1305,13 +1305,12 @@ This module defines an detector for event and value frequency deviations.
 * **output_event_handlers** for handling events, e.g., print events to stdout.
 * **window_size** the length of the time window for counting in seconds.
 * **confidence_factor** defines range of tolerable deviation of measured frequency from ground truth frequency gt by [gf * confidence_factor, gf / confidence_factor]. confidence_factor must be in range [0, 1].
-* **persistence_id name** of persistency document.
 * **learn_mode** specifies whether new frequency measurements override ground truth frequencies.
-* **output_log_line** specifies whether the full parsed log atom should be provided in the output.
+* **output_logline** specifies whether the full parsed log atom should be provided in the output.
 * **ignore_list** list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable.
 * **constraint_list** list of paths that have to be present in the log atom to be analyzed.
-* **suppress**: a boolean that suppresses anomaly output of that detector when set to True
-* **persistence_id**: the name of the file where the learned models are stored
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True.
+* **persistence_id**: the name of the file where the learned models are stored.
 
 .. code-block:: yaml
 
@@ -1322,6 +1321,30 @@ This module defines an detector for event and value frequency deviations.
 
 EventSequenceDetector
 ~~~~~~~~~~~~~~~~~~~~~
+
+This module defines an detector for event and value sequences. The concept is based on STIDE which was first published by Forrest et al.
+
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed.
+* **output_event_handlers** for handling events, e.g., print events to stdout.
+* **id_path_list** one or more paths that specify the trace of the sequence detection, i.e., incorrect sequences that are generated by interleaved events can be avoided when event sequence identifiers are available.
+* **seq_len** the length of the sequences to be learned (larger lengths increase precision, but may overfit the data).
+* **learn_mode** specifies whether newly observed sequences should be added to the learned model.
+* **output_logline** specifies whether the full parsed log atom should be provided in the output.
+* **ignore_list** list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable.
+* **constraint_list** list of paths that have to be present in the log atom to be analyzed.
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True.
+* **persistence_id**: the name of the file where the learned models are stored.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: EventSequenceDetector
+          id: EventSequenceDetector
+          seq_len: 4
+          paths:
+            - '/model/type/syscall/syscall'
+          id_path_list:
+            - '/model/type/syscall/id'
 
 EventTypeDetector
 ~~~~~~~~~~~~~~~~~
@@ -1344,20 +1367,100 @@ MissingMatchPathValueDetector
 NewMatchIdValueComboDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-NewMatchPathDetector
-~~~~~~~~~~~~~~~~~~~~
+This detector works similar to the NewMatchPathValueComboDetector, but allows to generate combos across multiple log events that are connected by a common value, e.g., trace ID.
+
+* **paths** parser paths of values to be analyzed.
+* **output_event_handlers** for handling events, e.g., print events to stdout.
+* **id_path_list** one or more paths that specify trace information, i.e., an identifier that specifies which log events belong together.
+* **allow_missing_values**: when set to True, the detector will also use matches, where one of the paths does not refer to an existing parsed data object.
+* **min_allowed_time_diff** the minimum amount of time in seconds after the first appearance of a log atom with a specific id that is waited for other log atoms with the same id to occur. The maximum possible time to keep an incomplete combo is 2*min_allowed_time_diff.
+* **learn_mode** specifies whether newly observed value combinations should be added to the learned model.
+* **output_logline** specifies whether the full parsed log atom should be provided in the output.
+* **ignore_list** list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable.
+* **constraint_list** list of paths that have to be present in the log atom to be analyzed.
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True.
+* **persistence_id**: the name of the file where the learned models are stored.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: NewMatchIdValueComboDetector
+          id: NewMatchIdValueComboDetector
+          paths:
+            - "/model/type/path/name"
+            - "/model/type/syscall/syscall"
+          id_path_list:
+            - "/model/type/path/id"
+            - "/model/type/syscall/id"
+          min_allowed_time_diff: 5
+          allow_missing_values: True
+          learn_mode: True
 
 NewMatchPathValueComboDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+This module defines a detector for new value combinations in multiple parser paths.
+
+* **paths** parser paths of values to be analyzed.
+* **output_event_handlers** for handling events, e.g., print events to stdout.
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True
+* **persistence_id**: the name of the file where the learned models are stored.
+* **allow_missing_values**: when set to True, the detector will also use matches, where one of the paths does not refer to an existing parsed data object.
+* **output_logline** specifies whether the full parsed log atom should be provided in the output.
+* **learn_mode** specifies whether newly observed value combinations should be added to the learned model.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: NewMatchPathValueComboDetector
+          id: NewMatchPathValueCombo
+          paths:
+            - "/model/IPAddresses/Username"
+            - "/model/IPAddresses/IP"
+          learn_mode: True
+
 NewMatchPathValueDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-PCADetector
-~~~~~~~~~~~
+This module defines a detector for new values in a parser path.
+
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values from all specified paths are mixed together.
+* **output_event_handlers** for handling events, e.g., print events to stdout.
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True
+* **persistence_id**: the name of the file where the learned models are stored.
+* **output_logline** specifies whether the full parsed log atom should be provided in the output.
+* **learn_mode** specifies whether newly observed values should be added to the learned model.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: NewMatchPathValueDetector
+          id: NewMatchPathValue
+          paths:
+            - "/model/DailyCron/JobNumber"
+            - "/model/IPAddresses/Username"
+          learn_mode: True
 
 ParserCount
 ~~~~~~~~~~~
+
+This component counts occurring combinations of values and periodically sends the results as a report.
+
+* **paths** parser paths of values to be analyzed.
+* **report_interval** time interval in seconds in which the reports are sent.
+* **labels** list of strings that are added to the report for each path in paths parameter (must be the same length as paths list).
+* **split_reports_flag** boolean flag to send report for each path in paths parameter separately when set to True.
+* **output_event_handlers** for handling events, e.g., print events to stdout.
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: ParserCount
+          id: ParserCount
+          paths:
+            - "/model/type/syscall/syscall"
+          report_interval: 10
 
 PathValueTimeIntervalDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
