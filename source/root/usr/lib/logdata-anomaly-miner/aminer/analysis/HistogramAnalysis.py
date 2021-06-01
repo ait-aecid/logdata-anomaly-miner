@@ -157,6 +157,7 @@ class LinearNumericBinDefinition(BinDefinition):
         if self.outlier_bins_flag:
             if value < self.lower_limit:
                 return 0
+            print("value: %d" % value)
             pos = int((value - self.lower_limit) / self.bin_size)
             if pos < self.bin_count:
                 return pos + 1
