@@ -1198,14 +1198,14 @@ Analysing
 All detectors have the following parameters and may have additional specific parameters that are defined in the respective sections. 
 
 * **id**: must be a unique string
-* **type**: must be an existing Analysis component
+* **type**: must be an existing Analysis component (required)
 
 AllowlistViolationDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module defines a detector for log atoms not matching any allowlisted rule.
 
-* **allowlist_rules**: list of rules executed in same way as inside Rules.OrMatchRule.list of rules executed in same way as inside Rules.OrMatchRule (list of strings, defaults to empty list).
+* **allowlist_rules**: list of rules executed in same way as inside Rules.OrMatchRule.list of rules executed in same way as inside Rules.OrMatchRule (required, list of strings, defaults to empty list).
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
 * **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to (list of strings, defaults to empty list).
 * **output_logline**: a boolean that specifies whether full log event parsing information should be appended to the anomaly when set to True (boolean, defaults to True).
@@ -1238,7 +1238,7 @@ EnhancedNewMatchPathValueComboDetector
 
 In addition to detecting new value combination (see NewMatchPathValueComboDetector), this detector also stores combo occurrence times and amounts, and allows to execute functions on tuples that need to be defined in the python code first.
 
-* **paths**: the list of values to extract from each match to create the value combination to be checked (list of strings).
+* **paths**: the list of values to extract from each match to create the value combination to be checked (required, list of strings).
 * **allow_missing_values**: when set to True, the detector will also use matches, where one of the pathes from target_path_list does not refer to an existing parsed data object (boolean, defaults to False).
 * **tuple_transformation_function**: when not None, this function will be invoked on each extracted value combination list to transform it. It may modify the list directly or create a new one to return it (string, defaults to None).
 * **learn_mode**: when set to True, this detector will report a new value only the first time before including it in the known values set automatically (boolean).
@@ -1369,11 +1369,11 @@ NewMatchIdValueComboDetector
 
 This detector works similar to the NewMatchPathValueComboDetector, but allows to generate combos across multiple log events that are connected by a common value, e.g., trace ID.
 
-* **paths** parser paths of values to be analyzed (list of strings).
+* **paths** parser paths of values to be analyzed (required, list of strings).
+* **id_path_list** one or more paths that specify trace information, i.e., an identifier that specifies which log events belong together (required, list of strings, defaults to empty list).
+* **min_allowed_time_diff** the minimum amount of time in seconds after the first appearance of a log atom with a specific id that is waited for other log atoms with the same id to occur. The maximum possible time to keep an incomplete combo is 2*min_allowed_time_diff (required, float, defaults to 5.0).
 * **output_event_handlers** for handling events, e.g., print events to stdout (list of strings, defaults to empty list).
-* **id_path_list** one or more paths that specify trace information, i.e., an identifier that specifies which log events belong together (list of strings, defaults to empty list).
 * **allow_missing_values**: when set to True, the detector will also use matches, where one of the paths does not refer to an existing parsed data object (boolean, defaults to False).
-* **min_allowed_time_diff** the minimum amount of time in seconds after the first appearance of a log atom with a specific id that is waited for other log atoms with the same id to occur. The maximum possible time to keep an incomplete combo is 2*min_allowed_time_diff (float, defaults to 5.0).
 * **learn_mode** specifies whether newly observed value combinations should be added to the learned model (boolean).
 * **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to True).
 * **ignore_list** list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted (list of strings, defaults to empty list).
@@ -1401,7 +1401,7 @@ NewMatchPathValueComboDetector
 
 This module defines a detector for new value combinations in multiple parser paths.
 
-* **paths** parser paths of values to be analyzed (list of strings).
+* **paths** parser paths of values to be analyzed (required, list of strings).
 * **output_event_handlers** for handling events, e.g., print events to stdout (list of strings, defaults to empty list).
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
 * **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
@@ -1424,7 +1424,7 @@ NewMatchPathValueDetector
 
 This module defines a detector for new values in a parser path.
 
-* **paths** parser paths of values to be analyzed. Multiple paths mean that values from all specified paths are mixed together (list of strings).
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values from all specified paths are mixed together (required, list of strings).
 * **output_event_handlers** for handling events, e.g., print events to stdout (list of strings, defaults to empty list).
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
 * **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
