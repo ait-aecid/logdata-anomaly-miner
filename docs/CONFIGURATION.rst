@@ -1349,6 +1349,27 @@ This module defines an detector for event and value sequences. The concept is ba
 EventTypeDetector
 ~~~~~~~~~~~~~~~~~
 
+This component serves as a basis for the VariableTypeDetector, VariableCorrelationDetector and TSAArimaDetector. It saves a list of the values to the single paths and tracks the time for the TSAArimaDetector.
+
+* **paths** parser paths of values to be analyzed (list of strings, defaults to empty list).
+* **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
+* **max_num_vals** maximum number of lines in the value list before it is reduced.
+* **min_num_vals** number of the values which the list is being reduced to.
+* **save_values** if False the values of the paths are not saved for further analysis. The values are not needed for the TSAArimaDetector.
+* **track_time_for_TSA** states if the time windows should be tracked for the time series analysis.
+* **waiting_time_for_TSA** time in seconds, until the time windows are being initialized.
+* **num_sections_waiting_time_for_TSA** number of sections of the initialization window.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: 'EventTypeDetector'
+          id: ETD
+          save_values: False
+          track_time_for_TSA: True
+          waiting_time_for_TSA: 1728000
+          num_sections_waiting_time_for_TSA: 1000
+
 HistogramAnalysis
 ~~~~~~~~~~~~~~~~~
 
@@ -1465,11 +1486,74 @@ This component counts occurring combinations of values and periodically sends th
 PathValueTimeIntervalDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+This detector analyzes the time intervals of the appearance of log_atoms. It sends a report if log_atoms appear at times outside of the intervals. The considered time intervals depend on the combination of values in the target_paths of target_path_list.
+
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed.
+* **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
+* **allow_missing_values_flag** when set to True, the detector will also use matches, where one of the pathes from target_path_list does not refer to an existing parsed data object.
+* **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted.
+* **output_log_line** specifies whether the full parsed log atom should be provided in the output.
+* **auto_include_flag** specifies whether new frequency measurements override ground truth frequencies.
+* **time_window_length** length of the time window in seconds for which the appearances of log lines are identified with each other.
+* **max_time_diff** maximal time difference in seconds for new times. If the difference of the new time to all previous times is greater than max_time_diff the new time is considered an anomaly.
+* **num_reduce_time_list** number of new time entries appended to the time list, before the list is being reduced.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: PathValueTimeIntervalDetector
+          id: PathValueTimeIntervalDetector
+          paths:
+            - "/model/DailyCron/UName"
+            - "/model/DailyCron/JobNumber"
+          time_window_length: 86400
+          max_time_diff: 3600
+          num_reduce_time_list: 10
+
 Rules
 ~~~~~
 
 TSAArimaDetector
 ~~~~~~~~~~~~~~~~
+
+This detector uses a tsa-arima model to track appearance frequencies of event lines.
+
+* **paths** at least one of the parser paths in this list needs to appear in the event to be analysed.
+* **event_type_detector** used to track the number of event lines in the time windows.
+* **build_sum_over_values** states if the sum of a series of counts is build before applying the TSA.
+* **num_division_time_step** Number of division of the time window to calculate the time step.
+* **alpha** significance level of the estimated values.
+* **num_min_time_history** minimal number of values of the time_history after it is initialised.
+* **num_max_time_history** maximal number of values of the time_history.
+* **num_results_bt** number of results which are used in the binomial test, which is used before reinitializing the ARIMA model.
+* **alpha_bt** significance level for the bt test.
+* **round_time_inteval_threshold** Threshold for the rounding of the time_steps to the times in self.assumed_time_steps. The higher the threshold the easier the time is rounded to the next time in the list.
+* **acf_threshold** threshold, which has to be exceeded by the highest peak of the cdf function of the time series, to be analysed.
+* **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
+* **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable.
+* **output_log_line** specifies whether the full parsed log atom should be provided in the output.
+* **auto_include_flag** specifies whether new frequency measurements override ground truth frequencies.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: 'EventTypeDetector'
+          id: ETD
+          save_values: False
+          track_time_for_TSA: True
+          waiting_time_for_TSA: 1728000
+          num_sections_waiting_time_for_TSA: 1000
+
+        - type: 'TSAArimaDetector'
+          id: TSA
+          event_type_detector: ETD
+          num_division_time_step: 10
+          alpha: 0.05
+          num_results_bt: 30
+          alpha_bt: 0.05
+          num_max_time_history: 30000
+          round_time_inteval_threshold: 0.1
+          acf_threshold: 0.02
 
 TimeCorrelationDetector
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -1486,8 +1570,109 @@ TimestampsUnsortedDetector
 VariableCorrelationDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+First, this detector finds a list of viable variables for each event type. Second, it builds pairs of variables. Third, correlations are generated and thereafter tested and updated.
+
+* **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
+* **event_type_detector** event_type_detector. Used to get the eventNumbers and values of the variables, etc.
+* **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted.
+* **constraint_list**  list of paths that the detector will be constrained to, i.e., other branches of the parser tree are ignored (list of strings, defaults to empty list).
+* **num_init** minimal number of lines of one event type to initialize the correlation rules.
+* **num_update** number of lines after the initialization after which the correlations are periodically tested and updated.
+* **check_cor_thres** threshold for the number of allowed different values of the distribution to be considderd a correlation.
+* **check_cor_prob_thres** threshold for the difference of the probability of the values to be considderd a correlation.
+* **check_cor_num_thres** number of allowed different values for the calculation if the distribution can be considderd a correlation.
+* **min_values_cors_thres** minimal number of apearances of values on the left side to consider the distribution as a possible correlation.
+* **new_vals_alarm_thres** threshold which has to be exceeded by the number of new values divided by the number of old values to report an anomaly.
+* **disc_div_thres** diversity threshold for variables to be considered discrete.
+* **num_steps_create_new_rules** number of update steps, for which new rules are generated periodically.
+* **num_upd_until_validation** number of update steps, for which the rules are validated periodically.
+* **num_end_learning_phase** number of update steps until the update phase ends and the test phase begins. False if no End should be defined.
+* **num_bt** number of considered testsamples for the binomial test.
+* **alpha_bt** significance level for the binomialtest for the testresults.
+* **used_homogeneity_test** states the used homogenety test which is used for the updates and tests of the correlations. The implemented methods are ['Chi', 'MaxDist'].
+* **alpha_chisquare_test** significance level alpha for the chisquare test.
+* **max_dist_rule_distr** maximum distance between the distribution of the rule and the distribution of the read in values before the rule fails.
+* **used_presel_meth** used preselection methods. The implemented methods are ['matchDiscDistr', 'excludeDueDistr', 'matchDiscVals', 'random'].
+* **intersect_presel_meth** states if the intersection or the union of the possible correlations found by the presel_meth is used for the resulting correlations.
+* **percentage_random_cors** percentage of the randomly picked correlations of all possible ones in the preselection method random.
+* **match_disc_vals_sim_tresh** similarity threshold for the preselection method pick_cor_match_disc_vals.
+* **exclude_due_distr_lower_limit** lower limit for the maximal appearance to one value of the distributions. If the maximal appearance is exceeded the variable is excluded.
+* **match_disc_distr_threshold** threshold for the preselection method pick_cor_match_disc_distr.
+* **used_cor_meth** used correlation detection methods. The implemented methods are ['Rel', 'WRel'].
+* **used_validate_cor_meth** used validation methods. The implemented methods are ['coverVals', 'distinctDistr'].
+* **validate_cor_cover_vals_thres** threshold for the validation method coverVals. The higher the threshold the more correlations must be detected to be validated a correlation.
+* **validate_cor_distinct_thres** threshold for the validation method distinctDistr. The threshold states which value the variance of the distributions have to surpass to be considered real correlations. The lower the value the less likely that the correlations are being rejected.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: 'EventTypeDetector'
+          id: ETD
+
+        - type: 'VariableCorrelationDetector'
+          event_type_detector: ETD
+          num_init: 10000
+          num_update: 1000
+          num_steps_create_new_rules: 10
+          used_presel_meth: ['matchDiscDistr', 'excludeDueDistr']
+          used_validate_cor_meth: ['distinctDistr', 'coverVals']
+          used_cor_meth: ['WRel']
+
 VariableTypeDetector
 ~~~~~~~~~~~~~~~~~~~~
+
+This detector analyses each variable of the event_types by assigning them the implemented variable types.
+
+* **paths** List of paths, which variables are being tested for a type. All other paths will not get a type assigned.
+* **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
+* **event_type_detector** event_type_detector. Used to get the eventNumbers and values of the variables, etc.
+* **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted.
+* **constraint_list**  list of paths that the detector will be constrained to, i.e., other branches of the parser tree are ignored (list of strings, defaults to empty list).
+* **save_statistics** tracks the indicators and changed variable types, if set to True.
+* **use_empiric_distr** states if empiric distributions of the values should be used if no continuous distribution is detected
+* **used_gof_test** states the used test statistic for the continous data type. Implemented are the 'KS' and 'CM' tests.
+* **gof_alpha** significance level for p-value for the distribution test of the initialization.
+* **s_gof_alpha** significance level for p-value for the sliding gof-test in the update step.
+* **s_gof_bt_alpha** significance level for the binomialtest of the testresults of the s_gof-test.
+* **d_alpha** significance level for the binomialtest of the single discrete variables.
+* **d_bt_alpha** significance level for the binomialtest of the testresults of the discrete tests.
+* **div_thres** threshold for diversity of the values of a variable. The higher the more values have to be distinct to be considered to be continuous distributed.
+* **sim_thres** threshold for similarity of the values of a variable. The higher the more values have to be common to be considered discrete.
+* **indicator_thres** threshold for the variable indicators to be used in the event indicator.
+* **num_init** number of read in lines before detecting the variable types.
+* **num_update** number of values for which the variableType is updated.
+* **num_update_unq** number of values for which the values of type unq is unique (last num_update + num_update_unq values are unique).
+* **num_s_gof_values** number of values which are tested in the s_gof-test.
+* **num_s_gof_bt** number of tested s_gof-tests for the binomialtest of the testresults of the s_gof-tests.
+* **num_d_bt** number of tested discrete samples for the binomialtest of the testresults of the discrete tests.
+* **num_pause_discrete** number of paused updates, before the discrete var type is adapted.
+* **num_pause_others** number of paused updates, before trying to find a new var_type for the variable type others.
+* **test_gof_int** states if integer number should be tested for the continuous variable type.
+* **update_var_type_bool** states, if the found variable types are updated when a test fails.
+* **num_stop_update** switch the LearnMode to False after num_stop_update processed lines. If False LearnMode will not be switched to False.
+* **silence_output_without_confidence** silences all messages without a confidence-entry.
+* **silence_output_except_indicator** silences all messages which are not related with the calculated indicator.
+* **num_var_type_hist_ref** states how long the reference for the var_type_history_list is. The reference is used in the evaluation.
+* **num_update_var_type_hist_ref** number of updatesteps before the var_type_history_list is being updated.
+* **num_var_type_considered_ind** this attribute states how many variable types of the history are used as the recent history in the calculation of the indicator. False if no output of the indicator should be generated.
+* **num_stat_stop_update** number of static values of a variable, to stop tracking the variable type and read in in eventTypeD. Default is False.
+* **num_updates_until_var_reduction** number of updatesteps until the variables are tested, if they are suitable for an indicator. If not suitable, they are removed from the tracking of EvTypeD. Default is False.
+* **var_reduction_thres** threshold for the reduction of variable types. The most likely none others var type must have a higher relative appearance for the variable to be further checked.
+* **num_skipped_ind_for_weights** number of the skipped indicators for the calculation of the indicator weights.
+* **num_ind_for_weights** number of indicators used in the calculation of the indicator weights.
+* **used_multinomial_test** states the used multinomial test. the value can be of the list ['MT', 'Approx', 'Chi'], where 'MT' means original MT, 'Approx' is the approximation with single BTs and 'Chi' is the ChisquareTest.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: 'EventTypeDetector'
+          id: ETD
+
+        - type: 'VariableTypeDetector'
+          event_type_detector: ETD
+          num_init: 200
+          num_update: 100
+          num_s_gof_values: 100
 
 -------------
 EventHandling
