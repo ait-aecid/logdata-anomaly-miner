@@ -1200,6 +1200,8 @@ All detectors have the following parameters and may have additional specific par
 * **id**: must be a unique string
 * **type**: must be an existing Analysis component (required)
 
+.. _AllowlistViolationDetector:
+
 AllowlistViolationDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1232,6 +1234,10 @@ This module defines a detector for log atoms not matching any allowlisted rule.
           id: Allowlist
           allowlist_rules:
             - "or_match_rule"
+
+.. seealso::
+
+   :ref:`MatchRules`
 
 EnhancedNewMatchPathValueComboDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1675,6 +1681,95 @@ This component counts occurring combinations of values and periodically sends th
 PathValueTimeIntervalDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+
+TSAArimaDetector
+~~~~~~~~~~~~~~~~
+
+TimeCorrelationDetector
+~~~~~~~~~~~~~~~~~~~~~~~
+
+This component tries to find time correlation patterns between different log atoms.
+When a possible correlation rule is detected, it creates an event including the rules. This is useful to implement checks as depicted
+in http://dx.doi.org/10.1016/j.cose.2014.09.006.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: TimeCorrelationDetector
+          id: TimeCorrelationDetector
+          parallel_check_count: 2
+          min_rule_attributes: 1
+          max_rule_attributes: 5
+          record_count_before_event: 10000
+
+
+
+.. _TimeCorrelationViolationDetector:
+
+TimeCorrelationViolationDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This component creates events when one of the given time correlation rules is violated.
+This is used to implement checks as depicted in http://dx.doi.org/10.1016/j.cose.2014.09.006
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: PathExistsMatchRule
+          id: path_exists_match_rule3
+          path: "/model/CronAnnouncement/Run"
+          match_action: a_class_selector
+        - type: PathExistsMatchRule
+          id: path_exists_match_rule4
+          path: "/model/CronExecution/Job"
+          match_action: b_class_selector
+        - type: TimeCorrelationViolationDetector
+          id: TimeCorrelationViolationDetector
+          ruleset:
+            - path_exists_match_rule3
+            - path_exists_match_rule4
+
+
+.. seealso::
+
+   :ref:`MatchRules`
+
+SimpleMonotonicTimestampAdjust
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Adjust decreasing timestamp of new records to the maximum observed so far to ensure monotony for other analysis components.
+
+TimestampsUnsortedDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This detector is useful to to detect algorithm malfunction or
+configuration errors, e.g. invalid timezone configuration.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: TimestampsUnsortedDetector
+          id: TimestampsUnsortedDetector
+
+VariableCorrelationDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+VariableTypeDetector
+~~~~~~~~~~~~~~~~~~~~
+
+.. _MatchRules:
+
+----------
+MatchRules
+----------
+
+The following detectors work with MatchRules:
+
+* :ref:`AllowlistViolationDetector`
+* :ref:`TimeCorrelationViolationDetector`
+
+.. note:: MatchRules must be defined in the "Analysis"-part of the configuration.
+
 AndMatchRule
 ~~~~~~~~~~~~
 
@@ -1821,73 +1916,6 @@ DebugHistoryMatchRule
 This rule can be inserted into a normal ruleset just to see when a match attempt is made.
 It just adds the evaluated log_atom to a ObjectHistory.
 
-TSAArimaDetector
-~~~~~~~~~~~~~~~~
-
-TimeCorrelationDetector
-~~~~~~~~~~~~~~~~~~~~~~~
-
-This component tries to find time correlation patterns between different log atoms.
-When a possible correlation rule is detected, it creates an event including the rules. This is useful to implement checks as depicted
-in http://dx.doi.org/10.1016/j.cose.2014.09.006.
-
-.. code-block:: yaml
-
-     Analysis:
-        - type: TimeCorrelationDetector
-          id: TimeCorrelationDetector
-          parallel_check_count: 2
-          min_rule_attributes: 1
-          max_rule_attributes: 5
-          record_count_before_event: 10000
-
-
-
-TimeCorrelationViolationDetector
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This component creates events when one of the given time correlation rules is violated.
-This is used to implement checks as depicted in http://dx.doi.org/10.1016/j.cose.2014.09.006
-
-.. code-block:: yaml
-
-     Analysis:
-        - type: PathExistsMatchRule
-          id: path_exists_match_rule3
-          path: "/model/CronAnnouncement/Run"
-          match_action: a_class_selector
-        - type: PathExistsMatchRule
-          id: path_exists_match_rule4
-          path: "/model/CronExecution/Job"
-          match_action: b_class_selector
-        - type: TimeCorrelationViolationDetector
-          id: TimeCorrelationViolationDetector
-          ruleset:
-            - path_exists_match_rule3
-            - path_exists_match_rule4
-
-SimpleMonotonicTimestampAdjust
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Adjust decreasing timestamp of new records to the maximum observed so far to ensure monotony for other analysis components.
-
-TimestampsUnsortedDetector
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This detector is useful to to detect algorithm malfunction or
-configuration errors, e.g. invalid timezone configuration.
-
-.. code-block:: yaml
-
-     Analysis:
-        - type: TimestampsUnsortedDetector
-          id: TimestampsUnsortedDetector
-
-VariableCorrelationDetector
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-VariableTypeDetector
-~~~~~~~~~~~~~~~~~~~~
 
 -------------
 EventHandling
