@@ -98,7 +98,8 @@ class JsonModelElement(ModelElementInterface):
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)
 
-    def is_escaped_unicode(self, text: str):
+    def is_escaped_unicode(self, text: str):  # skipcq: PYL-R0201
+        """Check if the text contains only ascii characters."""
         if all(ord(c) < 128 for c in text):  # is escaped unicode ascii?
             return True
         return False
