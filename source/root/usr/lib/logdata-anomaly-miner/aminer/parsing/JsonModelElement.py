@@ -98,6 +98,11 @@ class JsonModelElement(ModelElementInterface):
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)
 
+    def is_escaped_unicode(self, text: str):
+        if all(ord(c) < 128 for c in text):  # is escaped unicode ascii?
+            return True
+        return False
+
     def get_match_element(self, path: str, match_context):
         """
         Try to parse all of the match_context against JSON.
@@ -116,7 +121,8 @@ class JsonModelElement(ModelElementInterface):
         except JSONDecodeError as e:
             logging.getLogger(debug_log_prefix + DEBUG_LOG_NAME).debug(e)
             return None
-        match_context.match_data = match_context.match_data.decode("unicode-escape").encode()
+        if self.is_escaped_unicode(match_context.match_data.decode()):
+            match_context.match_data = match_context.match_data.decode("unicode-escape").encode()
         matches += self.parse_json_dict(self.key_parser_dict, json_match_data, current_path, match_context)
         remove_chars = b' }]"\r\n'
         match_data = match_context.match_data
@@ -264,8 +270,11 @@ class JsonModelElement(ModelElementInterface):
     def parse_json_object(self, json_dict, json_match_data, key, split_key, current_path, match_context):  # skipcq: PYL-R0201
         """Parse a literal from the json object."""
         data = json_match_data[split_key]
+        enc = "utf-8"
         if isinstance(data, str):
-            data = data.encode("unicode-escape")
+            if self.is_escaped_unicode(data):
+                enc = "unicode-escape"
+            data = data.encode(enc)
         elif isinstance(data, bool):
             data = str(data).replace("T", "t").replace("F", "f").encode()
         elif data is None:

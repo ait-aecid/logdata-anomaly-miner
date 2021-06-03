@@ -263,8 +263,8 @@ class JsonModelElementTest(TestBase):
         value = json.loads(data)
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
-        # match_context.match_string = str(value).encode()
-        # match_context.match_data = data[len(match_context.match_string):]
+        match_context.match_string = str(value).encode()
+        match_context.match_data = data[len(match_context.match_string):]
         self.compare_match_results(
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
