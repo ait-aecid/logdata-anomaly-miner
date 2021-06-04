@@ -830,7 +830,7 @@ This model element parses decimal values with optional signum, padding or expone
             value_sign_type: 'optional'
 
 DecimalIntegerValueModelElement
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This model element parses integer values with optional signum or padding. With padding, the signum has to be found before the padding characters.
 
@@ -1200,6 +1200,8 @@ All detectors have the following parameters and may have additional specific par
 * **id**: must be a unique string
 * **type**: must be an existing Analysis component (required)
 
+.. _AllowlistViolationDetector:
+
 AllowlistViolationDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1232,6 +1234,10 @@ This module defines a detector for log atoms not matching any allowlisted rule.
           id: Allowlist
           allowlist_rules:
             - "or_match_rule"
+
+.. seealso::
+
+   :ref:`MatchRules`
 
 EnhancedNewMatchPathValueComboDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1370,20 +1376,232 @@ This component serves as a basis for the VariableTypeDetector, VariableCorrelati
           waiting_time_for_TSA: 1728000
           num_sections_waiting_time_for_TSA: 1000
 
+
+
+.. _HistogramAnalysis:
+
 HistogramAnalysis
 ~~~~~~~~~~~~~~~~~
+
+This component performs a histogram analysis on one or more input
+properties. The properties are parsed values denoted by their
+parsing path. Those values are then handed over to the selected
+"binning function", that calculates the histogram bin.
+
+* Binning:
+
+Binning can be done using one of the predefined binning functions
+or by creating own subclasses from "HistogramAnalysis.BinDefinition".
+
+  * LinearNumericBinDefinition: Binning function working on numeric
+    values and sorting them into bins of same size.
+
+  * ModuloTimeBinDefinition: Binning function working on parsed
+    datetime values but applying a modulo function to them. This
+    is useful for analysis of periodic activities.
+
+
+* **histogram_defs**: list of tuples. First element of the tuple contains the target property path to analyze. The second element contains the id of a bin_definition(LinearNumericBinDefinition or ModuloTimeBinDefinition). List(strings) **Required**
+* **report_interval**: Report_interval delay in seconds between creaton of two reports. The parameter is applied to the parsed record data time, not the system time. Hence reports can be delayed when no data is received. Integer(min: 1) **Required**
+* **reset_after_report_flag**: Zero counters after the report was sent. Boolean(Default: true)
+* **persistence_id'**: the name of the file where the learned models are stored. String(Default: 'Default')
+* **output_logline**: specifies whether the full parsed log atom should be provided in the output. Boolean(Default: true)
+* **output_event_handlers**: List of event-handler-id to send the report to.
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: LinearNumericBinDefinition
+          id: linear_numeric_bin_definition
+          lower_limit: 50
+          bin_size: 5
+          bin_count: 20
+          outlier_bins_flag: True
+
+        - type: HistogramAnalysis
+          id: HistogramAnalysis
+          histogram_defs: [["/model/RandomTime/Random", "linear_numeric_bin_definition"]]
+          report_interval: 10
+
+.. _PathDependentHistogramAnalysis:
+
+PathDependentHistogramAnalysis
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This component creates a histogram for only a single input property,
+e.g. an IP address, but for each group of correlated match pathes.
+Assume there two pathes that include the input property but they
+separate after the property was found on the path. This might
+be for example the client IP address in ssh log atoms, where the
+parsing path may split depending if this was a log atom for a
+successful login, logout or some error. This analysis component
+will then create separate histograms, one for the path common
+to all atoms and one for each disjunct part of the subpathes found.
+
+The component uses the same binning functions as the standard
+HistogramAnalysis.HistogramAnalysis, see documentation there.
+
+
+* **path**: The property-path. String(Required)
+* **bin_definition**: The id of a bin_definition(LinearNumericBinDefini  tion or ModuloTimeBinDefinition). String(Required)
+* **report_interval**: Report_interval delay in seconds between creaton of two reports. The parameter is applied to the parsed record data time, not the system time. Hence reports can be delayed when no data is received. Integer(min: 1)
+* **reset_after_report_flag**: Zero counters after the report was sent. Boolean(Default: true)
+* **persistence_id'**: the name of the file where the learned models are stored. String
+* **output_logline**: specifies whether the full parsed log atom should be provided in the output. Boolean(Default: true)
+* **output_event_handlers**: List of event-handler-id to send the report to.
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: ModuloTimeBinDefinition
+          id: modulo_time_bin_definition
+          modulo_value: 86400
+          time_unit: 3600
+          lower_limit: 0
+          bin_size: 1
+          bin_count: 24
+          outlier_bins_flag: True
+
+        - type: PathDependentHistogramAnalysis
+          id: PathDependentHistogramAnalysis
+          path: "/model/RandomTime"
+          bin_definition: "modulo_time_bin_definition"
+          report_interval: 10
+
+LinearNumericBinDefinition
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Binning function working on numeric values and sorting them into bins of same size.
+
+* **lower_limit**: Start on lowest bin. Integer or Float **Required**
+* **bin_size**: Size of bin in reporting units. Integer(min 1) **Required**
+* **bin_count**: Number of bins. Integer(min 1) **Required**
+* **outlier_bins_flag**: Disable outlier bins. Boolean. Default: False
+* **output_event_handlers**: List of handlers to send the report to.
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: LinearNumericBinDefinition
+          id: linear_numeric_bin_definition
+          lower_limit: 50
+          bin_size: 5
+          bin_count: 20
+          outlier_bins_flag: True
+
+.. seealso::
+
+   :ref:`HistogramAnalysis`
+
+ModuloTimeBinDefinition
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Binning function working on parsed datetime values but applying a modulo function to them. This is useful for analysis of periodic activities.
+
+* **modulo_value**: Modulo values in seconds.
+* **time_unit**: Division factor to get down to reporting unit
+* **lower_limit**: Start on lowest bin. Integer or Float **Required**
+* **bin_size**: Size of bin in reporting units. Size of bin in reporting units. Integer(min 1) **Required**
+* **bin_count**: Number of bins. Integer(min 1) **Required**
+* **outlier_bins_flag**: Disable outlier bins. Boolean. Default: False
+* **output_event_handlers**: List of handlers to send the report to.
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: ModuloTimeBinDefinition
+          id: modulo_time_bin_definition
+          modulo_value: 86400
+          time_unit: 3600
+          lower_limit: 0
+          bin_size: 1
+          bin_count: 24
+          outlier_bins_flag: True
+
+.. seealso::
+
+   :ref:`PathDependentHistogramAnalysis`
+
 
 MatchFilter
 ~~~~~~~~~~~
 
+This component creates events for specified paths and values.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: MatchFilter
+          id: MatchFilter
+          paths:
+            - "/model/Random"
+          value_list:
+            - 1
+            - 10
+            - 100
+
+
 MatchValueAverageChangeDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This detector calculates the average of a given list of values to monitor. Reports are generated if the average of the latest diverges significantly from the values observed before.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: MatchValueAverageChangeDetector
+          id: MatchValueAverageChange
+          timestamp_path: None
+          paths:
+            - "/model/Random"
+          min_bin_elements: 100
+          min_bin_time: 10
+
 
 MatchValueStreamWriter
 ~~~~~~~~~~~~~~~~~~~~~~
 
+This component extracts values from a given match and writes them to a stream. This can be used to forward these values to another program (when stream is a wrapped network socket) or to a file for further analysis. A stream is used instead of a file descriptor to increase performance. To flush it from time to time, add the writer object also to the time trigger list.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: MatchValueStreamWriter
+          id: MatchValueStreamWriter
+          stream: "sys.stdout"
+          paths:
+            - "/model/Sensors/CPUTemp"
+            - "/model/Sensors/CPUWorkload"
+            - "/model/Sensors/DTM"
+
+
 MissingMatchPathValueDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This component creates events when an expected value is not seen within a given timespan.
+For example because the service was deactivated or logging disabled unexpectedly. This is complementary to the function provided by
+NewMatchPathValueDetector. For each unique value extracted by target_path_list, a tracking record is added to expected_values_dict.
+It stores three numbers: the timestamp the extracted value was last seen, the maximum allowed gap between observations and the next
+alerting time when currently in error state. When in normal (alerting) state, the value is zero.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: MissingMatchPathValueDetector
+          id: MissingMatch
+          paths:
+            - "/model/DiskReport/Space"
+          check_interval: 2
+          realert_interval: 5
+          learn_mode: True
+
+.. seealso::
+
+   `Wiki: HowTo MissingMatchPathValueDetector <https://github.com/ait-aecid/logdata-anomaly-miner/wiki/HowTo-MissingMatchPathValueDetector>`_
 
 NewMatchIdValueComboDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1510,9 +1728,6 @@ This detector analyzes the time intervals of the appearance of log_atoms. It sen
           max_time_diff: 3600
           num_reduce_time_list: 10
 
-Rules
-~~~~~
-
 TSAArimaDetector
 ~~~~~~~~~~~~~~~~
 
@@ -1558,14 +1773,68 @@ This detector uses a tsa-arima model to track appearance frequencies of event li
 TimeCorrelationDetector
 ~~~~~~~~~~~~~~~~~~~~~~~
 
+This component tries to find time correlation patterns between different log atoms.
+When a possible correlation rule is detected, it creates an event including the rules. This is useful to implement checks as depicted
+in http://dx.doi.org/10.1016/j.cose.2014.09.006.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: TimeCorrelationDetector
+          id: TimeCorrelationDetector
+          parallel_check_count: 2
+          min_rule_attributes: 1
+          max_rule_attributes: 5
+          record_count_before_event: 10000
+
+
+
+.. _TimeCorrelationViolationDetector:
+
 TimeCorrelationViolationDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-TimestampCorrectionFilters
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+This component creates events when one of the given time correlation rules is violated.
+This is used to implement checks as depicted in http://dx.doi.org/10.1016/j.cose.2014.09.006
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: PathExistsMatchRule
+          id: path_exists_match_rule3
+          path: "/model/CronAnnouncement/Run"
+          match_action: a_class_selector
+        - type: PathExistsMatchRule
+          id: path_exists_match_rule4
+          path: "/model/CronExecution/Job"
+          match_action: b_class_selector
+        - type: TimeCorrelationViolationDetector
+          id: TimeCorrelationViolationDetector
+          ruleset:
+            - path_exists_match_rule3
+            - path_exists_match_rule4
+
+
+.. seealso::
+
+   :ref:`MatchRules`
+
+SimpleMonotonicTimestampAdjust
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Adjust decreasing timestamp of new records to the maximum observed so far to ensure monotony for other analysis components.
 
 TimestampsUnsortedDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This detector is useful to to detect algorithm malfunction or
+configuration errors, e.g. invalid timezone configuration.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: TimestampsUnsortedDetector
+          id: TimestampsUnsortedDetector
 
 VariableCorrelationDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1662,9 +1931,166 @@ This detector analyses each variable of the event_types by assigning them the im
 * **num_ind_for_weights** number of indicators used in the calculation of the indicator weights.
 * **used_multinomial_test** states the used multinomial test. the value can be of the list ['MT', 'Approx', 'Chi'], where 'MT' means original MT, 'Approx' is the approximation with single BTs and 'Chi' is the ChisquareTest.
 
+.. _MatchRules:
+
+----------
+MatchRules
+----------
+
+The following detectors work with MatchRules:
+
+* :ref:`AllowlistViolationDetector`
+* :ref:`TimeCorrelationViolationDetector`
+
+.. note:: MatchRules must be defined in the "Analysis"-part of the configuration.
+
+AndMatchRule
+~~~~~~~~~~~~
+
+This component provides a rule to match all subRules (logical and).
+
 .. code-block:: yaml
 
      Analysis:
+        - type: AndMatchRule
+          id: and_match_rule1
+          sub_rules:
+            - "path_exists_match_rule1"
+            - "negation_match_rule1"
+
+
+OrMatchRule
+~~~~~~~~~~~
+
+This component provides a rule to match any subRules (logical or).
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: OrMatchRule
+          id: or_match_rule
+          sub_rules:
+            - "and_match_rule1"
+            - "and_match_rule2"
+            - "negation_match_rule2"
+
+ParallelMatchRule
+~~~~~~~~~~~~~~~~~
+
+This component is a rule testing all the subrules in parallel.
+From the behaviour it is similar to the OrMatchRule, returning true if any subrule matches. The difference is that matching will not
+stop after the first positive match. This does only make sense when all subrules have match actions associated.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: ParallelMatchRule
+          id: parallel_match_rule
+          sub_rules:
+            - "and_match_rule1"
+            - "and_match_rule2"
+            - "negation_match_rule2"
+
+ValueDependentDelegatedMatchRule
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This component is a rule delegating rule checking to subrules depending on values found within the parser_match.
+The result of this rule is the result of the selected delegation rule.
+
+NegationMatchRule
+~~~~~~~~~~~~~~~~~
+
+Match elements of this component return true when the subrule did not match.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: NegationMatchRule
+          id: negation_match_rule1
+          sub_rule: "value_match_rule"
+        - type: NegationMatchRule
+          id: negation_match_rule2
+          sub_rule: "path_exists_match_rule2"
+
+PathExistsMatchRule
+~~~~~~~~~~~~~~~~~~~
+
+Match elements of this component return true when the given path was found in the parsed match data.
+
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: PathExistsMatchRule
+          id: path_exists_match_rule1
+          path: "/model/LoginDetails/PastTime/Time/Minutes"
+        - type: PathExistsMatchRule
+          id: path_exists_match_rule2
+          path: "/model/LoginDetails"
+
+
+ValueMatchRule
+~~~~~~~~~~~~~~
+
+Match elements of this component return true when the given path exists and has exactly the given parsed value.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: ValueMatchRule
+          id: value_match_rule
+          path: "/model/LoginDetails/Username"
+          value: "root"
+
+ValueListMatchRule
+~~~~~~~~~~~~~~~~~~
+
+Match elements of this component return true when the given path exists and has exactly one of the values included in the value list.
+
+ValueRangeMatchRule
+~~~~~~~~~~~~~~~~~~~
+
+Match elements of this component return true when the given path exists and the value is included in [lower, upper] range.
+
+StringRegexMatchRule
+~~~~~~~~~~~~~~~~~~~~
+
+Elements of this component return true when the given path exists and the string repr of the value matches the regular expression.
+
+ModuloTimeMatchRule
+~~~~~~~~~~~~~~~~~~~
+
+Match elements of this component return true when the following conditions are met.
+The given path exists, denotes a datetime object and the seconds since 1970 from that date modulo the given value are included in
+[lower, upper] range.
+
+ValueDependentModuloTimeMatchRule
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Match elements of this component return true when the following conditions are met.
+The given path exists, denotes a datetime object and the seconds since 1970 rom that date modulo the given value are included in a
+[lower, upper] range selected by values from the match.
+
+IPv4InRFC1918MatchRule
+~~~~~~~~~~~~~~~~~~~~~~
+
+Match elements of this component return true when the path matches and contains a valid IPv4 address from the RFC1918 private IP ranges.
+This could also be done by distinct range match elements, but as this kind of matching is common, have an own element for it.
+
+DebugMatchRule
+~~~~~~~~~~~~~~
+
+ This rule can be inserted into a normal ruleset just to see when a match attempt is made.
+ It just prints out the current log_atom that is evaluated. The match action is always invoked when defined, no matter which match
+ result is returned.
+
+DebugHistoryMatchRule
+~~~~~~~~~~~~~~~~~~~~~
+
+This rule can be inserted into a normal ruleset just to see when a match attempt is made.
+It just adds the evaluated log_atom to a ObjectHistory.
+
+=======
         - type: 'EventTypeDetector'
           id: ETD
 
