@@ -115,7 +115,7 @@ class AnalysisContext:
             else:
                 for trigger_class in register_time_trigger_class_override:
                     self.add_time_triggered_component(component, trigger_class)
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug(
+        logging.getLogger(DEBUG_LOG_NAME).debug(
             "Registered component %s with the id %d and component_name '%s'.", component.__class__.__name__, self.next_registry_id - 1,
             component_name)
 
@@ -166,7 +166,7 @@ class AnalysisContext:
 
     def build_analysis_pipeline(self):
         """Create the pipeline."""
-        logging.getLogger(AMinerConfig.DEBUG_LOG_NAME).debug("Started with build_analysis_pipeline.")
+        logging.getLogger(DEBUG_LOG_NAME).debug("Started with build_analysis_pipeline.")
         self.aminer_config.build_analysis_pipeline(self)
 
 
