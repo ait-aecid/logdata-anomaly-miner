@@ -1,0 +1,334 @@
+LearnMode: True
+
+Core.LogDir: '/tmp/lib/aminer/log'
+
+Core.PersistenceDir: '/tmp/lib/aminer'
+
+Core.PersistencePeriod: 600
+
+LogResourceList:
+        - 'file:///tmp/json_logs/wazuh.log'
+
+MailAlerting.TargetAddress: 'root@localhost'
+
+MailAlerting.FromAddress: 'root@localhost'
+
+MailAlerting.SubjectPrefix: 'aminer Alerts:'
+
+MailAlerting.AlertGraceTime: 0
+
+MailAlerting.EventCollectTime: 0
+
+MailAlerting.MinAlertGap: 0
+
+MailAlerting.MaxAlertGap: 600
+
+MailAlerting.MaxEventsPerMessage: 1000
+
+LogPrefix: 'Original log line: '
+
+Log.StatisticsPeriod: 3600
+
+Log.StatisticsLevel: 1
+
+Log.DebugLevel: 1
+
+Parser:
+       - id: timestamp
+         type: DateTimeModelElement
+         name: 'timestamp'
+         date_format: '%Y-%m-%dT%H:%M:%S.%f%z'
+
+       - id: level
+         type: DecimalIntegerValueModelElement
+         name: 'level'
+
+       - id: description
+         type: FixedWordlistDataModelElement
+         name: 'description'
+         args:
+           - 'IDS event.'
+           - 'Suricata: Alert - SURICATA HTTP METHOD terminated by non-compliant character'
+
+       - id: id
+         type: DecimalIntegerValueModelElement
+         name: 'id'
+<<<<<<< HEAD
+         value_pad_type: 'zero'
+=======
+>>>>>>> main
+
+       - id: firedtimes
+         type: DecimalIntegerValueModelElement
+         name: 'firedtimes'
+
+       - id: bool_wordlist
+         type: FixedWordlistDataModelElement
+         name: 'bool'
+         args:
+           - 'true'
+           - 'false'
+
+       - id: groups
+         type: FixedWordlistDataModelElement
+         name: 'name'
+         args:
+           - 'ids'
+           - 'suricata'
+
+       - id: name
+         type: FixedWordlistDataModelElement
+         name: 'name'
+         args:
+           - 'user-0'
+
+       - id: id_sec
+         type: DateTimeModelElement
+         name: 'id_sec'
+         date_format: '%s.%f'
+
+       - id: full_log
+         type: AnyByteDataModelElement
+         name: 'full_log'
+
+       - id: predecoder_timestamp
+         type: DateTimeModelElement
+         name: 'timestamp'
+         date_format: '%d/%m/%Y-%H:%M:%S.%f'
+
+       - id: _parent
+         type: FixedWordlistDataModelElement
+         name: '_parent'
+         args:
+           - 'snort'
+
+       - id: decoder_name
+         type: FixedWordlistDataModelElement
+         name: 'name'
+         args:
+           - 'snort'
+           - 'json'
+
+       - id: _srcip
+         type: IpAddressDataModelElement
+         name: '_srcip'
+
+       - id: dstip_ip
+         type: IpAddressDataModelElement
+         name: 'dstip_ip'
+
+       - id: colon
+         type: FixedDataModelElement
+         name: 'colon'
+         args: ':'
+
+       - id: port
+         type: DecimalIntegerValueModelElement
+         name: 'port'
+
+       - id: _dstip
+         type: SequenceModelElement
+         name: '_dstip'
+         args:
+           - dstip_ip
+           - colon
+           - port
+
+       - id: data_id
+         type: FixedWordlistDataModelElement
+         name: 'data_id'
+         args:
+           - '1:2221030:1'
+
+       - id: location
+         type: FixedWordlistDataModelElement
+         name: 'location'
+         args:
+           - '/var/log/forensic/suricata/fast.log'
+           - '/var/log/forensic/suricata/eve.json'
+
+       - id: _in_iface
+         type: FixedWordlistDataModelElement
+         name: '_in_iface'
+         args:
+           - 'eth0'
+
+       - id: _event_type
+         type: FixedWordlistDataModelElement
+         name: '_event_type'
+         args:
+           - 'alert'
+
+       - id: _src_ip
+         type: IpAddressDataModelElement
+         name: '_src_ip'
+
+       - id: _src_port
+         type: DecimalIntegerValueModelElement
+         name: '_src_port'
+
+       - id: _dest_ip
+         type: IpAddressDataModelElement
+         name: '_dest_ip'
+
+       - id: _dest_port
+         type: DecimalIntegerValueModelElement
+         name: '_dest_port'
+
+       - id: _proto
+         type: FixedWordlistDataModelElement
+         name: '_proto'
+         args:
+           - 'TCP'
+
+       - id: _tx_id
+         type: DecimalIntegerValueModelElement
+         name: '_tx_id'
+
+       - id: action
+         type: FixedWordlistDataModelElement
+         name: 'action'
+         args:
+           - 'allowed'
+
+       - id: gid
+         type: DecimalIntegerValueModelElement
+         name: 'gid'
+
+       - id: signature_id
+         type: DecimalIntegerValueModelElement
+         name: 'signature_id'
+
+       - id: rev
+         type: DecimalIntegerValueModelElement
+         name: 'rev'
+
+       - id: signature
+         type: FixedWordlistDataModelElement
+         name: 'signature'
+         args:
+           - 'SURICATA HTTP METHOD terminated by non-compliant character'
+
+       - id: category
+         type: FixedWordlistDataModelElement
+         name: 'category'
+         args:
+           - 'Generic Protocol Command Decode'
+
+       - id: severity
+         type: DecimalIntegerValueModelElement
+         name: 'severity'
+
+       - id: hostname
+         type: FixedWordlistDataModelElement
+         name: 'hostname'
+         args:
+           - 'mail.cup.com'
+
+       - id: url
+         type: VariableByteDataModelElement
+         name: 'url'
+         args: abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.:;&=+$,/?%#\~
+
+       - id: http_user_agent
+         type: FixedWordlistDataModelElement
+         name: 'http_user_agent'
+         args:
+           - 'Mozilla/5.00 (Nikto/2.1.5) (Evasions:6) (Test:map_codes)'
+
+       - id: http_content_type
+         type: FixedWordlistDataModelElement
+         name: 'http_content_type'
+         args:
+           - 'text/html'
+
+       - id: http_method
+         type: FixedWordlistDataModelElement
+         name: 'http_method'
+         args:
+           - 'GET'
+
+       - id: protocol
+         type: FixedDataModelElement
+         name: 'protocol'
+         args: 'HTTP/1.1'
+
+       - id: status
+         type: DecimalIntegerValueModelElement
+         name: 'status'
+
+       - id: length
+         type: DecimalIntegerValueModelElement
+         name: 'length'
+
+       - id: json
+         start: True
+         type: JsonModelElement
+         name: 'model'
+         optional_key_prefix: '_'
+         key_parser_dict:
+           timestamp: timestamp
+           rule:
+             level: level
+             description: description
+             id: id
+             firedtimes: firedtimes
+             mail: bool_wordlist
+             groups:
+               - groups
+           agent:
+             id: id
+             name: name
+           manager:
+             name: name
+           id: id_sec
+           full_log: full_log
+           _predecoder:
+             timestamp: predecoder_timestamp
+           decoder:
+             _parent: _parent
+             name: decoder_name
+           data:
+             _srcip: _srcip
+             _dstip: _dstip
+             _id: data_id
+             _timestamp: timestamp
+             _flow_id: id_sec
+             _in_iface: _in_iface
+             _event_type: _event_type
+             _src_ip: _src_ip
+             _src_port: _src_port
+             _dest_ip: _dest_ip
+             _dest_port: _dest_port
+             _proto: _proto
+             _tx_id: _tx_id
+             _alert:
+               action: action
+               gid: gid
+               signature_id: signature_id
+               rev: rev
+               signature: signature
+               category: category
+               severity: severity
+             _http:
+               hostname: hostname
+               url: url
+               http_user_agent: http_user_agent
+               http_content_type: http_content_type
+               http_method: http_method
+               protocol: protocol
+               status: status
+               length: length
+           location: location
+
+
+
+Input:
+        timestamp_paths: None
+        verbose: True
+        json_format: True
+
+EventHandlers:
+        - id: stpe
+          type: StreamPrinterEventHandler
+
