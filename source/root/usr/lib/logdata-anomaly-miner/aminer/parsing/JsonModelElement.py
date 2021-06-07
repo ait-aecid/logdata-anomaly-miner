@@ -301,8 +301,8 @@ class JsonModelElement(ModelElementInterface):
                          match_context.match_data.find(split_key.encode()), match_context.match_data.decode().find(split_key)])
             index += match_context.match_data[index:].find(split_key.encode() + b'":') + len(split_key.encode() + b'":')
             index += max([match_context.match_data.replace(b"\\", b"")[index:].find(data), match_context.match_data[index:].find(data),
-                         match_context.match_data.decode()[index:].find(data.decode()), match_context.match_data.decode("unicode-escape")[index:].find(
-                    data.decode("unicode-escape"))])
+                          match_context.match_data.decode()[index:].find(data.decode()),
+                          match_context.match_data.decode("unicode-escape")[index:].find(data.decode("unicode-escape"))])
             index += len(match_context.match_data[index:]) - len(match_context.match_data[index:].lstrip(b" \t\n"))
             if match_context.match_data[index:].find(b'"') == 0:
                 index += len(b'"')
