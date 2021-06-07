@@ -304,9 +304,6 @@ class JsonModelElement(ModelElementInterface):
             index += len(match_context.match_data[index:]) - len(match_context.match_data[index:].lstrip(b" \t\n"))
             if match_context.match_data[index:].find(b'"') == 0:
                 index += len(b'"')
-            index += len(data)
-            if match_context.match_data[index:].find(b'"') == 0:
-                index += len(b'"')
             # for example float scientific representation is converted to normal float..
             if index == -1 and match_element is not None and isinstance(json_match_data[split_key], float):
                 indices = [match_context.match_data.find(b",", len(match_element.match_string) // 3),
