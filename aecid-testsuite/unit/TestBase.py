@@ -14,8 +14,6 @@ from aminer.parsing.MatchElement import MatchElement
 from aminer.util import PersistenceUtil
 from aminer.util import SecureOSFunctions
 from _io import StringIO
-from pwd import getpwnam
-from grp import getgrnam
 
 
 def initialize_loggers(aminer_config, aminer_user_id, aminer_grp_id):
@@ -238,20 +236,6 @@ class DummyFirstMatchModelElement(ModelElementInterface):
                 return child_match
             match_context.match_data = match_data
         return None
-
-
-class DummyMatchContext:
-    """Dummy class for MatchContext."""
-
-    def __init__(self, match_data):
-        """Initiate the Dummy class."""
-        self.match_data = match_data
-        self.match_string = b''
-
-    def update(self, match_string):
-        """Update the data."""
-        self.match_data = self.match_data[len(match_string):]
-        self.match_string += match_string
 
 
 if __name__ == "__main__":
