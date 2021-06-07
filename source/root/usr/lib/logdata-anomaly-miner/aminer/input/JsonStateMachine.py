@@ -1,3 +1,6 @@
+# DISCLAIMER: adapted code from
+# https://stackoverflow.com/questions/6886283/how-i-can-i-lazily-read-multiple-json-values-from-a-file-stream-in-python
+
 # A streaming byte oriented JSON parser.  Feed it a single byte at a time and
 # it will emit complete objects as it comes across them.  Whitespace within and
 # between objects is ignored.  This means it can parse newline delimited JSON.

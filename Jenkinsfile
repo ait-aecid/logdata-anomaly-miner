@@ -22,12 +22,18 @@ pipeline {
                  sh "docker build -f aecid-testsuite/Dockerfile -t aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID ."
              }
          }
+
+         stage("Mypy Static Code Analysis"){
+             steps {
+                 sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runMypy"
+             }
+         }
          
          stage("UnitTest"){
              steps {
                  sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runUnittests"
-                 sh 'docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runSuspendModeTest'
-                 sh 'docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runRemoteControlTest'
+                 sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runSuspendModeTest"
+                 sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runRemoteControlTest"
              }
          }
          stage("Run Demo-Configs"){
@@ -54,7 +60,12 @@ pipeline {
                          sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runAminerJsonInputDemo"
                      }
                  }
-
+                 stage("encoding-demo-config") {
+                     steps {
+                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runAminerEncodingDemo demo/aminer/demo-config.py"
+                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runAminerEncodingDemo demo/aminer/demo-config.yml"
+                     }
+                 }
              }
          }
 
@@ -72,17 +83,18 @@ pipeline {
              steps {
                  sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runAminerIntegrationTest aminerIntegrationTest.sh config.py"
                  sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runAminerIntegrationTest aminerIntegrationTest2.sh config21.py config22.py"
+                 sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runOfflineMode"
              }
          }
 
 
          stage("Wiki Tests - development"){
              when {
-                 branch 'development'
+                 branch "development"
              }
              steps {
                  sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runTryItOut development"
-                 sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runGettingStarted development"
+//                 sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runGettingStarted development"
                  sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runHowToCreateYourOwnSequenceDetector development"
                  sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runHowToCreateYourOwnFrequencyDetector development"
                  sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runHowToMissingMatchPathValueDetector development"
@@ -91,17 +103,17 @@ pipeline {
 
     stage("Wiki Tests - main"){
              when {
-                 branch 'main'
+                 branch "main"
              }
              steps {
                  sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runTryItOut main"
-                 sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runGettingStarted main"
+                 // sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runGettingStarted main"
              }
          }
 
 /*         stage("Coverage Tests"){
              when {
-                 branch 'development'
+                 branch "development"
              }
              steps {
                  sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runCoverageTests"
@@ -143,7 +155,7 @@ pipeline {
         stage("Test Ubuntu 18.04") {
                     when {
                        expression {
-                            BRANCH_NAME == 'main' || BRANCH_NAME == 'development'
+                            BRANCH_NAME == "main" || BRANCH_NAME == "development"
                        }
                     }
                     steps {
@@ -158,7 +170,7 @@ pipeline {
         stage("Test Ubuntu 20.04") {
                     when {
                        expression {
-                            BRANCH_NAME == 'main' || BRANCH_NAME == 'development'
+                            BRANCH_NAME == "main" || BRANCH_NAME == "development"
                        }
                     }
                     steps {
@@ -169,6 +181,25 @@ pipeline {
                      sh "docker run --rm aecid/aminer-ubuntu-1804:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
                    }
                  }
+
+          stage("Build Documentation") {
+             when {
+                 expression {
+                    BRANCH_NAME == "main" || BRANCH_NAME == "development"
+                 }
+             }
+             environment {
+                 BUILDDOCSDIR = sh(script: 'mktemp -p $WORKSPACE_TMP -d | tr -d [:space:]', returnStdout: true)
+             }
+             steps {
+                 sh "docker build -f Dockerfile -t aecid/aminer-docs:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID ."
+                 sh "chmod 777 ${env.BUILDDOCSDIR}"
+                 sh "chmod g+s ${env.BUILDDOCSDIR}"
+                 sh "docker run --rm -v ${env.BUILDDOCSDIR}:/docs/_build aecid/aminer-docs:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID mkdocs"
+                 sh "scripts/deploydocs.sh ${env.BRANCH_NAME} ${env.BUILDDOCSDIR}/html /var/www/aeciddocs/logdata-anomaly-miner"
+             }
+         }
+
     }
     post {
         always {
@@ -188,6 +219,8 @@ pipeline {
            if( ubuntu20image == true ){
                sh "docker rmi aecid/aminer-ubuntu-2004:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
            }
+           // The following line is experimental. if it works, the code above can be deleted
+           sh "docker system prune -fa"
          }
         }
  

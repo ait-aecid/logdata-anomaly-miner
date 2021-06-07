@@ -211,6 +211,7 @@ who | awk '{print $1,$3,$4}' | while read user time; do \
 ({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n"; } | tr "\n" " " && echo " cron[123]: Job \`cron.daily\`") >> /tmp/syslog
 # AnyByteDataModelElement
 echo "Any:dafsdff12%3§fasß?–_=yy" >> /tmp/syslog
+echo "Any:äöüß" >> /tmp/syslog
 # Base64StringModelElement
 echo "VXNlcm5hbWU6ICJ1c2VyIgpQYXNzd29yZDogInBhc3N3b3JkIg==" >> /tmp/syslog
 # DateTimeModelElement

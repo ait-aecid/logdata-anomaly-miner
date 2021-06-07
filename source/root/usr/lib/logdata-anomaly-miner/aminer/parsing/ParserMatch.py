@@ -11,8 +11,9 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-
-
+import logging
+from aminer.AminerConfig import DEBUG_LOG_NAME
+from aminer.parsing.MatchElement import MatchElement
 from collections import deque
 
 
@@ -22,15 +23,16 @@ class ParserMatch:
     Unlike the MatchElement, this class also provides fields to store information commonly used when dealing with the match.
     """
 
-    def __init__(self, match_element, parsing_process_data=None):
+    def __init__(self, match_element: MatchElement):
         """
         Initialize the match.
         @param match_element the root MatchElement from the parsing process.
-        @param parsing_process_data this parameter might provide more information about the parsing process, e.g. when parsing produced
-        warnings. The data is specific for the source producing the match.
         """
+        if not isinstance(match_element, MatchElement):
+            msg = "match_element has to be of the type MatchElement."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         self.match_element = match_element
-        self.parsing_process_data = parsing_process_data
         self.match_dictionary = None
 
     def get_match_element(self):
@@ -49,10 +51,10 @@ class ParserMatch:
             for test_match in match_list:
                 result_dict[test_match.path] = test_match
                 children = test_match.children
-                if (children is not None) and children:
+                if children is not None:
                     stack.append(children)
         self.match_dictionary = result_dict
         return result_dict
 
     def __str__(self):
-        return 'ParserMatch: %s' % (self.match_element.annotate_match('  '))
+        return "ParserMatch: %s" % (self.match_element.annotate_match("  "))
