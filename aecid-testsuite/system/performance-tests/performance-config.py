@@ -9,7 +9,7 @@ config_properties = {}
 # to be readable by the aminer process! Supported types are:
 # * file://[path]: Read data from file, reopen it after rollover
 # * unix://[path]: Open the path as UNIX local socket for reading
-config_properties['LogResourceList'] = ['file:///tmp/syslog']  # skipcq: BAN-B108
+config_properties['LogResourceList'] = ['file:///tmp/syslog']
 
 # Define the uid/gid of the process that runs the calculation
 # after opening the log files:
@@ -34,7 +34,7 @@ config_properties['AminerGroup'] = 'aminer'
 # to the 'AminerUser' but not group/world readable. On violation,
 # aminer will refuse to start. When undefined, '/var/lib/aminer'
 # is used.
-config_properties['Core.PersistenceDir'] = '/tmp/lib/aminer'
+config_properties['Core.PersistenceDir'] = '/tmp/lib/aminer'  # skipcq: BAN-B108
 
 # Define a target e-mail address to send alerts to. When undefined,
 # no e-mail notification hooks are added.
