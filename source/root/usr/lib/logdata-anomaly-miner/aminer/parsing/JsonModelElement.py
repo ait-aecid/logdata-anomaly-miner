@@ -163,7 +163,7 @@ class JsonModelElement(ModelElementInterface):
                 return [None]
             if isinstance(value, dict):
                 matches += self.parse_json_dict(value, json_match_data[split_key], "%s/%s" % (current_path, split_key), match_context)
-                if matches[-1] is None:
+                if len(matches) == 0 or matches[-1] is None:
                     logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN MATCHES 1")
                     return matches
             elif isinstance(value, list):
@@ -297,11 +297,15 @@ class JsonModelElement(ModelElementInterface):
                     debug_log_prefix + "Data length not matching! match_string: %d, data: %d, data: %s" % (
                         len(match_element.match_string), len(data), data.decode()))
                 match_element = None
-            index = max([match_context.match_data.replace(b"\\", b"").find(data), match_context.match_data.find(data),
-                         match_context.match_data.decode().find(data.decode()), match_context.match_data.decode("unicode-escape").find(
-                    data.decode("unicode-escape"))])
-            if match_context.match_data[index:].find(data + b'": ' + data) == 0:
-                index += len(data + b'": ')
+            index = max([match_context.match_data.replace(b"\\", b"").find(split_key.encode()),
+                         match_context.match_data.find(split_key.encode()), match_context.match_data.decode().find(split_key)])
+            index += match_context.match_data[index:].find(split_key.encode() + b'":') + len(split_key.encode() + b'":')
+            index += max([match_context.match_data.replace(b"\\", b"")[index:].find(data), match_context.match_data[index:].find(data),
+                          match_context.match_data.decode()[index:].find(data.decode()),
+                          match_context.match_data.decode("unicode-escape")[index:].find(data.decode("unicode-escape"))])
+            index += len(match_context.match_data[index:]) - len(match_context.match_data[index:].lstrip(b" \t\n"))
+            if match_context.match_data[index:].find(b'"') == 0:
+                index += len(b'"')
             # for example float scientific representation is converted to normal float..
             if index == -1 and match_element is not None and isinstance(json_match_data[split_key], float):
                 indices = [match_context.match_data.find(b",", len(match_element.match_string) // 3),

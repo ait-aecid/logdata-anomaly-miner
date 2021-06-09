@@ -2090,15 +2090,6 @@ DebugHistoryMatchRule
 This rule can be inserted into a normal ruleset just to see when a match attempt is made.
 It just adds the evaluated log_atom to a ObjectHistory.
 
-=======
-        - type: 'EventTypeDetector'
-          id: ETD
-
-        - type: 'VariableTypeDetector'
-          event_type_detector: ETD
-          num_init: 200
-          num_update: 100
-          num_s_gof_values: 100
 
 -------------
 EventHandling

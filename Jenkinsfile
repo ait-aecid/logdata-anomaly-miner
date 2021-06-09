@@ -12,6 +12,7 @@ def  ubuntu18image = false
 def  ubuntu20image = false
 def  debianbusterimage = false
 def  debianbullseyeimage = false
+def  docsimage = false
 
 pipeline {
      agent any
@@ -192,6 +193,9 @@ pipeline {
                  BUILDDOCSDIR = sh(script: 'mktemp -p $WORKSPACE_TMP -d | tr -d [:space:]', returnStdout: true)
              }
              steps {
+                 script {
+                    docsimage = true
+                 }
                  sh "docker build -f Dockerfile -t aecid/aminer-docs:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID ."
                  sh "chmod 777 ${env.BUILDDOCSDIR}"
                  sh "chmod g+s ${env.BUILDDOCSDIR}"
@@ -219,8 +223,9 @@ pipeline {
            if( ubuntu20image == true ){
                sh "docker rmi aecid/aminer-ubuntu-2004:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
            }
-           // The following line is experimental. if it works, the code above can be deleted
-           sh "docker system prune -fa"
+           if( docsimage == true){
+               sh "docker rmi aecid/aminer-docs:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
+           }
          }
         }
  
