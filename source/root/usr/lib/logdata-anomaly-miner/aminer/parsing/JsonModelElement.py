@@ -209,6 +209,7 @@ class JsonModelElement(ModelElementInterface):
                 return [None]
             if isinstance(value, dict):
                 matches += self.parse_json_dict(value, json_match_data[split_key], "%s/%s" % (current_path, split_key), match_context)
+<<<<<<< HEAD
                 if json_match_data[split_key] == {}:
                     index = match_context.match_data.find(split_key.encode())
                     index = match_context.match_data.find(b"}", index)
@@ -216,6 +217,8 @@ class JsonModelElement(ModelElementInterface):
                         current_path+"/"+key, match_context.match_data[:index], match_context.match_data[:index], None)
                     matches.append(match_element)
                     match_context.update(match_context.match_data[:index])
+=======
+>>>>>>> Development merge for 2.4.0 (#751)
                 if len(matches) == 0 or matches[-1] is None:
                     logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN MATCHES 1")
                     return matches
@@ -394,6 +397,7 @@ class JsonModelElement(ModelElementInterface):
             index = max([match_context.match_data.replace(b"\\", b"").find(split_key.encode()),
                          match_context.match_data.find(split_key.encode()), match_context.match_data.decode().find(split_key)])
             index += match_context.match_data[index:].find(split_key.encode() + b'":') + len(split_key.encode() + b'":')
+<<<<<<< HEAD
             try:
                 index += max([match_context.match_data.replace(b"\\", b"")[index:].find(data), match_context.match_data[index:].find(data),
                               match_context.match_data.decode(enc)[index:].find(data.decode(enc))])
@@ -401,6 +405,12 @@ class JsonModelElement(ModelElementInterface):
                 index += max([match_context.match_data.replace(b"\\", b"")[index:].find(data), match_context.match_data[index:].find(data),
                               match_context.match_data.decode()[index:].find(data.decode())])
             index += len(match_context.match_data[index:]) - len(match_context.match_data[index:].lstrip(b" \r\t\n"))
+=======
+            index += max([match_context.match_data.replace(b"\\", b"")[index:].find(data), match_context.match_data[index:].find(data),
+                          match_context.match_data.decode()[index:].find(data.decode()),
+                          match_context.match_data.decode("unicode-escape")[index:].find(data.decode("unicode-escape"))])
+            index += len(match_context.match_data[index:]) - len(match_context.match_data[index:].lstrip(b" \t\n"))
+>>>>>>> Development merge for 2.4.0 (#751)
             if match_context.match_data[index:].find(b'"') == 0:
                 index += len(b'"')
             # for example float scientific representation is converted to normal float..

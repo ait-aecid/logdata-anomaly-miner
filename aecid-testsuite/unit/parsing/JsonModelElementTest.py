@@ -348,6 +348,7 @@ class JsonModelElementTest(TestBase):
         self.compare_match_results(
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
+<<<<<<< HEAD
     def test9get_match_element_empty_list_empty_object_null(self):
         """Test if the keywords EMPTY_LIST, EMPTY_OBJECT, EMPTY_STRING and None (null) work properly."""
         key_parser_dict = {"menu": {
@@ -491,6 +492,9 @@ class JsonModelElementTest(TestBase):
         self.compare_no_match_results(data, match_element, match_context)
 
     def test12get_match_element_no_match(self):
+=======
+    def test9get_match_element_no_match(self):
+>>>>>>> Development merge for 2.4.0 (#751)
         """Parse not matching substring from MatchContext and check if the MatchContext was not changed."""
         json_model_element = JsonModelElement(self.id_, self.key_parser_dict)
         # missing key
@@ -533,7 +537,11 @@ class JsonModelElementTest(TestBase):
         match_element = json_model_element.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
+<<<<<<< HEAD
     def test13element_id_input_validation(self):
+=======
+    def test10element_id_input_validation(self):
+>>>>>>> Development merge for 2.4.0 (#751)
         """Check if element_id is validated."""
         self.assertRaises(ValueError, JsonModelElement, "", self.key_parser_dict)  # empty element_id
         self.assertRaises(TypeError, JsonModelElement, None, self.key_parser_dict)  # None element_id
@@ -547,7 +555,11 @@ class JsonModelElementTest(TestBase):
         self.assertRaises(TypeError, JsonModelElement, (), self.key_parser_dict)  # empty tuple element_id is not allowed
         self.assertRaises(TypeError, JsonModelElement, set(), self.key_parser_dict)  # empty set element_id is not allowed
 
+<<<<<<< HEAD
     def test14key_parser_dict_input_validation(self):
+=======
+    def test11key_parser_dict_input_validation(self):
+>>>>>>> Development merge for 2.4.0 (#751)
         """Check if key_parser_dict is validated."""
         self.assertRaises(TypeError, JsonModelElement, self.id_, "path")  # string key_parser_dict
         self.assertRaises(TypeError, JsonModelElement, self.id_, None)  # None key_parser_dict
@@ -568,7 +580,11 @@ class JsonModelElementTest(TestBase):
         self.assertRaises(TypeError, JsonModelElement, self.id_, ())  # empty tuple key_parser_dict is not allowed
         self.assertRaises(TypeError, JsonModelElement, self.id_, set())  # empty set key_parser_dict is not allowed
 
+<<<<<<< HEAD
     def test15optional_key_prefix_input_validation(self):
+=======
+    def test12optional_key_prefix_input_validation(self):
+>>>>>>> Development merge for 2.4.0 (#751)
         """Check if optional_key_prefix is validated."""
         self.assertRaises(ValueError, JsonModelElement, self.id_, self.key_parser_dict, "")  # empty optional_key_prefix
         self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, None)  # None optional_key_prefix
@@ -582,6 +598,7 @@ class JsonModelElementTest(TestBase):
         self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, ())  # empty tuple optional_key_prefix is not allowed
         self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, set())  # empty set optional_key_prefix not allowed
 
+<<<<<<< HEAD
     def test16allow_all_fields_input_validation(self):
         """Check if allow_all_fields is validated."""
         self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, allow_all_fields="")
@@ -596,6 +613,9 @@ class JsonModelElementTest(TestBase):
         self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, allow_all_fields=set())
 
     def test17get_match_element_match_context_input_validation(self):
+=======
+    def test13get_match_element_match_context_input_validation(self):
+>>>>>>> Development merge for 2.4.0 (#751)
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = JsonModelElement(self.id_, self.key_parser_dict)
         data = b"abcdefghijklmnopqrstuvwxyz.!?"

@@ -12,7 +12,10 @@ def  ubuntu18image = false
 def  ubuntu20image = false
 def  debianbusterimage = false
 def  debianbullseyeimage = false
+<<<<<<< HEAD
 def  productionimage = false
+=======
+>>>>>>> Development merge for 2.4.0 (#751)
 def  docsimage = false
 
 pipeline {
