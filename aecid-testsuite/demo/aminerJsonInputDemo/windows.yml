@@ -10,7 +10,7 @@ Core.PersistencePeriod: 600
 
 LogResourceList:
         - 'file:///tmp/windows_json_logs/Security_Error.log'
-        - 'file:///tmp/windows_json_logs/Security_Unparsed.log'
+        #- 'file:///tmp/windows_json_logs/Security_Unparsed.log'
         - 'file:///tmp/windows_json_logs/Security_Working.log'
 
 MailAlerting.TargetAddress: 'root@localhost'
