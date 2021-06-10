@@ -77,6 +77,7 @@ pipeline {
                  sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runJsonDemo demo/aminerJsonInputDemo/json-eve-demo.yml"
                  sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runJsonDemo demo/aminerJsonInputDemo/json-journal-demo.yml"
                  sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runJsonDemo demo/aminerJsonInputDemo/json-wazuh-demo.yml"
+                 sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runJsonDemo demo/aminerJsonInputDemo/windows.yml"
              }
          }
 
