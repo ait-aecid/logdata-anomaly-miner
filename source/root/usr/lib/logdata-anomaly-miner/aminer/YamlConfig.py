@@ -518,7 +518,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 if item['stream'] == 'sys.stderr':
                     stream = sys.stderr
                 tmp_analyser = func(stream, item['paths'], item['separator'].encode().replace(b"\\n", b"\n").replace(b"\\t", b"\t").replace(
-                    b"\\r", b"\r").replace(b"\\\\", b"\\").replace(b"\\b", b"\b"),item['missing_value_string'].encode().replace(
+                    b"\\r", b"\r").replace(b"\\\\", b"\\").replace(b"\\b", b"\b"), item['missing_value_string'].encode().replace(
                     b"\\n", b"\n").replace(b"\\t", b"\t").replace(b"\\r", b"\r").replace(b"\\\\", b"\\").replace(b"\\b", b"\b"))
             elif item['type'].name == 'NewMatchPathDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
