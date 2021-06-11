@@ -306,7 +306,7 @@ class JsonModelElement(ModelElementInterface):
             except UnicodeDecodeError:
                 index += max([match_context.match_data.replace(b"\\", b"")[index:].find(data), match_context.match_data[index:].find(data),
                               match_context.match_data.decode()[index:].find(data.decode())])
-            index += len(match_context.match_data[index:]) - len(match_context.match_data[index:].lstrip(b" \t\n"))
+            index += len(match_context.match_data[index:]) - len(match_context.match_data[index:].lstrip(b" \r\t\n"))
             if match_context.match_data[index:].find(b'"') == 0:
                 index += len(b'"')
             # for example float scientific representation is converted to normal float..
