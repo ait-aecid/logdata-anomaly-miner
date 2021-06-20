@@ -221,7 +221,10 @@ class JsonModelElement(ModelElementInterface):
         """Parse a list in a json object."""
         for data in json_match_data[split_key]:
             if isinstance(data, str):
-                data = data.encode()
+                enc = "utf-8"
+                if self.is_escaped_unicode(data):
+                    enc = "unicode-escape"
+                data = data.encode(enc)
             if data is None:
                 data = b"null"
             elif not isinstance(data, bytes):
