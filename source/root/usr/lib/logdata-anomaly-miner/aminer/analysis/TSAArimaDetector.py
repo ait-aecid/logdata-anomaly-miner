@@ -33,16 +33,18 @@ from scipy.signal import savgol_filter
 class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """This class is used for an arima time series analysis of the appearances of log lines to events."""
 
-    def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, build_sum_over_values=False, num_division_time_step=10,
-                 alpha=0.05, num_min_time_history=20, num_max_time_history=30, num_results_bt=15, alpha_bt=0.05, acf_threshold=0.2,
-                 round_time_inteval_threshold=0.02, persistence_id='Default', path_list=None, ignore_list=None, output_log_line=True,
-                 auto_include_flag=True):
+    def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, acf_pause_area=0.2, build_sum_over_values=False,
+                 num_periods_tsa_ini=15, num_division_time_step=10, alpha=0.05, num_min_time_history=20, num_max_time_history=30,
+                 num_results_bt=15, alpha_bt=0.05, acf_threshold=0.2, round_time_inteval_threshold=0.02, persistence_id='Default',
+                 path_list=None, ignore_list=None, output_log_line=True, auto_include_flag=True):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param event_type_detector used to track the number of events in the time windows.
+        @param acf_pause_area states which area of the resutls of the ACF are not used to find the highest peak.
         @param build_sum_over_values states if the sum of a series of counts is build before applying the TSA.
+        @param num_periods_tsa_ini Number of periods used to initialize the Arima-model.
         @param num_division_time_step Number of division of the time window to calculate the time step.
         @param alpha significance level of the estimated values.
         @param num_min_time_history minimal number of values of the time_history after it is initialised.
@@ -72,7 +74,9 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             self.ignore_list = []
 
         self.event_type_detector = event_type_detector
+        self.acf_pause_area = acf_pause_area
         self.build_sum_over_values = build_sum_over_values
+        self.num_periods_tsa_ini = num_periods_tsa_ini
         self.num_division_time_step = num_division_time_step
         self.alpha = alpha
         self.num_min_time_history = num_min_time_history
@@ -113,12 +117,21 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             self.arima_models_statsmodels = [None for _ in self.time_window_history]
             # skipcq: PTC-W0060
             for event_index in range(len(self.arima_models_statsmodels)):
-                if len(self.time_window_history[event_index]) >= 10*self.num_division_time_step:
+                if len(self.time_window_history[event_index]) >= self.num_periods_tsa_ini*self.num_division_time_step:
                     try:
-                        model = statsmodels.tsa.arima.model.ARIMA(
-                                self.time_window_history[event_index][-10*self.num_division_time_step:],
-                                order=(self.num_division_time_step, 0, 0), seasonal_order=(0, 0, 0, self.num_division_time_step))
-                        self.arima_models_statsmodels[event_index] = model.fit()
+                        if not self.build_sum_over_values:
+                            model = statsmodels.tsa.arima.model.ARIMA(
+                                    self.time_window_history[event_index][-self.num_periods_tsa_ini*self.num_division_time_step:],
+                                    order=(self.num_division_time_step, 0, 0), seasonal_order=(0, 0, 0, self.num_division_time_step))
+                            self.arima_models_statsmodels[event_index] = model.fit()
+                        else:
+                            model = statsmodels.tsa.arima.model.ARIMA([sum(self.time_window_history[event_index][
+                                    -self.num_periods_tsa_ini*self.num_division_time_step+i:
+                                    -(self.num_periods_tsa_ini-1)*self.num_division_time_step+i]) for i in
+                                    range((self.num_periods_tsa_ini-1)*self.num_division_time_step)]+[
+                                    sum(self.time_window_history[event_index][-self.num_division_time_step:])],
+                                    order=(self.num_division_time_step, 0, 0), seasonal_order=(0, 0, 0, self.num_division_time_step))
+                            self.arima_models_statsmodels[event_index] = model.fit()
                     except:  # skipcq FLK-E722
                         self.arima_models_statsmodels[event_index] = None
                         self.time_window_history[event_index] = []
@@ -258,11 +271,12 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
             # Add the new count to the history and shorten it, if neccessary
             self.time_window_history[event_index].append(count)
-            if len(self.time_window_history[event_index]) > 20 * self.num_division_time_step:
-                self.time_window_history[event_index] = self.time_window_history[event_index][-10*self.num_division_time_step:]
+            if len(self.time_window_history[event_index]) > 2 * self.num_periods_tsa_ini * self.num_division_time_step:
+                self.time_window_history[event_index] = self.time_window_history[event_index][
+                        -self.num_periods_tsa_ini*self.num_division_time_step:]
 
             # Check if enough values have been stored to initialize the arima_model
-            if len(self.time_window_history[event_index]) >= 10*self.num_division_time_step:
+            if len(self.time_window_history[event_index]) >= self.num_periods_tsa_ini*self.num_division_time_step:
                 message = 'Initializing the TSA for the eventtype %s' % event_index
                 affected_path = self.event_type_detector.variable_key_list[event_index]
                 self.print(message, log_atom, affected_path)
@@ -271,7 +285,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     # Add the arima_model to the list
                     try:
                         model = statsmodels.tsa.arima.model.ARIMA(
-                                self.time_window_history[event_index][-10*self.num_division_time_step:],
+                                self.time_window_history[event_index][-self.num_periods_tsa_ini*self.num_division_time_step:],
                                 order=(self.num_division_time_step, 0, 0), seasonal_order=(0, 0, 0, self.num_division_time_step))
                         self.arima_models_statsmodels[event_index] = model.fit()
                     except:  # skipcq FLK-E722
@@ -280,8 +294,9 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     # Add the arima_model to the list
                     try:
                         model = statsmodels.tsa.arima.model.ARIMA([sum(self.time_window_history[event_index][
-                                -10*self.num_division_time_step+i:-9*self.num_division_time_step+i]) for i in
-                                range(9*self.num_division_time_step)]+[
+                                -self.num_periods_tsa_ini*self.num_division_time_step+i:
+                                -(self.num_periods_tsa_ini-1)*self.num_division_time_step+i]) for i in
+                                range((self.num_periods_tsa_ini-1)*self.num_division_time_step)]+[
                                 sum(self.time_window_history[event_index][-self.num_division_time_step:])],
                                 order=(self.num_division_time_step, 0, 0), seasonal_order=(0, 0, 0, self.num_division_time_step))
                         self.arima_models_statsmodels[event_index] = model.fit()
