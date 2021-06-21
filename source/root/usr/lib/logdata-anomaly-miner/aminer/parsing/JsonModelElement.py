@@ -65,6 +65,7 @@ class JsonModelElement(ModelElementInterface):
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         self.optional_key_prefix = optional_key_prefix
+        self.dec_escapes = False
 
     def get_id(self):
         """Get the element ID."""
@@ -122,8 +123,10 @@ class JsonModelElement(ModelElementInterface):
         except JSONDecodeError as e:
             logging.getLogger(debug_log_prefix + DEBUG_LOG_NAME).debug(e)
             return None
+        self.dec_escapes = True
         if self.is_escaped_unicode(match_context.match_data.decode()):
             match_context.match_data = match_context.match_data.decode("unicode-escape").encode()
+            self.dec_escapes = False
         matches += self.parse_json_dict(self.key_parser_dict, json_match_data, current_path, match_context)
         remove_chars = b' }]"\r\n'
         match_data = match_context.match_data
@@ -221,7 +224,10 @@ class JsonModelElement(ModelElementInterface):
         """Parse a list in a json object."""
         for data in json_match_data[split_key]:
             if isinstance(data, str):
-                data = data.encode()
+                enc = "utf-8"
+                if self.is_escaped_unicode(data) and self.dec_escapes:
+                    enc = "unicode-escape"
+                data = data.encode(enc)
             if data is None:
                 data = b"null"
             elif not isinstance(data, bytes):
@@ -273,7 +279,7 @@ class JsonModelElement(ModelElementInterface):
         data = json_match_data[split_key]
         enc = "utf-8"
         if isinstance(data, str):
-            if self.is_escaped_unicode(data):
+            if self.is_escaped_unicode(data) and self.dec_escapes:
                 enc = "unicode-escape"
             data = data.encode(enc)
         elif isinstance(data, bool):
