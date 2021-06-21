@@ -73,7 +73,7 @@ Parser:
        - id: non_empty_elem
          type: VariableByteDataModelElement
          name: 'non_empty_elem'
-         args: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.:;&%=+$,/?%#\~()\r\n\t '
+         args: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZüäö0123456789-_.:;&%=+$,/?%#\~()\r\n\t '
 
        #- id: non_empty_elem
        #  type: AnyByteDataModelElement
