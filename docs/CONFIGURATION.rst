@@ -1735,7 +1735,9 @@ This detector uses a tsa-arima model to track appearance frequencies of event li
 
 * **paths** at least one of the parser paths in this list needs to appear in the event to be analyzed.
 * **event_type_detector** used to track the number of event lines in the time windows.
+* **acf_pause_area** states which area of the resutls of the ACF are not used to find the highest peak.
 * **build_sum_over_values** states if the sum of a series of counts is built before applying the TSA.
+* **num_periods_tsa_ini** Number of periods used to initialize the Arima-model.
 * **num_division_time_step** Number of divisions of the time window to calculate the time step.
 * **alpha** significance level of the estimated values.
 * **num_min_time_history** minimal number of values of the time_history after it is initialized.
