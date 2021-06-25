@@ -4,8 +4,8 @@ Documentation=man:aminer(1)
 
 [Service]
 Type=simple
-ExecStartPre=touch /var/log/aminer.log
-ExecStartPre=chown aminer:aminer /var/log/aminer.log
+ExecStartPre=/usr/bin/touch /var/log/aminer.log
+ExecStartPre=/bin/chown aminer:aminer /var/log/aminer.log
 ExecStart=/usr/lib/logdata-anomaly-miner/aminer.py --config /etc/aminer/config.yml
 KillMode=control-group
 # Write everything to /dev/null: if aminer is misconfigured, it

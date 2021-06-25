@@ -477,7 +477,7 @@ class YamlConfigTest(TestBase):
         aminer_config.load_yaml('unit/data/configfiles/template_config.yml')
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        self.assertEqual(context.atomizer_factory.event_handler_list[0].stream.name, '/tmp/streamPrinter.txt')
+        self.assertEqual(context.atomizer_factory.event_handler_list[0].stream.name, '/tmp/streamPrinter.txt')  # skipcq: BAN-B108
         self.assertEqual(context.atomizer_factory.event_handler_list[0].stream.mode, 'w+')
 
     def test20_suppress_output(self):

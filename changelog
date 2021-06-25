@@ -1,3 +1,27 @@
+logdata-anomaly-miner (2.4.0) unstable; urgency=low
+  Bugfixes:
+  * Fixed error in JsonModelElement
+  * Fixed problems with umlauts in JsonParser
+  * Fixed problems with the start element of the ElementValueBranchModelElement
+  * Fixed issues with the stat and debug command line parameters
+  * Fixed issues if posix acl are not supported by the filesystem
+  * Fixed issues with output for non ascii characters
+  * Modified kafka-version
+  Changes:
+  * Improved command-line-options install-script
+  * Added documentation
+  * Improved VTD CM-Test
+  * Improved unit-tests
+  * Refactoring
+  * Added TSAArimaDetector
+  * Improved ParserCount
+  * Added the PathValueTimeIntervalDetector
+  * Implemented offline mode
+  * Added PCA detector
+  * Added timeout-paramter to ESD
+
+ -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Fri,  04 Jun 2021 12:00:00 +0000
+
 logdata-anomaly-miner (2.3.1) unstable; urgency=low
   Bugfixes:
   * Replaced username and groupname with uid and gid for chown()
