@@ -1,3 +1,5 @@
+.. _Overview:
+
 ========
 Overview
 ========
@@ -17,6 +19,105 @@ The core component of the logdata-anomaly-miner is the "analysis pipeline". It c
 
 .. image:: images/analysis-pipeline.png
    :alt: Parts of the analysis-pipeline
+
+=======================
+Command-line Parameters
+=======================
+
+----------
+-h, --help
+----------
+
+Show the help message and exit.
+
+-------------
+-v, --version
+-------------
+
+Show program's version number and exit.
+
+-------------------
+-u, --check-updates
+-------------------
+
+Check if updates for the aminer are available and exit.
+
+--------------------------
+-c CONFIG, --config CONFIG
+--------------------------
+
+* Default: /etc/aminer/config.yml
+
+Use the settings of the file CONFIG on startup. Two config-variants are allowed: python and yaml.
+
+.. seealso::
+
+   :ref:`Overview`
+
+------------
+-D, --daemon
+------------
+
+Run aminer as a daemon process.
+
+--------------------------
+-s {0,1,2}, --stat {0,1,2}
+--------------------------
+
+Set the stat level. Possible stat-levels are 0 for no statistics, 1 for normal statistic level and 2 for verbose statistics.
+
+---------------------------
+-d {0,1,2}, --debug {0,1,2}
+---------------------------
+
+Set the debug level. Possible debug-levels are 0 for no debugging, 1 for normal output (INFO and above), 2 for printing all debug information.
+
+--------------
+--run-analysis
+--------------
+
+Run aminer analysis-child.
+
+.. note:: This parameter is for internal use only.
+
+-----------
+-C, --clear
+-----------
+
+Remove all persistence directories and run aminer.
+
+--------------------------
+-r REMOVE, --remove REMOVE
+--------------------------
+
+Remove a specific persistence directory. REMOVE must be the name of the directory and must not contain '/' or '.'. Usually this directory can be found in '/var/lib/aminer'.
+
+-----------------------------
+-R RESTORE, --restore RESTORE
+-----------------------------
+
+Restore a persistence backup. RESTORE must be the name of the directory and must not contain '/' or '.'. Usually this directory can be found in '/var/lib/aminer'.
+
+----------------
+-f, --from-begin
+----------------
+
+Removes repositioning data before starting the aminer so that all input files will be analyzed starting from the first line in the file rather than the last previously analyzed line.
+
+------------------
+-o, --offline-mode
+------------------
+
+Stop the aminer after all logs have been processed.
+
+.. note:: This parameter is useful for forensic analysis.
+
+---------------------------------------------
+--config-properties KEY=VALUE [KEY=VALUE ...]
+---------------------------------------------
+
+Set a number of config_properties by using key-value pairs (do not put spaces before or after the = sign). If a value contains spaces, you should define it with double quotes: 'foo="this is a sentence". Note that values are always treated as strings. If values are already defined in the config_properties, the input types are converted to the ones already existing.
+
 
 =======================
 Configuration Reference
@@ -729,7 +830,7 @@ This model element parses decimal values with optional signum, padding or expone
             value_sign_type: 'optional'
 
 DecimalIntegerValueModelElement
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This model element parses integer values with optional signum or padding. With padding, the signum has to be found before the padding characters.
 
@@ -1097,17 +1198,19 @@ Analysing
 All detectors have the following parameters and may have additional specific parameters that are defined in the respective sections. 
 
 * **id**: must be a unique string
-* **type**: must be an existing Analysis component
+* **type**: must be an existing Analysis component (required)
+
+.. _AllowlistViolationDetector:
 
 AllowlistViolationDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module defines a detector for log atoms not matching any allowlisted rule.
 
-* **allowlist_rules**: list of rules executed in same way as inside Rules.OrMatchRule.list of rules executed in same way as inside Rules.OrMatchRule.
-* **suppress**: a boolean that suppresses anomaly output of that detector when set to True
-* **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to
-* **output_logline**: a boolean that specifies whether full log event parsing information should be appended to the anomaly when set to True
+* **allowlist_rules**: list of rules executed in same way as inside Rules.OrMatchRule.list of rules executed in same way as inside Rules.OrMatchRule (required, list of strings, defaults to empty list).
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
+* **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to (list of strings, defaults to empty list).
+* **output_logline**: a boolean that specifies whether full log event parsing information should be appended to the anomaly when set to True (boolean, defaults to True).
 
 .. code-block:: yaml
 
@@ -1132,19 +1235,23 @@ This module defines a detector for log atoms not matching any allowlisted rule.
           allowlist_rules:
             - "or_match_rule"
 
+.. seealso::
+
+   :ref:`MatchRules`
+
 EnhancedNewMatchPathValueComboDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In addition to detecting new value combination (see NewMatchPathValueComboDetector), this detector also stores combo occurrence times and amounts, and allows to execute functions on tuples that need to be defined in the python code first.
 
-* **paths**: the list of values to extract from each match to create the value combination to be checked.
-* **allow_missing_values_flag**: when set to True, the detector will also use matches, where one of the pathes from target_path_list does not refer to an existing parsed data object.
-* **tuple_transformation_function**: when not None, this function will be invoked on each extracted value combination list to transform it. It may modify the list directly or create a new one to return it.
-* **learn_mode**: when set to True, this detector will report a new value only the first time before including it in the known values set automatically.
-* **persistence_id**: the name of the file where the learned models are stored
-* **suppress**: a boolean that suppresses anomaly output of that detector when set to True
-* **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to
-* **output_logline**: a boolean that specifies whether full log event parsing information should be appended to the anomaly when set to True
+* **paths**: the list of values to extract from each match to create the value combination to be checked (required, list of strings).
+* **allow_missing_values**: when set to True, the detector will also use matches, where one of the pathes from target_path_list does not refer to an existing parsed data object (boolean, defaults to False).
+* **tuple_transformation_function**: when not None, this function will be invoked on each extracted value combination list to transform it. It may modify the list directly or create a new one to return it (string, defaults to None).
+* **learn_mode**: when set to True, this detector will report a new value only the first time before including it in the known values set automatically (boolean).
+* **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
+* **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to (list of strings, defaults to empty list).
+* **output_logline**: a boolean that specifies whether full log event parsing information should be appended to the anomaly when set to True (boolean, defaults to True).
 
 .. code-block:: yaml
 
@@ -1166,25 +1273,25 @@ This module defines an evaluator and generator for event rules. The overall idea
 3. Observe for a long time (max_observations) whether the hypothesis holds.
 4. If the hypothesis holds, transform it to a rule. Otherwise, discard the hypothesis.
 
-* **paths**: a list of paths where values or value combinations used for correlation occur. If this parameter is not available, correlation is done on event types instead.
-* **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to
-* **max_hypotheses** maximum amount of hypotheses and rules hold in memory.
-* **hypothesis_max_delta_time** time span of events considered for hypothesis generation.
-* **generation_probability** probability in [0, 1] that currently processed log line is considered for hypothesis with each of the candidates.
-* **generation_factor** likelihood in [0, 1] that currently processed log line is added to the set of candidates for hypothesis generation.
-* **max_observations** maximum amount of evaluations before hypothesis is transformed into a rule or discarded or rule is evaluated.
-* **p0** expected value for hypothesis evaluation distribution.
-* **alpha** confidence value for hypothesis evaluation.
-* **candidates_size** maximum number of stored candidates used for hypothesis generation.
-* **hypotheses_eval_delta_time** duration between hypothesis evaluation phases that remove old hypotheses that are likely to remain unused.
-* **delta_time_to_discard_hypothesis** time span required for old hypotheses to be discarded.
-* **check_rules_flag** specifies whether existing rules are evaluated.
-* **ignore_list**: a list of parser paths that are ignored for analysis by this detector
-* **constraint_list**: a list of parser paths that the detector will be constrained to, i.e., other branches of the parser tree are ignored
-* **output_logline**: a boolean that specifies whether full log event parsing information should be appended to the anomaly when set to True
-* **persistence_id**: the name of the file where the learned models are stored
-* **suppress**: a boolean that suppresses anomaly output of that detector when set to True
-* **learn_mode**: specifies whether new hypotheses and rules are generated.
+* **paths**: a list of paths where values or value combinations used for correlation occur. If this parameter is not set, correlation is done on event types instead (list of strings, defaults to empty list).
+* **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to (list of strings, defaults to empty list).
+* **max_hypotheses** maximum amount of hypotheses and rules hold in memory (integer, defaults to 1000).
+* **hypothesis_max_delta_time** time span in seconds of events considered for hypothesis generation (float, defaults to 5.0).
+* **generation_probability** probability in [0, 1] that currently processed log line is considered for hypothesis with each of the candidates (float, defaults to 1.0).
+* **generation_factor** likelihood in [0, 1] that currently processed log line is added to the set of candidates for hypothesis generation (float, defaults to 1.0).
+* **max_observations** maximum amount of evaluations before hypothesis is transformed into a rule or discarded or rule is evaluated (integer, defaults to 500).
+* **p0** expected value for hypothesis evaluation distribution (float, defaults to 0.9).
+* **alpha** confidence value for hypothesis evaluation (float, defaults to 0.05).
+* **candidates_size** maximum number of stored candidates used for hypothesis generation (integer, defaults to 10).
+* **hypotheses_eval_delta_time** duration in seconds between hypothesis evaluation phases that remove old hypotheses that are likely to remain unused (float, 120.0).
+* **delta_time_to_discard_hypothesis** time span in seconds required for old hypotheses to be discarded (float, defaults to 180.0).
+* **check_rules_flag** specifies whether existing rules are evaluated (boolean, defaults to True).
+* **ignore_list**: a list of parser paths that are ignored for analysis by this detector (list of strings, defaults to empty list).
+* **constraint_list**: a list of parser paths that the detector will be constrained to, i.e., other branches of the parser tree are ignored (list of strings, defaults to empty list).
+* **output_logline**: a boolean that specifies whether full log event parsing information should be appended to the anomaly when set to True (boolean, defaults to True).
+* **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
+* **learn_mode**: specifies whether new hypotheses and rules are generated (boolean).
 
 .. code-block:: yaml
 
@@ -1200,17 +1307,16 @@ EventFrequencyDetector
 
 This module defines an detector for event and value frequency deviations.
 
-* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed.
-* **output_event_handlers** for handling events, e.g., print events to stdout.
-* **window_size** the length of the time window for counting in seconds.
-* **confidence_factor** defines range of tolerable deviation of measured frequency from ground truth frequency gt by [gf * confidence_factor, gf / confidence_factor]. confidence_factor must be in range [0, 1].
-* **persistence_id name** of persistency document.
-* **learn_mode** specifies whether new frequency measurements override ground truth frequencies.
-* **output_log_line** specifies whether the full parsed log atom should be provided in the output.
-* **ignore_list** list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable.
-* **constraint_list** list of paths that have to be present in the log atom to be analyzed.
-* **suppress**: a boolean that suppresses anomaly output of that detector when set to True
-* **persistence_id**: the name of the file where the learned models are stored
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings, defaults to empty list).
+* **output_event_handlers** for handling events, e.g., print events to stdout (list of strings, defaults to empty list).
+* **window_size** the length of the time window for counting in seconds (float, defaults to 600).
+* **confidence_factor** defines range of tolerable deviation of measured frequency from ground truth frequency gt by [gf * confidence_factor, gf / confidence_factor], where confidence_factor is in range [0, 1]. (float, defaults to 0.5).
+* **learn_mode** specifies whether new frequency measurements override ground truth frequencies (boolean).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to True).
+* **ignore_list** list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted (list of strings, defaults to empty list).
+* **constraint_list** list of paths that have to be present in the log atom to be analyzed (list of strings, defaults to empty list).
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
+* **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
 
 .. code-block:: yaml
 
@@ -1222,68 +1328,770 @@ This module defines an detector for event and value frequency deviations.
 EventSequenceDetector
 ~~~~~~~~~~~~~~~~~~~~~
 
+This module defines an detector for event and value sequences. The concept is based on STIDE which was first published by Forrest et al.
+
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings, defaults to empty list).
+* **output_event_handlers** for handling events, e.g., print events to stdout (list of strings, defaults to empty list).
+* **id_path_list** one or more paths that specify the trace of the sequence detection, i.e., incorrect sequences that are generated by interleaved events can be avoided when event sequence identifiers are available (list of strings, defaults to empty list).
+* **seq_len** the length of the sequences to be learned (larger lengths increase precision, but may overfit the data). (integer, defaults to 3).
+* **learn_mode** specifies whether newly observed sequences should be added to the learned model (boolean).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to True).
+* **ignore_list** list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted (list of strings, defaults to empty list).
+* **constraint_list** list of paths that have to be present in the log atom to be analyzed (list of strings, defaults to empty list).
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
+* **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: EventSequenceDetector
+          id: EventSequenceDetector
+          seq_len: 4
+          paths:
+            - '/model/type/syscall/syscall'
+          id_path_list:
+            - '/model/type/syscall/id'
+
 EventTypeDetector
 ~~~~~~~~~~~~~~~~~
+
+This component serves as a basis for the VariableTypeDetector, VariableCorrelationDetector and TSAArimaDetector. It saves a list of the values to the single paths and tracks the time for the TSAArimaDetector.
+
+* **paths** parser paths of values to be analyzed (list of strings, defaults to empty list).
+* **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
+* **max_num_vals** maximum number of lines in the value list before it is reduced.
+* **min_num_vals** number of the values which the list is being reduced to.
+* **save_values** if False the values of the paths are not saved for further analysis. The values are not needed for the TSAArimaDetector.
+* **track_time_for_TSA** states if time windows should be tracked for the time series analysis.
+* **waiting_time_for_TSA** time in seconds, until the time windows are being initialized.
+* **num_sections_waiting_time_for_TSA** number of sections of the initialization window.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: 'EventTypeDetector'
+          id: ETD
+          save_values: False
+          track_time_for_TSA: True
+          waiting_time_for_TSA: 1728000
+          num_sections_waiting_time_for_TSA: 1000
+
+
+
+.. _HistogramAnalysis:
 
 HistogramAnalysis
 ~~~~~~~~~~~~~~~~~
 
+This component performs a histogram analysis on one or more input
+properties. The properties are parsed values denoted by their
+parsing path. Those values are then handed over to the selected
+"binning function", that calculates the histogram bin.
+
+* Binning:
+
+Binning can be done using one of the predefined binning functions
+or by creating own subclasses from "HistogramAnalysis.BinDefinition".
+
+  * LinearNumericBinDefinition: Binning function working on numeric
+    values and sorting them into bins of same size.
+
+  * ModuloTimeBinDefinition: Binning function working on parsed
+    datetime values but applying a modulo function to them. This
+    is useful for analysis of periodic activities.
+
+
+* **histogram_defs**: list of tuples. First element of the tuple contains the target property path to analyze. The second element contains the id of a bin_definition(LinearNumericBinDefinition or ModuloTimeBinDefinition). List(strings) **Required**
+* **report_interval**: Report_interval delay in seconds between creaton of two reports. The parameter is applied to the parsed record data time, not the system time. Hence reports can be delayed when no data is received. Integer(min: 1) **Required**
+* **reset_after_report_flag**: Zero counters after the report was sent. Boolean(Default: true)
+* **persistence_id'**: the name of the file where the learned models are stored. String(Default: 'Default')
+* **output_logline**: specifies whether the full parsed log atom should be provided in the output. Boolean(Default: true)
+* **output_event_handlers**: List of event-handler-id to send the report to.
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: LinearNumericBinDefinition
+          id: linear_numeric_bin_definition
+          lower_limit: 50
+          bin_size: 5
+          bin_count: 20
+          outlier_bins_flag: True
+
+        - type: HistogramAnalysis
+          id: HistogramAnalysis
+          histogram_defs: [["/model/RandomTime/Random", "linear_numeric_bin_definition"]]
+          report_interval: 10
+
+.. _PathDependentHistogramAnalysis:
+
+PathDependentHistogramAnalysis
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This component creates a histogram for only a single input property,
+e.g. an IP address, but for each group of correlated match pathes.
+Assume there two pathes that include the input property but they
+separate after the property was found on the path. This might
+be for example the client IP address in ssh log atoms, where the
+parsing path may split depending if this was a log atom for a
+successful login, logout or some error. This analysis component
+will then create separate histograms, one for the path common
+to all atoms and one for each disjunct part of the subpathes found.
+
+The component uses the same binning functions as the standard
+HistogramAnalysis.HistogramAnalysis, see documentation there.
+
+
+* **path**: The property-path. String(Required)
+* **bin_definition**: The id of a bin_definition(LinearNumericBinDefini  tion or ModuloTimeBinDefinition). String(Required)
+* **report_interval**: Report_interval delay in seconds between creaton of two reports. The parameter is applied to the parsed record data time, not the system time. Hence reports can be delayed when no data is received. Integer(min: 1)
+* **reset_after_report_flag**: Zero counters after the report was sent. Boolean(Default: true)
+* **persistence_id'**: the name of the file where the learned models are stored. String
+* **output_logline**: specifies whether the full parsed log atom should be provided in the output. Boolean(Default: true)
+* **output_event_handlers**: List of event-handler-id to send the report to.
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: ModuloTimeBinDefinition
+          id: modulo_time_bin_definition
+          modulo_value: 86400
+          time_unit: 3600
+          lower_limit: 0
+          bin_size: 1
+          bin_count: 24
+          outlier_bins_flag: True
+
+        - type: PathDependentHistogramAnalysis
+          id: PathDependentHistogramAnalysis
+          path: "/model/RandomTime"
+          bin_definition: "modulo_time_bin_definition"
+          report_interval: 10
+
+LinearNumericBinDefinition
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Binning function working on numeric values and sorting them into bins of same size.
+
+* **lower_limit**: Start on lowest bin. Integer or Float **Required**
+* **bin_size**: Size of bin in reporting units. Integer(min 1) **Required**
+* **bin_count**: Number of bins. Integer(min 1) **Required**
+* **outlier_bins_flag**: Disable outlier bins. Boolean. Default: False
+* **output_event_handlers**: List of handlers to send the report to.
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: LinearNumericBinDefinition
+          id: linear_numeric_bin_definition
+          lower_limit: 50
+          bin_size: 5
+          bin_count: 20
+          outlier_bins_flag: True
+
+.. seealso::
+
+   :ref:`HistogramAnalysis`
+
+ModuloTimeBinDefinition
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Binning function working on parsed datetime values but applying a modulo function to them. This is useful for analysis of periodic activities.
+
+* **modulo_value**: Modulo values in seconds.
+* **time_unit**: Division factor to get down to reporting unit
+* **lower_limit**: Start on lowest bin. Integer or Float **Required**
+* **bin_size**: Size of bin in reporting units. Size of bin in reporting units. Integer(min 1) **Required**
+* **bin_count**: Number of bins. Integer(min 1) **Required**
+* **outlier_bins_flag**: Disable outlier bins. Boolean. Default: False
+* **output_event_handlers**: List of handlers to send the report to.
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: ModuloTimeBinDefinition
+          id: modulo_time_bin_definition
+          modulo_value: 86400
+          time_unit: 3600
+          lower_limit: 0
+          bin_size: 1
+          bin_count: 24
+          outlier_bins_flag: True
+
+.. seealso::
+
+   :ref:`PathDependentHistogramAnalysis`
+
+
 MatchFilter
 ~~~~~~~~~~~
+
+This component creates events for specified paths and values.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: MatchFilter
+          id: MatchFilter
+          paths:
+            - "/model/Random"
+          value_list:
+            - 1
+            - 10
+            - 100
+
 
 MatchValueAverageChangeDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+This detector calculates the average of a given list of values to monitor. Reports are generated if the average of the latest diverges significantly from the values observed before.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: MatchValueAverageChangeDetector
+          id: MatchValueAverageChange
+          timestamp_path: None
+          paths:
+            - "/model/Random"
+          min_bin_elements: 100
+          min_bin_time: 10
+
+
 MatchValueStreamWriter
 ~~~~~~~~~~~~~~~~~~~~~~
+
+This component extracts values from a given match and writes them to a stream. This can be used to forward these values to another program (when stream is a wrapped network socket) or to a file for further analysis. A stream is used instead of a file descriptor to increase performance. To flush it from time to time, add the writer object also to the time trigger list.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: MatchValueStreamWriter
+          id: MatchValueStreamWriter
+          stream: "sys.stdout"
+          paths:
+            - "/model/Sensors/CPUTemp"
+            - "/model/Sensors/CPUWorkload"
+            - "/model/Sensors/DTM"
+
 
 MissingMatchPathValueDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+This component creates events when an expected value is not seen within a given timespan.
+For example because the service was deactivated or logging disabled unexpectedly. This is complementary to the function provided by
+NewMatchPathValueDetector. For each unique value extracted by target_path_list, a tracking record is added to expected_values_dict.
+It stores three numbers: the timestamp the extracted value was last seen, the maximum allowed gap between observations and the next
+alerting time when currently in error state. When in normal (alerting) state, the value is zero.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: MissingMatchPathValueDetector
+          id: MissingMatch
+          paths:
+            - "/model/DiskReport/Space"
+          check_interval: 2
+          realert_interval: 5
+          learn_mode: True
+
+.. seealso::
+
+   `Wiki: HowTo MissingMatchPathValueDetector <https://github.com/ait-aecid/logdata-anomaly-miner/wiki/HowTo-MissingMatchPathValueDetector>`_
+
 NewMatchIdValueComboDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-NewMatchPathDetector
-~~~~~~~~~~~~~~~~~~~~
+This detector works similar to the NewMatchPathValueComboDetector, but allows to generate combos across multiple log events that are connected by a common value, e.g., trace ID.
+
+* **paths** parser paths of values to be analyzed (required, list of strings).
+* **id_path_list** one or more paths that specify trace information, i.e., an identifier that specifies which log events belong together (required, list of strings, defaults to empty list).
+* **min_allowed_time_diff** the minimum amount of time in seconds after the first appearance of a log atom with a specific id that is waited for other log atoms with the same id to occur. The maximum possible time to keep an incomplete combo is 2*min_allowed_time_diff (required, float, defaults to 5.0).
+* **output_event_handlers** for handling events, e.g., print events to stdout (list of strings, defaults to empty list).
+* **allow_missing_values**: when set to True, the detector will also use matches, where one of the paths does not refer to an existing parsed data object (boolean, defaults to False).
+* **learn_mode** specifies whether newly observed value combinations should be added to the learned model (boolean).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to True).
+* **ignore_list** list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted (list of strings, defaults to empty list).
+* **constraint_list** list of paths that have to be present in the log atom to be analyzed (list of strings, defaults to empty list).
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
+* **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: NewMatchIdValueComboDetector
+          id: NewMatchIdValueComboDetector
+          paths:
+            - "/model/type/path/name"
+            - "/model/type/syscall/syscall"
+          id_path_list:
+            - "/model/type/path/id"
+            - "/model/type/syscall/id"
+          min_allowed_time_diff: 5
+          allow_missing_values: True
+          learn_mode: True
 
 NewMatchPathValueComboDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+This module defines a detector for new value combinations in multiple parser paths.
+
+* **paths** parser paths of values to be analyzed (required, list of strings).
+* **output_event_handlers** for handling events, e.g., print events to stdout (list of strings, defaults to empty list).
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
+* **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
+* **allow_missing_values**: when set to True, the detector will also use matches, where one of the paths does not refer to an existing parsed data object (boolean, defaults to False).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to True).
+* **learn_mode** specifies whether newly observed value combinations should be added to the learned model (boolean).
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: NewMatchPathValueComboDetector
+          id: NewMatchPathValueCombo
+          paths:
+            - "/model/IPAddresses/Username"
+            - "/model/IPAddresses/IP"
+          learn_mode: True
+
 NewMatchPathValueDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-PCADetector
-~~~~~~~~~~~
+This module defines a detector for new values in a parser path.
+
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values from all specified paths are mixed together (required, list of strings).
+* **output_event_handlers** for handling events, e.g., print events to stdout (list of strings, defaults to empty list).
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
+* **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to True).
+* **learn_mode** specifies whether newly observed values should be added to the learned model (boolean).
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: NewMatchPathValueDetector
+          id: NewMatchPathValue
+          paths:
+            - "/model/DailyCron/JobNumber"
+            - "/model/IPAddresses/Username"
+          learn_mode: True
 
 ParserCount
 ~~~~~~~~~~~
 
+This component counts occurring combinations of values and periodically sends the results as a report.
+
+* **paths** parser paths of values to be analyzed (list of strings, defaults to empty list).
+* **report_interval** time interval in seconds in which the reports are sent (integer, defaults to 10).
+* **labels** list of strings that are added to the report for each path in paths parameter (must be the same length as paths list). (list of strings, defaults to empty list)
+* **split_reports_flag** boolean flag to send report for each path in paths parameter separately when set to True (boolean, defaults to False).
+* **output_event_handlers** for handling events, e.g., print events to stdout (list of strings, defaults to empty list).
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: ParserCount
+          id: ParserCount
+          paths:
+            - "/model/type/syscall/syscall"
+          report_interval: 10
+
 PathValueTimeIntervalDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Rules
-~~~~~
+This detector analyzes the time intervals of the appearance of log_atoms. It sends a report if log_atoms appear at times outside of the intervals. The considered time intervals depend on the combination of values in the target_paths of target_path_list.
+
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed.
+* **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
+* **allow_missing_values_flag** when set to True, the detector will also use matches, where one of the pathes from target_path_list does not refer to an existing parsed data object.
+* **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted.
+* **output_log_line** specifies whether the full parsed log atom should be provided in the output.
+* **auto_include_flag** specifies whether new frequency measurements override ground truth frequencies.
+* **time_window_length** length of the time window in seconds for which the appearances of log lines are identified with each other.
+* **max_time_diff** maximal time difference in seconds for new times. If the difference of the new time to all previous times is greater than max_time_diff the new time is considered an anomaly.
+* **num_reduce_time_list** number of new time entries appended to the time list, before the list is being reduced.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: PathValueTimeIntervalDetector
+          id: PathValueTimeIntervalDetector
+          paths:
+            - "/model/DailyCron/UName"
+            - "/model/DailyCron/JobNumber"
+          time_window_length: 86400
+          max_time_diff: 3600
+          num_reduce_time_list: 10
 
 TSAArimaDetector
 ~~~~~~~~~~~~~~~~
 
+This detector uses a tsa-arima model to track appearance frequencies of event lines.
+
+* **paths** at least one of the parser paths in this list needs to appear in the event to be analyzed.
+* **event_type_detector** used to track the number of event lines in the time windows.
+* **acf_pause_area** states which area of the resutls of the ACF are not used to find the highest peak.
+* **build_sum_over_values** states if the sum of a series of counts is built before applying the TSA.
+* **num_periods_tsa_ini** Number of periods used to initialize the Arima-model.
+* **num_division_time_step** Number of divisions of the time window to calculate the time step.
+* **alpha** significance level of the estimated values.
+* **num_min_time_history** minimal number of values of the time_history after it is initialized.
+* **num_max_time_history** maximal number of values of the time_history.
+* **num_results_bt** number of results which are used in the binomial test, which is used before reinitializing the ARIMA model.
+* **alpha_bt** significance level for the bt test.
+* **round_time_inteval_threshold** Threshold for the rounding of the time_steps to the times in self.assumed_time_steps. The higher the threshold the easier the time is rounded to the next time in the list.
+* **acf_threshold** threshold, which must be exceeded by the highest peak of the cdf function of the time series, to be analyzed.
+* **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
+* **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable.
+* **output_log_line** specifies whether the full parsed log atom should be provided in the output.
+* **auto_include_flag** specifies whether new frequency measurements override ground truth frequencies.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: 'EventTypeDetector'
+          id: ETD
+          save_values: False
+          track_time_for_TSA: True
+          waiting_time_for_TSA: 1728000
+          num_sections_waiting_time_for_TSA: 1000
+
+        - type: 'TSAArimaDetector'
+          id: TSA
+          event_type_detector: ETD
+          num_division_time_step: 10
+          alpha: 0.05
+          num_results_bt: 30
+          alpha_bt: 0.05
+          num_max_time_history: 30000
+          round_time_inteval_threshold: 0.1
+          acf_threshold: 0.02
+
 TimeCorrelationDetector
 ~~~~~~~~~~~~~~~~~~~~~~~
+
+This component tries to find time correlation patterns between different log atoms.
+When a possible correlation rule is detected, it creates an event including the rules. This is useful to implement checks as depicted
+in http://dx.doi.org/10.1016/j.cose.2014.09.006.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: TimeCorrelationDetector
+          id: TimeCorrelationDetector
+          parallel_check_count: 2
+          min_rule_attributes: 1
+          max_rule_attributes: 5
+          record_count_before_event: 10000
+
+
+
+.. _TimeCorrelationViolationDetector:
 
 TimeCorrelationViolationDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-TimestampCorrectionFilters
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+This component creates events when one of the given time correlation rules is violated.
+This is used to implement checks as depicted in http://dx.doi.org/10.1016/j.cose.2014.09.006
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: PathExistsMatchRule
+          id: path_exists_match_rule3
+          path: "/model/CronAnnouncement/Run"
+          match_action: a_class_selector
+        - type: PathExistsMatchRule
+          id: path_exists_match_rule4
+          path: "/model/CronExecution/Job"
+          match_action: b_class_selector
+        - type: TimeCorrelationViolationDetector
+          id: TimeCorrelationViolationDetector
+          ruleset:
+            - path_exists_match_rule3
+            - path_exists_match_rule4
+
+
+.. seealso::
+
+   :ref:`MatchRules`
+
+SimpleMonotonicTimestampAdjust
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Adjust decreasing timestamp of new records to the maximum observed so far to ensure monotony for other analysis components.
 
 TimestampsUnsortedDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+This detector is useful to to detect algorithm malfunction or
+configuration errors, e.g. invalid timezone configuration.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: TimestampsUnsortedDetector
+          id: TimestampsUnsortedDetector
+
 VariableCorrelationDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+First, this detector finds a list of viable variables for each event type. Second, it builds pairs of variables. Third, correlations are generated and thereafter tested and updated.
+
+* **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
+* **event_type_detector** event_type_detector. Used to get the event numbers and values of the variables, etc.
+* **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted.
+* **constraint_list** list of paths that the detector will be constrained to, i.e., other branches of the parser tree are ignored (list of strings, defaults to empty list).
+* **num_init** minimal number of lines of one event type to initialize the correlation rules.
+* **num_update** number of lines after the initialization after which the correlations are periodically tested and updated.
+* **check_cor_thres** threshold for the number of allowed different values of the distribution to be considerd a correlation.
+* **check_cor_prob_thres** threshold for the difference of the probability of the values to be considerd a correlation.
+* **check_cor_num_thres** number of allowed different values for the calculation if the distribution can be considerd a correlation.
+* **min_values_cors_thres** minimal number of appearances of values on the left side to consider the distribution as a possible correlation.
+* **new_vals_alarm_thres** threshold which has to be exceeded by the number of new values divided by the number of old values to report an anomaly.
+* **disc_div_thres** diversity threshold for variables to be considered discrete.
+* **num_steps_create_new_rules** number of update steps, for which new rules are generated periodically.
+* **num_upd_until_validation** number of update steps, for which the rules are validated periodically.
+* **num_end_learning_phase** number of update steps until the update phase ends and the test phase begins. False if no End should be defined.
+* **num_bt** number of considered testsamples for the binomial test.
+* **alpha_bt** significance level for the binomialtest for the test results.
+* **used_homogeneity_test** states the used homogeneity test which is used for the updates and tests of the correlations. The implemented methods are ['Chi', 'MaxDist'].
+* **alpha_chisquare_test** significance level alpha for the chisquare test.
+* **max_dist_rule_distr** maximum distance between the distribution of the rule and the distribution of the read in values before the rule fails.
+* **used_presel_meth** used preselection methods. The implemented methods are ['matchDiscDistr', 'excludeDueDistr', 'matchDiscVals', 'random'].
+* **intersect_presel_meth** states if the intersection or the union of the possible correlations found by the presel_meth is used for the resulting correlations.
+* **percentage_random_cors** percentage of the randomly picked correlations of all possible ones in the preselection method random.
+* **match_disc_vals_sim_tresh** similarity threshold for the preselection method pick_cor_match_disc_vals.
+* **exclude_due_distr_lower_limit** lower limit for the maximal appearance to one value of the distributions. If the maximal appearance is exceeded the variable is excluded.
+* **match_disc_distr_threshold** threshold for the preselection method pick_cor_match_disc_distr.
+* **used_cor_meth** used correlation detection methods. The implemented methods are ['Rel', 'WRel'].
+* **used_validate_cor_meth** used validation methods. The implemented methods are ['coverVals', 'distinctDistr'].
+* **validate_cor_cover_vals_thres** threshold for the validation method coverVals. The higher the threshold the more correlations must be detected to be validated a correlation.
+* **validate_cor_distinct_thres** threshold for the validation method distinctDistr. The threshold states which value the variance of the distributions must surpass to be considered real correlations. The lower the value the less likely that the correlations are being rejected.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: 'EventTypeDetector'
+          id: ETD
+
+        - type: 'VariableCorrelationDetector'
+          event_type_detector: ETD
+          num_init: 10000
+          num_update: 1000
+          num_steps_create_new_rules: 10
+          used_presel_meth: ['matchDiscDistr', 'excludeDueDistr']
+          used_validate_cor_meth: ['distinctDistr', 'coverVals']
+          used_cor_meth: ['WRel']
+
 VariableTypeDetector
 ~~~~~~~~~~~~~~~~~~~~
+
+This detector analyses each variable of the event_types by assigning them the implemented variable types.
+
+* **paths** List of paths, which variables are being tested for a type. All other paths will not get a type assigned.
+* **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
+* **event_type_detector** event_type_detector. Used to get the event numbers and values of the variables, etc.
+* **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted.
+* **constraint_list** list of paths that the detector will be constrained to, i.e., other branches of the parser tree are ignored (list of strings, defaults to empty list).
+* **save_statistics** tracks the indicators and changed variable types, if set to True.
+* **use_empiric_distr** states if empiric distributions of the values should be used if no continuous distribution is detected
+* **used_gof_test** states the used test statistic for the continuous data type. Implemented are the 'KS' and 'CM' tests.
+* **gof_alpha** significance level for p-value for the distribution test of the initialization.
+* **s_gof_alpha** significance level for p-value for the sliding gof-test in the update step.
+* **s_gof_bt_alpha** significance level for the binomialtest of the test results of the s_gof-test.
+* **d_alpha** significance level for the binomialtest of the single discrete variables.
+* **d_bt_alpha** significance level for the binomialtest of the test results of the discrete tests.
+* **div_thres** threshold for diversity of the values of a variable. The higher the more values have to be distinct to be considered to be continuous distributed.
+* **sim_thres** threshold for similarity of the values of a variable. The higher the more values have to be common to be considered discrete.
+* **indicator_thres** threshold for the variable indicators to be used in the event indicator.
+* **num_init** number of read in lines before detecting the variable types.
+* **num_update** number of values for which the variableType is updated.
+* **num_update_unq** number of values for which the values of type unq is unique (last num_update + num_update_unq values are unique).
+* **num_s_gof_values** number of values which are tested in the s_gof-test.
+* **num_s_gof_bt** number of tested s_gof-tests for the binomialtest of the test results of the s_gof-tests.
+* **num_d_bt** number of tested discrete samples for the binomialtest of the test results of the discrete tests.
+* **num_pause_discrete** number of paused updates, before the discrete var type is adapted.
+* **num_pause_others** number of paused updates, before trying to find a new variable type for the variable type others.
+* **test_gof_int** states if integer number should be tested for the continuous variable type.
+* **update_var_type_bool** states, if found variable types are updated when a test fails.
+* **num_stop_update** switch the LearnMode to False after num_stop_update processed lines. If False LearnMode will not be switched to False.
+* **silence_output_without_confidence** silences all messages without a confidence-entry.
+* **silence_output_except_indicator** silences all messages which are not related with the calculated indicator.
+* **num_var_type_hist_ref** states how long the reference for the var_type_history_list is. The reference is used in the evaluation.
+* **num_update_var_type_hist_ref** number of update steps before the var_type_history_list is being updated.
+* **num_var_type_considered_ind** this attribute states how many variable types of the history are used as the recent history in the calculation of the indicator. False if no output of the indicator should be generated.
+* **num_stat_stop_update** number of static values of a variable, to stop tracking the variable type and read in in eventTypeD. Default is False.
+* **num_updates_until_var_reduction** number of update steps until the variables are tested, if they are suitable for an indicator. If not suitable, they are removed from the tracking of EvTypeD. Default is False.
+* **var_reduction_thres** threshold for the reduction of variable types. The most likely none others var type must have a higher relative appearance for the variable to be further checked.
+* **num_skipped_ind_for_weights** number of the skipped indicators for the calculation of the indicator weights.
+* **num_ind_for_weights** number of indicators used in the calculation of the indicator weights.
+* **used_multinomial_test** states the used multinomial test. the value can be of the list ['MT', 'Approx', 'Chi'], where 'MT' means original MT, 'Approx' is the approximation with single BTs and 'Chi' is the ChisquareTest.
+
+.. _MatchRules:
+
+----------
+MatchRules
+----------
+
+The following detectors work with MatchRules:
+
+* :ref:`AllowlistViolationDetector`
+* :ref:`TimeCorrelationViolationDetector`
+
+.. note:: MatchRules must be defined in the "Analysis"-part of the configuration.
+
+AndMatchRule
+~~~~~~~~~~~~
+
+This component provides a rule to match all subRules (logical and).
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: AndMatchRule
+          id: and_match_rule1
+          sub_rules:
+            - "path_exists_match_rule1"
+            - "negation_match_rule1"
+
+
+OrMatchRule
+~~~~~~~~~~~
+
+This component provides a rule to match any subRules (logical or).
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: OrMatchRule
+          id: or_match_rule
+          sub_rules:
+            - "and_match_rule1"
+            - "and_match_rule2"
+            - "negation_match_rule2"
+
+ParallelMatchRule
+~~~~~~~~~~~~~~~~~
+
+This component is a rule testing all the subrules in parallel.
+From the behaviour it is similar to the OrMatchRule, returning true if any subrule matches. The difference is that matching will not
+stop after the first positive match. This does only make sense when all subrules have match actions associated.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: ParallelMatchRule
+          id: parallel_match_rule
+          sub_rules:
+            - "and_match_rule1"
+            - "and_match_rule2"
+            - "negation_match_rule2"
+
+ValueDependentDelegatedMatchRule
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This component is a rule delegating rule checking to subrules depending on values found within the parser_match.
+The result of this rule is the result of the selected delegation rule.
+
+NegationMatchRule
+~~~~~~~~~~~~~~~~~
+
+Match elements of this component return true when the subrule did not match.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: NegationMatchRule
+          id: negation_match_rule1
+          sub_rule: "value_match_rule"
+        - type: NegationMatchRule
+          id: negation_match_rule2
+          sub_rule: "path_exists_match_rule2"
+
+PathExistsMatchRule
+~~~~~~~~~~~~~~~~~~~
+
+Match elements of this component return true when the given path was found in the parsed match data.
+
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: PathExistsMatchRule
+          id: path_exists_match_rule1
+          path: "/model/LoginDetails/PastTime/Time/Minutes"
+        - type: PathExistsMatchRule
+          id: path_exists_match_rule2
+          path: "/model/LoginDetails"
+
+
+ValueMatchRule
+~~~~~~~~~~~~~~
+
+Match elements of this component return true when the given path exists and has exactly the given parsed value.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: ValueMatchRule
+          id: value_match_rule
+          path: "/model/LoginDetails/Username"
+          value: "root"
+
+ValueListMatchRule
+~~~~~~~~~~~~~~~~~~
+
+Match elements of this component return true when the given path exists and has exactly one of the values included in the value list.
+
+ValueRangeMatchRule
+~~~~~~~~~~~~~~~~~~~
+
+Match elements of this component return true when the given path exists and the value is included in [lower, upper] range.
+
+StringRegexMatchRule
+~~~~~~~~~~~~~~~~~~~~
+
+Elements of this component return true when the given path exists and the string repr of the value matches the regular expression.
+
+ModuloTimeMatchRule
+~~~~~~~~~~~~~~~~~~~
+
+Match elements of this component return true when the following conditions are met.
+The given path exists, denotes a datetime object and the seconds since 1970 from that date modulo the given value are included in
+[lower, upper] range.
+
+ValueDependentModuloTimeMatchRule
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Match elements of this component return true when the following conditions are met.
+The given path exists, denotes a datetime object and the seconds since 1970 rom that date modulo the given value are included in a
+[lower, upper] range selected by values from the match.
+
+IPv4InRFC1918MatchRule
+~~~~~~~~~~~~~~~~~~~~~~
+
+Match elements of this component return true when the path matches and contains a valid IPv4 address from the RFC1918 private IP ranges.
+This could also be done by distinct range match elements, but as this kind of matching is common, have an own element for it.
+
+DebugMatchRule
+~~~~~~~~~~~~~~
+
+ This rule can be inserted into a normal ruleset just to see when a match attempt is made.
+ It just prints out the current log_atom that is evaluated. The match action is always invoked when defined, no matter which match
+ result is returned.
+
+DebugHistoryMatchRule
+~~~~~~~~~~~~~~~~~~~~~
+
+This rule can be inserted into a normal ruleset just to see when a match attempt is made.
+It just adds the evaluated log_atom to a ObjectHistory.
+
 
 -------------
 EventHandling
