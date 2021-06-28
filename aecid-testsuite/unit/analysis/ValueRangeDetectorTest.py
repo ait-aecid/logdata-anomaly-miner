@@ -30,7 +30,8 @@ class ValueRangeDetectorTest(TestBase):
 
         # Initialize detector
         test_handler = TestHandler()
-        event_sequence_detector = ValueRangeDetector(self.aminer_config, [test_handler], ['/model/id'], ['/model/value'], 'Default', True, False)
+        event_sequence_detector = ValueRangeDetector(self.aminer_config, [test_handler], ['/model/id'], ['/model/value'], 'Default', True,
+                                                     False)
         self.analysis_context.register_component(event_sequence_detector, description)
 
         # Prepare log atoms that represent two entities (id) with floats (value). Anomalies are generated when ranges are first established.
@@ -121,6 +122,7 @@ class ValueRangeDetectorTest(TestBase):
                                                                       'AffectedLogAtomValues': [3.1],
                                                                       'Range': [5, 6.3]}})
         test_handler.anomaly = None
+
 
 if __name__ == "__main__":
     unittest.main()
