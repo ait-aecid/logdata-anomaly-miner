@@ -85,8 +85,8 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
 
         # Skip atom when ignore paths in atom or constraint paths not in atom.
         all_paths_set = set(parser_match.get_match_dictionary().keys())
-        if len(all_paths_set.intersection(self.ignore_list)) > 0 or
-        len(all_paths_set.intersection(self.constraint_list)) != len(self.constraint_list):
+        if len(all_paths_set.intersection(self.ignore_list)) > 0 or \
+           len(all_paths_set.intersection(self.constraint_list)) != len(self.constraint_list):
             return
 
         # Store all values from target paths in a list.
