@@ -1240,7 +1240,7 @@ This module defines a detector for log atoms not matching any allowlisted rule.
    :ref:`MatchRules`
 
 CharsetDetector
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 This detector generates anomalies for new characters in parsed elements and extends the allowed alphabet when learning is active.
 
