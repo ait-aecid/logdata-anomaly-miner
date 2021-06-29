@@ -1239,6 +1239,29 @@ This module defines a detector for log atoms not matching any allowlisted rule.
 
    :ref:`MatchRules`
 
+CharsetDetector
+~~~~~~~~~~~~~~~~~~
+
+This detector generates anomalies for new characters in parsed elements and extends the allowed alphabet when learning is active.
+
+* **paths** parser paths of values to be analyzed; multiple paths mean that all values occurring in these paths are considered for character detection (required, list of strings).
+* **id_path_list** list of strings that specify group identifiers for which alphabets should be learned (list of strings, defaults to empty list).
+* **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
+* **learn_mode** specifies whether value ranges should be extended when values outside of ranges are observed (boolean).
+* **output_log_line** specifies whether the full parsed log atom should be provided in the output (boolean).
+* **ignore_list**: a list of parser paths that are ignored for analysis by this detector (list of strings, defaults to empty list).
+* **constraint_list**: a list of parser paths that the detector will be constrained to, i.e., other branches of the parser tree are ignored (list of strings, defaults to empty list).
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
+* **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to (list of strings, defaults to empty list).
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: 'CharsetDetector'
+          paths:
+            - '/parser/value'
+          learn_mode: True
+
 EnhancedNewMatchPathValueComboDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1846,7 +1869,7 @@ This detector generates ranges for numeric values, detects values outside of the
 * **paths** parser paths of values to be analyzed; multiple paths mean that all values occurring in these paths are considered for value range generation (required, list of strings).
 * **id_path_list** list of strings that specify group identifiers for which numeric ranges should be learned (list of strings, defaults to empty list).
 * **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
-* **learn_mode** specifies whether value ranges should be extended when values outside of ranges are observed (.
+* **learn_mode** specifies whether value ranges should be extended when values outside of ranges are observed (boolean).
 * **output_log_line** specifies whether the full parsed log atom should be provided in the output (boolean).
 * **ignore_list**: a list of parser paths that are ignored for analysis by this detector (list of strings, defaults to empty list).
 * **constraint_list**: a list of parser paths that the detector will be constrained to, i.e., other branches of the parser tree are ignored (list of strings, defaults to empty list).
