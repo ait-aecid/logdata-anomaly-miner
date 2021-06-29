@@ -74,12 +74,14 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
                 self.charsets[tuple(lst[0])] = set(lst[1])
 
     def receive_atom(self, log_atom):
+        """Receive a log atom from a source."""
         self.log_total += 1
         parser_match = log_atom.parser_match
 
         # Skip atom when ignore paths in atom or constraint paths not in atom.
         all_paths_set = set(parser_match.get_match_dictionary().keys())
-        if len(all_paths_set.intersection(self.ignore_list)) > 0 or len(all_paths_set.intersection(self.constraint_list)) != len(self.constraint_list):
+        if len(all_paths_set.intersection(self.ignore_list)) > 0 or \
+                len(all_paths_set.intersection(self.constraint_list)) != len(self.constraint_list):
             return
 
         # Store all values from target paths in a list.
@@ -133,12 +135,12 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
                 affected_values = []
                 for value in values:
                     affected_values.append(value.decode(AminerConfig.ENCODING))
-                analysis_component = {'AffectedLogAtomPaths': self.target_path_list, 'AffectedLogAtomValues': affected_values, 
+                analysis_component = {'AffectedLogAtomPaths': self.target_path_list, 'AffectedLogAtomValues': affected_values,
                                       'MissingCharacters': missing_chars_decoded}
                 event_data = {'AnalysisComponent': analysis_component}
                 for listener in self.anomaly_event_handlers:
-                    listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Value range anomaly detected', [log_atom.raw_data],
-                                               event_data, log_atom, self)
+                    listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Value range anomaly detected', sorted_log_lines,
+                                           event_data, log_atom, self)
             # Extend charsets if learn mode is active.
             if self.auto_include_flag is True:
                 self.charsets[id_event].update(missing_chars)
@@ -172,7 +174,6 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
         PersistenceUtil.store_json(self.persistence_file_name, lst)
         self.next_persist_time = None
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
-
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """

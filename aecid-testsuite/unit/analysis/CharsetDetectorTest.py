@@ -31,7 +31,7 @@ class CharsetDetectorTest(TestBase):
         # Initialize detector
         test_handler = TestHandler()
         event_charset_detector = CharsetDetector(self.aminer_config, [test_handler], ['/model/id'], ['/model/value'], 'Default', True,
-                                                     False)
+                                                 False)
         self.analysis_context.register_component(event_charset_detector, description)
 
         # Prepare log atoms that represent two entities (id) with strings (value). Anomalies are generated when new characters are observed.
