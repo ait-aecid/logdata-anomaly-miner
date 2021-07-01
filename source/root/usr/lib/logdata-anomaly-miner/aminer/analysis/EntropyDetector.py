@@ -38,13 +38,13 @@ class EntropyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths
-        are considered for value range generation.
+        are considered as if they occur in the same path.
         @param prob_thresh limit for the average probability of character pairs for which anomalies are reported.
         @param default_probs initializes the probabilities with default values from https://github.com/markbaggett/freq.
         @param skip_repetitions boolean that determines whether only distinct values are used for character pair counting. This
         counteracts the problem of imbalanced word frequencies that distort the frequency table generated in a single aminer run.
         @param persistence_id name of persistency document.
-        @param auto_include_flag specifies whether value ranges should be extended when values outside of ranges are observed.
+        @param auto_include_flag when set to True, the detector will extend the table of character pair frequencies based on new values.
         @param output_log_line specifies whether the full parsed log atom should be provided in the output.
         @param ignore_list list of paths that are not considered for analysis, i.e., events that contain one of these paths are
         omitted.
