@@ -74,7 +74,7 @@ class EntropyDetectorTest(TestBase):
         self.assertEqual(test_handler.anomaly, {'AnalysisComponent': {'AffectedLogAtomPaths': ['/value'],
                                                                       'AffectedLogAtomValues': ['aminer'],
                                                                       'CriticalValue': 0.0,
-                                                                      'ProbabilityThreshold': 0.05}})        
+                                                                      'ProbabilityThreshold': 0.05}})
         test_handler.anomaly = None
 
         # Second value should not generate an anomaly, because it contains substring 'miner' which shares charpairs with 'aminer'
