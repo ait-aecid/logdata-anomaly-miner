@@ -143,6 +143,20 @@
                 },
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
+                    'type': {'type': 'string', 'allowed': ['EntropyDetector'], 'required': True},
+                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'prob_thresh': {'type': 'float'},
+                    'default_freqs': {'type': 'boolean'},
+                    'persistence_id': {'type': 'string', 'empty': False},
+                    'learn_mode': {'type': 'boolean'},
+                    'output_logline': {'type': 'boolean'},
+                    'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'suppress': {'type': 'boolean'}
+                },
+                {
+                    'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['EventTypeDetector'], 'required': True},
                     'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'persistence_id': {'type': 'string', 'empty': False},

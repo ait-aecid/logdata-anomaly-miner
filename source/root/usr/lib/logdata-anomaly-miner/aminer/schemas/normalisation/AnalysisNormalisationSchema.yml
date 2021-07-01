@@ -44,6 +44,8 @@
                 'ignore_list': {
                     'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                 'id_path_list': {'type': 'list', 'default': []},
+                'prob_thresh': {'type': 'float', 'default': 0.05},
+                'default_freqs': {'type': 'boolean', 'default': False},
                 'seq_len': {'type': 'integer', 'default': 3},
                 'timeout': {'type': ['integer', 'float'], 'default': -1},
                 'allow_missing_id': {'type': 'boolean', 'default': False},
