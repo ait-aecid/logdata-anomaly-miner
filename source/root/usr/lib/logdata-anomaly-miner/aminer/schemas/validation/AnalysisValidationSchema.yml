@@ -147,6 +147,7 @@
                     'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'prob_thresh': {'type': 'float'},
                     'default_freqs': {'type': 'boolean'},
+                    'skip_repetitions': {'type': 'boolean'},
                     'persistence_id': {'type': 'string', 'empty': False},
                     'learn_mode': {'type': 'boolean'},
                     'output_logline': {'type': 'boolean'},

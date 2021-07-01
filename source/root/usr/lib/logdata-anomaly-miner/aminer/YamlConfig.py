@@ -435,6 +435,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             elif item['type'].name == 'EntropyDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
                                     prob_thresh=item['prob_thresh'], default_freqs=item['default_freqs'],
+                                    skip_repetitions=item['skip_repetitions'],
                                     persistence_id=item['persistence_id'], auto_include_flag=learn,
                                     output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
                                     constraint_list=item['constraint_list'])

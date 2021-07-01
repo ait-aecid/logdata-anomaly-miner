@@ -31,7 +31,8 @@ class EntropyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
     """This class creates events when character pairs with low probabilities occur in values."""
 
     def __init__(self, aminer_config, anomaly_event_handlers, target_path_list=None, prob_thresh=0.05, default_freqs=False,
-                 persistence_id='Default', auto_include_flag=False, output_log_line=True, ignore_list=None, constraint_list=None):
+                 skip_repetitions=False, persistence_id='Default', auto_include_flag=False, output_log_line=True,
+                 ignore_list=None, constraint_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -40,6 +41,8 @@ class EntropyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
         are considered for value range generation.
         @param prob_thresh limit for the average probability of character pairs for which anomalies are reported.
         @param default_probs initializes the probabilities with default values from https://github.com/markbaggett/freq.
+        @param skip_repetitions boolean that determines whether only distinct values are used for character pair counting. This
+        counteracts the problem of imbalanced word frequencies that distort the frequency table generated in a single aminer run.
         @param persistence_id name of persistency document.
         @param auto_include_flag specifies whether value ranges should be extended when values outside of ranges are observed.
         @param output_log_line specifies whether the full parsed log atom should be provided in the output.
@@ -55,6 +58,8 @@ class EntropyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
         self.aminer_config = aminer_config
         self.persistence_id = persistence_id
         self.prob_thresh = prob_thresh
+        self.skip_repetitions = skip_repetitions
+        self.value_set = set()
         if constraint_list is None:
             self.constraint_list = []
         else:
@@ -161,9 +166,15 @@ class EntropyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
                     listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Value range anomaly detected', [log_atom.raw_data],
                                                event_data, log_atom, self)
         
-        # Extend charsets if learn mode is active.
+        # Extend frequency table if learn mode is active.
         if self.auto_include_flag is True:
             for value in values:
+                if self.skip_repetitions is True:
+                    # Do not consider repeating values multiple times for extending frequency table to avoid distortions.
+                    if value in self.value_set:
+                        continue
+                    else:
+                        self.value_set.add(value)
                 for i in range(-1, len(value)):
                     first_char = -1
                     if i != -1:
