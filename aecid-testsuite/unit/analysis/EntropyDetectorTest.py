@@ -37,11 +37,11 @@ class EntropyDetectorTest(TestBase):
         # Prepare log atoms that represent string values. Anomalies are detected when character pair distributions deviate.
         # The following events are generated:
         #  value: aminer
-        #  value: aecid
+        #  value: logdata-anomaly-miner
         #  value: ait-aecid
         #  value: austrian
         #  value: institute
-        #  value: fmvasacz
+        #  value: lfmvasacz
         m_1 = MatchElement('/value', b'aminer', b'aminer', None)
         parser_match_1 = ParserMatch(m_1)
         log_atom_1 = LogAtom(b'aminer', parser_match_1, 1, None)
