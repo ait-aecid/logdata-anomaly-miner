@@ -1287,6 +1287,32 @@ In addition to detecting new value combination (see NewMatchPathValueComboDetect
           tuple_transformation_function: "demo"
           learn_mode: True
 
+EntropyDetector
+~~~~~~~~~~~~~~
+
+This detector monitors and learns occurrence probabilities of character pairs in values. Many unlikely character pairs in values suggest that they are randomly generated or not fitting the learned character patterns.
+
+* **paths** parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths are considered as if they occur in the same field (required, list of strings).
+* **prob_thresh** limit for the average probability of character pairs for which anomalies are reported (float, defaults to 0.05).
+* **default_probs** initializes the probabilities with default values from https://github.com/markbaggett/freq (boolean, defaults to False).
+* **skip_repetitions** boolean that determines whether only distinct values are used for character pair counting. This counteracts the problem of imbalanced word frequencies that distort the frequency table generated in a single aminer run (boolean, defaults to False).
+* **persistence_id** name of persistency document (string, defaults to "Default").
+* **learn_mode** when set to True, the detector will extend the table of character pair frequencies based on new values (boolean).
+* **output_log_line** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to True).
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
+* **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to (list of strings, defaults to empty list).
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: 'EntropyDetector'
+          paths:
+            - '/parser/value'
+          prob_thresh: 0.05
+          default_freqs: false
+          skip_repetitions: false
+          learn_mode: True
+
 EventCorrelationDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
