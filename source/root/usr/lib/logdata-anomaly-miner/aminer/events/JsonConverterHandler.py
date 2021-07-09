@@ -59,7 +59,7 @@ class JsonConverterHandler(EventHandlerInterface):
             analysis_component['AnalysisComponentName'] = self.analysis_context.get_name_by_component(event_source)
             analysis_component['Message'] = event_message
             analysis_component['PersistenceFileName'] = event_source.persistence_id
-            if hasattr(event_source, 'autoIncludeFlag'):
+            if hasattr(event_source, 'auto_include_flag'):
                 analysis_component['TrainingMode'] = event_source.auto_include_flag
 
             detector_analysis_component = event_data.get('AnalysisComponent')
@@ -78,4 +78,8 @@ class JsonConverterHandler(EventHandlerInterface):
         res[0] = str(json_data)
 
         for listener in self.json_event_handlers:
+            if event_source.output_event_handlers is not None and listener not in event_source.output_event_handlers:
+                import copy
+                event_source = copy.copy(event_source)
+                event_source.output_event_handlers.append(listener)
             listener.receive_event(event_type, event_message, res, json_data, log_atom, event_source)
