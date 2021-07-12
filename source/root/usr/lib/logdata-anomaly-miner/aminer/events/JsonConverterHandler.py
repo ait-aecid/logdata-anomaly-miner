@@ -78,7 +78,8 @@ class JsonConverterHandler(EventHandlerInterface):
         res[0] = str(json_data)
 
         for listener in self.json_event_handlers:
-            if event_source.output_event_handlers is not None and listener not in event_source.output_event_handlers:
+            if hasattr(event_source, "output_event_handlers") and event_source.output_event_handlers is not None \
+                    and listener not in event_source.output_event_handlers:
                 import copy
                 event_source = copy.copy(event_source)
                 event_source.output_event_handlers.append(listener)
