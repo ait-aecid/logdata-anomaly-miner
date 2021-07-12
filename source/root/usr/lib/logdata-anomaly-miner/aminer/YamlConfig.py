@@ -667,7 +667,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             elif item['type'].name == 'EventTypeDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
-                    path_list=item['paths'], min_num_vals=item['min_num_vals'], max_num_vals=item['max_num_vals'],
+                    path_list=item['paths'], id_path_list=item['id_path_list'], allow_missing_id=item['allow_missing_id'],
+                    allowed_id_tuples=item['allowed_id_tuples'], min_num_vals=item['min_num_vals'], max_num_vals=item['max_num_vals'],
                     save_values=item['save_values'], track_time_for_TSA=item['track_time_for_TSA'],
                     waiting_time_for_TSA=item['waiting_time_for_TSA'],
                     num_sections_waiting_time_for_TSA=item['num_sections_waiting_time_for_TSA'])
