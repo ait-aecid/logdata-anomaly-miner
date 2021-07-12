@@ -346,10 +346,13 @@ class JsonModelElementTest(TestBase):
                     "optional_key_clickable": DummyFirstMatchModelElement("clickable", [
                         DummyFixedDataModelElement("true", b"true"), DummyFixedDataModelElement("false", b"false")])
                 }]
-            }}}
+            }},
+            "a": "EMPTY_LIST",
+            "b": "EMPTY_OBJECT"
+        }
         json_model_element = JsonModelElement(self.id_, key_parser_dict)
         data = b'{"menu": {"id": {}, "value": [], "popup": {"menuitem": [{"value": null, "onclick": "CreateNewDoc()"}, {"value": null, ' \
-               b'"onclick": "OpenDoc()"}, {"value": null, "onclick": "CloseDoc()"}]}}}'
+               b'"onclick": "OpenDoc()"}, {"value": null, "onclick": "CloseDoc()"}]}}, "a": [], "b": {}}'
         value = json.loads(data)
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
@@ -358,7 +361,7 @@ class JsonModelElementTest(TestBase):
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
         data = b'{"menu": {"id": {\n}, "value": [\n], "popup": {"menuitem": [{"value": null, "onclick": "CreateNewDoc()"}, {"value": ' \
-               b'null, "onclick": "OpenDoc()"}, {"value": null, "onclick": "CloseDoc()"}]}}}'
+               b'null, "onclick": "OpenDoc()"}, {"value": null, "onclick": "CloseDoc()"}]}}, "a": [], "b": {}}'
         value = json.loads(data)
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
@@ -366,6 +369,9 @@ class JsonModelElementTest(TestBase):
         match_context.match_data = data[len(match_context.match_string):]
         self.compare_match_results(
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
+
+        JsonModelElement(self.id_, {"a": "EMPTY_LIST"})
+        JsonModelElement(self.id_, {"a": "EMPTY_OBJECT"})
 
     def test10get_match_element_no_match(self):
         """Parse not matching substring from MatchContext and check if the MatchContext was not changed."""
