@@ -485,7 +485,20 @@ class JsonModelElementTest(TestBase):
         self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, ())  # empty tuple optional_key_prefix is not allowed
         self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, set())  # empty set optional_key_prefix not allowed
 
-    def test16get_match_element_match_context_input_validation(self):
+    def test16allow_all_fields_input_validation(self):
+        """Check if allow_all_fields is validated."""
+        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, allow_all_fields="")
+        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, allow_all_fields=None)
+        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, allow_all_fields=b"path")
+        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, allow_all_fields=123)
+        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, allow_all_fields=123.22)
+        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, allow_all_fields={"id": "path"})
+        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, allow_all_fields=["path"])
+        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, allow_all_fields=[])
+        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, allow_all_fields=())
+        self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, allow_all_fields=set())
+
+    def test17get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = JsonModelElement(self.id_, self.key_parser_dict)
         data = b"abcdefghijklmnopqrstuvwxyz.!?"
