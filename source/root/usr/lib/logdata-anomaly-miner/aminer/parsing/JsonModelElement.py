@@ -122,7 +122,6 @@ class JsonModelElement(ModelElementInterface):
             index = 0
             while index != -1:
                 index = match_context.match_data.find(rb"\x", index)
-                #if index - 1 != match_context.match_data.find(b"\\x"):
                 if index != -1 and index != match_context.match_data.find(b"\\x", index-1):
                     match_context.match_data = match_context.match_data.decode("unicode-escape").encode()
                     break
