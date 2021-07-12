@@ -318,11 +318,15 @@ class JsonModelElement(ModelElementInterface):
             data = str(data).encode()
         if json_dict[key] == "ALLOW_ALL":
             logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "ALLOW_ALL (DICT)", data.decode())
-            match_element = MatchElement(current_path+"/"+key, data, data, None)
-            last_bracket = match_context.match_data.find(b"}", len(data))
-            while match_context.match_data.count(b"{", 0, last_bracket) - match_context.match_data.count(b"}", 0, last_bracket) > 0:
-                last_bracket = match_context.match_data.find(b"}", last_bracket) + 1
-            index = last_bracket - len(data)
+            if data.startswith(b"{"):
+                match_element = MatchElement(current_path, data, data, None)
+                last_bracket = match_context.match_data.find(b"}", len(data))
+                while match_context.match_data.count(b"{", 0, last_bracket) - match_context.match_data.count(b"}", 0, last_bracket) > 0:
+                    last_bracket = match_context.match_data.find(b"}", last_bracket) + 1
+                index = last_bracket - len(data)
+            else:
+                match_element = None
+                index = -1
         else:
             match_element = json_dict[key].get_match_element(current_path, MatchContext(data))
             if match_element is not None and len(match_element.match_string) != len(data) and (
