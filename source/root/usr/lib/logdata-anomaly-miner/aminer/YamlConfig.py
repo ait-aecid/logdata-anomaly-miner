@@ -853,7 +853,7 @@ def parse_json_yaml(json_dict, parser_model_dict):
         elif isinstance(value, list):
             if isinstance(value[0], dict):
                 key_parser_dict[key] = [parse_json_yaml(value[0], parser_model_dict)]
-            elif value[0] == "ALLOW_ALL":
+            elif value[0] in ("ALLOW_ALL", "EMPTY_LIST", "EMPTY_OBJECT"):
                 key_parser_dict[key] = value
             elif parser_model_dict.get(value[0]) is None:
                 msg = 'The parser model %s does not exist!' % value[0]
@@ -861,7 +861,7 @@ def parse_json_yaml(json_dict, parser_model_dict):
                 raise ValueError(msg)
             else:
                 key_parser_dict[key] = [parser_model_dict.get(value[0])]
-        elif value == "ALLOW_ALL":
+        elif value in ("ALLOW_ALL", "EMPTY_LIST", "EMPTY_OBJECT"):
             key_parser_dict[key] = value
         elif parser_model_dict.get(value) is None:
             msg = 'The parser model %s does not exist!' % value
