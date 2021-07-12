@@ -262,9 +262,9 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         if len(self.time_window_history) <= event_index:
             self.time_window_history += [[] for _ in range(event_index + 1 - len(self.time_window_history))]
             self.arima_models_statsmodels += [None for _ in range(event_index + 1 - len(self.arima_models_statsmodels))]
-            self.prediction_history += [[[], [], []] for _ in range(event_index + 1 - len(self.arima_models_statsmodels))]
-            self.time_history += [[] for _ in range(event_index + 1 - len(self.arima_models_statsmodels))]
-            self.result_list += [[1]*self.num_results_bt for _ in range(event_index + 1 - len(self.arima_models_statsmodels))]
+            self.prediction_history += [[[], [], []] for _ in range(event_index + 1 - len(self.prediction_history))]
+            self.time_history += [[] for _ in range(event_index + 1 - len(self.time_history))]
+            self.result_list += [[1]*self.num_results_bt for _ in range(event_index + 1 - len(self.result_list))]
 
         # Initialize the arima_model if needed
         if self.auto_include_flag and self.arima_models_statsmodels[event_index] is None:

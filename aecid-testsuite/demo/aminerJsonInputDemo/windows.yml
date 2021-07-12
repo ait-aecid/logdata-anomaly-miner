@@ -148,6 +148,8 @@ Parser:
            UserName: username
            Site: site
            Container: container
+           _empty_list: EMPTY_LIST
+           _empty_object: EMPTY_OBJECT
 
 
 

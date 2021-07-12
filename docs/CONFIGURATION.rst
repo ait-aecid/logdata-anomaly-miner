@@ -1239,6 +1239,29 @@ This module defines a detector for log atoms not matching any allowlisted rule.
 
    :ref:`MatchRules`
 
+CharsetDetector
+~~~~~~~~~~~~~~~
+
+This detector generates anomalies for new characters in parsed elements and extends the allowed alphabet when learning is active.
+
+* **paths** parser paths of values to be analyzed; multiple paths mean that all values occurring in these paths are considered for character detection (required, list of strings).
+* **id_path_list** list of strings that specify group identifiers for which alphabets should be learned (list of strings, defaults to empty list).
+* **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
+* **learn_mode** specifies whether value ranges should be extended when values outside of ranges are observed (boolean).
+* **output_log_line** specifies whether the full parsed log atom should be provided in the output (boolean).
+* **ignore_list**: a list of parser paths that are ignored for analysis by this detector (list of strings, defaults to empty list).
+* **constraint_list**: a list of parser paths that the detector will be constrained to, i.e., other branches of the parser tree are ignored (list of strings, defaults to empty list).
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
+* **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to (list of strings, defaults to empty list).
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: 'CharsetDetector'
+          paths:
+            - '/parser/value'
+          learn_mode: True
+
 EnhancedNewMatchPathValueComboDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1262,6 +1285,32 @@ In addition to detecting new value combination (see NewMatchPathValueComboDetect
             - "/model/DailyCron/UName"
             - "/model/DailyCron/JobNumber"
           tuple_transformation_function: "demo"
+          learn_mode: True
+
+EntropyDetector
+~~~~~~~~~~~~~~
+
+This detector monitors and learns occurrence probabilities of character pairs in values. Many unlikely character pairs in values suggest that they are randomly generated or not fitting the learned character patterns.
+
+* **paths** parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths are considered as if they occur in the same field (required, list of strings).
+* **prob_thresh** limit for the average probability of character pairs for which anomalies are reported (float, defaults to 0.05).
+* **default_probs** initializes the probabilities with default values from https://github.com/markbaggett/freq (boolean, defaults to False).
+* **skip_repetitions** boolean that determines whether only distinct values are used for character pair counting. This counteracts the problem of imbalanced word frequencies that distort the frequency table generated in a single aminer run (boolean, defaults to False).
+* **persistence_id** name of persistency document (string, defaults to "Default").
+* **learn_mode** when set to True, the detector will extend the table of character pair frequencies based on new values (boolean).
+* **output_log_line** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to True).
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
+* **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to (list of strings, defaults to empty list).
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: 'EntropyDetector'
+          paths:
+            - '/parser/value'
+          prob_thresh: 0.05
+          default_freqs: false
+          skip_repetitions: false
           learn_mode: True
 
 EventCorrelationDetector
@@ -1837,6 +1886,31 @@ configuration errors, e.g. invalid timezone configuration.
      Analysis:
         - type: TimestampsUnsortedDetector
           id: TimestampsUnsortedDetector
+
+ValueRangeDetector
+~~~~~~~~~~~~~~~~~~
+
+This detector generates ranges for numeric values, detects values outside of these ranges, and automatically extends ranges when learning is active.
+
+* **paths** parser paths of values to be analyzed; multiple paths mean that all values occurring in these paths are considered for value range generation (required, list of strings).
+* **id_path_list** list of strings that specify group identifiers for which numeric ranges should be learned (list of strings, defaults to empty list).
+* **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
+* **learn_mode** specifies whether value ranges should be extended when values outside of ranges are observed (boolean).
+* **output_log_line** specifies whether the full parsed log atom should be provided in the output (boolean).
+* **ignore_list**: a list of parser paths that are ignored for analysis by this detector (list of strings, defaults to empty list).
+* **constraint_list**: a list of parser paths that the detector will be constrained to, i.e., other branches of the parser tree are ignored (list of strings, defaults to empty list).
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
+* **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to (list of strings, defaults to empty list).
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: 'ValueRangeDetector'
+          paths:
+            - '/parser/value'
+          id_path_list:
+            - '/parser/id'
+          learn_mode: True
 
 VariableCorrelationDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

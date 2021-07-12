@@ -422,6 +422,23 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     auto_include_flag=learn, timeout=item['timeout'], allow_missing_id=item['allow_missing_id'],
                                     output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
                                     constraint_list=item['constraint_list'])
+            elif item['type'].name == 'ValueRangeDetector':
+                tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['id_path_list'],
+                                    target_path_list=item['paths'], persistence_id=item['persistence_id'], auto_include_flag=learn,
+                                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
+                                    constraint_list=item['constraint_list'])
+            elif item['type'].name == 'CharsetDetector':
+                tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['id_path_list'],
+                                    target_path_list=item['paths'], persistence_id=item['persistence_id'], auto_include_flag=learn,
+                                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
+                                    constraint_list=item['constraint_list'])
+            elif item['type'].name == 'EntropyDetector':
+                tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
+                                    prob_thresh=item['prob_thresh'], default_freqs=item['default_freqs'],
+                                    skip_repetitions=item['skip_repetitions'],
+                                    persistence_id=item['persistence_id'], auto_include_flag=learn,
+                                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
+                                    constraint_list=item['constraint_list'])
             elif item['type'].name == 'EventFrequencyDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
                                     persistence_id=item['persistence_id'], window_size=item['window_size'],
@@ -837,7 +854,7 @@ def parse_json_yaml(json_dict, parser_model_dict):
         elif isinstance(value, list):
             if isinstance(value[0], dict):
                 key_parser_dict[key] = [parse_json_yaml(value[0], parser_model_dict)]
-            elif value[0] == "ALLOW_ALL":
+            elif value[0] in ("ALLOW_ALL", "EMPTY_LIST", "EMPTY_OBJECT"):
                 key_parser_dict[key] = value
             elif parser_model_dict.get(value[0]) is None:
                 msg = 'The parser model %s does not exist!' % value[0]
@@ -845,7 +862,7 @@ def parse_json_yaml(json_dict, parser_model_dict):
                 raise ValueError(msg)
             else:
                 key_parser_dict[key] = [parser_model_dict.get(value[0])]
-        elif value == "ALLOW_ALL":
+        elif value in ("ALLOW_ALL", "EMPTY_LIST", "EMPTY_OBJECT"):
             key_parser_dict[key] = value
         elif parser_model_dict.get(value) is None:
             msg = 'The parser model %s does not exist!' % value
