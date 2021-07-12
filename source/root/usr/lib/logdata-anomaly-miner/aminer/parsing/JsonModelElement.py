@@ -30,7 +30,7 @@ debug_log_prefix = "JsonModelElement: "
 class JsonModelElement(ModelElementInterface):
     """Parse single- or multi-lined JSON data."""
 
-    def __init__(self, element_id: str, key_parser_dict: dict, optional_key_prefix: str = "optional_key_"):
+    def __init__(self, element_id: str, key_parser_dict: dict, optional_key_prefix: str = "optional_key_", allow_all_fields: bool = False):
         """
         Initialize the JsonModelElement.
         @param element_id: The ID of the element.
@@ -38,6 +38,7 @@ class JsonModelElement(ModelElementInterface):
             start with the OptionalMatchModelElement. To allow every key in a JSON object use "key": "ALLOW_ALL". To allow only empty arrays
             - [] - use "key": "EMPTY_LIST". To allow only empty objects - {} - use "key": "EMPTY_OBJECT".
         @param optional_key_prefix: If some key starts with the optional_key_prefix it will be considered optional.
+        @param allow_all_fields: Unknown fields are skipped without parsing with any parsing model.
         """
         if not isinstance(element_id, str):
             msg = "element_id has to be of the type string."
@@ -66,6 +67,11 @@ class JsonModelElement(ModelElementInterface):
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         self.optional_key_prefix = optional_key_prefix
+        if not isinstance(allow_all_fields, bool):
+            msg = "allow_all_fields has to be of the type bool."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        self.allow_all_fields = allow_all_fields
         self.dec_escapes = False
 
     def get_id(self):
@@ -160,7 +166,14 @@ class JsonModelElement(ModelElementInterface):
                 index = match_context.match_data.find(key.encode())
                 match_context.update(match_context.match_data[:index])
                 logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 2", key, json_dict)
-                return [None]
+                if self.allow_all_fields:
+                    match_context.update(match_context.match_data[
+                                         :match_context.match_data.find(key.encode()) + len(key.encode()) + len(str(json_match_data[key]))])
+                    if match_context.match_data.replace(b"}", b"").replace(b"]", b"") == b"":
+                        match_context.update(match_context.match_data)
+                    continue
+                else:
+                    return [None]
             value = json_dict[key]
             if isinstance(value, (dict, list)) and (not isinstance(json_match_data, dict) or split_key not in json_match_data):
                 logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 3")
