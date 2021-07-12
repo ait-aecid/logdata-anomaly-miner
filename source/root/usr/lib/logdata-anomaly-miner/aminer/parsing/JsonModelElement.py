@@ -177,7 +177,8 @@ class JsonModelElement(ModelElementInterface):
             elif value == "EMPTY_OBJECT":
                 if isinstance(json_match_data[split_key], dict) and len(json_match_data[split_key].keys()) == 0:
                     index = match_context.match_data.find(b"}") + 1
-                    match_element = MatchElement(current_path, match_context.match_data[:index], match_context.match_data[:index], None)
+                    match_element = MatchElement(
+                        current_path+"/"+key, match_context.match_data[:index], match_context.match_data[:index], None)
                     matches.append(match_element)
                     match_context.update(match_context.match_data[:index])
                 else:
@@ -185,7 +186,8 @@ class JsonModelElement(ModelElementInterface):
             elif json_dict[key] == "EMPTY_LIST":
                 if isinstance(json_match_data[split_key], list) and len(json_match_data[split_key]) == 0:
                     index = match_context.match_data.find(b"]") + 1
-                    match_element = MatchElement(current_path, match_context.match_data[:index], match_context.match_data[:index], None)
+                    match_element = MatchElement(
+                        current_path+"/"+key, match_context.match_data[:index], match_context.match_data[:index], None)
                     matches.append(match_element)
                     match_context.update(match_context.match_data[:index])
                 else:
@@ -260,11 +262,12 @@ class JsonModelElement(ModelElementInterface):
             else:
                 if json_dict[key][0] == "ALLOW_ALL":
                     logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "ALLOW_ALL (LIST)")
-                    match_element = MatchElement(current_path, data, data, None)
+                    match_element = MatchElement(current_path+"/"+key, data, data, None)
                 elif json_dict[key] == "EMPTY_LIST":
                     if isinstance(data, list) and len(data) == 0:
                         index = match_context.match_data.find(b"]")
-                        match_element = MatchElement(current_path, match_context.match_data[:index], match_context.match_data[:index], None)
+                        match_element = MatchElement(
+                            current_path+"/"+key, match_context.match_data[:index], match_context.match_data[:index], None)
                         match_context.update(match_context.match_data[:index])
                     else:
                         return None
@@ -315,7 +318,7 @@ class JsonModelElement(ModelElementInterface):
             data = str(data).encode()
         if json_dict[key] == "ALLOW_ALL":
             logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "ALLOW_ALL (DICT)", data.decode())
-            match_element = MatchElement(current_path, data, data, None)
+            match_element = MatchElement(current_path+"/"+key, data, data, None)
             last_bracket = match_context.match_data.find(b"}", len(data))
             while match_context.match_data.count(b"{", 0, last_bracket) - match_context.match_data.count(b"}", 0, last_bracket) > 0:
                 last_bracket = match_context.match_data.find(b"}", last_bracket) + 1
