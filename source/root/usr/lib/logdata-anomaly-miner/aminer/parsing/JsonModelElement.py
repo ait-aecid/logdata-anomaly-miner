@@ -172,8 +172,7 @@ class JsonModelElement(ModelElementInterface):
                     if match_context.match_data.replace(b"}", b"").replace(b"]", b"") == b"":
                         match_context.update(match_context.match_data)
                     continue
-                else:
-                    return [None]
+                return [None]
             value = json_dict[key]
             if isinstance(value, (dict, list)) and (not isinstance(json_match_data, dict) or split_key not in json_match_data):
                 logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 3")
