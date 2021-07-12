@@ -118,6 +118,8 @@ class JsonModelElement(ModelElementInterface):
         old_match_data = match_context.match_data
         matches: Union[List[Union[MatchElement, None]]] = []
         try:
+            if rb"\x" in match_context.match_data:
+                match_context.match_data = match_context.match_data.decode("unicode-escape").encode()
             json_match_data = json.loads(match_context.match_data)
             if not isinstance(json_match_data, dict):
                 return None
