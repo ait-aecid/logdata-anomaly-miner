@@ -670,9 +670,9 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
                     path_list=item['paths'], min_num_vals=item['min_num_vals'], max_num_vals=item['max_num_vals'],
-                    save_values=item['save_values'], track_time_for_TSA=item['track_time_for_TSA'],
-                    waiting_time_for_TSA=item['waiting_time_for_TSA'],
-                    num_sections_waiting_time_for_TSA=item['num_sections_waiting_time_for_TSA'])
+                    save_values=item['save_values'], track_time_for_tsa=item['track_time_for_tsa'],
+                    waiting_time_for_tsa=item['waiting_time_for_tsa'],
+                    num_sections_waiting_time_for_tsa=item['num_sections_waiting_time_for_tsa'])
             elif item['type'].name == 'VariableTypeDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
