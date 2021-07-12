@@ -23,6 +23,7 @@ from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 from aminer.util import PersistenceUtil
 
+
 class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """This class keeps track of the found eventtypes and the values of each variable."""
 
@@ -30,7 +31,6 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                  allow_missing_id=False, allowed_id_tuples=None, min_num_vals=1000, max_num_vals=1500, save_values=True,
                  track_time_for_TSA=False, waiting_time_for_TSA=1000, num_sections_waiting_time_for_TSA=100):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
-
         self.next_persist_time = time.time() + 600.0
         self.anomaly_event_handlers = anomaly_event_handlers
         # One or more paths that specify the trace of the EventTypeDetector. If the list is not empty the events corresponds to the values
@@ -253,7 +253,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                         id_tuple += ('',)
                     else:
                         # Omit log atom if one of the id paths is not found.
-                        return
+                        return False
                 else:
                     if isinstance(id_match.match_object, bytes):
                         id_tuple += (id_match.match_object.decode(AminerConfig.ENCODING),)
@@ -263,7 +263,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             # Check if only certain tuples are allowed and if the tuplle is included.
             if self.allowed_id_tuples != [] and id_tuple not in self.allowed_id_tuples:
                 self.current_index = -1
-                return
+                return False
 
             # Searches if the id_tuple has previously appeared
             current_index = -1
@@ -389,7 +389,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             # Skips the variable if check_variable is False, or if the var_key is not included in the match_dict
             if not self.check_variables[current_index][var_index]:
                 continue
-            elif var_key not in log_atom.parser_match.get_match_dictionary():
+            if var_key not in log_atom.parser_match.get_match_dictionary():
                 self.values[current_index][var_index] = []
                 self.check_variables[current_index][var_index] = False
                 continue
