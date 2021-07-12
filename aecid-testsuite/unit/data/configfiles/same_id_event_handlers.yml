@@ -11,7 +11,8 @@ Parser:
           start: True
           type: SequenceModelElement
           name: 'model'
-          args: apacheModel
+          args:
+            - apacheModel
 
 Input:
         verbose: True # optional

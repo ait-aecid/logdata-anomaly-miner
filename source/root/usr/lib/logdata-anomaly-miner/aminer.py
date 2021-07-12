@@ -240,11 +240,12 @@ def main():
     parser.add_argument('-u', '--check-updates', action='store_true', help='check if updates for the aminer are available.')
     parser.add_argument('-c', '--config', default='/etc/aminer/config.yml', type=str, help='path to the config-file')
     parser.add_argument('-D', '--daemon', action='store_false', help='run as a daemon process')
-    parser.add_argument('-s', '--stat', choices=[0, 1, 2], type=int, help='set the stat level. Possible stat-levels are 0 for no statistics'
-                                                                          ', 1 for normal statistic level and 2 for verbose statistics.')
-    parser.add_argument('-d', '--debug', choices=[0, 1, 2], type=int, help='set the debug level. Possible debug-levels are 0 for no '
-                                                                           'debugging, 1 for normal output (INFO and above), 2 for printing'
-                                                                           ' all debug information.')
+    parser.add_argument('-s', '--stat', choices=["0", "1", "2"], type=str,
+                        help='set the stat level. Possible stat-levels are 0 for no statistics, 1 for normal statistic level and 2 for '
+                             'verbose statistics.')
+    parser.add_argument('-d', '--debug', choices=["0", "1", "2"], type=str,
+                        help='set the debug level. Possible debug-levels are 0 for no debugging, 1 for normal output (INFO and above), 2 '
+                             'for printing all debug information.')
     parser.add_argument('--run-analysis', action='store_true', help='enable/disable analysis')
     parser.add_argument('-C', '--clear', action='store_true', help='removes all persistence directories')
     parser.add_argument('-r', '--remove', action='append', type=str, help='removes a specific persistence directory')
@@ -299,10 +300,10 @@ def main():
     stat_level_console_flag = False
     debug_level_console_flag = False
     if args.stat is not None:
-        stat_level = args.stat
+        stat_level = int(args.stat)
         stat_level_console_flag = True
     if args.debug is not None:
-        debug_level = args.stat
+        debug_level = int(args.debug)
         debug_level_console_flag = True
 
     # Load the main configuration file.
@@ -674,7 +675,7 @@ def main():
             exec_args.append("--config-properties")
             for config_property in args.config_properties:
                 exec_args.append(config_property)
-        os.execve(sys.argv[0], exec_args, {})  # skipcq: BAN-B606
+        os.execv(sys.argv[0], exec_args)  # skipcq: BAN-B606
         msg = 'Failed to execute child process'
         print(msg, file=sys.stderr)
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)

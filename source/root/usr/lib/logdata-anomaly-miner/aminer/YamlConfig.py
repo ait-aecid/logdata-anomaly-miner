@@ -144,7 +144,6 @@ def build_parsing_model():
     parser_model_dict = {}
     start = None
     ws_count = 0
-    whitespace_str = b' '
 
     # We might be able to remove this and us it like the config_properties
     # skipcq: PYL-W0603
@@ -154,10 +153,15 @@ def build_parsing_model():
             raise ValueError('Config-Error: The id "%s" occurred multiple times in Parser!' % item['id'])
         if 'start' in item and item['start'] is True and item['type'].name != 'JsonModelElement':
             start = item
-            continue
         if item['type'].is_model:
             if 'args' in item:
                 if isinstance(item['args'], list):  # skipcq: PTC-W0048
+                    for i, value in enumerate(item["args"]):
+                        if value == "WHITESPACE":
+                            from aminer.parsing.FixedDataModelElement import FixedDataModelElement
+                            sp = "sp%d" % ws_count
+                            item["args"][i] = FixedDataModelElement(sp, b' ')
+                            ws_count += 1
                     if item['type'].name not in ('DecimalFloatValueModelElement', 'DecimalIntegerValueModelElement'):
                         # encode string to bytearray
                         for j, val in enumerate(item['args']):
@@ -166,7 +170,8 @@ def build_parsing_model():
                 else:
                     if item['type'].name not in ('DecimalFloatValueModelElement', 'DecimalIntegerValueModelElement') and isinstance(
                             item['args'], str):
-                        item['args'] = item['args'].encode()
+                        item['args'] = item['args'].encode().replace(b"\\n", b"\n").replace(b"\\t", b"\t").replace(b"\\r", b"\r").\
+                            replace(b"\\\\", b"\\").replace(b"\\b", b"\b")
             if item['type'].name == 'ElementValueBranchModelElement':
                 value_model = parser_model_dict.get(item['args'][0].decode())
                 if value_model is None:
@@ -195,7 +200,8 @@ def build_parsing_model():
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     fmt = date_format['format']
-                    fmt[0] = fmt[0].encode()
+                    fmt[0] = fmt[0].encode().replace(b"\\n", b"\n").replace(b"\\t", b"\t").replace(b"\\r", b"\r").replace(b"\\\\", b"\\").\
+                        replace(b"\\b", b"\b")
                     date_formats.append(tuple(fmt))
                 parser_model_dict[item['id']] = item['type'].func(
                     item['name'], date_formats, item['start_year'], item['max_time_jump_seconds'])
@@ -223,11 +229,16 @@ def build_parsing_model():
             elif item['type'].name in ('FirstMatchModelElement', 'SequenceModelElement'):
                 children = []
                 for child in item['args']:
-                    if parser_model_dict.get(child.decode()) is None:
-                        msg = 'The parser model %s does not exist!' % child.decode()
-                        logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                        raise ValueError(msg)
-                    children.append(parser_model_dict.get(child.decode()))
+                    if isinstance(child, bytes):
+                        child = child.decode()
+                    if isinstance(child, str):
+                        if parser_model_dict.get(child) is None:
+                            msg = 'The parser model %s does not exist!' % child
+                            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                            raise ValueError(msg)
+                        children.append(parser_model_dict.get(child))
+                    else:
+                        children.append(child)
                 parser_model_dict[item['id']] = item['type'].func(item['name'], children)
             elif item['type'].name == 'OptionalMatchModelElement':
                 optional_element = parser_model_dict.get(item['args'].decode())
@@ -237,7 +248,8 @@ def build_parsing_model():
                     raise ValueError(msg)
                 parser_model_dict[item['id']] = item['type'].func(item['name'], optional_element)
             elif item['type'].name == 'DelimitedDataModelElement':
-                delimiter = item['delimiter'].encode()
+                delimiter = item['delimiter'].encode().replace(b"\\n", b"\n").replace(b"\\t", b"\t").replace(b"\\r", b"\r").\
+                    replace(b"\\\\", b"\\").replace(b"\\b", b"\b")
                 parser_model_dict[item['id']] = item['type'].func(item['name'], delimiter, item['escape'], item['consume_delimiter'])
             elif item['type'].name == 'JsonModelElement':
                 key_parser_dict = parse_json_yaml(item['key_parser_dict'], parser_model_dict)
@@ -253,29 +265,10 @@ def build_parsing_model():
         else:
             parser_model_dict[item['id']] = item['type'].func()
 
-    args_list = []
     if start.__class__.__name__ == 'JsonModelElement':
         parsing_model = start
-    elif 'args' in start:
-        if isinstance(start['args'], list):
-            for i in start['args']:
-                if i == 'WHITESPACE':
-                    from aminer.parsing.FixedDataModelElement import FixedDataModelElement
-                    sp = 'sp%d' % ws_count
-                    args_list.append(FixedDataModelElement(sp, whitespace_str))
-                    ws_count += 1
-                else:
-                    model = parser_model_dict.get(i)
-                    if model is None:
-                        msg = 'The parser model %s does not exist!' % i
-                        logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                        raise ValueError(msg)
-                    args_list.append(model)
-            parsing_model = start['type'].func(start['name'], args_list)
-        else:
-            parsing_model = start['type'].func(start['name'], [parser_model_dict[start['args']]])
     else:
-        parsing_model = start['type'].func()
+        parsing_model = parser_model_dict[start['id']]
     return parsing_model
 
 
@@ -294,7 +287,8 @@ def build_input_pipeline(analysis_context, parsing_model):
     if isinstance(timestamp_paths, str):
         timestamp_paths = [timestamp_paths]
     sync_wait_time = yaml_data['Input']['sync_wait_time']
-    eol_sep = yaml_data['Input']['eol_sep'].encode()
+    eol_sep = yaml_data['Input']['eol_sep'].encode().replace(b"\\n", b"\n").replace(b"\\t", b"\t").replace(b"\\r", b"\r").\
+        replace(b"\\\\", b"\\").replace(b"\\b", b"\b")
     json_format = yaml_data['Input']['json_format']
     if yaml_data['Input']['multi_source'] is True:
         from aminer.input.SimpleMultisourceAtomSync import SimpleMultisourceAtomSync
@@ -428,6 +422,23 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     auto_include_flag=learn, timeout=item['timeout'], allow_missing_id=item['allow_missing_id'],
                                     output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
                                     constraint_list=item['constraint_list'])
+            elif item['type'].name == 'ValueRangeDetector':
+                tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['id_path_list'],
+                                    target_path_list=item['paths'], persistence_id=item['persistence_id'], auto_include_flag=learn,
+                                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
+                                    constraint_list=item['constraint_list'])
+            elif item['type'].name == 'CharsetDetector':
+                tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['id_path_list'],
+                                    target_path_list=item['paths'], persistence_id=item['persistence_id'], auto_include_flag=learn,
+                                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
+                                    constraint_list=item['constraint_list'])
+            elif item['type'].name == 'EntropyDetector':
+                tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
+                                    prob_thresh=item['prob_thresh'], default_freqs=item['default_freqs'],
+                                    skip_repetitions=item['skip_repetitions'],
+                                    persistence_id=item['persistence_id'], auto_include_flag=learn,
+                                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
+                                    constraint_list=item['constraint_list'])
             elif item['type'].name == 'EventFrequencyDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
                                     persistence_id=item['persistence_id'], window_size=item['window_size'],
@@ -523,7 +534,9 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 stream = sys.stdout
                 if item['stream'] == 'sys.stderr':
                     stream = sys.stderr
-                tmp_analyser = func(stream, item['paths'], item['separator'].encode(), item['missing_value_string'].encode())
+                tmp_analyser = func(stream, item['paths'], item['separator'].encode().replace(b"\\n", b"\n").replace(b"\\t", b"\t").replace(
+                    b"\\r", b"\r").replace(b"\\\\", b"\\").replace(b"\\b", b"\b"), item['missing_value_string'].encode().replace(
+                    b"\\n", b"\n").replace(b"\\t", b"\t").replace(b"\\r", b"\r").replace(b"\\\\", b"\\").replace(b"\\b", b"\b"))
             elif item['type'].name == 'NewMatchPathDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
                                     auto_include_flag=learn, output_log_line=item['output_logline'])
@@ -579,13 +592,15 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     tmp_analyser = func(item['path'], match_action=match_action)
                 if item['type'].name == 'ValueMatchRule':
                     if isinstance(item['value'], str):
-                        item['value'] = item['value'].encode()
+                        item['value'] = item['value'].encode().replace(b"\\n", b"\n").replace(b"\\t", b"\t").replace(b"\\r", b"\r").\
+                            replace(b"\\\\", b"\\").replace(b"\\b", b"\b")
                     tmp_analyser = func(item['path'], item['value'], match_action=match_action)
                 if item['type'].name == 'ValueListMatchRule':
                     value_list = []
                     for val in item['value_list']:
                         if isinstance(val, str):
-                            val = val.encode()
+                            val = val.encode().replace(b"\\n", b"\n").replace(b"\\t", b"\t").replace(b"\\r", b"\r").\
+                                replace(b"\\\\", b"\\").replace(b"\\b", b"\b")
                         value_list.append(val)
                     tmp_analyser = func(item['path'], value_list, match_action=match_action)
                 if item['type'].name == 'ValueRangeMatchRule':
@@ -736,11 +751,11 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     raise ValueError(msg)
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, etd, persistence_id=item['persistence_id'],
-                    path_list=item['paths'], build_sum_over_values=item['build_sum_over_values'],
-                    num_division_time_step=item['num_division_time_step'], alpha=item['alpha'],
-                    num_min_time_history=item['num_min_time_history'], num_max_time_history=item['num_max_time_history'],
-                    num_results_bt=item['num_results_bt'], alpha_bt=item['alpha_bt'], acf_threshold=item['acf_threshold'],
-                    round_time_inteval_threshold=item['round_time_inteval_threshold'],
+                    path_list=item['paths'], acf_pause_area=item['acf_pause_area'], build_sum_over_values=item['build_sum_over_values'],
+                    num_periods_tsa_ini=item['num_periods_tsa_ini'], num_division_time_step=item['num_division_time_step'],
+                    alpha=item['alpha'], num_min_time_history=item['num_min_time_history'],
+                    num_max_time_history=item['num_max_time_history'], num_results_bt=item['num_results_bt'], alpha_bt=item['alpha_bt'],
+                    acf_threshold=item['acf_threshold'], round_time_inteval_threshold=item['round_time_inteval_threshold'],
                     output_log_line=item['output_logline'], ignore_list=item['ignore_list'])
             else:
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn)
@@ -838,7 +853,7 @@ def parse_json_yaml(json_dict, parser_model_dict):
         elif isinstance(value, list):
             if isinstance(value[0], dict):
                 key_parser_dict[key] = [parse_json_yaml(value[0], parser_model_dict)]
-            elif value[0] == "ALLOW_ALL":
+            elif value[0] in ("ALLOW_ALL", "EMPTY_LIST", "EMPTY_OBJECT"):
                 key_parser_dict[key] = value
             elif parser_model_dict.get(value[0]) is None:
                 msg = 'The parser model %s does not exist!' % value[0]
@@ -846,7 +861,7 @@ def parse_json_yaml(json_dict, parser_model_dict):
                 raise ValueError(msg)
             else:
                 key_parser_dict[key] = [parser_model_dict.get(value[0])]
-        elif value == "ALLOW_ALL":
+        elif value in ("ALLOW_ALL", "EMPTY_LIST", "EMPTY_OBJECT"):
             key_parser_dict[key] = value
         elif parser_model_dict.get(value) is None:
             msg = 'The parser model %s does not exist!' % value

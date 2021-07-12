@@ -44,6 +44,9 @@
                 'ignore_list': {
                     'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                 'id_path_list': {'type': 'list', 'default': []},
+                'prob_thresh': {'type': 'float', 'default': 0.05},
+                'default_freqs': {'type': 'boolean', 'default': False},
+                'skip_repetitions': {'type': 'boolean', 'default': False},
                 'seq_len': {'type': 'integer', 'default': 3},
                 'timeout': {'type': ['integer', 'float'], 'default': -1},
                 'allow_missing_id': {'type': 'boolean', 'default': False},
@@ -182,7 +185,9 @@
                 'num_results_bt': {'type': 'integer', 'default': 15},
                 'alpha_bt': {'type': 'float', 'default': 0.05},
                 'round_time_inteval_threshold': {'type': 'float', 'default': 0.02},
-                'acf_threshold': {'type': 'float', 'default': 0.2}
+                'acf_threshold': {'type': 'float', 'default': 0.2},
+                'acf_pause_area': {'type': 'float', 'default': 0.2},
+                'num_periods_tsa_ini': {'type': 'integer', 'default': 15}
             }
         }
     }

@@ -477,7 +477,7 @@ class YamlConfigTest(TestBase):
         aminer_config.load_yaml('unit/data/configfiles/template_config.yml')
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        self.assertEqual(context.atomizer_factory.event_handler_list[0].stream.name, '/tmp/streamPrinter.txt')
+        self.assertEqual(context.atomizer_factory.event_handler_list[0].stream.name, '/tmp/streamPrinter.txt')  # skipcq: BAN-B108
         self.assertEqual(context.atomizer_factory.event_handler_list[0].stream.mode, 'w+')
 
     def test20_suppress_output(self):
@@ -621,7 +621,7 @@ class YamlConfigTest(TestBase):
             aminer_config.load_yaml('unit/data/configfiles/filter_config_errors.yml')
         except ValueError as e:
             msg = "Config-Error: {'AMinerGroup': ['unknown field'], 'Analysis': [{0: ['none or more than one rule validate', {'oneof " \
-                  "definition 22': [{'learn_mode': ['unknown field'], 'reset_after_report_flag': ['unknown field'], 'type': {'allowed': [" \
+                  "definition 25': [{'learn_mode': ['unknown field'], 'reset_after_report_flag': ['unknown field'], 'type': {'allowed': [" \
                   "'ParserCount']}}]}]}], 'EventHandlers': [{1: ['none or more than one rule validate', {'oneof definition 3': [{" \
                   "'output_file_path': ['unknown field'], 'type': {'allowed': ['SyslogWriterEventHandler']}}]}]}], 'Parser': [{0: ['none " \
                   "or more than one rule validate', {'oneof definition 0': [{'args2': ['unknown field'], 'type': {'forbidden': [" \
