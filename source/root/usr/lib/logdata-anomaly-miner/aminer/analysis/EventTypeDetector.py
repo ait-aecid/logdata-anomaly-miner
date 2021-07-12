@@ -36,6 +36,8 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         # One or more paths that specify the trace of the EventTypeDetector. If the list is not empty the events corresponds to the values
         # in these paths not the event types.
         self.id_path_list = id_path_list
+        if self.id_path_list is None:
+            self.id_path_list = []
         # Specifies whether log atoms without id path should be omitted (only if id path is set).
         self.allow_missing_id = allow_missing_id
         # List of the allowed id tuples. Log atoms with id tuples not in this list are not analyzed, when this list is not empty.
