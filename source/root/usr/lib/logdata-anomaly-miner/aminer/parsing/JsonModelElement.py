@@ -167,6 +167,13 @@ class JsonModelElement(ModelElementInterface):
                 return [None]
             if isinstance(value, dict):
                 matches += self.parse_json_dict(value, json_match_data[split_key], "%s/%s" % (current_path, split_key), match_context)
+                if json_match_data[split_key] == {}:
+                    index = match_context.match_data.find(split_key.encode())
+                    index = match_context.match_data.find(b"}", index)
+                    match_element = MatchElement(
+                        current_path+"/"+key, match_context.match_data[:index], match_context.match_data[:index], None)
+                    matches.append(match_element)
+                    match_context.update(match_context.match_data[:index])
                 if len(matches) == 0 or matches[-1] is None:
                     logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN MATCHES 1")
                     return matches
