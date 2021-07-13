@@ -30,7 +30,7 @@ class FixedWordlistDataModelElementTest(TestBase):
         match_context = DummyMatchContext(data)
         fixed_wordlist_dme = FixedWordlistDataModelElement(self.id_, self.wordlist)
         match_element = fixed_wordlist_dme.get_match_element(self.path, match_context)
-        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, index, None)
+        self.compare_match_results(data, match_element, match_context, self.id_+"/0", self.path, value, index, None)
 
         data = b"word, wordlist"
         index = 1
@@ -38,7 +38,7 @@ class FixedWordlistDataModelElementTest(TestBase):
         match_context = DummyMatchContext(data)
         fixed_wordlist_dme = FixedWordlistDataModelElement(self.id_, self.wordlist)
         match_element = fixed_wordlist_dme.get_match_element(self.path, match_context)
-        self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, index, None)
+        self.compare_match_results(data, match_element, match_context, self.id_+"/1", self.path, value, index, None)
 
     def test4get_match_element_no_match(self):
         """Parse not matching substring from MatchContext and check if the MatchContext was not changed."""
