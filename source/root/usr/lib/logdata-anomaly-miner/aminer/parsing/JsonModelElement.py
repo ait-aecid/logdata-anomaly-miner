@@ -59,7 +59,8 @@ class JsonModelElement(ModelElementInterface):
         @param element_id: The ID of the element.
         @param key_parser_dict: A dictionary of all keys with the according parsers. If a key should be optional, the associated parser must
             start with the OptionalMatchModelElement. To allow every key in a JSON object use "key": "ALLOW_ALL". To allow only empty arrays
-            - [] - use "key": "EMPTY_LIST". To allow only empty objects - {} - use "key": "EMPTY_OBJECT".
+            - [] - use "key": "EMPTY_LIST". To allow only empty objects - {} - use "key": "EMPTY_OBJECT". To allow only empty strings - "" -
+             use "key": "EMPTY_STRING".
         @param optional_key_prefix: If some key starts with the optional_key_prefix it will be considered optional.
         """
         if not isinstance(element_id, str):
@@ -118,7 +119,7 @@ class JsonModelElement(ModelElementInterface):
                 children.append(value_list)
             elif isinstance(value, dict):
                 self.find_children_in_dict(value, children)
-            elif value not in ("ALLOW_ALL", "EMPTY_LIST", "EMPTY_OBJECT"):
+            elif value not in ("ALLOW_ALL", "EMPTY_LIST", "EMPTY_OBJECT", "EMPTY_STRING"):
                 msg = "wrong type found in key_parser_dict."
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)
@@ -360,6 +361,13 @@ class JsonModelElement(ModelElementInterface):
                 while match_context.match_data.count(b"{", 0, last_bracket) - match_context.match_data.count(b"}", 0, last_bracket) > 0:
                     last_bracket = match_context.match_data.find(b"}", last_bracket) + 1
                 index = last_bracket - len(data)
+            else:
+                match_element = None
+                index = -1
+        elif json_dict[key] == "EMPTY_STRING":
+            if data == b"":
+                match_element = MatchElement(current_path, data, data, None)
+                index = len(split_key) + len(b'""')
             else:
                 match_element = None
                 index = -1

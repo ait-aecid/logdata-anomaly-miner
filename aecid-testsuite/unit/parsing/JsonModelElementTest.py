@@ -346,7 +346,7 @@ class JsonModelElementTest(TestBase):
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
     def test9get_match_element_empty_list_empty_object_null(self):
-        """Test if the keywords EMPTY_LIST, EMPTY_OBJECT and None (null) work properly."""
+        """Test if the keywords EMPTY_LIST, EMPTY_OBJECT, EMPTY_STRING and None (null) work properly."""
         key_parser_dict = {"menu": {
             "id": "EMPTY_OBJECT",
             "value": "EMPTY_LIST",
@@ -361,11 +361,12 @@ class JsonModelElementTest(TestBase):
                 }]
             }},
             "a": "EMPTY_LIST",
-            "b": "EMPTY_OBJECT"
+            "b": "EMPTY_OBJECT",
+            "c": "EMPTY_STRING"
         }
         json_model_element = JsonModelElement(self.id_, key_parser_dict)
         data = b'{"menu": {"id": {}, "value": [], "popup": {"menuitem": [{"value": null, "onclick": "CreateNewDoc()"}, {"value": null, ' \
-               b'"onclick": "OpenDoc()"}, {"value": null, "onclick": "CloseDoc()"}]}}, "a": [], "b": {}}'
+               b'"onclick": "OpenDoc()"}, {"value": null, "onclick": "CloseDoc()"}]}}, "a": [], "b": {}, "c": ""}'
         value = json.loads(data)
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
@@ -374,7 +375,7 @@ class JsonModelElementTest(TestBase):
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
         data = b'{"menu": {"id": {\n}, "value": [\n], "popup": {"menuitem": [{"value": null, "onclick": "CreateNewDoc()"}, {"value": ' \
-               b'null, "onclick": "OpenDoc()"}, {"value": null, "onclick": "CloseDoc()"}]}}, "a": [], "b": {}}'
+               b'null, "onclick": "OpenDoc()"}, {"value": null, "onclick": "CloseDoc()"}]}}, "a": [], "b": {}, "c": ""}'
         value = json.loads(data)
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
@@ -385,6 +386,25 @@ class JsonModelElementTest(TestBase):
 
         JsonModelElement(self.id_, {"a": "EMPTY_LIST"})
         JsonModelElement(self.id_, {"a": "EMPTY_OBJECT"})
+        JsonModelElement(self.id_, {"a": "EMPTY_STRING"})
+
+        data = b'{"menu": {"id": {}, "value": [], "popup": {"menuitem": [{"value": null, "onclick": "CreateNewDoc()"}, {"value": null, ' \
+               b'"onclick": "OpenDoc()"}, {"value": null, "onclick": "CloseDoc()"}]}}, "a": ["a"], "b": {}, "c": ""}'
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b'{"menu": {"id": {}, "value": [], "popup": {"menuitem": [{"value": null, "onclick": "CreateNewDoc()"}, {"value": null, ' \
+               b'"onclick": "OpenDoc()"}, {"value": null, "onclick": "CloseDoc()"}]}}, "a": [], "b": {"a": "a"}, "c": ""}'
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        data = b'{"menu": {"id": {}, "value": [], "popup": {"menuitem": [{"value": null, "onclick": "CreateNewDoc()"}, {"value": null, ' \
+               b'"onclick": "OpenDoc()"}, {"value": null, "onclick": "CloseDoc()"}]}}, "a": [], "b": {}, "c": "ab"}'
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
 
     def test10get_match_element_float_exponents(self):
         """Parse float values with exponents.
