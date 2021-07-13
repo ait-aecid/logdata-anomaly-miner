@@ -4,6 +4,7 @@ import json
 from aminer.parsing.JsonModelElement import JsonModelElement
 from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.MatchElement import MatchElement
+from aminer.parsing.DecimalFloatValueModelElement import DecimalFloatValueModelElement
 from unit.TestBase import TestBase, DummyMatchContext, DummyFixedDataModelElement, DummyFirstMatchModelElement
 
 
@@ -27,6 +28,7 @@ class JsonModelElementTest(TestBase):
         b'{"menu": {"value": "File","popup": {"menuitem": [{"clickable": false, "value": "New", "onclick": "CreateNewDoc()"}, {' \
         b'"onclick": "OpenDoc()", "value": "Open"}, {"value": "Close", "onclick": "CloseDoc()", "clickable": false}]}, "id": "file"}}'
     single_line_json_list = b'{"menu": {"id": "file", "value": "File", "popup": ["value", "value", "value"]}}'
+    single_line_escaped_json = br'{"a": "\x2d"}'
     multi_line_json = b"""{
   "menu": {
     "id": "file",
@@ -92,6 +94,7 @@ class JsonModelElementTest(TestBase):
             DummyFixedDataModelElement("value", b"value")
         ]
     }}
+    key_parser_dict_escaped = {"a":  DummyFixedDataModelElement("id", b"-")}
     empty_key_parser_dict = {"optional_key_key": DummyFixedDataModelElement("key", b"value")}
     key_parser_dict_allow_all_fields = {"menu": {
         "id": DummyFixedDataModelElement("id", b"file")
@@ -161,6 +164,16 @@ class JsonModelElementTest(TestBase):
 
         json_model_element = JsonModelElement(self.id_, self.key_parser_dict_list)
         data = self.single_line_json_list
+        value = json.loads(data)
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        match_context.match_string = str(value).encode()
+        match_context.match_data = data[len(match_context.match_string):]
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
+
+        json_model_element = JsonModelElement(self.id_, self.key_parser_dict_escaped)
+        data = self.single_line_escaped_json.decode("unicode-escape").encode()
         value = json.loads(data)
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
@@ -375,6 +388,70 @@ class JsonModelElementTest(TestBase):
 
         JsonModelElement(self.id_, {"a": "EMPTY_LIST"})
         JsonModelElement(self.id_, {"a": "EMPTY_OBJECT"})
+
+    def test10get_match_element_float_exponents(self):
+        """Parse float values with exponents.
+        The principle of only testing dummy classes can not be applied here, as the functionality between the JsonModelElement and
+        DecimalFloatValueModelElement must be tested directly."""
+        json_model_element = JsonModelElement(self.id_, {
+            "a": DecimalFloatValueModelElement(self.id_, exponent_type=DecimalFloatValueModelElement.EXP_TYPE_OPTIONAL),
+            "b": DecimalFloatValueModelElement(self.id_, exponent_type=DecimalFloatValueModelElement.EXP_TYPE_OPTIONAL)})
+
+        def format_float(val):
+            exp = None
+            if "e" in val:
+                exp = "e"
+            elif "E" in val:
+                exp = "E"
+            if "+" in val:
+                sign = "+"
+            else:
+                sign = "-"
+            if exp is not None:
+                pos_point = val.find(exp)
+                if "." in val:
+                    pos_point = val.find(".")
+                if len(val) - val.find(sign) <= 2:
+                    result = format(float(val), "1.%dE" % (val.find(exp) - pos_point))[:-2]
+                    result += format(float(val), "1.%dE" % (val.find(exp) - pos_point))[-1]
+                    return result
+                return format(float(val), "1.%dE" % (val.find(exp) - pos_point))
+            return float(val)
+        data = b'{"a": 111.1, "b": 111.1}'
+        value = json.loads(data, parse_float=format_float)
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        match_context.match_string = str(value).encode()
+        match_context.match_data = data[len(match_context.match_string):]
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
+
+        data = b'{"a": 1E-01, "b": 111.1}'
+        value = json.loads(data, parse_float=format_float)
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        match_context.match_string = str(value).encode()
+        match_context.match_data = data[len(match_context.match_string):]
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
+
+        data = b'{"a": 111.1, "b": 1E-1}'
+        value = json.loads(data, parse_float=format_float)
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        match_context.match_string = str(value).encode()
+        match_context.match_data = data[len(match_context.match_string):]
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
+
+        data = b'{"a": 1E-1, "b": 1E-1}'
+        value = json.loads(data, parse_float=format_float)
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        match_context.match_string = str(value).encode()
+        match_context.match_data = data[len(match_context.match_string):]
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
     def test11get_match_element_allow_all_fields(self):
         """Parse matching substring from MatchContext using the allow_all_fields parameter."""

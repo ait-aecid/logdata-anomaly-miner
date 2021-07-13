@@ -107,9 +107,9 @@
                 'min_num_vals': {'type': 'integer', 'default': 1000},
                 'max_num_vals': {'type': 'integer', 'default': 1500},
                 'save_values': {'type': 'boolean', 'default': True},
-                'track_time_for_TSA': {'type': 'boolean', 'default': False},
-                'waiting_time_for_TSA': {'type': 'integer', 'default': 300},
-                'num_sections_waiting_time_for_TSA': {'type': 'integer', 'default': 10},
+                'track_time_for_tsa': {'type': 'boolean', 'default': False},
+                'waiting_time_for_tsa': {'type': 'integer', 'default': 300},
+                'num_sections_waiting_time_for_tsa': {'type': 'integer', 'default': 10},
                 'event_type_detector': {'type': 'string'},
                 'used_gof_test': {'type': 'string', 'allowed': ['CM', 'KS'], 'default': 'CM'},
                 'gof_alpha': {'type': 'float', 'default': 0.05},
@@ -187,7 +187,9 @@
                 'round_time_inteval_threshold': {'type': 'float', 'default': 0.02},
                 'acf_threshold': {'type': 'float', 'default': 0.2},
                 'acf_pause_area': {'type': 'float', 'default': 0.2},
-                'num_periods_tsa_ini': {'type': 'integer', 'default': 15}
+                'num_periods_tsa_ini': {'type': 'integer', 'default': 15},
+                'allowed_id_tuples': {'type': 'list', 'schema': {'type': 'list', 'schema': {'type': 'string'}}, 'nullable': True,
+                    'default': None}
             }
         }
     }
