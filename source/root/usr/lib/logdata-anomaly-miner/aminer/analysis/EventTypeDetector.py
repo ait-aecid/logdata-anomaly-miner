@@ -52,11 +52,11 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         # If False the values of the Token are not saved for further analysis. Disables self.values, and self.check_variables
         self.save_values = save_values
         # States if the time windows should be tracked for the time series analysis
-        self.track_time_for_TSA = track_time_for_TSA
+        self.track_time_for_tsa = track_time_for_tsa
         # Time in seconds, until the time windows are being initialized
-        self.waiting_time_for_TSA = waiting_time_for_TSA
+        self.waiting_time_for_tsa = waiting_time_for_tsa
         # Number of sections of the initialization window. The length of the input-list of the calculate_time_steps is this number
-        self.num_sections_waiting_time_for_TSA = num_sections_waiting_time_for_TSA
+        self.num_sections_waiting_time_for_tsa = num_sections_waiting_time_for_tsa
         self.aminer_config = aminer_config
 
         self.num_events = 0
@@ -308,17 +308,19 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 tmp_int = 0
                 if self.path_list is None:
                     for var_key in self.variable_key_list[current_index]:
-                        if var_key is not None and (var_key.count('/') > tmp_int or (
-                                var_key.count('/') == tmp_int and len(self.longest_path[current_index]) < len(var_key))):
+                        count = var_key.count('/')
+                        if var_key is not None and (count > tmp_int or (
+                                count == tmp_int and len(self.longest_path[current_index]) < len(var_key))):
                             self.longest_path[current_index] = var_key
-                            tmp_int = var_key.count('/')
+                            tmp_int = count
                 else:
                     found_keys_list = list(self.found_keys[current_index])
                     for found_key in found_keys_list:
-                        if found_key.count('/') > tmp_int or\
-                                (found_key.count('/') == tmp_int and len(self.longest_path[current_index]) < len(found_key)):
+                        count = found_key.count('/')
+                        if count > tmp_int or\
+                                (count == tmp_int and len(self.longest_path[current_index]) < len(found_key)):
                             self.longest_path[current_index] = found_key
-                            tmp_int = found_key.count('/')
+                            tmp_int = count
             else:
                 self.id_path_list_tuples.append(id_tuple)
 
