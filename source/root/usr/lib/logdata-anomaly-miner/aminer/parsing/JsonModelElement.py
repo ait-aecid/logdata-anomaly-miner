@@ -27,6 +27,28 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 debug_log_prefix = "JsonModelElement: "
 
 
+def format_float(val):
+    exp = None
+    if "e" in val:
+        exp = "e"
+    elif "E" in val:
+        exp = "E"
+    if "+" in val:
+        sign = "+"
+    else:
+        sign = "-"
+    if exp is not None:
+        pos_point = val.find(exp)
+        if "." in val:
+            pos_point = val.find(".")
+        if len(val) - val.find(sign) <= 2:
+            result = format(float(val), "1.%dE" % (val.find(exp) - pos_point))[:-2]
+            result += format(float(val), "1.%dE" % (val.find(exp) - pos_point))[-1]
+            return result
+        return format(float(val), "1.%dE" % (val.find(exp) - pos_point))
+    return float(val)
+
+
 class JsonModelElement(ModelElementInterface):
     """Parse single- or multi-lined JSON data."""
 
@@ -118,27 +140,6 @@ class JsonModelElement(ModelElementInterface):
         old_match_data = match_context.match_data
         matches: Union[List[Union[MatchElement, None]]] = []
         try:
-            def format_float(val):
-                exp = None
-                if "e" in val:
-                    exp = "e"
-                elif "E" in val:
-                    exp = "E"
-                if "+" in val:
-                    sign = "+"
-                else:
-                    sign = "-"
-                if exp is not None:
-                    pos_point = val.find(exp)
-                    if "." in val:
-                        pos_point = val.find(".")
-                    if len(val) - val.find(sign) <= 2:
-                        result = format(float(val), "1.%dE" % (val.find(exp) - pos_point))[:-2]
-                        result += format(float(val), "1.%dE" % (val.find(exp) - pos_point))[-1]
-                        return result
-                    return format(float(val), "1.%dE" % (val.find(exp) - pos_point))
-                return float(val)
-
             json_match_data = json.loads(match_context.match_data, parse_float=format_float)
             if not isinstance(json_match_data, dict):
                 return None
