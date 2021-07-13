@@ -239,17 +239,17 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         for index, time_step in enumerate(time_step_list):
             if time_step != -1:
                 for assumed_time_step in self.assumed_time_steps:
-                    if abs(assumed_time_step - time_step * self.num_division_time_step * self.event_type_detector.waiting_time_for_TSA /
-                            self.event_type_detector.num_sections_waiting_time_for_TSA) / assumed_time_step <\
+                    if abs(assumed_time_step - time_step * self.num_division_time_step * self.event_type_detector.waiting_time_for_tsa /
+                            self.event_type_detector.num_sections_waiting_time_for_tsa) / assumed_time_step <\
                             self.round_time_inteval_threshold:
                         time_step_list[index] = assumed_time_step / self.num_division_time_step /\
-                            self.event_type_detector.waiting_time_for_TSA * self.event_type_detector.num_sections_waiting_time_for_TSA
+                            self.event_type_detector.waiting_time_for_tsa * self.event_type_detector.num_sections_waiting_time_for_tsa
                         break
 
         # Print a message of the length of the time steps
         message = 'Calculated the time steps for the single event types in seconds: %s' % [
-                time_step * self.num_division_time_step * self.event_type_detector.waiting_time_for_TSA /
-                self.event_type_detector.num_sections_waiting_time_for_TSA if
+                time_step * self.num_division_time_step * self.event_type_detector.waiting_time_for_tsa /
+                self.event_type_detector.num_sections_waiting_time_for_tsa if
                 time_step != -1 else time_step for time_step in time_step_list]
         affected_path = None
         self.print(message, log_atom, affected_path)
