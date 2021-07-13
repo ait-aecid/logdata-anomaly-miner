@@ -46,6 +46,7 @@ read -r -d '' VAR << END
     "AnalysisComponentName": "NewPath",
     "Message": "New path(es) detected",
     "PersistenceFileName": "Default",
+    "TrainingMode": true,
     "AffectedLogAtomPaths": [
       "/model/DiskUpgrade",
       "/model/DiskUpgrade/DTM",
@@ -168,6 +169,7 @@ read -r -d '' VAR << END
     "AnalysisComponentName": "NewPath",
     "Message": "New path(es) detected",
     "PersistenceFileName": "Default",
+    "TrainingMode": true,
     "AffectedLogAtomPaths": [
       "/model/HomePath",
       "/model/HomePath/Pwd",
@@ -208,6 +210,7 @@ read -r -d '' VAR << END
     "AnalysisComponentName": "NewValueCombo",
     "Message": "New value combination(s) detected",
     "PersistenceFileName": "Default",
+    "TrainingMode": true,
     "AffectedLogAtomPaths": [
       "/model/HomePath/Username",
       "/model/HomePath/Path"
@@ -249,6 +252,7 @@ read -r -d '' VAR << END
     "AnalysisComponentName": "NewValueCombo",
     "Message": "New value combination(s) detected",
     "PersistenceFileName": "Default",
+    "TrainingMode": true,
     "AffectedLogAtomPaths": [
       "/model/HomePath/Username",
       "/model/HomePath/Path"
@@ -290,6 +294,7 @@ read -r -d '' VAR << END
     "AnalysisComponentName": "NewValueCombo",
     "Message": "New value combination(s) detected",
     "PersistenceFileName": "Default",
+    "TrainingMode": true,
     "AffectedLogAtomPaths": [
       "/model/HomePath/Username",
       "/model/HomePath/Path"

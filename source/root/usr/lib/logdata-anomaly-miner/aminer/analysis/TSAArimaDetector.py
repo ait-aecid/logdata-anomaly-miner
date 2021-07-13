@@ -215,7 +215,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         # Initialize the lists of the results
         self.result_list = [[1]*self.num_results_bt for _ in range(len(counts))]
         # Minimal size of the time step
-        min_lag = max(int(0.2*self.event_type_detector.num_sections_waiting_time_for_TSA), 1)
+        min_lag = max(int(self.acf_pause_area*self.event_type_detector.num_sections_waiting_time_for_TSA), 1)
         for event_index, data in enumerate(counts):
             if (self.path_list != [] and all(path not in self.event_type_detector.found_keys[event_index] for path in self.path_list)) or (
                     self.ignore_list != [] and any(ignore_path in self.event_type_detector.found_keys[event_index] for ignore_path in
@@ -223,14 +223,14 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 time_step_list.append(-1)
             else:
                 # Apply the autocorrelation function to the data of the single event types.
-                corr = list(map(abs, sm.tsa.acf(data, nlags=len(data), fft=True)[min_lag:]))
+                corr = list(map(abs, sm.tsa.acf(data, nlags=len(data), fft=True)))
                 corr = np.array(corr)
                 # Apply the Savitzky-Golay-Filter to the list corr, to smooth the curve and get better results
-                corrfit = savgol_filter(corr, min(max(3, int(len(corr)/10)-int(int(len(corr)/10) % 2 == 0)), 101), 1)
+                corrfit = savgol_filter(corr, min(max(3, int(len(corr)/100)-int(int(len(corr)/100) % 2 == 0)), 101), 1)
 
                 # Find the highest peak and set the time-step as the index + lag
-                highest_peak_index = np.argmax(corrfit)
-                if corrfit[highest_peak_index] > self.acf_threshold:
+                highest_peak_index = np.argmax(corrfit[min_lag:])
+                if corrfit[min_lag + highest_peak_index] > self.acf_threshold:
                     time_step_list.append((highest_peak_index + min_lag) / self.num_division_time_step)
                 else:
                     time_step_list.append(-1)
@@ -239,17 +239,17 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         for index, time_step in enumerate(time_step_list):
             if time_step != -1:
                 for assumed_time_step in self.assumed_time_steps:
-                    if abs(assumed_time_step - time_step * self.num_division_time_step * self.event_type_detector.waiting_time_for_TSA /
-                            self.event_type_detector.num_sections_waiting_time_for_TSA) / assumed_time_step <\
+                    if abs(assumed_time_step - time_step * self.num_division_time_step * self.event_type_detector.waiting_time_for_tsa /
+                            self.event_type_detector.num_sections_waiting_time_for_tsa) / assumed_time_step <\
                             self.round_time_inteval_threshold:
                         time_step_list[index] = assumed_time_step / self.num_division_time_step /\
-                            self.event_type_detector.waiting_time_for_TSA * self.event_type_detector.num_sections_waiting_time_for_TSA
+                            self.event_type_detector.waiting_time_for_tsa * self.event_type_detector.num_sections_waiting_time_for_tsa
                         break
 
         # Print a message of the length of the time steps
         message = 'Calculated the time steps for the single event types in seconds: %s' % [
-                time_step * self.num_division_time_step * self.event_type_detector.waiting_time_for_TSA /
-                self.event_type_detector.num_sections_waiting_time_for_TSA if
+                time_step * self.num_division_time_step * self.event_type_detector.waiting_time_for_tsa /
+                self.event_type_detector.num_sections_waiting_time_for_tsa if
                 time_step != -1 else time_step for time_step in time_step_list]
         affected_path = None
         self.print(message, log_atom, affected_path)

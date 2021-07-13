@@ -13,6 +13,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import json
+import sys
 import warnings
 import logging
 from typing import List, Union
@@ -140,6 +141,12 @@ class JsonModelElement(ModelElementInterface):
         old_match_data = match_context.match_data
         matches: Union[List[Union[MatchElement, None]]] = []
         try:
+            index = 0
+            while index != -1:
+                index = match_context.match_data.find(rb"\x", index)
+                if index != -1 and index != match_context.match_data.find(b"\\x", index-1):
+                    match_context.match_data = match_context.match_data.decode("unicode-escape").encode()
+                    break
             json_match_data = json.loads(match_context.match_data, parse_float=format_float)
             if not isinstance(json_match_data, dict):
                 return None
