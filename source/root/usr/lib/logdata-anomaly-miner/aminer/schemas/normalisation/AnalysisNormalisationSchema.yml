@@ -187,7 +187,9 @@
                 'round_time_inteval_threshold': {'type': 'float', 'default': 0.02},
                 'acf_threshold': {'type': 'float', 'default': 0.2},
                 'acf_pause_area': {'type': 'float', 'default': 0.2},
-                'num_periods_tsa_ini': {'type': 'integer', 'default': 15}
+                'num_periods_tsa_ini': {'type': 'integer', 'default': 15},
+                'allowed_id_tuples': {'type': 'list', 'schema': {'type': 'list', 'schema': {'type': 'string'}}, 'nullable': True,
+                    'default': None}
             }
         }
     }
