@@ -914,6 +914,16 @@ Analysis:
             - "/model/DailyCron/JobNumber"
           tuple_transformation_function: "demo"
           learn_mode: True
+        - type: ModuloTimeMatchRule
+          id: "modulo_time_match_rule"
+          path: null
+          seconds_modulo: 3
+          lower_limit: 0
+          upper_limit: 2.95
+        - type: AllowlistViolationDetector
+          id: TimeAllowlist
+          allowlist_rules:
+            - "modulo_time_match_rule"
         - type: LinearNumericBinDefinition
           id: linear_numeric_bin_definition
           lower_limit: 50
@@ -939,7 +949,7 @@ Analysis:
           report_interval: 10
         - type: MatchValueAverageChangeDetector
           id: MatchValueAverageChange
-          timestamp_path: None
+          timestamp_path: null
           paths:
             - "/model/Random"
           min_bin_elements: 100

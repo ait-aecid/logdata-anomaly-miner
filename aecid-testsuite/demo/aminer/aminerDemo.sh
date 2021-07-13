@@ -33,7 +33,7 @@ for ((i=0; i<10000; i++)); do
 done
 #Comment
 
-#EnhancedNewMatchPathValueComboDetector, NewMatchPathValueDetector
+#EnhancedNewMatchPathValueComboDetector, NewMatchPathValueDetector, ModuloTimeMatchRule
 #:<<Comment
 R=`shuf -i 1-3 -n 1`
 for ((i=0; i<R; i++)); do

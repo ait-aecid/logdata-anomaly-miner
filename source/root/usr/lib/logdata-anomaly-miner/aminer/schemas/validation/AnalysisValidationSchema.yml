@@ -233,7 +233,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['MatchValueAverageChangeDetector'], 'required': True},
-                    'timestamp_path': {'type': 'string', 'required': True, 'empty': False},
+                    'timestamp_path': {'type': 'string', 'required': True, 'nullable': True, 'empty': False},
                     'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
                     'min_bin_elements': {'type': 'integer', 'required': True, 'min': 1},
                     'min_bin_time': {'type': 'integer', 'required': True, 'min': 1},
@@ -390,7 +390,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['ModuloTimeMatchRule'], 'required': True},
-                    'path': {'type': 'string', 'required': True, 'empty': False},
+                    'path': {'type': 'string', 'required': True, 'nullable': True, 'empty': False},
                     'seconds_modulo': {'type': 'integer', 'required': True, 'min': 1},
                     'lower_limit': {'type': ['integer', 'float'], 'required': True, 'min': 0},
                     'upper_limit': {

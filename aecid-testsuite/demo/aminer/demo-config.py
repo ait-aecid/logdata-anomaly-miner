@@ -362,6 +362,12 @@ def build_analysis_pipeline(analysis_context):
     analysis_context.register_component(enhanced_new_match_path_value_combo_detector, component_name="EnhancedNewValueCombo")
     atom_filter.add_handler(enhanced_new_match_path_value_combo_detector)
 
+    modulo_time_match_rule = [Rules.ModuloTimeMatchRule(None, 3, 0, 2.95, None)]
+    time_allowlist_violation_detector = AllowlistViolationDetector(
+        analysis_context.aminer_config, modulo_time_match_rule, anomaly_event_handlers, output_log_line=True)
+    analysis_context.register_component(time_allowlist_violation_detector, component_name="TimeAllowlist")
+    atom_filter.add_handler(time_allowlist_violation_detector)
+
     from aminer.analysis.HistogramAnalysis import HistogramAnalysis, LinearNumericBinDefinition, ModuloTimeBinDefinition, \
         PathDependentHistogramAnalysis
     modulo_time_bin_definition = ModuloTimeBinDefinition(86400, 3600, 0, 1, 24, True)
