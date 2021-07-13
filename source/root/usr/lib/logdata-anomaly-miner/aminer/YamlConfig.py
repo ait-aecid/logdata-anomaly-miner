@@ -228,6 +228,11 @@ def build_parsing_model():
                 parser_model_dict[item['id']] = item['type'].func(item['name'], item['value_sign_type'], item['value_pad_type'])
             elif item['type'].name in ('FirstMatchModelElement', 'SequenceModelElement'):
                 children = []
+                if not isinstance(item['args'], list):
+                    msg = '"args" has to be a list when using the %s. Currently args is defined as %s' % (
+                        item['type'].name, repr(item['args']))
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise TypeError(msg)
                 for child in item['args']:
                     if isinstance(child, bytes):
                         child = child.decode()
