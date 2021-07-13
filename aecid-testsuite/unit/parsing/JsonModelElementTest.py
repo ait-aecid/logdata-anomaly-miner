@@ -4,6 +4,7 @@ import json
 from aminer.parsing.JsonModelElement import JsonModelElement
 from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.MatchElement import MatchElement
+from aminer.parsing.DecimalFloatValueModelElement import DecimalFloatValueModelElement
 from unit.TestBase import TestBase, DummyMatchContext, DummyFixedDataModelElement, DummyFirstMatchModelElement
 
 
@@ -385,7 +386,71 @@ class JsonModelElementTest(TestBase):
         JsonModelElement(self.id_, {"a": "EMPTY_LIST"})
         JsonModelElement(self.id_, {"a": "EMPTY_OBJECT"})
 
-    def test10get_match_element_no_match(self):
+    def test10get_match_element_float_exponents(self):
+        """Parse float values with exponents.
+        The principle of only testing dummy classes can not be applied here, as the functionality between the JsonModelElement and
+        DecimalFloatValueModelElement must be tested directly."""
+        json_model_element = JsonModelElement(self.id_, {
+            "a": DecimalFloatValueModelElement(self.id_, exponent_type=DecimalFloatValueModelElement.EXP_TYPE_OPTIONAL),
+            "b": DecimalFloatValueModelElement(self.id_, exponent_type=DecimalFloatValueModelElement.EXP_TYPE_OPTIONAL)})
+
+        def format_float(val):
+            exp = None
+            if "e" in val:
+                exp = "e"
+            elif "E" in val:
+                exp = "E"
+            if "+" in val:
+                sign = "+"
+            else:
+                sign = "-"
+            if exp is not None:
+                pos_point = val.find(exp)
+                if "." in val:
+                    pos_point = val.find(".")
+                if len(val) - val.find(sign) <= 2:
+                    result = format(float(val), "1.%dE" % (val.find(exp) - pos_point))[:-2]
+                    result += format(float(val), "1.%dE" % (val.find(exp) - pos_point))[-1]
+                    return result
+                return format(float(val), "1.%dE" % (val.find(exp) - pos_point))
+            return float(val)
+        data = b'{"a": 111.1, "b": 111.1}'
+        value = json.loads(data, parse_float=format_float)
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        match_context.match_string = str(value).encode()
+        match_context.match_data = data[len(match_context.match_string):]
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
+
+        data = b'{"a": 1E-01, "b": 111.1}'
+        value = json.loads(data, parse_float=format_float)
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        match_context.match_string = str(value).encode()
+        match_context.match_data = data[len(match_context.match_string):]
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
+
+        data = b'{"a": 111.1, "b": 1E-1}'
+        value = json.loads(data, parse_float=format_float)
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        match_context.match_string = str(value).encode()
+        match_context.match_data = data[len(match_context.match_string):]
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
+
+        data = b'{"a": 1E-1, "b": 1E-1}'
+        value = json.loads(data, parse_float=format_float)
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        match_context.match_string = str(value).encode()
+        match_context.match_data = data[len(match_context.match_string):]
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
+
+    def test11get_match_element_no_match(self):
         """Parse not matching substring from MatchContext and check if the MatchContext was not changed."""
         json_model_element = JsonModelElement(self.id_, self.key_parser_dict)
         # missing key
@@ -428,7 +493,7 @@ class JsonModelElementTest(TestBase):
         match_element = json_model_element.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
-    def test11element_id_input_validation(self):
+    def test12element_id_input_validation(self):
         """Check if element_id is validated."""
         self.assertRaises(ValueError, JsonModelElement, "", self.key_parser_dict)  # empty element_id
         self.assertRaises(TypeError, JsonModelElement, None, self.key_parser_dict)  # None element_id
@@ -442,7 +507,7 @@ class JsonModelElementTest(TestBase):
         self.assertRaises(TypeError, JsonModelElement, (), self.key_parser_dict)  # empty tuple element_id is not allowed
         self.assertRaises(TypeError, JsonModelElement, set(), self.key_parser_dict)  # empty set element_id is not allowed
 
-    def test12key_parser_dict_input_validation(self):
+    def test13key_parser_dict_input_validation(self):
         """Check if key_parser_dict is validated."""
         self.assertRaises(TypeError, JsonModelElement, self.id_, "path")  # string key_parser_dict
         self.assertRaises(TypeError, JsonModelElement, self.id_, None)  # None key_parser_dict
@@ -463,7 +528,7 @@ class JsonModelElementTest(TestBase):
         self.assertRaises(TypeError, JsonModelElement, self.id_, ())  # empty tuple key_parser_dict is not allowed
         self.assertRaises(TypeError, JsonModelElement, self.id_, set())  # empty set key_parser_dict is not allowed
 
-    def test13optional_key_prefix_input_validation(self):
+    def test14optional_key_prefix_input_validation(self):
         """Check if optional_key_prefix is validated."""
         self.assertRaises(ValueError, JsonModelElement, self.id_, self.key_parser_dict, "")  # empty optional_key_prefix
         self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, None)  # None optional_key_prefix
@@ -477,7 +542,7 @@ class JsonModelElementTest(TestBase):
         self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, ())  # empty tuple optional_key_prefix is not allowed
         self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, set())  # empty set optional_key_prefix not allowed
 
-    def test14get_match_element_match_context_input_validation(self):
+    def test15get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = JsonModelElement(self.id_, self.key_parser_dict)
         data = b"abcdefghijklmnopqrstuvwxyz.!?"
