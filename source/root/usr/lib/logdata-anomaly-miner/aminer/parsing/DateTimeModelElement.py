@@ -446,8 +446,10 @@ class DateTimeModelElement(ModelElementInterface):
                         data = remaining_data.split(b"-")
                     if len(data[1]) == 4:
                         self.tz_specifier_offset = (int(data[1][0:2]) * 3600 + int(data[1][2:4]) * 60) * sign
+                    elif data[1].find(b":") == 2 and len(data[1]) == 5:
+                        self.tz_specifier_offset = (int(data[1][:2]) * 3600 + int(data[1][3:]) * 60) * sign
                     else:
-                        self.tz_specifier_offset = (int(data[1])) * 3600 * sign
+                        self.tz_specifier_offset = int(data[1]) * 3600 * sign
                     self.tz_specifier_offset_str = remaining_data
             total_seconds += self.tz_specifier_offset
             return MatchElement("%s/%s" % (path, self.element_id), date_str + remaining_data, total_seconds, None)
