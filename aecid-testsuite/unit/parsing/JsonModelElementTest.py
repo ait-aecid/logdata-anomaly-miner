@@ -27,6 +27,7 @@ class JsonModelElementTest(TestBase):
         b'{"menu": {"value": "File","popup": {"menuitem": [{"clickable": false, "value": "New", "onclick": "CreateNewDoc()"}, {' \
         b'"onclick": "OpenDoc()", "value": "Open"}, {"value": "Close", "onclick": "CloseDoc()", "clickable": false}]}, "id": "file"}}'
     single_line_json_list = b'{"menu": {"id": "file", "value": "File", "popup": ["value", "value", "value"]}}'
+    single_line_escaped_json = br'{"a": "\x2d"}'
     multi_line_json = b"""{
   "menu": {
     "id": "file",
@@ -92,6 +93,7 @@ class JsonModelElementTest(TestBase):
             DummyFixedDataModelElement("value", b"value")
         ]
     }}
+    key_parser_dict_escaped = {"a":  DummyFixedDataModelElement("id", b"-")}
     empty_key_parser_dict = {"optional_key_key": DummyFixedDataModelElement("key", b"value")}
 
     def test1get_id(self):
@@ -158,6 +160,16 @@ class JsonModelElementTest(TestBase):
 
         json_model_element = JsonModelElement(self.id_, self.key_parser_dict_list)
         data = self.single_line_json_list
+        value = json.loads(data)
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        match_context.match_string = str(value).encode()
+        match_context.match_data = data[len(match_context.match_string):]
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
+
+        json_model_element = JsonModelElement(self.id_, self.key_parser_dict_escaped)
+        data = self.single_line_escaped_json.decode("unicode-escape").encode()
         value = json.loads(data)
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
