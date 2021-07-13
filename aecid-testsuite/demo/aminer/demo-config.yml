@@ -943,10 +943,23 @@ Analysis:
           sub_rules:
             - "modulo_time_match_rule"
             - "value_dependent_modulo_time_match_rule"
+        - type: EventGenerationMatchAction
+          id: "ip_match_action"
+          event_type: "Analysis.Rules.IPv4InRFC1918MatchRule"
+          event_message: "Private IP address occured!"
+        - type: IPv4InRFC1918MatchRule
+          id: "ipv4_in_rfc1918_match_rule"
+          path: "/model/ParsingME/se2/IpAddressDataModelElement"
+          match_action: "ip_match_action"
+        - type: ParallelMatchRule
+          id: "parallel_match_rule"
+          sub_rules:
+            - "time_or_match_rule"
+            - "ipv4_in_rfc1918_match_rule"
         - type: AllowlistViolationDetector
           id: TimeAllowlist
           allowlist_rules:
-            - "time_or_match_rule"
+            - "parallel_match_rule"
         - type: LinearNumericBinDefinition
           id: linear_numeric_bin_definition
           lower_limit: 50

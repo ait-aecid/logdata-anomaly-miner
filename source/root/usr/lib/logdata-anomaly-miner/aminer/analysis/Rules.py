@@ -531,7 +531,7 @@ class IPv4InRFC1918MatchRule(MatchRule):
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
         self.log_total += 1
-        match_element = log_atom.parser_match.get_match_dictionary().get(self.path, None)
+        match_element = log_atom.parser_match.get_match_dictionary().get(self.path)
         if (match_element is None) or not isinstance(match_element.match_object, int):
             return False
         value = match_element.match_object

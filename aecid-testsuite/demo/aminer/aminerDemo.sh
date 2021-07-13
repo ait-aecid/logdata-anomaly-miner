@@ -228,6 +228,8 @@ echo "match data: 25000" >> /tmp/syslog
 echo "b654686973206973206a7573742061206e6f726d616c2074657874" >> /tmp/syslog
 # IpAddressModelElement
 echo "Gateway IP-Address: 192.168.128.225" >> /tmp/syslog
+# IPv4InRFC1918MatchRule
+echo "Gateway IP-Address: 8.8.8.8" >> /tmp/syslog
 # MultiLocaleDateTimeModelElement
 echo "Feb 25 2019" >> /tmp/syslog
 # OptionalMatchModelElement

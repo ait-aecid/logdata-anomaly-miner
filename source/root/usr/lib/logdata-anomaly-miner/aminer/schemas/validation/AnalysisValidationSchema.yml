@@ -332,6 +332,12 @@
                 },
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
+                    'type': {'type': 'string', 'allowed': ['EventGenerationMatchAction'], 'required': True},
+                    'event_type': {'type': 'string', 'required': True},
+                    'event_message': {'type': 'string', 'required': True}
+                },
+                {
+                    'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['AndMatchRule', 'OrMatchRule', 'ParallelMatchRule'], 'required': True},
                     'sub_rules': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
                     'match_action': {'type': 'string', 'nullable': True}
