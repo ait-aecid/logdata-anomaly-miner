@@ -400,11 +400,11 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['ValueDependentModuloTimeMatchRule'], 'required': True},
-                    'path': {'type': 'string', 'required': True, 'empty': False},
+                    'path': {'type': 'string', 'required': True, 'nullable': True, 'empty': False},
                     'seconds_modulo': {'type': 'integer', 'required': True, 'min': 1},
                     'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
-                    'limit_lookup_dict': {'type': 'dict', 'schema': {'id': {'type': 'string', 'empty': False}, 'type': {
-                        'type': 'list', 'schema': {'type': 'integer', 'min': 0}}}, 'required': True},
+                    'limit_lookup_dict': {'type': 'dict', 'valuesrules': {'type': 'list', 'schema': {
+                            'type': ['integer', 'float'], 'min': 0}}, 'required': True},
                     'default_limit': {'type': 'list', 'schema': {'type': 'integer', 'min': 0}, 'nullable': True},
                     'match_action': {'type': 'string', 'nullable': True, 'empty': False}
                 },

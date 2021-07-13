@@ -920,10 +920,33 @@ Analysis:
           seconds_modulo: 3
           lower_limit: 0
           upper_limit: 2.95
+        - type: ValueDependentModuloTimeMatchRule
+          id: "value_dependent_modulo_time_match_rule"
+          path: null
+          seconds_modulo: 3
+          paths:
+            - "/model/ECD/a"
+            - "/model/ECD/b"
+            - "/model/ECD/c"
+            - "/model/ECD/d"
+            - "/model/ECD/e"
+            - "/model/ECD/f"
+          limit_lookup_dict:
+            e:
+              - 0
+              - 2.95
+          default_limit:
+            - 0
+            - 3
+        - type: OrMatchRule
+          id: "time_or_match_rule"
+          sub_rules:
+            - "modulo_time_match_rule"
+            - "value_dependent_modulo_time_match_rule"
         - type: AllowlistViolationDetector
           id: TimeAllowlist
           allowlist_rules:
-            - "modulo_time_match_rule"
+            - "time_or_match_rule"
         - type: LinearNumericBinDefinition
           id: linear_numeric_bin_definition
           lower_limit: 50

@@ -85,8 +85,8 @@
                 'value': {'type': ['boolean', 'float', 'integer', 'string']},
                 'regex': {'type': 'string'},
                 'seconds_modulo': {'type': 'integer'},
-                'limit_lookup_dict': {
-                    'type': 'dict', 'schema': {'id': {'type': 'string'}, 'type': {'type': 'list', 'schema': {'type': 'integer'}}}},
+                'limit_lookup_dict': {'type': 'dict', 'valuesrules': {'type': 'list', 'schema': {
+                    'type': [ 'integer', 'float' ], 'min': 0}}},
                 'default_limit': {'type': 'list', 'schema': {'type': 'integer'}, 'nullable': True, 'default': None},
                 'rule_id': {'type': 'string'},
                 'min_time_delta': {'type': 'integer'},

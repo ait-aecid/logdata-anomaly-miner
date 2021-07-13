@@ -486,12 +486,15 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
         match_dict = log_atom.parser_match.get_match_dictionary()
         value_list = []
         for path in self.value_path_list:
-            value_element = match_dict.get(path, None)
-            if value_element is None:
-                value_list.append(None)
-            else:
+            value_element = match_dict.get(path)
+            if value_element is not None:
                 value_list.append(value_element.match_object)
-        limits = self.limit_lookup_dict.get(value_list[0], self.default_limit)
+
+        if len(value_list) > 0:
+            value = value_list[0]
+        else:
+            value = None
+        limits = self.limit_lookup_dict.get(value, self.default_limit)
         if limits is None:
             return False
 

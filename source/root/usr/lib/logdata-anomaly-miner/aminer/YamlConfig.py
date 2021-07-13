@@ -618,7 +618,13 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                         match_action=match_action)
                 if item['type'].name == 'ValueDependentModuloTimeMatchRule':
                     # tzinfo parameter cannot be used yet..
-                    tmp_analyser = func(item['path'], item['seconds_modulo'], item['paths'], item['limit_lookup_dict'],
+                    limit_lookup_dict = {}
+                    for key in item['limit_lookup_dict'].keys():
+                        if isinstance(key, str):
+                            limit_lookup_dict[key.encode()] = item['limit_lookup_dict'][key]
+                        else:
+                            limit_lookup_dict[key] = item['limit_lookup_dict'][key]
+                    tmp_analyser = func(item['path'], item['seconds_modulo'], item['paths'], limit_lookup_dict,
                                         default_limit=item['default_limit'], match_action=match_action)
                 if item['type'].name == 'DebugMatchRule':
                     tmp_analyser = func(debug_match_result=item['debug_mode'], match_action=match_action)
