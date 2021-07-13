@@ -826,6 +826,9 @@ Analysis:
         - type: PathExistsMatchRule
           id: path_exists_match_rule1
           path: "/model/LoginDetails/PastTime/Time/Minutes"
+        - type: DebugMatchRule
+          id: debug_match_rule
+          debug_mode: True
         - type: PathExistsMatchRule
           id: path_exists_match_rule2
           path: "/model/LoginDetails"
@@ -844,11 +847,13 @@ Analysis:
           sub_rules:
             - "path_exists_match_rule1"
             - "negation_match_rule1"
+            - "debug_match_rule"
         - type: AndMatchRule
           id: and_match_rule2
           sub_rules:
             - "negation_match_rule1"
             - "path_exists_match_rule2"
+            - "debug_match_rule"
         - type: OrMatchRule
           id: or_match_rule
           sub_rules:
