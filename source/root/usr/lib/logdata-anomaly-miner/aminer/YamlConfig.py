@@ -14,6 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import sys
 import logging
 import copy
+import ast
 from aminer.AminerConfig import DEBUG_LOG_NAME
 
 
@@ -579,12 +580,12 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     tmp_analyser = func(sub_rules, match_action=match_action)
                 if item['type'].name == 'ValueDependentDelegatedMatchRule':
                     rule_lookup_dict = {}
-                    for rule in item['rule_lookup_dict']:
+                    for key, rule in item['rule_lookup_dict'].items():
                         if rule not in match_rules_dict:
                             msg = 'The match rule %s does not exist!' % rule
                             logging.getLogger(DEBUG_LOG_NAME).error(msg)
                             raise ValueError(msg)
-                        rule_lookup_dict[rule] = match_rules_dict[rule]
+                        rule_lookup_dict[ast.literal_eval(key)] = match_rules_dict[rule]
                     tmp_analyser = func(item['paths'], rule_lookup_dict, default_rule=item['default_rule'], match_action=match_action)
                 if item['type'].name == 'NegationMatchRule':
                     if item['sub_rule'] not in match_rules_dict:

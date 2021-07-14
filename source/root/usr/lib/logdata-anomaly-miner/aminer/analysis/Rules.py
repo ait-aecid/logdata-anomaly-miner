@@ -246,12 +246,14 @@ class ValueDependentDelegatedMatchRule(MatchRule):
         match_dict = log_atom.parser_match.get_match_dictionary()
         value_list = []
         for path in self.value_path_list:
-            value_element = match_dict.get(path, None)
-            if value_element is None:
-                value_list.append(None)
-            else:
+            value_element = match_dict.get(path)
+            if value_element is not None:
                 value_list.append(value_element.match_object)
-        rule = self.rule_lookup_dict.get(tuple(value_list), self.default_rule)
+        if len(value_list) > 0:
+            value = tuple(value_list)
+        else:
+            value = None
+        rule = self.rule_lookup_dict.get(value, self.default_rule)
         if rule is None:
             return False
         if rule.match(log_atom):

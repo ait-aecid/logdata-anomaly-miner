@@ -915,13 +915,13 @@ Analysis:
           tuple_transformation_function: "demo"
           learn_mode: True
         - type: ModuloTimeMatchRule
-          id: "modulo_time_match_rule"
+          id: "mt"
           path: null
           seconds_modulo: 3
           lower_limit: 0
-          upper_limit: 2.95
+          upper_limit: 3
         - type: ValueDependentModuloTimeMatchRule
-          id: "value_dependent_modulo_time_match_rule"
+          id: "vdmt"
           path: null
           seconds_modulo: 3
           paths:
@@ -938,15 +938,28 @@ Analysis:
           default_limit:
             - 0
             - 3
-        - type: OrMatchRule
-          id: "time_or_match_rule"
-          sub_rules:
-            - "modulo_time_match_rule"
-            - "value_dependent_modulo_time_match_rule"
+        - type: ValueDependentDelegatedMatchRule
+          id: "value_dependent_delegated_match_rule"
+          paths:
+            - "/model/ECD/a"
+            - "/model/ECD/b"
+            - "/model/ECD/c"
+            - "/model/ECD/d"
+            - "/model/ECD/e"
+            - "/model/ECD/f"
+          rule_lookup_dict:
+            (b"a",): "mt"
+            (b"b",): "mt"
+            (b"c",): "mt"
+            (b"d",): "vdmt"
+            (b"e",): "vdmt"
+            (b"f",): "vdmt"
+            None: "mt"
+          default_rule: "mt"
         - type: EventGenerationMatchAction
           id: "ip_match_action"
           event_type: "Analysis.Rules.IPv4InRFC1918MatchRule"
-          event_message: "Private IP address occured!"
+          event_message: "Private IP address occurred!"
         - type: IPv4InRFC1918MatchRule
           id: "ipv4_in_rfc1918_match_rule"
           path: "/model/ParsingME/se2/IpAddressDataModelElement"
@@ -954,7 +967,7 @@ Analysis:
         - type: ParallelMatchRule
           id: "parallel_match_rule"
           sub_rules:
-            - "time_or_match_rule"
+            - "value_dependent_delegated_match_rule"
             - "ipv4_in_rfc1918_match_rule"
         - type: AllowlistViolationDetector
           id: TimeAllowlist

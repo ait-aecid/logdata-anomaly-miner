@@ -346,8 +346,7 @@
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['ValueDependentDelegatedMatchRule'], 'required': True},
                     'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
-                    'rule_lookup_dict': {'type': 'dict', 'schema': {
-                        'id': {'type': 'string', 'empty': False}, 'type': {'type': 'string', 'empty': False}}, 'required': True},
+                    'rule_lookup_dict': {'type': 'dict', 'valuesrules': {'type': 'string'}, 'required': True},
                     'default_rule': {'type': 'string', 'nullable': True, 'empty': False},
                     'match_action': {'type': 'string', 'nullable': True, 'empty': False}
                 },
