@@ -965,6 +965,9 @@ Analysis:
           id: "ipv4_in_rfc1918_match_rule"
           path: "/model/ParsingME/se2/IpAddressDataModelElement"
           match_action: "ip_match_action"
+        - type: DebugHistoryMatchRule
+          id: "debug_history_match_rule"
+          debug_mode: True
         - type: ValueListMatchRule
           id: "value_list_match_rule"
           path: "/model/ParsingME/se2/IpAddressDataModelElement"
@@ -994,6 +997,7 @@ Analysis:
           sub_rules:
             - "value_dependent_delegated_match_rule"
             - "ipv4_in_rfc1918_match_rule"
+            - "debug_history_match_rule"
         - type: AndMatchRule
           id: "time_and_match_rule"
           sub_rules:

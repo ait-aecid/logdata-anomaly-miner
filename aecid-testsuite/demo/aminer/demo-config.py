@@ -364,7 +364,6 @@ def build_analysis_pipeline(analysis_context):
     atom_filter.add_handler(enhanced_new_match_path_value_combo_detector)
 
     import re
-
     ip_match_action = Rules.EventGenerationMatchAction(
         "Analysis.Rules.IPv4InRFC1918MatchRule", "Private IP address occurred!", anomaly_event_handlers)
 
@@ -376,7 +375,8 @@ def build_analysis_pipeline(analysis_context):
                 Rules.ValueDependentDelegatedMatchRule([
                     '/model/ECD/g', '/model/ECD/h', '/model/ECD/i', '/model/ECD/j', '/model/ECD/k', '/model/ECD/l'], {
                         (b"a",): mt, (b"b",): mt, (b"c",): mt, (b"d",): vdmt, (b"e",): vdmt, (b"f",): vdmt, None: mt}, mt),
-                Rules.IPv4InRFC1918MatchRule("/model/ParsingME/se2/IpAddressDataModelElement", ip_match_action)
+                Rules.IPv4InRFC1918MatchRule("/model/ParsingME/se2/IpAddressDataModelElement", ip_match_action),
+                Rules.DebugHistoryMatchRule(debug_match_result=True)
             ]),
             # IP addresses 8.8.8.8, 8.8.4.4 and 10.0.0.0 - 10.255.255.255 are not allowed
             Rules.NegationMatchRule(Rules.ValueListMatchRule("/model/ParsingME/se2/IpAddressDataModelElement", [134744072, 134743044])),
