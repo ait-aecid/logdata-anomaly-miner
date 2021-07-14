@@ -12,6 +12,7 @@ def  ubuntu18image = false
 def  ubuntu20image = false
 def  debianbusterimage = false
 def  debianbullseyeimage = false
+def  productionimage = false
 def  docsimage = false
 
 pipeline {
@@ -154,6 +155,23 @@ pipeline {
                    }
                  }
 
+                 stage("Test Production Docker Image") {
+                    steps {
+                    script {
+                      productionimage = true
+                    }
+                     sh "docker build -f Dockerfile -t aecid/aminer-production:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID ."
+                     sh "mkdir -p /tmp/production-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && mkdir /tmp/production-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/persistency && mkdir /tmp/production-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/logs"
+                     sh "cp aecid-testsuite/demo/aminer/access.log /tmp/production-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/logs/"
+                     sh "cp -r source/root/etc/aminer /tmp/production-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg"
+                     sh "cp /tmp/production-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/template_config.yml /tmp/production-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/config.yml"
+                     sh "cp /tmp/production-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-available/generic/ApacheAccessModel.py /tmp/production-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-enabled"
+                     /* the result of timeout is negated with "!". This is because aminer returns 1 if timeout stops the process and otherwise 0. The way around is a valid result for a test */
+                     sh "cd /tmp/production-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && ! timeout -s INT --preserve-status 5 docker run -v $PWD/aminercfg:/etc/aminer -v $PWD/persistency:/var/lib/aminer -v $PWD/logs:/logs --rm -it aecid/aminer-production:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID aminer"
+                   }
+                 }
+
+
         stage("Test Ubuntu 18.04") {
                     when {
                        expression {
@@ -217,6 +235,10 @@ pipeline {
            if( debianbusterimage == true ){
                sh "docker rmi aecid/aminer-debian-buster:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
                sh "cd / && test -d /tmp/simplerun-buster-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && rm -rf /tmp/simplerun-buster-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
+           }
+           if( productionimage == true ){
+               sh "docker rmi aecid/aminer-production:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
+               sh "cd / && test -d /tmp/production-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && rm -rf /tmp/production-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
            }
            if( ubuntu18image == true ){
                sh "docker rmi aecid/aminer-ubuntu-1804:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
