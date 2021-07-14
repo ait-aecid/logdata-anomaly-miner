@@ -40,16 +40,10 @@ class HexStringModelElementTest(TestBase):
                         data, match_element, match_context, self.id_, self.path, bytes.fromhex(data.decode()), data, None)
                     self.assertEqual(match_element.get_match_object(), data)
                 else:
-                    data = char2 + char2 + char2
-                    match_context = DummyMatchContext(data + char1)
-                    match_element = hex_string_model_element.get_match_element(self.path, match_context)
-                    # need to add length as only 1 character is no valid hex
-                    match_element.match_string = match_element.match_string + bytes.fromhex("0" + char2.decode())
-                    # match_context.match_string check has to be skipped.
-                    match_context.match_string = bytes.fromhex("0" + data.decode() + "0" + char2.decode())
-                    self.compare_match_results(data + char1, match_element, match_context, self.id_, self.path, bytes.fromhex(
-                        "0" + data.decode() + "0" + char2.decode()), data, None)
-                    self.assertEqual(match_element.get_match_object(), data)
+                    match_context.match_string = bytes.fromhex("0" + char2.decode())  # match_context.match_string check has to be skipped.
+                    self.compare_match_results(
+                        data, match_element, match_context, self.id_, self.path, bytes.fromhex("0" + char2.decode()), char2, None)
+                    self.assertEqual(match_element.get_match_object(), char2)
             else:
                 self.compare_no_match_results(data, match_element, match_context)
             if ord(char1) == 0x7f:
@@ -71,10 +65,7 @@ class HexStringModelElementTest(TestBase):
                 if char1 in allowed_chars:
                     self.assertEqual(match_element.get_match_object(), data)
                 else:
-                    data = char2 + char2 + char2
-                    match_context = DummyMatchContext(data + char1)
-                    match_element = hex_string_model_element.get_match_element(self.path, match_context)
-                    self.assertEqual(match_element.get_match_object(), data)
+                    self.assertEqual(match_element.get_match_object(), char2)
             else:
                 self.compare_no_match_results(data, match_element, match_context)
             if ord(char1) == 0x7f:
@@ -138,7 +129,7 @@ class HexStringModelElementTest(TestBase):
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, ())
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, model_element)
 
-    def test8performance(self):  # skipcq: PYL-R0201
+    def test12performance(self):  # skipcq: PYL-R0201
         """Test the performance of the implementation. Comment this test out in normal cases."""
         import_setup = """
 import copy

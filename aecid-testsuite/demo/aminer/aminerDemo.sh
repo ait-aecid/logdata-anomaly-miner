@@ -246,7 +246,7 @@ echo "The-searched-element-was-found!" >> /tmp/syslog
 # RepeatedElementDataModelElement
 for i in {1..5}; do
 	R=`shuf -i 1-45 -n 1`
-	echo "drawn number: $R" | tr -d "\n" >> /tmp/syslog
+	echo "[drawn number]: $R" | tr -d "\n" >> /tmp/syslog
 done
 echo "" >> /tmp/syslog
 # VariableByteDataModelElement

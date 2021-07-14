@@ -203,7 +203,7 @@ def build_analysis_pipeline(analysis_context):
         MultiLocaleDateTimeModelElement('MultiLocaleDateTimeModelElement', [(b'%b %d %Y', None, '%s.%s' % loc)]))
     service_children_parsing_model_element.append(
         RepeatedElementDataModelElement('RepeatedElementDataModelElement', SequenceModelElement('SequenceModelElement', [
-            FixedDataModelElement('FixedDataModelElement', b'drawn number: '),
+            FixedDataModelElement('FixedDataModelElement', b'[drawn number]: '),
             DecimalIntegerValueModelElement('DecimalIntegerValueModelElement')]), 1))
     service_children_parsing_model_element.append(VariableByteDataModelElement('VariableByteDataModelElement', b'-@#'))
     service_children_parsing_model_element.append(

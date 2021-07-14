@@ -573,7 +573,7 @@ Parser:
        - id: fixedDataModelElementDrawnNumber
          type: FixedDataModelElement
          name: 'FixedDataModelElement'
-         args: 'drawn number: '
+         args: '[drawn number]: '
 
        - id: decimalIntegerValueModelElement1
          type: DecimalIntegerValueModelElement

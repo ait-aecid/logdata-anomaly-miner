@@ -59,7 +59,7 @@ class HexStringModelElement(ModelElementInterface):
         @return a match when at least one byte being a digit was found
         """
         m = self.hex_regex.match(match_context.match_data)
-        if m is None or m.span(0)[1] == 1:
+        if m is None:
             return None
         match_len = m.span(0)[1]
 
