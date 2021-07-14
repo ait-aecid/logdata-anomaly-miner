@@ -368,11 +368,16 @@ def build_analysis_pipeline(analysis_context):
     vdmt = Rules.ValueDependentModuloTimeMatchRule(None, 3, ["/model/ECD/d", "/model/ECD/e", "/model/ECD/f"], {b"e": [0, 2.95]}, [0, 3])
     mt = Rules.ModuloTimeMatchRule(None, 3, 0, 3, None)
     time_allowlist_rules = [
-        Rules.ParallelMatchRule([
-            Rules.ValueDependentDelegatedMatchRule([
-                "/model/ECD/a", "/model/ECD/b", "/model/ECD/c", "/model/ECD/d", "/model/ECD/e", "/model/ECD/f"], {
-                    (b"a",): mt, (b"b",): mt, (b"c",): mt, (b"d",): vdmt, (b"e",): vdmt, (b"f",): vdmt, None: mt}, mt),
-            Rules.IPv4InRFC1918MatchRule("/model/ParsingME/se2/IpAddressDataModelElement", ip_match_action)
+        Rules.AndMatchRule([
+            Rules.ParallelMatchRule([
+                Rules.ValueDependentDelegatedMatchRule([
+                    "/model/ECD/a", "/model/ECD/b", "/model/ECD/c", "/model/ECD/d", "/model/ECD/e", "/model/ECD/f"], {
+                        (b"a",): mt, (b"b",): mt, (b"c",): mt, (b"d",): vdmt, (b"e",): vdmt, (b"f",): vdmt, None: mt}, mt),
+                Rules.IPv4InRFC1918MatchRule("/model/ParsingME/se2/IpAddressDataModelElement", ip_match_action)
+            ]),
+            # IP addresses 8.8.8.8, 8.8.4.4 and 10.0.0.0 - 10.255.255.255 are not allowed
+            Rules.NegationMatchRule(Rules.ValueListMatchRule("/model/ParsingME/se2/IpAddressDataModelElement", [134744072, 134743044])),
+            Rules.NegationMatchRule(Rules.ValueRangeMatchRule("/model/ParsingME/se2/IpAddressDataModelElement", 167772160, 184549375))
         ])
     ]
     time_allowlist_violation_detector = AllowlistViolationDetector(

@@ -964,15 +964,38 @@ Analysis:
           id: "ipv4_in_rfc1918_match_rule"
           path: "/model/ParsingME/se2/IpAddressDataModelElement"
           match_action: "ip_match_action"
+        - type: ValueListMatchRule
+          id: "value_list_match_rule"
+          path: "/model/ParsingME/se2/IpAddressDataModelElement"
+          value_list:
+            - 134744072
+            - 134743044
+        - type: NegationMatchRule
+          id: "negation_list"
+          sub_rule: "value_list_match_rule"
+        - type: ValueRangeMatchRule
+          id: "value_range_match_rule"
+          path: "/model/ParsingME/se2/IpAddressDataModelElement"
+          lower_limit: 167772160
+          upper_limit: 184549375
+        - type: NegationMatchRule
+          id: "negation_range"
+          sub_rule: "value_range_match_rule"
         - type: ParallelMatchRule
           id: "parallel_match_rule"
           sub_rules:
             - "value_dependent_delegated_match_rule"
             - "ipv4_in_rfc1918_match_rule"
+        - type: AndMatchRule
+          id: "time_and_match_rule"
+          sub_rules:
+            - "parallel_match_rule"
+            - "negation_list"
+            - "negation_range"
         - type: AllowlistViolationDetector
           id: TimeAllowlist
           allowlist_rules:
-            - "parallel_match_rule"
+            - "time_and_match_rule"
         - type: LinearNumericBinDefinition
           id: linear_numeric_bin_definition
           lower_limit: 50
