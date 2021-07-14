@@ -820,6 +820,7 @@ Parser:
 Input:
         timestamp_paths: ["/model/DailyCron/DTM"]
         verbose: True # use this to debug your parser-model
+        adjust_timestamps: True
 
 Analysis:
         - type: TimestampsUnsortedDetector

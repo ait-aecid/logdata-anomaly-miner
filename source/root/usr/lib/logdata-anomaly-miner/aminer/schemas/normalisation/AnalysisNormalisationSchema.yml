@@ -76,7 +76,6 @@
                 'missing_value_string': {'type': 'string'},
                 'event_type': {'type': 'string'},
                 'event_message': {'type': 'string'},
-                'stop_when_handled_flag': {'type': 'boolean', 'default': False},
                 'sub_rules': {'type': 'list', 'schema': {'type': 'string'}},
                 'sub_rule': {'type': 'string'},
                 'match_action': {'type': 'string', 'nullable': True, 'default': None},

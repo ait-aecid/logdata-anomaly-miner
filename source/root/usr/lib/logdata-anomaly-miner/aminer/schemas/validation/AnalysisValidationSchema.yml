@@ -459,13 +459,6 @@
                 },
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
-                    'type': {'type': 'string', 'allowed': ['SimpleMonotonicTimestampAdjust'], 'required': True},
-                    'stop_when_handled_flag': {'type': 'boolean'},
-                    'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
-                    'suppress': {'type': 'boolean'}
-                },
-                {
-                    'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['TimestampsUnsortedDetector'], 'required': True},
                     'exit_on_error_flag': {'type': 'boolean'},
                     'output_logline': {'type': 'boolean'},

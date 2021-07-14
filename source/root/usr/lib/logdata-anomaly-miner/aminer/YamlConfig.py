@@ -298,13 +298,20 @@ def build_input_pipeline(analysis_context, parsing_model):
     json_format = yaml_data['Input']['json_format']
     if yaml_data['Input']['multi_source'] is True:
         from aminer.input.SimpleMultisourceAtomSync import SimpleMultisourceAtomSync
-        analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(parsing_model, [SimpleMultisourceAtomSync([
-            atom_filter], sync_wait_time=sync_wait_time)], anomaly_event_handlers, default_timestamp_paths=timestamp_paths, eol_sep=eol_sep,
-            json_format=json_format)
+        if yaml_data['Input']['adjust_timestamps'] is True:
+            from aminer.analysis.TimestampCorrectionFilters import SimpleMonotonicTimestampAdjust
+            atom_handler_list = [SimpleMultisourceAtomSync([SimpleMonotonicTimestampAdjust([atom_filter])], sync_wait_time=sync_wait_time)]
+        else:
+            atom_handler_list = [SimpleMultisourceAtomSync([atom_filter], sync_wait_time=sync_wait_time)]
     else:
-        analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
-            parsing_model, [atom_filter], anomaly_event_handlers, default_timestamp_paths=timestamp_paths, eol_sep=eol_sep,
-            json_format=json_format)
+        if yaml_data['Input']['adjust_timestamps'] is True:
+            from aminer.analysis.TimestampCorrectionFilters import SimpleMonotonicTimestampAdjust
+            atom_handler_list = [SimpleMonotonicTimestampAdjust([atom_filter])]
+        else:
+            atom_handler_list = [atom_filter]
+    analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
+        parsing_model, atom_handler_list, anomaly_event_handlers, default_timestamp_paths=timestamp_paths, eol_sep=eol_sep,
+        json_format=json_format)
     # Just report all unparsed atoms to the event handlers.
     if yaml_data['Input']['verbose'] is True:
         from aminer.input.VerboseUnparsedAtomHandler import VerboseUnparsedAtomHandler
@@ -679,8 +686,6 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     ruleset.append(match_rules_dict[rule])
                 tmp_analyser = func(analysis_context.aminer_config, ruleset, anomaly_event_handlers, persistence_id=item['persistence_id'],
                                     output_log_line=item['output_logline'])
-            elif item['type'].name == 'SimpleMonotonicTimestampAdjust':
-                tmp_analyser = func([atom_filter], stop_when_handled_flag=item['stop_when_handled_flag'])
             elif item['type'].name == 'TimestampsUnsortedDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, exit_on_error_flag=item['exit_on_error_flag'],
                                     output_log_line=item['output_logline'])
