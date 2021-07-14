@@ -155,7 +155,7 @@ Parser:
        - id: degrees
          type: FixedDataModelElement
          name: 'Degrees'
-         args: '\xc2\xb0C'
+         args: '°C'
 
        - id: cpuTemp
          type: SequenceModelElement
@@ -243,7 +243,7 @@ Parser:
        - id: started
          type: FixedDataModelElement
          name: 'Started'
-         args: "\\' started"
+         args: "' started"
 
        - id: typePath
          type: FixedDataModelElement
@@ -315,6 +315,7 @@ Parser:
        - id: mode
          type: DecimalIntegerValueModelElement
          name: 'mode'
+         value_pad_type: "zero"
 
        - id: ouid_string
          type: FixedDataModelElement
@@ -650,35 +651,35 @@ Parser:
          name: 'OptionalMatchModelElement'
          args: firstMatchModelElement
 
-       - id: a
+       - id: g
          type: FixedDataModelElement
-         name: 'a'
-         args: 'a'
+         name: 'g'
+         args: 'g'
 
-       - id: b
+       - id: h
          type: FixedDataModelElement
-         name: 'b'
-         args: 'b'
+         name: 'h'
+         args: 'h'
 
-       - id: c
+       - id: i
          type: FixedDataModelElement
-         name: 'c'
-         args: 'c'
+         name: 'i'
+         args: 'i'
 
-       - id: d
+       - id: j
          type: FixedDataModelElement
-         name: 'd'
-         args: 'd'
+         name: 'j'
+         args: 'j'
 
-       - id: e
+       - id: k
          type: FixedDataModelElement
-         name: 'e'
-         args: 'e'
+         name: 'k'
+         args: 'k'
 
-       - id: f
+       - id: l
          type: FixedDataModelElement
-         name: 'f'
-         args: 'f'
+         name: 'l'
+         args: 'l'
 
        - id: cronAnnouncement
          type: SequenceModelElement
@@ -773,12 +774,12 @@ Parser:
          type: FirstMatchModelElement
          name: 'ECD'
          args:
-           - a
-           - b
-           - c
-           - d
-           - e
-           - f
+           - g
+           - h
+           - i
+           - j
+           - k
+           - l
 
        - id: parsingME
          type: FirstMatchModelElement
@@ -818,7 +819,7 @@ Parser:
 
 Input:
         timestamp_paths: ["/model/DailyCron/DTM"]
-        verbose: False # use this to debug your parser-model
+        verbose: True # use this to debug your parser-model
 
 Analysis:
         - type: TimestampsUnsortedDetector
@@ -890,12 +891,12 @@ Analysis:
           id_path_list:
             - '/model/ParsingME'
           ignore_list:
-            - '/model/ECD/a'
-            - '/model/ECD/b'
-            - '/model/ECD/c'
-            - '/model/ECD/d'
-            - '/model/ECD/e'
-            - '/model/ECD/f'
+            - '/model/ECD/g'
+            - '/model/ECD/h'
+            - '/model/ECD/i'
+            - '/model/ECD/j'
+            - '/model/ECD/k'
+            - '/model/ECD/l'
             - '/model/Random'
             - '/model/RandomTime'
             - '/model/DailyCron'
@@ -925,12 +926,12 @@ Analysis:
           path: null
           seconds_modulo: 3
           paths:
-            - "/model/ECD/a"
-            - "/model/ECD/b"
-            - "/model/ECD/c"
-            - "/model/ECD/d"
-            - "/model/ECD/e"
-            - "/model/ECD/f"
+            - "/model/ECD/g"
+            - "/model/ECD/h"
+            - "/model/ECD/i"
+            - "/model/ECD/j"
+            - "/model/ECD/k"
+            - "/model/ECD/l"
           limit_lookup_dict:
             e:
               - 0
@@ -941,19 +942,19 @@ Analysis:
         - type: ValueDependentDelegatedMatchRule
           id: "value_dependent_delegated_match_rule"
           paths:
-            - "/model/ECD/a"
-            - "/model/ECD/b"
-            - "/model/ECD/c"
-            - "/model/ECD/d"
-            - "/model/ECD/e"
-            - "/model/ECD/f"
+            - "/model/ECD/g"
+            - "/model/ECD/h"
+            - "/model/ECD/i"
+            - "/model/ECD/j"
+            - "/model/ECD/k"
+            - "/model/ECD/l"
           rule_lookup_dict:
-            (b"a",): "mt"
-            (b"b",): "mt"
-            (b"c",): "mt"
-            (b"d",): "vdmt"
-            (b"e",): "vdmt"
-            (b"f",): "vdmt"
+            (b"g",): "mt"
+            (b"h",): "mt"
+            (b"i",): "mt"
+            (b"j",): "vdmt"
+            (b"k",): "vdmt"
+            (b"l",): "vdmt"
             None: "mt"
           default_rule: "mt"
         - type: EventGenerationMatchAction
@@ -981,6 +982,13 @@ Analysis:
         - type: NegationMatchRule
           id: "negation_range"
           sub_rule: "value_range_match_rule"
+        - type: StringRegexMatchRule
+          id: "string_regex_match_rule"
+          path: "/model/type/syscall/success"
+          regex: "^no$"
+        - type: NegationMatchRule
+          id: "negation_string_regex"
+          sub_rule: "string_regex_match_rule"
         - type: ParallelMatchRule
           id: "parallel_match_rule"
           sub_rules:
@@ -992,6 +1000,7 @@ Analysis:
             - "parallel_match_rule"
             - "negation_list"
             - "negation_range"
+            - "negation_string_regex"
         - type: AllowlistViolationDetector
           id: TimeAllowlist
           allowlist_rules:

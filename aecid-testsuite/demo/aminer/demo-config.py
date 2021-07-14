@@ -159,7 +159,8 @@ def build_analysis_pipeline(analysis_context):
             FixedDataModelElement('name_string', b' name="'), DelimitedDataModelElement('name', b'"'),
             FixedDataModelElement('inode_string', b'" inode='), DecimalIntegerValueModelElement('inode'),
             FixedDataModelElement('dev_string', b' dev='), DelimitedDataModelElement('dev', b' '),
-            FixedDataModelElement('mode_string', b' mode='), DecimalIntegerValueModelElement('mode'),
+            FixedDataModelElement('mode_string', b' mode='),
+            DecimalIntegerValueModelElement('mode', value_pad_type=DecimalIntegerValueModelElement.PAD_TYPE_ZERO),
             FixedDataModelElement('ouid_string', b' ouid='), DecimalIntegerValueModelElement('ouid'),
             FixedDataModelElement('ogid_string', b' ogid='), DecimalIntegerValueModelElement('ogid'),
             FixedDataModelElement('rdev_string', b' rdev='), DelimitedDataModelElement('rdev', b' '),
@@ -219,7 +220,7 @@ def build_analysis_pipeline(analysis_context):
             FixedDataModelElement('FixedDataModelElement', b'The-searched-element-was-found!'), SequenceModelElement('se', [
                 FixedDataModelElement('FixedDME', b'Any:'), AnyByteDataModelElement('AnyByteDataModelElement')])])))
 
-    alphabet = b'abcdef'
+    alphabet = b'ghijkl'
     service_children_ecd = []
     for _, char in enumerate(alphabet):
         char = bytes([char])
@@ -327,7 +328,7 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis.EventSequenceDetector import EventSequenceDetector
     esd = EventSequenceDetector(analysis_context.aminer_config, anomaly_event_handlers, ['/model/ParsingME'], ignore_list=[
-        '/model/ECD/a', '/model/ECD/b', '/model/ECD/c', '/model/ECD/d', '/model/ECD/e', '/model/ECD/f', '/model/Random',
+        '/model/ECD/g', '/model/ECD/h', '/model/ECD/i', '/model/ECD/j', '/model/ECD/k', '/model/ECD/l', '/model/Random',
         '/model/RandomTime', '/model/DailyCron'])
     analysis_context.register_component(esd, component_name="EventSequenceDetector")
     atom_filter.add_handler(esd)
@@ -362,22 +363,25 @@ def build_analysis_pipeline(analysis_context):
     analysis_context.register_component(enhanced_new_match_path_value_combo_detector, component_name="EnhancedNewValueCombo")
     atom_filter.add_handler(enhanced_new_match_path_value_combo_detector)
 
+    import re
+
     ip_match_action = Rules.EventGenerationMatchAction(
         "Analysis.Rules.IPv4InRFC1918MatchRule", "Private IP address occurred!", anomaly_event_handlers)
 
-    vdmt = Rules.ValueDependentModuloTimeMatchRule(None, 3, ["/model/ECD/d", "/model/ECD/e", "/model/ECD/f"], {b"e": [0, 2.95]}, [0, 3])
+    vdmt = Rules.ValueDependentModuloTimeMatchRule(None, 3, ["/model/ECD/j", "/model/ECD/k", "/model/ECD/l"], {b"e": [0, 2.95]}, [0, 3])
     mt = Rules.ModuloTimeMatchRule(None, 3, 0, 3, None)
     time_allowlist_rules = [
         Rules.AndMatchRule([
             Rules.ParallelMatchRule([
                 Rules.ValueDependentDelegatedMatchRule([
-                    "/model/ECD/a", "/model/ECD/b", "/model/ECD/c", "/model/ECD/d", "/model/ECD/e", "/model/ECD/f"], {
+                    '/model/ECD/g', '/model/ECD/h', '/model/ECD/i', '/model/ECD/j', '/model/ECD/k', '/model/ECD/l'], {
                         (b"a",): mt, (b"b",): mt, (b"c",): mt, (b"d",): vdmt, (b"e",): vdmt, (b"f",): vdmt, None: mt}, mt),
                 Rules.IPv4InRFC1918MatchRule("/model/ParsingME/se2/IpAddressDataModelElement", ip_match_action)
             ]),
             # IP addresses 8.8.8.8, 8.8.4.4 and 10.0.0.0 - 10.255.255.255 are not allowed
             Rules.NegationMatchRule(Rules.ValueListMatchRule("/model/ParsingME/se2/IpAddressDataModelElement", [134744072, 134743044])),
-            Rules.NegationMatchRule(Rules.ValueRangeMatchRule("/model/ParsingME/se2/IpAddressDataModelElement", 167772160, 184549375))
+            Rules.NegationMatchRule(Rules.ValueRangeMatchRule("/model/ParsingME/se2/IpAddressDataModelElement", 167772160, 184549375)),
+            Rules.NegationMatchRule(Rules.StringRegexMatchRule("/model/type/syscall/success", re.compile(b"^no$")))
         ])
     ]
     time_allowlist_violation_detector = AllowlistViolationDetector(

@@ -612,7 +612,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 if item['type'].name == 'ValueRangeMatchRule':
                     tmp_analyser = func(item['path'], item['lower_limit'], item['upper_limit'], match_action)
                 if item['type'].name == 'StringRegexMatchRule':
-                    tmp_analyser = func(item['path'], item['regex'], match_action=match_action)
+                    import re
+                    tmp_analyser = func(item['path'], re.compile(item['regex'].encode()), match_action=match_action)
                 if item['type'].name == 'ModuloTimeMatchRule':
                     # tzinfo parameter cannot be used yet..
                     tmp_analyser = func(item['path'], item['seconds_modulo'], item['lower_limit'], item['upper_limit'],
