@@ -228,6 +228,11 @@ def build_parsing_model():
                 parser_model_dict[item['id']] = item['type'].func(item['name'], item['value_sign_type'], item['value_pad_type'])
             elif item['type'].name in ('FirstMatchModelElement', 'SequenceModelElement'):
                 children = []
+                if not isinstance(item['args'], list):
+                    msg = '"args" has to be a list when using the %s. Currently args is defined as %s' % (
+                        item['type'].name, repr(item['args']))
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise TypeError(msg)
                 for child in item['args']:
                     if isinstance(child, bytes):
                         child = child.decode()
@@ -425,6 +430,18 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             elif item['type'].name == 'ValueRangeDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['id_path_list'],
                                     target_path_list=item['paths'], persistence_id=item['persistence_id'], auto_include_flag=learn,
+                                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
+                                    constraint_list=item['constraint_list'])
+            elif item['type'].name == 'CharsetDetector':
+                tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['id_path_list'],
+                                    target_path_list=item['paths'], persistence_id=item['persistence_id'], auto_include_flag=learn,
+                                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
+                                    constraint_list=item['constraint_list'])
+            elif item['type'].name == 'EntropyDetector':
+                tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
+                                    prob_thresh=item['prob_thresh'], default_freqs=item['default_freqs'],
+                                    skip_repetitions=item['skip_repetitions'],
+                                    persistence_id=item['persistence_id'], auto_include_flag=learn,
                                     output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
                                     constraint_list=item['constraint_list'])
             elif item['type'].name == 'EventFrequencyDetector':
@@ -672,10 +689,11 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             elif item['type'].name == 'EventTypeDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
-                    path_list=item['paths'], min_num_vals=item['min_num_vals'], max_num_vals=item['max_num_vals'],
-                    save_values=item['save_values'], track_time_for_TSA=item['track_time_for_TSA'],
-                    waiting_time_for_TSA=item['waiting_time_for_TSA'],
-                    num_sections_waiting_time_for_TSA=item['num_sections_waiting_time_for_TSA'])
+                    path_list=item['paths'], id_path_list=item['id_path_list'], allow_missing_id=item['allow_missing_id'],
+                    allowed_id_tuples=item['allowed_id_tuples'], min_num_vals=item['min_num_vals'], max_num_vals=item['max_num_vals'],
+                    save_values=item['save_values'], track_time_for_tsa=item['track_time_for_tsa'],
+                    waiting_time_for_tsa=item['waiting_time_for_tsa'],
+                    num_sections_waiting_time_for_tsa=item['num_sections_waiting_time_for_tsa'])
             elif item['type'].name == 'VariableTypeDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
@@ -841,7 +859,7 @@ def parse_json_yaml(json_dict, parser_model_dict):
         elif isinstance(value, list):
             if isinstance(value[0], dict):
                 key_parser_dict[key] = [parse_json_yaml(value[0], parser_model_dict)]
-            elif value[0] == "ALLOW_ALL":
+            elif value[0] in ("ALLOW_ALL", "EMPTY_LIST", "EMPTY_OBJECT"):
                 key_parser_dict[key] = value
             elif parser_model_dict.get(value[0]) is None:
                 msg = 'The parser model %s does not exist!' % value[0]
@@ -849,7 +867,7 @@ def parse_json_yaml(json_dict, parser_model_dict):
                 raise ValueError(msg)
             else:
                 key_parser_dict[key] = [parser_model_dict.get(value[0])]
-        elif value == "ALLOW_ALL":
+        elif value in ("ALLOW_ALL", "EMPTY_LIST", "EMPTY_OBJECT"):
             key_parser_dict[key] = value
         elif parser_model_dict.get(value) is None:
             msg = 'The parser model %s does not exist!' % value
