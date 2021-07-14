@@ -225,9 +225,9 @@ class ValueDependentDelegatedMatchRule(MatchRule):
     def __init__(self, value_path_list, rule_lookup_dict, default_rule=None, match_action=None):
         """
         Create the rule.
-        @param list with value pathes that are used to extract the lookup keys for ruleLookupDict. If value lookup fails, None
+        @param list with value paths that are used to extract the lookup keys for ruleLookupDict. If value lookup fails, None
         will be used for lookup.
-        @param rule_lookup_dict dicitionary with tuple containing values for valuePathList as key and target rule as value.
+        @param rule_lookup_dict dictionary with tuple containing values for valuePathList as key and target rule as value.
         @param default_rule when not none, this rule will be executed as default. Otherwise when rule lookup failed, False will
         be returned unconditionally.
         @param match_action if None, no action is performed.
