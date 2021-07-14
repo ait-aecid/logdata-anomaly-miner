@@ -215,7 +215,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         # Initialize the lists of the results
         self.result_list = [[1]*self.num_results_bt for _ in range(len(counts))]
         # Minimal size of the time step
-        min_lag = max(int(self.acf_pause_area*self.event_type_detector.num_sections_waiting_time_for_TSA), 1)
+        min_lag = max(int(self.acf_pause_area*self.event_type_detector.num_sections_waiting_time_for_tsa), 1)
         for event_index, data in enumerate(counts):
             if (self.path_list != [] and all(path not in self.event_type_detector.found_keys[event_index] for path in self.path_list)) or (
                     self.ignore_list != [] and any(ignore_path in self.event_type_detector.found_keys[event_index] for ignore_path in
