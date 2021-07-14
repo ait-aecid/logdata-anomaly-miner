@@ -175,6 +175,12 @@ class DateTimeModelElementTest(TestBase):
         match_element = date_time_model_element.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, date, 1518021600, None)
 
+        data = b"07.02.2018 11:40:00-05:00: it still works"
+        date = b"07.02.2018 11:40:00-05:00"
+        match_context = DummyMatchContext(data)
+        match_element = date_time_model_element.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, date, 1518021600, None)
+
         data = b"07.02.2018 11:40:00 UTC+0000: it still works"
         date = b"07.02.2018 11:40:00 UTC+0000"
         match_context = DummyMatchContext(data)
@@ -183,6 +189,12 @@ class DateTimeModelElementTest(TestBase):
 
         data = b"07.02.2018 11:40:00 UTC+0100: it still works"
         date = b"07.02.2018 11:40:00 UTC+0100"
+        match_context = DummyMatchContext(data)
+        match_element = date_time_model_element.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, date, 1518000000, None)
+
+        data = b"07.02.2018 11:40:00+01:00: it still works"
+        date = b"07.02.2018 11:40:00+01:00"
         match_context = DummyMatchContext(data)
         match_element = date_time_model_element.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, date, 1518000000, None)

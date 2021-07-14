@@ -100,6 +100,7 @@ Parser:
        - id: FromTime
          type: DecimalFloatValueModelElement
          name: 'FromTime'
+         exponent_type: 'mandatory'
 
        - id: /parser/model/php
          type: DecimalIntegerValueModelElement
@@ -137,6 +138,7 @@ Parser:
        - id: ToTime
          type: DecimalFloatValueModelElement
          name: 'ToTime'
+         exponent_type: 'mandatory'
 
        - id: fromtimestamp
          type: DateTimeModelElement
