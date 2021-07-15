@@ -6,12 +6,11 @@ from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
 from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
 from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
 from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
-from aminer.parsing.DateTimeModelElement import DateTimeModelElement
+from aminer.parsing.DateTimeModelElement import DateTimeModelElement, MultiLocaleDateTimeModelElement
 from aminer.parsing.IpAddressDataModelElement import IpAddressDataModelElement
 from aminer.parsing.Base64StringModelElement import Base64StringModelElement
 from aminer.parsing.ElementValueBranchModelElement import ElementValueBranchModelElement
 from aminer.parsing.HexStringModelElement import HexStringModelElement
-from aminer.parsing.MultiLocaleDateTimeModelElement import MultiLocaleDateTimeModelElement
 from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
 from aminer.parsing.RepeatedElementDataModelElement import RepeatedElementDataModelElement
 from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
@@ -173,7 +172,7 @@ def build_analysis_pipeline(analysis_context):
         DateTimeModelElement('DateTimeModelElement', b'Current DateTime: %d.%m.%Y %H:%M:%S'),
         DecimalFloatValueModelElement('DecimalFloatValueModelElement', value_sign_type='optional'),
         DecimalIntegerValueModelElement('DecimalIntegerValueModelElement', value_sign_type='optional', value_pad_type='blank'),
-        SequenceModelElement('', [
+        SequenceModelElement('se', [
             DelimitedDataModelElement('DelimitedDataModelElement', b';'), FixedDataModelElement('FixedDataModelElement', b';')])]
 
     # ElementValueBranchModelElement
@@ -188,21 +187,21 @@ def build_analysis_pipeline(analysis_context):
             SequenceModelElement("seq2", [fixed_data_me1, fixed_wordlist_data_model_element, fixed_data_me2])]), "wordlist",
                                  {0: decimal_integer_value_model_element, 1: fixed_data_me2}))
     service_children_parsing_model_element.append(HexStringModelElement('HexStringModelElement'))
-    service_children_parsing_model_element.append(SequenceModelElement('', [
+    service_children_parsing_model_element.append(SequenceModelElement('se2', [
         FixedDataModelElement('FixedDataModelElement', b'Gateway IP-Address: '), IpAddressDataModelElement('IpAddressDataModelElement')]))
     import locale
     loc = locale.getlocale()
     if loc == (None, None):
         loc = ('en_US', 'utf8')
     service_children_parsing_model_element.append(
-        MultiLocaleDateTimeModelElement('MultiLocaleDateTimeModelElement', [(b'%b %d %Y', '%s.%s' % (loc), None)]))
+        MultiLocaleDateTimeModelElement('MultiLocaleDateTimeModelElement', [(b'%b %d %Y', None, '%s.%s' % loc)]))
     service_children_parsing_model_element.append(
         RepeatedElementDataModelElement('RepeatedElementDataModelElement', SequenceModelElement('SequenceModelElement', [
             FixedDataModelElement('FixedDataModelElement', b'drawn number: '),
             DecimalIntegerValueModelElement('DecimalIntegerValueModelElement')]), 1))
     service_children_parsing_model_element.append(VariableByteDataModelElement('VariableByteDataModelElement', b'-@#'))
-    service_children_parsing_model_element.append(
-        SequenceModelElement('', [WhiteSpaceLimitedDataModelElement('WhiteSpaceLimitedDataModelElement'), FixedDataModelElement('', b' ')]))
+    service_children_parsing_model_element.append(SequenceModelElement('se', [
+        WhiteSpaceLimitedDataModelElement('WhiteSpaceLimitedDataModelElement'), FixedDataModelElement('fixed', b' ')]))
 
     # The Base64StringModelElement must be just before the AnyByteDataModelElement to avoid unexpected Matches.
     service_children_parsing_model_element.append(Base64StringModelElement('Base64StringModelElement'))
@@ -211,7 +210,7 @@ def build_analysis_pipeline(analysis_context):
     # to the AnyByteDataModelElement. The AnyByteDataModelElement must be last, because all bytes are accepted.
     service_children_parsing_model_element.append(
         OptionalMatchModelElement('OptionalMatchModelElement', FirstMatchModelElement('FirstMatchModelElement', [
-            FixedDataModelElement('FixedDataModelElement', b'The-searched-element-was-found!'), SequenceModelElement('', [
+            FixedDataModelElement('FixedDataModelElement', b'The-searched-element-was-found!'), SequenceModelElement('se', [
                 FixedDataModelElement('FixedDME', b'Any:'), AnyByteDataModelElement('AnyByteDataModelElement')])])))
 
     alphabet = b'abcdef'
@@ -406,7 +405,7 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis.MissingMatchPathValueDetector import MissingMatchPathValueDetector
     missing_match_path_value_detector = MissingMatchPathValueDetector(
-        analysis_context.aminer_config, '/model/DiskReport/Space', anomaly_event_handlers, auto_include_flag=True, default_interval=2,
+        analysis_context.aminer_config, ['/model/DiskReport/Space'], anomaly_event_handlers, auto_include_flag=True, default_interval=2,
         realert_interval=5, output_log_line=True)
     analysis_context.register_component(missing_match_path_value_detector, component_name="MissingMatch")
     atom_filter.add_handler(missing_match_path_value_detector)

@@ -243,7 +243,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             t = time.time()
             while measured_time < self.waiting_time / 10:
                 rand = random.randint(0, 100000)
-                match_element = MatchElement('match/crontab', t + rand, t + rand, [])
+                match_element = MatchElement('match/crontab', str(t + rand).encode(), t + rand, None)
                 log_atom = LogAtom(histogram_data.bin_data, ParserMatch(match_element), t + i, histogram_analysis)
                 measured_time += timeit.timeit(lambda: histogram_analysis.receive_atom(log_atom), number=1)
                 i = i + 1
@@ -271,22 +271,22 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 self.stream_printer_event_handler], None, path_list, 2, t, False, 'Default')
             i = 0
             while i < number_of_paths:
-                match_element = MatchElement(self.integerd + str(i), '%s' % str(t), t, [])
+                match_element = MatchElement(self.integerd + str(i), b'%d' % t, t, None)
                 log_atom = LogAtom(
                     match_element.get_match_object(), ParserMatch(match_element), t, match_value_average_change_detector)
                 match_value_average_change_detector.receive_atom(log_atom)
 
-                match_element = MatchElement(self.integerd + str(i), '%s' % str(t + 0.1), t + 0.1, [])
+                match_element = MatchElement(self.integerd + str(i), b'%d' % (t + 0.1), t + 0.1, None)
                 log_atom = LogAtom(
                     match_element.get_match_object(), ParserMatch(match_element), t + 0.1, match_value_average_change_detector)
                 match_value_average_change_detector.receive_atom(log_atom)
 
-                match_element = MatchElement(self.integerd + str(i), '%s' % str(t + 0.2), t + 0.2, [])
+                match_element = MatchElement(self.integerd + str(i), b'%d' % (t + 0.2), t + 0.2, None)
                 log_atom = LogAtom(
                     match_element.get_match_object(), ParserMatch(match_element), t + 0.2, match_value_average_change_detector)
                 match_value_average_change_detector.receive_atom(log_atom)
 
-                match_element = MatchElement(self.integerd + str(i), '%s' % str(t + 10), t + 10, [])
+                match_element = MatchElement(self.integerd + str(i), b'%d' % (t + 10), t + 10, None)
                 log_atom = LogAtom(
                     match_element.get_match_object(), ParserMatch(match_element), t + 10, match_value_average_change_detector)
                 match_value_average_change_detector.receive_atom(log_atom)
@@ -294,13 +294,13 @@ class AnalysisComponentsPerformanceTest(TestBase):
             t = time.time()
 
             # worst case
-            match_element = MatchElement(self.integerd + str(number_of_paths - 1), '%s' % str(t), t, [])
+            match_element = MatchElement(self.integerd + str(number_of_paths - 1), b'%d' % t, t, None)
             log_atom = LogAtom(match_element.get_match_object(), ParserMatch(match_element), t, match_value_average_change_detector)
             worst_case = self.waiting_time / (
                     timeit.timeit(lambda: match_value_average_change_detector.receive_atom(log_atom), number=10000) / 10000)
 
             # best case
-            match_element = MatchElement(self.integerd + str(0), '%s' % str(t), t, [])
+            match_element = MatchElement(self.integerd + str(0), b'%d' % t, t, None)
             log_atom = LogAtom(match_element.get_match_object(), ParserMatch(match_element), t, match_value_average_change_detector)
             best_case = self.waiting_time / (
                     timeit.timeit(lambda: match_value_average_change_detector.receive_atom(log_atom), number=10000) / 10000)
@@ -696,7 +696,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
             DelimitedDataModelElement('name', b'"'), FixedDataModelElement('inode_string', b'" inode='),
             DecimalIntegerValueModelElement('inode'), FixedDataModelElement('dev_string', b' dev='),
             DelimitedDataModelElement('dev', b' '), FixedDataModelElement('mode_string', b' mode='),
-            DecimalIntegerValueModelElement('mode'), FixedDataModelElement('ouid_string', b' ouid='),
+            DecimalIntegerValueModelElement('mode', value_pad_type=DecimalIntegerValueModelElement.PAD_TYPE_ZERO),
+            FixedDataModelElement('ouid_string', b' ouid='),
             DecimalIntegerValueModelElement('ouid'), FixedDataModelElement('ogid_string', b' ogid='),
             DecimalIntegerValueModelElement('ogid'), FixedDataModelElement('rdev_string', b' rdev='),
             DelimitedDataModelElement('rdev', b' '), FixedDataModelElement('nametype_string', b' nametype='),
@@ -800,7 +801,8 @@ class AnalysisComponentsPerformanceTest(TestBase):
             DelimitedDataModelElement('name', b'"'), FixedDataModelElement('inode_string', b'" inode='),
             DecimalIntegerValueModelElement('inode'), FixedDataModelElement('dev_string', b' dev='),
             DelimitedDataModelElement('dev', b' '), FixedDataModelElement('mode_string', b' mode='),
-            DecimalIntegerValueModelElement('mode'), FixedDataModelElement('ouid_string', b' ouid='),
+            DecimalIntegerValueModelElement('mode', value_pad_type=DecimalIntegerValueModelElement.PAD_TYPE_ZERO),
+            FixedDataModelElement('ouid_string', b' ouid='),
             DecimalIntegerValueModelElement('ouid'), FixedDataModelElement('ogid_string', b' ogid='),
             DecimalIntegerValueModelElement('ogid'), FixedDataModelElement('rdev_string', b' rdev='),
             DelimitedDataModelElement('rdev', b' '), FixedDataModelElement('nametype_string', b' nametype='),
@@ -844,10 +846,11 @@ class AnalysisComponentsPerformanceTest(TestBase):
                                        hypothesis_eval_delta_time, delta_time_to_discard_hypothesis):
         """Run the performance tests for EventCorrelationDetector."""
         alphabet = b'abcdefghijklmnopqrstuvwxyz'
-        alphabet_model = FirstMatchModelElement('first', [])
+        children = []
         for i, char in enumerate(alphabet):
             char = bytes([char])
-            alphabet_model.children.append(FixedDataModelElement(char.decode(), char))
+            children.append(FixedDataModelElement(char.decode(), char))
+        alphabet_model = FirstMatchModelElement('first', children)
 
         # training phase
         results = [None] * self.iterations
@@ -948,19 +951,19 @@ class AnalysisComponentsPerformanceTest(TestBase):
         with open('unit/data/vtd_data/beta1_data_test6', 'rb') as f:
             beta1_data_list = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/uni_data_test7', 'rb') as f:
-            [uni_data_list_ini, uni_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+            [uni_data_list_ini, uni_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/nor_data_test7', 'rb') as f:
-            [nor_data_list_ini, nor_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+            [nor_data_list_ini, nor_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta1_data_test7', 'rb') as f:
-            [beta1_data_list_ini, beta1_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta1_data_list_ini, beta1_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta2_data_test7', 'rb') as f:
-            [beta2_data_list_ini, beta2_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta2_data_list_ini, beta2_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta3_data_test7', 'rb') as f:
-            [beta3_data_list_ini, beta3_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta3_data_list_ini, beta3_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta4_data_test7', 'rb') as f:
-            [beta4_data_list_ini, beta4_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta4_data_list_ini, beta4_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta5_data_test7', 'rb') as f:
-            [beta5_data_list_ini, beta5_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta5_data_list_ini, beta5_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
 
         data = uni_data_list + nor_data_list + beta1_data_list + uni_data_list_ini + uni_data_list_upd + nor_data_list_ini +\
             nor_data_list_upd + beta1_data_list_ini + beta1_data_list_upd + beta2_data_list_ini + beta2_data_list_upd + beta3_data_list_ini\
@@ -1007,19 +1010,19 @@ class AnalysisComponentsPerformanceTest(TestBase):
         with open('unit/data/vtd_data/beta1_data_test6', 'rb') as f:
             beta1_data_list = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/uni_data_test7', 'rb') as f:
-            [uni_data_list_ini, uni_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+            [uni_data_list_ini, uni_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/nor_data_test7', 'rb') as f:
-            [nor_data_list_ini, nor_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+            [nor_data_list_ini, nor_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta1_data_test7', 'rb') as f:
-            [beta1_data_list_ini, beta1_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta1_data_list_ini, beta1_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta2_data_test7', 'rb') as f:
-            [beta2_data_list_ini, beta2_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta2_data_list_ini, beta2_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta3_data_test7', 'rb') as f:
-            [beta3_data_list_ini, beta3_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta3_data_list_ini, beta3_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta4_data_test7', 'rb') as f:
-            [beta4_data_list_ini, beta4_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta4_data_list_ini, beta4_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta5_data_test7', 'rb') as f:
-            [beta5_data_list_ini, beta5_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta5_data_list_ini, beta5_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
 
         data = uni_data_list + nor_data_list + beta1_data_list + uni_data_list_ini + uni_data_list_upd + nor_data_list_ini +\
             nor_data_list_upd + beta1_data_list_ini + beta1_data_list_upd + beta2_data_list_ini + beta2_data_list_upd + beta3_data_list_ini\
@@ -1068,19 +1071,19 @@ class AnalysisComponentsPerformanceTest(TestBase):
         with open('unit/data/vtd_data/beta1_data_test6', 'rb') as f:
             beta1_data_list = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/uni_data_test7', 'rb') as f:
-            [uni_data_list_ini, uni_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+            [uni_data_list_ini, uni_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/nor_data_test7', 'rb') as f:
-            [nor_data_list_ini, nor_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+            [nor_data_list_ini, nor_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta1_data_test7', 'rb') as f:
-            [beta1_data_list_ini, beta1_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta1_data_list_ini, beta1_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta2_data_test7', 'rb') as f:
-            [beta2_data_list_ini, beta2_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta2_data_list_ini, beta2_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta3_data_test7', 'rb') as f:
-            [beta3_data_list_ini, beta3_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta3_data_list_ini, beta3_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta4_data_test7', 'rb') as f:
-            [beta4_data_list_ini, beta4_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta4_data_list_ini, beta4_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta5_data_test7', 'rb') as f:
-            [beta5_data_list_ini, beta5_data_list_upd, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta5_data_list_ini, beta5_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
 
         data = uni_data_list + nor_data_list + beta1_data_list + uni_data_list_ini + uni_data_list_upd + nor_data_list_ini +\
             nor_data_list_upd + beta1_data_list_ini + beta1_data_list_upd + beta2_data_list_ini + beta2_data_list_upd + beta3_data_list_ini\

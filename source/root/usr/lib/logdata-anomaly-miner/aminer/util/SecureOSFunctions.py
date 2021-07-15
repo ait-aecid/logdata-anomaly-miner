@@ -17,7 +17,7 @@ import socket
 import struct
 import sys
 import logging
-from aminer import AminerConfig
+from aminer.AminerConfig import DEBUG_LOG_NAME
 
 
 base_dir_fd = None
@@ -38,11 +38,11 @@ def secure_open_base_directory(directory_name=None, flags=0):
         directory_name = directory_name.encode()
     if base_dir_path is None and (directory_name is None or not directory_name.startswith(b'/')):
         msg = 'Secure open on relative path not supported'
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+        logging.getLogger(DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
     if base_dir_path is None and (flags & os.O_DIRECTORY) == 0:
         msg = 'Opening directory but O_DIRECTORY flag missing'
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+        logging.getLogger(DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
 
     if base_dir_fd is None:
@@ -68,7 +68,7 @@ def close_base_directory():
             tmp_base_dir_fd = None
     except OSError as e:
         msg = 'Could not close the base directory. Error: %s' % e
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+        logging.getLogger(DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
 
 
@@ -80,11 +80,11 @@ def secure_open_log_directory(log_directory_name=None, flags=0):
         log_directory_name = log_directory_name.encode()
     if log_dir_path is None and (log_directory_name is None or not log_directory_name.startswith(b'/')):
         msg = 'Secure open on relative path not supported'
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+        logging.getLogger(DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
     if log_dir_path is None and (flags & os.O_DIRECTORY) == 0:
         msg = 'Opening directory but O_DIRECTORY flag missing'
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+        logging.getLogger(DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
     if log_dir_fd is None:
         if base_dir_path is not None and base_dir_path.startswith(os.path.split(log_directory_name)[0]):
@@ -107,7 +107,7 @@ def close_log_directory():
             log_dir_path = None
     except OSError as e:
         msg = 'Could not close the base log directory. Error: %s' % e
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+        logging.getLogger(DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
 
 
@@ -131,11 +131,11 @@ def secure_open_file(file_name, flags):
         file_name = file_name.encode()
     if not file_name.startswith(b'/'):
         msg = 'Secure open on relative path not supported'
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+        logging.getLogger(DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
     if (file_name.endswith(b'/')) and ((flags & os.O_DIRECTORY) == 0):
         msg = 'Opening directory but O_DIRECTORY flag missing'
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+        logging.getLogger(DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
 
     global base_dir_path  # skipcq: PYL-W0603
@@ -168,7 +168,7 @@ def send_annotated_file_descriptor(send_socket, send_fd, type_info, annotation_d
         annotation_data = annotation_data.encode()
     if type_info.find(b'\x00') >= 0:
         msg = 'Null bytes not supported in typeInfo'
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+        logging.getLogger(DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
     message_data = b'%s\x00%s' % (type_info, annotation_data)
     send_socket.sendmsg([message_data], [(socket.SOL_SOCKET, socket.SCM_RIGHTS, struct.pack('i', send_fd))])
@@ -189,30 +189,30 @@ def receive_annoted_file_descriptor(receive_socket):
     message_data, anc_data, _flags, _remote_address = receive_socket.recvmsg(1 << 16, socket.CMSG_LEN(struct.calcsize('i')))
     if len(anc_data) != 1:
         msg = 'Received %d sets of ancillary data instead of 1' % len(anc_data)
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+        logging.getLogger(DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
     cmsg_level, cmsg_type, cmsg_data = anc_data[0]
     if (cmsg_level != socket.SOL_SOCKET) or (cmsg_type != socket.SCM_RIGHTS):
         msg = 'Received invalid message from remote side'
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+        logging.getLogger(DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
     # Do not accept multiple or unaligned FDs.
     if len(cmsg_data) != 4:
         msg = 'Unsupported control message length %d' % len(cmsg_data)
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+        logging.getLogger(DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
     received_fd = struct.unpack('i', cmsg_data)[0]
 
     split_pos = message_data.find(b'\x00')
     if split_pos < 0:
         msg = 'No null byte in received message'
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+        logging.getLogger(DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
     type_info = message_data[:split_pos]
     annotation_data = message_data[split_pos + 1:]
     if received_fd <= 2:
         msg = 'received "reserved" fd %d' % received_fd
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
+        logging.getLogger(DEBUG_LOG_NAME).warning(msg)
         print('WARNING: ' + msg, file=sys.stderr)
     if isinstance(type_info, str):
         type_info = type_info.encode()

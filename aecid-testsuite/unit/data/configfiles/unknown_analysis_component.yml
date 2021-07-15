@@ -10,7 +10,7 @@ Parser:
          - id: 'timeModel'
            type: DateTimeModelElement
            name: 'time'
-           args: '%Y-%m-%dT%H:%M:%S.%f'
+           date_format: '%Y-%m-%dT%H:%M:%S.%f'
 
          - id: 'hostModel'
            type: VariableByteDataModelElement
@@ -49,7 +49,7 @@ Analysis:
 
         - type: NewMatchPathValueComboDetector
           paths: ["/model/accesslog/request","/model/accesslog/method"]
-          auto_include_flag: True
+          learn_mode: True
           persistence_id: 'accesslog_request' # optional default: Default
           output_logline: False # optional default: True
           allow_missing_values: False # optional default: False

@@ -16,8 +16,9 @@ import time
 import os
 import logging
 
+from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
+    STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
 from aminer import AminerConfig
-from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.EventInterfaces import EventSourceInterface
 from aminer.input.InputInterfaces import AtomHandlerInterface
@@ -42,14 +43,14 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         self.log_learned_paths = 0
         self.log_new_learned_paths = []
 
-        self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
+        self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is None:
             self.known_path_set = set()
         else:
             self.known_path_set = set(persistence_data)
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     def receive_atom(self, log_atom):
         """
@@ -70,22 +71,24 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if unknown_path_list:
             if self.next_persist_time is None:
                 self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                    AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
-            original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
-            if original_log_line_prefix is None:
-                original_log_line_prefix = ''
+                    KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+            original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
+            try:
+                data = log_atom.raw_data.decode(AminerConfig.ENCODING)
+            except UnicodeError:
+                data = repr(log_atom.raw_data)
             if self.output_log_line:
                 sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + repr(
-                    unknown_path_list) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
+                    unknown_path_list) + os.linesep + original_log_line_prefix + data]
             else:
-                sorted_log_lines = [repr(unknown_path_list) + os.linesep + original_log_line_prefix + repr(log_atom.raw_data)]
+                sorted_log_lines = [repr(unknown_path_list) + os.linesep + original_log_line_prefix + data]
             analysis_component = {'AffectedLogAtomPaths': list(unknown_path_list)}
             if self.output_log_line:
                 match_paths_values = {}
                 for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
                     match_value = match_element.match_object
                     if isinstance(match_value, bytes):
-                        match_value = match_value.decode()
+                        match_value = match_value.decode(AminerConfig.ENCODING)
                     match_paths_values[match_path] = match_value
                 analysis_component['ParsedLogAtom'] = match_paths_values
             event_data = {'AnalysisComponent': analysis_component}
@@ -102,19 +105,19 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted."""
         if self.next_persist_time is None:
-            return self.aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
+            return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
         if delta < 0:
             self.do_persist()
-            delta = self.aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
+            delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
         PersistenceUtil.store_json(self.persistence_file_name, list(self.known_path_set))
         self.next_persist_time = None
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """
@@ -124,11 +127,11 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         """
         if event_type != 'Analysis.%s' % self.__class__.__name__:
             msg = 'Event not from this source'
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if allowlisting_data is not None:
             msg = 'Allowlisting data not understood by this detector'
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         self.known_path_set.add(event_data)
         return 'Allowlisted path(es) %s in %s.' % (event_data, event_type)
@@ -138,11 +141,11 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         Log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
         @param component_name the name of the component which is printed in the log line.
         """
-        if STAT_LEVEL == 1:
+        if AminerConfig.STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
                 "'%s' processed %d out of %d log atoms successfully and learned %d new paths in the last 60"
                 " minutes.", component_name, self.log_success, self.log_total, self.log_learned_paths)
-        elif STAT_LEVEL == 2:
+        elif AminerConfig.STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
                 "'%s' processed %d out of %d log atoms successfully and learned %d new paths in the last 60"
                 " minutes. Following new paths were learned: %s", component_name, self.log_success, self.log_total, self.log_learned_paths,

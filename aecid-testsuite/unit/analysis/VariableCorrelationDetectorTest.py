@@ -33,11 +33,11 @@ class VariableCorrelationDetectorTest(TestBase):
         """Run the filter variables code with or without the VariableTypeDetector."""
         t = time()
         stat_data = b'5.3.0-55-generic'
-        log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+        log_atom = LogAtom(stat_data, ParserMatch(MatchElement(None, stat_data, stat_data, None)), t, self.__class__.__name__)
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         if use_vtd:
             vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size,
-                                       div_thres=0.1, test_ks_int=True, sim_thres=0.3, ks_alpha=self.significance_niveau)
+                                       div_thres=0.1, test_gof_int=True, sim_thres=0.3, gof_alpha=self.significance_niveau)
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1)
         for _ in range(self.dataset_size):
             etd.receive_atom(log_atom)
@@ -50,11 +50,11 @@ class VariableCorrelationDetectorTest(TestBase):
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         if use_vtd:
             vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size,
-                                       div_thres=0.1, test_ks_int=False, sim_thres=0.5, ks_alpha=self.significance_niveau)
+                                       div_thres=0.1, test_gof_int=False, sim_thres=0.5, gof_alpha=self.significance_niveau)
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1)
         for i in range(self.dataset_size):
             stat_data = bytes(str((i % 60) * 0.1), 'utf-8')
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement("/", stat_data, stat_data, None)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)
             if use_vtd:
                 vtd.receive_atom(log_atom)
@@ -65,13 +65,13 @@ class VariableCorrelationDetectorTest(TestBase):
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         if use_vtd:
             vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size,
-                                       div_thres=0.1, test_ks_int=True, sim_thres=0.3, ks_alpha=self.significance_niveau)
+                                       div_thres=0.1, test_gof_int=True, sim_thres=0.3, gof_alpha=self.significance_niveau)
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1)
         values = []
         for i in range(self.dataset_size):
             stat_data = bytes(str((i % 10) * 0.1), 'utf-8')
             values.append(float(stat_data))
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement("/", stat_data, stat_data, None)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)
             if use_vtd:
                 vtd.receive_atom(log_atom)
@@ -83,13 +83,13 @@ class VariableCorrelationDetectorTest(TestBase):
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         if use_vtd:
             vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size,
-                                       div_thres=0.1, test_ks_int=True, sim_thres=0.3, ks_alpha=self.significance_niveau)
+                                       div_thres=0.1, test_gof_int=True, sim_thres=0.3, gof_alpha=self.significance_niveau)
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1)
         values = []
         for i in range(self.dataset_size):
             stat_data = bytes(str((i % 11) * 0.1), 'utf-8')
             values.append(float(stat_data))
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(None, stat_data, stat_data, None)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)
             if use_vtd:
                 vtd.receive_atom(log_atom)
@@ -217,8 +217,8 @@ class VariableCorrelationDetectorTest(TestBase):
         for i in range(self.dataset_size):
             stat_data = bytes(str((i % 10) * 0.1), 'utf-8')
             values.append(float(stat_data))
-            children = [MatchElement(str(j), stat_data.decode(), stat_data, None) for j in range(5)]
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', bytes(str(i), 'utf-8').decode(), bytes(str(i), 'utf-8'), children)),
+            children = [MatchElement(str(j), stat_data, stat_data, None) for j in range(5)]
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', str(i).encode(), str(i).encode(), children)),
                                t, self.__class__.__name__)
             etd.receive_atom(log_atom)
         vcd.init_cor(0)
@@ -269,10 +269,11 @@ class VariableCorrelationDetectorTest(TestBase):
         var3 = ['c']*20 + ['d']*50 + ['e']*30
         var4 = ['c']*50 + ['d']*50
 
-        for i in range(len(var1)):
-            children = [MatchElement('2', var2[i], var2[i].encode(), None), MatchElement('3', var3[i], var3[i].encode(), None),
-                        MatchElement('4', var4[i], var4[i].encode(), None)]
-            log_atom = LogAtom(var1[i].encode(), ParserMatch(MatchElement('/', var1[i], var1[i].encode(), children)), t,
+        for i, val in enumerate(var1):
+            children = [MatchElement('2', var2[i].encode(), var2[i].encode(), None),
+                        MatchElement('3', var3[i].encode(), var3[i].encode(), None),
+                        MatchElement('4', var4[i].encode(), var4[i].encode(), None)]
+            log_atom = LogAtom(val.encode(), ParserMatch(MatchElement('/', val.encode(), val.encode(), children)), t,
                                self.__class__.__name__)
             etd.receive_atom(log_atom)
         vcd_union.init_cor(0)
@@ -320,18 +321,18 @@ class VariableCorrelationDetectorTest(TestBase):
         for i in range(self.dataset_size // 2):
             stat_data = bytes(str((i % 10) * 1), 'utf-8')
             values1.append(float(stat_data))
-            children = [MatchElement(str(0), stat_data.decode(), stat_data, None)]
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', bytes(str((i % 10) * 1), 'utf-8').decode(),
-                               bytes(str((i % 10) * 1), 'utf-8'), children)), t, self.__class__.__name__)
+            children = [MatchElement(str(0), stat_data, stat_data, None)]
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', str((i % 10) * 1).encode(), str((i % 10) * 1).encode(), children)),
+                               t, self.__class__.__name__)
             etd.receive_atom(log_atom)
         values2 = []
         # generate the second half of the data with child elements being (i % 10) * 2.
         for i in range(self.dataset_size // 2):
             stat_data = bytes(str((i % 10) * 2), 'utf-8')
             values2.append(float(stat_data))
-            children = [MatchElement(str(0), stat_data.decode(), stat_data, None)]
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', bytes(str((i % 10) * 1), 'utf-8').decode(),
-                               bytes(str((i % 10) * 1), 'utf-8'), children)), t, self.__class__.__name__)
+            children = [MatchElement(str(0), stat_data, stat_data, None)]
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', str((i % 10) * 1).encode(), str((i % 10) * 1).encode(), children)),
+                               t, self.__class__.__name__)
             etd.receive_atom(log_atom)
         vcd.init_cor(0)
         values_set = list(set(values1 + values2))
@@ -351,7 +352,7 @@ class VariableCorrelationDetectorTest(TestBase):
         for rel in rel_list[0]:
             for r in rel:
                 step = 2
-                for i in range(len(r)):
+                for i in range(len(r)):  # skipcq: PTC-W0060
                     key = (i % 20 >= 10)*10 + ((i % 10) * step)
                     # search for the key k in the relation r or convert key to float if applicable.
                     for k in r:
@@ -389,7 +390,7 @@ class VariableCorrelationDetectorTest(TestBase):
                     cnt_half += 1
                 else:
                     cnt_double += 1
-                for i in range(len(r)):
+                for i in range(len(r)):  # skipcq: PTC-W0060
                     key = (i % 20 >= 10)*10 + ((i % 10) * step)
                     value = r[key]
                     # there is no difference between the first half and the second half of the data, when value = 0.
@@ -437,10 +438,9 @@ class VariableCorrelationDetectorTest(TestBase):
             vcd.validate_cor_cover_vals_thres = h*0.1
             # init and validate. This is needed as the ETD also needs to be initialized.
             for i in range(self.dataset_size):
-                stat_data = bytes(str((i % 10)), 'utf-8')
-                children = [MatchElement(str(0), stat_data.decode(), stat_data, None)]
-                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', stat_data.decode(), stat_data, children)), t,
-                                   self.__class__.__name__)
+                stat_data = str((i % 10)).encode()
+                children = [MatchElement(str(0), stat_data, stat_data, None)]
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', stat_data, stat_data, children)), t, self.__class__.__name__)
                 etd.receive_atom(log_atom)
             vcd.init_cor(0)
             vcd.rel_list = [[[{9.0: {9.0: 26}, 16.0: {16.0: 13}}, {9.0: {9.0: 26}, 16.0: {16.0: 13}}]]]
@@ -451,7 +451,7 @@ class VariableCorrelationDetectorTest(TestBase):
             vcd.validate_cor()
             self.assertEqual(len(old_rel_list), len(vcd.rel_list[0]))
             self.assertEqual(len(old_w_rel_list), len(vcd.w_rel_list[0]))
-            for i in range(len(vcd.rel_list[0])):
+            for i, rel in enumerate(vcd.rel_list[0]):
                 for r in old_rel_list[i]:
                     cnt = 0
                     for key in r:
@@ -460,12 +460,12 @@ class VariableCorrelationDetectorTest(TestBase):
                     # when the count is smaller than validate_cor_cover_vals_thres in percent, then there should not be any correlations.
                     # h must be multiplied by 10 as it represents 10% steps.
                     if cnt < h * 10:
-                        for val in vcd.rel_list[0][i]:
+                        for val in rel:
                             self.assertEqual({}, val)
                     else:
                         self.assertEqual(vcd.rel_list[0], old_rel_list)
 
-            for i in range(len(vcd.w_rel_list[0])):
+            for i, rel in enumerate(vcd.w_rel_list[0]):
                 for r in old_w_rel_list[i]:
                     cnt = 0
                     for key in r:
@@ -474,7 +474,7 @@ class VariableCorrelationDetectorTest(TestBase):
                     # when the count is smaller than validate_cor_cover_vals_thres in percent, then there should not be any correlations.
                     # h must be multiplied by 10 as it represents 10% steps.
                     if cnt < h * 10:
-                        for val in vcd.w_rel_list[0][i]:
+                        for val in rel:
                             self.assertEqual({}, val)
                     else:
                         self.assertEqual(vcd.w_rel_list[0], old_w_rel_list)
@@ -501,10 +501,10 @@ class VariableCorrelationDetectorTest(TestBase):
         unsimilar_data3 = ['a']*25 + ['b']*15 + ['c']*50 + ['d']*10
 
         for i in range(self.dataset_size):
-            children = [MatchElement(str(1), similar_data2[i], bytes(similar_data2[i], 'utf-8'), None),
-                        MatchElement(str(2), similar_data3[i], bytes(similar_data3[i], 'utf-8'), None)]
-            log_atom = LogAtom(similar_data1, ParserMatch(MatchElement('/', similar_data1[i],
-                               bytes(similar_data1[i], 'utf-8'), children)), t, self.__class__.__name__)
+            children = [MatchElement(str(1), similar_data2[i].encode(), similar_data2[i].encode(), None),
+                        MatchElement(str(2), similar_data3[i].encode(), similar_data3[i].encode(), None)]
+            log_atom = LogAtom(similar_data1, ParserMatch(MatchElement(
+                '/', similar_data1[i].encode(), similar_data1[i].encode(), children)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)
         vcd.init_cor(0)
         old_w_rel_list = deepcopy(vcd.w_rel_list[0])
@@ -520,10 +520,10 @@ class VariableCorrelationDetectorTest(TestBase):
         for w_rel in vcd.w_rel_list[0]:
             for cor in w_rel:
                 deleted = False
-                for i in range(len(expected_similar_correlations)):
-                    if cor in expected_similar_correlations[i]:
-                        index = expected_similar_correlations[i].index(cor)
-                        del expected_similar_correlations[i][index]
+                for expected_similar_correlation in expected_similar_correlations:
+                    if cor in expected_similar_correlation:
+                        index = expected_similar_correlation.index(cor)
+                        del expected_similar_correlation[index]
                         deleted = True
                         break
                 # if the correlation was not deleted an error is raised and the test fails.
@@ -533,15 +533,15 @@ class VariableCorrelationDetectorTest(TestBase):
 
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size, div_thres=0.1,
-                                   test_ks_int=True, sim_thres=0.1, ks_alpha=self.significance_niveau)
+                                   test_gof_int=True, sim_thres=0.1, gof_alpha=self.significance_niveau)
         vcd = VariableCorrelationDetector(
             self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_validate_cor_meth=['distinctDistr'],
             validate_cor_distinct_thres=0.05, num_init=self.dataset_size)
         for i in range(self.dataset_size):
-            children = [MatchElement(str(1), unsimilar_data2[i], bytes(unsimilar_data2[i], 'utf-8'), None),
-                        MatchElement(str(2), unsimilar_data3[i], bytes(unsimilar_data3[i], 'utf-8'), None)]
-            log_atom = LogAtom(unsimilar_data1[i], ParserMatch(MatchElement('/', unsimilar_data1[i],
-                               bytes(unsimilar_data1[i], 'utf-8'), children)), t, self.__class__.__name__)
+            children = [MatchElement(str(1), unsimilar_data2[i].encode(), unsimilar_data2[i].encode(), None),
+                        MatchElement(str(2), unsimilar_data3[i].encode(), unsimilar_data3[i].encode(), None)]
+            log_atom = LogAtom(unsimilar_data1[i], ParserMatch(MatchElement(
+                '/', unsimilar_data1[i].encode(), unsimilar_data1[i].encode(), children)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)
             vtd.receive_atom(log_atom)
         vcd.init_cor(0)
@@ -556,10 +556,10 @@ class VariableCorrelationDetectorTest(TestBase):
         for w_rel in vcd.w_rel_list[0]:
             for cor in w_rel:
                 deleted = False
-                for i in range(len(expected_unsimilar_correlations)):
-                    if cor in expected_unsimilar_correlations[i]:
-                        index = expected_unsimilar_correlations[i].index(cor)
-                        del expected_unsimilar_correlations[i][index]
+                for expected_unsimilar_correlation in expected_unsimilar_correlations:
+                    if cor in expected_unsimilar_correlation:
+                        index = expected_unsimilar_correlation.index(cor)
+                        del expected_unsimilar_correlation[index]
                         deleted = True
                         break
                 # if the correlation was not deleted an error is raised and the test fails.
@@ -678,8 +678,8 @@ class VariableCorrelationDetectorTest(TestBase):
         for i in range(self.dataset_size):
             stat_data = bytes(str((i % 10) * 1), 'utf-8')
             values.append(float(stat_data))
-            children = [MatchElement(str(0), stat_data.decode(), stat_data, None)]
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', stat_data.decode(), stat_data, children)), t,
+            children = [MatchElement(str(0), stat_data, stat_data, None)]
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', stat_data, stat_data, children)), t,
                                self.__class__.__name__)
             etd.receive_atom(log_atom)
         vcd.init_cor(0)
@@ -696,10 +696,9 @@ class VariableCorrelationDetectorTest(TestBase):
         for i in range(self.dataset_size):
             stat_data = bytes(str((i % 10) * 2 + offset), 'utf-8')
             values.append(float(stat_data))
-            children = [MatchElement(str(0), stat_data.decode(), stat_data, None)]
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(
-                '/', bytes(str((i % 10) * 2), 'utf-8').decode(), bytes(str((i % 10) * 2), 'utf-8'), children)), t,
-                self.__class__.__name__)
+            children = [MatchElement(str(0), stat_data, stat_data, None)]
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', str((i % 10) * 2).encode(), str((i % 10) * 2).encode(), children)),
+                               t, self.__class__.__name__)
             etd.receive_atom(log_atom)
         vcd.log_atom = log_atom
         vcd.update_rules[0] = update_rules
@@ -835,16 +834,16 @@ class VariableCorrelationDetectorTest(TestBase):
         for i in range(70):
             stat_data = bytes(str((i % 10) * 1), 'utf-8')
             values.append(float(stat_data))
-            children = [MatchElement(str(0), stat_data.decode(), stat_data, None)]
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', stat_data.decode(), stat_data, children)), t,
+            children = [MatchElement(str(0), stat_data, stat_data, None)]
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', stat_data, stat_data, children)), t,
                                self.__class__.__name__)
             etd.receive_atom(log_atom)
         for i in range(30):
             stat_data = bytes(str((i % 10) * 2), 'utf-8')
             values.append(float(stat_data))
-            children = [MatchElement(str(0), stat_data.decode(), stat_data, None)]
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', bytes(
-                str((i % 10) * 1), 'utf-8').decode(), bytes(str((i % 10) * 1), 'utf-8'), children)), t, self.__class__.__name__)
+            children = [MatchElement(str(0), stat_data, stat_data, None)]
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', str((i % 10) * 1).encode(), str((i % 10) * 1).encode(), children)),
+                               t, self.__class__.__name__)
             etd.receive_atom(log_atom)
         vcd.init_cor(0)
         old_w_rel_list = deepcopy(vcd.w_rel_list[0])
@@ -867,16 +866,16 @@ class VariableCorrelationDetectorTest(TestBase):
         for i in range(80):
             stat_data = bytes(str((i % 10) * 1 + offset), 'utf-8')
             values.append(float(stat_data))
-            children = [MatchElement(str(0), stat_data.decode(), stat_data, None)]
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', stat_data.decode(), stat_data, children)), t,
+            children = [MatchElement(str(0), stat_data, stat_data, None)]
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', stat_data, stat_data, children)), t,
                                self.__class__.__name__)
             etd.receive_atom(log_atom)
         for i in range(20):
             stat_data = bytes(str((i % 10) * 2 + offset), 'utf-8')
             values.append(float(stat_data))
-            children = [MatchElement(str(0), stat_data.decode(), stat_data, None)]
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', bytes(
-                str((i % 10) * 1), 'utf-8').decode(), bytes(str((i % 10) * 1), 'utf-8'), children)), t, self.__class__.__name__)
+            children = [MatchElement(str(0), stat_data, stat_data, None)]
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', str((i % 10) * 1).encode(), str((i % 10) * 1).encode(), children)),
+                               t, self.__class__.__name__)
             etd.receive_atom(log_atom)
         vcd.log_atom = log_atom
         vcd.update_rules[0] = update_rules
@@ -896,9 +895,9 @@ class VariableCorrelationDetectorTest(TestBase):
         for i in range(self.dataset_size):
             stat_data = bytes(str((i % 10) * 0.1), 'utf-8')
             values.append(float(stat_data))
-            children = [MatchElement(str(0), stat_data.decode(), stat_data, None)]
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', bytes(str((i % 10) * 0.1), 'utf-8').decode(), bytes(
-                str((i % 10) * 0.1), 'utf-8'), children)), t, self.__class__.__name__)
+            children = [MatchElement(str(0), stat_data, stat_data, None)]
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(
+                '/', str((i % 10) * 0.1).encode(), str((i % 10) * 0.1).encode(), children)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)
             vcd.receive_atom(log_atom)
             if i < self.dataset_size - 1:
@@ -920,9 +919,9 @@ class VariableCorrelationDetectorTest(TestBase):
         for i in range(self.dataset_size):
             stat_data = bytes(str((i % 10) * 1), 'utf-8')
             values.append(float(stat_data))
-            children = [MatchElement(str(0), stat_data.decode(), stat_data, None)]
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', bytes(str((i % 10) * 1), 'utf-8').decode(), bytes(
-                str((i % 10) * 1), 'utf-8'), children)), t, self.__class__.__name__)
+            children = [MatchElement(str(0), stat_data, stat_data, None)]
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', str((i % 10) * 1).encode(), str((i % 10) * 1).encode(), children)),
+                               t, self.__class__.__name__)
             etd.receive_atom(log_atom)
             vcd.receive_atom(log_atom)
             if i < self.dataset_size - 1:

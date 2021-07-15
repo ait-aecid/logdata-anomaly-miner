@@ -13,6 +13,8 @@ import random
 class VariableTypeDetectorTest(TestBase):
     """Unittests for the VariableTypeDetector."""
 
+    path = "path"
+
     def test1convert_to_floats(self):
         """This unittest tests possible inputs of the convert_to_floats function."""
         # use a list full of floats
@@ -67,129 +69,209 @@ class VariableTypeDetectorTest(TestBase):
 
         # load data
         with open('unit/data/vtd_data/uni_data_test3', 'rb') as f:
-            [uni_data_list, uni_result_shapes] = pickle.load(f)  # skipcq: BAN-B301
+            [uni_data_list, uni_result_shapes_ks, uni_result_shapes_cm] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/nor_data_test3', 'rb') as f:
-            [nor_data_list, nor_result_shapes] = pickle.load(f)  # skipcq: BAN-B301
+            [nor_data_list, nor_result_shapes_ks, nor_result_shapes_cm] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta1_data_test3', 'rb') as f:
-            [beta1_data_list, beta1_result_shapes] = pickle.load(f)  # skipcq: BAN-B301
+            [beta1_data_list, beta1_result_shapes_ks, beta1_result_shapes_cm] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta2_data_test3', 'rb') as f:
-            [beta2_data_list, beta2_result_shapes] = pickle.load(f)  # skipcq: BAN-B301
+            [beta2_data_list, beta2_result_shapes_ks, beta2_result_shapes_cm] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta3_data_test3', 'rb') as f:
-            [beta3_data_list, beta3_result_shapes] = pickle.load(f)  # skipcq: BAN-B301
+            [beta3_data_list, beta3_result_shapes_ks, beta3_result_shapes_cm] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta4_data_test3', 'rb') as f:
-            [beta4_data_list, beta4_result_shapes] = pickle.load(f)  # skipcq: BAN-B301
+            [beta4_data_list, beta4_result_shapes_ks, beta4_result_shapes_cm] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta5_data_test3', 'rb') as f:
-            [beta5_data_list, beta5_result_shapes] = pickle.load(f)  # skipcq: BAN-B301
+            [beta5_data_list, beta5_result_shapes_ks, beta5_result_shapes_cm] = pickle.load(f)  # skipcq: BAN-B301
 
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=dataset_size,
-                                   div_thres=0.5, test_ks_int=True, sim_thres=0.3, ks_alpha=significance_niveau)
+        vtd_ks = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=dataset_size,
+                                      div_thres=0.5, test_gof_int=True, sim_thres=0.3, gof_alpha=significance_niveau,
+                                      used_gof_test='KS')
+        vtd_cm = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=dataset_size,
+                                      div_thres=0.5, test_gof_int=True, sim_thres=0.3, gof_alpha=significance_niveau,
+                                      used_gof_test='CM')
 
-        result_list = []  # List of the results of the single tests
+        result_list_ks = []  # List of the results of the single tests
+        result_list_cm = []  # List of the results of the single tests
         for i in range(iterations):
-            distribution_list = vtd.detect_continuous_shape(uni_data_list[i * dataset_size:(i + 1) * dataset_size])
+            distribution_list = vtd_ks.detect_continuous_shape(uni_data_list[i * dataset_size:(i + 1) * dataset_size])
 
             # Add if the searched distribution is present in the found distributions
             if distribution_list[0] == 'uni' or 'uni' in [distr[0] for distr in distribution_list[-1]]:
-                result_list.append(1)
+                result_list_ks.append(1)
             else:
-                result_list.append(0)
+                result_list_ks.append(0)
+
+            distribution_list = vtd_cm.detect_continuous_shape(uni_data_list[i * dataset_size:(i + 1) * dataset_size])
+
+            # Add if the searched distribution is present in the found distributions
+            if distribution_list[0] == 'uni' or 'uni' in [distr[0] for distr in distribution_list[-1]]:
+                result_list_cm.append(1)
+            else:
+                result_list_cm.append(0)
 
         # Test if the result list is correct
-        self.assertTrue(result_list == uni_result_shapes)
+        self.assertTrue(result_list_ks == uni_result_shapes_ks)
+        self.assertTrue(result_list_cm == uni_result_shapes_cm)
 
-        result_list = []  # List of the results of the single tests
+        result_list_ks = []  # List of the results of the single tests
+        result_list_cm = []  # List of the results of the single tests
         for i in range(iterations):
-            distribution_list = vtd.detect_continuous_shape(nor_data_list[i * dataset_size:(i + 1) * dataset_size])
+            distribution_list = vtd_ks.detect_continuous_shape(nor_data_list[i * dataset_size:(i + 1) * dataset_size])
 
             # Add if the searched distribution is present in the found distributions
             if distribution_list[0] == 'nor' or 'nor' in [distr[0] for distr in distribution_list[-1]]:
-                result_list.append(1)
+                result_list_ks.append(1)
             else:
-                result_list.append(0)
+                result_list_ks.append(0)
 
-        # Test if the result list is correct
-        self.assertTrue(result_list == nor_result_shapes)
-
-        result_list = []  # List of the results of the single tests
-        for i in range(iterations):
-            distribution_list = vtd.detect_continuous_shape(beta1_data_list[i * dataset_size:(i + 1) * dataset_size])
+            distribution_list = vtd_cm.detect_continuous_shape(nor_data_list[i * dataset_size:(i + 1) * dataset_size])
 
             # Add if the searched distribution is present in the found distributions
-            if (distribution_list[0] == 'beta' and distribution_list[-1] == 1) or 'beta1' in [
-                    distr[0]+str(distr[-1]) for distr in distribution_list[-1]]:
-                result_list.append(1)
+            if distribution_list[0] == 'nor' or 'nor' in [distr[0] for distr in distribution_list[-1]]:
+                result_list_cm.append(1)
             else:
-                result_list.append(0)
+                result_list_cm.append(0)
 
         # Test if the result list is correct
-        self.assertTrue(result_list == beta1_result_shapes)
+        self.assertTrue(result_list_ks == nor_result_shapes_ks)
+        self.assertTrue(result_list_cm == nor_result_shapes_cm)
 
-        result_list = []  # List of the results of the single tests
+        result_list_ks = []  # List of the results of the single tests
+        result_list_cm = []  # List of the results of the single tests
         for i in range(iterations):
-            distribution_list = vtd.detect_continuous_shape(beta2_data_list[i * dataset_size:(i + 1) * dataset_size])
+            distribution_list = vtd_ks.detect_continuous_shape(beta1_data_list[i * dataset_size:(i + 1) * dataset_size])
 
             # Add if the searched distribution is present in the found distributions
-            if (distribution_list[0] == 'beta' and distribution_list[-1] == 2) or 'beta2' in [
+            if (distribution_list[0] == 'beta' and distribution_list[-2] == 1) or 'beta1' in [
                     distr[0]+str(distr[-1]) for distr in distribution_list[-1]]:
-                result_list.append(1)
+                result_list_ks.append(1)
             else:
-                result_list.append(0)
+                result_list_ks.append(0)
 
-        # Test if the result list is correct
-        self.assertTrue(result_list == beta2_result_shapes)
-
-        result_list = []  # List of the results of the single tests
-        for i in range(iterations):
-            distribution_list = vtd.detect_continuous_shape(beta3_data_list[i * dataset_size:(i + 1) * dataset_size])
+            distribution_list = vtd_cm.detect_continuous_shape(beta1_data_list[i * dataset_size:(i + 1) * dataset_size])
 
             # Add if the searched distribution is present in the found distributions
-            if (distribution_list[0] == 'beta' and distribution_list[-1] == 3) or 'beta3' in [
+            if (distribution_list[0] == 'beta' and distribution_list[-2] == 1) or 'beta1' in [
                     distr[0]+str(distr[-1]) for distr in distribution_list[-1]]:
-                result_list.append(1)
+                result_list_cm.append(1)
             else:
-                result_list.append(0)
+                result_list_cm.append(0)
 
         # Test if the result list is correct
-        self.assertTrue(result_list == beta3_result_shapes)
+        self.assertTrue(result_list_ks == beta1_result_shapes_ks)
+        self.assertTrue(result_list_cm == beta1_result_shapes_cm)
 
-        result_list = []  # List of the results of the single tests
+        result_list_ks = []  # List of the results of the single tests
+        result_list_cm = []  # List of the results of the single tests
         for i in range(iterations):
-            distribution_list = vtd.detect_continuous_shape(beta4_data_list[i * dataset_size:(i + 1) * dataset_size])
+            distribution_list = vtd_ks.detect_continuous_shape(beta2_data_list[i * dataset_size:(i + 1) * dataset_size])
 
             # Add if the searched distribution is present in the found distributions
-            if (distribution_list[0] == 'beta' and distribution_list[-1] == 4) or 'beta4' in [
+            if (distribution_list[0] == 'beta' and distribution_list[-2] == 2) or 'beta2' in [
                     distr[0]+str(distr[-1]) for distr in distribution_list[-1]]:
-                result_list.append(1)
+                result_list_ks.append(1)
             else:
-                result_list.append(0)
+                result_list_ks.append(0)
 
-        # Test if the result list is correct
-        self.assertTrue(result_list == beta4_result_shapes)
-
-        result_list = []  # List of the results of the single tests
-        for i in range(iterations):
-            distribution_list = vtd.detect_continuous_shape(beta5_data_list[i * dataset_size:(i + 1) * dataset_size])
+            distribution_list = vtd_cm.detect_continuous_shape(beta2_data_list[i * dataset_size:(i + 1) * dataset_size])
 
             # Add if the searched distribution is present in the found distributions
-            if (distribution_list[0] == 'beta' and distribution_list[-1] == 5) or 'beta5' in [
+            if (distribution_list[0] == 'beta' and distribution_list[-2] == 2) or 'beta2' in [
                     distr[0]+str(distr[-1]) for distr in distribution_list[-1]]:
-                result_list.append(1)
+                result_list_cm.append(1)
             else:
-                result_list.append(0)
+                result_list_cm.append(0)
 
         # Test if the result list is correct
-        self.assertTrue(result_list == beta5_result_shapes)
+        self.assertTrue(result_list_ks == beta2_result_shapes_ks)
+        self.assertTrue(result_list_cm == beta2_result_shapes_cm)
+
+        result_list_ks = []  # List of the results of the single tests
+        result_list_cm = []  # List of the results of the single tests
+        for i in range(iterations):
+            distribution_list = vtd_ks.detect_continuous_shape(beta3_data_list[i * dataset_size:(i + 1) * dataset_size])
+
+            # Add if the searched distribution is present in the found distributions
+            if (distribution_list[0] == 'beta' and distribution_list[-2] == 3) or 'beta3' in [
+                    distr[0]+str(distr[-1]) for distr in distribution_list[-1]]:
+                result_list_ks.append(1)
+            else:
+                result_list_ks.append(0)
+
+            distribution_list = vtd_cm.detect_continuous_shape(beta3_data_list[i * dataset_size:(i + 1) * dataset_size])
+
+            # Add if the searched distribution is present in the found distributions
+            if (distribution_list[0] == 'beta' and distribution_list[-2] == 3) or 'beta3' in [
+                    distr[0]+str(distr[-1]) for distr in distribution_list[-1]]:
+                result_list_cm.append(1)
+            else:
+                result_list_cm.append(0)
+
+        # Test if the result list is correct
+        self.assertTrue(result_list_ks == beta3_result_shapes_ks)
+        self.assertTrue(result_list_cm == beta3_result_shapes_cm)
+
+        result_list_ks = []  # List of the results of the single tests
+        result_list_cm = []  # List of the results of the single tests
+        for i in range(iterations):
+            distribution_list = vtd_ks.detect_continuous_shape(beta4_data_list[i * dataset_size:(i + 1) * dataset_size])
+
+            # Add if the searched distribution is present in the found distributions
+            if (distribution_list[0] == 'beta' and distribution_list[-2] == 4) or 'beta4' in [
+                    distr[0]+str(distr[-1]) for distr in distribution_list[-1]]:
+                result_list_ks.append(1)
+            else:
+                result_list_ks.append(0)
+
+            distribution_list = vtd_cm.detect_continuous_shape(beta4_data_list[i * dataset_size:(i + 1) * dataset_size])
+
+            # Add if the searched distribution is present in the found distributions
+            if (distribution_list[0] == 'beta' and distribution_list[-2] == 4) or 'beta4' in [
+                    distr[0]+str(distr[-1]) for distr in distribution_list[-1]]:
+                result_list_cm.append(1)
+            else:
+                result_list_cm.append(0)
+
+        # Test if the result list is correct
+        self.assertTrue(result_list_ks == beta4_result_shapes_ks)
+        self.assertTrue(result_list_cm == beta4_result_shapes_cm)
+
+        result_list_ks = []  # List of the results of the single tests
+        result_list_cm = []  # List of the results of the single tests
+        for i in range(iterations):
+            distribution_list = vtd_ks.detect_continuous_shape(beta5_data_list[i * dataset_size:(i + 1) * dataset_size])
+
+            # Add if the searched distribution is present in the found distributions
+            if (distribution_list[0] == 'beta' and distribution_list[-2] == 5) or 'beta5' in [
+                    distr[0]+str(distr[-1]) for distr in distribution_list[-1]]:
+                result_list_ks.append(1)
+            else:
+                result_list_ks.append(0)
+
+            distribution_list = vtd_cm.detect_continuous_shape(beta5_data_list[i * dataset_size:(i + 1) * dataset_size])
+
+            # Add if the searched distribution is present in the found distributions
+            if (distribution_list[0] == 'beta' and distribution_list[-2] == 5) or 'beta5' in [
+                    distr[0]+str(distr[-1]) for distr in distribution_list[-1]]:
+                result_list_cm.append(1)
+            else:
+                result_list_cm.append(0)
+
+        # Test if the result list is correct
+        self.assertTrue(result_list_ks == beta5_result_shapes_ks)
+        self.assertTrue(result_list_cm == beta5_result_shapes_cm)
 
     def test4detect_var_type(self):
         """This unittest tests possible scenarios of the detect_var_type method."""
         num_init = 100
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=num_init)
+        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=num_init,
+                                   used_gof_test='KS')
         t = time.time()
         # test the 'static' path of detect_var_type
         stat_data = b'5.3.0-55-generic'
-        log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+        log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
         # check what happens if less than numMinAppearance values are available
         for i in range(num_init):
             self.assertTrue(etd.receive_atom(log_atom))
@@ -198,48 +280,52 @@ class VariableTypeDetectorTest(TestBase):
 
         # reset etd and vtd for clear results.
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=num_init)
+        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=num_init,
+                                   used_gof_test='KS')
 
         # test ascending with float values
         for i in range(num_init):
             stat_data = bytes(str(i * 0.1), 'utf-8')
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
             self.assertTrue(etd.receive_atom(log_atom))
         result = vtd.detect_var_type(0, 0)
         self.assertEqual(['asc', 'float'], result)
 
         # reset etd and vtd for clear results.
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=num_init)
+        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=num_init,
+                                   used_gof_test='KS')
 
         # test ascending with integer values
         for i in range(num_init):
             stat_data = bytes(str(i), 'utf-8')
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
             self.assertTrue(etd.receive_atom(log_atom))
         result = vtd.detect_var_type(0, 0)
         self.assertEqual(['asc', 'int'], result)
 
         # reset etd and vtd for clear results.
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=num_init)
+        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=num_init,
+                                   used_gof_test='KS')
 
         # test descending with float values
         for i in range(num_init, 0, -1):
             stat_data = bytes(str(i * 0.1), 'utf-8')
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
             self.assertTrue(etd.receive_atom(log_atom))
         result = vtd.detect_var_type(0, 0)
         self.assertEqual(['desc', 'float'], result)
 
         # reset etd and vtd for clear results.
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=num_init)
+        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=num_init,
+                                   used_gof_test='KS')
 
         # test descending with integer values
         for i in range(num_init, 0, -1):
             stat_data = bytes(str(i), 'utf-8')
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
             self.assertTrue(etd.receive_atom(log_atom))
         result = vtd.detect_var_type(0, 0)
         self.assertEqual(['desc', 'int'], result)
@@ -247,18 +333,18 @@ class VariableTypeDetectorTest(TestBase):
         # reset etd and vtd for clear results.
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=num_init, div_thres=0.3,
-                                   test_ks_int=True)
+                                   test_gof_int=True, used_gof_test='KS')
 
         # test 'num_init' and 'div_thres'
         # prevent results from becoming asc or desc
         stat_data = bytes(str(99), 'utf-8')
-        log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+        log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
         etd.receive_atom(log_atom)
         values = [float(stat_data)]
         for i in range(99):
             stat_data = bytes(str(i), 'utf-8')
             values.append(float(stat_data))
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
             self.assertTrue(etd.receive_atom(log_atom))
         result = vtd.detect_var_type(0, 0)
         # this means that the uniformal distribution must be detected.
@@ -266,24 +352,24 @@ class VariableTypeDetectorTest(TestBase):
 
         # test 'divThres' option for the continuous distribution
         vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=num_init, div_thres=1.0,
-                                   test_ks_int=True)
+                                   test_gof_int=True, used_gof_test='KS')
         result = vtd.detect_var_type(0, 0)
         self.assertEqual(['unq', values], result)
 
         # test 'testInt' option for the continuous distribution
         vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=num_init, div_thres=0.3,
-                                   test_ks_int=False)
+                                   test_gof_int=False, used_gof_test='KS')
         result = vtd.detect_var_type(0, 0)
         self.assertEqual(['unq', values], result)
 
         # test 'simThres' option to result in 'others'
         vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=num_init, div_thres=0.5,
-                                   test_ks_int=False, sim_thres=0.5)
+                                   test_gof_int=False, sim_thres=0.5, used_gof_test='KS')
         values = []
         for i in range(100):
             stat_data = bytes(str((i % 50) * 0.1), 'utf-8')
             values.append(float(stat_data))
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
             self.assertTrue(etd.receive_atom(log_atom))
         result = vtd.detect_var_type(0, 0)
         # at least (1 - 'simThresh') * 'numMinAppearance' and maximal 'numMinAppearance' * 'divThres' - 1 unique values must exist.
@@ -291,12 +377,12 @@ class VariableTypeDetectorTest(TestBase):
 
         # test discrete result
         vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=num_init, div_thres=0.5,
-                                   test_ks_int=False, sim_thres=0.3)
+                                   test_gof_int=False, sim_thres=0.3, used_gof_test='KS')
         values = []
         for i in range(num_init):
             stat_data = bytes(str((i % 50) * 0.1), 'utf-8')
             values.append(float(stat_data))
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
             self.assertTrue(etd.receive_atom(log_atom))
         result = vtd.detect_var_type(0, 0)
         values_set = list(set(values))
@@ -330,25 +416,22 @@ class VariableTypeDetectorTest(TestBase):
         Therefore the assumption that after 200 values the VTD with the default parameters can change to the right distribution.
         """
         # load data
-        with open('unit/data/vtd_data/uni_data_test6', 'rb') as f:
-            uni_data_list = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/nor_data_test6', 'rb') as f:
             nor_data_list = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta1_data_test6', 'rb') as f:
             beta1_data_list = pickle.load(f)  # skipcq: BAN-B301
 
-        uni_data_list = uni_data_list*10
         nor_data_list = nor_data_list*10
         beta1_data_list = beta1_data_list*10
-        vtd_arguments = [(100, 50), (110, 55), (90, 45), (80, 40), (70, 35)]
+        vtd_arguments = [(50, 30), (75, 50), (100, 50), (100, 75), (100, 100)]
 
         for init, update in vtd_arguments:
             etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
             vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=init, num_update=update,
-                                       div_thres=0.8, sim_thres=0.3, num_pause_others=0)
+                                       num_s_gof_values=update, div_thres=0.45, sim_thres=0.75, num_pause_others=0)
             t = time.time()
             stat_data = b'True'
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
             # initialize data
             for i in range(init):
                 self.assertTrue(etd.receive_atom(log_atom))
@@ -364,8 +447,9 @@ class VariableTypeDetectorTest(TestBase):
             self.assertEqual(['stat', [stat_data.decode()], True], result, (init, update, result))
 
             # static -> uni
-            for uni_data in uni_data_list[:init]:
-                log_atom = LogAtom(uni_data, ParserMatch(MatchElement('', uni_data, str(uni_data), None)), t, self.__class__.__name__)
+            for uni_data in [((i+1) % update) / update for i in range(2*update)]:
+                log_atom = LogAtom(uni_data, ParserMatch(MatchElement(self.path, str(uni_data).encode(), str(uni_data), None)), t,
+                                   self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -374,9 +458,8 @@ class VariableTypeDetectorTest(TestBase):
 
             # uni -> others
             for i in range(update):
-                stat_data = bytes(str((i % 75) * 0.1), 'utf-8')
-                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
-                                   self.__class__.__name__)
+                stat_data = bytes(str((i % int(update / 5))), 'utf-8')
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -384,9 +467,8 @@ class VariableTypeDetectorTest(TestBase):
 
             # others -> d
             for i in range(update):
-                stat_data = bytes(str((i % 10) * 0.1), 'utf-8')
-                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
-                                   self.__class__.__name__)
+                stat_data = bytes(str((i % int(update / 5))), 'utf-8')
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -395,21 +477,21 @@ class VariableTypeDetectorTest(TestBase):
             # reset all
             etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
             vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=init, num_update=update,
-                                       div_thres=0.3, sim_thres=0.5, num_pause_others=0, num_d_bt=30)
+                                       num_s_gof_values=update, div_thres=0.45, sim_thres=0.75, num_pause_others=0, num_d_bt=30)
 
             # initialize with d
             for i in range(init):
-                stat_data = bytes(str((i % 10) * 0.1), 'utf-8')
-                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
-                                   self.__class__.__name__)
+                stat_data = bytes(str((i % int(update / 5))), 'utf-8')
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
             self.assertEqual('d', result[0], (init, update, result))
 
             # discrete to others with new values
-            for uni_data in uni_data_list[:init]:
-                log_atom = LogAtom(uni_data, ParserMatch(MatchElement('', uni_data, str(uni_data), None)), t, self.__class__.__name__)
+            for uni_data in [i / update for i in range(update)]:
+                log_atom = LogAtom(uni_data, ParserMatch(MatchElement(self.path, str(uni_data).encode(), str(uni_data), None)), t,
+                                   self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -418,13 +500,12 @@ class VariableTypeDetectorTest(TestBase):
             # reset all
             etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
             vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=init, num_update=update,
-                                       div_thres=0.3, sim_thres=0.5, num_pause_others=0, num_d_bt=20)
+                                       num_s_gof_values=update, div_thres=0.45, sim_thres=0.75, num_pause_others=0, num_d_bt=20)
 
             # initialize with d
             for i in range(init):
-                stat_data = bytes(str((i % 10) * 0.1), 'utf-8')
-                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
-                                   self.__class__.__name__)
+                stat_data = bytes(str((i % int(update / 5))), 'utf-8')
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -432,9 +513,8 @@ class VariableTypeDetectorTest(TestBase):
 
             # discrete to others without new values, low num_d_bt
             for i in range(update):
-                stat_data = bytes(str((i % 3) * 0.1), 'utf-8')
-                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
-                                   self.__class__.__name__)
+                stat_data = bytes(str((i % int(update / 20))), 'utf-8')
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -443,13 +523,12 @@ class VariableTypeDetectorTest(TestBase):
             # reset all
             etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
             vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=init, num_update=update,
-                                       div_thres=0.3, sim_thres=0.5, num_pause_others=0, num_d_bt=100)
+                                       num_s_gof_values=update, div_thres=0.45, sim_thres=0.75, num_pause_others=0, num_d_bt=100)
 
             # initialize with d
             for i in range(init):
-                stat_data = bytes(str((i % 10) * 0.1), 'utf-8')
-                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
-                                   self.__class__.__name__)
+                stat_data = bytes(str((i % int(update / 5))), 'utf-8')
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -457,9 +536,8 @@ class VariableTypeDetectorTest(TestBase):
 
             # discrete to others without new values, high num_d_bt
             for i in range(update):
-                stat_data = bytes(str((i % 3) * 0.1), 'utf-8')
-                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
-                                   self.__class__.__name__)
+                stat_data = bytes(str((i % int(update / 20))), 'utf-8')
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -468,10 +546,10 @@ class VariableTypeDetectorTest(TestBase):
             # reset all
             etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
             vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=init, num_update=update,
-                                       div_thres=0.3, sim_thres=0.3, num_pause_others=0)
+                                       num_s_gof_values=update, div_thres=0.45, sim_thres=0.75, num_pause_others=0)
             t = time.time()
             stat_data = b'True'
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
             # initialize data
             for i in range(init):
                 self.assertTrue(etd.receive_atom(log_atom))
@@ -480,20 +558,18 @@ class VariableTypeDetectorTest(TestBase):
             self.assertEqual(['stat', [stat_data.decode()], True], result, (init, update, result))
 
             # static -> asc
-            for i in range(init):
+            for i in range(2*update):
                 stat_data = bytes(str(i * 0.1), 'utf-8')
-                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
-                                   self.__class__.__name__)
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
             self.assertEqual(['asc', 'float'], result, (init, update, result))
 
             # asc -> desc
-            for i in range(init, 0, -1):
+            for i in range(2*update, 0, -1):
                 stat_data = bytes(str(i * 0.1), 'utf-8')
-                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t,
-                                   self.__class__.__name__)
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -502,10 +578,10 @@ class VariableTypeDetectorTest(TestBase):
             # reset all
             etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
             vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=init, num_update=update,
-                                       div_thres=0.3, sim_thres=0.3, num_pause_others=0)
+                                       num_s_gof_values=update, div_thres=0.45, sim_thres=0.75, num_pause_others=0)
             t = time.time()
             stat_data = b'True'
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
             # initialize data
             for i in range(init):
                 self.assertTrue(etd.receive_atom(log_atom))
@@ -514,8 +590,9 @@ class VariableTypeDetectorTest(TestBase):
             self.assertEqual(['stat', [stat_data.decode()], True], result, (init, update, result))
 
             # static -> nor
-            for nor_data in nor_data_list[:init]:
-                log_atom = LogAtom(nor_data, ParserMatch(MatchElement('', nor_data, str(nor_data), None)), t, self.__class__.__name__)
+            for nor_data in nor_data_list[:2*update]:
+                log_atom = LogAtom(nor_data, ParserMatch(MatchElement(self.path, str(nor_data).encode(), str(nor_data), None)), t,
+                                   self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -523,8 +600,9 @@ class VariableTypeDetectorTest(TestBase):
             self.assertTrue(result[0] == 'nor' or 'nor' in [distr[0] for distr in pos_distr], (init, update, result))
 
             # nor -> beta1
-            for beta1_data in beta1_data_list[:init]:
-                log_atom = LogAtom(beta1_data, ParserMatch(MatchElement('', beta1_data, str(beta1_data), None)), t, self.__class__.__name__)
+            for beta1_data in beta1_data_list[:2*update]:
+                log_atom = LogAtom(beta1_data, ParserMatch(MatchElement(self.path, str(beta1_data).encode(), str(beta1_data), None)), t,
+                                   self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -535,10 +613,11 @@ class VariableTypeDetectorTest(TestBase):
             # reset all
             etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
             vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=init, num_update=update,
-                                       div_thres=0.3, sim_thres=0.3, num_pause_others=0)
+                                       num_s_gof_values=update, div_thres=0.45, sim_thres=0.75, num_pause_others=0)
             t = time.time()
             stat_data = b'True'
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('', stat_data.decode(), stat_data, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t,
+                               self.__class__.__name__)
             # initialize data
             for i in range(init):
                 self.assertTrue(etd.receive_atom(log_atom))
@@ -547,11 +626,11 @@ class VariableTypeDetectorTest(TestBase):
             self.assertEqual(['stat', [stat_data.decode()], True], result, (init, update, result))
 
             # static -> unq
-            vtd.test_ks_int = False
-            unq_data_list = [bytes(str(i), 'utf-8') for i in range(init)]
+            vtd.test_gof_int = False
+            unq_data_list = [bytes(str(i), 'utf-8') for i in range(2*update)]
             random.shuffle(unq_data_list)
             for unq_data in unq_data_list:
-                log_atom = LogAtom(unq_data, ParserMatch(MatchElement('', unq_data, unq_data, None)), t, self.__class__.__name__)
+                log_atom = LogAtom(unq_data, ParserMatch(MatchElement(self.path, unq_data, unq_data, None)), t, self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -559,7 +638,7 @@ class VariableTypeDetectorTest(TestBase):
 
     def test7update_continuous_VT(self):
         """
-        This unittest tests the s_ks_test method. It uses randomised datasets, which can be printed in the terminal.
+        This unittest tests the s_gof_test method. It uses randomised datasets, which can be printed in the terminal.
         Every distribution has generated 30*300 Datasets and var_ev = 0, var_var = 1.
         """
         # Number of execution of the tested function
@@ -573,191 +652,298 @@ class VariableTypeDetectorTest(TestBase):
 
         # load data
         with open('unit/data/vtd_data/uni_data_test7', 'rb') as f:
-            [uni_data_list_ini, uni_data_list_upd, uni_result_shapes] = pickle.load(f)  # skipcq: BAN-B301
+            [uni_data_list_ini, uni_data_list_upd, uni_result_shapes_ks, uni_result_shapes_cm] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/nor_data_test7', 'rb') as f:
-            [nor_data_list_ini, nor_data_list_upd, nor_result_shapes] = pickle.load(f)  # skipcq: BAN-B301
+            [nor_data_list_ini, nor_data_list_upd, nor_result_shapes_ks, nor_result_shapes_cm] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta1_data_test7', 'rb') as f:
-            [beta1_data_list_ini, beta1_data_list_upd, beta1_result_shapes] = pickle.load(f)  # skipcq: BAN-B301
+            [beta1_data_list_ini, beta1_data_list_upd, beta1_result_shapes_ks, beta1_result_shapes_cm] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta2_data_test7', 'rb') as f:
-            [beta2_data_list_ini, beta2_data_list_upd, beta2_result_shapes] = pickle.load(f)  # skipcq: BAN-B301
+            [beta2_data_list_ini, beta2_data_list_upd, beta2_result_shapes_ks, beta2_result_shapes_cm] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta3_data_test7', 'rb') as f:
-            [beta3_data_list_ini, beta3_data_list_upd, beta3_result_shapes] = pickle.load(f)  # skipcq: BAN-B301
+            [beta3_data_list_ini, beta3_data_list_upd, beta3_result_shapes_ks, beta3_result_shapes_cm] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta4_data_test7', 'rb') as f:
-            [beta4_data_list_ini, beta4_data_list_upd, beta4_result_shapes] = pickle.load(f)  # skipcq: BAN-B301
+            [beta4_data_list_ini, beta4_data_list_upd, beta4_result_shapes_ks, beta4_result_shapes_cm] = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta5_data_test7', 'rb') as f:
-            [beta5_data_list_ini, beta5_data_list_upd, beta5_result_shapes] = pickle.load(f)  # skipcq: BAN-B301
+            [beta5_data_list_ini, beta5_data_list_upd, beta5_result_shapes_ks, beta5_result_shapes_cm] = pickle.load(f)  # skipcq: BAN-B301
 
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=dataset_size_ini,
-                                   num_update=dataset_size_upd, ks_alpha=significance_niveau)
+        vtd_ks = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=dataset_size_ini,
+                                      num_update=dataset_size_upd, gof_alpha=significance_niveau, used_gof_test='KS')
+        vtd_cm = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=dataset_size_ini,
+                                      num_update=dataset_size_upd, gof_alpha=significance_niveau, used_gof_test='CM')
 
-        result_list = []  # List of the results of the single tests
+        result_list_ks = []  # List of the results of the single tests
+        result_list_cm = []  # List of the results of the single tests
         for i in range(iterations):
             # Create the initial distribution, which has to pass the initial test
-            variable_type_ini = vtd.detect_continuous_shape(uni_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
-            while True:
-                if variable_type_ini[0] == 'uni':
-                    if isinstance(variable_type_ini[-1], list):
-                        variable_type_ini = variable_type_ini[:-1]
-                    break
-                if 'uni' in [distr[0] for distr in variable_type_ini[-1]]:
-                    for j in range(len(variable_type_ini[-1])):
-                        if variable_type_ini[-1][j][0] == 'uni':
-                            variable_type_ini = variable_type_ini[-1][j]
-                            break
+            variable_type_ini = vtd_ks.detect_continuous_shape(uni_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
+            if variable_type_ini[0] == 'uni':
+                variable_type_ini = variable_type_ini[:-1]
+            elif 'uni' in [distr[0] for distr in variable_type_ini[-1]]:
+                for distr in variable_type_ini[-1]:
+                    if distr[0] == 'uni':
+                        variable_type_ini = distr
+            else:
+                variable_type_ini = ['others', 0]
 
-            # Test and save the result of the sKS-Test
+            # Test and save the result of the s_gof-Test
             etd.values = [[uni_data_list_upd[i * dataset_size_upd:(i + 1) * dataset_size_upd]]]
-            vtd.var_type = [[variable_type_ini]]
-            result_list.append(vtd.s_ks_test(0, 0, True)[0])
+            vtd_ks.var_type = [[variable_type_ini]]
+            result_list_ks.append(vtd_ks.s_gof_test(0, 0, True)[0])
+
+            variable_type_ini = vtd_cm.detect_continuous_shape(uni_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
+            if variable_type_ini[0] == 'uni':
+                variable_type_ini = variable_type_ini[:-1]
+            elif 'uni' in [distr[0] for distr in variable_type_ini[-1]]:
+                for distr in variable_type_ini[-1]:
+                    if distr[0] == 'uni':
+                        variable_type_ini = distr
+            else:
+                variable_type_ini = ['others', 0]
+
+            # Test and save the result of the s_gof-Test
+            etd.values = [[uni_data_list_upd[i * dataset_size_upd:(i + 1) * dataset_size_upd]]]
+            vtd_cm.var_type = [[variable_type_ini]]
+            result_list_cm.append(vtd_cm.s_gof_test(0, 0, True)[0])
 
         # Test if the result list is correct
-        self.assertTrue(result_list == uni_result_shapes)
+        self.assertTrue(result_list_ks == uni_result_shapes_ks)
+        self.assertTrue(result_list_cm == uni_result_shapes_cm)
 
-        result_list = []  # List of the results of the single tests
+        result_list_ks = []  # List of the results of the single tests
+        result_list_cm = []  # List of the results of the single tests
         for i in range(iterations):
             # Create the initial distribution, which has to pass the initial test
-            variable_type_ini = vtd.detect_continuous_shape(nor_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
-            while True:
-                if variable_type_ini[0] == 'nor':
-                    if isinstance(variable_type_ini[-1], list):
-                        variable_type_ini = variable_type_ini[:-1]
-                    break
-                if 'nor' in [distr[0] for distr in variable_type_ini[-1]]:
-                    for j in range(len(variable_type_ini[-1])):
-                        if variable_type_ini[-1][j][0] == 'nor':
-                            variable_type_ini = variable_type_ini[-1][j]
-                            break
+            variable_type_ini = vtd_ks.detect_continuous_shape(nor_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
+            if variable_type_ini[0] == 'nor':
+                variable_type_ini = variable_type_ini[:-1]
+            elif 'nor' in [distr[0] for distr in variable_type_ini[-1]]:
+                for distr in variable_type_ini[-1]:
+                    if distr[0] == 'nor':
+                        variable_type_ini = distr
+            else:
+                variable_type_ini = ['others', 0]
 
-            # Test and save the result of the sKS-Test
+            # Test and save the result of the s_gof-Test
             etd.values = [[nor_data_list_upd[i * dataset_size_upd:(i + 1) * dataset_size_upd]]]
-            vtd.var_type = [[variable_type_ini]]
-            result_list.append(vtd.s_ks_test(0, 0, True)[0])
+            vtd_ks.var_type = [[variable_type_ini]]
+            result_list_ks.append(vtd_ks.s_gof_test(0, 0, True)[0])
+
+            variable_type_ini = vtd_cm.detect_continuous_shape(nor_data_list_ini[i * dataset_size_ini:(i + 1) * dataset_size_ini])
+            if variable_type_ini[0] == 'nor':
+                variable_type_ini = variable_type_ini[:-1]
+            elif 'nor' in [distr[0] for distr in variable_type_ini[-1]]:
+                for distr in variable_type_ini[-1]:
+                    if distr[0] == 'nor':
+                        variable_type_ini = distr
+            else:
+                variable_type_ini = ['others', 0]
+
+            # Test and save the result of the s_gof-Test
+            etd.values = [[nor_data_list_upd[i * dataset_size_upd:(i + 1) * dataset_size_upd]]]
+            vtd_cm.var_type = [[variable_type_ini]]
+            result_list_cm.append(vtd_cm.s_gof_test(0, 0, True)[0])
 
         # Test if the result list is correct
-        self.assertTrue(result_list == nor_result_shapes)
+        self.assertTrue(result_list_ks == nor_result_shapes_ks)
+        self.assertTrue(result_list_cm == nor_result_shapes_cm)
 
-        result_list = []  # List of the results of the single tests
+        result_list_ks = []  # List of the results of the single tests
+        result_list_cm = []  # List of the results of the single tests
         for i in range(iterations):
             # Create the initial distribution, which has to pass the initial test
-            variable_type_ini = vtd.detect_continuous_shape(beta1_data_list_ini[
+            variable_type_ini = vtd_ks.detect_continuous_shape(beta1_data_list_ini[
                 i * dataset_size_ini:(i + 1) * dataset_size_ini])
-            while True:
-                if variable_type_ini[0] == 'beta' and (variable_type_ini[-1] == 1 or (
-                        isinstance(variable_type_ini[-1], list) and variable_type_ini[-2] == 1)):
-                    if isinstance(variable_type_ini[-1], list):
-                        variable_type_ini = variable_type_ini[:-1]
-                    break
-                if 'beta1' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
-                    for j in range(len(variable_type_ini[-1])):
-                        if variable_type_ini[-1][j][0] == 'beta' and variable_type_ini[-1][j][-1] == 1:
-                            variable_type_ini = variable_type_ini[-1][j]
-                            break
+            if variable_type_ini[0] == 'beta' and variable_type_ini[-2] == 1:
+                variable_type_ini = variable_type_ini[:-1]
+            elif 'beta1' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
+                for distr in variable_type_ini[-1]:
+                    if distr[0] == 'beta' and distr[-1] == 1:
+                        variable_type_ini = distr
+            else:
+                variable_type_ini = ['others', 0]
 
-            # Test and save the result of the sKS-Test
+            # Test and save the result of the s_gof-Test
             etd.values = [[beta1_data_list_upd[i * dataset_size_upd:(i + 1) * dataset_size_upd]]]
-            vtd.var_type = [[variable_type_ini]]
-            result_list.append(vtd.s_ks_test(0, 0, True)[0])
+            vtd_ks.var_type = [[variable_type_ini]]
+            result_list_ks.append(vtd_ks.s_gof_test(0, 0, True)[0])
+
+            variable_type_ini = vtd_cm.detect_continuous_shape(beta1_data_list_ini[
+                i * dataset_size_ini:(i + 1) * dataset_size_ini])
+            if variable_type_ini[0] == 'beta' and variable_type_ini[-2] == 1:
+                variable_type_ini = variable_type_ini[:-1]
+            elif 'beta1' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
+                for distr in variable_type_ini[-1]:
+                    if distr[0] == 'beta' and distr[-1] == 1:
+                        variable_type_ini = distr
+            else:
+                variable_type_ini = ['others', 0]
+
+            # Test and save the result of the s_gof-Test
+            etd.values = [[beta1_data_list_upd[i * dataset_size_upd:(i + 1) * dataset_size_upd]]]
+            vtd_cm.var_type = [[variable_type_ini]]
+            result_list_cm.append(vtd_cm.s_gof_test(0, 0, True)[0])
 
         # Test if the result list is correct
-        self.assertTrue(result_list == beta1_result_shapes)
+        self.assertTrue(result_list_ks == beta1_result_shapes_ks)
+        self.assertTrue(result_list_cm == beta1_result_shapes_cm)
 
-        result_list = []  # List of the results of the single tests
+        result_list_ks = []  # List of the results of the single tests
+        result_list_cm = []  # List of the results of the single tests
         for i in range(iterations):
             # Create the initial distribution, which has to pass the initial test
-            variable_type_ini = vtd.detect_continuous_shape(beta2_data_list_ini[
+            variable_type_ini = vtd_ks.detect_continuous_shape(beta2_data_list_ini[
                 i * dataset_size_ini:(i + 1) * dataset_size_ini])
-            while True:
-                if variable_type_ini[0] == 'beta' and (variable_type_ini[-1] == 2 or (
-                        isinstance(variable_type_ini[-1], list) and variable_type_ini[-2] == 2)):
-                    if isinstance(variable_type_ini[-1], list):
-                        variable_type_ini = variable_type_ini[:-1]
-                    break
-                if 'beta2' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
-                    for j in range(len(variable_type_ini[-1])):
-                        if variable_type_ini[-1][j][0] == 'beta' and variable_type_ini[-1][j][-1] == 2:
-                            variable_type_ini = variable_type_ini[-1][j]
-                            break
+            if variable_type_ini[0] == 'beta' and variable_type_ini[-2] == 2:
+                variable_type_ini = variable_type_ini[:-1]
+            elif 'beta2' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
+                for distr in variable_type_ini[-1]:
+                    if distr[0] == 'beta' and distr[-1] == 2:
+                        variable_type_ini = distr
+            else:
+                variable_type_ini = ['others', 0]
 
-            # Test and save the result of the sKS-Test
+            # Test and save the result of the s_gof-Test
             etd.values = [[beta2_data_list_upd[i * dataset_size_upd:(i + 1) * dataset_size_upd]]]
-            vtd.var_type = [[variable_type_ini]]
-            result_list.append(vtd.s_ks_test(0, 0, True)[0])
+            vtd_ks.var_type = [[variable_type_ini]]
+            result_list_ks.append(vtd_ks.s_gof_test(0, 0, True)[0])
+
+            variable_type_ini = vtd_cm.detect_continuous_shape(beta2_data_list_ini[
+                i * dataset_size_ini:(i + 1) * dataset_size_ini])
+            if variable_type_ini[0] == 'beta' and variable_type_ini[-2] == 2:
+                variable_type_ini = variable_type_ini[:-1]
+            elif 'beta2' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
+                for distr in variable_type_ini[-1]:
+                    if distr[0] == 'beta' and distr[-1] == 2:
+                        variable_type_ini = distr
+            else:
+                variable_type_ini = ['others', 0]
+
+            # Test and save the result of the s_gof-Test
+            etd.values = [[beta2_data_list_upd[i * dataset_size_upd:(i + 1) * dataset_size_upd]]]
+            vtd_cm.var_type = [[variable_type_ini]]
+            result_list_cm.append(vtd_cm.s_gof_test(0, 0, True)[0])
 
         # Test if the result list is correct
-        self.assertTrue(result_list == beta2_result_shapes, "%s\n%s" % (result_list, beta2_result_shapes))
+        self.assertTrue(result_list_ks == beta2_result_shapes_ks)
+        self.assertTrue(result_list_cm == beta2_result_shapes_cm)
 
-        result_list = []  # List of the results of the single tests
+        result_list_ks = []  # List of the results of the single tests
+        result_list_cm = []  # List of the results of the single tests
         for i in range(iterations):
             # Create the initial distribution, which has to pass the initial test
-            variable_type_ini = vtd.detect_continuous_shape(beta3_data_list_ini[
+            variable_type_ini = vtd_ks.detect_continuous_shape(beta3_data_list_ini[
                 i * dataset_size_ini:(i + 1) * dataset_size_ini])
-            while True:
-                if variable_type_ini[0] == 'beta' and (variable_type_ini[-1] == 3 or (
-                        isinstance(variable_type_ini[-1], list)and variable_type_ini[-2] == 3)):
-                    if isinstance(variable_type_ini[-1], list):
-                        variable_type_ini = variable_type_ini[:-1]
-                    break
-                if 'beta3' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
-                    for j in range(len(variable_type_ini[-1])):
-                        if variable_type_ini[-1][j][0] == 'beta' and variable_type_ini[-1][j][-1] == 3:
-                            variable_type_ini = variable_type_ini[-1][j]
-                            break
+            if variable_type_ini[0] == 'beta' and variable_type_ini[-2] == 3:
+                variable_type_ini = variable_type_ini[:-1]
+            elif 'beta3' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
+                for distr in variable_type_ini[-1]:
+                    if distr[0] == 'beta' and distr[-1] == 3:
+                        variable_type_ini = distr
+            else:
+                variable_type_ini = ['others', 0]
 
-            # Test and save the result of the sKS-Test
+            # Test and save the result of the s_gof-Test
             etd.values = [[beta3_data_list_upd[i * dataset_size_upd:(i + 1) * dataset_size_upd]]]
-            vtd.var_type = [[variable_type_ini]]
-            result_list.append(vtd.s_ks_test(0, 0, True)[0])
+            vtd_ks.var_type = [[variable_type_ini]]
+            result_list_ks.append(vtd_ks.s_gof_test(0, 0, True)[0])
+
+            variable_type_ini = vtd_cm.detect_continuous_shape(beta3_data_list_ini[
+                i * dataset_size_ini:(i + 1) * dataset_size_ini])
+            if variable_type_ini[0] == 'beta' and variable_type_ini[-2] == 3:
+                variable_type_ini = variable_type_ini[:-1]
+            elif 'beta3' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
+                for distr in variable_type_ini[-1]:
+                    if distr[0] == 'beta' and distr[-1] == 3:
+                        variable_type_ini = distr
+            else:
+                variable_type_ini = ['others', 0]
+
+            # Test and save the result of the s_gof-Test
+            etd.values = [[beta3_data_list_upd[i * dataset_size_upd:(i + 1) * dataset_size_upd]]]
+            vtd_cm.var_type = [[variable_type_ini]]
+            result_list_cm.append(vtd_cm.s_gof_test(0, 0, True)[0])
 
         # Test if the result list is correct
-        self.assertTrue(result_list == beta3_result_shapes)
+        self.assertTrue(result_list_ks == beta3_result_shapes_ks)
+        self.assertTrue(result_list_cm == beta3_result_shapes_cm)
 
-        result_list = []  # List of the results of the single tests
+        result_list_ks = []  # List of the results of the single tests
+        result_list_cm = []  # List of the results of the single tests
         for i in range(iterations):
             # Create the initial distribution, which has to pass the initial test
-            variable_type_ini = vtd.detect_continuous_shape(beta4_data_list_ini[
+            variable_type_ini = vtd_ks.detect_continuous_shape(beta4_data_list_ini[
                 i * dataset_size_ini:(i + 1) * dataset_size_ini])
-            while True:
-                if variable_type_ini[0] == 'beta' and (variable_type_ini[-1] == 4 or (
-                        isinstance(variable_type_ini[-1], list) and variable_type_ini[-2] == 4)):
-                    if isinstance(variable_type_ini[-1], list):
-                        variable_type_ini = variable_type_ini[:-1]
-                    break
-                if 'beta4' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
-                    for j in range(len(variable_type_ini[-1])):
-                        if variable_type_ini[-1][j][0] == 'beta' and variable_type_ini[-1][j][-1] == 4:
-                            variable_type_ini = variable_type_ini[-1][j]
-                            break
+            if variable_type_ini[0] == 'beta' and variable_type_ini[-2] == 4:
+                variable_type_ini = variable_type_ini[:-1]
+            elif 'beta4' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
+                for distr in variable_type_ini[-1]:
+                    if distr[0] == 'beta' and distr[-1] == 4:
+                        variable_type_ini = distr
+            else:
+                variable_type_ini = ['others', 0]
 
-            # Test and save the result of the sKS-Test
+            # Test and save the result of the s_gof-Test
             etd.values = [[beta4_data_list_upd[i * dataset_size_upd:(i + 1) * dataset_size_upd]]]
-            vtd.var_type = [[variable_type_ini]]
-            result_list.append(vtd.s_ks_test(0, 0, True)[0])
+            vtd_ks.var_type = [[variable_type_ini]]
+            result_list_ks.append(vtd_ks.s_gof_test(0, 0, True)[0])
+
+            variable_type_ini = vtd_cm.detect_continuous_shape(beta4_data_list_ini[
+                i * dataset_size_ini:(i + 1) * dataset_size_ini])
+            if variable_type_ini[0] == 'beta' and variable_type_ini[-2] == 4:
+                variable_type_ini = variable_type_ini[:-1]
+            elif 'beta4' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
+                for distr in variable_type_ini[-1]:
+                    if distr[0] == 'beta' and distr[-1] == 4:
+                        variable_type_ini = distr
+            else:
+                variable_type_ini = ['others', 0]
+
+            # Test and save the result of the s_gof-Test
+            etd.values = [[beta4_data_list_upd[i * dataset_size_upd:(i + 1) * dataset_size_upd]]]
+            vtd_cm.var_type = [[variable_type_ini]]
+            result_list_cm.append(vtd_cm.s_gof_test(0, 0, True)[0])
 
         # Test if the result list is correct
-        self.assertTrue(result_list == beta4_result_shapes)
+        self.assertTrue(result_list_ks == beta4_result_shapes_ks)
+        self.assertTrue(result_list_cm == beta4_result_shapes_cm)
 
-        result_list = []  # List of the results of the single tests
+        result_list_ks = []  # List of the results of the single tests
+        result_list_cm = []  # List of the results of the single tests
         for i in range(iterations):
             # Create the initial distribution, which has to pass the initial test
-            variable_type_ini = vtd.detect_continuous_shape(beta5_data_list_ini[
+            variable_type_ini = vtd_ks.detect_continuous_shape(beta5_data_list_ini[
                 i * dataset_size_ini:(i + 1) * dataset_size_ini])
-            while True:
-                if variable_type_ini[0] == 'beta' and (variable_type_ini[-1] == 5 or (
-                        isinstance(variable_type_ini[-1], list) and variable_type_ini[-2] == 5)):
-                    if isinstance(variable_type_ini[-1], list):
-                        variable_type_ini = variable_type_ini[:-1]
-                    break
-                if 'beta5' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
-                    for j in range(len(variable_type_ini[-1])):
-                        if variable_type_ini[-1][j][0] == 'beta' and variable_type_ini[-1][j][-1] == 5:
-                            variable_type_ini = variable_type_ini[-1][j]
-                            break
+            if variable_type_ini[0] == 'beta' and variable_type_ini[-2] == 5:
+                variable_type_ini = variable_type_ini[:-1]
+            elif 'beta5' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
+                for distr in variable_type_ini[-1]:
+                    if distr[0] == 'beta' and distr[-1] == 5:
+                        variable_type_ini = distr
+            else:
+                variable_type_ini = ['others', 0]
 
-            # Test and save the result of the sKS-Test
+            # Test and save the result of the s_gof-Test
             etd.values = [[beta5_data_list_upd[i * dataset_size_upd:(i + 1) * dataset_size_upd]]]
-            vtd.var_type = [[variable_type_ini]]
-            result_list.append(vtd.s_ks_test(0, 0, True)[0])
+            vtd_ks.var_type = [[variable_type_ini]]
+            result_list_ks.append(vtd_ks.s_gof_test(0, 0, True)[0])
+
+            variable_type_ini = vtd_cm.detect_continuous_shape(beta5_data_list_ini[
+                i * dataset_size_ini:(i + 1) * dataset_size_ini])
+            if variable_type_ini[0] == 'beta' and variable_type_ini[-2] == 5:
+                variable_type_ini = variable_type_ini[:-1]
+            elif 'beta5' in [distr[0]+str(distr[-1]) for distr in variable_type_ini[-1]]:
+                for distr in variable_type_ini[-1]:
+                    if distr[0] == 'beta' and distr[-1] == 5:
+                        variable_type_ini = distr
+            else:
+                variable_type_ini = ['others', 0]
+
+            # Test and save the result of the s_gof-Test
+            etd.values = [[beta5_data_list_upd[i * dataset_size_upd:(i + 1) * dataset_size_upd]]]
+            vtd_cm.var_type = [[variable_type_ini]]
+            result_list_cm.append(vtd_cm.s_gof_test(0, 0, True)[0])
 
         # Test if the result list is correct
-        self.assertTrue(result_list == beta5_result_shapes)
+        self.assertTrue(result_list_ks == beta5_result_shapes_ks)
+        self.assertTrue(result_list_cm == beta5_result_shapes_cm)

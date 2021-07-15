@@ -4,28 +4,13 @@
 
 . ./declarations.sh
 AMINER_PERSISTENCE_PATH=/tmp/lib/aminer/*
-sudoInstalled=`dpkg -s sudo | grep Status 2> /dev/null`
 
-if [[ $sudoInstalled == "Status: install ok installed" ]]; then
-	sudoInstalled=0
-else
-	sudoInstalled=1
-fi
-	
-if [[ $sudoInstalled == 0 ]]; then
-	sudo mkdir /tmp/lib 2> /dev/null
-	sudo mkdir /tmp/lib/aminer 2> /dev/null
-	sudo chown -R $USER:$USER /tmp/lib/aminer 2> /dev/null
-	sudo rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
-	sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
-	sudo rm /tmp/output 2> /dev/null
-else
-	mkdir /tmp/lib 2> /dev/null
-	mkdir /tmp/lib/aminer 2> /dev/null
-	rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
-	chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
-	rm /tmp/output 2> /dev/null
-fi
+sudo mkdir /tmp/lib 2> /dev/null
+sudo mkdir /tmp/lib/aminer 2> /dev/null
+sudo chown -R $USER:$USER /tmp/lib/aminer 2> /dev/null
+sudo rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
+sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
+sudo rm /tmp/output 2> /dev/null
 
 echo "Integration test started.."
 echo ""
@@ -37,11 +22,7 @@ if ! test -f "$FILE"; then
 fi
 
 #start aminer
-if [[ $sudoInstalled == 0 ]]; then
-	sudo aminer --config "$FILE" > /tmp/output &
-else
-	aminer --config "$FILE" > /tmp/output &
-fi
+sudo aminer --config "$FILE" > /tmp/output &
 
 time=`date +%s`
 
@@ -71,13 +52,8 @@ echo 'The Path of the home directory shown by pwd of the user guest is: /home/gu
 
 #stop aminer
 sleep 3 & wait $!
-if [[ $sudoInstalled == 0 ]]; then
-	sudo pkill -x aminer
-	KILL_PID=$!
-else
-	pkill -x aminer
-	KILL_PID=$!
-fi
+sudo pkill -x aminer
+KILL_PID=$!
 sleep 3
 wait $KILL_PID
 

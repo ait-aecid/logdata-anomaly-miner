@@ -12,20 +12,38 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import logging
-from aminer import AminerConfig
+from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 
 
 class FirstMatchModelElement(ModelElementInterface):
     """This class defines a model element to return the match from the the first matching child model within a given list."""
 
-    def __init__(self, element_id, children):
+    def __init__(self, element_id: str, children: list):
+        if not isinstance(element_id, str):
+            msg = "element_id has to be of the type string."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if len(element_id) < 1:
+            msg = "element_id must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
         self.element_id = element_id
+
+        if not isinstance(children, list):
+            msg = "children has to be of the type string."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if len(children) < 1:
+            msg = "children must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        for child in children:
+            if not isinstance(child, ModelElementInterface):
+                msg = "all children have to be of the type ModelElementInterface."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
         self.children = children
-        if (children is None) or (None in children):
-            msg = 'Invalid children list'
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-            raise Exception(msg)
 
     def get_id(self):
         """Get the element ID."""
@@ -35,7 +53,7 @@ class FirstMatchModelElement(ModelElementInterface):
         """Get all possible child model elements of this element."""
         return self.children
 
-    def get_match_element(self, path, match_context):
+    def get_match_element(self, path: str, match_context):
         """@return None when there is no match, MatchElement otherwise."""
         current_path = "%s/%s" % (path, self.element_id)
 

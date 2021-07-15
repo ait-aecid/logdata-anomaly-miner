@@ -1,38 +1,12 @@
 #!/bin/bash
 
-#This script should be used as a demo-tool to show different components and their use cases. To show the content just uncomment the needed outputs, which are described in the comment before. 
-
-#
-# add the following line to /etc/sudoers.d/<current-user>:
-#    <current-user> ALL=(aminer) /pfad/zum/demo.sh
-#
-# execute demo.sh as aminer:
-#    sudo -u aminer /pfad/zum/demo.sh
-#
-
-sudoInstalled=`dpkg -s sudo | grep Status 2> /dev/null`
-if [[ $sudoInstalled == "Status: install ok installed" ]]; then
-	sudoInstalled=0
-else
-	sudoInstalled=1
-fi
-
-if [[ $sudoInstalled == 0 ]]; then
-	sudo mkdir /tmp/lib 2> /dev/null
-	sudo mkdir /tmp/lib/aminer 2> /dev/null
-	sudo chown -R $USER:$USER /tmp/lib/aminer 2> /dev/null
-	sudo rm -r /tmp/lib/aminer/* 2> /dev/null
-	sudo mkdir /tmp/lib/aminer/log 2> /dev/null
-	sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
-	sudo rm /tmp/syslog 2> /dev/null
-else
-	mkdir /tmp/lib 2> /dev/null
-	mkdir /tmp/lib/aminer 2> /dev/null
-	rm -r /tmp/lib/aminer/* 2> /dev/null
-	mkdir /tmp/lib/aminer/log 2> /dev/null
-	chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
-	rm /tmp/syslog 2> /dev/null
-fi
+sudo mkdir /tmp/lib 2> /dev/null
+sudo mkdir /tmp/lib/aminer 2> /dev/null
+sudo chown -R $USER:$USER /tmp/lib/aminer 2> /dev/null
+sudo rm -r /tmp/lib/aminer/* 2> /dev/null
+sudo mkdir /tmp/lib/aminer/log 2> /dev/null
+sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
+sudo rm /tmp/syslog 2> /dev/null
 
 echo "Demo started.."
 echo ""
@@ -47,15 +21,11 @@ if ! test -f "$FILE"; then
 fi
 
 #start aminer
-if [[ $sudoInstalled == 0 ]]; then
-	sudo aminer --config "$FILE" &
-else
-	aminer --config "$FILE" &
-fi
+sudo aminer --config "$FILE" &
 
 #EventCorrelationDetector, NewMatchPathDetector
 #:<<Comment
-alphabet='abcdef'
+alphabet='ghijkl'
 alphabet_len=$(echo -n $alphabet | wc -m)
 for ((i=0; i<10000; i++)); do
 	echo ${alphabet:$i % $alphabet_len:1} >> /tmp/syslog
@@ -63,7 +33,7 @@ for ((i=0; i<10000; i++)); do
 done
 #Comment
 
-#EnhancedNewMatchPathValueComboDetector, NewMatchPathValueDetector
+#EnhancedNewMatchPathValueComboDetector, NewMatchPathValueDetector, ModuloTimeMatchRule
 #:<<Comment
 R=`shuf -i 1-3 -n 1`
 for ((i=0; i<R; i++)); do
@@ -191,6 +161,9 @@ echo 'type=SYSCALL msg=audit(1580367400.000:9): arch=c000003e syscall=2 success=
 echo 'type=PATH msg=audit(1580367401.000:9): item=0 name="three" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL' >> /tmp/syslog
 echo 'type=PATH msg=audit(1580367402.000:10): item=0 name="one" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL' >> /tmp/syslog
 echo 'type=SYSCALL msg=audit(1580367403.000:10): arch=c000003e syscall=3 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)' >> /tmp/syslog
+
+# StringRegexMatchRule
+echo 'type=SYSCALL msg=audit(1580367403.000:10): arch=c000003e syscall=3 success=no exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)' >> /tmp/syslog
 #Comment
 
 #TimeCorrelationDetector
@@ -241,6 +214,7 @@ who | awk '{print $1,$3,$4}' | while read user time; do \
 ({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n"; } | tr "\n" " " && echo " cron[123]: Job \`cron.daily\`") >> /tmp/syslog
 # AnyByteDataModelElement
 echo "Any:dafsdff12%3§fasß?–_=yy" >> /tmp/syslog
+echo "Any:äöüß" >> /tmp/syslog
 # Base64StringModelElement
 echo "VXNlcm5hbWU6ICJ1c2VyIgpQYXNzd29yZDogInBhc3N3b3JkIg==" >> /tmp/syslog
 # DateTimeModelElement
@@ -257,6 +231,14 @@ echo "match data: 25000" >> /tmp/syslog
 echo "b654686973206973206a7573742061206e6f726d616c2074657874" >> /tmp/syslog
 # IpAddressModelElement
 echo "Gateway IP-Address: 192.168.128.225" >> /tmp/syslog
+# IPv4InRFC1918MatchRule, ValueListMatchRule
+echo "Gateway IP-Address: 8.8.8.8" >> /tmp/syslog
+# IPv4InRFC1918MatchRule, ValueListMatchRule
+echo "Gateway IP-Address: 8.8.4.4" >> /tmp/syslog
+# IPv4InRFC1918MatchRule, ValueRangeMatchRule
+echo "Gateway IP-Address: 10.0.0.0" >> /tmp/syslog
+# IPv4InRFC1918MatchRule, ValueRangeMatchRule
+echo "Gateway IP-Address: 11.0.0.0" >> /tmp/syslog
 # MultiLocaleDateTimeModelElement
 echo "Feb 25 2019" >> /tmp/syslog
 # OptionalMatchModelElement
@@ -264,14 +246,14 @@ echo "The-searched-element-was-found!" >> /tmp/syslog
 # RepeatedElementDataModelElement
 for i in {1..5}; do
 	R=`shuf -i 1-45 -n 1`
-	echo "drawn number: $R" | tr -d "\n" >> /tmp/syslog
+	echo "[drawn number]: $R" | tr -d "\n" >> /tmp/syslog
 done
 echo "" >> /tmp/syslog
 # VariableByteDataModelElement
 echo "---------------------------------------------------------------------" >> /tmp/syslog
 # WhiteSpaceLimitedDataModelElement
 alphabet="abcdefghijklmnopqrstuvwxyz "
-text=""
+text="z"
 for i in {1..1000}; do
 	R=`shuf -i 0-26 -n 1`
 	text=$text${alphabet:R:1}
@@ -284,11 +266,7 @@ echo "$text" >> /tmp/syslog
 
 #stop aminer
 sleep 3 & wait $!
-if [[ $sudoInstalled == 0 ]]; then
-	sudo pkill -x aminer
-else
-    pkill -x aminer
-fi
+sudo pkill -x aminer
 KILL_PID=$!
 sleep 3
 wait $KILL_PID

@@ -11,7 +11,6 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import aminer
-from aminer import AminerConfig, AnalysisChild
 import resource
 import os
 import shutil
@@ -21,6 +20,9 @@ import logging
 import re
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util import PersistenceUtil
+from aminer import AnalysisChild, AminerConfig
+from aminer.AminerConfig import KEY_PERSISTENCE_PERIOD, KEY_LOG_STAT_LEVEL, KEY_LOG_DEBUG_LEVEL, KEY_LOG_STAT_PERIOD,\
+    KEY_RESOURCES_MAX_MEMORY_USAGE, KEY_LOG_PREFIX, KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR, KEY_LOG_SOURCES_LIST, DEBUG_LOG_NAME
 
 attr_str = '"%s": %s,\n'
 component_not_found = 'Event history component not found.'
@@ -44,11 +46,11 @@ class AminerRemoteControlExecutionMethods:
     MAIL_CONFIG_PROPERTIES = [CONFIG_KEY_MAIL_TARGET_ADDRESS, CONFIG_KEY_MAIL_FROM_ADDRESS]
     INTEGER_CONFIG_PROPERTY_LIST = [
         CONFIG_KEY_MAIL_ALERT_GRACE_TIME, CONFIG_KEY_EVENT_COLLECT_TIME, CONFIG_KEY_ALERT_MIN_GAP, CONFIG_KEY_ALERT_MAX_GAP,
-        CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE, AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.KEY_LOG_STAT_LEVEL,
-        AminerConfig.KEY_LOG_DEBUG_LEVEL, AminerConfig.KEY_LOG_STAT_PERIOD, AminerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE
+        CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE, KEY_PERSISTENCE_PERIOD, KEY_LOG_STAT_LEVEL, KEY_LOG_DEBUG_LEVEL, KEY_LOG_STAT_PERIOD,
+        KEY_RESOURCES_MAX_MEMORY_USAGE
     ]
     STRING_CONFIG_PROPERTY_LIST = [
-        CONFIG_KEY_MAIL_TARGET_ADDRESS, CONFIG_KEY_MAIL_FROM_ADDRESS, CONFIG_KEY_MAIL_SUBJECT_PREFIX, AminerConfig.KEY_LOG_PREFIX
+        CONFIG_KEY_MAIL_TARGET_ADDRESS, CONFIG_KEY_MAIL_FROM_ADDRESS, CONFIG_KEY_MAIL_SUBJECT_PREFIX, KEY_LOG_PREFIX
     ]
 
     def print_response(self, value):
@@ -78,20 +80,20 @@ class AminerRemoteControlExecutionMethods:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: the value of the property '%s' must be of type %s!" % (property_name, t)
             return
 
-        if property_name in [AminerConfig.KEY_PERSISTENCE_DIR, AminerConfig.KEY_LOG_SOURCES_LIST]:
+        if property_name in [KEY_PERSISTENCE_DIR, KEY_LOG_SOURCES_LIST]:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: the property '%s' can only be changed at " \
                                             "startup in the aminer root process!" % property_name
             return
-        if property_name == AminerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE:
+        if property_name == KEY_RESOURCES_MAX_MEMORY_USAGE:
             result = self.change_config_property_max_memory(analysis_context, value)
         elif property_name in config_keys_mail_alerting:
             result = self.change_config_property_mail_alerting(analysis_context, property_name, value)
-        elif property_name in (AminerConfig.KEY_LOG_PREFIX, AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.KEY_LOG_STAT_PERIOD):
+        elif property_name in (KEY_LOG_PREFIX, KEY_PERSISTENCE_PERIOD, KEY_LOG_STAT_PERIOD):
             analysis_context.aminer_config.config_properties[property_name] = value
             result = 0
-        elif property_name == AminerConfig.KEY_LOG_STAT_LEVEL:
+        elif property_name == KEY_LOG_STAT_LEVEL:
             result = self.change_config_property_log_stat_level(analysis_context, value)
-        elif property_name == AminerConfig.KEY_LOG_DEBUG_LEVEL:
+        elif property_name == KEY_LOG_DEBUG_LEVEL:
             result = self.change_config_property_log_debug_level(analysis_context, value)
         else:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: property %s could not be changed. Please check the property_name " \
@@ -100,7 +102,7 @@ class AminerRemoteControlExecutionMethods:
         if result == 0:
             msg = "'%s' changed to '%s' successfully." % (property_name, value)
             self.REMOTE_CONTROL_RESPONSE += msg
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info(msg)
+            logging.getLogger(DEBUG_LOG_NAME).info(msg)
 
     def change_config_property_mail_alerting(self, analysis_context, property_name, value):
         """Change any mail property."""
@@ -123,7 +125,7 @@ class AminerRemoteControlExecutionMethods:
                 self.REMOTE_CONTROL_RESPONSE += "FAILURE: it is not safe to run the aminer with less than 32MB RAM."
                 return 1
             resource.setrlimit(resource.RLIMIT_AS, (max_memory_mb * 1024 * 1024, resource.RLIM_INFINITY))
-            analysis_context.aminer_config.config_properties[AminerConfig.KEY_RESOURCES_MAX_MEMORY_USAGE] = max_memory_mb
+            analysis_context.aminer_config.config_properties[KEY_RESOURCES_MAX_MEMORY_USAGE] = max_memory_mb
             return 0
         except ValueError:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: property 'maxMemoryUsage' must be of type Integer!"
@@ -132,7 +134,7 @@ class AminerRemoteControlExecutionMethods:
     def change_config_property_log_stat_level(self, analysis_context, stat_level):
         """Set the statistic logging level."""
         if stat_level in (0, 1, 2):
-            analysis_context.aminer_config.config_properties[AminerConfig.KEY_LOG_STAT_LEVEL] = stat_level
+            analysis_context.aminer_config.config_properties[KEY_LOG_STAT_LEVEL] = stat_level
             AminerConfig.STAT_LEVEL = stat_level
             return 0
         self.REMOTE_CONTROL_RESPONSE += "FAILURE: STAT_LEVEL %d is not allowed. Allowed STAT_LEVEL values are 0, 1, 2." % stat_level
@@ -141,9 +143,9 @@ class AminerRemoteControlExecutionMethods:
     def change_config_property_log_debug_level(self, analysis_context, debug_level):
         """Set the debug log level."""
         if debug_level in (0, 1, 2):
-            analysis_context.aminer_config.config_properties[AminerConfig.KEY_LOG_DEBUG_LEVEL] = debug_level
+            analysis_context.aminer_config.config_properties[KEY_LOG_DEBUG_LEVEL] = debug_level
             AminerConfig.DEBUG_LEVEL = debug_level
-            debug_logger = logging.getLogger(AminerConfig.DEBUG_LOG_NAME)
+            debug_logger = logging.getLogger(DEBUG_LOG_NAME)
             if debug_level == 0:
                 debug_logger.setLevel(logging.ERROR)
             elif debug_level == 1:
@@ -167,7 +169,7 @@ class AminerRemoteControlExecutionMethods:
             setattr(analysis_context.get_component_by_name(component_name), attribute, value)
             msg = "'%s.%s' changed from %s to %s successfully." % (component_name, attribute, repr(attr), value)
             self.REMOTE_CONTROL_RESPONSE += msg
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info(msg)
+            logging.getLogger(DEBUG_LOG_NAME).info(msg)
         else:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: property '%s.%s' must be of type %s!" % (component_name, attribute, type(attr))
 
@@ -189,7 +191,7 @@ class AminerRemoteControlExecutionMethods:
                 analysis_context.registered_components_by_name[new_component_name] = component
                 msg = "Component '%s' renamed to '%s' successfully." % (old_component_name, new_component_name)
                 self.REMOTE_CONTROL_RESPONSE += msg
-                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info(msg)
+                logging.getLogger(DEBUG_LOG_NAME).info(msg)
 
     def print_config_property(self, analysis_context, property_name):
         """
@@ -325,31 +327,30 @@ class AminerRemoteControlExecutionMethods:
         """
         msg = AminerConfig.save_config(analysis_context, destination_file)
         self.REMOTE_CONTROL_RESPONSE = msg
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info(msg)
+        logging.getLogger(DEBUG_LOG_NAME).info(msg)
 
     def persist_all(self):
         """Persist all data by calling the function in PersistenceUtil."""
         PersistenceUtil.persist_all()
         self.REMOTE_CONTROL_RESPONSE = 'OK'
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info('Called persist_all() via remote control.')
+        logging.getLogger(DEBUG_LOG_NAME).info('Called persist_all() via remote control.')
 
     def create_backup(self, analysis_context):
         """Create a backup with the current datetime string."""
         backup_time = time()
         backup_time_str = datetime.fromtimestamp(backup_time).strftime('%Y-%m-%d-%H-%M-%S')
-        persistence_dir = analysis_context.aminer_config.config_properties[AminerConfig.KEY_PERSISTENCE_DIR]
+        persistence_dir = analysis_context.aminer_config.config_properties[KEY_PERSISTENCE_DIR]
         persistence_dir = persistence_dir.rstrip('/')
         backup_path = persistence_dir + '/backup/'
         backup_path_with_date = os.path.join(backup_path, backup_time_str)
         shutil.copytree(persistence_dir, backup_path_with_date, ignore=shutil.ignore_patterns('backup*'))
         msg = 'Created backup %s' % backup_time_str
         self.REMOTE_CONTROL_RESPONSE = 'Created backup %s' % backup_time_str
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info(msg)
+        logging.getLogger(DEBUG_LOG_NAME).info(msg)
 
     def list_backups(self, analysis_context):
         """List all available backups from the persistence directory."""
-        persistence_dir = analysis_context.aminer_config.config_properties.get(
-            AminerConfig.KEY_PERSISTENCE_DIR, AminerConfig.DEFAULT_PERSISTENCE_DIR)
+        persistence_dir = analysis_context.aminer_config.config_properties.get(KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR)
         for _dirpath, dirnames, _filenames in os.walk(os.path.join(persistence_dir, 'backup')):
             self.REMOTE_CONTROL_RESPONSE = '"backups": %s' % dirnames
             break
@@ -380,7 +381,7 @@ class AminerRemoteControlExecutionMethods:
         try:
             msg = component.allowlist_event("Analysis.%s" % component.__class__.__name__, event_data, allowlisting_data)
             self.REMOTE_CONTROL_RESPONSE += msg
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info(msg)
+            logging.getLogger(DEBUG_LOG_NAME).info(msg)
         # skipcq: PYL-W0703
         except Exception as e:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
@@ -404,7 +405,7 @@ class AminerRemoteControlExecutionMethods:
         try:
             msg = component.blocklist_event("Analysis.%s" % component.__class__.__name__, event_data, blocklisting_data)
             self.REMOTE_CONTROL_RESPONSE += msg
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info(msg)
+            logging.getLogger(DEBUG_LOG_NAME).info(msg)
         # skipcq: PYL-W0703
         except Exception as e:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
@@ -431,7 +432,7 @@ class AminerRemoteControlExecutionMethods:
         analysis_context.register_component(component, component_name)
         msg = "Component '%s' added to '%s' successfully." % (component_name, atom_handler)
         self.REMOTE_CONTROL_RESPONSE += msg
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info(msg)
+        logging.getLogger(DEBUG_LOG_NAME).info(msg)
 
     def dump_events_from_history(self, analysis_context, history_component_name, dump_event_id):
         """
@@ -469,7 +470,7 @@ class AminerRemoteControlExecutionMethods:
                     result_string += '\n  Log lines:\n    %s' % '\n    '.join(sorted_log_lines)
                 break
             self.REMOTE_CONTROL_RESPONSE = result_string
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info(result_string)
+            logging.getLogger(DEBUG_LOG_NAME).info(result_string)
 
     def ignore_events_from_history(self, analysis_context, history_component_name, event_ids):
         """
@@ -505,7 +506,7 @@ class AminerRemoteControlExecutionMethods:
                 event_pos += 1
         msg = 'OK\n%d elements ignored' % delete_count
         self.REMOTE_CONTROL_RESPONSE = msg
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info(msg)
+        logging.getLogger(DEBUG_LOG_NAME).info(msg)
 
     def list_events_from_history(self, analysis_context, history_component_name, max_event_count=None):
         """
@@ -568,7 +569,7 @@ class AminerRemoteControlExecutionMethods:
                     message = event_source.allowlist_event(
                         event_type, sorted_log_lines, event_data, allowlisting_data)
                     result_string += 'OK %d: %s\n' % (event_id, message)
-                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info(result_string)
+                    logging.getLogger(DEBUG_LOG_NAME).info(result_string)
                     allowlisted_flag = True
                 except NotImplementedError:
                     result_string += 'FAIL %d: component does not support allowlisting.' % event_id

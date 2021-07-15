@@ -80,7 +80,8 @@ class EventTypeDetectorTest(TestBase):
         FixedDataModelElement('name_string', b' name="'), DelimitedDataModelElement('name', b'"'),
         FixedDataModelElement('inode_string', b'" inode='), DecimalIntegerValueModelElement('inode'),
         FixedDataModelElement('dev_string', b' dev='), DelimitedDataModelElement('dev', b' '),
-        FixedDataModelElement('mode_string', b' mode='), DecimalIntegerValueModelElement('mode'),
+        FixedDataModelElement('mode_string', b' mode='), DecimalIntegerValueModelElement(
+            'mode', value_pad_type=DecimalIntegerValueModelElement.PAD_TYPE_ZERO),
         FixedDataModelElement('ouid_string', b' ouid='), DecimalIntegerValueModelElement('ouid'),
         FixedDataModelElement('ogid_string', b' ogid='), DecimalIntegerValueModelElement('ogid'),
         FixedDataModelElement('rdev_string', b' rdev='), DelimitedDataModelElement('rdev', b' '),
@@ -137,19 +138,19 @@ class EventTypeDetectorTest(TestBase):
         event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         # initialize all values.
         t = time.time()
-        log_atom = LogAtom(b'22.2', ParserMatch(MatchElement('path', '22.2', 22.2, None)), t, self.__class__.__name__)
+        log_atom = LogAtom(b'22.2', ParserMatch(MatchElement('path', b'22.2', 22.2, None)), t, self.__class__.__name__)
         event_type_detector.receive_atom(log_atom)
 
         event_type_detector.values = [[[]]]
         event_type_detector.append_values(log_atom, 0)
         self.assertEqual(event_type_detector.values, [[[22.2]]])
 
-        log_atom = LogAtom(b'22', ParserMatch(MatchElement('path', '22', 22, None)), t, self.__class__.__name__)
+        log_atom = LogAtom(b'22', ParserMatch(MatchElement('path', b'22', 22, None)), t, self.__class__.__name__)
         event_type_detector.values = [[[]]]
         event_type_detector.append_values(log_atom, 0)
         self.assertEqual(event_type_detector.values, [[[22]]])
 
-        log_atom = LogAtom(b'22.2', ParserMatch(MatchElement('path', '22', b'22', None)), t, self.__class__.__name__)
+        log_atom = LogAtom(b'22.2', ParserMatch(MatchElement('path', b'22', b'22', None)), t, self.__class__.__name__)
         event_type_detector.values = [[[]]]
         event_type_detector.append_values(log_atom, 0)
         self.assertEqual(event_type_detector.values, [[[22]]])
@@ -163,14 +164,14 @@ class EventTypeDetectorTest(TestBase):
         # initialize all values.
         t = time.time()
         log_atom = LogAtom(b'This is a string', ParserMatch(
-            MatchElement('path', 'This is a string', b'This is a string', None)), t, self.__class__.__name__)
+            MatchElement('path', b'This is a string', b'This is a string', None)), t, self.__class__.__name__)
         event_type_detector.receive_atom(log_atom)
 
         event_type_detector.values = [[[]]]
         event_type_detector.append_values(log_atom, 0)
         self.assertEqual(event_type_detector.values, [[['This is a string']]])
 
-        log_atom = LogAtom(b'24.05.', ParserMatch(MatchElement('path', '24.05.', b'24.05.', None)), t, self.__class__.__name__)
+        log_atom = LogAtom(b'24.05.', ParserMatch(MatchElement('path', b'24.05.', b'24.05.', None)), t, self.__class__.__name__)
         event_type_detector.values = [[[]]]
         event_type_detector.append_values(log_atom, 0)
         self.assertEqual(event_type_detector.values, [[['24.05.']]])
@@ -181,12 +182,12 @@ class EventTypeDetectorTest(TestBase):
         t = time.time()
         val_list = [[[]]]
         for i in range(1, event_type_detector.max_num_vals + 1, 1):
-            log_atom = LogAtom(str(i).encode(), ParserMatch(MatchElement('path', str(i), i, None)), t, self.__class__.__name__)
+            log_atom = LogAtom(str(i).encode(), ParserMatch(MatchElement('path', str(i).encode(), i, None)), t, self.__class__.__name__)
             val_list[0][0].append(float(i))
             self.assertTrue(event_type_detector.receive_atom(log_atom))
             self.assertEqual(event_type_detector.values, val_list)
         i += 1
-        log_atom = LogAtom(str(i).encode(), ParserMatch(MatchElement('path', str(i), i, None)), t, self.__class__.__name__)
+        log_atom = LogAtom(str(i).encode(), ParserMatch(MatchElement('path', str(i).encode(), i, None)), t, self.__class__.__name__)
         val_list[0][0].append(float(i))
         self.assertTrue(event_type_detector.receive_atom(log_atom))
         self.assertEqual(event_type_detector.values, [[val_list[0][0][-event_type_detector.min_num_vals:]]])
@@ -195,7 +196,7 @@ class EventTypeDetectorTest(TestBase):
         """This unittest checks the functionality of the persistence by persisting and reloading values."""
         event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         t = time.time()
-        log_atom = LogAtom(b'22.2', ParserMatch(MatchElement('path', '22.2', 22.2, None)), t, self.__class__.__name__)
+        log_atom = LogAtom(b'22.2', ParserMatch(MatchElement('path', b'22.2', 22.2, None)), t, self.__class__.__name__)
         event_type_detector.receive_atom(log_atom)
         event_type_detector.do_persist()
         event_type_detector_loaded = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])

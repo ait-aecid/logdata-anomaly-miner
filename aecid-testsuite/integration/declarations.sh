@@ -1,21 +1,13 @@
 #!/bin/bash
 
-sudoInstalled=`dpkg -s sudo | grep Status 2>&1 /dev/null`
-
-if [[ $sudoInstalled == "Status: install ok installed" ]]; then
-	sudoInstalled=0
-else
-	sudoInstalled=1
-fi
-
 # declare all expected values without the variable ones. These arrays are used to compare with the incoming log lines.
-declare -a NEW_PATH_HD_REPAIR_1=(" New path(es) detected" "NewMatchPathDetector: \"NewPath\" (1 lines)" "  /model/DiskUpgrade: b'" ": System rebooted for hard disk upgrade'" "  /model/DiskUpgrade/DTM: " "  /model/DiskUpgrade/UNameSpace1: " "  /model/DiskUpgrade/UName: " "  /model/DiskUpgrade/UNameSpace2: " " /model/DiskUpgrade/User: " "  /model/DiskUpgrade/HDRepair: b' System rebooted for hard disk upgrade'" "['/model/DiskUpgrade', '/model/DiskUpgrade/DTM', '/model/DiskUpgrade/UNameSpace1', '/model/DiskUpgrade/UName', '/model/DiskUpgrade/UNameSpace2', '/model/DiskUpgrade/User', '/model/DiskUpgrade/HDRepair']" "Original log line: b'")
+declare -a NEW_PATH_HD_REPAIR_1=(" New path(es) detected" "NewMatchPathDetector: \"NewPath\" (1 lines)" "  /model/DiskUpgrade: " ": System rebooted for hard disk upgrade" "  /model/DiskUpgrade/DTM: " "  /model/DiskUpgrade/UNameSpace1: " "  /model/DiskUpgrade/UName: " "  /model/DiskUpgrade/UNameSpace2: " " /model/DiskUpgrade/User: " "  /model/DiskUpgrade/HDRepair:  System rebooted for hard disk upgrade" "['/model/DiskUpgrade', '/model/DiskUpgrade/DTM', '/model/DiskUpgrade/UNameSpace1', '/model/DiskUpgrade/UName', '/model/DiskUpgrade/UNameSpace2', '/model/DiskUpgrade/User', '/model/DiskUpgrade/HDRepair']" "Original log line: ")
 declare -a UNPARSED_ATOM_1=(" Unparsed atom received" "SimpleUnparsedAtomHandler: \"UnparsedHandler\" (1 lines)" " System rebooted for hard disk upgrad")
 declare -a UNPARSED_ATOM_2=(" Unparsed atom received" "SimpleUnparsedAtomHandler: \"UnparsedHandler\" (1 lines)" ": System rebooted for hard disk upgrade")
-declare -a NEW_PATH_HOME_PATH_ROOT_1=(" New path(es) detected" "NewMatchPathDetector: \"NewPath\" (1 lines)" "  /model/HomePath: b'The Path of the home directory shown by pwd of the user root is: /root'" "  /model/HomePath/Pwd: b'The Path of the home directory shown by pwd of the user '" "  /model/HomePath/Username: b'root'" "  /model/HomePath/Is: b' is: '" "  /model/HomePath/Path: b'/root'" "['/model/HomePath', '/model/HomePath/Pwd', '/model/HomePath/Username', '/model/HomePath/Is', '/model/HomePath/Path']" "Original log line: b'The Path of the home directory shown by pwd of the user root is: /root'")
-declare -a NEW_VALUE_COMBINATION_HOME_PATH_ROOT_1=(" New value combination(s) detected" "NewMatchPathValueComboDetector: \"NewValueCombo\" (1 lines)" "  /model/HomePath: b'The Path of the home directory shown by pwd of the user root is: /root'" "  /model/HomePath/Pwd: b'The Path of the home directory shown by pwd of the user '" "  /model/HomePath/Username: b'root'" "  /model/HomePath/Is: b' is: '" "  /model/HomePath/Path: b'/root'" "(b'root', b'/root')" "Original log line: b'The Path of the home directory shown by pwd of the user root is: /root'")
-declare -a NEW_VALUE_COMBINATION_HOME_PATH_USER_1=(" New value combination(s) detected" "NewMatchPathValueComboDetector: \"NewValueCombo\" (1 lines)" "  /model/HomePath: b'The Path of the home directory shown by pwd of the user user is: /home/user'" "  /model/HomePath/Pwd: b'The Path of the home directory shown by pwd of the user '" "  /model/HomePath/Username: b'user'" "  /model/HomePath/Is: b' is: '" "  /model/HomePath/Path: b'/home/user'" "(b'user', b'/home/user')" "Original log line: b'The Path of the home directory shown by pwd of the user user is: /home/user'")
-declare -a NEW_VALUE_COMBINATION_HOME_PATH_GUEST_1=(" New value combination(s) detected" "NewMatchPathValueComboDetector: \"NewValueCombo\" (1 lines)" "  /model/HomePath: b'The Path of the home directory shown by pwd of the user guest is: /home/guest'" "  /model/HomePath/Pwd: b'The Path of the home directory shown by pwd of the user '" "  /model/HomePath/Username: b'guest'" "  /model/HomePath/Is: b' is: '" "  /model/HomePath/Path: b'/home/guest'" "(b'guest', b'/home/guest')" "Original log line: b'The Path of the home directory shown by pwd of the user guest is: /home/guest'")
+declare -a NEW_PATH_HOME_PATH_ROOT_1=(" New path(es) detected" "NewMatchPathDetector: \"NewPath\" (1 lines)" "  /model/HomePath: The Path of the home directory shown by pwd of the user root is: /root" "  /model/HomePath/Pwd: The Path of the home directory shown by pwd of the user " "  /model/HomePath/Username: root" "  /model/HomePath/Is:  is: " "  /model/HomePath/Path: /root" "['/model/HomePath', '/model/HomePath/Pwd', '/model/HomePath/Username', '/model/HomePath/Is', '/model/HomePath/Path']" "Original log line: The Path of the home directory shown by pwd of the user root is: /root")
+declare -a NEW_VALUE_COMBINATION_HOME_PATH_ROOT_1=(" New value combination(s) detected" "NewMatchPathValueComboDetector: \"NewValueCombo\" (1 lines)" "  /model/HomePath: The Path of the home directory shown by pwd of the user root is: /root" "  /model/HomePath/Pwd: The Path of the home directory shown by pwd of the user " "  /model/HomePath/Username: root" "  /model/HomePath/Is:  is: " "  /model/HomePath/Path: /root" "(b'root', b'/root')" "Original log line: The Path of the home directory shown by pwd of the user root is: /root")
+declare -a NEW_VALUE_COMBINATION_HOME_PATH_USER_1=(" New value combination(s) detected" "NewMatchPathValueComboDetector: \"NewValueCombo\" (1 lines)" "  /model/HomePath: The Path of the home directory shown by pwd of the user user is: /home/user" "  /model/HomePath/Pwd: The Path of the home directory shown by pwd of the user " "  /model/HomePath/Username: user" "  /model/HomePath/Is:  is: " "  /model/HomePath/Path: /home/user" "(b'user', b'/home/user')" "Original log line: The Path of the home directory shown by pwd of the user user is: /home/user")
+declare -a NEW_VALUE_COMBINATION_HOME_PATH_GUEST_1=(" New value combination(s) detected" "NewMatchPathValueComboDetector: \"NewValueCombo\" (1 lines)" "  /model/HomePath: The Path of the home directory shown by pwd of the user guest is: /home/guest" "  /model/HomePath/Pwd: The Path of the home directory shown by pwd of the user " "  /model/HomePath/Username: guest" "  /model/HomePath/Is:  is: " "  /model/HomePath/Path: /home/guest" "(b'guest', b'/home/guest')" "Original log line: The Path of the home directory shown by pwd of the user guest is: /home/guest")
 declare -a JSON_OUTPUT=()
 read -r -d '' VAR << END
   {
@@ -54,6 +46,7 @@ read -r -d '' VAR << END
     "AnalysisComponentName": "NewPath",
     "Message": "New path(es) detected",
     "PersistenceFileName": "Default",
+    "TrainingMode": true,
     "AffectedLogAtomPaths": [
       "/model/DiskUpgrade",
       "/model/DiskUpgrade/DTM",
@@ -100,15 +93,15 @@ JSON_OUTPUT+=("$VAR")
 read -r -d '' VAR << END
 ,
     "LogLinesCount": 1,
-    "AnnotatedMatchElement": "/model/DiskUpgrade: b'
+    "AnnotatedMatchElement": "/model/DiskUpgrade: 
 END
 JSON_OUTPUT+=("$VAR")
 read -r -d '' VAR << END
- localhost root: System rebooted for hard disk upgrade'\n  /model/DiskUpgrade/DTM:
+ localhost root: System rebooted for hard disk upgrade\n  /model/DiskUpgrade/DTM:
 END
 JSON_OUTPUT+=("$VAR")
 read -r -d '' VAR << END
-\n  /model/DiskUpgrade/UNameSpace1: b' '\n  /model/DiskUpgrade/UName: b'localhost'\n  /model/DiskUpgrade/UNameSpace2: b' '\n  /model/DiskUpgrade/User: b'root:'\n  /model/DiskUpgrade/HDRepair: b' System rebooted for hard disk upgrade'"
+\n  /model/DiskUpgrade/UNameSpace1:  \n  /model/DiskUpgrade/UName: localhost\n  /model/DiskUpgrade/UNameSpace2:  \n  /model/DiskUpgrade/User: root:\n  /model/DiskUpgrade/HDRepair:  System rebooted for hard disk upgrade"
   }
 }
 {
@@ -176,6 +169,7 @@ read -r -d '' VAR << END
     "AnalysisComponentName": "NewPath",
     "Message": "New path(es) detected",
     "PersistenceFileName": "Default",
+    "TrainingMode": true,
     "AffectedLogAtomPaths": [
       "/model/HomePath",
       "/model/HomePath/Pwd",
@@ -206,7 +200,7 @@ JSON_OUTPUT+=("$VAR")
 read -r -d '' VAR << END
 ,
     "LogLinesCount": 1,
-    "AnnotatedMatchElement": "/model/HomePath: b'The Path of the home directory shown by pwd of the user root is: /root'\n  /model/HomePath/Pwd: b'The Path of the home directory shown by pwd of the user '\n  /model/HomePath/Username: b'root'\n  /model/HomePath/Is: b' is: '\n  /model/HomePath/Path: b'/root'"
+    "AnnotatedMatchElement": "/model/HomePath: The Path of the home directory shown by pwd of the user root is: /root\n  /model/HomePath/Pwd: The Path of the home directory shown by pwd of the user \n  /model/HomePath/Username: root\n  /model/HomePath/Is:  is: \n  /model/HomePath/Path: /root"
   }
 }
 {
@@ -216,6 +210,7 @@ read -r -d '' VAR << END
     "AnalysisComponentName": "NewValueCombo",
     "Message": "New value combination(s) detected",
     "PersistenceFileName": "Default",
+    "TrainingMode": true,
     "AffectedLogAtomPaths": [
       "/model/HomePath/Username",
       "/model/HomePath/Path"
@@ -247,7 +242,7 @@ JSON_OUTPUT+=("$VAR")
 read -r -d '' VAR << END
 ,
     "LogLinesCount": 1,
-    "AnnotatedMatchElement": "/model/HomePath: b'The Path of the home directory shown by pwd of the user root is: /root'\n  /model/HomePath/Pwd: b'The Path of the home directory shown by pwd of the user '\n  /model/HomePath/Username: b'root'\n  /model/HomePath/Is: b' is: '\n  /model/HomePath/Path: b'/root'"
+    "AnnotatedMatchElement": "/model/HomePath: The Path of the home directory shown by pwd of the user root is: /root\n  /model/HomePath/Pwd: The Path of the home directory shown by pwd of the user \n  /model/HomePath/Username: root\n  /model/HomePath/Is:  is: \n  /model/HomePath/Path: /root"
   }
 }
 {
@@ -257,6 +252,7 @@ read -r -d '' VAR << END
     "AnalysisComponentName": "NewValueCombo",
     "Message": "New value combination(s) detected",
     "PersistenceFileName": "Default",
+    "TrainingMode": true,
     "AffectedLogAtomPaths": [
       "/model/HomePath/Username",
       "/model/HomePath/Path"
@@ -288,7 +284,7 @@ JSON_OUTPUT+=("$VAR")
 read -r -d '' VAR << END
 ,
     "LogLinesCount": 1,
-    "AnnotatedMatchElement": "/model/HomePath: b'The Path of the home directory shown by pwd of the user user is: /home/user'\n  /model/HomePath/Pwd: b'The Path of the home directory shown by pwd of the user '\n  /model/HomePath/Username: b'user'\n  /model/HomePath/Is: b' is: '\n  /model/HomePath/Path: b'/home/user'"
+    "AnnotatedMatchElement": "/model/HomePath: The Path of the home directory shown by pwd of the user user is: /home/user\n  /model/HomePath/Pwd: The Path of the home directory shown by pwd of the user \n  /model/HomePath/Username: user\n  /model/HomePath/Is:  is: \n  /model/HomePath/Path: /home/user"
   }
 }
 {
@@ -298,6 +294,7 @@ read -r -d '' VAR << END
     "AnalysisComponentName": "NewValueCombo",
     "Message": "New value combination(s) detected",
     "PersistenceFileName": "Default",
+    "TrainingMode": true,
     "AffectedLogAtomPaths": [
       "/model/HomePath/Username",
       "/model/HomePath/Path"
@@ -329,7 +326,7 @@ JSON_OUTPUT+=("$VAR")
 read -r -d '' VAR << END
 ,
     "LogLinesCount": 1,
-    "AnnotatedMatchElement": "/model/HomePath: b'The Path of the home directory shown by pwd of the user guest is: /home/guest'\n  /model/HomePath/Pwd: b'The Path of the home directory shown by pwd of the user '\n  /model/HomePath/Username: b'guest'\n  /model/HomePath/Is: b' is: '\n  /model/HomePath/Path: b'/home/guest'"
+    "AnnotatedMatchElement": "/model/HomePath: The Path of the home directory shown by pwd of the user guest is: /home/guest\n  /model/HomePath/Pwd: The Path of the home directory shown by pwd of the user \n  /model/HomePath/Username: guest\n  /model/HomePath/Is:  is: \n  /model/HomePath/Path: /home/guest"
   }
 }
 END
@@ -586,11 +583,7 @@ function checkAllMails() {
 	dpkg -s mailutils &> /dev/null
 	if [ ! $? -eq 0 ]; then
     	echo -e "\e[31mMailutils-package is not installed! Installing it now..]"
-		if [[ $sudoInstalled == 0 ]]; then
-			sudo apt install mailutils -y
-		else
-			apt install mailutils -y
-		fi
+		sudo apt install mailutils -y
 	fi
 
 	echo ""
@@ -600,11 +593,7 @@ function checkAllMails() {
 	i=1
 	while [ $i -lt $linecount ] 
 	do
-		if [[ $sudoInstalled == 0 ]]; then
-			sudo echo p | mail > /tmp/out
-		else
-			echo p | mail > /tmp/out
-		fi
+		sudo echo p | mail > /tmp/out
 		input="/tmp/out"
 		t=false
 		aminerMail=false
@@ -669,19 +658,11 @@ function checkAllMails() {
 
 # This function checks if the output of the Syslog is as expected.
 function checkAllSyslogs(){
-	if [[ $sudoInstalled == 0 ]]; then
-		sudo tail -n 1000 /var/log/syslog > /tmp/out
-	else
-		tail -n 1000 /var/log/syslog > /tmp/out
-	fi
+	sudo tail -n 1000 /var/log/syslog > /tmp/out
 	
 	lastLine=`tail -n 1 /tmp/output`
 	if [[ $lastLine == "" ]]; then
-		if [[ $sudoInstalled == 0 ]]; then
-			sudo sed -i "$ d" /tmp/output
-		else
-			runuser -u aminer -- sed -i '$ d' /tmp/output
-		fi
+		sudo sed -i "$ d" /tmp/output
 	fi
 	
 	cntr=0

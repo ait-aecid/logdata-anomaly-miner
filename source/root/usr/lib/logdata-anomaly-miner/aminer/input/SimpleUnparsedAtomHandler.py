@@ -13,6 +13,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer import AminerConfig
 
 
 class SimpleUnparsedAtomHandler(AtomHandlerInterface):
@@ -27,6 +28,10 @@ class SimpleUnparsedAtomHandler(AtomHandlerInterface):
         if log_atom.is_parsed():
             return False
         event_data = {}
+        try:
+            data = log_atom.raw_data.decode(AminerConfig.ENCODING)
+        except UnicodeError:
+            data = repr(log_atom.raw_data)
         for listener in self.event_handlers:
-            listener.receive_event('Input.UnparsedAtomHandler', 'Unparsed atom received', [log_atom.raw_data], event_data, log_atom, self)
+            listener.receive_event('Input.UnparsedAtomHandler', 'Unparsed atom received', [data], event_data, log_atom, self)
         return True

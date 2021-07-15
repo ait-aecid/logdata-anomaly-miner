@@ -41,11 +41,11 @@ class SecureOSFunctionsTestLocal(TestBase):
         secure_open_file(directory, os.O_DIRECTORY)
         SecureOSFunctions.no_secure_open_warn_once_flag = True
         self.assertTrue(
-            error.getvalue() == 'WARNING: SECURITY: No secure open yet due to missing openat in python!\n' or error.getvalue() == '')
+            error.getvalue() in ['WARNING: SECURITY: No secure open yet due to missing openat in python!\n', ''])
 
     def test4sendAnnotatedFileDescriptor(self):
         """A valid annotated file descriptor is to be sent by a socket."""
-        sock_name = '/tmp/test4unixSocket.sock'
+        sock_name = '/tmp/test4unixSocket.sock'  # skipcq: BAN-B108
         data = b'readmeStream' + b'\x00' + b'You should read these README instructions for better understanding.'
 
         # skipcq: BAN-B607, BAN-B603
@@ -86,7 +86,7 @@ class SecureOSFunctionsTestLocal(TestBase):
 
     def test6send_logstream_descriptor(self):
         """A valid logstream descriptor is to be sent."""
-        sock_name = '/tmp/test6unixSocket.sock'
+        sock_name = '/tmp/test6unixSocket.sock'  # skipcq: BAN-B108
         data = b'logstream' + b'\x00' + b'/var/log/syslog'
 
         # skipcq: BAN-B607, BAN-B603
@@ -117,7 +117,7 @@ class SecureOSFunctionsTestLocal(TestBase):
 
     def test7receive_annotated_file_descriptor(self):
         """A valid annotated file descriptor is to be received by a socket."""
-        sock_name = '/tmp/test6unixSocket.sock'
+        sock_name = '/tmp/test6unixSocket.sock'  # skipcq: BAN-B108
         type_info = b'logstream'
         path = b'/var/log/syslog'
         data = (type_info, path)

@@ -69,19 +69,54 @@ case "$1" in
 		./${1}.sh ${*:2}
 		exit $?
 		;;
+	runJsonDemo)
+		cd $TESTDIR
+		./${1}.sh ${*:2}
+		exit $?
+		;;
+	runAminerEncodingDemo)
+		cd $TESTDIR
+		./${1}.sh ${*:2}
+		exit $?
+		;;
+	runOfflineMode)
+		cd $TESTDIR
+		./${1}.sh ${*:2}
+		exit $?
+		;;
+	runMypy)
+		cd $TESTDIR
+		./${1}.sh ${*:2}
+		exit $?
+		;;
+	runConfAvailableTest)
+		cd $TESTDIR
+		./${1}.sh ${*:2}
+		exit $?
+		;;
 	ALL)
 		cd $TESTDIR
+		        ./runMypy.sh
                 ./runSuspendModeTest.sh
                 ./runUnittests.sh
                 ./runRemoteControlTest.sh
+                ./runConfAvailableTest.sh
                 ./runAminerDemo.sh demo/aminer/demo-config.py
                 ./runAminerDemo.sh demo/aminer/jsonConverterHandler-demo-config.py
                 ./runAminerDemo.sh demo/aminer/template_config.py
                 ./runAminerDemo.sh demo/aminer/template_config.yml
                 ./runAminerDemo.sh demo/aminer/demo-config.yml
+                ./runAminerEncodingDemo.sh demo/aminer/demo-config.py
+                ./runAminerEncodingDemo.sh demo/aminer/demo-config.yml
                 ./runAminerJsonInputDemo.sh
+                ./runJsonDemo.sh demo/aminerJsonInputDemo/json-aminer-demo.yml
+                ./runJsonDemo.sh demo/aminerJsonInputDemo/json-elastic-demo.yml
+                ./runJsonDemo.sh demo/aminerJsonInputDemo/json-eve-demo.yml
+                ./runJsonDemo.sh demo/aminerJsonInputDemo/json-journal-demo.yml
+                ./runJsonDemo.sh demo/aminerJsonInputDemo/json-wazuh-demo.yml
                 ./runAminerIntegrationTest.sh aminerIntegrationTest.sh config.py
                 ./runAminerIntegrationTest.sh aminerIntegrationTest2.sh config21.py config22.py
+                ./runOfflineMode.sh
                 ./runGettingStarted.sh
                 ./runTryItOut.sh
                 ./runHowToCreateYourOwnSequenceDetector.sh
@@ -95,10 +130,10 @@ case "$1" in
 		exit 0
 		;;
 	*)
-		echo "Usage: [ ALL | SHELL | runSuspendModeTest | runUnittests | runAminerDemo | runAminerJsonInputDemo "
-		echo "         runAminerIntegrationTest | runCoverageTests | runRemoteControlTest | runTryItOut "
+		echo "Usage: [ ALL | SHELL | runSuspendModeTest | runUnittests | runAminerDemo | runJsonDemo | runAminerJsonInputDemo "
+		echo "         runAminerIntegrationTest | runOfflineMode | runCoverageTests | runRemoteControlTest | runTryItOut "
 		echo "         runGettingStarted | runHowToCreateYourOwnSequenceDetector | runHowToCreateYourOwnFrequencyDetector"
-		echo "         runHowToMissingMatchPathValueDetector] <options>"
+		echo "         runHowToMissingMatchPathValueDetector | runAminerEncodingDemo | runMypy | runConfAvailableTest] <options>"
 		exit 1
 		;;
         

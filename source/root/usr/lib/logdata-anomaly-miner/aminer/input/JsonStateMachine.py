@@ -1,3 +1,6 @@
+# DISCLAIMER: adapted code from
+# https://stackoverflow.com/questions/6886283/how-i-can-i-lazily-read-multiple-json-values-from-a-file-stream-in-python
+
 # A streaming byte oriented JSON parser.  Feed it a single byte at a time and
 # it will emit complete objects as it comes across them.  Whitespace within and
 # between objects is ignored.  This means it can parse newline delimited JSON.
@@ -43,11 +46,11 @@ def json_machine(emit, next_func=None):  # skipcq: PY-D0003
 
         return next_func(byte_data)
 
-    def on_value(value):  # skipcq: PY-D0003
+    def on_value(value):  # skipcq: PY-D0003, PTC-W0065
         emit(value)
         return next_func
 
-    def on_number(number, byte):  # skipcq: PY-D0003
+    def on_number(number, byte):  # skipcq: PY-D0003, PTC-W0065
         emit(number)
         return _value(byte)
 
@@ -101,7 +104,7 @@ def string_machine(emit):  # skipcq: PY-D0003
         string += chr(byte_data)
         return _string
 
-    def _escaped_string(byte_data):  # skipcq: PY-D0003
+    def _escaped_string(byte_data):  # skipcq: PY-D0003, PTC-W0065
         nonlocal string
 
         if byte_data in (0x22, 0x5c, 0x2f):  # " \ /
@@ -133,7 +136,7 @@ def string_machine(emit):  # skipcq: PY-D0003
 
         return None
 
-    def on_char_code(char_code):  # skipcq: PY-D0003
+    def on_char_code(char_code):  # skipcq: PY-D0003, PTC-W0065
         nonlocal string
         string += chr(char_code)
         return _string
@@ -213,8 +216,12 @@ def number_machine(byte_data, emit):  # skipcq: PY-D0003
     esign = 1
     exponent = 0
     dividend = 10
+    start_with_zero = False
 
     def _mid(byte_data):  # skipcq: PY-D0003
+        if start_with_zero and byte_data not in (0x2e, 0x45, 0x65, 0x7d, 0x2c):  # . E e } ,
+            return None
+
         if byte_data == 0x2e:  # .
             return _decimal
 
@@ -229,8 +236,10 @@ def number_machine(byte_data, emit):  # skipcq: PY-D0003
         return _mid(byte_data)
 
     def _start(byte_data):  # skipcq: PY-D0003
+        nonlocal start_with_zero
         if byte_data == 0x30:
-            return None
+            start_with_zero = True
+            return _mid
 
         if 0x30 < byte_data < 0x3a:
             return _number(byte_data)
@@ -248,13 +257,13 @@ def number_machine(byte_data, emit):  # skipcq: PY-D0003
 
         return _later(byte_data)
 
-    def _later(byte_data):  # skipcq: PY-D0003
+    def _later(byte_data):  # skipcq: PY-D0003, PTC-W0065
         if byte_data in (0x45, 0x65):  # E e
             return _esign
 
         return _done(byte_data)
 
-    def _esign(byte_data):  # skipcq: PY-D0003
+    def _esign(byte_data):  # skipcq: PY-D0003, PTC-W0065
         nonlocal esign
         if byte_data == 0x2b:  # +
             return _exponent
@@ -273,7 +282,7 @@ def number_machine(byte_data, emit):  # skipcq: PY-D0003
 
         return _done(byte_data)
 
-    def _done(byte_data):  # skipcq: PY-D0003
+    def _done(byte_data):  # skipcq: PY-D0003, PTC-W0065
         value = sign * (number + decimal)
         if exponent:
             value *= math.pow(10, esign * exponent)
@@ -338,7 +347,7 @@ def object_machine(emit):  # skipcq: PY-D0003
         return None
         # raise Exception("Unexpected byte: 0x" + str(byte_data))
 
-    def on_key(result):  # skipcq: PY-D0003
+    def on_key(result):  # skipcq: PY-D0003, PTC-W0065
         nonlocal key
         key = result
         return _colon
@@ -353,7 +362,7 @@ def object_machine(emit):  # skipcq: PY-D0003
         return None
         # raise Exception("Unexpected byte: 0x" + str(byte_data))
 
-    def on_value(value):  # skipcq: PY-D0003
+    def on_value(value):  # skipcq: PY-D0003, PTC-W0065
         object_data[key] = value
 
     def _comma(byte_data):  # skipcq: PY-D0003

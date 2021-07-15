@@ -14,15 +14,17 @@ class EventCorrelationDetectorTest(TestBase):
     """Unittests for the EventCorrelationDetector."""
 
     alphabet = b'abcdefghijklmnopqrstuvwxyz'
-    alphabet_model = FirstMatchModelElement('first', [])
+    alphabet_model = None
     analysis = 'Analysis.%s'
 
     @classmethod
     def setUpClass(cls):
         """Set up the data for the all tests."""
-        for i in range(len(cls.alphabet)):
-            char = bytes([cls.alphabet[i]])
-            cls.alphabet_model.children.append(FixedDataModelElement(char.decode(), char))
+        children = []
+        for _, val in enumerate(cls.alphabet):
+            char = bytes([val])
+            children.append(FixedDataModelElement(char.decode(), char))
+        cls.alphabet_model = FirstMatchModelElement('first', children)
         error_rate = 0.000085
         cls.perfect_data_diff5 = cls.generate_perfect_data(cls, 30000, 5)
         cls.perfect_data_diff1 = cls.generate_perfect_data(cls, 30000, 1)
@@ -192,7 +194,7 @@ class EventCorrelationDetectorTest(TestBase):
             for rule in sorted_forward_rules[path]:
                 trigger = rule.trigger_event[0].split('/')[-1].encode()
                 implications.append(self.alphabet.index(rule.implied_event[0].split('/')[-1].encode()))
-            for i in range(1, len(sorted_forward_rules[path]), 1):
+            for i in range(1, len(sorted_forward_rules[path]), 1):  # skipcq: PTC-W0060
                 self.assertIn((self.alphabet.index(trigger) + i) % len(self.alphabet), implications)
         for path in sorted_back_rules:
             self.assertEqual(len(sorted_back_rules[path]), 5 / diff)
@@ -201,7 +203,7 @@ class EventCorrelationDetectorTest(TestBase):
             for rule in sorted_back_rules[path]:
                 trigger = rule.trigger_event[0].split('/')[-1].encode()
                 implications.append(self.alphabet.index(rule.implied_event[0].split('/')[-1].encode()))
-            for i in range(1, len(sorted_back_rules[path]), 1):
+            for i in range(1, len(sorted_back_rules[path]), 1):  # skipcq: PTC-W0060
                 self.assertIn((self.alphabet.index(trigger) - i) % len(self.alphabet), implications)
 
     def check_anomaly_detection(self, ecd, t, diff):
@@ -223,7 +225,7 @@ class EventCorrelationDetectorTest(TestBase):
                 # print(bytes([self.alphabet[(self.alphabet.index(char) - i) % len(self.alphabet)]]))
                 self.assertIn('Event %s is missing, but should precede event %s' % (
                     bytes([self.alphabet[(self.alphabet.index(char) - i) % len(self.alphabet)]]), char), self.output_stream.getvalue())
-            for i in range(int(5 / diff) + 1, len(self.alphabet), 1):
+            for i in range(int(5 / diff) + 1, len(self.alphabet), 1):  # skipcq: PTC-W0060
                 # print("not in")
                 # print(bytes([self.alphabet[(self.alphabet.index(char) - i) % len(self.alphabet)]]))
                 self.assertNotIn('Event %s is missing, but should precede event %s' % (
@@ -235,7 +237,7 @@ class EventCorrelationDetectorTest(TestBase):
                 # print(bytes([self.alphabet[(self.alphabet.index(char) + i) % len(self.alphabet)]]))
                 self.assertIn('Event %s is missing, but should follow event %s' % (
                     bytes([self.alphabet[(self.alphabet.index(char) + i) % len(self.alphabet)]]), char), self.output_stream.getvalue())
-            for i in range(int(5 / diff) + 1, len(self.alphabet), 1):
+            for i in range(int(5 / diff) + 1, len(self.alphabet), 1):  # skipcq: PTC-W0060
                 # print("not in")
                 # print(bytes([self.alphabet[(self.alphabet.index(char) + i) % len(self.alphabet)]]))
                 self.assertNotIn('Event %s is missing, but should follow event %s' % (

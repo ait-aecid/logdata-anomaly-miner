@@ -19,12 +19,12 @@ import tempfile
 import shutil
 import sys
 
-from aminer import AminerConfig
+from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.util import SecureOSFunctions
 from aminer.util import JsonUtil
 
 # Have a registry of all persistable components. Those might be happy to be invoked before python process is terminating.
-persistable_components = []
+persistable_components: list = []
 SKIP_PERSISTENCE_ID_WARNING = False
 
 
@@ -34,7 +34,7 @@ def add_persistable_component(component):
         if hasattr(c, 'persistence_file_name') and c.persistence_file_name == component.persistence_file_name:
             msg = 'Detectors of type %s use the persistence_id "%s" multiple times. Please assign a unique persistence_id for every ' \
                   'component.' % (c.__class__.__name__, os.path.split(c.persistence_file_name)[1])
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
+            logging.getLogger(DEBUG_LOG_NAME).warning(msg)
             if not SKIP_PERSISTENCE_ID_WARNING:
                 print('Warning: ' + msg, file=sys.stderr)
     persistable_components.append(component)
@@ -52,7 +52,7 @@ def open_persistence_file(file_name, flags):
         return fd
     except OSError as openOsError:
         if ((flags & os.O_CREAT) == 0) or (openOsError.errno != errno.ENOENT):
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(openOsError)
+            logging.getLogger(DEBUG_LOG_NAME).error(openOsError)
             raise openOsError
     create_missing_directories(file_name)
 
@@ -63,7 +63,7 @@ def replace_persistence_file(file_name, new_file_handle):
         os.unlink(file_name, dir_fd=SecureOSFunctions.secure_open_base_directory())
     except OSError as openOsError:
         if openOsError.errno != errno.ENOENT:
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(openOsError)
+            logging.getLogger(DEBUG_LOG_NAME).error(openOsError)
             raise openOsError
 
     tmp_file_name = os.readlink('/proc/self/fd/%d' % new_file_handle)
@@ -93,7 +93,7 @@ def load_json(file_name):
         os.close(persistence_file_handle)
     except OSError as openOsError:
         if openOsError.errno != errno.ENOENT:
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(openOsError)
+            logging.getLogger(DEBUG_LOG_NAME).error(openOsError)
             raise openOsError
         return None
 
@@ -102,7 +102,7 @@ def load_json(file_name):
         result = JsonUtil.load_json(persistence_data)
     except ValueError as valueError:
         msg = 'Corrupted data in %s' % file_name, valueError
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+        logging.getLogger(DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
     return result
 
@@ -142,13 +142,13 @@ def clear_persistence(persistence_dir_name, persistence_dir_fd):
             if not os.path.isdir(file_path):
                 msg = 'The aminer persistence directory should not contain any files.'
                 print(msg, file=sys.stderr)
-                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
+                logging.getLogger(DEBUG_LOG_NAME).warning(msg)
                 continue
             SecureOSFunctions.secure_rmtree(file_path, persistence_dir_fd)
         except OSError as e:
             msg = 'Failed to delete %s. Reason: %s' % (file_path, e)
             print(msg, file=sys.stderr)
-            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
 
 
 def copytree(src, dst, symlinks=False, ignore=None):

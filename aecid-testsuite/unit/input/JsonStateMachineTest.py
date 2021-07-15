@@ -430,16 +430,15 @@ class ByteStreamLineAtomizerTest(TestBase):
 
         # octal number
         value = b'0222'
-        self.assertIsNone(number_machine(value[0], raise_error))
+        self.assertIsNone(number_machine(value[0], raise_error)(value[1]))
 
         # negative octal number
         value = b'-0222'
-        state = number_machine(value[0], raise_error)
-        self.assertIsNone(state(value[1]))
+        self.assertIsNone(number_machine(value[0], raise_error)(value[1])(value[2]))
 
         # hex number
         value = b'0x80'
-        self.assertIsNone(number_machine(value[0], raise_error))
+        self.assertIsNone(number_machine(value[0], raise_error)(value[1]))
 
         value = b'NaN'
         self.assertIsNone(number_machine(value[0], raise_error))
@@ -478,6 +477,9 @@ class ByteStreamLineAtomizerTest(TestBase):
         value = b'+222'
         self.check_number_machine_from_json_machine(check_int_value, object_prefix+value, end_sign)
 
+        value = b'0'
+        self.check_number_machine_from_json_machine(check_float_value, object_prefix+value, end_sign)
+
         value = b'21.50'
         self.check_number_machine_from_json_machine(check_float_value, object_prefix+value, end_sign)
 
@@ -487,6 +489,9 @@ class ByteStreamLineAtomizerTest(TestBase):
         value = b'-21.05'
         self.check_number_machine_from_json_machine(check_float_value, object_prefix+value, end_sign)
 
+        value = b'0.56'
+        self.check_number_machine_from_json_machine(check_float_value, object_prefix+value, end_sign)
+
         value = b'1.56E-5'
         self.check_number_machine_from_json_machine(check_float_value, object_prefix+value, end_sign)
 
@@ -494,6 +499,9 @@ class ByteStreamLineAtomizerTest(TestBase):
         self.check_number_machine_from_json_machine(check_float_value, object_prefix+value, end_sign)
 
         value = b'1.56e+5'
+        self.check_number_machine_from_json_machine(check_float_value, object_prefix+value, end_sign)
+
+        value = b'0.56e+5'
         self.check_number_machine_from_json_machine(check_float_value, object_prefix+value, end_sign)
 
     def test23array_machine_valid_array(self):

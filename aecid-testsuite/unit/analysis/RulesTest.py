@@ -31,7 +31,7 @@ class RuleTest(TestBase):
     match_s1 = 'match/s1'
     fixed_string = b'fixed String'
     match_any = 'match/any'
-    alphabet = 'There are 26 letters in the english alphabet'
+    alphabet = b'There are 26 letters in the english alphabet'
     model_syslog_time = '/model/syslog/time'
     model_syslog = '/model/syslog'
     match_ipv4 = 'match/IPv4'
@@ -163,7 +163,7 @@ class RuleTest(TestBase):
     def test7string_regex_match_rule(self):
         """This case unit the StringRegexMatchRule."""
         description = "Test7Rules"
-        string_regex_match_rule = StringRegexMatchRule(self.match_any, re.compile(r'\w'), None)
+        string_regex_match_rule = StringRegexMatchRule(self.match_any, re.compile(rb'\w'), None)
         self.analysis_context.register_component(string_regex_match_rule, description)
         any_byte_date_me = AnyByteDataModelElement('any')
 
@@ -172,7 +172,7 @@ class RuleTest(TestBase):
         log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), 1, string_regex_match_rule)
         self.assertTrue(string_regex_match_rule.match(log_atom))
 
-        match_context = MatchContext('--> There are 26 letters in the english alphabet')
+        match_context = MatchContext(b'--> There are 26 letters in the english alphabet')
         match_element = any_byte_date_me.get_match_element('match', match_context)
         log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), 1, string_regex_match_rule)
         self.assertTrue(not string_regex_match_rule.match(log_atom))
@@ -337,7 +337,7 @@ class RuleTest(TestBase):
     def test13value_dependent_delegated_match_rule(self):
         """This case unit the ValueDependentDelegatedMatchRule."""
         description = "Test13Rules"
-        string_regex_match_rule = StringRegexMatchRule(self.match_any, re.compile(r'\w'), None)
+        string_regex_match_rule = StringRegexMatchRule(self.match_any, re.compile(rb'\w'), None)
         self.analysis_context.register_component(string_regex_match_rule, description)
         any_byte_date_me = AnyByteDataModelElement('any')
 
@@ -346,8 +346,8 @@ class RuleTest(TestBase):
         ip_address_data_model_element = IpAddressDataModelElement('IPv4')
 
         value_dependent_delegated_match_rule = ValueDependentDelegatedMatchRule([
-            self.match_any, self.match_ipv4], {(self.alphabet, None): string_regex_match_rule,
-                                               (None, 3232235520): i_pv4_in_rfc1918_match_rule})
+            self.match_any, self.match_ipv4], {(self.alphabet,): string_regex_match_rule,
+                                               (3232235520,): i_pv4_in_rfc1918_match_rule})
         self.analysis_context.register_component(value_dependent_delegated_match_rule, description + "3")
 
         match_context = MatchContext(self.alphabet)
@@ -361,7 +361,7 @@ class RuleTest(TestBase):
         self.assertTrue(value_dependent_delegated_match_rule.match(log_atom))
 
         # not matching values
-        match_context = MatchContext('.There are 26 letters in the english alphabet')
+        match_context = MatchContext(b'.There are 26 letters in the english alphabet')
         match_element = any_byte_date_me.get_match_element('match', match_context)
         log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), 1, value_dependent_delegated_match_rule)
         self.assertTrue(not value_dependent_delegated_match_rule.match(log_atom))

@@ -6,33 +6,16 @@ NUMBER_OF_LOG_LINES=7
 
 . ./declarations.sh
 
-sudoInstalled=`dpkg -s sudo | grep Status 2> /dev/null`
-if [[ $sudoInstalled == "Status: install ok installed" ]]; then
-	sudoInstalled=0
-else
-	sudoInstalled=1
-fi
-
 #<<'END'
 AMINER_PERSISTENCE_PATH=/tmp/lib/aminer/*
-if [[ $sudoInstalled == 0 ]]; then
-	sudo mkdir /tmp/lib 2> /dev/null
-	sudo mkdir /tmp/lib/aminer 2> /dev/null
-	sudo chown -R $USER:$USER /tmp/lib/aminer 2> /dev/null
-	sudo rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
-	sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
-	sudo rm /tmp/syslog 2> /dev/null
-	sudo rm /tmp/auth.log 2> /dev/null
-	sudo rm /tmp/output 2> /dev/null
-else
-	mkdir /tmp/lib 2> /dev/null
-	mkdir /tmp/lib/aminer 2> /dev/null
-	rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
-	chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
-	rm /tmp/syslog 2> /dev/null
-	rm /tmp/auth.log 2> /dev/null
-	rm /tmp/output 2> /dev/null
-fi
+sudo mkdir /tmp/lib 2> /dev/null
+sudo mkdir /tmp/lib/aminer 2> /dev/null
+sudo chown -R $USER:$USER /tmp/lib/aminer 2> /dev/null
+sudo rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
+sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
+sudo rm /tmp/syslog 2> /dev/null
+sudo rm /tmp/auth.log 2> /dev/null
+sudo rm /tmp/output 2> /dev/null
 
 echo "Integration test started.."
 echo ""
@@ -49,11 +32,7 @@ if ! test -f "$FILE"; then
 fi
 
 #start aminer
-if [[ $sudoInstalled == 0 ]]; then
-	sudo aminer --config /tmp/config21.py > /tmp/output &
-else
-	aminer --config /tmp/config21.py > /tmp/output &
-fi
+sudo aminer --config /tmp/config21.py > /tmp/output &
 
 time=`date +%s`
 
@@ -91,13 +70,8 @@ echo 'The Path of the home directory shown by pwd of the user guest is: /home/gu
 
 #stop aminer
 sleep 3 & wait $!
-if [[ $sudoInstalled == 0 ]]; then
-	sudo pkill -x aminer
-	KILL_PID=$!
-else
-	pkill -x aminer
-	KILL_PID=$!
-fi
+sudo pkill -x aminer
+KILL_PID=$!
 sleep 3
 wait $KILL_PID
 
@@ -131,27 +105,16 @@ echo ""
 #END
 
 AMINER_PERSISTENCE_PATH=/tmp/lib/aminer/*
-if [[ $sudoInstalled == 0 ]]; then
-	sudo mkdir /tmp/lib 2> /dev/null
-	sudo mkdir /tmp/lib/aminer 2> /dev/null
-	sudo chown -R $USER:$USER /tmp/lib/aminer 2> /dev/null
-	sudo rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
-	sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
-	sudo rm /tmp/syslog 2> /dev/null
-	sudo rm /tmp/auth.log 2> /dev/null
-	sudo rm /tmp/output 2> /dev/null
-	sudo cp ../unit/config/kafka-client.conf /etc/aminer/kafka-client.conf
-else
-	mkdir /tmp/lib 2> /dev/null
-	mkdir /tmp/lib/aminer 2> /dev/null
-	rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
-	chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
-	rm /tmp/syslog 2> /dev/null
-	rm /tmp/auth.log 2> /dev/null
-	rm /tmp/output 2> /dev/null
-	cp ../unit/config/kafka-client.conf /etc/aminer/kafka-client.conf
-fi
-curl https://mirror.klaus-uwe.me/apache/kafka/2.7.0/kafka_2.12-2.7.0.tgz --output kafka.tgz
+sudo mkdir /tmp/lib 2> /dev/null
+sudo mkdir /tmp/lib/aminer 2> /dev/null
+sudo chown -R $USER:$USER /tmp/lib/aminer 2> /dev/null
+sudo rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
+sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
+sudo rm /tmp/syslog 2> /dev/null
+sudo rm /tmp/auth.log 2> /dev/null
+sudo rm /tmp/output 2> /dev/null
+sudo cp ../unit/data/kafka-client.conf /etc/aminer/kafka-client.conf
+curl https://downloads.apache.org/kafka/2.7.0/kafka_2.12-2.7.0.tgz --output kafka.tgz
 tar xvf kafka.tgz > /dev/null
 rm kafka.tgz
 kafka_2.12-2.7.0/bin/zookeeper-server-start.sh kafka_2.12-2.7.0/config/zookeeper.properties > /dev/null &
@@ -162,11 +125,7 @@ sleep 1
 COUNTER=0
 
 #start aminer
-if [[ $sudoInstalled == 0 ]]; then
-	sudo aminer --config /tmp/config22.py > /tmp/output &
-else
-	aminer --config /tmp/config22.py > /tmp/output &
-fi
+sudo aminer --config /tmp/config22.py > /tmp/output &
 sleep 5
 
 time=`date +%s`
@@ -205,13 +164,8 @@ echo 'The Path of the home directory shown by pwd of the user guest is: /home/gu
 
 #stop aminer
 sleep 3 & wait $!
-if [[ $sudoInstalled == 0 ]]; then
-	sudo pkill -x aminer
-	KILL_PID=$!
-else
-	pkill -x aminer
-	KILL_PID=$!
-fi
+sudo pkill -x aminer
+KILL_PID=$!
 sleep 3
 wait $KILL_PID
 

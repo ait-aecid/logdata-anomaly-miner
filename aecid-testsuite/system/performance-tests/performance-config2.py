@@ -53,7 +53,7 @@ config_properties['AminerGroup'] = 'aminer'
 # to the 'AminerUser' but not group/world readable. On violation,
 # aminer will refuse to start. When undefined, '/var/lib/aminer'
 # is used.
-config_properties['Core.PersistenceDir'] = '/tmp/lib/aminer'
+config_properties['Core.PersistenceDir'] = '/tmp/lib/aminer'  # skipcq: BAN-B108
 
 # Define a target e-mail address to send alerts to. When undefined,
 # no e-mail notification hooks are added.
@@ -321,7 +321,7 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis.MissingMatchPathValueDetector import MissingMatchPathValueDetector
     missing_match_path_value_detector = MissingMatchPathValueDetector(
-        analysis_context.aminer_config, '/model/DiskReport/Space', anomaly_event_handlers, auto_include_flag=True, default_interval=2,
+        analysis_context.aminer_config, ['/model/DiskReport/Space'], anomaly_event_handlers, auto_include_flag=True, default_interval=2,
         realert_interval=5)
     analysis_context.register_component(missing_match_path_value_detector, component_name="MissingMatch")
     atom_filter.add_handler(missing_match_path_value_detector)
