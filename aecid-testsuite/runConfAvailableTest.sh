@@ -6,7 +6,7 @@ CONFIG_PATH=/tmp/config.yml
 OUT=/tmp/output.txt
 LOG_FILE=/tmp/log.txt
 PATH_AIT_LDS=../source/root/etc/aminer/conf-available/ait-lds/*.py
-#PATH_AIT_LDS=/etc/aminer/conf-available/ait-lds/*.py
+PATH_AIT_LDS=/etc/aminer/conf-available/ait-lds/*.py
 
 for filename in $PATH_AIT_LDS; do
     cat > $CONFIG_PATH <<EOL

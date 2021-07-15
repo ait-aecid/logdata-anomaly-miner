@@ -51,7 +51,7 @@ ADD LICENSE /docs/LICENSE.md
 
 # Copy logdata-anomaly-miner-sources
 ADD source/root/usr/lib/logdata-anomaly-miner /usr/lib/logdata-anomaly-miner
-ADD source/root/etc/aminer/conf-available/ait-lds
+ADD source/root/etc/aminer/conf-available/ait-lds /etc/aminer/conf-available/ait-lds
 
 # Entrypoint-wrapper
 ADD scripts/aminerwrapper.sh /aminerwrapper.sh
