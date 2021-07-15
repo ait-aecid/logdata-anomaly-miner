@@ -79,8 +79,19 @@ case "$1" in
 		./${1}.sh ${*:2}
 		exit $?
 		;;
+	runOfflineMode)
+		cd $TESTDIR
+		./${1}.sh ${*:2}
+		exit $?
+		;;
+	runMypy)
+		cd $TESTDIR
+		./${1}.sh ${*:2}
+		exit $?
+		;;
 	ALL)
 		cd $TESTDIR
+		        ./runMypy.sh
                 ./runSuspendModeTest.sh
                 ./runUnittests.sh
                 ./runRemoteControlTest.sh
@@ -99,6 +110,7 @@ case "$1" in
                 ./runJsonDemo.sh demo/aminerJsonInputDemo/json-wazuh-demo.yml
                 ./runAminerIntegrationTest.sh aminerIntegrationTest.sh config.py
                 ./runAminerIntegrationTest.sh aminerIntegrationTest2.sh config21.py config22.py
+                ./runOfflineMode.sh
                 ./runGettingStarted.sh
                 ./runTryItOut.sh
                 ./runHowToCreateYourOwnSequenceDetector.sh
@@ -113,9 +125,9 @@ case "$1" in
 		;;
 	*)
 		echo "Usage: [ ALL | SHELL | runSuspendModeTest | runUnittests | runAminerDemo | runJsonDemo | runAminerJsonInputDemo "
-		echo "         runAminerIntegrationTest | runCoverageTests | runRemoteControlTest | runTryItOut "
+		echo "         runAminerIntegrationTest | runOfflineMode | runCoverageTests | runRemoteControlTest | runTryItOut "
 		echo "         runGettingStarted | runHowToCreateYourOwnSequenceDetector | runHowToCreateYourOwnFrequencyDetector"
-		echo "         runHowToMissingMatchPathValueDetector | runAminerEncodingDemo] <options>"
+		echo "         runHowToMissingMatchPathValueDetector | runAminerEncodingDemo | runMypy] <options>"
 		exit 1
 		;;
         

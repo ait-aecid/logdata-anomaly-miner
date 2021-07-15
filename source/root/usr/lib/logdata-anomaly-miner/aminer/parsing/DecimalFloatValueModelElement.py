@@ -17,18 +17,6 @@ from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
 
-SIGN_TYPE_NONE = "none"
-SIGN_TYPE_OPTIONAL = "optional"
-SIGN_TYPE_MANDATORY = "mandatory"
-
-PAD_TYPE_NONE = "none"
-PAD_TYPE_ZERO = "zero"
-PAD_TYPE_BLANK = "blank"
-
-EXP_TYPE_NONE = "none"
-EXP_TYPE_OPTIONAL = "optional"
-EXP_TYPE_MANDATORY = "mandatory"
-
 
 class DecimalFloatValueModelElement(ModelElementInterface):
     """
@@ -36,7 +24,20 @@ class DecimalFloatValueModelElement(ModelElementInterface):
     With padding, the signum has to be found before the padding characters.
     """
 
-    def __init__(self, element_id, value_sign_type=SIGN_TYPE_NONE, value_pad_type=PAD_TYPE_NONE, exponent_type=EXP_TYPE_NONE):
+    SIGN_TYPE_NONE = "none"
+    SIGN_TYPE_OPTIONAL = "optional"
+    SIGN_TYPE_MANDATORY = "mandatory"
+
+    PAD_TYPE_NONE = "none"
+    PAD_TYPE_ZERO = "zero"
+    PAD_TYPE_BLANK = "blank"
+
+    EXP_TYPE_NONE = "none"
+    EXP_TYPE_OPTIONAL = "optional"
+    EXP_TYPE_MANDATORY = "mandatory"
+
+    def __init__(self, element_id: str, value_sign_type: str = SIGN_TYPE_NONE, value_pad_type: str = PAD_TYPE_NONE,
+                 exponent_type: str = EXP_TYPE_NONE):
         if not isinstance(element_id, str):
             msg = "element_id has to be of the type string."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -47,16 +48,15 @@ class DecimalFloatValueModelElement(ModelElementInterface):
             raise ValueError(msg)
         self.element_id = element_id
 
-        self.start_characters = None
         if not isinstance(value_sign_type, str):
             msg = 'value_sign_type must be of type string.' % value_sign_type
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
-        if value_sign_type == SIGN_TYPE_NONE:
+        if value_sign_type == DecimalFloatValueModelElement.SIGN_TYPE_NONE:
             self.start_characters = b"0123456789"
-        elif value_sign_type == SIGN_TYPE_OPTIONAL:
+        elif value_sign_type == DecimalFloatValueModelElement.SIGN_TYPE_OPTIONAL:
             self.start_characters = b"-0123456789"
-        elif value_sign_type == SIGN_TYPE_MANDATORY:
+        elif value_sign_type == DecimalFloatValueModelElement.SIGN_TYPE_MANDATORY:
             self.start_characters = b"+-"
         else:
             msg = 'Invalid value_sign_type "%s"' % value_sign_type
@@ -68,11 +68,11 @@ class DecimalFloatValueModelElement(ModelElementInterface):
             msg = 'value_pad_type must be of type string.' % value_sign_type
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
-        if value_pad_type == PAD_TYPE_NONE:
+        if value_pad_type == DecimalFloatValueModelElement.PAD_TYPE_NONE:
             pass
-        elif value_pad_type == PAD_TYPE_ZERO:
+        elif value_pad_type == DecimalFloatValueModelElement.PAD_TYPE_ZERO:
             self.pad_characters = b"0"
-        elif value_pad_type == PAD_TYPE_BLANK:
+        elif value_pad_type == DecimalFloatValueModelElement.PAD_TYPE_BLANK:
             self.pad_characters = b" "
         else:
             msg = 'Invalid value_pad_type "%s"' % value_sign_type
@@ -84,7 +84,8 @@ class DecimalFloatValueModelElement(ModelElementInterface):
             msg = 'exponent_type must be of type string.' % value_sign_type
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
-        if exponent_type not in [EXP_TYPE_NONE, EXP_TYPE_OPTIONAL, EXP_TYPE_MANDATORY]:
+        if exponent_type not in [DecimalFloatValueModelElement.EXP_TYPE_NONE, DecimalFloatValueModelElement.EXP_TYPE_OPTIONAL,
+                                 DecimalFloatValueModelElement.EXP_TYPE_MANDATORY]:
             msg = 'Invalid exponent_type "%s"' % exponent_type
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
@@ -101,7 +102,7 @@ class DecimalFloatValueModelElement(ModelElementInterface):
         """
         return None
 
-    def get_match_element(self, path, match_context):
+    def get_match_element(self, path: str, match_context):
         """
         Find the maximum number of bytes forming a decimal number according to the parameters specified.
         @return a match when at least one byte being a digit was found
@@ -148,7 +149,7 @@ class DecimalFloatValueModelElement(ModelElementInterface):
                 return None
 
         # See if there could be any exponent following the number.
-        if (self.exponent_type != EXP_TYPE_NONE) and (match_len + 1 < len(data)) and (
+        if (self.exponent_type != DecimalFloatValueModelElement.EXP_TYPE_NONE) and (match_len + 1 < len(data)) and (
                 data[match_len] in b"eE"):
             match_len += 1
             if data[match_len] in b"+-":

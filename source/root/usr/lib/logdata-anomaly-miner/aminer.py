@@ -36,6 +36,8 @@ import shutil
 import warnings
 import argparse
 import stat
+import tempfile
+import ast
 from pwd import getpwnam
 from grp import getgrnam
 
@@ -51,11 +53,12 @@ from metadata import __version_string__, __version__  # skipcq: FLK-E402
 
 
 child_termination_triggered_flag = False
+offline_mode = False
 
 
 def run_analysis_child(aminer_config, program_name):
     """Run the Analysis Child."""
-    # Verify existance and ownership of persistence directory.
+    # Verify existence and ownership of persistence directory.
     logging.getLogger(AminerConfig.REMOTE_CONTROL_LOG_NAME).info('aminer started.')
     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info('aminer started.')
     persistence_dir_name = aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_DIR, AminerConfig.DEFAULT_PERSISTENCE_DIR)
@@ -70,13 +73,17 @@ def run_analysis_child(aminer_config, program_name):
         sys.exit(1)
     import posix1e
     # O_PATH is problematic when checking ACL. However it is possible to check the ACL using the file name.
-    if posix1e.has_extended(persistence_dir_name):
-        msg = 'WARNING: SECURITY: Extended POSIX ACLs are set in %s, but not supported by the aminer. Backdoor access could be possible.'\
-              % persistence_dir_name.decode()
-        print(msg, file=sys.stderr)
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
+    try:
+        if posix1e.has_extended(persistence_dir_name):
+            msg = 'WARNING: SECURITY: Extended POSIX ACLs are set in %s, but not supported by the aminer. Backdoor access could be ' \
+                  'possible.' % persistence_dir_name.decode()
+            print(msg, file=sys.stderr)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
+    except OSError:  # system does not support POSIX ACLs.
+        pass
 
     child = AnalysisChild(program_name, aminer_config)
+    child.offline_mode = offline_mode
     # This function call will only return on error or signal induced normal termination.
     child_return_status = child.run_analysis(3)
     if child_return_status == 0:
@@ -180,6 +187,35 @@ def initialize_loggers(aminer_config, aminer_user_id, aminer_grp_id):
     debug_logger.addHandler(debug_file_handler)
 
 
+def parse_var(s):
+    """
+    Parse a key, value pair, separated by "=".
+    That's the reverse of ShellArgs.
+
+    On the command line (argparse) a declaration will typically look like:
+        foo=hello
+    or
+        foo="hello world"
+    """
+    items = s.split("=")
+    key = items[0].strip()  # we remove blanks around keys, as is logical
+    if len(items) > 1:
+        # rejoin the rest:
+        value = "=".join(items[1:])
+    return key, value
+
+
+def parse_vars(items):
+    """Parse a series of key-value pairs and return a dictionary."""
+    d = {}
+
+    if items:
+        for item in items:
+            key, value = parse_var(item)
+            d[key] = value
+    return d
+
+
 def main():
     """Run the aminer main program."""
     # Extract program name, but only when sure to contain no problematic characters.
@@ -204,16 +240,23 @@ def main():
     parser.add_argument('-u', '--check-updates', action='store_true', help='check if updates for the aminer are available.')
     parser.add_argument('-c', '--config', default='/etc/aminer/config.yml', type=str, help='path to the config-file')
     parser.add_argument('-D', '--daemon', action='store_false', help='run as a daemon process')
-    parser.add_argument('-s', '--stat', choices=[0, 1, 2], type=int, help='set the stat level. Possible stat-levels are 0 for no statistics'
-                                                                          ', 1 for normal statistic level and 2 for verbose statistics.')
-    parser.add_argument('-d', '--debug', choices=[0, 1, 2], type=int, help='set the debug level. Possible debug-levels are 0 for no '
-                                                                           'debugging, 1 for normal output (INFO and above), 2 for printing'
-                                                                           ' all debug information.')
+    parser.add_argument('-s', '--stat', choices=["0", "1", "2"], type=str,
+                        help='set the stat level. Possible stat-levels are 0 for no statistics, 1 for normal statistic level and 2 for '
+                             'verbose statistics.')
+    parser.add_argument('-d', '--debug', choices=["0", "1", "2"], type=str,
+                        help='set the debug level. Possible debug-levels are 0 for no debugging, 1 for normal output (INFO and above), 2 '
+                             'for printing all debug information.')
     parser.add_argument('--run-analysis', action='store_true', help='enable/disable analysis')
     parser.add_argument('-C', '--clear', action='store_true', help='removes all persistence directories')
     parser.add_argument('-r', '--remove', action='append', type=str, help='removes a specific persistence directory')
     parser.add_argument('-R', '--restore', type=str, help='restore a persistence backup')
     parser.add_argument('-f', '--from-begin', action='store_true', help='removes RepositioningData before starting the aminer')
+    parser.add_argument('-o', '--offline-mode', action='store_true', help='stop the aminer after all logs have been processed.')
+    parser.add_argument("--config-properties", metavar="KEY=VALUE", nargs='+',
+                        help="Set a number of config_properties by using key-value pairs (do not put spaces before or after the = sign). "
+                             "If a value contains spaces, you should define it with double quotes: 'foo=\"this is a sentence\". Note that "
+                             "values are always treated as strings. If values are already defined in the config_properties, the input "
+                             "types are converted to the ones already existing.")
 
     args = parser.parse_args()
 
@@ -243,6 +286,8 @@ def main():
     clear_persistence_flag = args.clear
     remove_persistence_dirs = args.remove
     from_begin_flag = args.from_begin
+    global offline_mode  # skipcq: PYL-W0603
+    offline_mode = args.offline_mode
     if args.restore is not None and ('.' in args.restore or '/' in args.restore):
         parser.error('The restore path %s must not contain any . or /' % args.restore)
     if args.remove is not None:
@@ -255,10 +300,10 @@ def main():
     stat_level_console_flag = False
     debug_level_console_flag = False
     if args.stat is not None:
-        stat_level = args.stat
+        stat_level = int(args.stat)
         stat_level_console_flag = True
     if args.debug is not None:
-        debug_level = args.stat
+        debug_level = int(args.debug)
         debug_level_console_flag = True
 
     # Load the main configuration file.
@@ -266,13 +311,73 @@ def main():
         print('%s: config "%s" not (yet) available!' % (program_name, config_file_name), file=sys.stderr)
         sys.exit(1)
 
+    # using the solution here to override config_properties:
+    # https://stackoverflow.com/questions/27146262/create-variable-key-value-pairs-with-argparse-python
+    use_temp_config = False
+    config_properties = parse_vars(args.config_properties)
+    if args.config_properties and "LearnMode" in config_properties:
+        ymlext = [".YAML", ".YML", ".yaml", ".yml"]
+        extension = os.path.splitext(config_file_name)[1]
+        if extension in ymlext:
+            use_temp_config = True
+            fd, temp_config = tempfile.mkstemp(suffix=".yml")
+            with open(config_file_name) as f:
+                for line in f:
+                    if "LearnMode" in line:
+                        line = "LearnMode: %s" % config_properties["LearnMode"]
+                    os.write(fd, line.encode())
+            config_file_name = temp_config
+            os.close(fd)
+        else:
+            msg = "The LearnMode parameter does not exist in .py configs!"
+            print(msg, sys.stderr)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            sys.exit(1)
+
     # Minimal import to avoid loading too much within the privileged process.
     try:
         aminer_config = AminerConfig.load_config(config_file_name)
+        if use_temp_config:
+            os.remove(config_file_name)
+            config_file_name = args.config
     except ValueError as e:
         sys.exit(1)
-    persistence_dir = aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_DIR, AminerConfig.DEFAULT_PERSISTENCE_DIR)
 
+    for config_property in config_properties:
+        if config_property == "LearnMode":
+            continue
+        old_value = aminer_config.config_properties.get(config_property)
+        value = config_properties[config_property]
+        if old_value is not None:
+            try:
+                if isinstance(old_value, bool):
+                    if value == "True":
+                        value = True
+                    elif value == "False":
+                        value = False
+                    else:
+                        msg = "The %s parameter must be of type %s!" % (config_property, type(old_value))
+                        print(msg, sys.stderr)
+                        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                        sys.exit(1)
+                elif isinstance(old_value, int):
+                    value = int(value)
+                elif isinstance(old_value, float):
+                    value = float(value)
+                elif isinstance(old_value, list):
+                    value = ast.literal_eval(value)
+            except ValueError:
+                msg = "The %s parameter must be of type %s!" % (config_property, type(old_value))
+                print(msg, sys.stderr)
+                logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                sys.exit(1)
+        else:
+            msg = "The %s parameter is not set in the config. It will be treated as a string!" % config_property
+            print("WARNING: " + msg, sys.stderr)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
+        aminer_config.config_properties[config_property] = value
+
+    persistence_dir = aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_DIR, AminerConfig.DEFAULT_PERSISTENCE_DIR)
     child_user_name = aminer_config.config_properties.get(AminerConfig.KEY_AMINER_USER)
     child_group_name = aminer_config.config_properties.get(AminerConfig.KEY_AMINER_GROUP)
     child_user_id = -1
@@ -562,9 +667,15 @@ def main():
         # Now execute the very same program again, but user might have moved or renamed it meanwhile. This would be problematic with
         # SUID-binaries (which we do not yet support). Do NOT just fork but also exec to avoid child circumventing
         # parent's ALSR due to cloned kernel VMA.
-        execArgs = ['aminerChild', '--run-analysis', '--config', analysis_config_file_name, '--stat', str(stat_level), '--debug',
-                    str(debug_level)]
-        os.execve(sys.argv[0], execArgs, {})  # skipcq: BAN-B606
+        exec_args = ['aminerChild', '--run-analysis', '--config', analysis_config_file_name, '--stat', str(stat_level), '--debug',
+                     str(debug_level)]
+        if offline_mode:
+            exec_args.append("--offline-mode")
+        if args.config_properties:
+            exec_args.append("--config-properties")
+            for config_property in args.config_properties:
+                exec_args.append(config_property)
+        os.execv(sys.argv[0], exec_args)  # skipcq: BAN-B606
         msg = 'Failed to execute child process'
         print(msg, file=sys.stderr)
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
@@ -597,7 +708,7 @@ def main():
         (sig_child_pid, sig_status) = os.waitpid(-1, os.WNOHANG)
         if sig_child_pid != 0:
             if sig_child_pid == child_pid:
-                if child_termination_triggered_flag:
+                if child_termination_triggered_flag or offline_mode:
                     # This was expected, just terminate.
                     break
                 msg = '%s: Analysis child process %d terminated unexpectedly with signal 0x%x' % (program_name, sig_child_pid, sig_status)

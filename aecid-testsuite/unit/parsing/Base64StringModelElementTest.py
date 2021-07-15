@@ -1,5 +1,7 @@
 import unittest
 from aminer.parsing.Base64StringModelElement import Base64StringModelElement
+from aminer.parsing.MatchContext import MatchContext
+from aminer.parsing.MatchElement import MatchElement
 from unit.TestBase import TestBase, DummyMatchContext
 
 
@@ -90,60 +92,26 @@ class Base64StringModelElementTest(TestBase):
 
     def test10element_id_input_validation(self):
         """Check if element_id is validated."""
-        # empty element_id
-        element_id = ""
-        self.assertRaises(ValueError, Base64StringModelElement, element_id)
-
-        # None element_id
-        element_id = None
-        self.assertRaises(TypeError, Base64StringModelElement, element_id)
-
-        # bytes element_id is not allowed
-        element_id = b"path"
-        self.assertRaises(TypeError, Base64StringModelElement, element_id)
-
-        # integer element_id is not allowed
-        element_id = 123
-        self.assertRaises(TypeError, Base64StringModelElement, element_id)
-
-        # float element_id is not allowed
-        element_id = 123.22
-        self.assertRaises(TypeError, Base64StringModelElement, element_id)
-
-        # boolean element_id is not allowed
-        element_id = True
-        self.assertRaises(TypeError, Base64StringModelElement, element_id)
-
-        # dict element_id is not allowed
-        element_id = {"id": "path"}
-        self.assertRaises(TypeError, Base64StringModelElement, element_id)
-
-        # list element_id is not allowed
-        element_id = ["path"]
-        self.assertRaises(TypeError, Base64StringModelElement, element_id)
-
-        # empty list element_id is not allowed
-        element_id = []
-        self.assertRaises(TypeError, Base64StringModelElement, element_id)
-
-        # empty tuple element_id is not allowed
-        element_id = ()
-        self.assertRaises(TypeError, Base64StringModelElement, element_id)
-
-        # empty set element_id is not allowed
-        element_id = set()
-        self.assertRaises(TypeError, Base64StringModelElement, element_id)
+        self.assertRaises(ValueError, Base64StringModelElement, "")  # empty element_id
+        self.assertRaises(TypeError, Base64StringModelElement, None)  # None element_id
+        self.assertRaises(TypeError, Base64StringModelElement, b"path")  # bytes element_id is not allowed
+        self.assertRaises(TypeError, Base64StringModelElement, True)  # boolean element_id is not allowed
+        self.assertRaises(TypeError, Base64StringModelElement, 123)  # integer element_id is not allowed
+        self.assertRaises(TypeError, Base64StringModelElement, 123.22)  # float element_id is not allowed
+        self.assertRaises(TypeError, Base64StringModelElement, {"id": "path"})  # dict element_id is not allowed
+        self.assertRaises(TypeError, Base64StringModelElement, ["path"])  # list element_id is not allowed
+        self.assertRaises(TypeError, Base64StringModelElement, [])  # empty list element_id is not allowed
+        self.assertRaises(TypeError, Base64StringModelElement, ())  # empty tuple element_id is not allowed
+        self.assertRaises(TypeError, Base64StringModelElement, set())  # empty set element_id is not allowed
 
     def test11get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = Base64StringModelElement(self.id_)
         data = b"VGhpcyBpcyBzb21lIHN0cmluZyB0byBiZSBlbmNvZGVkLg=="
         model_element.get_match_element(self.path, DummyMatchContext(data))
-        from aminer.parsing.MatchContext import MatchContext
         model_element.get_match_element(self.path, MatchContext(data))
 
-        from aminer.parsing.MatchElement import MatchElement
-        self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(data, None, None, None))
+        self.assertRaises(AttributeError, model_element.get_match_element, self.path, MatchElement(self.path, data, None, None))
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data)
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, data.decode())
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, 123)

@@ -23,7 +23,7 @@ from aminer.parsing.MatchElement import MatchElement
 class Base64StringModelElement(ModelElementInterface):
     """This class just tries to strip off as many base64 bytes as possible from a given data string."""
 
-    def __init__(self, element_id):
+    def __init__(self, element_id: str):
         if not isinstance(element_id, str):
             msg = "element_id has to be of the type string."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -46,7 +46,7 @@ class Base64StringModelElement(ModelElementInterface):
         """
         return None
 
-    def get_match_element(self, path, match_context):
+    def get_match_element(self, path: str, match_context):
         """
         Find the maximum number of bytes forming a integer number according to the parameters specified.
         @return a match when at least one byte being a digit was found.

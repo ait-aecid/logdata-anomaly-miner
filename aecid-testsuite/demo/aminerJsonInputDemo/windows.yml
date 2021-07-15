@@ -1,0 +1,164 @@
+LearnMode: False
+
+Log.Encoding: 'utf-8'
+
+Core.LogDir: '/tmp/lib/aminer/log'
+
+Core.PersistenceDir: '/tmp/lib/aminer'
+
+Core.PersistencePeriod: 600
+
+LogResourceList:
+        - 'file:///tmp/windows_json_logs/Security_Error.log'
+        - 'file:///tmp/windows_json_logs/Security_Working.log'
+
+MailAlerting.TargetAddress: 'root@localhost'
+
+MailAlerting.FromAddress: 'root@localhost'
+
+MailAlerting.SubjectPrefix: 'aminer Alerts:'
+
+MailAlerting.AlertGraceTime: 0
+
+MailAlerting.EventCollectTime: 0
+
+MailAlerting.MinAlertGap: 0
+
+MailAlerting.MaxAlertGap: 600
+
+MailAlerting.MaxEventsPerMessage: 1000
+
+LogPrefix: ''
+
+Log.StatisticsPeriod: 3600
+
+Log.StatisticsLevel: 1
+
+Log.DebugLevel: 2
+
+Parser:
+       - id: machinename
+         type: FixedWordlistDataModelElement
+         name: 'machinename'
+         args:
+          - 'N3IM1703.D03.arc.local'
+
+       - id: data
+         type: FixedWordlistDataModelElement
+         name: 'data'
+         args:
+          - ''
+
+       - id: index
+         type: DecimalIntegerValueModelElement
+         name: 'index'
+
+       - id: categorynumber
+         type: DecimalIntegerValueModelElement
+         name: 'categorynumber'
+
+       - id: eventid
+         type: DecimalIntegerValueModelElement
+         name: 'eventid'
+
+       - id: entrytype
+         type: DecimalIntegerValueModelElement
+         name: 'entrytype'
+
+       - id: source
+         type: VariableByteDataModelElement
+         name: 'source'
+         args: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.:;&%=+$,/?%#\~ '
+
+       - id: non_empty_elem
+         type: VariableByteDataModelElement
+         name: 'non_empty_elem'
+         args: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZüäö0123456789-_.:;&%=+$,/?%#\~()\r\n\t '
+
+       #- id: non_empty_elem
+       #  type: AnyByteDataModelElement
+       #  name: 'non_empty_elem'
+       #  #args: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.:;&%=+$,/?%#\~Ä '
+
+       - id: empty_elem
+         type: FixedWordlistDataModelElement
+         name: 'empty'
+         args:
+          - ''
+
+       - id: replacementstrings
+         type: FirstMatchModelElement
+         name: 'replacementstrings'
+         args:
+          - non_empty_elem
+          - empty_elem
+
+       - id: instanceid
+         type: DecimalIntegerValueModelElement
+         name: 'instanceid'
+
+       - id: timegenerated
+         type: VariableByteDataModelElement
+         name: 'timegenerated'
+         args: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.:;&%=+$,/?%#\~ '
+
+       - id: timewritten
+         type: VariableByteDataModelElement
+         name: 'timewritten'
+         args: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.:;&%=+$,/?%#\~ '
+
+       - id: username
+         type: FixedWordlistDataModelElement
+         name: 'username'
+         args:
+           - 'NT-AUTORITÄT'
+           - '\\'
+           - 'SYSTEM'
+           - 'Lokaler Dienst'
+           - 'null'
+
+       - id: site
+         type: FixedDataModelElement
+         name: 'site'
+         args: 'null'
+
+       - id: container
+         type: FixedDataModelElement
+         name: 'container'
+         args: 'null'
+
+       - id: json
+         start: True
+         type: JsonModelElement
+         name: 'model'
+         optional_key_prefix: '_'
+         key_parser_dict:
+           MachineName: machinename
+           Data: data
+           Index: index
+           CategoryNumber: categorynumber
+           EventID: eventid
+           EntryType: entrytype
+           Source: source
+           ReplacementStrings:
+            - replacementstrings
+           InstanceId: instanceid
+           TimeGenerated: timegenerated
+           TimeWritten: timewritten
+           UserName: username
+           Site: site
+           Container: container
+           _empty_list: EMPTY_LIST
+           _empty_object: EMPTY_OBJECT
+
+
+
+Input:
+        timestamp_paths: None
+        verbose: True
+        json_format: True
+
+EventHandlers:
+        - id: stpe
+          json: true
+          type: StreamPrinterEventHandler
