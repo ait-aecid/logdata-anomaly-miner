@@ -339,10 +339,10 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             self.check_variables = persistence_data["check_variables"]
             self.num_eventlines = persistence_data["num_eventlines"]
             self.etd_time_trigger = persistence_data["etd_time_trigger"]
-            self.num_eventlines_TSA_ref = persistence_data["num_eventlines_TSA_ref"]
+            self.num_eventlines_tsa_ref = persistence_data["num_eventlines_tsa_ref"]
             self.num_events = len(self.found_keys)
         else:
-            if self.track_time_for_TSA:
+            if self.track_time_for_tsa:
                 self.etd_time_trigger[0].append(-1)
                 self.etd_time_trigger[1].append(-1)
                 self.etd_time_trigger[2].append(-1)
@@ -351,7 +351,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         """Immediately write persistence data to storage."""
         persist_dict = {"found_keys": self.found_keys, "variable_key_list": self.variable_key_list, "values": self.values,
                         "longest_path": self.longest_path, "check_variables": self.check_variables, "num_eventlines": self.num_eventlines,
-                        "etd_time_trigger": self.etd_time_trigger, "num_eventlines_TSA_ref": self.num_eventlines_TSA_ref}
+                        "etd_time_trigger": self.etd_time_trigger, "num_eventlines_tsa_ref": self.num_eventlines_tsa_ref}
         PersistenceUtil.store_json(self.persistence_file_name, persist_dict)
 
         for following_module in self.following_modules:
