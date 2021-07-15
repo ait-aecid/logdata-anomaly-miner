@@ -26,9 +26,7 @@ def get_model():
         FixedDataModelElement('sp2', b' '),
         VariableByteDataModelElement('user_id', alphabet),
         FixedDataModelElement('sp3', b' ['),
-        DateTimeModelElement('time', b'%d/%b/%Y:%H:%M:%S'),
-        FixedDataModelElement('sp4', b' +'),
-        DecimalIntegerValueModelElement('tz'),
+        DateTimeModelElement('time', b'%d/%b/%Y:%H:%M:%S%z'),
         FixedDataModelElement('sp5', b'] "'),
         FirstMatchModelElement('fm', [
             FixedDataModelElement('dash', b'-'),
