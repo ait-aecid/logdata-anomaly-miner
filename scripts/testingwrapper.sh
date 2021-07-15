@@ -89,12 +89,18 @@ case "$1" in
 		./${1}.sh ${*:2}
 		exit $?
 		;;
+	runConfAvailableTest)
+		cd $TESTDIR
+		./${1}.sh ${*:2}
+		exit $?
+		;;
 	ALL)
 		cd $TESTDIR
 		        ./runMypy.sh
                 ./runSuspendModeTest.sh
                 ./runUnittests.sh
                 ./runRemoteControlTest.sh
+                ./runConfAvailableTest.sh
                 ./runAminerDemo.sh demo/aminer/demo-config.py
                 ./runAminerDemo.sh demo/aminer/jsonConverterHandler-demo-config.py
                 ./runAminerDemo.sh demo/aminer/template_config.py
@@ -127,7 +133,7 @@ case "$1" in
 		echo "Usage: [ ALL | SHELL | runSuspendModeTest | runUnittests | runAminerDemo | runJsonDemo | runAminerJsonInputDemo "
 		echo "         runAminerIntegrationTest | runOfflineMode | runCoverageTests | runRemoteControlTest | runTryItOut "
 		echo "         runGettingStarted | runHowToCreateYourOwnSequenceDetector | runHowToCreateYourOwnFrequencyDetector"
-		echo "         runHowToMissingMatchPathValueDetector | runAminerEncodingDemo | runMypy] <options>"
+		echo "         runHowToMissingMatchPathValueDetector | runAminerEncodingDemo | runMypy | runConfAvailableTest] <options>"
 		exit 1
 		;;
         
