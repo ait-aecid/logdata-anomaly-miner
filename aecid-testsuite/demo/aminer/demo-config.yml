@@ -155,7 +155,7 @@ Parser:
        - id: degrees
          type: FixedDataModelElement
          name: 'Degrees'
-         args: '\xc2\xb0C'
+         args: '°C'
 
        - id: cpuTemp
          type: SequenceModelElement
@@ -243,7 +243,7 @@ Parser:
        - id: started
          type: FixedDataModelElement
          name: 'Started'
-         args: "\\' started"
+         args: "' started"
 
        - id: typePath
          type: FixedDataModelElement
@@ -315,6 +315,7 @@ Parser:
        - id: mode
          type: DecimalIntegerValueModelElement
          name: 'mode'
+         value_pad_type: "zero"
 
        - id: ouid_string
          type: FixedDataModelElement
@@ -572,7 +573,7 @@ Parser:
        - id: fixedDataModelElementDrawnNumber
          type: FixedDataModelElement
          name: 'FixedDataModelElement'
-         args: 'drawn number: '
+         args: '[drawn number]: '
 
        - id: decimalIntegerValueModelElement1
          type: DecimalIntegerValueModelElement
@@ -650,35 +651,35 @@ Parser:
          name: 'OptionalMatchModelElement'
          args: firstMatchModelElement
 
-       - id: a
+       - id: g
          type: FixedDataModelElement
-         name: 'a'
-         args: 'a'
+         name: 'g'
+         args: 'g'
 
-       - id: b
+       - id: h
          type: FixedDataModelElement
-         name: 'b'
-         args: 'b'
+         name: 'h'
+         args: 'h'
 
-       - id: c
+       - id: i
          type: FixedDataModelElement
-         name: 'c'
-         args: 'c'
+         name: 'i'
+         args: 'i'
 
-       - id: d
+       - id: j
          type: FixedDataModelElement
-         name: 'd'
-         args: 'd'
+         name: 'j'
+         args: 'j'
 
-       - id: e
+       - id: k
          type: FixedDataModelElement
-         name: 'e'
-         args: 'e'
+         name: 'k'
+         args: 'k'
 
-       - id: f
+       - id: l
          type: FixedDataModelElement
-         name: 'f'
-         args: 'f'
+         name: 'l'
+         args: 'l'
 
        - id: cronAnnouncement
          type: SequenceModelElement
@@ -773,12 +774,12 @@ Parser:
          type: FirstMatchModelElement
          name: 'ECD'
          args:
-           - a
-           - b
-           - c
-           - d
-           - e
-           - f
+           - g
+           - h
+           - i
+           - j
+           - k
+           - l
 
        - id: parsingME
          type: FirstMatchModelElement
@@ -818,7 +819,8 @@ Parser:
 
 Input:
         timestamp_paths: ["/model/DailyCron/DTM"]
-        verbose: False # use this to debug your parser-model
+        verbose: True # use this to debug your parser-model
+        adjust_timestamps: True
 
 Analysis:
         - type: TimestampsUnsortedDetector
@@ -826,6 +828,9 @@ Analysis:
         - type: PathExistsMatchRule
           id: path_exists_match_rule1
           path: "/model/LoginDetails/PastTime/Time/Minutes"
+        - type: DebugMatchRule
+          id: debug_match_rule
+          debug_mode: True
         - type: PathExistsMatchRule
           id: path_exists_match_rule2
           path: "/model/LoginDetails"
@@ -844,11 +849,13 @@ Analysis:
           sub_rules:
             - "path_exists_match_rule1"
             - "negation_match_rule1"
+            - "debug_match_rule"
         - type: AndMatchRule
           id: and_match_rule2
           sub_rules:
             - "negation_match_rule1"
             - "path_exists_match_rule2"
+            - "debug_match_rule"
         - type: OrMatchRule
           id: or_match_rule
           sub_rules:
@@ -885,12 +892,12 @@ Analysis:
           id_path_list:
             - '/model/ParsingME'
           ignore_list:
-            - '/model/ECD/a'
-            - '/model/ECD/b'
-            - '/model/ECD/c'
-            - '/model/ECD/d'
-            - '/model/ECD/e'
-            - '/model/ECD/f'
+            - '/model/ECD/g'
+            - '/model/ECD/h'
+            - '/model/ECD/i'
+            - '/model/ECD/j'
+            - '/model/ECD/k'
+            - '/model/ECD/l'
             - '/model/Random'
             - '/model/RandomTime'
             - '/model/DailyCron'
@@ -909,6 +916,100 @@ Analysis:
             - "/model/DailyCron/JobNumber"
           tuple_transformation_function: "demo"
           learn_mode: True
+        - type: ModuloTimeMatchRule
+          id: "mt"
+          path: null
+          seconds_modulo: 3
+          lower_limit: 0
+          upper_limit: 3
+        - type: ValueDependentModuloTimeMatchRule
+          id: "vdmt"
+          path: null
+          seconds_modulo: 3
+          paths:
+            - "/model/ECD/g"
+            - "/model/ECD/h"
+            - "/model/ECD/i"
+            - "/model/ECD/j"
+            - "/model/ECD/k"
+            - "/model/ECD/l"
+          limit_lookup_dict:
+            e:
+              - 0
+              - 2.95
+          default_limit:
+            - 0
+            - 3
+        - type: ValueDependentDelegatedMatchRule
+          id: "value_dependent_delegated_match_rule"
+          paths:
+            - "/model/ECD/g"
+            - "/model/ECD/h"
+            - "/model/ECD/i"
+            - "/model/ECD/j"
+            - "/model/ECD/k"
+            - "/model/ECD/l"
+          rule_lookup_dict:
+            (b"g",): "mt"
+            (b"h",): "mt"
+            (b"i",): "mt"
+            (b"j",): "vdmt"
+            (b"k",): "vdmt"
+            (b"l",): "vdmt"
+            None: "mt"
+          default_rule: "mt"
+        - type: EventGenerationMatchAction
+          id: "ip_match_action"
+          event_type: "Analysis.Rules.IPv4InRFC1918MatchRule"
+          event_message: "Private IP address occurred!"
+        - type: IPv4InRFC1918MatchRule
+          id: "ipv4_in_rfc1918_match_rule"
+          path: "/model/ParsingME/se2/IpAddressDataModelElement"
+          match_action: "ip_match_action"
+        - type: DebugHistoryMatchRule
+          id: "debug_history_match_rule"
+          debug_mode: True
+        - type: ValueListMatchRule
+          id: "value_list_match_rule"
+          path: "/model/ParsingME/se2/IpAddressDataModelElement"
+          value_list:
+            - 134744072
+            - 134743044
+        - type: NegationMatchRule
+          id: "negation_list"
+          sub_rule: "value_list_match_rule"
+        - type: ValueRangeMatchRule
+          id: "value_range_match_rule"
+          path: "/model/ParsingME/se2/IpAddressDataModelElement"
+          lower_limit: 167772160
+          upper_limit: 184549375
+        - type: NegationMatchRule
+          id: "negation_range"
+          sub_rule: "value_range_match_rule"
+        - type: StringRegexMatchRule
+          id: "string_regex_match_rule"
+          path: "/model/type/syscall/success"
+          regex: "^no$"
+        - type: NegationMatchRule
+          id: "negation_string_regex"
+          sub_rule: "string_regex_match_rule"
+        - type: ParallelMatchRule
+          id: "parallel_match_rule"
+          sub_rules:
+            - "value_dependent_delegated_match_rule"
+            - "ipv4_in_rfc1918_match_rule"
+            - "debug_history_match_rule"
+        - type: AndMatchRule
+          id: "time_and_match_rule"
+          sub_rules:
+            - "parallel_match_rule"
+            - "negation_list"
+            - "negation_range"
+            - "negation_string_regex"
+        - type: AllowlistViolationDetector
+          id: TimeAllowlist
+          allowlist_rules:
+            - "time_and_match_rule"
         - type: LinearNumericBinDefinition
           id: linear_numeric_bin_definition
           lower_limit: 50
@@ -934,7 +1035,7 @@ Analysis:
           report_interval: 10
         - type: MatchValueAverageChangeDetector
           id: MatchValueAverageChange
-          timestamp_path: None
+          timestamp_path: null
           paths:
             - "/model/Random"
           min_bin_elements: 100

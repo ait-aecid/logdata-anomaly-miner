@@ -14,6 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import sys
 import logging
 import copy
+import ast
 from aminer.AminerConfig import DEBUG_LOG_NAME
 
 
@@ -297,13 +298,20 @@ def build_input_pipeline(analysis_context, parsing_model):
     json_format = yaml_data['Input']['json_format']
     if yaml_data['Input']['multi_source'] is True:
         from aminer.input.SimpleMultisourceAtomSync import SimpleMultisourceAtomSync
-        analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(parsing_model, [SimpleMultisourceAtomSync([
-            atom_filter], sync_wait_time=sync_wait_time)], anomaly_event_handlers, default_timestamp_paths=timestamp_paths, eol_sep=eol_sep,
-            json_format=json_format)
+        if yaml_data['Input']['adjust_timestamps'] is True:
+            from aminer.analysis.TimestampCorrectionFilters import SimpleMonotonicTimestampAdjust
+            atom_handler_list = [SimpleMultisourceAtomSync([SimpleMonotonicTimestampAdjust([atom_filter])], sync_wait_time=sync_wait_time)]
+        else:
+            atom_handler_list = [SimpleMultisourceAtomSync([atom_filter], sync_wait_time=sync_wait_time)]
     else:
-        analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
-            parsing_model, [atom_filter], anomaly_event_handlers, default_timestamp_paths=timestamp_paths, eol_sep=eol_sep,
-            json_format=json_format)
+        if yaml_data['Input']['adjust_timestamps'] is True:
+            from aminer.analysis.TimestampCorrectionFilters import SimpleMonotonicTimestampAdjust
+            atom_handler_list = [SimpleMonotonicTimestampAdjust([atom_filter])]
+        else:
+            atom_handler_list = [atom_filter]
+    analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
+        parsing_model, atom_handler_list, anomaly_event_handlers, default_timestamp_paths=timestamp_paths, eol_sep=eol_sep,
+        json_format=json_format)
     # Just report all unparsed atoms to the event handlers.
     if yaml_data['Input']['verbose'] is True:
         from aminer.input.VerboseUnparsedAtomHandler import VerboseUnparsedAtomHandler
@@ -579,12 +587,12 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     tmp_analyser = func(sub_rules, match_action=match_action)
                 if item['type'].name == 'ValueDependentDelegatedMatchRule':
                     rule_lookup_dict = {}
-                    for rule in item['rule_lookup_dict']:
+                    for key, rule in item['rule_lookup_dict'].items():
                         if rule not in match_rules_dict:
                             msg = 'The match rule %s does not exist!' % rule
                             logging.getLogger(DEBUG_LOG_NAME).error(msg)
                             raise ValueError(msg)
-                        rule_lookup_dict[rule] = match_rules_dict[rule]
+                        rule_lookup_dict[ast.literal_eval(key)] = match_rules_dict[rule]
                     tmp_analyser = func(item['paths'], rule_lookup_dict, default_rule=item['default_rule'], match_action=match_action)
                 if item['type'].name == 'NegationMatchRule':
                     if item['sub_rule'] not in match_rules_dict:
@@ -611,14 +619,21 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 if item['type'].name == 'ValueRangeMatchRule':
                     tmp_analyser = func(item['path'], item['lower_limit'], item['upper_limit'], match_action)
                 if item['type'].name == 'StringRegexMatchRule':
-                    tmp_analyser = func(item['path'], item['regex'], match_action=match_action)
+                    import re
+                    tmp_analyser = func(item['path'], re.compile(item['regex'].encode()), match_action=match_action)
                 if item['type'].name == 'ModuloTimeMatchRule':
                     # tzinfo parameter cannot be used yet..
                     tmp_analyser = func(item['path'], item['seconds_modulo'], item['lower_limit'], item['upper_limit'],
                                         match_action=match_action)
                 if item['type'].name == 'ValueDependentModuloTimeMatchRule':
                     # tzinfo parameter cannot be used yet..
-                    tmp_analyser = func(item['path'], item['seconds_modulo'], item['paths'], item['limit_lookup_dict'],
+                    limit_lookup_dict = {}
+                    for key in item['limit_lookup_dict'].keys():
+                        if isinstance(key, str):
+                            limit_lookup_dict[key.encode()] = item['limit_lookup_dict'][key]
+                        else:
+                            limit_lookup_dict[key] = item['limit_lookup_dict'][key]
+                    tmp_analyser = func(item['path'], item['seconds_modulo'], item['paths'], limit_lookup_dict,
                                         default_limit=item['default_limit'], match_action=match_action)
                 if item['type'].name == 'DebugMatchRule':
                     tmp_analyser = func(debug_match_result=item['debug_mode'], match_action=match_action)
@@ -671,8 +686,6 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     ruleset.append(match_rules_dict[rule])
                 tmp_analyser = func(analysis_context.aminer_config, ruleset, anomaly_event_handlers, persistence_id=item['persistence_id'],
                                     output_log_line=item['output_logline'])
-            elif item['type'].name == 'SimpleMonotonicTimestampAdjust':
-                tmp_analyser = func([atom_filter], stop_when_handled_flag=item['stop_when_handled_flag'])
             elif item['type'].name == 'TimestampsUnsortedDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, exit_on_error_flag=item['exit_on_error_flag'],
                                     output_log_line=item['output_logline'])

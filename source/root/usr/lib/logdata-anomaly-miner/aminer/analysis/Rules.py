@@ -225,9 +225,9 @@ class ValueDependentDelegatedMatchRule(MatchRule):
     def __init__(self, value_path_list, rule_lookup_dict, default_rule=None, match_action=None):
         """
         Create the rule.
-        @param list with value pathes that are used to extract the lookup keys for ruleLookupDict. If value lookup fails, None
+        @param list with value paths that are used to extract the lookup keys for ruleLookupDict. If value lookup fails, None
         will be used for lookup.
-        @param rule_lookup_dict dicitionary with tuple containing values for valuePathList as key and target rule as value.
+        @param rule_lookup_dict dictionary with tuple containing values for valuePathList as key and target rule as value.
         @param default_rule when not none, this rule will be executed as default. Otherwise when rule lookup failed, False will
         be returned unconditionally.
         @param match_action if None, no action is performed.
@@ -246,12 +246,14 @@ class ValueDependentDelegatedMatchRule(MatchRule):
         match_dict = log_atom.parser_match.get_match_dictionary()
         value_list = []
         for path in self.value_path_list:
-            value_element = match_dict.get(path, None)
-            if value_element is None:
-                value_list.append(None)
-            else:
+            value_element = match_dict.get(path)
+            if value_element is not None:
                 value_list.append(value_element.match_object)
-        rule = self.rule_lookup_dict.get(tuple(value_list), self.default_rule)
+        if len(value_list) > 0:
+            value = tuple(value_list)
+        else:
+            value = None
+        rule = self.rule_lookup_dict.get(value, self.default_rule)
         if rule is None:
             return False
         if rule.match(log_atom):
@@ -349,7 +351,7 @@ class ValueListMatchRule(MatchRule):
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
         self.log_total += 1
-        test_value = log_atom.parser_match.get_match_dictionary().get(self.path, None)
+        test_value = log_atom.parser_match.get_match_dictionary().get(self.path)
         if (test_value is not None) and (test_value.match_object in self.value_list):
             if self.match_action is not None:
                 self.match_action.match_action(log_atom)
@@ -486,12 +488,15 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
         match_dict = log_atom.parser_match.get_match_dictionary()
         value_list = []
         for path in self.value_path_list:
-            value_element = match_dict.get(path, None)
-            if value_element is None:
-                value_list.append(None)
-            else:
+            value_element = match_dict.get(path)
+            if value_element is not None:
                 value_list.append(value_element.match_object)
-        limits = self.limit_lookup_dict.get(value_list[0], self.default_limit)
+
+        if len(value_list) > 0:
+            value = value_list[0]
+        else:
+            value = None
+        limits = self.limit_lookup_dict.get(value, self.default_limit)
         if limits is None:
             return False
 
@@ -528,7 +533,7 @@ class IPv4InRFC1918MatchRule(MatchRule):
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
         self.log_total += 1
-        match_element = log_atom.parser_match.get_match_dictionary().get(self.path, None)
+        match_element = log_atom.parser_match.get_match_dictionary().get(self.path)
         if (match_element is None) or not isinstance(match_element.match_object, int):
             return False
         value = match_element.match_object
