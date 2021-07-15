@@ -112,6 +112,7 @@ def close_log_directory():
 
 
 def secure_rmtree(directory, fd):
+    """Remove a tree securely by using dir_fd."""
     for dirpath, dirnames, filenames in os.walk(directory, topdown=False):
         for filename in filenames:
             os.unlink(os.path.join(dirpath, filename), dir_fd=fd)
