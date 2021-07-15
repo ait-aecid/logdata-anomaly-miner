@@ -40,6 +40,11 @@ pipeline {
          }
          stage("Run Demo-Configs"){
              parallel {
+                 stage("available parsing models in conf-available") {
+                     steps {
+                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runConfAvailableTest"
+                     }
+                 }
                  stage("demo-config and jsonConverterHandler-demo-config") {
                      steps {
                          sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runAminerDemo demo/aminer/demo-config.py"
