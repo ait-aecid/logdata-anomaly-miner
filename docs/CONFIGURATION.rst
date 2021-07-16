@@ -2222,10 +2222,11 @@ The SyslogWriterEventHandler writes alerts to the local syslog instance.
 KafkaEventHandler
 ~~~~~~~~~~~~~~~~~
 
-The KafkaEventHandler writes it's output to a Kafka Message-Queue
+The KafkaEventHandler writes it's output to a `Kafka Message-Queue <https://kafka.apache.org/>`_
 
 * **topic**: String property with the topic-name for the message queue
 * **cfgfile**: String property with the path to the kafka-config file. A comprehensive list of all config-parameters can be found at https://kafka-python.readthedocs.io/en/master/apidoc/KafkaProducer.html
+  
   A typical kafka-config-file might look like this:
 
 .. code-block:: yaml
