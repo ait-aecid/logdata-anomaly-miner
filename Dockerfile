@@ -47,7 +47,6 @@ ADD docs /docs
 ADD README.md /docs
 ADD SECURITY.md /docs
 ADD LICENSE /docs/LICENSE.md
-ADD requirements.txt /docs/requirements.txt
 
 
 # Copy logdata-anomaly-miner-sources
