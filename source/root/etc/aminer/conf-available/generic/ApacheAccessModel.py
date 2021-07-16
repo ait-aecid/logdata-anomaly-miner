@@ -8,11 +8,7 @@ from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelE
 
 def get_model():
     """Return a parser for apache2 access.log."""
-    new_time_model = SequenceModelElement('time_model', [
-        DateTimeModelElement('time', b'[%d/%b/%Y:%H:%M:%S '),
-        FixedWordlistDataModelElement('sign', [b'+', b'-']),
-        DecimalIntegerValueModelElement('tz'),
-        FixedDataModelElement('bracket', b']')])
+    new_time_model = DateTimeModelElement('time', b'[%d/%b/%Y:%H:%M:%S%z')
     host_name_model = VariableByteDataModelElement('host', b'-.01234567890abcdefghijklmnopqrstuvwxyz:')
     identity_model = VariableByteDataModelElement('ident', b'-.01234567890abcdefghijklmnopqrstuvwxyz:')
     user_name_model = VariableByteDataModelElement('user', b'0123456789abcdefghijklmnopqrstuvwxyz.-')
@@ -35,7 +31,7 @@ def get_model():
         user_name_model,
         FixedDataModelElement('sp2', whitespace_str),
         new_time_model,
-        FixedDataModelElement('sp3', b' "'),
+        FixedDataModelElement('sp3', b'] "'),
         request_method_model,
         FixedDataModelElement('sp4', whitespace_str),
         request_model,
