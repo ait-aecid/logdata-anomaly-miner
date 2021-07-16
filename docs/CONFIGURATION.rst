@@ -2170,3 +2170,45 @@ It just adds the evaluated log_atom to a ObjectHistory.
 -------------
 EventHandling
 -------------
+
+EventHandler are output modules that allows the logdata-anomaly-miner to write alerts to specific targets.
+
+All EventHandler must have the following parameters and may have additional specific parameters that are defined in the respective sections. 
+
+* **id**: must be a unique string (required)
+* **type**: must be an existing Analysis component (required)
+* **json**: A boolean value that enables that the output is formatted in json (default: False )
+
+
+StreamPrinterEventHandler
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The StreamPrinterEventHandler writes alerts to a stream. If no output_file_path is defined, it writes the output to **stdout**
+
+* **output_file_path**: This string value defines a file where the output should be written to. Default: stdout
+
+SyslogWriterEventHandler
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+The SyslogWriterEventHandler writes alerts to the local syslog instance.
+
+.. warning:: USE THIS AT YOUR OWN RISK: by creating aminer/syslog log data processing loops, you will flood your syslog and probably fill up your disks.0
+
+* **instance_name**: This string defines the instance_name for the syslog. Default: **aminer**
+
+KafkaEventHandler
+~~~~~~~~~~~~~~~~~
+
+The KafkaEventHandler writes it's output to a Kafka Message-Queue
+
+* **topic**: String property with the topic-name for the message queue
+* **cfgfile**: String property with the path to the kafka-config file. A comprehensive list of all config-parameters can be found at https://kafka-python.readthedocs.io/en/master/apidoc/KafkaProducer.html
+  A typical kafka-config-file might look like this:
+
+.. code-block:: yaml
+
+  [DEFAULT]
+  bootstrap_servers = localhost:9092
+  security_protocol = PLAINTEXT
+
+.. note:: The header [DEFAULT] is important and must exist in the configuration file
