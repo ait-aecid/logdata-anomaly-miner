@@ -99,13 +99,45 @@ EOL
             echo '{"timestamp":"2020-02-29T06:11:02.147044+0000","flow_id":415686269975930,"in_iface":"eth0","event_type":"alert","src_ip":"192.168.10.238","src_port":50850,"dest_ip":"192.168.10.154","dest_port":80,"proto":"TCP","tx_id":0,"alert":{"action":"allowed","gid":1,"signature_id":2012887,"rev":3,"signature":"ET POLICY Http Client Body contains pass= in cleartext","category":"Potential Corporate Privacy Violation","severity":1},"http":{"hostname":"mail.cup.com","url":"\/login.php","http_user_agent":"Mozilla\/5.0 (X11; Ubuntu; Linux x86_64; rv:73.0) Gecko\/20100101 Firefox\/73.0","http_content_type":"text\/html","http_refer":"http:\/\/mail.cup.com\/login.php","http_method":"POST","protocol":"HTTP\/1.1","status":302,"redirect":"\/services\/portal\/","length":20}}' >> $LOG_FILE
             ;;
         SuricataFastParsingModel)
-            exit 0
-            echo "test6" > $LOG_FILE
+            echo "02/29/2020-00:00:13.674931  [**] [1:2012887:3] ET POLICY Http Client Body contains pass= in cleartext [**] [Classification: Potential Corporate Privacy Violation] [Priority: 1] {TCP} 192.168.10.190:39438 -> 192.168.10.154:80" > $LOG_FILE
             ;;
         SyslogParsingModel)
-            echo "test7" > $LOG_FILE
+            echo "Feb 29 00:01:41 mail-0 dovecot: imap(kelsey): Logged out in=79 out=875" > $LOG_FILE
+            echo "Mar  1 06:25:38 mail dovecot: imap(lino): Error: Failed to autocreate mailbox INBOX: Internal error occurred. Refer to server log for more information. [2020-03-01 06:25:38]" >> $LOG_FILE
+            echo "Feb 29 00:01:44 mail-0 dovecot: imap(della): Error: file_dotlock_create(/var/mail/della) failed: Permission denied (euid=1013(della) egid=1013(della) missing +w perm: /var/mail, we're not in group 8(mail), dir owned by 0:8 mode=0775) (set mail_privileged_group=mail)" >> $LOG_FILE
+            echo "Mar  1 06:25:41 mail dovecot: imap(idella): Error: Failed to autocreate mailbox INBOX: Internal error occurred. Refer to server log for more information. [2020-03-01 06:25:41]" >> $LOG_FILE
+            echo "Mar  4 14:14:36 mail dovecot: imap-login: Disconnected (auth failed, 2 attempts in 12 secs): user=<violet>, method=PLAIN, rip=127.0.0.1, lip=127.0.0.1, secured, session=<fEeWCQigUph/AAAB>" >> $LOG_FILE
+            echo "Mar  4 18:43:05 mail dovecot: imap-login: Disconnected (no auth attempts in 0 secs): user=<>, rip=192.168.10.185, lip=192.168.10.177, session=<cjd4ygugaJTAqAq5>" >> $LOG_FILE
+            echo "Mar  4 13:51:48 mail dovecot: imap-login: Disconnected (disconnected before auth was ready, waited 0 secs): user=<>, rip=192.168.10.18, lip=192.168.10.21, session=<+KO9uAeg4sPAqAoS>" >> $LOG_FILE
+            echo "Mar  4 18:43:59 mail dovecot: imap-login: Login: user=<sadye>, method=PLAIN, rip=127.0.0.1, lip=127.0.0.1, mpid=11475, secured, session=<8ZitzQugnrh/AAAB>" >> $LOG_FILE
+            echo "Feb 29 11:39:45 mail-0 dovecot: imap-login: Error: anvil: Anvil queries timed out after 5 secs - aborting queries" >> $LOG_FILE
+            echo "Feb 29 09:15:59 mail-1 dovecot: imap-login: Warning: Auth process not responding, delayed sending initial response (greeting): user=<>, rip=127.0.0.1, lip=127.0.0.1, secured, session=<dVUEZ7OfnLl/AAAB>" >> $LOG_FILE
+            echo "Feb 29 11:39:35 mail-2 dovecot: auth: Error: auth worker: Aborted PASSV request for marjory: Worker process died unexpectedly" >> $LOG_FILE
+            echo "Feb 29 11:39:35 mail-2 dovecot: auth-worker(2233): Fatal: Error reading configuration: Timeout reading config from /var/run/dovecot/config" >> $LOG_FILE
+            echo "Feb 29 11:39:35 mail-2 dovecot: master: Error: service(auth-worker): command startup failed, throttling for 2 secs" >> $LOG_FILE
+            ### delete this: service/horde noch nicht begonnen
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
             ;;
         AminerParsingModel)
+            exit 0
             echo "test8" > $LOG_FILE
             ;;
         ApacheAccessModel)
