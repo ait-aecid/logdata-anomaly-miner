@@ -1,0 +1,13 @@
+version: "3"
+services:
+    aminer:
+        build:
+            context: .
+        volumes:
+            - '$PWD/aminercfg:/etc/aminer'
+            - '$PWD/persistency:/var/lib/aminer'
+            - '$PWD/logs:/logs'
+        command: ["aminer", "--version"]
+
+
+        
