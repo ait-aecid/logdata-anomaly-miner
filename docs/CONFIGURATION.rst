@@ -2187,6 +2187,21 @@ The StreamPrinterEventHandler writes alerts to a stream. If no output_file_path 
 
 * **output_file_path**: This string value defines a file where the output should be written to. Default: stdout
 
+.. code-block:: yaml
+
+  EventHandlers:
+  # output to stdout:
+      - id: 'stpe'
+        type: 'StreamPrinterEventHandler'
+
+  # output json to file:
+      - id: 'stpefile'
+        type: 'StreamPrinterEventHandler'
+        json: true
+        output_file_path: '/tmp/aminer_out.log'
+
+
+
 SyslogWriterEventHandler
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -2195,6 +2210,14 @@ The SyslogWriterEventHandler writes alerts to the local syslog instance.
 .. warning:: USE THIS AT YOUR OWN RISK: by creating aminer/syslog log data processing loops, you will flood your syslog and probably fill up your disks.0
 
 * **instance_name**: This string defines the instance_name for the syslog. Default: **aminer**
+
+.. code-block:: yaml
+
+  EventHandlers:
+      - id: 'swe'
+        type: 'SyslogWriterEventHandler'
+        instance_name: 'logdata-anomaly-miner'
+
 
 KafkaEventHandler
 ~~~~~~~~~~~~~~~~~
@@ -2212,3 +2235,14 @@ The KafkaEventHandler writes it's output to a Kafka Message-Queue
   security_protocol = PLAINTEXT
 
 .. note:: The header [DEFAULT] is important and must exist in the configuration file
+
+
+.. code-block:: yaml
+
+  EventHandlers:
+  # output to kafka using the topic 'aminer'
+      - id: 'mqe'
+        json: True
+        topic: 'aminer'
+        cfgfile: '/etc/aminer/kafka-client.conf'
+        type: 'KafkaEventHandler'
