@@ -115,30 +115,59 @@ EOL
             echo "Feb 29 11:39:35 mail-2 dovecot: auth: Error: auth worker: Aborted PASSV request for marjory: Worker process died unexpectedly" >> $LOG_FILE
             echo "Feb 29 11:39:35 mail-2 dovecot: auth-worker(2233): Fatal: Error reading configuration: Timeout reading config from /var/run/dovecot/config" >> $LOG_FILE
             echo "Feb 29 11:39:35 mail-2 dovecot: master: Error: service(auth-worker): command startup failed, throttling for 2 secs" >> $LOG_FILE
-            ### delete this: service/horde noch nicht begonnen
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
+            echo 'Feb 29 11:39:46 mail-2 HORDE: [imp] Login success for marjory (192.168.10.18) to {imap://localhost/} [pid 1764 on line 156 of "/var/www/mail.insect.com/imp/lib/Auth.php"]' >> $LOG_FILE
+            echo 'Feb 29 17:18:23 mail-2 HORDE: [imp] Message sent to marcelle@mail.insect.com, merlene@mail.insect.com from les (192.168.10.18) [pid 9596 on line 970 of "/var/www/mail.insect.com/imp/lib/Compose.php"]' >> $LOG_FILE
+            echo 'Feb 29 20:01:48 mail-2 HORDE: [imp] FAILED LOGIN for violet (192.168.10.18) to {imap://localhost/} [pid 14794 on line 156 of "/var/www/mail.insect.com/imp/lib/Auth.php"]' >> $LOG_FILE
+            echo 'Mar  1 06:25:38 mail HORDE: [imp] [status] Could not open mailbox "INBOX". [pid 999 on line 730 of "/var/www/mail.onion.com/imp/lib/Imap.php"]' >> $LOG_FILE
+            echo 'Mar  1 06:27:56 mail HORDE: [imp] [getSyncToken] IMAP error reported by server. [pid 1127 on line 730 of "/var/www/mail.onion.com/imp/lib/Imap.php"]' >> $LOG_FILE
+            echo 'Feb 29 12:12:54 mail-2 HORDE: [horde] Login success for dorie to horde (192.168.10.18) [pid 2272 on line 163 of "/var/www/mail.insect.com/login.php"]' >> $LOG_FILE
+            echo 'Feb 29 12:13:00 mail-2 HORDE: [horde] User marjory logged out of Horde (192.168.10.18) [pid 2988 on line 106 of "/var/www/mail.insect.com/login.php"]' >> $LOG_FILE
+            echo 'Feb 29 17:07:07 mail-2 HORDE: [horde] FAILED LOGIN for marcelle to horde (192.168.10.98) [pid 8517 on line 198 of "/var/www/mail.insect.com/login.php"]' >> $LOG_FILE
+            echo 'Mar  1 18:22:40 mail HORDE: [imp] [login] Authentication failed. [pid 12890 on line 730 of "/var/www/mail.onion.com/imp/lib/Imap.php"]' >> $LOG_FILE
+            echo 'Mar  4 18:55:05 mail HORDE: [turba] PHP ERROR: finfo_file(): Empty filename or path [pid 11642 on line 166 of "/usr/share/php/Horde/Mime/Magic.php"]' >> $LOG_FILE
+            echo 'Mar  4 18:50:51 mail HORDE: [horde] PHP ERROR: Cannot modify header information - headers already sent [pid 11019 on line 0 of "Unknown"]' >> $LOG_FILE
+            echo 'Mar  4 18:01:23 mail HORDE: Guest user is not authorized for Horde (Host: 192.168.10.81). [pid 4815 on line 324 of "/usr/share/php/Horde/Registry.php"]' >> $LOG_FILE
+            echo 'Mar  4 18:10:08 mail HORDE: PHP ERROR: rawurlencode() expects parameter 1 to be string, array given [pid 6556 on line 302 of "/usr/share/php/Horde/Url.php"]' >> $LOG_FILE
+            # missing model/service/horde/horde/free_msg - no log found!
+            echo "Feb 29 12:39:02 mail-0 CRON[11260]: (root) CMD (  [ -x /usr/lib/php/sessionclean ] && if [ ! -d /run/systemd/system ]; then /usr/lib/php/sessionclean; fi)" >> $LOG_FILE
+            echo "Feb 29 06:25:01 mail-1 CRON[27486]: pam_unix(cron:session): session opened for user root by (uid=0)" >> $LOG_FILE
+            echo "Feb 29 15:42:36 mail-1 auth: pam_unix(dovecot:auth): authentication failure; logname= uid=0 euid=0 tty=dovecot ruser=marcelino rhost=127.0.0.1  user=marcelino" >> $LOG_FILE
+            echo "Mar  1 03:09:18 mail-0 systemd[1]: Starting Clean php session files..." >> $LOG_FILE
+            echo "Mar  1 03:09:19 mail-0 systemd[1]: Started Clean php session files." >> $LOG_FILE
+            echo "Mar  1 18:26:18 mail systemd[1]: Starting Cleanup of Temporary Directories..." >> $LOG_FILE
+            echo "Mar  1 18:26:18 mail systemd[1]: Started Cleanup of Temporary Directories." >> $LOG_FILE
+            echo "Mar  2 06:37:52 mail systemd[1]: Starting Daily apt upgrade and clean activities..." >> $LOG_FILE
+            echo "Mar  2 06:37:53 mail systemd[1]: Started Daily apt upgrade and clean activities." >> $LOG_FILE
+            echo "Mar  2 12:30:18 mail systemd[1]: Starting Daily apt download activities..." >> $LOG_FILE
+            echo "Mar  2 12:30:19 mail systemd[1]: Started Daily apt download activities." >> $LOG_FILE
+            echo "Mar  3 06:29:00 mail systemd[1]: Starting Security Auditing Service..." >> $LOG_FILE
+            echo "Mar  3 06:29:00 mail systemd[1]: Started Security Auditing Service." >> $LOG_FILE
+            echo "Mar  4 06:29:05 mail systemd[1]: Stopping Security Auditing Service..." >> $LOG_FILE
+            echo "Mar  4 06:29:05 mail systemd[1]: Stopped Security Auditing Service." >> $LOG_FILE
+            echo "Mar  5 06:25:35 mail systemd[1]: Reloading The Apache HTTP Server." >> $LOG_FILE
+            echo "Mar  5 06:25:35 mail systemd[1]: Reloaded The Apache HTTP Server." >> $LOG_FILE
+            echo "Feb 29 11:52:32 mail-2 systemd[1]: Mounting Arbitrary Executable File Formats File System..." >> $LOG_FILE
+            echo "Feb 29 11:52:32 mail-2 systemd[1]: Mounted Arbitrary Executable File Formats File System." >> $LOG_FILE
+            echo "Feb 29 13:56:59 mail-2 systemd[1]: apt-daily.timer: Adding 6h 4min 46.743459s random time." >> $LOG_FILE
+            # missing model/service/systemd/service - no log found!
+            echo "Feb 29 07:24:02 mail-0 kernel: [47678.309129]  [<ffffffff92e1e577>] ? ret_from_fork+0x57/0x70" >> $LOG_FILE
+            echo "Mar  5 06:29:07 mail augenrules[17378]: backlog_wait_time 0" >> $LOG_FILE
+            echo "Mar  5 06:29:07 mail auditd[17377]: dispatch error reporting limit reached - ending report notification." >> $LOG_FILE
+            echo "Mar  5 06:29:07 mail auditd: audit log is not writable by owner" >> $LOG_FILE
+            echo "Mar  4 06:29:05 mail audispd: No plugins found, exiting" >> $LOG_FILE
+            echo 'Mar  3 06:29:01 mail liblogging-stdlog:  [origin software="rsyslogd" swVersion="8.24.0" x-pid="480" x-info="http://www.rsyslog.com"] rsyslogd was HUPed' >> $LOG_FILE
+            echo "Mar  1 09:25:16 mail freshclam[22090]: Sun Mar  1 09:25:16 2020 -> bytecode.cvd is up to date (version: 331, sigs: 94, f-level: 63, builder: anvilleg)" >> $LOG_FILE
+            echo "Mar  1 07:26:09 mail dhclient[418]: DHCPREQUEST of 192.168.10.21 on eth0 to 192.168.10.2 port 67" >> $LOG_FILE
+            echo "Mar  1 00:59:38 mail-2 dhclient[387]: DHCPACK of 192.168.10.21 from 192.168.10.2" >> $LOG_FILE
+            echo "Feb 29 21:12:42 mail-2 dhclient[418]: bound to 192.168.10.21 -- renewal in 36807 seconds." >> $LOG_FILE
             ;;
         AminerParsingModel)
             exit 0
             echo "test8" > $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
             ;;
         ApacheAccessModel)
             echo '83.149.9.216 - - [17/May/2015:10:05:03 +0000] "GET /presentations/logstash-monitorama-2013/images/kibana-search.png HTTP/1.1" 200 203023 "http://semicomplete.com/presentations/logstash-monitorama-2013/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.77 Safari/537.36"' > $LOG_FILE
