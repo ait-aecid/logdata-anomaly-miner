@@ -50,7 +50,7 @@ def get_model():
                 FixedDataModelElement("sp10", b'" "'),
                 DelimitedDataModelElement("user_agent", b'"', b"\\"),
                 FixedDataModelElement("sp11", b'"'),
-                ])),
+                ]))
         ])
 
     return model

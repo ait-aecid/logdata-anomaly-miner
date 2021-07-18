@@ -88,7 +88,7 @@ def get_model():
                                 DelimitedDataModelElement("egid_user", b")"),
                                 FixedDataModelElement("perm_str", b") missing +w perm: "),
                                 DelimitedDataModelElement("mail_path", b","),
-                                FixedDataModelElement("group_str", b", we\"re not in group "),
+                                FixedDataModelElement("group_str", b", we're not in group "),
                                 DecimalIntegerValueModelElement("group_id"),
                                 FixedDataModelElement("brack_str4", b"("),
                                 DelimitedDataModelElement("group_name", b")"),

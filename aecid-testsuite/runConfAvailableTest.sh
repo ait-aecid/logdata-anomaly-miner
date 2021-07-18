@@ -162,7 +162,7 @@ EOL
             echo "Feb 29 21:12:42 mail-2 dhclient[418]: bound to 192.168.10.21 -- renewal in 36807 seconds." >> $LOG_FILE
             ;;
         AminerParsingModel)
-            exit 0
+            # skipping this one for now!
             echo "test8" > $LOG_FILE
             echo "" >> $LOG_FILE
             echo "" >> $LOG_FILE
@@ -173,11 +173,48 @@ EOL
             echo '83.149.9.216 - - [17/May/2015:10:05:03 +0000] "GET /presentations/logstash-monitorama-2013/images/kibana-search.png HTTP/1.1" 200 203023 "http://semicomplete.com/presentations/logstash-monitorama-2013/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.77 Safari/537.36"' > $LOG_FILE
             echo '::1 - - [17/May/2015:10:05:03 +0000] "-" 200 203023' >> $LOG_FILE
             echo '192.168.10.190 - - [29/Feb/2020:13:58:32 +0000] "GET /services/portal/ HTTP/1.1" 200 7499 "-" "-"' >> $LOG_FILE
+            echo 'www.google.com - - [29/Feb/2020:13:58:32 +0000] "GET /services/portal/ HTTP/1.1" 200 7499 "-" "-"' >> $LOG_FILE
             ;;
         AudispdParsingModel)
-            echo "test10" > $LOG_FILE
+            echo 'type=EXECVE msg=audit(1582934957.620:917519): argc=10 a0="find" a1="/usr/lib/php" a2="-mindepth" a3="1" a4="-maxdepth" a5="1" a6="-regex" a7=".*[0-9]\.[0-9]" a8="-printf" a9="%f\n"' > $LOG_FILE
+            echo 'type=PROCTITLE msg=audit(1582934957.616:917512): proctitle=736F7274002D726E' >> $LOG_FILE
+            echo 'type=SYSCALL msg=audit(1582934957.616:917513): arch=c000003e syscall=2 success=yes exit=3 a0=7f5b904e4988 a1=80000 a2=1 a3=7f5b906ec518 items=1 ppid=25680 pid=25684 auid=4294967295 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=(none) ses=4294967295 comm="sort" exe="/usr/bin/sort" key=(null)' >> $LOG_FILE
+            echo 'type=PATH msg=audit(1582934957.616:917512): item=0 name="/usr/bin/sort" inode=2883 dev=fe:01 mode=0100755 ouid=0 ogid=0 rdev=00:00 nametype=NORMAL' >> $LOG_FILE
+            echo 'type=LOGIN msg=audit(1582935421.373:947570): pid=25821 uid=0 old-auid=4294967295 auid=0 tty=(none) old-ses=4294967295 ses=22 res=1' >> $LOG_FILE
+            echo "type=SOCKADDR msg=audit(1582935421.377:947594): saddr=01002F6465762F6C6F6700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" >> $LOG_FILE
+            echo "type=UNKNOWN[1327] msg=audit(1522927552.749:917): proctitle=636174002F6574632F706173737764" >> $LOG_FILE
+            echo 'type=CRED_REFR msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
+            echo 'type=USER_START msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
+            echo 'type=USER_ACCT msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
+            echo 'type=USER_AUTH msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
+            echo 'type=CRED_DISP msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
+            echo 'type=SERVICE_START msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
+            echo 'type=SERVICE_STOP msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
+            echo 'type=USER_END msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
+            echo 'type=USER_CMD msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
+            echo 'type=CRED_ACQ msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
+            echo 'type=BPRM_FCAPS msg=audit(1583242318.512:13886958): fver=17474 fp=33 fi=4294967295 fe=4294967295 old_pp=message old_pi="apache2" old_pe="/usr/bin/bash" new_pp=(null) new_pi=(null) new_pe=(null)' >> $LOG_FILE
+            echo 'type=CWD msg=audit(1522927552.749:917):  cwd="/root"' >> $LOG_FILE
+            echo "type=SOCKETCALL msg=audit(1134642601.473:447): nargs=3 a0=1 a1=1 a2=0" >> $LOG_FILE
+            echo "type=USER_AUTH msg=audit(1234877011.791:7731): user pid=26127 uid=0 auid=4294967295 ses=4294967295 msg='op=PAM:authentication acct=\"root\" exe=\"/usr/sbin/sshd\"(hostname=jupiter.example.com, addr=192.168.2.100, terminal=ssh res=success)'" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
             ;;
         CronParsingModel)
+            exit 0
             echo "test11" > $LOG_FILE
             ;;
         EximGenericParsingModel)
@@ -242,7 +279,7 @@ EOL
 
     #cat $OUT
 
-    if `grep -Fq "VerboseUnparsedAtomHandler" $OUT` || `grep -Fq "Traceback" $OUT` || `grep -Fq "{'Parser'" $OUT`; then
+    if `grep -Fq "VerboseUnparsedAtomHandler" $OUT` || `grep -Fq "Traceback" $OUT` || `grep -Fq "{'Parser'" $OUT` || `grep -Fq "FATAL" $OUT`; then
         echo "Failed Test in $filename"
 	    exit_code=1
 	    cat $OUT

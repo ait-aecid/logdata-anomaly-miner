@@ -15,15 +15,24 @@ from aminer.parsing.RepeatedElementDataModelElement import RepeatedElementDataMo
 from aminer.parsing.SequenceModelElement import SequenceModelElement
 from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
 from aminer.parsing.WhiteSpaceLimitedDataModelElement import WhiteSpaceLimitedDataModelElement
+from aminer.parsing.ModelElementInterface import ModelElementInterface
 
 
 def get_model():
     """Return a model to parse a audispd message logged via syslog after any standard logging preamble, e.g. from syslog."""
 
-    class ExecArgumentDataModelElement():
+    class ExecArgumentDataModelElement(ModelElementInterface):
         """This is a helper class for parsing the (encoded) exec argument strings found within audit logs."""
 
-        def __init__(self, element_id):
+        def __init__(self, element_id: str):
+            if not isinstance(element_id, str):
+                msg = "element_id has to be of the type string."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
+            if len(element_id) < 1:
+                msg = "element_id must not be empty."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise ValueError(msg)
             self.element_id = element_id
 
         @staticmethod
@@ -31,7 +40,7 @@ def get_model():
             """Get the children of this element (none)."""
             return None
 
-        def get_match_element(self, path, match_context):
+        def get_match_element(self, path: str, match_context):
             """
             Find the maximum number of bytes belonging to an exec argument.
             @return a match when at least two bytes were found including the delimiters.
