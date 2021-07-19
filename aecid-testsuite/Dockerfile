@@ -77,6 +77,12 @@ RUN pip3 install coverage
 # Copy logdata-anomaly-miner-sources
 ADD source/root/usr/lib/logdata-anomaly-miner /usr/lib/logdata-anomaly-miner
 
+# copy these files instead as symlinks would need absolute paths.
+ADD source/root/etc/aminer/conf-available/ait-lds/* /etc/aminer/conf-enabled/
+ADD source/root/etc/aminer/conf-available/generic/* /etc/aminer/conf-enabled/
+ADD source/root/etc/aminer/conf-available/ait-lds /etc/aminer/conf-available/ait-lds
+ADD source/root/etc/aminer/conf-available/generic /etc/aminer/conf-available/generic
+
 # Entrypoint-wrapper
 ADD scripts/aminerwrapper.sh /aminerwrapper.sh
 
