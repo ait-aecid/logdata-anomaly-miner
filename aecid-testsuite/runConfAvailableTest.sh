@@ -1,5 +1,13 @@
 #!/bin/bash
 
+sudo mkdir /tmp/lib 2> /dev/null
+sudo mkdir /tmp/lib/aminer 2> /dev/null
+sudo chown -R $USER:$USER /tmp/lib/aminer 2> /dev/null
+sudo rm -r /tmp/lib/aminer/* 2> /dev/null
+sudo mkdir /tmp/lib/aminer/log 2> /dev/null
+sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
+sudo rm /tmp/syslog 2> /dev/null
+
 exit_code=0
 
 CONFIG_PATH=/tmp/config.yml
