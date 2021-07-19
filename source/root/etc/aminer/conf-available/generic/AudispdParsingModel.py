@@ -1,5 +1,6 @@
 """This module contains functions and classes to create the parsing model."""
 
+import logging
 from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
 from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
 from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
@@ -16,6 +17,7 @@ from aminer.parsing.SequenceModelElement import SequenceModelElement
 from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
 from aminer.parsing.WhiteSpaceLimitedDataModelElement import WhiteSpaceLimitedDataModelElement
 from aminer.parsing.ModelElementInterface import ModelElementInterface
+from aminer.AminerConfig import DEBUG_LOG_NAME
 
 
 def get_model():
@@ -34,6 +36,10 @@ def get_model():
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise ValueError(msg)
             self.element_id = element_id
+
+        def get_id(self):
+            """Get the element ID."""
+            return self.element_id
 
         @staticmethod
         def get_child_elements():
@@ -205,8 +211,7 @@ def get_model():
         ]),
         'CWD': SequenceModelElement('cwd', [
             FixedDataModelElement('s0', b'  cwd='),
-            ExecArgumentDataModelElement('cwd')]),
-        'EOE': OptionalMatchModelElement('eoe', FixedDataModelElement('s0', b''))
+            ExecArgumentDataModelElement('cwd')])
     }
 
     # We need a type branch here also, but there is no additional
@@ -257,7 +262,7 @@ def get_model():
         VariableByteDataModelElement('dev', b'0123456789abcdef:'),
         FixedDataModelElement('s2', b' mode='),
         # is octal
-        DecimalIntegerValueModelElement('mode'),
+        DecimalIntegerValueModelElement('mode', value_pad_type=DecimalIntegerValueModelElement.PAD_TYPE_ZERO),
         FixedDataModelElement('s3', b' ouid='),
         DecimalIntegerValueModelElement('ouid'),
         FixedDataModelElement('s4', b' ogid='),
