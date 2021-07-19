@@ -30,7 +30,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
     """This class creates events when new values for a given data path were found."""
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id='Default', auto_include_flag=False,
-                 output_log_line=True):
+                 output_log_line=True, check_subpath=False):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
         self.target_path_list = target_path_list
         self.anomaly_event_handlers = anomaly_event_handlers
@@ -39,6 +39,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         self.output_log_line = output_log_line
         self.aminer_config = aminer_config
         self.persistence_id = persistence_id
+        self.check_subpath = check_subpath
 
         self.log_success = 0
         self.log_total = 0
@@ -58,9 +59,22 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         """Receive a log atom from a source."""
         self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
-        for target_path in self.target_path_list:
-            match = match_dict.get(target_path, None)
+        i = 0
+        while i < len(self.target_path_list):
+            target_path = self.target_path_list[i]
+            match = match_dict.get(target_path)
             if match is None:
+                added_path = True
+                if self.check_subpath:
+                    added_path = False
+                    for key in match_dict.keys():
+                        if key.startswith(target_path + "/") and "/" not in key.replace(target_path + "/", "", 1) and \
+                                key not in self.target_path_list:
+                            self.target_path_list = [key] + self.target_path_list
+                            added_path = True
+                            i = 0
+                if not self.check_subpath or not added_path:
+                    i += 1
                 continue
             if match.match_object not in self.known_values_set:
                 if self.auto_include_flag:
@@ -102,6 +116,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                     listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New value(s) detected', sorted_log_lines, event_data,
                                            log_atom, self)
                 self.log_success += 1
+            i += 1
 
     def get_time_trigger_class(self):  # skipcq: PYL-R0201
         """

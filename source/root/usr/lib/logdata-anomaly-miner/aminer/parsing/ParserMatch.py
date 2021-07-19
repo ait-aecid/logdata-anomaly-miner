@@ -48,8 +48,18 @@ class ParserMatch:
         result_dict = {}
         while stack:
             match_list = stack.pop()
+            counter_dict = {}
             for test_match in match_list:
-                result_dict[test_match.path] = test_match
+                if test_match.path in counter_dict.keys():
+                    counter_dict[test_match.path] = 0
+                else:
+                    counter_dict[test_match.path] = None
+            for test_match in match_list:
+                path = test_match.path
+                if counter_dict[test_match.path] is not None:
+                    path += "/%d" % counter_dict[path]
+                    counter_dict[test_match.path] += 1
+                result_dict[path] = test_match
                 children = test_match.children
                 if children is not None:
                     stack.append(children)
