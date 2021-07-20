@@ -27,7 +27,7 @@ class KafkaEventHandlerTest(TestBase):
     test_detector = 'Analysis.TestDetector'
     event_message = 'An event happened!'
     sorted_log_lines = ['Event happend at /path/ 5 times.', '', '', '', '']
-    expected_string = '%s %s\n%s: "%s" (5 lines)\n  {\n  "AnalysisComponent": {\n    "AnalysisComponentIdentifier": 0,\n' \
+    expected_string = '{\n  "AnalysisComponent": {\n    "AnalysisComponentIdentifier": 0,\n' \
                       '    "AnalysisComponentType": "%s",\n    "AnalysisComponentName": "%s",\n    "Message": "%s",\n' \
                       '    "PersistenceFileName": "%s",\n    "AffectedParserPaths": [\n      "test/path/1",\n' \
                       '      "test/path/2"\n    ]\n  },\n  "LogData": {\n    "RawLogData": [\n      " pid="\n    ],\n    ' \
@@ -64,7 +64,6 @@ class KafkaEventHandlerTest(TestBase):
             if "DetectionTimestamp" in line:
                 detection_timestamp = line.split(':')[1].strip(' ,')
         self.assertEqual(val, self.expected_string % (
-            datetime.fromtimestamp(self.t).strftime("%Y-%m-%d %H:%M:%S"), self.event_message, self.__class__.__name__, self.description,
             self.__class__.__name__, self.description, self.event_message, self.persistence_id, round(self.t, 2), detection_timestamp,
             ""))
 
