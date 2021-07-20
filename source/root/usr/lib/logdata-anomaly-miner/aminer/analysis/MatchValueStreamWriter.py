@@ -43,12 +43,20 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
         for path in self.match_value_path_list:
             if add_sep_flag:
                 result += self.separator_string
-            match = match_dict.get(path, None)
+            match = match_dict.get(path)
             if match is None:
                 result += self.missing_value_string
             else:
-                result += match.match_string
-                contains_data = True
+                matches = []
+                if isinstance(match, list):
+                    matches = match
+                else:
+                    matches.append(match)
+                for match in matches:
+                    if contains_data:
+                        result += self.separator_string
+                    result += match.match_string
+                    contains_data = True
             add_sep_flag = True
         if contains_data:
             if not isinstance(self.stream, _io.BytesIO):
@@ -66,7 +74,7 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
         """
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def do_timer(self, trigger_time):
+    def do_timer(self, _trigger_time):
         """Flush the timer."""
         self.stream.flush()
         return 10

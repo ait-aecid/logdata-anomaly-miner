@@ -87,7 +87,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                 if isinstance(match_dict.get(target_path), list):
                     res = {target_path: affected_log_atom_values}
                 else:
-                    res = {target_path: affected_log_atom_values[0]}
+                    res = {target_path: match_dict.get(target_path)}
                 try:
                     data = log_atom.raw_data.decode(AminerConfig.ENCODING)
                 except UnicodeError:

@@ -122,10 +122,16 @@ class EntropyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
             match = parser_match.get_match_dictionary().get(path)
             if match is None:
                 continue
-            value = match.match_object
-            if value is not None:
-                all_values_none = False
-            values.append(value)
+            matches = []
+            if isinstance(match, list):
+                matches = match
+            else:
+                matches.append(match)
+            for match in matches:
+                value = match.match_object
+                if value is not None:
+                    all_values_none = False
+                values.append(value)
         if all_values_none is True:
             return
 
