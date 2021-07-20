@@ -52,6 +52,7 @@ class ParserMatch:
             for test_match in match_list:
                 if test_match.path in counter_dict.keys():
                     counter_dict[test_match.path] = 0
+                    result_dict[test_match.path] = []
                 else:
                     counter_dict[test_match.path] = None
             for test_match in match_list:
@@ -59,6 +60,7 @@ class ParserMatch:
                 if counter_dict[test_match.path] is not None:
                     path += "/%d" % counter_dict[path]
                     counter_dict[test_match.path] += 1
+                    result_dict[test_match.path].append(test_match)
                 result_dict[path] = test_match
                 children = test_match.children
                 if children is not None:
