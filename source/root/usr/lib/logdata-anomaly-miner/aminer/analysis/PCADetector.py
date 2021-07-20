@@ -298,7 +298,7 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             for value in events:
                 events[value] = 0
 
-    def get_time_trigger_class(self):
+    def get_time_trigger_class(self):  # skipcq: PYL-R0201
         """
         Get the trigger class this component should be registered for.
         This trigger is used only for persistence, so real-time triggering is needed.
