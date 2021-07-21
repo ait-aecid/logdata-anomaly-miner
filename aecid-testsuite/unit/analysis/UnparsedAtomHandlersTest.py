@@ -5,7 +5,7 @@ from time import time
 from aminer.parsing.ParserMatch import ParserMatch
 from aminer.parsing.MatchContext import MatchContext
 from aminer.input.LogAtom import LogAtom
-from aminer.input.SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler
+from aminer.analysis.UnparsedAtomHandlers import SimpleUnparsedAtomHandler
 from unit.TestBase import TestBase
 
 
