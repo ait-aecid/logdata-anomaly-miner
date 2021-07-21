@@ -352,6 +352,25 @@ class DateTimeModelElementTest(TestBase):
         self.assertEqual(date_time_model_element.start_year, start_year)
         self.assertIn("WARNING:DEBUG:DateTimeModelElement time inconsistencies parsing b'01.01 23:59:01', expecting value around "
                       "1609459140. Check your settings!", log_stream.getvalue())
+
+        date_time_model_element = DateTimeModelElement(
+            self.id_, b"%d.%m %H:%M:%S", timezone.utc, start_year=start_year, max_time_jump_seconds=max_time_jump_seconds)
+        data = b"05.03 06:29:07: it still works"
+        date = b"05.03 06:29:07"
+        match_context = DummyMatchContext(data)
+        match_element = date_time_model_element.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, date, 1583389747, None)
+        self.assertEqual(date_time_model_element.start_year, start_year)
+        self.assertIn("WARNING:DEBUG:DateTimeModelElement time inconsistencies parsing b'01.01 23:59:01', expecting value around "
+                      "1609459140. Check your settings!", log_stream.getvalue())
+
+        data = b"29.02 07:24:02: it still works"
+        date = b"29.02 07:24:02"
+        match_context = DummyMatchContext(data)
+        match_element = date_time_model_element.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, date, 1582961042, None)
+        self.assertEqual(date_time_model_element.start_year, start_year)
+
         for handler in logging.root.handlers[:]:
             logging.root.removeHandler(handler)
         initialize_loggers(self.aminer_config, getpwnam("aminer").pw_uid, getgrnam("aminer").gr_gid)
