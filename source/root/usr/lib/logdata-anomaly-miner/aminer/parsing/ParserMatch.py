@@ -57,9 +57,14 @@ class ParserMatch:
                     counter_dict[test_match.path] = None
             for test_match in match_list:
                 path = test_match.path
-                if counter_dict[test_match.path] is not None:
-                    path += "/%d" % counter_dict[path]
-                    counter_dict[test_match.path] += 1
+                if counter_dict[path] is not None:
+                    try:
+                        pos = next(x.match_object for x in result_dict.values() if not isinstance(x, list) and isinstance(
+                            test_match.match_object, type(x.match_object)) and test_match.match_object == x.match_object)
+                        path += "/%d" % pos
+                    except StopIteration:
+                        path += "/%d" % counter_dict[path]
+                        counter_dict[test_match.path] += 1
                     result_dict[test_match.path].append(test_match)
                 result_dict[path] = test_match
                 children = test_match.children
