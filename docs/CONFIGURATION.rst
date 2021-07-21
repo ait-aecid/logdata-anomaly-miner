@@ -2204,7 +2204,7 @@ It just adds the evaluated log_atom to a ObjectHistory.
 EventHandling
 -------------
 
-EventHandler are output modules that allows the logdata-anomaly-miner to write alerts to specific targets.
+EventHandler are output modules that allow the logdata-anomaly-miner to write alerts to specific targets.
 
 All EventHandler must have the following parameters and may have additional specific parameters that are defined in the respective sections. 
 
