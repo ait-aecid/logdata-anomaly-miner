@@ -1496,7 +1496,7 @@ HistogramAnalysis.HistogramAnalysis, see documentation there.
 * **bin_definition**: The id of a bin_definition(LinearNumericBinDefini  tion or ModuloTimeBinDefinition). String(Required)
 * **report_interval**: Report_interval delay in seconds between creaton of two reports. The parameter is applied to the parsed record data time, not the system time. Hence reports can be delayed when no data is received. Integer(min: 1)
 * **reset_after_report_flag**: Zero counters after the report was sent. Boolean(Default: true)
-* **persistence_id'**: the name of the file where the learned models are stored. String
+* **persistence_id**: the name of the file where the learned models are stored. String
 * **output_logline**: specifies whether the full parsed log atom should be provided in the output. Boolean(Default: true)
 * **output_event_handlers**: List of event-handler-id to send the report to.
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True.
@@ -1581,6 +1581,12 @@ MatchFilter
 
 This component creates events for specified paths and values.
 
+* **paths**: List of paths defined as strings(Required)
+* **value_list**: List of values(Required)
+* **output_logline**: Defines if logline should be added to the output. Boolean(Default: True)
+* **output_event_handlers**: List of strings with id's of the event_handlers
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True.
+
 .. code-block:: yaml
 
      Analysis:
@@ -1599,6 +1605,16 @@ MatchValueAverageChangeDetector
 
 This detector calculates the average of a given list of values to monitor. Reports are generated if the average of the latest diverges significantly from the values observed before.
 
+* **timestamp_path**: Use this path value for timestamp based bins. String (**required**)
+* **paths**: List of match paths to analyze in this detector. List of strings( **required**)
+* **min_bin_elements**: Evaluate the latest bin only after at least that number of elements was added to it. Integer, min: 1 (**required**)
+* **min_bin_time**: Evaluate the latest bin only when the first element is received after min_bin_time has elapsed. Integer, min: 1 (**required**)
+* **debug_mode**: Enables debug output. Boolean(Default: False)
+* **persistence_id**: The name of the file where the learned models are stored. String
+* **output_logline**: Defines if logline should be added to the output. Boolean(Default: True)
+* **output_event_handlers**: List of strings with id's of the event_handlers
+* **suppress**: A boolean that suppresses anomaly output of that detector when set to True.
+
 .. code-block:: yaml
 
      Analysis:
@@ -1615,6 +1631,13 @@ MatchValueStreamWriter
 ~~~~~~~~~~~~~~~~~~~~~~
 
 This component extracts values from a given match and writes them to a stream. This can be used to forward these values to another program (when stream is a wrapped network socket) or to a file for further analysis. A stream is used instead of a file descriptor to increase performance. To flush it from time to time, add the writer object also to the time trigger list.
+
+* **stream**: Stream to write the value of the match to. Possible values: 'sys.stdout' or 'sys.stderr' ( **required**)
+* **paths**: List of match paths to analyze in this detector. List of strings( **required**)
+* **separator**: Use this string as a seperator for the output. String ( **required**)
+* **missing_value_string**: Write this string if the value is missing. ( **required**)
+* **output_event_handlers**: List of strings with id's of the event_handlers
+* **suppress**: A boolean that suppresses anomaly output of that detector when set to True.
 
 .. code-block:: yaml
 
@@ -1636,6 +1659,16 @@ For example because the service was deactivated or logging disabled unexpectedly
 NewMatchPathValueDetector. For each unique value extracted by target_path_list, a tracking record is added to expected_values_dict.
 It stores three numbers: the timestamp the extracted value was last seen, the maximum allowed gap between observations and the next
 alerting time when currently in error state. When in normal (alerting) state, the value is zero.
+
+
+* **paths**: List of match paths to analyze in this detector. List of strings( **required**)
+* **learn_mode** specifies whether newly observed value combinations should be added to the learned model (boolean).
+* **check_interval**: This integer(seconds) defines the interval in which pre-set or learned values need to appear. Integer min:1 (Default: 3600)
+* **realert_interval**: This integer(seconds) defines the interval in which the AMiner should alert us about missing token values. Integer min: 1 (Default: 3600)
+* **persistence_id**: The name of the file where the learned models are stored. String
+* **output_logline**: Defines if logline should be added to the output. Boolean(Default: True)
+* **output_event_handlers**: List of strings with id's of the event_handlers
+* **suppress**: A boolean that suppresses anomaly output of that detector when set to True.
 
 .. code-block:: yaml
 
