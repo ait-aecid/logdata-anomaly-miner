@@ -53,10 +53,10 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 else:
                     matches.append(match)
                 for match in matches:
-                    if contains_data:
-                        result += self.separator_string
-                    result += match.match_string
+                    result += match.match_string + self.separator_string
                     contains_data = True
+                if len(self.separator_string) > 0:
+                    result = result[:-len(self.separator_string)]
             add_sep_flag = True
         if contains_data:
             if not isinstance(self.stream, _io.BytesIO):

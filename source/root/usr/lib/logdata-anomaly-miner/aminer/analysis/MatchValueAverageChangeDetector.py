@@ -91,15 +91,15 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         ready_for_analysis_flag = True
         for (path, stat_data) in self.stat_data:
             match = value_dict.get(path)
-            if isinstance(match, list):
-                data = []
-                for m in match:
-                    data.append(m.match_object)
-            else:
-                data = match.match_object
             if match is None:
                 ready_for_analysis_flag = (ready_for_analysis_flag and self.update(stat_data, timestamp_value, None))
             else:
+                if isinstance(match, list):
+                    data = []
+                    for m in match:
+                        data.append(m.match_object)
+                else:
+                    data = match.match_object
                 ready_for_analysis_flag = (ready_for_analysis_flag and self.update(stat_data, timestamp_value, data))
 
         if ready_for_analysis_flag:
