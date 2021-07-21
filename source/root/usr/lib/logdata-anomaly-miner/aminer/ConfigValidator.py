@@ -101,8 +101,8 @@ class ConfigValidator(Validator):
     def _validate_has_start(self, has_start, field, value):
         """
         Test if there is a key named "has_start".
-        The rule"s arguments are validated against this schema:
-        {"type": "boolean"}
+        The rule's arguments are validated against this schema:
+        {'type': 'boolean'}
         """
         seen_start = False
         for var in value:
@@ -122,8 +122,8 @@ class ConfigValidator(Validator):
         For example:
         "max_num_vals": {"type": "integer", "bigger_than_or_equal": ["min_num_vals", 1000]}
 
-        The rule"s arguments are validated against this schema:
-        {"type": "list"}
+        The rule's arguments are validated against this schema:
+        {'type': 'list'}
         """
         key, default_value = bigger_than_or_equal
         if key not in self.document:
