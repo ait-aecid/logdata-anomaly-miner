@@ -11,22 +11,22 @@ class ParserModelType:
 
     def __init__(self, name):
         self.name = name
-        if name.endswith('ModelElement'):
+        if name.endswith("ModelElement"):
             self.is_model = True
             # Classes must be imported from the right modules. Some class names do not match the module name and need to be set explicitly.
             module = "aminer.parsing"
-            if name == 'DebugMatchContext':
-                module += '.MatchContext'
+            if name == "DebugMatchContext":
+                module += ".MatchContext"
             if name == "MultiLocaleDateTimeModelElement":
                 module += ".DateTimeModelElement"
             else:
-                module += '.' + name
+                module += "." + name
             self.func = getattr(__import__(module, fromlist=[name]), name)
         else:
             self.is_model = False
             # we need this import:
             # skipcq: PTC-W0034
-            self.func = getattr(__import__(name), 'get_model')
+            self.func = getattr(__import__(name), "get_model")
 
     def __str__(self):
         return self.name
@@ -42,24 +42,26 @@ class AnalysisType:
         self.name = name
         # Classes must be imported from the right modules. Some class names do not match the module name and need to be set explicitly.
         module = "aminer.analysis"
-        if name in ('MatchPathFilter', 'MatchValueFilter', 'SubhandlerFilter'):
-            module += '.AtomFilters'
-        elif name in ('LinearNumericBinDefinition', 'ModuloTimeBinDefinition', 'PathDependentHistogramAnalysis', 'BinDefinition',
-                      'HistogramData'):
-            module += '.HistogramAnalysis'
-        elif name in ('AndMatchRule', 'OrMatchRule', 'AtomFilterMatchAction', 'DebugHistoryMatchRule', 'EventGenerationMatchAction',
-                      'DebugMatchRule', 'IPv4InRFC1918MatchRule', 'ModuloTimeMatchRule', 'NegationMatchRule', 'ParallelMatchRule',
-                      'PathExistsMatchRule', 'StringRegexMatchRule', 'ValueDependentDelegatedMatchRule',
-                      'ValueDependentModuloTimeMatchRule', 'ValueListMatchRule', 'ValueMatchRule', 'ValueRangeMatchRule'):
-            module += '.Rules'
-        elif name in ('TimeCorrelationDetector', 'CorrelationFeature'):
-            module += '.TimeCorrelationDetector'
-        elif name in ('TimeCorrelationViolationDetector', 'CorrelationRule', 'EventClassSelector'):
-            module += '.TimeCorrelationViolationDetector'
-        elif name == 'SimpleMonotonicTimestampAdjust':
-            module += '.TimestampCorrectionFilters'
+        if name in ("MatchPathFilter", "MatchValueFilter", "SubhandlerFilter"):
+            module += ".AtomFilters"
+        elif name in ("LinearNumericBinDefinition", "ModuloTimeBinDefinition", "PathDependentHistogramAnalysis", "BinDefinition",
+                      "HistogramData"):
+            module += ".HistogramAnalysis"
+        elif name in ("AndMatchRule", "OrMatchRule", "AtomFilterMatchAction", "DebugHistoryMatchRule", "EventGenerationMatchAction",
+                      "DebugMatchRule", "IPv4InRFC1918MatchRule", "ModuloTimeMatchRule", "NegationMatchRule", "ParallelMatchRule",
+                      "PathExistsMatchRule", "StringRegexMatchRule", "ValueDependentDelegatedMatchRule",
+                      "ValueDependentModuloTimeMatchRule", "ValueListMatchRule", "ValueMatchRule", "ValueRangeMatchRule"):
+            module += ".Rules"
+        elif name in ("TimeCorrelationDetector", "CorrelationFeature"):
+            module += ".TimeCorrelationDetector"
+        elif name in ("TimeCorrelationViolationDetector", "CorrelationRule", "EventClassSelector"):
+            module += ".TimeCorrelationViolationDetector"
+        elif name == "SimpleMonotonicTimestampAdjust":
+            module += ".TimestampCorrectionFilters"
+        elif name in ("SimpleUnparsedAtomHandler", "VerboseUnparsedAtomHandler"):
+            module += "UnparsedAtomHandlers"
         else:
-            module += '.' + name
+            module += "." + name
         self.func = getattr(__import__(module, fromlist=[name]), name)
 
     def __str__(self):
@@ -76,21 +78,21 @@ class EventHandlerType:
         self.name = name
         # Classes must be imported from the right modules. Some class names do not match the module name and need to be set explicitly.
         module = "aminer.events"
-        if name in ('EventHandlerInterface', 'EventSourceInterface'):
-            module += '.EventInterfaces'
-        elif name == 'VolatileLogarithmicBackoffEventHistory':
-            module += '.Utils'
+        if name in ("EventHandlerInterface", "EventSourceInterface"):
+            module += ".EventInterfaces"
+        elif name == "VolatileLogarithmicBackoffEventHistory":
+            module += ".Utils"
         else:
-            module += '.' + name
+            module += "." + name
         self.func = getattr(__import__(module, fromlist=[name]), name)
 
     def __str__(self):
         return self.name
 
 
-parser_type = TypeDefinition('parsermodel', (ParserModelType, str), ())
-analysis_type = TypeDefinition('analysistype', (AnalysisType, str), ())
-event_handler_type = TypeDefinition('eventhandlertype', (EventHandlerType, str), ())
+parser_type = TypeDefinition("parsermodel", (ParserModelType, str), ())
+analysis_type = TypeDefinition("analysistype", (AnalysisType, str), ())
+event_handler_type = TypeDefinition("eventhandlertype", (EventHandlerType, str), ())
 
 
 class ConfigValidator(Validator):
@@ -98,30 +100,30 @@ class ConfigValidator(Validator):
 
     def _validate_has_start(self, has_start, field, value):
         """
-        Test if there is a key named 'has_start'.
-        The rule's arguments are validated against this schema:
-        {'type': 'boolean'}
+        Test if there is a key named "has_start".
+        The rule"s arguments are validated against this schema:
+        {"type": "boolean"}
         """
         seen_start = False
         for var in value:
-            if "start" in var and var['start'] is True:
+            if "start" in var and var["start"] is True:
                 if seen_start:
-                    self._error(field, "Only one parser with 'start'-key is allowed")
+                    self._error(field, 'Only one parser with "start"-key is allowed')
                 seen_start = True
         if has_start and not seen_start:
-            self._error(field, "Parser must contain a 'start'-key")
+            self._error(field, 'Parser must contain a "start"-key')
 
     def _validate_bigger_than_or_equal(self, bigger_than_or_equal, field, value):
         """
         Check if the value of the current attribute is bigger than the value of bigger_than.
         This check works for integers and floats.
         Usage:
-        {'bigger_than_or_equal': ['lower_value_attribute', default_value_if_not_defined]}
+        {"bigger_than_or_equal": ["lower_value_attribute", default_value_if_not_defined]}
         For example:
-        'max_num_vals': {'type': 'integer', 'bigger_than_or_equal': ['min_num_vals', 1000]}
+        "max_num_vals": {"type": "integer", "bigger_than_or_equal": ["min_num_vals", 1000]}
 
-        The rule's arguments are validated against this schema:
-        {'type': 'list'}
+        The rule"s arguments are validated against this schema:
+        {"type": "list"}
         """
         key, default_value = bigger_than_or_equal
         if key not in self.document:
@@ -136,9 +138,9 @@ class NormalisationValidator(ConfigValidator):
     """Normalises values from the configs."""
 
     types_mapping = Validator.types_mapping.copy()
-    types_mapping['parsermodel'] = parser_type
-    types_mapping['analysistype'] = analysis_type
-    types_mapping['eventhandlertype'] = event_handler_type
+    types_mapping["parsermodel"] = parser_type
+    types_mapping["analysistype"] = analysis_type
+    types_mapping["eventhandlertype"] = event_handler_type
 
     # we skip the following issue, otherwise an
     # "must have self"-issue will pop up
