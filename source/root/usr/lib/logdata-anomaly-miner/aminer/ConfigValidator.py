@@ -59,7 +59,7 @@ class AnalysisType:
         elif name == "SimpleMonotonicTimestampAdjust":
             module += ".TimestampCorrectionFilters"
         elif name in ("SimpleUnparsedAtomHandler", "VerboseUnparsedAtomHandler"):
-            module += "UnparsedAtomHandlers"
+            module += ".UnparsedAtomHandlers"
         else:
             module += "." + name
         self.func = getattr(__import__(module, fromlist=[name]), name)

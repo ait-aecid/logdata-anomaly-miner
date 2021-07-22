@@ -3,8 +3,6 @@ AminerGroup: 'aminer' # optional default: aminer
 
 LearnMode: False
 
-SuppressNewMatchPathDetector: False
-
 LogResourceList:
         - 'file:///var/log/apache2/access.log'
 

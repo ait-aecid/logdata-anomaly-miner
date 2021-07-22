@@ -174,8 +174,6 @@ Analysis:
           paths: ["/model/Sensors/CPUTemp", "/model/Sensors/CPUWorkload", "/model/Sensors/DTM"]
           separator: ";"
           missing_value_string: ""
-        - type: NewMatchPathDetector
-          id: NewMatchPathDetector
         - type: PathExistsMatchRule
           id: path_exists_match_rule1
           path: "/model/LoginDetails/PastTime/Time/Minutes"
