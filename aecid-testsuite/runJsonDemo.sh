@@ -20,7 +20,7 @@ if grep -Fq "VerboseUnparsedAtomHandler" $OUT; then
 	sed '/VerboseUnparsedAtomHandler/,$p' $OUT
 fi
 
-if grep -Fq "UnicodeDecodeError" $OUT; then
+if grep -Fq "UnicodeDecodeError" $OUT || grep -Fq "Config-Error" $OUT; then
 	exit_code=1
 	sed '/UnicodeDecodeError/,$p' $OUT
 fi
