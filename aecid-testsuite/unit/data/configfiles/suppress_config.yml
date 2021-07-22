@@ -38,6 +38,9 @@ Analysis:
         - type: VerboseUnparsedAtomHandler
           id: VerboseUnparsedAtomHandler
           suppress: True
+        - type: NewMatchPathDetector
+          id: DefaultNewMatchPathDetector
+          suppress: False
 
 EventHandlers:
         - id: stpe

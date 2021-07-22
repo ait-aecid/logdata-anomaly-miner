@@ -344,8 +344,10 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 new_analysis_list += yaml_data['Analysis']
                 yaml_data['Analysis'] = new_analysis_list
                 break
+        for item in yaml_data['Analysis']:
             if item['type'].name == 'NewMatchPathDetector':
                 has_new_match_path_handler = True
+                break
         has_new_match_path_handler, has_unparsed_handler = add_default_analysis_components(
             analysis_context, anomaly_event_handlers, atom_filter, has_new_match_path_handler, has_unparsed_handler, parsing_model)
 
