@@ -151,11 +151,8 @@ Parser:
            _empty_list: EMPTY_LIST
            _empty_object: EMPTY_OBJECT
 
-
-
 Input:
         timestamp_paths: None
-        verbose: True
         json_format: True
 
 EventHandlers:

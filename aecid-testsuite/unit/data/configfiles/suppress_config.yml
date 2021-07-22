@@ -26,10 +26,8 @@ Parser:
             - apacheModel
 
 Input:
-        verbose: True # optional
         multi_source: False # optional
         timestamp_paths: "/model/accesslog/time"
-        suppress_unparsed: True
 
 Analysis:
         - type: NewMatchPathValueComboDetector
@@ -39,6 +37,9 @@ Analysis:
           output_logline: False # optional default: True
           allow_missing_values: False # optional default: False
           suppress: False
+        - type: VerboseUnparsedAtomHandler
+          id: VerboseUnparsedAtomHandler
+          suppress: True
 
 EventHandlers:
         - id: stpe
