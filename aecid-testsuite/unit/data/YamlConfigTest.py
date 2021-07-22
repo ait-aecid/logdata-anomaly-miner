@@ -507,9 +507,9 @@ class YamlConfigTest(TestBase):
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
 
-        context.aminer_config.yaml_data['Analysis']['DefaultNewMatchPathDetector']['suppress'] = False
+        context.aminer_config.yaml_data['Analysis'][2]['suppress'] = False
         context.atomizer_factory.event_handler_list[0].stream = self.output_stream
-        default_nmpd = context.registered_components[1][0]
+        default_nmpd = context.registered_components[2][0]
         default_nmpd.output_log_line = False
         self.assertTrue(default_nmpd.receive_atom(log_atom_fixed_dme))
         self.assertEqual(self.output_stream.getvalue(), __expected_string1 % (
@@ -517,11 +517,11 @@ class YamlConfigTest(TestBase):
             match_path_s1, pid))
         self.reset_output_stream()
 
-        context.aminer_config.yaml_data['Analysis']['DefaultNewMatchPathDetector']['suppress'] = True
+        context.aminer_config.yaml_data['Analysis'][2]['suppress'] = True
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
         context.atomizer_factory.event_handler_list[0].stream = self.output_stream
-        default_nmpd = context.registered_components[1][0]
+        default_nmpd = context.registered_components[2][0]
         default_nmpd.output_log_line = False
         self.assertTrue(default_nmpd.receive_atom(log_atom_fixed_dme))
         self.assertEqual(self.output_stream.getvalue(), "")
