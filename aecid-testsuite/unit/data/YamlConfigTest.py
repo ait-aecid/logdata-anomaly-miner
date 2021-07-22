@@ -507,6 +507,7 @@ class YamlConfigTest(TestBase):
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
 
+        print(context.registered_components)
         context.aminer_config.yaml_data['Analysis'][2]['suppress'] = False
         context.atomizer_factory.event_handler_list[0].stream = self.output_stream
         default_nmpd = context.registered_components[3][0]
@@ -537,10 +538,10 @@ class YamlConfigTest(TestBase):
             'ValueComboDetector', 1, string2))
         self.reset_output_stream()
 
-        context.aminer_config.yaml_data['Analysis'][0]['suppress'] = True
+        context.aminer_config.yaml_data['Analysis'][1]['suppress'] = True
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        value_combo_det = context.registered_components[1][0]
+        value_combo_det = context.registered_components[2][0]
         context.atomizer_factory.event_handler_list[0].stream = self.output_stream
         self.assertTrue(value_combo_det.receive_atom(log_atom_sequence_me))
         self.assertEqual(self.output_stream.getvalue(), "")
