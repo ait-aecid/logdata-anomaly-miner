@@ -17,13 +17,13 @@ git checkout $BRANCH > /dev/null 2>&1
 cd ..
 # load the aminer command.
 awk '/^```$/ && ++n == 9, /^```$/ && n++ == 10' < logdata-anomaly-miner.wiki/Getting-started-\(tutorial\).md > /tmp/gettingStarted-config.yml
-CMD=$(sed -n '5p' < /tmp/gettingStarted-config.yml)
-CMD=${CMD##*#}
+CMD=$(sed -n '4p' < /tmp/gettingStarted-config.yml)
+CMD=${CMD#*$ }
 CFG_PATH=/${CMD#*/}
 # test the first yaml config.
 awk '/^```yaml$/ && ++n == 1, /^```$/' < logdata-anomaly-miner.wiki/Getting-started-\(tutorial\).md | sed '/^```/ d' > /tmp/gettingStarted-config.yml
 sudo cp /tmp/gettingStarted-config.yml $CFG_PATH
-sudo $CMD > /dev/null &
+$CMD > /dev/null &
 sleep 5 & wait $!
 sudo pkill -x aminer
 if [[ $? != 0 ]]; then

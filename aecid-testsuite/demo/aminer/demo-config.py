@@ -111,7 +111,7 @@ def build_analysis_pipeline(analysis_context):
         DelimitedDataModelElement('Data', b'%'), AnyByteDataModelElement('Rest')]
 
     service_children_login_details = [
-        FixedDataModelElement('User', b'User '), DelimitedDataModelElement('Username', b' '),
+        FixedDataModelElement('User/LoginDetails', b'User '), DelimitedDataModelElement('Username', b' '),
         FixedWordlistDataModelElement('Status', [b' logged in', b' logged out']), OptionalMatchModelElement(
             'PastTime', SequenceModelElement('Time', [
                 FixedDataModelElement('Blank', b' '), DecimalIntegerValueModelElement('Minutes'),
@@ -134,7 +134,7 @@ def build_analysis_pipeline(analysis_context):
         DateTimeModelElement('DTM', date_format_string)]
 
     service_children_user_ip_address = [
-        FixedDataModelElement('User', b'User '), DelimitedDataModelElement('Username', b' '),
+        FixedDataModelElement('User/UserIPAddress', b'User '), DelimitedDataModelElement('Username', b' '),
         FixedDataModelElement('Action', b' changed IP address to '), IpAddressDataModelElement('IP')]
 
     service_children_cron_job_announcement = [
@@ -216,7 +216,7 @@ def build_analysis_pipeline(analysis_context):
     # The OptionalMatchModelElement must be paired with a FirstMatchModelElement because it accepts all data and thus no data gets to the
     # AnyByteDataModelElement. The AnyByteDataModelElement must be last, because all bytes are accepted.
     service_children_parsing_model_element.append(OptionalMatchModelElement(
-        'OptionalMatchModelElement', FirstMatchModelElement('FirstMatchModelElement', [
+        '/', FirstMatchModelElement('FirstMatchModelElement//optional', [
             FixedDataModelElement('FixedDataModelElement', b'The-searched-element-was-found!'), SequenceModelElement('se', [
                 FixedDataModelElement('FixedDME', b'Any:'), AnyByteDataModelElement('AnyByteDataModelElement')])])))
 

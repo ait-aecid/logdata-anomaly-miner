@@ -42,13 +42,18 @@ Parser:
        - id: data
          type: DelimitedDataModelElement
          name: 'Data'
-         delimiter: '%'
+         delimiter: '%''/'
 
        - id: rest
          type: AnyByteDataModelElement
          name: 'Rest'
 
-       - id: user
+       - id: userLoginDetails
+         type: FixedDataModelElement
+         name: 'User'
+         args: 'User '
+
+       - id: userIpAddress
          type: FixedDataModelElement
          name: 'User'
          args: 'User '
@@ -641,14 +646,14 @@ Parser:
 
        - id: firstMatchModelElement
          type: FirstMatchModelElement
-         name: 'FirstMatchModelElement'
+         name: 'FirstMatchModelElement//optional'
          args:
            - fixed3
            - seq4
 
        - id: optionalMatchModelElement
          type: OptionalMatchModelElement
-         name: 'OptionalMatchModelElement'
+         name: '/'
          args: firstMatchModelElement
 
        - id: g
@@ -732,7 +737,7 @@ Parser:
          type: SequenceModelElement
          name: 'LoginDetails'
          args:
-           - user
+           - userLoginDetails
            - username
            - status
            - pastTime
@@ -758,7 +763,7 @@ Parser:
          type: SequenceModelElement
          name: 'IPAddresses'
          args:
-           - user
+           - userIpAddress
            - username
            - action
            - ip

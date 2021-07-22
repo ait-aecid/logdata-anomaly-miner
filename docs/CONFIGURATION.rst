@@ -1408,12 +1408,12 @@ This component serves as a basis for the VariableTypeDetector, VariableCorrelati
 
 * **paths** parser paths of values to be analyzed (list of strings, defaults to empty list).
 * **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
-* **max_num_vals** maximum number of lines in the value list before it is reduced.
-* **min_num_vals** number of the values which the list is being reduced to.
-* **save_values** if False the values of the paths are not saved for further analysis. The values are not needed for the TSAArimaDetector.
-* **track_time_for_TSA** states if time windows should be tracked for the time series analysis.
-* **waiting_time_for_TSA** time in seconds, until the time windows are being initialized.
-* **num_sections_waiting_time_for_TSA** number of sections of the initialization window.
+* **max_num_vals** maximum number of lines in the value list before it is reduced (integer, defaults to 1500).
+* **min_num_vals** number of the values which the list is being reduced to (integer, defaults to 1000).
+* **save_values** if False the values of the paths are not saved for further analysis. The values are not needed for the TSAArimaDetector (boolean, defaults to True).
+* **track_time_for_TSA** states if time windows should be tracked for the time series analysis (boolean, defaults to False).
+* **waiting_time_for_TSA** time in seconds, until the time windows are being initialized (integer, defaults to 300 seconds).
+* **num_sections_waiting_time_for_TSA** number of sections of the initialization window (integer, defaults to 10).
 
 .. code-block:: yaml
 
@@ -1455,8 +1455,8 @@ or by creating own subclasses from "HistogramAnalysis.BinDefinition".
 * **reset_after_report_flag**: Zero counters after the report was sent. Boolean(Default: true)
 * **persistence_id'**: the name of the file where the learned models are stored. String(Default: 'Default')
 * **output_logline**: specifies whether the full parsed log atom should be provided in the output. Boolean(Default: true)
-* **output_event_handlers**: List of event-handler-id to send the report to.
-* **suppress**: a boolean that suppresses anomaly output of that detector when set to True.
+* **output_event_handlers**: List of event-handler-id to send the report to. List(strings)
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True. Boolean(Default: false)
 
 .. code-block:: yaml
 
@@ -1496,10 +1496,10 @@ HistogramAnalysis.HistogramAnalysis, see documentation there.
 * **bin_definition**: The id of a bin_definition(LinearNumericBinDefini  tion or ModuloTimeBinDefinition). String(Required)
 * **report_interval**: Report_interval delay in seconds between creaton of two reports. The parameter is applied to the parsed record data time, not the system time. Hence reports can be delayed when no data is received. Integer(min: 1)
 * **reset_after_report_flag**: Zero counters after the report was sent. Boolean(Default: true)
-* **persistence_id'**: the name of the file where the learned models are stored. String
+* **persistence_id'**: the name of the file where the learned models are stored. String(Default: 'Default')
 * **output_logline**: specifies whether the full parsed log atom should be provided in the output. Boolean(Default: true)
-* **output_event_handlers**: List of event-handler-id to send the report to.
-* **suppress**: a boolean that suppresses anomaly output of that detector when set to True.
+* **output_event_handlers**: List of event-handler-id to send the report to List(strings).
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True. Boolean(Default: false)
 
 .. code-block:: yaml
 
@@ -1755,15 +1755,15 @@ PathValueTimeIntervalDetector
 
 This detector analyzes the time intervals of the appearance of log_atoms. It sends a report if log_atoms appear at times outside of the intervals. The considered time intervals depend on the combination of values in the target_paths of target_path_list.
 
-* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed.
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings, defaults to empty list).
 * **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
-* **allow_missing_values_flag** when set to True, the detector will also use matches, where one of the pathes from target_path_list does not refer to an existing parsed data object.
-* **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted.
-* **output_log_line** specifies whether the full parsed log atom should be provided in the output.
-* **auto_include_flag** specifies whether new frequency measurements override ground truth frequencies.
-* **time_window_length** length of the time window in seconds for which the appearances of log lines are identified with each other.
-* **max_time_diff** maximal time difference in seconds for new times. If the difference of the new time to all previous times is greater than max_time_diff the new time is considered an anomaly.
-* **num_reduce_time_list** number of new time entries appended to the time list, before the list is being reduced.
+* **allow_missing_values_flag** when set to True, the detector will also use matches, where one of the pathes from target_path_list does not refer to an existing parsed data object (boolean, defaults to True).
+* **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted (string of lists, defaults to empty list).
+* **output_log_line** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to true).
+* **auto_include_flag** specifies whether new frequency measurements override ground truth frequencies (boolean).
+* **time_window_length** length of the time window in seconds for which the appearances of log lines are identified with each other (integer, defaults to 86400).
+* **max_time_diff** maximal time difference in seconds for new times. If the difference of the new time to all previous times is greater than max_time_diff the new time is considered an anomaly (integer, defaults to 360).
+* **num_reduce_time_list** number of new time entries appended to the time list, before the list is being reduced (integer, defaults to 10).
 
 .. code-block:: yaml
 
@@ -1777,28 +1777,59 @@ This detector analyzes the time intervals of the appearance of log_atoms. It sen
           max_time_diff: 3600
           num_reduce_time_list: 10
 
+PCADetector
+~~~~~~~~~~~
+
+This class creates events if event or value occurrence counts are outliers in PCA space.
+
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed as separate dimensions. When no paths are specified, the events given by the full path list are analyzed (list of strings).
+* **window_size** the length of the time window for counting in seconds (float, defaults to 600 seconds).
+* **min_anomaly_score** the minimum computed outlier score for reporting anomalies. Scores are scaled by training data, i.e., reasonable minimum scores are > 1 to detect outliers with respect to currently trained PCA matrix (float, defaults to 1.1).
+* **min_variance** the minimum variance covered by the principal components (float in range [0, 1], defaults to 0.98).
+* **num_windows** the number of time windows in the sliding window approach. Total covered time span = window_size * num_windows (integer, defaults to 50).
+* **persistence_id** name of persistency document (string, defaults to Default).
+* **learn_mode** specifies whether new count measurements are added to the PCA count matrix (boolean).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to true).
+* **ignore_list** list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted (list of strings, defaults to empty list)
+* **constraint_list** list of paths that have to be present in the log atom to be analyzed (list of strings, defaults to empty list).
+* **output_event_handlers** list of event handler id that anomalies are forwarded to (list of strings, defaults is to send to all event handlers).
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: PCADetector
+          id: PCADetector
+          paths:
+            - "/model/username"
+            - "/model/service"
+          windows_size: 60
+          min_anomaly_score: 1.2
+          min_variance: 0.95
+          num_windows: 100
+          learn_mode: true
+
 TSAArimaDetector
 ~~~~~~~~~~~~~~~~
 
 This detector uses a tsa-arima model to track appearance frequencies of event lines.
 
-* **paths** at least one of the parser paths in this list needs to appear in the event to be analyzed.
-* **event_type_detector** used to track the number of event lines in the time windows.
-* **acf_pause_area** states which area of the resutls of the ACF are not used to find the highest peak.
-* **build_sum_over_values** states if the sum of a series of counts is built before applying the TSA.
-* **num_periods_tsa_ini** Number of periods used to initialize the Arima-model.
-* **num_division_time_step** Number of divisions of the time window to calculate the time step.
-* **alpha** significance level of the estimated values.
-* **num_min_time_history** minimal number of values of the time_history after it is initialized.
-* **num_max_time_history** maximal number of values of the time_history.
-* **num_results_bt** number of results which are used in the binomial test, which is used before reinitializing the ARIMA model.
-* **alpha_bt** significance level for the bt test.
-* **round_time_inteval_threshold** Threshold for the rounding of the time_steps to the times in self.assumed_time_steps. The higher the threshold the easier the time is rounded to the next time in the list.
-* **acf_threshold** threshold, which must be exceeded by the highest peak of the cdf function of the time series, to be analyzed.
+* **paths** at least one of the parser paths in this list needs to appear in the event to be analyzed (list of strings).
+* **event_type_detector** used to track the number of event lines in the time windows (string).
+* **acf_pause_area** states which area of the results of the ACF are not used to find the highest peak (float, defaults to 0.2).
+* **build_sum_over_values** states if the sum of a series of counts is built before applying the TSA (boolean, defaults to false).
+* **num_periods_tsa_ini** Number of periods used to initialize the Arima-model (integer, defaults to 15).
+* **num_division_time_step** Number of divisions of the time window to calculate the time step (integer, defaults to 10).
+* **alpha** significance level of the estimated values (float, defaults to 0.05).
+* **num_min_time_history** minimal number of values of the time_history after it is initialized (integer, defaults to 20).
+* **num_max_time_history** maximal number of values of the time_history (integer, defaults to 30).
+* **num_results_bt** number of results which are used in the binomial test, which is used before reinitializing the ARIMA model (integer, defaults to 15).
+* **alpha_bt** significance level for the bt test (float, defaults to 0.05).
+* **round_time_inteval_threshold** Threshold for the rounding of the time_steps to the times in self.assumed_time_steps. The higher the threshold the easier the time is rounded to the next time in the list (float, defaults to 0.02).
+* **acf_threshold** threshold, which must be exceeded by the highest peak of the cdf function of the time series, to be analyzed (float, defaults to 0.2).
 * **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
-* **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable.
-* **output_log_line** specifies whether the full parsed log atom should be provided in the output.
-* **auto_include_flag** specifies whether new frequency measurements override ground truth frequencies.
+* **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable (list of strings, defaults to empty list).
+* **output_log_line** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to true).
+* **auto_include_flag** specifies whether new frequency measurements override ground truth frequencies (boolean).
 
 .. code-block:: yaml
 
