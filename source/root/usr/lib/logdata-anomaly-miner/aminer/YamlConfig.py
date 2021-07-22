@@ -318,8 +318,6 @@ def build_input_pipeline(analysis_context, parsing_model):
 def build_analysis_components(analysis_context, anomaly_event_handlers, atom_filter, parsing_model):
     """Build the analysis components."""
     suppress_detector_list = analysis_context.suppress_detector_list
-    if yaml_data['SuppressNewMatchPathDetector']:
-        suppress_detector_list.append('DefaultNewMatchPathDetector')
     has_unparsed_handler = False
     has_new_match_path_handler = False
     if 'Analysis' in yaml_data and yaml_data['Analysis'] is not None:
@@ -801,11 +799,10 @@ def add_default_analysis_components(analysis_context, anomaly_event_handlers, at
         has_unparsed_handler = True
     if not has_new_match_path_handler:
         has_new_match_path_handler = True
-        if 'LearnMode' not in yaml_data:
-            msg = 'Config-Error: LearnMode must be defined if no NewMatchPathDetector is defined.'
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        learn = yaml_data['LearnMode']
+        if 'LearnMode' in yaml_data:
+            learn = yaml_data['LearnMode']
+        else:
+            learn = True
         from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
         nmpd = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=learn)
         nmpd.output_event_handlers = None
