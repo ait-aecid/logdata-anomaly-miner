@@ -509,7 +509,7 @@ class YamlConfigTest(TestBase):
 
         context.aminer_config.yaml_data['Analysis'][2]['suppress'] = False
         context.atomizer_factory.event_handler_list[0].stream = self.output_stream
-        default_nmpd = context.registered_components[2][0]
+        default_nmpd = context.registered_components[3][0]
         default_nmpd.output_log_line = False
         self.assertTrue(default_nmpd.receive_atom(log_atom_fixed_dme))
         self.assertEqual(self.output_stream.getvalue(), __expected_string1 % (
@@ -521,7 +521,7 @@ class YamlConfigTest(TestBase):
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
         context.atomizer_factory.event_handler_list[0].stream = self.output_stream
-        default_nmpd = context.registered_components[2][0]
+        default_nmpd = context.registered_components[3][0]
         default_nmpd.output_log_line = False
         self.assertTrue(default_nmpd.receive_atom(log_atom_fixed_dme))
         self.assertEqual(self.output_stream.getvalue(), "")
