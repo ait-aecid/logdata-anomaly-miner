@@ -84,4 +84,4 @@ class JsonConverterHandler(EventHandlerInterface):
                 import copy
                 event_source = copy.copy(event_source)
                 event_source.output_event_handlers.append(listener)
-            listener.receive_event(event_type, event_message, res, json_data, log_atom, event_source)
+            listener.receive_event(event_type, None, res, json_data, log_atom, event_source)

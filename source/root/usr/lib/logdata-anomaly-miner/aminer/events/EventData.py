@@ -28,31 +28,38 @@ class EventData:
         if analysis_context is not None:
             self.description = '"%s"' % analysis_context.get_name_by_component(event_source)
         else:
-            self.description = ''
+            self.description = ""
         if log_atom is None:
             return
         self.log_atom = log_atom
 
     def receive_event_string(self):
         """Receive an event string."""
-        message = ''
-        if hasattr(self, "log_atom"):
-            if self.log_atom.get_timestamp() is None:
-                import time
-                self.log_atom.set_timestamp(time.time())
-            message += '%s ' % datetime.fromtimestamp(self.log_atom.get_timestamp()).strftime("%Y-%m-%d %H:%M:%S")
-            message += '%s\n' % self.event_message
-            message += '%s: %s (%d lines)\n' % (self.event_source.__class__.__name__, self.description, len(self.sorted_log_lines))
+        message = ""
+        if self.event_message is not None:
+            indent = "  "
+            if hasattr(self, "log_atom"):
+                if self.log_atom.get_timestamp() is None:
+                    import time
+                    self.log_atom.set_timestamp(time.time())
+                message += "%s " % datetime.fromtimestamp(self.log_atom.get_timestamp()).strftime("%Y-%m-%d %H:%M:%S")
+                message += "%s\n" % self.event_message
+                message += "%s: %s (%d lines)\n" % (self.event_source.__class__.__name__, self.description, len(self.sorted_log_lines))
+            else:
+                message += "%s (%d lines)\n" % (self.event_message, len(self.sorted_log_lines))
         else:
-            message += '%s (%d lines)\n' % (self.event_message, len(self.sorted_log_lines))
+            indent = ""
         for line in self.sorted_log_lines:
             if isinstance(line, bytes):  # skipcq: PTC-W0048
-                if line != b'':
-                    message += '  ' + line.decode(AminerConfig.ENCODING) + '\n'
+                if line != b"":
+                    message += indent + line.decode(AminerConfig.ENCODING) + "\n"
             else:
                 original_log_line_prefix = self.analysis_context.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX)
                 if original_log_line_prefix is not None and line.startswith(original_log_line_prefix):
-                    message += line + '\n'
-                elif line != '':
-                    message += '  ' + line + '\n'
+                    message += line + "\n"
+                elif line != "":
+                    message += indent + line + "\n"
+        if self.event_message is None:
+            # remove last newline
+            message = message[:-1]
         return message
