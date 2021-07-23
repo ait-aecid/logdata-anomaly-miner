@@ -34,7 +34,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """This class is used for an arima time series analysis of the appearances of log lines to events."""
 
     def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, acf_pause_area_percentage=0.2,
-                 acf_auto_pause_area = True, acf_auto_pause_area_num_min = 10, build_sum_over_values=False, num_periods_tsa_ini=15,
+                 acf_auto_pause_area=True, acf_auto_pause_area_num_min=10, build_sum_over_values=False, num_periods_tsa_ini=15,
                  num_division_time_step=10, alpha=0.05, num_min_time_history=20, num_max_time_history=30, num_results_bt=15, alpha_bt=0.05,
                  acf_threshold=0.2, round_time_inteval_threshold=0.02, persistence_id='Default', path_list=None, ignore_list=None,
                  output_log_line=True, auto_include_flag=True):
