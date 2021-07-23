@@ -216,6 +216,7 @@ class JsonModelElement(ModelElementInterface):
                         current_path+"/"+key, match_context.match_data[:index], match_context.match_data[:index], None)
                     matches.append(match_element)
                     match_context.update(match_context.match_data[:index])
+
                 if len(matches) == 0 or matches[-1] is None:
                     logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN MATCHES 1")
                     return matches

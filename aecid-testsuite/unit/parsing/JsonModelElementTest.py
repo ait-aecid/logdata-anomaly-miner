@@ -358,7 +358,7 @@ class JsonModelElementTest(TestBase):
         match_context.match_data = data[len(match_context.match_string):]
         self.compare_match_results(
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
-
+        
     def test9get_match_element_empty_array_empty_object_null(self):
         """Test if the keywords EMPTY_ARRAY, EMPTY_OBJECT, EMPTY_STRING and None (null) work properly."""
         key_parser_dict = {"menu": {
