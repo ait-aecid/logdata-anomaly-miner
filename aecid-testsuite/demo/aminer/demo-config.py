@@ -111,7 +111,7 @@ def build_analysis_pipeline(analysis_context):
         DelimitedDataModelElement('Data', b'%'), AnyByteDataModelElement('Rest')]
 
     service_children_login_details = [
-        FixedDataModelElement('User', b'User '), DelimitedDataModelElement('Username', b' '),
+        FixedDataModelElement('User/LoginDetails', b'User '), DelimitedDataModelElement('Username', b' '),
         FixedWordlistDataModelElement('Status', [b' logged in', b' logged out']), OptionalMatchModelElement(
             'PastTime', SequenceModelElement('Time', [
                 FixedDataModelElement('Blank', b' '), DecimalIntegerValueModelElement('Minutes'),
@@ -134,7 +134,7 @@ def build_analysis_pipeline(analysis_context):
         DateTimeModelElement('DTM', date_format_string)]
 
     service_children_user_ip_address = [
-        FixedDataModelElement('User', b'User '), DelimitedDataModelElement('Username', b' '),
+        FixedDataModelElement('User/UserIPAddress', b'User '), DelimitedDataModelElement('Username', b' '),
         FixedDataModelElement('Action', b' changed IP address to '), IpAddressDataModelElement('IP')]
 
     service_children_cron_job_announcement = [
@@ -159,7 +159,8 @@ def build_analysis_pipeline(analysis_context):
             FixedDataModelElement('name_string', b' name="'), DelimitedDataModelElement('name', b'"'),
             FixedDataModelElement('inode_string', b'" inode='), DecimalIntegerValueModelElement('inode'),
             FixedDataModelElement('dev_string', b' dev='), DelimitedDataModelElement('dev', b' '),
-            FixedDataModelElement('mode_string', b' mode='), DecimalIntegerValueModelElement('mode'),
+            FixedDataModelElement('mode_string', b' mode='),
+            DecimalIntegerValueModelElement('mode', value_pad_type=DecimalIntegerValueModelElement.PAD_TYPE_ZERO),
             FixedDataModelElement('ouid_string', b' ouid='), DecimalIntegerValueModelElement('ouid'),
             FixedDataModelElement('ogid_string', b' ogid='), DecimalIntegerValueModelElement('ogid'),
             FixedDataModelElement('rdev_string', b' rdev='), DelimitedDataModelElement('rdev', b' '),
@@ -202,7 +203,7 @@ def build_analysis_pipeline(analysis_context):
         MultiLocaleDateTimeModelElement('MultiLocaleDateTimeModelElement', [(b'%b %d %Y', None, '%s.%s' % loc)]))
     service_children_parsing_model_element.append(
         RepeatedElementDataModelElement('RepeatedElementDataModelElement', SequenceModelElement('SequenceModelElement', [
-            FixedDataModelElement('FixedDataModelElement', b'drawn number: '),
+            FixedDataModelElement('FixedDataModelElement', b'[drawn number]: '),
             DecimalIntegerValueModelElement('DecimalIntegerValueModelElement')]), 1))
     service_children_parsing_model_element.append(VariableByteDataModelElement('VariableByteDataModelElement', b'-@#'))
     service_children_parsing_model_element.append(
@@ -215,11 +216,11 @@ def build_analysis_pipeline(analysis_context):
     # The OptionalMatchModelElement must be paired with a FirstMatchModelElement because it accepts all data and thus no data gets to the
     # AnyByteDataModelElement. The AnyByteDataModelElement must be last, because all bytes are accepted.
     service_children_parsing_model_element.append(OptionalMatchModelElement(
-        'OptionalMatchModelElement', FirstMatchModelElement('FirstMatchModelElement', [
+        '/', FirstMatchModelElement('FirstMatchModelElement//optional', [
             FixedDataModelElement('FixedDataModelElement', b'The-searched-element-was-found!'), SequenceModelElement('se', [
                 FixedDataModelElement('FixedDME', b'Any:'), AnyByteDataModelElement('AnyByteDataModelElement')])])))
 
-    alphabet = b'abcdef'
+    alphabet = b'ghijkl'
     service_children_ecd = []
     for _, char in enumerate(alphabet):
         char = bytes([char])
@@ -280,10 +281,12 @@ def build_analysis_pipeline(analysis_context):
         Rules.OrMatchRule([
             Rules.AndMatchRule([
                 Rules.PathExistsMatchRule('/model/LoginDetails/PastTime/Time/Minutes'),
-                Rules.NegationMatchRule(Rules.ValueMatchRule('/model/LoginDetails/Username', b'root'))]),
+                Rules.NegationMatchRule(Rules.ValueMatchRule('/model/LoginDetails/Username', b'root')),
+                Rules.DebugMatchRule(debug_match_result=True)]),
             Rules.AndMatchRule([
                 Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails/PastTime/Time/Minutes')),
-                Rules.PathExistsMatchRule('/model/LoginDetails')]),
+                Rules.PathExistsMatchRule('/model/LoginDetails'),
+                Rules.DebugMatchRule(debug_match_result=True)]),
             Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails'))])]
 
     allowlist_violation_detector = AllowlistViolationDetector(analysis_context.aminer_config, allowlist_rules, anomaly_event_handlers,
@@ -325,7 +328,7 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis.EventSequenceDetector import EventSequenceDetector
     esd = EventSequenceDetector(analysis_context.aminer_config, anomaly_event_handlers, ['/model/ParsingME'], ignore_list=[
-        '/model/ECD/a', '/model/ECD/b', '/model/ECD/c', '/model/ECD/d', '/model/ECD/e', '/model/ECD/f', '/model/Random',
+        '/model/ECD/g', '/model/ECD/h', '/model/ECD/i', '/model/ECD/j', '/model/ECD/k', '/model/ECD/l', '/model/Random',
         '/model/RandomTime', '/model/DailyCron'])
     analysis_context.register_component(esd, component_name="EventSequenceDetector")
     atom_filter.add_handler(esd)
@@ -359,6 +362,32 @@ def build_analysis_pipeline(analysis_context):
         tuple_transformation_function=tuple_transformation_function, output_log_line=True)
     analysis_context.register_component(enhanced_new_match_path_value_combo_detector, component_name="EnhancedNewValueCombo")
     atom_filter.add_handler(enhanced_new_match_path_value_combo_detector)
+
+    import re
+    ip_match_action = Rules.EventGenerationMatchAction(
+        "Analysis.Rules.IPv4InRFC1918MatchRule", "Private IP address occurred!", anomaly_event_handlers)
+
+    vdmt = Rules.ValueDependentModuloTimeMatchRule(None, 3, ["/model/ECD/j", "/model/ECD/k", "/model/ECD/l"], {b"e": [0, 2.95]}, [0, 3])
+    mt = Rules.ModuloTimeMatchRule(None, 3, 0, 3, None)
+    time_allowlist_rules = [
+        Rules.AndMatchRule([
+            Rules.ParallelMatchRule([
+                Rules.ValueDependentDelegatedMatchRule([
+                    '/model/ECD/g', '/model/ECD/h', '/model/ECD/i', '/model/ECD/j', '/model/ECD/k', '/model/ECD/l'], {
+                        (b"a",): mt, (b"b",): mt, (b"c",): mt, (b"d",): vdmt, (b"e",): vdmt, (b"f",): vdmt, None: mt}, mt),
+                Rules.IPv4InRFC1918MatchRule("/model/ParsingME/se2/IpAddressDataModelElement", ip_match_action),
+                Rules.DebugHistoryMatchRule(debug_match_result=True)
+            ]),
+            # IP addresses 8.8.8.8, 8.8.4.4 and 10.0.0.0 - 10.255.255.255 are not allowed
+            Rules.NegationMatchRule(Rules.ValueListMatchRule("/model/ParsingME/se2/IpAddressDataModelElement", [134744072, 134743044])),
+            Rules.NegationMatchRule(Rules.ValueRangeMatchRule("/model/ParsingME/se2/IpAddressDataModelElement", 167772160, 184549375)),
+            Rules.NegationMatchRule(Rules.StringRegexMatchRule("/model/type/syscall/success", re.compile(b"^no$")))
+        ])
+    ]
+    time_allowlist_violation_detector = AllowlistViolationDetector(
+        analysis_context.aminer_config, time_allowlist_rules, anomaly_event_handlers, output_log_line=True)
+    analysis_context.register_component(time_allowlist_violation_detector, component_name="TimeAllowlist")
+    atom_filter.add_handler(time_allowlist_violation_detector)
 
     from aminer.analysis.HistogramAnalysis import HistogramAnalysis, LinearNumericBinDefinition, ModuloTimeBinDefinition, \
         PathDependentHistogramAnalysis

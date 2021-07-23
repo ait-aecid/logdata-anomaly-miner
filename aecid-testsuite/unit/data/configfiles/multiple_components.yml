@@ -115,6 +115,7 @@ Parser:
 Input:
         timestamp_paths: ["/accesslog/time"]
         verbose: False # use this to debug your parser-model
+        adjust_timestamps: True
 
 Analysis:
         - type: TimestampsUnsortedDetector
@@ -223,8 +224,6 @@ Analysis:
         - type: TimeCorrelationViolationDetector
           id: TimeCorrelationViolationDetector
           ruleset: ["path_exists_match_rule3", "path_exists_match_rule4"]
-        - type: SimpleMonotonicTimestampAdjust
-          id: SimpleMonotonicTimestampAdjust
         - type: AllowlistViolationDetector
           id: AllowlistViolationDetector
           allowlist_rules: ["or_match_rule"]
