@@ -35,7 +35,6 @@ for filename in ${files[@]}; do
     cat > $CONFIG_PATH <<EOL
 LearnMode: False
 Core.PersistenceDir: '/tmp/lib/aminer'
-Core.LogDir: '/tmp/lib/aminer/log'
 
 LogResourceList:
         - 'file://$LOG_FILE'
@@ -172,7 +171,7 @@ EOL
             ;;
         AminerParsingModel)
             # skipping generic parsing models as the log data is missing.
-            exit 0
+            exit $exit_code
             echo "test8" > $LOG_FILE
             echo "" >> $LOG_FILE
             echo "" >> $LOG_FILE
