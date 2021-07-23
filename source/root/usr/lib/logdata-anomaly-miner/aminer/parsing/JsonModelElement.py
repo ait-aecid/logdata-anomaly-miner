@@ -29,6 +29,9 @@ debug_log_prefix = "JsonModelElement: "
 
 
 def format_float(val):
+    """
+    This function formats the float-value and parses the sign and the exponent
+    """
     exp = None
     if "e" in val:
         exp = "e"
