@@ -59,8 +59,8 @@ class JsonModelElement(ModelElementInterface):
         @param element_id: The ID of the element.
         @param key_parser_dict: A dictionary of all keys with the according parsers. If a key should be optional, the associated parser must
             start with the OptionalMatchModelElement. To allow every key in a JSON object use "key": "ALLOW_ALL". To allow only empty arrays
-            - [] - use "key": "EMPTY_ARRAY". To allow only empty objects - {} - use "key": "EMPTY_OBJECT". To allow only empty strings - "" -
-             use "key": "EMPTY_STRING".
+            - [] - use "key": "EMPTY_ARRAY". To allow only empty objects - {} - use "key": "EMPTY_OBJECT".
+            To allow only empty strings - "" - use "key": "EMPTY_STRING".
         @param optional_key_prefix: If some key starts with the optional_key_prefix it will be considered optional.
         @param allow_all_fields: Unknown fields are skipped without parsing with any parsing model.
         """
@@ -290,6 +290,7 @@ class JsonModelElement(ModelElementInterface):
         return True
 
     def flatten_list(self, lst):
+        """Flatten a list of lists using this method recursively."""
         res = []
         for val in lst:
             if isinstance(val, list):
