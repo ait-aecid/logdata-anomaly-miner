@@ -1581,6 +1581,12 @@ MatchFilter
 
 This component creates events for specified paths and values.
 
+* **paths**: List of paths defined as strings(Required)
+* **value_list**: List of values(Required)
+* **output_logline**: Defines if logline should be added to the output. Boolean(Default: True)
+* **output_event_handlers**: List of strings with id's of the event_handlers
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True.
+
 .. code-block:: yaml
 
      Analysis:
@@ -1599,6 +1605,16 @@ MatchValueAverageChangeDetector
 
 This detector calculates the average of a given list of values to monitor. Reports are generated if the average of the latest diverges significantly from the values observed before.
 
+* **timestamp_path**: Use this path value for timestamp based bins. String (**required**)
+* **paths**: List of match paths to analyze in this detector. List of strings( **required**)
+* **min_bin_elements**: Evaluate the latest bin only after at least that number of elements was added to it. Integer, min: 1 (**required**)
+* **min_bin_time**: Evaluate the latest bin only when the first element is received after min_bin_time has elapsed. Integer, min: 1 (**required**)
+* **debug_mode**: Enables debug output. Boolean(Default: False)
+* **persistence_id**: The name of the file where the learned models are stored. String
+* **output_logline**: Defines if logline should be added to the output. Boolean(Default: True)
+* **output_event_handlers**: List of strings with id's of the event_handlers
+* **suppress**: A boolean that suppresses anomaly output of that detector when set to True.
+
 .. code-block:: yaml
 
      Analysis:
@@ -1615,6 +1631,13 @@ MatchValueStreamWriter
 ~~~~~~~~~~~~~~~~~~~~~~
 
 This component extracts values from a given match and writes them to a stream. This can be used to forward these values to another program (when stream is a wrapped network socket) or to a file for further analysis. A stream is used instead of a file descriptor to increase performance. To flush it from time to time, add the writer object also to the time trigger list.
+
+* **stream**: Stream to write the value of the match to. Possible values: 'sys.stdout' or 'sys.stderr' ( **required**)
+* **paths**: List of match paths to analyze in this detector. List of strings( **required**)
+* **separator**: Use this string as a seperator for the output. String ( **required**)
+* **missing_value_string**: Write this string if the value is missing. ( **required**)
+* **output_event_handlers**: List of strings with id's of the event_handlers
+* **suppress**: A boolean that suppresses anomaly output of that detector when set to True.
 
 .. code-block:: yaml
 
@@ -1636,6 +1659,16 @@ For example because the service was deactivated or logging disabled unexpectedly
 NewMatchPathValueDetector. For each unique value extracted by target_path_list, a tracking record is added to expected_values_dict.
 It stores three numbers: the timestamp the extracted value was last seen, the maximum allowed gap between observations and the next
 alerting time when currently in error state. When in normal (alerting) state, the value is zero.
+
+
+* **paths**: List of match paths to analyze in this detector. List of strings( **required**)
+* **learn_mode** specifies whether newly observed value combinations should be added to the learned model (boolean).
+* **check_interval**: This integer(seconds) defines the interval in which pre-set or learned values need to appear. Integer min:1 (Default: 3600)
+* **realert_interval**: This integer(seconds) defines the interval in which the AMiner should alert us about missing token values. Integer min: 1 (Default: 3600)
+* **persistence_id**: The name of the file where the learned models are stored. String
+* **output_logline**: Defines if logline should be added to the output. Boolean(Default: True)
+* **output_event_handlers**: List of strings with id's of the event_handlers
+* **suppress**: A boolean that suppresses anomaly output of that detector when set to True.
 
 .. code-block:: yaml
 
@@ -2201,3 +2234,80 @@ It just adds the evaluated log_atom to a ObjectHistory.
 -------------
 EventHandling
 -------------
+
+EventHandler are output modules that allow the logdata-anomaly-miner to write alerts to specific targets.
+
+All EventHandler must have the following parameters and may have additional specific parameters that are defined in the respective sections. 
+
+* **id**: must be a unique string (required)
+* **type**: must be an existing Analysis component (required)
+* **json**: A boolean value that enables that the output is formatted in json (default: False )
+
+
+StreamPrinterEventHandler
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The StreamPrinterEventHandler writes alerts to a stream. If no output_file_path is defined, it writes the output to **stdout**
+
+* **output_file_path**: This string value defines a file where the output should be written to. Default: stdout
+
+.. code-block:: yaml
+
+  EventHandlers:
+  # output to stdout:
+      - id: 'stpe'
+        type: 'StreamPrinterEventHandler'
+
+  # output json to file:
+      - id: 'stpefile'
+        type: 'StreamPrinterEventHandler'
+        json: true
+        output_file_path: '/tmp/aminer_out.log'
+
+
+
+SyslogWriterEventHandler
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+The SyslogWriterEventHandler writes alerts to the local syslog instance.
+
+.. warning:: USE THIS AT YOUR OWN RISK: by creating aminer/syslog log data processing loops, you will flood your syslog and probably fill up your disks.0
+
+* **instance_name**: This string defines the instance_name for the syslog. Default: **aminer**
+
+.. code-block:: yaml
+
+  EventHandlers:
+      - id: 'swe'
+        type: 'SyslogWriterEventHandler'
+        instance_name: 'logdata-anomaly-miner'
+
+
+KafkaEventHandler
+~~~~~~~~~~~~~~~~~
+
+The KafkaEventHandler writes it's output to a `Kafka Message-Queue <https://kafka.apache.org/>`_
+
+* **topic**: String property with the topic-name for the message queue
+* **cfgfile**: String property with the path to the kafka-config file. A comprehensive list of all config-parameters can be found at https://kafka-python.readthedocs.io/en/master/apidoc/KafkaProducer.html
+  
+  A typical kafka-config-file might look like this:
+
+.. code-block:: yaml
+
+  [DEFAULT]
+  bootstrap_servers = localhost:9092
+  security_protocol = PLAINTEXT
+
+.. note:: The header [DEFAULT] is important and must exist in the configuration file
+
+
+.. code-block:: yaml
+
+  EventHandlers:
+  # output to kafka using the topic 'aminer'
+      - id: 'mqe'
+        json: True
+        topic: 'aminer'
+        cfgfile: '/etc/aminer/kafka-client.conf'
+        type: 'KafkaEventHandler'
