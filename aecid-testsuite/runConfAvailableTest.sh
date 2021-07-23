@@ -229,7 +229,7 @@ EOL
             echo "test22" > $LOG_FILE
             ;;
         *)
-            echo "Unknown parser config was found! Please extend these tests. Failing.."
+            echo "Unknown parser config '$BN' was found! Please extend these tests. Failing.."
             exit_code=2
             continue
             ;;
@@ -257,7 +257,7 @@ EOL
 
     #cat $OUT
 
-    if (`grep -Fq "VerboseUnparsedAtomHandler" $OUT` && ($BN != "AminerParsingModel" || `grep -o "VerboseUnparsedAtomHandler" $OUT | wc -l`)) || `grep -Fq "Traceback" $OUT` || `grep -Fq "{'Parser'" $OUT` || `grep -Fq "FATAL" $OUT` || `grep -Fq "Config-Error" $OUT`; then
+    if (`grep -Fq "VerboseUnparsedAtomHandler" $OUT` && ($BN != "AminerParsingModel" || `grep -o "VerboseUnparsedAtomHandler" $OUT | wc -l` -gt 2)) || `grep -Fq "Traceback" $OUT` || `grep -Fq "{'Parser'" $OUT` || `grep -Fq "FATAL" $OUT` || `grep -Fq "Config-Error" $OUT`; then
       echo "Failed Test in $filename"
 	    exit_code=1
 	    cat $OUT
