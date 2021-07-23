@@ -35,7 +35,6 @@ for filename in ${files[@]}; do
     cat > $CONFIG_PATH <<EOL
 LearnMode: False
 Core.PersistenceDir: '/tmp/lib/aminer'
-Core.LogDir: '/tmp/lib/aminer/log'
 
 LogResourceList:
         - 'file://$LOG_FILE'
@@ -171,15 +170,11 @@ EOL
             echo "Feb 29 21:12:42 mail-2 dhclient[418]: bound to 192.168.10.21 -- renewal in 36807 seconds." >> $LOG_FILE
             ;;
         AminerParsingModel)
-            # skipping generic parsing models as the log data is missing.
-            exit 0
-            echo "test8" > $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
+            sudo cp ./demo/aminer/jsonConverterHandler-demo-config.py /tmp/demo-config.py
+            sudo ./demo/aminer/aminerDemo.sh > $LOG_FILE
             ;;
         ApacheAccessModel)
+            exit $exit_code
             echo '83.149.9.216 - - [17/May/2015:10:05:03 +0000] "GET /presentations/logstash-monitorama-2013/images/kibana-search.png HTTP/1.1" 200 203023 "http://semicomplete.com/presentations/logstash-monitorama-2013/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.77 Safari/537.36"' > $LOG_FILE
             echo '::1 - - [17/May/2015:10:05:03 +0000] "-" 200 203023' >> $LOG_FILE
             echo '192.168.10.190 - - [29/Feb/2020:13:58:32 +0000] "GET /services/portal/ HTTP/1.1" 200 7499 "-" "-"' >> $LOG_FILE
@@ -262,8 +257,8 @@ EOL
 
     #cat $OUT
 
-    if `grep -Fq "VerboseUnparsedAtomHandler" $OUT` || `grep -Fq "Traceback" $OUT` || `grep -Fq "{'Parser'" $OUT` || `grep -Fq "FATAL" $OUT`; then
-        echo "Failed Test in $filename"
+    if (`grep -Fq "VerboseUnparsedAtomHandler" $OUT` && ($BN != "AminerParsingModel" || `grep -o "VerboseUnparsedAtomHandler" $OUT | wc -l`)) || `grep -Fq "Traceback" $OUT` || `grep -Fq "{'Parser'" $OUT` || `grep -Fq "FATAL" $OUT`; then
+      echo "Failed Test in $filename"
 	    exit_code=1
 	    cat $OUT
 	    echo
