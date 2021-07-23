@@ -171,7 +171,7 @@ EOL
             ;;
         AminerParsingModel)
             # skipping generic parsing models as the log data is missing.
-            exit 0
+            exit $exit_code
             echo "test8" > $LOG_FILE
             echo "" >> $LOG_FILE
             echo "" >> $LOG_FILE
