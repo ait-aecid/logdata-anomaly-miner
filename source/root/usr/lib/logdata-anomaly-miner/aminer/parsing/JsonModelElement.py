@@ -29,7 +29,9 @@ debug_log_prefix = "JsonModelElement: "
 
 
 def format_float(val):
-    """Format a float the way it is expected."""
+    """
+    This function formats the float-value and parses the sign and the exponent.
+    """
     exp = None
     if "e" in val:
         exp = "e"
@@ -217,6 +219,7 @@ class JsonModelElement(ModelElementInterface):
                         current_path+"/"+key, match_context.match_data[:index], match_context.match_data[:index], None)
                     matches.append(match_element)
                     match_context.update(match_context.match_data[:index])
+
                 if len(matches) == 0 or matches[-1] is None:
                     logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN MATCHES 1")
                     return matches
