@@ -176,7 +176,8 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
                 r[var] = attr
         return r
 
-    def get_time_trigger_class(self):
+    @staticmethod
+    def get_time_trigger_class():
         """
         Get the trigger class this component should be registered for.
         This trigger is used only for persistence, so real-time triggering is needed.

@@ -29,6 +29,7 @@ debug_log_prefix = "JsonModelElement: "
 
 
 def format_float(val):
+    """Format a float the way it is expected."""
     exp = None
     if "e" in val:
         exp = "e"
@@ -188,9 +189,7 @@ class JsonModelElement(ModelElementInterface):
         if not self.check_keys(json_dict, json_match_data, match_context):
             return [None]
 
-        last_key = None
         for i, key in enumerate(json_match_data.keys()):
-            last_key = key
             split_key = key
             if self.optional_key_prefix + key in json_dict:
                 key = self.optional_key_prefix + key

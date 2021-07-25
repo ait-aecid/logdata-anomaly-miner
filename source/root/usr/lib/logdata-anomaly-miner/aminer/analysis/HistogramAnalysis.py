@@ -326,7 +326,8 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
             self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
                 KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
-    def get_time_trigger_class(self):
+    @staticmethod
+    def get_time_trigger_class():
         """
         Get the trigger class this component should be registered for.
         This trigger is used only for persistence, so real-time triggering is needed.
@@ -524,7 +525,8 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
                 KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.log_success += 1
 
-    def get_time_trigger_class(self):
+    @staticmethod
+    def get_time_trigger_class():
         """
         Get the trigger class this component should be registered for.
         This trigger is used only for persistence, so real-time triggering is needed.
