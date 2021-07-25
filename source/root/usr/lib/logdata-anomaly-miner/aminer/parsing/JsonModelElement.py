@@ -188,7 +188,9 @@ class JsonModelElement(ModelElementInterface):
         if not self.check_keys(json_dict, json_match_data, match_context):
             return [None]
 
+        last_key = None
         for i, key in enumerate(json_match_data.keys()):
+            last_key = key
             split_key = key
             if self.optional_key_prefix + key in json_dict:
                 key = self.optional_key_prefix + key
@@ -289,8 +291,10 @@ class JsonModelElement(ModelElementInterface):
                 return False
         return True
 
-    def flatten_list(self, lst):
+    def flatten_list(self, lst: list):
         """Flatten a list of lists using this method recursively."""
+        if not isinstance(lst, list):
+            return None
         res = []
         for val in lst:
             if isinstance(val, list):
@@ -305,6 +309,8 @@ class JsonModelElement(ModelElementInterface):
         value = json_dict[key]
         search_string = b""
         match_array = self.flatten_list(json_match_data[split_key])
+        if match_array is None:
+            return None
         while isinstance(value, list):
             value = value[0]
             search_string += b"]"

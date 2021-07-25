@@ -113,9 +113,9 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
                 match_value = match_value.decode(AminerConfig.ENCODING)
             affected_log_atom_values.append(str(match_value))
         values = self.known_values_dict.get(match_value_tuple)
-        metadata['TimeFirstOccurrence'] = str(values[0])
-        metadata['TimeLastOccurence'] = str(values[1])
-        metadata['NumberOfOccurences'] = str(values[2])
+        metadata['TimeFirstOccurrence'] = values[0]
+        metadata['TimeLastOccurrence'] = values[1]
+        metadata['NumberOfOccurrences'] = values[2]
 
         analysis_component = {'AffectedLogAtomPaths': self.target_path_list, 'AffectedLogAtomValues': affected_log_atom_values,
                               'Metadata': metadata}

@@ -33,22 +33,19 @@ done
 
 for filename in ${files[@]}; do
     cat > $CONFIG_PATH <<EOL
-LearnMode: False
+LearnMode: True
 Core.PersistenceDir: '/tmp/lib/aminer'
 
 LogResourceList:
         - 'file://$LOG_FILE'
 
-Input:
-        timestamp_paths: ["/accesslog/time"]
-        verbose: True
-
 EventHandlers:
         - id: stpe
           type: StreamPrinterEventHandler
 
-Parser:
-        - id: 'testingModel'
+Input:
+        timestamp_paths: ["/accesslog/time"]
+        verbose: True
 EOL
 
     BN=`basename "$filename" .py`
@@ -172,6 +169,17 @@ EOL
         AminerParsingModel)
             sudo cp ./demo/aminer/jsonConverterHandler-demo-config.py /tmp/demo-config.py
             sudo ./demo/aminer/aminerDemo.sh > $LOG_FILE
+            sed -i -e 1,2d $LOG_FILE
+            sed -i -e "/Generating data for the LinearNumericBinDefinition histogram report../d" $LOG_FILE
+            sed -i -e "/Generating data for the ModuloTimeBinDefinition histogram report../d" $LOG_FILE
+            sed -i "/^CPU Temp: /d" $LOG_FILE
+            sed -i "/^first$/d" $LOG_FILE
+            sed -i "/^second$/d" $LOG_FILE
+            sed -i "/^third$/d" $LOG_FILE
+            sed -i "/^fourth$/d" $LOG_FILE
+            cat >> $CONFIG_PATH <<EOL
+        json_format: True
+EOL
             ;;
         ApacheAccessModel)
             exit $exit_code
@@ -236,6 +244,9 @@ EOL
     esac
 
     cat >> $CONFIG_PATH <<EOL
+
+Parser:
+        - id: 'testingModel'
           type: $BN
           name: 'testedModel'
 
@@ -246,18 +257,16 @@ EOL
           args:
             - testingModel
 EOL
-
     sudo aminer -C -c $CONFIG_PATH > $OUT 2>&1 &
     #stop aminer
-    sleep 3 & wait $!
+    sleep 6 & wait $!
     sudo pkill -x aminer
     KILL_PID=$!
     sleep 2
     wait $KILL_PID
 
     #cat $OUT
-
-    if (`grep -Fq "VerboseUnparsedAtomHandler" $OUT` && ($BN != "AminerParsingModel" || `grep -o "VerboseUnparsedAtomHandler" $OUT | wc -l` -gt 2)) || `grep -Fq "Traceback" $OUT` || `grep -Fq "{'Parser'" $OUT` || `grep -Fq "FATAL" $OUT` || `grep -Fq "Config-Error" $OUT`; then
+    if [[ `grep -Fq "VerboseUnparsedAtomHandler" $OUT` == 0 && $BN != "AminerParsingModel" ]] || [[ `grep -o '\bVerboseUnparsedAtomHandler\b' $OUT | wc -l` > 5 ]] || `grep -Fq "Traceback" $OUT` || `grep -Fq "{'Parser'" $OUT` || `grep -Fq "FATAL" $OUT` || `grep -Fq "Config-Error" $OUT`; then
       echo "Failed Test in $filename"
 	    exit_code=1
 	    cat $OUT
