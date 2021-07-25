@@ -64,7 +64,7 @@ def get_model():
                 "TimeLastOccurrence": DecimalFloatValueModelElement("time_last_occurrence"),
                 "NumberOfOccurrences": DecimalIntegerValueModelElement("number_of_occurrences")
             },
-            "_ParsedLogAtom": "ALLOW_ALL",
+            "_ParsedLogAtom": {"ALLOW_ALL_KEYS": VariableByteDataModelElement("allow_all_keys", alphabet)},
             "_FeatureList": [{
                 "Rule": {
                     "type": VariableByteDataModelElement("type", name_alphabet),
@@ -85,7 +85,7 @@ def get_model():
                 "TotalElements": DecimalIntegerValueModelElement("total_elements"),
                 "BinnedElements": DecimalIntegerValueModelElement("binned_elements"),
                 "HasOutlierBinsFlag": has_outlier_bins_flag,
-                "Bins": "ALLOW_ALL",
+                "Bins": {"ALLOW_ALL_KEYS": DecimalIntegerValueModelElement("bin")},
                 "BinDefinition": {
                     "Type": FixedWordlistDataModelElement("type", [b"ModuloTimeBinDefinition", b"LinearNumericBinDefinition"]),
                     "LowerLimit": DecimalIntegerValueModelElement("lower_limit"),
@@ -173,7 +173,10 @@ def get_model():
             "LogLinesCount": DecimalIntegerValueModelElement("lines_count"),
             "_AnnotatedMatchElement": VariableByteDataModelElement("annotated_match_element", alphabet_with_newline),
         },
-        "_StatusInfo": "ALLOW_ALL",
+        "_StatusInfo": {"ALLOW_ALL_KEYS": {
+            "CurrentProcessedLines": DecimalIntegerValueModelElement("current_processed_lines"),
+            "TotalProcessedLines": DecimalIntegerValueModelElement("total_processed_lines")
+        }},
         "_FromTime": DecimalFloatValueModelElement("from_time"),
         "_ToTime": DecimalFloatValueModelElement("to_time"),
         "_DebugLog": [OptionalMatchModelElement("optional", VariableByteDataModelElement("debug_log", alphabet))]
