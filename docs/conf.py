@@ -22,7 +22,6 @@ copyright = '2021, Florian Skopik, Markus Wurzenberger, Max Landauer, Roman Fied
 author = 'Florian Skopik, Markus Wurzenberger, Max Landauer, Georg Hoeld, Roman Fiedler, Wolfgang Hotwagner, Ernst Leierzopf'
 release = '2.5.0-dev'
 
-
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
