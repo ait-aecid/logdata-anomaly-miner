@@ -8,4 +8,3 @@ services:
             - '$PWD/aminercfg:/etc/aminer'
             - '$PWD/persistency:/var/lib/aminer'
             - '$PWD/logs:/logs'
-        command: ["aminer", "--version"]
