@@ -8,6 +8,9 @@
 
 # Pull base image.
 FROM debian:bullseye
+ARG UNAME=aminer
+ARG UID=1000
+ARG GID=1000
 
 # Set local timezone
 ENV TZ=Europe/Vienna
@@ -70,9 +73,9 @@ RUN ln -s /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerr
 	&& ln -s /usr/lib/python3/dist-packages/dateutil /usr/lib/logdata-anomaly-miner/dateutil \
 	&& ln -s /usr/lib/python3/dist-packages/six.py /usr/lib/logdata-anomaly-miner/six.py \
 	&& ln -s /usr/lib/python3/dist-packages/urllib3 /usr/lib/logdata-anomaly-miner/urllib3 \
-	&& useradd -ms /usr/sbin/nologin aminer && mkdir -p /var/lib/aminer/logs && mkdir /etc/aminer \
-        && chown aminer.aminer -R /var/lib/aminer \
-        && chown aminer.aminer -R /docs \
+	&& groupadd -g $GID -o $UNAME && useradd -u $UID -g $GID -ms /usr/sbin/nologin $UNAME && mkdir -p /var/lib/aminer/logs && mkdir /etc/aminer \
+        && chown $UID.$GID -R /var/lib/aminer \
+        && chown $UID.$GID -R /docs \
         && chmod 0755 /aminerwrapper.sh
 
 RUN PACK=$(find /usr/lib/python3/dist-packages -name posix1e.cpython\*.so) && FILE=$(echo $PACK | awk -F '/' '{print $NF}') ln -s $PACK /usr/lib/logdata-anomaly-miner/$FILE

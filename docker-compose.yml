@@ -1,10 +1,21 @@
 version: "3"
 
 services:
+    akafka:
+        image: aitaecid/akafka
+        environment:
+                KAFKA_TOPICS: '["aminer"]'
+                KAFKA_BOOTSTRAP_SERVERS: localhost:9092
+        volumes:
+            - '$PWD/akafka:/var/lib/akafka'
     aminer:
         build:
             context: .
         volumes:
+            - '$PWD/akafka:/var/lib/akafka'
             - '$PWD/aminercfg:/etc/aminer'
             - '$PWD/persistency:/var/lib/aminer'
             - '$PWD/logs:/logs'
+        depends_on:
+                - akafka
+
