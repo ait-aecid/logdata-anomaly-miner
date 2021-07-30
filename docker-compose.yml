@@ -2,7 +2,7 @@ version: "3"
 
 services:
     akafka:
-        image: aitaecid/akafka
+        image: aitaecid/akafka:latest
         environment:
                 KAFKA_TOPICS: '["aminer"]'
                 KAFKA_BOOTSTRAP_SERVERS: localhost:9092
