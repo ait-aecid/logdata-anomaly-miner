@@ -217,9 +217,9 @@ EOL
             echo "audispd: type=ANOM_RBAC_FAIL msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
             echo "audispd: type=ANOM_RBAC_INTEGRITY_FAIL msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
             echo "audispd: type=ANOM_ROOT_TRANS msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=AVC msg=audit(1226270358.848:238): avc:  denied  { write } for  pid=13349 comm=\"certwatch\" name=\"cache\" dev=dm-0 ino=218171 scontext=system_u:system_r:certwatch_t:s0 tcontext=system_u:object_r:var_t:s0 tclass=dir" >> $LOG_FILE
-#            echo "audispd: type=AVC_PATH msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=BPRM_FCAPS msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=AVC msg=audit(1226270358.848:238): avc:  denied  { write } for  pid=13349 comm=\"certwatch\" name=\"cache\" dev=dm-0 ino=218171 scontext=system_u:system_r:certwatch_t:s0 tcontext=system_u:object_r:var_t:s0 tclass=dir" >> $LOG_FILE
+            echo "audispd: type=AVC_PATH msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo 'audispd: type=BPRM_FCAPS msg=audit(1583242318.512:13886958): fver=17474 fp=33 fi=4294967295 fe=4294967295 old_pp=message old_pi="apache2" old_pe="/usr/bin/bash" new_pp=(null) new_pi=(null) new_pe=(null)' >> $LOG_FILE
 #            echo "audispd: type=CAPSET msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
 #            echo "audispd: type=CHGRP_ID msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
 #            echo "audispd: type=CHUSER_ID msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
