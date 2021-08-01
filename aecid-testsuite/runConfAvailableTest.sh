@@ -304,22 +304,22 @@ EOL
             echo "audispd: type=ROLE_ASSIGN msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
             echo "audispd: type=ROLE_MODIFY msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
             echo "audispd: type=ROLE_REMOVE msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=SELINUX_ERR msg=audit(1311948547.151:138): op=security_compute_av reason=bounds scontext=system_u:system_r:anon_webapp_t:s0-s0:c0,c100,c200 tcontext=system_u:object_r:security_t:s0 tclass=dir perms=ioctl,read,lock" >> $LOG_FILE
-#            echo "audispd: type=SERVICE_START msg=audit(1450876900.115:30): pid=1 uid=0 auid=4294967295 ses=4294967295 msg=' comm=\"Serv-U\" exe=\"/lib/systemd/systemd\" hostname=? addr=? terminal=? res=success'" >> $LOG_FILE
-#            echo "audispd: type=SERVICE_STOP msg=audit(1450876900.115:31): pid=1 uid=0 auid=4294967295 ses=4294967295 msg=' comm=\"Serv-U\" exe=\"/lib/systemd/systemd\" hostname=? addr=? terminal=? res=success'" >> $LOG_FILE
-#            echo "audispd: type=SOCKADDR msg=audit(1582935421.377:947594): saddr=01002F6465762F6C6F6700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" >> $LOG_FILE
-#            echo "audispd: type=SOCKETCALL msg=audit(1134642541.683:201): nargs=3 a0=10 a1=3 a2=9" >> $LOG_FILE
-#            echo 'audispd: type=SYSCALL msg=audit(1582934957.616:917513): arch=c000003e syscall=2 success=yes exit=3 a0=7f5b904e4988 a1=80000 a2=1 a3=7f5b906ec518 items=1 ppid=25680 pid=25684 auid=4294967295 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=(none) ses=4294967295 comm="sort" exe="/usr/bin/sort" key=(null)' >> $LOG_FILE
-#            echo "audispd: type=SYSTEM_BOOT msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=SYSTEM_RUNLEVEL msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=SYSTEM_SHUTDOWN msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=TRUSTED_APP msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=TTY msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=USER_ACCT msg=audit(1450767661.820:3296328): user pid=15789 uid=0 auid=4294967295 msg='PAM: accounting acct=\"root\" : exe=\"/usr/sbin/crond\" (hostname=?, addr=?, terminal=cron res=success)'" >> $LOG_FILE
-#            echo "audispd: type=USER_AUTH msg=audit(1451403184.143:1834): pid=3380 uid=0 auid=4294967295 ses=4294967295 msg='op=PAM:authentication acct=\"toor\" exe=\"/usr/sbin/sshd\" hostname=192.168.2.100 addr=192.168.2.100 terminal=ssh res=failed'" >> $LOG_FILE
-#            echo "audispd: type=USER_AUTH msg=audit(1451403193.995:1835): pid=3380 uid=0 auid=4294967295 ses=4294967295 msg='op=PAM:authentication acct=\"toor\" exe=\"/usr/sbin/sshd\" hostname=192.168.2.100 addr=192.168.2.100 terminal=ssh res=success'" >> $LOG_FILE
-#            echo "audispd: type=USER_AVC msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=USER_CHAUTHTOK msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=SELINUX_ERR msg=audit(1311948547.151:138): op=security_compute_av reason=bounds scontext=system_u:system_r:anon_webapp_t:s0-s0:c0,c100,c200 tcontext=system_u:object_r:security_t:s0 tclass=dir perms=ioctl,read,lock" >> $LOG_FILE
+            echo "audispd: type=SERVICE_START msg=audit(1450876900.115:30): pid=1 uid=0 auid=4294967295 ses=4294967295 msg=' comm=\"Serv-U\" exe=\"/lib/systemd/systemd\" hostname=? addr=? terminal=? res=success'" >> $LOG_FILE
+            echo "audispd: type=SERVICE_STOP msg=audit(1450876900.115:31): pid=1 uid=0 auid=4294967295 ses=4294967295 msg=' comm=\"Serv-U\" exe=\"/lib/systemd/systemd\" hostname=? addr=? terminal=? res=success'" >> $LOG_FILE
+            echo "audispd: type=SOCKADDR msg=audit(1582935421.377:947594): saddr=01002F6465762F6C6F6700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" >> $LOG_FILE
+            echo "audispd: type=SOCKETCALL msg=audit(1134642541.683:201): nargs=3 a0=10 a1=3 a2=9" >> $LOG_FILE
+            echo 'audispd: type=SYSCALL msg=audit(1582934957.616:917513): arch=c000003e syscall=2 success=yes exit=3 a0=7f5b904e4988 a1=80000 a2=1 a3=7f5b906ec518 items=1 ppid=25680 pid=25684 auid=4294967295 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=(none) ses=4294967295 comm="sort" exe="/usr/bin/sort" key=(null)' >> $LOG_FILE
+            echo "audispd: type=SYSTEM_BOOT msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=SYSTEM_RUNLEVEL msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=SYSTEM_SHUTDOWN msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=TRUSTED_APP msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=TTY msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=USER_ACCT msg=audit(1234877011.795:7732): user pid=26127 uid=0 auid=4294967295 ses=4294967295 msg='op=PAM:accounting acct=\"root\" exe=\"/usr/sbin/sshd\" (hostname=jupiter.example.com, addr=192.168.2.100, terminal=ssh res=success)'" >> $LOG_FILE
+            echo "audispd: type=USER_AUTH msg=audit(1451403184.143:1834): pid=3380 uid=0 auid=4294967295 ses=4294967295 msg='op=PAM:authentication acct=\"toor\" exe=\"/usr/sbin/sshd\" hostname=192.168.2.100 addr=192.168.2.100 terminal=ssh res=failed'" >> $LOG_FILE
+            echo "audispd: type=USER_AUTH msg=audit(1451403193.995:1835): pid=3380 uid=0 auid=4294967295 ses=4294967295 msg='op=PAM:authentication acct=\"toor\" exe=\"/usr/sbin/sshd\" hostname=192.168.2.100 addr=192.168.2.100 terminal=ssh res=success'" >> $LOG_FILE
+            echo "audispd: type=USER_AVC msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=USER_CHAUTHTOK msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
 #            echo "audispd: type=USER_CMD msg=audit(1450785575.705:3316357): user pid=21619 uid=0 auid=526 msg='cwd=\"/home/hi\" cmd=\"/bin/bash\" (terminal=pts/0 res=success)'" >> $LOG_FILE
 #            echo "audispd: type=USER_END msg=audit(1450767601.813:3296218): user pid=15764 uid=0 auid=0 msg='PAM: session close acct=\"root\" : exe=\"/usr/sbin/crond\" (hostname=?, addr=?, terminal=cron res=success)'" >> $LOG_FILE
 #            echo "audispd: type=USER_ERR msg=audit(1450770602.157:3300444): user pid=16643 uid=0 auid=4294967295 msg='PAM: bad_ident acct="?" : exe=\"/usr/sbin/sshd\" (hostname=111.111.211.38, addr=111.111.211.38, terminal=ssh res=failed)'" >> $LOG_FILE
@@ -339,7 +339,7 @@ EOL
 #            echo "audispd: type=VIRT_RESOURCE msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
 #            echo "audisp-remote: queue is full - dropping event" >> $LOG_FILE
 #            echo "audispd: queue is full - dropping event" >> $LOG_FILE
-#            echo "audispd: type=UNKNOWN[1327] msg=audit(1522927552.749:917): proctitle=636174002F6574632F706173737764" >> $LOG_FILE
+            echo "audispd: type=UNKNOWN[1327] msg=audit(1522927552.749:917): proctitle=636174002F6574632F706173737764" >> $LOG_FILE
             ;;
         CronParsingModel)
             exit $exit_code

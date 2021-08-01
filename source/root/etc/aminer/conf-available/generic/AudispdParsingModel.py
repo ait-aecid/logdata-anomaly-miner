@@ -110,6 +110,7 @@ def get_model():
     dev = b" dev="
     sig = b" sig="
     alphabet = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._-"
+    perms_alphabet = b"abcdefghijklmnopqrstuvwxyz,"
 
     type_branches = {
         "ADD_GROUP": SequenceModelElement("addgroup", [
@@ -591,7 +592,7 @@ def get_model():
             FixedWordlistDataModelElement("nametype", [b"CREATE", b"DELETE", b"NORMAL", b"PARENT", b"UNKNOWN"])
         ]),
         "PROCTITLE": SequenceModelElement("proctitle", [
-            FixedDataModelElement("s1", b" proctitle="),
+            FixedDataModelElement("s0", b" proctitle="),
             ExecArgumentDataModelElement("proctitle")]),
         "RESP_ACCT_LOCK": AnyByteDataModelElement("resp_acct_lock"),
         "RESP_ACCT_LOCK_TIMED": AnyByteDataModelElement("resp_acct_lock_timed"),
@@ -609,13 +610,20 @@ def get_model():
         "ROLE_ASSIGN": AnyByteDataModelElement("role_assign"),
         "ROLE_MODIFY": AnyByteDataModelElement("role_modify"),
         "ROLE_REMOVE": AnyByteDataModelElement("role_remove"),
-
-
-
-
-        "RESP_KILL_PROC": AnyByteDataModelElement("role_assign"),
-        "RESP_KILL_PROC": AnyByteDataModelElement("resp_kill_proc"),
-        "RESP_KILL_PROC": AnyByteDataModelElement("resp_kill_proc"),
+        "SELINUX_ERR": SequenceModelElement("service_err", [
+            FixedDataModelElement("s0", b" op="),
+            DelimitedDataModelElement("op", b" "),
+            FixedDataModelElement("s1", reason),
+            DelimitedDataModelElement("reason", b" "),
+            FixedDataModelElement("s2", b" scontext="),
+            DelimitedDataModelElement("scontext", b" "),
+            FixedDataModelElement("s3", b" tcontext="),
+            DelimitedDataModelElement("tcontext", b" "),
+            FixedDataModelElement("s4", b" tclass="),
+            DelimitedDataModelElement("tclass", b" "),
+            FixedDataModelElement("s5", b" perms="),
+            VariableByteDataModelElement("perms", perms_alphabet)
+        ]),
         "SERVICE_START": SequenceModelElement("service", [
             FixedDataModelElement("s0", pid),
             DecimalIntegerValueModelElement("pid"),
@@ -625,9 +633,11 @@ def get_model():
             DecimalIntegerValueModelElement("auid"),
             FixedDataModelElement("s3", ses),
             DecimalIntegerValueModelElement("ses"),
-            FixedDataModelElement("s4", b" msg='unit="),
-            DelimitedDataModelElement("unit", b" "),
-            FixedDataModelElement("s5", b' comm="systemd" exe="'),
+            FixedDataModelElement("s4", b" msg='"),
+            OptionalMatchModelElement("optional_msg", DelimitedDataModelElement("msg", b" ")),
+            FixedDataModelElement("s5", b' comm="'),
+            DelimitedDataModelElement("comm", b'"'),
+            FixedDataModelElement("s5", b'" exe="'),
             DelimitedDataModelElement("exec", b'"'),
             FixedDataModelElement("s6", hostname),
             DelimitedDataModelElement("clientname", b" "),
@@ -642,6 +652,16 @@ def get_model():
         "SOCKADDR": SequenceModelElement("sockaddr", [
             FixedDataModelElement("s0", b" saddr="),
             HexStringModelElement("sockaddr", upper_case=True)
+        ]),
+        "SOCKETCALL": SequenceModelElement("socketcall", [
+            FixedDataModelElement("s0", b" nargs="),
+            DecimalIntegerValueModelElement("nargs"),
+            RepeatedElementDataModelElement("args", SequenceModelElement("arg", [
+                FixedDataModelElement("s1", b" a"),
+                DecimalIntegerValueModelElement("arg_num"),
+                FixedDataModelElement("s2", b"="),
+                DecimalIntegerValueModelElement("arg"),
+            ]))
         ]),
         "SYSCALL": SequenceModelElement("syscall", [
             FixedDataModelElement("s0", b" arch="),
@@ -702,6 +722,11 @@ def get_model():
             FixedDataModelElement("s24", b'" key='),
             AnyByteDataModelElement("key")
         ]),
+        "SYSTEM_BOOT": AnyByteDataModelElement("system_boot"),
+        "SYSTEM_RUNLEVEL": AnyByteDataModelElement("system_runlevel"),
+        "SYSTEM_SHUTDOWN": AnyByteDataModelElement("system_shutdown"),
+        "TRUSTED_APP": AnyByteDataModelElement("trusted_app"),
+        "TTY": AnyByteDataModelElement("tty"),
         # The UNKNOWN type is used then audispd does not know the type of the event, usually because the kernel is more recent than audispd,
         # thus emiting yet unknown event types.
         # * type=1327: procitle: see https://www.redhat.com/archives/linux-audit/2014-February/msg00047.html
@@ -710,6 +735,8 @@ def get_model():
             ExecArgumentDataModelElement("proctitle")
         ]),
         "USER_ACCT": SequenceModelElement("useracct", [
+            FixedDataModelElement("space", b" "),
+            DelimitedDataModelElement("user", b" "),
             FixedDataModelElement("s0", pid),
             DecimalIntegerValueModelElement("pid"),
             FixedDataModelElement("s1", uid),
@@ -722,13 +749,15 @@ def get_model():
             DelimitedDataModelElement("username", b'"'),
             FixedDataModelElement("s5", exe1),
             DelimitedDataModelElement("exec", b'"'),
-            FixedDataModelElement("s6", hostname),
+            FixedDataModelElement("s6", hostname1),
             DelimitedDataModelElement("clientname", b" "),
             FixedDataModelElement("s7", addr),
             DelimitedDataModelElement("clientip", b" "),
             FixedDataModelElement("s8", terminal),
             WhiteSpaceLimitedDataModelElement("terminal"),
-            FixedDataModelElement("s9", success)
+            FixedDataModelElement("s9", res),
+            pam_status_word_list,
+            FixedDataModelElement("s10", b")'")
         ]),
         "USER_AUTH": SequenceModelElement("userauth", [
             FixedDataModelElement("s0", pid),
@@ -749,8 +778,15 @@ def get_model():
             DelimitedDataModelElement("clientip", b" "),
             FixedDataModelElement("s8", terminal),
             WhiteSpaceLimitedDataModelElement("terminal"),
-            FixedDataModelElement("s9", success)
+            FixedDataModelElement("s9", res),
+            pam_status_word_list,
+            FixedDataModelElement("s10", b"'")
         ]),
+        "USER_AVC": AnyByteDataModelElement("user_avc"),
+        "USER_CHAUTHTOK": AnyByteDataModelElement("user_chauthtok"),
+        "SYSTEM_SHUTDOWN": AnyByteDataModelElement("system_shutdown"),
+        "SYSTEM_SHUTDOWN": AnyByteDataModelElement("system_shutdown"),
+        "SYSTEM_SHUTDOWN": AnyByteDataModelElement("system_shutdown"),
         "USER_START": SequenceModelElement("userstart", [
             FixedDataModelElement("s0", pid),
             DecimalIntegerValueModelElement("pid"),
