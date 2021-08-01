@@ -3,6 +3,7 @@
 import logging
 from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
 from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.DecimalFloatValueModelElement import DecimalFloatValueModelElement
 from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
 from aminer.parsing.ElementValueBranchModelElement import ElementValueBranchModelElement
 from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
@@ -262,14 +263,23 @@ def get_model():
             FixedDataModelElement("s9", b" new_pe="),
             AnyByteDataModelElement("pe-new")
         ]),
+        "CAPSET": AnyByteDataModelElement("capset"),
+        "CHGRP_ID": AnyByteDataModelElement("chgrp_id"),
+        "CHUSER_ID": AnyByteDataModelElement("chuser_id"),
         "CONFIG_CHANGE": SequenceModelElement("conf-change", [
             FixedDataModelElement("s0", auid),
             DecimalIntegerValueModelElement("auid"),
             FixedDataModelElement("s1", ses),
             DecimalIntegerValueModelElement("ses"),
-            FixedDataModelElement("s2", b' op="add rule" key=(null) list='),
+            FixedDataModelElement("s2", b' op="'),
+            DelimitedDataModelElement("op", b'"'),
+            FixedDataModelElement("s3", b'" path="'),
+            DelimitedDataModelElement("path", b'"'),
+            FixedDataModelElement("s4", b'" key='),
+            DelimitedDataModelElement("key", b" "),
+            FixedDataModelElement("s5", b' list='),
             DecimalIntegerValueModelElement("list"),
-            FixedDataModelElement("s3", res),
+            FixedDataModelElement("s6", res),
             DecimalIntegerValueModelElement("result")
         ]),
         "CRED_ACQ": SequenceModelElement("credacq", [
@@ -329,9 +339,116 @@ def get_model():
             IpAddressDataModelElement("clientip"),
             FixedDataModelElement("s6", b" terminal=ssh res=success'")
         ]),
+        "CRYPTO_FAILURE_USER": AnyByteDataModelElement("crypto_failure_user"),
+        "CRYPTO_KEY_USER": AnyByteDataModelElement("crypto_key_user"),
+        "CRYPTO_LOGIN": AnyByteDataModelElement("crypto_login"),
+        "CRYPTO_LOGOUT": AnyByteDataModelElement("crypto_logout"),
+        "CRYPTO_PARAM_CHANGE_USER": AnyByteDataModelElement("crypto_param_change_user"),
+        "CRYPTO_REPLAY_USER": AnyByteDataModelElement("crypto_replay_user"),
+        "CRYPTO_SESSION": SequenceModelElement("crypto_session", [
+            FixedDataModelElement("space", b" "),
+            VariableByteDataModelElement("user", alphabet),
+            FixedDataModelElement("s0", pid),
+            DecimalIntegerValueModelElement("pid"),
+            FixedDataModelElement("s1", uid),
+            DecimalIntegerValueModelElement("uid"),
+            FixedDataModelElement("s2", auid),
+            DecimalIntegerValueModelElement("auid"),
+            FixedDataModelElement("s4", b" msg='op="),
+            DelimitedDataModelElement("msg", b" "),
+            FixedDataModelElement("s5", b' direction='),
+            DelimitedDataModelElement("direction", b' '),
+            FixedDataModelElement("s6", b' cipher='),
+            DelimitedDataModelElement("cipher", b' '),
+            FixedDataModelElement("s7", b' ksize='),
+            DecimalIntegerValueModelElement("ksize"),
+            FixedDataModelElement("s8", b' rport='),
+            DecimalIntegerValueModelElement("rport"),
+            FixedDataModelElement("s9", b' laddr='),
+            IpAddressDataModelElement("laddr"),
+            FixedDataModelElement("s10", b' lport='),
+            DecimalIntegerValueModelElement("lport"),
+            FixedDataModelElement("s11", b' id='),
+            DecimalIntegerValueModelElement("id"),
+            FixedDataModelElement("s12", exe),
+            DelimitedDataModelElement("exec", b'"'),
+            FixedDataModelElement("s13", hostname1),
+            DelimitedDataModelElement("hostname", b","),
+            FixedDataModelElement("s14", addr1),
+            DelimitedDataModelElement("addr", b","),
+            FixedDataModelElement("s15", terminal1),
+            DelimitedDataModelElement("terminal", b" "),
+            FixedDataModelElement("s16", res),
+            pam_status_word_list,
+            FixedDataModelElement("s17", b")'")
+        ]),
+        "CRYPTO_TEST_USER": AnyByteDataModelElement("crypto_test_user"),
         "CWD": SequenceModelElement("cwd", [
             FixedDataModelElement("s0", b"  cwd="),
             ExecArgumentDataModelElement("cwd")]),
+        "DAC_CHECK": AnyByteDataModelElement("dac_check"),
+        "DAEMON_ABORT": SequenceModelElement("daemon_abort", [
+            FixedDataModelElement("s0", b" auditd error halt,"),
+            FixedDataModelElement("s1", auid),
+            DecimalIntegerValueModelElement("auid"),
+            FixedDataModelElement("s2", pid),
+            DecimalIntegerValueModelElement("pid"),
+            FixedDataModelElement("s3", res),
+            pam_status_word_list
+        ]),
+        "DAEMON_ACCEPT": AnyByteDataModelElement("daemon_accept"),
+        "DAEMON_CLOSE": AnyByteDataModelElement("daemon_close"),
+        "DAEMON_CONFIG": SequenceModelElement("daemon_config", [
+            FixedDataModelElement("s0", b" auditd error getting hup info - no change, sending"),
+            FixedDataModelElement("s1", auid),
+            DelimitedDataModelElement("auid", b" "),
+            FixedDataModelElement("s2", pid),
+            DelimitedDataModelElement("pid", b" "),
+            FixedDataModelElement("s3", subj),
+            DelimitedDataModelElement("subj", b" "),
+            FixedDataModelElement("s4", res),
+            pam_status_word_list
+        ]),
+        "DAEMON_END": SequenceModelElement("daemon_end", [
+            FixedDataModelElement("s0", b" auditd normal halt, sending"),
+            FixedDataModelElement("s1", auid),
+            DelimitedDataModelElement("auid", b" "),
+            FixedDataModelElement("s2", pid),
+            DelimitedDataModelElement("pid", b" "),
+            FixedDataModelElement("s3", subj),
+            OptionalMatchModelElement("optional_subj", DelimitedDataModelElement("subj", b" ")),
+            FixedDataModelElement("s4", res),
+            pam_status_word_list
+        ]),
+        "DAEMON_RESUME": SequenceModelElement("daemon_resume", [
+            FixedDataModelElement("s0", b" auditd resuming logging, sending"),
+            FixedDataModelElement("s1", auid),
+            DelimitedDataModelElement("auid", b" "),
+            FixedDataModelElement("s2", pid),
+            DelimitedDataModelElement("pid", b" "),
+            FixedDataModelElement("s3", subj),
+            DelimitedDataModelElement("subj", b" "),
+            FixedDataModelElement("s4", res),
+            pam_status_word_list
+        ]),
+        "DAEMON_ROTATE": AnyByteDataModelElement("daemon_rotate"),
+        "DAEMON_START": SequenceModelElement("daemon_start", [
+            FixedDataModelElement("s0", b" auditd start, ver="),
+            DecimalFloatValueModelElement("ver"),
+            FixedDataModelElement("s1", b" format="),
+            DelimitedDataModelElement("format", b" "),
+            FixedDataModelElement("s2", b" kernel="),
+            DelimitedDataModelElement("kernel", b" "),
+            FixedDataModelElement("s3", auid),
+            DelimitedDataModelElement("auid", b" "),
+            FixedDataModelElement("s4", pid),
+            DelimitedDataModelElement("pid", b" "),
+            FixedDataModelElement("s5", res),
+            pam_status_word_list
+        ]),
+        "DEL_GROUP": AnyByteDataModelElement("del_group"),
+        "DEL_USER": AnyByteDataModelElement("del_user"),
+        "EOE": AnyByteDataModelElement("eoe"),
         "EXECVE": SequenceModelElement("execve", [
             FixedDataModelElement("s0", b" argc="),
             DecimalIntegerValueModelElement("argc"),
@@ -349,30 +466,88 @@ def get_model():
             FixedDataModelElement("s1", b" fd1="),
             DecimalIntegerValueModelElement("fd1")
         ]),
+        "FS_RELABEL": AnyByteDataModelElement("fs_relabel"),
+        "GRP_AUTH": AnyByteDataModelElement("grp_auth"),
+        "INTEGRITY_DATA": AnyByteDataModelElement("integrity_data"),
+        "INTEGRITY_HASH": AnyByteDataModelElement("integrity_hash"),
+        "INTEGRITY_METADATA": AnyByteDataModelElement("integrity_metadata"),
+        "INTEGRITY_PCR": AnyByteDataModelElement("integrity_pcr"),
+        "INTEGRITY_RULE": AnyByteDataModelElement("integrity_rule"),
+        "INTEGRITY_STATUS": AnyByteDataModelElement("integrity_status"),
+        "IPC": AnyByteDataModelElement("ipc"),
+        "IPC_SET_PERM": AnyByteDataModelElement("ipc_set_perm"),
+        "KERNEL": AnyByteDataModelElement("kernel"),
+        "KERNEL_OTHER": AnyByteDataModelElement("kernel_other"),
+        "LABEL_LEVEL_CHANGE": AnyByteDataModelElement("label_level_change"),
+        "LABEL_OVERRIDE": AnyByteDataModelElement("label_override"),
         # This message differs on Ubuntu 32/64 bit variants.
         "LOGIN": SequenceModelElement("login", [
-            FixedDataModelElement("s0", pid),
+            FixedDataModelElement("s0", b" login"),
+            FixedDataModelElement("s1", pid),
             DecimalIntegerValueModelElement("pid"),
-            FixedDataModelElement("s1", uid),
+            FixedDataModelElement("s2", uid),
             DecimalIntegerValueModelElement("uid"),
-            FixedWordlistDataModelElement("s2", [b" old auid=", b" old-auid="]),
+            FixedWordlistDataModelElement("s3", [b" old auid=", b" old-auid="]),
             DecimalIntegerValueModelElement("auid-old"),
-            FixedWordlistDataModelElement("s3", [b" new auid=", auid]),
+            FixedWordlistDataModelElement("s4", [b" new auid=", auid]),
             DecimalIntegerValueModelElement("auid-new"),
-            FixedWordlistDataModelElement("s4", [b" old ses=", b" old-ses="]),
+            FixedWordlistDataModelElement("s5", [b" old ses=", b" old-ses="]),
             DecimalIntegerValueModelElement("ses-old"),
-            FixedWordlistDataModelElement("s5", [b" new ses=", ses]),
+            FixedWordlistDataModelElement("s6", [b" new ses=", ses]),
             DecimalIntegerValueModelElement("ses-new"),
-            FixedDataModelElement("s6", res),
-            DecimalIntegerValueModelElement("result")
+            OptionalMatchModelElement("optional_result", SequenceModelElement("result_seq", [
+                FixedDataModelElement("s7", res),
+                DecimalIntegerValueModelElement("result")
+            ]))
         ]),
-        "NETFILTER_CFG": SequenceModelElement("conf-change", [
+        "MAC_CIPSOV4_ADD": AnyByteDataModelElement("mac_cipsov4_add"),
+        "MAC_CIPSOV4_DEL": AnyByteDataModelElement("mac_cipsov4_del"),
+        "MAC_CONFIG_CHANGE": AnyByteDataModelElement("mac_config_change"),
+        "MAC_IPSEC_EVENT": AnyByteDataModelElement("mac_ipsec_event"),
+        "MAC_MAP_ADD": AnyByteDataModelElement("mac_map_add"),
+        "MAC_MAP_DEL": AnyByteDataModelElement("mac_map_del"),
+        "MAC_POLICY_LOAD": AnyByteDataModelElement("mac_policy_load"),
+        "MAC_STATUS": SequenceModelElement("mac_status", [
+            FixedDataModelElement("s0", b" enforcing="),
+            DecimalIntegerValueModelElement("enforcing"),
+            FixedDataModelElement("s1", b" old_enforcing="),
+            DecimalIntegerValueModelElement("old_enforcing"),
+            FixedDataModelElement("s2", auid),
+            DelimitedDataModelElement("auid", b" "),
+            FixedDataModelElement("s3", ses),
+            DecimalIntegerValueModelElement("ses")
+        ]),
+        "MAC_UNLBL_ALLOW": AnyByteDataModelElement("mac_unlbl_allow"),
+        "MAC_UNLBL_STCADD": AnyByteDataModelElement("mac_unlbl_stcadd"),
+        "MAC_UNLBL_STCDEL": AnyByteDataModelElement("mac_unlbl_stcdel"),
+        "MMAP": AnyByteDataModelElement("mmap"),
+        "MQ_GETSETATTR": AnyByteDataModelElement("mq_getsetattr"),
+        "MQ_NOTIFY": AnyByteDataModelElement("mq_notify"),
+        "MQ_OPEN": AnyByteDataModelElement("mq_open"),
+        "MQ_SENDRECV": AnyByteDataModelElement("mq_sendrecv"),
+        "NETFILTER_CFG": SequenceModelElement("netfilter_cfg", [
             FixedDataModelElement("s0", b" table="),
             FixedWordlistDataModelElement("table", [b"filter", b"mangle", b"nat"]),
             FixedDataModelElement("s1", b" family="),
             DecimalIntegerValueModelElement("family"),
             FixedDataModelElement("s2", b" entries="),
             DecimalIntegerValueModelElement("entries")
+        ]),
+        "NETFILTER_PKT": SequenceModelElement("netfilter_pkt", [
+            FixedDataModelElement("s0", b" mark=0x"),
+            HexStringModelElement("mark"),
+            FixedDataModelElement("s1", b" saddr="),
+            FirstMatchModelElement("saddr", [
+                IpAddressDataModelElement("ipv4"),
+                IpAddressDataModelElement("ipv6", ipv6=True),
+            ]),
+            FixedDataModelElement("s2", b" daddr="),
+            FirstMatchModelElement("daddr", [
+                IpAddressDataModelElement("ipv4"),
+                IpAddressDataModelElement("ipv6", ipv6=True),
+            ]),
+            FixedDataModelElement("s3", b" proto="),
+            DecimalIntegerValueModelElement("proto")
         ]),
         "OBJ_PID": SequenceModelElement("objpid", [
             FixedDataModelElement("s0", b" opid="),
@@ -383,6 +558,8 @@ def get_model():
             DecimalIntegerValueModelElement("ouid"),
             FixedDataModelElement("s3", b" oses="),
             DecimalIntegerValueModelElement("oses", value_sign_type=DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL),
+            FixedDataModelElement("s4", b" obj="),
+            DelimitedDataModelElement("obj", b" "),
             FixedDataModelElement("s4", b" ocomm="),
             ExecArgumentDataModelElement("ocomm")
         ]),
@@ -416,6 +593,29 @@ def get_model():
         "PROCTITLE": SequenceModelElement("proctitle", [
             FixedDataModelElement("s1", b" proctitle="),
             ExecArgumentDataModelElement("proctitle")]),
+        "RESP_ACCT_LOCK": AnyByteDataModelElement("resp_acct_lock"),
+        "RESP_ACCT_LOCK_TIMED": AnyByteDataModelElement("resp_acct_lock_timed"),
+        "RESP_ACCT_REMOTE": AnyByteDataModelElement("resp_acct_remote"),
+        "RESP_ACCT_UNLOCK_TIMED": AnyByteDataModelElement("resp_acct_unlock_timed"),
+        "RESP_ALERT": AnyByteDataModelElement("resp_alert"),
+        "RESP_ANOMALY": AnyByteDataModelElement("resp_anomaly"),
+        "RESP_EXEC": AnyByteDataModelElement("resp_exec"),
+        "RESP_HALT": AnyByteDataModelElement("resp_halt"),
+        "RESP_KILL_PROC": AnyByteDataModelElement("resp_kill_proc"),
+        "RESP_SEBOOL": AnyByteDataModelElement("resp_sebool"),
+        "RESP_SINGLE": AnyByteDataModelElement("resp_single"),
+        "RESP_TERM_ACCESS": AnyByteDataModelElement("resp_term_access"),
+        "RESP_TERM_LOCK": AnyByteDataModelElement("resp_term_lock"),
+        "ROLE_ASSIGN": AnyByteDataModelElement("role_assign"),
+        "ROLE_MODIFY": AnyByteDataModelElement("role_modify"),
+        "ROLE_REMOVE": AnyByteDataModelElement("role_remove"),
+
+
+
+
+        "RESP_KILL_PROC": AnyByteDataModelElement("role_assign"),
+        "RESP_KILL_PROC": AnyByteDataModelElement("resp_kill_proc"),
+        "RESP_KILL_PROC": AnyByteDataModelElement("resp_kill_proc"),
         "SERVICE_START": SequenceModelElement("service", [
             FixedDataModelElement("s0", pid),
             DecimalIntegerValueModelElement("pid"),
@@ -645,7 +845,7 @@ def get_model():
     type_branches["SERVICE_STOP"] = type_branches["SERVICE_START"]
 
     model = SequenceModelElement("audispd", [
-        FixedDataModelElement("sname", b"audispd: "),
+        OptionalMatchModelElement("optional", FixedDataModelElement("sname", b"audispd: ")),
         FirstMatchModelElement("msg", [
             ElementValueBranchModelElement("record", SequenceModelElement("preamble", [
                 FixedDataModelElement("s0", b"type="),
@@ -653,7 +853,7 @@ def get_model():
                 FixedDataModelElement("s1", b" msg=audit("),
                 DecimalIntegerValueModelElement("time"),
                 FixedDataModelElement("s0", b"."),
-                DecimalIntegerValueModelElement("ms"),
+                DecimalIntegerValueModelElement("ms", value_pad_type=DecimalIntegerValueModelElement.PAD_TYPE_ZERO),
                 FixedDataModelElement("s1", b":"),
                 DecimalIntegerValueModelElement("seq"),
                 FixedDataModelElement("s2", b"):")
