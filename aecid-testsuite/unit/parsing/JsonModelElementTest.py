@@ -426,14 +426,19 @@ class JsonModelElementTest(TestBase):
         self.compare_no_match_results(data, match_element, match_context)
 
     def test10get_match_element_float_exponents(self):
-        """Parse float values with exponents.
+        """
+        Parse float values with exponents.
         The principle of only testing dummy classes can not be applied here, as the functionality between the JsonModelElement and
-        DecimalFloatValueModelElement must be tested directly."""
+        DecimalFloatValueModelElement must be tested directly.
+        """
         json_model_element = JsonModelElement(self.id_, {
             "a": DecimalFloatValueModelElement(self.id_, exponent_type=DecimalFloatValueModelElement.EXP_TYPE_OPTIONAL),
             "b": DecimalFloatValueModelElement(self.id_, exponent_type=DecimalFloatValueModelElement.EXP_TYPE_OPTIONAL)})
 
         def format_float(val):
+            """
+            This function formats the float-value and parses the sign and the exponent
+            """
             exp = None
             if "e" in val:
                 exp = "e"
