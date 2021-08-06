@@ -274,7 +274,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                             break
 
         # Print a message of the length of the time steps
-        message = 'Calculated the time steps for the single event types in seconds: %s' % [
+        message = 'Calculated the periods for the single event types in seconds: %s' % [
                 time_step * self.num_division_time_step * self.event_type_detector.waiting_time_for_tsa /
                 self.event_type_detector.num_sections_waiting_time_for_tsa if
                 time_step != -1 else time_step for time_step in time_step_list]
