@@ -182,7 +182,12 @@
                 'num_results_bt': {'type': 'integer', 'default': 15},
                 'alpha_bt': {'type': 'float', 'default': 0.05},
                 'round_time_inteval_threshold': {'type': 'float', 'default': 0.02},
-                'acf_threshold': {'type': 'float', 'default': 0.2}
+                'acf_threshold': {'type': 'float', 'default': 0.2},
+                'user_path_list': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
+                'ignore_list': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
+                'value_constraint_list': {'type': 'list', 'schema': {
+                    'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None}, 'nullable': True, 'default': None},
+                'num_log_lines_matrix_reduction': {'type': 'integer', 'default': 10000}
             }
         }
     }
