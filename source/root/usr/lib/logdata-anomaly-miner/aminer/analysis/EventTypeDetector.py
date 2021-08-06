@@ -81,7 +81,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.check_variables = []
         # List ot the time trigger. The first list states the times when something should be triggered, the second list states the indices
         # of the eventtyps, or a list of the evnettype, a path and a value which should be counted (-1 for an initialization)
-        # the third list states, the length of the time window (-1 for a one time trigger)
+        # the third list states, the length of the time step (-1 for a one time trigger)
         self.etd_time_trigger = [[], [], []]
         # Reference containing the number of lines of the events for the TSA
         self.num_eventlines_tsa_ref = []
@@ -169,7 +169,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                         del self.etd_time_trigger[1][indices[i]]
                         del self.etd_time_trigger[2][indices[i]]
 
-                    # Initialize the trigger for the timewindows
+                    # Initialize the trigger for the time steps
                     else:
                         # Initialize the lists of self.num_eventlines_tsa_ref if not already initialized
                         if not self.num_eventlines_tsa_ref:
@@ -183,7 +183,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                                 self.num_eventlines_tsa_ref[j].append(val-sum(self.num_eventlines_tsa_ref[j]))
 
                         # skipcq: PTC-W0063
-                        # Get the timewindow lengths
+                        # Get the time step lengths
                         time_list = self.following_modules[next(
                             j for j in range(len(self.following_modules)) if self.following_modules[j].__class__.__name__ ==
                             'TSAArimaDetector')].calculate_time_steps(self.num_eventlines_tsa_ref, log_atom)
@@ -218,7 +218,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                                 self.num_eventlines_tsa_ref[self.etd_time_trigger[1][-k]] = self.num_eventlines[self.etd_time_trigger[
                                     1][-k]]
 
-                # Trigger for an reoccuring time window
+                # Trigger for an reoccuring time step
                 else:
                     while current_time >= self.etd_time_trigger[0][indices[i]]:
                         # skipcq: PTC-W0063
