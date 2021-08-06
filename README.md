@@ -8,7 +8,7 @@ This tool parses log data and allows to define analysis pipelines for anomaly de
 
 In order to install logdata-anomaly-miner a **Linux system** with **python >= 3.6** is required. **Debian-based** distributions are currently recommended. 
 
-_See [requirements.txt](requirements.txt) for further module dependencies_
+_See [requirements.txt](https://github.com/ait-aecid/logdata-anomaly-miner/requirements.txt) for further module dependencies_
 
 
 ## Installation
@@ -32,13 +32,18 @@ chmod +x aminer_install.sh
 ./aminer_install.sh
 ```
 
+### Docker
+
+For installation with Docker see: [Deployment with Docker](https://github.com/ait-aecid/logdata-anomaly-miner/wiki/Deployment-with-Docker)
+
 ## Getting started
 
 Here are some resources to read in order to get started with configurations:
 
 * [Getting started](https://github.com/ait-aecid/logdata-anomaly-miner/wiki/Getting-started-(tutorial))
 * [Some available configurations](https://github.com/ait-aecid/logdata-anomaly-miner/tree/main/source/root/etc/aminer/)
-* [Documentation](https://github.com/ait-aecid/logdata-anomaly-miner/tree/main/source/root/usr/share/doc/logdata-anomaly-miner)
+* [Documentation](https://aeciddocs.ait.ac.at/logdata-anomaly-miner/)
+* [Wiki](https://github.com/ait-aecid/logdata-anomaly-miner/wiki)
 
 ## Publications
 

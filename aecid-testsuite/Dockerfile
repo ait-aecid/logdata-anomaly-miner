@@ -58,6 +58,10 @@ RUN apt-get update && apt-get install -y \
     git \
     mypy
 
+
+
+
+
 RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
     sed -i -e 's/# de_AT ISO-8859-1/de_AT ISO-8859-1/' /etc/locale.gen && \
     dpkg-reconfigure --frontend=noninteractive locales && \
@@ -76,6 +80,8 @@ ADD source/root/usr/lib/logdata-anomaly-miner /usr/lib/logdata-anomaly-miner
 # copy these files instead as symlinks would need absolute paths.
 ADD source/root/etc/aminer/conf-available/ait-lds/* /etc/aminer/conf-enabled/
 ADD source/root/etc/aminer/conf-available/generic/* /etc/aminer/conf-enabled/
+ADD source/root/etc/aminer/conf-available/ait-lds /etc/aminer/conf-available/ait-lds
+ADD source/root/etc/aminer/conf-available/generic /etc/aminer/conf-available/generic
 
 # Entrypoint-wrapper
 ADD scripts/aminerwrapper.sh /aminerwrapper.sh

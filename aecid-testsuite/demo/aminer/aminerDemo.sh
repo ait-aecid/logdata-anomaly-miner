@@ -25,7 +25,7 @@ sudo aminer --config "$FILE" &
 
 #EventCorrelationDetector, NewMatchPathDetector
 #:<<Comment
-alphabet='abcdef'
+alphabet='ghijkl'
 alphabet_len=$(echo -n $alphabet | wc -m)
 for ((i=0; i<10000; i++)); do
 	echo ${alphabet:$i % $alphabet_len:1} >> /tmp/syslog
@@ -33,7 +33,7 @@ for ((i=0; i<10000; i++)); do
 done
 #Comment
 
-#EnhancedNewMatchPathValueComboDetector, NewMatchPathValueDetector
+#EnhancedNewMatchPathValueComboDetector, NewMatchPathValueDetector, ModuloTimeMatchRule
 #:<<Comment
 R=`shuf -i 1-3 -n 1`
 for ((i=0; i<R; i++)); do
@@ -161,6 +161,9 @@ echo 'type=SYSCALL msg=audit(1580367400.000:9): arch=c000003e syscall=2 success=
 echo 'type=PATH msg=audit(1580367401.000:9): item=0 name="three" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL' >> /tmp/syslog
 echo 'type=PATH msg=audit(1580367402.000:10): item=0 name="one" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL' >> /tmp/syslog
 echo 'type=SYSCALL msg=audit(1580367403.000:10): arch=c000003e syscall=3 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)' >> /tmp/syslog
+
+# StringRegexMatchRule
+echo 'type=SYSCALL msg=audit(1580367403.000:10): arch=c000003e syscall=3 success=no exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)' >> /tmp/syslog
 #Comment
 
 #TimeCorrelationDetector
@@ -228,6 +231,14 @@ echo "match data: 25000" >> /tmp/syslog
 echo "b654686973206973206a7573742061206e6f726d616c2074657874" >> /tmp/syslog
 # IpAddressModelElement
 echo "Gateway IP-Address: 192.168.128.225" >> /tmp/syslog
+# IPv4InRFC1918MatchRule, ValueListMatchRule
+echo "Gateway IP-Address: 8.8.8.8" >> /tmp/syslog
+# IPv4InRFC1918MatchRule, ValueListMatchRule
+echo "Gateway IP-Address: 8.8.4.4" >> /tmp/syslog
+# IPv4InRFC1918MatchRule, ValueRangeMatchRule
+echo "Gateway IP-Address: 10.0.0.0" >> /tmp/syslog
+# IPv4InRFC1918MatchRule, ValueRangeMatchRule
+echo "Gateway IP-Address: 11.0.0.0" >> /tmp/syslog
 # MultiLocaleDateTimeModelElement
 echo "Feb 25 2019" >> /tmp/syslog
 # OptionalMatchModelElement
@@ -235,14 +246,14 @@ echo "The-searched-element-was-found!" >> /tmp/syslog
 # RepeatedElementDataModelElement
 for i in {1..5}; do
 	R=`shuf -i 1-45 -n 1`
-	echo "drawn number: $R" | tr -d "\n" >> /tmp/syslog
+	echo "[drawn number]: $R" | tr -d "\n" >> /tmp/syslog
 done
 echo "" >> /tmp/syslog
 # VariableByteDataModelElement
 echo "---------------------------------------------------------------------" >> /tmp/syslog
 # WhiteSpaceLimitedDataModelElement
 alphabet="abcdefghijklmnopqrstuvwxyz "
-text=""
+text="z"
 for i in {1..1000}; do
 	R=`shuf -i 0-26 -n 1`
 	text=$text${alphabet:R:1}

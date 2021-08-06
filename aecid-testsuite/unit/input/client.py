@@ -1,6 +1,6 @@
 from time import sleep
 import socket
-sock_name = '/tmp/test5unixSocket.sock'
+sock_name = '/tmp/test5unixSocket.sock'  # skipcq: BAN-B108
 
 sleep(0.5)
 client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)

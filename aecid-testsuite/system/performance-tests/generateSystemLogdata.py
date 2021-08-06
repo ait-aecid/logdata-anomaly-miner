@@ -7,7 +7,7 @@ import sys
 from datetime import datetime
 import multiprocessing
 
-with open('/tmp/results.csv', 'a+', buffering=100) as file:
+with open('/tmp/results.csv', 'a+', buffering=100) as file:  # skipcq: BAN-B108
     string = ''
     string += 'time,aminerCpuUsage,aminerMemUsage,'
     for i in range(multiprocessing.cpu_count()):

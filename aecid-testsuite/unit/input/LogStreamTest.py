@@ -65,7 +65,7 @@ class LogStreamTest(TestBase):
         In this case the logStreamFd is > 0 and repositioningData is not None.
         The stream should be repositioned to the right position.
         """
-        fd = os.open('/tmp/log.txt', os.O_RDONLY)
+        fd = os.open('/tmp/log.txt', os.O_RDONLY)  # skipcq: BAN-B108
         length = 65536
         data = os.read(fd, length)
         # skipcq: PTC-W1003
@@ -74,7 +74,7 @@ class LogStreamTest(TestBase):
         hash_digest = md5.digest()
         os.close(fd)
 
-        fd = os.open('/tmp/log.txt', os.O_RDONLY)
+        fd = os.open('/tmp/log.txt', os.O_RDONLY)  # skipcq: BAN-B108
         file_log_data_resource = FileLogDataResource(self.file + self.logfile, fd, 65536,
                                                      [os.fstat(fd).st_ino, length, base64.b64encode(hash_digest)])
         file_log_data_resource.fill_buffer()

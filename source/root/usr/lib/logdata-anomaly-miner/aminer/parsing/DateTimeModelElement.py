@@ -357,10 +357,14 @@ class DateTimeModelElement(ModelElementInterface):
                     else:
                         # This might be the first date value for the next year or one from the previous.
                         # Test both cases and see, what is more likely.
-                        next_year_date_time = parsed_date_time.replace(self.start_year + 1)
-                        delta = next_year_date_time - self.epoch_start_time
-                        next_year_total_seconds = (delta.days * 86400 + delta.seconds)
-                        if next_year_total_seconds - self.last_parsed_seconds <= self.max_time_jump_seconds:
+                        date_error = False
+                        try:
+                            next_year_date_time = parsed_date_time.replace(self.start_year + 1)
+                            delta = next_year_date_time - self.epoch_start_time
+                            next_year_total_seconds = (delta.days * 86400 + delta.seconds)
+                        except ValueError:
+                            date_error = True
+                        if not date_error and next_year_total_seconds - self.last_parsed_seconds <= self.max_time_jump_seconds:
                             self.start_year += 1
                             parsed_date_time = next_year_date_time
                             total_seconds = next_year_total_seconds
@@ -371,10 +375,13 @@ class DateTimeModelElement(ModelElementInterface):
                             logging.getLogger(DEBUG_LOG_NAME).warning(msg)
                             print("WARNING: " + msg, file=sys.stderr)
                         else:
-                            last_year_date_time = parsed_date_time.replace(self.start_year - 1)
-                            delta = last_year_date_time - self.epoch_start_time
-                            last_year_total_seconds = (delta.days * 86400 + delta.seconds)
-                            if self.last_parsed_seconds - last_year_total_seconds <= self.max_time_jump_seconds:
+                            try:
+                                last_year_date_time = parsed_date_time.replace(self.start_year - 1)
+                                delta = last_year_date_time - self.epoch_start_time
+                                last_year_total_seconds = (delta.days * 86400 + delta.seconds)
+                            except ValueError:
+                                date_error = True
+                            if not date_error and self.last_parsed_seconds - last_year_total_seconds <= self.max_time_jump_seconds:
                                 parsed_date_time = last_year_date_time
                                 total_seconds = last_year_total_seconds
                                 self.last_parsed_seconds = total_seconds
@@ -446,8 +453,10 @@ class DateTimeModelElement(ModelElementInterface):
                         data = remaining_data.split(b"-")
                     if len(data[1]) == 4:
                         self.tz_specifier_offset = (int(data[1][0:2]) * 3600 + int(data[1][2:4]) * 60) * sign
+                    elif data[1].find(b":") == 2 and len(data[1]) == 5:
+                        self.tz_specifier_offset = (int(data[1][:2]) * 3600 + int(data[1][3:]) * 60) * sign
                     else:
-                        self.tz_specifier_offset = (int(data[1])) * 3600 * sign
+                        self.tz_specifier_offset = int(data[1]) * 3600 * sign
                     self.tz_specifier_offset_str = remaining_data
             total_seconds += self.tz_specifier_offset
             return MatchElement("%s/%s" % (path, self.element_id), date_str + remaining_data, total_seconds, None)
