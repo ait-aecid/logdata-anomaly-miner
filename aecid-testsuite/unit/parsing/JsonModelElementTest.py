@@ -20,6 +20,7 @@ class JsonModelElementTest(TestBase):
                                          b'"Close", "onclick": "CloseDoc()", "clickable": false}]}}}'
     single_line_missing_key_json = b'{"menu": {"id": "file", "popup": {"menuitem": [{"value": "New", "onclick": "CreateNewDoc()"}, {' \
                                    b'"value": "Open", "onclick": "OpenDoc()"}, {"value": "Close", "onclick": "CloseDoc()"}]}}}'
+    single_line_object_instead_of_array = b'{"menu": {"id": "file", "popup": {"menuitem": {"value": "New", "onclick": "CreateNewDoc()"}}}}'
     single_line_invalid_json = b'{"menu": {"id": "file", "value": "File", "popup": {"menuitem": [{"value": "New", "onclick": "CreateNew' \
                                b'Doc()"}, {"value": "Open", "onclick": "OpenDoc()"}, {"value": "Close", "onclick": "CloseDoc()"'
     single_line_no_match_json = b'{"menu": {"id": "NoMatch", "value": "File", "popup": {"menuitem": [{"value": "New", "onclick": "Create' \
@@ -27,8 +28,9 @@ class JsonModelElementTest(TestBase):
     single_line_different_order_with_optional_key_json = \
         b'{"menu": {"value": "File","popup": {"menuitem": [{"clickable": false, "value": "New", "onclick": "CreateNewDoc()"}, {' \
         b'"onclick": "OpenDoc()", "value": "Open"}, {"value": "Close", "onclick": "CloseDoc()", "clickable": false}]}, "id": "file"}}'
-    single_line_json_list = b'{"menu": {"id": "file", "value": "File", "popup": ["value", "value", "value"]}}'
+    single_line_json_array = b'{"menu": {"id": "file", "value": "File", "popup": ["value", "value", "value"]}}'
     single_line_escaped_json = br'{"a": "\x2d"}'
+    single_line_empty_array = b'{"menu": {"id": "file", "value": "File", "popup": {"menuitem": []}}}'
     multi_line_json = b"""{
   "menu": {
     "id": "file",
@@ -154,6 +156,15 @@ class JsonModelElementTest(TestBase):
         self.compare_match_results(
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
+        data = self.single_line_empty_array
+        value = json.loads(data)
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        match_context.match_string = str(json.loads(match_context.match_string)).encode()
+        match_context.match_data = data[len(match_context.match_string):]
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
+
         json_model_element = JsonModelElement(self.id_, self.key_parser_dict_allow_all)
         data = self.single_line_different_order_with_optional_key_json
         value = json.loads(data)
@@ -165,7 +176,7 @@ class JsonModelElementTest(TestBase):
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
         json_model_element = JsonModelElement(self.id_, self.key_parser_dict_array)
-        data = self.single_line_json_list
+        data = self.single_line_json_array
         value = json.loads(data)
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
@@ -516,6 +527,12 @@ class JsonModelElementTest(TestBase):
         json_model_element = JsonModelElement(self.id_, self.key_parser_dict)
         # missing key
         data = self.single_line_missing_key_json
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        # object instead of array
+        data = self.single_line_object_instead_of_array
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
