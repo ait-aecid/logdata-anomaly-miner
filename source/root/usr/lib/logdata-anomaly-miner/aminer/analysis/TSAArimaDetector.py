@@ -230,15 +230,15 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         if self.force_period_length:
             # Force the period length
             time_step_list = [self.set_period_length / self.num_division_time_step / self.event_type_detector.waiting_time_for_tsa *
-                    self.event_type_detector.num_sections_waiting_time_for_tsa for count in counts]
+                              self.event_type_detector.num_sections_waiting_time_for_tsa for count in counts]
         else:
             # Minimal size of the time step
             min_lag = max(int(self.acf_pause_area_percentage*self.event_type_detector.num_sections_waiting_time_for_tsa), 1)
 
             for event_index, data in enumerate(counts):
-                if (self.path_list != [] and all(path not in self.event_type_detector.found_keys[event_index] for path in self.path_list)) or (
-                        self.ignore_list != [] and any(ignore_path in self.event_type_detector.found_keys[event_index] for ignore_path in
-                                                       self.ignore_list)):
+                if (self.path_list != [] and all(path not in self.event_type_detector.found_keys[event_index] for path in self.path_list))\
+                        or (self.ignore_list != [] and any(ignore_path in self.event_type_detector.found_keys[event_index] for ignore_path
+                                                           in self.ignore_list)):
                     time_step_list.append(-1)
                 else:
                     # Apply the autocorrelation function to the data of the single event types.
