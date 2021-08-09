@@ -36,8 +36,8 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, acf_pause_area_percentage=0.2,
                  acf_auto_pause_area=True, acf_auto_pause_area_num_min=10, build_sum_over_values=False, num_periods_tsa_ini=15,
                  num_division_time_step=10, alpha=0.05, num_min_time_history=20, num_max_time_history=30, num_results_bt=15, alpha_bt=0.05,
-                 acf_threshold=0.2, round_time_inteval_threshold=0.02, persistence_id='Default', path_list=None, ignore_list=None,
-                 output_log_line=True, auto_include_flag=True):
+                 acf_threshold=0.2, round_time_inteval_threshold=0.02, force_period_length=False, set_period_length=604800,
+                 persistence_id='Default', path_list=None, ignore_list=None, output_log_line=True, auto_include_flag=True):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -59,6 +59,9 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         @param round_time_inteval_threshold threshold for the rounding of the time_steps to the times in self.assumed_time_steps.
         The higher the threshold the easier the time is rounded to the next time in the list.
         @param acf_threshold threshold, which has to be exceeded by the highest peak of the cdf function of the time series, to be analysed.
+        @param force_period_length states if the period length is calculated through the ACF, or if the period lenth is forced to
+        be set to set_period_length.
+        @param set_period_length states how long the period legth is if force_period_length is set to True.
         @param persistence_id name of persistency document.
         @param path_list At least one of the parser paths in this list needs to appear in the event to be analysed.
         @param ignore_list list of paths that are not considered for correlation, i.e., events that contain one of these paths are
@@ -92,6 +95,8 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.alpha_bt = alpha_bt
         self.round_time_inteval_threshold = round_time_inteval_threshold
         self.acf_threshold = acf_threshold
+        self.force_period_length = force_period_length
+        self.set_period_length = set_period_length
 
         # Add the TSAArimaDetector-module to the list of the modules, which use the event_type_detector.
         self.event_type_detector.add_following_modules(self)
@@ -221,48 +226,55 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.time_history = [[] for _ in range(len(counts))]
         # Initialize the lists of the results
         self.result_list = [[1]*self.num_results_bt for _ in range(len(counts))]
-        # Minimal size of the time step
-        min_lag = max(int(self.acf_pause_area_percentage*self.event_type_detector.num_sections_waiting_time_for_tsa), 1)
-        for event_index, data in enumerate(counts):
-            if (self.path_list != [] and all(path not in self.event_type_detector.found_keys[event_index] for path in self.path_list)) or (
-                    self.ignore_list != [] and any(ignore_path in self.event_type_detector.found_keys[event_index] for ignore_path in
-                                                   self.ignore_list)):
-                time_step_list.append(-1)
-            else:
-                # Apply the autocorrelation function to the data of the single event types.
-                corr = list(map(abs, sm.tsa.acf(data, nlags=len(data), fft=True)))
-                corr = np.array(corr)
-                # Apply the Savitzky-Golay-Filter to the list corr, to smooth the curve and get better results
-                corrfit = savgol_filter(corr, min(max(3, int(len(corr)/100)-int(int(len(corr)/100) % 2 == 0)), 101), 1)
 
-                # Set the pause area automatically
-                if self.acf_auto_pause_area:
-                    # Find the first local minima, which is the minimum in the last and next self.acf_auto_pause_area_num_min values
-                    for i in range(self.acf_auto_pause_area_num_min, len(corrfit)-self.acf_auto_pause_area_num_min):
-                        if corrfit[i] == min(corrfit[i-self.acf_auto_pause_area_num_min: i+self.acf_auto_pause_area_num_min+1]):
-                            min_lag = i
+        if self.force_period_length:
+            # Force the period length
+            time_step_list = [self.set_period_length / self.num_division_time_step / self.event_type_detector.waiting_time_for_tsa *
+                              self.event_type_detector.num_sections_waiting_time_for_tsa for count in counts]
+        else:
+            # Minimal size of the time step
+            min_lag = max(int(self.acf_pause_area_percentage*self.event_type_detector.num_sections_waiting_time_for_tsa), 1)
+
+            for event_index, data in enumerate(counts):
+                if (self.path_list != [] and all(path not in self.event_type_detector.found_keys[event_index] for path in self.path_list))\
+                        or (self.ignore_list != [] and any(ignore_path in self.event_type_detector.found_keys[event_index] for ignore_path
+                                                           in self.ignore_list)):
+                    time_step_list.append(-1)
+                else:
+                    # Apply the autocorrelation function to the data of the single event types.
+                    corr = list(map(abs, sm.tsa.acf(data, nlags=len(data), fft=True)))
+                    corr = np.array(corr)
+                    # Apply the Savitzky-Golay-Filter to the list corr, to smooth the curve and get better results
+                    corrfit = savgol_filter(corr, min(max(3, int(len(corr)/100)-int(int(len(corr)/100) % 2 == 0)), 101), 1)
+
+                    # Set the pause area automatically
+                    if self.acf_auto_pause_area:
+                        # Find the first local minima, which is the minimum in the last and next self.acf_auto_pause_area_num_min values
+                        for i in range(self.acf_auto_pause_area_num_min, len(corrfit)-self.acf_auto_pause_area_num_min):
+                            if corrfit[i] == min(corrfit[i-self.acf_auto_pause_area_num_min: i+self.acf_auto_pause_area_num_min+1]):
+                                min_lag = i
+                                break
+
+                    # Find the highest peak and set the time-step as the index + lag
+                    highest_peak_index = np.argmax(corrfit[min_lag:])
+                    if corrfit[min_lag + highest_peak_index] > self.acf_threshold:
+                        time_step_list.append((highest_peak_index + min_lag) / self.num_division_time_step)
+                    else:
+                        time_step_list.append(-1)
+
+            # Round the time_steps if they are similar to the times in self.assumed_time_steps
+            for index, time_step in enumerate(time_step_list):
+                if time_step != -1:
+                    for assumed_time_step in self.assumed_time_steps:
+                        if abs(assumed_time_step - time_step * self.num_division_time_step * self.event_type_detector.waiting_time_for_tsa /
+                                self.event_type_detector.num_sections_waiting_time_for_tsa) / assumed_time_step <\
+                                self.round_time_inteval_threshold:
+                            time_step_list[index] = assumed_time_step / self.num_division_time_step /\
+                                self.event_type_detector.waiting_time_for_tsa * self.event_type_detector.num_sections_waiting_time_for_tsa
                             break
 
-                # Find the highest peak and set the time-step as the index + lag
-                highest_peak_index = np.argmax(corrfit[min_lag:])
-                if corrfit[min_lag + highest_peak_index] > self.acf_threshold:
-                    time_step_list.append((highest_peak_index + min_lag) / self.num_division_time_step)
-                else:
-                    time_step_list.append(-1)
-
-        # Round the time_steps if they are similar to the times in self.assumed_time_steps
-        for index, time_step in enumerate(time_step_list):
-            if time_step != -1:
-                for assumed_time_step in self.assumed_time_steps:
-                    if abs(assumed_time_step - time_step * self.num_division_time_step * self.event_type_detector.waiting_time_for_tsa /
-                            self.event_type_detector.num_sections_waiting_time_for_tsa) / assumed_time_step <\
-                            self.round_time_inteval_threshold:
-                        time_step_list[index] = assumed_time_step / self.num_division_time_step /\
-                            self.event_type_detector.waiting_time_for_tsa * self.event_type_detector.num_sections_waiting_time_for_tsa
-                        break
-
         # Print a message of the length of the time steps
-        message = 'Calculated the time steps for the single event types in seconds: %s' % [
+        message = 'Calculated the periods for the single event types in seconds: %s' % [
                 time_step * self.num_division_time_step * self.event_type_detector.waiting_time_for_tsa /
                 self.event_type_detector.num_sections_waiting_time_for_tsa if
                 time_step != -1 else time_step for time_step in time_step_list]
