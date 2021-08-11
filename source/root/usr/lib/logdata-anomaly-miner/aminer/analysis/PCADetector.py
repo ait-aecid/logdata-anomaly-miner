@@ -180,19 +180,25 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 match = parser_match.get_match_dictionary().get(path)
                 if match is None:
                     continue
-                if isinstance(match.match_object, bytes):
-                    value = match.match_object.decode(AminerConfig.ENCODING)
+                matches = []
+                if isinstance(match, list):
+                    matches = match
                 else:
-                    value = str(match.match_object)
-                if value is not None:
-                    all_values_none = False
-                if path in self.event_count_vector:
-                    if value in self.event_count_vector[path]:
-                        self.event_count_vector[path][value] += 1
+                    matches.append(match)
+                for match in matches:
+                    if isinstance(match.match_object, bytes):
+                        value = match.match_object.decode(AminerConfig.ENCODING)
                     else:
-                        self.event_count_vector[path][value] = 1
-                else:
-                    self.event_count_vector[path] = {value: 1}
+                        value = str(match.match_object)
+                    if value is not None:
+                        all_values_none = False
+                    if path in self.event_count_vector:
+                        if value in self.event_count_vector[path]:
+                            self.event_count_vector[path][value] += 1
+                        else:
+                            self.event_count_vector[path][value] = 1
+                    else:
+                        self.event_count_vector[path] = {value: 1}
             if all_values_none is True:
                 return
 
@@ -292,7 +298,7 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             for value in events:
                 events[value] = 0
 
-    def get_time_trigger_class(self):
+    def get_time_trigger_class(self):  # skipcq: PYL-R0201
         """
         Get the trigger class this component should be registered for.
         This trigger is used only for persistence, so real-time triggering is needed.
