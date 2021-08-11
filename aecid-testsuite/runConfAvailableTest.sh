@@ -366,13 +366,13 @@ EOL
             echo "2014-09-29 21:27:08 1XYdJu-002e6P-9F SMTP error from remote mail server after MAIL FROM:<someone@someaddress.com> SIZE=6601: host mta5.am0.yahoodns.net [66.196.118.240]: 421 4.7.0 [GL01] Message from (184.171.253.133) temporarily deferred - 4.16.50. Please refer to http://postmaster.yahoo.com/errors/postmaster-21.html" >> $LOG_FILE
             echo "2020-04-28 22:08:03 1m1x23-2011cZ-MN H=mta7.am0.yahoodns.net [67.195.228.106]: SMTP error from remote mail server after pipelined MAIL FROM:<SENDER@senderdomain.com> SIZE=1758: 421 4.7.0 [TSS04] Messages from 184.171.253.133 temporarily deferred due to unexpected volume or user complaints - 4.16.55.1; see https://postmaster.verizonmedia.com/error-codes" >> $LOG_FILE
             echo "2014-09-12 08:01:12 1XSLn4-003Fa1-OX SMTP error from remote mail server after end of data: host gmail-smtp-in.l.google.com [173.194.66.27]: 421-4.7.0 [77.69.28.195 15] Our system has detected an unusual rate of\n421-4.7.0 unsolicited mail originating from your IP address. To protect our\n421-4.7.0 users from spam, mail sent from your IP address has been temporarily\n421-4.7.0 rate limited. Please visit\n421-4.7.0 http://www.google.com/mail/help/bulk_mail.html to review our Bulk\n421 4.7.0 Email Senders Guidelines. q4si1448293wij.85 - gsmtp" >> $LOG_FILE
-#            echo "" >> $LOG_FILE
-#            echo "" >> $LOG_FILE
-#            echo "" >> $LOG_FILE
-#            echo "" >> $LOG_FILE
-#            echo "" >> $LOG_FILE
-#            echo "" >> $LOG_FILE
-#            echo "" >> $LOG_FILE
+            echo "2014-09-18 13:44:19 1XUb4M-000v5R-6R SMTP error from remote mail server after MAIL FROM:<someone@someaddress.com> SIZE=1811: host mta7.am0.yahoodns.net [66.66.66.66]: 421 4.7.1 [TS03] All messages from 5.196.113.212 will be permanently deferred; Retrying will NOT succeed. See http://postmaster.yahoo.com/421-ts03.html" >> $LOG_FILE
+            echo "TO:<someone@someaddress>: host mx.someaddress.com [20.20.20.20]: 450 4.7.1 Client host rejected: cannot find your hostname, [20.20.20.20] 2014-09-21 16:06:05 1XUKFa-0003bb-EM ** someone@someaddress>: retry timeout exceeded" >> $LOG_FILE
+            echo "2014-10-10 10:25:01 1XcKLM-003IGU-Fr SMTP error from remote mail server after RCPT TO:<ma@bol.com>: host pro-mail-mx-002.bol.com [20.20.20.20]: 450 4.7.1 Service unavailable" >> $LOG_FILE
+            echo "2014-09-24 12:59:49 1XWqqy-00028x-FK == test@badluckbryan.com R=lookuphost T=remote_smtp defer (-44): SMTP error from remote mail server after RCPT TO:<test@gylsystems.com>: host gylsystems.com [69.69.69.69]: 451 Temporary local problem - please try later" >> $LOG_FILE
+            echo "2014-11-24 11:25:33 H=localhost (mail.fictional.example) [::1]:49956 sender verify defer for <aaron@domain.com>: require_files: error for /home/aaron/etc/domain.com: Permission denied" >> $LOG_FILE
+            echo "2014-11-24 11:25:33 H=localhost (srv-hs1.netsons.net) [::1]:49956 F=<aaron@domain.com> A=dovecot_login:aaron@domain.com temporarily rejected RCPT <test@pleasecheck.net>: Could not complete sender verify" >> $LOG_FILE
+            echo "2014-09-13 11:37:53 1XSdCz-00049U-5A ==aaron@domain.com R=lookuphost T=remote_smtp defer (-44): SMTP error from remote mail server after RCPT TO:<aaron@domain.com>: host mail.fictional.example [10.5.40.204]: 452 <aron@domain.com> Domain size limit exceeded" >> $LOG_FILE
 #            echo "" >> $LOG_FILE
 #            echo "" >> $LOG_FILE
 #            echo "" >> $LOG_FILE
