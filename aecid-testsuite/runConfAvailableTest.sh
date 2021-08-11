@@ -41,7 +41,6 @@ LogResourceList:
 
 Input:
         timestamp_paths: ["/accesslog/time"]
-        verbose: True
 
 EventHandlers:
         - id: stpe
@@ -261,7 +260,7 @@ EOL
 
     #cat $OUT
 
-    if `grep -Fq "VerboseUnparsedAtomHandler" $OUT` || `grep -Fq "Traceback" $OUT` || `grep -Fq "{'Parser'" $OUT` || `grep -Fq "FATAL" $OUT`; then
+    if `grep -Fq "VerboseUnparsedAtomHandler" $OUT` || `grep -Fq "Traceback" $OUT` || `grep -Fq "{'Parser'" $OUT` || `grep -Fq "FATAL" $OUT` || `grep -Fq "Config-Error" $OUT`; then
         echo "Failed Test in $filename"
 	    exit_code=1
 	    cat $OUT

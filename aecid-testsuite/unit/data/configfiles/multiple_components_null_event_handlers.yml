@@ -112,9 +112,9 @@ Parser:
                   - sq5
                   - user_agent_model
                   - sq6
+
 Input:
         timestamp_paths: "/accesslog/time"
-        verbose: False # use this to debug your parser-model
         adjust_timestamps: True
 
 Analysis:
@@ -174,8 +174,6 @@ Analysis:
           paths: ["/model/Sensors/CPUTemp", "/model/Sensors/CPUWorkload", "/model/Sensors/DTM"]
           separator: ";"
           missing_value_string: ""
-        - type: NewMatchPathDetector
-          id: NewMatchPathDetector
         - type: PathExistsMatchRule
           id: path_exists_match_rule1
           path: "/model/LoginDetails/PastTime/Time/Minutes"

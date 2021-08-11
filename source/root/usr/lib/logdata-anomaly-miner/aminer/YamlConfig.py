@@ -129,7 +129,7 @@ def build_analysis_pipeline(analysis_context):
     """
     parsing_model = build_parsing_model()
     anomaly_event_handlers, atom_filter = build_input_pipeline(analysis_context, parsing_model)
-    build_analysis_components(analysis_context, anomaly_event_handlers, atom_filter)
+    build_analysis_components(analysis_context, anomaly_event_handlers, atom_filter, parsing_model)
     event_handler_id_list = build_event_handlers(analysis_context, anomaly_event_handlers)
     # do not check UnparsedAtomHandler
     for index, analysis_component in enumerate(atom_filter.subhandler_list[1:]):
@@ -312,32 +312,14 @@ def build_input_pipeline(analysis_context, parsing_model):
     analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
         parsing_model, atom_handler_list, anomaly_event_handlers, default_timestamp_paths=timestamp_paths, eol_sep=eol_sep,
         json_format=json_format)
-    # Just report all unparsed atoms to the event handlers.
-    if yaml_data['Input']['verbose'] is True:
-        from aminer.input.VerboseUnparsedAtomHandler import VerboseUnparsedAtomHandler
-        atom_filter.add_handler(VerboseUnparsedAtomHandler(anomaly_event_handlers, parsing_model), stop_when_handled_flag=True)
-    else:
-        from aminer.input.SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler
-        atom_filter.add_handler(SimpleUnparsedAtomHandler(anomaly_event_handlers), stop_when_handled_flag=True)
-    if yaml_data['Input']['suppress_unparsed'] is True:
-        analysis_context.suppress_detector_list.append(atom_filter.subhandler_list[-1][0])
-    from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
-    if 'LearnMode' in yaml_data:
-        learn = yaml_data['LearnMode']
-    else:
-        learn = True
-    nmpd = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=learn)
-    nmpd.output_event_handlers = None
-    analysis_context.register_component(nmpd, component_name='DefaultNewMatchPathDetector')
-    atom_filter.add_handler(nmpd)
     return anomaly_event_handlers, atom_filter
 
 
-def build_analysis_components(analysis_context, anomaly_event_handlers, atom_filter):
+def build_analysis_components(analysis_context, anomaly_event_handlers, atom_filter, parsing_model):
     """Build the analysis components."""
     suppress_detector_list = analysis_context.suppress_detector_list
-    if yaml_data['SuppressNewMatchPathDetector']:
-        suppress_detector_list.append('DefaultNewMatchPathDetector')
+    has_unparsed_handler = False
+    has_new_match_path_handler = False
     if 'Analysis' in yaml_data and yaml_data['Analysis'] is not None:
         analysis_dict = {}
         match_action_dict = {}
@@ -354,6 +336,23 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 break
 
         for item in yaml_data['Analysis']:
+            if item['type'].name in ('SimpleUnparsedAtomHandler', 'VerboseUnparsedAtomHandler'):
+                has_unparsed_handler = True
+                index = yaml_data['Analysis'].index(item)
+                new_analysis_list = [item]
+                del yaml_data['Analysis'][index]
+                new_analysis_list += yaml_data['Analysis']
+                yaml_data['Analysis'] = new_analysis_list
+                break
+        for item in yaml_data['Analysis']:
+            if item['type'].name == 'NewMatchPathDetector':
+                has_new_match_path_handler = True
+                break
+        has_new_match_path_handler, has_unparsed_handler = add_default_analysis_components(
+            analysis_context, anomaly_event_handlers, atom_filter, has_new_match_path_handler, has_unparsed_handler, parsing_model)
+
+        for item in yaml_data['Analysis']:
+            stop_when_handled_flag = False
             if item['id'] == 'None':
                 comp_name = None
             else:
@@ -779,12 +778,42 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     round_time_inteval_threshold=item['round_time_inteval_threshold'],
                     force_period_length=item['force_period_length'], set_period_length=item['set_period_length'],
                     output_log_line=item['output_logline'], ignore_list=item['ignore_list'])
+            elif item["type"].name == "VerboseUnparsedAtomHandler":
+                has_unparsed_handler = True
+                stop_when_handled_flag = True
+                tmp_analyser = func(anomaly_event_handlers, parsing_model)
+            elif item["type"].name == "SimpleUnparsedAtomHandler":
+                has_unparsed_handler = True
+                stop_when_handled_flag = True
+                tmp_analyser = func(anomaly_event_handlers)
             else:
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn)
             if item['output_event_handlers'] is not None:
                 tmp_analyser.output_event_handlers = item['output_event_handlers']
             analysis_context.register_component(tmp_analyser, component_name=comp_name)
-            atom_filter.add_handler(tmp_analyser)
+            atom_filter.add_handler(tmp_analyser, stop_when_handled_flag=stop_when_handled_flag)
+    add_default_analysis_components(
+        analysis_context, anomaly_event_handlers, atom_filter, has_new_match_path_handler, has_unparsed_handler, parsing_model)
+
+
+def add_default_analysis_components(analysis_context, anomaly_event_handlers, atom_filter, has_new_match_path_handler, has_unparsed_handler,
+                                    parsing_model):
+    if not has_unparsed_handler:
+        from aminer.analysis.UnparsedAtomHandlers import VerboseUnparsedAtomHandler
+        atom_filter.add_handler(VerboseUnparsedAtomHandler(anomaly_event_handlers, parsing_model), stop_when_handled_flag=True)
+        has_unparsed_handler = True
+    if not has_new_match_path_handler:
+        has_new_match_path_handler = True
+        if 'LearnMode' in yaml_data:
+            learn = yaml_data['LearnMode']
+        else:
+            learn = True
+        from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
+        nmpd = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=learn)
+        nmpd.output_event_handlers = None
+        analysis_context.register_component(nmpd, component_name='DefaultNewMatchPathDetector')
+        atom_filter.add_handler(nmpd)
+    return has_new_match_path_handler, has_unparsed_handler
 
 
 def build_event_handlers(analysis_context, anomaly_event_handlers):
