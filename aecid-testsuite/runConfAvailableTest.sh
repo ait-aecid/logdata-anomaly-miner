@@ -320,25 +320,25 @@ EOL
             echo "audispd: type=USER_AUTH msg=audit(1451403193.995:1835): pid=3380 uid=0 auid=4294967295 ses=4294967295 msg='op=PAM:authentication acct=\"toor\" exe=\"/usr/sbin/sshd\" hostname=192.168.2.100 addr=192.168.2.100 terminal=ssh res=success'" >> $LOG_FILE
             echo "audispd: type=USER_AVC msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
             echo "audispd: type=USER_CHAUTHTOK msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=USER_CMD msg=audit(1450785575.705:3316357): user pid=21619 uid=0 auid=526 msg='cwd=\"/home/hi\" cmd=\"/bin/bash\" (terminal=pts/0 res=success)'" >> $LOG_FILE
-#            echo "audispd: type=USER_END msg=audit(1450767601.813:3296218): user pid=15764 uid=0 auid=0 msg='PAM: session close acct=\"root\" : exe=\"/usr/sbin/crond\" (hostname=?, addr=?, terminal=cron res=success)'" >> $LOG_FILE
-#            echo "audispd: type=USER_ERR msg=audit(1450770602.157:3300444): user pid=16643 uid=0 auid=4294967295 msg='PAM: bad_ident acct="?" : exe=\"/usr/sbin/sshd\" (hostname=111.111.211.38, addr=111.111.211.38, terminal=ssh res=failed)'" >> $LOG_FILE
-#            echo "audispd: type=USER_LABELED_EXPORT msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=USER_LOGIN msg=audit(1450770603.209:3300446): user pid=16649 uid=0 auid=4294967295 msg='acct=\"root\": exe=\"/usr/sbin/sshd\" (hostname=?, addr=11.111.53.58, terminal=sshd res=failed)'" >> $LOG_FILE
-#            echo "audispd: type=USER_LOGOUT msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=USER_MAC_POLICY_LOAD msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=USER_MGMT msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=USER_ROLE_CHANGE msg=audit(1280266360.845:51): user pid=1978 uid=0 auid=500 subj=system_u:system_r:local_login_t:s0-s0:c0.c1023 msg='pam: default-context=user_u:system_r:unconfined_t:s0 selected-context=user_u:system_r:unconfined_t:s0: exe=\"/bin/login\" (hostname=?, addr=?, terminal=tty1 res=success)'" >> $LOG_FILE
-#            echo "audispd: type=USER_SELINUX_ERR msg=audit(1311948547.151:138): Text" >> $LOG_FILE
-#            echo "audispd: type=USER_START msg=audit(1450771201.437:3301540): user pid=16878 uid=0 auid=0 msg='PAM: session open acct=\"root\" : exe=\"/usr/sbin/crond\" (hostname=?, addr=?, terminal=cron res=success)'" >> $LOG_FILE
-#            echo "audispd: type=USER_TTY msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=USER_UNLABELED_EXPORT msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=USYS_CONFIG msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=VIRT_CONTROL msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=VIRT_MACHINE_ID msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=VIRT_RESOURCE msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audisp-remote: queue is full - dropping event" >> $LOG_FILE
-#            echo "audispd: queue is full - dropping event" >> $LOG_FILE
+            echo "audispd: type=USER_CMD msg=audit(1450785575.705:3316357): user pid=21619 uid=0 auid=526 msg='cwd=\"/home/hi\" cmd=\"/bin/bash\" (terminal=pts/0 res=success)'" >> $LOG_FILE
+            echo "audispd: type=USER_END msg=audit(1450767601.813:3296218): user pid=15764 uid=0 auid=0 msg='PAM: session close acct=\"root\" : exe=\"/usr/sbin/crond\" (hostname=?, addr=?, terminal=cron res=success)'" >> $LOG_FILE
+            echo "audispd: type=USER_ERR msg=audit(1450770602.157:3300444): user pid=16643 uid=0 auid=4294967295 msg='PAM: bad_ident acct="?" : exe=\"/usr/sbin/sshd\" (hostname=111.111.211.38, addr=111.111.211.38, terminal=ssh res=failed)'" >> $LOG_FILE
+            echo "audispd: type=USER_LABELED_EXPORT msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=USER_LOGIN msg=audit(1450770603.209:3300446): user pid=16649 uid=0 auid=4294967295 msg='acct=\"root\": exe=\"/usr/sbin/sshd\" (hostname=?, addr=11.111.53.58, terminal=sshd res=failed)'" >> $LOG_FILE
+            echo "audispd: type=USER_LOGOUT msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=USER_MAC_POLICY_LOAD msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=USER_MGMT msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=USER_ROLE_CHANGE msg=audit(1280266360.845:51): user pid=1978 uid=0 auid=500 subj=system_u:system_r:local_login_t:s0-s0:c0.c1023 msg='pam: default-context=user_u:system_r:unconfined_t:s0 selected-context=user_u:system_r:unconfined_t:s0: exe=\"/bin/login\" (hostname=?, addr=?, terminal=tty1 res=success)'" >> $LOG_FILE
+            echo "audispd: type=USER_SELINUX_ERR msg=audit(1311948547.151:138): Text" >> $LOG_FILE
+            echo "audispd: type=USER_START msg=audit(1450771201.437:3301540): user pid=16878 uid=0 auid=0 msg='PAM: session open acct=\"root\" : exe=\"/usr/sbin/crond\" (hostname=?, addr=?, terminal=cron res=success)'" >> $LOG_FILE
+            echo "audispd: type=USER_TTY msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=USER_UNLABELED_EXPORT msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=USYS_CONFIG msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=VIRT_CONTROL msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=VIRT_MACHINE_ID msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=VIRT_RESOURCE msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audisp-remote: queue is full - dropping event" >> $LOG_FILE
+            echo "audispd: queue is full - dropping event" >> $LOG_FILE
             echo "audispd: type=UNKNOWN[1327] msg=audit(1522927552.749:917): proctitle=636174002F6574632F706173737764" >> $LOG_FILE
             ;;
         CronParsingModel)
