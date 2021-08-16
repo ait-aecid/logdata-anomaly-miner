@@ -290,8 +290,8 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             self.variable_key_list.append(list(self.found_keys[current_index]))
             # Delete the entries with value None or timestamps as values
             for var_index in range(len(self.variable_key_list[current_index]) - 1, -1, -1):
-                if (type(log_atom.parser_match.get_match_dictionary()[self.variable_key_list[current_index][var_index]]) !=
-                        'MatchElement.MatchElement') or (log_atom.parser_match.get_match_dictionary()[self.variable_key_list[
+                if (type(log_atom.parser_match.get_match_dictionary()[self.variable_key_list[current_index][var_index]]).__name__ !=
+                        'MatchElement') or (log_atom.parser_match.get_match_dictionary()[self.variable_key_list[
                         current_index][var_index]].match_object is None):
                     del self.variable_key_list[current_index][var_index]
                 elif (self.path_list is not None) and self.variable_key_list[current_index][var_index] not in self.path_list:
