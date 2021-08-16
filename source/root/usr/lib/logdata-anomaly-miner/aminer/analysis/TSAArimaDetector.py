@@ -258,7 +258,8 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     highest_peak_index = np.argmax(corrfit[min_lag:])
                     if corrfit[min_lag + highest_peak_index] > self.acf_threshold:
                         time_step_list.append((highest_peak_index + min_lag) / self.num_division_time_step *
-                                self.event_type_detector.waiting_time_for_tsa / self.event_type_detector.num_sections_waiting_time_for_tsa)
+                                              self.event_type_detector.waiting_time_for_tsa /
+                                              self.event_type_detector.num_sections_waiting_time_for_tsa)
                     else:
                         time_step_list.append(-1)
 
