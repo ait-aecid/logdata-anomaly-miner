@@ -349,9 +349,6 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        for following_module in self.following_modules:
-            following_module.do_persist()
-
         tmp_list = [[]]
         for key in self.found_keys:
             tmp_list[0].append(list(key))
