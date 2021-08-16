@@ -559,7 +559,7 @@
                     'num_reduce_time_list': {'type': 'integer', 'min': 1},
                     'allow_missing_values_flag': {'type': 'boolean'},
                     'output_logline': {'type': 'boolean'},
-                    'auto_include_flag': {'type': 'boolean'},
+                    'learn_mode': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'suppress': {'type': 'boolean'}
                 },
@@ -588,6 +588,7 @@
                     'set_period_length': {'type': 'integer', 'min': 1},
                     'min_log_lines_per_time_step': {'type': 'integer', 'min': 1},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'learn_mode': {'type': 'boolean'},
                     'suppress': {'type': 'boolean'}
                 }
             ]
