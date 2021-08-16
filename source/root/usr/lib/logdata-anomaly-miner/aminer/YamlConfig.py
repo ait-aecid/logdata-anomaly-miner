@@ -778,7 +778,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     num_results_bt=item['num_results_bt'], alpha_bt=item['alpha_bt'], acf_threshold=item['acf_threshold'],
                     round_time_inteval_threshold=item['round_time_inteval_threshold'],
                     force_period_length=item['force_period_length'], set_period_length=item['set_period_length'],
-                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'])
+                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'], auto_include_flag=learn)
             else:
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn)
             if item['output_event_handlers'] is not None:
