@@ -2033,6 +2033,7 @@ VariableTypeDetector
 This detector analyses each variable of the event_types by assigning them the implemented variable types.
 
 * **paths** List of paths, which variables are being tested for a type. All other paths will not get a type assigned.
+* **learn_mode** states, if found variable types are updated when a test fails.
 * **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
 * **event_type_detector** event_type_detector. Used to get the event numbers and values of the variables, etc.
 * **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted.
@@ -2057,7 +2058,6 @@ This detector analyses each variable of the event_types by assigning them the im
 * **num_pause_discrete** number of paused updates, before the discrete var type is adapted.
 * **num_pause_others** number of paused updates, before trying to find a new variable type for the variable type others.
 * **test_gof_int** states if integer number should be tested for the continuous variable type.
-* **update_var_type_bool** states, if found variable types are updated when a test fails.
 * **num_stop_update** switch the LearnMode to False after num_stop_update processed lines. If False LearnMode will not be switched to False.
 * **silence_output_without_confidence** silences all messages without a confidence-entry.
 * **silence_output_except_indicator** silences all messages which are not related with the calculated indicator.

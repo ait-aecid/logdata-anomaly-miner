@@ -527,7 +527,6 @@
                     'num_pause_discrete': {'type': 'integer', 'min': 0},
                     'num_pause_others': {'type': 'integer', 'min': 0},
                     'test_gof_int': {'type': 'boolean'},
-                    'update_var_type_bool': {'type': 'boolean'},
                     'num_stop_update': {'type': 'boolean'},
                     'silence_output_without_confidence': {'type': 'boolean'},
                     'silence_output_except_indicator': {'type': 'boolean'},
@@ -546,6 +545,7 @@
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'learn_mode': {'type': 'boolean'},
                     'suppress': {'type': 'boolean'}
                 },
                 {
