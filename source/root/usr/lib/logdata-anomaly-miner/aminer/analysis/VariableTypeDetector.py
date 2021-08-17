@@ -35,12 +35,12 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
     def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id='Default', path_list=None,
                  used_gof_test='CM', gof_alpha=0.05, s_gof_alpha=0.05, s_gof_bt_alpha=0.05, d_alpha=0.1, d_bt_alpha=0.1, div_thres=0.3,
                  sim_thres=0.1, indicator_thres=0.4, num_init=100, num_update=50, num_update_unq=200, num_s_gof_values=50,
-                 num_s_gof_bt=30, num_d_bt=30, num_pause_discrete=5, num_pause_others=2, test_gof_int=True, update_var_type_bool=True,
+                 num_s_gof_bt=30, num_d_bt=30, num_pause_discrete=5, num_pause_others=2, test_gof_int=True,
                  num_stop_update=False, silence_output_without_confidence=False, silence_output_except_indicator=True,
                  num_var_type_hist_ref=10, num_update_var_type_hist_ref=10,  num_var_type_considered_ind=10, num_stat_stop_update=200,
                  num_updates_until_var_reduction=20, var_reduction_thres=0.6, num_skipped_ind_for_weights=1, num_ind_for_weights=100,
                  used_multinomial_test='Chi', use_empiric_distr=True, save_statistics=True, output_log_line=True, ignore_list=None,
-                 constraint_list=None):
+                 constraint_list=None, auto_include_flag=True):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
         self.next_persist_time = None
         self.anomaly_event_handlers = anomaly_event_handlers
@@ -97,7 +97,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         # States if integer number should be tested for the continuous variable type
         self.test_gof_int = test_gof_int
         # States, if the the found variable types are updated if a test fails
-        self.update_var_type_bool = update_var_type_bool
+        self.auto_include_flag = auto_include_flag
         # Stops updating the found variableTypes after num_stop_update processed lines. If False the updating of lines will not be stopped
         self.num_stop_update = num_stop_update
         # Silences the all messages without a confidence-entry
@@ -332,23 +332,27 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             self.load_persistence_data(persistence_data)
             logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
+        # Generate the modifiers for the estimation of the minimum and maximum for the uniform distribution
         self.min_mod_ini_uni = 1 / (self.num_init + 1)
         self.min_mod_upd_uni = 1 / (self.num_init + self.num_update + 1)
         self.max_mod_ini_uni = 1 / (self.num_init + 1)
         self.max_mod_upd_uni = 1 / (self.num_init + self.num_update + 1)
 
+        # Generate the modifiers for the estimation of the minimum and maximum for the beta1 distribution
         self.min_mod_ini_beta1 = self.quantiles['beta1'][max(0.001, int(1 / (self.num_init + 1) * 1000 + 0.5) / 1000)]
         self.min_mod_upd_beta1 = self.quantiles['beta1'][max(0.001, int(1 / (self.num_init + self.num_update + 1) * 1000 + 0.5) / 1000)]
         self.max_mod_ini_beta1 = 1 - self.quantiles['beta1'][min(0.999, int(self.num_init / (self.num_init + 1) * 1000 + 0.5) / 1000)]
         self.max_mod_upd_beta1 = 1 - self.quantiles['beta1'][min(0.999, int((self.num_init + self.num_update) / (
                 self.num_init + self.num_update + 1) * 1000 + 0.5) / 1000)]
 
+        # Generate the modifiers for the estimation of the minimum and maximum for the beta2 distribution
         self.min_mod_ini_beta2 = self.quantiles['beta2'][max(0.001, int(1 / (self.num_init + 1) * 1000 + 0.5) / 1000)]
         self.min_mod_upd_beta2 = self.quantiles['beta2'][max(0.001, int(1 / (self.num_init + self.num_update + 1) * 1000 + 0.5) / 1000)]
         self.max_mod_ini_beta2 = 1-self.quantiles['beta2'][min(0.999, int(self.num_init / (self.num_init + 1) * 1000 + 0.5) / 1000)]
         self.max_mod_upd_beta2 = 1-self.quantiles['beta2'][min(0.999, int((self.num_init + self.num_update) / (
                 self.num_init + self.num_update + 1) * 1000 + 0.5) / 1000)]
 
+        # Generate the modifiers for the estimation of the minimum and maximum for the beta4 distribution
         self.min_mod_ini_beta4 = self.quantiles['beta4'][max(0.001, int(1 / (self.num_init + 1) * 1000 + 0.5) / 1000)]
         self.min_mod_upd_beta4 = self.quantiles['beta4'][max(0.001, int(1 / (self.num_init + self.num_update + 1) * 1000 + 0.5) / 1000)]
         self.max_mod_ini_beta4 = 1-self.quantiles['beta4'][min(0.999, int(self.num_init / (self.num_init + 1) * 1000 + 0.5) / 1000)]
@@ -566,9 +570,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
             logging.getLogger(DEBUG_LOG_NAME).debug('%s started update phase of var types.', self.__class__.__name__)
             # Checks if the updates of the varTypes should be stopped
-            if self.update_var_type_bool and (not isinstance(self.num_stop_update, bool)) and (
+            if self.auto_include_flag and (not isinstance(self.num_stop_update, bool)) and (
                     self.event_type_detector.total_records >= self.num_stop_update):
-                self.update_var_type_bool = False
+                self.auto_include_flag = False
 
             # Get the index_list for the variables which should be updated
             index_list = None
@@ -798,7 +802,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         self.print(tmp_string, log_atom, affected_paths, np.arctan(2 * indicator) / np.pi * 2, indicator=True)
 
                 # Update the var_type_history_list_reference
-                if self.update_var_type_bool and (not isinstance(self.num_var_type_hist_ref, bool)) and (
+                if self.auto_include_flag and (not isinstance(self.num_var_type_hist_ref, bool)) and (
                         not isinstance(self.num_update_var_type_hist_ref, bool)) and len(
                         self.var_type_history_list_reference) >= event_index + 1 and \
                         self.var_type_history_list_reference[event_index] != [] and (((
@@ -1127,7 +1131,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 if first_distr and (sum(self.bt_results[event_index][var_index]) >= self.s_gof_bt_min_success):
                     return
 
-                if not self.update_var_type_bool:  # Do not update variableType
+                if not self.auto_include_flag:  # Do not update variableType
                     self.bt_results[event_index][var_index] = [1] * self.num_s_gof_bt
                     self.print_reject_var_type(event_index, self.var_type[event_index][var_index], var_index, log_atom)
                     self.var_type_history_list[event_index][var_index][0][-1] = 1
@@ -1168,7 +1172,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 if self.event_type_detector.values[event_index][var_index][j - 1] >\
                         self.event_type_detector.values[event_index][var_index][j]:
                     # Do not update variableType
-                    if not self.update_var_type_bool:
+                    if not self.auto_include_flag:
                         self.print_reject_var_type(event_index, self.var_type[event_index][var_index], var_index, log_atom)
                         self.var_type_history_list[event_index][var_index][0][-1] = 1
                         return
@@ -1181,7 +1185,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             for j in range(-self.num_update, 0):  # Searches for a not ascending sequence in the values
                 if self.event_type_detector.values[event_index][var_index][j - 1] <\
                         self.event_type_detector.values[event_index][var_index][j]:
-                    if not self.update_var_type_bool:  # Do not update variableType
+                    if not self.auto_include_flag:  # Do not update variableType
                         self.print_reject_var_type(event_index, self.var_type[event_index][var_index], var_index, log_atom)
                         self.var_type_history_list[event_index][var_index][0][-1] = 1
                         return
@@ -1197,7 +1201,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 if len(set(new_values + self.var_type[event_index][var_index][1])) >= (
                         self.num_update + self.var_type[event_index][var_index][3]) * (1 - self.sim_thres):
                     # Do not update variableType
-                    if not self.update_var_type_bool:
+                    if not self.auto_include_flag:
                         self.print_reject_var_type(event_index, self.var_type[event_index][var_index], var_index, log_atom)
                         self.var_type_history_list[event_index][var_index][0][-1] = 1
                         return
@@ -1206,7 +1210,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     return
 
                 # Do not update variableType
-                if not self.update_var_type_bool:
+                if not self.auto_include_flag:
                     self.print_reject_var_type(event_index, self.var_type[event_index][var_index], var_index, log_atom)
                     self.var_type_history_list[event_index][var_index][2][1][-1] = 1
                     return
@@ -1248,7 +1252,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         self.bt_results[event_index][var_index][0]) < self.d_bt_min_success):
 
                 # Do not update variableType
-                if not self.update_var_type_bool:
+                if not self.auto_include_flag:
                     self.print_reject_var_type(event_index, self.var_type[event_index][var_index], var_index, log_atom)
                     self.bt_results[event_index][var_index][0] = [1] * self.num_d_bt
                     self.var_type_history_list[event_index][var_index][0][-1] = 1
@@ -1260,7 +1264,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 return
 
             # Update the probabilities of the discrete values
-            if self.update_var_type_bool and self.bt_results[event_index][var_index][0][-1]:
+            if self.auto_include_flag and self.bt_results[event_index][var_index][0][-1]:
                 # List for the number of appearance of the values
                 values_app = [0 for x in range(len(self.var_type[event_index][var_index][1]))]
                 for val in new_values:
@@ -1300,7 +1304,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 return
 
             # Do not update variableType
-            if not self.update_var_type_bool:
+            if not self.auto_include_flag:
                 self.print_reject_var_type(event_index, self.var_type[event_index][var_index], var_index, log_atom)
                 self.var_type_history_list[event_index][var_index][0][-1] = 1
                 return
@@ -1330,7 +1334,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         elif self.var_type[event_index][var_index][0] == 'unq':
             # Checks if the new values are not unique
             if len(set(self.event_type_detector.values[event_index][var_index][-self.num_update:])) != self.num_update:
-                if not self.update_var_type_bool:  # Do not update variableType
+                if not self.auto_include_flag:  # Do not update variableType
                     self.print_reject_var_type(event_index, self.var_type[event_index][var_index], var_index, log_atom)
                     self.var_type_history_list[event_index][var_index][0][-1] = 1
                     return
@@ -1344,7 +1348,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 if j in self.event_type_detector.values[event_index][var_index][
                         -self.num_update_unq - self.num_update:-self.num_update]:
                     # Do not update variableType
-                    if not self.update_var_type_bool:
+                    if not self.auto_include_flag:
                         self.print_reject_var_type(event_index, self.var_type[event_index][var_index], var_index, log_atom)
                         self.var_type_history_list[event_index][var_index][0][-1] = 1
                         return
@@ -1357,7 +1361,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         # Update for var type others
         elif self.var_type[event_index][var_index][0] == 'others':
             # Do not update variableType
-            if not self.update_var_type_bool:
+            if not self.auto_include_flag:
                 return
 
             # Check if it has passed enough time, to check if the values have a new var_type

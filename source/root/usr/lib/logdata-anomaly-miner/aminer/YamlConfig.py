@@ -721,8 +721,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     num_init=item['num_init'], num_update=item['num_update'], num_update_unq=item['num_update_unq'],
                     num_s_gof_values=item['num_s_gof_values'], num_s_gof_bt=item['num_s_gof_bt'], num_d_bt=item['num_d_bt'],
                     num_pause_discrete=item['num_pause_discrete'], num_pause_others=item['num_pause_others'],
-                    test_gof_int=item['test_gof_int'], update_var_type_bool=item['update_var_type_bool'],
-                    num_stop_update=item['num_stop_update'], silence_output_without_confidence=item['silence_output_without_confidence'],
+                    test_gof_int=item['test_gof_int'], num_stop_update=item['num_stop_update'],
+                    silence_output_without_confidence=item['silence_output_without_confidence'],
                     silence_output_except_indicator=item['silence_output_except_indicator'],
                     num_var_type_hist_ref=item['num_var_type_hist_ref'], num_update_var_type_hist_ref=item['num_update_var_type_hist_ref'],
                     num_var_type_considered_ind=item['num_var_type_considered_ind'], num_stat_stop_update=item['num_stat_stop_update'],
@@ -730,7 +730,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     var_reduction_thres=item['var_reduction_thres'], num_skipped_ind_for_weights=item['num_skipped_ind_for_weights'],
                     num_ind_for_weights=item['num_ind_for_weights'], used_multinomial_test=item['used_multinomial_test'],
                     use_empiric_distr=item['use_empiric_distr'], save_statistics=item['save_statistics'],
-                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'], constraint_list=item['constraint_list'])
+                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'], constraint_list=item['constraint_list'],
+                    auto_include_flag=learn)
             elif item['type'].name == 'VariableCorrelationDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
