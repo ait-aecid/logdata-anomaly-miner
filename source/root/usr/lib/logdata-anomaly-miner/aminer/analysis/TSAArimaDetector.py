@@ -232,8 +232,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
         if self.force_period_length:
             # Force the period length
-            time_step_list = [self.set_period_length / self.num_division_time_step / self.event_type_detector.waiting_time_for_tsa *
-                              self.event_type_detector.num_sections_waiting_time_for_tsa for count in counts]
+            time_step_list = [self.set_period_length / self.num_division_time_step for count in counts]
         else:
             # Minimal size of the time step
             min_lag = max(int(self.acf_pause_area_percentage*self.event_type_detector.num_sections_waiting_time_for_tsa), 1)
@@ -261,7 +260,9 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     # Find the highest peak and set the time-step as the index + lag
                     highest_peak_index = np.argmax(corrfit[min_lag:])
                     if corrfit[min_lag + highest_peak_index] > self.acf_threshold:
-                        time_step_list.append((highest_peak_index + min_lag) / self.num_division_time_step)
+                        time_step_list.append((highest_peak_index + min_lag) / self.num_division_time_step *
+                                              self.event_type_detector.waiting_time_for_tsa /
+                                              self.event_type_detector.num_sections_waiting_time_for_tsa)
                     else:
                         time_step_list.append(-1)
 
@@ -269,23 +270,20 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             for index, time_step in enumerate(time_step_list):
                 if time_step != -1:
                     for assumed_time_step in self.assumed_time_steps:
-                        if abs(assumed_time_step - time_step * self.num_division_time_step * self.event_type_detector.waiting_time_for_tsa /
-                                self.event_type_detector.num_sections_waiting_time_for_tsa) / assumed_time_step <\
+                        if abs(assumed_time_step - time_step * self.num_division_time_step) / assumed_time_step <\
                                 self.round_time_inteval_threshold:
-                            time_step_list[index] = assumed_time_step / self.num_division_time_step /\
-                                self.event_type_detector.waiting_time_for_tsa * self.event_type_detector.num_sections_waiting_time_for_tsa
+                            time_step_list[index] = assumed_time_step / self.num_division_time_step
                             break
 
         for index, time_step in enumerate(time_step_list):
-            if time_step_list[index] != -1 and sum(counts[index]) / len(counts[index]) * time_step_list[index] <\
+            if time_step_list[index] != -1 and sum(counts[index]) / len(counts[index]) * time_step_list[index] /\
+                    self.event_type_detector.waiting_time_for_tsa * self.event_type_detector.num_sections_waiting_time_for_tsa <\
                     self.min_log_lines_per_time_step:
                 time_step_list[index] = -1
 
         # Print a message of the length of the time steps
         message = 'Calculated the periods for the single event types in seconds: %s' % [
-                time_step * self.num_division_time_step * self.event_type_detector.waiting_time_for_tsa /
-                self.event_type_detector.num_sections_waiting_time_for_tsa if
-                time_step != -1 else 'None' for time_step in time_step_list]
+                time_step * self.num_division_time_step if time_step != -1 else 'None' for time_step in time_step_list]
         affected_path = None
         self.print(message, log_atom, affected_path)
 

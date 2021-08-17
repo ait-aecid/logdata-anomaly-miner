@@ -195,11 +195,9 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                         for j, val in enumerate(time_list):
                             if val != -1:
                                 num_added_trigger += 1
-                                self.etd_time_trigger[0].append(self.etd_time_trigger[0][indices[i]] + val * self.waiting_time_for_tsa /
-                                                                self.num_sections_waiting_time_for_tsa)
+                                self.etd_time_trigger[0].append(self.etd_time_trigger[0][indices[i]] + val)
                                 self.etd_time_trigger[1].append(j)
-                                self.etd_time_trigger[2].append(val * self.waiting_time_for_tsa / self.num_sections_waiting_time_for_tsa)
-
+                                self.etd_time_trigger[2].append(val)
                         # Delete the initialization trigger
                         del self.etd_time_trigger[0][indices[i]]
                         del self.etd_time_trigger[1][indices[i]]
