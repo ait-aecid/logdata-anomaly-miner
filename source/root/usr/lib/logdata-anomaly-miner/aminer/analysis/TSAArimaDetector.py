@@ -37,7 +37,8 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                  acf_auto_pause_area=True, acf_auto_pause_area_num_min=10, build_sum_over_values=False, num_periods_tsa_ini=15,
                  num_division_time_step=10, alpha=0.05, num_min_time_history=20, num_max_time_history=30, num_results_bt=15, alpha_bt=0.05,
                  acf_threshold=0.2, round_time_inteval_threshold=0.02, force_period_length=False, set_period_length=604800,
-                 persistence_id='Default', path_list=None, ignore_list=None, output_log_line=True, auto_include_flag=True):
+                 min_log_lines_per_time_step=10, persistence_id='Default', path_list=None, ignore_list=None, output_log_line=True,
+                 auto_include_flag=True):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -62,6 +63,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         @param force_period_length states if the period length is calculated through the ACF, or if the period lenth is forced to
         be set to set_period_length.
         @param set_period_length states how long the period legth is if force_period_length is set to True.
+        @param min_log_lines_per_time_step states the minimal average number of log lines per time step to make a TSA.
         @param persistence_id name of persistency document.
         @param path_list At least one of the parser paths in this list needs to appear in the event to be analysed.
         @param ignore_list list of paths that are not considered for correlation, i.e., events that contain one of these paths are
@@ -97,6 +99,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.acf_threshold = acf_threshold
         self.force_period_length = force_period_length
         self.set_period_length = set_period_length
+        self.min_log_lines_per_time_step = min_log_lines_per_time_step
 
         # Add the TSAArimaDetector-module to the list of the modules, which use the event_type_detector.
         self.event_type_detector.add_following_modules(self)
@@ -272,9 +275,15 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                             time_step_list[index] = assumed_time_step / self.num_division_time_step
                             break
 
+        for index, time_step in enumerate(time_step_list):
+            if time_step_list[index] != -1 and sum(counts[index]) / len(counts[index]) * time_step_list[index] /\
+                    self.event_type_detector.waiting_time_for_tsa * self.event_type_detector.num_sections_waiting_time_for_tsa <\
+                    self.min_log_lines_per_time_step:
+                time_step_list[index] = -1
+
         # Print a message of the length of the time steps
         message = 'Calculated the periods for the single event types in seconds: %s' % [
-                time_step * self.num_division_time_step if time_step != -1 else time_step for time_step in time_step_list]
+                time_step * self.num_division_time_step if time_step != -1 else 'None' for time_step in time_step_list]
         affected_path = None
         self.print(message, log_atom, affected_path)
 
