@@ -27,12 +27,13 @@ from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 from aminer.util import PersistenceUtil
 
+
 class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """This class is used for an arima time series analysis of the values of the paths in target_path_list."""
 
     def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id='Default', target_path_list=None,
-                 output_log_line=True, auto_include_flag=False, num_init=50, force_period_length=False, set_period_length=10, alpha = 0.05,
-                 alpha_bt = 0.05, num_results_bt = 15, num_min_time_history = 20, num_max_time_history = 30, num_periods_tsa_ini = 10):
+                 output_log_line=True, auto_include_flag=False, num_init=50, force_period_length=False, set_period_length=10, alpha=0.05,
+                 alpha_bt=0.05, num_results_bt=15, num_min_time_history=20, num_max_time_history=30, num_periods_tsa_ini=10):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -148,7 +149,6 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         """Load the persistence data from storage."""
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
 
-
         if persistence_data is not None:
             self.target_path_index_list = persistence_data[0]
             self.period_length_list = persistence_data[1]
@@ -247,26 +247,26 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         if any(not isinstance(self.event_type_detector.values[event_index][var_index][-1], float) for var_index in
                self.target_path_index_list[event_index]):
             delete_indices = [count_index for count_index, var_index in enumerate(self.target_path_index_list[event_index])
-                    if not isinstance(self.event_type_detector.values[event_index][var_index][-1], float)]
+                              if not isinstance(self.event_type_detector.values[event_index][var_index][-1], float)]
             delete_indices.sort(reverse=True)
 
             for count_index in delete_indices:
                 # Remove the entries of the lists
                 if len(self.target_path_index_list) > event_index and len(self.target_path_index_list[event_index]) > count_index:
-                        self.target_path_index_list[event_index] = self.target_path_index_list[event_index][:count_index] +\
-                                self.target_path_index_list[event_index][count_index + 1:]
+                    self.target_path_index_list[event_index] = self.target_path_index_list[event_index][:count_index] +\
+                            self.target_path_index_list[event_index][count_index + 1:]
                 if len(self.period_length_list) > event_index and len(self.period_length_list[event_index]) > count_index:
-                        self.period_length_list[event_index] = self.period_length_list[event_index][:count_index] +\
-                                self.period_length_list[event_index][count_index + 1:]
+                    self.period_length_list[event_index] = self.period_length_list[event_index][:count_index] +\
+                            self.period_length_list[event_index][count_index + 1:]
                 if len(self.arima_models) > event_index and len(self.arima_models[event_index]) > count_index:
-                        self.arima_models[event_index] = self.arima_models[event_index][:count_index] +\
-                                self.arima_models[event_index][count_index + 1:]
+                    self.arima_models[event_index] = self.arima_models[event_index][:count_index] +\
+                            self.arima_models[event_index][count_index + 1:]
                 if len(self.prediction_history) > event_index and len(self.prediction_history[event_index]) > count_index:
-                        self.prediction_history[event_index] = self.prediction_history[event_index][:count_index] +\
-                                self.prediction_history[event_index][count_index + 1:]
+                    self.prediction_history[event_index] = self.prediction_history[event_index][:count_index] +\
+                            self.prediction_history[event_index][count_index + 1:]
                 if len(self.result_list) > event_index and len(self.result_list[event_index]) > count_index:
-                        self.result_list[event_index] = self.result_list[event_index][:count_index] +\
-                                self.result_list[event_index][count_index + 1:]
+                    self.result_list[event_index] = self.result_list[event_index][:count_index] +\
+                            self.result_list[event_index][count_index + 1:]
 
         # Initialize and update the arima_model if possible
         for count_index, var_index in enumerate(self.target_path_index_list[event_index]):
@@ -291,7 +291,7 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                         try:
                             model = statsmodels.tsa.arima.model.ARIMA(
                                     self.event_type_detector.values[event_index][var_index][
-                                    -self.num_periods_tsa_ini * self.period_length_list[event_index][count_index]:],
+                                        -self.num_periods_tsa_ini * self.period_length_list[event_index][count_index]:],
                                     order=(self.period_length_list[event_index][count_index], 0, 0),
                                     seasonal_order=(0, 0, 0, self.period_length_list[event_index][count_index]))
                             self.arima_models[event_index][count_index] = model.fit()
@@ -392,7 +392,7 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             sorted_log_lines = [tmp_str + log_atom.raw_data.decode()]
             analysis_component = {'AffectedLogAtomPaths': affected_path}
 
-        if confidence != None:
+        if confidence is not None:
             event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
                           'TypeInfo': {'Confidence': confidence}}
         else:
