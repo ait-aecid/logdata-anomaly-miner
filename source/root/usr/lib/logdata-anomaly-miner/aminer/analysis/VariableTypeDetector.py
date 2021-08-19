@@ -308,15 +308,15 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             self.num_s_gof_values = nearest
 
         if self.event_type_detector.min_num_vals < max(self.num_init, self.num_update, self.num_s_gof_values):
-            msg = 'Changed the parameter min_num_vals of the VTD from %s to %s to use pregenerated critical values for the gof-test' % (
-                    self.event_type_detector.min_num_vals, max(self.num_init, self.num_update, num_s_gof_values))
+            msg = 'Changed the parameter min_num_vals of the ETD from %s to %s to use pregenerated critical values for the VTDs gof-test' %\
+                    (self.event_type_detector.min_num_vals, max(self.num_init, self.num_update, num_s_gof_values))
             logging.getLogger(DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
             self.event_type_detector.min_num_vals = max(self.num_init, self.num_update, self.num_s_gof_values)
 
         if self.event_type_detector.max_num_vals < max(self.num_init, self.num_update, self.num_s_gof_values) + 500:
-            msg = 'Changed the parameter max_num_vals of the VTD from %s to %s to use pregenerated critical values for the gof-test' % (
-                    self.event_type_detector.max_num_vals, max(self.num_init, self.num_update, self.num_s_gof_values) + 500)
+            msg = 'Changed the parameter max_num_vals of the ETD from %s to %s to use pregenerated critical values for the VTDs gof-test' %\
+                    (self.event_type_detector.max_num_vals, max(self.num_init, self.num_update, self.num_s_gof_values) + 500)
             logging.getLogger(DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
             self.event_type_detector.max_num_vals = max(self.num_init, self.num_update, self.num_s_gof_values) + 500
