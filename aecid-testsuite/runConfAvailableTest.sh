@@ -373,12 +373,15 @@ EOL
             echo "2014-11-24 11:25:33 H=localhost (mail.fictional.example) [::1]:49956 sender verify defer for <aaron@domain.com>: require_files: error for /home/aaron/etc/domain.com: Permission denied" >> $LOG_FILE
             echo "2014-11-24 11:25:33 H=localhost (srv-hs1.netsons.net) [::1]:49956 F=<aaron@domain.com> A=dovecot_login:aaron@domain.com temporarily rejected RCPT <test@pleasecheck.net>: Could not complete sender verify" >> $LOG_FILE
             echo "2014-09-13 11:37:53 1XSdCz-00049U-5A ==aaron@domain.com R=lookuphost T=remote_smtp defer (-44): SMTP error from remote mail server after RCPT TO:<aaron@domain.com>: host mail.fictional.example [10.5.40.204]: 452 <aron@domain.com> Domain size limit exceeded" >> $LOG_FILE
-#            echo "" >> $LOG_FILE
-#            echo "" >> $LOG_FILE
-#            echo "" >> $LOG_FILE
-#            echo "" >> $LOG_FILE
-#            echo "" >> $LOG_FILE
-#            echo "" >> $LOG_FILE
+            echo "2014-08-31 08:43:16 1XO5PX-0006SC-Qa ** aaron@domain.com R=dkim_lookuphost T=dkim_remote_smtp: SMTP error from remote mail server after RCPT TO:<aaron@domain.com>: host mail.domain.com [10.5.40.204]: 550-Verification for <garfield@domain.com>\n550-The mail server could not deliver mail to garfield@domain.com. The account or domain may not exist, they may be blacklisted, or missing the proper dns entries.\n550 Sender verify failed" >> $LOG_FILE
+            echo "SMTP error from remote mail server after RCPT TO:: host mail.fictional.example[10.5.40.204]: 550-Sender has no A, AAAA, or MX DNS records. mail.fictional.example\n550 l mail.fictional.example\nVerify the zone file in /etc/named for the correct information. If it appear correct, you can run named-checkzone domain.com domain.com.db to verify if named is able to load the zone." >> $LOG_FILE
+            echo "Diagnostic-Code: X-Postfix; host mail1.domain.com [10.5.40.204] said: 550 5.7.1 Message rejected due to content restrictions (in reply to end of DATA command)\nWhen you see an error such as 550 5.7.1" >> $LOG_FILE
+            echo "Final-Recipient: rfc822;aaron@domain.com\nAction: failed\nStatus: 5.5.0\nDiagnostic-Code: smtp;550-Please turn on SMTP Authentication in your mail client.\n550-mail.fictional.example [10.5.40.204]:58133 is not permitted to relay 550 through this server without authentication." >> $LOG_FILE
+            echo "DHE-RSA-AES256-SHA:256: SMTP error from remote mail server after MAIL FROM:<aaron@domain.com> SIZE=1834: host mail.fictional.example [10.5.40.204..212]: 550 \"REJECTED - Bad HELO - Host impersonating [mail.fictional2.example]\"" >> $LOG_FILE
+            echo "2014-08-31 08:43:16 1XO5PY-0006SO-GS <= <> R=1XO5PX-0006SC-Qa U=mailnull P=local S=1951 T=\"Mail delivery failed: returning message to sender\" for aaron@domain.com" >> $LOG_FILE
+
+            # !!!! NOTE: CHANGE EXISTING SEQUENCES TO ALSO USE VARIABLES
+
 #            echo "" >> $LOG_FILE
 #            echo "" >> $LOG_FILE
 #            echo "" >> $LOG_FILE

@@ -17,11 +17,13 @@ def get_model():
     alphabet = b"!'#$%&\"()*+,-./0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\\^_`abcdefghijklmnopqrstuvwxyz{|}~=[]"
 
     size = b" SIZE="
-    host = b": host "
+    host1 = b" host "
+    host = b":" + host1
     status_code421 = b": 421"
     status_code450 = b": 450 "
     status_code451 = b": 451 "
     status_code452 = b": 452 <"
+    status_code550 = b": 550"
     dtme = DateTimeModelElement("time", b"%Y-%m-%d %H:%M:%S")
     msg_id = DelimitedDataModelElement("id", b" ")
     h = b" H="
@@ -30,6 +32,9 @@ def get_model():
     t = b" T="
     f = b" F=<"
     a = b" A="
+    u = b" U="
+    p = b" P="
+    s = b" S="
 
     model = FirstMatchModelElement("model", [
         SequenceModelElement("date_seq", [
@@ -56,77 +61,6 @@ def get_model():
                     FixedDataModelElement("sp1", b" ["),
                     IpAddressDataModelElement("ip"),
                     FixedDataModelElement("sp2", b"]")
-                ]),
-                SequenceModelElement("mail", [
-                    msg_id,
-                    FirstMatchModelElement("dir", [
-                        SequenceModelElement("dir_in", [
-                            FixedDataModelElement("in", b" <= "),
-                            FirstMatchModelElement("fm", [
-                                SequenceModelElement("seq1", [
-                                    FixedDataModelElement("brack", b"<> "),
-                                    FirstMatchModelElement("fm", [
-                                        SequenceModelElement("r", [
-                                            FixedDataModelElement("r_str", b"R="),
-                                            DelimitedDataModelElement("r", b" "),
-                                            FixedDataModelElement("u_str", b" U="),
-                                            DelimitedDataModelElement("u", b" "),
-                                        ]),
-                                        SequenceModelElement("h", [
-                                            FixedDataModelElement("h_str", b"H="),
-                                            DelimitedDataModelElement("h", b" "),
-                                            FixedDataModelElement("sp1", b" ["),
-                                            IpAddressDataModelElement("ip"),
-                                            FixedDataModelElement("sp1", b"]"),
-                                        ])
-                                    ]),
-                                    FixedDataModelElement("sp2", b" P="),
-                                    DelimitedDataModelElement("p", b" "),
-                                    FixedDataModelElement("sp2", b" S="),
-                                    DecimalIntegerValueModelElement("s"),
-                                ]),
-                                SequenceModelElement("seq2", [
-                                    DelimitedDataModelElement("mail", b" "),
-                                    FixedDataModelElement("user_str", b" U="),
-                                    DelimitedDataModelElement("user", b" "),
-                                    FixedDataModelElement("p_str", b" P="),
-                                    DelimitedDataModelElement("p", b" "),
-                                    FixedDataModelElement("s_str", b" S="),
-                                    DecimalIntegerValueModelElement("s"),
-                                    OptionalMatchModelElement(
-                                        "id", SequenceModelElement("id", [
-                                            FixedDataModelElement("id_str", b" id="),
-                                            AnyByteDataModelElement("id")
-                                        ])
-                                    )
-                                ])
-                            ])
-                        ]),
-                        SequenceModelElement("dir_out", [
-                            FixedDataModelElement("in", b" => "),
-                            DelimitedDataModelElement("name", b" "),
-                            FixedDataModelElement("sp1", b" "),
-                            OptionalMatchModelElement(
-                                "mail_opt", SequenceModelElement("mail", [
-                                    FixedDataModelElement("brack1", b"("),
-                                    DelimitedDataModelElement("brack_mail", b")"),
-                                    FixedDataModelElement("brack2", b") "),
-                                ])),
-                            FixedDataModelElement("sp2", b"<"),
-                            DelimitedDataModelElement("mail", b">"),
-                            FixedDataModelElement("r_str", b"> R="),
-                            DelimitedDataModelElement("r", b" "),
-                            FixedDataModelElement("t_str", b" T="),
-                            VariableByteDataModelElement("t", alphabet),
-                        ]),
-                        SequenceModelElement("aster", [
-                            FixedDataModelElement("aster", b" ** "),
-                            DelimitedDataModelElement("command", b" "),
-                            FixedDataModelElement("headers_str", b' Too many "Received" headers - suspected mail loop')]),
-                        FixedDataModelElement("completed", b" Completed"),
-                        FixedDataModelElement("frozen", b" Message is frozen"),
-                        FixedDataModelElement("frozen", b" Frozen (delivery error message)")
-                    ])
                 ]),
                 SequenceModelElement("deferred", [
                     msg_id,
@@ -282,7 +216,115 @@ def get_model():
                     FixedDataModelElement("status_code", b"]" + status_code452),
                     DelimitedDataModelElement("mail_to", b">"),
                     FixedDataModelElement("msg", b"> Domain size limit exceeded")
-                ])
+                ]),
+                SequenceModelElement("verification_failed", [
+                    msg_id,
+                    FixedDataModelElement("s0", b" ** "),
+                    DelimitedDataModelElement("mail_to", b" "),
+                    FixedDataModelElement("s1", r),
+                    DelimitedDataModelElement("r", b" "),
+                    FixedDataModelElement("s2", t),
+                    DelimitedDataModelElement("t", b":"),
+                    FixedDataModelElement("msg", b": SMTP error from remote mail server after RCPT TO:<"),
+                    DelimitedDataModelElement("mail_to", b">"),
+                    FixedDataModelElement("s3", b">" + host),
+                    DelimitedDataModelElement("host", b" "),
+                    FixedDataModelElement("s4", b" ["),
+                    IpAddressDataModelElement("host_ip"),
+                    FixedDataModelElement("status_code", b"]" + status_code550),
+                    FixedDataModelElement("msg", b"-Verification for <"),
+                    DelimitedDataModelElement("mail_from", b">"),
+                    FixedDataModelElement("msg", b">\\n550-The mail server could not deliver mail to "),
+                    DelimitedDataModelElement("mail_to", b" "),
+                    FixedDataModelElement("msg", b" The account or domain may not exist, they may be blacklisted, or missing the proper"
+                                                 b" dns entries.\\n550 Sender verify failed")
+                ]),
+                SequenceModelElement("mail_delivery_failure", [
+                    msg_id,
+                    FixedDataModelElement("s0", b" <= <>" + r),
+                    DelimitedDataModelElement("r", b" "),
+                    FixedDataModelElement("s1", u),
+                    DelimitedDataModelElement("u", b" "),
+                    FixedDataModelElement("s2", p),
+                    DelimitedDataModelElement("p", b" "),
+                    FixedDataModelElement("s3", s),
+                    DecimalIntegerValueModelElement("s"),
+                    FixedDataModelElement("s4", t),
+                    FixedDataModelElement("t", b"\"Mail delivery failed: returning message to sender\""),
+                    FixedDataModelElement("s5", b" for "),
+                    VariableByteDataModelElement("mail_from", alphabet)
+                ]),
+                SequenceModelElement("mail", [
+                    msg_id,
+                    FirstMatchModelElement("dir", [
+                        SequenceModelElement("dir_in", [
+                            FixedDataModelElement("in", b" <= "),
+                            FirstMatchModelElement("fm", [
+                                SequenceModelElement("seq1", [
+                                    FixedDataModelElement("brack", b"<> "),
+                                    FirstMatchModelElement("fm", [
+                                        SequenceModelElement("r", [
+                                            FixedDataModelElement("r_str", b"R="),
+                                            DelimitedDataModelElement("r", b" "),
+                                            FixedDataModelElement("u_str", b" U="),
+                                            DelimitedDataModelElement("u", b" "),
+                                        ]),
+                                        SequenceModelElement("h", [
+                                            FixedDataModelElement("h_str", b"H="),
+                                            DelimitedDataModelElement("h", b" "),
+                                            FixedDataModelElement("sp1", b" ["),
+                                            IpAddressDataModelElement("ip"),
+                                            FixedDataModelElement("sp1", b"]"),
+                                        ])
+                                    ]),
+                                    FixedDataModelElement("sp2", b" P="),
+                                    DelimitedDataModelElement("p", b" "),
+                                    FixedDataModelElement("sp2", b" S="),
+                                    DecimalIntegerValueModelElement("s"),
+                                ]),
+                                SequenceModelElement("seq2", [
+                                    DelimitedDataModelElement("mail", b" "),
+                                    FixedDataModelElement("user_str", b" U="),
+                                    DelimitedDataModelElement("user", b" "),
+                                    FixedDataModelElement("p_str", b" P="),
+                                    DelimitedDataModelElement("p", b" "),
+                                    FixedDataModelElement("s_str", b" S="),
+                                    DecimalIntegerValueModelElement("s"),
+                                    OptionalMatchModelElement(
+                                        "id", SequenceModelElement("id", [
+                                            FixedDataModelElement("id_str", b" id="),
+                                            AnyByteDataModelElement("id")
+                                        ])
+                                    )
+                                ])
+                            ])
+                        ]),
+                        SequenceModelElement("dir_out", [
+                            FixedDataModelElement("in", b" => "),
+                            DelimitedDataModelElement("name", b" "),
+                            FixedDataModelElement("sp1", b" "),
+                            OptionalMatchModelElement(
+                                "mail_opt", SequenceModelElement("mail", [
+                                    FixedDataModelElement("brack1", b"("),
+                                    DelimitedDataModelElement("brack_mail", b")"),
+                                    FixedDataModelElement("brack2", b") "),
+                                ])),
+                            FixedDataModelElement("sp2", b"<"),
+                            DelimitedDataModelElement("mail", b">"),
+                            FixedDataModelElement("r_str", b"> R="),
+                            DelimitedDataModelElement("r", b" "),
+                            FixedDataModelElement("t_str", b" T="),
+                            VariableByteDataModelElement("t", alphabet),
+                        ]),
+                        SequenceModelElement("aster", [
+                            FixedDataModelElement("aster", b" ** "),
+                            DelimitedDataModelElement("command", b" "),
+                            FixedDataModelElement("headers_str", b' Too many "Received" headers - suspected mail loop')]),
+                        FixedDataModelElement("completed", b" Completed"),
+                        FixedDataModelElement("frozen", b" Message is frozen"),
+                        FixedDataModelElement("frozen", b" Frozen (delivery error message)")
+                    ])
+                ]),
             ])
         ]),
         SequenceModelElement("no_date_seq", [
@@ -303,7 +345,65 @@ def get_model():
             FixedDataModelElement("s5", b" ** "),
             DelimitedDataModelElement("to_mail", b">"),
             FixedDataModelElement("msg", b">: retry timeout exceeded")
-        ])
+        ]),
+        SequenceModelElement("invalid_dns_record", [
+            FixedDataModelElement("msg", b"SMTP error from remote mail server after RCPT TO:" + host),
+            DelimitedDataModelElement("host", b"["),
+            FixedDataModelElement("s0", b"["),
+            IpAddressDataModelElement("host_ip"),
+            FixedDataModelElement("status_code", b"]" + status_code550),
+            FixedDataModelElement("msg", b"-Sender has no A, AAAA, or MX DNS records. "),
+            DelimitedDataModelElement("host", b"\\"),
+            FixedDataModelElement("s1", b"\\n550 l "),
+            DelimitedDataModelElement("host", b"\\"),
+            FixedDataModelElement("msg", b"\\nVerify the zone file in "),
+            DelimitedDataModelElement("file", b" "),
+            FixedDataModelElement("msg", b" for the correct information. If it appear correct, you can run named-checkzone "
+                                         b"domain.com domain.com.db to verify if named is able to load the zone.")
+        ]),
+        SequenceModelElement("mail_rejected", [
+            FixedDataModelElement("msg", b"Diagnostic-Code: X-Postfix;" + host1),
+            DelimitedDataModelElement("host", b" "),
+            FixedDataModelElement("s0", b" ["),
+            IpAddressDataModelElement("host_ip"),
+            FixedDataModelElement("status_code", b"] said" + status_code550 + b" "),
+            DelimitedDataModelElement("version", b" "),
+            FixedDataModelElement("msg", b" Message rejected due to content restrictions (in reply to end of DATA command)\\nWhen you see "
+                                         b"an error such as 550 "),
+            VariableByteDataModelElement("version", alphabet)
+        ]),
+        SequenceModelElement("mail_authentication_error", [
+            FixedDataModelElement("msg", b"Final-Recipient: rfc822;"),
+            DelimitedDataModelElement("mail_from", b"\\"),
+            FixedDataModelElement("msg", b"\\nAction: failed\\nStatus: "),
+            DelimitedDataModelElement("status", b"\\"),
+            FixedDataModelElement("msg", b"\\nDiagnostic-Code: smtp;550-Please turn on SMTP Authentication in your mail client.\\n550-"),
+            DelimitedDataModelElement("host", b" "),
+            FixedDataModelElement("s0", b" ["),
+            IpAddressDataModelElement("host_ip"),
+            FixedDataModelElement("s1", b"]:"),
+            DecimalIntegerValueModelElement("port"),
+            FixedDataModelElement("msg", b" is not permitted to relay 550 through this server without authentication.")
+        ]),
+        SequenceModelElement("bad_helo_record", [
+            DelimitedDataModelElement("cipher_suite", b" "),
+            FixedDataModelElement("msg", b" SMTP error from remote mail server after MAIL FROM:<"),
+            DelimitedDataModelElement("mail_from", b">"),
+            FixedDataModelElement("s0", b">" + size),
+            DecimalIntegerValueModelElement("size"),
+            FixedDataModelElement("s1", host),
+            DelimitedDataModelElement("host", b" "),
+            FixedDataModelElement("s2", b" ["),
+            IpAddressDataModelElement("host_ip"),
+            OptionalMatchModelElement("optional", SequenceModelElement("seq", [
+                FixedDataModelElement("to", b".."),
+                DecimalIntegerValueModelElement("upper_ip")
+            ])),
+            FixedDataModelElement("status_code", b"]" + status_code550),
+            FixedDataModelElement("msg", b" \"REJECTED - Bad HELO - Host impersonating ["),
+            DelimitedDataModelElement("original_host", b"]"),
+            FixedDataModelElement("s3", b"]\"")
+        ]),
     ])
 
     return model
