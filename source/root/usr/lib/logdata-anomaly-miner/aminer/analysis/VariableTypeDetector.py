@@ -307,6 +307,14 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             print('WARNING: ' + msg, file=sys.stderr)
             self.num_s_gof_values = nearest
 
+        # Test if the ETD saves the values
+        if not self.event_type_detector.save_values:
+            msg = 'Changed the parameter save_values of the VTD from False to True to properly use the PathArimaDetector'
+            logging.getLogger(DEBUG_LOG_NAME).warning(msg)
+            print('WARNING: ' + msg, file=sys.stderr)
+            self.event_type_detector.save_values = True
+
+        # Test if the ETD saves enough values
         if self.event_type_detector.min_num_vals < max(self.num_init, self.num_update, self.num_s_gof_values):
             msg = 'Changed the parameter min_num_vals of the ETD from %s to %s to use pregenerated critical values for the VTDs gof-test' %\
                     (self.event_type_detector.min_num_vals, max(self.num_init, self.num_update, num_s_gof_values))
@@ -314,6 +322,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             print('WARNING: ' + msg, file=sys.stderr)
             self.event_type_detector.min_num_vals = max(self.num_init, self.num_update, self.num_s_gof_values)
 
+        # Test if the ETD saves enough values
         if self.event_type_detector.max_num_vals < max(self.num_init, self.num_update, self.num_s_gof_values) + 500:
             msg = 'Changed the parameter max_num_vals of the ETD from %s to %s to use pregenerated critical values for the VTDs gof-test' %\
                     (self.event_type_detector.max_num_vals, max(self.num_init, self.num_update, self.num_s_gof_values) + 500)
