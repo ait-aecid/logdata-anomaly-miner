@@ -763,6 +763,19 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     allow_missing_values_flag=item['allow_missing_values'],
                     output_log_line=item['output_logline'], time_window_length=item['time_window_length'],
                     max_time_diff=item['max_time_diff'], num_reduce_time_list=item['num_reduce_time_list'], auto_include_flag=learn)
+            elif item['type'].name == 'PathArimaDetector':
+                etd = analysis_context.get_component_by_name(item['event_type_detector'])
+                if etd is None:
+                    msg = 'The defined EventTypeDetector %s does not exist!' % item['event_type_detector']
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
+                tmp_analyser = func(
+                    analysis_context.aminer_config, anomaly_event_handlers, etd, persistence_id=item['persistence_id'],
+                    target_path_list=item['paths'], output_log_line=item['output_logline'], auto_include_flag=learn,
+                    num_init=item['num_init'], force_period_length=item['force_period_length'], set_period_length=item['set_period_length'],
+                    alpha=item['alpha'], alpha_bt=item['alpha_bt'], num_results_bt=item['num_results_bt'],
+                    num_min_time_history=item['num_min_time_history'], num_max_time_history=item['num_max_time_history'],
+                    num_periods_tsa_ini=item['num_periods_tsa_ini'])
             elif item['type'].name == 'TSAArimaDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
