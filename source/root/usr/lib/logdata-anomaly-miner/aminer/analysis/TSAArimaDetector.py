@@ -53,7 +53,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         @param num_periods_tsa_ini number of periods used to initialize the Arima-model.
         @param num_division_time_step number of division of the time window to calculate the time step.
         @param alpha significance level of the estimated values.
-        @param num_min_time_history minimal number of values of the time_history after which it is initialised.
+        @param num_min_time_history minimal number of values of the time_history that have been obserserved before the initialization.
         @param num_max_time_history maximal number of values of the time_history.
         @param num_results_bt number of results which are used in the binomial test.
         @param alpha_bt significance level for the bt test.
