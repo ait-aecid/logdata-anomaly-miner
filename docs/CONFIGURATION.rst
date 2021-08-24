@@ -1404,16 +1404,19 @@ This module defines an detector for event and value sequences. The concept is ba
 EventTypeDetector
 ~~~~~~~~~~~~~~~~~
 
-This component serves as a basis for the VariableTypeDetector, VariableCorrelationDetector and TSAArimaDetector. It saves a list of the values to the single paths and tracks the time for the TSAArimaDetector.
+This component serves as a basis for the VariableTypeDetector, VariableCorrelationDetector, TSAArimaDetector and PathArimaDetector. It saves a list of the values to the single paths and tracks the time for the TSAArimaDetector.
 
 * **paths** parser paths of values to be analyzed (list of strings, defaults to empty list).
+* **id_path_list** list of strings that specify group identifiers for which alphabets should be learned (list of strings, defaults to empty list).
+* **allow_missing_id** specifies whether log atoms without id path should be omitted (only if id path is set).
+* **allowed_id_tuples** list of the allowed id tuples. Log atoms with id tuples not in this list are not analyzed, when this list is not empty.
 * **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
 * **max_num_vals** maximum number of lines in the value list before it is reduced (integer, defaults to 1500).
 * **min_num_vals** number of the values which the list is being reduced to (integer, defaults to 1000).
 * **save_values** if False the values of the paths are not saved for further analysis. The values are not needed for the TSAArimaDetector (boolean, defaults to True).
-* **track_time_for_TSA** states if time windows should be tracked for the time series analysis (boolean, defaults to False).
-* **waiting_time_for_TSA** time in seconds, until the time windows are being initialized (integer, defaults to 300 seconds).
-* **num_sections_waiting_time_for_TSA** number of sections of the initialization window (integer, defaults to 10).
+* **track_time_for_tsa** states if time windows should be tracked for the time series analysis (boolean, defaults to False).
+* **waiting_time_for_tsa** time in seconds, until the time windows are being initialized (integer, defaults to 300 seconds).
+* **num_sections_waiting_time_for_tsa** number of sections of the initialization window (integer, defaults to 10).
 
 .. code-block:: yaml
 
@@ -1421,11 +1424,9 @@ This component serves as a basis for the VariableTypeDetector, VariableCorrelati
         - type: 'EventTypeDetector'
           id: ETD
           save_values: False
-          track_time_for_TSA: True
-          waiting_time_for_TSA: 1728000
-          num_sections_waiting_time_for_TSA: 1000
-
-
+          track_time_for_tsa: True
+          waiting_time_for_tsa: 1728000
+          num_sections_waiting_time_for_tsa: 1000
 
 .. _HistogramAnalysis:
 
@@ -1793,7 +1794,7 @@ This detector analyzes the time intervals of the appearance of log_atoms. It sen
 * **allow_missing_values_flag** when set to True, the detector will also use matches, where one of the pathes from target_path_list does not refer to an existing parsed data object (boolean, defaults to True).
 * **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted (string of lists, defaults to empty list).
 * **output_log_line** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to true).
-* **auto_include_flag** specifies whether new frequency measurements override ground truth frequencies (boolean).
+* **learn_mode** specifies whether new frequency measurements override ground truth frequencies (boolean).
 * **time_window_length** length of the time window in seconds for which the appearances of log lines are identified with each other (integer, defaults to 86400).
 * **max_time_diff** maximal time difference in seconds for new times. If the difference of the new time to all previous times is greater than max_time_diff the new time is considered an anomaly (integer, defaults to 360).
 * **num_reduce_time_list** number of new time entries appended to the time list, before the list is being reduced (integer, defaults to 10).
@@ -1848,7 +1849,7 @@ This detector uses a tsa-arima model to track appearance frequencies of event li
 
 * **paths** at least one of the parser paths in this list needs to appear in the event to be analyzed (list of strings).
 * **event_type_detector** used to track the number of event lines in the time windows (string).
-* **acf_pause_area** states which area of the results of the ACF are not used to find the highest peak (float, defaults to 0.2).
+* **acf_pause_area_percentage** states which area of the results of the ACF are not used to find the highest peak (float, defaults to 0.2).
 * **build_sum_over_values** states if the sum of a series of counts is built before applying the TSA (boolean, defaults to false).
 * **num_periods_tsa_ini** Number of periods used to initialize the Arima-model (integer, defaults to 15).
 * **num_division_time_step** Number of divisions of the time window to calculate the time step (integer, defaults to 10).
@@ -1861,8 +1862,13 @@ This detector uses a tsa-arima model to track appearance frequencies of event li
 * **acf_threshold** threshold, which must be exceeded by the highest peak of the cdf function of the time series, to be analyzed (float, defaults to 0.2).
 * **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
 * **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable (list of strings, defaults to empty list).
-* **output_log_line** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to true).
-* **auto_include_flag** specifies whether new frequency measurements override ground truth frequencies (boolean).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to true).
+* **learn_mode** specifies whether new frequency measurements override ground truth frequencies (boolean).
+* **acf_auto_pause_area** states if the pause area is automatically set. If enabled, the variable acf_pause_area_percentage loses its functionality.
+* **acf_auto_pause_area_num_min** states the number of values in which a local minima must be the minimum, to be considered a local minimum of the function and not a outlier.
+* **force_period_length** states if the period length is calculated through the ACF, or if the period lenth is forced to be set to set_period_length.
+* **set_period_length** states how long the period legth is if force_period_length is set to True.
+* **min_log_lines_per_time_step** states the minimal average number of log lines per time step to make a TSA.
 
 .. code-block:: yaml
 
@@ -1870,9 +1876,9 @@ This detector uses a tsa-arima model to track appearance frequencies of event li
         - type: 'EventTypeDetector'
           id: ETD
           save_values: False
-          track_time_for_TSA: True
-          waiting_time_for_TSA: 1728000
-          num_sections_waiting_time_for_TSA: 1000
+          track_time_for_tsa: True
+          waiting_time_for_tsa: 1728000
+          num_sections_waiting_time_for_tsa: 1000
 
         - type: 'TSAArimaDetector'
           id: TSA
@@ -1884,6 +1890,41 @@ This detector uses a tsa-arima model to track appearance frequencies of event li
           num_max_time_history: 30000
           round_time_inteval_threshold: 0.1
           acf_threshold: 0.02
+
+PathArimaDetector
+~~~~~~~~~~~~~~~~
+
+This detector uses a tsa-arima model to the values of the chosen paths.
+
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed.
+* **event_type_detector** used to track the number of events in the time windows.
+* **persistence_id** name of persistency document.
+* **output_logline** specifies whether the full parsed log atom should be provided in the output.
+* **learn_mode** specifies whether new frequency measurements override ground truth frequencies.
+* **num_init** number of read in lines before the period length is calculated.
+* **force_period_length** states if the period length is calculated through the ACF, or if the period lenth is forced to be set to set_period_length.
+* **set_period_length** states how long the period legth is if force_period_length is set to True.
+* **alpha** significance level of the estimated values.
+* **alpha_bt** significance level for the bt test.
+* **num_results_bt** number of results which are used in the binomial test.
+* **num_min_time_history** minimal number of values of the time_history after which it is initialised.
+* **num_max_time_history** maximal number of values of the time_history.
+* **num_periods_tsa_ini** number of periods used to initialize the Arima-model.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: "EventTypeDetector"
+          id: ETD
+
+        - type: 'PathArimaDetector'
+          id: PTSA
+          event_type_detector: ETD
+          paths: ["/model/model/val1", "/model/model/val2"]
+          num_init: 20
+          force_period_length: True
+          set_period_length: 15
+          num_periods_tsa_ini: 10
 
 TimeCorrelationDetector
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -2036,6 +2077,7 @@ This detector analyses each variable of the event_types by assigning them the im
 * **learn_mode** states, if found variable types are updated when a test fails.
 * **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
 * **event_type_detector** event_type_detector. Used to get the event numbers and values of the variables, etc.
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to true).
 * **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted.
 * **constraint_list** list of paths that the detector will be constrained to, i.e., other branches of the parser tree are ignored (list of strings, defaults to empty list).
 * **save_statistics** tracks the indicators and changed variable types, if set to True.
@@ -2070,6 +2112,18 @@ This detector analyses each variable of the event_types by assigning them the im
 * **num_skipped_ind_for_weights** number of the skipped indicators for the calculation of the indicator weights.
 * **num_ind_for_weights** number of indicators used in the calculation of the indicator weights.
 * **used_multinomial_test** states the used multinomial test. the value can be of the list ['MT', 'Approx', 'Chi'], where 'MT' means original MT, 'Approx' is the approximation with single BTs and 'Chi' is the ChisquareTest.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: 'EventTypeDetector'
+          id: ETD
+
+        - type: 'VariableTypeDetector'
+          event_type_detector: ETD
+          num_init: 200
+          num_update: 100
+          num_s_gof_values: 100
 
 .. _MatchRules:
 
