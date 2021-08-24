@@ -784,8 +784,9 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     raise ValueError(msg)
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, etd, persistence_id=item['persistence_id'],
-                    path_list=item['paths'], acf_pause_area_percentage=item['acf_pause_area_percentage'],
-                    acf_auto_pause_area=item['acf_auto_pause_area'], acf_auto_pause_area_num_min=item['acf_auto_pause_area_num_min'],
+                    path_list=item['paths'], acf_pause_interval_percentage=item['acf_pause_interval_percentage'],
+                    acf_auto_pause_interval=item['acf_auto_pause_interval'],
+                    acf_auto_pause_interval_num_min=item['acf_auto_pause_interval_num_min'],
                     build_sum_over_values=item['build_sum_over_values'], num_periods_tsa_ini=item['num_periods_tsa_ini'],
                     num_division_time_step=item['num_division_time_step'], alpha=item['alpha'],
                     num_min_time_history=item['num_min_time_history'], num_max_time_history=item['num_max_time_history'],

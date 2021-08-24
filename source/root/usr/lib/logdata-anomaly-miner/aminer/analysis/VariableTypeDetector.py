@@ -75,7 +75,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         self.sim_thres = sim_thres
         # threshold for the variable indicators to be used in the event indicator
         self.indicator_thres = indicator_thres
-        # Number of read in lines before detecting the variable types
+        # Number of lines processed before detecting the variable types
         # Recomended values are the implemented values of crit_val_ini_ks and crit_val_upd_ks or _cm
         self.num_init = num_init
         # Number of values for which the variableType is updated

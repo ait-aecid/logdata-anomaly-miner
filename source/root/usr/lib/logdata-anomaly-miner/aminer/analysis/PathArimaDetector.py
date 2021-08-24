@@ -44,15 +44,15 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         occurrences. When no paths are specified, the events given by the full path list are analyzed.
         @param output_log_line specifies whether the full parsed log atom should be provided in the output.
         @param auto_include_flag specifies whether new frequency measurements override ground truth frequencies.
-        @param num_init number of read in lines before the period length is calculated.
-        @param force_period_length states if the period length is calculated through the ACF, or if the period lenth is forced to
+        @param num_init number of lines processed before the period length is calculated.
+        @param force_period_length states if the period length is calculated through the ACF, or if the period length is forced to
         be set to set_period_length.
-        @param set_period_length states how long the period legth is if force_period_length is set to True.
+        @param set_period_length states how long the period length is if force_period_length is set to True.
         @param alpha significance level of the estimated values.
         @param alpha_bt significance level for the bt test.
         @param num_results_bt number of results which are used in the binomial test.
-        @param num_min_time_history minimal number of values of the time_history after which it is initialised.
-        @param num_max_time_history maximal number of values of the time_history.
+        @param num_min_time_history number of lines processed before the period length is calculated.
+        @param num_max_time_history maximum number of values of the time_history.
         @param num_periods_tsa_ini number of periods used to initialize the Arima-model.
         """
         self.aminer_config = aminer_config
