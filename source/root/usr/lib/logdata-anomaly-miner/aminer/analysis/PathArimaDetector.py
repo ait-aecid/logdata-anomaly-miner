@@ -244,8 +244,9 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             self.prediction_history[event_index] = [[[], [], []] for _ in range(len(self.target_path_index_list[event_index]))]
 
         # Check if the new values are floats
-        if any(not isinstance(self.event_type_detector.values[event_index][var_index][-1], float) for var_index in
-               self.target_path_index_list[event_index]):
+        if not self.event_type_detector.check_variables[current_index][var_index] or\
+                any(not isinstance(self.event_type_detector.values[event_index][var_index][-1], float) for var_index in
+                    self.target_path_index_list[event_index]):
             delete_indices = [count_index for count_index, var_index in enumerate(self.target_path_index_list[event_index])
                               if not isinstance(self.event_type_detector.values[event_index][var_index][-1], float)]
             delete_indices.sort(reverse=True)
@@ -267,6 +268,12 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 if len(self.result_list) > event_index and len(self.result_list[event_index]) > count_index:
                     self.result_list[event_index] = self.result_list[event_index][:count_index] +\
                             self.result_list[event_index][count_index + 1:]
+
+            message = 'Disabled the TSA for the eventtype %s for the targetpaths %s' % (
+                    event_index, [self.event_type_detector.variable_key_list[event_index][count_index]
+                                  for count_index in delete_indices])
+            affected_path = self.event_type_detector.variable_key_list[event_index][count_index]
+            self.print(message, log_atom, affected_path)
 
         # Initialize and update the arima_model if possible
         for count_index, var_index in enumerate(self.target_path_index_list[event_index]):
