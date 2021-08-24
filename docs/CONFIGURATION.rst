@@ -1894,7 +1894,7 @@ This detector uses a tsa-arima model to track appearance frequencies of event li
 PathArimaDetector
 ~~~~~~~~~~~~~~~~
 
-This detector uses a tsa-arima model to the values of the chosen paths.
+This detector uses a tsa-arima model to analyze the values of the chosen paths.
 
 * **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed.
 * **event_type_detector** used to track the number of events in the time windows.
