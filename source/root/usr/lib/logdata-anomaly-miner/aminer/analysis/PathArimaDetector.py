@@ -51,7 +51,7 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         @param alpha significance level of the estimated values.
         @param alpha_bt significance level for the bt test.
         @param num_results_bt number of results which are used in the binomial test.
-        @param num_min_time_history number of read in lines before the period length is calculated.
+        @param num_min_time_history number of lines processed before the period length is calculated.
         @param num_max_time_history maximum number of values of the time_history.
         @param num_periods_tsa_ini number of periods used to initialize the Arima-model.
         """

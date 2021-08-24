@@ -1865,7 +1865,7 @@ This detector uses a tsa-arima model to track appearance frequencies of event li
 * **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to true).
 * **learn_mode** specifies whether new frequency measurements override ground truth frequencies (boolean).
 * **acf_auto_pause_interval** states if the pause area is automatically set. If enabled, the variable acf_pause_interval_percentage loses its functionality.
-* **acf_auto_pause_interval_num_min** states the number of values in which a local minima must be the minimum, to be considered a local minimum of the function and not a outlier.
+* **acf_auto_pause_interval_num_min** states the number of values in which a local minima must be the minimum, to be considered a local minimum of the function and not an outlier.
 * **force_period_length** states if the period length is calculated through the ACF, or if the period length is forced to be set to set_period_length.
 * **set_period_length** states how long the period length is if force_period_length is set to True.
 * **min_log_lines_per_time_step** states the minimal average number of log lines per time step to make a TSA.
@@ -1907,7 +1907,7 @@ This detector uses a tsa-arima model to analyze the values of the chosen paths.
 * **alpha** significance level of the estimated values.
 * **alpha_bt** significance level for the bt test.
 * **num_results_bt** number of results which are used in the binomial test.
-* **num_min_time_history** number of read in lines before the period length is calculated.
+* **num_min_time_history** number of lines processed before the period length is calculated.
 * **num_max_time_history** maximum number of values of the time_history.
 * **num_periods_tsa_ini** number of periods used to initialize the Arima-model.
 

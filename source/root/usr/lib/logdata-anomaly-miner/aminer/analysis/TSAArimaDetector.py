@@ -48,12 +48,12 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         @param acf_auto_pause_interval states if the pause area is automatically set.
         If enabled, the variable acf_pause_interval_percentage loses its functionality.
         @param acf_auto_pause_interval_num_min states the number of values in which a local minima must be the minimum, to be considered a
-        local minimum of the function and not a outlier.
+        local minimum of the function and not an outlier.
         @param build_sum_over_values states if the sum of a series of counts is build before applying the TSA.
         @param num_periods_tsa_ini number of periods used to initialize the Arima-model.
         @param num_division_time_step number of division of the time window to calculate the time step.
         @param alpha significance level of the estimated values.
-        @param num_min_time_history number of read in lines before the period length is calculated.
+        @param num_min_time_history number of lines processed before the period length is calculated.
         @param num_max_time_history maximum number of values of the time_history.
         @param num_results_bt number of results which are used in the binomial test.
         @param alpha_bt significance level for the bt test.
