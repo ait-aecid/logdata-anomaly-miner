@@ -244,11 +244,11 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             self.prediction_history[event_index] = [[[], [], []] for _ in range(len(self.target_path_index_list[event_index]))]
 
         # Check if the new values are floats
-        if any(not self.event_type_detector.check_variables[current_index][var_index] or
+        if any(not self.event_type_detector.check_variables[event_index][var_index] or
                 not isinstance(self.event_type_detector.values[event_index][var_index][-1], float) for var_index in
                 self.target_path_index_list[event_index]):
             delete_indices = [count_index for count_index, var_index in enumerate(self.target_path_index_list[event_index])
-                              if not self.event_type_detector.check_variables[current_index][var_index] or
+                              if not self.event_type_detector.check_variables[event_index][var_index] or
                               not isinstance(self.event_type_detector.values[event_index][var_index][-1], float)]
             delete_indices.sort(reverse=True)
 
