@@ -219,7 +219,8 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                         self.period_length_list[event_index][target_path_index] = int(highest_peak_index + min_lag)
 
         # Print a message of the length of the time steps
-        message = 'Calculated the periods for the event type %s: %s' % (event_index, self.period_length_list[event_index])
+        message = 'Calculated the periods for the event %s: %s' % (self.event_type_detector.get_event_type(event_index),
+                self.period_length_list[event_index])
         affected_path = None
         self.print(message, log_atom, affected_path)
 
@@ -270,8 +271,9 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     self.result_list[event_index] = self.result_list[event_index][:count_index] +\
                             self.result_list[event_index][count_index + 1:]
 
-            message = 'Disabled the TSA for the targetpaths %s of eventtype %s' % (
-                    [self.event_type_detector.variable_key_list[event_index][count_index] for count_index in delete_indices], event_index)
+            message = 'Disabled the TSA for the targetpaths %s of event %s' % (
+                    [self.event_type_detector.variable_key_list[event_index][count_index] for count_index in delete_indices],
+                    self.event_type_detector.get_event_type(event_index))
             affected_path = [self.event_type_detector.variable_key_list[event_index][count_index] for count_index in delete_indices]
             self.print(message, log_atom, affected_path)
 
@@ -289,8 +291,9 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     # Check if enough values have been stored to initialize the arima_model
                     if len(self.event_type_detector.values[event_index][var_index]) >= self.num_periods_tsa_ini *\
                             self.period_length_list[event_index][count_index]:
-                        message = 'Initializing the TSA for the eventtype %s targetpath %s' % (
-                                event_index, self.event_type_detector.variable_key_list[event_index][count_index])
+                        message = 'Initializing the TSA for the event %s and targetpath %s' % (
+                                self.event_type_detector.get_event_type(event_index),
+                                self.event_type_detector.variable_key_list[event_index][count_index])
                         affected_path = self.event_type_detector.variable_key_list[event_index][count_index]
                         self.print(message, log_atom, affected_path)
 
@@ -327,7 +330,9 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 else:
                     # Test if count is in boundaries
                     if count < lower_limit or count > upper_limit:
-                        message = 'EventNumber: %s, Lower: %s, Count: %s, Upper: %s' % (event_index, lower_limit, count, upper_limit)
+                        message = 'Event: %s, Path: %s, Lower: %s, Count: %s, Upper: %s' % (
+                                self.event_type_detector.get_event_type(event_index),
+                                self.event_type_detector.variable_key_list[event_index][var_index], lower_limit, count, upper_limit)
                         affected_path = self.event_type_detector.variable_key_list[event_index][var_index]
                         confidence = 1 - min(count / lower_limit, upper_limit / count)
                         self.print(message, log_atom, affected_path, confidence=confidence)
@@ -340,7 +345,8 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
                 # Discard or update the model, for the next step
                 if self.auto_include_flag and sum(self.result_list[event_index][count_index][-self.num_results_bt:]) < self.bt_min_suc:
-                    message = 'Discard the TSA model for the eventtype %s' % event_index
+                    message = 'Discard the TSA model for the event %s and path %s' % (self.event_type_detector.get_event_type(event_index),
+                            self.event_type_detector.variable_key_list[event_index][var_index])
                     affected_path = self.event_type_detector.variable_key_list[event_index][var_index]
                     self.print(message, log_atom, affected_path)
 
