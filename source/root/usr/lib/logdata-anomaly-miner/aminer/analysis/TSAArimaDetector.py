@@ -368,8 +368,8 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 else:
                     # Test if count is in boundaries
                     if count < lower_limit or count > upper_limit:
-                        message = 'Event: %s, Lower: %s, Count: %s, Upper: %s' % (self.event_type_detector.get_event_type(event_index),
-                                lower_limit, count, upper_limit)
+                        message = 'Event: %s, Lower: %s, Count: %s, Upper: %s' % (
+                                self.event_type_detector.get_event_type(event_index), lower_limit, count, upper_limit)
                         affected_path = self.event_type_detector.variable_key_list[event_index]
                         confidence = 1 - min(count / lower_limit, upper_limit / count)
                         self.print(message, log_atom, affected_path, confidence=confidence)
@@ -413,8 +413,8 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
                 # Test if count_sum is in boundaries
                 if count_sum < lower_limit or count_sum > upper_limit:
-                    message = 'Event: %s, Lower: %s, Count: %s, Upper: %s' % (self.event_type_detector.get_event_type(event_index),
-                            lower_limit, count_sum, upper_limit)
+                    message = 'Event: %s, Lower: %s, Count: %s, Upper: %s' % (
+                            self.event_type_detector.get_event_type(event_index), lower_limit, count_sum, upper_limit)
                     affected_path = self.event_type_detector.variable_key_list[event_index]
                     confidence = 1 - min(count_sum / lower_limit, upper_limit / count_sum)
                     self.print(message, log_atom, affected_path, confidence=confidence)

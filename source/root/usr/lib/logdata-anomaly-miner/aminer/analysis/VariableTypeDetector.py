@@ -683,8 +683,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                             self.var_type_history_list_reference[event_index][var_index] = []
                         affected_path = self.event_type_detector.variable_key_list[event_index][var_index]
                         self.print(
-                            'Stopped tracking the variable of event type %s with Path:\n%s\nbecause of irregular variable types.' % (
-                            self.event_type_detector.get_event_type(event_index), affected_path), log_atom, affected_path,
+                            'Stopped tracking the variable of event type %s with Path:\n%s\nbecause of irregular variable types.' %
+                            (self.event_type_detector.get_event_type(event_index), affected_path), log_atom, affected_path,
                             confidence=1 / (1 + np.exp(-4 / tmp_max)) / 0.9820137900379085)
                         # 1 / (1 + np.exp(-4 / tmp_max)) / 0.9820137900379085 is the scaled sigmoidfunction.
                         # 1 / (1 + np.exp(-4)) = 0.9820137900379085

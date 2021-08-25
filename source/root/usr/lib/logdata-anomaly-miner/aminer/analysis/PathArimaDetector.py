@@ -219,8 +219,8 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                         self.period_length_list[event_index][target_path_index] = int(highest_peak_index + min_lag)
 
         # Print a message of the length of the time steps
-        message = 'Calculated the periods for the event %s: %s' % (self.event_type_detector.get_event_type(event_index),
-                self.period_length_list[event_index])
+        message = 'Calculated the periods for the event %s: %s' % (
+                self.event_type_detector.get_event_type(event_index), self.period_length_list[event_index])
         affected_path = None
         self.print(message, log_atom, affected_path)
 
@@ -345,7 +345,8 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
                 # Discard or update the model, for the next step
                 if self.auto_include_flag and sum(self.result_list[event_index][count_index][-self.num_results_bt:]) < self.bt_min_suc:
-                    message = 'Discard the TSA model for the event %s and path %s' % (self.event_type_detector.get_event_type(event_index),
+                    message = 'Discard the TSA model for the event %s and path %s' % (
+                            self.event_type_detector.get_event_type(event_index),
                             self.event_type_detector.variable_key_list[event_index][var_index])
                     affected_path = self.event_type_detector.variable_key_list[event_index][var_index]
                     self.print(message, log_atom, affected_path)
