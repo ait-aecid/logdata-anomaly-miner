@@ -1112,7 +1112,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         """Test if the new num_update values fit the detected var type and updates the var type if the test fails."""
         # Getting the new values and saving the old distribution for printing-purposes if the test fails
         new_values = self.event_type_detector.values[event_index][var_index][-self.num_update:]
-        VT_old = self.var_type[event_index][var_index]
+        VT_old = copy.deepcopy(self.var_type[event_index][var_index])
 
         # Test and update for continuous distribution
         if self.var_type[event_index][var_index][0] in self.distr_list:
@@ -1225,7 +1225,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     return
 
                 # Create the new value-set and expands the occurrence-list for the new values
-                new_values_set = list(set(self.event_type_detector.values[event_index][var_index][-self.num_init:]))
+                new_values_set = list(set(self.event_type_detector.values[event_index][var_index][-self.num_update:]))
                 for val in new_values_set:
                     if val not in self.var_type[event_index][var_index][1]:
                         self.var_type[event_index][var_index][1].append(val)
@@ -1233,8 +1233,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
                 # update the occurrences
                 # List for the appearances of the new values
-                values_app = list([0] * len(self.var_type[event_index][var_index][1]))
-                for i in range(-self.num_init, 0):
+                values_app = [0] * len(self.var_type[event_index][var_index][1])
+                for i in range(-self.num_update, 0):
                     values_app[self.var_type[event_index][var_index][1].index(
                         self.event_type_detector.values[event_index][var_index][i])] += 1
 
@@ -1326,7 +1326,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             # Change the var type from static to discrete
 
             # list of the values
-            values_set = list(set(self.event_type_detector.values[event_index][var_index][-self.num_init:]))
+            values_set = list(set(self.event_type_detector.values[event_index][var_index][-self.num_update:]))
             values_app = [0 for _ in range(len(values_set))]  # List to store the appearance of the values
 
             for j in range(-self.num_init, 0):
@@ -2143,7 +2143,7 @@ def get_vt_string(vt):
         return_string = vt[0] + ' ['
         for i, val in enumerate(vt[2]):
             if val >= 0.1:
-                return_string += '%s(%s%%), ' % (str(vt[1][i]), str(int(val*100)))
+                return_string += '"%s"(%s%%), ' % (str(vt[1][i]), str(int(val*100+0.5)))
         if any(val < 0.1 for _, val in enumerate(vt[2])):
             return_string += '...]'
         else:
