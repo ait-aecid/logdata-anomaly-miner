@@ -370,7 +370,10 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     if count < lower_limit or count > upper_limit:
                         message = 'EventNumber: %s, Lower: %s, Count: %s, Upper: %s' % (event_index, lower_limit, count, upper_limit)
                         affected_path = self.event_type_detector.variable_key_list[event_index]
-                        confidence = 1 - min(count / lower_limit, upper_limit / count)
+                        if count < lower_limit:
+                            confidence = (lower_limit - count) / (upper_limit - count)
+                        else:
+                            confidence = (count - upper_limit) / (count - lower_limit)
                         self.print(message, log_atom, affected_path, confidence=confidence)
                         self.result_list[event_index].append(0)
                     else:
