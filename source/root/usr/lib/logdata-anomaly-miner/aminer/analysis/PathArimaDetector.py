@@ -332,7 +332,7 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                         if count < lower_limit:
                             confidence = (lower_limit - count) / (upper_limit - count)
                         else:
-                            confidence = (count - upper_limit) / (count - lower_limit
+                            confidence = (count - upper_limit) / (count - lower_limit)
                         self.print(message, log_atom, affected_path, confidence=confidence)
                         self.result_list[event_index][count_index].append(0)
                     else:
