@@ -424,3 +424,12 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 if not self.check_variables[current_index][var_index]:
                     continue
                 self.values[current_index][var_index] = self.values[current_index][var_index][-self.min_num_vals:]
+
+    def get_event_type(self, event_index):
+        """Return a string which includes information about the event type."""
+        return_string = ''
+        if self.id_path_list != []:
+            return_string = str(event_index) + '(' + str(self.id_path_list_tuples[event_index]) + ')'
+        else:
+            return_string = str(event_index) + '(' + str(self.longest_path[event_index]) + ')'
+        return return_string

@@ -683,8 +683,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                             self.var_type_history_list_reference[event_index][var_index] = []
                         affected_path = self.event_type_detector.variable_key_list[event_index][var_index]
                         self.print(
-                            'Stopped tracking the variable with Path:\n%s\nbecause of irregular variable types.' %
-                            affected_path, log_atom, affected_path, confidence=1 / (1 + np.exp(-4 / tmp_max)) / 0.9820137900379085)
+                            'Stopped tracking the variable of event type %s with Path:\n%s\nbecause of irregular variable types.' %
+                            (self.event_type_detector.get_event_type(event_index), affected_path), log_atom, affected_path,
+                            confidence=1 / (1 + np.exp(-4 / tmp_max)) / 0.9820137900379085)
                         # 1 / (1 + np.exp(-4 / tmp_max)) / 0.9820137900379085 is the scaled sigmoidfunction.
                         # 1 / (1 + np.exp(-4)) = 0.9820137900379085
 
@@ -805,6 +806,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         affected_paths = [self.event_type_detector.variable_key_list[event_index][var_index] for var_index in
                                           indices_failed_tests]
                         if self.var_type_history_list:
+                            tmp_string += 'Event %s: ' % (self.event_type_detector.get_event_type(event_index))
                             tmp_string += 'Indicator of a change in system behaviour: %s. Paths to the corresponding variables: %s' % (
                                 np.arctan(2 * indicator) / np.pi * 2, affected_paths)
 
@@ -1308,8 +1310,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         self.var_type_history_list_reference[event_index][var_index] = []
 
                     affected_path = self.event_type_detector.variable_key_list[event_index][var_index]
-                    self.print('Stopped tracking the variable with Path:\n%s\nbecause of its static values.' %
-                               affected_path, log_atom, affected_path, confidence=1 - 1 / self.num_stat_stop_update)
+                    self.print('Stopped tracking the variable of event type %s with Path:\n%s\nbecause of its static values.' % (
+                               self.event_type_detector.get_event_type(event_index), affected_path), log_atom, affected_path,
+                               confidence=1 - 1 / self.num_stat_stop_update)
                 return
 
             # Do not update variableType
@@ -1962,7 +1965,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             data = log_atom.raw_data.decode(AminerConfig.ENCODING)
         except UnicodeError:
             data = repr(log_atom.raw_data)
-        message = 'Initial detection of varTypes in lines like %s:' % data
+        message = 'Initial detection of variable types of event %s:' % self.event_type_detector.get_event_type(event_index)
         tmp_string = ''
         type_info = {}
 
@@ -2022,8 +2025,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         for listener in self.anomaly_event_handlers:
             listener.receive_event(
                 'Analysis.%s' % self.__class__.__name__,
-                "VariableType of path '%s' changed from %s to %s after the %s-th analysed line" % (
-                    self.event_type_detector.variable_key_list[event_index][var_index], vt_old_string, vt_new_string,
+                "Variable type of path '%s' of event %s changed from %s to %s after the %s-th analysed line" % (
+                    self.event_type_detector.variable_key_list[event_index][var_index],
+                    self.event_type_detector.get_event_type(event_index), vt_old_string, vt_new_string,
                     self.event_type_detector.num_eventlines[event_index]), sorted_log_lines, event_data, log_atom, self)
 
     def print_reject_var_type(self, event_index, vt, var_index, log_atom):
@@ -2053,8 +2057,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         for listener in self.anomaly_event_handlers:
             listener.receive_event(
                 'Analysis.%s' % self.__class__.__name__,
-                "VariableType of path '%s' would reject the type '%s' after the %s-th analysed line" % (
-                    self.event_type_detector.variable_key_list[event_index][var_index], vt[0], self.event_type_detector.num_eventlines[
+                "Variable type of path '%s' of event %s would reject the type '%s' after the %s-th analysed line" % (
+                    self.event_type_detector.variable_key_list[event_index][var_index],
+                    self.event_type_detector.get_event_type(event_index), vt[0], self.event_type_detector.num_eventlines[
                         event_index]), sorted_log_lines, event_data, log_atom, self)
 
     def print(self, message, log_atom, affected_path, confidence=None, indicator=None):
