@@ -409,8 +409,7 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             sorted_log_lines = [tmp_str + log_atom.raw_data.decode()]
             analysis_component = {'AffectedLogAtomPaths': affected_path}
 
-        event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
-                          'TypeInfo': {}}
+        event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records, 'TypeInfo': {}}
         if self.event_type_detector.id_path_list != []:
             event_data['IDpaths'] = self.event_type_detector.id_path_list
             event_data['IDvalues'] = list(self.event_type_detector.id_path_list_tuples[self.event_type_detector.current_index])

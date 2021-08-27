@@ -2026,7 +2026,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if self.event_type_detector.id_path_list != []:
             event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
                           'TypeInfo': {'from': vt_old[0], 'to': vt_new[0], 'lines': self.event_type_detector.num_eventlines[event_index]},
-                                       'IDpaths': self.event_type_detector.id_path_list,
+                          'IDpaths': self.event_type_detector.id_path_list,
                           'IDvalues': list(self.event_type_detector.id_path_list_tuples[event_index])}
         else:
             event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
