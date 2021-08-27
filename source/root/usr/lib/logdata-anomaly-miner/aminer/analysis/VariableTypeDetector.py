@@ -1985,8 +1985,13 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             sorted_log_lines = [tmp_string + data]
             analysis_component = {'AffectedLogAtomPaths': [self.event_type_detector.variable_key_list[event_index][var_index]]}
 
-        event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
-                      'TypeInfo': type_info}
+        if self.event_type_detector.id_path_list != []:
+            event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
+                          'TypeInfo': type_info, 'IDpaths': self.event_type_detector.id_path_list,
+                          'IDvalues': list(self.event_type_detector.id_path_list_tuples[event_index])}
+        else:
+            event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
+                          'TypeInfo': type_info}
         for listener in self.anomaly_event_handlers:
             listener.receive_event(
                 'Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, log_atom, self)
@@ -2018,8 +2023,14 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 '  ' + self.event_type_detector.variable_key_list[event_index][var_index] + os.linesep + data]
             analysis_component = {'AffectedLogAtomPaths': [self.event_type_detector.variable_key_list[event_index][var_index]]}
 
-        event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
-                      'TypeInfo': {'from': vt_old[0], 'to': vt_new[0], 'lines': self.event_type_detector.num_eventlines[event_index]}}
+        if self.event_type_detector.id_path_list != []:
+            event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
+                          'TypeInfo': {'from': vt_old[0], 'to': vt_new[0], 'lines': self.event_type_detector.num_eventlines[event_index]},
+                                       'IDpaths': self.event_type_detector.id_path_list,
+                          'IDvalues': list(self.event_type_detector.id_path_list_tuples[event_index])}
+        else:
+            event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
+                          'TypeInfo': {'from': vt_old[0], 'to': vt_new[0], 'lines': self.event_type_detector.num_eventlines[event_index]}}
         vt_old_string = get_vt_string(vt_old)
         vt_new_string = get_vt_string(vt_new)
         for listener in self.anomaly_event_handlers:
@@ -2052,8 +2063,14 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 '  ' + self.event_type_detector.variable_key_list[event_index][var_index] + os.linesep + data]
             analysis_component = {'AffectedLogAtomPaths': [self.event_type_detector.variable_key_list[event_index][var_index]]}
 
-        event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
-                      'TypeInfo': {'reject': vt[0], 'lines': self.event_type_detector.num_eventlines[event_index]}}
+        if self.event_type_detector.id_path_list != []:
+            event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
+                          'TypeInfo': {'reject': vt[0], 'lines': self.event_type_detector.num_eventlines[event_index]},
+                          'IDpaths': self.event_type_detector.id_path_list,
+                          'IDvalues': list(self.event_type_detector.id_path_list_tuples[event_index])}
+        else:
+            event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
+                          'TypeInfo': {'reject': vt[0], 'lines': self.event_type_detector.num_eventlines[event_index]}}
         for listener in self.anomaly_event_handlers:
             listener.receive_event(
                 'Analysis.%s' % self.__class__.__name__,
@@ -2090,8 +2107,14 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             sorted_log_lines = [tmp_str + data]
             analysis_component = {'AffectedLogAtomPaths': affected_path}
 
-        event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
-                      'TypeInfo': {'Confidence': confidence, 'Indicator': indicator}}
+        if self.event_type_detector.id_path_list != []:
+            event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
+                          'TypeInfo': {'Confidence': confidence, 'Indicator': indicator},
+                          'IDpaths': self.event_type_detector.id_path_list,
+                          'IDvalues': list(self.event_type_detector.id_path_list_tuples[self.event_type_detector.current_index])}
+        else:
+            event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
+                          'TypeInfo': {'Confidence': confidence, 'Indicator': indicator}}
         for listener in self.anomaly_event_handlers:
             listener.receive_event('Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, log_atom, self)
 

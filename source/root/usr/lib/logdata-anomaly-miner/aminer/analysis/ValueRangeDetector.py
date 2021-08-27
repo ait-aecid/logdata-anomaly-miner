@@ -141,7 +141,8 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
             else:
                 sorted_log_lines = [data]
             analysis_component = {'AffectedLogAtomPaths': self.target_path_list, 'AffectedLogAtomValues': values,
-                                  'Range': [self.ranges_min[id_event], self.ranges_max[id_event]]}
+                                  'Range': [self.ranges_min[id_event], self.ranges_max[id_event]], 'IDpaths': self.id_path_list,
+                                  'IDvalues': list(id_event)}
             event_data = {'AnalysisComponent': analysis_component}
             for listener in self.anomaly_event_handlers:
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Value range anomaly detected', sorted_log_lines,

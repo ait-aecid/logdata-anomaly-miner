@@ -409,11 +409,12 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             sorted_log_lines = [tmp_str + log_atom.raw_data.decode()]
             analysis_component = {'AffectedLogAtomPaths': affected_path}
 
-        if confidence is not None:
-            event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
-                          'TypeInfo': {'Confidence': confidence}}
-        else:
-            event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
+        event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
                           'TypeInfo': {}}
+        if self.event_type_detector.id_path_list != []:
+            event_data['IDpaths'] = self.event_type_detector.id_path_list
+            event_data['IDvalues'] = list(self.event_type_detector.id_path_list_tuples[self.event_type_detector.current_index])
+        if confidence is not None:
+            event_data['TypeInfo']['Confidence'] = confidence
         for listener in self.anomaly_event_handlers:
             listener.receive_event('Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, log_atom, self)
