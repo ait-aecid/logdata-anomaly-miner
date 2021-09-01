@@ -362,9 +362,6 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         tmp_list.append(self.id_path_list_tuples)
         PersistenceUtil.store_json(self.persistence_file_name, tmp_list)
 
-        for following_module in self.following_modules:
-            following_module.do_persist()
-
         self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
             KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
