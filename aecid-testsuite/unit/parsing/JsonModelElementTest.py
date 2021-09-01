@@ -20,6 +20,7 @@ class JsonModelElementTest(TestBase):
                                          b'"Close", "onclick": "CloseDoc()", "clickable": false}]}}}'
     single_line_missing_key_json = b'{"menu": {"id": "file", "popup": {"menuitem": [{"value": "New", "onclick": "CreateNewDoc()"}, {' \
                                    b'"value": "Open", "onclick": "OpenDoc()"}, {"value": "Close", "onclick": "CloseDoc()"}]}}}'
+    single_line_object_instead_of_array = b'{"menu": {"id": "file", "popup": {"menuitem": {"value": "New", "onclick": "CreateNewDoc()"}}}}'
     single_line_invalid_json = b'{"menu": {"id": "file", "value": "File", "popup": {"menuitem": [{"value": "New", "onclick": "CreateNew' \
                                b'Doc()"}, {"value": "Open", "onclick": "OpenDoc()"}, {"value": "Close", "onclick": "CloseDoc()"'
     single_line_no_match_json = b'{"menu": {"id": "NoMatch", "value": "File", "popup": {"menuitem": [{"value": "New", "onclick": "Create' \
@@ -27,8 +28,9 @@ class JsonModelElementTest(TestBase):
     single_line_different_order_with_optional_key_json = \
         b'{"menu": {"value": "File","popup": {"menuitem": [{"clickable": false, "value": "New", "onclick": "CreateNewDoc()"}, {' \
         b'"onclick": "OpenDoc()", "value": "Open"}, {"value": "Close", "onclick": "CloseDoc()", "clickable": false}]}, "id": "file"}}'
-    single_line_json_list = b'{"menu": {"id": "file", "value": "File", "popup": ["value", "value", "value"]}}'
+    single_line_json_array = b'{"menu": {"id": "file", "value": "File", "popup": ["value", "value", "value"]}}'
     single_line_escaped_json = br'{"a": "\x2d"}'
+    single_line_empty_array = b'{"menu": {"id": "file", "value": "File", "popup": {"menuitem": []}}}'
     multi_line_json = b"""{
   "menu": {
     "id": "file",
@@ -67,6 +69,7 @@ class JsonModelElementTest(TestBase):
     }
   }
 }"""
+    array_of_arrays = b'{"a": [["abc", "abc", "abc"], ["abc", "abc"], ["abc"]]}'
     key_parser_dict = {"menu": {
         "id": DummyFixedDataModelElement("id", b"file"),
         "value": DummyFixedDataModelElement("value", b"File"),
@@ -87,7 +90,7 @@ class JsonModelElementTest(TestBase):
         "value": DummyFixedDataModelElement("value", b"File"),
         "popup": "ALLOW_ALL"
     }}
-    key_parser_dict_list = {"menu": {
+    key_parser_dict_array = {"menu": {
         "id": DummyFixedDataModelElement("id", b"file"),
         "value": DummyFixedDataModelElement("value", b"File"),
         "popup": [
@@ -99,6 +102,7 @@ class JsonModelElementTest(TestBase):
     key_parser_dict_allow_all_fields = {"menu": {
         "id": DummyFixedDataModelElement("id", b"file")
     }}
+    key_parser_dict_array_of_arrays = {"a": [[DummyFixedDataModelElement("abc", b"abc")]]}
 
     def test1get_id(self):
         """Test if get_id works properly."""
@@ -152,6 +156,15 @@ class JsonModelElementTest(TestBase):
         self.compare_match_results(
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
+        data = self.single_line_empty_array
+        value = json.loads(data)
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        match_context.match_string = str(json.loads(match_context.match_string)).encode()
+        match_context.match_data = data[len(match_context.match_string):]
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
+
         json_model_element = JsonModelElement(self.id_, self.key_parser_dict_allow_all)
         data = self.single_line_different_order_with_optional_key_json
         value = json.loads(data)
@@ -162,8 +175,8 @@ class JsonModelElementTest(TestBase):
         self.compare_match_results(
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
-        json_model_element = JsonModelElement(self.id_, self.key_parser_dict_list)
-        data = self.single_line_json_list
+        json_model_element = JsonModelElement(self.id_, self.key_parser_dict_array)
+        data = self.single_line_json_array
         value = json.loads(data)
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
@@ -179,6 +192,15 @@ class JsonModelElementTest(TestBase):
         match_element = json_model_element.get_match_element(self.path, match_context)
         match_context.match_string = str(value).encode()
         match_context.match_data = data[len(match_context.match_string):]
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
+
+        json_model_element = JsonModelElement(self.id_, self.key_parser_dict_array_of_arrays)
+        data = self.array_of_arrays
+        value = json.loads(data)
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        match_context.match_string = str(json.loads(match_context.match_string)).encode()
         self.compare_match_results(
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
@@ -348,11 +370,11 @@ class JsonModelElementTest(TestBase):
         self.compare_match_results(
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
-    def test9get_match_element_empty_list_empty_object_null(self):
-        """Test if the keywords EMPTY_LIST, EMPTY_OBJECT, EMPTY_STRING and None (null) work properly."""
+    def test9get_match_element_empty_array_empty_object_null(self):
+        """Test if the keywords EMPTY_ARRAY, EMPTY_OBJECT, EMPTY_STRING and None (null) work properly."""
         key_parser_dict = {"menu": {
             "id": "EMPTY_OBJECT",
-            "value": "EMPTY_LIST",
+            "value": "EMPTY_ARRAY",
             "popup": {
                 "menuitem": [{
                     "value": DummyFixedDataModelElement("null", b"null"),
@@ -363,7 +385,7 @@ class JsonModelElementTest(TestBase):
                         DummyFixedDataModelElement("true", b"true"), DummyFixedDataModelElement("false", b"false")])
                 }]
             }},
-            "a": "EMPTY_LIST",
+            "a": "EMPTY_ARRAY",
             "b": "EMPTY_OBJECT",
             "c": "EMPTY_STRING"
         }
@@ -387,7 +409,7 @@ class JsonModelElementTest(TestBase):
         self.compare_match_results(
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
-        JsonModelElement(self.id_, {"a": "EMPTY_LIST"})
+        JsonModelElement(self.id_, {"a": "EMPTY_ARRAY"})
         JsonModelElement(self.id_, {"a": "EMPTY_OBJECT"})
         JsonModelElement(self.id_, {"a": "EMPTY_STRING"})
 
@@ -409,15 +431,25 @@ class JsonModelElementTest(TestBase):
         match_element = json_model_element.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
+        data = b'{"menu": {"id": {}, "value": [], "popup": {"menuitem": []}}, "a": [], "b": {}, "c": ""}'
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
     def test10get_match_element_float_exponents(self):
-        """Parse float values with exponents.
+        """
+        Parse float values with exponents.
         The principle of only testing dummy classes can not be applied here, as the functionality between the JsonModelElement and
-        DecimalFloatValueModelElement must be tested directly."""
+        DecimalFloatValueModelElement must be tested directly.
+        """
         json_model_element = JsonModelElement(self.id_, {
             "a": DecimalFloatValueModelElement(self.id_, exponent_type=DecimalFloatValueModelElement.EXP_TYPE_OPTIONAL),
             "b": DecimalFloatValueModelElement(self.id_, exponent_type=DecimalFloatValueModelElement.EXP_TYPE_OPTIONAL)})
 
         def format_float(val):
+            """
+            This function formats the float-value and parses the sign and the exponent
+            """
             exp = None
             if "e" in val:
                 exp = "e"
@@ -495,6 +527,12 @@ class JsonModelElementTest(TestBase):
         json_model_element = JsonModelElement(self.id_, self.key_parser_dict)
         # missing key
         data = self.single_line_missing_key_json
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        # object instead of array
+        data = self.single_line_object_instead_of_array
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)

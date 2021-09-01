@@ -71,6 +71,5 @@ class HexStringModelElement(ModelElementInterface):
             match_string = bytes.fromhex(pad + match_object.decode(AminerConfig.ENCODING))
         except ValueError:
             return None
-
         match_context.update(match_object)
         return MatchElement("%s/%s" % (path, self.element_id), match_string, match_object, None)

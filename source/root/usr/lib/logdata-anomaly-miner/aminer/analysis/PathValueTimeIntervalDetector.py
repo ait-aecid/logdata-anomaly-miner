@@ -95,13 +95,18 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         # Save the values of the target paths in match_value_list and build a tuple of them
         match_value_list = []
         for target_path in self.target_path_list:
-            match_element = match_dict.get(target_path, None)
+            match_element = match_dict.get(target_path)
             if match_element is None:
                 if not self.allow_missing_values_flag:
                     return False
                 match_value_list.append(None)
             else:
-                match_value_list.append(match_element.match_object)
+                if isinstance(match_element, list):
+                    matches = match_element
+                else:
+                    matches = [match_element]
+                for match_element in matches:
+                    match_value_list.append(match_element.match_object)
         match_value_tuple = tuple(match_value_list)
 
         # Print message if combination of values is new
