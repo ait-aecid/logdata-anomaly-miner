@@ -852,7 +852,10 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                     ctx = func(analysis_context)
                 if item['json'] is True or item['type'].name == 'KafkaEventHandler':
                     from aminer.events.JsonConverterHandler import JsonConverterHandler
-                    ctx = JsonConverterHandler([ctx], analysis_context)
+                    if item['pretty'] is True:
+                        ctx = JsonConverterHandler([ctx], analysis_context, pretty_print=True)
+                    else:
+                        ctx = JsonConverterHandler([ctx], analysis_context, pretty_print=False)
                 anomaly_event_handlers.append(ctx)
             return event_handler_id_list
         raise KeyError()
