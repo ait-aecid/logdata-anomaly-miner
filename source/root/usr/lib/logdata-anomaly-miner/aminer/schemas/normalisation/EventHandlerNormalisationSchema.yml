@@ -14,7 +14,8 @@
                 'topic': {'type': 'string'},
                 'cfgfile': {'type': 'string', 'default': '/etc/aminer/kafka-client.conf'},
                 'options': {'type': 'dict', 'schema': {'id': {'type': 'string'}, 'type': {'type': ['string', 'list', 'integer']}}},
-                'output_file_path': {'type': 'string'}
+                'output_file_path': {'type': 'string'},
+                'pretty': {'type': 'boolean', 'default': True}
             }
         }
     }

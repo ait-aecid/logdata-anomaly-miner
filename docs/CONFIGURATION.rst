@@ -2295,7 +2295,8 @@ All EventHandler must have the following parameters and may have additional spec
 
 * **id**: must be a unique string (required)
 * **type**: must be an existing Analysis component (required)
-* **json**: A boolean value that enables that the output is formatted in json (default: False )
+* **json**: A boolean value that enables that the output is formatted in json (default: False)
+* **pretty**: A boolean value that specifies whether json output should be in a single line (False) or pretty printed (True) (default: True)
 
 
 StreamPrinterEventHandler
@@ -2316,6 +2317,7 @@ The StreamPrinterEventHandler writes alerts to a stream. If no output_file_path 
       - id: 'stpefile'
         type: 'StreamPrinterEventHandler'
         json: true
+        pretty: true
         output_file_path: '/tmp/aminer_out.log'
 
 

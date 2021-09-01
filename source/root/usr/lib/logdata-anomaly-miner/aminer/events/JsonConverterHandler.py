@@ -21,9 +21,10 @@ from aminer import AminerConfig
 class JsonConverterHandler(EventHandlerInterface):
     """This class implements an event record listener, that will convert event data to JSON format."""
 
-    def __init__(self, json_event_handlers, analysis_context):
+    def __init__(self, json_event_handlers, analysis_context, pretty_print=True):
         self.json_event_handlers = json_event_handlers
         self.analysis_context = analysis_context
+        self.pretty_print = pretty_print
 
     def receive_event(self, event_type, event_message, sorted_log_lines, event_data, log_atom, event_source):
         """Receive information about a detected event."""
@@ -74,7 +75,10 @@ class JsonConverterHandler(EventHandlerInterface):
                 event_data['LogData'] = log_data
             event_data['AnalysisComponent'] = analysis_component
 
-        json_data = json.dumps(event_data, indent=2)
+        if self.pretty_print is True:
+            json_data = json.dumps(event_data, indent=2)
+        else:
+            json_data = json.dumps(event_data)
         res = [''] * len(sorted_log_lines)
         res[0] = str(json_data)
 
