@@ -528,7 +528,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         self.var_type[event_index][var_index] = tmp_var_type
                         self.d_init_bt(event_index, var_index)
 
-                    # mMrk the variables, which could be static parts of the parser model
+                    # Mark the variables, which could be static parts of the parser model
                     elif tmp_var_type[0] == 'stat':
                         self.var_type[event_index][var_index] = tmp_var_type
                         self.var_type[event_index][var_index][2] = True
@@ -678,6 +678,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         self.event_type_detector.values[event_index][var_index] = []
                         self.var_type[event_index][var_index] = []
                         self.var_type_history_list[event_index][var_index] = []
+                        self.distr_val[event_index][var_index] = []
                         if len(self.var_type_history_list_reference) > event_index and len(
                                 self.var_type_history_list_reference[event_index]) > var_index:
                             self.var_type_history_list_reference[event_index][var_index] = []
