@@ -221,7 +221,7 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         # Print a message of the length of the time steps
         message = 'Calculated the periods for the event %s: %s' % (
                 self.event_type_detector.get_event_type(event_index), self.period_length_list[event_index])
-        affected_path = None
+        affected_path = self.event_type_detector.variable_key_list[event_index]
         self.print(message, log_atom, affected_path)
 
     def test_num_appearance(self, event_index, log_atom):
