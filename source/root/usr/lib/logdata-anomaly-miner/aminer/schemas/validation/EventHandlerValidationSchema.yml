@@ -18,6 +18,7 @@
                     'id': {'type': 'string', 'required': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['KafkaEventHandler'], 'required': True},
                     'json': {'type': 'boolean'},
+                    'pretty': {'type': 'boolean'},
                     'topic': {'type': 'string', 'required': True, 'empty': False},
                     'cfgfile': {'type': 'string', 'empty': False},
                     'options': {'type': 'dict', 'schema': {
@@ -27,12 +28,14 @@
                     'id': {'type': 'string', 'required': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['StreamPrinterEventHandler'], 'required': True},
                     'json': {'type': 'boolean'},
+                    'pretty': {'type': 'boolean'},
                     'output_file_path': {'type': 'string', 'empty': False}
                 },
                 {
                     'id': {'type': 'string', 'required': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['SyslogWriterEventHandler'], 'required': True},
                     'json': {'type': 'boolean'},
+                    'pretty': {'type': 'boolean'},
                     'instance_name': {'type': 'string', 'default': 'aminer', 'empty': False}
                 }
             ]

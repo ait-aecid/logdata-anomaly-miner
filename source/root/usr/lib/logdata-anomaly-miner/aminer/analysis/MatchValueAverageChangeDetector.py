@@ -90,11 +90,17 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         analysis_summary = ''
         ready_for_analysis_flag = True
         for (path, stat_data) in self.stat_data:
-            match = value_dict.get(path, None)
+            match = value_dict.get(path)
             if match is None:
                 ready_for_analysis_flag = (ready_for_analysis_flag and self.update(stat_data, timestamp_value, None))
             else:
-                ready_for_analysis_flag = (ready_for_analysis_flag and self.update(stat_data, timestamp_value, match.match_object))
+                if isinstance(match, list):
+                    data = []
+                    for m in match:
+                        data.append(m.match_object)
+                else:
+                    data = match.match_object
+                ready_for_analysis_flag = (ready_for_analysis_flag and self.update(stat_data, timestamp_value, data))
 
         if ready_for_analysis_flag:
             anomaly_scores = []
@@ -140,7 +146,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Statistical data report', res, event_data, log_atom, self)
         self.log_success += 1
 
-    def get_time_trigger_class(self):
+    def get_time_trigger_class(self):  # skipcq: PYL-R0201
         """
         Get the trigger class this component should be registered for.
         This trigger is used only for persistence, so real-time triggering is needed.

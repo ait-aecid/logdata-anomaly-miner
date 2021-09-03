@@ -8,6 +8,7 @@ AminerGroup: 'aminer' # optional default: aminer
 
 LogResourceList:
         - 'file:///var/log/apache2/access.log'
+#        - 'unix:///var/lib/akafka/aminer.sock'
 
 # Read and store information to be used between multiple invocations
 # of aminer in this directory. The directory must only be accessible

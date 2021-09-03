@@ -564,8 +564,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
             if self.update_rules[event_index]:
                 # Update both list in rel_list[event_index][pos_var_cor_index] and create new rules if self.generate_rules[event_index]
                 # is True
-                message = 'New values appeared after the %s-th line in correlation(s) with EventID - EventPath: %s - %s' % (
-                    self.event_type_detector.total_records, event_index, self.event_type_detector.longest_path[event_index])
+                message = 'New values appeared after the %s-th line in correlation(s) of the event %s' % (
+                    self.event_type_detector.total_records, self.event_type_detector.get_event_type(event_index))
                 confidence = 0
                 total_correlations = len([None for _ in self.rel_list[event_index][pos_var_cor_index][0]]) + len(
                         [None for _ in self.rel_list[event_index][pos_var_cor_index][1]])
@@ -1018,8 +1018,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
                     if self.update_rules[event_index]:
                         # Print if new values have appeared in the correlation rules
-                        message = 'New values appeared after the %s-th line in correlation(s) with EventID - EventPath: %s - %s' % (
-                            self.event_type_detector.total_records, event_index, self.event_type_detector.longest_path[event_index])
+                        message = 'New values appeared after the %s-th line in correlation(s) of the event %s' % (
+                            self.event_type_detector.total_records, self.event_type_detector.get_event_type(event_index))
                         confidence = 0
                         total_correlations = len([None for _ in self.w_rel_list[event_index][pos_var_cor_index][0]]) + len(
                                 [None for _ in self.w_rel_list[event_index][pos_var_cor_index][1]])
@@ -1393,8 +1393,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
     def print_ini_rel(self, event_index):
         """Print the generated correlations for the method 'relations'."""
-        message = 'Initialisation of the method relations of the event type with the following event ID - event path: %s - %s' % (
-            event_index, self.event_type_detector.longest_path[event_index])
+        message = 'Initialisation of the method relations of the event %s' % (self.event_type_detector.get_event_type(event_index))
         message += '\n%s rules have been generated for this event type' % (
                 sum([len(self.rel_list[event_index][pos_var_cor_index][0]) for pos_var_cor_index in range(len(
                     self.rel_list[event_index])) if self.rel_list[event_index][pos_var_cor_index] != [{}, {}]]) + sum([len(
@@ -1447,8 +1446,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
     def print_ini_w_rel(self, event_index):
         """Print the generated correlations for the method 'weighted relations'."""
-        message = 'Initialisation of the method weighted relations of the event type with the following event ID - event path: %s - %s' % (
-            event_index, self.event_type_detector.longest_path[event_index])
+        message = 'Initialisation of the method weighted relations of the event %s' % (self.event_type_detector.get_event_type(event_index))
         message += '\n%s rules have been generated for this event type' % (
                 sum([len([i_val for i_val in self.w_rel_list[event_index][pos_var_cor_index][0] if len(self.w_rel_list[event_index][
                     pos_var_cor_index][0][i_val]) > 0 and sum(self.w_rel_list[event_index][pos_var_cor_index][0][i_val].values()) >

@@ -26,6 +26,9 @@ learn_mode = True
 # is used.
 # config_properties['Core.PersistenceDir'] = '/var/lib/aminer'
 
+# Set the Unix-Domain-Socket for RemoteControl
+# RemoteControlSocket: '/var/lib/aminer/log/remcontrol.sock'
+
 # Add your ruleset here:
 
 

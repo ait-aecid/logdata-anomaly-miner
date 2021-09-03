@@ -96,10 +96,16 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
             match = parser_match.get_match_dictionary().get(path)
             if match is None:
                 continue
-            value = match.match_object
-            if value is not None:
-                all_values_none = False
-            values.append(value)
+            matches = []
+            if isinstance(match, list):
+                matches = match
+            else:
+                matches.append(match)
+            for match in matches:
+                value = match.match_object
+                if value is not None:
+                    all_values_none = False
+                values.append(value)
         if all_values_none is True:
             return
 
@@ -109,11 +115,17 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
             match = parser_match.get_match_dictionary().get(path)
             if match is None:
                 continue
-            if isinstance(match.match_object, bytes):
-                value = match.match_object.decode(AminerConfig.ENCODING)
+            matches = []
+            if isinstance(match, list):
+                matches = match
             else:
-                value = str(match.match_object)
-            id_vals.append(value)
+                matches.append(match)
+            for match in matches:
+                if isinstance(match.match_object, bytes):
+                    value = match.match_object.decode(AminerConfig.ENCODING)
+                else:
+                    value = str(match.match_object)
+                id_vals.append(value)
         id_event = tuple(id_vals)
 
         # Check if one of the values is outside of expected value ranges for a specific id path.
@@ -129,7 +141,8 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
             else:
                 sorted_log_lines = [data]
             analysis_component = {'AffectedLogAtomPaths': self.target_path_list, 'AffectedLogAtomValues': values,
-                                  'Range': [self.ranges_min[id_event], self.ranges_max[id_event]]}
+                                  'Range': [self.ranges_min[id_event], self.ranges_max[id_event]], 'IDpaths': self.id_path_list,
+                                  'IDvalues': list(id_event)}
             event_data = {'AnalysisComponent': analysis_component}
             for listener in self.anomaly_event_handlers:
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Value range anomaly detected', sorted_log_lines,
