@@ -103,7 +103,7 @@ RUN ln -s /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerr
 	&& ln -s /usr/lib/python3/dist-packages/dateutil /etc/aminer/conf-enabled/dateutil \
 	&& ln -s /usr/lib/python3/dist-packages/six.py /etc/aminer/conf-enabled/six.py \
 	&& ln -s /usr/lib/python3/dist-packages/urllib3 /etc/aminer/conf-enabled/urllib3 \
-	&& ln -s /usr/lib/python3/dist-packages/statsmodels /usr/lib/logdata-anomaly-miner/statsmodels \
+	&& ln -s /usr/lib/python3/dist-packages/statsmodels /etc/aminer/conf-enabled/statsmodels \
 	&& useradd -ms /usr/sbin/nologin aminer && mkdir -p /var/lib/aminer/log && chmod 0755 /aminerwrapper.sh \
         && chown aminer.aminer -R /var/lib/aminer
 
