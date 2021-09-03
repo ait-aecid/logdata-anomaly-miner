@@ -379,21 +379,33 @@ EOL
             echo "Final-Recipient: rfc822;aaron@domain.com\nAction: failed\nStatus: 5.5.0\nDiagnostic-Code: smtp;550-Please turn on SMTP Authentication in your mail client.\n550-mail.fictional.example [10.5.40.204]:58133 is not permitted to relay 550 through this server without authentication." >> $LOG_FILE
             echo "DHE-RSA-AES256-SHA:256: SMTP error from remote mail server after MAIL FROM:<aaron@domain.com> SIZE=1834: host mail.fictional.example [10.5.40.204..212]: 550 \"REJECTED - Bad HELO - Host impersonating [mail.fictional2.example]\"" >> $LOG_FILE
             echo "2014-08-31 08:43:16 1XO5PY-0006SO-GS <= <> R=1XO5PX-0006SC-Qa U=mailnull P=local S=1951 T=\"Mail delivery failed: returning message to sender\" for aaron@domain.com" >> $LOG_FILE
-
-            # !!!! NOTE: CHANGE EXISTING SEQUENCES TO ALSO USE VARIABLES
-
-#            echo "" >> $LOG_FILE
-#            echo "" >> $LOG_FILE
-#            echo "" >> $LOG_FILE
-#            echo "" >> $LOG_FILE
-#            echo "" >> $LOG_FILE
-#            echo "" >> $LOG_FILE
-#            echo "" >> $LOG_FILE
-#            echo "" >> $LOG_FILE
+            echo "SMTP error from remote mail server after MAIL FROM:<aaron@domain.com>: host mail.fictional.example [10.5.40.204]: 553 sorry, your domain does not exists." >> $LOG_FILE
+            echo "2014-11-26 10:26:32 1XtYro-004Ecv-65 ** aaron@domain.com R=dkim_lookuphost T=dkim_remote_smtp: SMTP error from remote mail server after MAIL FROM:<aaron@domain.com> SIZE=1604: host mail.fictional.example [10.5.40.204]: 553 <aaron@domain.com> unable to verify address\nVerify that SMPT authentication has been enabled." >> $LOG_FILE
+            echo "[15:03:30 hosts5 root /var/log]cPs# grep 1XeRdP-0006JC-FO exim_mainlog 2014-10-15 12:41:11 1XeRdP-0006JC-FO <= <> R=1XeRdF-0006HI-EY U=mailnull P=local S=5445 T=\"Mail delivery failed: returning message to sender\" for aaron@domain.com 2014-10-15 12:41:11 cwd=/var/spool/exim 3 args: /usr/sbin/exim -Mc 1XeRdP-0006JC-FO 2014-10-15 12:42:12 1XeRdP-0006JC-FO ** aaron@domain.com R=dkim_lookuphost T=dkim_remote_smtp: SMTP error from remote mail server after end of data: host mail.fictional.example [10.5.40.204]: 554 rejected due to spam content" >> $LOG_FILE
+            echo "2014-10-01 15:12:26 1XZKdg-0001g3-JS H=mail.fictional.example [10.5.40.204]:4779 Warning: \"SpamAssassin as marka22 detected message as spam (11.0)\"" >> $LOG_FILE
+            echo "2014-10-01 15:12:26 1XZKdg-0001g3-JS <=10.5.40.204 H=mail.fictional.example[10.5.40.204]:4779 P=esmtp S=491878 id=dos45yx4zbmri7f@domain.com T="Payment confirmation: 7037487121" for aaron@domain.net [" >> $LOG_FILE
+            echo "2014-10-01 15:12:26 1XZKdg-0001g3-JS => aaron  <aaron@domain.net [> R=virtual_user_spam T=virtual_userdelivery_spam" >> $LOG_FILE
+            echo "2014-10-01 15:12:26 1XZKdg-0001g3-JS Completed 2014-10-01 15:30:35 1XZKvG-0002HW-ML H=(12-12-12-12.domain.net [10.5.40.204]:65376 Warning: \"SpamAssassin as marka22 detected message as spam (7.2)\"" >> $LOG_FILE
+            echo "2014-10-01 15:30:35 1XZKvG-0002HW-ML <= item@something.net H=(12-12-12-12.domain.net [10.5.40.204]:65376 P=esmtp S=519381 id=dos45yx4zbmri7f@domain.com T=\"Payment confirmation: 7037487121\" for mark@domain.com 2014-10-01 15:30:35 1XZKvG-0002HW-ML => mark <mark@domain.net [> R=virtual_user_spam T=virtual_userdelivery_spam" >> $LOG_FILE
+            echo "2014-10-01 15:30:35 1XZKvG-0002HW-ML Completed" >> $LOG_FILE
+            echo "2014-09-10 13:06:55 1XRlM6-003yMv-KG H=mail.fictional.example[10.5.40.204]:46793 Warning: Message has been scanned: no virus or other harmful content was found" >> $LOG_FILE
+            echo "2014-09-10 13:06:56 1XRlM6-003yMv-KG H=mail.fictional.example[10.5.40.204]:46793 Warning: \"SpamAssassin as cpaneleximscanner detected OUTGOING smtp message as NOT spam (-0.1)\"" >> $LOG_FILE
+            echo "2014-09-10 13:06:56 1XRlM6-003yMv-KG <= bob@bob.com H=mail.fictional.example [10.5.40.204]:46793 P=esmtpsa X=TLSv1:AES128-SHA:128 A=dovecot_login:aaron@domain.com S=18635 T=\"14\\\" plates\" for live@somedomain.com" >> $LOG_FILE
+            echo "2014-09-10 13:06:56 1XRlM6-003yMv-KG SMTP connection outbound 1410368816 1XRlM6-003yMv-KG domain.com live@somedomain.com" >> $LOG_FILE
+            echo "2014-09-10 13:07:22 1XRlM6-003yMv-KG => live@somedomain.com R=dkim_lookuphost T=dkim_remote_smtp H=mail.fictional.example [10.5.40.204] X=TLSv1:DHE-RSA-AES256-SHA:256 C=\"250 OK id=1XRlMC-0006w5-F4\" 2014-09-10 13:07:22 1XRlM6-003yMv-KG Completed" >> $LOG_FILE
+            echo "2014-11-06 09:14:13 1XmNp0-0005Qp-MR H=mail-qg0-f68.google.com [10.5.40.204]:42603 Warning: \"SpamAssassin as sfgthib detected message as spam (998.0)\" 2014-11-06 09:14:13 1XmNp0-0005Qp-MR H=mail-qg0-f68.google.com [10.5.40.204]:42603 Warning: Message has been scanned: no virus or other harmful content was found" >> $LOG_FILE
+            echo "2014-11-06 09:14:13 1XmNp0-0005Qp-MR <= cpaneltest@gmail.com H=mail.fictional.example [10.5.40.204]:42603 P=esmtps X=TLSv1:RC4-SHA:128 S=3411 id=CAPtYmmQYRDb38yTmnA_ULZVjnKVOdtu6yw-HapGmjBCAk6rYYw@mail.gmail.com T=\"test\" for aaron@domain.com" >> $LOG_FILE
             ;;
         KernelMsgParsingModel)
             exit $exit_code
             echo "test13" > $LOG_FILE
+#            echo "" >> $LOG_FILE
+#            echo "" >> $LOG_FILE
+#            echo "" >> $LOG_FILE
+#            echo "" >> $LOG_FILE
+#            echo "" >> $LOG_FILE
+#            echo "" >> $LOG_FILE
+#            echo "" >> $LOG_FILE
             ;;
         NtpParsingModel)
             echo "test14" > $LOG_FILE
