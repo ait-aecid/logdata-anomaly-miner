@@ -307,6 +307,8 @@ class JsonModelElement(ModelElementInterface):
                          match_context, i: int):
         """Parse a array in a json object."""
         value = json_dict[key]
+        if not isinstance(json_match_data[split_key], list):
+            return [None]
         search_string = b""
         match_array = self.flatten_list(json_match_data[split_key])
         while isinstance(value, list):

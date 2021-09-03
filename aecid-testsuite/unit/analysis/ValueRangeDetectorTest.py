@@ -98,6 +98,8 @@ class ValueRangeDetectorTest(TestBase):
         event_sequence_detector.receive_atom(log_atom_3)
         self.assertEqual(test_handler.anomaly, {'AnalysisComponent': {'AffectedLogAtomPaths': ['/model/value'],
                                                                       'AffectedLogAtomValues': [4.75],
+                                                                      'IDpaths': ['/model/id'],
+                                                                      'IDvalues': ['a'],
                                                                       'Range': [2.5, 2.5]}})
         test_handler.anomaly = None
 
@@ -107,6 +109,8 @@ class ValueRangeDetectorTest(TestBase):
         event_sequence_detector.receive_atom(log_atom_4)
         self.assertEqual(test_handler.anomaly, {'AnalysisComponent': {'AffectedLogAtomPaths': ['/model/value'],
                                                                       'AffectedLogAtomValues': [6.3],
+                                                                      'IDpaths': ['/model/id'],
+                                                                      'IDvalues': ['b'],
                                                                       'Range': [5, 5]}})
         test_handler.anomaly = None
 
@@ -120,6 +124,8 @@ class ValueRangeDetectorTest(TestBase):
         event_sequence_detector.receive_atom(log_atom_6)
         self.assertEqual(test_handler.anomaly, {'AnalysisComponent': {'AffectedLogAtomPaths': ['/model/value'],
                                                                       'AffectedLogAtomValues': [3.1],
+                                                                      'IDpaths': ['/model/id'],
+                                                                      'IDvalues': ['b'],
                                                                       'Range': [5, 6.3]}})
         test_handler.anomaly = None
 

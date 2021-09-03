@@ -30,7 +30,7 @@ NewMatchPathDetector: "DefaultNewMatchPathDetector" (1 lines)
   /model/menu/popup/menuitem/buttonOnclick: 1
   /model/menu/popup/menuitem/buttonNames: 2
   /model/menu/popup/menuitem/buttonOnclick: 2
-['/model', '/model/menu/id', '/model/menu/value', '/model/menu/popup/menuitem/buttonNames', '/model/menu/popup/menuitem/buttonOnclick']
+['/model', '/model/menu/popup/menuitem/buttonNames', '/model/menu/popup/menuitem/buttonOnclick', '/model/menu/id', '/model/menu/value', '/model/menu/popup/menuitem/buttonNames/0', '/model/menu/popup/menuitem/buttonOnclick/0', '/model/menu/popup/menuitem/buttonNames/1', '/model/menu/popup/menuitem/buttonOnclick/1', '/model/menu/popup/menuitem/buttonNames/2', '/model/menu/popup/menuitem/buttonOnclick/2']
 Original log line: {"menu": {
   "id": "file",
   "value": "File",

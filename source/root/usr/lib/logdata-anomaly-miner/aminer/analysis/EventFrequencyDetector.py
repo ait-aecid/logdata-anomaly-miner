@@ -111,13 +111,19 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 match = parser_match.get_match_dictionary().get(path)
                 if match is None:
                     continue
-                if isinstance(match.match_object, bytes):
-                    value = match.match_object.decode(AminerConfig.ENCODING)
+                matches = []
+                if isinstance(match, list):
+                    matches = match
                 else:
-                    value = str(match.match_object)
-                if value is not None:
-                    all_values_none = False
-                values.append(value)
+                    matches.append(match)
+                for match in matches:
+                    if isinstance(match.match_object, bytes):
+                        value = match.match_object.decode(AminerConfig.ENCODING)
+                    else:
+                        value = str(match.match_object)
+                    if value is not None:
+                        all_values_none = False
+                    values.append(value)
             if all_values_none is True:
                 return
             log_event = tuple(values)

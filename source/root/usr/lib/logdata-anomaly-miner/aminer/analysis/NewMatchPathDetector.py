@@ -86,7 +86,15 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             if self.output_log_line:
                 match_paths_values = {}
                 for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
-                    match_value = match_element.match_object
+                    if isinstance(match_element, list):
+                        match_value = []
+                        for m in match_element:
+                            if isinstance(m.match_object, bytes):
+                                match_value.append(m.match_object.decode(AminerConfig.ENCODING))
+                            else:
+                                match_value.append(m.match_object)
+                    else:
+                        match_value = match_element.match_object
                     if isinstance(match_value, bytes):
                         match_value = match_value.decode(AminerConfig.ENCODING)
                     match_paths_values[match_path] = match_value
