@@ -801,7 +801,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         if self.save_statistics:
                             self.failed_indicators_total.append(self.event_type_detector.total_records)
                             self.failed_indicators_values.append(np.arctan(2 * indicator) / np.pi * 2)
-                            if self.id_path_list != []:
+                            if self.event_type_detector.id_path_list != []:
                                 self.failed_indicators_paths.append(self.event_type_detector.id_path_list_tuples[event_index])
                             else:
                                 self.failed_indicators_paths.append(self.event_type_detector.longest_path[event_index])
