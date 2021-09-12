@@ -84,7 +84,7 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
         id_match_element = None
         for id_path in self.id_path_list:
             # Get the id value and return if not found in this log atom.
-            id_match_element = match_dict.get(id_path, None)
+            id_match_element = match_dict.get(id_path)
             if id_match_element is not None:
                 break
         if id_match_element is None:
@@ -105,7 +105,13 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
                 self.id_dict_old = self.id_dict_current
                 self.id_dict_current = {}
 
-        id_match_object = id_match_element.match_object
+        if isinstance(id_match_element, list):
+            id_match_object = []
+            for match_element in id_match_element:
+                id_match_object.append(match_element.match_object)
+            id_match_object = tuple(id_match_object)
+        else:
+            id_match_object = id_match_element.match_object
 
         # Find dictionary containing id and create ref to old or current dict (side-effects)
         id_dict = None
@@ -119,12 +125,22 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
 
         for target_path in self.target_path_list:
             # Append values to the combo.
-            match_element = match_dict.get(target_path, None)
+            match_element = match_dict.get(target_path)
             if match_element is not None:
-                if isinstance(match_element.match_object, bytes):
-                    id_dict[id_match_object][target_path] = match_element.match_object.decode(AminerConfig.ENCODING)
+                if isinstance(match_element, list):
+                    values = []
+                    matches = match_element
+                    for match_element in matches:
+                        if isinstance(match_element.match_object, bytes):
+                            values.append(match_element.match_object.decode(AminerConfig.ENCODING))
+                        else:
+                            values.append(id_dict[id_match_object][target_path])
+                    id_dict[id_match_object][target_path] = values
                 else:
-                    id_dict[id_match_object][target_path] = match_element.match_object
+                    if isinstance(match_element.match_object, bytes):
+                        id_dict[id_match_object][target_path] = match_element.match_object.decode(AminerConfig.ENCODING)
+                    else:
+                        id_dict[id_match_object][target_path] = match_element.match_object
 
         if len(id_dict[id_match_object]) == len(self.target_path_list):
             # Found value for all target paths. No need to wait more.

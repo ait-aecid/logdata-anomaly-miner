@@ -73,6 +73,11 @@ docs/SECURITY.md
 docs/README.md
 docs/LICENSE.md
 
+#docker
+akafka/
+aminercfg/
+persistency/
+logs/
 
 # PyBuilder
 .pybuilder/

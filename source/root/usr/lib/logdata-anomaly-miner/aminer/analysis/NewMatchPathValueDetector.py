@@ -55,27 +55,37 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
         for target_path in self.target_path_list:
-            match = match_dict.get(target_path, None)
+            match = match_dict.get(target_path)
             if match is None:
                 continue
-            if match.match_object not in self.known_values_set:
-                if self.auto_include_flag:
-                    self.known_values_set.add(match.match_object)
-                    self.log_learned_path_values += 1
-                    self.log_new_learned_values.append(match.match_object)
-                    if self.next_persist_time is None:
-                        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                            KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+            matches = []
+            if isinstance(match, list):
+                matches = match
+            else:
+                matches.append(match)
+            affected_log_atom_values = []
+            for match in matches:
+                if match.match_object not in self.known_values_set:
+                    if self.auto_include_flag:
+                        self.known_values_set.add(match.match_object)
+                        self.log_learned_path_values += 1
+                        self.log_new_learned_values.append(match.match_object)
+                        if self.next_persist_time is None:
+                            self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
+                                KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
-                if isinstance(match.match_object, bytes):
-                    affected_log_atom_values = [match.match_object.decode(AminerConfig.ENCODING)]
-                else:
-                    affected_log_atom_values = [str(match.match_object)]
+                    if isinstance(match.match_object, bytes):
+                        affected_log_atom_values.append(match.match_object.decode(AminerConfig.ENCODING))
+                    else:
+                        affected_log_atom_values.append(str(match.match_object))
+            if len(affected_log_atom_values) > 0:
                 analysis_component = {'AffectedLogAtomPaths': [target_path], 'AffectedLogAtomValues': affected_log_atom_values}
-                if isinstance(match.match_object, bytes):
-                    res = {target_path: match.match_object.decode(AminerConfig.ENCODING)}
+                if isinstance(match_dict.get(target_path), list):
+                    res = {target_path: affected_log_atom_values}
                 else:
-                    res = {target_path: match.match_object}
+                    res = {target_path: match_dict.get(target_path).match_object}
+                    if isinstance(res[target_path], bytes):
+                        res[target_path] = res[target_path].decode(AminerConfig.ENCODING)
                 try:
                     data = log_atom.raw_data.decode(AminerConfig.ENCODING)
                 except UnicodeError:
@@ -84,9 +94,17 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                 if self.output_log_line:
                     match_paths_values = {}
                     for match_path, match_element in match_dict.items():
-                        match_value = match_element.match_object
-                        if isinstance(match_value, bytes):
-                            match_value = match_value.decode(AminerConfig.ENCODING)
+                        if isinstance(match_element, list):
+                            match_value = []
+                            for match in match_element:
+                                if isinstance(match.match_object, bytes):
+                                    match_value.append(match.match_object.decode(AminerConfig.ENCODING))
+                                else:
+                                    match_value.append(match.match_object)
+                        else:
+                            match_value = match_element.match_object
+                            if isinstance(match_value, bytes):
+                                match_value = match_value.decode(AminerConfig.ENCODING)
                         match_paths_values[match_path] = match_value
                     analysis_component['ParsedLogAtom'] = match_paths_values
                     sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + str(
