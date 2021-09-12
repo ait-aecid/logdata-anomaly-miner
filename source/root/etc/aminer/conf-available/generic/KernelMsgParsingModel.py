@@ -7,6 +7,7 @@ from aminer.parsing.FixedDataModelElement import FixedDataModelElement
 from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
 from aminer.parsing.IpAddressDataModelElement import IpAddressDataModelElement
 from aminer.parsing.SequenceModelElement import SequenceModelElement
+from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
 
 
 def get_model():
@@ -29,9 +30,12 @@ def get_model():
     ]
 
     model = SequenceModelElement('kernel', [
-        FixedDataModelElement('sname', b'kernel: ['),
-        DelimitedDataModelElement('timestamp', b']'),
-        FixedDataModelElement('s0', b'] '),
+        FixedDataModelElement('sname', b'kernel: '),
+        OptionalMatchModelElement("opt", SequenceModelElement("seq", [
+            FixedDataModelElement("opt_s0", b"]"),
+            DelimitedDataModelElement('timestamp', b']'),
+            FixedDataModelElement('opt_s1', b'] '),
+        ])),
         FirstMatchModelElement('msg', type_children)
     ])
     return model

