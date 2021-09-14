@@ -147,6 +147,9 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
 
         # Extend ranges if learn mode is active.
         if self.auto_include_flag is True:
+            if self.next_persist_time is None:
+                self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
+                    KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
             if id_event in self.ranges_min:
                 self.ranges_min[id_event] = min(self.ranges_min[id_event], min(values))
             else:
@@ -168,12 +171,12 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted."""
         if self.next_persist_time is None:
-            return 600
+            return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
         if delta < 0:
             self.do_persist()
-            delta = 600
+            delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         return delta
 
     def do_persist(self):
