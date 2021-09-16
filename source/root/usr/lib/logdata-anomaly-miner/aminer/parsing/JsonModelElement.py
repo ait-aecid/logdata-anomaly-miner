@@ -115,10 +115,11 @@ class JsonModelElement(ModelElementInterface):
             if isinstance(value, ModelElementInterface):
                 children.append(value)
             elif isinstance(value, list):
-                if len(value) != 1:
-                    msg = "lists in key_parser_dict must have exactly one entry."
+                if len(value) == 0:
+                    msg = "lists in key_parser_dict must have at least one entry."
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
+
                 value_list: List[dict] = []
                 for v in value:
                     if isinstance(v, dict):
@@ -308,66 +309,77 @@ class JsonModelElement(ModelElementInterface):
     def parse_json_array(self, json_dict: dict, json_match_data: dict, key: str, split_key: str, current_path: str, matches: list,
                          match_context, i: int):
         """Parse a array in a json object."""
-        value = json_dict[key]
         if not isinstance(json_match_data[split_key], list):
             return [None]
-        search_string = b""
+        search_string = b"]"
         match_array = self.flatten_list(json_match_data[split_key])
-        while isinstance(value, list):
-            value = value[0]
-            search_string += b"]"
+        value = self.flatten_list(json_dict[key])
 
-        for data in match_array:
-            if isinstance(data, str):
-                enc = "utf-8"
-                if self.is_escaped_unicode(data) and self.dec_escapes:
-                    enc = "unicode-escape"
-                data = data.encode(enc)
-            if data is None:
-                data = b"null"
-            elif not isinstance(data, bytes):
-                data = str(data).encode()
-            if isinstance(value, dict):
-                for match_data in match_array:
+        for j, data in enumerate(match_array):
+            for k, val in enumerate(value):
+                if isinstance(data, str):
+                    enc = "utf-8"
+                    if self.is_escaped_unicode(data) and self.dec_escapes:
+                        enc = "unicode-escape"
+                    data = data.encode(enc)
+                if data is None:
+                    data = b"null"
+                elif not isinstance(data, bytes):
+                    data = str(data).encode()
+                if isinstance(val, dict):
                     matches += self.parse_json_dict(
-                        value, match_data, "%s/%s" % (current_path, split_key), match_context)
+                        val, match_array[j], "%s/%s" % (current_path, split_key), match_context)
                     if matches[-1] is None:
-                        logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN MATCHES 2")
-                        return matches
-            else:
-                if value == "ALLOW_ALL":
-                    logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "ALLOW_ALL (ARRAY)")
-                    match_element = MatchElement(current_path+"/"+key, data, data, None)
-                elif json_dict[key] == "EMPTY_ARRAY":
-                    if isinstance(data, list) and len(data) == 0:
-                        index = match_context.match_data.find(search_string)
-                        match_element = MatchElement(
-                            current_path+"/"+key, match_context.match_data[:index], match_context.match_data[:index], None)
-                        match_context.update(match_context.match_data[:index])
+                        if len(value) - 1 == k:
+                            logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN MATCHES 2")
+                            return matches
+                        else:
+                            del matches[-1]
+                            continue
                     else:
-                        return None
+                        break
                 else:
-                    match_element = value.get_match_element(current_path, MatchContext(data))
-                    if match_element is not None and len(match_element.match_string) != len(data):
-                        logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "MatchElement NONE 1")
-                        match_element = None
-                index = match_context.match_data.find(data)
-                if match_element is None:
-                    logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "MatchElement NONE 2", data.decode())
-                    index = -1
-                match_context.update(match_context.match_data[:index + len(data)])
-                if index == -1 and value == "ALLOW_ALL":
-                    logging.getLogger(DEBUG_LOG_NAME).debug(
-                        debug_log_prefix + "ALLOW_ALL (ARRAY-ELEMENT)", match_context.match_data.decode())
-                    index = match_context.match_data.find(search_string)
-                    match_context.update(match_context.match_data[:index])
-                if match_element is not None or (match_element is None and not key.startswith(self.optional_key_prefix)):
-                    matches.append(match_element)
-                    if index == -1:
-                        return matches
-                if matches[-1] is None:
-                    logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN MATCHES 3")
-                    return matches
+                    if val == "ALLOW_ALL":
+                        logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "ALLOW_ALL (ARRAY)")
+                        match_element = MatchElement(current_path+"/"+key, data, data, None)
+                    elif json_dict[key] == "EMPTY_ARRAY":
+                        if isinstance(data, list) and len(data) == 0:
+                            index = match_context.match_data.find(search_string)
+                            match_element = MatchElement(
+                                current_path+"/"+key, match_context.match_data[:index], match_context.match_data[:index], None)
+                            match_context.update(match_context.match_data[:index])
+                        else:
+                            return None
+                    else:
+                        match_element = val.get_match_element(current_path, MatchContext(data))
+                        if match_element is not None and len(match_element.match_string) != len(data):
+                            logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "MatchElement NONE 1")
+                            match_element = None
+                    index = match_context.match_data.find(data)
+                    if match_element is None:
+                        logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "MatchElement NONE 2", data.decode())
+                        index = -1
+                    match_context.update(match_context.match_data[:index + len(data)])
+                    if index == -1 and val == "ALLOW_ALL":
+                        logging.getLogger(DEBUG_LOG_NAME).debug(
+                            debug_log_prefix + "ALLOW_ALL (ARRAY-ELEMENT)", match_context.match_data.decode())
+                        index = match_context.match_data.find(search_string)
+                        match_context.update(match_context.match_data[:index])
+                    if match_element is not None or (match_element is None and not key.startswith(self.optional_key_prefix)):
+                        matches.append(match_element)
+                        if index == -1:
+                            if len(value) - 1 > k:
+                                return matches
+                            else:
+                                del matches[-1]
+                                continue
+                    if matches[-1] is None:
+                        if len(value) - 1 > k:
+                            logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN MATCHES 3")
+                            return matches
+                        else:
+                            del matches[-1]
+                            continue
         if len(json_match_data.keys()) > i + 1:
             logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "ARRAY - Searching next key")
             match_context.update(match_context.match_data[:match_context.match_data.find(
@@ -401,7 +413,8 @@ class JsonModelElement(ModelElementInterface):
         elif json_dict[key] == "EMPTY_STRING":
             if data == b"":
                 match_element = MatchElement(current_path, data, data, None)
-                index = len(split_key) + len(b'""')
+                index = match_context.match_data.find(split_key.encode()) + len(split_key)
+                index += match_context.match_data[index:].find(b'""') + len(b'""')
             else:
                 match_element = None
                 index = -1
