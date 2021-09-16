@@ -326,7 +326,7 @@ class JsonModelElement(ModelElementInterface):
                     data = b"null"
                 elif not isinstance(data, bytes):
                     data = str(data).encode()
-                if isinstance(val, dict):
+                if isinstance(val, dict):  # skipcq: PYL-R1723
                     matches += self.parse_json_dict(
                         val, match_array[j], "%s/%s" % (current_path, split_key), match_context)
                     if matches[-1] is None:
@@ -335,7 +335,8 @@ class JsonModelElement(ModelElementInterface):
                             return matches
                         del matches[-1]
                         continue
-                    break
+                    else:
+                        break
                 else:
                     if val == "ALLOW_ALL":
                         logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "ALLOW_ALL (ARRAY)")
