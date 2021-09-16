@@ -335,8 +335,7 @@ class JsonModelElement(ModelElementInterface):
                             return matches
                         del matches[-1]
                         continue
-                    else:
-                        break
+                    break
                 else:
                     if val == "ALLOW_ALL":
                         logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "ALLOW_ALL (ARRAY)")
