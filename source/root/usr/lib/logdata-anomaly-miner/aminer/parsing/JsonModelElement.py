@@ -333,9 +333,8 @@ class JsonModelElement(ModelElementInterface):
                         if len(value) - 1 == k:
                             logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN MATCHES 2")
                             return matches
-                        else:
-                            del matches[-1]
-                            continue
+                        del matches[-1]
+                        continue
                     else:
                         break
                 else:
@@ -370,16 +369,14 @@ class JsonModelElement(ModelElementInterface):
                         if index == -1:
                             if len(value) - 1 > k:
                                 return matches
-                            else:
-                                del matches[-1]
-                                continue
+                            del matches[-1]
+                            continue
                     if matches[-1] is None:
                         if len(value) - 1 > k:
                             logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN MATCHES 3")
                             return matches
-                        else:
-                            del matches[-1]
-                            continue
+                        del matches[-1]
+                        continue
         if len(json_match_data.keys()) > i + 1:
             logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "ARRAY - Searching next key")
             match_context.update(match_context.match_data[:match_context.match_data.find(

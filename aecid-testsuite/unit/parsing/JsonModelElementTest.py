@@ -14,7 +14,8 @@ class JsonModelElementTest(TestBase):
     id_ = "json"
     path = "path"
     single_line_json = b'{"menu": {"id": "file", "value": "File", "popup": {"menuitem": [{"value": "New", "onclick": "CreateNewDoc()"}, {' \
-                       b'"value": "Open", "onclick": "OpenDoc()"}, {"value": "Close", "onclick": "CloseDoc()"}, {"value": "Undo", "onclick": "UndoDoc()", "clickable": true}]}}}'
+                       b'"value": "Open", "onclick": "OpenDoc()"}, {"value": "Close", "onclick": "CloseDoc()"}, ' \
+                       b'{"value": "Undo", "onclick": "UndoDoc()", "clickable": true}]}}}'
     single_line_with_optional_key_json = b'{"menu": {"id": "file", "value": "File", "popup": {"menuitem": [{"value": "New", "onclick":' \
                                          b' "CreateNewDoc()", "clickable": false}, {"value": "Open", "onclick": "OpenDoc()"}, {"value": ' \
                                          b'"Close", "onclick": "CloseDoc()", "clickable": false}]}}}'
