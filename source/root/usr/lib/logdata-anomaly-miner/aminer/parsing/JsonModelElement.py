@@ -200,9 +200,11 @@ class JsonModelElement(ModelElementInterface):
                 match_context.update(match_context.match_data[:index])
                 logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 2", key, json_dict)
                 if self.allow_all_fields:
-                    match_context.update(match_context.match_data[
-                                         :match_context.match_data.find(key.encode()) + len(key.encode()) + len(str(json_match_data[key]))])
-                    if match_context.match_data.replace(b"}", b"").replace(b"]", b"") == b"":
+                    index = match_context.match_data.find(key.encode()) + len(key.encode())
+                    index += len(match_context.match_data) - len(match_context.match_data[index:].lstrip(b' \n\t:"')) + \
+                        len(str(json_match_data[key]))
+                    match_context.update(match_context.match_data[:index])
+                    if match_context.match_data.replace(b"}", b"").replace(b"]", b"").replace(b'"', b"") == b"":
                         match_context.update(match_context.match_data)
                     continue
                 return [None]
