@@ -43,12 +43,20 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
         for path in self.match_value_path_list:
             if add_sep_flag:
                 result += self.separator_string
-            match = match_dict.get(path, None)
+            match = match_dict.get(path)
             if match is None:
                 result += self.missing_value_string
             else:
-                result += match.match_string
-                contains_data = True
+                matches = []
+                if isinstance(match, list):
+                    matches = match
+                else:
+                    matches.append(match)
+                for match in matches:
+                    result += match.match_string + self.separator_string
+                    contains_data = True
+                if len(self.separator_string) > 0:
+                    result = result[:-len(self.separator_string)]
             add_sep_flag = True
         if contains_data:
             if not isinstance(self.stream, _io.BytesIO):
@@ -59,14 +67,14 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 self.stream.write(b'\n')
             self.log_success += 1
 
-    def get_time_trigger_class(self):
+    def get_time_trigger_class(self):  # skipcq: PYL-R0201
         """
         Get the trigger class this component should be registered for.
         This trigger is used only for persistence, so real-time triggering is needed.
         """
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def do_timer(self, trigger_time):
+    def do_timer(self, _trigger_time):
         """Flush the timer."""
         self.stream.flush()
         return 10

@@ -36,6 +36,7 @@ RUN apt-get update && apt-get install -y \
         python3-yaml \
         python3-pylibacl \
         python3-urllib3 \
+        python3-statsmodels \
         libacl1-dev
 
 # Docs
@@ -73,6 +74,7 @@ RUN ln -s /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerr
 	&& ln -s /usr/lib/python3/dist-packages/dateutil /usr/lib/logdata-anomaly-miner/dateutil \
 	&& ln -s /usr/lib/python3/dist-packages/six.py /usr/lib/logdata-anomaly-miner/six.py \
 	&& ln -s /usr/lib/python3/dist-packages/urllib3 /usr/lib/logdata-anomaly-miner/urllib3 \
+	&& ln -s /usr/lib/python3/dist-packages/statsmodels /usr/lib/logdata-anomaly-miner/statsmodels \
 	&& groupadd -g $GID -o $UNAME && useradd -u $UID -g $GID -ms /usr/sbin/nologin $UNAME && mkdir -p /var/lib/aminer/logs && mkdir /etc/aminer \
         && chown $UID.$GID -R /var/lib/aminer \
         && chown $UID.$GID -R /docs \
