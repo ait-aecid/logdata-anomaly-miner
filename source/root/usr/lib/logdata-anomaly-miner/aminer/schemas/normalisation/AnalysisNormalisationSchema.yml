@@ -186,7 +186,6 @@
                 'acf_pause_interval_percentage': {'type': 'float', 'default': 0.2},
                 'acf_auto_pause_interval': {'type': 'boolean', 'default': True},
                 'acf_auto_pause_interval_num_min': {'type': 'integer', 'min': 1, 'required': True, 'default': 10},
-                'user_path_list': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                 'value_constraint_list': {'type': 'list', 'schema': {
                     'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None}, 'nullable': True, 'default': None},
                 'num_log_lines_matrix_solidification': {'type': 'integer', 'default': 10000},

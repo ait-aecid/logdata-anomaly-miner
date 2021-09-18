@@ -619,7 +619,7 @@
                     'output_logline': {'type': 'boolean'},
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'auto_include_flag': {'type': 'boolean'},
-                    'user_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'id_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'value_constraint_list': {'type': 'list', 'schema': {'type': 'list', 'schema': {
                         'type': 'string', 'empty': False}, 'nullable': True}, 'nullable': True},
                     'num_log_lines_matrix_solidification': {'type': 'integer', 'min': 1},

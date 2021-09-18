@@ -798,9 +798,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             elif item['type'].name == 'MinimalTransitionTimeDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
-                    auto_include_flag=learn, output_log_line=item['output_logline'], place_path_list=item['paths'],
-                    user_path_list=item['user_path_list'], ignore_list=item['ignore_list'],
-                    value_constraint_list=item['value_constraint_list'],
+                    auto_include_flag=learn, output_log_line=item['output_logline'], path_list=item['paths'],
+                    id_path_list=item['id_path_list'], ignore_list=item['ignore_list'], value_constraint_list=item['value_constraint_list'],
                     num_log_lines_matrix_solidification=item['num_log_lines_matrix_solidification'],
                     time_output_threshold=item['time_output_threshold'])
             else:
