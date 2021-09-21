@@ -801,7 +801,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     auto_include_flag=learn, output_log_line=item['output_logline'], path_list=item['paths'],
                     id_path_list=item['id_path_list'], ignore_list=item['ignore_list'], value_constraint_list=item['value_constraint_list'],
                     num_log_lines_matrix_solidification=item['num_log_lines_matrix_solidification'],
-                    time_output_threshold=item['time_output_threshold'])
+                    time_output_threshold=item['time_output_threshold'], undercut_threshold=item['undercut_threshold'])
             else:
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn)
             if item['output_event_handlers'] is not None:

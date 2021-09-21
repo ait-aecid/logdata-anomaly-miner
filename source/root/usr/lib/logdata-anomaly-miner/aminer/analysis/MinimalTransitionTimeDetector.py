@@ -12,10 +12,9 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 # ToDo:
-# x) anomaly output
-# x) path_list or id_path_list empty?
+# x) Persistency
 # x) value_constraint_list
-# x) time_output_threshold
+# x) ToDo's
 
 import time
 import os
@@ -35,7 +34,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
     """This class creates events when event or value frequencies change."""
 
     def __init__(self, aminer_config, anomaly_event_handlers, path_list=None, id_path_list=None, ignore_list=None,
-                 value_constraint_list=None, num_log_lines_matrix_solidification=100, time_output_threshold=3600,
+                 value_constraint_list=None, num_log_lines_matrix_solidification=100, time_output_threshold=45, undercut_threshold=0.95,
                  persistence_id='Default', auto_include_flag=False, output_log_line=True):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
@@ -66,6 +65,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
             self.ignore_list = []
         self.num_log_lines_matrix_solidification = num_log_lines_matrix_solidification
         self.time_output_threshold = time_output_threshold
+        self.undercut_threshold = undercut_threshold
 
         self.allow_missing_id = False
 
@@ -79,25 +79,28 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
 
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is not None:
-            # ToDo
-            print ('ToDo')
+            return_matrix = persistence_data[0]
+            keys_1 = [tuple(key) for key in persistence_data[1]]
+            keys_2 = [[tuple(key) for key in persistence_data[2][i]] for i in range(len(persistence_data[2]))]
+            self.time_matrix = {keys_1[i]: {keys_2[i][j]: return_matrix[i][j] for j in range(len(keys_2[i]))} for i in range(len(keys_1))}
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
         parser_match = log_atom.parser_match
 
         # Skip paths from ignore list.
-        for ignore_path in self.ignore_list:
-            if ignore_path in parser_match.get_match_dictionary().keys():
-                return
+        if any(ignore_path in parser_match.get_match_dictionary().keys() for ignore_path in self.ignore_list):
+            return
 
         if log_atom.atom_time is None:
+            return
+
+        if self.id_path_list == []:
             return
 
         self.log_total += 1
         if self.log_total % self.num_log_lines_matrix_solidification == 0:
             self.solidify_matrix()
-
 
         # In case that path_list is set, use it to differentiate sequences by their id.
         # Otherwise, the empty tuple () is used as the only key of the current_sequences dict.
@@ -120,36 +123,33 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
                     else:
                         event_value += (match.match_object,)
 
-        # Get the current index, eighter from the combination of values of the paths of id_path_list, or the event type
-        if self.id_path_list != []:
-            # In case that id_path_list is set, use it to differentiate sequences by their id.
-            # Otherwise, the empty tuple () is used as the only key of the current_sequences dict.
-            id_tuple = ()
-            for id_path in self.id_path_list:
-                id_match = log_atom.parser_match.get_match_dictionary().get(id_path)
-                if id_match is None:
-                    if self.allow_missing_id is True:
-                        # Insert placeholder for id_path that is not available
-                        id_tuple += ('',)
-                    else:
-                        # Omit log atom if one of the id paths is not found.
-                        return False
+        # Get the current index from the combination of values of the paths of id_path_list
+        id_tuple = ()
+        for id_path in self.id_path_list:
+            id_match = log_atom.parser_match.get_match_dictionary().get(id_path)
+            if id_match is None:
+                if self.allow_missing_id is True:
+                    # Insert placeholder for id_path that is not available
+                    id_tuple += ('',)
                 else:
-                    if isinstance(id_match.match_object, bytes):
-                        id_tuple += (id_match.match_object.decode(AminerConfig.ENCODING),)
-                    else:
-                        id_tuple += (id_match.match_object,)
+                    # Omit log atom if one of the id paths is not found.
+                    return False
+            else:
+                if isinstance(id_match.match_object, bytes):
+                    id_tuple += (id_match.match_object.decode(AminerConfig.ENCODING),)
+                else:
+                    id_tuple += (id_match.match_object,)
 
         if id_tuple not in self.last_value:
             self.last_value[id_tuple] = event_value
             self.last_time[id_tuple] = log_atom.atom_time
         else:
-            if log_atom.atom_time - self.last_time[id_tuple] < 0:
-                self.print('Anomaly in the order of log lines: %s - %s (%s): %s - %s'%(self.last_value[id_tuple], event_value, id_tuple,
-                           self.last_time[id_tuple], log_atom.atom_time), log_atom, self.path_list, confidence=1)
-
             if self.last_value[id_tuple] == event_value:
                 self.last_time[id_tuple] = log_atom.atom_time
+                return
+            elif log_atom.atom_time - self.last_time[id_tuple] <= 0:
+                self.print('Anomaly in the order of log lines: %s - %s (%s): %s - %s'%(self.last_value[id_tuple], event_value, id_tuple,
+                           self.last_time[id_tuple], log_atom.atom_time), log_atom, self.path_list, confidence=1)
                 return
 
             event_value_1 = None
@@ -172,11 +172,14 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
                     self.time_matrix[event_value][self.last_value[id_tuple]] = log_atom.atom_time - self.last_time[id_tuple]
             else:
                 # Check and update if the time was under cut
-                if self.time_matrix[event_value_1][event_value_2] > log_atom.atom_time - self.last_time[id_tuple]:
-                    message = 'Anomaly: %s - %s (%s), %s -> %s'%(self.last_value[id_tuple], event_value, id_tuple,
-                            self.time_matrix[event_value_1][event_value_2], log_atom.atom_time - self.last_time[id_tuple])
-                    confidence = 1 - (log_atom.atom_time - self.last_time[id_tuple]) / self.time_matrix[event_value_1][event_value_2]
-                    self.print(message, log_atom, self.path_list, confidence)
+                if self.time_matrix[event_value_1][event_value_2] > log_atom.atom_time - self.last_time[id_tuple] and\
+                        self.time_matrix[event_value_1][event_value_2] > self.time_output_threshold:
+                    if (log_atom.atom_time - self.last_time[id_tuple]) / self.time_matrix[event_value_1][event_value_2] <\
+                            self.undercut_threshold:
+                        message = 'Anomaly: %s - %s (%s), %s -> %s'%(self.last_value[id_tuple], event_value, id_tuple,
+                                self.time_matrix[event_value_1][event_value_2], log_atom.atom_time - self.last_time[id_tuple])
+                        confidence = 1 - (log_atom.atom_time - self.last_time[id_tuple]) / self.time_matrix[event_value_1][event_value_2]
+                        self.print(message, log_atom, self.path_list, confidence)
 
                     if self.auto_include_flag:
                         self.time_matrix[event_value_1][event_value_2] = log_atom.atom_time - self.last_time[id_tuple]
@@ -276,7 +279,12 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
     def do_persist(self):
         """Immediately write persistence data to storage."""
         persist_data = []
-        # ToDo
+        keys_1 = list(self.time_matrix.keys())
+        keys_2 = [list(self.time_matrix[key].keys()) for key in keys_1]
+        return_matrix = [[self.time_matrix[keys_1[i]][keys_2[i][j]] for j in range(len(keys_2[i]))] for i in range(len(keys_1))]
+        persist_data.append(return_matrix)
+        persist_data.append(keys_1)
+        persist_data.append(keys_2)
         PersistenceUtil.store_json(self.persistence_file_name, persist_data)
         self.next_persist_time = None
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
