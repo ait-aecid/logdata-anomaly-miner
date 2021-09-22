@@ -72,11 +72,8 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
         PersistenceUtil.add_persistable_component(self)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is not None:
-            for l in persistence_data:
-                if l[0] == 'min':
-                    self.ranges_min[tuple(l[1])] = float(l[2])
-                elif l[0] == 'max':
-                    self.ranges_max[tuple(l[1])] = float(l[2])
+            self.ranges_min = persistence_data[0]
+            self.ranges_max = persistence_data[1]
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
@@ -150,6 +147,9 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
 
         # Extend ranges if learn mode is active.
         if self.auto_include_flag is True:
+            if self.next_persist_time is None:
+                self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
+                    KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
             if id_event in self.ranges_min:
                 self.ranges_min[id_event] = min(self.ranges_min[id_event], min(values))
             else:
@@ -171,22 +171,17 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted."""
         if self.next_persist_time is None:
-            return 600
+            return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
         if delta < 0:
             self.do_persist()
-            delta = 600
+            delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        lst = []
-        for id_ev, v in self.ranges_min.items():
-            lst.append(['min', id_ev, v])
-        for id_ev, v in self.ranges_max.items():
-            lst.append(['max', id_ev, v])
-        PersistenceUtil.store_json(self.persistence_file_name, lst)
+        PersistenceUtil.store_json(self.persistence_file_name, [self.ranges_min, self.ranges_max])
         self.next_persist_time = None
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
