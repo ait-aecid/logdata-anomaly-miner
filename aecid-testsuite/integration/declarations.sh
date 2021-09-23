@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source ../config
+
 # declare all expected values without the variable ones. These arrays are used to compare with the incoming log lines.
 declare -a NEW_PATH_HD_REPAIR_1=(" New path(es) detected" "NewMatchPathDetector: \"NewPath\" (1 lines)" "  /model/DiskUpgrade: " ": System rebooted for hard disk upgrade" "  /model/DiskUpgrade/DTM: " "  /model/DiskUpgrade/UNameSpace1: " "  /model/DiskUpgrade/UName: " "  /model/DiskUpgrade/UNameSpace2: " " /model/DiskUpgrade/User: " "  /model/DiskUpgrade/HDRepair:  System rebooted for hard disk upgrade" "['/model/DiskUpgrade', '/model/DiskUpgrade/DTM', '/model/DiskUpgrade/UNameSpace1', '/model/DiskUpgrade/UName', '/model/DiskUpgrade/UNameSpace2', '/model/DiskUpgrade/User', '/model/DiskUpgrade/HDRepair']" "Original log line: ")
 declare -a UNPARSED_ATOM_1=(" Unparsed atom received" "SimpleUnparsedAtomHandler: \"UnparsedHandler\" (1 lines)" " System rebooted for hard disk upgrad")
@@ -721,7 +723,7 @@ function checkAllSyslogs(){
 
 # This function checks if the output of the Kafka Topic is as expected.
 function checkKafkaTopic(){
-  out=$(kafka_2.12-2.7.0/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test_topic --from-beginning --timeout-ms 3000)
+  out=$($KAFKA_VERSIONSTRING/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test_topic --from-beginning --timeout-ms 3000)
   for t in "${JSON_OUTPUT[@]}"
   do
     if [[ $out != *"$t"* ]]; then
