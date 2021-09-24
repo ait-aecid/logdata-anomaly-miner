@@ -1651,6 +1651,34 @@ This component extracts values from a given match and writes them to a stream. T
             - "/model/Sensors/CPUWorkload"
             - "/model/Sensors/DTM"
 
+MinimalTransitionTimeDetector
+~~~~~~~~~~~~~~~~~~~~~
+
+This module defines an detector for event and value sequences. The concept is based on STIDE which was first published by Forrest et al.
+
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings).
+* **id_path_list** parser paths where id values can be stored in all relevant log event types (list of strings) (list of strings).
+* **ignore_list** parser paths that are not considered for analysis, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable (list of strings).
+* **allow_missing_id** when set to True, the detector will also use matches, where one of the pathes from target_path_list does not refer to an existing parsed data object (boolean).
+* **num_log_lines_solidify_matrix** number of processed log lines after which the matrix is solidified. This process is periodically repeated (integer).
+* **time_output_threshold** threshold for the tested minimal transition time which has to be exceeded to be tested (float).
+* **anomaly_threshold** threshold for the confidence which must be exceeded to raise an anomaly (float).
+* **persistence_id** name of persistency document (string).
+* **learn_mode** specifies whether newly observed sequences should be added to the learned model (boolean).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean).
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: MinimalTransitionTimeDetector
+          id: MinimalTransitionTimeDetector
+          paths:
+            - '/model/type/syscall/syscall'
+          id_path_list:
+            - '/model/type/syscall/id'
+          anomaly_threshold: 0.05
+
+
 
 MissingMatchPathValueDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

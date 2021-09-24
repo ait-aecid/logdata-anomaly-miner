@@ -616,15 +616,14 @@
                     'type': {'type': 'string', 'allowed': ['MinimalTransitionTimeDetector'], 'required': True},
                     'persistence_id': {'type': 'string', 'empty': False},
                     'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
-                    'output_logline': {'type': 'boolean'},
-                    'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
-                    'auto_include_flag': {'type': 'boolean'},
                     'id_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
-                    'value_constraint_list': {'type': 'list', 'schema': {'type': 'list', 'schema': {
-                        'type': 'string', 'empty': False}, 'nullable': True}, 'nullable': True},
-                    'num_log_lines_matrix_solidification': {'type': 'integer', 'min': 1},
+                    'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'num_log_lines_solidify_matrix': {'type': 'integer', 'min': 1},
                     'time_output_threshold': {'type': 'integer', 'min': 0},
-                    'undercut_threshold': {'type': 'float', 'min': 0, 'max': 1.0}
+                    'anomaly_threshold': {'type': 'float', 'min': 0, 'max': 1.0},
+                    'output_logline': {'type': 'boolean'},
+                    'auto_include_flag': {'type': 'boolean'},
+                    'allow_missing_id': {'type': 'boolean'}
                 }
             ]
         }

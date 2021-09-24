@@ -799,9 +799,9 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
                     auto_include_flag=learn, output_log_line=item['output_logline'], path_list=item['paths'],
-                    id_path_list=item['id_path_list'], ignore_list=item['ignore_list'], value_constraint_list=item['value_constraint_list'],
-                    num_log_lines_matrix_solidification=item['num_log_lines_matrix_solidification'],
-                    time_output_threshold=item['time_output_threshold'], undercut_threshold=item['undercut_threshold'])
+                    id_path_list=item['id_path_list'], ignore_list=item['ignore_list'], allow_missing_id=item[allow_missing_id],
+                    num_log_lines_solidify_matrix=item['num_log_lines_solidify_matrix'],
+                    time_output_threshold=item['time_output_threshold'], anomaly_threshold=item['anomaly_threshold'])
             else:
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn)
             if item['output_event_handlers'] is not None:
