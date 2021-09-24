@@ -14,6 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import time
 import os
 import logging
+import sys
 
 from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
     STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
@@ -72,7 +73,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         self.next_persist_time = None
 
         # Test if both path_list and id_path_list are not empty
-        if self.path_list == [] or self.id_path_list == []:
+        if [] in (self.path_list, self.id_path_list):
             msg = 'Both paths and id_path_list must not be empty.'
             logging.getLogger(DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
@@ -98,16 +99,16 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         parser_match = log_atom.parser_match
 
         # Do not analyze the log line if path_list or id_path_list is empty
-        if self.path_list == [] or self.id_path_list == []:
-            return
+        if [] in (self.path_list, self.id_path_list):
+            return False
 
         # Skip paths from ignore list.
         if any(ignore_path in parser_match.get_match_dictionary().keys() for ignore_path in self.ignore_list):
-            return
+            return False
 
         # Skip line if atom_time is not defined.
         if log_atom.atom_time is None:
-            return
+            return False
 
         # Increase the count by one and check if the matrix should be solidified.
         self.log_total += 1
@@ -157,11 +158,11 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
             # Check if the event_value changed or if the times are not strictly ascending and skip the line in that cases.
             if self.last_value[id_tuple] == event_value:
                 self.last_time[id_tuple] = log_atom.atom_time
-                return
-            elif log_atom.atom_time - self.last_time[id_tuple] <= 0:
-                self.print('Anomaly in log line order: %s - %s (%s): %s - %s'%(self.last_value[id_tuple], event_value, id_tuple,
+                return True
+            if log_atom.atom_time - self.last_time[id_tuple] <= 0:
+                self.print('Anomaly in log line order: %s - %s (%s): %s - %s' % (self.last_value[id_tuple], event_value, id_tuple,
                            self.last_time[id_tuple], log_atom.atom_time), log_atom, self.path_list, confidence=1)
-                return
+                return True
 
             # Check in which order the event_values appear in the time matrix
             event_value_1 = None
@@ -177,7 +178,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
                 # Initialize the entry in the time matrix
                 if event_value not in self.time_matrix:
                     self.time_matrix[event_value] = {}
-                message = 'First Appearance: %s - %s (%s), %s'%(self.last_value[id_tuple], event_value, id_tuple,
+                message = 'First Appearance: %s - %s (%s), %s' % (self.last_value[id_tuple], event_value, id_tuple,
                         log_atom.atom_time - self.last_time[id_tuple])
                 self.print(message, log_atom, self.path_list)
                 if self.auto_include_flag:
@@ -188,8 +189,9 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
                         self.time_matrix[event_value_1][event_value_2] > self.time_output_threshold:
                     if 1 - (log_atom.atom_time - self.last_time[id_tuple]) / self.time_matrix[event_value_1][event_value_2] >\
                             self.anomaly_threshold:
-                        message = 'Anomaly: %s - %s (%s), %s -> %s'%(self.last_value[id_tuple], event_value, id_tuple,
-                                self.time_matrix[event_value_1][event_value_2], log_atom.atom_time - self.last_time[id_tuple])
+                        message = 'Anomaly: %s - %s (%s), %s -> %s' % (
+                                self.last_value[id_tuple], event_value, id_tuple, self.time_matrix[event_value_1][event_value_2],
+                                log_atom.atom_time - self.last_time[id_tuple])
                         confidence = 1 - (log_atom.atom_time - self.last_time[id_tuple]) / self.time_matrix[event_value_1][event_value_2]
                         self.print(message, log_atom, self.path_list, confidence)
 
@@ -200,11 +202,13 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
             self.last_value[id_tuple] = event_value
             self.last_time[id_tuple] = log_atom.atom_time
 
+        return True
+
     def solidify_matrix(self):
         """Solidify minimal time matrix with the trianlge inequality."""
         # Initialize list old_pairs with all transitions and a list of all values
         # The list of old_pairs includes the minimal times which can be used to reduce the minimal ransition times of other transitions
-        values = [key for key in self.time_matrix]
+        values = list(self.time_matrix.keys())
         for key1 in self.time_matrix:
             values += [key for key in self.time_matrix[key1] if key not in values]
         old_pairs = [[key1, key2] for key1 in self.time_matrix for key2 in self.time_matrix[key1]]
@@ -212,69 +216,68 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         # Check the triangle inequality as long as values are corrected
         while len(old_pairs) > 0:
             new_pairs = []
-            for k in range(len(old_pairs)):
-                # Check triangle inequality value - old_pairs[k][0] - old_pairs[k][1] > value - old_pairs[k][1] and 
-                # old_pairs[k][0] - old_pairs[k][1] - value > value - old_pairs[k][0]
+            for old_pair in old_pairs:
+                # Check triangle inequality value - old_pair[0] - old_pair[1] > value - old_pair[1] and
+                # old_pair[0] - old_pair[1] - value > value - old_pair[0]
                 for value in values:
-                    if value == old_pairs[k][0] or value == old_pairs[k][1]:
+                    if value in (old_pair[0], old_pair[1]):
                         continue
 
-                    # Check value - old_pairs[k][0] - old_pairs[k][1] > value - old_pairs[k][1]
-                    if (old_pairs[k][0] in self.time_matrix and value in self.time_matrix[old_pairs[k][0]]) or (
-                           value in self.time_matrix and old_pairs[k][0] in self.time_matrix[value]):
+                    # Check value - old_pair[0] - old_pair[1] > value - old_pair[1]
+                    if (old_pair[0] in self.time_matrix and value in self.time_matrix[old_pair[0]]) or (
+                           value in self.time_matrix and old_pair[0] in self.time_matrix[value]):
 
-                        if old_pairs[k][0] in self.time_matrix and value in self.time_matrix[old_pairs[k][0]]:
-                            key_1_1 = old_pairs[k][0]
+                        if old_pair[0] in self.time_matrix and value in self.time_matrix[old_pair[0]]:
+                            key_1_1 = old_pair[0]
                             key_1_2 = value
                         else:
                             key_1_1 = value
-                            key_1_2 = old_pairs[k][0]
+                            key_1_2 = old_pair[0]
 
-                        if old_pairs[k][1] in self.time_matrix and value in self.time_matrix[old_pairs[k][1]]:
-                            key_2_1 = old_pairs[k][1]
+                        if old_pair[1] in self.time_matrix and value in self.time_matrix[old_pair[1]]:
+                            key_2_1 = old_pair[1]
                             key_2_2 = value
                         else:
                             key_2_1 = value
-                            key_2_2 = old_pairs[k][1]
+                            key_2_2 = old_pair[1]
 
                         if key_2_1 not in self.time_matrix:
                             self.time_matrix[key_2_1] = {}
                         if (key_2_2 not in self.time_matrix[key_2_1] or self.time_matrix[key_1_1][key_1_2] +
-                                self.time_matrix[old_pairs[k][0]][old_pairs[k][1]] < self.time_matrix[key_2_1][key_2_2]):
+                                self.time_matrix[old_pair[0]][old_pair[1]] < self.time_matrix[key_2_1][key_2_2]):
                             self.time_matrix[key_2_1][key_2_2] = self.time_matrix[key_1_1][key_1_2] +\
-                                    self.time_matrix[old_pairs[k][0]][old_pairs[k][1]]
+                                    self.time_matrix[old_pair[0]][old_pair[1]]
                             if [key_2_1, key_2_2] not in new_pairs:
                                 new_pairs += [[key_2_1, key_2_2]]
 
-                    # Check old_pairs[k][0] - old_pairs[k][1] - value > value - old_pairs[k][0]
-                    if (old_pairs[k][1] in self.time_matrix and value in self.time_matrix[old_pairs[k][1]]) or (
-                           value in self.time_matrix and old_pairs[k][1] in self.time_matrix[value]):
+                    # Check old_pair[0] - old_pair[1] - value > value - old_pair[0]
+                    if (old_pair[1] in self.time_matrix and value in self.time_matrix[old_pair[1]]) or (
+                           value in self.time_matrix and old_pair[1] in self.time_matrix[value]):
 
-                        if old_pairs[k][1] in self.time_matrix and value in self.time_matrix[old_pairs[k][1]]:
-                            key_1_1 = old_pairs[k][1]
+                        if old_pair[1] in self.time_matrix and value in self.time_matrix[old_pair[1]]:
+                            key_1_1 = old_pair[1]
                             key_1_2 = value
                         else:
                             key_1_1 = value
-                            key_1_2 = old_pairs[k][1]
+                            key_1_2 = old_pair[1]
 
-                        if old_pairs[k][0] in self.time_matrix and value in self.time_matrix[old_pairs[k][0]]:
-                            key_2_1 = old_pairs[k][0]
+                        if old_pair[0] in self.time_matrix and value in self.time_matrix[old_pair[0]]:
+                            key_2_1 = old_pair[0]
                             key_2_2 = value
                         else:
                             key_2_1 = value
-                            key_2_2 = old_pairs[k][0]
+                            key_2_2 = old_pair[0]
 
                         if key_2_1 not in self.time_matrix:
                             self.time_matrix[key_2_1] = {}
                         if (key_2_2 not in self.time_matrix[key_2_1] or self.time_matrix[key_1_1][key_1_2] +
-                                self.time_matrix[old_pairs[k][0]][old_pairs[k][1]] < self.time_matrix[key_2_1][key_2_2]):
+                                self.time_matrix[old_pair[0]][old_pair[1]] < self.time_matrix[key_2_1][key_2_2]):
                             self.time_matrix[key_2_1][key_2_2] = self.time_matrix[key_1_1][key_1_2] +\
-                                    self.time_matrix[old_pairs[k][0]][old_pairs[k][1]]
+                                    self.time_matrix[old_pair[0]][old_pair[1]]
                             if [key_2_1, key_2_2] not in new_pairs:
                                 new_pairs += [[key_2_1, key_2_2]]
 
             old_pairs = new_pairs
-        
 
     def get_time_trigger_class(self):  # skipcq: PYL-R0201
         """
