@@ -179,7 +179,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
                 if event_value not in self.time_matrix:
                     self.time_matrix[event_value] = {}
                 message = 'First Appearance: %s - %s (%s), %s' % (self.last_value[id_tuple], event_value, id_tuple,
-                        log_atom.atom_time - self.last_time[id_tuple])
+                                                                  log_atom.atom_time - self.last_time[id_tuple])
                 self.print(message, log_atom, self.path_list)
                 if self.auto_include_flag:
                     self.time_matrix[event_value][self.last_value[id_tuple]] = log_atom.atom_time - self.last_time[id_tuple]
