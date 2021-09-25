@@ -396,24 +396,47 @@ EOL
 #            echo "2014-11-06 09:14:13 1XmNp0-0005Qp-MR H=mail-qg0-f68.google.com [10.5.40.204]:42603 Warning: \"SpamAssassin as sfgthib detected message as spam (998.0)\" 2014-11-06 09:14:13 1XmNp0-0005Qp-MR H=mail-qg0-f68.google.com [10.5.40.204]:42603 Warning: Message has been scanned: no virus or other harmful content was found" >> $LOG_FILE
 #            echo "2014-11-06 09:14:13 1XmNp0-0005Qp-MR <= cpaneltest@gmail.com H=mail.fictional.example [10.5.40.204]:42603 P=esmtps X=TLSv1:RC4-SHA:128 S=3411 id=CAPtYmmQYRDb38yTmnA_ULZVjnKVOdtu6yw-HapGmjBCAk6rYYw@mail.gmail.com T=\"test\" for aaron@domain.com" >> $LOG_FILE
 #            ;;
-        KernelMsgParsingModel)
-            echo "kernel: martian source 192.168.12.197 from 192.168.12.198, on dev bondib0" > $LOG_FILE
-#            echo "" >> $LOG_FILE
-#            echo "" >> $LOG_FILE
-#            echo "" >> $LOG_FILE
-#            echo "" >> $LOG_FILE
-#            echo "" >> $LOG_FILE
-#            echo "" >> $LOG_FILE
-#            echo "" >> $LOG_FILE
-            ;;
-        NtpParsingModel)
-            exit $exit_code
-            echo "test14" > $LOG_FILE
-            ;;
+#        KernelMsgParsingModel)
+#            echo "kernel: martian source 192.168.12.197 from 192.168.12.198, on dev bondib0" > $LOG_FILE
+#            echo "kernel: martian source 192.168.1.255 from 192.168.1.251, on dev eth3" >> $LOG_FILE
+#            echo "kernel: ll header: ff:ff:ff:ff:ff:ff:00:18:f8:0e:81:93:08:00" >> $LOG_FILE
+#            echo "kernel: martian source 192.168.12.197 from 192.168.12.198, on dev bondib0" >> $LOG_FILE
+#            echo "kernel: ll header: 00000000: ff ff ff ff ff ff 00 50 56 ad 59 09 08 00 .......PV.Y..." >> $LOG_FILE
+#            echo "kernel: ll header: 00000000: ff ff ff ff ff ff a6 2c 90 bb 31 e9 08 06        .......,..1..." >> $LOG_FILE
+#            ;;
+#        NtpParsingModel)
+#            echo "ntpd[8457]: Listen and drop on 0 v6wildcard [::]:123" > $LOG_FILE
+#            echo "ntpd[8457]: Listen and drop on 1 v4wildcard 0.0.0.0:123" >> $LOG_FILE
+#            echo "ntpd[8457]: Listen normally on 2 lo 127.0.0.1:123" >> $LOG_FILE
+#            echo "ntpd[8457]: Listen normally on 3 eth0 1.2.2.19:123" >> $LOG_FILE
+#            echo "ntpd[8457]: Listening on routing socket on fd #20 for interface updates" >> $LOG_FILE
+#            echo "ntpd[21152]: logging to file /var/log/ntplog" >> $LOG_FILE
+#            echo "ntpd[22760]: Soliciting pool server 78.41.116.113" >> $LOG_FILE
+#            echo "ntpd[23165]: ntpd 4.2.8p12@1.3728-o (1): Starting" >> $LOG_FILE
+#            echo "ntpd[23165]: Command line: ntpd" >> $LOG_FILE
+#            echo "ntpd[23165]: must be run as root, not uid 1000" >> $LOG_FILE
+#            echo "ntpd[23170]: proto: precision = 0.045 usec (-24)" >> $LOG_FILE
+#            echo "ntpd[23170]: leapsecond file ('/usr/share/zoneinfo/leap-seconds.list'): good hash signature" >> $LOG_FILE
+#            echo "ntpd[23170]: leapsecond file ('/usr/share/zoneinfo/leap-seconds.list'): loaded, expire=2021-12-28T00:00:00Z last=2017-01-01T00:00:00Z ofs=37" >> $LOG_FILE
+#            echo "ntpd[23170]: unable to bind to wildcard address :: - another process may be running - EXITING" >> $LOG_FILE
+#            ;;
         RsyslogParsingModel)
-            echo "test15" > $LOG_FILE
+            echo "rsyslogd: [origin software=\"rsyslogd\" swVersion=\"8.4.2\" x-pid=\"1812\" x-info=\"http://www.rsyslog.com\"] rsyslogd was HUPed" > $LOG_FILE
+            echo "rsyslogd0: action 'action 17' resumed (module 'builtin:ompipe') [try http://www.rsyslog.com/e/0 ]" >> $LOG_FILE
+            echo "rsyslogd-2359: action 'action 17' resumed (module 'builtin:ompipe') [try http://www.rsyslog.com/e/2359 ]" >> $LOG_FILE
+            echo "rsyslogd-2007: action 'action 17' suspended, next retry is Sun May 24 06:56:28 2015 [try http://www.rsyslog.com/e/2007 ]" >> $LOG_FILE
+            echo "rsyslogd: rsyslogd's groupid changed to 109" >> $LOG_FILE
+            echo "rsyslogd: rsyslogd's userid changed to 104" >> $LOG_FILE
+            echo "rsyslogd: [origin software=\"rsyslogd\" swVersion=\"8.2001.0\" x-pid=\"28018\" x-info=\"https://www.rsyslog.com\"] start" >> $LOG_FILE
+            echo "rsyslogd: [origin software=\"rsyslogd\" swVersion=\"8.2001.0\" x-pid=\"542\" x-info=\"https://www.rsyslog.com\"] rsyslogd was HUPed" >> $LOG_FILE
+            echo "rsyslogd-2222: command 'KLogPermitNonKernelFacility' is currently not permitted - did you already set it via a RainerScript command (v6+ config)? [v8.16.0 try http://www.rsyslog.com/e/2222 ]" >> $LOG_FILE
             ;;
         SshdParsingModel)
+            exit $exit_code
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+#            echo "" >> $LOG_FILE
             echo "test16" > $LOG_FILE
             ;;
         SsmtpParsingModel)
