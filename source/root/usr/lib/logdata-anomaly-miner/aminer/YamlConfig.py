@@ -796,6 +796,13 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     force_period_length=item['force_period_length'], set_period_length=item['set_period_length'],
                     min_log_lines_per_time_step=item['min_log_lines_per_time_step'], output_log_line=item['output_logline'],
                     ignore_list=item['ignore_list'], auto_include_flag=learn)
+            elif item['type'].name == 'MinimalTransitionTimeDetector':
+                tmp_analyser = func(
+                    analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
+                    auto_include_flag=learn, output_log_line=item['output_logline'], path_list=item['paths'],
+                    id_path_list=item['id_path_list'], ignore_list=item['ignore_list'], allow_missing_id=item['allow_missing_id'],
+                    num_log_lines_solidify_matrix=item['num_log_lines_solidify_matrix'],
+                    time_output_threshold=item['time_output_threshold'], anomaly_threshold=item['anomaly_threshold'])
             else:
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn)
             if item['output_event_handlers'] is not None:
