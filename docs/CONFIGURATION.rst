@@ -1654,18 +1654,18 @@ This component extracts values from a given match and writes them to a stream. T
 MinimalTransitionTimeDetector
 ~~~~~~~~~~~~~~~~~~~~~
 
-This module defines an detector for event and value sequences. The concept is based on STIDE which was first published by Forrest et al.
+This module defines an detector for minimal transition times between states (e.g. value combinations of stated paths).
 
-* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings).
-* **id_path_list** parser paths where id values can be stored in all relevant log event types (list of strings) (list of strings).
-* **ignore_list** parser paths that are not considered for analysis, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable (list of strings).
-* **allow_missing_id** when set to True, the detector will also use matches, where one of the pathes from target_path_list does not refer to an existing parsed data object (boolean).
-* **num_log_lines_solidify_matrix** number of processed log lines after which the matrix is solidified. This process is periodically repeated (integer).
-* **time_output_threshold** threshold for the tested minimal transition time which has to be exceeded to be tested (float).
-* **anomaly_threshold** threshold for the confidence which must be exceeded to raise an anomaly (float).
-* **persistence_id** name of persistency document (string).
-* **learn_mode** specifies whether newly observed sequences should be added to the learned model (boolean).
-* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean).
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings, **required**).
+* **id_path_list** parser paths where id values can be stored in all relevant log event types (list of strings, **required**).
+* **ignore_list** parser paths that are not considered for analysis, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable (list of strings, default: []).
+* **allow_missing_id** when set to True, the detector will also use matches, where one of the pathes from target_path_list does not refer to an existing parsed data object (boolean, default: False).
+* **num_log_lines_solidify_matrix** number of processed log lines after which the matrix is solidified. This process is periodically repeated (integer, default: 10000).
+* **time_output_threshold** threshold for the tested minimal transition time which has to be exceeded to be tested (float, default: 0).
+* **anomaly_threshold** threshold for the confidence which must be exceeded to raise an anomaly (float, default: 0.05).
+* **persistence_id** name of persistency document (string, default: 'Default').
+* **learn_mode** specifies whether newly observed sequences should be added to the learned model (boolean, default: True).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, default: True).
 
 .. code-block:: yaml
 

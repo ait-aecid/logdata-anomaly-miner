@@ -1,5 +1,6 @@
 """
-This module defines an detector for event and value frequency deviations.
+This module defines an detector for minimal transition times between states
+(e.g. value combinations of stated paths).
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
 Foundation, either version 3 of the License, or (at your option) any later
@@ -27,7 +28,7 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 
 
 class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
-    """This class creates events when event or value frequencies change."""
+    """This class creates events when minimal transition times between states (e.g. value combinations of stated paths) are undercut."""
 
     def __init__(self, aminer_config, anomaly_event_handlers, path_list=None, id_path_list=None, ignore_list=None, allow_missing_id=False,
                  num_log_lines_solidify_matrix=100, time_output_threshold=0, anomaly_threshold=0.05, persistence_id='Default',
