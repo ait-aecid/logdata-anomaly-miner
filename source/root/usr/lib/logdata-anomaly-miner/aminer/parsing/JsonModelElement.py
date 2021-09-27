@@ -158,6 +158,15 @@ class JsonModelElement(ModelElementInterface):
                 if index != -1 and index != match_context.match_data.find(b"\\x", index-1):
                     match_context.match_data = match_context.match_data.decode("unicode-escape").encode()
                     break
+            index = 0
+            while index != -1:
+                index = match_context.match_data.find(b"\\", index)
+                if index != -1 and len(match_context.match_data) - 1 > index and match_context.match_data[
+                        index + 1] not in b"\\'\"abfnrtv/":
+                    match_context.match_data = match_context.match_data[:index] + b"\\" + match_context.match_data[index:]
+                    index += 2
+                elif index != -1:
+                    index += 2
             json_match_data = json.loads(match_context.match_data, parse_float=format_float)
             if not isinstance(json_match_data, dict):
                 return None
@@ -175,7 +184,7 @@ class JsonModelElement(ModelElementInterface):
             match_data = match_data.replace(bytes(chr(c), encoding="utf-8"), b"")
         if None in matches or (match_data != b"" and len(matches) > 0):
             logging.getLogger(DEBUG_LOG_NAME).debug(
-                debug_log_prefix + "get_match_element_main NONE RETURNED", match_context.match_data.strip(b' }]"\r\n').decode())
+                debug_log_prefix + "get_match_element_main NONE RETURNED\n" + match_context.match_data.strip(b' }]"\r\n').decode())
             match_context.match_data = old_match_data
             return None
         # remove all remaining spaces and brackets.
@@ -199,7 +208,6 @@ class JsonModelElement(ModelElementInterface):
             if key not in json_dict:
                 index = match_context.match_data.find(key.encode())
                 match_context.update(match_context.match_data[:index])
-                logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 2", key, json_dict)
                 if self.allow_all_fields:
                     index = match_context.match_data.find(key.encode()) + len(key.encode())
                     index += len(match_context.match_data) - len(match_context.match_data[index:].lstrip(b' \n\t:"')) + \
