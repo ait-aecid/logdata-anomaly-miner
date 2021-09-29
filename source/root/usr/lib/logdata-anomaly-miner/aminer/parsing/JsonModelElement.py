@@ -158,6 +158,15 @@ class JsonModelElement(ModelElementInterface):
                 if index != -1 and index != match_context.match_data.find(b"\\x", index-1):
                     match_context.match_data = match_context.match_data.decode("unicode-escape").encode()
                     break
+            index = 0
+            while index != -1:
+                index = match_context.match_data.find(b"\\", index)
+                if index != -1 and len(match_context.match_data) - 1 > index and match_context.match_data[
+                        index + 1] not in b"\\'\"abfnrtv/":
+                    match_context.match_data = match_context.match_data[:index] + b"\\" + match_context.match_data[index:]
+                    index += 2
+                elif index != -1:
+                    index += 2
             json_match_data = json.loads(match_context.match_data, parse_float=format_float)
             if not isinstance(json_match_data, dict):
                 return None
@@ -175,7 +184,7 @@ class JsonModelElement(ModelElementInterface):
             match_data = match_data.replace(bytes(chr(c), encoding="utf-8"), b"")
         if None in matches or (match_data != b"" and len(matches) > 0):
             logging.getLogger(DEBUG_LOG_NAME).debug(
-                debug_log_prefix + "get_match_element_main NONE RETURNED", match_context.match_data.strip(b' }]"\r\n').decode())
+                debug_log_prefix + "get_match_element_main NONE RETURNED\n" + match_context.match_data.strip(b' }]"\r\n').decode())
             match_context.match_data = old_match_data
             return None
         # remove all remaining spaces and brackets.
@@ -199,7 +208,6 @@ class JsonModelElement(ModelElementInterface):
             if key not in json_dict:
                 index = match_context.match_data.find(key.encode())
                 match_context.update(match_context.match_data[:index])
-                logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 2", key, json_dict)
                 if self.allow_all_fields:
                     index = match_context.match_data.find(key.encode()) + len(key.encode())
                     index += len(match_context.match_data) - len(match_context.match_data[index:].lstrip(b' \n\t:"')) + \
@@ -211,7 +219,7 @@ class JsonModelElement(ModelElementInterface):
                 return [None]
             value = json_dict[key]
             if isinstance(value, (dict, list)) and (not isinstance(json_match_data, dict) or split_key not in json_match_data):
-                logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 3")
+                logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 3, Key: " + split_key + ", Value: " + repr(value))
                 return [None]
             if isinstance(value, dict):
                 matches += self.parse_json_dict(value, json_match_data[split_key], "%s/%s" % (current_path, split_key), match_context)
@@ -224,7 +232,7 @@ class JsonModelElement(ModelElementInterface):
                     match_context.update(match_context.match_data[:index])
 
                 if len(matches) == 0 or matches[-1] is None:
-                    logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN MATCHES 1")
+                    logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "No match found for key " + split_key)
                     return matches
             elif isinstance(value, list):
                 res = self.parse_json_array(json_dict, json_match_data, key, split_key, current_path, matches, match_context, i)
@@ -238,6 +246,8 @@ class JsonModelElement(ModelElementInterface):
                     matches.append(match_element)
                     match_context.update(match_context.match_data[:index])
                 else:
+                    logging.getLogger(DEBUG_LOG_NAME).debug(
+                        debug_log_prefix + "EMPTY_OBJECT " + split_key + " is not empty. Keys: " + str(json_match_data[split_key].keys()))
                     matches.append(None)
             elif json_dict[key] == "EMPTY_ARRAY":
                 if isinstance(json_match_data[split_key], list) and len(json_match_data[split_key]) == 0:
@@ -247,6 +257,8 @@ class JsonModelElement(ModelElementInterface):
                     matches.append(match_element)
                     match_context.update(match_context.match_data[:index])
                 else:
+                    logging.getLogger(DEBUG_LOG_NAME).debug(
+                        debug_log_prefix + "EMPTY_ARRAY " + split_key + " is not empty. Data: " + str(json_match_data[split_key]))
                     matches.append(None)
             else:
                 if key != split_key and split_key not in json_match_data:
@@ -262,16 +274,16 @@ class JsonModelElement(ModelElementInterface):
                     matches.append(match_element)
                     if index == -1 and match_element is None:
                         logging.getLogger(DEBUG_LOG_NAME).debug(
-                            debug_log_prefix +
-                            "Necessary element did not match! MatchElement: %s\nData: %s\nMatchContext: %s\nIsFloat %s, Index: %d" % (
-                                match_element, data.decode(), match_context.match_data.replace(b"\\", b"").decode(),
-                                isinstance(json_match_data[split_key], float), index))
+                            debug_log_prefix + "Necessary element did not match! Key: %s, MatchElement: %s, Data: %s, IsFloat %s, "
+                                               "Index: %d, MatchContext: %s" % (
+                                                    key, match_element, data.decode(), isinstance(json_match_data[split_key], float), index,
+                                                    match_context.match_data.replace(b"\\", b"").decode()))
                         return matches
                 match_context.update(match_context.match_data[:index + len(data)])
         missing_keys = [x for x in json_dict if x not in json_match_data]
         for key in missing_keys:
             if not key.startswith(self.optional_key_prefix):
-                logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "Missing Key:", key)
+                logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "Missing Key: " + key)
                 return [None]
         return matches
 
@@ -282,7 +294,7 @@ class JsonModelElement(ModelElementInterface):
             if not key.startswith(self.optional_key_prefix):
                 index = match_context.match_data.find(key.encode())
                 match_context.update(match_context.match_data[:index])
-                logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 1", key)
+                logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 1. Key: " + key)
                 return False
         for key in json_dict.keys():
             k = key
@@ -292,7 +304,7 @@ class JsonModelElement(ModelElementInterface):
                     key] != "EMPTY_ARRAY":
                 index = match_context.match_data.find(key.encode())
                 match_context.update(match_context.match_data[:index])
-                logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 5", key)
+                logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 5. Key: " + key)
                 return False
         return True
 
@@ -310,6 +322,8 @@ class JsonModelElement(ModelElementInterface):
                          match_context, i: int):
         """Parse a array in a json object."""
         if not isinstance(json_match_data[split_key], list):
+            logging.getLogger(DEBUG_LOG_NAME).debug(
+                debug_log_prefix + "Key " + split_key + " is no array. Data: " + str(json_match_data[split_key]))
             return [None]
         search_string = b"]"
         match_array = self.flatten_list(json_match_data[split_key])
@@ -331,7 +345,7 @@ class JsonModelElement(ModelElementInterface):
                         val, match_array[j], "%s/%s" % (current_path, split_key), match_context)
                     if matches[-1] is None:
                         if len(value) - 1 == k:
-                            logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN MATCHES 2")
+                            logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "No match found for key " + split_key)
                             return matches
                         del matches[-1]
                         continue
@@ -347,20 +361,24 @@ class JsonModelElement(ModelElementInterface):
                                 current_path+"/"+key, match_context.match_data[:index], match_context.match_data[:index], None)
                             match_context.update(match_context.match_data[:index])
                         else:
+                            logging.getLogger(DEBUG_LOG_NAME).debug(
+                                debug_log_prefix + "EMPTY_ARRAY " + split_key + " is not empty. Data: " + json_match_data[split_key])
                             return None
                     else:
                         match_element = val.get_match_element(current_path, MatchContext(data))
                         if match_element is not None and len(match_element.match_string) != len(data):
-                            logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "MatchElement NONE 1")
+                            logging.getLogger(DEBUG_LOG_NAME).debug(
+                                debug_log_prefix + "MatchElement NONE 1. match_string: " + match_element.match_string.decode() +
+                                ", data: " + data.decode())
                             match_element = None
                     index = match_context.match_data.find(data)
                     if match_element is None:
-                        logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "MatchElement NONE 2", data.decode())
+                        logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "MatchElement NONE 2. Data: " + data.decode())
                         index = -1
                     match_context.update(match_context.match_data[:index + len(data)])
                     if index == -1 and val == "ALLOW_ALL":
                         logging.getLogger(DEBUG_LOG_NAME).debug(
-                            debug_log_prefix + "ALLOW_ALL (ARRAY-ELEMENT)", match_context.match_data.decode())
+                            debug_log_prefix + "ALLOW_ALL (ARRAY-ELEMENT). Data: " + match_context.match_data.decode())
                         index = match_context.match_data.find(search_string)
                         match_context.update(match_context.match_data[:index])
                     if match_element is not None or (match_element is None and not key.startswith(self.optional_key_prefix)):
@@ -400,7 +418,7 @@ class JsonModelElement(ModelElementInterface):
         elif not isinstance(data, bytes):
             data = str(data).encode()
         if json_dict[key] == "ALLOW_ALL":
-            logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "ALLOW_ALL (DICT)", data.decode())
+            logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "ALLOW_ALL (DICT)\n" + data.decode())
             match_element = MatchElement(current_path, data, data, None)
             last_bracket = match_context.match_data.find(b"}", len(data))
             while match_context.match_data.count(b"{", 0, last_bracket) - match_context.match_data.count(b"}", 0, last_bracket) > 0:
