@@ -27,6 +27,9 @@ from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 from aminer.util import PersistenceUtil
 
+# ToDo:
+# x) self.result_list leer initialisieren und dann testen
+# x) Persitency
 
 class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """This class is used for an arima time series analysis of the values of the paths in target_path_list."""
@@ -110,8 +113,10 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.prediction_history = []
         # List of the the results if th value was in the limits of the one step predictions
         self.result_list = []
-        # Minimal number of successes for the binomial test
+        # Minimal number of successes for the binomial test in the last num_results_bt results
         self.bt_min_suc = self.bt_min_successes(self.num_results_bt, self.alpha, self.alpha_bt)
+        # Maximal number of successes for the binomial test in the last num_periods_tsa_ini * period_length results
+        self.bt_max_suc = []
 
         # Loads the persistence
         self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
@@ -134,6 +139,30 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         return delta
 
     def do_persist(self):
+        import matplotlib
+        matplotlib.use('pdf')
+        import matplotlib.pyplot as plt
+        for event_index in range(len(self.prediction_history)):
+            for count_index in range(len(self.prediction_history[event_index])):
+                plt.figure(figsize=(8, 4.5))
+
+                plt.plot(self.prediction_history[event_index][count_index][0], 'red')
+                plt.plot(self.prediction_history[event_index][count_index][2], 'red')
+                plt.plot(self.prediction_history[event_index][count_index][1], 'blue')
+
+                for i in range(len(self.prediction_history[event_index][count_index][0])):
+                    if self.prediction_history[event_index][count_index][0][i] != self.prediction_history[event_index][count_index][2][i] and (
+                            self.prediction_history[event_index][count_index][0][i] > self.prediction_history[event_index][count_index][1][i] or
+                            self.prediction_history[event_index][count_index][1][i] > self.prediction_history[event_index][count_index][2][i]):
+                        plt.plot(i, [self.prediction_history[event_index][count_index][1][i]], 'or', fillstyle='none', ms=8.0)
+
+                plt.gcf().autofmt_xdate()
+
+                plt.savefig('/tmp/TSAoutput_'+str(self.event_type_detector.id_path_list_tuples[event_index]) + '_' + str(count_index), dpi=600)
+                # plt.savefig('/tmp/TSAoutput_'+str(self.event_type_detector.id_path_list_tuples[event_index]) + '_' + str(tuple([self.event_type_detector.variable_key_list[event_index][var_index] for var_index in self.target_path_index_list[event_index]])), dpi=600)
+                    # Or str(event_index) if id_path_list == None/[]
+                plt.close()
+
         """Immediately write persistence data to storage."""
         persistence_data = []
         persistence_data.append(self.target_path_index_list)
@@ -234,13 +263,20 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         if len(self.arima_models) <= event_index:
             self.arima_models += [None for _ in range(event_index + 1 - len(self.arima_models))]
             self.result_list += [None for _ in range(event_index + 1 - len(self.result_list))]
+            self.bt_max_suc += [None for _ in range(event_index + 1 - len(self.bt_max_suc))]
         if len(self.prediction_history) <= event_index:
             self.prediction_history += [None for _ in range(event_index + 1 - len(self.prediction_history))]
 
         # Initialize the lists for the arima models for this ET
         if self.arima_models[event_index] is None:
             self.arima_models[event_index] = [None for _ in range(len(self.target_path_index_list[event_index]))]
-            self.result_list[event_index] = [[1] * self.num_results_bt for _ in range(len(self.target_path_index_list[event_index]))]
+            self.result_list[event_index] = [[] for _ in range(len(self.target_path_index_list[event_index]))]
+            self.bt_max_suc[event_index] = [min(
+                                            self.num_periods_tsa_ini * self.period_length_list[event_index][count_index] - 1,
+                                            self.bt_min_successes(
+                                            self.num_periods_tsa_ini * self.period_length_list[event_index][count_index],
+                                            self.alpha, 1 - self.alpha_bt)) if self.period_length_list[event_index][count_index] != None
+                                            else None for count_index in range(len(self.target_path_index_list[event_index]))]
         if self.prediction_history[event_index] is None:
             self.prediction_history[event_index] = [[[], [], []] for _ in range(len(self.target_path_index_list[event_index]))]
 
@@ -270,6 +306,9 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 if len(self.result_list) > event_index and len(self.result_list[event_index]) > count_index:
                     self.result_list[event_index] = self.result_list[event_index][:count_index] +\
                             self.result_list[event_index][count_index + 1:]
+                if len(self.bt_max_suc) > event_index and len(self.bt_max_suc[event_index]) > count_index:
+                    self.bt_max_suc[event_index] = self.bt_max_suc[event_index][:count_index] +\
+                            self.bt_max_suc[event_index][count_index + 1:]
 
             message = 'Disabled the TSA for the targetpaths %s of event %s' % (
                     [self.event_type_detector.variable_key_list[event_index][count_index] for count_index in delete_indices],
@@ -343,11 +382,21 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     else:
                         self.result_list[event_index][count_index].append(1)
 
-                    if len(self.result_list[event_index][count_index]) >= 2 * self.num_results_bt:
-                        self.result_list[event_index][count_index] = self.result_list[event_index][count_index][-self.num_results_bt:]
+                    # Reduce the number of entries in the time history if it gets too large
+                    if len(self.result_list[event_index][count_index]) >= 2 * max(
+                            self.num_results_bt, self.num_periods_tsa_ini * self.period_length_list[event_index][count_index]):
+                        self.result_list[event_index][count_index] = self.result_list[event_index][count_index][-max(
+                            self.num_results_bt, self.num_periods_tsa_ini * self.period_length_list[event_index][count_index]):]
 
-                # Discard or update the model, for the next step
-                if self.auto_include_flag and sum(self.result_list[event_index][count_index][-self.num_results_bt:]) < self.bt_min_suc:
+                # Check if the too few or many successes are in the last section of the test history and discard the model
+                # Else update the model for the next step
+                if self.auto_include_flag and (
+                        sum(self.result_list[event_index][count_index][-self.num_results_bt:]) +
+                        max(0, self.num_results_bt - len(self.result_list[event_index][count_index])) < self.bt_min_suc or
+                        sum(self.result_list[event_index][count_index][
+                        -self.num_periods_tsa_ini * self.period_length_list[event_index][count_index]:]) >
+                        self.bt_max_suc[event_index][count_index]):
+
                     message = 'Discard the TSA model for the event %s and path %s' % (
                             self.event_type_detector.get_event_type(event_index),
                             self.event_type_detector.variable_key_list[event_index][var_index])
@@ -356,7 +405,7 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
                     # Discard the trained model and reset the result_list
                     self.arima_models[event_index][count_index] = None
-                    self.result_list[event_index][count_index] = [1]*self.num_results_bt
+                    self.result_list[event_index][count_index] = []
                 else:
                     # Update the model
                     self.arima_models[event_index][count_index] = self.arima_models[event_index][count_index].append([count])
