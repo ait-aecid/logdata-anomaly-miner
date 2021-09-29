@@ -157,15 +157,15 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             self.prediction_history = persistence_data[2]
 
         self.bt_max_suc += [None for _ in range(len(self.target_path_index_list))]
-        for event_index in range(len(self.target_path_index_list)):
-            if self.target_path_index_list[event_index] is not None:
+        for event_index, target_path_index in enumerate(self.target_path_index_list):
+            if target_path_index is not None:
                 self.bt_max_suc[event_index] = [min(
                                                 self.num_periods_tsa_ini * self.period_length_list[event_index][count_index] - 1,
-                                                self.bt_min_successes(
-                                                self.num_periods_tsa_ini * self.period_length_list[event_index][count_index],
-                                                self.alpha, 1 - self.alpha_bt)) if self.period_length_list[event_index][count_index] != None
-                                                else None for count_index in range(len(self.target_path_index_list[event_index]))]
-        print(self.bt_max_suc)
+                                                self.bt_min_successes(self.num_periods_tsa_ini *
+                                                                      self.period_length_list[event_index][count_index], self.alpha,
+                                                                      1 - self.alpha_bt))
+                                                if self.period_length_list[event_index][count_index] is not
+                                                None else None for count_index in range(len(target_path_index))]
 
     def receive_atom(self, log_atom):
         """
@@ -257,10 +257,11 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             self.result_list[event_index] = [[] for _ in range(len(self.target_path_index_list[event_index]))]
             self.bt_max_suc[event_index] = [min(
                                             self.num_periods_tsa_ini * self.period_length_list[event_index][count_index] - 1,
-                                            self.bt_min_successes(
-                                            self.num_periods_tsa_ini * self.period_length_list[event_index][count_index],
-                                            self.alpha, 1 - self.alpha_bt)) if self.period_length_list[event_index][count_index] != None
-                                            else None for count_index in range(len(self.target_path_index_list[event_index]))]
+                                            self.bt_min_successes(self.num_periods_tsa_ini *
+                                                                  self.period_length_list[event_index][count_index],
+                                                                  self.alpha, 1 - self.alpha_bt)) if
+                                            self.period_length_list[event_index][count_index] is not None else None for count_index in
+                                            range(len(self.target_path_index_list[event_index]))]
         if self.prediction_history[event_index] is None:
             self.prediction_history[event_index] = [[[], [], []] for _ in range(len(self.target_path_index_list[event_index]))]
 
