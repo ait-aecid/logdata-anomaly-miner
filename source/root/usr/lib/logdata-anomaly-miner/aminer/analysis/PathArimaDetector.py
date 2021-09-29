@@ -27,9 +27,6 @@ from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 from aminer.util import PersistenceUtil
 
-# ToDo:
-# x) self.result_list leer initialisieren und dann testen
-# x) Persitency
 
 class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """This class is used for an arima time series analysis of the values of the paths in target_path_list."""
@@ -139,30 +136,6 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         return delta
 
     def do_persist(self):
-        import matplotlib
-        matplotlib.use('pdf')
-        import matplotlib.pyplot as plt
-        for event_index in range(len(self.prediction_history)):
-            for count_index in range(len(self.prediction_history[event_index])):
-                plt.figure(figsize=(8, 4.5))
-
-                plt.plot(self.prediction_history[event_index][count_index][0], 'red')
-                plt.plot(self.prediction_history[event_index][count_index][2], 'red')
-                plt.plot(self.prediction_history[event_index][count_index][1], 'blue')
-
-                for i in range(len(self.prediction_history[event_index][count_index][0])):
-                    if self.prediction_history[event_index][count_index][0][i] != self.prediction_history[event_index][count_index][2][i] and (
-                            self.prediction_history[event_index][count_index][0][i] > self.prediction_history[event_index][count_index][1][i] or
-                            self.prediction_history[event_index][count_index][1][i] > self.prediction_history[event_index][count_index][2][i]):
-                        plt.plot(i, [self.prediction_history[event_index][count_index][1][i]], 'or', fillstyle='none', ms=8.0)
-
-                plt.gcf().autofmt_xdate()
-
-                plt.savefig('/tmp/TSAoutput_'+str(self.event_type_detector.id_path_list_tuples[event_index]) + '_' + str(count_index), dpi=600)
-                # plt.savefig('/tmp/TSAoutput_'+str(self.event_type_detector.id_path_list_tuples[event_index]) + '_' + str(tuple([self.event_type_detector.variable_key_list[event_index][var_index] for var_index in self.target_path_index_list[event_index]])), dpi=600)
-                    # Or str(event_index) if id_path_list == None/[]
-                plt.close()
-
         """Immediately write persistence data to storage."""
         persistence_data = []
         persistence_data.append(self.target_path_index_list)
@@ -182,6 +155,17 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             self.target_path_index_list = persistence_data[0]
             self.period_length_list = persistence_data[1]
             self.prediction_history = persistence_data[2]
+
+        self.bt_max_suc += [None for _ in range(len(self.target_path_index_list))]
+        for event_index in range(len(self.target_path_index_list)):
+            if self.target_path_index_list[event_index] is not None:
+                self.bt_max_suc[event_index] = [min(
+                                                self.num_periods_tsa_ini * self.period_length_list[event_index][count_index] - 1,
+                                                self.bt_min_successes(
+                                                self.num_periods_tsa_ini * self.period_length_list[event_index][count_index],
+                                                self.alpha, 1 - self.alpha_bt)) if self.period_length_list[event_index][count_index] != None
+                                                else None for count_index in range(len(self.target_path_index_list[event_index]))]
+        print(self.bt_max_suc)
 
     def receive_atom(self, log_atom):
         """
