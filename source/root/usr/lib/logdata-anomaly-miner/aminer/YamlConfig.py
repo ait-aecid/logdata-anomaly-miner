@@ -260,9 +260,10 @@ def build_parsing_model():
             elif item['type'].name == 'JsonModelElement':
                 key_parser_dict = parse_json_yaml(item['key_parser_dict'], parser_model_dict)
                 if 'start' in item and item['start'] is True:
-                    start = item['type'].func(item['name'], key_parser_dict, item['optional_key_prefix'])
+                    start = item['type'].func(item['name'], key_parser_dict, item['optional_key_prefix'], item['allow_all_fields'])
                 else:
-                    parser_model_dict[item['id']] = item['type'].func(item['name'], key_parser_dict, item['optional_key_prefix'])
+                    parser_model_dict[item['id']] = item['type'].func(
+                        item['name'], key_parser_dict, item['optional_key_prefix'], item['allow_all_fields'])
             else:
                 if 'args' in item:
                     parser_model_dict[item['id']] = item['type'].func(item['name'], item['args'])
@@ -795,6 +796,13 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     force_period_length=item['force_period_length'], set_period_length=item['set_period_length'],
                     min_log_lines_per_time_step=item['min_log_lines_per_time_step'], output_log_line=item['output_logline'],
                     ignore_list=item['ignore_list'], auto_include_flag=learn)
+            elif item['type'].name == 'MinimalTransitionTimeDetector':
+                tmp_analyser = func(
+                    analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
+                    auto_include_flag=learn, output_log_line=item['output_logline'], path_list=item['paths'],
+                    id_path_list=item['id_path_list'], ignore_list=item['ignore_list'], allow_missing_id=item['allow_missing_id'],
+                    num_log_lines_solidify_matrix=item['num_log_lines_solidify_matrix'],
+                    time_output_threshold=item['time_output_threshold'], anomaly_threshold=item['anomaly_threshold'])
             else:
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn)
             if item['output_event_handlers'] is not None:
@@ -892,16 +900,22 @@ def parse_json_yaml(json_dict, parser_model_dict):
         if isinstance(value, dict):
             key_parser_dict[key] = parse_json_yaml(value, parser_model_dict)
         elif isinstance(value, list):
-            if isinstance(value[0], dict):
-                key_parser_dict[key] = [parse_json_yaml(value[0], parser_model_dict)]
-            elif value[0] in ("ALLOW_ALL", "EMPTY_ARRAY", "EMPTY_OBJECT"):
-                key_parser_dict[key] = value
-            elif parser_model_dict.get(value[0]) is None:
-                msg = 'The parser model %s does not exist!' % value[0]
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise ValueError(msg)
-            else:
-                key_parser_dict[key] = [parser_model_dict.get(value[0])]
+            key_parser_dict[key] = []
+            for val in value:
+                if isinstance(val, dict):
+                    key_parser_dict[key].append(parse_json_yaml(val, parser_model_dict))
+                elif val in ("ALLOW_ALL", "EMPTY_ARRAY", "EMPTY_OBJECT"):
+                    if len(value) > 1 and val == "ALLOW_ALL":
+                        msg = "ALLOW_ALL must not be combined with other parsers in lists."
+                        logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                        raise ValueError(msg)
+                    key_parser_dict[key] = value
+                elif parser_model_dict.get(val) is None:
+                    msg = 'The parser model %s does not exist!' % val
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
+                else:
+                    key_parser_dict[key].append(parser_model_dict.get(val))
         elif value in ("ALLOW_ALL", "EMPTY_ARRAY", "EMPTY_OBJECT"):
             key_parser_dict[key] = value
         elif parser_model_dict.get(value) is None:

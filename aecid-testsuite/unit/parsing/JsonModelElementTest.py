@@ -14,7 +14,8 @@ class JsonModelElementTest(TestBase):
     id_ = "json"
     path = "path"
     single_line_json = b'{"menu": {"id": "file", "value": "File", "popup": {"menuitem": [{"value": "New", "onclick": "CreateNewDoc()"}, {' \
-                       b'"value": "Open", "onclick": "OpenDoc()"}, {"value": "Close", "onclick": "CloseDoc()"}]}}}'
+                       b'"value": "Open", "onclick": "OpenDoc()"}, {"value": "Close", "onclick": "CloseDoc()"}, ' \
+                       b'{"value": "Undo", "onclick": "UndoDoc()", "clickable": true}]}}}'
     single_line_with_optional_key_json = b'{"menu": {"id": "file", "value": "File", "popup": {"menuitem": [{"value": "New", "onclick":' \
                                          b' "CreateNewDoc()", "clickable": false}, {"value": "Open", "onclick": "OpenDoc()"}, {"value": ' \
                                          b'"Close", "onclick": "CloseDoc()", "clickable": false}]}}}'
@@ -31,6 +32,9 @@ class JsonModelElementTest(TestBase):
     single_line_json_array = b'{"menu": {"id": "file", "value": "File", "popup": ["value", "value", "value"]}}'
     single_line_escaped_json = br'{"a": "\x2d"}'
     single_line_empty_array = b'{"menu": {"id": "file", "value": "File", "popup": {"menuitem": []}}}'
+    single_line_multiple_menuitems = \
+        b'{"menu": {"id": "file", "value": "File", "popup": {"menuitem": [{"value": "New", "onclick": "CreateNewDoc()"}, {"value": ' \
+        b'"Open", "onclick": "OpenDoc()"}, {"value": "Close", "onclick": "CloseDoc()"}, , ]}}}'
     multi_line_json = b"""{
   "menu": {
     "id": "file",
@@ -83,6 +87,11 @@ class JsonModelElementTest(TestBase):
                     DummyFixedDataModelElement("open_doc", b"OpenDoc()"), DummyFixedDataModelElement("close_doc", b"CloseDoc()")]),
                 "optional_key_clickable": DummyFirstMatchModelElement("clickable", [
                     DummyFixedDataModelElement("true", b"true"), DummyFixedDataModelElement("false", b"false")])
+            }, {
+                "value": DummyFirstMatchModelElement("buttonNames", [DummyFixedDataModelElement("undo", b"Undo")]),
+                "onclick": DummyFirstMatchModelElement("buttonOnclick", [DummyFixedDataModelElement("undo_doc", b"UndoDoc()")]),
+                "clickable": DummyFirstMatchModelElement("clickable", [
+                    DummyFixedDataModelElement("true", b"true"), DummyFixedDataModelElement("false", b"false")])
             }]
         }}}
     key_parser_dict_allow_all = {"menu": {
@@ -114,8 +123,10 @@ class JsonModelElementTest(TestBase):
         k = self.key_parser_dict
         json_me = JsonModelElement(self.id_, self.key_parser_dict)
         self.assertEqual(json_me.get_child_elements(), [
-            k["menu"]["id"], k["menu"]["value"], [k["menu"]["popup"]["menuitem"][0]["value"], k["menu"]["popup"]["menuitem"][0]["onclick"],
-                                                  k["menu"]["popup"]["menuitem"][0]["optional_key_clickable"]]])
+            k["menu"]["id"], k["menu"]["value"], [
+                k["menu"]["popup"]["menuitem"][0]["value"], k["menu"]["popup"]["menuitem"][0]["onclick"],
+                k["menu"]["popup"]["menuitem"][0]["optional_key_clickable"], k["menu"]["popup"]["menuitem"][1]["value"],
+                k["menu"]["popup"]["menuitem"][1]["onclick"], k["menu"]["popup"]["menuitem"][1]["clickable"]]])
 
     def test3get_match_element_valid_match(self):
         """Parse matching substring from MatchContext and check if the MatchContext was updated with all characters."""
@@ -409,6 +420,15 @@ class JsonModelElementTest(TestBase):
         self.compare_match_results(
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
+        data = b'{"menu": {"id": {}, "value": [], "popup": {"menuitem": []}}, "a": [], "b": {}, "c": ""}'
+        value = json.loads(data)
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        match_context.match_string = str(json.loads(match_context.match_string)).encode()
+        match_context.match_data = data[len(match_context.match_string):]
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
+
         JsonModelElement(self.id_, {"a": "EMPTY_ARRAY"})
         JsonModelElement(self.id_, {"a": "EMPTY_OBJECT"})
         JsonModelElement(self.id_, {"a": "EMPTY_STRING"})
@@ -427,11 +447,6 @@ class JsonModelElementTest(TestBase):
 
         data = b'{"menu": {"id": {}, "value": [], "popup": {"menuitem": [{"value": null, "onclick": "CreateNewDoc()"}, {"value": null, ' \
                b'"onclick": "OpenDoc()"}, {"value": null, "onclick": "CloseDoc()"}]}}, "a": [], "b": {}, "c": "ab"}'
-        match_context = DummyMatchContext(data)
-        match_element = json_model_element.get_match_element(self.path, match_context)
-        self.compare_no_match_results(data, match_element, match_context)
-
-        data = b'{"menu": {"id": {}, "value": [], "popup": {"menuitem": []}}, "a": [], "b": {}, "c": ""}'
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
@@ -597,8 +612,6 @@ class JsonModelElementTest(TestBase):
         self.assertRaises(TypeError, JsonModelElement, self.id_, {"id": "path"})
         # dict key_parser_dict with list of other lengths than 1 is not allowed.
         key_parser_dict = copy.deepcopy(self.key_parser_dict)
-        key_parser_dict["menu"]["popup"]["menuitem"].append(key_parser_dict["menu"]["popup"]["menuitem"][0])
-        self.assertRaises(ValueError, JsonModelElement, self.id_, key_parser_dict)
         key_parser_dict["menu"]["popup"]["menuitem"] = []
         self.assertRaises(ValueError, JsonModelElement, self.id_, key_parser_dict)
         self.assertRaises(TypeError, JsonModelElement, self.id_, ["path"])  # list key_parser_dict is not allowed
