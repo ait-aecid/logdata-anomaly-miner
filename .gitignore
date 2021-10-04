@@ -154,3 +154,8 @@ playbook.retry
 # for testing
 aecid-testsuite/aminer
 aecid-testsuite/demo/aminer/template_config.py
+
+# Aminer Docker Volumes
+aminercfg/
+persistency/
+logs/
