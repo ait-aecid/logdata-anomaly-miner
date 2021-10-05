@@ -420,27 +420,69 @@ EOL
 #            echo "ntpd[23170]: leapsecond file ('/usr/share/zoneinfo/leap-seconds.list'): loaded, expire=2021-12-28T00:00:00Z last=2017-01-01T00:00:00Z ofs=37" >> $LOG_FILE
 #            echo "ntpd[23170]: unable to bind to wildcard address :: - another process may be running - EXITING" >> $LOG_FILE
 #            ;;
-        RsyslogParsingModel)
-            echo "rsyslogd: [origin software=\"rsyslogd\" swVersion=\"8.4.2\" x-pid=\"1812\" x-info=\"http://www.rsyslog.com\"] rsyslogd was HUPed" > $LOG_FILE
-            echo "rsyslogd0: action 'action 17' resumed (module 'builtin:ompipe') [try http://www.rsyslog.com/e/0 ]" >> $LOG_FILE
-            echo "rsyslogd-2359: action 'action 17' resumed (module 'builtin:ompipe') [try http://www.rsyslog.com/e/2359 ]" >> $LOG_FILE
-            echo "rsyslogd-2007: action 'action 17' suspended, next retry is Sun May 24 06:56:28 2015 [try http://www.rsyslog.com/e/2007 ]" >> $LOG_FILE
-            echo "rsyslogd: rsyslogd's groupid changed to 109" >> $LOG_FILE
-            echo "rsyslogd: rsyslogd's userid changed to 104" >> $LOG_FILE
-            echo "rsyslogd: [origin software=\"rsyslogd\" swVersion=\"8.2001.0\" x-pid=\"28018\" x-info=\"https://www.rsyslog.com\"] start" >> $LOG_FILE
-            echo "rsyslogd: [origin software=\"rsyslogd\" swVersion=\"8.2001.0\" x-pid=\"542\" x-info=\"https://www.rsyslog.com\"] rsyslogd was HUPed" >> $LOG_FILE
-            echo "rsyslogd-2222: command 'KLogPermitNonKernelFacility' is currently not permitted - did you already set it via a RainerScript command (v6+ config)? [v8.16.0 try http://www.rsyslog.com/e/2222 ]" >> $LOG_FILE
-            ;;
+#        RsyslogParsingModel)
+#            echo "rsyslogd: [origin software=\"rsyslogd\" swVersion=\"8.4.2\" x-pid=\"1812\" x-info=\"http://www.rsyslog.com\"] rsyslogd was HUPed" > $LOG_FILE
+#            echo "rsyslogd0: action 'action 17' resumed (module 'builtin:ompipe') [try http://www.rsyslog.com/e/0 ]" >> $LOG_FILE
+#            echo "rsyslogd-2359: action 'action 17' resumed (module 'builtin:ompipe') [try http://www.rsyslog.com/e/2359 ]" >> $LOG_FILE
+#            echo "rsyslogd-2007: action 'action 17' suspended, next retry is Sun May 24 06:56:28 2015 [try http://www.rsyslog.com/e/2007 ]" >> $LOG_FILE
+#            echo "rsyslogd: rsyslogd's groupid changed to 109" >> $LOG_FILE
+#            echo "rsyslogd: rsyslogd's userid changed to 104" >> $LOG_FILE
+#            echo "rsyslogd: [origin software=\"rsyslogd\" swVersion=\"8.2001.0\" x-pid=\"28018\" x-info=\"https://www.rsyslog.com\"] start" >> $LOG_FILE
+#            echo "rsyslogd: [origin software=\"rsyslogd\" swVersion=\"8.2001.0\" x-pid=\"542\" x-info=\"https://www.rsyslog.com\"] rsyslogd was HUPed" >> $LOG_FILE
+#            echo "rsyslogd-2222: command 'KLogPermitNonKernelFacility' is currently not permitted - did you already set it via a RainerScript command (v6+ config)? [v8.16.0 try http://www.rsyslog.com/e/2222 ]" >> $LOG_FILE
+#            ;;
         SshdParsingModel)
-            exit $exit_code
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-            echo "" >> $LOG_FILE
-#            echo "" >> $LOG_FILE
-            echo "test16" > $LOG_FILE
+            echo "sshd[35618]: Server listening on 0.0.0.0 port 22." > $LOG_FILE
+            echo "sshd[35619]: Failed password for someuser from 1.1.1.1 port 1372 ssh2" >> $LOG_FILE
+            echo "sshd[35619]: Accepted password for someuser from 1.1.1.1 port 1372 ssh2" >> $LOG_FILE
+            echo "sshd[36108]: Accepted publickey for someuser from 1.1.1.2 port 51590 ssh2" >> $LOG_FILE
+            echo "sshd[54798]: error: maximum authentication attempts exceeded for root from 122.121.51.193 port 59928 ssh2 [preauth]" >> $LOG_FILE
+            echo "sshd[54798]: Disconnecting authenticating user root 122.121.51.193 port 59928: Too many authentication failures [preauth]" >> $LOG_FILE
+            echo "sshd[5197]: Accepted publickey for fred from 192.0.2.60 port 59915 ssh2: RSA SHA256:5xyQ+PG1Z3CIiShclJ2iNya5TOdKDgE/HrOXr21IdOo" >> $LOG_FILE
+            echo "sshd[50140]: Accepted publickey for fred from 192.0.2.60 port 44456 ssh2: ECDSA-CERT SHA256:qGl9KiyXrG6mIOo1CT01oHUvod7Ngs5VMHM14DTbxzI ID foobar (serial 9624) CA ED25519 SHA256:fZ6L7TlBLqf1pGWzkcQMQMFZ+aGgrtYgRM90XO0gzZ8" >> $LOG_FILE
+            echo "sshd[5104]: Accepted publickey for fred from 192.0.2.60 port 60594 ssh2: RSA e8:31:68:c7:01:2d:25:20:36:8f:50:5d:f9:ee:70:4c" >> $LOG_FILE
+            echo "sshd[252]: Connection closed by authenticating user fred 192.0.2.60 port 44470 [preauth]" >> $LOG_FILE
+            echo "sshd[90593]: fatal: Timeout before authentication for 192.0.2.60 port 44718" >> $LOG_FILE
+            echo "sshd[252]: error: Certificate invalid: expired" >> $LOG_FILE
+            echo "sshd[90593]: error: Certificate invalid: not yet valid" >> $LOG_FILE
+            echo "sshd[98884]: error: Certificate invalid: name is not a listed principal" >> $LOG_FILE
+            echo "sshd[2420]: cert: Authentication tried for fred with valid certificate but not from a permitted source address (192.0.2.61)." >> $LOG_FILE
+            echo "sshd[2420]: error: Refused by certificate options" >> $LOG_FILE
+            echo "sshd[26299]: Failed none for fred from 192.0.2.60 port 47366 ssh2" >> $LOG_FILE
+            echo "sshd[26299]: User child is on pid 21613" >> $LOG_FILE
+            echo "sshd[21613]: Changed root directory to \"/home/fred\"" >> $LOG_FILE
+            echo "sshd[21613]: subsystem request for sftp" >> $LOG_FILE
+            echo "sshd[83709]: packet_write_poll: Connection from 192.0.2.97 port 57608: Host is down" >> $LOG_FILE
+            echo "sshd[9075]: debug1: Got 100/147 for keepalive" >> $LOG_FILE
+            echo "sshd[73960]: debug2: channel 0: request keepalive@openssh.com confirm 1" >> $LOG_FILE
+            echo "sshd[73960]: debug3: send packet: type 98" >> $LOG_FILE
+            echo "sshd[73960]: debug3: receive packet: type 100" >> $LOG_FILE
+            echo "sshd[73960]: debug1: Got 100/22 for keepalive" >> $LOG_FILE
+            echo "sshd[15780]: debug1: do_cleanup" >> $LOG_FILE
+            echo "sshd[48675]: debug1: session_pty_cleanup: session 0 release /dev/ttyp0" >> $LOG_FILE
+            echo "sshd[29235]: error: Authentication key RSA SHA256:jXEPmu4thnubqPUDcKDs31MOVLQJH6FfF1XSGT748jQ revoked by file /etc/ssh/ssh_revoked_keys" >> $LOG_FILE
+            echo "sshd[38594]: Invalid user ubnt from 201.179.249.231 port 52471" >> $LOG_FILE
+            echo "sshd[38594]: Failed password for invalid user ubnt from 201.179.249.231 port 52471 ssh2" >> $LOG_FILE
+            echo "sshd[38594]: error: maximum authentication attempts exceeded for invalid user ubnt from 201.179.249.231 port 52471 ssh2 [preauth]" >> $LOG_FILE
+            echo "sshd[38594]: Disconnecting invalid user ubnt 201.179.249.231 port 52471: Too many authentication failures [preauth]" >> $LOG_FILE
+            echo "sshd[93126]: Failed none for invalid user admin from 125.64.94.136 port 27586 ssh2" >> $LOG_FILE
+            echo "sshd[9265]: Accepted password for fred from 127.0.0.1 port 40426 ssh2" >> $LOG_FILE
+            echo "sshd[5613]: Invalid user cloud from ::1 port 57404" >> $LOG_FILE
+            echo "sshd[5613]: Failed password for invalid user cloud from ::1 port 57404 ssh2" >> $LOG_FILE
+            echo "sshd[5613]: Connection closed by invalid user cloud ::1 port 57404 [preauth]" >> $LOG_FILE
+            echo "sshd[3545]: pam_succeed_if(sshd:auth): requirement \"uid >= 1000\" not met by user \"root\"" >> $LOG_FILE
+            echo "sshd[3545]: pam_unix(sshd:session): session opened for user root by (uid=0)" >> $LOG_FILE
+            echo "sshd[3545]: Received disconnect from ::1: 11: disconnected by user" >> $LOG_FILE
+            echo "sshd[3545]: pam_unix(sshd:session): session closed for user root" >> $LOG_FILE
+            echo "sshd[4182]: error: Could not load host key: /etc/ssh/ssh_host_dsa_key" >> $LOG_FILE
             ;;
         SsmtpParsingModel)
+            exit $exit_code
             echo "test17" > $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
+            echo "" >> $LOG_FILE
             ;;
         SuSessionParsingModel)
             echo "test18" > $LOG_FILE
@@ -480,7 +522,7 @@ Parser:
 EOL
     sudo aminer -C -c $CONFIG_PATH > $OUT 2>&1 &
     #stop aminer
-    sleep 6 & wait $!
+    sleep 8 & wait $!
     sudo pkill -x aminer
     KILL_PID=$!
     sleep 2
