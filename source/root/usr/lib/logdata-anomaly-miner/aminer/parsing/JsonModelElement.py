@@ -210,7 +210,7 @@ class JsonModelElement(ModelElementInterface):
                 logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 2", key, json_dict)
                 if "ALLOW_ALL_KEYS" in json_dict.keys():
                     key = "ALLOW_ALL_KEYS"
-                if self.allow_all_fields:
+                elif self.allow_all_fields:
                     index = match_context.match_data.find(key.encode()) + len(key.encode())
                     index += len(match_context.match_data) - len(match_context.match_data[index:].lstrip(b' \n\t:"')) + \
                         len(str(json_match_data[key]))
@@ -218,7 +218,8 @@ class JsonModelElement(ModelElementInterface):
                     if match_context.match_data.replace(b"}", b"").replace(b"]", b"").replace(b'"', b"") == b"":
                         match_context.update(match_context.match_data)
                     continue
-                return [None]
+                else:
+                    return [None]
             value = json_dict[key]
             if isinstance(value, (dict, list)) and (not isinstance(json_match_data, dict) or split_key not in json_match_data):
                 logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 3, Key: " + split_key + ", Value: " + repr(value))

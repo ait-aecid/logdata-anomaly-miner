@@ -451,11 +451,6 @@ class JsonModelElementTest(TestBase):
         match_element = json_model_element.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
-        data = b'{"menu": {"id": {}, "value": [], "popup": {"menuitem": []}}, "a": [], "b": {}, "c": ""}'
-        match_context = DummyMatchContext(data)
-        match_element = json_model_element.get_match_element(self.path, match_context)
-        self.compare_no_match_results(data, match_element, match_context)
-
         key_parser_dict = {"ALLOW_ALL_KEYS": DummyFirstMatchModelElement("first", [
             DummyFixedDataModelElement("abc", b"abc"), DummyFixedDataModelElement("123", b"123")])}
         json_model_element = JsonModelElement(self.id_, key_parser_dict)
