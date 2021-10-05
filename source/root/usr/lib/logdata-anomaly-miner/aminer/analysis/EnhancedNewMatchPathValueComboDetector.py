@@ -42,7 +42,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param target_path_list the list of values to extract from each match to create the value combination to be checked.
-        @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the pathes from target_path_list
+        @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the paths from target_path_list
         does not refer to an existing parsed data object.
         @param auto_include_flag when set to True, this detector will report a new value only the first time before including it
         in the known values set automatically.
@@ -86,13 +86,19 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         timestamp = round(timestamp, 3)
         match_value_list = []
         for target_path in self.target_path_list:
-            match_element = match_dict.get(target_path, None)
-            if match_element is None:
+            match = match_dict.get(target_path)
+            if match is None:
                 if not self.allow_missing_values_flag:
                     return False
                 match_value_list.append(None)
             else:
-                match_value_list.append(match_element.match_object)
+                matches = []
+                if isinstance(match, list):
+                    matches = match
+                else:
+                    matches.append(match)
+                for match_element in matches:
+                    match_value_list.append(match_element.match_object)
 
         if self.tuple_transformation_function is not None:
             match_value_list = self.tuple_transformation_function(match_value_list)
@@ -131,9 +137,17 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
                 if self.output_log_line:
                     match_paths_values = {}
                     for match_path, match_element in match_dict.items():
-                        match_value = match_element.match_object
-                        if isinstance(match_value, bytes):
-                            match_value = match_value.decode(AminerConfig.ENCODING)
+                        if isinstance(match_element, list):
+                            match_value = []
+                            for match in match_element:
+                                if isinstance(match.match_object, bytes):
+                                    match_value.append(match.match_object.decode(AminerConfig.ENCODING))
+                                else:
+                                    match_value.append(match.match_object)
+                        else:
+                            match_value = match_element.match_object
+                            if isinstance(match_value, bytes):
+                                match_value = match_value.decode(AminerConfig.ENCODING)
                         match_paths_values[match_path] = match_value
                     analysis_component['ParsedLogAtom'] = match_paths_values
                     sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + str(

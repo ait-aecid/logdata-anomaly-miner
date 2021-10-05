@@ -48,8 +48,25 @@ class ParserMatch:
         result_dict = {}
         while stack:
             match_list = stack.pop()
+            counter_dict = {}
             for test_match in match_list:
-                result_dict[test_match.path] = test_match
+                if test_match.path in counter_dict.keys():
+                    counter_dict[test_match.path] = 0
+                    result_dict[test_match.path] = []
+                else:
+                    counter_dict[test_match.path] = None
+            for test_match in match_list:
+                path = test_match.path
+                if counter_dict[path] is not None:
+                    try:
+                        pos = next(i for i, x in enumerate(result_dict[test_match.path]) if not isinstance(x, list) and isinstance(
+                            test_match.match_object, type(x.match_object)) and test_match.match_object == x.match_object)
+                        path += "/%d" % pos
+                    except StopIteration:
+                        path += "/%d" % counter_dict[path]
+                        counter_dict[test_match.path] += 1
+                    result_dict[test_match.path].append(test_match)
+                result_dict[path] = test_match
                 children = test_match.children
                 if children is not None:
                     stack.append(children)

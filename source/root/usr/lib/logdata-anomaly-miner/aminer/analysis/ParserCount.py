@@ -65,7 +65,7 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
         match_dict = log_atom.parser_match.get_match_dictionary()
         success_flag = False
         for target_path in self.target_path_list:
-            match_element = match_dict.get(target_path, None)
+            match_element = match_dict.get(target_path)
             if match_element is not None:
                 success_flag = True
                 if self.target_label_list:

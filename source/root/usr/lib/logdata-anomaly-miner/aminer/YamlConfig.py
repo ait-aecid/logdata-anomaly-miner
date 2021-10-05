@@ -260,9 +260,10 @@ def build_parsing_model():
             elif item['type'].name == 'JsonModelElement':
                 key_parser_dict = parse_json_yaml(item['key_parser_dict'], parser_model_dict)
                 if 'start' in item and item['start'] is True:
-                    start = item['type'].func(item['name'], key_parser_dict, item['optional_key_prefix'])
+                    start = item['type'].func(item['name'], key_parser_dict, item['optional_key_prefix'], item['allow_all_fields'])
                 else:
-                    parser_model_dict[item['id']] = item['type'].func(item['name'], key_parser_dict, item['optional_key_prefix'])
+                    parser_model_dict[item['id']] = item['type'].func(
+                        item['name'], key_parser_dict, item['optional_key_prefix'], item['allow_all_fields'])
             else:
                 if 'args' in item:
                     parser_model_dict[item['id']] = item['type'].func(item['name'], item['args'])
@@ -721,8 +722,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     num_init=item['num_init'], num_update=item['num_update'], num_update_unq=item['num_update_unq'],
                     num_s_gof_values=item['num_s_gof_values'], num_s_gof_bt=item['num_s_gof_bt'], num_d_bt=item['num_d_bt'],
                     num_pause_discrete=item['num_pause_discrete'], num_pause_others=item['num_pause_others'],
-                    test_gof_int=item['test_gof_int'], update_var_type_bool=item['update_var_type_bool'],
-                    num_stop_update=item['num_stop_update'], silence_output_without_confidence=item['silence_output_without_confidence'],
+                    test_gof_int=item['test_gof_int'], num_stop_update=item['num_stop_update'],
+                    silence_output_without_confidence=item['silence_output_without_confidence'],
                     silence_output_except_indicator=item['silence_output_except_indicator'],
                     num_var_type_hist_ref=item['num_var_type_hist_ref'], num_update_var_type_hist_ref=item['num_update_var_type_hist_ref'],
                     num_var_type_considered_ind=item['num_var_type_considered_ind'], num_stat_stop_update=item['num_stat_stop_update'],
@@ -730,7 +731,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     var_reduction_thres=item['var_reduction_thres'], num_skipped_ind_for_weights=item['num_skipped_ind_for_weights'],
                     num_ind_for_weights=item['num_ind_for_weights'], used_multinomial_test=item['used_multinomial_test'],
                     use_empiric_distr=item['use_empiric_distr'], save_statistics=item['save_statistics'],
-                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'], constraint_list=item['constraint_list'])
+                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'], constraint_list=item['constraint_list'],
+                    auto_include_flag=learn)
             elif item['type'].name == 'VariableCorrelationDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
@@ -762,6 +764,19 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     allow_missing_values_flag=item['allow_missing_values'],
                     output_log_line=item['output_logline'], time_window_length=item['time_window_length'],
                     max_time_diff=item['max_time_diff'], num_reduce_time_list=item['num_reduce_time_list'], auto_include_flag=learn)
+            elif item['type'].name == 'PathArimaDetector':
+                etd = analysis_context.get_component_by_name(item['event_type_detector'])
+                if etd is None:
+                    msg = 'The defined EventTypeDetector %s does not exist!' % item['event_type_detector']
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
+                tmp_analyser = func(
+                    analysis_context.aminer_config, anomaly_event_handlers, etd, persistence_id=item['persistence_id'],
+                    target_path_list=item['paths'], output_log_line=item['output_logline'], auto_include_flag=learn,
+                    num_init=item['num_init'], force_period_length=item['force_period_length'], set_period_length=item['set_period_length'],
+                    alpha=item['alpha'], alpha_bt=item['alpha_bt'], num_results_bt=item['num_results_bt'],
+                    num_min_time_history=item['num_min_time_history'], num_max_time_history=item['num_max_time_history'],
+                    num_periods_tsa_ini=item['num_periods_tsa_ini'])
             elif item['type'].name == 'TSAArimaDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
@@ -770,12 +785,24 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     raise ValueError(msg)
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, etd, persistence_id=item['persistence_id'],
-                    path_list=item['paths'], acf_pause_area=item['acf_pause_area'], build_sum_over_values=item['build_sum_over_values'],
-                    num_periods_tsa_ini=item['num_periods_tsa_ini'], num_division_time_step=item['num_division_time_step'],
-                    alpha=item['alpha'], num_min_time_history=item['num_min_time_history'],
-                    num_max_time_history=item['num_max_time_history'], num_results_bt=item['num_results_bt'], alpha_bt=item['alpha_bt'],
-                    acf_threshold=item['acf_threshold'], round_time_inteval_threshold=item['round_time_inteval_threshold'],
-                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'])
+                    path_list=item['paths'], acf_pause_interval_percentage=item['acf_pause_interval_percentage'],
+                    acf_auto_pause_interval=item['acf_auto_pause_interval'],
+                    acf_auto_pause_interval_num_min=item['acf_auto_pause_interval_num_min'],
+                    build_sum_over_values=item['build_sum_over_values'], num_periods_tsa_ini=item['num_periods_tsa_ini'],
+                    num_division_time_step=item['num_division_time_step'], alpha=item['alpha'],
+                    num_min_time_history=item['num_min_time_history'], num_max_time_history=item['num_max_time_history'],
+                    num_results_bt=item['num_results_bt'], alpha_bt=item['alpha_bt'], acf_threshold=item['acf_threshold'],
+                    round_time_inteval_threshold=item['round_time_inteval_threshold'],
+                    force_period_length=item['force_period_length'], set_period_length=item['set_period_length'],
+                    min_log_lines_per_time_step=item['min_log_lines_per_time_step'], output_log_line=item['output_logline'],
+                    ignore_list=item['ignore_list'], auto_include_flag=learn)
+            elif item['type'].name == 'MinimalTransitionTimeDetector':
+                tmp_analyser = func(
+                    analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
+                    auto_include_flag=learn, output_log_line=item['output_logline'], path_list=item['paths'],
+                    id_path_list=item['id_path_list'], ignore_list=item['ignore_list'], allow_missing_id=item['allow_missing_id'],
+                    num_log_lines_solidify_matrix=item['num_log_lines_solidify_matrix'],
+                    time_output_threshold=item['time_output_threshold'], anomaly_threshold=item['anomaly_threshold'])
             else:
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn)
             if item['output_event_handlers'] is not None:
@@ -833,7 +860,10 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                     ctx = func(analysis_context)
                 if item['json'] is True or item['type'].name == 'KafkaEventHandler':
                     from aminer.events.JsonConverterHandler import JsonConverterHandler
-                    ctx = JsonConverterHandler([ctx], analysis_context)
+                    if item['pretty'] is True:
+                        ctx = JsonConverterHandler([ctx], analysis_context, pretty_print=True)
+                    else:
+                        ctx = JsonConverterHandler([ctx], analysis_context, pretty_print=False)
                 anomaly_event_handlers.append(ctx)
             return event_handler_id_list
         raise KeyError()
@@ -870,16 +900,22 @@ def parse_json_yaml(json_dict, parser_model_dict):
         if isinstance(value, dict):
             key_parser_dict[key] = parse_json_yaml(value, parser_model_dict)
         elif isinstance(value, list):
-            if isinstance(value[0], dict):
-                key_parser_dict[key] = [parse_json_yaml(value[0], parser_model_dict)]
-            elif value[0] in ("ALLOW_ALL", "EMPTY_ARRAY", "EMPTY_OBJECT"):
-                key_parser_dict[key] = value
-            elif parser_model_dict.get(value[0]) is None:
-                msg = 'The parser model %s does not exist!' % value[0]
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise ValueError(msg)
-            else:
-                key_parser_dict[key] = [parser_model_dict.get(value[0])]
+            key_parser_dict[key] = []
+            for val in value:
+                if isinstance(val, dict):
+                    key_parser_dict[key].append(parse_json_yaml(val, parser_model_dict))
+                elif val in ("ALLOW_ALL", "EMPTY_ARRAY", "EMPTY_OBJECT"):
+                    if len(value) > 1 and val == "ALLOW_ALL":
+                        msg = "ALLOW_ALL must not be combined with other parsers in lists."
+                        logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                        raise ValueError(msg)
+                    key_parser_dict[key] = value
+                elif parser_model_dict.get(val) is None:
+                    msg = 'The parser model %s does not exist!' % val
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
+                else:
+                    key_parser_dict[key].append(parser_model_dict.get(val))
         elif value in ("ALLOW_ALL", "EMPTY_ARRAY", "EMPTY_OBJECT"):
             key_parser_dict[key] = value
         elif parser_model_dict.get(value) is None:

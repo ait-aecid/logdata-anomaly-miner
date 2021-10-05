@@ -391,14 +391,6 @@ def main():
         print('Failed to resolve %s or %s' % (AminerConfig.KEY_AMINER_USER, AminerConfig.KEY_AMINER_GROUP), file=sys.stderr)
         sys.exit(1)
 
-    initialize_loggers(aminer_config, child_user_id, child_group_id)
-
-    if restore_relative_persistence_path is not None and (clear_persistence_flag or remove_persistence_dirs):
-        msg = 'The --restore parameter removes all persistence files. Do not use this parameter with --Clear or --Remove!'
-        print(msg, sys.stderr)
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-        sys.exit(1)
-
     if not stat_level_console_flag and AminerConfig.KEY_LOG_STAT_LEVEL in aminer_config.config_properties:
         stat_level = aminer_config.config_properties[AminerConfig.KEY_LOG_STAT_LEVEL]
     if not debug_level_console_flag and AminerConfig.KEY_LOG_DEBUG_LEVEL in aminer_config.config_properties:
@@ -408,6 +400,14 @@ def main():
 
     AminerConfig.STAT_LEVEL = stat_level
     AminerConfig.DEBUG_LEVEL = debug_level
+
+    initialize_loggers(aminer_config, child_user_id, child_group_id)
+
+    if restore_relative_persistence_path is not None and (clear_persistence_flag or remove_persistence_dirs):
+        msg = 'The --restore parameter removes all persistence files. Do not use this parameter with --Clear or --Remove!'
+        print(msg, sys.stderr)
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+        sys.exit(1)
 
     if clear_persistence_flag:
         if remove_persistence_dirs:
