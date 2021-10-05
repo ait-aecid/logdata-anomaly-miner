@@ -13,10 +13,10 @@ exit_code=0
 CONFIG_PATH=/tmp/config.yml
 OUT=/tmp/output.txt
 LOG_FILE=/tmp/log.txt
-PATH_AIT_LDS=../source/root/etc/aminer/conf-available/ait-lds/*.py
-#PATH_AIT_LDS=/etc/aminer/conf-available/ait-lds/*.py
-PATH_GENERIC=../source/root/etc/aminer/conf-available/generic/*.py
-#PATH_GENERIC=/etc/aminer/conf-available/generic/*.py
+#PATH_AIT_LDS=../source/root/etc/aminer/conf-available/ait-lds/*.py
+PATH_AIT_LDS=/etc/aminer/conf-available/ait-lds/*.py
+#PATH_GENERIC=../source/root/etc/aminer/conf-available/generic/*.py
+PATH_GENERIC=/etc/aminer/conf-available/generic/*.py
 
 cntr=0
 files=()
