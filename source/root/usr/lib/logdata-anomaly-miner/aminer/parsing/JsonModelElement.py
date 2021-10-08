@@ -207,7 +207,7 @@ class JsonModelElement(ModelElementInterface):
             if key not in json_dict:
                 index = match_context.match_data.find(key.encode())
                 match_context.update(match_context.match_data[:index])
-                logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 2", key, json_dict)
+                logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 2" + key + str(json_dict))
                 if "ALLOW_ALL_KEYS" in json_dict.keys():
                     key = "ALLOW_ALL_KEYS"
                 elif self.allow_all_fields:
@@ -329,6 +329,13 @@ class JsonModelElement(ModelElementInterface):
                          match_context, i: int):
         """Parse a array in a json object."""
         if not isinstance(json_match_data[split_key], list):
+            if key.startswith(self.optional_key_prefix) and json_match_data[split_key] is None:
+                data = b"null"
+                index = match_context.match_data.find(split_key.encode() + b'":') + len(split_key.encode() + b'":')
+                index += match_context.match_data[index:].find(b"null") + len(b"null")
+                match_context.update(match_context.match_data[:index])
+                matches.append(MatchElement(current_path, data, data, None))
+                return matches
             logging.getLogger(DEBUG_LOG_NAME).debug(
                 debug_log_prefix + "Key " + split_key + " is no array. Data: " + str(json_match_data[split_key]))
             return [None]
