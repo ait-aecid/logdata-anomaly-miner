@@ -382,7 +382,7 @@ class JsonModelElementTest(TestBase):
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
     def test9get_match_element_empty_array_empty_object_null(self):
-        """Test if the keywords EMPTY_ARRAY, EMPTY_OBJECT, EMPTY_STRING and None (null) work properly."""
+        """Test if the keywords EMPTY_ARRAY, EMPTY_OBJECT, EMPTY_STRING,  and None (null) work properly."""
         key_parser_dict = {"menu": {
             "id": "EMPTY_OBJECT",
             "value": "EMPTY_ARRAY",
@@ -450,6 +450,17 @@ class JsonModelElementTest(TestBase):
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
+
+        key_parser_dict = {"ALLOW_ALL_KEYS": DummyFirstMatchModelElement("first", [
+            DummyFixedDataModelElement("abc", b"abc"), DummyFixedDataModelElement("123", b"123")])}
+        json_model_element = JsonModelElement(self.id_, key_parser_dict)
+        data = b'{"key1": "abc", "afd": "abc", "1234": "123", "&544": "123"}'
+        value = json.loads(data)
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        match_context.match_string = str(json.loads(match_context.match_string)).encode()
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
     def test10get_match_element_float_exponents(self):
         """

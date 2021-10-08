@@ -247,7 +247,7 @@ class ByteStreamLineAtomizerTest(TestBase):
         """Test the string_machine with all valid characters."""
         def check_value(data):  # skipcq: PY-D0003
             self.assertEqual(data, allowed_chars)
-        allowed_chars = ""
+        allowed_chars = "\n"
         for c in range(0x20, 0x80):
             if c in (0x22, 0x5c):  # skip "\
                 continue
@@ -264,6 +264,8 @@ class ByteStreamLineAtomizerTest(TestBase):
         def raise_error(_):  # skipcq: PY-D0003
             raise Exception("Invalid returned as valid.")
         for c in range(0x20):  # ascii control characters
+            if c == 0xa:
+                continue
             state = string_machine(raise_error)
             self.assertIsNone(state(c))
 
@@ -637,6 +639,15 @@ class ByteStreamLineAtomizerTest(TestBase):
         # multiline with tabs
         value = b'{\n\t"string": "Hello World",\n\t"integer": 22,\n\t"float": 22.23,\n\t"bool": true,\n\t"array": [' \
                 b'\n\t\t"Hello",\n\t\t"World"]}'
+        state = json_machine(check_value)
+        for c in value:
+            state = state(c)
+        self.assertEqual(state.__name__, '_value')
+
+        value = b"""{"HistogramData": {"Bins": {"...-0]": 0, "[0-1]": 0, "[1-2]": 0, "[2-3]": 0, "[3-...]": 0\n}, "BinNames": ["...-0]",
+"[0-1]", "[1-2]", "[2-3]", "[3-...]"]}}"""
+        compare_value = {"HistogramData": {"Bins": {'...-0]': 0, '[0-1]': 0, '[1-2]': 0, '[2-3]': 0, '[3-...]': 0}, "BinNames": [
+            '...-0]', '[0-1]', '[1-2]', '[2-3]', '[3-...]']}}
         state = json_machine(check_value)
         for c in value:
             state = state(c)

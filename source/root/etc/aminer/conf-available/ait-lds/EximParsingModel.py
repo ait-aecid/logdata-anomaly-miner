@@ -1,4 +1,4 @@
-"""This module defines a generated parser model."""
+"""This module defines a parser model for exim."""
 
 from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
 from aminer.parsing.DateTimeModelElement import DateTimeModelElement
