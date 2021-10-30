@@ -138,9 +138,6 @@ class DateTimeModelElement(ModelElementInterface):
         # Make sure that dateFormat is valid and extract the relevant parts from it.
         self.format_has_year_flag = False
         self.format_has_tz_specifier = False
-        self.tz_specifier_offset = 0
-        self.tz_specifier_offset_str = None
-        self.tz_specifier_format_length = -1
         self.date_format_parts: Union[List[Union[bytes, tuple]]] = []
         self.date_format = date_format
         if not isinstance(date_format, bytes):
@@ -406,7 +403,7 @@ class DateTimeModelElement(ModelElementInterface):
         if self.format_has_tz_specifier:
             valid_tz_specifier = True
             offset_allowed = True
-            tz_specifier_offset = 0
+            tz_specifier_offset = 0.
             if match_context.match_data[parse_pos] == ord(b" "):
                 parse_pos += 1
                 resulting_key = None
