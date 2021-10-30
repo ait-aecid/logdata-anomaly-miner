@@ -65,8 +65,8 @@ search_tz_dict = {}
 keys = list(timezone_info.keys())
 keys.sort()
 for idx in range(65, 91):
-    search_tz_dict[i] = [x.encode() for x in keys if x.encode()[0] == idx]
-    search_tz_dict[i].sort(key=len, reverse=True)  # sorts by descending length
+    search_tz_dict[idx] = [x.encode() for x in keys if x.encode()[0] == idx]
+    search_tz_dict[idx].sort(key=len, reverse=True)  # sorts by descending length
 
 
 class DateTimeModelElement(ModelElementInterface):
