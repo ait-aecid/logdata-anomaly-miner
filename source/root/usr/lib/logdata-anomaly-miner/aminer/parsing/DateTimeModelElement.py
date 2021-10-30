@@ -61,6 +61,13 @@ timezone_info = {
     "WITA": 8 * 3600, "WST": 14 * 3600, "WT": 0 * 3600, "X": -11 * 3600, "Y": -12 * 3600, "YAKST": 10 * 3600, "YAKT": 9 * 3600,
     "YAPT": 10 * 3600, "YEKST": 6 * 3600, "YEKT": 5 * 3600, "Z": 0 * 3600}
 
+search_tz_dict = {}
+keys = list(timezone_info.keys())
+keys.sort()
+for i in range(65, 91):
+    search_tz_dict[i] = [x.encode() for x in keys if x.encode()[0] == i]
+    search_tz_dict[i].sort(key=len, reverse=True)  # sorts by descending length
+
 
 class DateTimeModelElement(ModelElementInterface):
     """
@@ -397,69 +404,59 @@ class DateTimeModelElement(ModelElementInterface):
                 total_seconds += result[6]
 
         if self.format_has_tz_specifier:
-            start = 0
-            while start < parse_pos:
-                try:
-                    parse(match_context.match_data[start:parse_pos], tzinfos=timezone_info)
-                    break
-                # skipcq: FLK-E722
-                except:
-                    start += 1
-            self.tz_specifier_format_length = len(match_context.match_data)
-            # try to find the longest matching date
-            while True:
-                try:
-                    parse(match_context.match_data[start:self.tz_specifier_format_length], tzinfos=timezone_info)
-                    break
-                # skipcq: FLK-E722
-                except:
-                    self.tz_specifier_format_length -= 1
-                    if self.tz_specifier_format_length <= 0:
-                        msg = "The date_format could not be found."
-                        logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                        raise Exception(msg)
-        match_context.update(date_str)
-        if self.format_has_tz_specifier:
-            if self.tz_specifier_format_length < parse_pos and (b"+" in match_context.match_data or b"-" in match_context.match_data):
-                data = match_context.match_data.split(b"+")
-                if len(data) == 1:
-                    data = match_context.match_data.split(b"-")
-                for i in range(1, 5):
-                    if not match_context.match_data[i:i+1].decode(AminerConfig.ENCODING).isdigit():
-                        i -= 1
-                        break
-                self.tz_specifier_format_length = len(data[0]) + i + 1
-                parse_pos = 0
+            valid_tz_specifier = True
+            offset_allowed = True
+            tz_specifier_offset = 0
+            if match_context.match_data[parse_pos] == ord(b" "):
+                parse_pos += 1
+                # TODO: optimize the selection algorithm
+                resulting_key = None
+                if match_context.match_data[parse_pos] in search_tz_dict.keys():
+                    for key in search_tz_dict[match_context.match_data[parse_pos]]:
+                        if match_context.match_data[parse_pos:].startswith(key):
+                            resulting_key = key
+                            break
+                    if resulting_key not in (b"UTC", b"GMT"):
+                        offset_allowed = False
+                    if resulting_key is not None:
+                        tz_specifier_offset = timezone_info[resulting_key.decode()]
+                        parse_pos += len(resulting_key)
 
-            remaining_data = match_context.match_data[:self.tz_specifier_format_length-parse_pos]
-            match_context.update(remaining_data)
-            self.tz_specifier_offset = 0
-            self.tz_specifier_offset_str = remaining_data
-            if b"+" not in remaining_data and b"-" not in remaining_data:
-                offset = parse(date_str + remaining_data, tzinfos=timezone_info).utcoffset()
-                if offset is not None:
-                    self.tz_specifier_offset = -offset.days * 86400 - offset.seconds
-            else:
+            if match_context.match_data[parse_pos] in (ord(b"+"), ord(b"-")) and offset_allowed and valid_tz_specifier:
                 sign = -1
-                data = remaining_data.split(b"+")
-                if len(data) == 1:
-                    data = remaining_data.split(b"-")
+                if match_context.match_data[parse_pos] == ord(b"+"):
                     sign = 1
-                    if len(data) == 1:
-                        data = None
-                # only add offset if a + or - sign is used.
-                if data is not None:
-                    if len(data) == 1:
-                        data = remaining_data.split(b"-")
-                    if len(data[1]) == 4:
-                        self.tz_specifier_offset = (int(data[1][0:2]) * 3600 + int(data[1][2:4]) * 60) * sign
-                    elif data[1].find(b":") == 2 and len(data[1]) == 5:
-                        self.tz_specifier_offset = (int(data[1][:2]) * 3600 + int(data[1][3:]) * 60) * sign
+                parse_pos += 1
+                cnt_digits = 0
+                colon_shift = 0
+                while parse_pos < len(match_context.match_data):
+                    if chr(match_context.match_data[parse_pos]).isdigit():
+                        cnt_digits += 1
+                        parse_pos += 1
+                    elif cnt_digits == 2 and match_context.match_data[parse_pos] == ord(b":"):
+                        parse_pos += 1
+                        colon_shift = 1
                     else:
-                        self.tz_specifier_offset = int(data[1]) * 3600 * sign
-                    self.tz_specifier_offset_str = remaining_data
-            total_seconds += self.tz_specifier_offset
-            return MatchElement("%s/%s" % (path, self.element_id), date_str + remaining_data, total_seconds, None)
+                        break
+                if cnt_digits != 4 and colon_shift == 1:
+                    parse_pos -= 1
+                    colon_shift = 0
+                if cnt_digits == 0 or cnt_digits > 4:
+                    valid_tz_specifier = False
+                else:
+                    if cnt_digits == 1:
+                        tz_specifier_offset = sign * int(chr(match_context.match_data[parse_pos-1])) * 3600
+                    elif cnt_digits == 2:
+                        tz_specifier_offset = sign * int(match_context.match_data[parse_pos-2:parse_pos].decode()) * 3600
+                    elif cnt_digits == 4:
+                        tz_specifier_offset = sign * int(match_context.match_data[parse_pos-4-colon_shift:parse_pos-2-colon_shift]) * \
+                                              3600 + int(match_context.match_data[parse_pos-2:parse_pos] * 60)
+
+            if valid_tz_specifier:
+                date_str = match_context.match_data[:parse_pos]
+                # the offset must be subtracted, because the timestamp should always be UTC.
+                total_seconds -= tz_specifier_offset
+        match_context.update(date_str)
         return MatchElement("%s/%s" % (path, self.element_id), date_str, total_seconds, None)
 
     @staticmethod
