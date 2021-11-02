@@ -407,14 +407,18 @@ class DateTimeModelElement(ModelElementInterface):
             if match_context.match_data[parse_pos] == ord(b" "):
                 parse_pos += 1
                 resulting_key = None
+                # only if the next character is in A-Z, a valid resulting_key can exist.
                 if match_context.match_data[parse_pos] in search_tz_dict.keys():
+                    # search the first fitting resulting_key in the sorted tz_dict and break the loop.
                     for key in search_tz_dict[match_context.match_data[parse_pos]]:
                         if match_context.match_data[parse_pos:].startswith(key):
                             resulting_key = key
                             break
+                    # an offset is only allowed with UTC and GMT.
                     if resulting_key not in (b"UTC", b"GMT"):
                         offset_allowed = False
                     if resulting_key is not None:
+                        # get the offset from the timezone_info dict.
                         tz_specifier_offset = timezone_info[resulting_key.decode()]
                         parse_pos += len(resulting_key)
 
@@ -425,25 +429,34 @@ class DateTimeModelElement(ModelElementInterface):
                 parse_pos += 1
                 cnt_digits = 0
                 colon_shift = 0
+                # parse data as long as there is more data.
                 while parse_pos < len(match_context.match_data):
+                    # shift the position and count to the next position, if the current character is a digit.
                     if chr(match_context.match_data[parse_pos]).isdigit():
                         cnt_digits += 1
                         parse_pos += 1
+                    # if the current character is no digit and cnt_digits is 2, a colon is allowed.
                     elif cnt_digits == 2 and match_context.match_data[parse_pos] == ord(b":"):
                         parse_pos += 1
                         colon_shift = 1
                     else:
                         break
+                # if the digit count is not 4 and a colon is found, then no colon shift should be applied. This could be the case, if a
+                # colon follows the date (02.11.2021 UTC+01: some text)
                 if cnt_digits != 4 and colon_shift == 1:
                     parse_pos -= 1
                     colon_shift = 0
+                # if the digits count is zero or bigger than 4, then the specifier is not valid.
                 if cnt_digits == 0 or cnt_digits > 4:
                     valid_tz_specifier = False
                 else:
+                    # only one hour position was found.
                     if cnt_digits == 1:
                         tz_specifier_offset = sign * int(chr(match_context.match_data[parse_pos-1])) * 3600
+                    # two hours specifiers were found.
                     elif cnt_digits == 2:
                         tz_specifier_offset = sign * int(match_context.match_data[parse_pos-2:parse_pos].decode()) * 3600
+                    # four time specifiers were found with an optional colon.
                     elif cnt_digits == 4:
                         tz_specifier_offset = sign * int(match_context.match_data[parse_pos-4-colon_shift:parse_pos-2-colon_shift]) * \
                                               3600 + int(match_context.match_data[parse_pos-2:parse_pos] * 60)
