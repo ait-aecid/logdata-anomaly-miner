@@ -86,6 +86,9 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         @param log_atom the parsed log atom
         @return True if this handler was really able to handle and process the match.
         """
+        if log_atom.atom_time is None:
+            return False
+
         match_dict = log_atom.parser_match.get_match_dictionary()
         # Skip paths from ignore_list.
         for ignore_path in self.ignore_list:
