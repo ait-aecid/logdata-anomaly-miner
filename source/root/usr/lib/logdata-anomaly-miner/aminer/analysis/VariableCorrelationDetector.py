@@ -307,8 +307,9 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
             # Else use the variables which are neither unique nor static # !!!
             else:
-                self.discrete_indices[event_index] = [var_index for var_index in
-                        range(len(self.event_type_detector.variable_key_list[event_index])) if target_path_list == [] or
+                self.discrete_indices[event_index] = [
+                        var_index for var_index in range(len(self.event_type_detector.variable_key_list[event_index])) if
+                        self.target_path_list == [] or
                         self.event_type_detector.variable_key_list[event_index][var_index] in self.target_path_list]
                 for i in range(len(self.event_type_detector.values[event_index]) - 1, -1, -1):  # skipcq: PTC-W0060
                     tmp_list = list(set(self.event_type_detector.values[event_index][i][-self.num_init:]))
