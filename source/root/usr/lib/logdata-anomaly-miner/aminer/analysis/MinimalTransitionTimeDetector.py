@@ -161,8 +161,12 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
                 self.last_time[id_tuple] = log_atom.atom_time
                 return True
             if log_atom.atom_time - self.last_time[id_tuple] <= 0:
-                self.print('Anomaly in log line order: %s - %s (%s): %s - %s' % (self.last_value[id_tuple], event_value, id_tuple,
-                           self.last_time[id_tuple], log_atom.atom_time), log_atom, self.path_list, confidence=1)
+                additional_information = {'AffectedLogAtomValues': [list(self.last_value[id_tuple]), list(event_value)],
+                                          'AffectedIdValues': list(id_tuple), 'PreviousTime': self.last_time[id_tuple],
+                                          'NewTime': log_atom.atom_time}
+                self.print('Anomaly in log line order: %s - %s (%s): %s - %s' % (list(self.last_value[id_tuple]), list(event_value),
+                           list(id_tuple), self.last_time[id_tuple], log_atom.atom_time), log_atom, self.path_list, confidence=1,
+                           additional_information=additional_information)
                 return True
 
             # Check in which order the event_values appear in the time matrix
@@ -179,9 +183,14 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
                 # Initialize the entry in the time matrix
                 if event_value not in self.time_matrix:
                     self.time_matrix[event_value] = {}
-                message = 'First Appearance: %s - %s (%s), %s' % (self.last_value[id_tuple], event_value, id_tuple,
+
+                additional_information = {'AffectedLogAtomValues': [list(self.last_value[id_tuple]), list(event_value)],
+                                          'AffectedIdValues': list(id_tuple),
+                                          'NewMinimalTime': log_atom.atom_time - self.last_time[id_tuple]}
+                message = 'First Appearance: %s - %s (%s), %s' % (list(self.last_value[id_tuple]),
+                                                                  list(event_value), list(id_tuple),
                                                                   log_atom.atom_time - self.last_time[id_tuple])
-                self.print(message, log_atom, self.path_list)
+                self.print(message, log_atom, self.path_list, additional_information=additional_information)
                 if self.auto_include_flag:
                     self.time_matrix[event_value][self.last_value[id_tuple]] = log_atom.atom_time - self.last_time[id_tuple]
             else:
@@ -190,11 +199,15 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
                         self.time_matrix[event_value_1][event_value_2] > self.time_output_threshold:
                     if 1 - (log_atom.atom_time - self.last_time[id_tuple]) / self.time_matrix[event_value_1][event_value_2] >\
                             self.anomaly_threshold:
-                        message = 'Anomaly: %s - %s (%s), %s -> %s' % (
-                                self.last_value[id_tuple], event_value, id_tuple, self.time_matrix[event_value_1][event_value_2],
-                                log_atom.atom_time - self.last_time[id_tuple])
+                        additional_information = {'AffectedLogAtomValues': [list(self.last_value[id_tuple]), list(event_value)],
+                                                  'AffectedIdValues': list(id_tuple),
+                                                  'PreviousMinimalTime': self.time_matrix[event_value_1][event_value_2],
+                                                  'NewMinimalTime': log_atom.atom_time - self.last_time[id_tuple]}
+                        message = 'Undercut transition time: %s - %s (%s), %s -> %s' % (
+                                list(self.last_value[id_tuple]), list(event_value), list(id_tuple),
+                                self.time_matrix[event_value_1][event_value_2], log_atom.atom_time - self.last_time[id_tuple])
                         confidence = 1 - (log_atom.atom_time - self.last_time[id_tuple]) / self.time_matrix[event_value_1][event_value_2]
-                        self.print(message, log_atom, self.path_list, confidence)
+                        self.print(message, log_atom, self.path_list, confidence=confidence, additional_information=additional_information)
 
                     if self.auto_include_flag:
                         self.time_matrix[event_value_1][event_value_2] = log_atom.atom_time - self.last_time[id_tuple]
@@ -347,10 +360,12 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
             self.ignore_list.append(event_data)
         return 'Blocklisted path %s.' % event_data
 
-    def print(self, message, log_atom, affected_path, confidence=None):
+    def print(self, message, log_atom, affected_path, confidence=None, additional_information=None):
         """Print the message."""
         if isinstance(affected_path, str):
             affected_path = [affected_path]
+        if additional_information is None:
+            additional_information = {}
 
         original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
         if original_log_line_prefix is None:
@@ -370,6 +385,9 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
             tmp_str = tmp_str.lstrip('  ')
             sorted_log_lines = [tmp_str + log_atom.raw_data.decode()]
             analysis_component = {'AffectedLogAtomPaths': affected_path}
+
+        for key, value in additional_information.items():
+            analysis_component[key] = value
 
         event_data = {'AnalysisComponent': analysis_component, 'TypeInfo': {}}
         if confidence is not None:

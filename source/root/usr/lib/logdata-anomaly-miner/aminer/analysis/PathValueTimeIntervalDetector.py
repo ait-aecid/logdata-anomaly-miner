@@ -111,11 +111,14 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
 
         # Print message if combination of values is new
         if match_value_tuple not in self.appeared_time_list:
-            msg = 'New observed combination: ['
+            additional_information = {'AffectedLogAtomValues': [str(repr(val))[2:-1] for val in match_value_tuple],
+                                      'NewTime': log_atom.atom_time % self.time_window_length}
+
+            msg = 'First time (%s) detected for [' % (log_atom.atom_time % self.time_window_length)
             for match_value in match_value_tuple:
-                msg += str(repr(match_value)) + ', '
+                msg += str(repr(match_value))[1:] + ', '
             msg = msg[:-2] + ']'
-            self.print(msg, log_atom=log_atom, affected_path=self.target_path_list)
+            self.print(msg, log_atom=log_atom, affected_path=self.target_path_list, additional_information=additional_information)
             self.appeared_time_list[match_value_tuple] = [log_atom.atom_time % self.time_window_length]
             self.counter_reduce_time_intervals[match_value_tuple] = 0
         else:
@@ -126,12 +129,16 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
                 if all((abs(log_atom.atom_time % self.time_window_length - time) > self.max_time_diff) and
                        (abs(log_atom.atom_time % self.time_window_length - time) < self.time_window_length - self.max_time_diff)
                         for time in self.appeared_time_list[match_value_tuple]):
-                    msg = 'New time (%s) out of range of previously observed times (%s) detected in the combination: [' % (
+                    additional_information = {'AffectedLogAtomValues': [str(repr(val))[2:-1] for val in match_value_tuple],
+                                              'PreviousAppearedTimes': self.appeared_time_list[match_value_tuple],
+                                              'NewTime': log_atom.atom_time % self.time_window_length}
+
+                    msg = 'New time (%s) out of range of previously observed times %s detected for [' % (
                             log_atom.atom_time % self.time_window_length, self.appeared_time_list[match_value_tuple])
                     for match_value in match_value_tuple:
-                        msg += str(repr(match_value)) + ', '
+                        msg += str(repr(match_value))[1:] + ', '
                     msg = msg[:-2] + ']'
-                    self.print(msg, log_atom=log_atom, affected_path=self.target_path_list)
+                    self.print(msg, log_atom=log_atom, affected_path=self.target_path_list, additional_information=additional_information)
 
                     if not self.auto_include_flag:
                         return True
@@ -219,10 +226,12 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
                 self.counter_reduce_time_intervals[tuple(match_value_tuple)] = counter
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
-    def print(self, message, log_atom, affected_path):
+    def print(self, message, log_atom, affected_path, additional_information=None):
         """Print the message."""
         if isinstance(affected_path, str):
             affected_path = [affected_path]
+        if additional_information is None:
+            additional_information = {}
 
         original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
         if self.output_log_line:
@@ -239,6 +248,9 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
             tmp_str = tmp_str.lstrip('  ')
             sorted_log_lines = [tmp_str + log_atom.raw_data.decode(AminerConfig.ENCODING)]
             analysis_component = {'AffectedLogAtomPaths': affected_path}
+
+        for key, value in additional_information.items():
+            analysis_component[key] = value
 
         event_data = {'AnalysisComponent': analysis_component}
         for listener in self.anomaly_event_handlers:
