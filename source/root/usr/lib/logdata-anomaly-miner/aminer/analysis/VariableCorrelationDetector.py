@@ -27,7 +27,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                  alpha_chisquare_test=0.05, max_dist_rule_distr=0.1, used_presel_meth=None, intersect_presel_meth=False,
                  percentage_random_cors=0.20, match_disc_vals_sim_tresh=0.7, exclude_due_distr_lower_limit=0.4,
                  match_disc_distr_threshold=0.5, used_cor_meth=None, used_validate_cor_meth=None, validate_cor_cover_vals_thres=0.7,
-                 validate_cor_distinct_thres=0.05, ignore_list=None, constraint_list=None):
+                 validate_cor_distinct_thres=0.05, ignore_list=None, constraint_list=None, auto_include_flag=True):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
         self.next_persist_time = None
         self.event_type_detector = event_type_detector
@@ -166,6 +166,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         if self.constraint_list is None:
             self.constraint_list = []
 
+        self.auto_include_flag = auto_include_flag
+
         self.log_atom = None
 
         # Loads the persistence
@@ -204,7 +206,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         if self.event_type_detector.num_eventlines[event_index] == self.num_init:  # Initialisation Phase
             self.init_cor(event_index)  # Initialise the correlations
 
-            if self.update_rules[event_index]:
+            if self.update_rules[event_index] and self.auto_include_flag:
                 self.validate_cor()  # Validate the correlations and removes the cors, which fail the requirements
 
             # Print the found correlations
@@ -561,7 +563,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
             i = pos_var_cor_val[0]  # Index of the first variable in discrete_indices
             j = pos_var_cor_val[1]  # Index of the second variable in discrete_indices
 
-            if self.update_rules[event_index]:
+            if self.update_rules[event_index] and self.auto_include_flag:
                 # Update both list in rel_list[event_index][pos_var_cor_index] and create new rules if self.generate_rules[event_index]
                 # is True
                 message = 'New values appeared after the %s-th line in correlation(s) of the event %s' % (
@@ -1016,7 +1018,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                                 pos_var_cor_index][1][j_val][1:] + [0]
                             failed_j_vals.append(j_val)
 
-                    if self.update_rules[event_index]:
+                    if self.update_rules[event_index] and self.auto_include_flag:
                         # Print if new values have appeared in the correlation rules
                         message = 'New values appeared after the %s-th line in correlation(s) of the event %s' % (
                             self.event_type_detector.total_records, self.event_type_detector.get_event_type(event_index))
