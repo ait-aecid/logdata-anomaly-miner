@@ -161,12 +161,11 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
                 self.last_time[id_tuple] = log_atom.atom_time
                 return True
             if log_atom.atom_time - self.last_time[id_tuple] <= 0:
-                additional_information = {'AffectedLogAtomValues': [[val for val in self.last_value[id_tuple]], [
-                                val for val in event_value]], 'AffectedIdValues': [val for val in id_tuple],
-                                'PreviousTime': self.last_time[id_tuple], 'NewTime': log_atom.atom_time}
-                self.print('Anomaly in log line order: %s - %s (%s): %s - %s' % ([val for val in self.last_value[id_tuple]],
-                           [val for val in event_value], [val for val in id_tuple],
-                           self.last_time[id_tuple], log_atom.atom_time), log_atom, self.path_list, confidence=1,
+                additional_information = {'AffectedLogAtomValues': [list(self.last_value[id_tuple]), list(event_value)],
+                                          'AffectedIdValues': list(id_tuple), 'PreviousTime': self.last_time[id_tuple],
+                                          'NewTime': log_atom.atom_time}
+                self.print('Anomaly in log line order: %s - %s (%s): %s - %s' % (list(self.last_value[id_tuple]), list(event_value),
+                           list(id_tuple), self.last_time[id_tuple], log_atom.atom_time), log_atom, self.path_list, confidence=1,
                            additional_information=additional_information)
                 return True
 
@@ -185,11 +184,11 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
                 if event_value not in self.time_matrix:
                     self.time_matrix[event_value] = {}
 
-                additional_information = {'AffectedLogAtomValues': [[val for val in self.last_value[id_tuple]], [
-                                val for val in event_value]], 'AffectedIdValues': [val for val in id_tuple],
-                                'NewMinimalTime': log_atom.atom_time - self.last_time[id_tuple]}
-                message = 'First Appearance: %s - %s (%s), %s' % ([val for val in self.last_value[id_tuple]],
-                                                                  [val for val in event_value], [val for val in id_tuple],
+                additional_information = {'AffectedLogAtomValues': [list(self.last_value[id_tuple]), list(event_value)],
+                                          'AffectedIdValues': list(id_tuple),
+                                          'NewMinimalTime': log_atom.atom_time - self.last_time[id_tuple]}
+                message = 'First Appearance: %s - %s (%s), %s' % (list(self.last_value[id_tuple]),
+                                                                  list(event_value), list(id_tuple),
                                                                   log_atom.atom_time - self.last_time[id_tuple])
                 self.print(message, log_atom, self.path_list, additional_information=additional_information)
                 if self.auto_include_flag:
@@ -200,12 +199,11 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
                         self.time_matrix[event_value_1][event_value_2] > self.time_output_threshold:
                     if 1 - (log_atom.atom_time - self.last_time[id_tuple]) / self.time_matrix[event_value_1][event_value_2] >\
                             self.anomaly_threshold:
-                        additional_information = {'AffectedLogAtomValues': [[val for val in self.last_value[id_tuple]], [
-                                val for val in event_value]], 'AffectedIdValues': [val for val in id_tuple],
-                                'PreviousMinimalTime': self.time_matrix[event_value_1][event_value_2],
+                        additional_information = {'AffectedLogAtomValues': [list(self.last_value[id_tuple]), list(event_value)],
+                                'AffectedIdValues': list(id_tuple), 'PreviousMinimalTime': self.time_matrix[event_value_1][event_value_2],
                                 'NewMinimalTime': log_atom.atom_time - self.last_time[id_tuple]}
                         message = 'Undercut transition time: %s - %s (%s), %s -> %s' % (
-                                [val for val in self.last_value[id_tuple]], [val for val in event_value], [val for val in id_tuple],
+                                list(self.last_value[id_tuple]), list(event_value), list(id_tuple),
                                 self.time_matrix[event_value_1][event_value_2], log_atom.atom_time - self.last_time[id_tuple])
                         confidence = 1 - (log_atom.atom_time - self.last_time[id_tuple]) / self.time_matrix[event_value_1][event_value_2]
                         self.print(message, log_atom, self.path_list, confidence=confidence, additional_information=additional_information)
@@ -361,10 +359,12 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
             self.ignore_list.append(event_data)
         return 'Blocklisted path %s.' % event_data
 
-    def print(self, message, log_atom, affected_path, confidence=None, additional_information={}):
+    def print(self, message, log_atom, affected_path, confidence=None, additional_information=None):
         """Print the message."""
         if isinstance(affected_path, str):
             affected_path = [affected_path]
+        if additional_information is None:
+            additional_information = {}
 
         original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
         if original_log_line_prefix is None:
@@ -385,7 +385,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
             sorted_log_lines = [tmp_str + log_atom.raw_data.decode()]
             analysis_component = {'AffectedLogAtomPaths': affected_path}
 
-        for key in additional_information:
+        for key in additional_information.keys():
             analysis_component[key] = additional_information[key]
 
         event_data = {'AnalysisComponent': analysis_component, 'TypeInfo': {}}

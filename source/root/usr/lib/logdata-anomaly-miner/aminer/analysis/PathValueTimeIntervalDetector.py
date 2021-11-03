@@ -226,10 +226,12 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
                 self.counter_reduce_time_intervals[tuple(match_value_tuple)] = counter
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
-    def print(self, message, log_atom, affected_path, additional_information={}):
+    def print(self, message, log_atom, affected_path, additional_information=None):
         """Print the message."""
         if isinstance(affected_path, str):
             affected_path = [affected_path]
+        if additional_information is None:
+            additional_information = {}
 
         original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
         if self.output_log_line:
@@ -247,7 +249,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
             sorted_log_lines = [tmp_str + log_atom.raw_data.decode(AminerConfig.ENCODING)]
             analysis_component = {'AffectedLogAtomPaths': affected_path}
 
-        for key in additional_information:
+        for key in additional_information.keys():
             analysis_component[key] = additional_information[key]
 
         event_data = {'AnalysisComponent': analysis_component}
