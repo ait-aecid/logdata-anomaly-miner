@@ -1333,7 +1333,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             # Change the var type from static to discrete
 
             # list of the values
-            values_set = list(set(self.event_type_detector.values[event_index][var_index][-self.num_update:]))
+            values_set = list(set(self.event_type_detector.values[event_index][var_index][-self.num_init:]))
             values_app = [0 for _ in range(len(values_set))]  # List to store the appearance of the values
 
             for j in range(-self.num_init, 0):
