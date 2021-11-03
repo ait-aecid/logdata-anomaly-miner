@@ -470,6 +470,7 @@
                     'type': {'type': 'string', 'allowed': ['VariableCorrelationDetector'], 'required': True},
                     'event_type_detector': {'type': 'string', 'required': True, 'empty': False},
                     'persistence_id': {'type': 'string', 'empty': False},
+                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'num_init': {'type': 'integer', 'min': 1},
                     'num_update': {'type': 'integer', 'min': 1},
                     'disc_div_thres': {'type': 'float', 'min': 0.000001, 'max': 1.0},

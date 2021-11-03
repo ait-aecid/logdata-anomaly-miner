@@ -20,8 +20,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
     This module builds upon the event_type_detector.
     """
 
-    def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id='Default', num_init=100,
-                 num_update=100, disc_div_thres=0.3, num_steps_create_new_rules=-1, num_upd_until_validation=20,
+    def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id='Default', target_path_list=None,
+                 num_init=100, num_update=100, disc_div_thres=0.3, num_steps_create_new_rules=-1, num_upd_until_validation=20,
                  num_end_learning_phase=-1, check_cor_thres=0.5, check_cor_prob_thres=1, check_cor_num_thres=10,
                  min_values_cors_thres=5, new_vals_alarm_thres=3.5, num_bt=30, alpha_bt=0.1, used_homogeneity_test='Chi',
                  alpha_chisquare_test=0.05, max_dist_rule_distr=0.1, used_presel_meth=None, intersect_presel_meth=False,
@@ -33,6 +33,9 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         self.event_type_detector = event_type_detector
         self.event_type_detector.add_following_modules(self)
         self.anomaly_event_handlers = anomaly_event_handlers
+        self.target_path_list = target_path_list
+        if self.target_path_list is None:
+            self.target_path_list = []
         self.variable_type_detector = None
         if any(self.event_type_detector.following_modules[j].__class__.__name__ == 'VariableTypeDetector' for j in range(
                 len(self.event_type_detector.following_modules))):
@@ -42,23 +45,6 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                         self.event_type_detector.following_modules[j].__class__.__name__ == 'VariableTypeDetector')]
             except StopIteration:
                 pass
-        self.update_rules = []  # List which states for what event types the rules are updated
-        self.generate_rules = []  # List which states for what event types new rules are being generated
-        self.min_successes_bt = 0  # Minimal number of successes for the binomialtest
-        self.discrete_indices = []  # List of the indices to every event type which are assumed to be discrete
-        self.pos_var_val = []  # List of the possible values to the single variables of the event types
-        self.pos_var_cor = []  # List of all pairs of variables of the event types which are assumed to be correlated
-        self.rel_list = []  # List of lists, that saves the data for the found correlations with the method Rel.
-        # First index states the event_index, second index states which correlation is examined, third index states which direction of the
-        # correlation is examined, fourth index states the value of the first variable and the fifth value states the value of the second
-        # variable. The content is the number of appearance in the log lines.
-        self.w_rel_list = []  # List of lists, that saves the data for the correlation finding with WRel.
-        # First index states the event_index, second index states which correlation is examined, third index states which direction of the
-        # correlation is examined, fourth index states the value of the first variable and the fifth value states the value of the second
-        # variable. The content is the number of appearance in the log lines.
-        self.w_rel_num_ll_to_vals = []  # List of the number of lines in which the values of the first variable have appeared
-        self.w_rel_ht_results = []  # List of the results of the homogeneity tests for the binomial test
-        self.w_rel_confidences = []  # List for the confidences of the homogeneity tests
 
         # Minimal number of lines of one event type to initialize the correlation rules
         self.num_init = num_init
@@ -165,6 +151,24 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         self.constraint_list = constraint_list
         if self.constraint_list is None:
             self.constraint_list = []
+
+        self.update_rules = []  # List which states for what event types the rules are updated
+        self.generate_rules = []  # List which states for what event types new rules are being generated
+        self.min_successes_bt = 0  # Minimal number of successes for the binomialtest
+        self.discrete_indices = []  # List of the indices to every event type which are assumed to be discrete
+        self.pos_var_val = []  # List of the possible values to the single variables of the event types
+        self.pos_var_cor = []  # List of all pairs of variables of the event types which are assumed to be correlated
+        self.rel_list = []  # List of lists, that saves the data for the found correlations with the method Rel.
+        # First index states the event_index, second index states which correlation is examined, third index states which direction of the
+        # correlation is examined, fourth index states the value of the first variable and the fifth value states the value of the second
+        # variable. The content is the number of appearance in the log lines.
+        self.w_rel_list = []  # List of lists, that saves the data for the correlation finding with WRel.
+        # First index states the event_index, second index states which correlation is examined, third index states which direction of the
+        # correlation is examined, fourth index states the value of the first variable and the fifth value states the value of the second
+        # variable. The content is the number of appearance in the log lines.
+        self.w_rel_num_ll_to_vals = []  # List of the number of lines in which the values of the first variable have appeared
+        self.w_rel_ht_results = []  # List of the results of the homogeneity tests for the binomial test
+        self.w_rel_confidences = []  # List for the confidences of the homogeneity tests
 
         self.log_atom = None
 
@@ -295,13 +299,17 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
             if self.variable_type_detector is not None:
                 for i in range(len(self.event_type_detector.variable_key_list[event_index])):  # skipcq: PTC-W0060
                     if len(self.variable_type_detector.var_type[event_index][i]) > 0 and \
-                            self.variable_type_detector.var_type[event_index][i][0] == 'd':
+                            self.variable_type_detector.var_type[event_index][i][0] == 'd' and (
+                            self.target_path_list == [] or
+                            self.event_type_detector.variable_key_list[event_index][i] in self.target_path_list):
                         self.discrete_indices[event_index].append(i)
                         self.pos_var_val[event_index].append(self.variable_type_detector.var_type[event_index][i][1])
 
             # Else use the variables which are neither unique nor static # !!!
             else:
-                self.discrete_indices[event_index] = list(range(len(self.event_type_detector.variable_key_list[event_index])))
+                self.discrete_indices[event_index] = [var_index for var_index in
+                        range(len(self.event_type_detector.variable_key_list[event_index])) if target_path_list == [] or
+                        self.event_type_detector.variable_key_list[event_index][var_index] in self.target_path_list]
                 for i in range(len(self.event_type_detector.values[event_index]) - 1, -1, -1):  # skipcq: PTC-W0060
                     tmp_list = list(set(self.event_type_detector.values[event_index][i][-self.num_init:]))
                     if len(tmp_list) == 1 or (len(tmp_list) > self.disc_div_thres * self.num_init):
