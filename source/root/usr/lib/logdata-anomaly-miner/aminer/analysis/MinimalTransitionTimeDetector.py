@@ -200,8 +200,9 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
                     if 1 - (log_atom.atom_time - self.last_time[id_tuple]) / self.time_matrix[event_value_1][event_value_2] >\
                             self.anomaly_threshold:
                         additional_information = {'AffectedLogAtomValues': [list(self.last_value[id_tuple]), list(event_value)],
-                                'AffectedIdValues': list(id_tuple), 'PreviousMinimalTime': self.time_matrix[event_value_1][event_value_2],
-                                'NewMinimalTime': log_atom.atom_time - self.last_time[id_tuple]}
+                                                  'AffectedIdValues': list(id_tuple),
+                                                  'PreviousMinimalTime': self.time_matrix[event_value_1][event_value_2],
+                                                  'NewMinimalTime': log_atom.atom_time - self.last_time[id_tuple]}
                         message = 'Undercut transition time: %s - %s (%s), %s -> %s' % (
                                 list(self.last_value[id_tuple]), list(event_value), list(id_tuple),
                                 self.time_matrix[event_value_1][event_value_2], log_atom.atom_time - self.last_time[id_tuple])
@@ -385,8 +386,8 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
             sorted_log_lines = [tmp_str + log_atom.raw_data.decode()]
             analysis_component = {'AffectedLogAtomPaths': affected_path}
 
-        for key in additional_information.keys():
-            analysis_component[key] = additional_information[key]
+        for key, value in additional_information.items():
+            analysis_component[key] = value
 
         event_data = {'AnalysisComponent': analysis_component, 'TypeInfo': {}}
         if confidence is not None:

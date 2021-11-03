@@ -249,8 +249,8 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
             sorted_log_lines = [tmp_str + log_atom.raw_data.decode(AminerConfig.ENCODING)]
             analysis_component = {'AffectedLogAtomPaths': affected_path}
 
-        for key in additional_information.keys():
-            analysis_component[key] = additional_information[key]
+        for key, value in additional_information.items():
+            analysis_component[key] = value
 
         event_data = {'AnalysisComponent': analysis_component}
         for listener in self.anomaly_event_handlers:
