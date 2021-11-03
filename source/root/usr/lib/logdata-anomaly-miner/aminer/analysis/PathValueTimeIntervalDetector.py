@@ -30,7 +30,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
 
     def __init__(self, aminer_config, anomaly_event_handlers, persistence_id='Default', target_path_list=None,
                  allow_missing_values_flag=True, ignore_list=None, output_log_line=True, auto_include_flag=False,
-                 time_window_length=86400, max_time_diff=360, num_reduce_time_list=10):
+                 time_period_length=86400, max_time_diff=360, num_reduce_time_list=10):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -44,7 +44,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         omitted. The default value is [] as None is not iterable.
         @param output_log_line specifies whether the full parsed log atom should be provided in the output.
         @param auto_include_flag specifies whether new frequency measurements override ground truth frequencies.
-        @param time_window_length length of the time window for which the appearances of log lines are identified with each other.
+        @param time_period_length length of the time window for which the appearances of log lines are identified with each other.
         Value of 86400 specfies a day and 604800 a week.
         @param max_time_diff maximal time difference in seconds for new times. If the difference of the new time to all previous times is
         greater than max_time_diff the new time is considered an anomaly.
@@ -62,7 +62,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         self.target_path_list = target_path_list
         if self.target_path_list is None:
             self.target_path_list = []
-        self.time_window_length = time_window_length
+        self.time_period_length = time_period_length
         self.max_time_diff = max_time_diff
         self.num_reduce_time_list = num_reduce_time_list
 
@@ -112,29 +112,29 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         # Print message if combination of values is new
         if match_value_tuple not in self.appeared_time_list:
             additional_information = {'AffectedLogAtomValues': [str(repr(val))[2:-1] for val in match_value_tuple],
-                                      'NewTime': log_atom.atom_time % self.time_window_length}
+                                      'NewTime': log_atom.atom_time % self.time_period_length}
 
-            msg = 'First time (%s) detected for [' % (log_atom.atom_time % self.time_window_length)
+            msg = 'First time (%s) detected for [' % (log_atom.atom_time % self.time_period_length)
             for match_value in match_value_tuple:
                 msg += str(repr(match_value))[1:] + ', '
             msg = msg[:-2] + ']'
             self.print(msg, log_atom=log_atom, affected_path=self.target_path_list, additional_information=additional_information)
-            self.appeared_time_list[match_value_tuple] = [log_atom.atom_time % self.time_window_length]
+            self.appeared_time_list[match_value_tuple] = [log_atom.atom_time % self.time_period_length]
             self.counter_reduce_time_intervals[match_value_tuple] = 0
         else:
             # Checks if the time has already been observed
-            if log_atom.atom_time % self.time_window_length not in self.appeared_time_list[match_value_tuple]:
+            if log_atom.atom_time % self.time_period_length not in self.appeared_time_list[match_value_tuple]:
                 # Check and prints an message if the new time is out of range of the observed times
-                # The second query is needed when time intevals exceed over 0/self.time_window_length
-                if all((abs(log_atom.atom_time % self.time_window_length - time) > self.max_time_diff) and
-                       (abs(log_atom.atom_time % self.time_window_length - time) < self.time_window_length - self.max_time_diff)
+                # The second query is needed when time intevals exceed over 0/self.time_period_length
+                if all((abs(log_atom.atom_time % self.time_period_length - time) > self.max_time_diff) and
+                       (abs(log_atom.atom_time % self.time_period_length - time) < self.time_period_length - self.max_time_diff)
                         for time in self.appeared_time_list[match_value_tuple]):
                     additional_information = {'AffectedLogAtomValues': [str(repr(val))[2:-1] for val in match_value_tuple],
                                               'PreviousAppearedTimes': self.appeared_time_list[match_value_tuple],
-                                              'NewTime': log_atom.atom_time % self.time_window_length}
+                                              'NewTime': log_atom.atom_time % self.time_period_length}
 
                     msg = 'New time (%s) out of range of previously observed times %s detected for [' % (
-                            log_atom.atom_time % self.time_window_length, self.appeared_time_list[match_value_tuple])
+                            log_atom.atom_time % self.time_period_length, self.appeared_time_list[match_value_tuple])
                     for match_value in match_value_tuple:
                         msg += str(repr(match_value))[1:] + ', '
                     msg = msg[:-2] + ']'
@@ -144,7 +144,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
                         return True
 
                 # Add the new time to the time list and reduces the time list after num_reduce_time_list of times have been appended
-                self.insert_and_reduce_time_intervals(match_value_tuple, log_atom.atom_time % self.time_window_length)
+                self.insert_and_reduce_time_intervals(match_value_tuple, log_atom.atom_time % self.time_period_length)
 
         return True
 
@@ -169,7 +169,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
             # Reset the counter
             self.counter_reduce_time_intervals[match_value_tuple] = 0
             # Check every entry if it enlarges the time intervals, and remove it, if not.
-            last_accepted_time = self.appeared_time_list[match_value_tuple][0] + self.time_window_length
+            last_accepted_time = self.appeared_time_list[match_value_tuple][0] + self.time_period_length
             for index in range(len(self.appeared_time_list[match_value_tuple])-1, 0, -1):
                 if last_accepted_time - self.appeared_time_list[match_value_tuple][index-1] < 2 * self.max_time_diff:
                     del self.appeared_time_list[match_value_tuple][index]
@@ -178,15 +178,15 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
 
             # Checks the last and first two time of the time list, and removes the obsolete entries
             if (len(self.appeared_time_list[match_value_tuple]) >= 4) and (
-                    self.time_window_length + self.appeared_time_list[match_value_tuple][1] -
+                    self.time_period_length + self.appeared_time_list[match_value_tuple][1] -
                     self.appeared_time_list[match_value_tuple][-2] < 2 * self.max_time_diff):
                 self.appeared_time_list[match_value_tuple] = self.appeared_time_list[match_value_tuple][1:len(self.appeared_time_list[
                         match_value_tuple])-1]
-            elif self.time_window_length + self.appeared_time_list[match_value_tuple][0] - self.appeared_time_list[match_value_tuple][-2] <\
+            elif self.time_period_length + self.appeared_time_list[match_value_tuple][0] - self.appeared_time_list[match_value_tuple][-2] <\
                     2 * self.max_time_diff:
                 self.appeared_time_list[match_value_tuple] = self.appeared_time_list[match_value_tuple][:len(self.appeared_time_list[
                         match_value_tuple])-1]
-            elif self.time_window_length + self.appeared_time_list[match_value_tuple][1] - self.appeared_time_list[match_value_tuple][-1] <\
+            elif self.time_period_length + self.appeared_time_list[match_value_tuple][1] - self.appeared_time_list[match_value_tuple][-1] <\
                     2 * self.max_time_diff:
                 self.appeared_time_list[match_value_tuple] = self.appeared_time_list[match_value_tuple][1:]
 
