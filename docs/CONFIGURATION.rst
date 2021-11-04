@@ -1823,7 +1823,7 @@ This detector analyzes the time intervals of the appearance of log_atoms. It sen
 * **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted (string of lists, defaults to empty list).
 * **output_log_line** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to true).
 * **learn_mode** specifies whether new frequency measurements override ground truth frequencies (boolean).
-* **time_window_length** length of the time window in seconds for which the appearances of log lines are identified with each other (integer, defaults to 86400).
+* **time_period_length** length of the time window in seconds for which the appearances of log lines are identified with each other (integer, defaults to 86400).
 * **max_time_diff** maximal time difference in seconds for new times. If the difference of the new time to all previous times is greater than max_time_diff the new time is considered an anomaly (integer, defaults to 360).
 * **num_reduce_time_list** number of new time entries appended to the time list, before the list is being reduced (integer, defaults to 10).
 
@@ -1835,7 +1835,7 @@ This detector analyzes the time intervals of the appearance of log_atoms. It sen
           paths:
             - "/model/DailyCron/UName"
             - "/model/DailyCron/JobNumber"
-          time_window_length: 86400
+          time_period_length: 86400
           max_time_diff: 3600
           num_reduce_time_list: 10
 
