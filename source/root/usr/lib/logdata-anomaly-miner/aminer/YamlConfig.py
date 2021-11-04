@@ -762,7 +762,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
                     target_path_list=item['paths'], ignore_list=item['ignore_list'],
                     allow_missing_values_flag=item['allow_missing_values'],
-                    output_log_line=item['output_logline'], time_window_length=item['time_window_length'],
+                    output_log_line=item['output_logline'], time_period_length=item['time_period_length'],
                     max_time_diff=item['max_time_diff'], num_reduce_time_list=item['num_reduce_time_list'], auto_include_flag=learn)
             elif item['type'].name == 'PathArimaDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])

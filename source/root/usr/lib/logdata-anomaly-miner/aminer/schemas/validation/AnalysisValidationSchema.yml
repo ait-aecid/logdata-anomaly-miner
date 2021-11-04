@@ -554,7 +554,7 @@
                     'persistence_id': {'type': 'string', 'empty': False},
                     'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
-                    'time_window_length': {'type': 'integer', 'min': 1},
+                    'time_period_length': {'type': 'integer', 'min': 1},
                     'max_time_diff': {'type': 'integer', 'min': 1},
                     'num_reduce_time_list': {'type': 'integer', 'min': 1},
                     'allow_missing_values_flag': {'type': 'boolean'},
