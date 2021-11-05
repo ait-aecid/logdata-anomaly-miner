@@ -741,8 +741,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     raise ValueError(msg)
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, etd, persistence_id=item['persistence_id'],
-                    num_init=item['num_init'], num_update=item['num_update'], disc_div_thres=item['disc_div_thres'],
-                    num_steps_create_new_rules=item['num_steps_create_new_rules'],
+                    target_path_list=item['paths'], num_init=item['num_init'], num_update=item['num_update'],
+                    disc_div_thres=item['disc_div_thres'], num_steps_create_new_rules=item['num_steps_create_new_rules'],
                     num_upd_until_validation=item['num_upd_until_validation'], num_end_learning_phase=item['num_end_learning_phase'],
                     check_cor_thres=item['check_cor_thres'], check_cor_prob_thres=item['check_cor_prob_thres'],
                     check_cor_num_thres=item['check_cor_num_thres'], min_values_cors_thres=item['min_values_cors_thres'],
