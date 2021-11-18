@@ -133,7 +133,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
                        (abs(log_atom.atom_time % self.time_period_length - time) < self.time_period_length - self.max_time_diff)
                         for time in self.appeared_time_list[match_value_tuple]):
                     additional_information = {'AffectedLogAtomValues': [str(repr(val))[2:-1] for val in match_value_tuple],
-                                              'PreviousAppearedTimes': self.appeared_time_list[match_value_tuple],
+                                              'PreviousAppearedTimes': [float(val) for val in self.appeared_time_list[match_value_tuple]],
                                               'NewTime': log_atom.atom_time % self.time_period_length}
 
                     msg = 'New time (%s) out of range of previously observed times %s detected for [' % (
