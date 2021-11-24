@@ -122,13 +122,20 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
                 match = parser_match.get_match_dictionary().get(path)
                 if match is None:
                     continue
-                if isinstance(match.match_object, bytes):
-                    value = match.match_object.decode(AminerConfig.ENCODING)
+                matches = []
+                if isinstance(match, list):
+                    matches = match
                 else:
-                    value = str(match.match_object)
-                if value is not None:
-                    all_values_none = False
-                values.append(value)
+                    matches.append(match)
+                # the match variable is not needed any more and reused for the iteration.
+                for match in matches:
+                    if isinstance(match.match_object, bytes):
+                        value = match.match_object.decode(AminerConfig.ENCODING)
+                    else:
+                        value = str(match.match_object)
+                    if value is not None:
+                        all_values_none = False
+                    values.append(value)
             if all_values_none is True:
                 return
             log_event = tuple(values)
@@ -146,10 +153,16 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
                     # Omit log atom if one of the id paths is not found.
                     return
             else:
-                if isinstance(match.match_object, bytes):
-                    id_tuple += (id_match.match_object.decode(AminerConfig.ENCODING),)
+                matches = []
+                if isinstance(id_match, list):
+                    matches = id_match
                 else:
-                    id_tuple += (id_match.match_object,)
+                    matches.append(id_match)
+                for match in matches:
+                    if isinstance(match.match_object, bytes):
+                        id_tuple += (match.match_object.decode(AminerConfig.ENCODING),)
+                    else:
+                        id_tuple += (match.match_object,)
 
         # Create entry for the id_tuple in the current_sequences dict if it did not occur before.
         if id_tuple not in self.current_sequences:

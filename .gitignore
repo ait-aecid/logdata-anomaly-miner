@@ -73,6 +73,11 @@ docs/SECURITY.md
 docs/README.md
 docs/LICENSE.md
 
+#docker
+akafka/
+aminercfg/
+persistency/
+logs/
 
 # PyBuilder
 .pybuilder/
@@ -149,3 +154,8 @@ playbook.retry
 # for testing
 aecid-testsuite/aminer
 aecid-testsuite/demo/aminer/template_config.py
+
+# Aminer Docker Volumes
+aminercfg/
+persistency/
+logs/

@@ -40,7 +40,7 @@ for ((i=0; i<R; i++)); do
 	R1=`shuf -i 30-50 -n 1`
 	R2=`shuf -i 1-65000 -n 1`
 	for ((j=0; j<R1; j++)); do
-        sleep 0.25
+    sleep 0.25
 		({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n"; } | tr "\n" " " && echo " cron[$R2]: Job \`cron.daily\` started.") >> /tmp/syslog
 	done
 done

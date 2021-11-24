@@ -121,14 +121,20 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         """Get the key identifying the channel this log_atom is coming from."""
         value_list = []
         for target_path in self.target_path_list:
-            match_element = log_atom.parser_match.get_match_dictionary().get(target_path)
-            if match_element is None:
+            match = log_atom.parser_match.get_match_dictionary().get(target_path)
+            if match is None:
                 return None
-            if isinstance(match_element.match_object, bytes):
-                affected_log_atom_values = match_element.match_object.decode(AminerConfig.ENCODING)
+            matches = []
+            if isinstance(match, list):
+                matches = match
             else:
-                affected_log_atom_values = match_element.match_object
-            value_list.append(str(affected_log_atom_values))
+                matches.append(match)
+            for match in matches:
+                if isinstance(match.match_object, bytes):
+                    affected_log_atom_values = match.match_object.decode(AminerConfig.ENCODING)
+                else:
+                    affected_log_atom_values = match.match_object
+                value_list.append(str(affected_log_atom_values))
         return self.target_path_list, str(value_list)
 
     def check_timeouts(self, timestamp, log_atom):
@@ -176,10 +182,19 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                 for value, overdue_time, interval in missing_value_list:
                     e = {}
                     try:
-                        if isinstance(value, bytes):
-                            data = value.decode(AminerConfig.ENCODING)
+                        if isinstance(value, list):
+                            data = []
+                            for val in value:
+                                if isinstance(val, bytes):
+                                    data.append(val.decode(AminerConfig.ENCODING))
+                                else:
+                                    data.append(val)
+                            data = str(data)
                         else:
-                            data = repr(value)
+                            if isinstance(value, bytes):
+                                data = value.decode(AminerConfig.ENCODING)
+                            else:
+                                data = repr(value)
                     except UnicodeError:
                         data = repr(value)
                     if self.__class__.__name__ == 'MissingMatchPathValueDetector':

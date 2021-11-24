@@ -18,19 +18,7 @@ NewMatchPathDetector: "DefaultNewMatchPathDetector" (1 lines)
   /model/menu/popup/menuitem/buttonOnclick: 1
   /model/menu/popup/menuitem/buttonNames: 2
   /model/menu/popup/menuitem/buttonOnclick: 2
-  /model/menu/popup/menuitem/buttonNames: 0
-  /model/menu/popup/menuitem/buttonOnclick: 0
-  /model/menu/popup/menuitem/buttonNames: 1
-  /model/menu/popup/menuitem/buttonOnclick: 1
-  /model/menu/popup/menuitem/buttonNames: 2
-  /model/menu/popup/menuitem/buttonOnclick: 2
-  /model/menu/popup/menuitem/buttonNames: 0
-  /model/menu/popup/menuitem/buttonOnclick: 0
-  /model/menu/popup/menuitem/buttonNames: 1
-  /model/menu/popup/menuitem/buttonOnclick: 1
-  /model/menu/popup/menuitem/buttonNames: 2
-  /model/menu/popup/menuitem/buttonOnclick: 2
-['/model', '/model/menu/id', '/model/menu/value', '/model/menu/popup/menuitem/buttonNames', '/model/menu/popup/menuitem/buttonOnclick']
+['/model', '/model/menu/popup/menuitem/buttonNames', '/model/menu/popup/menuitem/buttonOnclick', '/model/menu/id', '/model/menu/value', '/model/menu/popup/menuitem/buttonNames/0', '/model/menu/popup/menuitem/buttonOnclick/0', '/model/menu/popup/menuitem/buttonNames/1', '/model/menu/popup/menuitem/buttonOnclick/1', '/model/menu/popup/menuitem/buttonNames/2', '/model/menu/popup/menuitem/buttonOnclick/2']
 Original log line: {"menu": {
   "id": "file",
   "value": "File",
@@ -55,18 +43,6 @@ NewMatchPathValueComboDetector: "NewMatchPathValueCombo" (1 lines)
   /model: {'menu': {'id': 'file', 'value': 'File', 'popup': {'menuitem': [{'value': 'New', 'onclick': 'CreateNewDoc()'}, {'value': 'Open', 'onclick': 'OpenDoc()'}, {'value': 'Close', 'onclick': 'CloseDoc()'}]}}}
   /model/menu/id: file
   /model/menu/value: File
-  /model/menu/popup/menuitem/buttonNames: 0
-  /model/menu/popup/menuitem/buttonOnclick: 0
-  /model/menu/popup/menuitem/buttonNames: 1
-  /model/menu/popup/menuitem/buttonOnclick: 1
-  /model/menu/popup/menuitem/buttonNames: 2
-  /model/menu/popup/menuitem/buttonOnclick: 2
-  /model/menu/popup/menuitem/buttonNames: 0
-  /model/menu/popup/menuitem/buttonOnclick: 0
-  /model/menu/popup/menuitem/buttonNames: 1
-  /model/menu/popup/menuitem/buttonOnclick: 1
-  /model/menu/popup/menuitem/buttonNames: 2
-  /model/menu/popup/menuitem/buttonOnclick: 2
   /model/menu/popup/menuitem/buttonNames: 0
   /model/menu/popup/menuitem/buttonOnclick: 0
   /model/menu/popup/menuitem/buttonNames: 1
@@ -104,18 +80,6 @@ NewMatchPathValueDetector: "NewMatchPathValue" (1 lines)
   /model/menu/popup/menuitem/buttonOnclick: 1
   /model/menu/popup/menuitem/buttonNames: 2
   /model/menu/popup/menuitem/buttonOnclick: 2
-  /model/menu/popup/menuitem/buttonNames: 0
-  /model/menu/popup/menuitem/buttonOnclick: 0
-  /model/menu/popup/menuitem/buttonNames: 1
-  /model/menu/popup/menuitem/buttonOnclick: 1
-  /model/menu/popup/menuitem/buttonNames: 2
-  /model/menu/popup/menuitem/buttonOnclick: 2
-  /model/menu/popup/menuitem/buttonNames: 0
-  /model/menu/popup/menuitem/buttonOnclick: 0
-  /model/menu/popup/menuitem/buttonNames: 1
-  /model/menu/popup/menuitem/buttonOnclick: 1
-  /model/menu/popup/menuitem/buttonNames: 2
-  /model/menu/popup/menuitem/buttonOnclick: 2
 {'/model/menu/id': 'file'}
 Original log line: {"menu": {
   "id": "file",
@@ -141,18 +105,6 @@ NewMatchPathValueDetector: "NewMatchPathValue" (1 lines)
   /model: {'menu': {'id': 'file', 'value': 'File', 'popup': {'menuitem': [{'value': 'New', 'onclick': 'CreateNewDoc()'}, {'value': 'Open', 'onclick': 'OpenDoc()'}, {'value': 'Close', 'onclick': 'CloseDoc()'}]}}}
   /model/menu/id: file
   /model/menu/value: File
-  /model/menu/popup/menuitem/buttonNames: 0
-  /model/menu/popup/menuitem/buttonOnclick: 0
-  /model/menu/popup/menuitem/buttonNames: 1
-  /model/menu/popup/menuitem/buttonOnclick: 1
-  /model/menu/popup/menuitem/buttonNames: 2
-  /model/menu/popup/menuitem/buttonOnclick: 2
-  /model/menu/popup/menuitem/buttonNames: 0
-  /model/menu/popup/menuitem/buttonOnclick: 0
-  /model/menu/popup/menuitem/buttonNames: 1
-  /model/menu/popup/menuitem/buttonOnclick: 1
-  /model/menu/popup/menuitem/buttonNames: 2
-  /model/menu/popup/menuitem/buttonOnclick: 2
   /model/menu/popup/menuitem/buttonNames: 0
   /model/menu/popup/menuitem/buttonOnclick: 0
   /model/menu/popup/menuitem/buttonNames: 1

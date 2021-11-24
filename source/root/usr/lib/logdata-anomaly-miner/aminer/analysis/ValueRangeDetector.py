@@ -72,11 +72,8 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
         PersistenceUtil.add_persistable_component(self)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is not None:
-            for l in persistence_data:
-                if l[0] == 'min':
-                    self.ranges_min[tuple(l[1])] = float(l[2])
-                elif l[0] == 'max':
-                    self.ranges_max[tuple(l[1])] = float(l[2])
+            self.ranges_min = persistence_data[0]
+            self.ranges_max = persistence_data[1]
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
@@ -96,10 +93,16 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
             match = parser_match.get_match_dictionary().get(path)
             if match is None:
                 continue
-            value = match.match_object
-            if value is not None:
-                all_values_none = False
-            values.append(value)
+            matches = []
+            if isinstance(match, list):
+                matches = match
+            else:
+                matches.append(match)
+            for match in matches:
+                value = match.match_object
+                if value is not None:
+                    all_values_none = False
+                values.append(value)
         if all_values_none is True:
             return
 
@@ -109,11 +112,17 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
             match = parser_match.get_match_dictionary().get(path)
             if match is None:
                 continue
-            if isinstance(match.match_object, bytes):
-                value = match.match_object.decode(AminerConfig.ENCODING)
+            matches = []
+            if isinstance(match, list):
+                matches = match
             else:
-                value = str(match.match_object)
-            id_vals.append(value)
+                matches.append(match)
+            for match in matches:
+                if isinstance(match.match_object, bytes):
+                    value = match.match_object.decode(AminerConfig.ENCODING)
+                else:
+                    value = str(match.match_object)
+                id_vals.append(value)
         id_event = tuple(id_vals)
 
         # Check if one of the values is outside of expected value ranges for a specific id path.
@@ -129,7 +138,8 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
             else:
                 sorted_log_lines = [data]
             analysis_component = {'AffectedLogAtomPaths': self.target_path_list, 'AffectedLogAtomValues': values,
-                                  'Range': [self.ranges_min[id_event], self.ranges_max[id_event]]}
+                                  'Range': [self.ranges_min[id_event], self.ranges_max[id_event]], 'IDpaths': self.id_path_list,
+                                  'IDvalues': list(id_event)}
             event_data = {'AnalysisComponent': analysis_component}
             for listener in self.anomaly_event_handlers:
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Value range anomaly detected', sorted_log_lines,
@@ -137,6 +147,9 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
 
         # Extend ranges if learn mode is active.
         if self.auto_include_flag is True:
+            if self.next_persist_time is None:
+                self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
+                    KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
             if id_event in self.ranges_min:
                 self.ranges_min[id_event] = min(self.ranges_min[id_event], min(values))
             else:
@@ -158,22 +171,17 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted."""
         if self.next_persist_time is None:
-            return 600
+            return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
         if delta < 0:
             self.do_persist()
-            delta = 600
+            delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        lst = []
-        for id_ev, v in self.ranges_min.items():
-            lst.append(['min', id_ev, v])
-        for id_ev, v in self.ranges_max.items():
-            lst.append(['max', id_ev, v])
-        PersistenceUtil.store_json(self.persistence_file_name, lst)
+        PersistenceUtil.store_json(self.persistence_file_name, [self.ranges_min, self.ranges_max])
         self.next_persist_time = None
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
