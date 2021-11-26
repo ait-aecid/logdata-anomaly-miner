@@ -30,6 +30,7 @@ import shutil
 
 from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, KEY_RESOURCES_MAX_MEMORY_USAGE, KEY_LOG_STAT_PERIOD,\
     DEFAULT_STAT_PERIOD, KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR, REMOTE_CONTROL_LOG_NAME
+from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
 from aminer.input.LogStream import LogStream
 from aminer.util import PersistenceUtil
 from aminer.util import SecureOSFunctions
@@ -435,6 +436,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         PersistenceUtil.persist_all()
         for sock in self.tracked_fds_dict.values():
             sock.close()
+        self.close_event_handler_streams()
         return delayed_return_status
 
     def handle_master_control_socket_receive(self):
@@ -512,6 +514,18 @@ class AnalysisChild(TimeTriggeredComponentInterface):
             self.next_persist_time = trigger_time + delta
             logging.getLogger(DEBUG_LOG_NAME).debug('Repositioning data was persisted.')
         return delta
+
+    def close_event_handler_streams(self, reopen=False):
+        """Close the streams of all StreamPrinterEventHandlers."""
+        for event_handler in self.analysis_context.atomizer_factory.event_handler_list:
+            if isinstance(event_handler, StreamPrinterEventHandler):
+                import os
+                # Can not rotate sys.stdout. Consider using the copytruncate option of logrotate instead.
+                if event_handler.stream.name == "<stdout>":
+                    continue
+                event_handler.stream.close()
+                if reopen:
+                    event_handler.stream = open(event_handler.stream.name, "w+")
 
 
 class AnalysisChildRemoteControlHandler:
@@ -610,6 +624,7 @@ class AnalysisChildRemoteControlHandler:
                     'persist_all': methods.persist_all,
                     'list_backups': methods.list_backups,
                     'create_backup': methods.create_backup,
+                    'reopen_event_handler_streams': methods.reopen_event_handler_streams,
                     'EnhancedNewMatchPathValueComboDetector': EnhancedNewMatchPathValueComboDetector.EnhancedNewMatchPathValueComboDetector,
                     'EventCorrelationDetector': EventCorrelationDetector.EventCorrelationDetector,
                     'EventTypeDetector': EventTypeDetector.EventTypeDetector,

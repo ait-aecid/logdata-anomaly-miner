@@ -592,6 +592,13 @@ class AminerRemoteControlExecutionMethods:
             result_string = 'FAIL: Not a single event ID from specification found'
         self.REMOTE_CONTROL_RESPONSE = result_string
 
+    def reopen_event_handler_streams(self, analysis_context):
+        """Reopen all StreamPrinterEventHandler streams for log rotation."""
+        analysis_context.close_event_handler_streams(reopen=True)
+        msg = "Reopened all StreamPrinterEventHandler streams."
+        self.REMOTE_CONTROL_RESPONSE = msg
+        logging.getLogger(DEBUG_LOG_NAME).info(msg)
+
 
 def _repr_recursive(attr):
     """
