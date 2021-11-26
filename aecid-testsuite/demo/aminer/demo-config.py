@@ -75,6 +75,8 @@ config_properties['LogPrefix'] = 'Original log line: '
 config_properties['Log.StatisticsPeriod'] = 3600
 config_properties['Log.StatisticsLevel'] = 1
 config_properties['Log.DebugLevel'] = 1
+config_properties['Log.Rotation.BackupCount'] = 5
+config_properties['Log.Rotation.MaxBytes'] = 2 << 19
 
 # Add your ruleset here:
 
