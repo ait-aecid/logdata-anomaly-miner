@@ -136,6 +136,18 @@
             'type': 'string',
             'empty': False
         },
+        'Log.Rotation.MaxBytes': {
+            'required': False,
+            'type': 'integer',
+            'default': 1048576,  # 1 Megabyte
+            'min': 1
+        },
+        'Log.Rotation.BackupCount': {
+            'required': False,
+            'type': 'integer',
+            'default': 5,
+            'min': 1
+        },
         'Log.Encoding': {
             'required': False,
             'type': 'string',
