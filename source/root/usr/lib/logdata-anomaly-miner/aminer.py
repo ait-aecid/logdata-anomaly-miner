@@ -344,7 +344,7 @@ def main():
         if use_temp_config:
             os.remove(config_file_name)
             config_file_name = args.config
-    except ValueError as e:
+    except ValueError:
         sys.exit(1)
 
     for config_property in config_properties:
