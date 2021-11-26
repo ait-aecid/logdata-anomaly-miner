@@ -519,7 +519,6 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         """Close the streams of all StreamPrinterEventHandlers."""
         for event_handler in self.analysis_context.atomizer_factory.event_handler_list:
             if isinstance(event_handler, StreamPrinterEventHandler):
-                import os
                 # Can not rotate sys.stdout. Consider using the copytruncate option of logrotate instead.
                 if event_handler.stream.name == "<stdout>":
                     continue
