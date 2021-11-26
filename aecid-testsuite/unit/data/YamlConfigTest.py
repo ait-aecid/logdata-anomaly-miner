@@ -399,7 +399,6 @@ class YamlConfigTest(TestBase):
 
     def test17_demo_yaml_config_equals_python_config(self):
         """This test checks if the yaml demo config is the same as the python version."""
-        self.maxDiff = None
         spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
