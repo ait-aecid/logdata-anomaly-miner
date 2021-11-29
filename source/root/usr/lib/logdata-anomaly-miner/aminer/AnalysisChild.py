@@ -170,6 +170,17 @@ class AnalysisContext:
         logging.getLogger(DEBUG_LOG_NAME).debug("Started with build_analysis_pipeline.")
         self.aminer_config.build_analysis_pipeline(self)
 
+    def close_event_handler_streams(self, reopen=False):
+        """Close the streams of all StreamPrinterEventHandlers."""
+        for event_handler in self.atomizer_factory.event_handler_list:
+            if isinstance(event_handler, StreamPrinterEventHandler):
+                # Can not rotate sys.stdout. Consider using the copytruncate option of logrotate instead.
+                if event_handler.stream.name in ("<stdout>", "<stderr>"):
+                    continue
+                event_handler.stream.close()
+                if reopen:
+                    event_handler.stream = open(event_handler.stream.name, "w+")
+
 
 suspended_flag = False
 
@@ -436,7 +447,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         PersistenceUtil.persist_all()
         for sock in self.tracked_fds_dict.values():
             sock.close()
-        self.close_event_handler_streams()
+        self.analysis_context.close_event_handler_streams()
         return delayed_return_status
 
     def handle_master_control_socket_receive(self):
@@ -514,17 +525,6 @@ class AnalysisChild(TimeTriggeredComponentInterface):
             self.next_persist_time = trigger_time + delta
             logging.getLogger(DEBUG_LOG_NAME).debug('Repositioning data was persisted.')
         return delta
-
-    def close_event_handler_streams(self, reopen=False):
-        """Close the streams of all StreamPrinterEventHandlers."""
-        for event_handler in self.analysis_context.atomizer_factory.event_handler_list:
-            if isinstance(event_handler, StreamPrinterEventHandler):
-                # Can not rotate sys.stdout. Consider using the copytruncate option of logrotate instead.
-                if event_handler.stream.name == "<stdout>":
-                    continue
-                event_handler.stream.close()
-                if reopen:
-                    event_handler.stream = open(event_handler.stream.name, "w+")
 
 
 class AnalysisChildRemoteControlHandler:

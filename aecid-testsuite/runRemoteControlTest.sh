@@ -562,6 +562,20 @@ stdout=$(echo "$stdout" | sed -e "s/\"next_persist_time\".*,//")
 expected_list="${expected_list}${stdout}
 "
 
+echo "reopen_event_handler_streams(analysis_context)" >> /tmp/commands.txt
+stdout=$(sudo aminerremotecontrol --exec "reopen_event_handler_streams(analysis_context)")
+expected="$PREFIX'Reopened all StreamPrinterEventHandler streams.'"
+if [[ "$stdout" != "$expected" ]]; then
+	echo "$ERROR reopen_event_handler_streams had an execution error."
+	echo "$stdout"
+	echo "Expected: $expected"
+	echo
+	exit_code=1
+fi
+stdout=$(echo "$stdout" | sed -e "s/\"next_persist_time\".*,//")
+expected_list="${expected_list}${stdout}
+"
+
 sudo pkill -x aminer
 sleep 2 & wait $!
 sudo mkdir /tmp/lib 2> /dev/null

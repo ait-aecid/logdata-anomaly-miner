@@ -310,10 +310,11 @@ class AminerRemoteControlExecutionMethods:
         """Test if an object is of an instance of a aminer class."""
         class_list = [
             aminer.analysis.AtomFilters.SubhandlerFilter, aminer.analysis.AtomFilters.MatchPathFilter,
-            aminer.analysis.AtomFilters.MatchValueFilter, aminer.analysis.LinearNumericBinDefinition, aminer.analysis.BinDefinition,
-            aminer.analysis.ModuloTimeBinDefinition, aminer.analysis.Rules.MatchAction, aminer.analysis.Rules.MatchRule,
-            aminer.analysis.HistogramData, aminer.analysis.CorrelationRule, aminer.analysis.CorrelationFeature,
-            aminer.events.EventInterfaces.EventHandlerInterface, aminer.util.ObjectHistory]
+            aminer.analysis.AtomFilters.MatchValueFilter, aminer.analysis.HistogramAnalysis.LinearNumericBinDefinition,
+            aminer.analysis.HistogramAnalysis.BinDefinition, aminer.analysis.HistogramAnalysis.ModuloTimeBinDefinition,
+            aminer.analysis.Rules.MatchAction, aminer.analysis.Rules.MatchRule, aminer.analysis.HistogramAnalysis.HistogramData,
+            aminer.analysis.TimeCorrelationViolationDetector.CorrelationRule, aminer.analysis.TimeCorrelationDetector.CorrelationFeature,
+            aminer.events.EventInterfaces.EventHandlerInterface, aminer.util.History.ObjectHistory]
         for c in class_list:
             if isinstance(obj, c):
                 return True
