@@ -1,5 +1,5 @@
 sudo cp demo/aminerRemoteControl/demo-config.py /tmp/demo-config.py
-sudo sed 's/StreamPrinterEventHandler(analysis_context)/StreamPrinterEventHandler(analysis_context, stream=open("/tmp/log.txt", "a"))/g' /tmp/demo-config.py
+sudo sed -i 's/StreamPrinterEventHandler(analysis_context)/StreamPrinterEventHandler(analysis_context, stream=open("\/tmp\/log.txt", "a"))/g' /tmp/demo-config.py
 sudo mkdir /tmp/lib 2> /dev/null
 sudo mkdir /tmp/lib/aminer 2> /dev/null
 sudo mkdir /tmp/lib/aminer/log 2> /dev/null
