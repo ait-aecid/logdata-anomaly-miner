@@ -139,7 +139,7 @@
         'Log.Rotation.MaxBytes': {
             'required': False,
             'type': 'integer',
-            'default': 1048576,  # 1 Megabyte
+            'default': 104857600,  # 100 Megabytes
             'min': 1
         },
         'Log.Rotation.BackupCount': {
