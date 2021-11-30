@@ -177,9 +177,15 @@ class AnalysisContext:
                 # Can not rotate sys.stdout. Consider using the copytruncate option of logrotate instead.
                 if event_handler.stream.name in ("<stdout>", "<stderr>"):
                     continue
-                event_handler.stream.close()
-                if reopen:
-                    event_handler.stream = open(event_handler.stream.name, "w+")
+                try:
+                    event_handler.stream.close()
+                    if reopen:
+                        event_handler.stream = open(event_handler.stream.name, "w+")
+                except IOError as e:
+                    msg = "Error when closing or opening stream with the name %s, shutting down.\n%s" % (event_handler.stream.name, e)
+                    logging.getLogger(DEBUG_LOG_NAME).critical(msg)
+                    print(msg, file=sys.stderr)
+                    sys.exit(1)
 
 
 suspended_flag = False
