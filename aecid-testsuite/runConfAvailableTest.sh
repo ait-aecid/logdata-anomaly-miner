@@ -45,7 +45,6 @@ EventHandlers:
 
 Input:
         timestamp_paths: ["/accesslog/time"]
-        verbose: True
 EOL
 
     BN=`basename "$filename" .py`

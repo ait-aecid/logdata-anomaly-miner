@@ -12,12 +12,15 @@ case "$1" in
         aminer-persistence)
 		$AMINERDIR/aminer-persistence.py ${*:2}
 		;;
+	supervisor)
+		/usr/bin/supervisord
+		;;
 	mkdocs)
 		cd /docs
 		make html
 		;;
 	*)
-		echo "Usage: [ aminer | aminerremotecontrol | aminer-persistence | mkdocs ] <options>"
+		echo "Usage: [ aminer | aminerremotecontrol | aminer-persistence | supervisor | mkdocs ] <options>"
 		exit 1
 		;;
         
