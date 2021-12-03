@@ -112,9 +112,9 @@ Parser:
                   - sq5
                   - user_agent_model
                   - sq6
+
 Input:
         timestamp_paths: ["/accesslog/time"]
-        verbose: False # use this to debug your parser-model
         adjust_timestamps: True
 
 Analysis:

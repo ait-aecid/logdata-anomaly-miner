@@ -49,7 +49,6 @@ Parser:
               - element_value_branch
 
 Input:
-        verbose: True # optional
         multi_source: False # optional
         timestamp_paths: "/model/accesslog/time"
 

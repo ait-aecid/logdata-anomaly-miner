@@ -19,7 +19,6 @@ Parser:
 
 Input:
         timestamp_paths: None
-        verbose: False
 
 EventHandlers:
         - id: stpe

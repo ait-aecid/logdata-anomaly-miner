@@ -39,13 +39,13 @@ Core.PersistenceDir: '/tmp/lib/aminer'
 LogResourceList:
         - 'file://$LOG_FILE'
 
+Input:
+        timestamp_paths: ["/accesslog/time"]
+
 EventHandlers:
         - id: stpe
           type: StreamPrinterEventHandler
 
-Input:
-        timestamp_paths: ["/accesslog/time"]
-        verbose: True
 EOL
 
     BN=`basename "$filename" .py`
