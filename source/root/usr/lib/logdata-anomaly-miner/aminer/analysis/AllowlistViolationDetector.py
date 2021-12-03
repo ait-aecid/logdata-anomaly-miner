@@ -55,7 +55,7 @@ class AllowlistViolationDetector(AtomHandlerInterface):
             data = log_atom.raw_data.decode(AminerConfig.ENCODING)
         except UnicodeError:
             data = repr(log_atom.raw_data)
-        analysis_component = {'AffectedLogAtomPathes': list(log_atom.parser_match.get_match_dictionary()), 'AffectedLogAtomValues': [data]}
+        analysis_component = {'AffectedLogAtomPaths': list(log_atom.parser_match.get_match_dictionary()), 'AffectedLogAtomValues': [data]}
         if self.output_log_line:
             match_paths_values = {}
             for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():

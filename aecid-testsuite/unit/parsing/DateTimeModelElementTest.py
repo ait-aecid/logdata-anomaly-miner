@@ -74,6 +74,34 @@ class DateTimeModelElementTest(TestBase):
         match_element = date_time_model_element.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, date, 1549539600, None)
 
+        # test normal date with z
+        data = b"07.02.2019 11:40:00 UTC: it still works"
+        date = b"07.02.2019 11:40:00 UTC"
+        match_context = DummyMatchContext(data)
+        match_element = date_time_model_element.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, date, 1549539600, None)
+
+        # test normal date with z
+        data = b"07.02.2019 11:40:00 GMT: it still works"
+        date = b"07.02.2019 11:40:00 GMT"
+        match_context = DummyMatchContext(data)
+        match_element = date_time_model_element.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, date, 1549539600, None)
+
+        # test normal date with z
+        data = b"07.02.2019 11:40:00 UTC+01: it still works"
+        date = b"07.02.2019 11:40:00 UTC+01"
+        match_context = DummyMatchContext(data)
+        match_element = date_time_model_element.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, date, 1549536000, None)
+
+        # wrong timezone identifiers for offsets
+        data = b"07.02.2019 11:40:00 CET+01: it still works"
+        date = b"07.02.2019 11:40:00 CET"
+        match_context = DummyMatchContext(data)
+        match_element = date_time_model_element.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, date, 1549536000, None)
+
         data = b"07.02.2019 11:40:00: it still works"
         date = b"07.02.2019 11:40:00"
         match_context = DummyMatchContext(data)
@@ -153,6 +181,12 @@ class DateTimeModelElementTest(TestBase):
         date_time_model_element = DateTimeModelElement(self.id_, b"%d.%m.%Y %H:%M:%S%z", timezone.utc)
         data = b"07.02.2018 11:40:00 UTC-1200: it still works"
         date = b"07.02.2018 11:40:00 UTC-1200"
+        match_context = DummyMatchContext(data)
+        match_element = date_time_model_element.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, date, 1518046800, None)
+
+        data = b"07.02.2018 11:40:00 GMT-1200: it still works"
+        date = b"07.02.2018 11:40:00 GMT-1200"
         match_context = DummyMatchContext(data)
         match_element = date_time_model_element.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, date, 1518046800, None)
@@ -587,19 +621,24 @@ class DateTimeModelElementTest(TestBase):
 
     def test27performance(self):  # skipcq: PYL-R0201
         """Test the performance of the implementation."""
+        run_test = False
         import_setup = """
 import copy
 from unit.TestBase import DummyMatchContext
 from aminer.parsing.DateTimeModelElement import DateTimeModelElement
-times = 300000
+times = 100000
 """
         string_no_z_setup = """
-date = b"18.03.2021 16:12:55"
-dtme = DateTimeModelElement("s0", b"%d.%m.%Y %H:%M:%S")
+date = b"[18/Oct/2021:16:12:55"
+dtme = DateTimeModelElement("s0", b"[%d/%b/%Y:%H:%M:%S")
 """
-        string_z_setup = """
-date = b"18.03.2021 16:12:55 UTC+0100"
-dtme = DateTimeModelElement("s0", b"%d.%m.%Y %H:%M:%S %z")
+        string_z1_setup = """
+date = b"[18/Oct/2021:16:12:55 UTC+0100"
+dtme = DateTimeModelElement("s0", b"[%d/%b/%Y:%H:%M:%S%z")
+"""
+        string_z2_setup = """
+date = b"[18/Oct/2021:16:12:55 +0000]"
+dtme = DateTimeModelElement("s0", b"[%d/%b/%Y:%H:%M:%S%z")
 """
         end_setup = """
 dummy_match_context = DummyMatchContext(date)
@@ -609,16 +648,20 @@ def run():
     match_context = dummy_match_context_list.pop(0)
     dtme.get_match_element("match", match_context)
 """
-        _no_z_setup = import_setup + string_no_z_setup + end_setup
-        _z_setup = import_setup + string_z_setup + end_setup
-        # import timeit
-        # times = 300000
-        # print()
-        # print("Every date is run 300.000 times.")
-        # t = timeit.timeit(setup=_no_z_setup, stmt="run()", number=times)
-        # print("No %z parameter: ", t)
-        # t = timeit.timeit(setup=_z_setup, stmt="run()", number=times)
-        # print("Date with %z parameter: ", t)
+        no_z_setup = import_setup + string_no_z_setup + end_setup
+        z1_setup = import_setup + string_z1_setup + end_setup
+        z2_setup = import_setup + string_z2_setup + end_setup
+        if run_test:
+            import timeit
+            times = 100000
+            print()
+            print("Every date is run %d times." % times)
+            t = timeit.timeit(setup=no_z_setup, stmt="run()", number=times)
+            print("No %z parameter ([18/Oct/2021:16:12:55): ", t)
+            t = timeit.timeit(setup=z1_setup, stmt="run()", number=times)
+            print("Date with %z parameter (18/Oct/2021:16:12:55 UTC+0100): ", t)
+            t = timeit.timeit(setup=z2_setup, stmt="run()", number=times)
+            print("Date with %z parameter (18/Oct/2021:16:12:55 +0000): ", t)
 
 
 if __name__ == "__main__":

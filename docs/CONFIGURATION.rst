@@ -1651,6 +1651,34 @@ This component extracts values from a given match and writes them to a stream. T
             - "/model/Sensors/CPUWorkload"
             - "/model/Sensors/DTM"
 
+MinimalTransitionTimeDetector
+~~~~~~~~~~~~~~~~~~~~~
+
+This module defines an detector for minimal transition times between states (e.g. value combinations of stated paths).
+
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings, **required**).
+* **id_path_list** parser paths where id values can be stored in all relevant log event types (list of strings, **required**).
+* **ignore_list** parser paths that are not considered for analysis, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable (list of strings, default: []).
+* **allow_missing_id** when set to True, the detector will also use matches, where one of the pathes from target_path_list does not refer to an existing parsed data object (boolean, default: False).
+* **num_log_lines_solidify_matrix** number of processed log lines after which the matrix is solidified. This process is periodically repeated (integer, default: 10000).
+* **time_output_threshold** threshold for the tested minimal transition time which has to be exceeded to be tested (float, default: 0).
+* **anomaly_threshold** threshold for the confidence which must be exceeded to raise an anomaly (float, default: 0.05).
+* **persistence_id** name of persistency document (string, default: 'Default').
+* **learn_mode** specifies whether newly observed sequences should be added to the learned model (boolean, default: True).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, default: True).
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: MinimalTransitionTimeDetector
+          id: MinimalTransitionTimeDetector
+          paths:
+            - '/model/type/syscall/syscall'
+          id_path_list:
+            - '/model/type/syscall/id'
+          anomaly_threshold: 0.05
+
+
 
 MissingMatchPathValueDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1795,7 +1823,7 @@ This detector analyzes the time intervals of the appearance of log_atoms. It sen
 * **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted (string of lists, defaults to empty list).
 * **output_log_line** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to true).
 * **learn_mode** specifies whether new frequency measurements override ground truth frequencies (boolean).
-* **time_window_length** length of the time window in seconds for which the appearances of log lines are identified with each other (integer, defaults to 86400).
+* **time_period_length** length of the time window in seconds for which the appearances of log lines are identified with each other (integer, defaults to 86400).
 * **max_time_diff** maximal time difference in seconds for new times. If the difference of the new time to all previous times is greater than max_time_diff the new time is considered an anomaly (integer, defaults to 360).
 * **num_reduce_time_list** number of new time entries appended to the time list, before the list is being reduced (integer, defaults to 10).
 
@@ -1807,7 +1835,7 @@ This detector analyzes the time intervals of the appearance of log_atoms. It sen
           paths:
             - "/model/DailyCron/UName"
             - "/model/DailyCron/JobNumber"
-          time_window_length: 86400
+          time_period_length: 86400
           max_time_diff: 3600
           num_reduce_time_list: 10
 

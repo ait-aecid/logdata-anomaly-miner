@@ -240,14 +240,14 @@ class AminerRemoteControlExecutionMethods:
                 self.REMOTE_CONTROL_RESPONSE += '"%s.%s": %s' % (component_name, attribute, new_attr)
             elif isinstance(attr, list):
                 self.REMOTE_CONTROL_RESPONSE += '"%s.%s": [' % (component_name, attribute)
-                for l in attr:
-                    if hasattr(l, '__dict__') and self.isinstance_aminer_class(l):
-                        new_attr = "\n[\n  " + l.__class__.__name__ + "  {\n" + self.get_all_vars(l, '  ') + "  }\n]"
+                for at in attr:
+                    if hasattr(at, '__dict__') and self.isinstance_aminer_class(at):
+                        new_attr = "\n[\n  " + at.__class__.__name__ + "  {\n" + self.get_all_vars(at, '  ') + "  }\n]"
                     else:
-                        if isinstance(l, str):
-                            new_attr = '"%s"' % l
+                        if isinstance(at, str):
+                            new_attr = '"%s"' % at
                         else:
-                            new_attr = str(l)
+                            new_attr = str(at)
                     self.REMOTE_CONTROL_RESPONSE += "%s, " % new_attr
                 self.REMOTE_CONTROL_RESPONSE = self.REMOTE_CONTROL_RESPONSE.rstrip(", ")
                 self.REMOTE_CONTROL_RESPONSE += "]"
@@ -292,10 +292,10 @@ class AminerRemoteControlExecutionMethods:
             if attr is not None and hasattr(attr, '__dict__') and self.isinstance_aminer_class(attr):
                 result += indent + '"%s": {\n' % var + self.get_all_vars(attr, indent + '  ') + indent + "},\n"
             elif isinstance(attr, list):
-                for l in attr:
-                    if hasattr(l, '__dict__') and self.isinstance_aminer_class(l):
-                        result += indent + '"%s": {\n' % var + indent + '  "' + l.__class__.__name__ + \
-                                  '": {\n' + self.get_all_vars(l, indent + '    ') + indent + '  ' + "}\n" + indent + '},\n'
+                for at in attr:
+                    if hasattr(at, '__dict__') and self.isinstance_aminer_class(at):
+                        result += indent + '"%s": {\n' % var + indent + '  "' + at.__class__.__name__ + \
+                                  '": {\n' + self.get_all_vars(at, indent + '    ') + indent + '  ' + "}\n" + indent + '},\n'
                     else:
                         rep = _reformat_attr(attr)
                         result += indent + attr_str % (var, rep)
@@ -310,10 +310,11 @@ class AminerRemoteControlExecutionMethods:
         """Test if an object is of an instance of a aminer class."""
         class_list = [
             aminer.analysis.AtomFilters.SubhandlerFilter, aminer.analysis.AtomFilters.MatchPathFilter,
-            aminer.analysis.AtomFilters.MatchValueFilter, aminer.analysis.LinearNumericBinDefinition, aminer.analysis.BinDefinition,
-            aminer.analysis.ModuloTimeBinDefinition, aminer.analysis.Rules.MatchAction, aminer.analysis.Rules.MatchRule,
-            aminer.analysis.HistogramData, aminer.analysis.CorrelationRule, aminer.analysis.CorrelationFeature,
-            aminer.events.EventInterfaces.EventHandlerInterface, aminer.util.ObjectHistory]
+            aminer.analysis.AtomFilters.MatchValueFilter, aminer.analysis.HistogramAnalysis.LinearNumericBinDefinition,
+            aminer.analysis.HistogramAnalysis.BinDefinition, aminer.analysis.HistogramAnalysis.ModuloTimeBinDefinition,
+            aminer.analysis.Rules.MatchAction, aminer.analysis.Rules.MatchRule, aminer.analysis.HistogramAnalysis.HistogramData,
+            aminer.analysis.TimeCorrelationViolationDetector.CorrelationRule, aminer.analysis.TimeCorrelationDetector.CorrelationFeature,
+            aminer.events.EventInterfaces.EventHandlerInterface, aminer.util.History.ObjectHistory]
         for c in class_list:
             if isinstance(obj, c):
                 return True
@@ -591,6 +592,13 @@ class AminerRemoteControlExecutionMethods:
         if lookup_count == 0:
             result_string = 'FAIL: Not a single event ID from specification found'
         self.REMOTE_CONTROL_RESPONSE = result_string
+
+    def reopen_event_handler_streams(self, analysis_context):
+        """Reopen all StreamPrinterEventHandler streams for log rotation."""
+        analysis_context.close_event_handler_streams(reopen=True)
+        msg = "Reopened all StreamPrinterEventHandler streams."
+        self.REMOTE_CONTROL_RESPONSE = msg
+        logging.getLogger(DEBUG_LOG_NAME).info(msg)
 
 
 def _repr_recursive(attr):

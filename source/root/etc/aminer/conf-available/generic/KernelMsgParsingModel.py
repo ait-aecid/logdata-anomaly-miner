@@ -7,31 +7,35 @@ from aminer.parsing.FixedDataModelElement import FixedDataModelElement
 from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
 from aminer.parsing.IpAddressDataModelElement import IpAddressDataModelElement
 from aminer.parsing.SequenceModelElement import SequenceModelElement
+from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
 
 
 def get_model():
     """Return a model to parse messages from kernel logging."""
     type_children = [
-        SequenceModelElement('ipv4-martian', [
-            FixedDataModelElement('s0', b'IPv4: martian '),
-            FixedWordlistDataModelElement('direction', [b'source', b'destination']),
-            FixedDataModelElement('s1', b' '),
-            IpAddressDataModelElement('destination'),
-            FixedDataModelElement('s2', b' from '),
-            IpAddressDataModelElement('source'),
-            FixedDataModelElement('s3', b', on dev '),
-            AnyByteDataModelElement('interface')]),
-        SequenceModelElement('net-llheader', [
-            FixedDataModelElement('s0', b'll header: '),
-            AnyByteDataModelElement('data')
+        SequenceModelElement("ipv4-martian", [
+            FixedDataModelElement("s0", b"IPv4: martian "),
+            FixedWordlistDataModelElement("direction", [b"source", b"destination"]),
+            FixedDataModelElement("s1", b" "),
+            IpAddressDataModelElement("destination"),
+            FixedDataModelElement("s2", b" from "),
+            IpAddressDataModelElement("source"),
+            FixedDataModelElement("s3", b", on dev "),
+            AnyByteDataModelElement("interface")]),
+        SequenceModelElement("net-llheader", [
+            FixedDataModelElement("s0", b"ll header: "),
+            AnyByteDataModelElement("data")
         ]),
-        AnyByteDataModelElement('unparsed')
+        AnyByteDataModelElement("unparsed")
     ]
 
-    model = SequenceModelElement('kernel', [
-        FixedDataModelElement('sname', b'kernel: ['),
-        DelimitedDataModelElement('timestamp', b']'),
-        FixedDataModelElement('s0', b'] '),
-        FirstMatchModelElement('msg', type_children)
+    model = SequenceModelElement("kernel", [
+        FixedDataModelElement("sname", b"kernel: "),
+        OptionalMatchModelElement("opt", SequenceModelElement("seq", [
+            FixedDataModelElement("opt_s0", b"]"),
+            DelimitedDataModelElement("timestamp", b"]"),
+            FixedDataModelElement("opt_s1", b"] "),
+        ])),
+        FirstMatchModelElement("msg", type_children)
     ])
     return model

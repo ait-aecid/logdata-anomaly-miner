@@ -1,3 +1,37 @@
+logdata-anomaly-miner (2.4.2) unstable; urgency=low
+  Bugfixes:
+  * PVTID: Fixed output format of previously appeared times
+  * VTD: Fixed bugs (static -> discrete)
+  * VTD: Fixed persistency-bugs
+  * Fixed %z performance issues
+  * Fixed error where optional keys with an array type are not parsed when being null
+  * Fixed issues with JasonModelElement
+  * Fixed persistence handling for ValueRangeDetector
+  * PTSAD: Fixed a bug, which occurs, when the ETD stops saving the values of one analyzed path
+  * ETD: Fixed the problem when entries of the match_dictionary are not of type MatchElement
+  * Fixed error where json data instead of array was parsed successfully.
+  Changes:
+  * Added multiple parameters to VariableCorrelationDetector
+  * Improved VTD
+  * PVTID: Renamed parameter time_window_length to time_period_length
+  * PVTID: Added check if atom time is None
+  * Enhanced output of MTTD and PVTID
+  * Improved docker-compose-configuration
+  * Improved testing
+  * Enhanced PathArimaDetector
+  * Improved documentation
+  * Improved KernelMsgParsingModel
+  * Added pretty print for json output
+  * Added the PathArimaDetector
+  * TSA: Added functionality to discard arima models with too few log lines per time step
+  * TSA: improved confidence calculation
+  * TSA: Added the option to force the period length
+  * TSA: Automatic selection of the pause area of the ACF
+  * Extended EximGenericParsingModel
+  * Extended AudispdParsingModel
+
+ -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Tue,  23 Nov 2021 12:00:00 +0000
+
 logdata-anomaly-miner (2.4.1) unstable; urgency=low
   Bugfixes:
   * Fixed issues with array of arrays in JsonParser

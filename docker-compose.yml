@@ -1,13 +1,23 @@
 version: "3"
 
 services:
+    redpanda:
+        image: docker.vectorized.io/vectorized/redpanda:latest
+        command: ['start --overprovisioned --smp 1 --memory 1G --reserve-memory 0M --node-id 0 --check=false']
+        ports:
+                - "9092:9092"
+                - "9644:9644"
     akafka:
         image: aitaecid/akafka:latest
         environment:
                 KAFKA_TOPICS: '["aminer"]'
-                KAFKA_BOOTSTRAP_SERVERS: localhost:9092
+                KAFKA_BOOTSTRAP_SERVERS: redpanda
         volumes:
             - '$PWD/akafka:/var/lib/akafka'
+        links:
+                - redpanda
+        depends_on:
+                - redpanda
     aminer:
         build:
             context: .
@@ -18,4 +28,3 @@ services:
             - '$PWD/logs:/logs'
         depends_on:
                 - akafka
-
