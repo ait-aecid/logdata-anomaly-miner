@@ -146,9 +146,6 @@ def build_parsing_model():
     start = None
     ws_count = 0
 
-    # We might be able to remove this and us it like the config_properties
-    # skipcq: PYL-W0603
-    global yaml_data
     for item in yaml_data['Parser']:
         if item['id'] in parser_model_dict:
             raise ValueError('Config-Error: The id "%s" occurred multiple times in Parser!' % item['id'])
@@ -822,6 +819,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
 
 def add_default_analysis_components(analysis_context, anomaly_event_handlers, atom_filter, has_new_match_path_handler, has_unparsed_handler,
                                     parsing_model):
+    """Add the default unparsed atom handler and/or NewMatchPathDetector if none is configured."""
     if not has_unparsed_handler:
         from aminer.analysis.UnparsedAtomHandlers import VerboseUnparsedAtomHandler
         atom_filter.add_handler(VerboseUnparsedAtomHandler(anomaly_event_handlers, parsing_model), stop_when_handled_flag=True)

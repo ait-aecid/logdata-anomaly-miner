@@ -36,6 +36,7 @@ class SimpleUnparsedAtomHandler(AtomHandlerInterface):
         return True
 
     def send_event_to_handlers(self, data, log_atom):
+        """Send the data to the event handlers."""
         event_data = {}
         for listener in self.event_handlers:
             listener.receive_event('Input.UnparsedAtomHandler', 'Unparsed atom received', [data], event_data, log_atom, self)
@@ -49,6 +50,7 @@ class VerboseUnparsedAtomHandler(SimpleUnparsedAtomHandler):
         self.parsing_model = parsing_model
 
     def send_event_to_handlers(self, data, log_atom):
+        """Send the data to the event handlers."""
         match_context = DebugMatchContext(log_atom.raw_data)
         self.parsing_model.get_match_element('', match_context)
         debug_info = match_context.get_debug_info()
