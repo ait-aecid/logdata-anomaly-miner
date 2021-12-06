@@ -197,7 +197,6 @@ Parser:
 
 Input:
         timestamp_paths: None
-        verbose: True
         json_format: True
 
 EventHandlers:

@@ -126,7 +126,7 @@ def build_analysis_pipeline(analysis_context):
         parsing_model, [simple_multisource_atom_sync], anomaly_event_handlers, default_timestamp_paths=['model/DiskUpgrade/Date'])
 
     # Just report all unparsed atoms to the event handlers.
-    from aminer.input.SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler
+    from aminer.analysis.UnparsedAtomHandlers import SimpleUnparsedAtomHandler
     simple_unparsed_atom_handler = SimpleUnparsedAtomHandler(anomaly_event_handlers)
     atom_filter.add_handler(simple_unparsed_atom_handler, stop_when_handled_flag=True)
     analysis_context.register_component(simple_unparsed_atom_handler, component_name="UnparsedHandler")

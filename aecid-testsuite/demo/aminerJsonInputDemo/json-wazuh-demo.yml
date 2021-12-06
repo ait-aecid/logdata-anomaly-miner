@@ -318,11 +318,8 @@ Parser:
                length: length
            location: location
 
-
-
 Input:
         timestamp_paths: None
-        verbose: True
         json_format: True
 
 EventHandlers:
