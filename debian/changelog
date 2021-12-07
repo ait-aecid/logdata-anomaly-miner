@@ -1,41 +1,46 @@
 logdata-anomaly-miner (2.5.0-1) unstable; urgency=low
 
- * New upstream release V2.5.0, see
+  [ Markus Wurzenberger ]
+  * New upstream release V2.5.0, see
     https://github.com/ait-aecid/logdata-anomaly-miner/releases/tag/V2.5.0
 
- -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Fri,  03 Dec 2021 12:00:00 +0000
+  [ Sebastian Ramacher ]
+  * debian/rules: Remove obsolete override
+  * debian/control: Bump Standards-Version
+
+ -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Mon, 06 Dec 2021 11:02:01 +0100
 
 logdata-anomaly-miner (2.4.2-1) unstable; urgency=low
 
- * New upstream release V2.4.2, see
+  * New upstream release V2.4.2, see
     https://github.com/ait-aecid/logdata-anomaly-miner/releases/tag/V2.4.2
 
  -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Tue,  23 Nov 2021 12:00:00 +0000
 
 logdata-anomaly-miner (2.4.1-1) unstable; urgency=low
 
- * New upstream release V2.4.1, see
+  * New upstream release V2.4.1, see
     https://github.com/ait-aecid/logdata-anomaly-miner/releases/tag/V2.4.1
 
  -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Fri,  23 Jul 2021 12:00:00 +0000
 
 logdata-anomaly-miner (2.4.0-1) unstable; urgency=low
 
- * New upstream release V2.4.0, see
+  * New upstream release V2.4.0, see
     https://github.com/ait-aecid/logdata-anomaly-miner/releases/tag/V2.4.0
 
  -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Fri,  04 Jun 2021 12:00:00 +0000
 
 logdata-anomaly-miner (2.3.1-1) unstable; urgency=low
 
- * New upstream release V2.3.1, see
+  * New upstream release V2.3.1, see
     https://github.com/ait-aecid/logdata-anomaly-miner/releases/tag/V2.3.1
 
  -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Thu,  08 Apr 2021 12:00:00 +0000
 
 logdata-anomaly-miner (2.3.0-1) unstable; urgency=low
 
- * New upstream release V2.3.0, see
+  * New upstream release V2.3.0, see
     https://github.com/ait-aecid/logdata-anomaly-miner/releases/tag/V2.3.0
 
  -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Mon,  29 Mar 2021 12:00:00 +0000
