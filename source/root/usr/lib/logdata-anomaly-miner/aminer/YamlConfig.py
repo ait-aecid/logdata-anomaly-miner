@@ -336,11 +336,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
         for item in yaml_data['Analysis']:
             if item['type'].name in ('SimpleUnparsedAtomHandler', 'VerboseUnparsedAtomHandler'):
                 has_unparsed_handler = True
-                index = yaml_data['Analysis'].index(item)
-                new_analysis_list = [item]
-                del yaml_data['Analysis'][index]
-                new_analysis_list += yaml_data['Analysis']
-                yaml_data['Analysis'] = new_analysis_list
+                # make room for the UnparsedAtomHandler.
+                atom_filter.add_handler(None, True)
                 break
         for item in yaml_data['Analysis']:
             if item['type'].name == 'NewMatchPathDetector':
@@ -799,14 +796,11 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     id_path_list=item['id_path_list'], ignore_list=item['ignore_list'], allow_missing_id=item['allow_missing_id'],
                     num_log_lines_solidify_matrix=item['num_log_lines_solidify_matrix'],
                     time_output_threshold=item['time_output_threshold'], anomaly_threshold=item['anomaly_threshold'])
-            elif item["type"].name == "VerboseUnparsedAtomHandler":
+            elif item["type"].name in ("VerboseUnparsedAtomHandler", "SimpleUnparsedAtomHandler"):
                 has_unparsed_handler = True
                 stop_when_handled_flag = True
                 tmp_analyser = func(anomaly_event_handlers, parsing_model)
-            elif item["type"].name == "SimpleUnparsedAtomHandler":
-                has_unparsed_handler = True
-                stop_when_handled_flag = True
-                tmp_analyser = func(anomaly_event_handlers)
+                atom_filter.subhandler_list[0] = (tmp_analyser, stop_when_handled_flag)
             else:
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn)
             if item['output_event_handlers'] is not None:
