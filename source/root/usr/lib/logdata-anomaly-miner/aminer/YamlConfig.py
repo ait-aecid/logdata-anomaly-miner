@@ -800,6 +800,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 has_unparsed_handler = True
                 stop_when_handled_flag = True
                 tmp_analyser = func(anomaly_event_handlers, parsing_model)
+                analysis_context.register_component(tmp_analyser, component_name=comp_name)
                 atom_filter.subhandler_list[0] = (tmp_analyser, stop_when_handled_flag)
                 continue
             else:
